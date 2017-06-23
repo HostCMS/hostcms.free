@@ -1,0 +1,144 @@
+@charset "UTF-8";
+
+.shadowed
+{
+	zoom: 1;
+	z-index: 998;
+	position: absolute;
+	margin-top: 10px;
+	background-color: #FFF;
+	font-size: 9pt;
+}
+
+.shadowed .tl
+{
+	position: absolute;
+	font-size: 0;
+	top: -15px;
+	left: -17px;
+	background: url('/hostcmsfiles/images/shadow-lt.png') 0 0 no-repeat !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-lt.png');
+	width: 17px;
+	height: 15px;
+}
+
+.shadowed .t
+{
+	position: absolute;
+	font-size: 0;
+	top: -15px;
+	left: 0;
+	background: url('/hostcmsfiles/images/shadow-t.png') 0 0 repeat-x !important;
+	background: url('/hostcmsfiles/images/spacer.gif');
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-t.png', sizingmethod='scale');
+	width: 100%;
+	height: 15px;
+}
+
+.shadowed .tr
+{
+	position: absolute;
+	font-size: 0;
+	top: -15px;
+	left: 100%;
+	background: url('/hostcmsfiles/images/shadow-rt.png') 0 0 no-repeat !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-rt.png');
+	width: 17px;
+	height: 15px;
+}
+
+.shadowed .r
+{
+	position: absolute;
+	font-size: 0;
+	top: 0;
+	left: 100%;
+	background: url('/hostcmsfiles/images/shadow-r.png') 0 0 repeat-y !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-r.png', sizingmethod='scale');
+	width: 17px;
+	height: 100%;
+}
+
+.shadowed .br
+{
+	position: absolute;
+	font-size: 0;
+	top: 100%;
+	left: 100%;
+	background: url('/hostcmsfiles/images/shadow-rb.png') 0 0 no-repeat !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-rb.png');
+	width: 17px;
+	height: 21px;
+}
+
+.shadowed .b
+{
+	position: absolute;
+	font-size: 0;
+	top: 100%;
+	left: 0;
+	background: url('/hostcmsfiles/images/shadow-b.png') 0 0 repeat-x !important;
+	background: url('/hostcmsfiles/images/spacer.gif');
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-b.png', sizingmethod='scale');
+	width: 100%;
+	height: 21px;
+}
+
+.shadowed .bl
+{
+	position: absolute;
+	font-size: 0;
+	top: 100%;
+	left: -17px;
+	background: url('/hostcmsfiles/images/shadow-lb.png') 0 0 no-repeat !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-lb.png');
+	width: 17px;
+	height: 21px;
+}
+
+.shadowed .l
+{
+	position: absolute;
+	font-size: 0;
+	top: 0;
+	left: -17px;
+	background: url('/hostcmsfiles/images/shadow-l.png') 0 0 repeat-y !important;
+	background: none;
+	filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/hostcmsfiles/images/shadow-l.png', sizingmethod='scale');
+	width: 17px;
+	height: 100%;
+}
+
+/* Панель в клиентском разделе */
+.hostcmsPanel{font-family:Arial, Verdana, 'MS Sans Serif';color:#000; line-height: 130%; }
+.hostcmsPanel a:link,.hostcmsPanel a:visited,.hostcmsPanel a:hover{color:#0070BD;text-decoration:underline}
+.hostcmsPanel .hostcmsSubPanel{margin-bottom:-3px; white-space: nowrap}
+.hostcmsPanel .hostcmsSubPanel img{margin: 0 2px; cursor: pointer; }
+.hostcmsTopPanel{left:50%;margin-left:-110px;top:0}
+
+.hostcmsWindow textarea {white-space:pre; font-size: 10pt; margin: 0; padding: 0; overflow: auto; width: 99%; height: 99%}
+.hostcmsXsl {margin: 3px 0}
+.hostcmsXsl div.hostcmsButton {border-top: 1px solid #DFDDD8; border-right: 1px solid #D1D0CB;
+	border-bottom: 1px solid #ACAAA6; border-left: 1px solid #D1D0CB; 
+	color: #5A6973; font-size: 8pt; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.7);
+	border-radius: 5px; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+	background: -moz-linear-gradient(90deg, #EFEEEA, #F6F5F3) repeat scroll 0 0 transparent;
+	background: -webkit-gradient(linear, center top, center bottom, from(#EFEEEA), to(#F6F5F3));
+	box-shadow: 0 1px 0 #EFEEEA; display: inline-block; margin: -3px 2px 0; padding: 0 3px 0 2px; vertical-align: top; height: 17px;
+}
+.hostcmsXsl div.hostcmsButton div {margin-top: 1px; font-weight: bold; vertical-align: top; display: inline-block; }
+
+.hostcmsWindow .sql_q,.hostcmsWindow .sql_qd{font-size:8pt;background-color:#F6F7EF;border:1px dashed #98D800;white-space:pre-wrap;color:#000;padding:5px}
+.hostcmsWindow .sql_qd{background-color:#F8EEE7;border:1px dashed #D80000}
+.hostcmsWindow .sql_t,.hostcmsWindow .sql_t a:link,.hostcmsWindow .sql_t a:hover,.hostcmsWindow .sql_t a:visited{font-size:8pt;color:#555}
+.hostcmsWindow .sql_db{font-size:8pt;color:#777;white-space:pre-wrap;display:none}
+.hostcmsWindow table.sql_explain{empty-cells:show;margin:1px}
+.hostcmsWindow table.sql_explain,.hostcmsWindow table.sql_explain td{border:1px solid #AAA;border-collapse:collapse}
+.hostcmsWindow table.sql_explain td{font-size:8pt;color:#333;padding:0 2px}
+
+.hostcmsEditable {border: 1px dashed #E83531 !important; border-radius: 5px !important; box-shadow:  1px 1px 1px 0px rgba(100, 100, 100, 0.1) !important; cursor: pointer !important }

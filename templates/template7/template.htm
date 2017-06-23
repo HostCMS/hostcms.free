@@ -1,0 +1,150 @@
+<div class="left_block content">
+	<div class="data">
+		<?php		
+		Core_Page::instance()->execute();
+		?>
+
+		<?php
+		if (Core::moduleIsActive('shop'))
+		{
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				Core_Entity::factory('Shop', 1)
+			);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинКаталогТоваровНаГлавнойСпецПред')
+				)
+				->groupsMode('none')
+				//->itemsForbiddenTags(array('text'))
+				->group(FALSE)
+				->cache(FALSE)
+				->limit(3);
+
+			$Shop_Controller_Show
+				->shopItems()
+				->queryBuilder()
+				->join('shop_item_discounts', 'shop_item_discounts.shop_item_id', '=', 'shop_items.id')
+				->join('shop_discounts', 'shop_discounts.id', '=', 'shop_item_discounts.shop_discount_id')
+				->where('shop_discounts.active', '=', 1)
+				->where('shop_discounts.start_datetime', '<', Core_Date::timestamp2sql(time()))
+				->where('shop_discounts.end_datetime', '>', Core_Date::timestamp2sql(time()))
+				->where('shop_discounts.deleted', '=', 0)
+				->where('shop_items.modification_id', '=', 0)
+				->clearOrderBy()
+				->orderBy('RAND()');
+
+			$Shop_Controller_Show->show();
+		}
+
+		// Услуги
+		if (Core::moduleIsActive('informationsystem'))
+		{
+			$Informationsystem_Controller_Show = new Informationsystem_Controller_Show(
+				Core_Entity::factory('Informationsystem', 6)
+			);
+
+			$Informationsystem_Controller_Show
+				->informationsystemItems()
+				->queryBuilder()
+				->clearOrderBy()
+				->orderBy('RAND()');
+
+			$Informationsystem_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('СписокУслугНаГлавной')
+				)
+				->groupsMode('none')
+				->itemsForbiddenTags(array('text'))
+				->group(FALSE)
+				->limit(2)
+				->show();
+		}
+
+		//Избранные товары
+		if (Core::moduleIsActive('shop'))
+		{
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				Core_Entity::factory('Shop', 1)
+			);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ИзбранноеНаГлавной')
+				)
+				->groupsMode('none')
+				->group(FALSE)
+				->limit(0)
+				->cache(FALSE)
+				->show();
+		}		
+		?>
+	</div>
+</div>
+<div class="right_block">
+	<div class="content">
+		<?php
+		// Новости
+		if (Core::moduleIsActive('informationsystem'))
+		{
+			$Informationsystem_Controller_Show = new Informationsystem_Controller_Show(
+				Core_Entity::factory('Informationsystem', 1)
+			);
+			$Informationsystem_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('СписокНовостейНаГлавной')
+				)
+				->groupsMode('none')
+				->itemsForbiddenTags(array('text'))
+				->group(FALSE)
+				->limit(2)
+				->show();
+		}
+
+		// Разделы магазина
+		if (Core::moduleIsActive('shop'))
+		{
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				Core_Entity::factory('Shop', 1)
+			);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинГруппыТоваровНаГлавной')
+				)
+				->groupsMode('tree')
+				//->itemsForbiddenTags(array('text'))
+				->group(0)
+				->limit(0)
+				->show();
+		}
+
+		// Метки
+		if (Core::moduleIsActive('informationsystem') && Core::moduleIsActive('tag'))
+		{
+			$Informationsystem_Controller_Tag_Show = new Informationsystem_Controller_Tag_Show(
+				Core_Entity::factory('Informationsystem', 1)
+			);
+			$Informationsystem_Controller_Tag_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ОблакоТэговИнформационнойСистемы')
+				)
+				->show();
+		}
+
+		// Опросы
+		if (Core::moduleIsActive('poll'))
+		{
+			$Poll_Group_Controller_Show = new Poll_Group_Controller_Show(
+				Core_Entity::factory('Poll_Group', 1)
+			);
+
+			$Poll_Group_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ОтображениеОпросаБезРезультатов')
+				)
+				->limit(1)
+				->rand()
+				->show();
+		}
+		?>			
+	</div>
+</div>
+<div class="clearing"></div>

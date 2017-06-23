@@ -1,0 +1,272 @@
+<div class="left_block content">
+	<div class="data">
+		<?php
+		Core_Page::instance()->execute();
+		?>
+	</div>
+</div>
+
+<div class="right_block">
+	<div class="content">
+		<?php
+		// Разделы магазина
+		if (Core::moduleIsActive('shop'))
+		{
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				Core_Entity::factory('Shop', Core_Page::instance()->libParams['shopId'])
+			);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинГруппыТоваровНаГлавной')
+				)
+				->groupsMode('tree')
+				->group(0)
+				->limit(0)
+				->show();
+		}
+
+		// Фильтр справа
+		if (Core::moduleIsActive('shop') && isset(Core_Page::instance()->libParams['shopId']))
+		{
+			$oShop = Core_Entity::factory('Shop', Core_Page::instance()->libParams['shopId']);
+			$Shop_Controller_Show = new Shop_Controller_Show($oShop);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинФильтр')
+				)
+				->groupsMode('tree')
+				->limit(0)
+				->itemsProperties(TRUE);
+
+			if (is_object(Core_Page::instance()->object)
+			&& get_class(Core_Page::instance()->object) == 'Shop_Controller_Show')
+			{
+				$Shop_Controller_Show->group(Core_Page::instance()->object->group);
+				$iCurrentShopGroup = Core_Page::instance()->object->group;
+			}
+			else
+			{
+				$iCurrentShopGroup = 0;
+			}
+
+			$price_from = intval(Core_Array::getGet('price_from'));
+			$price_to = intval(Core_Array::getGet('price_to'));
+
+			if ($price_from)
+			{
+				$Shop_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('price_from')->value($price_from)
+				);
+				$Shop_Controller_Show->addCacheSignature('price_from=' . $price_from);
+			}
+
+			if ($price_to)
+			{
+				$Shop_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('price_to')->value($price_to)
+				);
+				$Shop_Controller_Show->addCacheSignature('price_to=' . $price_to);
+			}
+
+			//Sorting
+			if (Core_Array::getGet('sorting'))
+			{
+				$sorting = intval(Core_Array::getGet('sorting'));
+				$Shop_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('sorting')->value($sorting)
+				);
+				$Shop_Controller_Show->addCacheSignature('sorting=' . $sorting);
+			}
+
+			//Producers
+			if (Core_Array::getGet('producer_id'))
+			{
+				$iProducerId = intval(Core_Array::getGet('producer_id'));
+				$Shop_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('producer_id')->value($iProducerId)
+				);
+				$Shop_Controller_Show->addCacheSignature('producer_id=' . $iProducerId);
+			}
+
+			// Additional properties
+			$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
+
+			$aProperties = $oShop_Item_Property_List->Properties->findAll();
+
+			$aTmpProperties = array();
+
+			foreach ($aProperties as $oProperty)
+			{
+				// Св-во может иметь несколько значений
+				$aPropertiesValue = Core_Array::getGet('property_' . $oProperty->id);
+				if ($aPropertiesValue)
+				{
+					!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
+					foreach ($aPropertiesValue as $sPropertyValue)
+					{
+						$aTmpProperties[] = array($oProperty, strval($sPropertyValue));
+					}
+				}
+				elseif (!is_null(Core_Array::getGet('property_' . $oProperty->id . '_from')))
+				{
+					$tmpFrom = Core_Array::getGet('property_' . $oProperty->id . '_from');
+					$tmpTo = Core_Array::getGet('property_' . $oProperty->id . '_to');
+
+					!is_array($tmpFrom) && $tmpFrom = array($tmpFrom);
+					!is_array($tmpTo) && $tmpTo = array($tmpTo);
+
+					// From ... to ...
+					foreach ($tmpFrom as $iKey => $sValue)
+					{
+						$to = Core_Array::get($tmpTo, $iKey);
+
+						$aTmpProperties[] = array($oProperty, array(
+							'from' => $sValue != ''
+								? ($oProperty->type == 11 ? floatval($sValue) : intval($sValue))
+								: '',
+							'to' => $to != ''
+								? ($oProperty->type == 11 ? floatval($to) : intval($to))
+								: ''
+						));
+					}
+				}
+			}
+
+			if (count($aTmpProperties))
+			{
+				reset($aTmpProperties);
+				while(list(, list($oProperty, $propertyValue)) = each($aTmpProperties))
+				{
+					$tableName = $oProperty->createNewValue(0)->getTableName();
+
+					$Shop_Controller_Show->shopItems()->queryBuilder()
+						->where('shop_item_properties.property_id', '=', $oProperty->id);
+
+					if (!is_array($propertyValue))
+					{
+						$Shop_Controller_Show->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('property_' . $oProperty->id)->value($propertyValue)
+						);
+						$Shop_Controller_Show->addCacheSignature("property{$oProperty->id}={$propertyValue}");
+					}
+					else
+					{
+						$from = trim(Core_Array::get($propertyValue, 'from'));
+						$to = trim(Core_Array::get($propertyValue, 'to'));
+
+						$Shop_Controller_Show->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('property_' . $oProperty->id . '_from')->value($from)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('property_' . $oProperty->id . '_to')->value($to)
+						);
+
+						$Shop_Controller_Show
+							->addCacheSignature("property{$oProperty->id}_from={$from}")
+							->addCacheSignature("property{$oProperty->id}_to={$to}");
+					}
+				}
+			}
+
+			$Shop_Controller_Show
+				->group($iCurrentShopGroup)
+				->addMinMaxPrice()
+				->show();
+		}
+
+		// Последний заказ
+		if (Core::moduleIsActive('shop') && Core_Array::get(Core_Page::instance()->libParams, 'shopId'))
+		{
+			$oShop = Core_Entity::factory('Shop', Core_Page::instance()->libParams['shopId']);
+
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				$oShop
+			);
+
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинПоследнийЗаказ')
+				)
+				->groupsMode('none')
+				->limit(0);
+
+			$oShop_Orders = $oShop->Shop_Orders;
+			$oShop_Orders
+				->queryBuilder()
+				->where('shop_orders.paid', '=', 1)
+				->clearOrderBy()
+				->orderBy('shop_orders.id', 'DESC')
+				->limit(1);
+
+			$aShop_Orders = $oShop_Orders->findAll();
+
+			if (count($aShop_Orders))
+			{
+				foreach ($aShop_Orders as $oShop_Order)
+				{
+					$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll();
+
+					foreach ($aShop_Order_Items as $oShop_Order_Item)
+					{
+						if ($oShop_Order_Item->shop_item_id)
+						{
+							$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Order_Item->shop_item_id);
+							
+							!is_null($oShop_Item) && $Shop_Controller_Show->addEntity(
+								$oShop_Item
+									->addForbiddenTag('text')
+									->addForbiddenTag('description')
+									->addForbiddenTag('shop_producer')
+									->showXmlComments(FALSE)
+									->showXmlAssociatedItems(FALSE)
+									->showXmlModifications(FALSE)
+									->showXmlSpecialprices(FALSE)
+									->showXmlTags(FALSE)
+									->showXmlWarehousesItems(FALSE)
+									->showXmlSiteuser(FALSE)
+									->showXmlProperties(FALSE)
+							);
+						}
+					}
+
+					$Shop_Controller_Show->addEntity(
+						$oShop_Order
+					);
+				}
+
+				$Shop_Controller_Show
+					->itemsForbiddenTags(array('text'))
+					->show();
+			}
+		}
+
+		// Метки
+		if (Core::moduleIsActive('shop') && Core::moduleIsActive('tag'))
+		{
+			$Shop_Controller_Tag_Show = new Shop_Controller_Tag_Show(
+				Core_Entity::factory('Shop', Core_Page::instance()->libParams['shopId'])
+			);
+			$Shop_Controller_Tag_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ОблакоТэговМагазин')
+				);
+
+			if (is_object(Core_Page::instance()->object)
+			&& get_class(Core_Page::instance()->object) == 'Shop_Controller_Show'
+			&& Core_Page::instance()->object->group)
+			{
+				$Shop_Controller_Tag_Show->group(Core_Page::instance()->object->group);
+			}
+
+			$Shop_Controller_Tag_Show->show();
+		}
+		?>
+	</div>
+</div>
+<div class="clearing"></div>

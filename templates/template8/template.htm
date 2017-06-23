@@ -1,0 +1,90 @@
+<div class="breadcrumbs"><?php
+// Вывод строки навигации
+$Structure_Controller_Breadcrumbs = new Structure_Controller_Breadcrumbs(
+		Core_Entity::factory('Site', CURRENT_SITE)
+	);
+$Structure_Controller_Breadcrumbs
+	->xsl(
+		Core_Entity::factory('Xsl')->getByName('ХлебныеКрошки')
+	)
+	->show();
+?></div>
+
+<div class="left_block content">
+	<div class="data">
+		<?php
+		Core_Page::instance()->execute();
+		?>
+	</div>
+</div>
+
+<div class="right_block">
+	<div class="content">
+		<?php
+		// Новости
+		if (Core::moduleIsActive('informationsystem'))
+		{
+			$Informationsystem_Controller_Show = new Informationsystem_Controller_Show(
+				Core_Entity::factory('Informationsystem', 1)
+			);
+
+			$Informationsystem_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('СписокНовостейНаГлавной')
+				)
+				->groupsMode('none')
+				->itemsForbiddenTags(array('text'))
+				->group(FALSE)
+				->limit(2)
+				->show();
+		}
+
+		// Метки
+		if (Core::moduleIsActive('informationsystem') && Core::moduleIsActive('tag'))
+		{
+			$Informationsystem_Controller_Tag_Show = new Informationsystem_Controller_Tag_Show(
+				Core_Entity::factory('Informationsystem', Core_Page::instance()->libParams['informationsystemId'])
+			);
+			$Informationsystem_Controller_Tag_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ОблакоТэговИнформационнойСистемы')
+				)
+				->show();
+		}
+
+		// Разделы магазина
+		if (Core::moduleIsActive('shop'))
+		{
+			$Shop_Controller_Show = new Shop_Controller_Show(
+				Core_Entity::factory('Shop', 1)
+			);
+			$Shop_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('МагазинГруппыТоваровНаГлавной')
+				)
+				->groupsMode('tree')
+				//->itemsForbiddenTags(array('text'))
+				->group(0)
+				->limit(0)
+				->show();
+		}
+
+		// Опросы
+		if (Core::moduleIsActive('poll'))
+		{
+			$Poll_Group_Controller_Show = new Poll_Group_Controller_Show(
+				Core_Entity::factory('Poll_Group', 1)
+			);
+
+			$Poll_Group_Controller_Show
+				->xsl(
+					Core_Entity::factory('Xsl')->getByName('ОтображениеОпросаБезРезультатов')
+				)
+				->limit(1)
+				->rand()
+				->show();
+		}
+		?>
+	</div>
+</div>
+<div class="clearing"></div>

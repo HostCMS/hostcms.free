@@ -1,0 +1,56 @@
+/* Dialog
+----------------------------------*/
+.backendBody .ui-dialog { position: absolute; padding: .2em; width: 300px; overflow: hidden;
+padding: 6px; margin: 6px; background-color: #FFF; border: 1px solid #D8D8D8;
+border-radius: 9px;
+box-shadow: 0 2px 2px rgba(204, 204, 204, 0.7);
+/*behavior: url('/modules/skin/default/js/pie/pie.htc');*/
+}
+.backendBody .ui-dialog-content{ background: #FFFFFF; padding-top: 2px; border-radius: 0 0 9px 9px }
+.backendBody .ui-dialog-content-transparent{ background: #FFFFFF; padding-top: 2px; background: url("images/transparent_bg_white.png") repeat scroll 0 0 transparent
+}
+
+.backendBody .ui-dialog .ui-dialog-titlebar {
+padding: .4em .5em; position: relative;
+/* add */
+background: #F2F2F2 !important;
+font-family: Arial, Verdana, 'MS Sans Serif', sans-serif !important;
+border-width: 0px 0px 1px 0px; border-color: #F2F2F2;
+text-align: center; overflow: hidden;
+border-radius: 9px 9px 0 0;
+}
+
+/* add */
+.backendBody .ui-dialog .ui-dialog-titlebar {
+	margin: -6px -6px 0px -6px;
+}
+
+.backendBody .ui-dialog-content, .backendBody .ui-dialog-content-transparent {
+	margin: 0px -6px -6px -6px;
+}
+/* --add */
+
+.backendBody .ui-dialog .ui-dialog-title {
+/*float: left;*/
+margin: .1em 16px .2em 0;
+text-shadow: 1px 1px 0 rgba(255,255,255,0.8);
+/*text-shadow: 2px 2px 0 rgba(220, 220, 220, 0.6);*/
+white-space: nowrap;
+}
+
+.backendBody .ui-dialog .ui-dialog-titlebar-close { position: absolute; right: .3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-close span { display: block; margin: 1px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-close:hover, .backendBody .ui-dialog .ui-dialog-titlebar-close:focus { padding: 0; }
+.backendBody .ui-dialog .ui-dialog-content { border: 0; /*padding: .5em 1em;*/
+/*background: none;*/
+overflow: auto; zoom: 1; }
+
+.backendBody .ui-dialog  .contentpadding { padding: 10px 25px 25px 40px; }
+
+.backendBody .ui-dialog .ui-dialog-buttonpane { text-align: left; border-width: 1px 0 0 0; background-image: none; margin: .5em 0 0 0; padding: .3em 1em .5em .4em; }
+.backendBody .ui-dialog .ui-dialog-buttonpane button { float: right; margin: .5em .4em .5em 0; cursor: pointer; padding: .2em .6em .3em .6em; line-height: 1.4em; width:auto; overflow:visible; }
+.backendBody .ui-dialog .ui-resizable-se { width: 14px; height: 14px; right: 3px; bottom: 3px; }
+.backendBody .ui-draggable .ui-dialog-titlebar { cursor: move; }
+
+.backendBody .ui-draggable-dragging {opacity: 0.5; box-shadow: none !important}
+.backendBody .ui-draggable-dragging .ui-dialog-content {display: none !important}

@@ -1,0 +1,92 @@
+/*!
+ * jQuery UI Button 1.8.19
+ *
+ * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
+ *
+ * http://docs.jquery.com/UI/Button#theming
+ */
+.backendBody .ui-button { display: inline-block; position: relative; padding: 0; margin-right: .1em; text-decoration: none !important; cursor: pointer; text-align: center; zoom: 1; overflow: visible; } /* the overflow property removes extra width in IE */
+.backendBody .ui-button-icon-only { width: 2.2em; } /* to make room for the icon, a width needs to be set here */
+.backendBody button.ui-button-icon-only { width: 2.4em; } /* button elements seem to need a little more width */
+.backendBody .ui-button-icons-only { width: 3.4em; }
+.backendBody button.ui-button-icons-only { width: 3.7em; }
+
+/*button text element */
+.backendBody .ui-button .ui-button-text { display: block; line-height: 1.4;  }
+.backendBody .ui-button-text-only .ui-button-text { padding: .4em 1em; }
+.backendBody .ui-button-icon-only .ui-button-text,
+.backendBody .ui-button-icons-only .ui-button-text { padding: .4em; text-indent: -9999999px; }
+.backendBody .ui-button-text-icon-primary .ui-button-text,
+.backendBody .ui-button-text-icons .ui-button-text { padding: .4em 1em .4em 2.1em; }
+.backendBody .ui-button-text-icon-secondary .ui-button-text,
+.backendBody  .ui-button-text-icons .ui-button-text { padding: .4em 2.1em .4em 1em; }
+.backendBody .ui-button-text-icons .ui-button-text { padding-left: 2.1em; padding-right: 2.1em; }
+/* no icon support for input elements, provide padding by default */
+.backendBody input.ui-button { padding: .4em 1em; }
+
+/*button icon element(s) */
+.backendBody .ui-button-icon-only .ui-icon, .backendBody .ui-button-text-icon-primary .ui-icon, .backendBody .ui-button-text-icon-secondary .ui-icon, .backendBody .ui-button-text-icons .ui-icon, .backendBody .ui-button-icons-only .ui-icon { position: absolute; top: 50%; margin-top: -8px; }
+.backendBody .ui-button-icon-only .ui-icon { left: 50%; margin-left: -8px; }
+.backendBody .ui-button-text-icon-primary .ui-button-icon-primary, .backendBody .ui-button-text-icons .ui-button-icon-primary, .backendBody .ui-button-icons-only .ui-button-icon-primary { left: .5em; }
+.backendBody .ui-button-text-icon-secondary .ui-button-icon-secondary, .backendBody .ui-button-text-icons .ui-button-icon-secondary, .backendBody .ui-button-icons-only .ui-button-icon-secondary { right: .5em; }
+.backendBody .ui-button-text-icons .ui-button-icon-secondary, .backendBody .ui-button-icons-only .ui-button-icon-secondary { right: .5em; }
+
+/*button sets*/
+.backendBody .ui-buttonset { margin-right: 7px; }
+.backendBody .ui-buttonset .ui-button { margin-left: 0; margin-right: -.3em; }
+
+/* workarounds */
+.backendBody button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra padding in Firefox */
+
+/* add */
+
+.backendBody .ui-buttonset .ui-state-default
+{
+font-weight: bold;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+border: 0;
+color:#545454; background-color:#f5f5f5;
+background:-moz-linear-gradient(top,#f5f5f5 0,#E1E5EB);
+background:-webkit-gradient(linear,left top,left bottom,from(#f5f5f5),to(#E1E5EB));
+background:-o-linear-gradient(top,#f5f5f5 0,#E1E5EB);
+background:-ms-linear-gradient(top,#f5f5f5 0,#E1E5EB);
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5',endColorstr='#E1E5EB',GradientType=0);
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f5f5f5',endColorstr='#E1E5EB',GradientType=0);
+background:linear-gradient(top,#f5f5f5 0,#E1E5EB);
+border-radius:4px;
+-moz-border-radius:4px;
+-webkit-border-radius:4px;
+-moz-box-shadow:0 1px 1px rgba(26,29,52,.69);
+-webkit-box-shadow:0 1px 1px rgba(26,29,52,.69);
+text-shadow:0 1px 0 rgba(255,255,255,0.47);
+}
+
+/*
+FFD800 = 00C0FF
+FFC410 = 10ADFF
+*/
+
+.backendBody .ui-buttonset .ui-state-active {
+color:#FFF;
+background-color:#00C0FF;
+background:-moz-linear-gradient(top,#00C0FF 0,#10ADFF);
+background:-webkit-gradient(linear,left top,left bottom,from(#00C0FF),to(#10ADFF));
+background:-o-linear-gradient(top,#00C0FF 0,#10ADFF);
+background:-ms-linear-gradient(top,#00C0FF 0,#10ADFF);
+filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#00C0FF',endColorstr='#10ADFF',GradientType=0);
+-ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#00C0FF',endColorstr='#10ADFF',GradientType=0);
+background:linear-gradient(top,#00C0FF 0,#10ADFF);
+/*border-radius:4px;
+-moz-border-radius:4px;
+-webkit-border-radius:4px;*/
+-moz-box-shadow:0 1px 1px rgba(0,95,119,1);
+-webkit-box-shadow:0 1px 1px rgba(0,95,119,1);
+text-shadow:0 1px 0 rgba(17,137,193,0.5);
+}

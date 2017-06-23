@@ -1,0 +1,93 @@
+.mbmenu { display: none; position: absolute; }
+.menuContainer { position: absolute;
+/*background: transparent url('images/bg.png');*/
+background-color: #CCE7E2;
+border-top: 5px solid black;
+padding: 0;
+box-shadow: #333 2px 2px 5px;
+-moz-box-shadow: #333 2px 2px 5px;
+-webkit-box-shadow: #333 2px 2px 5px;
+border-radius: 0 0 8px 8px;
+-moz-border-radius: 0 0 8px 8px;
+-webkit-border-radius: 0 0 8px 8px;
+max-height: 400px;
+overflow: auto;
+}
+.menuContainer.submenuContainer{
+/*border-top: none!important;*/
+}
+.menuContainer.disabled{
+border-top: 5px solid #999;
+}
+.menuContainer .line{
+width: 100%;
+}
+.menuContainer .line.title *{
+font-size: 11px;
+}
+.menuContainer.disabled .line.title {}
+.menuContainer .line.title a
+{
+color: #000;
+}
+.menuContainer.disabled .line.title a{
+color: #000;
+text-shadow: #FFF 0px 1px 1px;
+}
+.menuContainer td a{
+text-decoration: none;
+color: #000;
+text-shadow: #FFF 0px 1px 1px;
+}
+.menuContainer td.voice{
+font-size: 11px;
+padding: 7px;
+}
+.menuContainer .separator{
+background-color: #999;
+height: 1px;
+padding: 0;
+margin: 0;
+}
+.menuContainer td.img{
+text-align: center;
+font-size: 12px;
+color: #c3c3c3;
+background-color: transparent;
+width: 24px;
+padding: 5px;
+}
+.menuContainer td.img img{
+/*width: 20px;*/
+}
+.menuContainer .textBox{
+padding: 10px;
+font-size: 12px;
+}
+.menuContainer .textBox,
+.menuContainer .textBox a {
+color: #E3E3E3;
+text-shadow: 1px 1px 0px #666;
+}
+.menuContainer .selected td{
+background: transparent url('images/bg.png');
+}
+.menuContainer .selected td a{
+color: #000;
+text-shadow: 1px 1px 0px #fff;
+display: block;
+}
+.menuContainer .disabled td, .menuContainer .disabled td a {
+color: #555;
+text-shadow: 1px 1px 0px #999;
+}
+.menuContainer .subMenuOpener, .menuContainer .selected .subMenuOpener {
+background-repeat: no-repeat; background-position: right;
+}
+.menuContainer .subMenuOpener{
+/*background-image: url("images/menuArrow_w.gif");*/
+background-image: url("images/menuArrow.gif");
+}
+.menuContainer .selected .subMenuOpener{
+background-image: url("images/menuArrow.gif");
+}

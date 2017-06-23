@@ -1,0 +1,94 @@
+.backendBody .ui-dialog .ui-dialog-titlebar-reload { position: absolute; right: 2.3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-reload span { display: block; margin: 1px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-reload:hover, .backendBody .ui-dialog .ui-dialog-titlebar-reload:focus { padding: 0; }
+.backendBody .ui-icon-reload { background-position: -64px -80px; }
+
+.backendBody .ui-dialog .ui-dialog-titlebar-maximize { position: absolute; right: 2.3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-maximize span { display: block; margin: 1px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-maximize:hover, .backendBody .ui-dialog .ui-dialog-titlebar-maximize:focus { padding: 0; }
+.backendBody .ui-icon-maximize { background-position: -48px -80px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-minimize { position: absolute; right: 4.3em; top: 50%; width: 19px; margin: -10px 0 0 0; padding: 1px; height: 18px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-minimize span { display: block; margin: 1px; }
+.backendBody .ui-dialog .ui-dialog-titlebar-minimize:hover, .backendBody .ui-dialog .ui-dialog-titlebar-minimize:focus { padding: 0; }
+.backendBody .ui-icon-minimize { background-position: -128px -80px; }
+
+.backendBody .ui-icon-ajax { background: url(themes/base/images/ajax-loader.gif) left top !important }
+
+.backendBody .ui-datepicker {  background: url("themes/base/images/ui-bg_fine-grain_10_eceadf_60x60.png") repeat scroll 50% 50% #ECEADF !important; border: 1px solid #D9D6C4; color: #1F1F1F; }
+.backendBody .ui-datepicker .ui-datepicker-header { background: url("themes/base/images/ui-bg_fine-grain_15_ffffff_60x60.png") repeat scroll 50% 50% #FFFFFF; border: 1px solid #D4D1BF; color: #453821; font-weight: bold}
+.backendBody .ui-datepicker .ui-icon { background-image: url("themes/base/images/ui-icons_b83400_256x240.png") !important }
+.backendBody .ui-datepicker .ui-state-hover .ui-icon, .backendBody .ui-datepicker .ui-state-focus .ui-icon {background-image: url(themes/base/images/ui-icons_ffffff_256x240.png) !important; }
+
+.backendBody .ui-datepicker .ui-state-default { border: 1px solid #cbc7bd; background: #f8f7f6 url(themes/base/images/ui-bg_fine-grain_10_f8f7f6_60x60.png) 50% 50% repeat; font-weight: bold; color: #654b24 !important; }
+.backendBody .ui-datepicker .ui-state-default a, .backendBody .ui-datepicker  .ui-state-default a:link, .backendBody .ui-datepicker .ui-state-default a:visited { color: #654b24 !important; text-decoration: none; }
+.backendBody .ui-datepicker .ui-state-hover { border: 1px solid #654b24; background: #654b24 url(themes/base/images/ui-bg_fine-grain_65_654b24_60x60.png) 50% 50% repeat; font-weight: bold; color: #ffffff !important; }
+.backendBody .ui-datepicker .ui-state-hover a, .backendBody .ui-datepicker .ui-state-hover a:hover { color: #ffffff !important; text-decoration: none; }
+.backendBody .ui-datepicker .ui-state-active { border: 1px solid #CD3A00; background: #eceadf url(themes/base/images/ui-bg_fine-grain_15_eceadf_60x60.png) 50% 50% repeat; font-weight: bold; color: #140f06 !important; }
+.backendBody .ui-datepicker .ui-state-active a, .backendBody .ui-datepicker .ui-state-active a:link, .backendBody .ui-datepicker  .ui-state-active a:visited { color: #140f06 !important; text-decoration: none; }
+.backendBody .ui-datepicker .ui-widget :active { outline: none; } 
+
+/* css for timepicker */
+.backendBody .ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.backendBody .ui-timepicker-div dl { text-align: left; }
+.backendBody .ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
+.backendBody .ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
+.backendBody .ui-timepicker-div td { font-size: 90%; }
+.backendBody .ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+
+/* taskbar */
+#taskbar {
+	position: absolute;
+	bottom: 5px;
+	left: 0;
+	width: 100%;
+	z-index: 12000;
+	margin: 0px;
+}
+.taskbar-container {
+	position: absolute;
+	/*height: 50px;*/
+	/*background: url(images/transparent_bg.png);*/
+	padding-left: 20px;
+	margin: 0px;
+}
+.taskbar-item {
+	display: block;
+	font: bold 10pt Arial, Helvetica, sans-serif;
+	width: 48px;
+	height: auto;
+	color: #000;
+	bottom: 0px;
+	position: absolute;
+	text-align: center;
+	text-decoration: none;
+}
+
+.taskbar-item div {
+	/*font-size: 11px;*/
+	position: absolute;
+
+	font-size: 10pt;
+	color: white;
+	text-shadow: black 1px 1px 2px;
+
+	display: none;
+	text-align: center;
+	/*padding-left: 20px;*/
+	padding: 3px 6px 3px 7px;
+	white-space: nowrap;
+	background: url(images/transparent_bg.png);
+
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	/*-moz-box-shadow: #333 2px 2px 5px;
+	-webkit-box-shadow: #333 2px 2px 5px;
+	box-shadow: #333 2px 2px 5px;*/
+}
+.taskbar-item img {
+	/*padding: 5px 10px 0px;*/
+	border: none;
+	width: 100%;
+	cursor: pointer;
+	-webkit-box-reflect: below -5px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(.5, transparent), to(white));
+}

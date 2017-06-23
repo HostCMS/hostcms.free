@@ -1,0 +1,4 @@
+<FilesMatch "\.(htm|html|php|php3|php4|php5|php6|phps|phtml)$">
+Order Deny,Allow
+Deny from all
+</FilesMatch>

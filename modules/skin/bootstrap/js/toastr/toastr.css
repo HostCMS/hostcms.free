@@ -1,0 +1,281 @@
+/*#region Notifications*/
+.toast-title {
+  font-weight: bold;
+}
+.toast-message {
+  -ms-word-wrap: break-word;
+  word-wrap: break-word;
+}
+.toast-message a,
+.toast-message label {
+  color: #ffffff;
+}
+.toast-message a:hover {
+  color: #cccccc;
+  text-decoration: none;
+}
+.toast-close-button {
+  position: relative;
+  right: -0.3em;
+  top: -0.5em;
+  float: right;
+  font-size: 18px;
+  font-family: 'FontAwesome';
+  font-weight: bold;
+  color: #ffffff;
+  -webkit-text-shadow: 0 1px 0 #ffffff;
+  text-shadow: 0 1px 0 #ffffff;
+  zoom: 1;
+  filter: alpha(opacity=80);
+  -webkit-opacity: 0.8;
+  -moz-opacity: 0.8;
+  opacity: 0.8;
+}
+.toast-close-button:hover,
+.toast-close-button:focus {
+  color: #000000;
+  text-decoration: none;
+  cursor: pointer;
+  zoom: 1;
+  filter: alpha(opacity=40);
+  -webkit-opacity: 0.4;
+  -moz-opacity: 0.4;
+  opacity: 0.4;
+}
+/*Additional properties for button version
+ iOS requires the button element instead of an anchor tag.
+ If you want the anchor version, it requires `href="#"`.*/
+button.toast-close-button {
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+}
+.toast-top-full-width {
+  top: 0;
+  right: 0;
+  width: 100%;
+}
+.toast-bottom-full-width {
+  bottom: 0;
+  right: 0;
+  width: 100%;
+}
+.toast-top-left {
+  top: 12px;
+  left: 12px;
+}
+.toast-top-right {
+  top: 12px;
+  right: 12px;
+}
+.toast-bottom-right {
+  right: 12px;
+  bottom: 12px;
+}
+.toast-bottom-left {
+  bottom: 12px;
+  left: 12px;
+}
+#toast-container {
+  position: fixed;
+  z-index: 999999;
+  /*overrides*/
+}
+#toast-container > div {
+  margin: 0 0 6px;
+  padding: 15px 15px 15px 50px;
+  width: 300px;
+  -webkit-border-radius: 3px;
+  -webkit-background-clip: padding-box;
+  -moz-border-radius: 3px;
+  -moz-background-clip: padding;
+  border-radius: 3px;
+  background-clip: padding-box;
+  background-position: 15px center;
+  background-repeat: no-repeat;
+  -webkit-box-shadow: 0 0 12px #999999;
+  -moz-box-shadow: 0 0 12px #999999;
+  box-shadow: 0 0 12px #999999;
+  color: #ffffff;
+  zoom: 1;
+  filter: alpha(opacity=80);
+  -webkit-opacity: 0.8;
+  -moz-opacity: 0.8;
+  opacity: 0.8;
+}
+#toast-container > :hover {
+  -webkit-box-shadow: 0 0 12px #000000;
+  -moz-box-shadow: 0 0 12px #000000;
+  box-shadow: 0 0 12px #000000;
+  zoom: 1;
+  filter: alpha(opacity=100);
+  -webkit-opacity: 1;
+  -moz-opacity: 1;
+  opacity: 1;
+  cursor: pointer;
+}
+#toast-container > .toast {
+  background-image: none !important;
+}
+#toast-container > .toast:before {
+  position: fixed;
+  font-family: FontAwesome;
+  font-size: 24px;
+  line-height: 18px;
+  float: left;
+  color: #FFF;
+  padding-right: 0.5em;
+  margin: auto 0.5em auto -1.5em;
+}
+#toast-container.toast-top-full-width > div,
+#toast-container.toast-bottom-full-width > div {
+  width: 96%;
+  margin: auto;
+}
+.toast {
+  background-color: #030303;
+}
+.toast-white {
+  background-color: #ffffff !important;
+}
+.toast-snow {
+  background-color: #fbfbfb !important;
+}
+.toast-whitesmoke {
+  background-color: #f5f5f5 !important;
+}
+.toast-seashell {
+  background-color: #f3f3f3 !important;
+}
+.toast-ivory {
+  background-color: #eeeeee !important;
+}
+.toast-platinum {
+  background-color: #e5e5e5 !important;
+}
+.toast-lightgray {
+  background-color: #d0d0d0 !important;
+}
+.toast-gray {
+  background-color: #cccccc !important;
+}
+.toast-darkgray {
+  background-color: #999999 !important;
+}
+.toast-silver {
+  background-color: #777777 !important;
+}
+.toast-sonic-silver {
+  background-color: #737373 !important;
+}
+.toast-storm-cloud {
+  background-color: #666666 !important;
+}
+.toast-lightcarbon {
+  background-color: #555555 !important;
+}
+.toast-carbon {
+  background-color: #444444 !important;
+}
+.toast-slate-gray {
+  background-color: #333333 !important;
+}
+.toast-darkcarbon {
+  background-color: #262626 !important;
+}
+.toast-blue {
+  background-color: #5db2ff !important;
+}
+.toast-info {
+  background-color: #57b5e3 !important;
+}
+.toast-sky {
+  background-color: #11a9cc !important;
+}
+.toast-primary {
+  background-color: #4374e0 !important;
+}
+.toast-blueberry {
+  background-color: #6f85bf !important;
+}
+.toast-palegreen {
+  background-color: #a0d468 !important;
+}
+.toast-success {
+  background-color: #53a93f !important;
+}
+.toast-green {
+  background-color: #8cc474 !important;
+}
+.toast-lightyellow {
+  background-color: #f6d52e !important;
+}
+.toast-yellow {
+  background-color: #ffce55 !important;
+}
+.toast-warning {
+  background-color: #f4b400 !important;
+}
+.toast-gold {
+  background-color: #f9b256 !important;
+}
+.toast-orange {
+  background-color: #fb6e52 !important;
+}
+.toast-lightred {
+  background-color: #e46f61 !important;
+}
+.toast-darkorange {
+  background-color: #ed4e2a !important;
+}
+.toast-red {
+  background-color: #df5138 !important;
+}
+.toast-danger {
+  background-color: #d73d32 !important;
+}
+.toast-pink {
+  background-color: #e75b8d !important;
+}
+.toast-darkpink {
+  background-color: #cc324b !important;
+}
+.toast-magenta {
+  background-color: #bc5679 !important;
+}
+.toast-purple {
+  background-color: #7e3794 !important;
+}
+.toast-maroon {
+  background-color: #981b48 !important;
+}
+/*Responsive Design*/
+@media all and (max-width: 239px) {
+  #toast-container > div {
+    padding: 8px 8px 8px 50px;
+    width: 11em;
+  }
+  #toast-container .toast-close-button {
+    right: -0.2em;
+    top: -0.2em;
+  }
+}
+@media all and (min-width: 240px) and (max-width: 479px) {
+  #toast-container > div {
+    padding: 8px 8px 8px 50px;
+    width: 18em;
+  }
+  #toast-container .toast-close-button {
+    right: -0.2em;
+    top: -0.2em;
+  }
+}
+@media all and (min-width: 480px) and (max-width: 767px) {
+  #toast-container > div {
+    padding: 15px 15px 15px 50px;
+    width: 25em;
+  }
+}
+/*#endregion Notifications*/

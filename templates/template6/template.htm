@@ -1,0 +1,14 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru" lang="ru">
+<head>
+	<title><?php Core_Page::instance()->showTitle()?></title>
+	<meta name="description" content="<?php Core_Page::instance()->showDescription()?>"></meta>
+	<meta name="keywords" content="<?php Core_Page::instance()->showKeywords()?>"></meta>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<meta content="text/html; charset=<?php echo SITE_CODING?>" http-equiv="Content-Type"></meta>
+
+	<?php Core_Page::instance()->showCss()?>
+</head>
+<body>
+<?php Core_Page::instance()->execute()?>
+</body>
+</html>

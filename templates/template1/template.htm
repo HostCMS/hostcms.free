@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title><?php Core_Page::instance()->showTitle()?></title>
+	<meta name="description" content="<?php Core_Page::instance()->showDescription()?>" />
+	<meta name="keywords" content="<?php Core_Page::instance()->showKeywords()?>" />
+	<meta content="text/html; charset=<?php echo SITE_CODING?>" http-equiv="Content-Type" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<?php
+	Core_Page::instance()
+		->css('/hostcmsfiles/jquery/lightbox/css/jquery.lightbox.css')
+		->css('/hostcmsfiles/jquery/slider/jquery-ui.css')
+		->showCss();
+	?>
+	<!--[if IE]>
+	<style>.header input[type=text],.header input[type=password]{border:1px solid #eee;height:20px}</style>
+	<![endif]-->
+	<?php Core_Browser::check()?>
+
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/news/rss/" />
+
+	<?php
+	Core_Page::instance()
+		// jQuery
+		->js('/hostcmsfiles/jquery/jquery.min.js')
+		// Validate
+		->js('/hostcmsfiles/jquery/jquery.validate.min.js')
+		// LightBox
+		->js('/hostcmsfiles/jquery/lightbox/js/jquery.lightbox.js')
+		// HostCMS
+		->js('/templates/template1/hostcms.js')
+		->js('/hostcmsfiles/main.js')
+		// BBcode
+		->js('/hostcmsfiles/jquery/bbedit/jquery.bbedit.js')
+		// Stars
+		->js('/hostcmsfiles/jquery/stars/jquery.ui.core.min.js')
+		->js('/hostcmsfiles/jquery/stars/jquery.ui.widget.min.js')
+		->js('/hostcmsfiles/jquery/stars/jquery.ui.stars.js')
+
+		->js('/hostcmsfiles/jquery/slider/jquery-ui.min.js')
+
+		// jQuery.Autocomplete
+		->js('/hostcmsfiles/jquery/jquery.autocomplete.min.js')
+		->showJs();
+	?>
+	<script type="text/javascript">
+	// <![CDATA[
+	$(function() {
+		$('#gallery a[target="_blank"]:has(img)').lightBox();
+
+		$('.stars').stars({
+			inputType: "select", disableValue: false
+		});
+
+		// переход по ссылке(class="button")
+		$('.button:has(a[href])').click(function(){window.location.href = $(this).find('a').attr('href')});
+
+		// Очистка полей авторизации
+		$.fn.clearAuthFields = function(){
+			oV={l:this.find('[name="login"]').val(),p:this.find('[name="password"]').val()};
+			this.find(':text,:password').focus(function(){
+				o=$(this); n=o.attr('name');
+				if (n=='login' && o.val()==oV.l || n=='password' && o.val()==oV.p){
+					v=o.val(); o.val('');
+					o.focusout(v, function(){if ($(this).val() == '') $(this).val(v)})}
+			})};
+		$('#authorization').clearAuthFields();
+
+		$('div.filter legend').click(function(){
+			$(this).toggleClass("right");
+			$(this).next('div').toggle('fast', function(){ $(this).parent().toggleClass("toggle") });
+		});
+
+		$(".slider").slider({
+			range: true,
+			//step: 1000,
+			slide: function( event, ui ) {
+				$(this).prev().find("input[name$='_from']").val(ui.values[0]);
+				$(this).prev().find("input[name$='_to']").val(ui.values[1]);
+			},
+			create: function(event, ui) {
+				var min_value_original = parseInt($(this).prev().find("input[name$='_from_original']").val()),
+				max_value_original = parseInt($(this).prev().find("input[name$='_to_original']").val()),
+				min_value = parseInt($(this).prev().find("input[name$='_from']").val()),
+				max_value = parseInt($(this).prev().find("input[name$='_to']").val());
+
+				$(this).slider({
+					min: min_value_original,
+					max: max_value_original,
+					values: [min_value, max_value]
+				});
+			 }
+		});
+
+		//jQuery.Autocomplete selectors
+		$('#search').autocomplete({
+			serviceUrl: '/search/?autocomplete=1',
+			delimiter: ',',
+			maxHeight: 200,
+			width: 300,
+			deferRequestBy: 300
+		});
+	});
+	// ]]>
+	</script>
+</head>
+<body class="pageBody">
+	<div class="left_block header">
+		<div class="data">
+			<div class="logo">
+				<a href="/" title="HostCMS">
+					<img src="/images/logo.png" width="168" height="24" alt="HostCMS" />
+				</a>
+			</div>
+
+			<?php
+			// Если модуль пользователей сайта доступен
+			if (Core::moduleIsActive('siteuser'))
+			{?><div id="authorization"><?php
+				if (is_null(Core_Entity::factory('Siteuser')->getCurrent()))
+				{
+					?>
+					<form method="post" action="/users/">
+						<div><input type="text" name="login" value="Логин" /></div>
+						<div><input type="password" name="password" value="Пароль" /></div>
+						<div><input type="submit" name="apply" value="Войти" /></div>
+					</form>
+					<a href="/users/registration/" title="Зарегистрироваться">Зарегистрироваться</a>
+					<?php
+				}
+				/*else
+				{?>
+					<a href="/users/" title="Кабинет пользователя">Кабинет пользователя</a>
+				<?php
+				}*/
+				?></div><?php
+			}
+			?>
+		</div>
+	</div>
+	<div class="right_block header">
+		<?php
+			// Если модуль поиска доступен
+			if (Core::moduleIsActive('search'))
+			{
+				?><form method="get" action="/search/" class="search">
+					<div><input id="search" name="text" type="text" /></div>
+				</form><?php
+			}
+		?>
+		<div class="nav">
+			<ul>
+				<li><a href="/" title="На главную страницу"><img src="/images/home.gif" alt="На главную страницу" /></a></li>
+				<li><a href="/map/" title="Карта сайта"><img src="/images/map.gif" alt="Карта сайта" /></a></li>
+				<li><a href="/feedback/" title="Написать письмо"><img src="/images/mail.gif" alt="Написать письмо" /></a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="clearing"></div>
+
+	<?php
+	// Верхнее меню
+	$Structure_Controller_Show = new Structure_Controller_Show(
+		Core_Entity::factory('Site', CURRENT_SITE));
+
+	$Structure_Controller_Show->xsl(
+		Core_Entity::factory('Xsl')->getByName('ВерхнееМеню')
+	)
+	->showShopGroups(TRUE)
+	->menu(1)
+	->show();
+	?>
+
+	<div class="left_block slide_block">
+		<div class="data">
+			<div class="slide">
+				<div class="vcard_position">
+					<div class="vcard">
+						<div class="tel">
+							<span class="code value">+7 </span>
+							<span class="value">(495) 321-456-7</span>
+						</div>
+						<div><a href="mailto:info@mysite.ru" class="email">info@mysite.ru</a></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="right_block slide_block">
+		<div class="data">
+			<div class="cart">
+				<div class="content">
+					<?php
+					if (Core::moduleIsActive('shop'))
+					{
+						// Краткая корзина
+						$Shop_Cart_Controller_Show = new Shop_Cart_Controller_Show(
+							Core_Entity::factory('Shop', 1)
+						);
+						$Shop_Cart_Controller_Show
+							->xsl(
+								Core_Entity::factory('Xsl')->getByName('МагазинКорзинаКраткая')
+							)
+							->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : '')
+							->show();
+					}
+					?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="clearing"></div>
+
+	<?php
+	// Второе верхнее меню
+	$Structure_Controller_Show = new Structure_Controller_Show(
+		Core_Entity::factory('Site', CURRENT_SITE));
+
+	$Structure_Controller_Show
+		->xsl(Core_Entity::factory('Xsl')
+			->getByName('ВтороеВерхнееМеню'))
+		->menu(2)
+		->show();
+	?>
+
+	<?php
+	Core_Page::instance()->execute();
+	?>
+
+	<?php
+	// Нижнее меню
+	$Structure_Controller_Show = new Structure_Controller_Show(
+		Core_Entity::factory('Site', CURRENT_SITE));
+
+		$Structure_Controller_Show
+			->xsl(Core_Entity::factory('Xsl')
+				->getByName('НижнееМеню'))
+			->show();
+	?>
+	<div class="left_block footer">
+		<div class="data">
+			Copyright &copy; Корпорация. Работает на <a href="http://www.hostcms.ru" title="Система управления сайтом HostCMS">HostCMS</a>
+		</div>
+	</div>
+	<div class="center_block footer">
+		<?php
+			if (Core::moduleIsActive('advertisement'))
+			{
+				$Advertisement_Group_Controller_Show = new Advertisement_Group_Controller_Show(
+					Core_Entity::factory('Advertisement_Group', 1)
+				);
+
+				$Advertisement_Group_Controller_Show
+					->xsl(
+						Core_Entity::factory('Xsl')->getByName('ОтображениеБаннера')
+					)
+					->show();
+			}
+		?>
+	</div>
+	<div class="right_block footer">
+		<?php
+		// Если модуль рекламы доступен
+		if (Core::moduleIsActive('counter'))
+		{
+		?><!-- HostCMS Counter -->
+		<script type="text/javascript">document.cookie="hostmake=1; path=/";document.write("<a href=\"http://www.hostcms.ru/\"><img src=\"/counter/counter.php?rand="+Math.random()+"&id=1&refer="+escape(document.referrer)+"&amp;current_page="+escape(window.location.href)+"&cookie="+(document.cookie?"Y":"N")+"&java="+(navigator.javaEnabled()?"Y":"N")+"&screen="+screen.width+'x'+screen.height+"&px="+(((navigator.appName.substring(0,9)=="Microsoft"))?screen.colorDepth:screen.pixelDepth)+"&js_version=1.6&counter=1\" alt=\"HostCMS Counter\" width=\"88\" height=\"31\" /></a>")</script>
+		<noscript>
+		<a href="http://www.hostcms.ru/">
+		<img alt="HostCMS Counter" height="31" src="/counter/counter.php?id=1&amp;counter=1" width="88" /></a></noscript><!-- HostCMS Counter --><?php
+		}
+		?>
+	</div>
+	<div class="clearing"></div>
+</body>
+</html>
