@@ -10,7 +10,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Seo_Module extends Core_Module{	/**
+class Seo_Module extends Core_Module
+{
+	/**
 	 * Module version
 	 * @var string
 	 */
@@ -20,7 +22,8 @@ class Seo_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-06-14';
+	public $date = '2017-06-14';
+
 	/**
 	 * Module name
 	 * @var string
@@ -29,7 +32,9 @@ class Seo_Module extends Core_Module{	/**
 
 	/**
 	 * Constructor.
-	 */	public function __construct()	{
+	 */
+	public function __construct()
+	{
 		parent::__construct();
 
 		$this->menu = array(
@@ -41,4 +46,6 @@ class Seo_Module extends Core_Module{	/**
 				'href' => "/admin/seo/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/seo/index.php'}); return false"
 			)
-		);	}}
+		);
+	}
+}
