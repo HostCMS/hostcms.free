@@ -220,9 +220,9 @@ class Seo_Controller_Google extends Seo_Controller
 				throw new Core_Exception("verification(), Server response %code: %message", array('%code' => $aAnswer['error']['code'], '%message' => $aAnswer['error']['message']), 0, FALSE);
 			}
 
-			// echo "<pre>";
-			// var_dump($aAnswer);
-			// echo "</pre>";
+			echo "<pre>";
+			var_dump($aAnswer);
+			echo "</pre>";
 
 			// $sContent = "google-site-verification: google{$aAnswer['verification_uin']}";
 
