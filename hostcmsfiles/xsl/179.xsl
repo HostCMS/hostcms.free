@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://179">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -9,33 +9,33 @@
 	<xsl:template match="/">
 		<xsl:apply-templates select="/siteuser"/>
 	</xsl:template>
-	
+
 	<xsl:template match="/siteuser">
 
-		<h1>Движение по лицевому счету</h1>
+		<h1>&labelTransaction;</h1>
 
 		<table class="table">
 			<tr>
 				<th width="120px">
-					<b>Дата</b>
+					<b>&labelDate;</b>
 				</th>
 				<th width="120px">
-					<b>Сумма</b>
+					<b>&labelAmount;</b>
 				</th>
 				<th width="130px">
-					<b>В валюте магазина</b>
+					<b>&labelCurrency;</b>
 				</th>
 				<th width="50px">
-					<b>Заказ</b>
+					<b>&labelOrder;</b>
 				</th>
 				<th>
-					<b>Описание</b>
+					<b>&labelDescription;</b>
 				</th>
 			</tr>
 			<xsl:apply-templates select="shop/shop_siteuser_transaction"/>
 		</table>
 
-		<p>Остаток: <b><xsl:value-of select="shop/transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop/shop_currency/name"/></b></p>
+		<p>&labelTransactionAmount; <b><xsl:value-of select="shop/transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop/shop_currency/name"/></b></p>
 	</xsl:template>
 
 	<!-- Шаблон для магазина -->

@@ -1,7 +1,7 @@
 <div class="left_block content">
 	<div class="data">
-		<?php		
-		Core_Page::instance()->execute();
+		<?php
+			Core_Page::instance()->execute();
 		?>
 
 		<?php
@@ -15,7 +15,7 @@
 					Core_Entity::factory('Xsl')->getByName('МагазинКаталогТоваровНаГлавнойСпецПред')
 				)
 				->groupsMode('none')
-				//->itemsForbiddenTags(array('text'))
+				//->itemsForbiddenTags(array('text', 'marking', 'vendorcode', 'description'))
 				->group(FALSE)
 				->cache(FALSE)
 				->limit(3);
@@ -30,6 +30,7 @@
 				->where('shop_discounts.end_datetime', '>', Core_Date::timestamp2sql(time()))
 				->where('shop_discounts.deleted', '=', 0)
 				->where('shop_items.modification_id', '=', 0)
+				->groupBy('shop_items.id')
 				->clearOrderBy()
 				->orderBy('RAND()');
 
@@ -75,7 +76,7 @@
 				->limit(0)
 				->cache(FALSE)
 				->show();
-		}		
+		}
 		?>
 	</div>
 </div>
@@ -144,7 +145,7 @@
 				->rand()
 				->show();
 		}
-		?>			
+		?>
 	</div>
 </div>
 <div class="clearing"></div>

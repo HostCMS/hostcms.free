@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://132">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -10,21 +10,21 @@
 
 	<xsl:template match="/site">
 		<xsl:if test="count(*[@id]) &gt; 0">
-			<a href="/">Главная</a>
+			<a href="/">&labelMainPage;</a>
 			<xsl:apply-templates select="*[@id]" />
 		</xsl:if>
 	</xsl:template>
 
 	<xsl:template match="*">
 
-		<!-- Определяем адрес ссылки -->
+		<!-- Set $link variable -->
 		<xsl:variable name="link">
 			<xsl:choose>
 				<!-- Если внутренняя ссылка -->
 				<xsl:when test="link != ''">
 					<xsl:value-of disable-output-escaping="yes" select="link"/>
 				</xsl:when>
-				<!-- Если внешняя ссылка -->
+				<!-- External link -->
 				<xsl:otherwise>
 					<xsl:value-of disable-output-escaping="yes" select="url"/>
 				</xsl:otherwise>

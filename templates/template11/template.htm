@@ -174,8 +174,20 @@
 				}
 			}
 
+			/* Количество */
+			$on_page = intval(Core_Array::getGet('on_page'));
+			if ($on_page > 0 && $on_page < 150)
+			{
+				$Shop_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('on_page')->value($on_page)
+				);
+			}
+
 			$Shop_Controller_Show
 				->group($iCurrentShopGroup)
+				//Фильтровать по ярлыкам
+				->filterShortcuts(TRUE)
 				->addMinMaxPrice()
 				->show();
 		}
@@ -217,8 +229,8 @@
 						if ($oShop_Order_Item->shop_item_id)
 						{
 							$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Order_Item->shop_item_id);
-							
-							!is_null($oShop_Item) && $Shop_Controller_Show->addEntity(
+
+							!is_null($oShop_Item->id) && $Shop_Controller_Show->addEntity(
 								$oShop_Item
 									->addForbiddenTag('text')
 									->addForbiddenTag('description')
@@ -232,6 +244,15 @@
 									->showXmlSiteuser(FALSE)
 									->showXmlProperties(FALSE)
 							);
+
+							//Если модификация, то в неё добавляем родителя
+							if($oShop_Item->modification_id > 0)
+							{
+								$oShop_Parent_Item = Core_Entity::factory('Shop_Item', $oShop_Item->modification_id);
+								!is_null($oShop_Parent_Item->id) && $oShop_Item->addEntity(
+									$oShop_Parent_Item
+								);
+							}
 						}
 					}
 

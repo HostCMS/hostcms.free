@@ -12,8 +12,8 @@ $sCmsFolderTemporaryDirectory = CMS_FOLDER . $sMonthTemporaryDirectory;
 // Магазин для выгрузки
 $oShop = Core_Entity::factory('Shop')->find(Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
-// Размер блока выгружаемых данных (100000000 = 100 мБ)
-$iFileLimit = 100000000;
+// Размер блока выгружаемых данных (1000000 = 1 мБ)
+$iFileLimit = 1000000;
 
 // Логировать обмен
 $bDebug = TRUE;
@@ -55,6 +55,14 @@ elseif (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))
 	$answr = Core_Auth::login($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
 
 	Core_Auth::setCurrentSite();
+
+	if (!Core_Auth::logged())
+	{
+		Core_Log::instance()->clear()
+			->status(Core_Log::$ERROR)
+			//->notify(FALSE)
+			->write(Core::_('Core.error_log_authorization_error'));
+	}
 
 	$oUser = Core_Entity::factory('User')->getByLogin(
 		$_SERVER['PHP_AUTH_USER']
@@ -122,10 +130,9 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 					{
 						if ($file != '.' && $file != '..')
 						{
-							$pathName = $sCmsFolderTemporaryDirectory . DIRECTORY_SEPARATOR . $file;
+							$pathName = $sCmsFolderTemporaryDirectory .  $file;
 
-							if (Core_File::getExtension($pathName) == 'xml'
-								&& is_file($pathName))
+							if (Core_File::getExtension($pathName) == 'xml' && is_file($pathName))
 							{
 								$bDebug && Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
@@ -147,10 +154,8 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 		}
 	}
 
-	// Генерируем Guid сеанса обмена
-	$sGUID = Core_Guid::get();
-	setcookie("1c_exchange", $sGUID);
-	echo sprintf("{$BOM}success\n1c_exchange\n%s", $sGUID);
+	Core_Session::start();
+	echo sprintf("{$BOM}success\n%s\n%s", session_name(), session_id());
 }
 elseif (($sType == 'catalog' || $sType == 'sale') && $sMode == 'init')
 {
@@ -201,8 +206,8 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 			: 'Розничная';
 		//$oShop_Item_Import_Cml_Controller->updateFields = array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
-		$oShop_Item_Import_Cml_Controller->import();
-		echo "{$BOM}success";
+		$aReturn = $oShop_Item_Import_Cml_Controller->import();
+		echo "{$BOM}" . $aReturn['status'];
 	}
 	catch(Exception $exc)
 	{

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://54">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -12,24 +12,24 @@
 
 	<xsl:template match="/document/comment">
 
-		<h1>Добавление ответа</h1>
+		<h1>&labelTitle;</h1>
 
 		<!-- Определяем текст сообщения -->
 		<xsl:variable name="message">
 			<xsl:choose>
 				<!-- Ошибка. С момента добавления последнего комментария прошло слишком мало времени -->
 				<xsl:when test="/document/is_error_time = 1">
-					<div id="error">Ошибка! С момента добавления Вами последнего ответа прошло слишком мало времени!</div>
+					<div id="error">&labelError1;</div>
 				</xsl:when>
 				<!-- Ошибка. Неверный код подтверждения -->
 				<xsl:when test="/document/is_error_capthca = 1">
-					<div id="error">Ошибка! Вы неверно ввели число подтверждения отправки ответа!</div>
+					<div id="error">&labelError2;</div>
 				</xsl:when>
 				<!-- Без ошибок -->
 				<xsl:otherwise>
 					<div id="message">
-						Благодарим Вас, <xsl:value-of disable-output-escaping="yes" select="comment_autor"/>!
-						<br/>После проверки Администратором Ваш ответ станет доступным!
+						&labelThankYou; <xsl:value-of disable-output-escaping="yes" select="comment_autor"/>!
+						<br/>&labelLine1;
 					</div>
 				</xsl:otherwise>
 			</xsl:choose>

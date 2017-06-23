@@ -1,6 +1,6 @@
 <?php
 /**
- * SEO.
+ * Seo
  *
  * @package HostCMS
  * @version 6.x
@@ -12,11 +12,8 @@ require_once('../../bootstrap.php');
 Core_Auth::authorization($sModule = 'seo');
 
 // Код формы
-$iAdmin_Form_Id = 141;
+$iAdmin_Form_Id = 215;
 $sAdminFormAction = '/admin/seo/index.php';
-
-$sAdminFormQueryAction = '/admin/seo/query/index.php';
-
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Контроллер формы
@@ -28,68 +25,50 @@ $oAdmin_Form_Controller
 	->title(Core::_('Seo.title'))
 	->pageTitle(Core::_('Seo.title'));
 
-$sFormPath = $oAdmin_Form_Controller->getPath();
-
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
-$oAdmin_Form_Entity_Menus->add(Admin_Form_Entity::factory('Menu')
-	->name(Core::_('Seo.characteristics'))
-	->icon('fa fa-gears')
-	->add(Admin_Form_Entity::factory('Menu')
+$oAdmin_Form_Entity_Menus->add(
+	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/seo_add.gif')
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref($sFormPath, 'edit', NULL, 0, 0))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($sFormPath, 'edit', NULL, 0, 0))
-	)
-	->add(Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Seo.request'))
-		->icon('fa fa-globe')
-		->img('/admin/images/seo_go.gif')
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref($sFormPath, 'define', NULL, 0, 0))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($sFormPath, 'define', NULL, 0, 0))
-	)
-)
-->add(Admin_Form_Entity::factory('Menu')
-	->name(Core::_('Seo.search_requests'))
-	->icon('fa fa-search')
-	->add(Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Seo.management'))
-		->icon('fa fa-search')
-		->img('/admin/images/query.gif')
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref($sAdminFormQueryAction, NULL, NULL, 0, 0))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($sAdminFormQueryAction, NULL, NULL, 0, 0))
-	)
-	->add(Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Seo.get_position'))
-		->icon('fa fa-question')
-		->img('/admin/images/query_go.gif')
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref($sAdminFormQueryAction, 'define_position', NULL, 0, 0))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($sAdminFormQueryAction, 'define_position', NULL, 0, 0))
-	)
-)
-->add(Admin_Form_Entity::factory('Menu')
-	->name(Core::_('Seo.report_website'))
-	->icon('fa fa-list-alt')
-	->img('/admin/images/report.gif')
-	->href($oAdmin_Form_Controller->getAdminActionLoadHref($sFormPath, 'report', NULL, 0, 0))
-	->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($sFormPath, 'report', NULL, 0, 0))
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Seo.drivers'))
+		->icon('fa fa-gear')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/seo/driver/index.php', NULL, NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax('/admin/seo/driver/index.php', NULL, NULL, 0, 0)
+		)
 );
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
-// Строка навигации
+// Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
-// Элементы строки навигации
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Seo.title'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref($sFormPath, NULL, NULL, ''))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sFormPath, NULL, NULL, ''))
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Seo.menu'))
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
+		)
 );
+
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
@@ -98,64 +77,14 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
-	$oSeo_Controller_Edit = Admin_Form_Action_Controller::factory(
-		'Seo_Controller_Edit', $oAdmin_Form_Action
+	$oSeo_Site_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Seo_Site_Controller_Edit', $oAdmin_Form_Action
 	);
 
-	$oSeo_Controller_Edit->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+	$oSeo_Site_Controller_Edit->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oSeo_Controller_Edit);
-}
-
-// Действие редактирования
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('define');
-
-if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'define')
-{
-	$oSeo_Controller_Define = Admin_Form_Action_Controller::factory(
-		'Seo_Controller_Define', $oAdmin_Form_Action
-	);
-
-	$oAdmin_Form_Controller->addAction($oSeo_Controller_Define);
-}
-
-// Определение позиций
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('define_position');
-
-if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'define_position')
-{
-	$oSeo_Query_Position_Controller_Define = Admin_Form_Action_Controller::factory(
-		'Seo_Query_Position_Controller_Define', $oAdmin_Form_Action
-	);
-
-	$oAdmin_Form_Controller->addAction($oSeo_Query_Position_Controller_Define);
-}
-
-// Отчет по сайту
-$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('report');
-
-if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'report')
-{
-	$oSeo_Controller_Report = Admin_Form_Action_Controller::factory(
-		'Seo_Controller_Report', $oAdmin_Form_Action
-	);
-
-	$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Seo.report_title', Core_Entity::factory('Site', CURRENT_SITE)->name))
-		->href($oAdmin_Form_Controller->getAdminLoadHref($sFormPath, 'report', NULL, '0'))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sFormPath, 'report', NULL, '0'))
-	);
-
-	$oSeo_Controller_Report->addEntity($oAdmin_Form_Entity_Breadcrumbs);
-
-	$oAdmin_Form_Controller->addAction($oSeo_Controller_Report);
+	$oAdmin_Form_Controller->addAction($oSeo_Site_Controller_Edit);
 }
 
 // Действие "Применить"
@@ -165,44 +94,64 @@ $oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
-	$oControllerApply = Admin_Form_Action_Controller::factory(
+	$oSeoSiteControllerApply = Admin_Form_Action_Controller::factory(
 		'Admin_Form_Action_Controller_Type_Apply', $oAdminFormActionApply
 	);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oControllerApply);
+	$oAdmin_Form_Controller->addAction($oSeoSiteControllerApply);
 }
 
-// Действие "Копировать"
-$oAdminFormActionCopy = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('copy');
+// Источник данных 0
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Seo_Site'));
 
-if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
-{
-	$oControllerCopy = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Copy', $oAdminFormActionCopy
-	);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oControllerCopy);
-}
-
-// Источник данных
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
-	Core_Entity::factory('Seo')
-);
-
-// Ограничение по сайту
 $oAdmin_Form_Dataset->addCondition(
 	array('where' =>
 		array('site_id', '=', CURRENT_SITE)
 	)
 );
 
-// Добавляем источник данных контроллеру формы
-$oAdmin_Form_Controller->addDataset(
-	$oAdmin_Form_Dataset
-);
+$oSeo_Sites = Core_Entity::factory('Seo_Site');
+$oSeo_Sites->queryBuilder()
+	->where('seo_sites.active', '=', 1)
+	->open()
+		->where('seo_sites.last_update', '<', Core_Date::timestamp2sql(strtotime('-15 minutes')))
+		->setOr()
+		->where('seo_sites.last_update', 'IS', NULL)
+	->close();
 
+$aSeo_Sites = $oSeo_Sites->findAll(FALSE);
+
+foreach ($aSeo_Sites as $oSeo_Site)
+{
+	if (strlen($oSeo_Site->token))
+	{
+		try{
+			$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Site->Seo_Driver->driver);
+
+			$oSeo_Driver_Controller
+				->setSeoSite($oSeo_Site)
+				->execute();
+
+			// $host_id = $oSeo_Driver_Controller->getHostId();
+
+			// $aSitePopularQueries = $oSeo_Driver_Controller->getSitePopularQueries($host_id);
+
+			// ob_start();
+			// print_r($aSitePopularQueries);
+			// echo "\n\n";
+			// file_put_contents(CMS_FOLDER . 'seo.txt', ob_get_clean(), FILE_APPEND);
+		}
+		catch (Exception $e){
+			$oAdmin_Form_Controller->addMessage(
+				Core_Message::get($e->getMessage(), 'error')
+			);
+		}
+	}
+}
+
+// Добавляем источник данных контроллеру формы
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+// Показ формы
 $oAdmin_Form_Controller->execute();

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://67">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -20,12 +20,12 @@
 		
 		<xsl:if test="ПользовательИмеетПравоОтвечать=1">
 			<xsl:if test="ОтображатьСообщениеПользователю=1">
-				<p id="message">Спасибо Ваш ответ принят!</p>
+				<p id="message">&labelSuccess;</p>
 			</xsl:if>
 		</xsl:if>
 		
 		<xsl:if test="poll/show_results != 1 and ОтображатьСообщениеПользователю != 1">
-			<p id="error">Запрещено отображение результатов!</p>
+			<p id="error">&labelDenied;</p>
 		</xsl:if>
 		
 		<!--<xsl:if test="НеВыбранВариантОтвета=1 and poll/show_results != 1">
@@ -33,7 +33,7 @@
 		</xsl:if>-->
 		
 		<xsl:if test="ПользовательИмеетПравоОтвечать=0">
-			<p id="error">Вы уже голосовали по данному опросу!</p>
+			<p id="error">&labelAlreadyVote;</p>
 		</xsl:if>
 		
 		<xsl:if test="not(НеВыбранВариантОтвета=1 and poll/show_results != 1)">
@@ -44,7 +44,7 @@
 					<xsl:apply-templates select="poll/poll_response"></xsl:apply-templates>
 				</table>
 				
-			<p>Всего голосов: <strong><xsl:value-of select="poll/voted"/></strong></p>
+			<p>&labelTotal; <strong><xsl:value-of select="poll/voted"/></strong></p>
 			</xsl:if>
 		</xsl:if>
 	</xsl:template>

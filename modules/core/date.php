@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Date
 {
@@ -86,7 +86,7 @@ class Core_Date
 			self::datetime2timestamp($sDate)
 		);
 	}
-
+	
 	/**
 	 * Преобразовывает дату из формата даты в SQL
 	 *
@@ -122,6 +122,17 @@ class Core_Date
 	static public function timestamp2sql($timestamp)
 	{
 		return date(self::$_sqlFormat, $timestamp);
+	}
+	
+	/**
+	 * Преобразовывает дату из временной метки в формат даты SQL
+	 *
+	 * @param string $timestamp
+	 * @return string дата в формате SQL
+	 */
+	static public function timestamp2sqldate($timestamp)
+	{
+		return date('Y-m-d', $timestamp);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://226">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -59,7 +59,7 @@
 				<xsl:if test="total &lt; (page + 1) * limit">
 					<xsl:attribute name="style">display: none</xsl:attribute>
 				</xsl:if>
-				Предыдущие сообщения
+				&labelPrevious;
 			</div>
 
 			<div id="chat_window">
@@ -70,12 +70,12 @@
 			<div class="comment">
 				<form action="{url}{message_topic/@id}/" id="send_message" method="post">
 					<div class="row">
-						<div class="caption">Сообщение</div>
+						<div class="caption">&labelMessage;</div>
 						<div class="field">
 							<p>
 								<textarea name="text" rows="3" cols="60"></textarea>
 							</p>
-							<p><input type="submit" class="button" value="Ответить" name="add_message" /></p>
+							<p><input type="submit" class="button" value="&labelReply;" name="add_message" /></p>
 						</div>
 					</div>
 				</form>
@@ -123,20 +123,20 @@
 					<xsl:variable name="month" select="substring(datetime, 4, 2)" />
 
 					<xsl:choose>
-						<xsl:when test="$month = 1"> января </xsl:when>
-						<xsl:when test="$month = 2"> февраля </xsl:when>
-						<xsl:when test="$month = 3"> марта </xsl:when>
-						<xsl:when test="$month = 4"> апреля </xsl:when>
-						<xsl:when test="$month = 5"> мая </xsl:when>
-						<xsl:when test="$month = 6"> июня </xsl:when>
-						<xsl:when test="$month = 7"> июля </xsl:when>
-						<xsl:when test="$month = 8"> августа </xsl:when>
-						<xsl:when test="$month = 9"> сентября </xsl:when>
-						<xsl:when test="$month = 10"> октября </xsl:when>
-						<xsl:when test="$month = 11"> ноября </xsl:when>
-						<xsl:otherwise> декабря </xsl:otherwise>
+						<xsl:when test="$month = 1"> &labelMonth1; </xsl:when>
+						<xsl:when test="$month = 2"> &labelMonth2; </xsl:when>
+						<xsl:when test="$month = 3"> &labelMonth3; </xsl:when>
+						<xsl:when test="$month = 4"> &labelMonth4; </xsl:when>
+						<xsl:when test="$month = 5"> &labelMonth5; </xsl:when>
+						<xsl:when test="$month = 6"> &labelMonth6; </xsl:when>
+						<xsl:when test="$month = 7"> &labelMonth7; </xsl:when>
+						<xsl:when test="$month = 8"> &labelMonth8; </xsl:when>
+						<xsl:when test="$month = 9"> &labelMonth9; </xsl:when>
+						<xsl:when test="$month = 10"> &labelMonth10; </xsl:when>
+						<xsl:when test="$month = 11"> &labelMonth11; </xsl:when>
+						<xsl:otherwise> &labelMonth12; </xsl:otherwise>
 					</xsl:choose>
-					в
+					&labelIn;
 				</xsl:if>
 
 				<!-- Время -->

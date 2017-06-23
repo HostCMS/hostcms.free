@@ -1,92 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://230">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
-	
+
 	<xsl:template match="/">
 		<xsl:apply-templates select="/shop"/>
 	</xsl:template>
-	
+
 	<xsl:variable name="n" select="number(3)"/>
-	
+
 	<xsl:template match="/shop">
-		
-		<!-- Получаем ID родительской группы и записываем в переменную $group -->
+
+		<!-- Store parent id in a variable -->
 		<xsl:variable name="group" select="group"/>
-		
+
 		<xsl:variable name="path">
 			<xsl:choose>
 				<xsl:when test="/shop//shop_group[@id=$group]/node()"><xsl:value-of select="/shop//shop_group[@id=$group]/url"/></xsl:when>
 				<xsl:otherwise><xsl:value-of select="/shop/url"/></xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		
+
 		<!-- дополнение пути для action, если выбрана метка -->
 	<xsl:variable name="form_tag_url"><xsl:if test="count(tag) = 1">tag/<xsl:value-of select="tag/urlencode"/>/</xsl:if></xsl:variable>
-		
+
 		<form method="get" action="{$path}{$form_tag_url}">
 			<div class="filter">
 				<div class="sorting">
 					<select name="sorting" onchange="$(this).parents('form:first').submit()">
-						<option value="0">Сортировать</option>
+						<option value="0">&labelSorting;</option>
 						<option value="1">
 						<xsl:if test="sorting = 1"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							По цене (сначала дешевые)
+							&labelSorting1;
 						</option>
 						<option value="2">
 						<xsl:if test="sorting = 2"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							По цене (сначала дорогие)
+							&labelSorting2;
 						</option>
 						<option value="3">
 						<xsl:if test="sorting = 3"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							По названию
+							&labelSorting3;
 						</option>
 					</select>
 				</div>
-				
+
 				<div class="priceFilter">
-					<xsl:text>Цена от: </xsl:text>
+					<xsl:text>&labelPriceFrom; </xsl:text>
 					<input name="price_from" size="5" type="text" value="{/shop/min_price}">
 						<xsl:if test="/shop/price_from != 0">
 							<xsl:attribute name="value"><xsl:value-of select="/shop/price_from"/></xsl:attribute>
 						</xsl:if>
 					</input>
-					
-					<xsl:text>до: </xsl:text>
+
+					<xsl:text>&labelPriceTo; </xsl:text>
 					<input name="price_to" size="5" type="text" value="{/shop/max_price}">
 						<xsl:if test="/shop/price_to != 0">
 							<xsl:attribute name="value"><xsl:value-of select="/shop/price_to"/></xsl:attribute>
 						</xsl:if>
 					</input>
-					
+
 					<input name="price_from_original" value="{/shop/min_price}" hidden="hidden" />
 					<input name="price_to_original" value="{/shop/max_price}" hidden="hidden" />
 				</div>
-				
+
 				<div class="slider"></div><br/>
-				
+
 				<!-- Фильтр по дополнительным свойствам товара: -->
 				<xsl:if test="count(shop_item_properties//property[filter != 0 and (type = 0 or type = 1 or type = 3 or type = 7 or type = 11)])">
 					<span class="table_row"></span>
 					<xsl:apply-templates select="shop_item_properties//property[filter != 0 and (type = 0 or type = 1 or type = 3 or type = 7 or type = 11)]" mode="propertyList"/>
 				</xsl:if>
-				
+
+				<xsl:if test="/shop/on_page/node() and /shop/on_page &gt; 0">
+					<input type="hidden" name="on_page" value="{/shop/on_page}" />
+				</xsl:if>
+
 				<input name="filter" class="button" value="Применить" type="submit"/>
 			</div>
 		</form>
 	</xsl:template>
-	
+
 	<!-- Шаблон для фильтра по дополнительным свойствам -->
 	<xsl:template match="property" mode="propertyList">
 		<xsl:variable name="nodename">property_<xsl:value-of select="@id"/></xsl:variable>
 		<xsl:variable name="nodename_from">property_<xsl:value-of select="@id"/>_from</xsl:variable>
 		<xsl:variable name="nodename_to">property_<xsl:value-of select="@id"/>_to</xsl:variable>
-		
+
 		<fieldset>
 			<!-- Не флажок -->
 			<xsl:if test="filter != 5">
@@ -94,7 +98,7 @@
 					<span><xsl:value-of select="name"/></span>
 				</legend>
 			</xsl:if>
-			
+
 			<xsl:choose>
 				<!-- Отображаем поле ввода -->
 				<xsl:when test="filter = 1">
@@ -118,7 +122,7 @@
 					<br/>
 					<div class="propertyInput">
 						<input type="radio" name="property_{@id}" value="0" id="id_prop_radio_{@id}_0"></input>
-						<label for="id_prop_radio_{@id}_0">Любой вариант</label>
+						<label for="id_prop_radio_{@id}_0">&labelAny;</label>
 						<xsl:apply-templates select="list/list_item"/>
 					</div>
 				</xsl:when>
@@ -146,8 +150,8 @@
 				<xsl:when test="filter = 6">
 					<div class="propertyInput">
 						<div>
-							от: <input type="text" name="property_{@id}_from" size="5" value="{/shop/*[name()=$nodename_from]}"/> до: <input type="text" name="property_{@id}_to" size="5" value="{/shop/*[name()=$nodename_to]}"/>
-							
+							&labelFrom; <input type="text" name="property_{@id}_from" size="5" value="{/shop/*[name()=$nodename_from]}"/> &labelTo; <input type="text" name="property_{@id}_to" size="5" value="{/shop/*[name()=$nodename_to]}"/>
+
 							<input name="property_{@id}_from_original" value="{/shop/*[name()=$nodename_from]}" hidden="hidden" />
 							<input name="property_{@id}_to_original" value="{/shop/*[name()=$nodename_to]}" hidden="hidden" />
 						</div>
@@ -164,7 +168,7 @@
 			</xsl:choose>
 		</fieldset>
 	</xsl:template>
-	
+
 	<xsl:template match="list/list_item">
 		<xsl:if test="../../filter = 2">
 			<!-- Отображаем список -->

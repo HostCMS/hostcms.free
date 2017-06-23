@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://189">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -18,38 +18,38 @@
 			<xsl:value-of select="name"/>
 		</p>
 
-		<!-- Отображение записи информационной системы -->
+		<!-- Show informationsystem_item -->
 		<xsl:if test="informationsystem_item">
 			<dl class="news_list">
 				<xsl:apply-templates select="informationsystem_item"/>
 			</dl>
 		</xsl:if>
 
-		<p class="button"><a href="{url}" title="Все новости">Все новости</a></p>
+		<p class="button"><a href="{url}" title="&labelAllNews;">&labelAllNews;</a></p>
 	</xsl:template>
 
-	<!-- Шаблон вывода информационного элемента -->
+	<!-- informationsystem_item template -->
 	<xsl:template match="informationsystem_item">
-		<!-- Дата время -->
+		<!-- Text representation of a date -->
 		<dt>
 			<xsl:value-of select="substring-before(date, '.')"/>
 			<xsl:variable name="month_year" select="substring-after(date, '.')"/>
 			<xsl:variable name="month" select="substring-before($month_year, '.')"/>
 			<xsl:choose>
-				<xsl:when test="$month = 1"> января </xsl:when>
-				<xsl:when test="$month = 2"> февраля </xsl:when>
-				<xsl:when test="$month = 3"> марта </xsl:when>
-				<xsl:when test="$month = 4"> апреля </xsl:when>
-				<xsl:when test="$month = 5"> мая </xsl:when>
-				<xsl:when test="$month = 6"> июня </xsl:when>
-				<xsl:when test="$month = 7"> июля </xsl:when>
-				<xsl:when test="$month = 8"> августа </xsl:when>
-				<xsl:when test="$month = 9"> сентября </xsl:when>
-				<xsl:when test="$month = 10"> октября </xsl:when>
-				<xsl:when test="$month = 11"> ноября </xsl:when>
-				<xsl:otherwise> декабря </xsl:otherwise>
+				<xsl:when test="$month = 1"> &labelMonth1; </xsl:when>
+				<xsl:when test="$month = 2"> &labelMonth2; </xsl:when>
+				<xsl:when test="$month = 3"> &labelMonth3; </xsl:when>
+				<xsl:when test="$month = 4"> &labelMonth4; </xsl:when>
+				<xsl:when test="$month = 5"> &labelMonth5; </xsl:when>
+				<xsl:when test="$month = 6"> &labelMonth6; </xsl:when>
+				<xsl:when test="$month = 7"> &labelMonth7; </xsl:when>
+				<xsl:when test="$month = 8"> &labelMonth8; </xsl:when>
+				<xsl:when test="$month = 9"> &labelMonth9; </xsl:when>
+				<xsl:when test="$month = 10"> &labelMonth10; </xsl:when>
+				<xsl:when test="$month = 11"> &labelMonth11; </xsl:when>
+				<xsl:otherwise> &labelMonth12; </xsl:otherwise>
 			</xsl:choose>
-			<xsl:value-of select="substring-after($month_year, '.')"/><xsl:text> г.</xsl:text>
+			<xsl:value-of select="substring-after($month_year, '.')"/>
 		</dt>
 
 		<dd>

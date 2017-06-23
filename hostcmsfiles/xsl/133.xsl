@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://133">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -13,16 +13,16 @@
 	<xsl:template match="/form">
 
 		<p><b><xsl:value-of select="name"/></b></p>
-		<p>Заполнена форма № <xsl:value-of select="form_fill/@id"/></p>
-		
+		<p>&labelTitle; <xsl:value-of select="form_fill/@id"/></p>
+
 		<!-- Вывод разделов формы 0-го уровня -->
 		<xsl:apply-templates select="form_field_dir" />
 
 		<!-- Вывод списка полей формы 0-го уровня -->
 		<xsl:apply-templates select="form_field" />
-		
+
 		<p>---
-		<br/>Система управления сайтом HostCMS
+		<br/>&labelHostcms;
 		<br/>
 		<a href="http://www.hostcms.ru">http://www.hostcms.ru</a>
 		</p>
@@ -37,7 +37,7 @@
 		<!-- Вывод разделов формы -->
 		<xsl:apply-templates select="form_field_dir" />
 	</xsl:template>
-	
+
 	<xsl:template match="form_field">
 		<p>
 			<b>

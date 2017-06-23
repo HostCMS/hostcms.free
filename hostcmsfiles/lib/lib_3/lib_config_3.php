@@ -17,6 +17,8 @@ if (Core::moduleIsActive('search'))
 			->select('shop_items.*')
 			->join('shops', 'shop_items.shop_id', '=', 'shops.id')
 			->where('shops.site_id', '=', CURRENT_SITE)
+			->where('shop_items.active', '=', 1)
+			->where('shop_items.indexing', '=', 1)
 			->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(10);
 

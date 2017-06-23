@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://40">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -27,7 +27,7 @@
 			</xsl:comment>
 		</script>
 
-		<h1><xsl:choose><xsl:when test="not(forum_topic/node())">Создание</xsl:when><xsl:otherwise>Редактирование</xsl:otherwise></xsl:choose> темы</h1>
+		<h1><xsl:choose><xsl:when test="not(forum_topic/node())">&labelCreate;</xsl:when><xsl:otherwise>&labelEdit;</xsl:otherwise></xsl:choose> &labelTopic;</h1>
 
 		<xsl:if test="error != ''">
 			<div id="error">
@@ -37,7 +37,7 @@
 
 		<!-- Хлебные крошки -->
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/">
 				<xsl:value-of select="forum_category/name"/>
@@ -62,7 +62,7 @@
 			<div class="add_message_table">
 				<div class="add_row">
 					<!-- Заголовок темы-->
-					<div style="float: left; width: 50px; margin-top: 2px">Тема:</div>
+					<div style="float: left; width: 50px; margin-top: 2px">&labelSubject;</div>
 					<div style="margin-left: 50px; padding-right: 10px"><input id="topic_title" type="text" style="width: 97%;" name="topic_subject" value="{$topic_title}"/></div>
 				</div>
 
@@ -78,7 +78,7 @@
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="announcement">Объявление</label>
+								<label for="announcement">&labelAnnouncement;</label>
 							</div>
 
 							<!-- Открытость -->
@@ -89,7 +89,7 @@
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="closed">Закрытая</label>
+								<label for="closed">&labelClosed;</label>
 							</div>
 
 							<!-- Видимость -->
@@ -101,7 +101,7 @@
 									</xsl:if>
 
 								</input>
-								<label for="visible">Видимая</label>
+								<label for="visible">&labelVisible;</label>
 							</div>
 							<div style="clear: both"></div>
 						</div>
@@ -127,12 +127,12 @@
 				<xsl:if test="not(siteuser/node()) and forum_category/use_captcha = 1">
 					<div class="add_row">
 						<div>
-							Контрольное число:
-							<input type="text" name="captcha" size="15" class="required" minlength="4" title="Введите число, которое указано выше."/>
+							&labelCaptchaId;
+							<input type="text" name="captcha" size="15" class="required" minlength="4" title="&labelEnterNumber;"/>
 
 							<div class="captcha" style="margin: 5px 0 5px 125px">
-								<img id="addForumPost" class="captcha" src="/captcha.php?id={forum_category/captcha_id}&amp;height=30&amp;width=100" title="Контрольное число" name="captcha"/>
-								<div><img src="/images/refresh.png" /> <span onclick="$('#addForumPost').updateCaptcha('{forum_category/captcha_id}', 30); return false">Показать другое число</span></div>
+								<img id="addForumPost" class="captcha" src="/captcha.php?id={forum_category/captcha_id}&amp;height=30&amp;width=100" title="&labelCaptchaId;" name="captcha"/>
+								<div><img src="/images/refresh.png" /> <span onclick="$('#addForumPost').updateCaptcha('{forum_category/captcha_id}', 30); return false">&labelUpdateCaptcha;</span></div>
 							</div>
 						</div>
 						<input type="hidden" name="captcha_id" value="{forum_category/captcha_id}"/>
@@ -140,7 +140,7 @@
 				</xsl:if>
 
 				<div class="add_row">
-					<input border="0" name="add_edit_topic" class="button" type="submit" value="Добавить"/>
+					<input border="0" name="add_edit_topic" class="button" type="submit" value="&labelAdd;"/>
 				</div>
 				<input type="hidden" name="current_page" value="{page + 1}" />
 				<input type="hidden" name="forum_topic_id" value="{forum_topic/@id}" />
@@ -148,7 +148,7 @@
 		</form>
 
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/">
 				<xsl:value-of select="forum_category/name"/>

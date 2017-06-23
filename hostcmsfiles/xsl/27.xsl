@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://27">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -9,21 +9,21 @@
 	<xsl:template match="/siteuser">
 		
 		<xsl:choose>
-			<!-- Авторизованный пользователь -->
+			<!-- Authorized User -->
 			<xsl:when test="@id > 0">
-				<h1>Пользователь <xsl:value-of select="login" /></h1>
+				<h1>&labelUser; <xsl:value-of select="login" /></h1>
 				
-				<!-- Выводим меню -->
+				<!-- Show Menu -->
 				<ul class="users">
 					<xsl:apply-templates select="item"/>
 				</ul>
 			</xsl:when>
-			<!-- Неавторизованный пользователь -->
+			<!-- Unauthorized user -->
 			<xsl:otherwise>
 				<div class="authorization">
-					<h1>Личный кабинет</h1>
+					<h1>&labelAccount;</h1>
 					
-					<!-- Выводим ошибку, если она была передана через внешний параметр -->
+					<!-- Show Error -->
 					<xsl:if test="error/node()">
 						<div id="error">
 							<xsl:value-of select="error"/>
@@ -31,78 +31,58 @@
 					</xsl:if>
 					
 					<form action="/users/" method="post">
-						<p>Пользователь:
+						<p>&labelLogin;
 							<br /><input name="login" type="text" size="30" class="large" />
 						</p>
-						<p>Пароль:
+						<p>&labelPassword;
 							<br /><input name="password" type="password" size="30" class="large" />
 						</p>
 						<p>
-							<label><input name="remember" type="checkbox" /> Запомнить меня на сайте.</label>
+							<label><input name="remember" type="checkbox" /> &labelRemember;</label>
 						</p>
-						<input name="apply" type="submit" value="Войти" class="button" />
+						<input name="apply" type="submit" value="&labelLoginButton;" class="button" />
 						
-						<!-- Страница редиректа после авторизации -->
+						<!-- Page Redirect after login -->
 						<xsl:if test="location/node()">
 							<input name="location" type="hidden" value="{location}" />
 						</xsl:if>
 					</form>
 					
-				<p>Первый раз на сайте? — <a href="/users/registration/">Зарегистрируйтесь</a>!</p>
-					
-				<p>Забыли пароль? Мы можем его <a href="/users/restore_password/">восстановить</a>.</p>
+				<p>&labelLine1; — <a href="/users/registration/">&labelRegister;</a></p>
+				<p>&labelLine2; <a href="/users/restore_password/">&labelRestore;</a></p>
 				</div>
 				
-				<xsl:if test="count(site/siteuser_identity_provider)">
-					<div class="authorization">
-						
-						<h1>OAuth</h1>
-						
-						<xsl:for-each select="site/siteuser_identity_provider[image != '' and type = 1]">
-							<xsl:element name="a">
-								<xsl:attribute name="href">
-									?oauth_provider=<xsl:value-of select="@id"/>
-								</xsl:attribute>
-								<img src="{dir}{image}" alt="{name}"/>
-							</xsl:element>&#160;
-						</xsl:for-each>
+				<div class="authorization">
+					<h1>&labelNewAccount;</h1>
 					
-						<h1>OpenID</h1>
-						
-						<!-- Выводим ошибку, если она была передана через внешний параметр -->
-						<xsl:if test="provider_error/node()">
-							<div id="error">
-								<xsl:value-of select="provider_error"/>
+					<p>&labelNewAccountLine1;</p>
+					
+					<ul class="account">
+						<li>&labelNewAccountAdvantage1;</li>
+						<li>&labelNewAccountAdvantage2;</li>
+						<li>&labelNewAccountAdvantage3;</li>
+					</ul>
+					
+					<p class="button">&labelRegister;</p>
+				</div>
+				
+				<xsl:if test="count(site/siteuser_identity_provider[image != '' and type = 1])">
+					<div class="row">
+						<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+							<div class="social-authorization">
+								<h1>&labelLoginWithSocialAccount;</h1>
+								<xsl:for-each select="site/siteuser_identity_provider[image != '' and type = 1]">
+									<xsl:element name="a">
+									<xsl:attribute name="href">/users/?oauth_provider=<xsl:value-of select="@id"/><xsl:if test="/siteuser/location/node()">&amp;location=<xsl:value-of select="/siteuser/location"/></xsl:if></xsl:attribute>
+										<xsl:attribute name="class">social-icon</xsl:attribute>
+										<img src="{dir}{image}" alt="{name}" title="{name}" />
+								</xsl:element><xsl:text> </xsl:text>
+								</xsl:for-each>
 							</div>
-						</xsl:if>
-						
-						<form action="/users/" method="post">
-							<p>Войти с помощью:</p>
-							<xsl:for-each select="site/siteuser_identity_provider[image != '' and type = 0]">
-								<label>
-									<input type="radio" name="identity_provider" value="{@id}">
-										<xsl:if test="position() = 1">
-											<xsl:attribute name="checked">checked</xsl:attribute>
-										</xsl:if>
-									</input> <img src="{dir}{image}" alt="{name}" title="{name}" />
-								</label>
-							</xsl:for-each>
-							
-							<p>Логин в выбранном сервисе:
-								<br /><input name="openid_login" type="text" size="30" class="large" />
-							</p>
-							
-							<input name="applyOpenIDLogin" type="submit" value="Войти" class="button" />
-						</form>
-						
-						<form action="/users/" method="post">
-							<p>или введите OpenID вручную:
-								<br /><input name="openid" type="text" size="30" class="large" />
-							</p>
-							<input name="applyOpenID" type="submit" value="Войти" class="button" />
-						</form>
+						</div>
 					</div>
 				</xsl:if>
+				
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>

@@ -11,6 +11,7 @@
 		->css('/hostcmsfiles/jquery/lightbox/css/jquery.lightbox.css')
 		->css('/hostcmsfiles/jquery/slider/jquery-ui.css')
 		->showCss();
+
 	?>
 	<!--[if IE]>
 	<style>.header input[type=text],.header input[type=password]{border:1px solid #eee;height:20px}</style>
@@ -45,7 +46,6 @@
 		->showJs();
 	?>
 	<script type="text/javascript">
-	// <![CDATA[
 	$(function() {
 		$('#gallery a[target="_blank"]:has(img)').lightBox();
 
@@ -102,7 +102,6 @@
 			deferRequestBy: 300
 		});
 	});
-	// ]]>
 	</script>
 </head>
 <body class="pageBody">
@@ -168,6 +167,8 @@
 		Core_Entity::factory('Xsl')->getByName('ВерхнееМеню')
 	)
 	->showShopGroups(TRUE)
+	->showInformationsystemGroupProperties(TRUE)
+	->showInformationsystemGroups(TRUE)
 	->menu(1)
 	->show();
 	?>
@@ -192,9 +193,9 @@
 			<div class="cart">
 				<div class="content">
 					<?php
+					// Краткая корзина
 					if (Core::moduleIsActive('shop'))
 					{
-						// Краткая корзина
 						$Shop_Cart_Controller_Show = new Shop_Cart_Controller_Show(
 							Core_Entity::factory('Shop', 1)
 						);
@@ -203,7 +204,8 @@
 								Core_Entity::factory('Xsl')->getByName('МагазинКорзинаКраткая')
 							)
 							->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : '')
-							->show();
+							->show()
+							->refreshLittleCart();
 					}
 					?>
 				</div>
@@ -226,6 +228,8 @@
 
 	<?php
 	Core_Page::instance()->execute();
+
+	$this->showSection('top');
 	?>
 
 	<?php

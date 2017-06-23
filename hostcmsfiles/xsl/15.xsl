@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://15">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -9,19 +9,21 @@
 <xsl:template match="/"><xsl:apply-templates select="/document/comment"/></xsl:template>
 
 <xsl:template match="/document/comment">
-<p>На сайт был добавлен комментарий:</p>
+<p>&labelTitle;</p>
 
-<p>Автор: <xsl:value-of select="author" /><br />
-E-mail: <xsl:value-of select="email" /><br />
-Тема: <xsl:value-of select="subject" /><br />
-Комментарий: <xsl:value-of select="text" /><br />
-Магазин: <xsl:value-of select="../shop/name" /><br />
-Дата: <xsl:value-of select="datetime" /><br />
-IP-адрес: <xsl:value-of select="ip" />
+<p>&labelAuthor; <xsl:value-of select="author" /><br />
+&labelEmail; <xsl:value-of select="email" /><br />
+&labelSubject; <xsl:value-of select="subject" /><br />
+&labelReview; <xsl:value-of select="text" /><br />
+&labelShop; <xsl:value-of select="../shop/name" /><br />
+&labelShopItem; <xsl:value-of select="../shop_item/name" /><br />
+&labelLink; http:<xsl:value-of select="../shop/http" /><xsl:value-of select="../shop/url" /><br />
+&labelDate; <xsl:value-of select="datetime" /><br />
+&labelIp; <xsl:value-of select="ip" />
 </p>
 
 <p>---<br />
-Система управления сайтом HostCMS<br />
-http://www.hostcms.ru</p>
+&labelHostcms;<br />
+&labelHostcmsLink;</p>
 </xsl:template>
 </xsl:stylesheet>

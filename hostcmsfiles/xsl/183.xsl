@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://183">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -32,7 +32,7 @@
 			</xsl:comment>
 		</SCRIPT>
 
-		<h1>Служба поддержки <xsl:value-of select="name"/></h1>
+		<h1>&labelHelpdesk; <xsl:value-of select="name"/></h1>
 
 		<xsl:if test="message/node()">
 			<div id="message">
@@ -41,27 +41,27 @@
 		</xsl:if>
 
 		<form method="get" action="{/helpdesk/url}">
-			Cостояние запроса
+			&labelTicketStatus;
 			<select name="status">
-				<option value="-1">Любой</option>
+				<option value="-1">&labelAny;</option>
 				<option value="1">
-					<xsl:if test="apply_filter = 1"><xsl:attribute name="selected"></xsl:attribute></xsl:if>Открытый
+					<xsl:if test="apply_filter = 1"><xsl:attribute name="selected"></xsl:attribute></xsl:if>&labelOpen;
 				</option>
 				<option value="0">
-					<xsl:if test="apply_filter = 0"><xsl:attribute name="selected"></xsl:attribute></xsl:if>Закрытый
+					<xsl:if test="apply_filter = 0"><xsl:attribute name="selected"></xsl:attribute></xsl:if>&labelClose;
 				</option>
 			</select>
-			<input type="submit" class="button" style="margin-left: 15px" value="Показать" name="apply_filter"/>
+			<input type="submit" class="button" style="margin-left: 15px" value="&labelShow;" name="apply_filter"/>
 		</form>
 
 		<div class="clearing"></div>
 
 		<div id="ShowAddTicket">
 			<p>
-			<img src="/hostcmsfiles/images/add.gif" alt="Написать запрос" style="margin: 0px 5px -2px 6px"/>
-			<a href="#" onclick="$('#AddTicket').toggle('slow'); return false;">Написать запрос</a>
-			<img src="/hostcmsfiles/images/calendar.gif" alt="Режим работы" style="margin: 0px 5px -2px 6px; margin-left: 10px"/>
-			<a href="{url}worktime/">Режим работы</a>
+			<img src="/hostcmsfiles/images/add.gif" alt="&labelAddTicket;" style="margin: 0px 5px -2px 6px"/>
+			<a href="#" onclick="$('#AddTicket').toggle('slow'); return false;">&labelAddTicket;</a>
+			<img src="/hostcmsfiles/images/calendar.gif" alt="&labelWorkSchedule;" style="margin: 0px 5px -2px 6px; margin-left: 10px"/>
+			<a href="{url}worktime/">&labelWorkSchedule;</a>
 			</p>
 		</div>
 
@@ -73,18 +73,18 @@
 			<xsl:when test="helpdesk_ticket/node()">
 				<table class="table">
 					<tr>
-						<th width="65px">Тикет</th>
-						<th>Тема</th>
-						<th width="125px">Дата</th>
-						<th width="80px">Обработано</th>
-						<th>Состояние</th>
+						<th width="65px">&labelTicket;</th>
+						<th>&labelSubject;</th>
+						<th width="125px">&labelDate;</th>
+						<th width="80px">&labelProcessed;</th>
+						<th>&labelStatus;</th>
 						<th style="text-align: center">—</th>
 					</tr>
 					<xsl:apply-templates select="helpdesk_ticket" />
 				</table>
 			</xsl:when>
 			<xsl:otherwise>
-				<p><span style="color: #777">Обращений не найдено.</span></p>
+				<p><span style="color: #777">&labelNone;</span></p>
 			</xsl:otherwise>
 		</xsl:choose>
 
@@ -123,7 +123,7 @@
 				<xsl:variable name="category_id" select="helpdesk_category_id" />
 
 				<xsl:if test="/helpdesk//helpdesk_category[@id = $category_id]/node() and /helpdesk//helpdesk_category[@id = $category_id]/name != ''">
-					<br/>в "<xsl:value-of disable-output-escaping="yes" select="/helpdesk//helpdesk_category[@id = $category_id]/name"/>"
+					<br/>&labelIn; "<xsl:value-of disable-output-escaping="yes" select="/helpdesk//helpdesk_category[@id = $category_id]/name"/>"
 				</xsl:if>
 			</td>
 			<td>
@@ -138,12 +138,12 @@
 				<!-- Состояние -->
 				<xsl:choose>
 					<xsl:when test="open = 0">
-						<span class="helpdesk_status_1">Тикет закрыт.</span>
+						<span class="helpdesk_status_1">&labelTicketClose;</span>
 					</xsl:when>
 					<xsl:otherwise>
 						<xsl:choose>
 							<xsl:when test="processed_messages_count = messages_count">
-								<span class="helpdesk_status_1">Ожидаем Ваш ответ.</span>
+								<!-- <span class="helpdesk_status_1">&labelWait;</span> -->
 							</xsl:when>
 							<xsl:otherwise>
 								<!-- Возможные состояния
@@ -151,17 +151,17 @@
 								2 - Ожидание ответа пользователя-->
 								<xsl:choose>
 									<xsl:when test="expire > 0">
-										<xsl:if test="expire = 1"><span class="helpdesk_status_2">Скоро ответим …</span></xsl:if>
-										<xsl:if test="expire = 2"><span class="helpdesk_status_1">Ожидаем Ваш ответ.</span></xsl:if>
+										<xsl:if test="expire = 1"><span class="helpdesk_status_2">&labelReplySoon;</span></xsl:if>
+										<xsl:if test="expire = 2"><span class="helpdesk_status_1">&labelWait;</span></xsl:if>
 									</xsl:when>
 									<xsl:otherwise>
 										<xsl:if test="expire_after_days/node() or expire_after_hours/node() or expire_after_minutes/node()">
-										<span class="helpdesk_status_2">Ответим в течение<xsl:choose>
+										<span class="helpdesk_status_2">&labelAnswer;<xsl:choose>
 										<xsl:when test="expire_after_days/node()">
 										<xsl:if test="expire_after_days/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_days"/><xsl:text> </xsl:text>
-												<xsl:variable name="nominative">дня</xsl:variable>
-												<xsl:variable name="genitive_singular">дней</xsl:variable>
-												<xsl:variable name="genitive_plural">дней</xsl:variable>
+												<xsl:variable name="nominative">&labelDay;</xsl:variable>
+												<xsl:variable name="genitive_singular">&labelDays;</xsl:variable>
+												<xsl:variable name="genitive_plural">&labelDays;</xsl:variable>
 
 												<xsl:call-template name="declension">
 													<xsl:with-param name="number" select="expire_after_days"/>
@@ -173,9 +173,9 @@
 											</xsl:when>
 											<xsl:otherwise>
 											<xsl:if test="expire_after_hours/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_hours"/><xsl:text> </xsl:text>
-												<xsl:variable name="nominative">часа</xsl:variable>
-												<xsl:variable name="genitive_singular">часов</xsl:variable>
-												<xsl:variable name="genitive_plural">часов</xsl:variable>
+												<xsl:variable name="nominative">&labelHour;</xsl:variable>
+												<xsl:variable name="genitive_singular">&labelHours;</xsl:variable>
+												<xsl:variable name="genitive_plural">&labelHours;</xsl:variable>
 
 												<xsl:call-template name="declension">
 													<xsl:with-param name="number" select="expire_after_hours"/>
@@ -184,9 +184,9 @@
 													<xsl:with-param name="genitive_plural" select="$genitive_plural"/>
 												</xsl:call-template>
 											</xsl:if>
-											<xsl:if test="expire_after_minutes/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_minutes"/><xsl:text> </xsl:text><xsl:variable name="nominative">минуты</xsl:variable>
-												<xsl:variable name="genitive_singular">минут</xsl:variable>
-												<xsl:variable name="genitive_plural">минут</xsl:variable>
+											<xsl:if test="expire_after_minutes/node()"><xsl:text> </xsl:text><xsl:value-of select="expire_after_minutes"/><xsl:text> </xsl:text><xsl:variable name="nominative">&labelMinute;</xsl:variable>
+												<xsl:variable name="genitive_singular">&labelMinutes;</xsl:variable>
+												<xsl:variable name="genitive_plural">&labelMinutes;</xsl:variable>
 
 												<xsl:call-template name="declension">
 													<xsl:with-param name="number" select="expire_after_minutes"/>
@@ -210,10 +210,10 @@
 			<td align="center">
 				<xsl:choose>
 					<xsl:when test="open = 0">
-						<a href="./?open_ticket={@id}"><img src="/hostcmsfiles/images/lock.gif" alt="Открыть запрос" title="Открыть запрос" /></a>
+						<a href="./?open_ticket={@id}"><img src="/hostcmsfiles/images/lock.gif" alt="&labelOpenTicket;" title="&labelOpenTicket;" /></a>
 					</xsl:when>
 					<xsl:otherwise>
-						<a href="./?close_ticket={@id}"><img src="/hostcmsfiles/images/lock_open.gif" alt="Закрыть запрос" title="Закрыть запрос"/></a>
+						<a href="./?close_ticket={@id}"><img src="/hostcmsfiles/images/lock_open.gif" alt="&labelCloseTicket;" title="&labelCloseTicket;"/></a>
 					</xsl:otherwise>
 				</xsl:choose>
 			</td>
@@ -256,7 +256,7 @@
 		</xsl:if>
 	</xsl:template>
 
-	<!-- Цикл для вывода строк ссылок -->
+	<!-- Pagination -->
 	<xsl:template name="for">
 		<xsl:param name="i" select="0"/>
 		<xsl:param name="prefix">page</xsl:param>
@@ -268,7 +268,7 @@
 
 		<xsl:variable name="n" select="$ticket_count div $ticket_on_page"/>
 
-		<!-- Считаем количество выводимых ссылок перед текущим элементом -->
+		<!-- Links before current -->
 		<xsl:variable name="pre_count_page">
 			<xsl:choose>
 				<xsl:when test="$current_page &gt; ($n - (round($visible_pages div 2) - 1))">
@@ -280,7 +280,7 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		<!-- Считаем количество выводимых ссылок после текущего элемента -->
+		<!-- Links after current -->
 		<xsl:variable name="post_count_page">
 			<xsl:choose>
 				<xsl:when test="0 &gt; $current_page - (round($visible_pages div 2) - 1)">
@@ -313,18 +313,18 @@
 
 		<xsl:if test="$ticket_count &gt; $ticket_on_page and $n &gt; $i">
 
-			<!-- Определяем адрес ссылки -->
+			<!-- Set $link variable -->
 			<xsl:variable name="number_link">
 				<xsl:choose>
-					<!-- Если не нулевой уровень -->
+					
 					<xsl:when test="$i != 0">
 						<xsl:value-of select="$prefix"/>-<xsl:value-of select="$i + 1"/>/</xsl:when>
-					<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+					
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
 
-			<!-- Передаем фильтр -->
+			<!-- Filter String -->
 			<xsl:variable name="filter">
 				<xsl:choose>
 					<xsl:when test="/helpdesk/apply_filter/node()">?action=apply_filter&amp;status=<xsl:value-of select="/helpdesk/apply_filter"/>
@@ -341,16 +341,16 @@
 				</xsl:choose>
 			</xsl:variable>
 
-			<!-- Ставим ссылку на страницу-->
+			<!-- Pagination item -->
 			<xsl:if test="$i != $current_page">
-				<!-- Выводим ссылку на первую страницу -->
+				<!-- First pagination item -->
 				<xsl:if test="$current_page - $pre_count_page &gt; 0 and $i = 0">
 					<a href="{$link}{$filter}" class="page_link" style="text-decoration: none;">←</a>
 				</xsl:if>
 
 				<xsl:choose>
 					<xsl:when test="$i &gt;= ($current_page - $pre_count_page) and ($current_page + $post_count_page) &gt;= $i">
-						<!-- Выводим ссылки на видимые страницы -->
+						<!-- Pagination item -->
 						<a href="{$link}{$number_link}{$filter}" class="page_link">
 							<xsl:value-of select="$i + 1"/>
 						</a>
@@ -358,11 +358,11 @@
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 
-				<!-- Выводим ссылку на последнюю страницу -->
+				<!-- Last pagination item -->
 				<xsl:if test="$i+1 &gt;= $n and $n &gt; ($current_page + 1 + $post_count_page)">
 					<xsl:choose>
 						<xsl:when test="$n &gt; round($n)">
-							<!-- Выводим ссылку на последнюю страницу -->
+							<!-- Last pagination item -->
 							<a href="{$link}{$filter}{$prefix}-{round($n+1)}/" class="page_link" style="text-decoration: none;">→</a>
 						</xsl:when>
 						<xsl:otherwise>
@@ -372,13 +372,13 @@
 				</xsl:if>
 			</xsl:if>
 
-			<!-- Ссылка на предыдущую страницу для Ctrl + влево -->
+			<!-- Ctrl+left link -->
 			<xsl:if test="$current_page != 0 and $i = $current_page">
 				<xsl:variable name="prev_number_link">
 					<xsl:choose>
-						<!-- Если не нулевой уровень -->
+						
 						<xsl:when test="($current_page - 1) != 0">page-<xsl:value-of select="$i"/>/</xsl:when>
-						<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
@@ -386,19 +386,19 @@
 				<a href="{$link}{$prev_number_link}{$filter}" id="id_prev"></a>
 			</xsl:if>
 
-			<!-- Ссылка на следующую страницу для Ctrl + вправо -->
+			<!-- Ctrl+right link -->
 			<xsl:if test="($n - 1) > $current_page and $i = $current_page">
 				<a href="{$link}{$filter}page-{$current_page+2}/" id="id_next"></a>
 			</xsl:if>
 
-			<!-- Не ставим ссылку на страницу-->
+			<!-- Current pagination item -->
 			<xsl:if test="$i = $current_page">
 				<span class="current">
 					<xsl:value-of select="$i+1"/>
 				</span>
 			</xsl:if>
 
-			<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+			<!-- Recursive Template -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="i" select="$i + 1"/>
 				<xsl:with-param name="prefix" select="$prefix"/>
@@ -418,7 +418,7 @@
 			<!--Отображение формы добавления запроса в службу техподдержки-->
 			<form action="{/helpdesk/url}" name="" method="post" enctype="multipart/form-data">
 				<div class="row">
-					<div class="caption">Тема</div>
+					<div class="caption">&labelSubject;</div>
 					<div class="field">
 						<input type="text" size="62" name="subject" value=""/>
 					</div>
@@ -426,7 +426,7 @@
 
 				<xsl:if test="helpdesk_criticality_level/node()">
 					<div class="row">
-						<div class="caption">Уровень критичности</div>
+						<div class="caption">&labelCriticalityLevel;</div>
 						<div class="field">
 							<select name="criticality_level_id">
 								<xsl:apply-templates select="helpdesk_criticality_level"/>
@@ -437,7 +437,7 @@
 
 				<xsl:if test="helpdesk_category/node()">
 					<div class="row">
-						<div class="caption">Категория</div>
+						<div class="caption">&labelCategory;</div>
 						<div class="field">
 							<select name="helpdesk_category_id">
 								<option value="0">…</option>
@@ -448,7 +448,7 @@
 				</xsl:if>
 
 				<div class="row">
-					<div class="caption">Текст сообщения</div>
+					<div class="caption">&labelText;</div>
 					<div class="field">
 						<xsl:choose>
 							<xsl:when test="/helpdesk/messages_type = 0">
@@ -465,22 +465,18 @@
 					<div class="caption"></div>
 					<div class="field">
 						<p>
-							<input id="check_1" type="checkbox" name="notify_change_status" checked="checked" value="1" />
-							<label for="check_1">Посылать сообщения о смене статуса на e-mail</label>
-						</p>
-						<p>
 							<input id="check_2" type="checkbox" name="send_email" checked="checked" value="1" />
-							<label for="check_2">Отсылать ответы на e-mail</label>
+							<label for="check_2">&labelSendMail;</label>
 						</p>
 					</div>
 				</div>
 
 				<div class="row">
-					<div class="caption">Прикрепить файл</div>
+					<div class="caption">&labelAddFile;</div>
 					<div class="field">
 						<p id="helpdesk_upload_file">
-							<input size="30" name="attachment[]" type="file" title="Прикрепить файл" />
-							<xsl:text> </xsl:text><a href="#" id="addFile">Еще файл …</a>
+							<input size="30" name="attachment[]" type="file" title="&labelAddFile;" />
+							<xsl:text> </xsl:text><a href="#" id="addFile">&labelMoreFile;</a>
 						</p>
 					</div>
 				</div>
@@ -488,20 +484,20 @@
 				<div class="row">
 					<div class="caption"></div>
 					<div class="field">
-						<input type="submit" name="add_ticket" value="Отправить" class="button" />
+						<input type="submit" name="add_ticket" value="&labelSend;" class="button" />
 					</div>
 				</div>
 			</form>
 		</div>
 	</xsl:template>
 
-	<!-- Склонение после числительных -->
+	<!-- Declension of the numerals -->
 	<xsl:template name="declension">
 
 		<xsl:param name="number" select="number"/>
-		<!-- Именительный падеж -->
+		<!-- Nominative case / Именительный падеж -->
 		<xsl:param name="nominative" select="nominative"/>
-		<!-- Родительный падеж, единственное число -->
+		<!-- Genitive singular / Родительный падеж, единственное число -->
 		<xsl:param name="genitive_singular" select="genitive_singular"/>
 		<!-- Родительный падеж, множественное число -->
 		<xsl:param name="genitive_plural" select="genitive_plural"/>
@@ -526,5 +522,4 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-
 </xsl:stylesheet>

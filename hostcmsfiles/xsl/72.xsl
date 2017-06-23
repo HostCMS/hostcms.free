@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://72">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -13,37 +13,37 @@
 	<!-- Основной шаблон, формирующий таблицу сравнения -->
 	<xsl:template match="shop">
 
-		<h1>Сравнение товаров</h1>
+		<h1>&labelTitle;</h1>
 
 		<table class="shop_cart shop_cart_compare">
 			<tr>
-				<th>Название</th>
+				<th>&labelName;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="name"/>
 			</tr>
 			<tr>
-				<th>Фото</th>
+				<th>&labelPhoto;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="image"/>
 			</tr>
 			<tr>
-				<th>Цена</th>
+				<th>&labelPrice;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="price"/>
 			</tr>
 			<tr>
-				<th>Вес</th>
+				<th>&labelWeight;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="weight"/>
 			</tr>
 			<tr>
-				<th>Производитель</th>
+				<th>&labelProducer;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="shop_producer"/>
 			</tr>
 			<tr>
-				<th>Описание</th>
+				<th>&labelDescription;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="text"/>
 			</tr>
 			<xsl:apply-templates select="shop_item_properties//property"/>
 			<tr>
 				<th>
-					Сравнить
+					&labelCompare;
 				</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="comparing"/>
 			</tr>

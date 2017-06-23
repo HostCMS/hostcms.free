@@ -666,6 +666,7 @@ body.hostcms-bootstrap1:before {
 {
 	top: 14px !important;
 }
+.page-sidebar.menu-compact~.page-content{margin-left:47px}
 
 .DTTTFooter{
 	padding-left: 5px;

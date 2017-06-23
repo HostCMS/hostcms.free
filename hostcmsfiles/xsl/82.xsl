@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://82">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -7,14 +7,13 @@
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
 
 	<!-- БанковскийСчет -->
-
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
 
 	<xsl:template match="/">
 		<xsl:apply-templates select="shop"/>
 	</xsl:template>
 
-	<!-- Выводим данные -->
+	
 	<xsl:template match="shop">
 		<html>
 			<head>
@@ -74,37 +73,37 @@
 					<p><img src="http://{/shop/site/site_alias/name}/images/logo.png" border="0" /></p>
 
 					<p>
-						<b>Поставщик:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/name"/>
+						<b>&labelProviderName;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/name"/>
 						<br />
-						<b>ИНН/КПП:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/>/<xsl:value-of select="/shop/shop_company/kpp"/>
+						<b>&labelTinKpp;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/>/<xsl:value-of select="/shop/shop_company/kpp"/>
 						<br />
-						<b>ОГРН:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/psrn"/>
+						<b>&labelPsrn;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/psrn"/>
 						<br />
-						<b>Адрес:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/address"/>
+						<b>&labelAddress;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/address"/>
 						<br />
-						<b>Телефон:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/phone"/>
+						<b>&labelPhone;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/phone"/>
 						<br />
-						<b>Факс:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/fax"/>
+						<b>&labelFax;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/fax"/>
 						<br />
-						<b>E-mail:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/email"/>
+						<b>&labelEmail;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/email"/>
 						<br />
-						<b>Сайт:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/site"/>
+						<b>&labelSite;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/site"/>
 					</p>
 					<p>
 						<table cellpadding="1" cellspacing="0" width="100%">
 							<tr>
 								<td colspan="4" align="center">
-									<span style="font-weight: bold; font-size: 11pt">Образец заполнения платежного поручения</span>
+									<span style="font-weight: bold; font-size: 11pt">&labelSamplePaymentOrder;</span>
 								</td>
 							</tr>
 							<tr>
-								<td class="td_main">ИНН<xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/></td>
-								<td class="td_main">КПП<xsl:text> </xsl:text><xsl:value-of select="shop_company/kpp"/></td>
+								<td class="td_main">&labelTin;<xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/></td>
+								<td class="td_main">&labelKpp;<xsl:text> </xsl:text><xsl:value-of select="shop_company/kpp"/></td>
 								<td class="td_main" style="border-right: black 1px solid;" rowspan="2" colspan="2"></td>
 							</tr>
 							<tr>
 								<td class="td_main" colspan="2" width="50%">
-									<b>Получатель</b>
+									<b>&labelRecipient;</b>
 								</td>
 							</tr>
 							<tr>
@@ -112,7 +111,7 @@
 									<xsl:value-of select="shop_company/name"/>
 								</td>
 								<td class="td_main" width="100">
-									<b>Сч. №</b>
+									<b>&labelAccountNumber;</b>
 								</td>
 								<td class="td_main" style="border-right: black 1px solid;">
 									<xsl:value-of select="shop_company/current_account"/>
@@ -120,10 +119,10 @@
 							</tr>
 							<tr>
 								<td class="td_main" colspan="2">
-									<b>Банк получателя</b>
+									<b>&labelPayeesBank;</b>
 								</td>
 								<td class="td_main">
-									<b>БИК</b>
+									<b>&labelBic;</b>
 								</td>
 								<td class="td_main" style="border-right: black 1px solid;">
 									<xsl:value-of select="shop_company/bic"/>
@@ -134,7 +133,7 @@
 									<xsl:value-of select="shop_company/bank_name"/><xsl:text> </xsl:text><xsl:value-of select="shop_company/bank_address"/>
 								</td>
 								<td class="td_main" style="border-bottom: black 1px solid;">
-									<b>Кор/Сч. №</b>
+									<b>&labelCorrespondentAccount;</b>
 								</td>
 								<td class="td_main" style="border-bottom: black 1px solid; border-right: black 1px solid">
 									<xsl:value-of select="/shop/shop_company/correspondent_account"/>
@@ -143,17 +142,15 @@
 						</table>
 					</p>
 
-					<p><b>Уважаемый Клиент!</b>
-					<br />Просим оплатить этот счет в течение 5 дней с даты выставления.
-					Вы можете сделать это в любом банковском учреждении РФ.
-					Не забудьте указать номер счета в платежном документе.
+					<p><b>&labelMessageTitle;</b>
+					<br />&labelMessageText;
 					</p>
 
-					<p align="center"><span style="font-weight: bold; font-size: 12pt">Счет № <xsl:value-of select="shop_order/invoice"/> от <xsl:value-of select="shop_order/date"/> г.</span></p>
+					<p align="center"><span style="font-weight: bold; font-size: 12pt">&labelAccountNumber; <xsl:value-of select="shop_order/invoice"/> &labelDateFrom; <xsl:value-of select="shop_order/date"/></span></p>
 
 					<table cellpadding="2" cellspacing="0" width="100%">
 						<tr>
-							<td align="right">Покупатель:</td>
+							<td align="right">&labelCustomer;:</td>
 							<td>
 								<b>
 									<xsl:choose>
@@ -170,9 +167,9 @@
 							</td>
 						</tr>
 						<tr>
-							<td align="right">Адрес:</td>
+							<td align="right">&labelAddress;:</td>
 							<td>
-								<!-- Адрес -->
+								<!-- Address -->
 								<xsl:if test="/shop/shop_order/postcode != ''">
 									<xsl:value-of select="/shop/shop_order/postcode"/>,
 								</xsl:if>
@@ -180,14 +177,14 @@
 									<xsl:value-of select="/shop/shop_order/shop_country/name"/>
 								</xsl:if>
 								<xsl:if test="/shop/shop_order/shop_country/shop_country_location/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/name"/></xsl:if>
-								<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name != ''">, г. <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name"/></xsl:if>
-								<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name"/><xsl:text> </xsl:text>район</xsl:if>
+								<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name"/></xsl:if>
+								<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name"/><xsl:text> </xsl:text>&labelDistrict;</xsl:if>
 								<xsl:if test="/shop/shop_order/address != ''">, <xsl:value-of select="/shop/shop_order/address"/></xsl:if>
 							</td>
 						</tr>
 						<xsl:if test="shop_order/phone/node() or shop_order/fax/node()">
 						<tr>
-							<td align="right">Тел./факс:</td>
+							<td align="right">&labelPhoneFax;:</td>
 							<td>
 								<xsl:value-of select="shop_order/phone"/>
 								<xsl:if test="shop_order/fax/node() and shop_order/fax != shop_order/phone"><xsl:text> / </xsl:text><xsl:value-of select="shop_order/fax"/></xsl:if>
@@ -201,20 +198,20 @@
 					<table cellpadding="3" cellspacing="0" width="100%">
 					<tr>
 						<td class="td_header">№</td>
-						<td class="td_header">Наименование</td>
-						<td class="td_header">Кол-во</td>
-						<td class="td_header">Ед. изм.</td>
-						<td class="td_header">Цена,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
-						<td class="td_header">Ставка НДС</td>
-						<td class="td_header">НДС,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
-						<td class="td_header" style="border-right: black 1px solid; border-left: black 1px solid;">Сумма, <xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
+						<td class="td_header">&labelOrderItemName;</td>
+						<td class="td_header">&labelOrderItemCount;</td>
+						<td class="td_header">&labelOrderMeasure;</td>
+						<td class="td_header">&labelOrderItemPrice;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
+						<td class="td_header">&labelOrderValueAddedTaxRate;</td>
+						<td class="td_header">&labelOrderValueAddedTax;,<xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
+						<td class="td_header" style="border-right: black 1px solid; border-left: black 1px solid;">&labelOrderAmount;, <xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" /></td>
 					</tr>
-					<!-- Элементы заказа -->
+					<!-- Ordered Items -->
 					<xsl:apply-templates select="shop_order/shop_order_item"/>
-					<!-- Всего НДС -->
+					<!-- Total Tax -->
 					<tr class="tr_footer">
 						<td align="right" colspan="6" style="border-bottom: black 1px solid;">
-							<b>В том числе НДС:</b>
+							<b>&labelOrderIncludingVat;:</b>
 						</td>
 						<td align="right" colspan="2" style="border-bottom: black 1px solid;">
 							<xsl:choose>
@@ -222,16 +219,16 @@
 								<xsl:value-of select="format-number(shop_order/total_tax, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_order/shop_currency/name" />
 							</xsl:when>
 							<xsl:otherwise>
-								<b>Без НДС</b>
+								<b>&labelOrderWithoutVat;</b>
 							</xsl:otherwise>
 							</xsl:choose>
 
 						</td>
 					</tr>
-					<!-- Итого -->
+					<!-- Total -->
 					<tr class="tr_footer">
 						<td align="right" colspan="6">
-							<b>Всего к оплате:</b>
+							<b>&labelOrderTotalAmount;:</b>
 						</td>
 						<td align="right" colspan="2">
 							<b>
@@ -246,14 +243,14 @@
 
 					<table cellpadding="2" cellspacing="0" width="100%">
 						<tr>
-							<td width="200" height="50">Руководитель предприятия</td>
+							<td width="200" height="50">&labelOrderDirector;</td>
 							<td style="border-bottom: black 1px solid;"></td>
 							<td width="200">
 								<xsl:value-of select="shop_company/legal_name"/>
 							</td>
 						</tr>
 						<tr>
-							<td width="200" height="50">Главный бухгалтер</td>
+							<td width="200" height="50">&labelOrderChiefAccountant;</td>
 							<td style="border-bottom: black 1px solid;"> </td>
 							<td>
 								<xsl:value-of select="shop_company/accountant_legal_name"/>
@@ -261,7 +258,7 @@
 						</tr>
 						<tr>
 							<td height="50" align="center" colspan="3">
-								<b>М.П.</b>
+								<b>&labelOrderPlaceStamp;</b>
 							</td>
 						</tr>
 					</table>
@@ -270,15 +267,14 @@
 
 					<p>
 					<ol>
-					<li>Счет действителен в течение 5 банковских дней.</li>
+					<li>&labelOrderLine1;</li>
 					</ol>
 					</p>
 				</div>
 			</body>
 		</html>
 	</xsl:template>
-
-	<!-- Выводим элементы заказа -->
+	
 	<xsl:template match="shop_order/shop_order_item">
 		<xsl:variable name="tax_sum_item" select="quantity * price div (100 + rate) * rate" />
 		<tr>

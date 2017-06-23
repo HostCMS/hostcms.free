@@ -105,9 +105,17 @@ class Core_Zip
 		$this->_iFiles = 0;
 
 		$this->_ZipArchive = new ZipArchive();
-		$this->_ZipArchive->open($this->_outputPath, ZIPARCHIVE::CREATE);
-		$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));
-		$this->_ZipArchive->close();
+		$result = $this->_ZipArchive->open($this->_outputPath, ZIPARCHIVE::CREATE);
+		
+		if ($result === TRUE)
+		{
+			$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));
+			$this->_ZipArchive->close();
+		}
+		else
+		{
+			throw new Core_Exception('ZipArchive open error, code: %code', array('%code' => $result));
+		}
 	}
 
 	/**

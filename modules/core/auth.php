@@ -223,10 +223,8 @@ class Core_Auth
 		if (defined('USE_ONLY_HTTPS_AUTHORIZATION') && !Core::httpsUses())
 		{
 			$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
-
-			$url = str_replace ("\r", '', $url);
-			$url = str_replace ("\n", '', $url);
-
+			$url = str_replace(array("\r", "\n", "\0"), '', $url);
+			
 			header("HTTP/1.1 302 Found");
 			header("Location: https://{$url}");
 

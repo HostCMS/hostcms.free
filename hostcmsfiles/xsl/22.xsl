@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://22">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -28,7 +28,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="success/node() and success = 1">
-				<p>Спасибо! Запрос получен, в ближайшее время Вам будет дан ответ.</p>
+				<p>&labelSuccess;</p>
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:choose>
@@ -42,13 +42,16 @@
 						<div id="error">
 							<xsl:choose>
 								<xsl:when test="errorId = 0">
-									Вы неверно ввели число подтверждения отправки формы!
+									&labelError0;
 								</xsl:when>
 								<xsl:when test="errorId = 1">
-									Заполните все обязательные поля!
+									&labelError1;
 								</xsl:when>
 								<xsl:when test="errorId = 2">
-									Прошло слишком мало времени с момента последней отправки Вами формы!
+									&labelError2;
+								</xsl:when>
+								<xsl:when test="errorId = 3">
+									&labelError3;
 								</xsl:when>
 							</xsl:choose>
 						</div>
@@ -77,18 +80,18 @@
 									<img id="formCaptcha_{/form/@id}_{/form/captcha_id}" src="/captcha.php?id={captcha_id}&amp;height=30&amp;width=100" class="captcha" name="captcha" />
 									
 									<div class="captcha">
-										<img src="/images/refresh.png" /> <span onclick="$('#formCaptcha_{/form/@id}_{/form/captcha_id}').updateCaptcha('{/form/captcha_id}', 30); return false">Показать другое число</span>
+										<img src="/images/refresh.png" /> <span onclick="$('#formCaptcha_{/form/@id}_{/form/captcha_id}').updateCaptcha('{/form/captcha_id}', 30); return false">&labelUpdateCaptcha;</span>
 									</div>
 								</div>
 							</div>
 							
 							<div class="row">
 								<div class="caption">
-							Контрольное число<sup><font color="red">*</font></sup>
+							&labelCaptchaId;<sup><font color="red">*</font></sup>
 								</div>
 								<div class="field">
 									<input type="hidden" name="captcha_id" value="{/form/captcha_id}"/>
-									<input type="text" name="captcha" size="15" class="required" minlength="4" title="Введите число, которое указано выше."/>
+									<input type="text" name="captcha" size="15" class="required" minlength="4" title="&labelEnterNumber;"/>
 								</div>
 							</div>
 						</xsl:if>
@@ -131,7 +134,7 @@
 				</div>
 				<div class="field">
 					<!-- Текстовые поля -->
-					<xsl:if test="type = 0 or type = 1 or type = 2">
+					<xsl:if test="type = 0 or type = 1 or type = 2 or type = 10 or type = 11 or type = 12 or type = 13 or type = 14 or type = 15 or type = 16 or type = 17 or type = 18 or type = 19">
 						<input type="text" name="{name}" value="{value}" size="{size}">
 							<xsl:choose>
 								<!-- Поле для ввода пароля -->
@@ -142,6 +145,46 @@
 								<xsl:when test="type = 2">
 									<xsl:attribute name="type">file</xsl:attribute>
 								</xsl:when>
+								<!-- HTML5: Дата -->
+								<xsl:when test="type = 10">
+									<xsl:attribute name="type">date</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Цвет -->
+								<xsl:when test="type = 11">
+									<xsl:attribute name="type">color</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Месяц -->
+								<xsl:when test="type = 12">
+									<xsl:attribute name="type">month</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Неделя -->
+								<xsl:when test="type = 13">
+									<xsl:attribute name="type">week</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Время -->
+								<xsl:when test="type = 14">
+									<xsl:attribute name="type">time</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Дата-Время -->
+								<xsl:when test="type = 15">
+									<xsl:attribute name="type">datetime</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: E-mail -->
+								<xsl:when test="type = 16">
+									<xsl:attribute name="type">email</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Поиск -->
+								<xsl:when test="type = 17">
+									<xsl:attribute name="type">search</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: Телефон -->
+								<xsl:when test="type = 18">
+									<xsl:attribute name="type">tel</xsl:attribute>
+								</xsl:when>
+								<!-- HTML5: URL -->
+								<xsl:when test="type = 19">
+									<xsl:attribute name="type">url</xsl:attribute>
+								</xsl:when>
 								<!-- Текстовое поле -->
 								<xsl:otherwise>
 									<xsl:attribute name="type">text</xsl:attribute>
@@ -150,7 +193,7 @@
 							<xsl:if test="obligatory = 1">
 								<xsl:attribute name="class">required</xsl:attribute>
 								<xsl:attribute name="minlength">1</xsl:attribute>
-								<xsl:attribute name="title">Заполните поле <xsl:value-of select="caption" /></xsl:attribute>
+								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
 							</xsl:if>
 						</input>
 					</xsl:if>
@@ -158,7 +201,7 @@
 					<!-- Радиокнопки -->
 					<xsl:if test="type = 3 or type = 9">
 						<xsl:apply-templates select="list/list_item" />
-						<label class="input_error" for="{name}" style="display: none">Выберите, пожалуйста, значение.</label>
+						<label class="input_error" for="{name}" style="display: none">&labelValue;</label>
 					</xsl:if>
 					
 					<!-- Checkbox -->
@@ -176,7 +219,7 @@
 							<xsl:if test="obligatory = 1">
 								<xsl:attribute name="class">required</xsl:attribute>
 								<xsl:attribute name="minlength">1</xsl:attribute>
-								<xsl:attribute name="title">Заполните поле <xsl:value-of select="caption" /></xsl:attribute>
+								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
 							</xsl:if>
 							<xsl:value-of select="value" />
 						</textarea>
@@ -187,7 +230,7 @@
 						<select name="{name}">
 							<xsl:if test="obligatory = 1">
 								<xsl:attribute name="class">required</xsl:attribute>
-								<xsl:attribute name="title">Заполните поле <xsl:value-of select="caption" /></xsl:attribute>
+								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
 							</xsl:if>
 							<option value="">...</option>
 							<xsl:apply-templates select="list/list_item" />
@@ -224,7 +267,7 @@
 					<xsl:if test="../../obligatory = 1">
 						<xsl:attribute name="class">required</xsl:attribute>
 						<xsl:attribute name="minlength">1</xsl:attribute>
-						<xsl:attribute name="title">Заполните поле <xsl:value-of select="caption" /></xsl:attribute>
+						<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
 					</xsl:if>
 			</input><xsl:text> </xsl:text>
 				<label for="{../../name}_{@id}"><xsl:value-of disable-output-escaping="yes" select="value" /></label>
@@ -244,11 +287,11 @@
 					<xsl:if test="../../values[value=$currentValue]/node()">
 						<xsl:attribute name="checked">checked</xsl:attribute>
 					</xsl:if>
-					<xsl:if test="../../obligatory = 1">
+					<!-- <xsl:if test="../../obligatory = 1">
 						<xsl:attribute name="class">required</xsl:attribute>
 						<xsl:attribute name="minlength">1</xsl:attribute>
-						<xsl:attribute name="title">Заполните поле <xsl:value-of select="caption" /></xsl:attribute>
-					</xsl:if>
+						<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
+					</xsl:if> -->
 			</input><xsl:text> </xsl:text>
 				<label for="{../../name}_{@id}"><xsl:value-of disable-output-escaping="yes" select="value" /></label>
 				<br/>

@@ -1,6 +1,12 @@
+#php_flag short_open_tag Off
+#php_value memory_limit "128M"
+#php_value max_execution_time "240"
+
+#php_value error_reporting "E_ALL"
+#php_value display_errors "1"
+
 Options +FollowSymlinks
 #Options +SymLinksIfOwnerMatch
-
 AddDefaultCharset Off
 
 <Files .htaccess>
@@ -62,4 +68,9 @@ AddDefaultCharset Off
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteRule ^(.*)$ /index.php
+
+	RewriteCond %{REQUEST_METHOD} !POST
+	RewriteCond %{HTTP_COOKIE} !^.*PHPSESSID=.*$
+	RewriteCond %{DOCUMENT_ROOT}/cache_html/%{HTTP_HOST}%{REQUEST_URI}%{QUERY_STRING}index.html -f
+	RewriteRule ^(.*)$ /cache_html/%{HTTP_HOST}%{REQUEST_URI}%{QUERY_STRING}index.html
 </IfModule>

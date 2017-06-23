@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://71">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -13,7 +13,7 @@
 	</xsl:template>
 
 	<xsl:template match="shop/shop_seller">
-		<h1>Продавец <xsl:value-of disable-output-escaping="no" select="name"/></h1>
+		<h1>&labelTitle; <xsl:value-of disable-output-escaping="no" select="name"/></h1>
 
 		<xsl:choose>
 			<xsl:when test="image_large!=''">
@@ -33,31 +33,31 @@
 		</xsl:if>
 
 		<xsl:if test="contact_person != ''">
-			<p><b>Контактное лицо:</b><xsl:text> </xsl:text><xsl:value-of select="contact_person"/></p>
+			<p><b>&labelContact;</b><xsl:text> </xsl:text><xsl:value-of select="contact_person"/></p>
 		</xsl:if>
 
 		<xsl:if test="address != ''">
-			<p><b>Адрес:</b><xsl:text> </xsl:text><xsl:value-of select="address"/></p>
+			<p><b>&labelAddress;</b><xsl:text> </xsl:text><xsl:value-of select="address"/></p>
 		</xsl:if>
 
 		<xsl:if test="phone != ''">
-			<p><b>Телефон:</b><xsl:text> </xsl:text><xsl:value-of select="phone"/></p>
+			<p><b>&labelPhone;</b><xsl:text> </xsl:text><xsl:value-of select="phone"/></p>
 		</xsl:if>
 
 		<xsl:if test="fax != ''">
-			<p><b>Факс:</b><xsl:text> </xsl:text><xsl:value-of select="fax"/></p>
+			<p><b>&labelFax;</b><xsl:text> </xsl:text><xsl:value-of select="fax"/></p>
 		</xsl:if>
 
 		<xsl:if test="site != ''">
-			<p><b>Сайт:</b><xsl:text> </xsl:text><xsl:value-of select="site"/></p>
+			<p><b>&labelSite;</b><xsl:text> </xsl:text><xsl:value-of select="site"/></p>
 		</xsl:if>
 
 		<xsl:if test="email != ''">
-			<p><b>E-Mail:</b><xsl:text> </xsl:text><a href="mailto:{email}"><xsl:value-of select="email"/></a></p>
+			<p><b>&labelEmail;</b><xsl:text> </xsl:text><a href="mailto:{email}"><xsl:value-of select="email"/></a></p>
 		</xsl:if>
 
 		<xsl:if test="tin != ''">
-			<p><b>ИНН:</b><xsl:text> </xsl:text><xsl:value-of select="tin"/></p>
+			<p><b>&labelTIN;</b><xsl:text> </xsl:text><xsl:value-of select="tin"/></p>
 		</xsl:if>
 
 	</xsl:template>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://61">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -10,19 +10,19 @@
 	
 	<xsl:template match="/shop">
 		<ul class="shop_navigation">
-		<li class="shop_navigation_current"><span>Адрес доставки</span>→</li>
-		<li><span>Способ доставки</span>→</li>
-		<li><span>Форма оплаты</span>→</li>
-		<li><span>Данные доставки</span></li>
+		<li class="shop_navigation_current"><span>&labelAddress;</span>→</li>
+		<li><span>&labelShipmentMethod;</span>→</li>
+		<li><span>&labelPaymentMethod;</span>→</li>
+		<li><span>&labelOrderConfirmation;</span></li>
 		</ul>
 		
 		<form method="POST">
-			<h1>Адрес доставки</h1>
+			<h1>&labelAddress;</h1>
 			
 			<div class="comment shop_address">
 				
 				<div class="row">
-					<div class="caption">Страна:</div>
+					<div class="caption">&labelCountry;</div>
 					<div class="field">
 						<select id="shop_country_id" name="shop_country_id" onchange="$.loadLocations('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -33,7 +33,7 @@
 				</div>
 				
 				<div class="row">
-					<div class="caption">Область:</div>
+					<div class="caption">&labelRegion;</div>
 					<div class="field">
 						<select name="shop_country_location_id" id="shop_country_location_id" onchange="$.loadCities('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -43,7 +43,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Город:</div>
+					<div class="caption">&labelCity;</div>
 					<div class="field">
 						<select name="shop_country_location_city_id" id="shop_country_location_city_id" onchange="$.loadCityAreas('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -52,7 +52,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Район города:</div>
+					<div class="caption">&labelDistrict;</div>
 					<div class="field">
 						<select name="shop_country_location_city_area_id" id="shop_country_location_city_area_id">
 							<option value="0">…</option>
@@ -60,20 +60,20 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Индекс:</div>
+					<div class="caption">&labelPostcode;</div>
 					<div class="field">
 						<input type="text" size="15" class="width1" name="postcode" value="{/shop/siteuser/postcode}" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Улица, дом, квартира:<br/>
-					(город, если не выбраны)</div>
+					<div class="caption">&labelAddressLine1;<br/>
+					&labelAddressLine2;</div>
 					<div class="field">
 						<input type="text" size="30" name="address" value="{/shop/siteuser/address}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Фамилия, Имя, Отчество:</div>
+					<div class="caption">&labelName;</div>
 					<div class="field">
 						<input type="text" size="15" class="width1" name="surname" value="{/shop/siteuser/surname}" />
 						<input type="text" size="15" class="width1" name="name" value="{/shop/siteuser/name}" />
@@ -81,25 +81,25 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Компания:</div>
+					<div class="caption">&labelCompany;</div>
 					<div class="field">
 						<input type="text" size="30" name="company" value="{/shop/siteuser/company}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Телефон:</div>
+					<div class="caption">&labelPhone;</div>
 					<div class="field">
 						<input type="text" size="30" name="phone" value="{/shop/siteuser/phone}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Факс:</div>
+					<div class="caption">&labelFax;</div>
 					<div class="field">
 						<input type="text" size="30" name="fax" value="{/shop/siteuser/fax}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">E-mail:</div>
+					<div class="caption">&labelEmail;</div>
 					<div class="field">
 						<input type="text" size="30" name="email" value="{/shop/siteuser/email}" class="width2" />
 					</div>
@@ -111,7 +111,7 @@
 				</xsl:if>
 				
 				<div class="row">
-					<div class="caption">Комментарий:</div>
+					<div class="caption">&labelReview;</div>
 					<div class="field">
 						<textarea rows="3" name="description" class="width2"></textarea>
 					</div>
@@ -120,7 +120,7 @@
 					<div class="caption"></div>
 					<div class="field">
 						<input name="step" value="2" type="hidden" />
-						<input value="Далее →" type="submit" class="button" />
+						<input value="&labelNext;" type="submit" class="button" />
 					</div>
 				</div>
 			</div>
@@ -169,7 +169,7 @@
 					<xsl:when test="display = 3">
 						<div class="propertyInput">
 							<input type="radio" name="property_{@id}" value="0" id="id_prop_radio_{@id}_0"></input>
-							<label for="id_prop_radio_{@id}_0">Любой вариант</label>
+							<label for="id_prop_radio_{@id}_0">&labelAnyOption;</label>
 							<xsl:apply-templates select="list/list_item"/>
 						</div>
 					</xsl:when>
@@ -262,7 +262,7 @@
 	
 	<xsl:template match="shop_country">
 		<option value="{@id}">
-			<xsl:if test="/shop/current_shop_country_id = @id or not(/shop/current_shop_country_id/node()) and /shop/shop_country_id = @id">
+			<xsl:if test="/shop/current_shop_country_id = @id or not(/shop/current_shop_country_id/node()) and /shop/shop_country_id = @id and /shop/shop_country_id/@id != 1">
 				<xsl:attribute name="selected">selected</xsl:attribute>
 			</xsl:if>
 			<xsl:value-of select="name" />

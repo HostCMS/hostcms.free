@@ -60,7 +60,7 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 	}
 
 	public function execute()
-	{
+	{	
 		$fOrderWeight = $this->_weight * $this->_coefficient;
 
 		if($fOrderWeight == 0 || $fOrderWeight > $this->_maxWeight)

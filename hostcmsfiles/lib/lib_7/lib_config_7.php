@@ -7,13 +7,15 @@ $bCheckStock = FALSE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 
+Shop_Delivery_Handler::checkBeforeContent($oShop);
+
 // Добавление товара в корзину
 if (Core_Array::getRequest('add'))
 {
 	// Запрещаем индексацию страницы корзины
 	Core_Page::instance()->response
 		->header('X-Robots-Tag', 'none');
-	
+
 	$add = Core_Array::getRequest('add');
 	!is_array($add) && $add = array($add);
 
@@ -28,7 +30,7 @@ if (Core_Array::getRequest('add'))
 			->clear()
 			->checkStock($bCheckStock)
 			->shop_item_id(intval($shop_item_id))
-			->quantity(intval(Core_Array::get($count, $key, 1)))
+			->quantity(floatval(Core_Array::get($count, $key, 1)))
 			->add();
 	}
 }

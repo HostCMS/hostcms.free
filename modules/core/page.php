@@ -326,7 +326,7 @@ class Core_Page extends Core_Servant_Properties
 
 		return $sReturn;
 	}
-	
+
 	/**
 	 * Show block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
@@ -623,8 +623,21 @@ class Core_Page extends Core_Servant_Properties
 		{
 			if (Core::$url['path'] != '/')
 			{
-				// Редирект на главную страницу
-				$oCore_Response->header('Location', '/');
+				//$oCore_Response->header('Location', '/');
+
+				$oCore_Response->body('<!DOCTYPE html>'
+					. '<html>'
+					. '<head>'
+					. '<meta charset="utf-8">'
+					. '<title>404</title>'
+					. '<meta http-equiv="refresh" content="0; url=/">'
+					. '</head>'
+					. '</html>'
+				)
+				->sendHeaders()
+				->showBody();
+
+				exit();
 			}
 		}
 

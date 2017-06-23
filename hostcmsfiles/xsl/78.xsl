@@ -12,7 +12,7 @@
 		<xsl:apply-templates select="shop"/>
 	</xsl:template>
 	
-	<!-- Выводим данные -->
+	
 	<xsl:template match="shop">
 		<html xmlns="http://www.w3.org/1999/xhtml">
 			<head>
@@ -200,7 +200,7 @@
 								<font size="2">Адрес плательщика</font>
 							</td>
 							<td>
-								<!-- Адрес -->
+								<!-- Address -->
 								<font size="1">
 									<xsl:if test="/shop/shop_order/postcode != ''"><xsl:value-of select="/shop/shop_order/postcode"/>,	</xsl:if>
 									

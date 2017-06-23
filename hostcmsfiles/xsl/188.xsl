@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://188">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -17,7 +17,7 @@
 							r2 = r.clone();
 							r2.find('.caption').text('');
 							r2.find('a').remove();
-							r2.find('input').attr('value', '');
+							r2.find('input').val('');
 							r.after(r2);
 							return false;
 						});
@@ -67,21 +67,21 @@
 		<form action="{/shop/structure/link}{@id}/" method="post" enctype="multipart/form-data" class="validate">
 			<div class="comment">
 				<div class="row">
-				<div class="caption">Заголовок<sup><font color="red">*</font></sup></div>
-					<div class="field"><input size="50" type="text" name="name" value="{name}" class="required" minlength="1" title="Заполните поле Заголовок" /></div>
+				<div class="caption">&labelSubject;<sup><font color="red">*</font></sup></div>
+					<div class="field"><input size="50" type="text" name="name" value="{name}" class="required" minlength="1" title="&labelFillField;" /></div>
 				</div>
 				<div class="row">
-					<div class="caption">Цена</div>
+					<div class="caption">&labelAmount;</div>
 					<div class="field"><input size="15" type="text" name="price" value="{price}" /></div>
 				</div>
 				<div class="row">
-					<div class="caption">Текст объявления</div>
+					<div class="caption">&labelText;</div>
 					<div class="field">
 						<textarea name="text" cols="50" rows="5"><xsl:value-of disable-output-escaping="yes" select="text"/></textarea>
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Фото</div>
+					<div class="caption">&labelPhoto;</div>
 					<div class="field"><input type="file" name="image" />
 						<xsl:if test="image_large/node()">
 							<xsl:text> </xsl:text><a target="_blank" href="{dir}{image_large}"><img src="/hostcmsfiles/images/preview.gif" /></a><xsl:text> </xsl:text>
@@ -163,7 +163,7 @@
 									</input>
 
 									<xsl:if test="type = 2">
-										<a id="addFile" href="#">Ещё файл...</a>
+										<a id="addFile" href="#">&labelAddFile;</a>
 									</xsl:if>
 								</xsl:when>
 
@@ -192,7 +192,7 @@
 
 				<div class="row">
 					<div class="caption"></div>
-					<div class="field"><input value="Сохранить" class="button" type="submit" name="update" /></div>
+					<div class="field"><input value="&labelSave;" class="button" type="submit" name="update" /></div>
 				</div>
 			</div>
 		</form>

@@ -6,12 +6,12 @@
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
 
-	<!-- Шаблон "ОплатаПоФормеПД4" -->
+	<!-- ОплатаПоФормеПД4 -->
 
 	<xsl:decimal-format name="my" decimal-separator="." grouping-separator=" "/>
 
 	<xsl:template match="/shop">
-		<!-- Строка шага заказа -->
+		
 		<ul class="shop_navigation">
 			<li><span>Адрес доставки</span>→</li>
 			<li><span>Способ доставки</span>→</li>
@@ -53,7 +53,7 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- Шаблон вывода данных о заказе -->
+	<!-- Order Template -->
 	<xsl:template match="shop_order">
 
 		<h2>Данные доставки</h2>
@@ -102,7 +102,7 @@
 		</p>
 	</xsl:template>
 
-	<!-- Данные о товарах -->
+	<!-- Ordered Item Template -->
 	<xsl:template match="shop_order/shop_order_item">
 		<tr>
 			<td>

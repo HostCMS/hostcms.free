@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://37">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict"
@@ -8,7 +8,7 @@
 		media-type="text/xml" />
 	
 	<xsl:template match="/forum">
-		<h1>Форумы</h1>
+		<h1>&labelForums;</h1>
 		<xsl:if test="error != ''">
 			<div id="error">
 				<xsl:value-of disable-output-escaping="yes" select="error" />
@@ -16,7 +16,7 @@
 		</xsl:if>
 		
 		<xsl:if test = "siteuser/node()">
-	<div style="float: right"><strong><a href="{url}myPosts/">Мои сообщения</a></strong></div>
+			<div style="float: right"><strong><a href="{url}myPosts/">&labelMyMessages;</a></strong></div>
 		</xsl:if>
 		
 		<div style="clear: both; height: 10px"></div>
@@ -27,7 +27,7 @@
 		
 		<xsl:if	test="last_siteuser/siteuser/node()">
 			<p>
-				<xsl:text>Последний зарегистрированный пользователь: </xsl:text><img style="margin: 0px 5px -4px 0px;" src="/hostcmsfiles/images/user.gif" /><a href="/users/info/{last_siteuser/siteuser/login}/">
+				<xsl:text>&labelLastUser; </xsl:text><img style="margin: 0px 5px -4px 0px;" src="/hostcmsfiles/images/user.gif" /><a href="/users/info/{last_siteuser/siteuser/login}/">
 					<xsl:value-of select="last_siteuser/siteuser/login" />
 				</a>
 			</p>
@@ -42,12 +42,12 @@
 				<xsl:choose>
 					<xsl:when test="not(siteuser/node())">
 						<td align="center">
-							<b>Авторизация</b>
+							<b>&labelAuthorization;</b>
 						</td>
 					</xsl:when>
 					<xsl:otherwise>
 						<td align="center">
-							Добро пожаловать,
+							&labelWelcome;
 							<span class="name_users">
 								<xsl:value-of select="siteuser/login" />
 							</span>!
@@ -61,17 +61,16 @@
 						<div id="error">
 							<xsl:choose>
 								<xsl:when test="error_reg = -1">
-									Введен некорректный электронный адрес
+									&labelError1;
 								</xsl:when>
 								<xsl:when test="error_reg = -2">
-									Пользователь с указанным электронным адресом зарегистрирован
-									ранее
+									&labelError2;
 								</xsl:when>
 								<xsl:when test="error_reg = -3">
-									Пользователь с указанным логином зарегистрирован ранее
+									&labelError3;
 								</xsl:when>
 								<xsl:when test="error_reg = -4">
-									Заполните, пожалуйста, все обязательные параметры
+									&labelError4;
 								</xsl:when>
 								<xsl:otherwise></xsl:otherwise>
 							</xsl:choose>
@@ -86,22 +85,22 @@
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="rad1" id="lab1">Зарегистрированный пользователь</label>
+								<label for="rad1" id="lab1">&labelRegistered;</label>
 								
 								<input id="rad2" type="radio" name="autoriz" value="new_user" onclick="HideShow('auto', 'new')">
 									<xsl:if test="/forum/quick/node() and /forum/quick='quick'">
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="rad2" id="lab2">Новый пользователь</label>
+								<label for="rad2" id="lab2">&labelNewUser;</label>
 								
 								<div id="auto" style="margin-left: 0px">
 									<form name="mainform" action="/users/" method="post">
-										Логин:
+										&labelLogin;
 										<input name="login" type="text" size="12" value="" />
-										Пароль:
+										&labelPassword;
 										<input name="password" type="password" size="12" value="" /><xsl:text> </xsl:text>
-										<input name="apply" class="button" type="submit" value="Войти" />
+										<input name="apply" class="button" type="submit" value="&labelEnter;" />
 										<br />
 										<input type="hidden" name="location" value="{url}" />
 									</form>
@@ -111,15 +110,15 @@
 									<div class="comment" style="width: 430px">
 										<form name="mainform1" action="/users/registration/" method="post">
 											<div class="row">
-										<div class="caption">Логин<sup><font color="red">*</font></sup></div>
+										<div class="caption">&labelLogin;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="text" size="40" value="" name="login" /></div>
 											</div>
 											<div class="row">
-										<div class="caption">Пароль<sup><font color="red">*</font></sup></div>
+										<div class="caption">&labelPassword;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="password" size="40" value="" name="password"/></div>
 											</div>
 											<div class="row">
-										<div class="caption">E-mail<sup><font color="red">*</font></sup></div>
+										<div class="caption">&labelEmail;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="text" size="40" value="" name="email" /></div>
 											</div>
 											
@@ -127,16 +126,16 @@
 											<div class="row">
 												<div class="caption"></div>
 												<div class="field">
-													<img name="captcha" title="Контрольное число" src="/captcha.php?id={captcha_id}&amp;height=30&amp;width=100" class="captcha" id="registerUser"/>
+													<img name="captcha" title="&labelCaptchaId;" src="/captcha.php?id={captcha_id}&amp;height=30&amp;width=100" class="captcha" id="registerUser"/>
 													<div class="captcha">
 														<img src="/images/refresh.png" />
-														<span onclick="$('#registerUser').updateCaptcha('{captcha_id}', 30); return false">Показать другое число</span>
+														<span onclick="$('#registerUser').updateCaptcha('{captcha_id}', 30); return false">&labelUpdateCaptcha;</span>
 													</div>
 												</div>
 											</div>
 											<div class="row">
 												<div class="caption">
-										Контрольное число<sup><font color="red">*</font></sup></div>
+										&labelCaptchaId;<sup><font color="red">*</font></sup></div>
 												<div class="field">
 													<input type="hidden" name="captcha_id" value="{captcha_id}"/>
 													<input type="text" size="15" name="captcha" />
@@ -145,7 +144,7 @@
 											<div class="row">
 												<div class="caption"></div>
 												<div class="field">
-													<input type="submit" class="button" value="Зарегистрироваться" name="apply" />
+													<input type="submit" class="button" value="&labelSignUp;" name="apply" />
 												</div>
 											</div>
 										</form>
@@ -178,7 +177,7 @@
 							</xsl:when>
 							<xsl:otherwise>
 								<div align="center">
-									<a href="/users/">Кабинет пользователя</a>
+									<a href="/users/">&labelAccount;</a>
 								</div>
 							</xsl:otherwise>
 						</xsl:choose>
@@ -196,19 +195,19 @@
 			<td align="center" width="40">
 				<!-- Атрибуты форума -->
 				<xsl:if test="closed=1 and new_posts=1">
-					<img src="/hostcmsfiles/forum/forum_locked_new.gif" title="Закрытый форум с новыми сообщениями"
+					<img src="/hostcmsfiles/forum/forum_locked_new.gif" title="&labelForumLockedNew;"
 					alt="X+"></img>
 				</xsl:if>
 				<xsl:if test="closed=1 and new_posts=0">
-					<img src="/hostcmsfiles/forum/forum_locked.gif" title="Закрытый форум без новых сообщений"
+					<img src="/hostcmsfiles/forum/forum_locked.gif" title="&labelForumLocked;"
 					alt="X-"></img>
 				</xsl:if>
 				<xsl:if test="closed=0 and new_posts=1">
-					<img src="/hostcmsfiles/forum/forum_new.gif" title="Открытый форум с новыми сообщениями"
+					<img src="/hostcmsfiles/forum/forum_new.gif" title="&labelForumNew;"
 					alt="O+"></img>
 				</xsl:if>
 				<xsl:if test="closed=0 and new_posts=0">
-					<img src="/hostcmsfiles/forum/forum.gif" title="Открытый форум без новых сообщений"
+					<img src="/hostcmsfiles/forum/forum.gif" title="&labelForum;"
 					alt="O-"></img>
 				</xsl:if>
 			</td>
@@ -255,12 +254,12 @@
 						
 					<strong><a href="{/forum/url}{@id}/{forum_topic/@id}/"><xsl:value-of select="$total_theme_name" /></a></strong>
 						<br />
-					от<xsl:text> </xsl:text><img src="/hostcmsfiles/images/user.gif" style="margin: 0px 5px -4px 0px;"/>
+					&labelFrom;<xsl:text> </xsl:text><img src="/hostcmsfiles/images/user.gif" style="margin: 0px 5px -4px 0px;"/>
 						
 						<!-- Автор последнего сообщения -->
 						<xsl:choose>
 							<xsl:when test="not(forum_topic/last/forum_topic_post/siteuser/login/node())">
-								Гость
+								&labelGuest;
 							</xsl:when>
 							<xsl:otherwise>
 								<a href="/users/info/{forum_topic/last/forum_topic_post/siteuser/login}/"><xsl:value-of select="forum_topic/last/forum_topic_post/siteuser/login" /></a>
@@ -270,7 +269,7 @@
 						<!-- Дата последнего сообщения -->
 						<br /><xsl:value-of select="forum_topic/last/forum_topic_post/datetime" />
 					</xsl:when>
-					<xsl:otherwise>Нет сообщений</xsl:otherwise>
+					<xsl:otherwise>&labelNone;</xsl:otherwise>
 				</xsl:choose>
 				
 			</td>
@@ -309,9 +308,9 @@
 					</tr>
 				</table>
 			</td>
-			<td align="center" width="200" class="row_title_group_forums">Последнее сообщение</td>
-			<td align="center" width="40" class="row_title_group_forums">Тем</td>
-			<td align="center" width="80" class="row_title_group_forums">Сообщений</td>
+			<td align="center" width="200" class="row_title_group_forums">&labelLastMessage;</td>
+			<td align="center" width="40" class="row_title_group_forums">&labelSubjects;</td>
+			<td align="center" width="80" class="row_title_group_forums">&labelMessages;</td>
 		</tr>
 		<xsl:apply-templates select="forum_category">
 			<!-- Вызов шаблона строк форумов -->

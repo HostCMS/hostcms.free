@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Поля формы центра администрирования',
@@ -28,6 +28,7 @@ return array(
 	'name' => '<acronym title="Ключевое поле таблицы">Ключевое поле</acronym>',
 	'sorting' => '<acronym title="Порядок сортировки поля">Порядок сортировки</acronym>',
 	'type' => '<acronym title="Тип поля (поле ввода, выпадающий список, флажок и т.д.)">Тип поля</acronym>',
+	'view' => '<acronym title="Параметр, определяющий отображение поля - в виде столбца таблицы или в виде элемента фильтра">Отображение</acronym>',
 	'format' => '<acronym title="Строка формата отображения данных. Строка формата состоит из директив: обычных символов (за исключением %), которые копируются в результирующую строку, и описатели преобразований, каждый из которых заменяется на один из параметров">Формат отображения</acronym>',
 	'allow_sorting' => '<acronym title="Разрешить сортировку по алфавиту">Разрешить сортировку</acronym>',
 	'allow_filter' => '<acronym title="Разрешить фильтр для значений поля">Разрешить фильтр</acronym>',
@@ -60,6 +61,10 @@ return array(
 	'field_type_image_link' => 'Картинка-ссылка',
 	'field_type_image_list' => 'Список',
 	'field_type_image_callback_function' => 'Вычисляемое поле (Используется обратный вызов функции)',
+	
+	// Отображение	
+	'field_view_column' => 'Столбец',
+	'field_view_filter_element' => 'Элемент фильтра',
 
 	// Список полей.
 	'show_form_fields_title' => 'Поля формы центра администрирования "%s"',
