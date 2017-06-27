@@ -71,6 +71,9 @@ class Seo_Controller_Google extends Seo_Controller
 
 			$this->verification($host_id);
 		}
+
+		// $this->setQuery($host_id, 'page' , '2017-02-01', '2017-06-26');
+		// $this->setQuery('http://www.hostcms.ru', 'query' , '2017-02-01', '2017-06-26', 10);
 	}
 
 	/**
@@ -79,7 +82,9 @@ class Seo_Controller_Google extends Seo_Controller
 	 */
 	public function getTokenUrl()
 	{
-		return "https://accounts.google.com/o/oauth2/auth?client_id=570995708792-6l1afmd6b1bm67e2qq4qh3uno543i9oo.apps.googleusercontent.com&response_type=code&approval_prompt=force&access_type=offline&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fwebmasters&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fwebmasters.readonly&https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fsiteverification&https%3A%2F%2Fwww.googleapis.com%2Fauth%siteverification.verify_only&redirect_uri=https://www.hostcms.ru/seo-google-callback.php";
+		$scopes = urlencode("https://www.googleapis.com/auth/webmasters https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/siteverification https://www.googleapis.com/auth/siteverification.verify_only");
+
+		return "https://accounts.google.com/o/oauth2/auth?client_id=570995708792-6l1afmd6b1bm67e2qq4qh3uno543i9oo.apps.googleusercontent.com&response_type=code&approval_prompt=force&access_type=offline&scope={$scopes}&redirect_uri=https://www.hostcms.ru/seo-google-callback.php";
 	}
 
 	/**
@@ -189,7 +194,7 @@ class Seo_Controller_Google extends Seo_Controller
 	/**
 	 * Verification
 	 * @param int $host_url site url
-	 * @return array
+	 * @return TRUE|NULL
 	 */
 	public function verification($host_url)
 	{
@@ -207,11 +212,43 @@ class Seo_Controller_Google extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('POST')
-			->url("https://www.googleapis.com/siteVerification/v1/token?fields=token")
+			->url("https://www.googleapis.com/siteVerification/v1/token?fields=token,method")
 			->additionalHeader("Authorization", "Bearer {$this->_token}")
 			->additionalHeader("Content-Type", "application/json")
 			->rawData($sData)
 			->execute();
+
+		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+
+		if (isset($aAnswer['error']))
+		{
+			throw new Core_Exception("verification(), Server response %code: %message", array('%code' => $aAnswer['error']['code'], '%message' => $aAnswer['error']['message']), 0, FALSE);
+		}
+
+		if (isset($aAnswer['token']) && isset($aAnswer['method']) && $aAnswer['method'] == 'FILE')
+		{
+			$sContent = "google-site-verification: {$aAnswer['token']}";
+
+			// Create verification file
+			Core_File::write(CMS_FOLDER . $aAnswer['token'], $sContent);
+
+			$sNewData = json_encode(
+				array(
+					"site" => array(
+						"identifier" => $host_url,
+						"type" => "SITE"
+					)
+				)
+			);
+
+			$Core_Http = Core_Http::instance('curl')
+				->clear()
+				->method('POST')
+				->url("https://www.googleapis.com/siteVerification/v1/webResource?verificationMethod=FILE")
+				->additionalHeader("Authorization", "Bearer {$this->_token}")
+				->additionalHeader("Content-Type", "application/json")
+				->rawData($sNewData)
+				->execute();
 
 			$aAnswer = json_decode($Core_Http->getBody(), TRUE);
 
@@ -220,14 +257,13 @@ class Seo_Controller_Google extends Seo_Controller
 				throw new Core_Exception("verification(), Server response %code: %message", array('%code' => $aAnswer['error']['code'], '%message' => $aAnswer['error']['message']), 0, FALSE);
 			}
 
-			echo "<pre>";
-			var_dump($aAnswer);
-			echo "</pre>";
+			if (isset($aAnswer['id']))
+			{
+				return TRUE;
+			}
+		}
 
-			// $sContent = "google-site-verification: google{$aAnswer['verification_uin']}";
-
-			// Create verification file
-			// Core_File::write(CMS_FOLDER . "google" . $aAnswer['verification_uin'] . ".html", $sContent);
+		return NULL;
 	}
 
 	/**
@@ -268,15 +304,41 @@ class Seo_Controller_Google extends Seo_Controller
 			throw new Core_Exception("verification(), Server response %code: %message", array('%code' => $aAnswer['error']['code'], '%message' => $aAnswer['error']['message']), 0, FALSE);
 		}
 
-		// echo "<pre>";
-		// var_dump($aAnswer);
-		// echo "</pre>";
-
-		return $aAnswer;
+		return isset($aAnswer['rows'])
+			? $aAnswer['rows']
+			: array();
 	}
 
-	public function getSitePopularQueries()
+	/**
+	 * Get icon
+	 * @return string
+	 */
+	public function getIcon()
 	{
+		return "<i class='fa fa-google google'></i>";
+	}
 
+	/**
+	 * Get site popular queries
+	 * @param string $host_url domain url
+	 * @return array
+	 */
+	public function getSitePopularQueries($host_url, $limit = 100)
+	{
+		$aReturn = array();
+
+		$aQueries = $this->setQuery($host_url, 'query' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
+
+		foreach ($aQueries as $aTmp)
+		{
+			$query_text = array_shift($aTmp);
+
+			$aReturn[$query_text[0]] = array(
+				'clicks' => $aTmp['clicks'],
+				'shows' => $aTmp['impressions']
+			);
+		}
+
+		return $aReturn;
 	}
 }

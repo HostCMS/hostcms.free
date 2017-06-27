@@ -16,7 +16,7 @@ return array(
 	'cond_of_delivery_edit_form_title' => "Редактирование информации об условии доставки",
 	'cond_of_delivery_add_form_title' => "Добавление информации об условии доставки",
 	'name' => "<acronym title=\"Название условия доставки\">Название</acronym>",
-	'active' => "<acronym title=\"Активность условия доставки\">Активность условия доставки</acronym>",	
+	'active' => "<acronym title=\"Активность условия доставки\">Активно</acronym>",	
 	'delivery_time' => "<acronym title=\"Период времени, в течение которого выполняется доставка\">Сроки доставки</acronym>",
 	'shop_country_id' => "<acronym title=\"Страна доставки\">Страна</acronym>",
 	'shop_country_location_id' => "<acronym title=\"Местоположение доставки\">Местоположение</acronym>",
@@ -42,11 +42,8 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'changeStatus_success' => "Информация успешно изменена",	
-	'marking' => "<acronym title=\"Артикул товара\">Артикул</acronym>",
+	'marking' => "<acronym title=\"Артикул доставки\">Артикул доставки</acronym>",
 	'sorting' => "<acronym title=\"Порядок сортировки\">Порядок сортировки</acronym>",
 	'apply_success' => "Информация успешно изменена",
-	'shop_country_id_inverted' => "Не",
-	'shop_country_location_id_inverted' => "Не",
-	'shop_country_location_city_id_inverted' => "Не",
-	'shop_country_location_city_area_id_inverted' => "Не",
+	'inverted' => "Не"
 );

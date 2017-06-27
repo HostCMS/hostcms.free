@@ -213,7 +213,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 	public function getHostId()
 	{
 		$aHostList = $this->getSiteList();
-		
+
 		if (isset($aHostList['hosts']))
 		{
 			$oSiteAlias = $this->_oSite->getCurrentAlias();
@@ -487,7 +487,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 	 * @param string $order_by queries order indicator
 	 * @return array
 	 */
-	public function getSitePopularQueries($host_id, $order_by = 'TOTAL_CLICKS')
+	public function getQueries($host_id, $order_by = 'TOTAL_CLICKS')
 	{
 		// Get user id
 		$this->getUserId();
@@ -509,17 +509,9 @@ class Seo_Controller_Yandex extends Seo_Controller
 			throw new Core_Exception("getSitePopularQueries(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
 		}
 
-		$aReturn = array();
-
-		if (isset($aAnswer['queries']))
-		{
-			foreach ($aAnswer['queries'] as $aTmp)
-			{
-				$aReturn[$aTmp['query_text']] = $aTmp['indicators'];
-			}
-		}
-
-		return $aReturn;
+		return isset($aAnswer['queries'])
+			? $aAnswer['queries']
+			: array();
 	}
 
 	/**
@@ -618,5 +610,37 @@ class Seo_Controller_Yandex extends Seo_Controller
 		}
 
 		return $aAnswer;
+	}
+
+	/**
+	 * Get icon
+	 * @return string
+	 */
+	public function getIcon()
+	{
+		return "<span class='badge-yandex'>Я</span>";
+	}
+
+	/**
+	 * Get site popular queries
+	 * @param int $host_id Yandex.Webmaster site id
+	 * @param int $limit limit
+	 * @return array
+	 */
+	public function getSitePopularQueries($host_id, $limit = 500)
+	{
+		$aQueries = $this->getQueries($host_id);
+
+		$aReturn = array();
+
+		foreach ($aQueries as $aTmp)
+		{
+			$aReturn[$aTmp['query_text']] = array(
+				'clicks' => $aTmp['indicators']['TOTAL_CLICKS'],
+				'shows' => $aTmp['indicators']['TOTAL_SHOWS']
+			);
+		}
+
+		return array_slice($aReturn, 0, $limit);
 	}
 }

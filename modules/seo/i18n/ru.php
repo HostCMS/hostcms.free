@@ -19,4 +19,10 @@ return array(
 	'google_search_token' => 'Токен Google Search Console',
 	'getNewToken' => 'Получить новый токен',
 	'save_success' => 'Данные сохранены успешно!',
+	'popular_query_header' => 'Популярные запросы',
+	'external_link_header' => 'Внешние ссылки',
+	'tic_header' => 'Общий рейтинг',
+	'seo_driver_data_click' => 'Клики',
+	'seo_driver_data_show' => 'Показы',
+	'reset' => 'Исходный вид',
 );

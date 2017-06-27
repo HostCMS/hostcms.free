@@ -1361,8 +1361,8 @@ class Shop_Order_Model extends Core_Entity
 			$oRepresentative->addChild('Наименование', $sUserFullName);
 		}
 
-		// Статус оплаты заказа
 		$oOrderProperties = $oOrderXml->addChild('ЗначенияРеквизитов');
+		// Статус оплаты заказа
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Заказ оплачен');
 		$oOrderProperty->addChild('Значение', $this->paid == 1 ? 'true' : 'false');

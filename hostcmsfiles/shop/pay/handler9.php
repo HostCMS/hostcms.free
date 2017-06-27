@@ -45,6 +45,40 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	// Использовать расчёт суммы к получению магазином.
 	protected $_calc_out_summ = FALSE;
 
+    /* Отправлять в Робокассу данные для чеков (54-ФЗ) */
+    protected $sendCheck = 1;
+
+	/*
+	Система налогообложения.
+	Перечисление со значениями:
+		«osn» – общая СН;
+		«usn_income» – упрощенная СН (доходы);
+		«usn_income_outcome» – упрощенная СН (доходы минус расходы);
+		«envd» – единый налог на вмененный доход;
+		«esn» – единый сельскохозяйственный налог;
+		«patent» – патентная СН.
+	*/
+	protected $robokassa_sno = 'osn';
+
+    /*
+	Налог в ККТ по-умолчанию.
+	Перечисление со значениями:
+		«none» – без НДС;
+		«vat0» – НДС по ставке 0%;
+		«vat10» – НДС чека по ставке 10%;
+		«vat18» – НДС чека по ставке 18%;
+		«vat110» – НДС чека по расчетной ставке 10/110;
+		«vat118» – НДС чека по расчетной ставке 18/118.
+	*/
+    protected $default_vat = 'vat118';
+
+    /* Массив отношений ставки налога в заказе и названия налога (none, vat0, vat110 или vat118)*/
+    protected $robokassa_vat = array(
+        0 => 'none',
+        10 => 'vat110',
+        18 => 'vat118'
+    );
+
 	/**
 	 * Метод, вызываемый в коде настроек ТДС через Shop_Payment_System_Handler::checkBeforeContent($oShop);
 	 */
@@ -176,6 +210,85 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 			? $this->calcOutSumm()
 			: $this->getSumWithCoeff();
 
+		/*{
+			"sno": "osn",
+			"items": [
+				{
+					"name": "Название товара 1",
+					"quantity": 1.0,
+					"sum": 100.0,
+					"tax": "vat10"
+				},
+				{
+					"name": "Название товара 2",
+					"quantity": 3,
+					"sum": 450,
+					"tax": "vat118"
+				}
+			]
+		}*/
+
+        if ($this->sendCheck)
+		{
+			$receipt = array(
+				'sno' => $this->robokassa_sno
+			);
+
+			$aShop_Order_Items = $this->_shopOrder->Shop_Order_Items->findAll(FALSE);
+
+			// Расчет сумм скидок, чтобы потом вычесть из цены каждого товара
+			$discount = $amount = 0;
+			foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
+			{
+				if ($oShop_Order_Item->price < 0)
+				{
+					$discount -= $oShop_Order_Item->getAmount();
+					unset($aShop_Order_Items[$key]);
+				}
+				else
+				{
+					if ($oShop_Order_Item->shop_item_id)
+					{
+						$amount += $oShop_Order_Item->getAmount();
+					}
+				}
+			}
+
+			$discount = $amount != 0
+				? abs($discount) / $amount
+				: 0;
+
+			foreach ($aShop_Order_Items as $oShop_Order_Item)
+			{
+				$tax_id = $oShop_Order_Item->shop_item_id
+					? $oShop_Order_Item->Shop_Item->shop_tax_id
+					: false;
+
+				/*if (strpos('Доставка', $oShop_Order_Item->name) != false) {
+
+				}*/
+
+				$receipt['items'][] = array(
+					'name' => mb_substr($oShop_Order_Item->name, 0, 128),
+					'quantity' => $oShop_Order_Item->quantity,
+					'tax' => Core_Array::get($this->robokassa_vat, $oShop_Order_Item->rate, $this->default_vat),
+					'sum' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', '')
+				);
+
+				/*$receipt['items'][] = array(
+					'quantity' => $oShop_Order_Item->quantity,
+					'text' => mb_substr($oShop_Order_Item->name, 0, 128),
+					'tax' => Core_Array::get($this->kassaTaxRates, $tax_id, $this->kassaTaxRateDefault),
+					'price' => array(
+						'amount' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', ''),
+						'currency' => 'RUB'
+					),
+				);*/
+			}
+			
+			$sReceiptJson = json_encode($receipt);
+		}
+
 		ob_start();
 
 		?>
@@ -194,14 +307,22 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		Внимание! Нажимая &laquo;Оплатить&raquo; Вы подтверждаете передачу контактных данных на сервер ROBOKASSA для оплаты.
 		</p>
 
+		<?php
+		$SignatureValue = md5(
+			$this->sendCheck
+				? "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:" . rawurlencode($sReceiptJson) . ":{$this->_mrh_pass1}"
+				: "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:{$this->_mrh_pass1}"
+		);
+		?>
 		<form action="https://merchant.roboxchange.com/Index.aspx<?php echo $this->_mode == 0 ? '?IsTest=1' : ''?>" method="post">
 			<input type="hidden" name="MrchLogin" value="<?php echo $this->_mrh_login?>">
 			<input type="hidden" name="OutSum" value="<?php echo $sRoboSum?>">
 			<input type="hidden" name="InvId" value="<?php echo $this->_shopOrder->id?>">
 			<input type="hidden" name="Desc" value="<?php echo "Оплата счета N {$this->_shopOrder->invoice}"?>">
-			<input type="hidden" name="SignatureValue" value="<?php echo md5("{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:{$this->_mrh_pass1}")?>">
+			<input type="hidden" name="SignatureValue" value="<?php echo $SignatureValue?>">
 			<input type="hidden" name="IncCurrLabel" value="<?php echo $this->_in_curr?>">
 			<input type="hidden" name="Culture" value="<?php echo $this->_culture?>">
+            <?php if ($this->sendCheck){ ?> <input type="hidden" name="Receipt" value="<?php echo htmlspecialchars($sReceiptJson)?>"><?php } ?>
 			<input type="submit" value="Оплатить">
 		</form>
 		<?php
