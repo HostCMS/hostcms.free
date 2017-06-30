@@ -315,7 +315,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				$this->_importGroups($Groups, $oShopGroup->id);
 			}
-
 		}
 		return $this;
 	}

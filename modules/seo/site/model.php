@@ -35,7 +35,9 @@ class Seo_Site_Model extends Core_Entity
 	protected $_hasMany = array(
 		'seo_rating' => array(),
 		'seo_indexed' => array(),
-		'seo_link' => array()
+		'seo_link' => array(),
+		'seo_page' => array(),
+		'seo_query' => array()
 	);
 
 	/**

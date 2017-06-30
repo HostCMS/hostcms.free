@@ -122,7 +122,21 @@ $oSeo_Sites->queryBuilder()
 
 $aSeo_Sites = $oSeo_Sites->findAll(FALSE);
 
-$aTmpQueries = array();
+function mysort($a, $b)
+{
+	if($a['total'] > $b['total'])
+	{
+		return -1;
+	}
+	elseif($a['total'] == $b['total'])
+	{
+		return 0;
+	}
+	else
+	{
+		return 1;
+	}
+}
 
 foreach ($aSeo_Sites as $oSeo_Site)
 {
@@ -139,17 +153,34 @@ foreach ($aSeo_Sites as $oSeo_Site)
 
 			$aSitePopularQueries = $oSeo_Driver_Controller->getSitePopularQueries($host_id);
 
+			$oSeo_Site->Seo_Queries->deleteAll(FALSE);
+
 			foreach ($aSitePopularQueries as $query => $aData)
 			{
-				if (!isset($aTmpQueries[$query]))
-				{
-					$aTmpQueries[$query] = array('total' => 0);
-				}
+				$oSeo_Query = Core_Entity::factory('Seo_Query');
+				$oSeo_Query
+					->seo_site_id($oSeo_Site->id)
+					->value($query)
+					->clicks(Core_Array::get($aData, 'clicks', 0))
+					->shows(Core_Array::get($aData, 'shows', 0))
+					->sorting(0)
+					->save();
+			}
 
-				$aTmpQueries[$query][$oSeo_Site->Seo_Driver->driver]['clicks'] = $aData['clicks'];
-				$aTmpQueries[$query][$oSeo_Site->Seo_Driver->driver]['shows'] = $aData['shows'];
+			$aSitePopularPages = $oSeo_Driver_Controller->getSitePopularPages($host_id);
 
-				$aTmpQueries[$query]['total'] += $aData['clicks'];
+			$oSeo_Site->Seo_Pages->deleteAll(FALSE);
+
+			foreach ($aSitePopularPages as $page => $aData)
+			{
+				$oSeo_Page = Core_Entity::factory('Seo_Page');
+				$oSeo_Page
+					->seo_site_id($oSeo_Site->id)
+					->value($page)
+					->clicks(Core_Array::get($aData, 'clicks', 0))
+					->shows(Core_Array::get($aData, 'shows', 0))
+					->sorting(0)
+					->save();
 			}
 		}
 		catch (Exception $e){
@@ -157,29 +188,67 @@ foreach ($aSeo_Sites as $oSeo_Site)
 				Core_Message::get($e->getMessage(), 'error')
 			);
 		}
+
+		$oSeo_Site->last_update = Core_Date::timestamp2sql(time());
+		$oSeo_Site->save();
 	}
 }
 
-function mysort($a, $b) {
-	if($a['total'] > $b['total'])
+$aTmpQueries = $aTmpPages = array();
+
+$aSeo_Sites = Core_Entity::factory('Seo_Site')->getAllByActive(1);
+
+foreach ($aSeo_Sites as $oSeo_Site)
+{
+	if (strlen($oSeo_Site->token))
 	{
-		return -1;
-	}
-	elseif($a['total'] == $b['total'])
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
+		$aSeo_Queries = $oSeo_Site->Seo_Queries->findAll(FALSE);
+
+		foreach ($aSeo_Queries as $oSeo_Query)
+		{
+			$query = $oSeo_Query->value;
+
+			if (!isset($aTmpQueries[$query]))
+			{
+				$aTmpQueries[$query] = array('total' => 0);
+			}
+
+			$aTmpQueries[$query][$oSeo_Site->Seo_Driver->driver]['clicks'] = $oSeo_Query->clicks;
+			$aTmpQueries[$query][$oSeo_Site->Seo_Driver->driver]['shows'] = $oSeo_Query->shows;
+
+			$aTmpQueries[$query]['total'] += $oSeo_Query->clicks;
+		}
+
+		$aSeo_Pages = $oSeo_Site->Seo_Pages->findAll(FALSE);
+
+		foreach ($aSeo_Pages as $oSeo_Page)
+		{
+			$page = $oSeo_Page->value;
+
+			if (!isset($aTmpPages[$page]))
+			{
+				$aTmpPages[$page] = array('total' => 0);
+			}
+
+			$aTmpPages[$page][$oSeo_Site->Seo_Driver->driver]['clicks'] = $oSeo_Page->clicks;
+			$aTmpPages[$page][$oSeo_Site->Seo_Driver->driver]['shows'] = $oSeo_Page->shows;
+
+			$aTmpPages[$page]['total'] += $oSeo_Page->clicks;
+		}
 	}
 }
 
 uasort($aTmpQueries, "mysort");
-$aTmpQueries = array_slice($aTmpQueries, 0, 10);
+$aTmpQueries = array_slice($aTmpQueries, 0, 100);
 $iCount = count($aTmpQueries);
 $aTmpQueriesFirstBlock = array_slice($aTmpQueries, 0, round($iCount/2));
-$aTmpQueriesSecondBlock = array_slice($aTmpQueries, round($iCount/2 + 1), round($iCount/2));
+$aTmpQueriesSecondBlock = array_slice($aTmpQueries, round($iCount/2), round($iCount/2));
+
+uasort($aTmpPages, "mysort");
+$aTmpPages = array_slice($aTmpPages, 0, 100);
+$iCount = count($aTmpPages);
+$aTmpPagesFirstBlock = array_slice($aTmpPages, 0, round($iCount/2));
+$aTmpPagesSecondBlock = array_slice($aTmpPages, round($iCount/2), round($iCount/2));
 
 function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 {
@@ -190,10 +259,19 @@ function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 			<?php
 				foreach ($aTmpQueries as $query => $aTmpQuery)
 				{
+					// var_dump($query);
+					if (strpos($query, 'http://') !== FALSE || strpos($query, 'https://') !== FALSE)
+					{
+						$url = "<a href='" . $query . "' target='_blank'>" . Core_Str::cut($query, 30) . "</a>";
+					}
+					else
+					{
+						$url = Core_Str::cut($query, 30);
+					}
 					?>
 					<tr>
 						<td><?php echo $counter?></td>
-						<td title="<?php echo $query?>"><?php echo Core_Str::cut($query, 30)?></td>
+						<td title="<?php echo $query?>"><?php echo $url?></td>
 						<?php
 						foreach ($aSeo_Sites as $oSeo_Site)
 						{
@@ -234,8 +312,8 @@ ob_start();
 ?>
 <div class="row">
 	<div class="col-xs-12">
-		<h5 class="row-title before-info">
-			<i class="fa fa-database info"></i>
+		<h5 class="row-title before-darkorange">
+			<i class="fa fa-question-circle-o darkorange"></i>
 			<?php echo Core::_('Seo.popular_query_header')?>
 		</h5>
 	</div>
@@ -250,8 +328,24 @@ ob_start();
 </div>
 <div class="row">
 	<div class="col-xs-12">
-		<h5 class="row-title before-info">
-			<i class="fa fa-database info"></i>
+		<h5 class="row-title before-azure">
+			<i class="fa fa-file-text-o azure"></i>
+			<?php echo Core::_('Seo.popular_page_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpPagesFirstBlock, $aSeo_Sites, 1)?>
+	</div>
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpPagesSecondBlock, $aSeo_Sites, round($iCount/2 + 1))?>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-palegreen">
+			<i class="fa fa-external-link palegreen"></i>
 			<?php echo Core::_('Seo.external_link_header')?>
 		</h5>
 	</div>
@@ -281,7 +375,7 @@ ob_start();
 <div class="row">
 	<div class="col-xs-12">
 		<h5 class="row-title before-info">
-			<i class="fa fa-database info"></i>
+			<i class="fa fa-line-chart info"></i>
 			<?php echo Core::_('Seo.tic_header')?>
 		</h5>
 	</div>
@@ -308,10 +402,41 @@ ob_start();
 		</div>
 	</div>
 </div>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-magenta">
+			<i class="fa fa-database magenta"></i>
+			<?php echo Core::_('Seo.indexed_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="widget counter">
+			<div class="widget-body">
+				<div id="seo-indexed">
+					<div class="row">
+						<div class="col-sm-12">
+							<div id="seo-indexed-chart" class="chart chart-lg"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="col-sm-12 col-md-6">
+								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 <?php
 $iBeginTimestamp = strtotime("-6 month");
 
-$aLinks = $aRatings = aSearchable = $aDownloaded = $aDownloaded2xx = $aDownloaded3xx = $aDownloaded4xx = $aDownloaded5xx = $aFailed = $aExcluded = array();
+$aLinks = $aRatings = $aSearchable = $aDownloaded = $aDownloaded2xx
+	= $aDownloaded3xx = $aDownloaded4xx = $aDownloaded5xx = $aFailed = $aExcluded = array();
 
 foreach ($aSeo_Sites as $oSeo_Site)
 {
@@ -327,7 +452,7 @@ foreach ($aSeo_Sites as $oSeo_Site)
 	{
 		$index = "'" . $oSeo_Link->date . "'";
 
-		$aLinks[$index] = $oSeo_Link->value;
+		$aLinks[$oSeo_Site->id][$index] = $oSeo_Link->value;
 	}
 
 	// Seo Ratings
@@ -342,7 +467,7 @@ foreach ($aSeo_Sites as $oSeo_Site)
 	{
 		$index = "'" . $oSeo_Rating->date . "'";
 
-		$aRatings[$index] = $oSeo_Rating->value;
+		$aRatings[$oSeo_Site->id][$index] = $oSeo_Rating->value;
 	}
 
 	// Seo Indexed
@@ -355,95 +480,267 @@ foreach ($aSeo_Sites as $oSeo_Site)
 
 	foreach ($aSeo_Indexeds as $oSeo_Indexed)
 	{
-		$index = "'" . $oSeo_Rating->date . "'";
+		$index = "'" . $oSeo_Indexed->date . "'";
 
-		$aSearchable[$index] = $oSeo_Indexed->searchable;
-		$aDownloaded[$index] = $oSeo_Indexed->downloaded;
-		$aDownloaded2xx[$index] = $oSeo_Indexed->downloaded_2xx;
-		$aDownloaded3xx[$index] = $oSeo_Indexed->downloaded_3xx;
-		$aDownloaded4xx[$index] = $oSeo_Indexed->downloaded_4xx;
-		$aDownloaded5xx[$index] = $oSeo_Indexed->downloaded_5xx;
-		$aFailed[$index] = $oSeo_Indexed->failed_to_download;
-		$aExcluded[$index] = $oSeo_Indexed->excluded;
+		$aSearchable[$oSeo_Site->id][$index] = $oSeo_Indexed->searchable;
+		$aDownloaded[$oSeo_Site->id][$index] = $oSeo_Indexed->downloaded;
+		$aDownloaded2xx[$oSeo_Site->id][$index] = $oSeo_Indexed->downloaded_2xx;
+		$aDownloaded3xx[$oSeo_Site->id][$index] = $oSeo_Indexed->downloaded_3xx;
+		$aDownloaded4xx[$oSeo_Site->id][$index] = $oSeo_Indexed->downloaded_4xx;
+		$aDownloaded5xx[$oSeo_Site->id][$index] = $oSeo_Indexed->downloaded_5xx;
+		$aFailed[$oSeo_Site->id][$index] = $oSeo_Indexed->failed_to_download;
+		$aExcluded[$oSeo_Site->id][$index] = $oSeo_Indexed->excluded;
 	}
 }
 
-$sTitles = implode(',', array_keys($aLinks));
-$sLinks = implode(',', array_values($aLinks));
-$sTitleRatings = implode(',', array_keys($aRatings));
-$sRatings = implode(',', array_values($aRatings));
+$aKeys = array_keys($aSeo_Sites);
+$last_key = end($aKeys);
 
 ?><script type="text/javascript">
 	$(function(){
 	//$(window).bind("load", function () {
-		var titles = [<?php echo $sTitles?>],
-			link_values = [<?php echo $sLinks?>],
-			valueTitlesLinks = new Array(),
-			title_rating = [<?php echo $sTitleRatings?>],
-			rating_values = [<?php echo $sRatings?>],
-			valueTitlesRatings = new Array();
+		var
+			<?php
+			foreach ($aSeo_Sites as $oSeo_Site)
+			{
+				if (isset($aLinks[$oSeo_Site->id]))
+				{
+				?>
+				title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
+				link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
+				valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
+				<?php
+				}
 
-		for(var i = 0; i < link_values.length; i++) {
-			valueTitlesLinks.push([new Date(titles[i]), link_values[i]]);
-		}
+				if (isset($aRatings[$oSeo_Site->id]))
+				{
+				?>
+				title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
+				rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
+				valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
+				<?php
+				}
 
-		for(var i = 0; i < rating_values.length; i++) {
-			valueTitlesRatings.push([new Date(title_rating[i]), rating_values[i]]);
+				if (isset($aSearchable[$oSeo_Site->id]))
+				{
+				?>
+				title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
+				searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
+				downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
+				downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
+				downloaded3xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded3xx[$oSeo_Site->id]))?>],
+				downloaded4xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded4xx[$oSeo_Site->id]))?>],
+				downloaded5xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded5xx[$oSeo_Site->id]))?>],
+				failed_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aFailed[$oSeo_Site->id]))?>],
+				excluded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aExcluded[$oSeo_Site->id]))?>],
+				valueTitlesSearchable<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesDownloaded<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesFailed<?php echo $oSeo_Site->id?> = new Array(),
+				valueTitlesExcluded<?php echo $oSeo_Site->id?> = new Array();
+				<?php
+				}
+			}
+
+		foreach ($aSeo_Sites as $oSeo_Site)
+		{
+			if (isset($aLinks[$oSeo_Site->id]))
+			{
+			?>
+			for(var i = 0; i < link_values<?php echo $oSeo_Site->id?>.length; i++) {
+				valueTitlesLinks<?php echo $oSeo_Site->id?>.push([new Date(title_links<?php echo $oSeo_Site->id?>[i]), link_values<?php echo $oSeo_Site->id?>[i]]);
+			}
+			<?php
+			}
+
+			if (isset($aRatings[$oSeo_Site->id]))
+			{
+			?>
+			for(var i = 0; i < rating_values<?php echo $oSeo_Site->id?>.length; i++) {
+				valueTitlesRatings<?php echo $oSeo_Site->id?>.push([new Date(title_ratings<?php echo $oSeo_Site->id?>[i]), rating_values<?php echo $oSeo_Site->id?>[i]]);
+			}
+			<?php
+			}
+
+			if (isset($aSearchable[$oSeo_Site->id]))
+			{
+			?>
+			for(var i = 0; i < searchable_values<?php echo $oSeo_Site->id?>.length; i++) {
+				valueTitlesSearchable<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), searchable_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesDownloaded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded2xx_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded3xx_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded4xx_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), downloaded5xx_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesFailed<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), failed_values<?php echo $oSeo_Site->id?>[i]]);
+				valueTitlesExcluded<?php echo $oSeo_Site->id?>.push([new Date(title_indexed<?php echo $oSeo_Site->id?>[i]), excluded_values<?php echo $oSeo_Site->id?>[i]]);
+			}
+			<?php
+			}
 		}
+		?>
 
 		var gridbordercolor = "#eee", dataLinks = [
 			<?php
-			$aKeys = array_keys($aSeo_Sites);
-			$last_key = end($aKeys);
+
 			foreach ($aSeo_Sites as $key => $oSeo_Site)
 			{
-				$oSeo_Links = $oSeo_Site->Seo_Links;
-				$oSeo_Links
-					->queryBuilder()
-					->where('date', '>=', date('Y-m-d', $iBeginTimestamp));
+				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Site->Seo_Driver->driver);
 
-				$aSeo_Links = $oSeo_Links->findAll(FALSE);
-
-				if (count($aSeo_Links))
+				if (isset($aLinks[$oSeo_Site->id]) && count($aLinks[$oSeo_Site->id]))
 				{
 					?>{
-						color: '#ff0000',
+						color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
 						label: "<?php echo htmlspecialchars($oSeo_Site->Seo_Driver->name)?>",
-						data: valueTitlesLinks
+						data: valueTitlesLinks<?php echo $oSeo_Site->id?>
 					}<?php
-				}
 
-				if ($key != $last_key)
-				{
-					echo ", ";
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
 				}
 			}
 			?>
 		], dataRatings = [
 			<?php
-			$aKeys = array_keys($aSeo_Sites);
-			$last_key = end($aKeys);
+
 			foreach ($aSeo_Sites as $key => $oSeo_Site)
 			{
-				$oSeo_Ratings = $oSeo_Site->Seo_Ratings;
-				$oSeo_Ratings
-					->queryBuilder()
-					->where('date', '>=', date('Y-m-d', $iBeginTimestamp));
+				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Site->Seo_Driver->driver);
 
-				$aSeo_Ratings = $oSeo_Ratings->findAll(FALSE);
-
-				if (count($aSeo_Ratings))
+				if (isset($aRatings[$oSeo_Site->id]) && count($aRatings[$oSeo_Site->id]))
 				{
 					?>{
-						color: '#ff0000',
+						color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
 						label: "<?php echo htmlspecialchars($oSeo_Site->Seo_Driver->name)?>",
-						data: valueTitlesRatings
+						data: valueTitlesRatings<?php echo $oSeo_Site->id?>
 					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+			}
+			?>
+		], dataIndexed = [
+			<?php
+			foreach ($aSeo_Sites as $key => $oSeo_Site)
+			{
+				if (isset($aSearchable[$oSeo_Site->id]) && count($aSearchable[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#A0D468",
+						label: "<?php echo Core::_('Seo.searchable')?>",
+						data: valueTitlesSearchable<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
 				}
 
-				if ($key != $last_key)
+				if (isset($aDownloaded[$oSeo_Site->id]) && count($aDownloaded[$oSeo_Site->id]))
 				{
-					echo ", ";
+					?>{
+						color: "#2DC3E8",
+						label: "<?php echo Core::_('Seo.downloaded')?>",
+						data: valueTitlesDownloaded<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aDownloaded2xx[$oSeo_Site->id]) && count($aDownloaded2xx[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#E0FF92",
+						label: "<?php echo Core::_('Seo.downloaded2xx')?>",
+						data: valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aDownloaded3xx[$oSeo_Site->id]) && count($aDownloaded3xx[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#FFCE55",
+						label: "<?php echo Core::_('Seo.downloaded3xx')?>",
+						data: valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aDownloaded4xx[$oSeo_Site->id]) && count($aDownloaded4xx[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#ff0000",
+						label: "<?php echo Core::_('Seo.downloaded4xx')?>",
+						data: valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aDownloaded5xx[$oSeo_Site->id]) && count($aDownloaded5xx[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#FB6E52",
+						label: "<?php echo Core::_('Seo.downloaded5xx')?>",
+						data: valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aFailed[$oSeo_Site->id]) && count($aFailed[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#D73D32",
+						label: "<?php echo Core::_('Seo.failed')?>",
+						data: valueTitlesFailed<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
+				}
+
+				if (isset($aExcluded[$oSeo_Site->id]) && count($aExcluded[$oSeo_Site->id]))
+				{
+					?>{
+						color: "#999999",
+						label: "<?php echo Core::_('Seo.excluded')?>",
+						data: valueTitlesExcluded<?php echo $oSeo_Site->id?>
+					}<?php
+
+					if ($key != $last_key)
+					{
+						echo ", ";
+					}
 				}
 			}
 			?>
@@ -455,7 +752,8 @@ $sRatings = implode(',', array_values($aRatings));
 					show: true
 				},
 				points: {
-					show: true
+					show: true,
+					radius: 1
 				}
 			},
 			legend: {
@@ -533,6 +831,28 @@ $sRatings = implode(',', array_values($aRatings));
 
 		$("#seo-ratings #clearSelection").click(function () {
 			plotSeoRatings.clearSelection();
+		});
+
+		// Indexed
+		var placeholderSeoIndexed = $("#seo-indexed-chart");
+
+		placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
+			plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
+				xaxis: {
+					min: ranges.xaxis.from,
+					max: ranges.xaxis.to
+				}
+			}));
+		});
+
+		$('#seo-indexed #setOriginalZoom').on('click', function(){
+			plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+		});
+
+		var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+
+		$("#seo-indexed #clearSelection").click(function () {
+			plotSeoIndexed.clearSelection();
 		});
 	});
 </script>

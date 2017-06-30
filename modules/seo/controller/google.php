@@ -71,9 +71,6 @@ class Seo_Controller_Google extends Seo_Controller
 
 			$this->verification($host_id);
 		}
-
-		// $this->setQuery($host_id, 'page' , '2017-02-01', '2017-06-26');
-		// $this->setQuery('http://www.hostcms.ru', 'query' , '2017-02-01', '2017-06-26', 10);
 	}
 
 	/**
@@ -319,6 +316,15 @@ class Seo_Controller_Google extends Seo_Controller
 	}
 
 	/**
+	 * Get color
+	 * @return string
+	 */
+	public function getColor()
+	{
+		return "#4285f4";
+	}
+
+	/**
 	 * Get site popular queries
 	 * @param string $host_url domain url
 	 * @return array
@@ -334,8 +340,32 @@ class Seo_Controller_Google extends Seo_Controller
 			$query_text = array_shift($aTmp);
 
 			$aReturn[$query_text[0]] = array(
-				'clicks' => $aTmp['clicks'],
-				'shows' => $aTmp['impressions']
+				'clicks' => Core_Array::get($aTmp, 'clicks', 0),
+				'shows' => Core_Array::get($aTmp, 'impressions', 0)
+			);
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get site popular pages
+	 * @param string $host_url domain url
+	 * @return array
+	 */
+	public function getSitePopularPages($host_url, $limit = 100)
+	{
+		$aReturn = array();
+
+		$aQueries = $this->setQuery($host_url, 'page' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
+
+		foreach ($aQueries as $aTmp)
+		{
+			$query_text = array_shift($aTmp);
+
+			$aReturn[$query_text[0]] = array(
+				'clicks' => Core_Array::get($aTmp, 'clicks', 0),
+				'shows' => Core_Array::get($aTmp, 'impressions', 0)
 			);
 		}
 

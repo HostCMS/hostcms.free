@@ -45,7 +45,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		{
 			foreach($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT'] as $aTmp)
 			{
-				$date = Core_Date::timestamp2sqldate(strtotime($aTmp['date']));
+				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
 				$oSeo_Link = $this->_oSeo_Site->Seo_Links->getByDate($date, FALSE);
 
@@ -55,7 +55,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 					$oSeo_Link
 						->seo_site_id($this->_oSeo_Site->id)
 						->date($date)
-						->value(intval($aTmp['value']))
+						->value(intval(Core_Array::get($aTmp, 'value')))
 						->save();
 				}
 			}
@@ -68,7 +68,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		{
 			foreach($aTicHistory['points'] as $aTmp)
 			{
-				$date = Core_Date::timestamp2sqldate(strtotime($aTmp['date']));
+				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
 				$oSeo_Rating = $this->_oSeo_Site->Seo_Ratings->getByDate($date, FALSE);
 
@@ -78,7 +78,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 					$oSeo_Rating
 						->seo_site_id($this->_oSeo_Site->id)
 						->date($date)
-						->value(intval($aTmp['value']))
+						->value(intval(Core_Array::get($aTmp, 'value')))
 						->save();
 				}
 			}
@@ -106,8 +106,8 @@ class Seo_Controller_Yandex extends Seo_Controller
 			{
 				foreach($aIndexingHistory['indicators'][$sIndicator] as $aTmp)
 				{
-					$date = Core_Date::timestamp2sqldate(strtotime($aTmp['date']));
-					$aValues[$date][$sIndicator] = intval($aTmp['value']);
+					$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
+					$aValues[$date][$sIndicator] = intval(Core_Array::get($aTmp, 'value'));
 				}
 			}
 		}
@@ -289,7 +289,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 		if (isset($aAnswer['error_code']))
 		{
-			throw new Core_Exception("addSite(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
+			throw new Core_Exception("Yandex:addSite(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
 		}
 
 		return $aAnswer['host_id'];
@@ -460,24 +460,6 @@ class Seo_Controller_Yandex extends Seo_Controller
 			throw new Core_Exception("getSiteExternalLinks(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
 		}
 
-		/**** Create all links array
-
-		$offset += $limit;
-
-		if (isset($aAnswer['count']) && $aAnswer['count'] > $offset)
-		{
-			$aList = $this->getSiteExternalLinks($host_id, $offset, $limit);
-
-			if (isset($aList['links']))
-			{
-				foreach($aList['links'] as $aLink)
-				{
-					$aAnswer['links'][] = $aLink;
-				}
-			}
-		}
-		****/
-
 		return $aAnswer;
 	}
 
@@ -622,6 +604,15 @@ class Seo_Controller_Yandex extends Seo_Controller
 	}
 
 	/**
+	 * Get color
+	 * @return string
+	 */
+	public function getColor()
+	{
+		return "#ff0000";
+	}
+
+	/**
 	 * Get site popular queries
 	 * @param int $host_id Yandex.Webmaster site id
 	 * @param int $limit limit
@@ -642,5 +633,15 @@ class Seo_Controller_Yandex extends Seo_Controller
 		}
 
 		return array_slice($aReturn, 0, $limit);
+	}
+
+	/**
+	 * Get site popular pages
+	 * @param string $host_url domain url
+	 * @return array
+	 */
+	public function getSitePopularPages($host_url, $limit = 100)
+	{
+		return array();
 	}
 }

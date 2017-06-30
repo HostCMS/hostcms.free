@@ -78,6 +78,18 @@ abstract class Seo_Controller{
 	abstract public function getTokenUrl();
 
 	/**
+	 * Get popular queries
+	 * @return array
+	 */
+	abstract public function getSitePopularQueries($host_id, $limit);
+
+	/**
+	 * Get popular pages
+	 * @return array
+	 */
+	abstract public function getSitePopularPages($host_id, $limit);
+
+	/**
 	 * Set token
 	 * @param string $token token
 	 * @return self
