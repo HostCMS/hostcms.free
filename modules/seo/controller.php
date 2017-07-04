@@ -78,6 +78,12 @@ abstract class Seo_Controller{
 	abstract public function getTokenUrl();
 
 	/**
+	 * Get rating name
+	 * @return string
+	 */
+	abstract public function getRatingName();
+
+	/**
 	 * Get popular queries
 	 * @return array
 	 */

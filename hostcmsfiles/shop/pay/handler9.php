@@ -247,10 +247,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 				}
 				else
 				{
-					if ($oShop_Order_Item->shop_item_id)
-					{
-						$amount += $oShop_Order_Item->getAmount();
-					}
+					$amount += $oShop_Order_Item->getAmount();
 				}
 			}
 
@@ -260,10 +257,6 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 
 			foreach ($aShop_Order_Items as $oShop_Order_Item)
 			{
-				$tax_id = $oShop_Order_Item->shop_item_id
-					? $oShop_Order_Item->Shop_Item->shop_tax_id
-					: false;
-
 				/*if (strpos('Доставка', $oShop_Order_Item->name) != false) {
 
 				}*/
@@ -274,16 +267,6 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 					'tax' => Core_Array::get($this->robokassa_vat, $oShop_Order_Item->rate, $this->default_vat),
 					'sum' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', '')
 				);
-
-				/*$receipt['items'][] = array(
-					'quantity' => $oShop_Order_Item->quantity,
-					'text' => mb_substr($oShop_Order_Item->name, 0, 128),
-					'tax' => Core_Array::get($this->kassaTaxRates, $tax_id, $this->kassaTaxRateDefault),
-					'price' => array(
-						'amount' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', ''),
-						'currency' => 'RUB'
-					),
-				);*/
 			}
 			
 			$sReceiptJson = json_encode($receipt);

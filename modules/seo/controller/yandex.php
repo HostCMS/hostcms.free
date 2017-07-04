@@ -613,6 +613,15 @@ class Seo_Controller_Yandex extends Seo_Controller
 	}
 
 	/**
+	 * Get rating name
+	 * @return string
+	 */
+	public function getRatingName()
+	{
+		return "тИЦ";
+	}
+
+	/**
 	 * Get site popular queries
 	 * @param int $host_id Yandex.Webmaster site id
 	 * @param int $limit limit

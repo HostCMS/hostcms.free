@@ -111,6 +111,8 @@ $oAdmin_Form_Dataset->addCondition(
 	)
 );
 
+ob_start();
+
 $oSeo_Sites = Core_Entity::factory('Seo_Site');
 $oSeo_Sites->queryBuilder()
 	->where('seo_sites.active', '=', 1)
@@ -182,15 +184,15 @@ foreach ($aSeo_Sites as $oSeo_Site)
 					->sorting(0)
 					->save();
 			}
+			
+			$oSeo_Site->last_update = Core_Date::timestamp2sql(time());
+			$oSeo_Site->save();
 		}
 		catch (Exception $e){
 			$oAdmin_Form_Controller->addMessage(
 				Core_Message::get($e->getMessage(), 'error')
 			);
 		}
-
-		$oSeo_Site->last_update = Core_Date::timestamp2sql(time());
-		$oSeo_Site->save();
 	}
 }
 
@@ -307,8 +309,6 @@ function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 	</div>
 <?php
 }
-
-ob_start();
 ?>
 <div class="row">
 	<div class="col-xs-12">
@@ -616,7 +616,7 @@ $last_key = end($aKeys);
 				{
 					?>{
 						color: "<?php echo $oSeo_Driver_Controller->getColor()?>",
-						label: "<?php echo htmlspecialchars($oSeo_Site->Seo_Driver->name)?>",
+						label: "<?php echo htmlspecialchars($oSeo_Driver_Controller->getRatingName())?>",
 						data: valueTitlesRatings<?php echo $oSeo_Site->id?>
 					}<?php
 

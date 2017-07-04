@@ -325,6 +325,12 @@ class Seo_Controller_Google extends Seo_Controller
 	}
 
 	/**
+	 * Get rating name
+	 * @return string
+	 */
+	public function getRatingName(){}
+
+	/**
 	 * Get site popular queries
 	 * @param string $host_url domain url
 	 * @return array
@@ -333,7 +339,7 @@ class Seo_Controller_Google extends Seo_Controller
 	{
 		$aReturn = array();
 
-		$aQueries = $this->setQuery($host_url, 'query' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
+		$aQueries = $this->setQuery($host_url, 'query' , Core_Date::timestamp2sqldate(strtotime('-8 days')), Core_Date::timestamp2sqldate(time()), $limit);
 
 		foreach ($aQueries as $aTmp)
 		{

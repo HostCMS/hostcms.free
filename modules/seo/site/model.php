@@ -84,4 +84,30 @@ class Seo_Site_Model extends Core_Entity
 			return htmlspecialchars($oSeo_Driver->name);
 		}
 	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return self
+	 * @hostcms-event seo_site.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Seo_Ratings->deleteAll(FALSE);
+		$this->Seo_Indexeds->deleteAll(FALSE);
+		$this->Seo_Links->deleteAll(FALSE);
+		$this->Seo_Pages->deleteAll(FALSE);
+		$this->Seo_Pages->deleteAll(FALSE);
+
+		return parent::delete($primaryKey);
+	}
 }

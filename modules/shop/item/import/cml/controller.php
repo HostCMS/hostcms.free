@@ -163,6 +163,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$this->updateFields = array();
 		$this->importGroups = $this->createShopItems = TRUE;
 
+		$this->importAction = 1;
+
 		$this->timeout = (!defined('DENY_INI_SET') || !DENY_INI_SET)
 			? ini_get('max_execution_time')
 			: 30;

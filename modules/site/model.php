@@ -64,8 +64,7 @@ class Site_Model extends Core_Entity
 		'poll_group' => array(),
 		'search_log' => array(),
 		'search_page' => array(),
-		'seo' => array(),
-		'seo_query' => array(),
+		'seo_site' => array(),
 		'shop' => array(),
 		'shop_dir' => array(),
 		'siteuser' => array(),
@@ -295,6 +294,8 @@ class Site_Model extends Core_Entity
 		$this->User_Groups->deleteAll(FALSE);
 		$this->User_Group_Action_Accesses->deleteAll(FALSE);
 		$this->User_Modules->deleteAll(FALSE);
+
+		$this->Seo_Sites->deleteAll(FALSE);
 
 		// Удаление доп. св-в структуры сайта
 		$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $this->id);
