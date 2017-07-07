@@ -102,18 +102,9 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 	$oAdmin_Form_Controller->addAction($oSeoSiteControllerApply);
 }
 
-// Источник данных 0
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Seo_Site'));
-
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('site_id', '=', CURRENT_SITE)
-	)
-);
-
 ob_start();
 
-$oSeo_Sites = Core_Entity::factory('Seo_Site');
+$oSeo_Sites = Core_Entity::factory('Site', CURRENT_SITE)->Seo_Sites;
 $oSeo_Sites->queryBuilder()
 	->where('seo_sites.active', '=', 1)
 	->open()
@@ -184,7 +175,7 @@ foreach ($aSeo_Sites as $oSeo_Site)
 					->sorting(0)
 					->save();
 			}
-			
+
 			$oSeo_Site->last_update = Core_Date::timestamp2sql(time());
 			$oSeo_Site->save();
 		}
@@ -198,7 +189,7 @@ foreach ($aSeo_Sites as $oSeo_Site)
 
 $aTmpQueries = $aTmpPages = array();
 
-$aSeo_Sites = Core_Entity::factory('Seo_Site')->getAllByActive(1);
+$aSeo_Sites = Core_Entity::factory('Site', CURRENT_SITE)->Seo_Sites->getAllByActive(1);
 
 foreach ($aSeo_Sites as $oSeo_Site)
 {
@@ -240,14 +231,19 @@ foreach ($aSeo_Sites as $oSeo_Site)
 	}
 }
 
+$aConfig = Core_Config::instance()->get('seo_config', array()) + array(
+	'topQueriesLimit' => 100,
+	'topPagesLimit' => 100
+);
+
 uasort($aTmpQueries, "mysort");
-$aTmpQueries = array_slice($aTmpQueries, 0, 100);
+$aTmpQueries = array_slice($aTmpQueries, 0, Core_Array::get($aConfig, 'topQueriesLimit', 100));
 $iCount = count($aTmpQueries);
 $aTmpQueriesFirstBlock = array_slice($aTmpQueries, 0, round($iCount/2));
 $aTmpQueriesSecondBlock = array_slice($aTmpQueries, round($iCount/2), round($iCount/2));
 
 uasort($aTmpPages, "mysort");
-$aTmpPages = array_slice($aTmpPages, 0, 100);
+$aTmpPages = array_slice($aTmpPages, 0, Core_Array::get($aConfig, 'topPagesLimit', 100));
 $iCount = count($aTmpPages);
 $aTmpPagesFirstBlock = array_slice($aTmpPages, 0, round($iCount/2));
 $aTmpPagesSecondBlock = array_slice($aTmpPages, round($iCount/2), round($iCount/2));
@@ -261,19 +257,18 @@ function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 			<?php
 				foreach ($aTmpQueries as $query => $aTmpQuery)
 				{
-					// var_dump($query);
 					if (strpos($query, 'http://') !== FALSE || strpos($query, 'https://') !== FALSE)
 					{
-						$url = "<a href='" . $query . "' target='_blank'>" . Core_Str::cut($query, 30) . "</a>";
+						$url = "<a href='" . $query . "' target='_blank'>" . Core_Str::cut($query, 50) . "</a>";
 					}
 					else
 					{
-						$url = Core_Str::cut($query, 30);
+						$url = $query;
 					}
 					?>
 					<tr>
 						<td><?php echo $counter?></td>
-						<td title="<?php echo $query?>"><?php echo $url?></td>
+						<td width="50%"><?php echo $url?></td>
 						<?php
 						foreach ($aSeo_Sites as $oSeo_Site)
 						{
@@ -309,130 +304,7 @@ function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 	</div>
 <?php
 }
-?>
-<div class="row">
-	<div class="col-xs-12">
-		<h5 class="row-title before-darkorange">
-			<i class="fa fa-question-circle-o darkorange"></i>
-			<?php echo Core::_('Seo.popular_query_header')?>
-		</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12 col-md-6">
-		<?php showBlock($aTmpQueriesFirstBlock, $aSeo_Sites, 1)?>
-	</div>
-	<div class="col-xs-12 col-md-6">
-		<?php showBlock($aTmpQueriesSecondBlock, $aSeo_Sites, round($iCount/2 + 1))?>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<h5 class="row-title before-azure">
-			<i class="fa fa-file-text-o azure"></i>
-			<?php echo Core::_('Seo.popular_page_header')?>
-		</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12 col-md-6">
-		<?php showBlock($aTmpPagesFirstBlock, $aSeo_Sites, 1)?>
-	</div>
-	<div class="col-xs-12 col-md-6">
-		<?php showBlock($aTmpPagesSecondBlock, $aSeo_Sites, round($iCount/2 + 1))?>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<h5 class="row-title before-palegreen">
-			<i class="fa fa-external-link palegreen"></i>
-			<?php echo Core::_('Seo.external_link_header')?>
-		</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<div class="widget counter">
-			<div class="widget-body">
-				<div id="seo-links">
-					<div class="row">
-						<div class="col-sm-12">
-							<div id="seo-links-chart" class="chart chart-lg"></div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xs-12">
-							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<h5 class="row-title before-info">
-			<i class="fa fa-line-chart info"></i>
-			<?php echo Core::_('Seo.tic_header')?>
-		</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<div class="widget counter">
-			<div class="widget-body">
-				<div id="seo-ratings">
-					<div class="row">
-						<div class="col-sm-12">
-							<div id="seo-ratings-chart" class="chart chart-lg"></div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xs-12">
-							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<h5 class="row-title before-magenta">
-			<i class="fa fa-database magenta"></i>
-			<?php echo Core::_('Seo.indexed_header')?>
-		</h5>
-	</div>
-</div>
-<div class="row">
-	<div class="col-xs-12">
-		<div class="widget counter">
-			<div class="widget-body">
-				<div id="seo-indexed">
-					<div class="row">
-						<div class="col-sm-12">
-							<div id="seo-indexed-chart" class="chart chart-lg"></div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xs-12">
-							<div class="col-sm-12 col-md-6">
-								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<?php
+
 $iBeginTimestamp = strtotime("-6 month");
 
 $aLinks = $aRatings = $aSearchable = $aDownloaded = $aDownloaded2xx
@@ -496,17 +368,170 @@ foreach ($aSeo_Sites as $oSeo_Site)
 $aKeys = array_keys($aSeo_Sites);
 $last_key = end($aKeys);
 
+if (count($aTmpQueriesFirstBlock))
+{
+?>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-darkorange">
+			<i class="fa fa-question-circle-o darkorange"></i>
+			<?php echo Core::_('Seo.popular_query_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpQueriesFirstBlock, $aSeo_Sites, 1)?>
+	</div>
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpQueriesSecondBlock, $aSeo_Sites, round($iCount/2 + 1))?>
+	</div>
+</div>
+<?php
+}
+
+if (count($aTmpPagesFirstBlock))
+{
+?>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-azure">
+			<i class="fa fa-file-text-o azure"></i>
+			<?php echo Core::_('Seo.popular_page_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpPagesFirstBlock, $aSeo_Sites, 1)?>
+	</div>
+	<div class="col-xs-12 col-md-6">
+		<?php showBlock($aTmpPagesSecondBlock, $aSeo_Sites, round($iCount/2 + 1))?>
+	</div>
+</div>
+<?php
+}
+
+if(count($aLinks))
+{
+?>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-palegreen">
+			<i class="fa fa-external-link palegreen"></i>
+			<?php echo Core::_('Seo.external_link_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="widget counter">
+			<div class="widget-body">
+				<div id="seo-links">
+					<div class="row">
+						<div class="col-sm-12">
+							<div id="seo-links-chart" class="chart chart-lg"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="col-sm-12 col-md-6">
+								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php
+}
+
+if (count($aRatings))
+{
+?>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-info">
+			<i class="fa fa-line-chart info"></i>
+			<?php echo Core::_('Seo.tic_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="widget counter">
+			<div class="widget-body">
+				<div id="seo-ratings">
+					<div class="row">
+						<div class="col-sm-12">
+							<div id="seo-ratings-chart" class="chart chart-lg"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="col-sm-12 col-md-6">
+								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php
+}
+
+if (count($aSearchable))
+{
+?>
+<div class="row">
+	<div class="col-xs-12">
+		<h5 class="row-title before-magenta">
+			<i class="fa fa-database magenta"></i>
+			<?php echo Core::_('Seo.indexed_header')?>
+		</h5>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12">
+		<div class="widget counter">
+			<div class="widget-body">
+				<div id="seo-indexed">
+					<div class="row">
+						<div class="col-sm-12">
+							<div id="seo-indexed-chart" class="chart chart-lg"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-xs-12">
+							<div class="col-sm-12 col-md-6">
+								<button class="btn btn-palegreen" id="setOriginalZoom"><i class="fa fa-area-chart icon-separator"></i><?php echo Core::_('Seo.reset')?></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<?php
+}
+
+if (count($aSeo_Sites))
+{
 ?><script type="text/javascript">
 	$(function(){
 	//$(window).bind("load", function () {
-		var
 			<?php
 			foreach ($aSeo_Sites as $oSeo_Site)
 			{
 				if (isset($aLinks[$oSeo_Site->id]))
 				{
 				?>
-				title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
+				var title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
 				link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
 				valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
 				<?php
@@ -515,7 +540,7 @@ $last_key = end($aKeys);
 				if (isset($aRatings[$oSeo_Site->id]))
 				{
 				?>
-				title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
+				var title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
 				rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
 				valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
 				<?php
@@ -524,7 +549,7 @@ $last_key = end($aKeys);
 				if (isset($aSearchable[$oSeo_Site->id]))
 				{
 				?>
-				title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
+				var title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
 				searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
 				downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
 				downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
@@ -790,6 +815,7 @@ $last_key = end($aKeys);
 			}
 		};
 
+		// Links
 		var placeholderSeoLinks = $("#seo-links-chart");
 
 		placeholderSeoLinks.bind("plotselected", function (event, ranges) {
@@ -857,9 +883,20 @@ $last_key = end($aKeys);
 	});
 </script>
 <?php
+}
+
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
 		->html(ob_get_clean())
+);
+
+// Источник данных 0
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Seo_Site'));
+
+$oAdmin_Form_Dataset->addCondition(
+	array('where' =>
+		array('site_id', '=', CURRENT_SITE)
+	)
 );
 
 // Добавляем источник данных контроллеру формы

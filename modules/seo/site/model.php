@@ -18,6 +18,12 @@ class Seo_Site_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_modelName = 'seo_site';
+	
+	/**
+	 * Column consist item's name
+	 * @var string
+	 */
+	protected $_nameColumn = 'site_id';	
 
 	/**
 	 * Belongs to relations
@@ -106,7 +112,7 @@ class Seo_Site_Model extends Core_Entity
 		$this->Seo_Indexeds->deleteAll(FALSE);
 		$this->Seo_Links->deleteAll(FALSE);
 		$this->Seo_Pages->deleteAll(FALSE);
-		$this->Seo_Pages->deleteAll(FALSE);
+		$this->Seo_Queries->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}

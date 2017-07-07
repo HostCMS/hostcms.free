@@ -295,7 +295,10 @@ class Site_Model extends Core_Entity
 		$this->User_Group_Action_Accesses->deleteAll(FALSE);
 		$this->User_Modules->deleteAll(FALSE);
 
-		$this->Seo_Sites->deleteAll(FALSE);
+		if (Core::moduleIsActive('seo'))
+		{
+			$this->Seo_Sites->deleteAll(FALSE);
+		}
 
 		// Удаление доп. св-в структуры сайта
 		$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $this->id);

@@ -60,7 +60,7 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Driver->driver);
 
 				$aSeoDriverTokens[$oSeo_Driver->id] =  $oSeo_Driver_Controller->getTokenUrl();
-				$aSeoDriverTokensJS[] ='"' . $oSeo_Driver->id . '": "' . htmlspecialchars($oSeo_Driver_Controller->getTokenUrl()) . '"';
+				$aSeoDriverTokensJS[] ='"' . $oSeo_Driver->id . '": \'' . Core_Str::escapeJavascriptVariable($oSeo_Driver_Controller->getTokenUrl()) . '\'';
 				$aSeoDriverOptions[$oSeo_Driver->id] = $oSeo_Driver->name;
 			}
 			catch (Exception $e){}
@@ -109,28 +109,4 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $this;
 	}
-
-	/**
-	 * Get seo drivers array
-	 * @return array
-	 */
-	/*public function fillSeoDrivers()
-	{
-		$oSeo_Drivers = Core_Entity::factory('Seo_Driver');
-
-		$oSeo_Drivers->queryBuilder()
-			->clearOrderBy()
-			->orderBy('name');
-
-		$aSeo_Drivers = $oSeo_Drivers->findAll();
-
-		$aSeoDriversArray = array(' … ');
-
-		foreach($aSeo_Drivers as $oSeo_Driver)
-		{
-			$aSeoDriversArray[$oSeo_Driver->id] = $oSeo_Driver->name;
-		}
-
-		return $aSeoDriversArray;
-	}*/
 }

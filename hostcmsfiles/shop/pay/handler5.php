@@ -5,7 +5,7 @@
  * Версия 1.4
  * Лицензионный договор:
  * Любое использование Вами программы означает полное и безоговорочное принятие Вами условий лицензионного договора, размещенного по адресу https://money.yandex.ru/doc.xml?id=527132 (далее – «Лицензионный договор»). Если Вы не принимаете условия Лицензионного договора в полном объёме, Вы не имеете права использовать программу в каких-либо целях.
- * 
+ *
  * Откорректировано HostCMS 27.06.2017 г.
  */
 class Shop_Payment_System_Handler5 extends Shop_Payment_System_Handler
@@ -296,7 +296,9 @@ class Shop_Payment_System_Handler5 extends Shop_Payment_System_Handler
 				$receipt['items'][] = array(
 					'quantity' => $oShop_Order_Item->quantity,
 					'text' => mb_substr($oShop_Order_Item->name, 0, 128),
-					'tax' => Core_Array::get($this->kassaTaxRates, $tax_id, $this->kassaTaxRateDefault),
+					'tax' => $tax_id
+						? Core_Array::get($this->kassaTaxRates, $tax_id, $this->kassaTaxRateDefault)
+						: 0,
 					'price' => array(
 						'amount' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', ''),
 						'currency' => 'RUB'
