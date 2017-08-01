@@ -457,7 +457,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		// Clear
 		$this->_aProperty_Dirs = $this->_aProperties = array();
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
 
 		return $this;

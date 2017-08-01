@@ -462,6 +462,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					continue;
 				}
 
+				$sData = trim($sData);
+
 				if ($sData != '')
 				{
 					switch ($this->csv_fields[$iKey])

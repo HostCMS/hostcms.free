@@ -30,9 +30,11 @@ class Core_Sitemap extends Core_Servant_Properties
 	protected $_allowedProperties = array(
 		'showInformationsystemGroups',
 		'showInformationsystemItems',
+		'showInformationsystemTags',
 		'showShopGroups',
 		'showShopItems',
 		'showModifications',
+		'showShopTags',
 		'rebuildTime',
 		'defaultProtocol',
 		'urlset',
@@ -88,9 +90,9 @@ class Core_Sitemap extends Core_Servant_Properties
 		$this->_Informationsystems = $this->_Shops = array();
 
 		$this->urlset = array('xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9');
-		
+
 		$this->defaultProtocol = 'http://';
-		
+
 		$this->fileName = 'sitemap-%d.xml';
 		$this->multipleFileName = 'sitemap-%d-%d.xml';
 	}
@@ -151,7 +153,7 @@ class Core_Sitemap extends Core_Servant_Properties
 	 * @var mixed
 	 */
 	protected $_siteAlias = NULL;
-	
+
 	/**
 	 * Executes the business logic.
 	 * @return self
@@ -201,7 +203,7 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		return $this;
 	}
-	
+
 	/**
 	 * Get Structure Protocol
 	 *
@@ -214,15 +216,11 @@ class Core_Sitemap extends Core_Servant_Properties
 			? 'https://'
 			: $this->defaultProtocol;
 	}
-	
+
 	/**
 	 * Add structure nodes by parent
 	 * @param int $structure_id structure ID
 	 * @return self
-	 * @hostcms-event Core_Sitemap.onBeforeSelectInformationsystemGroups
-	 * @hostcms-event Core_Sitemap.onBeforeSelectInformationsystemItems
-	 * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
-	 * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
 	 */
 	protected function _structure($structure_id = 0)
 	{
@@ -263,12 +261,14 @@ class Core_Sitemap extends Core_Servant_Properties
 		return $this;
 	}
 
-	/** 
+	/**
 	 * Add Informationsystem Nodes
 	 *
 	 * @param Structure_Model $oStructure
 	 * @param Informationsystem_Model $oInformationsystem
 	 * @return self
+	 * @hostcms-event Core_Sitemap.onBeforeSelectInformationsystemGroups
+	 * @hostcms-event Core_Sitemap.onBeforeSelectInformationsystemItems
 	 */
 	protected function _fillInformationsystem(Structure_Model $oStructure, Informationsystem_Model $oInformationsystem)
 	{
@@ -285,11 +285,11 @@ class Core_Sitemap extends Core_Servant_Properties
 		$aGroupsIDs = array();
 
 		$sProtocol = $this->getProtocol($oStructure);
-		
+
 		$path = $sProtocol . $this->_siteAlias . $oInformationsystem->Structure->getPath();
 
 		$dateTime = Core_Date::timestamp2sql(time());
-		
+
 		do {
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
@@ -374,16 +374,66 @@ class Core_Sitemap extends Core_Servant_Properties
 		}
 
 		unset($aGroupsIDs);
-		
+
+		// Tags
+		if ($this->showInformationsystemTags)
+		{
+			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
+			$oCore_QueryBuilder_Select
+				->from('tags')
+				->where('tags.deleted', '=', 0);
+
+			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			$maxId = $aRow['max_id'];
+
+			$iFrom = 0;
+
+			do {
+				$oTags = Core_Entity::factory('Tag');
+
+				$oTags->queryBuilder()
+					->select(array('COUNT(tag_id)', 'count'), 'tags.*')
+					->where('tags.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
+					->join('tag_informationsystem_items', 'tag_informationsystem_items.tag_id', '=', 'tags.id')
+					->join('informationsystem_items', 'tag_informationsystem_items.informationsystem_item_id', '=', 'informationsystem_items.id')
+					->leftJoin('informationsystem_groups', 'informationsystem_items.informationsystem_group_id', '=', 'informationsystem_groups.id',
+						array(
+							array('AND' => array('informationsystem_groups.deleted', '=', 0)),
+							array('AND' => array('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups))
+						)
+					)
+					->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+					->where('informationsystem_items.informationsystem_id', '=', $oInformationsystem->id)
+					->where('informationsystem_items.deleted', '=', 0)
+					//->where('tags.deleted', '=', 0)
+					->groupBy('tag_informationsystem_items.tag_id')
+					->having('count', '>', 0);
+
+				Core_Event::notify('Core_Sitemap.onBeforeSelectInformationsystemTags', $this, array($oTags));
+
+				$aTags = $oTags->findAll(FALSE);
+				foreach ($aTags as $oTag)
+				{
+					$this->addNode($path . 'tag/' . $oTag->path . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
+				}
+
+				$iFrom += $this->limit;
+			}
+			while ($iFrom < $maxId);
+		}
+
 		return $this;
 	}
-	
-	/** 
+
+	/**
 	 * Add Shop Nodes
 	 *
 	 * @param Structure_Model $oStructure
 	 * @param Shop_Model $oInformationsystem
 	 * @return self
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopGroups
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopItems
+	 * @hostcms-event Core_Sitemap.onBeforeSelectShopTags
 	 */
 	protected function _fillShop(Structure_Model $oStructure, Shop_Model $oShop)
 	{
@@ -400,9 +450,9 @@ class Core_Sitemap extends Core_Servant_Properties
 		$aGroupsIDs = array();
 
 		$sProtocol = $this->getProtocol($oStructure);
-		
+
 		$path = $sProtocol . $this->_siteAlias . $oShop->Structure->getPath();
-		
+
 		$dateTime = Core_Date::timestamp2sql(time());
 
 		do {
@@ -495,10 +545,57 @@ class Core_Sitemap extends Core_Servant_Properties
 		}
 
 		unset($aGroupsIDs);
-		
+
+		// Tags
+		if ($this->showShopTags)
+		{
+			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
+			$oCore_QueryBuilder_Select
+				->from('tags')
+				->where('tags.deleted', '=', 0);
+
+			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			$maxId = $aRow['max_id'];
+
+			$iFrom = 0;
+
+			do {
+				$oTags = Core_Entity::factory('Tag');
+
+				$oTags->queryBuilder()
+					->select(array('COUNT(tag_id)', 'count'), 'tags.*')
+					->where('tags.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
+					->join('tag_shop_items', 'tag_shop_items.tag_id', '=', 'tags.id')
+					->join('shop_items', 'tag_shop_items.shop_item_id', '=', 'shop_items.id')
+					->leftJoin('shop_groups', 'shop_items.shop_group_id', '=', 'shop_groups.id',
+						array(
+							array('AND' => array('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)),
+							array('AND' => array('shop_groups.deleted', '=', 0)),
+						)
+					)
+					->where('shop_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+					->where('shop_items.shop_id', '=', $oShop->id)
+					->where('shop_items.deleted', '=', 0)
+					//->where('tags.deleted', '=', 0)
+					->groupBy('tag_shop_items.tag_id')
+					->having('count', '>', 0);
+
+				Core_Event::notify('Core_Sitemap.onBeforeSelectShopTags', $this, array($oTags));
+
+				$aTags = $oTags->findAll(FALSE);
+				foreach ($aTags as $oTag)
+				{
+					$this->addNode($path . 'tag/' . $oTag->path . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
+				}
+
+				$iFrom += $this->limit;
+			}
+			while ($iFrom < $maxId);
+		}
+
 		return $this;
 	}
-	
+
 	/**
 	 * Is it necessary to rebuild sitemap?
 	 */
@@ -537,9 +634,9 @@ class Core_Sitemap extends Core_Servant_Properties
 	public function fillNodes()
 	{
 		$oSite_Alias = $this->_oSite->getCurrentAlias();
-				
+
 		$this->_siteAlias = $oSite_Alias->name;
-				
+
 		$sIndexFilePath = $this->_getIndexFilePath();
 
 		$this->_bRebuild = !is_file($sIndexFilePath) || time() > filemtime($sIndexFilePath) + $this->rebuildTime;

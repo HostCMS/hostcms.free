@@ -298,7 +298,7 @@ class Shop_Payment_System_Handler5 extends Shop_Payment_System_Handler
 					'text' => mb_substr($oShop_Order_Item->name, 0, 128),
 					'tax' => $tax_id
 						? Core_Array::get($this->kassaTaxRates, $tax_id, $this->kassaTaxRateDefault)
-						: 0,
+						: 1,
 					'price' => array(
 						'amount' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->shop_item_id ? 1 - $discount : 1), 2, '.', ''),
 						'currency' => 'RUB'

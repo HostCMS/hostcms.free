@@ -111,7 +111,7 @@ class Property_Value_File_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		if ($this->_dir)
 		{
 			$this

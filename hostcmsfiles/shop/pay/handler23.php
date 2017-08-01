@@ -206,38 +206,80 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 		<?php
 	}
 
+	private function cleanProductName($value)
+	{
+		$result = preg_replace('/[^0-9a-zA-Zа-яА-Я ]/ui', '', htmlspecialchars_decode($value));
+		$result = trim(mb_substr($result, 0, 20));
+		return $result;
+	}
+
 	/* печатает форму отправки запроса на сайт платёжной системы */
 	public function getNotification()
 	{
 		$Sum = number_format($this->getSumWithCoeff(), 2, '.', '');
 		$Signature = md5("{$this->_MNT_ID}{$this->_shopOrder->id}{$Sum}{$this->_shopOrder->Shop_Currency->code}{$this->_MNT_TEST_MODE}{$this->_MNT_DATAINTEGRITY_CODE}");
+
+		$clientEmail = $this->_shopOrder->email;
+		$inventory = array();
+		$aShopOrderItems = $this->_shopOrder->Shop_Order_Items->findAll();
+		if(count($aShopOrderItems))
+		{
+			foreach ($aShopOrderItems as $key => $oShopOrderItem)
+			{
+				$sItemAmount = $oShopOrderItem->getAmount();
+				$inventory[] = array(
+					"n" => $this->cleanProductName($oShopOrderItem->name),
+					"p" => floatval(number_format($sItemAmount, 2, '.', '')),
+					"q" => $oShopOrderItem->quantity,
+					"t" => 1105
+				);
+			}
+		}
+
+		$productsTototal = 0;
+		foreach ($inventory AS $item) {
+			$productsTototal = $productsTototal + floatval($item['p']) * floatval($item['q']);
+		}
+
+		if (floatval($productsTototal) != floatval($Sum)) {
+			$discountRate = floatval($Sum) / floatval($productsTototal);
+			$newInvenrory = array();
+			foreach ($inventory AS $item) {
+				$item['p'] = round(floatval($item['p']) * $discountRate, 5);
+				$newInvenrory[] = $item;
+			}
+			$inventory = $newInvenrory;
+		}
+
+		$data = array("customer" => $clientEmail, "items" => $inventory);
+
+		$jsonData = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
+			return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
+		}, json_encode($data));
+
 		?>
 		<h2>Оплата через систему PayAnyWay</h2>
-
 		<form method="POST" action="https://<?php echo $this->_MNT_PAYMENT_URL?>/assistant.htm">
-		<input type="hidden" name="MNT_ID" value="<?php echo $this->_MNT_ID?>">
-		<input type="hidden" name="MNT_TRANSACTION_ID" value="<?php echo $this->_shopOrder->id?>">
-		<input type="hidden" name="MNT_CURRENCY_CODE" value="<?php echo $this->_shopOrder->Shop_Currency->code?>">
-		<input type="hidden" name="MNT_TEST_MODE" value="<?php echo $this->_MNT_TEST_MODE?>">
-		<input type="hidden" name="MNT_SIGNATURE" value="<?php echo $Signature?>">
+			<input type="hidden" name="MNT_ID" value='<?php echo $this->_MNT_ID?>'>
+			<input type="hidden" name="MNT_TRANSACTION_ID" value='<?php echo $this->_shopOrder->id?>'>
+			<input type="hidden" name="MNT_CURRENCY_CODE" value='<?php echo $this->_shopOrder->Shop_Currency->code?>'>
+			<input type="hidden" name="MNT_TEST_MODE" value='<?php echo $this->_MNT_TEST_MODE?>'>
+			<input type="hidden" name="MNT_SIGNATURE" value='<?php echo $Signature?>'>
+			<input type="hidden" name="MNT_CUSTOM1" value='1'>
+			<input type="hidden" name="MNT_CUSTOM2" value="<?php echo htmlspecialchars($jsonData)?>">
 
-		<table border = "1" cellspacing = "0" width = "400" bgcolor = "#FFFFFF" align = "center" bordercolor = "#000000">
-			<tr>
-				<td>Сумма, руб.</td>
-				<td> <input type="text" name="MNT_AMOUNT" value="<?php echo $Sum?>" readonly="readonly"> </td>
-			</tr>
-			<tr>
-				<td>Номер заказа</td>
-				<td> <input type="text" name="AccountNumber" value="<?php echo $this->_shopOrder->invoice?>" readonly="readonly"> </td>
-			</tr>
-		</table>
+			<table border = "1" cellspacing = "0" width = "400" bgcolor = "#FFFFFF" align = "center" bordercolor = "#000000">
+				<tr>
+					<td>Сумма, руб.</td>
+					<td><?php echo $Sum?></td>
+				</tr>
+				<tr>
+					<td>Номер заказа</td>
+					<td><?php echo $this->_shopOrder->invoice?></td>
+				</tr>
+			</table>
 
-		<table border="0" cellspacing="1" align="center" width="400" bgcolor="#CCCCCC" >
-			<tr bgcolor="#FFFFFF">
-				<td width="490"></td>
-				<td width="48"><input type="submit" name = "BuyButton" value = "Submit"></td>
-			</tr>
-		</table>
+			<input type="submit" name = "BuyButton" value = "Оплатить"></td>
 		</form>
 	<?php
 	}

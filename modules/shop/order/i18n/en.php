@@ -137,4 +137,5 @@ return array(
 	'send_mail' => "Send order e-mail",
 	'most_ordered' => "Popular shop items (items)",
 	'popular_brands' => "Popular brands (items)",
+	'popover_title' => "Order # %s",
 );

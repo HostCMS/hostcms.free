@@ -10,10 +10,11 @@
  */
 return array(
 	'title' => 'Stopwords',
-	'model_name' => 'Antispam stopwords',
+	'model_name' => 'Antispam Stopwords',
 	'add_title' => 'Add stopword',
 	'edit_title' => 'Edit stopword',
-	'value' => 'Value',
+	'value' => 'Stopword',
+	'values' => 'Stopword/List of stopwords',
 	'id' => 'Id',
 	'edit_success' => "Stopword modified successfully!",
 	'delete_success' => 'Stopword deleted successfully!',

@@ -1377,7 +1377,6 @@ $(function(){
 	$('body').on('touchend', '.page-sidebar.menu-compact .sidebar-menu .submenu > li', function(e) {
 		$(this).find('a').click();
 	});
-
 });
 
 var methods = {

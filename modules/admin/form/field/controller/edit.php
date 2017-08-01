@@ -153,7 +153,7 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Admin_Form_Field.type'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10])");
 
 		$oMainTab->delete($this->getField('type'));

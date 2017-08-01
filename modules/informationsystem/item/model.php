@@ -322,10 +322,10 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function move($informationsystem_group_id)
 	{
+		$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $informationsystem_group_id);
+
 		if ($this->shortcut_id)
 		{
-			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $informationsystem_group_id);
-
 			$oInformationsystem_Item = $oInformationsystem_Group->Informationsystem_Items->getByShortcut_id($this->shortcut_id);
 
 			if (!is_null($oInformationsystem_Item))
@@ -334,9 +334,15 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
+		$this->Informationsystem_Group->decCountItems();
+
 		$this->informationsystem_group_id = $informationsystem_group_id;
 
-		return $this->save()->clearCache();
+		$this->save()->clearCache();
+
+		$oInformationsystem_Group->incCountItems();
+
+		return $this;
 	}
 
 	/**

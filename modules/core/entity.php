@@ -153,6 +153,15 @@ class Core_Entity extends Core_ORM
 	protected $_childrenEntities = array();
 
 	/**
+	 * Get children entities
+	 * @return array
+	 */
+	public function getEntities()
+	{
+		return $this->_childrenEntities;
+	}
+	
+	/**
 	 * Clear enities
 	 * @return self
 	 */

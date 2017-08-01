@@ -108,7 +108,8 @@ class Trash_Dataset extends Admin_Form_Dataset
 
 			$id = $key + 1;
 
-			if (isset($aColumns['deleted']))
+			// if (isset($aColumns['deleted']))
+			if (isset($aColumns['deleted']) && strpos($name, '~') !== 0)
 			{
 				if ($iRows < $aConfig['maxExactCount'] || $sEngine == 'MYISAM')
 				{

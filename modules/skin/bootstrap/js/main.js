@@ -1011,10 +1011,12 @@ function radiogroupOnChange(windowId, value, values)
 		if (value != values[x])
 		{
 			$("#"+windowId+" .hidden-"+values[x]).show();
+			$("#"+windowId+" .shown-"+values[x]).hide();
 		}
 	}
 
 	$("#"+windowId+" .hidden-"+value).hide();
+	$("#"+windowId+" .shown-"+value).show();
 }
 
 // -- Проверка ячеек

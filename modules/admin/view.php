@@ -18,7 +18,7 @@ abstract class Admin_View extends Core_Servant_Properties
 		'module',
 		'message',
 		'content',
-		'pageSelector',
+		'pageSelector', 
 	);
 
 	protected $_children = array();

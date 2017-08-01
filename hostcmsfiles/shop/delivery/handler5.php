@@ -1,7 +1,8 @@
 <?php
-/*
-	СДЭК http://www.edostavka.ru/clients/integrator.html
-*/
+
+/**
+ * СДЭК http://www.edostavka.ru/clients/integrator.html
+ */
 class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 {
 	// Login (для индивидуальных тарифов)
@@ -65,7 +66,11 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 		86 => 'Блиц-экспресс 21',
 		87 => 'Блиц-экспресс 22',
 		88 => 'Блиц-экспресс 23',
-		89 => 'Блиц-экспресс 24'
+		89 => 'Блиц-экспресс 24',
+		136=>'Посылка склад-склад',
+		137=>'Посылка склад-дверь',
+		138=>'Посылка дверь-склад',
+		139=>'Посылка дверь-дверь'
 	);
 
 	public function __construct() {

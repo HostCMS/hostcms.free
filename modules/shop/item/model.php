@@ -644,6 +644,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Make url path
 	 * @return self
+	 * @hostcms-event shop_item.onAfterMakePath
 	 */
 	public function makePath()
 	{
@@ -673,6 +674,8 @@ class Shop_Item_Model extends Core_Entity
 			$this->path = Core_Guid::get();
 		}
 
+		Core_Event::notify($this->_modelName . '.onAfterMakePath', $this);
+		
 		return $this;
 	}
 
@@ -840,10 +843,10 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function move($iShopGroupId)
 	{
+		$oShop_Group = Core_Entity::factory('Shop_Group', $iShopGroupId);
+		
 		if ($this->shortcut_id)
 		{
-			$oShop_Group = Core_Entity::factory('Shop_Group', $iShopGroupId);
-
 			$oShop_Item = $oShop_Group->Shop_Items->getByShortcut_id($this->shortcut_id);
 
 			if (!is_null($oShop_Item))
@@ -852,9 +855,14 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
+		$this->Shop_Group->decCountItems();
+		
 		$this->shop_group_id = $iShopGroupId;
+		$this->save()->clearCache();
 
-		return $this->save()->clearCache();
+		$oShop_Group->incCountItems();
+
+		return $this;
 	}
 
 	/**
@@ -2103,21 +2111,21 @@ class Shop_Item_Model extends Core_Entity
 				//$this->addEntities($aProperty_Values);
 			}
 
-			if (Core::moduleIsActive('list'))
+			$aListIDs = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
 			{
-				$aListIDs = array();
-
-				foreach ($aProperty_Values as $oProperty_Value)
+				// List_Items
+				if ($oProperty_Value->Property->type == 3)
 				{
-					// List_Items
-					if ($oProperty_Value->Property->type == 3)
-					{
-						$aListIDs[] = $oProperty_Value->value;
-					}
-
-					$this->addEntity($oProperty_Value);
+					$aListIDs[] = $oProperty_Value->value;
 				}
 
+				$this->addEntity($oProperty_Value);
+			}
+
+			if (Core::moduleIsActive('list'))
+			{
 				// Cache necessary List_Items
 				if (count($aListIDs))
 				{

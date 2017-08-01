@@ -1693,7 +1693,12 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	display: none;
 }
 
-.popover-content{
+.popover { max-width: 80%; font-size: 13px }
+.popover a{ cursor: pointer }
+/*.popover .popover-content table.table { background-color: #eee; }*/
+.popover .popover-content table.table tr td:last-child { text-align: right }
+.popover .popover-content table.table tr.footer { font-weight: bold }
+/*.popover-content{
 	background-color: #eee;
 }
 .popover.top > .arrow::after{
@@ -1707,10 +1712,7 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 }
 .popover.left> .arrow::after{
 	border-left-color: #eee;
-}
-.popover a{
-	cursor: pointer;
-}
+}*/
 
 .badge-hostcms {
 	background-color: #eee !important;
@@ -1881,8 +1883,8 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 	margin-top: 24px !important;
 }
 
-.siteuser_group_list_link>i, .structure_list_link>i { font-size:11px !important;margin-left:5px; }
-.siteuser_group_list_link>i:hover,.siteuser_group_list_link>i:focus, .structure_list_link>i:hover,.structure_list_link>i:focus { cursor:pointer; }
+.siteuser_group_list_link > i, .structure_list_link > i, .shop_order_link > i { font-size:11px !important;margin-left:5px; }
+.siteuser_group_list_link > i:hover,.siteuser_group_list_link > i:focus, .structure_list_link > i:hover,.structure_list_link > i:focus, .shop_order_link > i:hover,.shop_order_link > i:focus { cursor:pointer; }
 
 /* --- Autocomplete --- */
 .ui-autocomplete { position: absolute; top: 0; left: 0; cursor: default; padding: 0px; list-style: none; background-color: #fff; border: 1px solid #f5f5f5; }

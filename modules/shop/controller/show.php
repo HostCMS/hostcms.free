@@ -577,6 +577,12 @@ class Shop_Controller_Show extends Core_Controller
 					);
 			}
 
+			// Delete current item
+			if (($currentKey = array_search($this->item, $hostcmsViewed)) !== FALSE)
+			{
+				unset($hostcmsViewed[$currentKey]);
+			}
+			
 			// Extract a slice of the array
 			$hostcmsViewed = array_slice($hostcmsViewed, 0, $this->viewedLimit);
 
@@ -584,7 +590,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($view_item_id, FALSE);
 
-				if (!is_null($oShop_Item->id) && $oShop_Item->id != $this->item && $oShop_Item->active)
+				if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
 				{
 					$this->applyItemsForbiddenTags($oShop_Item);
 
@@ -987,7 +993,7 @@ class Shop_Controller_Show extends Core_Controller
 		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 
 		$bCache && $oCore_Cache->set(
 			$cacheKey,
@@ -1213,6 +1219,23 @@ class Shop_Controller_Show extends Core_Controller
 				->setOr()
 				->where('shop_items.shop_group_id', '=', 0)
 				->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Modifications);
+				
+			// Совместное modificationsList + filterShortcuts
+			if ($this->filterShortcuts)
+			{
+				$oCore_QueryBuilder_Select_Shortcuts_For_Modifications = Core_QueryBuilder::select('shop_items.shortcut_id')
+					->from('shop_items')
+					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.active', '=', 1)
+					->where('shop_items.shop_group_id', '=', $shop_group_id)
+					->where('shop_items.shortcut_id', '>', 0);
+					
+				$this->_Shop_Items
+					->queryBuilder()
+					->setOr()
+					->where('shop_items.shop_group_id', '=', 0)
+					->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Shortcuts_For_Modifications);
+			}
 		}
 
 		if ($this->filterShortcuts)

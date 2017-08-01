@@ -67,23 +67,34 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 
 	// Генерация окна с заказом в 1 клик
 	if (!is_null(Core_Array::getRequest('showDialog'))
-			&& Core_Array::getRequest('_', FALSE)
-			&& $shop_item_id
+		&& Core_Array::getRequest('_', FALSE)
+		&& $shop_item_id
 	)
 	{
 		ob_start();
 
 		$oneStepXslName = Core_Array::get(Core_Page::instance()->libParams, 'oneStepXsl');
 
+		$iQuantity = floatval(Core_Array::getRequest('count', 1));
+
 		$Shop_Cart_Controller_Onestep
 			->xsl(
 				Core_Entity::factory('Xsl')->getByName($oneStepXslName)
 			)
 			->shop_item_id($shop_item_id)
-			->quantity(Core_Array::getRequest('count', 1))
+			->quantity($iQuantity)
+			->addEntity(
+				Core::factory('Core_Xml_Entity')->name('count')->value($iQuantity)
+			)
 			->show();
 
-		echo json_encode(array('html' => ob_get_clean(), 'id' => $shop_item_id));
+		echo json_encode(
+			array(
+				'html' => ob_get_clean(),
+				'id' => $shop_item_id
+			)
+		);
+
 		exit();
 	}
 

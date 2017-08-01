@@ -14,14 +14,75 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
+	 *
+	 * @var array
+	 */
+	protected $_types = array();
+
+	/**
 	 * Constructor.
 	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
+	 * @hostcms-event Property_Controller_Edit.onAfterConstruct
 	 */
 	public function __construct(Admin_Form_Action_Model $oAdmin_Form_Action)
 	{
 		$this->_allowedProperties[] = 'linkedObject';
 
 		parent::__construct($oAdmin_Form_Action);
+
+		$this->_types = array(
+			0 => Core::_('Property.type0'),
+			11 => Core::_('Property.type11'),
+			1 => Core::_('Property.type1'),
+			2 => Core::_('Property.type2'),
+			3 => Core::_('Property.type3'),
+			4 => Core::_('Property.type4'),
+			5 => Core::_('Property.type5'),
+			12 => Core::_('Property.type12'),
+			6 => Core::_('Property.type6'),
+			7 => Core::_('Property.type7'),
+			8 => Core::_('Property.type8'),
+			9 => Core::_('Property.type9'),
+			10 => Core::_('Property.type10')
+		);
+
+		// Delete list type if module is not active
+		if (!Core::moduleIsActive('list'))
+		{
+			unset($this->_types[3]);
+		}
+		// Delete informationsystem type if module is not active
+		if (!Core::moduleIsActive('informationsystem'))
+		{
+			unset($this->_types[5]);
+		}
+		// Delete shop type if module is not active
+		if (!Core::moduleIsActive('shop'))
+		{
+			unset($this->_types[12]);
+		}
+
+		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/**
+	 * Get Property Types
+	 * @return array
+	 */
+	public function getTypes()
+	{
+		return $this->_types;
+	}
+
+	/**
+	 * Set Property Types
+	 * @param array $types
+	 * @return self
+	 */
+	public function setTypes(array $types)
+	{
+		$this->_types = $types;
+		return $this;
 	}
 
 	/**
@@ -107,37 +168,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$aListTypes = array(
-					0 => Core::_('Property.type0'),
-					11 => Core::_('Property.type11'),
-					1 => Core::_('Property.type1'),
-					2 => Core::_('Property.type2'),
-					3 => Core::_('Property.type3'),
-					4 => Core::_('Property.type4'),
-					5 => Core::_('Property.type5'),
-					12 => Core::_('Property.type12'),
-					6 => Core::_('Property.type6'),
-					7 => Core::_('Property.type7'),
-					8 => Core::_('Property.type8'),
-					9 => Core::_('Property.type9'),
-					10 => Core::_('Property.type10'),
-				);
+				$aListTypes = $this->getTypes();
 
-				// Delete list type if module is not active
-				if (!Core::moduleIsActive('list'))
-				{
-					unset($aListTypes[3]);
-				}
-				// Delete informationsystem type if module is not active
-				if (!Core::moduleIsActive('informationsystem'))
-				{
-					unset($aListTypes[5]);
-				}
-				// Delete shop type if module is not active
-				if (!Core::moduleIsActive('shop'))
-				{
-					unset($aListTypes[12]);
-				}
+				$sRadiogroupOnChangeList = implode(',', array_keys($aListTypes));
 
 				// Селектор с группой
 				$oSelect_Type = Admin_Form_Entity::factory('Select')
@@ -145,7 +178,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->name('type')
 					->value($this->_object->type)
 					->caption(Core::_('Property.type'))
-					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3,4,5,6,7,8,9,10,11,12])")
+					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [{$sRadiogroupOnChangeList}])")
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				// Удаляем стандартный <input>
@@ -311,7 +344,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 				$oAdmin_Form_Entity_Code->html(
-					"<script>radiogroupOnChange('{$windowId}', " . intval($this->_object->type) . ", [0,1,2,3,4,5,6,7,8,9,10,11,12])</script>"
+					"<script>radiogroupOnChange('{$windowId}', " . intval($this->_object->type) . ", [{$sRadiogroupOnChangeList}])</script>"
 				);
 
 				$oMainTab->add($oAdmin_Form_Entity_Code);

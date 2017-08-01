@@ -56,7 +56,9 @@ try
 			// Показывать группы информационных систем в карте сайта
 			->showInformationsystemGroups(Core_Page::instance()->libParams['showInformationsystemGroups'])
 			// Показывать элементы информационных систем в карте сайта
-			->showInformationsystemItems(Core_Page::instance()->libParams['showInformationsystemItems']);
+			->showInformationsystemItems(Core_Page::instance()->libParams['showInformationsystemItems'])
+			// Показывать метки информационных систем
+			->showInformationsystemTags(TRUE);
 	}
 
 	if (Core::moduleIsActive('shop'))
@@ -67,7 +69,9 @@ try
 			// Показывать товары магазина в карте сайта
 			->showShopItems(Core_Page::instance()->libParams['showShopItems'])
 			// Показывать модификации в карте сайта
-			->showModifications(Core_Array::get(Core_Page::instance()->libParams, 'showModifications', 1));
+			->showModifications(Core_Array::get(Core_Page::instance()->libParams, 'showModifications', 1))
+			// Показывать метки магазина
+			->showShopTags(TRUE);
 	}
 
 	$oCore_Sitemap

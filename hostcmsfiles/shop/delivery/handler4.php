@@ -1,7 +1,8 @@
 <?php
-/*
-	Деловые Линии.
-*/
+
+/**
+ * Деловые Линии.
+ */
 class Shop_Delivery_Handler4 extends Shop_Delivery_Handler
 {
 	// Токен обращения к БД КЛАДР

@@ -1,10 +1,9 @@
 <?php
-/*
-	Доставка EMS.
 
-	API: http://www.emspost.ru/ru/corp_clients/dogovor_docements/api/
+/**
+ * Доставка EMS.
+ * API: http://www.emspost.ru/ru/corp_clients/dogovor_docements/api/
 */
-
 class Shop_Delivery_Handler3 extends Shop_Delivery_Handler
 {
 	// Весовой коэффициент (расчет ведется в килограммах)

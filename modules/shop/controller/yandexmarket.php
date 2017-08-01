@@ -595,7 +595,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 							$iModificationOffset += $this->onStep;
 						}
-						while (count($aModifications));
+						while (count($aModifications) == $this->onStep);
 					}
 				}
 			}

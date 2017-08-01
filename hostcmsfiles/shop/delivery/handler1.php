@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Доставка почтой
+ * Доставка Почтой России с расчетом стоимости и различными видами отправлений
  */
 class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 {

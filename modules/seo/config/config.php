@@ -1,6 +1,6 @@
 <?php
 
 return array(
-	'topQueriesLimit' => 100,
-	'topPagesLimit' => 100
+	'topQueriesLimit' => 10,
+	'topPagesLimit' => 10
 );

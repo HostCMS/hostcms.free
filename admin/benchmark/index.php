@@ -456,7 +456,9 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 		$aChanged = array();
 		foreach ($aResult as $aRow)
 		{
-			if (strtolower($aRow['Engine']) != $sNewStorageEngine)
+			if (Core_Array::get($aRow, 'Comment') != 'VIEW'
+				&& strlen($aRow['Engine'])
+				&& strtolower($aRow['Engine']) != $sNewStorageEngine)
 			{
 				try {
 					Core_DataBase::instance()
@@ -498,9 +500,12 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 
 						foreach ($aResult as $aRow)
 						{
-							isset($aTableEngines[$aRow['Engine']])
-								? $aTableEngines[$aRow['Engine']]++
-								: $aTableEngines[$aRow['Engine']] = 1;
+							if (Core_Array::get($aRow, 'Comment') != 'VIEW' && strlen($aRow['Engine']))
+							{
+								isset($aTableEngines[$aRow['Engine']])
+									? $aTableEngines[$aRow['Engine']]++
+									: $aTableEngines[$aRow['Engine']] = 1;
+							}
 						}
 
 						asort($aTableEngines);

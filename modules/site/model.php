@@ -22,6 +22,7 @@ class Site_Model extends Core_Entity
 	/**
 	 * Backend property
 	 * @var int
+	 * @var int
 	 */
 	public $domains = 1;
 
@@ -255,8 +256,7 @@ class Site_Model extends Core_Entity
 
 		if (Core::moduleIsActive('seo'))
 		{
-			$this->Seos->deleteAll(FALSE);
-			$this->Seo_Queries->deleteAll(FALSE);
+			$this->Seo_Sites->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('shop'))
@@ -294,11 +294,6 @@ class Site_Model extends Core_Entity
 		$this->User_Groups->deleteAll(FALSE);
 		$this->User_Group_Action_Accesses->deleteAll(FALSE);
 		$this->User_Modules->deleteAll(FALSE);
-
-		if (Core::moduleIsActive('seo'))
-		{
-			$this->Seo_Sites->deleteAll(FALSE);
-		}
 
 		// Удаление доп. св-в структуры сайта
 		$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $this->id);
@@ -1183,20 +1178,14 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		if (Core::moduleIsActive('seo'))
+		/*if (Core::moduleIsActive('seo'))
 		{
-			$aSeos = $this->Seos->findAll(FALSE);
-			foreach ($aSeos as $oSeo)
+			$aSeo_Sites = $this->Seo_Sites->findAll(FALSE);
+			foreach ($aSeo_Sites as $oSeo_Site)
 			{
-				$newObject->add($oSeo->copy());
+				$newObject->add($oSeo_Site->copy());
 			}
-
-			$aSeo_Queries = $this->Seo_Queries->findAll(FALSE);
-			foreach ($aSeo_Queries as $oSeo_Query)
-			{
-				$newObject->add($oSeo_Query->copy());
-			}
-		}
+		}*/
 
 		if (Core::moduleIsActive('maillist'))
 		{
