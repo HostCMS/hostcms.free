@@ -537,6 +537,21 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oDocument->datetime = Core_Date::timestamp2sql(time());
 			$oDocument->save();
 
+			if (!$this->_object->document_id)
+			{
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+				?>
+				<script>
+				$('#<?php echo $windowId?> #document_id')
+					.append($("<option></option>")
+						.attr("value", <?php echo htmlspecialchars($oDocument->id)?>)
+						.attr("selected", "selected")
+						.text("<?php echo htmlspecialchars($oDocument->name)?>"))
+				</script>
+				<?php
+			}
+
 			$this->_object->document_id = $oDocument->id;
 			$this->_object->save();
 		}

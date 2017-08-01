@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://38">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -25,7 +25,7 @@
 			</div>
 		</xsl:if>
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/" class="current_page_link">
 				<xsl:value-of select="forum_category/name"/>
@@ -44,37 +44,37 @@
 			<xsl:choose>
 				<!-- Для закрытого форума появляется картинка - форум закрыт -->
 				<xsl:when test="forum_category/closed = 1 and not($moderator = 1)">
-					Только модераторы могут создавать темы и оставлять сообщения.
+					&labelModerator1;
 				</xsl:when>
 				<xsl:when test="forum_category/closed = 0 and not(siteuser/login) and forum_category/allow_guest_posting = 0">
-					Только зарегистрированные пользователи могут создавать темы и оставлять сообщения.
+					&labelModerator0;
 				</xsl:when>
 				<!-- Для открытого форума или, если пользователь - модератор, появляется кнопка добавить тему -->
 				<xsl:otherwise>
 					<p class="button">
-						<a href="{url}{forum_category/@id}/addTopic/">Добавить новую тему</a>
+						<a href="{url}{forum_category/@id}/addTopic/">&labelAddTopic;</a>
 					</p>
 				</xsl:otherwise>
 			</xsl:choose>
 		</div>
 		<xsl:if test = "siteuser/node()">
-			<div style="float: right"><strong><a href="{forums_path}myPosts/">Мои сообщения</a></strong></div>
+			<div style="float: right"><strong><a href="{forums_path}myPosts/">&labelMyPosts;</a></strong></div>
 		</xsl:if>
 		<div style="clear: both; height: 10px"></div>
 
 		<form action="{url}" method="post">
-			<!-- Шапка параметров тем -->
+			
 			<table class="table_forum table_themes">
 				<tr class="row_title_themes">
 					<td align="center" class="theme_td_attribute"></td>
-					<td align="center" class="theme_td_title">Тема</td>
-					<td align="center" class="theme_td_author">Автор</td>
-					<td align="center" class="theme_td_count_answer">Ответов</td>
-					<td align="center" class="theme_td_last_message">Последнее сообщение</td>
+					<td align="center" class="theme_td_title">&labelSubject;</td>
+					<td align="center" class="theme_td_author">&labelAuthor;</td>
+					<td align="center" class="theme_td_count_answer">&labelAnswers;</td>
+					<td align="center" class="theme_td_last_message">&labelLastMessage;</td>
 
 					<xsl:if test="$moderator = 1">
 						<td align="center" class="theme_td_action">
-							<b>Действие</b>
+							<b>&labelAction;</b>
 						</td>
 					</xsl:if>
 
@@ -90,10 +90,10 @@
 		<div class="clearing" style="margin-bottom: 10px"></div>
 
 		<!-- Список модераторов -->
-		<b>Модераторы:</b>
+		<b>&labelModerators;</b>
 		<span>
 			<xsl:choose>
-				<xsl:when test="count(forum_category/moderators/siteuser) = 0">нет.</xsl:when>
+				<xsl:when test="count(forum_category/moderators/siteuser) = 0">&labelNo;</xsl:when>
 				<xsl:otherwise>
 					<xsl:apply-templates select="forum_category/moderators/siteuser"/>
 				</xsl:otherwise>
@@ -106,7 +106,7 @@
 		</div>
 
 		<p>
-			<!-- Строка ссылок на другие страницы информационной системы -->
+			<!-- Pagination -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="limit" select="limit"/>
 				<xsl:with-param name="page" select="page"/>
@@ -122,9 +122,9 @@
 				<td align="center">
 				<xsl:choose>
 					<xsl:when test="siteuser/login/node()">
-						Добро пожаловать, <span class="name_users"><xsl:value-of select="siteuser/login"/></span> !
+						&labelWelcome; <span class="name_users"><xsl:value-of select="siteuser/login"/></span> !
 					</xsl:when>
-					<xsl:otherwise><b>Авторизация</b></xsl:otherwise>
+					<xsl:otherwise><b>&labelAuthorization;</b></xsl:otherwise>
 				</xsl:choose>
 				</td>
 			</tr>
@@ -138,22 +138,22 @@
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="rad1" id="lab1">Зарегистрированный пользователь</label>
+								<label for="rad1" id="lab1">&labelRegistered;</label>
 
 								<input id="rad2" type="radio" name="autoriz" value="new_user" onclick="HideShow('auto', 'new')">
 									<xsl:if test="/forum/quick/node() and /forum/quick='quick'">
 										<xsl:attribute name="checked">checked</xsl:attribute>
 									</xsl:if>
 								</input>
-								<label for="rad2" id="lab2">Новый пользователь</label>
+								<label for="rad2" id="lab2">&labelNewUser;</label>
 
 								<div id="auto" style="margin-left: 0px">
 									<form name="mainform" action="/users/" method="post">
-										Логин:
+										&labelLogin;
 										<input name="login" type="text" value="" />
-										Пароль:
+										&labelPassword;
 										<input name="password" type="password" value="" /><xsl:text> </xsl:text>
-										<input name="apply" class="button" type="submit" value="Войти" />
+										<input name="apply" class="button" type="submit" value="&labelEnter;" />
 										<br />
 										<input type="hidden" name="location" value="{url}{forum_category/@id}/" />
 									</form>
@@ -163,15 +163,15 @@
 									<div class="comment" style="width: 430px">
 										<form name="mainform1" action="/users/registration/" method="post">
 											<div class="row">
-												<div class="caption">Логин<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelLogin;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="text" size="40" value="" name="login" /></div>
 											</div>
 											<div class="row">
-												<div class="caption">Пароль<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelPassword;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="password" size="40" value="" name="password"/></div>
 											</div>
 											<div class="row">
-												<div class="caption">E-mail<sup><font color="red">*</font></sup></div>
+												<div class="caption">&labelEmail;<sup><font color="red">*</font></sup></div>
 												<div class="field"><input type="text" size="40" value="" name="email" /></div>
 											</div>
 
@@ -179,16 +179,16 @@
 											<div class="row">
 												<div class="caption"></div>
 												<div class="field">
-													<img name="captcha" title="Контрольное число" src="/captcha.php?id={captcha_id}&amp;height=30&amp;width=100" class="captcha" id="registerUser"/>
+													<img name="captcha" title="&labelCaptchaId;" src="/captcha.php?id={captcha_id}&amp;height=30&amp;width=100" class="captcha" id="registerUser"/>
 													<div class="captcha">
 														<img src="/images/refresh.png" />
-														<span onclick="$('#registerUser').updateCaptcha('{captcha_id}', 30); return false">Показать другое число</span>
+														<span onclick="$('#registerUser').updateCaptcha('{captcha_id}', 30); return false">&labelUpdateCaptcha;</span>
 													</div>
 												</div>
 											</div>
 											<div class="row">
 												<div class="caption">
-															Контрольное число<sup><font color="red">*</font></sup></div>
+															&labelCaptchaId;<sup><font color="red">*</font></sup></div>
 												<div class="field">
 													<input type="hidden" name="captcha_id" value="{captcha_id}"/>
 													<input type="text" size="15" name="captcha" />
@@ -197,7 +197,7 @@
 											<div class="row">
 												<div class="caption"></div>
 												<div class="field">
-													<input type="submit" class="button" value="Зарегистрироваться" name="apply" />
+													<input type="submit" class="button" value="&labelSignUp;" name="apply" />
 												</div>
 											</div>
 										</form>
@@ -230,7 +230,7 @@
 							</xsl:when>
 							<xsl:otherwise>
 								<div align="center">
-									<a href="/users/">Кабинет пользователя</a>
+									<a href="/users/">&labelAccount;</a>
 								</div>
 							</xsl:otherwise>
 						</xsl:choose>
@@ -240,7 +240,7 @@
 		</table>
 
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/" class="current_page_link">
 				<xsl:value-of select="forum_category/name"/>
@@ -255,25 +255,25 @@
 		<xsl:param name="current_page"/>
 		<xsl:param name="theme_id"/>
 		<xsl:if test="$n &gt; $i">
-			<!-- Определяем адрес ссылки -->
+			<!-- Set $link variable -->
 			<xsl:choose>
 				<!-- Если число страниц меньше 7 и больше 1 -->
 				<xsl:when test="7 &gt; $n">
 					<xsl:variable name="number_link">
 						<xsl:choose>
-							<!-- Если не нулевой уровень -->
+							
 							<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-							<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+							
 							<xsl:otherwise></xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
 
-					<!-- Ставим ссылку на страницу-->
+					<!-- Pagination item -->
 					<a href="{/forum/url}{/forum/forum_category/@id}/{$theme_id}/{$number_link}">
 						<xsl:value-of select="$i + 1"/>
 					</a>
 					<xsl:if test="$n - 1 &gt; $i ">,</xsl:if>
-					<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+					<!-- Recursive Template -->
 					<xsl:call-template name="pages">
 						<xsl:with-param name="i" select="$i + 1"/>
 						<xsl:with-param name="n" select="$n"/>
@@ -318,7 +318,7 @@
 			<xsl:choose><xsl:when test="/forum/forum_category/moderators//siteuser[@id = $current_siteuser_id]/node()">1</xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose>
 		</xsl:when><xsl:otherwise>0</xsl:otherwise></xsl:choose></xsl:variable>
 
-		<!-- Стиль строки -->
+		<!-- Row Style -->
 		<xsl:variable name="color_theme">
 			<xsl:choose>
 				<xsl:when test="(position() mod 2 = 0) and not (($moderator = 1) and (visible = 0))">color_2_theme</xsl:when>
@@ -327,34 +327,34 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		<!-- Отображаем тему если она не скрытая или/и пользвоатель - модератор -->
+		
 		<xsl:if test="($moderator = 1) or (visible = 1)">
 			<tr class="{$color_theme}">
 				<!-- Атрибуты темы -->
 				<td align="center" class="theme_td_attribute">
 					<xsl:if test="closed = 1 and announcement = 0 and new_posts = 1">
-						<img src="/hostcmsfiles/forum/theme_locked_new.gif" title="Закрытая тема с непрочитанными сообщениями" alt="X+"/>
+						<img src="/hostcmsfiles/forum/theme_locked_new.gif" title="&labelThemeLockedNew;" alt="X+"/>
 					</xsl:if>
 					<xsl:if test="closed = 1 and announcement = 0 and new_posts = 0">
-						<img src="/hostcmsfiles/forum/theme_locked.gif" title="Закрытая тема без непрочитанных сообщений" alt="X-"/>
+						<img src="/hostcmsfiles/forum/theme_locked.gif" title="&labelThemeLocked;" alt="X-"/>
 					</xsl:if>
 					<xsl:if test="closed = 0 and announcement = 1 and new_posts = 1">
-						<img src="/hostcmsfiles/forum/theme_notice_new.gif" title="Открытое объявление с непрочитанными сообщениями" alt="O!+"/>
+						<img src="/hostcmsfiles/forum/theme_notice_new.gif" title="&labelThemeNoticeNew;" alt="O!+"/>
 					</xsl:if>
 					<xsl:if test="closed = 0 and announcement = 1 and new_posts = 0">
-						<img src="/hostcmsfiles/forum/theme_notice.gif" title="Открытое объявление без непрочитанных сообщений" alt="O!-"/>
+						<img src="/hostcmsfiles/forum/theme_notice.gif" title="&labelThemeNotice;" alt="O!-"/>
 					</xsl:if>
 					<xsl:if test="closed = 1 and announcement = 1 and new_posts = 1">
-						<img src="/hostcmsfiles/forum/theme_notice_close_new.gif" title="Закрытое объявление с непрочитанными сообщениями" alt="X!+"/>
+						<img src="/hostcmsfiles/forum/theme_notice_close_new.gif" title="&labelThemeNoticeCloseNew;" alt="X!+"/>
 					</xsl:if>
 					<xsl:if test="closed = 1 and announcement = 1 and new_posts = 0">
-						<img src="/hostcmsfiles/forum/theme_notice_close.gif" title="Закрытое объявление без непрочитанных сообщений" alt="X!-"/>
+						<img src="/hostcmsfiles/forum/theme_notice_close.gif" title="&labelThemeNoticeClose;" alt="X!-"/>
 					</xsl:if>
 					<xsl:if test="closed = 0 and announcement = 0 and new_posts = 1">
-						<img src="/hostcmsfiles/forum/theme_new.gif" title="Тема с непрочитанными сообщениями" alt="O+"/>
+						<img src="/hostcmsfiles/forum/theme_new.gif" title="&labelThemeNew;" alt="O+"/>
 					</xsl:if>
 					<xsl:if test="closed = 0 and announcement = 0 and new_posts = 0">
-						<img src="/hostcmsfiles/forum/theme.gif" title="Тема без непрочитанных сообщений" alt="O-"/>
+						<img src="/hostcmsfiles/forum/theme.gif" title="&labelTheme;" alt="O-"/>
 					</xsl:if>
 				</td>
 
@@ -368,7 +368,7 @@
 					</xsl:choose>
 				</xsl:variable>
 
-				<!-- Заголовок темы -->
+				<!-- Topic Subject -->
 				<td class="theme_td_title">
 					<a href="{/forum/url}{/forum/category}/{@id}/" style="{$style_theme_name}">
 						<xsl:value-of select="forum_topic_post/subject"/>
@@ -391,7 +391,7 @@
 						<xsl:when test="forum_topic_post/siteuser/login/node()">
 							<a href="/users/info/{forum_topic_post/siteuser/login}/"><xsl:value-of select="forum_topic_post/siteuser/login"/></a>
 						</xsl:when>
-						<xsl:otherwise>Гость</xsl:otherwise>
+						<xsl:otherwise>&labelGuest;</xsl:otherwise>
 					</xsl:choose>
 
 					<!-- Дата создания темы -->
@@ -412,7 +412,7 @@
 						<xsl:when test="last/forum_topic_post/siteuser/login/node()">
 							<a href="/users/info/{last/forum_topic_post/siteuser/login}/"><xsl:value-of select="last/forum_topic_post/siteuser/login"/></a>
 						</xsl:when>
-						<xsl:otherwise>Гость</xsl:otherwise>
+						<xsl:otherwise>&labelGuest;</xsl:otherwise>
 					</xsl:choose>
 
 					<br/>
@@ -425,33 +425,33 @@
 					<td align="center" class="theme_td_action">
 						<xsl:choose>
 							<!-- Видимость темы -->
-							<xsl:when test="visible = 0"><a href="?visible_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_visible_button.gif" title="Сделать видимой" alt="Показать"/></a> </xsl:when>
-							<xsl:otherwise><a href="?visible_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_hidden_button.gif" title="Сделать невидимой" alt="Скрыть"/></a> </xsl:otherwise>
+							<xsl:when test="visible = 0"><a href="?visible_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_visible_button.gif" title="&labelThemeVisibleButton;" alt="&labelShow;"/></a> </xsl:when>
+							<xsl:otherwise><a href="?visible_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_hidden_button.gif" title="&labelThemeInvisibleButton;" alt="&labelHide;"/></a> </xsl:otherwise>
 						</xsl:choose>
 
 						<!-- Объявление --><xsl:choose>
-							<xsl:when test="announcement = 0"><a href="?notice_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_notice_button.gif" title="Сделать объявлением" alt="Объявление"/></a> </xsl:when>
-							<xsl:otherwise><a href="?notice_topic_id={@id}"><img src="/hostcmsfiles/forum/notice_theme_button.gif" title="Сделать обычной темой" alt="Обычная тема"/></a> </xsl:otherwise>
+							<xsl:when test="announcement = 0"><a href="?notice_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_notice_button.gif" title="&labelThemeNoticeButton;" alt="&labelNotice;"/></a> </xsl:when>
+							<xsl:otherwise><a href="?notice_topic_id={@id}"><img src="/hostcmsfiles/forum/notice_theme_button.gif" title="&labelThemeNormalButton;" alt="&labelNormal;"/></a> </xsl:otherwise>
 						</xsl:choose>
 
 						<!-- Закрыть/открыть -->
 						<xsl:choose>
 							<xsl:when test="closed = 0"><a href="?close_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_lock_button.gif" title="Закрыть" alt="Закрыть"/></a> </xsl:when>
-							<xsl:otherwise><a href="?close_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_unlock_button.gif" title="Открыть" alt="Открыть"/></a> </xsl:otherwise>
+							<xsl:otherwise><a href="?close_topic_id={@id}"><img src="/hostcmsfiles/forum/theme_unlock_button.gif" title="&labelUnlock;" alt="&labelUnlock;"/></a> </xsl:otherwise>
 						</xsl:choose>
 
 						<xsl:variable name="current_page">
 							<xsl:choose><xsl:when test="/forum/page > 0">page-<xsl:value-of select="/forum/page + 1" />/</xsl:when><xsl:otherwise></xsl:otherwise></xsl:choose>
 						</xsl:variable>
 						<!-- Редактировать -->
-						<a href="{/forum/url}{/forum/forum_category/@id}/editTopic-{@id}/{$current_page}"><img src="/hostcmsfiles/forum/edit.gif" title="Редактировать" alt="Редактировать"/></a> <!-- Удалить --><a href="?delete_topic_id={@id}" onclick="return confirm('Вы уверены, что хотите удалить тему?')"><img src="/hostcmsfiles/forum/delete.gif" title="Удалить" alt="Удалить"/></a>
+						<a href="{/forum/url}{/forum/forum_category/@id}/editTopic-{@id}/{$current_page}"><img src="/hostcmsfiles/forum/edit.gif" title="&labelEdit;" alt="&labelEdit;"/></a> <!-- Удалить --><a href="?delete_topic_id={@id}" onclick="return confirm('&labelDeleteAlert;')"><img src="/hostcmsfiles/forum/delete.gif" title="&labelDelete;" alt="&labelDelete;"/></a>
 					</td>
 				</xsl:if>
 			</tr>
 		</xsl:if>
 	</xsl:template>
 
-	<!-- Цикл для вывода строк ссылок -->
+	<!-- Pagination -->
 	<xsl:template name="for">
 		<xsl:param name="i" select="0"/>
 		<xsl:param name="limit"/>
@@ -462,12 +462,12 @@
 		<xsl:variable name="n" select="$count_items div $limit"/>
 
 
-		<!-- Ссылка, для которой дописываются суффиксы page-XX/ -->
+		<!-- Current page link -->
 		<xsl:variable name="link">
 			<xsl:value-of select="/forum/url"/>
 			<xsl:value-of select="/forum/forum_category/@id"/>/</xsl:variable>
 
-		<!-- Считаем количество выводимых ссылок перед текущим элементом -->
+		<!-- Links before current -->
 		<xsl:variable name="pre_count_page">
 			<xsl:choose>
 				<xsl:when test="$page &gt; ($n - (round($visible_pages div 2) - 1))">
@@ -479,7 +479,7 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		<!-- Считаем количество выводимых ссылок после текущего элемента -->
+		<!-- Links after current -->
 		<xsl:variable name="post_count_page">
 			<xsl:choose>
 				<xsl:when test="0 &gt; $page - (round($visible_pages div 2) - 1)">
@@ -499,20 +499,20 @@
 		</xsl:variable>
 
 		<xsl:if test="$count_items &gt; $limit and $n &gt; $i">
-			<!-- Ставим ссылку на страницу-->
+			<!-- Pagination item -->
 			<xsl:if test="$i != $page">
 
-				<!-- Определяем адрес ссылки -->
+				<!-- Set $link variable -->
 				<xsl:variable name="number_link">
 					<xsl:choose>
-						<!-- Если не нулевой уровень -->
+						
 						<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-						<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
 
-				<!-- Выводим ссылку на первую страницу -->
+				<!-- First pagination item -->
 				<xsl:if test="$page - $pre_count_page &gt; 0 and $i = 0">
 					<a href="{$link}" class="page_link" style="text-decoration: none;">←</a>
 				</xsl:if>
@@ -520,7 +520,7 @@
 				<xsl:choose>
 					<xsl:when test="$i &gt;= ($page - $pre_count_page) and ($page + $post_count_page) &gt;= $i">
 
-						<!-- Выводим ссылки на видимые страницы -->
+						<!-- Pagination item -->
 						<a href="{$link}{$number_link}" class="page_link">
 							<xsl:value-of select="$i + 1"/>
 						</a>
@@ -529,11 +529,11 @@
 					</xsl:otherwise>
 				</xsl:choose>
 
-				<!-- Выводим ссылку на последнюю страницу -->
+				<!-- Last pagination item -->
 				<xsl:if test="$i+1 &gt;= $n and $n &gt; ($page + 1 + $post_count_page)">
 					<xsl:choose>
 						<xsl:when test="$n &gt; round($n)">
-							<!-- Выводим ссылку на последнюю страницу -->
+							<!-- Last pagination item -->
 							<a href="{$link}page-{round($n+1)}/" class="page_link" style="text-decoration: none;">→</a>
 						</xsl:when>
 						<xsl:otherwise>
@@ -543,14 +543,14 @@
 				</xsl:if>
 			</xsl:if>
 
-			<!-- Не ставим ссылку на страницу-->
+			<!-- Current pagination item -->
 			<xsl:if test="$i = $page">
 				<span class="current">
 					<xsl:value-of select="$i+1"/>
 				</span>
 			</xsl:if>
 
-			<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+			<!-- Recursive Template -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="i" select="$i + 1"/>
 				<xsl:with-param name="limit" select="$limit"/>

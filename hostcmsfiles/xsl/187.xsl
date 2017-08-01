@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://187">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<xsl:template match="shop">
 		<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="shop">
 			<xsl:value-of select="name"/>
@@ -18,12 +18,12 @@
 				</div>
 			</xsl:when>
 			<xsl:otherwise>
-				<h2>В данном магазине нет объявлений, доступных для редактирования.</h2>
+				<h2>&labelNone;</h2>
 			</xsl:otherwise>
 		</xsl:choose>
 
 		<xsl:if test="show_button_add_advertisement/node() and show_button_add_advertisement = 1">
-			<p><a href="{path}">Добавить объявление</a></p>
+			<p><a href="{path}">&labelAddItem;</a></p>
 		</xsl:if>
 
 		<xsl:if test="total &gt; 0 and limit &gt; 0">
@@ -37,7 +37,7 @@
 				<xsl:otherwise><xsl:value-of select="$visible_pages"/></xsl:otherwise>
 			</xsl:choose></xsl:variable>
 
-			<!-- Считаем количество выводимых ссылок перед текущим элементом -->
+			<!-- Links before current -->
 			<xsl:variable name="pre_count_page"><xsl:choose>
 				<xsl:when test="page - (floor($real_visible_pages div 2)) &lt; 0">
 					<xsl:value-of select="page"/>
@@ -57,7 +57,7 @@
 				</xsl:otherwise>
 			</xsl:choose></xsl:variable>
 
-			<!-- Считаем количество выводимых ссылок после текущего элемента -->
+			<!-- Links after current -->
 			<xsl:variable name="post_count_page"><xsl:choose>
 				<xsl:when test="0 &gt; page - (floor($real_visible_pages div 2) - 1)">
 					<xsl:value-of select="$real_visible_pages - page - 1"/>
@@ -90,7 +90,7 @@
 			<div style="clear: both"></div>
 		</xsl:if>
 	</xsl:template>
-	
+
 	<xsl:template match="shop_item">
 		<div class="table_row">
 			<div class="date" style="display: table-cell">
@@ -98,20 +98,20 @@
 				<xsl:variable name="month_year" select="substring-after(datetime, '.')"/>
 				<xsl:variable name="month" select="substring-before($month_year, '.')"/>
 				<xsl:choose>
-					<xsl:when test="$month = 1"> января </xsl:when>
-					<xsl:when test="$month = 2"> февраля </xsl:when>
-					<xsl:when test="$month = 3"> марта </xsl:when>
-					<xsl:when test="$month = 4"> апреля </xsl:when>
-					<xsl:when test="$month = 5"> мая </xsl:when>
-					<xsl:when test="$month = 6"> июня </xsl:when>
-					<xsl:when test="$month = 7"> июля </xsl:when>
-					<xsl:when test="$month = 8"> августа </xsl:when>
-					<xsl:when test="$month = 9"> сентября </xsl:when>
-					<xsl:when test="$month = 10"> октября </xsl:when>
-					<xsl:when test="$month = 11"> ноября </xsl:when>
-					<xsl:otherwise> декабря </xsl:otherwise>
+					<xsl:when test="$month = 1"> &labelMonth1; </xsl:when>
+					<xsl:when test="$month = 2"> &labelMonth2; </xsl:when>
+					<xsl:when test="$month = 3"> &labelMonth3; </xsl:when>
+					<xsl:when test="$month = 4"> &labelMonth4; </xsl:when>
+					<xsl:when test="$month = 5"> &labelMonth5; </xsl:when>
+					<xsl:when test="$month = 6"> &labelMonth6; </xsl:when>
+					<xsl:when test="$month = 7"> &labelMonth7; </xsl:when>
+					<xsl:when test="$month = 8"> &labelMonth8; </xsl:when>
+					<xsl:when test="$month = 9"> &labelMonth9; </xsl:when>
+					<xsl:when test="$month = 10"> &labelMonth10; </xsl:when>
+					<xsl:when test="$month = 11"> &labelMonth11; </xsl:when>
+					<xsl:otherwise> &labelMonth12; </xsl:otherwise>
 				</xsl:choose>
-				<br/> в
+				<br/> &labelIn;
 				<!-- Время -->
 				<xsl:variable name="full_time" select="substring-after($month_year, ' ')"/>
 				<b><xsl:value-of select="substring($full_time, 1, 5)" /><xsl:text> </xsl:text></b>
@@ -142,12 +142,12 @@
 			</div>
 			<div style="width: 50px; text-decoration: none;">
 				<a href="{/shop/structure/link}{@id}/"><img src="/admin/images/edit.gif"/></a>
-				<a href="{/shop/structure/link}{@id}/delete/" onclick="return confirm('Вы действительно хотите удалить объявление?');"><img src="/admin/images/delete.gif"/></a>
+				<a href="{/shop/structure/link}{@id}/delete/" onclick="return confirm('&labelDeleteAlert;');"><img src="/admin/images/delete.gif"/></a>
 			</div>
 		</div>
-	</xsl:template>	
-	
-	<!-- Цикл для вывода строк ссылок -->
+	</xsl:template>
+
+	<!-- Pagination -->
 	<xsl:template name="for">
 
 		<xsl:param name="limit"/>
@@ -179,46 +179,46 @@
 		</xsl:if>
 
 		<xsl:if test="$items_count &gt; $limit and ($page + $post_count_page + 1) &gt; $i">
-			<!-- Определяем адрес ссылки -->
+			<!-- Set $link variable -->
 			<xsl:variable name="number_link"><xsl:if test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:if></xsl:variable>
 
-			<!-- Выводим ссылку на первую страницу -->
+			<!-- First pagination item -->
 			<xsl:if test="$page - $pre_count_page &gt; 0 and $i = $start_page">
 				<a href="{/shop/structure/link}" class="page_link" style="text-decoration: none;">←</a>
 			</xsl:if>
 
-			<!-- Ставим ссылку на страницу-->
+			<!-- Pagination item -->
 			<xsl:if test="$i != $page">
 				<xsl:if test="($page - $pre_count_page) &lt;= $i and $i &lt; $n">
-					<!-- Выводим ссылки на видимые страницы -->
+					<!-- Pagination item -->
 					<a href="{/shop/structure/link}{$number_link}" class="page_link">
 						<xsl:value-of select="$i + 1"/>
 					</a>
 				</xsl:if>
 
-				<!-- Выводим ссылку на последнюю страницу -->
+				<!-- Last pagination item -->
 				<xsl:if test="$i+1 &gt;= ($page + $post_count_page + 1) and $n &gt; ($page + 1 + $post_count_page)">
-					<!-- Выводим ссылку на последнюю страницу -->
+					<!-- Last pagination item -->
 					<a href="{/shop/structure/link}page-{$n}/" class="page_link" style="text-decoration: none;">→</a>
 				</xsl:if>
 			</xsl:if>
 
-			<!-- Ссылка на предыдущую страницу для Ctrl + влево -->
+			<!-- Ctrl+left link -->
 			<xsl:if test="$page != 0 and $i = $page"><xsl:variable name="prev_number_link"><xsl:if test="$page &gt; 1">page-<xsl:value-of select="$i"/>/</xsl:if></xsl:variable><a href="{/shop/structure/link}{$prev_number_link}" id="id_prev"></a></xsl:if>
 
-			<!-- Ссылка на следующую страницу для Ctrl + вправо -->
+			<!-- Ctrl+right link -->
 			<xsl:if test="($n - 1) > $page and $i = $page">
 				<a href="{/shop/structure/link}page-{$page+2}/" id="id_next"></a>
 			</xsl:if>
 
-			<!-- Не ставим ссылку на страницу-->
+			<!-- Current pagination item -->
 			<xsl:if test="$i = $page">
 				<span class="current">
 					<xsl:value-of select="$i+1"/>
 				</span>
 			</xsl:if>
 
-			<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+			<!-- Recursive Template -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="i" select="$i + 1"/>
 				<xsl:with-param name="limit" select="$limit"/>

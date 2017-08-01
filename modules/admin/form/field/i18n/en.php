@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Administration center form fields',
@@ -28,6 +28,7 @@ return array(
 	'name' => '<acronym title="Key field">Key field</acronym>',
 	'sorting' => '<acronym title="Field sort order">Sort order</acronym>',
 	'type' => '<acronym title="Field type (input field, drop-down list, checkbox etc.)">Field type</acronym>',
+	'view' => 'View',
 	'format' => '<acronym title="Data display format line. Format line consists of commands: general characters (except for %) that are copied to the resulting line and transformation descriptors each of which is substituted by one of the parameters">Display format</acronym>',
 	'allow_sorting' => '<acronym title="Enable alphabetical sorting">Enable sorting</acronym>',
 	'allow_filter' => '<acronym title="Enable field values filter">Enable filter</acronym>',
@@ -60,6 +61,10 @@ return array(
 	'field_type_image_link' => 'Picture-link',
 	'field_type_image_list' => 'List',
 	'field_type_image_callback_function' => 'Calculated field (Function callback is used)',
+	
+	// Отображение	
+	'field_view_column' => 'Column',
+	'field_view_filter_element' => 'Filter',
 
 	// Список полей.
 	'show_form_fields_title' => 'Administration center form fields "%s"',

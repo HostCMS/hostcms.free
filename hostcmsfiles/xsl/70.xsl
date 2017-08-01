@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://70">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -13,10 +13,10 @@
 	</xsl:template>
 	
 	<xsl:template match="shop">
-		<h1>Продавцы</h1>
+		<h1>&labelTitle;</h1>
 		
 		<xsl:if test="count(shop_seller) = 0">
-			<div id="error">Продавцы не найдены!</div>
+			<div id="error">&labelNone;</div>
 		</xsl:if>
 		
 		<table cellspacing="0" cellpadding="0" border="0" width="100%">
@@ -25,7 +25,7 @@
 			</tr>
 		</table>
 		
-		<!-- Ссылка, для которой дописываются суффиксы page-XX/ -->
+		<!-- Current page link -->
 		<xsl:variable name="link"><xsl:value-of select="/shop/url"/>sellers/</xsl:variable>
 		
 		<xsl:call-template name="for">
@@ -53,7 +53,7 @@
 		</xsl:if>
 	</xsl:template>
 	
-	<!-- Цикл для вывода строк ссылок -->
+	<!-- Pagination -->
 	<xsl:template name="for">
 		<xsl:param name="i" select="0"/>
 		<xsl:param name="prefix">page</xsl:param>
@@ -68,7 +68,7 @@
 		<!-- Заносим в переменную $parent_group_id идентификатор текущей группы -->
 		<xsl:variable name="parent_group_id" select="/document/parent_group_id"/>
 		
-		<!-- Считаем количество выводимых ссылок перед текущим элементом -->
+		<!-- Links before current -->
 		<xsl:variable name="pre_count_page">
 			<xsl:choose>
 				<xsl:when test="$page &gt; ($n - (round($visible_pages div 2) - 1))">
@@ -80,7 +80,7 @@
 			</xsl:choose>
 		</xsl:variable>
 		
-		<!-- Считаем количество выводимых ссылок после текущего элемента -->
+		<!-- Links after current -->
 		<xsl:variable name="post_count_page">
 			<xsl:choose>
 				<xsl:when test="0 &gt; $page - (round($visible_pages div 2) - 1)">
@@ -110,27 +110,27 @@
 		
 		<xsl:if test="$total &gt; $limit and $n &gt; $i">
 			
-			<!-- Определяем адрес ссылки -->
+			<!-- Set $link variable -->
 			<xsl:variable name="number_link">
 				<xsl:choose>
-					<!-- Если не нулевой уровень -->
+					
 					<xsl:when test="$i != 0">
 						<xsl:value-of select="$prefix"/>-<xsl:value-of select="$i + 1"/>/</xsl:when>
-					<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+					
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
 			
-			<!-- Ставим ссылку на страницу-->
+			<!-- Pagination item -->
 			<xsl:if test="$i != $page">
-				<!-- Выводим ссылку на первую страницу -->
+				<!-- First pagination item -->
 				<xsl:if test="$page - $pre_count_page &gt; 0 and $i = 0">
 					<a href="{$link}" class="page_link" style="text-decoration: none;">←</a>
 				</xsl:if>
 				
 				<xsl:choose>
 					<xsl:when test="$i &gt;= ($page - $pre_count_page) and ($page + $post_count_page) &gt;= $i">
-						<!-- Выводим ссылки на видимые страницы -->
+						<!-- Pagination item -->
 						<a href="{$link}{$number_link}" class="page_link">
 							<xsl:value-of select="$i + 1"/>
 						</a>
@@ -138,11 +138,11 @@
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 				
-				<!-- Выводим ссылку на последнюю страницу -->
+				<!-- Last pagination item -->
 				<xsl:if test="$i+1 &gt;= $n and $n &gt; ($page + 1 + $post_count_page)">
 					<xsl:choose>
 						<xsl:when test="$n &gt; round($n)">
-							<!-- Выводим ссылку на последнюю страницу -->
+							<!-- Last pagination item -->
 							<a href="{$link}{$prefix}-{round($n+1)}/" class="page_link" style="text-decoration: none;">→</a>
 						</xsl:when>
 						<xsl:otherwise>
@@ -152,13 +152,13 @@
 				</xsl:if>
 			</xsl:if>
 			
-			<!-- Ссылка на предыдущую страницу для Ctrl + влево -->
+			<!-- Ctrl+left link -->
 			<xsl:if test="$page != 0 and $i = $page">
 				<xsl:variable name="prev_number_link">
 					<xsl:choose>
-						<!-- Если не нулевой уровень -->
+						
 						<xsl:when test="$page &gt; 1">page-<xsl:value-of select="$i"/>/</xsl:when>
-						<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
@@ -166,19 +166,19 @@
 				<a href="{$link}{$prev_number_link}" id="id_prev"></a>
 			</xsl:if>
 			
-			<!-- Ссылка на следующую страницу для Ctrl + вправо -->
+			<!-- Ctrl+right link -->
 			<xsl:if test="($n - 1) &gt; $page and $i = $page">
 				<a href="{$link}page-{$page+2}/" id="id_next"></a>
 			</xsl:if>
 			
-			<!-- Не ставим ссылку на страницу-->
+			<!-- Current pagination item -->
 			<xsl:if test="$i = $page">
 				<span class="current">
 					<xsl:value-of select="$i+1"/>
 				</span>
 			</xsl:if>
 			
-			<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+			<!-- Recursive Template -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="i" select="$i + 1"/>
 				<xsl:with-param name="prefix" select="$prefix"/>

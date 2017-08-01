@@ -93,7 +93,7 @@ if (Core_Array::getRequest('compare'))
 }
 
 // Избранное
-if (Core_Array::getRequest('favorite'))
+/*if (Core_Array::getRequest('favorite'))
 {
 	$shop_item_id = intval(Core_Array::getRequest('favorite'));
 
@@ -131,7 +131,7 @@ if (Core_Array::getRequest('favorite'))
 		->showBody();
 
 	exit();
-}
+}*/
 
 // Viewed items
 if ($Shop_Controller_Show->item && $Shop_Controller_Show->viewed)
@@ -240,9 +240,17 @@ if (!is_null($Shop_Controller_Show->tag) && Core::moduleIsActive('tag'))
 	$oTag = Core_Entity::factory('Tag')->getByPath($Shop_Controller_Show->tag);
 	if ($oTag)
 	{
-		$aTitle[] = $oTag->seo_title != '' ? $oTag->seo_title : Core::_('Shop.tag', $oTag->name);
-		$aDescription[] = $oTag->seo_description != '' ? $oTag->seo_description : $oTag->name;
-		$aKeywords[] = $oTag->seo_keywords != '' ? $oTag->seo_keywords : $oTag->name;
+		$aTitle[] = $oTag->seo_title != ''
+			? $oTag->seo_title
+			: Core::_('Shop.tag', $oTag->name);
+
+		$aDescription[] = $oTag->seo_description != ''
+			? $oTag->seo_description
+			: $oTag->name;
+
+		$aKeywords[] = $oTag->seo_keywords != ''
+			? $oTag->seo_keywords
+			: $oTag->name;
 	}
 }
 
@@ -250,18 +258,23 @@ if ($Shop_Controller_Show->group)
 {
 	$oShop_Group = Core_Entity::factory('Shop_Group', $Shop_Controller_Show->group);
 
+	$bGroupTitle = $oShop_Group->seo_title != '';
+	$bGroupDescription = $oShop_Group->seo_description != '';
+	$bGroupKeywords = $oShop_Group->seo_keywords != '';
+
+	if (!$Shop_Controller_Show->item)
+	{
+		$bGroupTitle && Core_Page::instance()->title($oShop_Group->seo_title);
+		$bGroupDescription && Core_Page::instance()->description($oShop_Group->seo_description);
+		$bGroupKeywords && Core_Page::instance()->keywords($oShop_Group->seo_keywords);
+	}
+
 	do {
-		$aTitle[] = $oShop_Group->seo_title != ''
-			? $oShop_Group->seo_title
-			: $oShop_Group->name;
+		($Shop_Controller_Show->item || !$bGroupTitle) && $aTitle[] = $oShop_Group->name;
 
-		$aDescription[] = $oShop_Group->seo_description != ''
-			? $oShop_Group->seo_description
-			: $oShop_Group->name;
+		($Shop_Controller_Show->item || !$bGroupDescription) && $aDescription[] = $oShop_Group->name;
 
-		$aKeywords[] = $oShop_Group->seo_keywords != ''
-			? $oShop_Group->seo_keywords
-			: $oShop_Group->name;
+		($Shop_Controller_Show->item || !$bGroupKeywords) && $aKeywords[] = $oShop_Group->name;
 
 	} while($oShop_Group = $oShop_Group->getParent());
 }
@@ -270,17 +283,17 @@ if ($Shop_Controller_Show->item)
 {
 	$oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
 
-	$aTitle[] = $oShop_Item->seo_title != ''
-		? $oShop_Item->seo_title
-		: $oShop_Item->name;
+	$oShop_Item->seo_title != ''
+		? Core_Page::instance()->title($oShop_Item->seo_title)
+		: $aTitle[] = $oShop_Item->name;
 
-	$aDescription[] = $oShop_Item->seo_description != ''
-		? $oShop_Item->seo_description
-		: $oShop_Item->name;
+	$oShop_Item->seo_description != ''
+		? Core_Page::instance()->description($oShop_Item->seo_description)
+		: $aDescription[] = $oShop_Item->name;
 
-	$aKeywords[] = $oShop_Item->seo_keywords != ''
-		? $oShop_Item->seo_keywords
-		: $oShop_Item->name;
+	$oShop_Item->seo_keywords != ''
+		? Core_Page::instance()->keywords($oShop_Item->name)
+		: $aKeywords[] = $oShop_Item->name;
 }
 
 if ($Shop_Controller_Show->producer)

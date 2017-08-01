@@ -6,6 +6,8 @@ $oShop = $Shop_Cart_Controller_Show->getEntity();
 
 Shop_Payment_System_Handler::checkAfterContent($oShop);
 
+Shop_Delivery_Handler::checkAfterContent($oShop);
+
 // ------------------------------------------------
 // Вывод информации о статусе платежа после его совершения и перенаправления с платежной системы
 // ------------------------------------------------
@@ -271,14 +273,14 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			// хранится стоимость доставки, налог, название специфичного условия доставки
 			list($shopDeliveryInSession) = explode('#', $shop_delivery_condition_id);
 
-			if (isset($_SESSION['hostcmsOrder']['deliveries'][$shopDeliveryInSession]))
-			{
-				$aTmp = $_SESSION['hostcmsOrder']['deliveries'][$shopDeliveryInSession];
+			list($shop_delivery_id, $position) = explode('-', $shopDeliveryInSession);
 
-				$_SESSION['hostcmsOrder']['shop_delivery_id'] = $aTmp['shop_delivery_id'];
-				$_SESSION['hostcmsOrder']['shop_delivery_price'] = $aTmp['price'];
-				$_SESSION['hostcmsOrder']['shop_delivery_rate'] = $aTmp['rate'];
-				$_SESSION['hostcmsOrder']['shop_delivery_name'] = $aTmp['name'];
+			$oShop_Delivery = $oShop->Shop_Deliveries->getById($shop_delivery_id);
+
+			if (!is_null($oShop_Delivery))
+			{
+				$oShop_Delivery_Handler = Shop_Delivery_Handler::factory($oShop_Delivery);
+				$oShop_Delivery_Handler->process($position);
 			}
 		}
 
@@ -305,10 +307,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 				= intval(Core_Array::getPost('shop_payment_system_id', 0));
 
 			// Оплата бонусами с лицевого счета
-			if (Core_Array::getPost('partial_payment_by_personal_account', 0))
-			{
-				$_SESSION['hostcmsOrder']['partial_payment_by_personal_account'] = TRUE;
-			}
+			$_SESSION['hostcmsOrder']['partial_payment_by_personal_account'] = Core_Array::getPost('partial_payment_by_personal_account', 0);
 
 			// Если выбрана платежная система
 			if ($_SESSION['hostcmsOrder']['shop_payment_system_id'])

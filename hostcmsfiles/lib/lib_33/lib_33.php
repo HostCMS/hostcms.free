@@ -2,7 +2,7 @@
 if (!Core::moduleIsActive('helpdesk'))
 {
 	?>
-	<h1>Системы обработки запросов &madsh; HelpDesk</h1>
+	<h1>Системы обработки запросов &mdash; HelpDesk</h1>
 	<p>Функционал недоступен, приобретите более старшую редакцию.</p>
 	<p>Модуль &laquo;<a href="http://www.hostcms.ru/hostcms/modules/helpdesk/">Системы обработки запросов</a>&raquo; доступен в редакции &laquo;<a href="http://www.hostcms.ru/hostcms/editions/corporation/">Корпорация</a>&raquo;.</p>
 	<?php

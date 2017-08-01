@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://94">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<!-- ОтображениеБаннера -->
-	
+
 	<xsl:template match="/">
 		<xsl:choose>
 			<xsl:when test="advertisement_group/node()">
@@ -18,39 +18,39 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<xsl:template match="advertisement">
-		<!-- Определяем высоту баннера -->
+		<!-- Check banner's height -->
 	<xsl:variable name="height"><xsl:if test="height != 0">height: <xsl:value-of select="height"/>px;</xsl:if></xsl:variable>
-		
-		<!-- Определяем ширину баннера -->
+
+		<!-- Check banner's width -->
 	<xsl:variable name="width"><xsl:if test="width != 0">width: <xsl:value-of select="width"/>px;</xsl:if></xsl:variable>
-		
-		<!-- В зависимости от типа баннера отображаем соответствующий код -->
+
+		<!-- Check banner's type -->
 		<xsl:choose>
-			<!-- Графический баннер -->
+			<!-- Image -->
 			<xsl:when test="type = 0">
 				<div>
 					<xsl:if test="$height != '' or $width != ''">
 						<xsl:attribute name="style"><xsl:value-of select="$height" /><xsl:value-of select="$width" /></xsl:attribute>
 					</xsl:if>
-					
+
 					<xsl:choose>
-						<!-- Задана ссылка -->
+						<!-- Link -->
 						<xsl:when test="href != '' ">
 							<a href="/showbanner/?id={advertisement_show/@id}">
 								<img src="{dir}{source}" alt="" />
 							</a>
 						</xsl:when>
-						<!-- Для баннера не задана ссылка -->
+						<!-- Just image -->
 						<xsl:otherwise>
 							<img src="{dir}{source}" alt="" />
 						</xsl:otherwise>
 					</xsl:choose>
 				</div>
 			</xsl:when>
-			
-			<!-- Текстовый баннер -->
+
+			<!-- Text -->
 			<xsl:when test="type = 1">
 				<div>
 					<xsl:if test="$height != '' or $width != ''">
@@ -59,8 +59,8 @@
 					<xsl:value-of select="html" disable-output-escaping="yes"/>
 				</div>
 			</xsl:when>
-			
-			<!-- Всплывающий баннер -->
+
+			<!-- Popup -->
 			<xsl:when test="type = 2">
 				<SCRIPT language = "JavaScript">
 					<xsl:comment>
@@ -76,7 +76,7 @@
 					</xsl:comment>
 				</SCRIPT>
 			</xsl:when>
-			<!-- Flash-баннер -->
+			<!-- Flash -->
 			<xsl:when test="type = 3">
 				<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" width="{width}" height="{height}">
 					<param name="movie" value="{dir}{source}"/>

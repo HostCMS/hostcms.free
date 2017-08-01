@@ -2103,28 +2103,31 @@ class Shop_Item_Model extends Core_Entity
 				//$this->addEntities($aProperty_Values);
 			}
 
-			$aListIDs = array();
-
-			foreach ($aProperty_Values as $oProperty_Value)
+			if (Core::moduleIsActive('list'))
 			{
-				// List_Items
-				if ($oProperty_Value->Property->type == 3)
+				$aListIDs = array();
+
+				foreach ($aProperty_Values as $oProperty_Value)
 				{
-					$aListIDs[] = $oProperty_Value->value;
+					// List_Items
+					if ($oProperty_Value->Property->type == 3)
+					{
+						$aListIDs[] = $oProperty_Value->value;
+					}
+
+					$this->addEntity($oProperty_Value);
 				}
 
-				$this->addEntity($oProperty_Value);
-			}
+				// Cache necessary List_Items
+				if (count($aListIDs))
+				{
+					$oList_Items = Core_Entity::factory('List_Item');
+					$oList_Items->queryBuilder()
+						->where('id', 'IN', $aListIDs)
+						->clearOrderBy();
 
-			// Cache necessary List_Items
-			if (count($aListIDs))
-			{
-				$oList_Items = Core_Entity::factory('List_Item');
-				$oList_Items->queryBuilder()
-					->where('id', 'IN', $aListIDs)
-					->clearOrderBy();
-
-				$oList_Items->findAll(TRUE);
+					$oList_Items->findAll(TRUE);
+				}
 			}
 		}
 

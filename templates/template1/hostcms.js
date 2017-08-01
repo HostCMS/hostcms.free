@@ -2,91 +2,69 @@
 	// Функции без создания коллекции
 	jQuery.extend({
 		addIntoCart: function(path, shop_item_id, count){
-			$.clientRequest({path: path + '?add=' + shop_item_id + '&count=' + count, 'callBack': $.addIntoCartCallback, context: $('#little_cart')});
+			jQuery.clientRequest({
+				path: path,
+				data: {add: shop_item_id, count: count},
+				callBack: jQuery.addIntoCartCallback,
+				context: jQuery('#little_cart')
+			});
 			return false;
 		},
 		addIntoCartCallback: function(data, status, jqXHR)
 		{
-			$.loadingScreen('hide');
-			jQuery(this).html(data);
+			jQuery.loadingScreen('hide');
+			jQuery(this).replaceWith(data);
 		},
 		addCompare: function(path, shop_item_id, object){
-			$(object).toggleClass('current');
-			$.clientRequest({path: path + '?compare=' + shop_item_id, 'callBack': function(){
-					$.loadingScreen('hide');
-				}, context: $(object)});
-			$('#compareButton').show();
+			jQuery(object).toggleClass('current');
+			jQuery.clientRequest({path: path + '?compare=' + shop_item_id, 'callBack': function(){
+					jQuery.loadingScreen('hide');
+				}, context: jQuery(object)});
+			jQuery('#compareButton').show();
 			return false;
 		},
 		addFavorite: function(path, shop_item_id, object){
-			$(object).toggleClass('favorite_current');
-			$.clientRequest({path: path + '?favorite=' + shop_item_id, 'callBack': function(){
-					$.loadingScreen('hide');
-				}, context: $(object)});
-			$('#favoriteButton').show();
+			jQuery(object).toggleClass('favorite_current');
+
+			jQuery.clientRequest({
+				path: path,
+				data: {favorite: shop_item_id},
+				callBack: jQuery.addFavoriteCallback,
+				context: jQuery('#little_favorite')
+			});
+
 			return false;
+		},
+		addFavoriteCallback: function(data, status, jqXHR)
+		{
+			jQuery.loadingScreen('hide');
+			jQuery(this).replaceWith(data);
 		},
 
 		sendVote: function(id, vote, entity_type){
-			$.clientRequest({path: '?id=' + id + '&vote=' + vote + '&entity_type=' + entity_type , 'callBack': $.sendVoteCallback});
+			jQuery.clientRequest({path: '?id=' + id + '&vote=' + vote + '&entity_type=' + entity_type , 'callBack': jQuery.sendVoteCallback});
 			return false;
 		},
 		sendVoteCallback: function(data, status)
 		{
-			$.loadingScreen('hide');
-			$('#' + data.entity_type + '_id_' + data.item).removeClass("up down");
+			jQuery.loadingScreen('hide');
+			jQuery('#' + data.entity_type + '_id_' + data.item).removeClass("up down");
 			if (!data.delete_vote)
 			{
 				data.value == 1
-				? $('#' + data.entity_type + '_id_' + data.item).addClass("up")
-				: $('#' + data.entity_type + '_id_' + data.item).addClass("down");
-			}			
+				? jQuery('#' + data.entity_type + '_id_' + data.item).addClass("up")
+				: jQuery('#' + data.entity_type + '_id_' + data.item).addClass("down");
+			}
 
-			$('#' + data.entity_type + '_rate_' + data.item).text(data.rate);
-			$('#' + data.entity_type + '_likes_' + data.item).text(data.likes);
-			$('#' + data.entity_type + '_dislikes_' + data.item).text(data.dislikes);
+			jQuery('#' + data.entity_type + '_rate_' + data.item).text(data.rate);
+			jQuery('#' + data.entity_type + '_likes_' + data.item).text(data.likes);
+			jQuery('#' + data.entity_type + '_dislikes_' + data.item).text(data.dislikes);
 		}
 	});
-})(jQuery);
 
-/**
-* Склонение после числительных
-* int number числительное
-* int nominative Именительный падеж
-* int genitive_singular Родительный падеж, единственное число
-* int genitive_plural Родительный падеж, множественное число
-*/
-function declension(number, nominative, genitive_singular, genitive_plural)
-{
-	var last_digit = number % 10, last_two_digits = number % 100, result;
-
-	if (last_digit == 1 && last_two_digits != 11)
-	{
-		result = nominative;
-	}
-	else
-	{
-		if ((last_digit == 2 && last_two_digits != 12) || (last_digit == 3 && last_two_digits != 13) || (last_digit == 4 && last_two_digits != 14))
-		{
-			result = genitive_singular;
-		}
-		else
-		{
-			result = genitive_plural;
-		}
-	}
-
-	return result;
-}
-
-/*
- * jQuery Личные сообщения
- */
-// Личные сообщения
-(function($) {
-	$.fn.messageTopicsHostCMS = function(settings) {
+	jQuery.fn.messageTopicsHostCMS = function(settings) {
 		// Настройки
-		settings = $.extend({
+		settings = jQuery.extend({
 			timeout :					10000, // Таймаут обновлений
 			data :						'#messages_data', // блок с данными переписки для обновления
 			url :							'#url', // значение URL
@@ -96,7 +74,7 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 			keyToSend :				13 // Отправка сообщения
 		}, settings);
 
-		var Obj = $.extend({
+		var Obj = jQuery.extend({
 				_url :			this.find(settings.url).text(),
 				_page :			parseInt(this.find(settings.page).text()) + 1,
 				oData :			this.find(settings.data),
@@ -124,7 +102,7 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 				Obj.oForm.submit(function() {
 					if (Obj.oField.val().trim().length) {
 						_ajaxLoad({form : Obj.oForm.serialize()});
-						Obj.oForm.find(':input:not([type=submit],[type=button])').each(function(){$(this).val('')});
+						Obj.oForm.find(':input:not([type=submit],[type=button])').each(function(){jQuery(this).val('')});
 					}
 					return false;
 				});
@@ -137,28 +115,25 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 			if (!data) data = {};
 			form = data.form ? '&' + data.form : '';
 
-			return $.ajax({
+			return jQuery.ajax({
 				url : Obj._url + 'page-' + Obj._page + '/',
 				type : 'POST',
 				data : 'ajaxLoad=1' + form,
 				dataType : 'json',
 				success :	function (ajaxData) {
-					Obj.oData.html($(ajaxData.content).find(settings.data).html());
+					Obj.oData.html(jQuery(ajaxData.content).find(settings.data).html());
 				},
 				error : function (){return false}
 			});
 		}
 		return this.ready(_start);
 	};
-})(jQuery);
 
-// Личные сообщения
-(function($) {
-	$.fn.messagesHostCMS = function(settings) {
+	jQuery.fn.messagesHostCMS = function(settings) {
 	//jQuery.extend({
 		//messagesHostCMS: function(settings){
 			// Настройки
-			settings = $.extend({
+			settings = jQuery.extend({
 				chat_height :					465, // Высота чата переписки
 				timeout :							10000, // Таймаут обновлений
 				load_messages :				'#load_messages', // кнопка подгрузки старых сообщений
@@ -173,7 +148,7 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 				keyToSend :						13 // Отправка сообщения
 			}, settings);
 
-		var Obj = $.extend({
+		var Obj = jQuery.extend({
 				_activity :		1,
 				_autoscroll :	1,
 				_url :				this.find(settings.url).text(),
@@ -197,7 +172,7 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 				setInterval(_ajaxLoad, settings.timeout);
 
 				// проверка активности пользователя
-				$("body").mousemove(function(){
+				jQuery("body").mousemove(function(){
 					Obj._activity = Obj._autoscroll == 1 ? 1 : 0;
 				});
 
@@ -236,13 +211,13 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 			if (!data) data = {};
 			page = data.page ? data.page + '/' : '';
 			form = data.form ? '&' + data.form : '';
-			return $.ajax({
+			return jQuery.ajax({
 				url : Obj._url + Obj._topic_id + '/' + page,
 				type : 'POST',
 				data : 'ajaxLoad=1&activity=' + Obj._activity + form,
 				dataType : 'json',
 				success :	function (ajaxData) {
-					Obj.oTemp = $(ajaxData.content);
+					Obj.oTemp = jQuery(ajaxData.content);
 
 					if (!data.preload && Obj._count_msg > Obj._limit)
 					{
@@ -251,8 +226,8 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 
 					// замена сообщений чата
 					Obj.oTemp.find(settings.messages + ' > [id^='+settings.prefix_message_id+']').each(function(){
-						oMsg = Obj.oMessages.find('[id="' + $(this).attr('id') +'"]');
-						if (oMsg.length == 1) oMsg.replaceWith($(this));
+						oMsg = Obj.oMessages.find('[id="' + jQuery(this).attr('id') +'"]');
+						if (oMsg.length == 1) oMsg.replaceWith(jQuery(this));
 					});
 
 					newMessages = Obj.oTemp.find(settings.messages + ' > [id^='+settings.prefix_message_id+']');
@@ -284,3 +259,33 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 		return this.ready(_start);
 	};
 })(jQuery);
+
+/**
+* Склонение после числительных
+* int number числительное
+* int nominative Именительный падеж
+* int genitive_singular Родительный падеж, единственное число
+* int genitive_plural Родительный падеж, множественное число
+*/
+function declension(number, nominative, genitive_singular, genitive_plural)
+{
+	var last_digit = number % 10, last_two_digits = number % 100, result;
+
+	if (last_digit == 1 && last_two_digits != 11)
+	{
+		result = nominative;
+	}
+	else
+	{
+		if ((last_digit == 2 && last_two_digits != 12) || (last_digit == 3 && last_two_digits != 13) || (last_digit == 4 && last_two_digits != 14))
+		{
+			result = genitive_singular;
+		}
+		else
+		{
+			result = genitive_plural;
+		}
+	}
+
+	return result;
+}

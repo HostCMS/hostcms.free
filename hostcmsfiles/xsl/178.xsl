@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://178">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -11,7 +11,7 @@
 	</xsl:template>
 
 	<xsl:template match="/siteuser">
-		<h1>Лицевой счет</h1>
+		<h1>&labelTitle;</h1>
 		<ul>
 			<xsl:apply-templates select="shop"/>
 		</ul>
@@ -20,8 +20,8 @@
 	<!-- Шаблон для магазина -->
 	<xsl:template match="shop">
 		<li>
-			<strong><xsl:value-of select="transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/name" disable-output-escaping="yes"/></strong><xsl:text> —  магазин "</xsl:text><xsl:value-of select="name"/><xsl:text>". </xsl:text>
-			<a href="pay/{@id}/">Пополнить счет</a>, <a href="shop-{@id}/">история</a>.
+			<strong><xsl:value-of select="transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/name" disable-output-escaping="yes"/></strong><xsl:text> —  &labelShop; "</xsl:text><xsl:value-of select="name"/><xsl:text>". </xsl:text>
+			<a href="pay/{@id}/">&labelReplenish;</a>, <a href="shop-{@id}/">&labelHistory;</a>.
 		</li>
 	</xsl:template>
 </xsl:stylesheet>

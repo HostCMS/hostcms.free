@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://202">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -11,14 +11,14 @@
 	</xsl:template>
 
 	<xsl:template match="siteuser">
-		<h1>Бонусы</h1>
+		<h1>&labelBonuses;</h1>
 
 		<form method="POST" action="./">
-			Период <input type="text" name="date_from" size="8" value="{date_from}" />
+			&labelPeriod; <input type="text" name="date_from" size="8" value="{date_from}" />
 			<xsl:text> </xsl:text>
 			<input type="text" name="date_to" size="8" value="{date_to}" />
 			<xsl:text> </xsl:text>
-			<input type="submit" name="submit" value="Выбрать" />
+			<input type="submit" name="submit" value="&labelCheck;" />
 		</form>
 
 		<xsl:apply-templates select="shop" />
@@ -32,13 +32,13 @@
 			<xsl:variable name="shop_id" select="@id" />
 
 			<p>
-				Персональный бонус: <b><xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text><xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/name" /></b>
+				&labelBonus; <b><xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text><xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/name" /></b>
 			</p>
 
 			<xsl:choose>
 				<xsl:when test="count(/siteuser/affiliats/siteuser) = 0">
 					<p>
-						Нет информации о структуре партнерских отношений.
+						&labelNone;
 					</p>
 				</xsl:when>
 				<xsl:otherwise>
@@ -59,7 +59,7 @@
 
 		<li>
 			<b><xsl:value-of select="login" /></b><xsl:text> </xsl:text>
-			<xsl:value-of select="date" /><xsl:text> г. Бонусы: </xsl:text>
+			<xsl:value-of select="date" /><xsl:text> &labelBonuses;: </xsl:text>
 			<xsl:value-of select="format-number(sum(/siteuser/transactions/shop_siteuser_transaction[shop_id = $shop_id][shop_order/siteuser_id = $siteuser_id]/amount_base_currency), '0.##')" /><xsl:text> </xsl:text>
 			<xsl:value-of select="/siteuser/shop[@id = $shop_id]/shop_currency/name" />
 

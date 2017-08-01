@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Delivery conditions',
@@ -42,11 +42,8 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'changeStatus_success' => "Information has been successfully changed",	
-	'marking' => "<acronym title=\"Marking of goods\">Marking of goods</acronym>",
+	'marking' => "Delivery Marking",
 	'sorting' => "<acronym title=\"Sorting order\">Sorting order</acronym>",
 	'apply_success' => "Information has been successfully changed",
-	'shop_country_id_inverted' => "Not",
-	'shop_country_location_id_inverted' => "Not",
-	'shop_country_location_city_id_inverted' => "Not",
-	'shop_country_location_city_area_id_inverted' => "Not",
+	'inverted' => "Not",
 );

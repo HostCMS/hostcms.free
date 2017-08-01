@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://29">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -8,24 +8,24 @@
 
 	<xsl:template match="/siteuser">
 
-		<h1>Подписка на почтовые рассылки</h1>
+		<h1>&labelTitle;</h1>
 
 		<xsl:choose>
 			<xsl:when test="count(maillist) > 0">
 				<form method="post" action="./">
 					<table class="table" style="width: 400px">
 					<tr>
-						<th>Рассылка</th>
-						<th>Формат</th>
-						<th>Подписаться</th>
+						<th>&labelMaillist;</th>
+						<th>&labelFormat;</th>
+						<th>&labelSubscribe;</th>
 					</tr>
 					<xsl:apply-templates select="maillist"></xsl:apply-templates>
 					</table>
-					<input name="apply" type="submit" value="Подписаться" class="button" />
+					<input name="apply" type="submit" value="&labelSubscribe;" class="button" />
 				</form>
 			</xsl:when>
 			<xsl:otherwise>
-				<p>Доступные рассылки отсутствуют!</p>
+				<p>&labelNone;</p>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -45,7 +45,7 @@
 				<select name="type_{@id}">
 					<option value="0">
 						<xsl:if test="$maillist_siteuser/node() and $maillist_siteuser/type = 0"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-						Текст
+						&labelText;
 					</option>
 					<option value="1">
 						<xsl:if test="$maillist_siteuser/node() and $maillist_siteuser/type = 1"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>

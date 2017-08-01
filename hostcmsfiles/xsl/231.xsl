@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://231">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -11,10 +11,10 @@
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
 
 	<xsl:template match="/shop">
-		<p class="h1 red">Последний заказ</p>
+		<p class="h1 red">&labelTitle;</p>
 
 		<div class="lastOrder">
-			<p class="h2">Заказ от <xsl:value-of disable-output-escaping="yes" select="substring(shop_order/payment_datetime, 1, 10)"/> г. </p>
+			<p class="h2">&labelOrder; <xsl:value-of disable-output-escaping="yes" select="substring(shop_order/payment_datetime, 1, 10)"/></p>
 			<xsl:apply-templates select="shop_item[position() &lt; 3]"/>
 		</div>
 	</xsl:template>

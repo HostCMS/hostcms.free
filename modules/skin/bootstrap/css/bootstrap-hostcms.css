@@ -666,6 +666,7 @@ body.hostcms-bootstrap1:before {
 {
 	top: 14px !important;
 }
+.page-sidebar.menu-compact~.page-content{margin-left:47px}
 
 .DTTTFooter{
 	padding-left: 5px;
@@ -1986,4 +1987,33 @@ img.backend-preview {
 .flotTip span {
     color: #5db2ff;
     font-weight: 700;
+}
+
+table.table.table-popular-queries tr td:last-child {
+	text-align: left;
+}
+.table-popular-queries .seo-driver-data {
+	display: inline-block;
+}
+.table-popular-queries .seo-driver-data .seo-driver-data-click, .table-popular-queries .seo-driver-data .seo-driver-data-show {
+	text-decoration: underline dashed;
+	cursor: pointer;
+}
+.table-popular-queries .seo-driver-data .seo-driver-data-click {
+	color: #53a93f;
+}
+.table-popular-queries .seo-driver-data .seo-driver-data-show {
+	color: #57b5e3;
+}
+
+.table-popular-queries .seo-icon .google {
+	color: #4285F4;
+}
+.table-popular-queries .seo-icon .badge-yandex {
+	color: #FF0000;
+	font-weight: bold;
+	font-size: 14px;
+}
+.table.table-popular-queries > tbody > tr:first-child > td {
+	border-top: none;
 }

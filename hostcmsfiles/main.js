@@ -16,15 +16,7 @@
 	}
 	});
 
-	$.preLoadImages("/hostcmsfiles/images/shadow-b.png",
-	"/hostcmsfiles/images/shadow-l.png",
-	"/hostcmsfiles/images/shadow-lb.png",
-	"/hostcmsfiles/images/shadow-lt.png",
-	"/hostcmsfiles/images/shadow-r.png",
-	"/hostcmsfiles/images/shadow-rb.png",
-	"/hostcmsfiles/images/shadow-rt.png",
-	"/hostcmsfiles/images/shadow-t.png",
-	"/hostcmsfiles/images/ajax_loader.gif");
+	$.preLoadImages("/hostcmsfiles/images/ajax_loader.gif");
 
 	$(document).keydown(function(event) {
 
@@ -48,42 +40,7 @@
 		}
 	});
 
-	// Тень для окна
 	$.fn.extend({
-		// http://upshots.org/javascript/jquery-copy-style-copycss
-		getStyleObject: function() {
-			var dom = this.get(0);
-			var style;
-			var returns = {};
-			if (window.getComputedStyle){
-							var camelize = function(a,b){
-											return b.toUpperCase();
-							};
-							style = window.getComputedStyle(dom, null);
-							for(var i = 0, l = style.length; i < l; i++){
-											var prop = style[i];
-											var camel = prop.replace(/\-([a-z])/g, camelize);
-											var val = style.getPropertyValue(prop);
-											returns[camel] = val;
-							};
-							return returns;
-			};
-			if (style = dom.currentStyle){
-							for(var prop in style){
-											returns[prop] = style[prop];
-							};
-							return returns;
-			};
-			if (style = dom.style){
-					for(var prop in style){
-							if(typeof style[prop] != 'function'){
-									returns[prop] = style[prop];
-							};
-					};
-					return returns;
-			};
-			return returns;
-		},
 		applyShadow: function()
 		{
 			return this.each(function(index, object){
@@ -177,7 +134,9 @@
 
 			$.loadingScreen('show');
 
-			var path = settings.path, data = {};
+			var path = settings.path,
+				data = (typeof settings.data != 'undefined') ? settings.data : {};
+
 			data['_'] = Math.round(new Date().getTime());
 
 			jQuery.ajax({
@@ -253,23 +212,6 @@ function SlideWindow(windowId)
 	else
 	{
 		ShowWindow(windowId);
-	}
-}
-
-// Удаляет дочерние элементы элемента с ID, равным node_id
-function deleteChildNodes(node_id)
-{
-	var node = document.getElementById(node_id);
-
-	if (node !== undefined)
-	{
-		if (node.hasChildNodes())
-		{
-			while (node.firstChild)
-			{
-				node.removeChild(node.firstChild);
-			}
-		}
 	}
 }
 

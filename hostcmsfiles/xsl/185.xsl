@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://185">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -10,11 +10,11 @@
 
 	<xsl:template match="helpdesk">
 
-		<h1>Режим работы службы поддержки <xsl:value-of select="name"/></h1>
+		<h1>&labelHelpdeskWorktime; <xsl:value-of select="name"/></h1>
 
 		<p>
-			<a href="{url}">Служба поддержки <xsl:value-of select="name"/></a>
-			<span><xsl:text> → </xsl:text></span>Режим работы
+			<a href="{url}">&labelHelpdesk; <xsl:value-of select="name"/></a>
+			<span><xsl:text> → </xsl:text></span>&labelWorktime;
 		</p>
 
 		<!-- График работы -->
@@ -25,21 +25,21 @@
 			</tr>
 			<tr>
 				<td class="helpdesk_day">
-					<div>Понедельник</div>
-					<div>Вторник</div>
-					<div>Среда</div>
-					<div>Четверг</div>
-					<div>Пятница</div>
-					<div>Суббота</div>
-					<div>Воскресенье</div>
+					<div>&labelMonday;</div>
+					<div>&labelTuesday;</div>
+					<div>&labelWednesday;</div>
+					<div>&labelThursday;</div>
+					<div>&labelFriday;</div>
+					<div>&labelSaturday;</div>
+					<div>&labelSunday;</div>
 				</td>
 				<td><xsl:apply-templates select="worktimes/worktime"/></td>
 			</tr>
 		</table>
 
-		<p><div class="helpdesk_wt_2"></div><div class="helpdesk_legend">Текущий период.</div></p>
-		<p><div class="helpdesk_wt_1"></div><div class="helpdesk_legend">Рабочее время.</div></p>
-		<p><div class="helpdesk_wt_0"></div><div class="helpdesk_legend">Выходные.</div></p>
+		<p><div class="helpdesk_wt_2"></div><div class="helpdesk_legend">&labelWorktime2;</div></p>
+		<p><div class="helpdesk_wt_1"></div><div class="helpdesk_legend">&labelWorktime1;</div></p>
+		<p><div class="helpdesk_wt_0"></div><div class="helpdesk_legend">&labelWorktime0;</div></p>
 
 	</xsl:template>
 

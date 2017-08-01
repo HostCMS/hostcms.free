@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://184">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -39,7 +39,7 @@
 
 		<!-- Хлебные крошки -->
 		<p>
-			<a href="{/helpdesk/url}">Служба поддержки <xsl:value-of disable-output-escaping="yes" select="/helpdesk/name"/></a>
+			<a href="{/helpdesk/url}">&labelHelpdesk; <xsl:value-of select="/helpdesk/name"/></a>
 			<span><xsl:text> → </xsl:text></span>
 			<xsl:value-of select="number"/>
 		</p>
@@ -54,7 +54,7 @@
 			<div style="margin-bottom: 20px"><xsl:apply-templates select="helpdesk_message[parent_id = 0]" /></div>
 		</xsl:if>
 
-		<p class="button" onclick="$('.comment_reply').hide('slow');$('#AddMessage').toggle('slow')">Добавить сообщение</p>
+		<p class="button" onclick="$('.comment_reply').hide('slow');$('#AddMessage').toggle('slow')">&labelAddMessage;</p>
 
 		<div id="AddMessage" class="comment_reply">
 			<xsl:call-template name="AddReplyForm"></xsl:call-template>
@@ -135,13 +135,13 @@
 
 				<img src="/images/calendar.png" /> <span><xsl:value-of select="datetime"/></span>
 
-				<span class="red" onclick="$('.comment_reply').hide('slow');$('#cr_{@id}').toggle('slow')">ответить</span>
+				<span class="red" onclick="$('.comment_reply').hide('slow');$('#cr_{@id}').toggle('slow')">&labelReply;</span>
 			</p>
 
 			<xsl:if test="helpdesk_attachment/node()">
 				<div>
 					<p>
-						Прикрепленные файлы:
+						&labelAttachment;
 					</p>
 					<ul style="list-style-type: none; margin-top: 5px; padding-left: 5px">
 						<xsl:apply-templates select="helpdesk_attachment"/>
@@ -172,11 +172,11 @@
 		<xsl:param name="grade" select="0"/>
 		<xsl:param name="const_grade" select="0"/>
 
-		<!-- Чтобы избежать зацикливания -->
+		<!-- To avoid loops -->
 		<xsl:variable name="current_grade" select="$grade * 1"/>
 
 		<xsl:choose>
-			<!-- Если число целое -->
+			<!-- If a value is an integer -->
 			<xsl:when test="not($const_grade &gt; $current_grade)">
 				<xsl:if test="$current_grade - 1 &gt; 0">
 					<xsl:call-template name="show_grade">
@@ -188,22 +188,8 @@
 					<img src="/images/star-full.png"/>
 				</xsl:if>
 			</xsl:when>
-			<!--
-			<xsl:when test="$current_grade != 0 and not($const_grade &gt; ceiling($current_grade))">
 
-				<xsl:if test="$current_grade - 0.5 &gt; 0">
-					<xsl:call-template name="show_average_grade">
-
-						<xsl:with-param name="grade" select="$current_grade - 0.5"/>
-						<xsl:with-param name="const_grade" select="$const_grade - 1"/>
-					</xsl:call-template>
-				</xsl:if>
-
-				<img src="/images/star-half.png"/>
-			</xsl:when>
-			-->
-
-			<!-- Выводим серые звездочки, пока текущая позиция не дойдет то значения, увеличенного до целого -->
+			<!-- Show the gray stars until the current position does not reach the value increased to an integer -->
 			<xsl:otherwise>
 				<xsl:call-template name="show_grade">
 					<xsl:with-param name="grade" select="$current_grade"/>
@@ -364,16 +350,16 @@
 		</xsl:choose>
 	</xsl:template>
 
-	<!-- Вывод рейтинга -->
+	<!-- Star Rating -->
 	<xsl:template name="show_average_grade">
 		<xsl:param name="grade" select="0"/>
 		<xsl:param name="const_grade" select="0"/>
 
-		<!-- Чтобы избежать зацикливания -->
+		<!-- To avoid loops -->
 		<xsl:variable name="current_grade" select="$grade * 1"/>
 
 		<xsl:choose>
-			<!-- Если число целое -->
+			<!-- If a value is an integer -->
 			<xsl:when test="floor($current_grade) = $current_grade and not($const_grade &gt; ceiling($current_grade))">
 
 				<xsl:if test="$current_grade - 1 &gt; 0">
@@ -399,7 +385,7 @@
 				<img src="/hostcmsfiles/images/stars_half.gif"/>
 			</xsl:when>
 
-			<!-- Выводим серые звездочки, пока текущая позиция не дойдет то значения, увеличенного до целого -->
+			<!-- Show the gray stars until the current position does not reach the value increased to an integer -->
 			<xsl:otherwise>
 				<xsl:call-template name="show_average_grade">
 					<xsl:with-param name="grade" select="$current_grade"/>
@@ -418,20 +404,20 @@
 
 		<div class="comment">
 
-			<!--Отображение формы добавления комментария-->
+			
 			<form action="{/url}" name="message_form_0{$message_id}" method="post" enctype="multipart/form-data">
 
 				<input type="hidden" name="parent_id" value="{$message_parent_id}"/>
 
 				<div class="row">
-					<div class="caption">Тема</div>
+					<div class="caption">&labelSubject;</div>
 					<div class="field">
 						<input type="text" size="70" name="message_subject" value="{$message_comment_subject}"/>
 					</div>
 				</div>
 
 				<div class="row">
-					<div class="caption">Текст сообщения</div>
+					<div class="caption">&labelText;</div>
 					<div class="field">
 						<xsl:choose>
 							<xsl:when test="/helpdesk/message_type = 0">
@@ -446,15 +432,15 @@
 
 				<!-- {$message_id} добавляется для придания имени блока уникальности, т.к. таких блоков несколько -->
 				<div id="helpdesk_upload_file{$message_id}" class="row">
-					<div class="caption">Прикрепить файл</div>
+					<div class="caption">&labelAddFile;</div>
 					<div class="field">
-					<input size="30" name="attachment[]" type="file" title="Прикрепить файл" />
-					<xsl:text> </xsl:text><a href="#" class="addFile">Еще файл …</a></div>
+					<input size="30" name="attachment[]" type="file" title="&labelAddFile;" />
+					<xsl:text> </xsl:text><a href="#" class="addFile">&labelMoreFile;</a></div>
 				</div>
 
 				<div class="row">
 					<div class="caption"></div>
-					<div class="field"><input type="submit" name="send_message" class="button" value="Отправить"/></div>
+					<div class="field"><input type="submit" name="send_message" class="button" value="&labelSend;"/></div>
 				</div>
 			</form>
 		</div>

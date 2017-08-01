@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://24">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -8,16 +8,24 @@
 
 <xsl:template match="/"><xsl:apply-templates select="/form"/></xsl:template>
 
-<xsl:template match="/form">Заполнена форма "<xsl:value-of select="name"/>" № <xsl:value-of select="form_fill/@id"/>:
+<xsl:template match="/form">&labelTitle; "<xsl:value-of select="name"/>" № <xsl:value-of select="form_fill/@id"/>:
 <!-- Вывод разделов формы 0-го уровня -->
 <xsl:apply-templates select="form_field_dir" />
 <!-- Вывод списка полей формы 0-го уровня -->
 <xsl:apply-templates select="form_field" />
-IP-адрес: <xsl:value-of select="ip"/>
-Дата отправки: <xsl:value-of select="datetime"/>
-
+&labelIp; <xsl:value-of select="ip"/>
+&labelDate; <xsl:value-of select="datetime"/>
+<xsl:if test="source/node()">
+&labelService; <xsl:value-of select="source/service" />
+&labelCampaign; <xsl:value-of select="source/campaign" />
+&labelAd; <xsl:value-of select="source/ad" />
+&labelSource; <xsl:value-of select="source/source" />
+&labelMedium; <xsl:value-of select="source/medium" />
+&labelContent; <xsl:value-of select="source/content" />
+&labelTerm; <xsl:value-of select="source/term" />
+</xsl:if>
 ---
-Система управления сайтом HostCMS
+&labelHostcms;
 http://www.hostcms.ru
 </xsl:template>
 

@@ -6,22 +6,22 @@
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
 	
-	<!-- Шаблон "ОплатаПоФормеПД4" -->
+	<!-- Шаблон "ОплатаПочтовымПереводом" -->
 	
 	<xsl:decimal-format name="my" decimal-separator="." grouping-separator=" "/>
 	
 	<xsl:template match="/shop">
 		<!-- Строка шага заказа -->
 		<ul class="shop_navigation">
-		<li><span>Адрес доставки</span>→</li>
-		<li><span>Способ доставки</span>→</li>
-		<li><span>Форма оплаты</span>→</li>
-		<li class="shop_navigation_current"><span>Данные доставки</span></li>
+		<li><span>&labelAddress;</span>→</li>
+		<li><span>&labelShipmentMethod;</span>→</li>
+		<li><span>&labelPaymentMethod;</span>→</li>
+		<li class="shop_navigation_current"><span>&labelOrderConfirmation;</span></li>
 		</ul>
 		
 		<h1>Ваш заказ оформлен</h1>
 		
-<p>Распечатайте <a href="{/shop/url}cart/print/{shop_order/guid}/" target="_blank"><b>бланк квитанции почтового перевода</b></a><xsl:text> </xsl:text><img src="/hostcmsfiles/images/new_window.gif"/>, на двух сторонах одного листа формата А4. Вы можете совершить платёж в любом отделении Почты России</p>
+		<p>Распечатайте <a href="{/shop/url}cart/print/{shop_order/guid}/" target="_blank"><b>бланк квитанции почтового перевода</b></a><xsl:text> </xsl:text><img src="/hostcmsfiles/images/new_window.gif"/>, на двух сторонах одного листа формата А4. Вы можете совершить платёж в любом отделении Почты России</p>
 		
 		<!-- <p>Через некоторое время с Вами свяжется наш менеджер, чтобы согласовать заказанный товар и время доставки.</p> -->
 		

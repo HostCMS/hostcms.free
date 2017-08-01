@@ -84,37 +84,66 @@ else
 
 			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
 			{
-				$oComment->save();
+				// Antispam
+				if (Core::moduleIsActive('antispam'))
+				{
+					$Antispam_Controller = new Antispam_Controller();
+					$bAntispamAnswer = $Antispam_Controller
+						->addText($oComment->author)
+						->addText($oComment->email)
+						->addText($oComment->phone)
+						->addText($oComment->subject)
+						->addText($oComment->text)
+						->execute();
+				}
+				else
+				{
+					$bAntispamAnswer = TRUE;
+				}
 
-				$oComment
-					->dateFormat($oInformationsystem->format_date)
-					->dateTimeFormat($oInformationsystem->format_datetime);
+				if ($bAntispamAnswer)
+				{
+					$oComment->save();
 
-				$oInformationsystem_Item->add($oComment)->clearCache();
+					$oComment
+						->dateFormat($oInformationsystem->format_date)
+						->dateTimeFormat($oInformationsystem->format_datetime);
 
-				$oXmlCommentTag->addEntity($oInformationsystem);
+					$oInformationsystem_Item->add($oComment)->clearCache();
 
-				// Отправка письма администратору
-				$sText = Xsl_Processor::instance()
-					->xml($oXmlCommentTag->getXml())
-					->xsl(Core_Entity::factory('Xsl')->getByName(Core_Array::get(Core_Page::instance()->libParams, 'addCommentAdminMailXsl')))
-					->process();
+					$oXmlCommentTag->addEntity($oInformationsystem);
 
-				$aFrom = array_map('trim', explode(',', EMAIL_TO));
+					// Отправка письма администратору
+					$sText = Xsl_Processor::instance()
+						->xml($oXmlCommentTag->getXml())
+						->xsl(Core_Entity::factory('Xsl')->getByName(Core_Array::get(Core_Page::instance()->libParams, 'addCommentAdminMailXsl')))
+						->process();
 
-				$oCore_Mail_Driver = Core_Mail::instance()
-					->to(EMAIL_TO)
-					->from($aFrom[0])
-					->header('Reply-To', Core_Valid::email($oComment->email)
-						? $oComment->email
-						: $aFrom[0])
-					->subject(Core::_('Informationsystem.comment_mail_subject'))
-					->message(trim($sText))
-					->contentType(Core_Array::get(Core_Page::instance()->libParams, 'commentMailNoticeType', 0) == 0
-						? 'text/plain'
-						: 'text/html'
-					)
-					->send();
+					$aFrom = array_map('trim', explode(',', EMAIL_TO));
+
+					$oCore_Mail_Driver = Core_Mail::instance()
+						->to(EMAIL_TO)
+						->from($aFrom[0])
+						->header('Reply-To', Core_Valid::email($oComment->email)
+							? $oComment->email
+							: $aFrom[0])
+						->subject(Core::_('Informationsystem.comment_mail_subject'))
+						->message(trim($sText))
+						->contentType(Core_Array::get(Core_Page::instance()->libParams, 'commentMailNoticeType', 0) == 0
+							? 'text/plain'
+							: 'text/html'
+						)
+						->send();
+				}
+				else
+				{
+					$oXmlCommentTag->addEntity(Core::factory('Core_Xml_Entity')
+						->name('error_antispam')->value(1)
+					);
+
+					$oComment->text = Core_Str::br2nl($oComment->text);
+					$Informationsystem_Controller_Show->addEntity($oComment);
+				}
 			}
 			else
 			{

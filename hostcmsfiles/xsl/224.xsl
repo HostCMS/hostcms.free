@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://224">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -22,24 +22,23 @@
 	<xsl:variable name="floor" select="floor($count div 5)"/>
 	
 	<!-- Не распределенные элементы -->
-	
 	<xsl:template match="structure">
 		<li>
-			<!-- Определяем адрес ссылки -->
+			<!-- Set $link variable -->
 			<xsl:variable name="link">
 				<xsl:choose>
-					<!-- Если внешняя ссылка -->
+					<!-- External link -->
 					<xsl:when test="url != ''">
 						<xsl:value-of disable-output-escaping="yes" select="url"/>
 					</xsl:when>
-					<!-- Иначе если внутренняя ссылка -->
+					<!-- Internal link -->
 					<xsl:otherwise>
 						<xsl:value-of disable-output-escaping="yes" select="link"/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
 			
-			<!-- Ссылка на пункт меню -->
+			<!-- Menu Node -->
 			<a href="{$link}" title="{name}" hostcms:id="{@id}" hostcms:field="name" hostcms:entity="structure"><xsl:value-of select="name"/></a>
 		</li>
 

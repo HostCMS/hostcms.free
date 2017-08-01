@@ -166,7 +166,7 @@ class Shop_Order_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		// Удаляем значения доп. свойств
-		$aPropertyValues = $this->getPropertyValues();
+		$aPropertyValues = $this->getPropertyValues(FALSE);
 		foreach($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getOrderPath());
@@ -1361,8 +1361,8 @@ class Shop_Order_Model extends Core_Entity
 			$oRepresentative->addChild('Наименование', $sUserFullName);
 		}
 
-		// Статус оплаты заказа
 		$oOrderProperties = $oOrderXml->addChild('ЗначенияРеквизитов');
+		// Статус оплаты заказа
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Заказ оплачен');
 		$oOrderProperty->addChild('Значение', $this->paid == 1 ? 'true' : 'false');
@@ -1381,6 +1381,44 @@ class Shop_Order_Model extends Core_Entity
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Адрес доставки');
 		$oOrderProperty->addChild('Значение', $sFullAddress);
+
+		// Дополнительные свойства заказа
+		$aPropertyValues = $this->getPropertyValues(FALSE);
+		foreach ($aPropertyValues as $oPropertyValue)
+		{
+			$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
+			$oOrderProperty->addChild('Наименование', $oPropertyValue->Property->name);
+		
+			// List
+			if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+			{
+				$oOrderProperty->addChild('Значение', $oPropertyValue->value != 0
+					? $oPropertyValue->List_Item->value
+					: ''
+				);
+			}
+			// Informationsystem
+			elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
+			{
+				$oOrderProperty->addChild('Значение', $oPropertyValue->value != 0
+					? $oPropertyValue->Informationsystem_Item->name
+					: ''
+				);
+			}
+			// Shop
+			elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+			{
+				$oOrderProperty->addChild('Значение', $oPropertyValue->value != 0
+					? $oPropertyValue->Shop_Item->name
+					: ''
+				);
+			}
+			// Other type
+			elseif ($oPropertyValue->Property->type != 2)
+			{
+				$oOrderProperty->addChild('Значение', $oPropertyValue->value);
+			}
+		}
 
 		$oOrderXml->addChild('Время', $time);
 		$oOrderXml->addChild('Комментарий', $this->description);

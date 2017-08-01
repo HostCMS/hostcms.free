@@ -3,10 +3,9 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * SEO Module.
+ * Seo.
  *
- * @package HostCMS
- * @subpackage Seo
+ * @package HostCMS 6\Seo
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
@@ -23,7 +22,7 @@ class Seo_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-06-14';
+	public $date = '2017-07-06';
 
 	/**
 	 * Module name
@@ -40,8 +39,8 @@ class Seo_Module extends Core_Module
 
 		$this->menu = array(
 			array(
-				'sorting' => 55,
-				'block' => 1,
+				'sorting' => 150,
+				'block' => 3,
 				'ico' => 'fa fa-bullseye',
 				'name' => Core::_('Seo.menu'),
 				'href' => "/admin/seo/index.php",

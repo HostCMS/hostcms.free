@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://16">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -16,14 +16,14 @@
 
 		<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="informationsystem_item"><xsl:value-of select="name"/></h1>
 
-		<!-- Выводим сообщение -->
+		<!-- Show Message -->
 		<xsl:if test="/informationsystem/message/node()">
 			<xsl:value-of disable-output-escaping="yes" select="/informationsystem/message"/>
 		</xsl:if>
 
-		<!-- Фотогафия к информационному элементу -->
-		<xsl:if test="image_small!=''">
-			<!-- Проверяем задан ли путь к файлу большого изображения -->
+		<!-- Image -->
+		<xsl:if test="image_small != ''">
+			
 			<xsl:choose>
 				<xsl:when test="image_large!=''">
 					<div id="gallery">
@@ -38,7 +38,7 @@
 			</xsl:choose>
 		</xsl:if>
 
-		<!-- Текст информационного элемента -->
+		<!-- Text -->
 		<xsl:choose>
 		<xsl:when test="parts_count > 1">
 			<xsl:value-of disable-output-escaping="yes" select="text"/>
@@ -50,9 +50,9 @@
 		</xsl:otherwise>
 		</xsl:choose>
 
-		<!-- Ссылка 1-2-3 на части документа -->
+		<!-- Links 1-2-3 to the parts of the document -->
 		<xsl:if test="parts_count &gt; 1">
-			<div class="read_more">Читать дальше:</div>
+			<div class="read_more">&labelReadMore;</div>
 
 			<xsl:call-template name="for">
 				<xsl:with-param name="limit">1</xsl:with-param>
@@ -67,7 +67,7 @@
 		</xsl:if>
 	</xsl:template>
 
-	<!-- Цикл для вывода строк ссылок -->
+	<!-- Pagination -->
 	<xsl:template name="for">
 		<xsl:param name="i" select="0"/>
 		<xsl:param name="prefix">page</xsl:param>
@@ -79,11 +79,11 @@
 
 		<xsl:variable name="n" select="$items_count div $limit"/>
 
-		<!-- Заносим в переменную $group идентификатор текущей группы -->
+		<!-- Store in the variable $group ID of the current group -->
 		<xsl:variable name="group" select="/informationsystem/group"/>
 
 
-		<!-- Считаем количество выводимых ссылок перед текущим элементом -->
+		<!-- Links before current -->
 		<xsl:variable name="pre_count_page">
 			<xsl:choose>
 				<xsl:when test="$page &gt; ($n - (round($visible_pages div 2) - 1))">
@@ -95,7 +95,7 @@
 			</xsl:choose>
 		</xsl:variable>
 
-		<!-- Считаем количество выводимых ссылок после текущего элемента -->
+		<!-- Links after current -->
 		<xsl:variable name="post_count_page">
 			<xsl:choose>
 				<xsl:when test="0 &gt; $page - (round($visible_pages div 2) - 1)">
@@ -115,31 +115,31 @@
 		</xsl:variable>
 
 		<xsl:if test="$items_count &gt; $limit and $n &gt; $i">
-			<!-- Ставим ссылку на страницу-->
+			<!-- Pagination item -->
 			<xsl:if test="$i != $page">
 				<!-- Определяем адрес тэга -->
 				<xsl:variable name="tag_link">
 					<xsl:choose>
-						<!-- Если не нулевой уровень -->
-						<xsl:when test="count(/informationsystem/tag) != 0">tag/<xsl:value-of select="/informationsystem/tag/urlencode"/>/</xsl:when>
-						<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+						
+						<xsl:when test="count(/informationsystem/tag)">tag/<xsl:value-of select="/informationsystem/tag/urlencode"/>/</xsl:when>
+						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
 
-				<!-- Определяем адрес ссылки -->
+				<!-- Set $link variable -->
 				<xsl:variable name="number_link">
 
 					<xsl:choose>
-						<!-- Если не нулевой уровень -->
+						
 						<xsl:when test="$i != 0">
 							<xsl:value-of select="$prefix"/>-<xsl:value-of select="$i + 1"/>/</xsl:when>
-						<!-- Иначе если нулевой уровень - просто ссылка на страницу со списком элементов -->
+						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>
 
-				<!-- Выводим ссылку на первую страницу -->
+				<!-- First pagination item -->
 				<xsl:if test="$page - $pre_count_page &gt; 0 and $i = 0">
 					<a href="{$link}" class="page_link" style="text-decoration: none;">←</a>
 				</xsl:if>
@@ -147,7 +147,7 @@
 				<xsl:choose>
 					<xsl:when test="$i &gt;= ($page - $pre_count_page) and ($page + $post_count_page) &gt;= $i">
 
-						<!-- Выводим ссылки на видимые страницы -->
+						<!-- Pagination item -->
 						<a href="{$link}{$tag_link}{$number_link}" class="page_link">
 							<xsl:value-of select="$i + 1"/>
 						</a>
@@ -155,11 +155,11 @@
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 
-				<!-- Выводим ссылку на последнюю страницу -->
+				<!-- Last pagination item -->
 				<xsl:if test="$i+1 &gt;= $n and $n &gt; ($page + 1 + $post_count_page)">
 					<xsl:choose>
 						<xsl:when test="$n &gt; round($n)">
-							<!-- Выводим ссылку на последнюю страницу -->
+							<!-- Last pagination item -->
 							<a href="{$link}{$prefix}-{round($n+1)}/" class="page_link" style="text-decoration: none;">→</a>
 						</xsl:when>
 						<xsl:otherwise>
@@ -169,14 +169,14 @@
 				</xsl:if>
 			</xsl:if>
 
-			<!-- Не ставим ссылку на страницу-->
+			<!-- Current pagination item -->
 			<xsl:if test="$i = $page">
 				<span class="current">
 					<xsl:value-of select="$i+1"/>
 				</span>
 			</xsl:if>
 
-			<!-- Рекурсивный вызов шаблона. НЕОБХОДИМО ПЕРЕДАВАТЬ ВСЕ НЕОБХОДИМЫЕ ПАРАМЕТРЫ! -->
+			<!-- Recursive Template -->
 			<xsl:call-template name="for">
 				<xsl:with-param name="i" select="$i + 1"/>
 				<xsl:with-param name="prefix" select="$prefix"/>
@@ -189,18 +189,18 @@
 		</xsl:if>
 	</xsl:template>
 
-	<!-- Склонение после числительных -->
+	<!-- Declension of the numerals -->
 	<xsl:template name="declension">
 
 		<xsl:param name="number" select="number"/>
 
-		<!-- Именительный падеж -->
-	<xsl:variable name="nominative"><xsl:text>просмотр</xsl:text></xsl:variable>
+		<!-- Nominative case / Именительный падеж -->
+	<xsl:variable name="nominative"><xsl:text>&labelNominative;</xsl:text></xsl:variable>
 
-		<!-- Родительный падеж, единственное число -->
-	<xsl:variable name="genitive_singular"><xsl:text>просмотра</xsl:text></xsl:variable>
+		<!-- Genitive singular / Родительный падеж, единственное число -->
+	<xsl:variable name="genitive_singular"><xsl:text>&labelGenitiveSingular;</xsl:text></xsl:variable>
 
-	<xsl:variable name="genitive_plural"><xsl:text>просмотров</xsl:text></xsl:variable>
+	<xsl:variable name="genitive_plural"><xsl:text>&labelGenitivePlural;</xsl:text></xsl:variable>
 		<xsl:variable name="last_digit"><xsl:value-of select="$number mod 10"/></xsl:variable>
 		<xsl:variable name="last_two_digits"><xsl:value-of select="$number mod 100"/></xsl:variable>
 

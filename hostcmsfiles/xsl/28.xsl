@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://28">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -11,16 +11,16 @@
 		<!-- Быстрая регистрация в магазине -->
 		<xsl:if test="fastRegistration/node()">
 			<div id="fastRegistrationDescription" style="float: left">
-				<p class="h1">Быстрая регистрация</p>
-				<b>Какие преимущества дает регистрация на сайте?</b>
+				<p class="h1">&labelLine1;</p>
+				<b>&labelLine2;</b>
 
 				<ul class="ul1">
-					<li>Вы получаете возможность оформлять заказы прямо на сайте.</li>
-					<li>Вы будете получать информацию о специальных акциях магазина, доступных только зарегистрированным пользователям.</li>
+					<li>&labelLine3;</li>
+					<li>&labelLine4;</li>
 				</ul>
 
 				<p>
-					<a href="/users/registration/" onclick="$('#fastRegistrationDescription').hide('slow'); $('#fastRegistration').show('slow'); return false">Заполнить форму регистрации →</a>
+					<a href="/users/registration/" onclick="$('#fastRegistrationDescription').hide('slow'); $('#fastRegistration').show('slow'); return false">&labelForm; →</a>
 				</p>
 			</div>
 		</xsl:if>
@@ -31,32 +31,31 @@
 			</xsl:if>
 
 			<h1><xsl:choose>
-					<xsl:when test="@id > 0">Анкетные данные</xsl:when>
-					<xsl:otherwise>Регистрация нового пользователя</xsl:otherwise>
+					<xsl:when test="@id > 0">&labelData;</xsl:when>
+					<xsl:otherwise>&labelNewUser;</xsl:otherwise>
 			</xsl:choose></h1>
 
-			<!-- Выводим ошибку, если она была передана через внешний параметр -->
+			<!-- Show Error -->
 			<xsl:if test="error/node()">
 				<div id="error">
 					<xsl:value-of select="error"/>
 				</div>
 			</xsl:if>
 
-			<p>Обратите внимание, введенные контактные данные будут доступны на странице пользователя
-				неограниченному кругу лиц.
-				<br />Обязательные поля отмечены *.</p>
+			<p>&labelLine5;
+				<br />&labelRequired;</p>
 
 			<div class="comment">
 				<form action="/users/registration/" method="post" enctype="multipart/form-data">
 					<div class="row">
-						<div class="caption">Логин</div>
+						<div class="caption">&labelLogin;</div>
 						<div class="field">
 							<input name="login" type="text" value="{login}" size="40"/> *
 						</div>
 					</div>
 
 					<div class="row">
-						<div class="caption">Пароль</div>
+						<div class="caption">&labelPassword;</div>
 						<div class="field">
 							<input name="password" type="password" value="" size="40"/>
 
@@ -65,7 +64,7 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Повтор пароля</div>
+						<div class="caption">&labelPassword2;</div>
 						<div class="field">
 							<input name="password2" type="password" value="" size="40"/>
 
@@ -74,78 +73,78 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">E-mail</div>
+						<div class="caption">&labelEmail;</div>
 						<div class="field">
 							<input name="email" type="text" value="{email}" size="40"/> *</div>
 					</div>
 					<div class="row">
-						<div class="caption">Имя</div>
+						<div class="caption">&labelName;</div>
 						<div class="field">
 							<input name="name" type="text" value="{name}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Фамилия</div>
+						<div class="caption">&labelSurname;</div>
 						<div class="field">
 							<input name="surname" type="text" value="{surname}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Отчество</div>
+						<div class="caption">&labelPatronymic;</div>
 						<div class="field">
 							<input name="patronymic" type="text" value="{patronymic}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Компания</div>
+						<div class="caption">&labelCompany;</div>
 						<div class="field">
 							<input name="company" type="text" value="{company}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Телефон</div>
+						<div class="caption">&labelPhone;</div>
 						<div class="field">
 							<input name="phone" type="text" value="{phone}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Факс</div>
+						<div class="caption">&labelFax;</div>
 						<div class="field">
 							<input name="fax" type="text" value="{fax}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Сайт</div>
+						<div class="caption">&labelSite;</div>
 						<div class="field">
 							<input name="website" type="text" value="{website}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">ICQ</div>
+						<div class="caption">&labelICQ;</div>
 						<div class="field">
 							<input name="icq" type="text" value="{icq}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Страна</div>
+						<div class="caption">&labelCountry;</div>
 						<div class="field">
 							<input name="country" type="text" value="{country}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Почтовый индекс</div>
+						<div class="caption">&labelPostcode;</div>
 						<div class="field">
 							<input name="postcode" type="text" value="{postcode}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Город</div>
+						<div class="caption">&labelCity;</div>
 						<div class="field">
 							<input name="city" type="text" value="{city}" size="40"/>
 						</div>
 					</div>
 					<div class="row">
-						<div class="caption">Адрес</div>
+						<div class="caption">&labelAddress;</div>
 						<div class="field">
 							<input name="address" type="text" value="{address}" size="40"/>
 						</div>
@@ -158,7 +157,7 @@
 
 					<xsl:if test="@id > 0 and count(maillist) > 0">
 						<div class="row">
-						<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>Почтовые рассылки</strong></div>
+						<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>&labelMaillist;</strong></div>
 							<div class="field">
 								<xsl:apply-templates select="maillist"></xsl:apply-templates>
 							</div>
@@ -169,17 +168,17 @@
 						<div class="row">
 							<div class="caption"></div>
 							<div class="field">
-								<img id="registerUser" class="captcha" src="/captcha.php?id={/siteuser/captcha_id}&amp;height=30&amp;width=100" title="Контрольное число" name="captcha"/>
+								<img id="registerUser" class="captcha" src="/captcha.php?id={/siteuser/captcha_id}&amp;height=30&amp;width=100" title="&labelCaptchaId;" name="captcha"/>
 
 								<div class="captcha">
-									<img src="/images/refresh.png" /> <span onclick="$('#registerUser').updateCaptcha('{/siteuser/captcha_id}', 30); return false">Показать другое число</span>
+									<img src="/images/refresh.png" /> <span onclick="$('#registerUser').updateCaptcha('{/siteuser/captcha_id}', 30); return false">&labelUpdateCaptcha;</span>
 								</div>
 							</div>
 						</div>
 
 						<div class="row">
 							<div class="caption">
-						Контрольное число<sup><font color="red">*</font></sup>
+						&labelCaptchaId;<sup><font color="red">*</font></sup>
 							</div>
 							<div class="field">
 								<input type="hidden" name="captcha_id" value="{/siteuser/captcha_id}"/>
@@ -188,15 +187,15 @@
 						</div>
 					</xsl:if>
 
-					<!-- Страница редиректа после авторизации -->
+					<!-- Page Redirect after login -->
 					<xsl:if test="location/node()">
 						<input name="location" type="hidden" value="{location}" />
 					</xsl:if>
 
 					<!-- Определяем имя кнопки -->
 					<xsl:variable name="buttonName"><xsl:choose>
-							<xsl:when test="@id > 0">Изменить</xsl:when>
-							<xsl:otherwise>Зарегистрироваться</xsl:otherwise>
+							<xsl:when test="@id > 0">&labelChange;</xsl:when>
+							<xsl:otherwise>&labelRegister;</xsl:otherwise>
 					</xsl:choose></xsl:variable>
 
 					<div class="row">
@@ -221,7 +220,7 @@
 
 				<option value="0">
 				<xsl:if test="$maillist_siteuser/node() and $maillist_siteuser/type = 0"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-					Текст
+					&labelText;
 				</option>
 
 				<option value="1">
@@ -232,7 +231,7 @@
 
 	<input name="maillist_{@id}" type="checkbox" value="1" id="maillist_{@id}"><xsl:if test="$maillist_siteuser/node()" ><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input>
 
-			<label for="maillist_{@id}">подписаться</label>
+			<label for="maillist_{@id}">&labelSubscribe;</label>
 		</fieldset>
 	</xsl:template>
 
@@ -252,7 +251,7 @@
 						<!-- Отображаем поле ввода -->
 						<xsl:when test="type = 0 or type=1">
 							<br/>
-							<input type="text" name="property_{@id}" value="$property_value/value" size="40" />
+							<input type="text" name="property_{@id}" value="{$property_value/value}" size="40" />
 						</xsl:when>
 						<!-- Отображаем файл -->
 						<xsl:when test="type = 2">
@@ -261,7 +260,7 @@
 
 							<xsl:if test="$property_value/file != ''">
 								<xsl:text> </xsl:text>
-						<a href="{/siteuser/dir}{$property_value/file}" target="_blank"><img src="/hostcmsfiles/images/preview.gif" class="img"/></a><xsl:text> </xsl:text><a href="?delete_property={$property_value/property_id}" onclick="return confirm('Вы уверены, что хотите удалить?')"><img src="/hostcmsfiles/images/delete.gif" class="img" /></a>
+						<a href="{/siteuser/dir}{$property_value/file}" target="_blank"><img src="/hostcmsfiles/images/preview.gif" class="img"/></a><xsl:text> </xsl:text><a href="?delete_property={$property_value/property_id}" onclick="return confirm('&labelDeleteAlert;')"><img src="/hostcmsfiles/images/delete.gif" class="img" /></a>
 							</xsl:if>
 
 						</xsl:when>

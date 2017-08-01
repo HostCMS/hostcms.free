@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://59">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -8,15 +8,15 @@
 
 	<!-- ПисьмоВосстановлениеПароля -->
 
-	<xsl:template match="/siteuser">Здравствуйте, <xsl:value-of select="login"/>!
+	<xsl:template match="/siteuser">&labelLine1; <xsl:value-of select="login"/>!
 
-Кто-то, возможно Вы, изменил пароль на сайте: http://<xsl:value-of select="/siteuser/site/site_alias/alias_name_without_mask"/>
+&labelLine2; http://<xsl:value-of select="/siteuser/site/site_alias/alias_name_without_mask"/>
 
-Новые регистрационные данные:
-Логин: <xsl:value-of select="login"/>
-Пароль: <xsl:value-of select="new_password"/>
+&labelLine3;
+&labelLogin; <xsl:value-of select="login"/>
+&labelPassword; <xsl:value-of select="new_password"/>
 
 ---
-Администрация сайта <xsl:value-of select="/siteuser/site/site_alias/alias_name_without_mask"/>
+&labelAdministration; <xsl:value-of select="/siteuser/site/site_alias/alias_name_without_mask"/>
 </xsl:template>
 </xsl:stylesheet>

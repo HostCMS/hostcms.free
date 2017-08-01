@@ -26,7 +26,7 @@ return array (
 		'seo' => array(
 			'ico' => 'fa fa-rocket',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_seo'),
-			'modules' => array('counter', 'advertisement', 'seo', 'oneps'),
+			'modules' => array('counter', 'advertisement', 'seo', 'oneps', 'roistat'),
 		),
 		'users' => array(
 			'ico' => 'fa fa-users',

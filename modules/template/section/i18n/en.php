@@ -10,7 +10,7 @@
  */
 return array(
 	'model_name' => 'Template Sections',
-	'section_show_title' => 'Template %s` setions',
+	'section_show_title' => 'Template `%s` sections',
 	'section_form_title_edit' => 'Edit Template Section',
 	'section_form_title_add' => 'Add Template Section',
 	'id' => 'Id',

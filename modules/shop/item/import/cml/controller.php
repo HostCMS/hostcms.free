@@ -163,6 +163,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$this->updateFields = array();
 		$this->importGroups = $this->createShopItems = TRUE;
 
+		$this->importAction = 1;
+
 		$this->timeout = (!defined('DENY_INI_SET') || !DENY_INI_SET)
 			? ini_get('max_execution_time')
 			: 30;
@@ -315,7 +317,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				$this->_importGroups($Groups, $oShopGroup->id);
 			}
-
 		}
 		return $this;
 	}
@@ -1159,12 +1160,12 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 					}
 
-					$oShopItem->shop_id = $this->iShopId;
+					$oShopItem->shop_id = $oShop->id;
 
 					// check item path
 					$oShopItem->path == '' && $oShopItem->makePath();
 
-					$oSameShopItem = Core_Entity::factory('Shop', $this->iShopId)
+					$oSameShopItem = $oShop
 						->Shop_Items
 						->getByGroupIdAndPath($oShopItem->shop_group_id, $oShopItem->path);
 
@@ -1356,7 +1357,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				// Обработка специальных цен
 				foreach ($this->xpath($packageOfProposals, 'ТипыЦен/ТипЦены') as $oPrice)
 				{
-					$oShopPrice = Core_Entity::factory('Shop', $this->iShopId)->Shop_Prices->getByGuid(strval($oPrice->Ид), FALSE);
+					$oShopPrice = Core_Entity::factory('Shop', $this->iShopId)
+						->Shop_Prices
+						->getByGuid(strval($oPrice->Ид), FALSE);
 
 					if (is_null($oShopPrice))
 					{
@@ -1396,14 +1399,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				{
 					$sWarehouseGuid = strval($oWarehouse->Ид);
 
-					$oShopWarehouse = Core_Entity::factory('Shop', $this->iShopId)
+					$oShopWarehouse = $oShop
 						->Shop_Warehouses
 						->getByGuid($sWarehouseGuid, FALSE);
 
 					if (is_null($oShopWarehouse))
 					{
 						$oShopWarehouse = Core_Entity::factory('Shop_Warehouse');
-						$oShopWarehouse->shop_id = $this->iShopId;
+						$oShopWarehouse->shop_id = $oShop->id;
 						$oShopWarehouse->guid = $sWarehouseGuid;
 						$oShopWarehouse->name = strval($oWarehouse->Наименование);
 						$oShopWarehouse->address = strval($oWarehouse->Адрес->Представление);
@@ -1432,7 +1435,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Основной товар (не модификация)
-					$oShopItem = Core_Entity::factory('Shop', $this->iShopId)->Shop_Items->getByGuid($sItemGUID, FALSE);
+					$oShopItem = $oShop
+						->Shop_Items
+						->getByGuid($sItemGUID, FALSE);
 
 					if (!is_null($oShopItem))
 					{
@@ -1486,14 +1491,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						foreach ($this->xpath($oProposal, 'Цены/Цена') as $oPrice)
 						{
 							// Ищем цену
-							$oShopPrice = Core_Entity::factory('Shop', $this->iShopId)
+							$oShopPrice = $oShop
 								->Shop_Prices
 								->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
 
 							if (!is_null($oShopPrice)
 								&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
 							{
-								$oShop_Item_Price = Core_Entity::factory('Shop_Item', $oShopItem->id)
+								$oShop_Item_Price = $oShopItem
 									->Shop_Item_Prices
 									->getByPriceId($oShopPrice->id, FALSE);
 

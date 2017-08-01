@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://219">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -13,7 +13,7 @@
 	</xsl:template>
 	
 	<xsl:template match="shop/shop_producer">
-		<h1>Производитель <xsl:value-of disable-output-escaping="no" select="name"/></h1>
+		<h1>&labelProducer; <xsl:value-of disable-output-escaping="no" select="name"/></h1>
 		
 		<xsl:if test="image_large != ''">
 			<p><img src="{dir}{image_large}" vspace="5" border="0"/></p>
@@ -24,32 +24,32 @@
 		</xsl:if>
 		
 		<xsl:if test="address != ''">
-			<p><b>Адрес:</b><xsl:text> </xsl:text><xsl:value-of select="address"/></p>
+	<p><b>&labelAddress;</b><xsl:text> </xsl:text><xsl:value-of select="address"/></p>
 		</xsl:if>
-
+		
 		<xsl:if test="phone != ''">
-			<p><b>Телефон:</b><xsl:text> </xsl:text><xsl:value-of select="phone"/></p>
+	<p><b>&labelPhone;</b><xsl:text> </xsl:text><xsl:value-of select="phone"/></p>
 		</xsl:if>
-
+		
 		<xsl:if test="fax != ''">
-			<p><b>Факс:</b><xsl:text> </xsl:text><xsl:value-of select="fax"/></p>
+	<p><b>&labelFax;</b><xsl:text> </xsl:text><xsl:value-of select="fax"/></p>
 		</xsl:if>
-
+		
 		<xsl:if test="site != ''">
-			<p><b>Сайт:</b><xsl:text> </xsl:text><xsl:value-of select="site"/></p>
+	<p><b>&labelSite;</b><xsl:text> </xsl:text><xsl:value-of select="site"/></p>
 		</xsl:if>
-
+		
 		<xsl:if test="email != ''">
-			<p><b>E-Mail:</b><xsl:text> </xsl:text><a href="mailto:{email}"><xsl:value-of select="email"/></a></p>
+<p><b>&labelEmail;</b><xsl:text> </xsl:text><a href="mailto:{email}"><xsl:value-of select="email"/></a></p>
 		</xsl:if>
-
+		
 		<xsl:if test="tin != ''">
-			<p><b>ИНН:</b><xsl:text> </xsl:text><xsl:value-of select="tin"/></p>
+	<p><b>&labelINN;</b><xsl:text> </xsl:text><xsl:value-of select="tin"/></p>
 		</xsl:if>
 		
 		<p class="button">
-			<a href="{/shop/url}producer-{@id}/">Все товары <xsl:value-of select="name"/></a>
+			<a href="{/shop/url}producer-{@id}/">&labelAllItems; <xsl:value-of select="name"/></a>
 		</p>
 	</xsl:template>
-
+	
 </xsl:stylesheet>

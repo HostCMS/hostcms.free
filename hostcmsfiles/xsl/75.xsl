@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://75">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -8,63 +8,65 @@
 	
 	<xsl:decimal-format name="my" decimal-separator="." grouping-separator=" "/>
 	
+	<!-- ОплатаПриПолучении -->
+	
 	<xsl:template match="/shop">
-		<!-- Строка шага заказа -->
+		
 		<ul class="shop_navigation">
-		<li><span>Адрес доставки</span>→</li>
-		<li><span>Способ доставки</span>→</li>
-		<li><span>Форма оплаты</span>→</li>
-		<li class="shop_navigation_current"><span>Данные доставки</span></li>
+		<li><span>&labelAddress;</span>→</li>
+		<li><span>&labelShipmentMethod;</span>→</li>
+		<li><span>&labelPaymentMethod;</span>→</li>
+		<li class="shop_navigation_current"><span>&labelOrderConfirmation;</span></li>
 		</ul>
 		
-		<h1>Ваш заказ оформлен</h1>
+		<h1>&labelTitle;</h1>
 		
-		<p>Через некоторое время с Вами свяжется наш менеджер, чтобы согласовать заказанный товар и время доставки.</p>
+		<p>&labelLine1;</p>
 		
 		<xsl:apply-templates select="shop_order"/>
 		
 		<xsl:choose>
 			<xsl:when test="count(shop_order/shop_order_item)">
-				<h2>Заказанные товары</h2>
+				<h2>&labelOrderedItems;</h2>
 				
 				<table class="shop_cart">
 					<tr>
-						<th>Наименование</th>
-						<th>Артикул</th>
-						<th>Количество</th>
-						<th>Цена</th>
-						<th>Сумма</th>
+						<th>&labelItemName;</th>
+						<th>&labelMarking;</th>
+						<th>&labelQuantity;</th>
+						<th>&labelPrice;</th>
+						<th>&labelSum;</th>
 					</tr>
 					<xsl:apply-templates select="shop_order/shop_order_item"/>
 					<tr class="total">
 						<td colspan="3"></td>
-						<td>Итого:</td>
+						<td>&labelTotal;</td>
 					<td><xsl:value-of select="format-number(shop_order/total_amount,'### ##0.00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_order/shop_currency/name"/></td>
 					</tr>
 				</table>
 			</xsl:when>
 			<xsl:otherwise>
-			<p><b>Заказанных товаров нет.</b></p>
+			<p><b>&labelNone;</b></p>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
 	
-	<!-- Шаблон вывода данных о заказе -->
+	<!-- Order Template -->
 	<xsl:template match="shop_order">
 		
-		<h2>Данные доставки</h2>
+		<h2>&labelData;</h2>
 		
 		<p>
-<b>ФИО:</b><xsl:text> </xsl:text><xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/>
+			<b>&labelName;</b><xsl:text> </xsl:text><xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/>
 			
-		<br /><b>E-mail:</b><xsl:text> </xsl:text><xsl:value-of select="email"/>
+			<br /><b>&labelEmail;</b><xsl:text> </xsl:text><xsl:value-of select="email"/>
 			
 			<xsl:if test="phone != ''">
-			<br /><b>Телефон:</b><xsl:text> </xsl:text><xsl:value-of select="phone"/>
+			<br /><b>&labelPhone;</b><xsl:text> </xsl:text><xsl:value-of select="phone"/>
 			</xsl:if>
 			
 			<xsl:if test="fax != ''">
-			<br /><b>Факс:</b><xsl:text> </xsl:text><xsl:value-of select="fax"/>
+			<br /><b>&labelFax;</b><xsl:text> </xsl:text><xsl:value-of select="fax"/>
 			</xsl:if>
 			
 			<xsl:variable name="location">, <xsl:value-of select="shop_country/shop_country_location/name"/></xsl:variable>
@@ -72,7 +74,7 @@
 			<xsl:variable name="city_area">, <xsl:value-of select="shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name"/></xsl:variable>
 			<xsl:variable name="adres">, <xsl:value-of select="address"/></xsl:variable>
 			
-	<br /><b>Адрес доставки:</b><xsl:text> </xsl:text><xsl:if test="postcode != ''"><xsl:value-of select="postcode"/>, </xsl:if>
+			<br /><b>&labelDeliveryAddress;</b><xsl:text> </xsl:text><xsl:if test="postcode != ''"><xsl:value-of select="postcode"/>, </xsl:if>
 			<xsl:if test="shop_country/name != ''">
 				<xsl:value-of select="shop_country/name"/>
 			</xsl:if>
@@ -83,22 +85,22 @@
 				<xsl:value-of select="$city"/>
 			</xsl:if>
 			<xsl:if test="$city_area != ', '">
-				<xsl:value-of select="$city_area"/>&#xA0;район</xsl:if>
+				<xsl:value-of select="$city_area"/>&#xA0;&labelDistrict;</xsl:if>
 			<xsl:if test="$adres != ', '">
 				<xsl:value-of select="$adres"/>
 			</xsl:if>
 			
 			<xsl:if test="shop_delivery/name != ''">
-			<br /><b>Тип доставки:</b><xsl:text> </xsl:text><xsl:value-of select="shop_delivery/name"/>
+			<br /><b>&labelDelivery;</b><xsl:text> </xsl:text><xsl:value-of select="shop_delivery/name"/>
 			</xsl:if>
 			
 			<xsl:if test="shop_payment_system/name != ''">
-			<br /><b>Способ оплаты:</b><xsl:text> </xsl:text><xsl:value-of select="shop_payment_system/name"/>
+			<br /><b>&labelPaymentSystem;</b><xsl:text> </xsl:text><xsl:value-of select="shop_payment_system/name"/>
 			</xsl:if>
 		</p>
 	</xsl:template>
 	
-	<!-- Данные о товарах -->
+	<!-- Ordered Item Template -->
 	<xsl:template match="shop_order/shop_order_item">
 		<tr>
 			<td>

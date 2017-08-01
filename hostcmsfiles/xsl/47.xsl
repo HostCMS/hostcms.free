@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://47">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -8,7 +8,7 @@
 	
 	<xsl:template match="/site">
 		
-		<h1>Карта сайта</h1>
+		<h1>&labelTitle;</h1>
 		
 		<ul class="siteMap">
 			<!-- Выбираем узлы структуры -->
@@ -23,14 +23,14 @@
 			
 			<!-- Показывать ссылку, или нет -->
 			<xsl:if test="show = 1">
-				<!-- Определяем адрес ссылки -->
+				<!-- Set $link variable -->
 				<xsl:variable name="link">
 					<xsl:choose>
-						<!-- Если внешняя ссылка -->
+						<!-- External link -->
 						<xsl:when test="url != ''">
 							<xsl:value-of disable-output-escaping="yes" select="url"/>
 						</xsl:when>
-						<!-- Иначе если внутренняя ссылка -->
+						<!-- Internal link -->
 						<xsl:otherwise>
 							<xsl:value-of disable-output-escaping="yes" select="link"/>
 						</xsl:otherwise>

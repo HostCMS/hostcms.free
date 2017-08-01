@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://134">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -11,12 +11,12 @@
 	<xsl:template match="/shop">
 
 		<form method="POST">
-			<h1>Реквизиты</h1>
+			<h1>&labelPaymentDetails;</h1>
 
 			<div class="comment shop_address">
 
 				<div class="row">
-					<div class="caption">Сумма платежа:</div>
+					<div class="caption">&labelAmount;</div>
 					<div class="field">
 						<input type="text" size="15" class="width1" name="amount" />
 						<xsl:text> </xsl:text>
@@ -26,7 +26,7 @@
 				</div>
 
 				<div class="row">
-					<div class="caption">Страна:</div>
+					<div class="caption">&labelCountry;</div>
 					<div class="field">
 						<select id="shop_country_id" name="shop_country_id" onchange="$.loadLocations('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -37,7 +37,7 @@
 				</div>
 
 				<div class="row">
-					<div class="caption">Область:</div>
+					<div class="caption">&labelRegion;</div>
 					<div class="field">
 						<select name="shop_country_location_id" id="shop_country_location_id" onchange="$.loadCities('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -46,7 +46,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Город:</div>
+					<div class="caption">&labelCity;</div>
 					<div class="field">
 						<select name="shop_country_location_city_id" id="shop_country_location_city_id" onchange="$.loadCityAreas('{/shop/url}cart/', $(this).val())">
 							<option value="0">…</option>
@@ -54,7 +54,7 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Район города:</div>
+					<div class="caption">&labelDistrict;</div>
 					<div class="field">
 						<select name="shop_country_location_city_area_id" id="shop_country_location_city_area_id">
 							<option value="0">…</option>
@@ -62,20 +62,20 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Индекс:</div>
+					<div class="caption">&labelPostcode;</div>
 					<div class="field">
 						<input type="text" size="15" class="width1" name="postcode" value="{/shop/siteuser/postcode}" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Улица, дом, квартира:<br/>
-					(город, если не выбраны)</div>
+					<div class="caption">&labelAddressLine1;<br/>
+					&labelAddressLine2;</div>
 					<div class="field">
 						<input type="text" size="30" name="address" value="{/shop/siteuser/address}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Фамилия, Имя, Отчество:</div>
+					<div class="caption">&labelName;</div>
 					<div class="field">
 						<input type="text" size="15" class="width1" name="surname" value="{/shop/siteuser/surname}" />
 						<input type="text" size="15" class="width1" name="name" value="{/shop/siteuser/name}" />
@@ -83,56 +83,55 @@
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Компания:</div>
+					<div class="caption">&labelCompany;</div>
 					<div class="field">
 						<input type="text" size="30" name="company" value="{/shop/siteuser/company}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Телефон:</div>
+					<div class="caption">&labelPhone;</div>
 					<div class="field">
 						<input type="text" size="30" name="phone" value="{/shop/siteuser/phone}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Факс:</div>
+					<div class="caption">&labelFax;</div>
 					<div class="field">
 						<input type="text" size="30" name="fax" value="{/shop/siteuser/fax}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">E-mail:</div>
+					<div class="caption">&labelEmail;</div>
 					<div class="field">
 						<input type="text" size="30" name="email" value="{/shop/siteuser/email}" class="width2" />
 					</div>
 				</div>
 				<div class="row">
-					<div class="caption">Комментарий:</div>
+					<div class="caption">&labelReview;</div>
 					<div class="field">
 						<textarea rows="3" name="description" class="width2"></textarea>
 					</div>
 				</div>
-
 			</div>
 
-			<!-- Платежные системы -->
+			<!-- List of payment systems -->
 			<xsl:choose>
 			<xsl:when test="count(shop_payment_system) = 0">
-				<p><b>В данный момент нет доступных платежных систем!</b></p>
-				<p>Оформление заказа невозможно, свяжитесь с администрацией Интернет-магазина.</p>
+				<p><b>&labelShopPaymentSystemLine1;</b></p>
+				<p>&labelShopPaymentSystemLine2;</p>
 			</xsl:when>
 			<xsl:otherwise>
 				<table class="shop_cart">
 					<tr class="total">
-						<th>Форма оплаты</th>
-						<th>Описание</th>
+						<th>&labelPayForm;</th>
+						<th>&labelDescription;</th>
 					</tr>
 					<xsl:apply-templates select="shop_payment_system"/>
 				</table>
 
-				<!-- Кнопка -->
+				<!-- Button -->
 				<input name="apply" value="apply" type="hidden" />
-				<input value="Далее →" type="submit" class="button" />
+				<input value="&labelNext;" type="submit" class="button" />
 			</xsl:otherwise>
 			</xsl:choose>
 		</form>
@@ -171,5 +170,4 @@
 			</td>
 		</tr>
 	</xsl:template>
-
 </xsl:stylesheet>

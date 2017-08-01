@@ -1,41 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://135">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<!-- ПополнениеЛицевогоСчетаПлатежныеСистемы -->
-	
+
 	<xsl:template match="/list">
-		
+
 		<xsl:choose>
 			<xsl:when test="count_system_of_pay=0">
 				<p>
-					<b>В данный момент нет доступных платежных систем!</b>
+					<b>&labelShopPaymentSystemLine1;</b>
 				</p>
-				<p>Оформление заказа невозможно, свяжитесь с администрацией Интернет-магазина.</p>
+				<p>&labelShopPaymentSystemLine2;</p>
 			</xsl:when>
 			<xsl:otherwise>
 				<table cellspacing="0" cellpadding="0" border="0" class="shop_cart_table">
 					<tr class="shop_cart_table_title">
-						<td>Форма оплаты</td>
-						<td>Описание</td>
+						<td>&labelPayForm;</td>
+						<td>&labelDescription;</td>
 					</tr>
 					<xsl:apply-templates select="system_of_pay"/>
 				</table>
 				<div style="margin: 10px 0px; float: left" class="shop_button_block red_button_block">
-					<input name="apply" value="Отправить заказ" type="submit"/>
+					<input name="apply" value="&labelSendOrder;" type="submit"/>
 				</div>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<xsl:template match="system_of_pay">
 		<tr>
 			<td width="50%">
-				
 				<table border="0" cellpadding="0" cellspacing="0" width="100%">
 					<tr>
 						<td width="20" style="border-bottom: 0;">

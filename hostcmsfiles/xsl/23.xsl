@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://23">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -20,7 +20,7 @@
 				<xsl:value-of select="forms_name"/>
 			</h1>
 			
-			<p>Спасибо! Запрос получен, в ближайшее время Вам будет дан ответ.</p>
+			<p>&labelSuccess;</p>
 		</xsl:if>
 	</xsl:template>
 </xsl:stylesheet>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE xsl:stylesheet>
+<!DOCTYPE xsl:stylesheet SYSTEM "lang://41">
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:hostcms="http://www.hostcms.ru/"
@@ -22,7 +22,7 @@
 			</xsl:comment>
 		</script>
 
-		<h1>Редактирование сообщения</h1>
+		<h1>&labelEditMessage;</h1>
 
 		<xsl:if test="error != ''">
 			<div id="error">
@@ -32,7 +32,7 @@
 
 		<!-- Хлебные крошки -->
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/">
 				<xsl:value-of select="forum_category/name"/>
@@ -51,7 +51,7 @@
 			<div class="add_message_table">
 				<div class="add_row">
 					<!-- Заголовок темы-->
-					<div style="float: left; width: 50px; margin-top: 2px">Тема:</div>
+					<div style="float: left; width: 50px; margin-top: 2px">&labelSubject;</div>
 					<div style="margin-left: 50px; padding-right: 10px"><input id="post_title" style="width: 97%;" type="text" name="post_title" value="{$post_title}"/></div>
 				</div>
 
@@ -62,7 +62,7 @@
 				</div>
 
 				<div class="add_row">
-					<input border="0" name="add_post" type="submit" class="button" value="Добавить"/>
+					<input border="0" name="add_post" type="submit" class="button" value="&labelAdd;"/>
 				</div>
 			</div>
 
@@ -72,7 +72,7 @@
 
 		<!-- Хлебные крошки -->
 		<p>
-			<a href="{url}">Список форумов</a>
+			<a href="{url}">&labelForumsList;</a>
 			<span><xsl:text> → </xsl:text></span>
 			<a href="{url}{forum_category/@id}/">
 				<xsl:value-of select="forum_category/name"/>
@@ -84,5 +84,4 @@
 
 		</p>
 	</xsl:template>
-
 </xsl:stylesheet>

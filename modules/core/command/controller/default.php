@@ -582,7 +582,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					<div style="box-sizing: border-box; width: 740px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;"><div style="width: 75px; float: left"><img src="http://www.ie6nomore.com/files/theme/ie6nomore-warning.jpg" alt="Warning!"/></div>
 					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.4 лицензионого договора присоединения</div>
 					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Халява обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
-					<div><b>' . htmlspecialchars('<a href="http://www.hostcms.ru" target="_blank">Система управления сайтом Host CMS</a>') . '</b></div> на сайт производителя <a href="http://www.hostcms.ru" target="_blank">http://www.hostcms.ru</a>.</div>
+					<div><b>' . htmlspecialchars('<a href="http://www.hostcms.ru" target="_blank">Система управления сайтом HostCMS</a>') . '</b></div> на сайт производителя <a href="http://www.hostcms.ru" target="_blank">http://www.hostcms.ru</a>.</div>
 					</div>
 					</div>
 				</div>' . $sContent;

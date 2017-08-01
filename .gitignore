@@ -8,6 +8,7 @@
 *~
 *.project
 .builds
+Thumbs.db
 
 # Mac
 .DS_Store
@@ -16,7 +17,7 @@
 .fseventsd
 
 !/.gitignore
-!/.htaccess
+#!/.htaccess
 !/bootstrap.php
 !/captcha.php
 !/index.php
@@ -58,13 +59,16 @@
 !hostcmsfiles/captcha/**
 !hostcmsfiles/images/**
 !hostcmsfiles/jquery/**
-!hostcmsfiles/lib/**
+# Disable libs
+#!hostcmsfiles/lib/**
 !hostcmsfiles/logs/.htaccess
 !hostcmsfiles/shop/**
-!hostcmsfiles/structure/**
+# Disable structures
+#!hostcmsfiles/structure/**
 !hostcmsfiles/tmp/.htaccess
 !hostcmsfiles/update/.htaccess
-!hostcmsfiles/xsl/**
+# Disable xsls
+#!hostcmsfiles/xsl/**
 !hostcmsfiles/.htaccess
 !hostcmsfiles/main.js
 !hostcmsfiles/style.css
@@ -81,8 +85,8 @@
 !modules/comment/**
 !modules/constant/**
 !modules/core/**
-# !!! Disable config folder
-#modules/core/config/*
+# Disable config folder
+modules/core/config/*
 !modules/document/**
 !modules/informationsystem/**
 !modules/install/**
@@ -113,6 +117,6 @@
 !modules/xsl/**
 !modules/.htaccess
 #
-!templates/**
+#!templates/**
 #
-!upload/**
+#!upload/**

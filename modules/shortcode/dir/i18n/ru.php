@@ -5,7 +5,7 @@
  * @package HostCMS 6\Shortcode
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'shortcode_dir_add_form_title' => 'Добавление группы шорткодов',
