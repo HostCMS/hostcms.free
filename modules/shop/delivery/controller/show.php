@@ -243,6 +243,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 					$weight += $oShop_Cart->Shop_Item->weight * $oShop_Cart->quantity;
 
+					// Расчет единицы измерения ведется в милиметрах
 					$this->volume += Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->length, $oShop->size_measure, 0) * Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->width, $oShop->size_measure, 0) * Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->height, $oShop->size_measure, 0);
 				}
 			}

@@ -118,8 +118,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 						if (strlen($this->pageSelector))
 						{
 						?>
-						<div class="pull-right" id="editabledatatable_length">
-							<label><?php echo $this->pageSelector?></label>
+						<div class="table-toolbar-right pull-right">
+							<?php echo $this->pageSelector?>
 						</div>
 						<?php
 						}
@@ -127,6 +127,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 					</div>
 
 					<?php $this->showChildren()?>
+
 					<?php echo $this->content?>
 				</div>
 			</div>

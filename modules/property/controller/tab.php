@@ -1044,18 +1044,22 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 	/**
 	 * Apply object property
+	 * @hostcms-event Property_Controller_Tab.onBeforeApplyObjectProperty
+	 * @hostcms-event Property_Controller_Tab.onAfterApplyObjectProperty
 	 * @hostcms-event Property_Controller_Tab.onApplyObjectProperty
 	 */
 	public function applyObjectProperty()
 	{
 		$aProperties = $this->_getProperties()->findAll();
 
+		Core_Event::notify('Property_Controller_Tab.onBeforeApplyObjectProperty', $this, array($this->_Admin_Form_Controller, $aProperties));
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		foreach ($aProperties as $oProperty)
 		{
 			// Values already exist
-			$aProperty_Values = $oProperty->getValues($this->_object->id);
+			$aProperty_Values = $oProperty->getValues($this->_object->id, FALSE);
 
 			switch ($oProperty->type)
 			{
@@ -1234,6 +1238,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					Core_Event::notify('Property_Controller_Tab.onApplyObjectProperty', $this, array($oProperty, $aProperty_Values));
 			}
 		}
+
+		Core_Event::notify('Property_Controller_Tab.onAfterApplyObjectProperty', $this, array($this->_Admin_Form_Controller, $aProperties));
 	}
 
 	/**

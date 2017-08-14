@@ -375,9 +375,10 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				// Платежная система связана с доставкой. Удаляем связь платежной системы с доставкой
 				if (in_array($oShop_Payment_System->id, $aDelivery_Payment_Systems))
 				{
-					$oShop_Delivery_Payment_Systems = $this->_object->Shop_Delivery_Payment_Systems->getByShop_payment_system_id($oShop_Payment_System->id);
+					// $oShop_Delivery_Payment_System = $this->_object->Shop_Delivery_Payment_Systems->getByShop_payment_system_id($oShop_Payment_System->id);
+					// !is_null($oShop_Delivery_Payment_System) && $oShop_Delivery_Payment_System->delete();
 
-					!is_null($oShop_Delivery_Payment_Systems) && $oShop_Delivery_Payment_Systems->delete();
+					$this->_object->remove($oShop_Payment_System);
 				}
 			}
 		}

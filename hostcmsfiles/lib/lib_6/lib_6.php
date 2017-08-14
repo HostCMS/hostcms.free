@@ -489,4 +489,6 @@ $Shop_Controller_Show
 	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
 	//->filterShortcuts(TRUE)
+	// Учет остатка товаров на складе
+	//->warehouseMode('in-stock')
 	->show();

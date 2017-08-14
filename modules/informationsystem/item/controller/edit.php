@@ -166,7 +166,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						$(function(){
 							$(".shortcut-group-tags").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 2,
+								minimumInputLength: 1,
 								placeholder: "' . Core::_('Informationsystem_Item.select_group') . '",
 								tags: true,
 								allowClear: true,

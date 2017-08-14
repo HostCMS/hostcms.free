@@ -485,7 +485,7 @@ class Core_Str
 	}
 
 	/**
-	 * Escaping quotes and line breaks
+	 * Escaping apostrophe ('), slashes (\), 'script' and line breaks.
 	 * @param string $str source string
 	 * @return string
 	 */

@@ -30,7 +30,8 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 		$allow_filter = FALSE;
 
-		?><table width="100%" cellpadding="2" cellspacing="2" class="admin_table table">
+		?>
+		<table width="100%" cellpadding="2" cellspacing="2" class="admin_table table">
 		<thead>
 		<tr class="admin_table_title"><?php
 
@@ -805,8 +806,8 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
 		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
-			->name('admin_forms_on_page')
-			->id('id_on_page')
+			//->name('admin_forms_on_page')
+			//->id('id_on_page')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)

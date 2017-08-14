@@ -27,6 +27,7 @@ return array(
 	'desc' => 'Descending',
 	'not-installed' => 'Not installed',
 	'buy' => 'Buy',
+	'filter' => 'Filter',
 
 	'model_name' => 'Administration center forms',
 	'menu' => 'Administration center forms',

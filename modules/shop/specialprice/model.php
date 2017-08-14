@@ -45,7 +45,7 @@ class Shop_Specialprice_Model extends Core_Entity
 		'price' => 0,
 		'percent' => 0
 	);
-	
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -57,7 +57,7 @@ class Shop_Specialprice_Model extends Core_Entity
 
 		$oShop_Item_Controller = new Shop_Item_Controller();
 
-		// > 0, т.к. $this->price может быть строкой 0.00
+		// $this->price может быть строкой 0.00
 		if ($this->price > 0)
 		{
 			$price = $this->price;
@@ -75,6 +75,10 @@ class Shop_Specialprice_Model extends Core_Entity
 
 		$this->clearXmlTags()
 			->addXmlTag('price', $aPrices['price_discount']);
+
+		!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount']);
+		!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax']);
+		!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax']);
 
 		return parent::getXml();
 	}

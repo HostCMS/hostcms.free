@@ -14,6 +14,142 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
 	/**
+	 * Apply form settings
+	 * @return self
+	 */
+	public function formSettings()
+	{
+		parent::formSettings();
+
+		// Filter: Main Option
+		if (!is_null(Core_Array::getPost('changeFilterStatus')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$this->_oAdmin_Form_Setting->filter = json_encode(
+					array('show' => intval(Core_Array::getPost('show')))
+						+ (is_array($this->_filter)
+							? $this->_filter
+							: array())
+				);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Fields
+		if (!is_null(Core_Array::getPost('changeFilterField')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				// Main Tab should be first
+				if (!isset($tabs['main']))
+				{
+					$tab['main'] = array();
+				}
+
+				$tab = strval(Core_Array::getPost('tab'));
+				$field = strval(Core_Array::getPost('field'));
+				$show = intval(Core_Array::getPost('show'));
+
+				$tabs[$tab]['fields'][$field]['show'] = $show;
+
+				$this->_filter['tabs'] = $tabs;
+
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Save As
+		if (!is_null(Core_Array::getPost('saveFilterAs')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				$aNewTab = array(
+					'caption' => Core_Array::getPost('filterCaption')
+				);
+
+				$bCreated = FALSE;
+				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				{
+					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+					{
+						$field = $oAdmin_Form_Field->name;
+
+						$value = Core_Array::getPost($field);
+
+						if (strlen($value))
+						{
+							$bCreated = TRUE;
+							$aNewTab['fields'][$field]['show'] = 1;
+							$aNewTab['fields'][$field]['value'] = $value;
+						}
+						else
+						{
+							$aNewTab['fields'][$field]['show'] = 0;
+						}
+					}
+				}
+
+				//end($array); $last_id = key($array);
+
+				/*$tab = strval(Core_Array::getPost('tab'));
+				$field = strval(Core_Array::getPost('field'));
+				$show = intval(Core_Array::getPost('show'));
+
+				$tabs[$tab][$field]['show'] = $show;*/
+
+				if ($bCreated)
+				{
+					$tabs[] = $aNewTab;
+
+					$this->_filter['tabs'] = $tabs;
+
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+					$this->_oAdmin_Form_Setting->save();
+
+					end($tabs);
+					$aJSON = array('message' => 'OK', 'id' => key($tabs));
+				}
+				else
+				{
+					$aJSON = array('message' => 'Error, empty conditions');
+				}
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+
+		return $this;
+	}
+
+	/**
 	 * Show form content in administration center
 	 * @return self
 	 * @hostcms-event Admin_Form_Controller.onBeforeShowActions
@@ -35,9 +171,154 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
-		// div class="table-scrollable"
-		// table-bordered
+		$aHide = array();
+		$path = Core_Str::escapeJavascriptVariable($this->_path);
+		$aTabs = Core_Array::get($this->_filter, 'tabs', array());
 		?>
+		<div class="tabbable topFilter">
+			<ul class="nav nav-tabs tabs-flat" id="filterTabs">
+				<?php
+				//print_r($aTabs);
+				!isset($aTabs['main']) && $aTabs['main'] = array();
+
+				foreach ($aTabs as $tabName => $aTab)
+				{
+					$bMain = $tabName === 'main';
+
+					?><li<?php echo $bMain ? ' class="active tab-orange"' : ''?>>
+						<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
+							<?php echo htmlspecialchars(
+								$bMain
+									? Core::_('Admin_Form.filter')
+									: $aTab['caption']
+							)?>
+						</a>
+					</li>
+					<?php
+				}
+				?>
+			</ul>
+			<div class="tab-content tabs-flat">
+				<?php
+				foreach ($aTabs as $tabName => $aTab)
+				{
+					$bMain = $tabName === 'main';
+
+					?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bMain ? ' in active' : ''?>">
+						<div id="horizontal-form">
+							<form class="form-horizontal" role="form" action="<?php echo htmlspecialchars($this->_path)?>" data-filter-id="<?php echo $tabName?>">
+								<?php
+								foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+								{
+									if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+									{
+										$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+
+										$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+											? htmlspecialchars($Admin_Word_Value->name)
+											: '&mdash;';
+
+										$sInputId = $tabName . '-' . $oAdmin_Form_Field->id;
+										$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field->id;
+
+										if (isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
+											&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0)
+										{
+											$aHide[] = '#' . $sFormGroupId;
+										}
+
+										$value = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value'])
+											? $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value']
+											: '';
+										
+										?><div class="form-group" id="<?php echo $sFormGroupId?>">
+											<label for="<?php echo $sInputId?>" class="col-sm-2 control-label no-padding-right">
+												<?php echo $fieldName?>
+											</label>
+											<div class="col-sm-10">
+												<input type="text" name="<?php echo htmlspecialchars($oAdmin_Form_Field->name)?>" value="<?php echo htmlspecialchars($value)?>" class="form-control" id="<?php echo $sInputId?>">
+											</div>
+										</div><?php
+									}
+								}
+								?>
+								<div class="form-group text-align-right">
+									<div class="col-sm-offset-2 col-sm-10">
+										<button type="submit" class="btn btn-default"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
+
+										<div class="btn-group">
+											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+												<i class="fa fa-plus"></i>
+											</a>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<?php
+
+												foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+												{
+													if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+													{
+														$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+
+														$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+															? htmlspecialchars($Admin_Word_Value->name)
+															: '&mdash;';
+
+														$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
+															&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
+															? ''
+															: ' fa-check';
+
+														?><li>
+															<a data-filter-field-id="<?php echo $tabName . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo $tabName?>', field: '<?php echo $oAdmin_Form_Field->name?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo $fieldName?></a>
+														</li><?php
+													}
+												}
+												?>
+											</ul>
+										</div>
+
+										<div class="btn-group">
+											<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+												<i class="fa fa-gear"></i>
+											</a>
+											<ul class="dropdown-menu dropdown-menu-right">
+												<li>
+													<a href="javascript:void(0);" onclick="$.filterSaveAs('Введите название фильтра', $(this))">Сохранить как</a>
+													<?php if (!$bMain) {
+													?>
+													<a href="javascript:void(0);" onclick="$.filterSave($(this))">Сохранить</a>
+													<a href="javascript:void(0);">Удалить</a>
+													<?php
+													}
+													?>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</form>
+
+
+						</div>
+
+					</div>
+					<?php
+				}
+
+				if (count($aHide))
+				{
+					?><script>$('<?php echo implode(',', $aHide)?>').hide();</script><?php
+				}
+				?>
+			</div>
+
+			<?php if (!Core_Array::get($this->_filter, 'show'))
+			{
+				?><script>$('.topFilter').hide();</script><?php
+			}
+			?>
+		</div>
+
 		<div>
 			<table class="admin-table table table-hover table-striped">
 				<thead>
@@ -889,14 +1170,34 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		);
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
+		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Span')
+			//->name('admin_forms_on_page')
+			//->id('id_on_page')
+			->class('btn btn-sm btn-default margin-right-10')
+			->onclick('$(".topFilter").toggle(); $.changeFilterStatus({ path: "' . htmlspecialchars($this->_path) . '", show: + $(".topFilter").is(":visible") })')
+			->add(
+				Core::factory('Core_Html_Entity_I')
+					->class('fa fa-filter no-margin')
+			)
+			->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-orange')
+					->value(7)
+			)
+			->execute();
+
+		?><label><?php
+
 		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
-			->name('admin_forms_on_page')
-			->id('id_on_page')
+			//->name('admin_forms_on_page')
+			//->id('id_on_page')
 			->class('form-control input-sm')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
 			->execute();
+
+		?></label><?php
 	}
 
 	/**

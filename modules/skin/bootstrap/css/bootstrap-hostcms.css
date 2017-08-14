@@ -1151,8 +1151,16 @@ border-left: 0 none;
 	font-style: italic;
 }
 
-#editabledatatable_length{
-	margin-bottom: 20px;
+.table-toolbar-right { margin-bottom: 20px }
+.table-toolbar-right .btn-sm { font-size: 13px }
+.table-toolbar-right .btn-sm .badge {
+	background-color: #fb6e52;
+    font-size: 8px !important;
+    height: 15px;
+    padding: 3px 5px;
+    position: absolute;
+    right: -7px;
+    top: -7px;
 }
 
 table input[type="checkbox"] + .text:before, table input[type="radio"] + .text:before {

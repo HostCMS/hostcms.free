@@ -848,7 +848,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$(function(){
 								$(".shop-item-tags").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
-									minimumInputLength: 2,
+									minimumInputLength: 1,
 									placeholder: "' . Core::_('Shop_Item.type_tag') . '",
 									tags: true,
 									allowClear: true,

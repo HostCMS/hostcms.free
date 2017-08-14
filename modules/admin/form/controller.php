@@ -154,6 +154,12 @@ class Admin_Form_Controller
 	public $request = array();
 
 	/**
+	 * Admin_Form_Setting
+	 * @var Admin_Form_Setting_Model|NULL
+	 */
+	protected $_oAdmin_Form_Setting = NULL;
+	
+	/**
 	 * Apply form settings
 	 * @return self
 	 */
@@ -190,32 +196,31 @@ class Admin_Form_Controller
 		{
 			$user_id = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 
-			$oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser(
-				$user_id
-			);
+			is_null($this->_oAdmin_Form_Setting)
+				&& $this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($user_id);
 
-			$bAdmin_Form_Setting_Already_Exists = $oAdmin_Form_Setting;
+			$bAdmin_Form_Setting_Already_Exists = is_object($this->_oAdmin_Form_Setting);
 
 			if (!$bAdmin_Form_Setting_Already_Exists)
 			{
-				$oAdmin_Form_Setting = Core_Entity::factory('Admin_Form_Setting');
+				$this->_oAdmin_Form_Setting = Core_Entity::factory('Admin_Form_Setting');
 
 				// Связываем с формой и пользователем сайта
-				$this->_Admin_Form->add($oAdmin_Form_Setting);
-				$oUserCurrent->add($oAdmin_Form_Setting);
+				$this->_Admin_Form->add($this->_oAdmin_Form_Setting);
+				$oUserCurrent->add($this->_oAdmin_Form_Setting);
 			}
 
-			!is_null($this->_limit) && $oAdmin_Form_Setting->on_page = intval($this->_limit);
-			!is_null($this->_current) && $oAdmin_Form_Setting->page_number = intval($this->_current);
+			!is_null($this->_limit) && $this->_oAdmin_Form_Setting->on_page = intval($this->_limit);
+			!is_null($this->_current) && $this->_oAdmin_Form_Setting->page_number = intval($this->_current);
 
 			if (!is_null($this->_sortingFieldId))
 			{
-				$oAdmin_Form_Setting->order_field_id = intval($this->_sortingFieldId);
+				$this->_oAdmin_Form_Setting->order_field_id = intval($this->_sortingFieldId);
 			}
 			// Восстанавливаем сохраненный
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->_sortingFieldId = $oAdmin_Form_Setting->order_field_id;
+				$this->_sortingFieldId = $this->_oAdmin_Form_Setting->order_field_id;
 			}
 
 			// Set sorting field
@@ -223,15 +228,15 @@ class Admin_Form_Controller
 
 			if (!is_null($this->_sortingDirection))
 			{
-				$oAdmin_Form_Setting->order_direction = intval($this->_sortingDirection);
+				$this->_oAdmin_Form_Setting->order_direction = intval($this->_sortingDirection);
 			}
 			// Восстанавливаем сохраненный
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->_sortingDirection = $oAdmin_Form_Setting->order_direction;
+				$this->_sortingDirection = $this->_oAdmin_Form_Setting->order_direction;
 			}
 
-			$oAdmin_Form_Setting->save();
+			$this->_oAdmin_Form_Setting->save();
 		}
 
 		// Добавляем замену для windowId
@@ -439,18 +444,19 @@ class Admin_Form_Controller
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$user_id = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 
-			$oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser(
-				$user_id
-			);
+			$this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($user_id);
 
 			// Данные поля сортировки и направления из настроек пользователя
-			if ($oAdmin_Form_Setting)
+			if ($this->_oAdmin_Form_Setting)
 			{
+				$aFilter = $this->getFilterJson();
+				
 				$this
-					->limit($oAdmin_Form_Setting->on_page)
-					->current($oAdmin_Form_Setting->page_number)
-					->sortingFieldId($oAdmin_Form_Setting->order_field_id)
-					->sortingDirection($oAdmin_Form_Setting->order_direction);
+					->filter(is_array($aFilter) ? $aFilter : array())
+					->limit($this->_oAdmin_Form_Setting->on_page)
+					->current($this->_oAdmin_Form_Setting->page_number)
+					->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id)
+					->sortingDirection($this->_oAdmin_Form_Setting->order_direction);
 			}
 			else
 			{
@@ -467,6 +473,13 @@ class Admin_Form_Controller
 		$this->path($_SERVER['PHP_SELF']);
 	}
 
+	public function getFilterJson()
+	{
+		return $this->_oAdmin_Form_Setting->filter != ''
+			? json_decode($this->_oAdmin_Form_Setting->filter, TRUE)
+			: array();
+	}
+	
 	/**
 	 * Is showing operations necessary
 	 * @var boolean
@@ -727,6 +740,19 @@ class Admin_Form_Controller
 		return $this;
 	}
 
+	protected $_filter = array();
+
+	/**
+	 * Set filter settings
+	 * @param array $filter
+	 * @return self
+	 */
+	public function filter($filter)
+	{
+		$this->_filter = $filter;
+		return $this;
+	}
+
 	/**
 	 * Add dataset
 	 * @param Admin_Form_Dataset $oAdmin_Form_Dataset dataset
@@ -924,7 +950,7 @@ class Admin_Form_Controller
 		ob_start();
 
 		Core_Event::notify('Admin_Form_Controller.onBeforeExecute', $this);
-		
+
 		if (!empty($this->_action))
 		{
 			$actionName = $this->_action;
@@ -1097,7 +1123,7 @@ class Admin_Form_Controller
 			->addMessage(ob_get_clean())
 			->addContent($this->_getForm())
 			->show();
-			
+
 		Core_Event::notify('Admin_Form_Controller.onAfterExecute', $this);
 	}
 

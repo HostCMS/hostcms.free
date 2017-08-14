@@ -1289,7 +1289,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									->save()
 									->id;
 						break;
-						// Дополнительные группы для товара (CML_ID), где нужно создавать ярлыки
+						// "Ярлыки GUID" - дополнительные группы для товара (CML_ID групп через запятую)
 						case 'additional_groups':
 							$aShortcuts = explode(',', $sData);
 							$this->_aAdditionalGroups = array_merge($this->_aAdditionalGroups, $aShortcuts);

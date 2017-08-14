@@ -324,19 +324,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add characteristic to item
-	 * @param object $oShop_Item shop item
-	 * @param object $oItemProperty item property
-	 * @return self
-	 */
-	/*protected function _addCharacteristic($oShop_Item, $oItemProperty)
-	{
-		$this->_addPredefinedAdditionalProperty($oShop_Item, strval($oItemProperty->Наименование), strval($oItemProperty->Значение), TRUE);
-
-		return $this;
-	}*/
-
-	/**
 	 * Check if property exists in array and save it if so
 	 * @return self
 	 */
