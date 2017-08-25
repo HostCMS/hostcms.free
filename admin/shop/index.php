@@ -26,6 +26,61 @@ $oAdmin_Form_Controller
 	->title(Core::_('Shop.menu'))
 	->pageTitle(Core::_('Shop.menu'));
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& Core_Array::getGet('shop_id')
+	&& !is_null(Core_Array::getGet('queryString'))
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$shop_id = intval(Core_Array::getGet('shop_id'));
+		$oShop = Core_Entity::factory('Shop', $shop_id);
+
+		// Указание валюты не обязательно
+		$shop_currency_id = Core_Array::getGet('shop_currency_id');
+		$oShop_Currency = !is_null($shop_currency_id)
+			? Core_Entity::factory('Shop_Currency', intval($shop_currency_id))
+			: $oShop->Shop_Currency;
+
+		$oShop_Controller = Shop_Controller::instance();
+
+		$oShop_Items = $oShop->Shop_Items;
+		$oShop_Items->queryBuilder()
+			->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10);
+
+		$aShop_Items = $oShop_Items->findAll(FALSE);
+		foreach ($aShop_Items as $oShop_Item)
+		{
+			$oShop_Item_Controller = new Shop_Item_Controller();
+			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
+				? $oShop_Controller->getCurrencyCoefficientInShopCurrency(
+					$oShop_Item->Shop_Currency,
+					$oShop_Currency
+				)
+				: 0;
+
+			$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
+
+			$aJSON[] = array(
+				'id' => $oShop_Item->id,
+				'label' => $oShop_Item->name,
+				'price' => $aPrice['price_tax'] - $aPrice['tax'],
+				'price_with_tax' => $aPrice['price_tax'],
+				'rate' => $aPrice['rate'],
+				'marking' => $oShop_Item->marking,
+				'currency' => $oShop_Currency->name
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 

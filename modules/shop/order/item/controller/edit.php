@@ -107,7 +107,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			$('#itemInput').autocomplete({
 				  source: function(request, response) {
 					$.ajax({
-					  url: '/admin/shop/order/item/index.php?autocomplete=1&shop_order_id={$object->Shop_Order->id}',
+					  url: '/admin/shop/index.php?autocomplete&shop_id={$object->Shop_Order->shop_id}&shop_currency_id={$object->Shop_Order->shop_currency_id}',
 					  dataType: 'json',
 					  data: {
 						queryString: request.term

@@ -45,8 +45,8 @@ return array(
 	'tab_description' => 'Описание',
 	'tab_export' => 'Экспорт/Импорт',
 	'tab_seo' => 'SEO',
-	'tab_tags' => 'Метки',
-	'tab_special_prices' => 'Специальные цены',
+	'tab_associated' => 'Сопутствующие',
+	// 'tab_special_prices' => 'Специальные цены',
 	'tab_prop' => "Дополнительные свойства",
 	'shop_group_id' => '<acronym title="Группа, которой принадлежит товар">Группа</acronym>',
 	'item_type_selection_group_buttons_name_simple' => "Обычный товар",
@@ -303,4 +303,5 @@ return array(
 	'sales_order_show_producers_limit' => 'Количество производителей на графике',
 	'reset' => 'Исходный вид',
 	'legend' => 'Легенда',
+	'special_price_header' => 'Специальные цены',
 );
