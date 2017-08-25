@@ -140,7 +140,7 @@ class Skin_Default_Module_Informationsystem_Module extends Informationsystem_Mod
 							Core::_('Comment.delete')
 						)
 						->onclick(
-							"res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.msg_information_alt_delete')))."'); if (res) { $.widgetRequest({path: '" . $oAdmin_Form_Controller->getAdminActionLoadHref($sInformationsystemHref, 'markDeleted', NULL, 0, $oComment->id) . "', context: $('#{$windowId}')});} return false"
+							"res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))."'); if (res) { $.widgetRequest({path: '" . $oAdmin_Form_Controller->getAdminActionLoadHref($sInformationsystemHref, 'markDeleted', NULL, 0, $oComment->id) . "', context: $('#{$windowId}')});} return false"
 						)
 						->add(
 							Core::factory('Core_Html_Entity_Img')

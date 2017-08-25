@@ -11,6 +11,7 @@
  */
 return array(
 	'save' => 'Сохранить',
+	'saveAs' => 'Сохранить как',
 	'apply' => 'Применить',
 	'noSubject' => 'Без темы',
 	'actions' => 'Действия',
@@ -28,6 +29,7 @@ return array(
 	'not-installed' => 'Не установлен',
 	'buy' => 'Купить',
 	'filter' => 'Фильтр',
+	'delete' => 'Удалить',
 
 	'model_name' => 'Формы центра администрирования',
 	'menu' => 'Формы центра администрирования',
@@ -96,7 +98,6 @@ return array(
 	'msg_file_settings' => 'Настройки изображения',
 
 	'msg_information_delete' => 'Вы уверены, что хотите удалить?',
-	'msg_information_alt_delete' => 'Удалить',
 
 	'watermark_position_x' => '<acronym title="Свойство, определяющее положение водяного знака по оси X (в пикселях или процентах)">По оси X</acronym>',
 

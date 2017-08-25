@@ -1220,6 +1220,8 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	protected function _groupCondition()
 	{
+		$oShop = $this->getEntity();
+
 		$shop_group_id = !$this->parentItem
 			? intval($this->group)
 			: 0;
@@ -1240,6 +1242,7 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			$oCore_QueryBuilder_Select_Modifications = Core_QueryBuilder::select('shop_items.id')
 				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0)
 				->where('shop_items.active', '=', 1)
 				->where('shop_items.shop_group_id', '=', $shop_group_id);
@@ -1248,7 +1251,7 @@ class Shop_Controller_Show extends Core_Controller
 			$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
 
 			Core_Event::notify(get_class($this) . '.onBeforeSelectModifications', $this, array($oCore_QueryBuilder_Select_Modifications));
-			
+
 			$this->_Shop_Items
 				->queryBuilder()
 				->setOr()
@@ -1260,6 +1263,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$oCore_QueryBuilder_Select_Shortcuts_For_Modifications = Core_QueryBuilder::select('shop_items.shortcut_id')
 					->from('shop_items')
+					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.deleted', '=', 0)
 					->where('shop_items.active', '=', 1)
 					->where('shop_items.shop_group_id', '=', $shop_group_id)

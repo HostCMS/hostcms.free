@@ -173,6 +173,7 @@ class Admin_Form_Controller
 				'current' => NULL,
 				'sortingfield' => NULL,
 				'sortingdirection' => NULL,
+				'filterId' => 'main',
 				'action' => NULL,
 				'operation' => NULL,
 				'window' => 'id_content',
@@ -184,6 +185,7 @@ class Admin_Form_Controller
 			->current($formSettings['current'] !== '' ? $formSettings['current'] : NULL)
 			->sortingDirection($formSettings['sortingdirection'] !== '' ? $formSettings['sortingdirection'] : NULL)
 			->sortingFieldId($formSettings['sortingfield'] !== '' ? $formSettings['sortingfield'] : NULL)
+			->filterId($formSettings['filterId'])
 			->action($formSettings['action'] !== '' ? $formSettings['action'] : NULL)
 			->operation($formSettings['operation'] !== '' ? $formSettings['operation'] : NULL)
 			->checked($formSettings['checked'])
@@ -1316,6 +1318,24 @@ class Admin_Form_Controller
 		return $this;
 	}
 
+
+	/**
+	 * Current Filter Id
+	 * @var int
+	 */
+	protected $_filterId = NULL;
+
+	/**
+	 * Set Filter ID
+	 * @param mixed $sortingDirection direction
+	 * @return self
+	 */
+	public function filterId($filterId)
+	{
+		$this->_filterId = strval($filterId);
+		return $this;
+	}
+	
 	/**
 	 * Backend callback method
 	 * @param string $path path
@@ -1667,8 +1687,14 @@ class Admin_Form_Controller
 					// Если имя поля counter_pages.date, то остается date
 					$fieldName = $this->getFieldName($oAdmin_Form_Field->name);
 
-					$sFilterValue = Core_Array::get($this->request, "admin_form_filter_{$oAdmin_Form_Field->id}", NULL);
-
+					$filterPrefix = $this->_filterId === ''
+						// Main Filter
+						? 'admin_form_filter_'
+						// Top Filter
+						: 'topFilter_';
+					
+					$sFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}", NULL);
+var_dump($sFilterValue);
 					// Функция обратного вызова для значения в фильтре
 					if (isset($this->_filterCallbacks[$oAdmin_Form_Field->name]))
 					{
@@ -1752,7 +1778,7 @@ class Admin_Form_Controller
 								case 6: // Дата.
 
 									// Дата от.
-									$date = trim(Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}"));
+									$date = trim(Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}"));
 
 									if (!empty($date))
 									{
@@ -1768,7 +1794,7 @@ class Admin_Form_Controller
 									}
 
 									// Дата до.
-									$date = trim(Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}"));
+									$date = trim(Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}"));
 
 									if (!empty($date))
 									{

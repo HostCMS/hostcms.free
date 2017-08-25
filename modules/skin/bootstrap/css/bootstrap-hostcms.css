@@ -800,6 +800,14 @@ display: inline-block;
 	padding: 3px 5px;
 }
 
+.admin_table_filter.disabled {
+	opacity: .5;
+}
+tr.admin_table_filter.disabled input, 
+tr.admin_table_filter.disabled select {
+	pointer-events: none;
+}
+
 .table thead tr th .fa,
 .table tbody tr td .fa {
 	font-size: 14px;

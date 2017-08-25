@@ -203,6 +203,28 @@ function isEmpty(str) {
 				}
 			}
 
+			// Расширенные фильтры
+			var filterId = $('.topFilter').is(':visible')
+				? $('#filterTabs li.active').data('filter-id')
+				: null;
+
+			data['hostcms[filterId]'] = filterId;
+
+			var jTopFiltersItems = jQuery("#"+settings.windowId+" #filter-" + filterId + " :input[name^='topFilter_']"),
+				iTopFiltersItemsCount = jTopFiltersItems.length;
+
+			for (var jFiltersItem, i=0; i < iTopFiltersItemsCount; i++)
+			{
+				jFiltersItem = jTopFiltersItems.eq(i);
+
+				// Если значение фильтра до 255 символов
+				if (jFiltersItem.val().length < 256)
+				{
+					// Дописываем к передаваемым данным
+					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+				}
+			}
+
 			// Текущая страница.
 			/*if (ALimit === false)
 			{

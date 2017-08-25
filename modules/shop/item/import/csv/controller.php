@@ -2909,7 +2909,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			setlocale(LC_ALL, ALT_SITE_LOCALE);
 		}
 
-		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
+		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"');
 
 		if ($aCsvLine === FALSE)
 		{

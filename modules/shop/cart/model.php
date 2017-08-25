@@ -92,6 +92,23 @@ class Shop_Cart_Model extends Core_Entity
 	}
 
 	/**
+	 * Show special prices data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlSpecialprices = FALSE;
+
+	/**
+	 * Add special prices XML to item
+	 * @param boolean $showXmlSpecialprices mode
+	 * @return self
+	 */
+	public function showXmlSpecialprices($showXmlSpecialprices = TRUE)
+	{
+		$this->_showXmlSpecialprices = $showXmlSpecialprices;
+		return $this;
+	}
+	
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetXml
@@ -106,6 +123,7 @@ class Shop_Cart_Model extends Core_Entity
 			->showXmlWarehousesItems(TRUE)
 			->showXmlBonuses(TRUE)
 			->showXmlProperties($this->_showXmlProperties)
+			->showXmlSpecialprices($this->_showXmlSpecialprices)
 			->cartQuantity($this->quantity);
 
 		// Parent item for modification

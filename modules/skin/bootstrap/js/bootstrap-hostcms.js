@@ -249,6 +249,10 @@
 
 			object.find('i').toggleClass('fa-check');
 		},
+		toggleFilter: function() {
+			$('.topFilter').toggle();
+			$('tr.admin_table_filter').toggleClass('disabled');
+		},
 		changeFilterStatus: function(settings) {
 			$.ajax({
 				url: settings.path,
@@ -277,11 +281,22 @@
 				type: 'POST'
 			});
 		},
-		filterSaveAs: function(caption, object) {
+		filterSaveAs: function(caption, object, additionalParams) {
 			
 			bootbox.prompt(caption, function (result) {
 				if (result !== null) {
-					$.loadingScreen('show');
+					
+					$.adminSendForm({
+						buttonObject: object,
+						additionalParams: additionalParams,
+						post: {
+							'hostcms[filterId]': $('#filterTabs li.active').data('filter-id'),
+							filterCaption: result,
+							saveFilterAs: true
+						}
+					});
+					
+					/*$.loadingScreen('show');
 					//alert(object);
 					
 					var FormNode = object.closest('form'),
@@ -299,7 +314,7 @@
 							alert(data.toSource());
 							$.loadingScreen('hide');
 						}
-					});
+					});*/
 				}
 			});
 		},
@@ -308,7 +323,28 @@
 			$.loadingScreen('show');
 			
 			var FormNode = object.closest('form'),
-				data = { saveFilter: true, filterId: 1 },
+				data = { saveFilter: true, filterId: FormNode.data('filter-id') },
+				path = FormNode.attr('action');
+
+			FormNode.ajaxSubmit({
+				data: data,
+				url: path,
+				type: 'POST',
+				dataType: 'json',
+				cache: false,
+				success: function(data, status, jqXHR) {
+					//alert(data.toSource());
+					$.loadingScreen('hide');
+				}
+			});
+		},
+		filterDelete: function(object) {
+			
+			$.loadingScreen('show');
+			
+			var FormNode = object.closest('form'),
+				filterId = FormNode.data('filter-id'),
+				data = { deleteFilter: true, filterId: filterId },
 				path = FormNode.attr('action');
 
 			FormNode.ajaxSubmit({
@@ -319,10 +355,14 @@
 				dataType: 'json',
 				cache: false,
 				success: function(data, status, jqXHR) {
-					alert(data.toSource());
+					//alert(data.toSource());
 					$.loadingScreen('hide');
 				}
 			});
+
+			$('#filter-li-' + filterId).prev().find('a').tab('show');
+			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
+			
 		},
 		/* -- CHAT -- */
 		chatGetUsersList: function(event)

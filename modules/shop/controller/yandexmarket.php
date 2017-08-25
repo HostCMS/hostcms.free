@@ -8,7 +8,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
- * - outlets(TRUE|FALSE|array()) выводить данные рамках в программы «Забронировать на Маркете». По умолчанию FALSE. При указании массива данные будут выводиться только с указанных ID складов.
+ * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
+ * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
  * - recommended(TRUE|FALSE) экспортировать рекомендованные товары, по умолчанию FALSE.
  * - checkAvailable(TRUE|FALSE) проверять остаток на складе, по умолчанию TRUE. Если FALSE, то товар будет выгружаться доступным назвисимо от остатка на складе.
@@ -17,6 +18,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - type('offer'|'vendor.model'|'book'|'audiobook'|'artist.title'|'tour'|'event-ticket') тип товара, по умолчанию 'offer'
  * - onStep(3000) количество товаров, выбираемых запросом за 1 шаг, по умолчанию 500
  * - stdOut() поток вывода, может использоваться для записи результата в файл. По умолчанию Core_Out_Std
+ * - sno() система налогообложения (СНО) магазина. По умолчанию OSN — общая система налогообложения (ОСН).
+ *
  *
  * <code>
  * $Shop_Controller_YandexMarket = new Shop_Controller_YandexMarket(
@@ -54,6 +57,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	protected $_allowedProperties = array(
 		'itemsProperties',
 		'outlets',
+		'paymentMethod',
 		'modifications',
 		'recommended',
 		'checkAvailable',
@@ -62,7 +66,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'type',
 		'onStep',
 		'protocol',
-		'stdOut'
+		'stdOut',
+		'mode',
+		'token',
+		'sno',
+		//'pattern',
+		//'patternExpressions',
+		//'patternParams'
 	);
 
 	/**
@@ -76,6 +86,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @var Shop_Group_Model
 	 */
 	protected $_Shop_Groups = NULL;
+
+	/**
+	 * Shop order object
+	 * @var Shop_Order_Model
+	 */
+	protected $_Shop_Order = NULL;
 
 	/**
 	 * Array of siteuser's groups allowed for current siteuser
@@ -256,13 +272,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			= $this->checkAvailable = TRUE;
 
 		$this->recommended = $this->checkRest = $this->outlets = FALSE;
-		
+
+		$this->paymentMethod = array();
+
 		$this->type = 'offer';
 		$this->onStep = 500;
 
 		$this->stdOut = new Core_Out_Std();
 
 		$this->_Shop_Item_Controller = new Shop_Item_Controller();
+
+		$this->mode = NULL;
+		$this->token = '';
+		$this->sno = 'OSN';
 
 		Core_Session::close();
 	}
@@ -784,25 +806,23 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->itemsProperties && $this->_addPropertyValue($oShop_Item);
 
 		// outlets
-		if ($this->outlets)
+		if (is_array($this->outlets) && count($this->outlets))
 		{
-			$aShop_Warehouse_Items = is_array($this->outlets) && count($this->outlets)
-				? $oShop_Item->Shop_Warehouse_Items->getAllByShop_warehouse_id($this->outlets, FALSE, 'IN')
-				: $oShop_Item->Shop_Warehouse_Items->findAll(FALSE);
-				
+			$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->getAllByShop_warehouse_id(array_keys($this->outlets), FALSE, 'IN');
+
 			if (count($aShop_Warehouse_Items))
 			{
 				$this->stdOut->write('<outlets>' . "\n");
-				
+
 				foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
 				{
-					$this->stdOut->write('<outlet id="' . $oShop_Warehouse_Item->shop_warehouse_id . '" instock="' . intval($oShop_Warehouse_Item->count) . '" booking="true" />' . "\n");
+					$this->stdOut->write('<outlet id="' . $this->outlets[$oShop_Warehouse_Item->shop_warehouse_id] . '" instock="' . intval($oShop_Warehouse_Item->count) . '" booking="false" />' . "\n");
 				}
-				
+
 				$this->stdOut->write('</outlets>' . "\n");
 			}
 		}
-		
+
 		Core_Event::notify(get_class($this) . '.onAfterOffer', $this, array($oShop_Item));
 
 		$this->stdOut->write('</offer>'. "\n");
@@ -1032,6 +1052,76 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Parse URL and set controller properties
+	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeParseUrl
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterParseUrl
+	 */
+	public function parseUrl()
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
+
+		$action = Core_Array::getGet('action');
+
+		$path = NULL;
+
+		if (strlen($action))
+		{
+			$aParseUrl = parse_url($action);
+
+			$path = $aParseUrl['path'];
+
+			if (isset($aParseUrl['query']))
+			{
+				parse_str($aParseUrl['query'], $request);
+
+				if ($this->token != Core_Array::get($request, 'auth-token'))
+				{
+					return $this->error404();
+				}
+			}
+			else
+			{
+				return $this->error404();
+			}
+		}
+
+		if ($path != '')
+		{
+			switch ($path)
+			{
+				case '/cart':
+				case '/order/accept':
+				case '/order/status':
+				case '/order/shipment/status':
+					$this->mode = $path;
+				break;
+				default:
+					$this->error404();
+			}
+		}
+		elseif (is_null($path))
+		{
+			$this->mode = 'show';
+		}
+
+		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Define handler for 404 error
+	 * @return self
+	 */
+	public function error404()
+	{
+		Core_Page::instance()->error404();
+
+		return $this;
+	}
+
+	/**
 	 * Current site alias
 	 * @var string
 	 */
@@ -1051,6 +1141,427 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	public function show()
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
+
+		switch ($this->mode)
+		{
+			case '/cart':
+				$this->responseCart();
+			break;
+			case '/order/accept':
+				$this->orderAccept();
+			break;
+			case '/order/status':
+				$this->orderStatus();
+			break;
+			case '/order/shipment/status':
+				$this->orderShipmentStatus();
+			break;
+			case 'show':
+			default:
+				$this->showYml();
+			break;
+		}
+	}
+
+	/**
+	 * Response cart
+	 * @return array
+	 */
+	public function responseCart()
+	{
+		$body = file_get_contents('php://input');
+
+		$aResponse = json_decode($body, TRUE);
+
+		$aAnswer = array();
+
+		$oShop = $this->getEntity();
+
+		$aVat = array(
+			0 => 'NO_VAT',
+			10 => 'VAT_10',
+			18 => 'VAT_18',
+		);
+
+		if (isset($aResponse['cart']))
+		{
+			$sCurrency = $oShop->Shop_Currency->code == 'RUB'
+				? 'RUR'
+				: $oShop->Shop_Currency->code;
+
+			$aAnswer['cart']['deliveryCurrency'] = strval($sCurrency);
+			$aAnswer['cart']['taxSystem'] = strval($this->sno);
+
+			isset($aResponse['cart']['delivery']['address']['postcode'])
+				&& $postcode = $aResponse['cart']['delivery']['address']['postcode'];
+
+			$aRegion = isset($aResponse['cart']['delivery']['region'])
+				? $this->_getRegion($aResponse['cart']['delivery']['region'])
+				: array();
+
+			$aDeliveries = array();
+
+			if (count($aRegion))
+			{
+				$oShop_Country = Core_Entity::factory('Shop_Country')->getByName($aRegion[0]);
+
+				if (!is_null($oShop_Country))
+				{
+					$city = end($aRegion);
+
+					$oShop_Country_Location_Cities = Core_Entity::factory('Shop_Country_Location_City');
+					$oShop_Country_Location_Cities->queryBuilder()
+						->select('shop_country_location_cities.*')
+						->join('shop_country_locations', 'shop_country_locations.id', '=', 'shop_country_location_cities.shop_country_location_id')
+						->where('shop_country_locations.shop_country_id', '=', $oShop_Country->id)
+						->limit(1);
+
+					$oShop_Country_Location_City = $oShop_Country_Location_Cities->getByName($city);
+
+					if ($oShop_Country_Location_City)
+					{
+						$oShop_Delivery_Controller_Show = new Shop_Delivery_Controller_Show($oShop);
+						$oShop_Delivery_Controller_Show
+							->shop_country_id($oShop_Country->id)
+							->shop_country_location_id($oShop_Country_Location_City->shop_country_location_id)
+							->shop_country_location_city_id($oShop_Country_Location_City->id)
+							->setUp();
+
+						// Выбираем все типы доставки для данного магазина
+						$aShop_Deliveries = $oShop->Shop_Deliveries->getAllByActive(1);
+
+						$aDeliveryMethods = array(
+							0 => 'PICKUP',
+							1 => 'POST',
+							2 => 'DELIVERY',
+						);
+
+						foreach ($aShop_Deliveries as $oShop_Delivery)
+						{
+							$aShop_Delivery_Conditions = $oShop_Delivery_Controller_Show->getShopDeliveryConditions($oShop_Delivery);
+
+							foreach ($aShop_Delivery_Conditions as $key => $object)
+							{
+								// Не самовывоз или заданы outlets
+								if ($aDeliveryMethods[$oShop_Delivery->method] != 'PICKUP' || $this->outlets)
+								{
+									$aTmpDelivery = array(
+										'id' => $object->id,
+										'price' => floatval($object->price),
+										'paymentAllow' => FALSE,
+										'type' => $aDeliveryMethods[$oShop_Delivery->method],
+										'serviceName' => $object->name,
+										'vat' => isset($object->shop_tax_id)
+											? Core_Array::get($aVat, $object->Shop_Tax->rate, 'NO_VAT')
+											: 'NO_VAT',
+										/*'paymentMethods' => array(
+										  "CARD_ON_DELIVERY",
+										  "CASH_ON_DELIVERY",
+										  "YANDEX" // Предоплата
+										)*/
+									);
+
+									if ($aDeliveryMethods[$oShop_Delivery->method] == 'PICKUP')
+									{
+										$aShop_Warehouses = $oShop->Shop_Warehouses->getAllById(array_keys($this->outlets), FALSE, 'IN');
+
+										foreach ($aShop_Warehouses as $oShop_Warehouse)
+										{
+											$aTmpDelivery['outlets'][] = array(
+												'id' => intval($this->outlets[$oShop_Warehouse->id])
+											);
+										}
+									}
+
+									$aTmpDelivery['dates'] = array(
+										'fromDate' => date('d-m-Y', strtotime('+' . $oShop_Delivery->days_from . ' day')),
+										'toDate' => date('d-m-Y', strtotime('+' . $oShop_Delivery->days_to . ' day'))
+									);
+
+									$aDeliveries[] = $aTmpDelivery;
+								}
+							}
+						}
+
+						$aAnswer['cart']['deliveryOptions'] = $aDeliveries;
+					}
+					else
+					{
+						Core_Log::instance()->clear()
+							->status(Core_Log::$ERROR)
+							->write('Error: YML /cart: Can\'t find address ' . implode(', ', $aRegion));
+					}
+				}
+			}
+
+			if (isset($aResponse['cart']['items']))
+			{
+				foreach ($aResponse['cart']['items'] as $aItem)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($aItem['offerId']);
+
+					if (!is_null($oShop_Item))
+					{
+						$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->findAll(FALSE);
+
+						$count = 0;
+
+						foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
+						{
+							$count += $oShop_Warehouse_Item->count;
+						}
+
+						$aAnswer['cart']['items'][] = array(
+							'count' => $count,
+							'delivery' => count($aDeliveries) > 0,
+							'feedId' => $aItem['feedId'],
+							'offerId' => strval($oShop_Item->id),
+							'price' => floatval($oShop_Item->price),
+							'vat' => Core_Array::get($aVat, $oShop_Item->Shop_Tax->rate, 'NO_VAT')
+						);
+					}
+				}
+			}
+
+			$aAnswer['cart']['paymentMethods'] = array(
+			  "CARD_ON_DELIVERY",
+			  "CASH_ON_DELIVERY",
+			  // "YANDEX" // Предоплата
+			);
+		}
+
+		Core::showJson($aAnswer);
+	}
+
+	/**
+	 * Get region
+	 * @param array $aParam
+	 * @return array
+	 */
+	protected function _getRegion(array $aParam)
+	{
+		$aReturn = array($aParam['name']);
+
+		isset($aParam['parent'])
+			&& $aReturn = array_merge($this->_getRegion($aParam['parent']), $aReturn);
+
+		return $aReturn;
+	}
+
+	/**
+	 * Order accept
+	 * @return array
+	 */
+	public function orderAccept()
+	{
+		$body = file_get_contents('php://input');
+
+		$aResponse = json_decode($body, TRUE);
+
+		$aAnswer = array();
+
+		if (isset($aResponse['order']))
+		{
+			$oShop_Order = $this->createOrder($aResponse['order']);
+
+			if(!is_null($oShop_Order->id))
+			{
+				$aAnswer['order'] = array(
+					"accepted" => TRUE,
+					"id" => strval($oShop_Order->id)
+				);
+			}
+		}
+
+		Core::showJson($aAnswer);
+	}
+
+	/**
+	 * Order status
+	 * @return self
+	 */
+	public function orderStatus()
+	{
+		$body = file_get_contents('php://input');
+
+		$aResponse = json_decode($body, TRUE);
+
+		if (isset($aResponse['order']['status']))
+		{
+			$oShop_Order = Core_Entity::factory('Shop_Order')->getBySystem_information(intval($aResponse['order']['id']));
+
+			if (!is_null($oShop_Order))
+			{
+				$this->updateOrder($oShop_Order, $aResponse['order']);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Create order
+	 * @param array $aOrderParams
+	 * @return object
+	 */
+	public function createOrder(array $aOrderParams)
+	{
+		$oShop = $this->getEntity();
+
+		$oShop_Order = Core_Entity::factory('Shop_Order');
+		$oShop_Order
+			->shop_id($oShop->id)
+			->shop_currency_id($oShop->shop_currency_id);
+
+		$aRegion = isset($aOrderParams['delivery']['region'])
+			? $this->_getRegion($aOrderParams['delivery']['region'])
+			: array();
+
+		if (count($aRegion))
+		{
+			$oShop_Country = Core_Entity::factory('Shop_Country')->getByName($aRegion[0]);
+
+			if (!is_null($oShop_Country))
+			{
+				$city = end($aRegion);
+
+				$oShop_Country_Location_Cities = Core_Entity::factory('Shop_Country_Location_City');
+				$oShop_Country_Location_Cities->queryBuilder()
+					->select('shop_country_location_cities.*')
+					->join('shop_country_locations', 'shop_country_locations.id', '=', 'shop_country_location_cities.shop_country_location_id')
+					->where('shop_country_locations.shop_country_id', '=', $oShop_Country->id)
+					->limit(1);
+
+				$oShop_Country_Location_City = $oShop_Country_Location_Cities->getByName($city);
+
+				if ($oShop_Country_Location_City)
+				{
+					$oShop_Order
+						->shop_country_id($oShop_Country->id)
+						->shop_country_location_id($oShop_Country_Location_City->shop_country_location_id)
+						->shop_country_location_city_id($oShop_Country_Location_City->id);
+				}
+			}
+		}
+
+		$oShop_Order->system_information = intval($aOrderParams['id']);
+		$oShop_Order->shop_payment_system_id = Core_Array::get($this->paymentMethod, $aOrderParams['paymentMethod'], 0);
+
+		$oShop_Order->save();
+
+		if (count($aOrderParams['items']))
+		{
+			foreach ($aOrderParams['items'] as $orderItem)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item')->find($orderItem['offerId']);
+
+				if (!is_null($oShop_Item))
+				{
+					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+					$oShop_Order_Item
+						->shop_item_id($orderItem['offerId'])
+						->quantity($orderItem['count']);
+
+					$amountPurchaseDiscount = $amount = 0;
+
+					// Prices
+					$oShop_Item_Controller = new Shop_Item_Controller();
+
+					Core::moduleIsActive('siteuser') && $oSiteuser
+						&& $oShop_Item_Controller->siteuser($oSiteuser);
+
+					$oShop_Item_Controller->count($orderItem['count']);
+
+					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, TRUE);
+
+					$amount += $aPrices['price_discount'] * $orderItem['count'];
+
+					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+					for ($i = 0; $i < $orderItem['count']; $i++)
+					{
+						$aDiscountPrices[] = $aPrices['price_discount'];
+					}
+
+					// Сумма для скидок от суммы заказа рассчитывается отдельно
+					$oShop_Item->apply_purchase_discount
+						&& $amountPurchaseDiscount += $aPrices['price_discount'] * $orderItem['count'];
+
+					$oShop_Order_Item->price = $aPrices['price_discount'] - $aPrices['tax'];
+					$oShop_Order_Item->rate = $aPrices['rate'];
+					$oShop_Order_Item->name = $oShop_Item->name;
+					$oShop_Order_Item->type = 0;
+					$oShop_Order_Item->marking = $oShop_Item->marking;
+
+					$oShop_Order->add($oShop_Order_Item);
+				}
+			}
+		}
+
+		$oShop_Order->invoice = $oShop_Order->id;
+		$oShop_Order->save();
+
+		return $oShop_Order;
+	}
+
+	/**
+	 * Update order
+	 * @param Shop_Order_Model $oShop_Order
+	 * @param array $aOrderParams
+	 * @return array
+	 */
+	public function updateOrder(Shop_Order_Model $oShop_Order, array $aOrderParams)
+	{
+		switch($aOrderParams['status'])
+		{
+			case 'CANCELLED':
+				$oShop_Order->canceled = 1;
+				$oShop_Order->save();
+			break;
+			case 'DELIVERED':
+				$oShop_Order->paid = 1;
+				$oShop_Order->save();
+			break;
+		}
+
+		// Информация о покупателе
+		if (isset($aOrderParams['buyer']))
+		{
+			$oShop_Order
+				->name(isset($aOrderParams['buyer']['firstName']) ? $aOrderParams['buyer']['firstName'] : '')
+				->surname(isset($aOrderParams['buyer']['lastName']) ? $aOrderParams['buyer']['lastName'] : '')
+				->patronymic(isset($aOrderParams['buyer']['middleName']) ? $aOrderParams['buyer']['middleName'] : '')
+				->email($aOrderParams['buyer']['email'])
+				->phone($aOrderParams['buyer']['phone']);
+		}
+
+		$oShop_Order->save();
+
+		Core::showJson('OK');
+	}
+
+	/**
+	 * Order shipment status
+	 * @return array
+	 */
+	public function orderShipmentStatus()
+	{
+		Core::showJson('OK');
+	}
+
+	/**
+	 * Show UML built data
+	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
+	 */
+	public function showYml()
+	{
+		// Stop buffering
+		ob_get_clean();
+		header('Content-Type: raw/data');
+		header("Cache-Control: no-cache, must-revalidate");
+		header('X-Accel-Buffering: no');
+
+		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShowYml', $this);
 
 		$this->stdOut->open();
 

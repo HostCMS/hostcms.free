@@ -191,20 +191,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		$oLarge_Main_Block_Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
 			->class('row');
 
-		/*
 		$oLarge_Core_Html_Entity_Div
-			->class('input-group' . ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : ''))
-			//->class('input-group')
-			->add(
-				Core::factory('Core_Html_Entity_Div')
-					->class('col-lg-12')
-					->add($oLarge_Main_Block_Core_Html_Entity_Div)
+			->class(
+				(count($this->_children) ? 'input-group' : '')
+				. ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : '')
 			);
-		*/
-		$oLarge_Core_Html_Entity_Div
-			->class((count($this->_children) ? 'input-group' : '') . ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : ''));
-			//->class('input-group' . ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : ''))
-			//->class('input-group')
+
 		if (count($this->_children))
 		{
 			$oLarge_Core_Html_Entity_Div
@@ -219,33 +211,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			$oLarge_Core_Html_Entity_Div->add($oLarge_Main_Block_Core_Html_Entity_Div);
 		}
 
-		/*
-		$oLarge_Input_Div = Core::factory('Core_Html_Entity_Div')
-			//->style('margin-right: 10px; float: left')
-			->id('file_large_' . $iAdmin_Form_Count)
-			->class('form-group col-md-5 col-sm-7 col-xs-6 col-lg-6')
-			->add(
-				Core::factory('Core_Html_Entity_Span')
-					->class('caption')
-					->value($this->largeImage['caption'])
-			)
-			->add(
-				Core::factory('Core_Html_Entity_Div')
-					->class('input-group')
-					->style('float:left')
-					->add(
-						Core::factory('Core_Html_Entity_Input')
-							->name($this->largeImage['name'])
-							->id($this->largeImage['id'])
-							->type('file')
-							->size(30)
-							//->style('float: left')
-							->onkeydown("FieldCheck('{$windowId}', this)")
-							->onkeyup("FieldCheck('{$windowId}', this)")
-							->onblur("FieldCheck('{$windowId}', this)")
-					)
-			);
-		*/
 		$oLarge_Input_Div = Core::factory('Core_Html_Entity_Div')
 			->id('file_large_' . $iAdmin_Form_Count)
 			->class('form-group col-md-5 col-sm-7 col-xs-6 col-lg-6')
@@ -267,67 +232,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			);
 
 		$oLarge_Main_Block_Core_Html_Entity_Div
-			//->style("margin-right: 10px;" . $oLarge_Core_Html_Entity_Div->style)
-			//->id($this->id . '_' . $iAdmin_Form_Count)
-			//->class('item_div')
 			->add($oLarge_Input_Div);
-
-
-		/*
-		$oLarge_Core_Html_Entity_Div
-			//->style("margin-right: 10px;" . $oLarge_Core_Html_Entity_Div->style)
-			//->id($this->id . '_' . $iAdmin_Form_Count)
-			//->class('item_div')
-			->class('input-group')
-			->add($oLarge_Input_Div);
-			*/
-
+			
 		if ($this->largeImage['path'] != '' || $this->largeImage['show_params'])
 		{
-			// Картинка с контролем большого изображения
-			/*
-			$oLargeControl_Div = Core::factory('Core_Html_Entity_Div')
-				->class('img_control');
-			*/
-
 			if ($this->largeImage['path'] != '')
 			{
-				/*
-				//$oLargeControl_Div->add(
-				$oLarge_Input_Group_Div->add(
-					Core::factory('Core_Html_Entity_Div')
-						->id('control_' . 'large_' . $this->largeImage['id'])
-						->style("float: left")
-						->add(
-
-							Core::factory('Core_Html_Entity_A')
-								->href($this->largeImage['path'])
-								->target('_blank')
-								->add(
-									Core::factory('Core_Html_Entity_Img')
-										->class('img_line')
-										->src("/admin/images/image_preview.gif")
-										->alt(Core::_('Admin_Form.msg_file_view'))
-										->title(Core::_('Admin_Form.msg_file_view'))
-								)
-								//->value(' ')
-						)
-						->add(
-							Core::factory('Core_Html_Entity_A')
-								->href($this->largeImage['delete_href'])
-								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
-								->add(
-									Core::factory('Core_Html_Entity_Img')
-										->class('img_line')
-										->src("/admin/images/image_delete.gif")
-										->alt(Core::_('Admin_Form.msg_information_alt_delete'))
-										->title(Core::_('Admin_Form.msg_information_alt_delete'))
-								)
-								//->value(' ')
-						)
-				);
-				*/
-
 					$oLarge_Input_Group_Div->add(
 						Core::factory('Core_Html_Entity_A')
 							//->id('control_' . 'large_' . $this->largeImage['id'])
@@ -337,20 +247,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->href($this->largeImage['path'])
 							->target('_blank')
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
-						/*
-							Core::factory('Core_Html_Entity_A')
-								->href($this->largeImage['path'])
-								->target('_blank')
-								->add(
-									Core::factory('Core_Html_Entity_Img')
-										->class('img_line')
-										->src("/admin/images/image_preview.gif")
-										->alt(Core::_('Admin_Form.msg_file_view'))
-										->title(Core::_('Admin_Form.msg_file_view'))
-								)
-								*/
-								//->value(' ')
-
 					)
 					->add(
 						Core::factory('Core_Html_Entity_A')
@@ -358,22 +254,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->class('input-group-addon control-item')
 							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
-
-					/*
-						Core::factory('Core_Html_Entity_A')
-							->href($this->largeImage['delete_href'])
-							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
-							->add(
-								Core::factory('Core_Html_Entity_Img')
-									->class('img_line')
-									->src("/admin/images/image_delete.gif")
-									->alt(Core::_('Admin_Form.msg_information_alt_delete'))
-									->title(Core::_('Admin_Form.msg_information_alt_delete'))
-							)
-							*/
-							//->value(' ')
 					);
-
 			}
 
 			// Настройки большого изображения
@@ -390,27 +271,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							)
 							->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->largeImage['name']) . "').HostCMSWindow('open')")
 					);
-
-				/*
-				$oLargeControl_Div->add(
-					Core::factory('Core_Html_Entity_A')
-						->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->largeImage['name']) . "').HostCMSWindow('open')")
-						->add(
-							Core::factory('Core_Html_Entity_Img')
-								->class('img_line')
-								->src("/admin/images/image_settings.gif")
-								->alt(Core::_('Admin_Form.msg_file_settings'))
-								->title(Core::_('Admin_Form.msg_file_settings'))
-						)
-						//->value(' ')
-				);
-				*/
 			}
-
-			/*
-			$oLarge_Input_Div->add(
-				$oLargeControl_Div
-			);*/
 		}
 
 		// Настройки большого изображения
@@ -613,20 +474,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		// Отображать поле загрузки малого изображения
 		if ($this->smallImage['show'] == 1)
 		{
-			//$oSmall_Core_Html_Entity_Div = new Core_Html_Entity_Div();
-
-			// Установим атрибуты div'a.
-			/*if (is_array($this->divAttr))
-			{
-				foreach ($this->divAttr as $attrName => $attrValue)
-				{
-					$oSmall_Core_Html_Entity_Div->$attrName($attrValue);
-				}
-			}*/
-
-			/*
 			$oSmall_Input_Div = Core::factory('Core_Html_Entity_Div')
-				//->style('margin-right: 10px')
 				->id('file_small_' . $iAdmin_Form_Count)
 				->class('form-group col-md-5 col-sm-7 col-xs-6 col-lg-6')
 				->add(
@@ -635,114 +483,45 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 						->value($this->smallImage['caption'])
 				)
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					$oSmall_Input_Group_Div = Core::factory('Core_Html_Entity_Div')
 						->class('input-group')
-						->style('float:left')
 						->add(
 							Core::factory('Core_Html_Entity_Input')
+								->class('form-control')
 								->name($this->smallImage['name'])
 								->id($this->smallImage['id'])
 								->type('file')
-								->size(30)
-								->style('float: left')
-								->onkeydown("FieldCheck('{$windowId}', this)")
-								->onkeyup("FieldCheck('{$windowId}', this)")
-								->onblur("FieldCheck('{$windowId}', this)")
 						)
 				);
-				*/
 
-				$oSmall_Input_Div = Core::factory('Core_Html_Entity_Div')
-					->id('file_small_' . $iAdmin_Form_Count)
-					->class('form-group col-md-5 col-sm-7 col-xs-6 col-lg-6')
-					->add(
-						Core::factory('Core_Html_Entity_Span')
-							->class('caption')
-							->value($this->smallImage['caption'])
-					)
-					->add(
-						$oSmall_Input_Group_Div = Core::factory('Core_Html_Entity_Div')
-							->class('input-group')
-							->add(
-								Core::factory('Core_Html_Entity_Input')
-									->class('form-control')
-									->name($this->smallImage['name'])
-									->id($this->smallImage['id'])
-									->type('file')
-							)
-					);
-
-				/*
-				$oLarge_Core_Html_Entity_Div
-					->add(
-						Core::factory('Core_Html_Entity_Div')->style('clear: both')
-					)
-					->add($oSmall_Input_Div);
-					*/
-
-				$oLarge_Main_Block_Core_Html_Entity_Div
-					->add(
-						Core::factory('Core_Html_Entity_Div')
-							->style('clear:both')
-					)
-					->add($oSmall_Input_Div);
-				/*
-			$oSmall_Core_Html_Entity_Div
-				//->style("margin-right: 10px")
-				->add($oSmall_Input_Div)
-				;
-				*/
+			$oLarge_Main_Block_Core_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_Div')
+						->style('clear:both')
+				)
+				->add($oSmall_Input_Div);
 
 			if ($this->smallImage['path'] != '' || $this->smallImage['show_params'])
 			{
-				// Картинка с контролем малого изображения
-				/*
-				$oSmallControl_Div = Core::factory('Core_Html_Entity_Div')
-					->class('img_control');
-				*/
-
 				if ($this->smallImage['path'] != '')
 				{
 					//$oSmallControl_Div->add(
 					$oSmall_Input_Group_Div->add(
-						Core::factory('Core_Html_Entity_A')
-							//->id('control_' . $this->smallImage['id'])
-							->id('preview_' . 'small_' . $this->smallImage['id'])
-							->class('input-group-addon control-item')
-							->href($this->smallImage['path'])
-							->target('_blank')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
+							Core::factory('Core_Html_Entity_A')
+								//->id('control_' . $this->smallImage['id'])
+								->id('preview_' . 'small_' . $this->smallImage['id'])
+								->class('input-group-addon control-item')
+								->href($this->smallImage['path'])
+								->target('_blank')
+								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
 						)
-							/*
-								Core::factory('Core_Html_Entity_A')
-									->href($this->smallImage['path'])
-									->target('_blank')
-									->add(
-										Core::factory('Core_Html_Entity_Img')
-											->class('img_line')
-											->src("/admin/images/image_preview.gif")
-											->alt(Core::_('Admin_Form.msg_file_view'))
-											->title(Core::_('Admin_Form.msg_file_view'))
-									)
-									*/
-							->add(
-								Core::factory('Core_Html_Entity_A')
-									//->href($this->smallImage['delete_href'])
-									//->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
-									->id('delete_' . 'small_' . $this->smallImage['id'])
-									->class('input-group-addon control-item')
-									->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
-									->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>')
-									/*
-										Core::factory('Core_Html_Entity_Img')
-											->class('img_line')
-											->src("/admin/images/image_delete.gif")
-											->alt(Core::_('Admin_Form.msg_information_alt_delete'))
-											->title(Core::_('Admin_Form.msg_information_alt_delete'))
-											*/
-									)
-									//->value(' ')
-							);
+						->add(
+							Core::factory('Core_Html_Entity_A')
+								->id('delete_' . 'small_' . $this->smallImage['id'])
+								->class('input-group-addon control-item')
+								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
+								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
+						);
 				}
 
 				// Настройки малого изображения
@@ -758,27 +537,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 								)
 								->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow('open')")
 						);
-					/*
-					$oSmallControl_Div->add(
-						Core::factory('Core_Html_Entity_A')
-							//->onclick("SlideWindow('{$windowId}_watermark_{$this->smallImage['name']}')")
-							->onclick("$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow('open')")
-							->add(
-								Core::factory('Core_Html_Entity_Img')
-									->class('img_line')
-									->src("/admin/images/image_settings.gif")
-									->alt(Core::_('Admin_Form.msg_file_settings'))
-									->title(Core::_('Admin_Form.msg_file_settings'))
-							)
-							//->value(' ')
-					);*/
 				}
-
-				/*
-				$oSmall_Input_Div->add(
-					$oSmallControl_Div
-				);
-				*/
 			}
 
 			// Настройки малого изображения
@@ -920,35 +679,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 				if ($this->smallImage['show_description'])
 				{
-					/*
-					$oSmall_Input_Div
-						->style($oSmall_Input_Div->style . '; float: left');
-						*/
-
-						/*
-					$oSmall_Core_Html_Entity_Div
-						->style($oSmall_Core_Html_Entity_Div->style . '; float: left; width: 700px');
-						*/
-
-					/*
-					$oSmall_Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-						->class('form-group col-md-5 col-sm-7 col-xs-6 col-lg-6')
-						->add(
-							Core::factory('Core_Html_Entity_Span')
-								->class('caption')
-								->value(Core::_('Admin_Form.file_description'))
-						)
-						->add(
-							Core::factory('Core_Html_Entity_Input')
-								->type('text')
-								->id('description_small')
-								->name("description_{$this->smallImage['name']}")
-								->size(45)
-								->class('clear')
-								->value($this->smallImage['description'])
-						);
-						*/
-
 					$oLarge_Main_Block_Core_Html_Entity_Div
 						->add(
 							Core::factory('Core_Html_Entity_Div')
@@ -986,11 +716,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow({ autoOpen: false, destroyOnClose: false, title: '" . Core::_('Admin_Form.window_small_image') . "', AppendTo: '#{$windowId} form #file_small_{$iAdmin_Form_Count}', width: 360, height: 180, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 					);
 			}
-
-			/*
-			$oLarge_Core_Html_Entity_Div
-				->add($oSmall_Core_Html_Entity_Div);
-				*/
 		}
 
 		foreach ($this->_children as $oCore_Html_Entity)

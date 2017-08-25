@@ -52,5 +52,8 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'active' => "<acronym title=\"Активность производителя\">Активность</acronym>",
 	'changeStatus_success' => "Информация успешно изменена",
-	'changeDefaultStatus_success' => "Информация успешно изменена",	
+	'changeDefaultStatus_success' => "Информация успешно изменена",
+	'move_producers_groups_title' => "Перенос производителей",
+	'move_producers_groups_id' => "<acronym title=\"Группа, в которую будут перенесены производители\">Родительская группа</acronym>",
+	'move_success' => 'Производители перенесены',
 );

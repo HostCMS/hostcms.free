@@ -62,7 +62,7 @@ class Shop_Producer_Model extends Core_Entity
 	protected $_shortcodeTags = array(
 		'description',
 	);
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -338,6 +338,18 @@ class Shop_Producer_Model extends Core_Entity
 		return isset($aShop_Producers[0])
 			? $aShop_Producers[0]
 			: NULL;
+	}
+
+	/**
+	 * Move shop producer to another dir
+	 * @param int $shop_producer_dir_id dir id
+	 * @return self
+	 */
+	public function move($shop_producer_dir_id)
+	{
+		$this->shop_producer_dir_id = $shop_producer_dir_id;
+		$this->save();
+		return $this;
 	}
 
 	/**

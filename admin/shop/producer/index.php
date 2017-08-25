@@ -345,6 +345,47 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Перенести"
+$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$oShopProducerControllerMove = new Admin_Form_Action_Controller_Type_Move
+	(
+		$oAdminFormActionMove
+	);
+
+	$aExclude = array();
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		// Exclude just dirs
+		if ($datasetKey == 0)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				$aExclude[] = $key;
+			}
+		}
+	}
+	
+	$oShop_Producer_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'Shop_Producer_Controller_Edit', $oAdmin_Form_Action
+	);	
+
+	$oShopProducerControllerMove
+		->title(Core::_('Shop_Producer.move_producers_groups_title'))
+		->selectCaption(Core::_('Shop_Producer.move_producers_groups_id'))
+		// Список директорий генерируется другим контроллером
+		->selectOptions(array(' … ') + $oShop_Producer_Controller_Edit->fillGroupList($shop_id, 0, $aExclude))
+		->value($producer_dir_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShopProducerControllerMove);
+}
+
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Producer_Dir'));
 $oAdmin_Form_Dataset->changeField('active', 'type', 1);
 $oAdmin_Form_Dataset->addCondition(array('where' => array('shop_id', '=', $shop_id)));

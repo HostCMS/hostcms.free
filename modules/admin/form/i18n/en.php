@@ -11,6 +11,7 @@
  */
 return array(
 	'save' => 'Save',
+	'saveAs' => 'Save As',
 	'apply' => 'Apply',
 	'noSubject' => 'No subject',
 	'actions' => 'Actions',
@@ -28,6 +29,7 @@ return array(
 	'not-installed' => 'Not installed',
 	'buy' => 'Buy',
 	'filter' => 'Filter',
+	'delete' => 'Delete',
 
 	'model_name' => 'Administration center forms',
 	'menu' => 'Administration center forms',
@@ -97,7 +99,6 @@ return array(
 	'msg_file_settings' => 'File settings',
 
 	'msg_information_delete' => 'Are you sure you would like to delete?',
-	'msg_information_alt_delete' => 'Delete',
 
 	'watermark_position_x' => '<acronym title="Property of watermark position in X-direction (in pixels or per cents)">X-direction</acronym>',
 

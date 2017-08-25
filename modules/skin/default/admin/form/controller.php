@@ -54,7 +54,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			// Слово найдено
 			$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
 				? htmlspecialchars($Admin_Word_Value->name)
-				: '&mdash;';
+				: '—';
 
 			// Change to Font Awesome
 			if (strlen($oAdmin_Form_Field->ico))
@@ -256,7 +256,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 						break;
 
 						default:
-						?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
+						?><div style="color: #CEC3A3; text-align: center">—</div><?php
 						break;
 					}
 				}
@@ -264,7 +264,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			else
 			{
 				// Фильтр не разрешен.
-				?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
+				?><div style="color: #CEC3A3; text-align: center">—</div><?php
 			}
 			?></td><?php
 		}
@@ -475,7 +475,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 										$fieldName = $Admin_Word_Value
 											? htmlspecialchars($Admin_Word_Value->name)
-											: "&mdash;";
+											: "—";
 
 										// Warning: 01-06-11 Создать отдельное поле в таблице в БД и в нем хранить alt-ы
 										if (isset($field_value['admin_forms_field_alt']))
@@ -547,12 +547,12 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 										/*elseif (!empty($link) && !isset($value_array[$value]))
 										{
 											// Картинки для такого значения не найдено, но есть ссылка
-											?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $datasetKey?>_<?php echo $key_field_value?>').toggleHighlight();<?php echo $onclick?> ">&mdash;</a><?php
+											?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $datasetKey?>_<?php echo $key_field_value?>').toggleHighlight();<?php echo $onclick?> ">—</a><?php
 										}*/
 										else
 										{
 											// Картинки для такого значения не найдено
-											?>&mdash;<?php
+											?>—<?php
 										}
 									break;
 									case 8: // Выпадающий список

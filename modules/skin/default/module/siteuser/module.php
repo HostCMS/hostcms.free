@@ -124,7 +124,7 @@ class Skin_Default_Module_Siteuser_Module extends Siteuser_Module
 							Core::_('Siteuser.delete')
 						)
 						->onclick(
-							"res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.msg_information_alt_delete')))."'); if (res) { $.widgetRequest({path: '" . $oAdmin_Form_Controller->getAdminActionLoadHref($sSiteuserHref, 'markDeleted', NULL, 0, $oSiteuser->id) . "', context: $('#{$windowId}')});} return false"
+							"res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars(Core::_('Admin_Form.delete')))."'); if (res) { $.widgetRequest({path: '" . $oAdmin_Form_Controller->getAdminActionLoadHref($sSiteuserHref, 'markDeleted', NULL, 0, $oSiteuser->id) . "', context: $('#{$windowId}')});} return false"
 						)
 						->add(
 							Core::factory('Core_Html_Entity_Img')
