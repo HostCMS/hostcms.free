@@ -500,13 +500,13 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				if (Core::moduleIsActive('tag'))
 				{
-					$oTagsTab = Admin_Form_Entity::factory('Tab')
+					/*$oTagsTab = Admin_Form_Entity::factory('Tab')
 						->caption(Core::_('Informationsystem_Item.tab_3'))
 						->name('Tags');
 					$this->addTabAfter($oTagsTab, $oInformationsystemTabSeo);
 
 					$oTagsTab
-						->add($oTagRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+						->add($oTagRow1 = Admin_Form_Entity::factory('Div')->class('row'));*/
 
 					$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Item.tags'))
@@ -517,7 +517,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->multiple('multiple')
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oTagRow1->add($oAdditionalGroupsSelect);
+					$oMainRow5->add($oAdditionalGroupsSelect);
 
 					$html = '
 						<script type="text/javascript">
@@ -550,7 +550,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							})</script>
 						';
 
-					$oTagRow1->add(Admin_Form_Entity::factory('Code')->html($html));
+					$oMainRow5->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
 
 			break;

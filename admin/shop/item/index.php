@@ -89,7 +89,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$aConfig = Core_Config::instance()->get('property_config', array()) + array(
 				'select_modifications' => TRUE,
 			);
-			
+
 			$oShop_Items = $oShop->Shop_Items;
 			$oShop_Items->queryBuilder()
 				->where('shop_items.shop_group_id', '=', $iShopGroupId)
@@ -104,7 +104,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 					'id' => $oShop_Item->id,
 					'label' => $oShop_Item->name,
 				);
-				
+
 				// Shop Item's modifications
 				if ($aConfig['select_modifications'])
 				{
@@ -786,6 +786,20 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
 		->divId(array('preview_small_image', 'delete_small_image'));
 
 	$oAdmin_Form_Controller->addAction($oDeleteSmallImageController);
+}
+
+// Удаление сопутствующих товаров с вкладки
+$oAdminFormActionDeleteAssociated = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteAssociated');
+
+if ($oAdminFormActionDeleteAssociated && $oAdmin_Form_Controller->getAction() == 'deleteAssociated')
+{
+	$Shop_Item_Associated_Controller_Delete = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Associated_Controller_Delete', $oAdminFormActionDeleteAssociated
+	);
+
+	$oAdmin_Form_Controller->addAction($Shop_Item_Associated_Controller_Delete);
 }
 
 // Источник данных 0

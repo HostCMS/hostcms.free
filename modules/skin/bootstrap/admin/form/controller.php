@@ -157,9 +157,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
 					{
 						$field = $oAdmin_Form_Field->name;
-						
+
 						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id);
-						
+
 						if (strlen($value))
 						{
 							$tabs[$tabName]['fields'][$field]['show'] = 1;
@@ -256,12 +256,12 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				{
 					$tabName = strval($tabName);
 					$bMain = $tabName === 'main';
-					
+
 					/*var_dump($tabName);
 					var_dump($this->_filterId);*/
-					
+
 					$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
-					
+
 					?><li id="filter-li-<?php echo htmlspecialchars($tabName)?>" <?php echo $bCurrent ? ' class="active tab-orange"' : ''?> data-filter-id="<?php echo $tabName?>">
 						<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
 							<?php echo htmlspecialchars(
@@ -277,11 +277,12 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			</ul>
 			<div class="tab-content tabs-flat">
 				<?php
+				$filterPrefix = 'topFilter_';
 				foreach ($aTabs as $tabName => $aTab)
 				{
 					$tabName = strval($tabName);
 					$bMain = $tabName === 'main';
-					
+
 					$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
 
 					?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bCurrent ? ' in active' : ''?>">
@@ -289,9 +290,17 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							<form class="form-horizontal" role="form" action="<?php echo htmlspecialchars($this->_path)?>" data-filter-id="<?php echo $tabName?>" method="POST">
 								<?php
 								print_r($_POST);
+								// Top Filter
 								foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 								{
-									if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+									// Перекрытие параметров для данного поля
+									$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+									foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+									{
+										$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+									}
+
+									if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
 									{
 										$Admin_Word_Value = $oAdmin_Form_Field
 											->Admin_Word
@@ -301,32 +310,37 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 											? htmlspecialchars($Admin_Word_Value->name)
 											: '—';
 
-										$sInputId = $tabName . '-' . $oAdmin_Form_Field->id;
-										$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field->id;
-
-										$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
-											&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0;
 										
+										$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
+
+										$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+											&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
+
 										$bHide && $aHide[] = '#' . $sFormGroupId;
 
 										// Значение вначале берется из POST, если его там нет, то из данных в JSON
 										$value = !$bHide
-											? (isset($_POST['topFilter_' . $oAdmin_Form_Field->id])
-												? strval($_POST['topFilter_' . $oAdmin_Form_Field->id])
+											? (isset($_POST['topFilter_' . $oAdmin_Form_Field_Changed->id])
+												? strval($_POST['topFilter_' . $oAdmin_Form_Field_Changed->id])
 												: (
-													isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value'])
-														? $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value']
+													isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['value'])
+														? $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['value']
 														: ''
 												)
 											)
 											: '';
 
+										$sInputId = "id_{$filterPrefix}{$oAdmin_Form_Field_Changed->id}";
 										?><div class="form-group" id="<?php echo $sFormGroupId?>">
 											<label for="<?php echo $sInputId?>" class="col-sm-2 control-label no-padding-right">
 												<?php echo $fieldName?>
 											</label>
 											<div class="col-sm-10">
-												<input type="text" name="topFilter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo htmlspecialchars($value)?>" class="form-control" id="<?php echo $sInputId?>">
+												<?php
+												
+												$this->_showFilterField($filterPrefix, $oAdmin_Form_Field_Changed);
+												?>
+												<!-- <input type="text" name="topFilter_<?php echo $oAdmin_Form_Field_Changed->id?>" value="<?php echo htmlspecialchars($value)?>" class="form-control" id="<?php echo $sInputId?>"> -->
 											</div>
 										</div><?php
 									}
@@ -347,23 +361,25 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 											</a>
 											<ul class="dropdown-menu dropdown-menu-right">
 												<?php
-												foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+												foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field_Changed)
 												{
-													if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+													if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
 													{
-														$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+														$Admin_Word_Value = $oAdmin_Form_Field
+															->Admin_Word
+															->getWordByLanguage($this->_Admin_Language->id);
 
 														$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
 															? htmlspecialchars($Admin_Word_Value->name)
 															: '&mdash;';
 
-														$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
-															&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
+														$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+															&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0
 															? ''
 															: ' fa-check';
 
 														?><li>
-															<a data-filter-field-id="<?php echo $tabName . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo $tabName?>', field: '<?php echo $oAdmin_Form_Field->name?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo $fieldName?></a>
+															<a data-filter-field-id="<?php echo $tabName . '-field-' . $oAdmin_Form_Field_Changed->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo $tabName?>', field: '<?php echo $oAdmin_Form_Field_Changed->name?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo $fieldName?></a>
 														</li><?php
 													}
 												}
@@ -531,127 +547,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 				if ($oAdmin_Form_Field_Changed->allow_filter)
 				{
-					$value = trim(Core_Array::get($this->request, "admin_form_filter_{$oAdmin_Form_Field->id}"));
-
-					// Функция обратного вызова для фильтра
-					if (isset($this->_filters[$oAdmin_Form_Field_Changed->name]))
-					{
-						switch ($oAdmin_Form_Field_Changed->type)
-						{
-							case 1: // Строка
-							case 2: // Поле ввода
-							case 4: // Ссылка
-							case 10: // Функция обратного вызова
-							case 3: // Checkbox.
-							case 8: // Выпадающий список
-								echo call_user_func($this->_filters[$oAdmin_Form_Field_Changed->name], $value, $oAdmin_Form_Field);
-							break;
-
-							case 5: // Дата-время.
-							case 6: // Дата.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-
-								echo call_user_func($this->_filters[$oAdmin_Form_Field_Changed->name], $date_from, $date_to, $oAdmin_Form_Field);
-							break;
-						}
-					}
-					else
-					{
-						$style = /*!empty($width)
-							? "width: {$width};"
-							: */"width: 100%;";
-
-						switch ($oAdmin_Form_Field->type)
-						{
-							case 1: // Строка
-							case 2: // Поле ввода
-							case 4: // Ссылка
-							case 10: // Функция обратного вызова
-								$value = htmlspecialchars($value);
-								?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
-							break;
-
-							case 3: // Checkbox.
-								?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
-									<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-									<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
-									<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
-								</select><?php
-							break;
-
-							case 5: // Дата-время.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_from = htmlspecialchars($date_from);
-
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = htmlspecialchars($date_to);
-
-								?><div class="input-group date">
-									<input name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
-								</div>
-								<div class="input-group date">
-									<input name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
-								</div>
-								<script type="text/javascript">
-								(function($) {
-									$('#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-									$('#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-								})(jQuery);
-								</script><?php
-							break;
-
-							case 6: // Дата.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_from = htmlspecialchars($date_from);
-
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = htmlspecialchars($date_to);
-
-								?><div class="input-group date">
-									<input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm" />
-								</div>
-								<div class="input-group date">
-									<input type="text" name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="8" class="form-control input-sm" />
-								</div>
-								<script type="text/javascript">
-								(function($) {
-									$('#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-									$('#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-								})(jQuery);
-								</script>
-								<?php
-							break;
-							case 8: // Выпадающий список.
-								?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
-								<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-								<?php
-								$str_array = explode("\n", $oAdmin_Form_Field_Changed->list);
-								$value_array = array();
-
-								foreach ($str_array as $str_value)
-								{
-									// Каждую строку разделяем по равно
-									$str_explode = explode('=', $str_value);
-
-									if ($str_explode[0] != 0 && count($str_explode) > 1)
-									{
-										// сохраняем в массив варинаты значений и ссылки для них
-										$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-										?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
-									}
-								}
-								?>
-								</select>
-								<?php
-							break;
-
-							default:
-							?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
-							break;
-						}
-					}
+					$filterPrefix = 'admin_form_filter_';
+					$this->_showFilterField($filterPrefix, $oAdmin_Form_Field_Changed);
 				}
 				else
 				{

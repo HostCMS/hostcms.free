@@ -304,4 +304,8 @@ return array(
 	'reset' => 'Исходный вид',
 	'legend' => 'Легенда',
 	'special_price_header' => 'Специальные цены',
+	'associated_item_name' => 'Название',
+	'associated_item_marking' => 'Артикул',
+	'associated_item_count' => 'Количество',
+	'associated_item_price' => 'Цена',
 );

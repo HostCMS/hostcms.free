@@ -66,6 +66,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
 
+			$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
+
 			$aJSON[] = array(
 				'id' => $oShop_Item->id,
 				'label' => $oShop_Item->name,
@@ -73,7 +75,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				'price_with_tax' => $aPrice['price_tax'],
 				'rate' => $aPrice['rate'],
 				'marking' => $oShop_Item->marking,
-				'currency' => $oShop_Currency->name
+				'currency' => $oShop_Currency->name,
+				'count' => $oShop_Warehouse_Item->count
 			);
 		}
 	}

@@ -1641,6 +1641,133 @@ class Admin_Form_Controller
 		return $fieldName;
 	}
 
+	protected function _showFilterField($filterPrefix, $oAdmin_Form_Field)
+	{
+		$value = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
+
+		// Функция обратного вызова для фильтра
+		if (isset($this->_filters[$oAdmin_Form_Field->name]))
+		{
+			switch ($oAdmin_Form_Field->type)
+			{
+				case 1: // Строка
+				case 2: // Поле ввода
+				case 4: // Ссылка
+				case 10: // Функция обратного вызова
+				case 3: // Checkbox.
+				case 8: // Выпадающий список
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field);
+				break;
+
+				case 5: // Дата-время.
+				case 6: // Дата.
+					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
+					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
+
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field);
+				break;
+			}
+		}
+		else
+		{
+			$style = /*!empty($width)
+				? "width: {$width};"
+				: */"width: 100%;";
+
+			switch ($oAdmin_Form_Field->type)
+			{
+				case 1: // Строка
+				case 2: // Поле ввода
+				case 4: // Ссылка
+				case 10: // Функция обратного вызова
+					$value = htmlspecialchars($value);
+					?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
+				break;
+
+				case 3: // Checkbox.
+					?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
+						<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+						<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
+						<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
+					</select><?php
+				break;
+
+				case 5: // Дата-время.
+					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
+					$date_from = htmlspecialchars($date_from);
+
+					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
+					$date_to = htmlspecialchars($date_to);
+
+					?><div class="input-group date">
+						<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
+					</div>
+					<div class="input-group date">
+						<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
+					</div>
+					<script type="text/javascript">
+					(function($) {
+						$('#id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+						$('#id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+					})(jQuery);
+					</script><?php
+				break;
+
+				case 6: // Дата.
+					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
+					$date_from = htmlspecialchars($date_from);
+
+					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
+					$date_to = htmlspecialchars($date_to);
+
+					?><div class="input-group date">
+						<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+					</div>
+					<div class="input-group date">
+						<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
+					</div>
+					<script type="text/javascript">
+					(function($) {
+						$('#id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+						$('#id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+					})(jQuery);
+					</script>
+					<?php
+				break;
+				case 8: // Выпадающий список.
+					?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
+					<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+					<?php
+					$str_array = explode("\n", $oAdmin_Form_Field->list);
+					$value_array = array();
+
+					foreach ($str_array as $str_value)
+					{
+						// Каждую строку разделяем по равно
+						$str_explode = explode('=', $str_value);
+
+						if ($str_explode[0] != 0 && count($str_explode) > 1)
+						{
+							// сохраняем в массив варинаты значений и ссылки для них
+							$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
+
+							?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
+						}
+					}
+					?>
+					</select>
+					<?php
+				break;
+
+				default:
+				?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
+				break;
+			}
+		}
+		
+		return $this;
+	}
+	
 	/**
 	 * Set dataset conditions
 	 * @return self
@@ -1694,7 +1821,7 @@ class Admin_Form_Controller
 						: 'topFilter_';
 					
 					$sFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}", NULL);
-var_dump($sFilterValue);
+
 					// Функция обратного вызова для значения в фильтре
 					if (isset($this->_filterCallbacks[$oAdmin_Form_Field->name]))
 					{

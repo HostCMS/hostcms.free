@@ -262,11 +262,11 @@
 			});
 		},
 		changeFilterField: function(settings) {
-			
+
 			var li = $(settings.context);
 
 			$.filterToggleField(li);
-			
+
 			//path, filter, field, show
 			$.ajax({
 				url: settings.path,
@@ -282,10 +282,10 @@
 			});
 		},
 		filterSaveAs: function(caption, object, additionalParams) {
-			
+
 			bootbox.prompt(caption, function (result) {
 				if (result !== null) {
-					
+
 					$.adminSendForm({
 						buttonObject: object,
 						additionalParams: additionalParams,
@@ -295,10 +295,10 @@
 							saveFilterAs: true
 						}
 					});
-					
+
 					/*$.loadingScreen('show');
 					//alert(object);
-					
+
 					var FormNode = object.closest('form'),
 						data = { filterCaption: result, saveFilterAs: true },
 						path = FormNode.attr('action');
@@ -319,9 +319,9 @@
 			});
 		},
 		filterSave: function(object) {
-			
+
 			$.loadingScreen('show');
-			
+
 			var FormNode = object.closest('form'),
 				data = { saveFilter: true, filterId: FormNode.data('filter-id') },
 				path = FormNode.attr('action');
@@ -339,9 +339,9 @@
 			});
 		},
 		filterDelete: function(object) {
-			
+
 			$.loadingScreen('show');
-			
+
 			var FormNode = object.closest('form'),
 				filterId = FormNode.data('filter-id'),
 				data = { deleteFilter: true, filterId: filterId },
@@ -362,7 +362,7 @@
 
 			$('#filter-li-' + filterId).prev().find('a').tab('show');
 			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
-			
+
 		},
 		/* -- CHAT -- */
 		chatGetUsersList: function(event)

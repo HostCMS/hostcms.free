@@ -889,18 +889,23 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
 
-
-
-
-
-
-
-
-
-
-				//oShopItemTabAssociatedRow1
-
 				$aShop_Item_Associateds = $this->_object->Shop_Item_Associateds->findAll(FALSE);
+
+				$associatedTable = '
+					<table class="table table-striped table-hover associated-item-table">
+						<thead>
+							<tr>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_name') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_marking') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_count') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
+								<th scope="col">  </th>
+							</tr>
+						</thead>
+						<tbody>
+				';
+
+				$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
 				foreach ($aShop_Item_Associateds as $oShop_Item_Associated)
 				{
@@ -917,56 +922,47 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$oShop_Item = $oShop_Item->Shop_Item;
 						}
 
-						// echo $oShop_Item->name . " == " .  $oShop_Item->id . "<br>";
-						
-						
-						
+						$currencyName = $oShop_Item->Shop_Currency->name;
 
-						$oShopItemTabAssociated
-							->add($oShopItemTabAssociatedCurrentRow = Admin_Form_Entity::factory('Div')->class('row'));
+						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
 
-						$oShopItemTabAssociatedCurrentRow
-							->add(
-								Admin_Form_Entity::factory('Div')
-									->value($oShop_Item->name)
-									->class('form-group col-xs-9 col-sm-6 col-md-4')
-							)
-							->add(
-								Admin_Form_Entity::factory('Div')
-									->value($oShop_Item->marking)
-									->class('form-group col-xs-9 col-sm-6 col-md-2')
-							)
-							->add(
-								Admin_Form_Entity::factory('Input')
-									->divAttr(array('class' => 'form-group col-md-1'))
-									->class('add-associated-item form-control')
-									->disabled('disabled')
-									->value(1111)
-							)
-							;
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+
+						$associatedTable .= '
+							<tr id="' . $oShop_Item_Associated->id . '">
+								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
+								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
+								<td>' . $oShop_Warehouse_Item->count . '</td>
+								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . $currencyName . '</td>
+								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+							</tr>
+						';
 					}
 				}
 
+				$associatedTable .= '
+						</tbody>
+					</table>
+				';
+
 				$oShopItemTabAssociated
 					->add($oShopItemTabAssociatedRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemTabAssociatedRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-				$oShopItemTabAssociatedRow1->add(
-					Admin_Form_Entity::factory('Input')
-						->divAttr(array('class' => 'form-group col-xs-10'))
-						->class('add-associated-item form-control')
-						->name('associated_item_id')
-				)
-				->add(
-					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-2 btn-group')
-						->style('margin-top: 3px')
+				$oShopItemTabAssociatedRow1
+					->add(Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12')
 						->add(
-							Admin_Form_Entity::factory('Span')
-								->class('btn btn-success')
-								->value(Core::_('Admin_Form.add'))
-								->onclick('$.addAssociatedItem()')
+							Admin_Form_Entity::factory('Code')->html($associatedTable)
 						)
+					);
+
+				$oShopItemTabAssociatedRow2->add(
+					Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->class('add-associated-item form-control')
+						->name('associated_item_name')
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
@@ -999,10 +995,15 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							 $(this).prev('.ui-helper-hidden-accessible').remove();
 						  },
 						  select: function( event, ui ) {
-							$('#itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
-							$('#itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
-							$('#itemRate').val(typeof ui.item.rate !== 'undefined' ? ui.item.rate : 0);
-							$('#itemMarking').val(typeof ui.item.marking !== 'undefined' ? ui.item.marking : 0);
+							$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
+								.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+								.insertAfter($('.associated-item-table'));
+
+							var lastTr = $('.associated-item-table > tbody tr').filter(':last');
+
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>').insertAfter(lastTr);
+
+							ui.item.value = '';  // it will clear field
 						  },
 						  open: function() {
 							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
@@ -1014,21 +1015,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				");
 
 				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 				$this->getField('length')
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
@@ -1509,6 +1495,27 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						else
 						{
 							!is_null($oAdditionalPriceValue) && $oAdditionalPriceValue->delete();
+						}
+					}
+				}
+
+				// Сопутствующие товары
+				$aAddAssociatedItems = Core_Array::getPost('associated_item_id', array());
+
+				if (count($aAddAssociatedItems))
+				{
+					foreach ($aAddAssociatedItems as $associated_item_id)
+					{
+						$iCount = $this->_object->Shop_Item_Associateds->getCountByshop_item_associated_id($associated_item_id);
+
+						if (!$iCount)
+						{
+							$oShop_Item_Associated = Core_Entity::factory('Shop_Item_Associated');
+							$oShop_Item_Associated
+								->shop_item_associated_id($associated_item_id)
+								->shop_item_id($this->_object->id)
+								->count(1)
+								->save();
 						}
 					}
 				}

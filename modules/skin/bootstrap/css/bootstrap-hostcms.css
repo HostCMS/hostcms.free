@@ -803,7 +803,7 @@ display: inline-block;
 .admin_table_filter.disabled {
 	opacity: .5;
 }
-tr.admin_table_filter.disabled input, 
+tr.admin_table_filter.disabled input,
 tr.admin_table_filter.disabled select {
 	pointer-events: none;
 }
@@ -2034,4 +2034,8 @@ table.table.table-popular-queries tr td:last-child {
 }
 .table.table-popular-queries > tbody > tr:first-child > td {
 	border-top: none;
+}
+
+.table a.delete-associated-item:hover, .table a.add-associated-item:hover {
+	cursor: pointer;
 }
