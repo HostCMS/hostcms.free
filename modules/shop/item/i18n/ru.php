@@ -52,6 +52,7 @@ return array(
 	'item_type_selection_group_buttons_name_simple' => "Обычный товар",
 	'item_type_selection_group_buttons_name_electronic' => "Электронный товар",
 	'item_type_selection_group_buttons_name_divisible' => "Делимый товар",
+	'item_type_selection_group_buttons_name_set' => "Комплект",
 	'shop_item_catalog_modification_flag' => "Модификация для товара",
 	'shop_seller_id' => "<acronym title=\"Продавец товара\">Продавец</acronym>",
 	'shop_producer_id' => "<acronym title=\"Производитель товара\">Производитель</acronym>",
@@ -308,4 +309,7 @@ return array(
 	'associated_item_marking' => 'Артикул',
 	'associated_item_count' => 'Количество',
 	'associated_item_price' => 'Цена',
+	'set_item_header' => 'Комплект',
+	'apply_recount_set' => 'Пересчитать комплект',
+	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара "%s"',
 );

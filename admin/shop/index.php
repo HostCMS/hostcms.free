@@ -42,7 +42,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		// Указание валюты не обязательно
 		$shop_currency_id = Core_Array::getGet('shop_currency_id');
-		$oShop_Currency = !is_null($shop_currency_id)
+		$oShop_Currency = is_numeric($shop_currency_id) && $shop_currency_id > 0
 			? Core_Entity::factory('Shop_Currency', intval($shop_currency_id))
 			: $oShop->Shop_Currency;
 

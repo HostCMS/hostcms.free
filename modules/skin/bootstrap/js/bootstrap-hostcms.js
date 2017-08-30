@@ -1419,7 +1419,56 @@
 			});
 		},
 		/* --- /CHAT --- */
+		autocompleteShopItem: function(shop_id, shop_currency_id, selectOption)
+		{
+			return this.each(function(){
+				 jQuery(this).autocomplete({
+					  source: function(request, response) {
+						$.ajax({
+						  url: '/admin/shop/index.php?autocomplete&shop_id=' + shop_id + '&shop_currency_id=' + shop_currency_id,
+						  dataType: 'json',
+						  data: {
+							queryString: request.term
+						  },
+						  success: function( data ) {
+							response( data );
+						  }
+						});
+					  },
+					  minLength: 1,
+					  create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+							return $('<li></li>')
+								.data('item.autocomplete', item)
+								.append($('<a>').text(item.label))
+								.append($('<span>').text(item.price_with_tax + ' ' + item.currency))
+								.append($('<span>').text(item.marking))
+								.appendTo(ul);
+						}
 
+						 $(this).prev('.ui-helper-hidden-accessible').remove();
+					  },
+					  /*select: function( event, ui ) {
+						$('<input type=\'hidden\' name=\'set_item_id[]\'/>')
+							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+							.insertAfter($('.set-item-table'));
+
+						$('.set-item-table > tbody').append(
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						);
+
+						ui.item.value = '';  // it will clear field
+					  },*/
+					  select: selectOption,
+					  open: function() {
+						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+					  },
+					  close: function() {
+						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+					  }
+				});
+			});		
+		},
 		refreshEditor: function()
 		{
 			return this.each(function(){
