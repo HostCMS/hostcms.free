@@ -147,26 +147,35 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab->move($this->getField('invoice')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
 		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
-		$oAdditionalTab->move($this->getField('siteuser_id')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3')), $oMainRow1);
 
-		if ($this->_object->siteuser_id && Core::moduleIsActive('siteuser'))
+		$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = $this->_object->Siteuser;
 
-			$oSiteuserLink = Admin_Form_Entity::factory('Link');
-			$oSiteuserLink
-				->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
-				->a
-					->class('btn btn-labeled btn-sky')
-					->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/siteuser/index.php', 'edit', NULL, 0, $oSiteuser->id))
-					->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/siteuser/index.php', additionalParams: 'hostcms[checked][0][{$oSiteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
-					->value($oSiteuser->login)
-					->target('_blank');
-			$oSiteuserLink
-				->icon
-					->class('btn-label fa fa-user');
+			$options = !is_null($oSiteuser->id)
+				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+				: array(0);
 
-			$oMainRow1->add($oSiteuserLink);
+			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Order.siteuser_id'))
+				->options($options)
+				->name('siteuser_id')
+				->class('siteuser-tag')
+				->style('width: 100%')
+				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+
+			$oMainRow1->add($oSiteuserSelect);
+
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			->type("text/javascript")
+			->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+			$oMainRow1->add($oCore_Html_Entity_Script);
 		}
 
 		$oMainRow2
@@ -571,6 +580,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+
 		// Может измениться в parent::_applyObjectProperty()
 		$bShop_payment_system_id = $this->_object->shop_payment_system_id;
 

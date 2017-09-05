@@ -218,7 +218,7 @@ function isEmpty(str) {
 				jFiltersItem = jTopFiltersItems.eq(i);
 
 				// Если значение фильтра до 255 символов
-				if (jFiltersItem.val().length < 256)
+				if ((jFiltersItem.val() || '').length < 256)
 				{
 					// Дописываем к передаваемым данным
 					data[jFiltersItem.attr('name')] = jFiltersItem.val();

@@ -150,25 +150,13 @@ if($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href
-		(
-			$oAdmin_Form_Controller->getAdminLoadHref
-			(
-				'/admin/shop/item/index.php',
-				NULL,
-				NULL,
-				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref(
+				'/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"
 			)
 		)
-		->onclick
-		(
-			$oAdmin_Form_Controller->getAdminLoadAjax
-			(
-				'/admin/shop/item/index.php',
-				NULL,
-				NULL,
-				$sAdditionalParams
-			)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams)
 		)
 );
 
@@ -218,20 +206,13 @@ if($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.orders'))
-		->href
-		(
-			$oAdmin_Form_Controller->getAdminLoadHref
-			(
-				$oAdmin_Form_Controller->getPath(),
-				NULL,
-				NULL,
-				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref(
+				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"
 			)
 		)
-		->onclick
-		(
-			$oAdmin_Form_Controller->getAdminLoadAjax
-			(
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax(
 				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams
 			)
 		)
@@ -411,43 +392,6 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 	$oAdmin_Form_Controller->addAction($oDeletePropertyValueController);
 }
 
-// Действие "Удаление файла большого изображения"
-/*$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteLargeImage');
-
-if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteLargeImage')
-{
-	$oDeleteLargeImageController = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Delete_File', $oAction
-	);
-
-	$oDeleteLargeImageController
-		->methodName('deleteLargeImage')
-		->divId('control_large_image');
-
-	// Добавляем контроллер удаления изображения к контроллеру формы
-	$oAdmin_Form_Controller->addAction($oDeleteLargeImageController);
-}
-
-// Действие "Удаление файла малого изображения"
-$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteSmallImage');
-
-if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
-{
-	$oDeleteSmallImageController = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Delete_File', $oAction
-	);
-
-	$oDeleteSmallImageController
-		->methodName('deleteSmallImage')
-		->divId('control_small_image');
-
-	$oAdmin_Form_Controller->addAction($oDeleteSmallImageController);
-}*/
-
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Order')
@@ -467,6 +411,7 @@ $oAdmin_Form_Dataset->addCondition(
 
 // Список значений для фильтра и поля
 $aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
+//$sList = "0=…\n";
 $sList = "0=…\n";
 foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 {
@@ -474,7 +419,8 @@ foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 }
 
 $oAdmin_Form_Dataset
-	->changeField('shop_order_status_id', 'list', trim($sList));
+	->changeField('shop_order_status_id', 'list', trim($sList))
+	->changeField('paid', 'list', "0=" . Core::_('Admin_Form.no') . "\n" . "1=" . Core::_('Admin_Form.yes'));
 
 $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)

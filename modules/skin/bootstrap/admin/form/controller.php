@@ -1177,13 +1177,20 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			->add(
 				Core::factory('Core_Html_Entity_I')
 					->class('fa fa-filter no-margin')
-			)
-			->add(
+			);
+			
+		$iFilters = count(Core_Array::get($this->_filter, 'tabs', array()));
+			
+		if ($iFilters > 1)
+		{
+			$oCore_Html_Entity_Select->add(
 				Core::factory('Core_Html_Entity_Span')
 					->class('badge badge-orange')
-					->value(7)
-			)
-			->execute();
+					->value($iFilters)
+			);
+		}
+			
+		$oCore_Html_Entity_Select->execute();
 
 		?><label><?php
 

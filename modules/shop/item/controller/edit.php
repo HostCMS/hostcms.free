@@ -622,7 +622,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopProducerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.shop_producer_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(self::fillProducersList($object->shop_id))
 					->name('shop_producer_id')
 						->value($this->_object->id
@@ -636,13 +636,43 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Создаем поле групп пользователей сайта как выпадающий список
 				$oSiteUserGroupSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_("Shop_Item.siteuser_group_id"))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(array(-1 => Core::_('Shop_Item.shop_users_group_parrent')) + $aSiteuser_Groups)
 					->name('siteuser_group_id')
 					->value($this->_object->siteuser_group_id);
 
 				// Добавляем группы пользователей сайта
 				$oMainRow10->add($oSiteUserGroupSelect);
+
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Item.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+
+					$oMainRow10->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow10->add($oCore_Html_Entity_Script);
+				}
 
 				// Удаляем продавцов
 				$oAdditionalTab->delete($this->getField('shop_seller_id'));
@@ -651,7 +681,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopSellerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.shop_seller_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options($this->_fillSellersList())
 					->name('shop_seller_id')
 					->value($this->_object->id
@@ -1261,13 +1291,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow2->add($oImageField);
 
 				$this->getField("sorting")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				$this->getField("indexing")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$this->getField("active")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
 					->move($this->getField("indexing"), $oMainRow4)
@@ -1293,10 +1323,40 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->options(array(-1 => Core::_('Shop_Item.shop_users_group_parrent')) + $aSiteuser_Groups)
 					->name('siteuser_group_id')
 					->value($this->_object->siteuser_group_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				// Добавляем группы пользователей сайта
 				$oMainRow5->add($oSiteUserGroupSelect);
+
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Group.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+
+					$oMainRow5->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow5->add($oCore_Html_Entity_Script);
+				}
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
 				if ($oSiteAlias)
@@ -1393,6 +1453,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
+
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
 		parent::_applyObjectProperty();
 

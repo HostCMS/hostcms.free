@@ -234,13 +234,33 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oAdditionalTab->delete($this->getField('siteuser_id'));
 
-				$oSiteuser = Admin_Form_Entity::factory('Input')
-					->value($this->_object->siteuser_id)
-					->caption(Core::_('Informationsystem_Group.siteuser_id'))
-					->name('siteuser_id')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
 
-				$oMainRow6->add($oSiteuser);
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Informationsystem_Group.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+
+					$oMainRow6->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow6->add($oCore_Html_Entity_Script);
+				}
 
 				// Добавляем новое поле типа файл
 				$oImageField = Admin_Form_Entity::factory('File');
@@ -779,7 +799,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				// Sorting
 				$this->getField('sorting')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				$oMainTab->move($this->getField('sorting'), $oMainRow6);
 
@@ -806,15 +826,45 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->name('siteuser_group_id')
 					->value($this->_object->siteuser_group_id)
 					->caption(Core::_('Informationsystem_Group.siteuser_group_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				$oMainRow6->add($oSelect_SiteuserGroups);
 
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Informationsystem_Group.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+
+					$oMainRow6->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow6->add($oCore_Html_Entity_Script);
+				}
+
 				// Active
 				$this->getField('active')
-					->divAttr(array('class' => 'form-group col-xs-6'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
 				$this->getField('indexing')
-					->divAttr(array('class' => 'form-group col-xs-6'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
 
 				$oMainTab->move($this->getField('active'), $oMainRow7);
 				$oMainTab->move($this->getField('indexing'), $oMainRow7);
@@ -995,6 +1045,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _applyObjectProperty()
 	{
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+
 		parent::_applyObjectProperty();
 
 		$informationsystem_id = Core_Array::getGet('informationsystem_id');
@@ -1434,6 +1486,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			//$this->_object->save();
 		}
+
+		//
 
 		$this->_object->save();
 

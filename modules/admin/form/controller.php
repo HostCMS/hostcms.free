@@ -1728,11 +1728,15 @@ class Admin_Form_Controller
 					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
 					$date_to = htmlspecialchars($date_to);
 
-					?><div class="input-group date">
-						<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
-					</div>
-					<div class="input-group date">
-						<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
+					$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4';
+					
+					?><div class="row">
+						<div class="date <?php echo $divClass?>">
+							<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
+						</div>
+						<div class="date <?php echo $divClass?>">
+							<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
+						</div>
 					</div>
 					<script type="text/javascript">
 					(function($) {
@@ -1749,11 +1753,15 @@ class Admin_Form_Controller
 					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
 					$date_to = htmlspecialchars($date_to);
 
-					?><div class="input-group date">
-						<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
-					</div>
-					<div class="input-group date">
-						<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
+					$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
+					
+					?><div class="row">
+						<div class="date <?php echo $divClass?>">
+							<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+						</div>
+						<div class="date <?php echo $divClass?>">
+							<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
+						</div>
 					</div>
 					<script type="text/javascript">
 					(function($) {
@@ -1775,7 +1783,7 @@ class Admin_Form_Controller
 						// Каждую строку разделяем по равно
 						$str_explode = explode('=', $str_value);
 
-						if (/*$str_explode[0] != 0 && */count($str_explode) > 1)
+						if (/*$str_explode[0] != 0 && */$str_explode[1] != '…' && count($str_explode) > 1)
 						{
 							// сохраняем в массив варинаты значений и ссылки для них
 							$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);

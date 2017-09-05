@@ -76,7 +76,7 @@ return array(
 	//'warehouse_item_count' => "Количество товара на складе \"%s\"",
 	'siteuser_group_id' => '<acronym title="Группа, имеющая права доступа к товару">Группа доступа</acronym>',
 	'shop_users_group_parrent' => 'Как у родителя',
-	'siteuser_id' => '<acronym title="Идентификатор пользователя сайта, добавившего товар">Код пользователя</acronym>',
+	'siteuser_id' => '<acronym title="Идентификатор пользователя сайта, добавившего товар">Пользователь сайта</acronym>',
 	'exec_typograph_for_text' => '<acronym title="Применить типографирование к тексту">Типографировать текст</acronym>',
 	'use_trailing_punctuation_for_text' => '<acronym title="Оптическое выравнивание текста перемещает символы пунктуации за границу набора">Оптическое выравнивание</acronym>',
 	'shop_id' => 'Идентификатор магазина',

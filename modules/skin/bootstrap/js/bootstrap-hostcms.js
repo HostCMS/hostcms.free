@@ -1419,6 +1419,34 @@
 			});
 		},
 		/* --- /CHAT --- */
+		selectSiteuser: function(settings)
+		{
+			settings = $.extend({
+				minimumInputLength: 1,
+				allowClear: true,
+				ajax: {
+					url: "/admin/siteuser/siteuser/index.php?siteuser",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				}
+			}, settings);
+			
+			return this.each(function(){
+				jQuery(this).select2(settings);
+			});
+		},
 		autocompleteShopItem: function(shop_id, shop_currency_id, selectOption)
 		{
 			return this.each(function(){
@@ -1467,7 +1495,7 @@
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
 					  }
 				});
-			});		
+			});
 		},
 		refreshEditor: function()
 		{

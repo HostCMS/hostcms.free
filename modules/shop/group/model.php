@@ -97,6 +97,7 @@ class Shop_Group_Model extends Core_Entity
 		'shop_group' => array('foreign_key' => 'parent_id'),
 		'shop' => array(),
 		'siteuser_group' => array(),
+		'siteuser' => array(),
 		'user' => array()
 	);
 

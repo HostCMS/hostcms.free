@@ -24,6 +24,7 @@ return array(
 	'seo_description' => "<acronym title=\"Значение мета-тега description для группы товаров\">Описание (description)</acronym>",
 	'seo_keywords' => "<acronym title=\"Значение мета-тега keywords для группы товаров\">Ключевые слова (keywords)</acronym>",
 	'guid' => '<acronym title="Идентификатор группы товаров для формата CommerceML, например ID00006831">Идентификатор группы товаров CommerceML</acronym>',
+	'siteuser_id' => '<acronym title="Идентификатор пользователя сайта, добавившего группу товаров">Пользователь сайта</acronym>',	
 	'groups_add_form_title' => "Добавление информации о группе товаров",
 	'groups_edit_form_title' => "Редактирование информации о группе товаров",
 	'tab_yandex_market' => 'Экспорт/Импорт',
