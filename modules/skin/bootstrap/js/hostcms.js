@@ -574,3 +574,8 @@ function hasClass(elem, cls) {
 	var testCls = " " + cls + " ";
 	return (str.indexOf(testCls) != -1);
 }
+
+$('.page-content')
+	.on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+		$($(this).attr('href')).find('button[type="submit"]').click();
+	});

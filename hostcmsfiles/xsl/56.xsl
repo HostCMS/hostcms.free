@@ -84,7 +84,7 @@
 					type = 0 - простой тип товара
 					type = 1 - электронный товар, при этом остаток на складе больше 0 или -1,
 					что означает неограниченное количество -->
-					<xsl:if test="type = 0 or (type = 1 and (digitals > 0 or digitals = -1)) or type = 2">
+					<xsl:if test="type = 0 or (type = 1 and (digitals > 0 or digitals = -1)) or type = 2 or type = 3">
 						<a href="{/shop/url}cart/?add={@id}" onclick="return $.addIntoCart('{/shop/url}cart/', {@id}, 1)">
 							<img src="/images/add_to_cart.gif" alt="&labelAddIntoCart;" title="&labelAddIntoCart;" />
 						</a>

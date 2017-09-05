@@ -627,8 +627,10 @@ class Seo_Controller_Yandex extends Seo_Controller
 	 * @param int $limit limit
 	 * @return array
 	 */
-	public function getSitePopularQueries($host_id, $limit = 500)
+	public function getSitePopularQueries($host_id)
 	{
+		$limit = 100;
+
 		$aQueries = $this->getQueries($host_id);
 
 		$aReturn = array();
@@ -649,7 +651,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 	 * @param string $host_url domain url
 	 * @return array
 	 */
-	public function getSitePopularPages($host_url, $limit = 100)
+	public function getSitePopularPages($host_url)
 	{
 		return array();
 	}

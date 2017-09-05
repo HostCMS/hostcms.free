@@ -23,6 +23,8 @@ class Benchmark_Controller_Check extends Admin_Form_Action_Controller
 
 		$oBenchmark_Controller = Benchmark_Controller::instance();
 
+		$oBenchmark_Controller->createTable();
+
 		$oBenchmark
 			->site_id(CURRENT_SITE)
 			->mysql_write($oBenchmark_Controller->writeTable())
@@ -34,6 +36,8 @@ class Benchmark_Controller_Check extends Admin_Form_Action_Controller
 			->network($oBenchmark_Controller->networkDownloadTest())
 			->mail($oBenchmark_Controller->mailTest())
 			->save();
+
+		$oBenchmark_Controller->dropTable();
 
 		return FALSE;
 	}

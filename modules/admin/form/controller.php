@@ -1641,9 +1641,38 @@ class Admin_Form_Controller
 		return $fieldName;
 	}
 
-	protected function _showFilterField($filterPrefix, $oAdmin_Form_Field)
+	/**
+	 * Отображает поле фильтра (верхнего или основного)
+	 */
+	protected function _showFilterField($oAdmin_Form_Field, $filterPrefix, $tabName = NULL)
 	{
-		$value = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
+		if (is_null($tabName))
+		{
+			$value = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
+		}
+		else
+		{
+			$aTabs = Core_Array::get($this->_filter, 'tabs', array());
+			
+			$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
+				&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0;
+			
+			$bMain = $tabName === 'main';
+
+			$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
+			
+			// Значение вначале берется из POST, если его там нет, то из данных в JSON
+			$value = !$bHide
+				? (isset($_POST['topFilter_' . $oAdmin_Form_Field->id]) && $bCurrent
+					? strval($_POST['topFilter_' . $oAdmin_Form_Field->id])
+					: (
+						isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value'])
+							? $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value']
+							: ''
+					)
+				)
+				: '';
+		}
 
 		// Функция обратного вызова для фильтра
 		if (isset($this->_filters[$oAdmin_Form_Field->name]))
@@ -1681,11 +1710,11 @@ class Admin_Form_Controller
 				case 4: // Ссылка
 				case 10: // Функция обратного вызова
 					$value = htmlspecialchars($value);
-					?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
+					?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
 				break;
 
 				case 3: // Checkbox.
-					?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
+					?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
 						<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 						<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
 						<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
@@ -1700,15 +1729,15 @@ class Admin_Form_Controller
 					$date_to = htmlspecialchars($date_to);
 
 					?><div class="input-group date">
-						<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
+						<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
 					</div>
 					<div class="input-group date">
-						<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
+						<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-						$('#id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
 					})(jQuery);
 					</script><?php
 				break;
@@ -1721,21 +1750,21 @@ class Admin_Form_Controller
 					$date_to = htmlspecialchars($date_to);
 
 					?><div class="input-group date">
-						<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+						<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
 					</div>
 					<div class="input-group date">
-						<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
+						<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#id_<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-						$('#id_<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
 					})(jQuery);
 					</script>
 					<?php
 				break;
 				case 8: // Выпадающий список.
-					?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="id_<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
+					?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
 					<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 					<?php
 					$str_array = explode("\n", $oAdmin_Form_Field->list);
@@ -1746,7 +1775,7 @@ class Admin_Form_Controller
 						// Каждую строку разделяем по равно
 						$str_explode = explode('=', $str_value);
 
-						if ($str_explode[0] != 0 && count($str_explode) > 1)
+						if (/*$str_explode[0] != 0 && */count($str_explode) > 1)
 						{
 							// сохраняем в массив варинаты значений и ссылки для них
 							$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);

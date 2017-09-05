@@ -992,6 +992,30 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Warehouse_Item->save();
 					}
 				}
+
+				// Комплект
+				if ($oShop_Item->type == 3)
+				{
+					if (!is_null($oShop_Warehouse) && $oShop_Item->id)
+					{
+						$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
+							? $oShop_Order_Item->Shop_Warehouse
+							: $oShop->Shop_Warehouses->getDefault();
+
+						$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
+
+						foreach ($aShop_Item_Sets as $oShop_Item_Set)
+						{
+							$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item_Set->shop_item_set_id);
+
+							if (!is_null($oShop_Warehouse_Item))
+							{
+								$oShop_Warehouse_Item->count -= $oShop_Item_Set->count * $mode;
+								$oShop_Warehouse_Item->save();
+							}
+						}
+					}
+				}
 			}
 
 			// Начисление/списание бонусов

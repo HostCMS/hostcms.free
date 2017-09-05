@@ -1320,3 +1320,4 @@ function cookie_encode(string){
 	return ns;
 }
 /* /jQuery Cookie plugin */
+

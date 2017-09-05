@@ -332,14 +332,16 @@ class Seo_Controller_Google extends Seo_Controller
 
 	/**
 	 * Get site popular queries
-	 * @param string $host_url domain url
+	 * @param string $host_id domain url
 	 * @return array
 	 */
-	public function getSitePopularQueries($host_url, $limit = 100)
+	public function getSitePopularQueries($host_id)
 	{
 		$aReturn = array();
 
-		$aQueries = $this->setQuery($host_url, 'query' , Core_Date::timestamp2sqldate(strtotime('-8 days')), Core_Date::timestamp2sqldate(time()), $limit);
+		$limit = 500;
+		
+		$aQueries = $this->setQuery($host_id, 'query' , Core_Date::timestamp2sqldate(strtotime('-8 days')), Core_Date::timestamp2sqldate(time()), $limit);
 
 		foreach ($aQueries as $aTmp)
 		{
@@ -356,14 +358,16 @@ class Seo_Controller_Google extends Seo_Controller
 
 	/**
 	 * Get site popular pages
-	 * @param string $host_url domain url
+	 * @param string $host_id domain url
 	 * @return array
 	 */
-	public function getSitePopularPages($host_url, $limit = 100)
+	public function getSitePopularPages($host_id)
 	{
 		$aReturn = array();
 
-		$aQueries = $this->setQuery($host_url, 'page' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
+		$limit = 500;
+		
+		$aQueries = $this->setQuery($host_id, 'page' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
 
 		foreach ($aQueries as $aTmp)
 		{

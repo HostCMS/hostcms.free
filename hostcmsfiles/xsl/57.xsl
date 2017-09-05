@@ -126,6 +126,18 @@
 				<a href="{shop_item/url}">
 					<xsl:value-of disable-output-escaping="yes" select="shop_item/name"/>
 				</a>
+
+				<!-- Комплекты -->
+				<xsl:if test="shop_item/type = 3">
+					<xsl:for-each select="shop_item/set/shop_item">
+						<div>
+							<span><xsl:text> — </xsl:text></span>
+							<a href="{url}">
+								<xsl:value-of disable-output-escaping="yes" select="name"/>
+							</a>
+						</div>
+					</xsl:for-each>
+				</xsl:if>
 			</td>
 			<td>
 				<input type="text" size="3" name="quantity_{shop_item/@id}" id="quantity_{shop_item/@id}" value="{quantity}"/>

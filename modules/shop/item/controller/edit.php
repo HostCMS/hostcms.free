@@ -531,17 +531,16 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
 						);
 
-						ui.item.value = '';  // it will clear field
+						ui.item.value = '';
 					  } );");
 
 				$oSetRow2->add($oCore_Html_Entity_Script);
 
-
 				$oMainTab
-					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('showed')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('showed')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
 				;
 
 				// Добавляем новое поле типа файл
@@ -1082,7 +1081,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
 					);
 
-					ui.item.value = '';  // it will clear field
+					ui.item.value = '';
 				  } );"
 				);
 
@@ -1776,10 +1775,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Пересчет комплекта
-				if (Core_Array::getPost('apply_recount_set'))
-				{
-					$this->recountSet();
-				}
+				Core_Array::getPost('apply_recount_set') && $this->recountSet();
 			break;
 			case 'shop_group':
 			default:
@@ -2585,41 +2581,44 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return Admin_Form_Entity::factory('Code')->html(ob_get_clean());
 	}
 
+	/**
+	 * Пересчет цены комплекта
+	 */
 	public function recountSet()
 	{
-		$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll();
-
-		$Shop_Item_Controller = new Shop_Item_Controller();
-
-		$sum = 0;
-
-		foreach ($aShop_Item_Sets as $oShop_Item_Set)
-		{
-			$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
-
-			$oShop_Item = $oShop_Item->shortcut_id
-				? $oShop_Item->Shop_Item
-				: $oShop_Item;
-
-			if ($oShop_Item->shop_currency_id)
-			{
-				$aPrice = $Shop_Item_Controller->getPrices($oShop_Item);
-
-				$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop_Item->Shop_Currency,
-					$oShop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
-
-				$sum += $price * $oShop_Item_Set->count;
-			}
-			else
-			{
-				$this->addMessage(Core_Message::get(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error'));
-			}
-		}
-
 		if ($this->_object->shop_currency_id)
 		{
-			$this->_object->price = $sum;
+			$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
+
+			$Shop_Item_Controller = new Shop_Item_Controller();
+
+			$amount = 0;
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oShop_Item = $oShop_Item->shortcut_id
+					? $oShop_Item->Shop_Item
+					: $oShop_Item;
+
+				if ($oShop_Item->shop_currency_id)
+				{
+					$aPrice = $Shop_Item_Controller->getPrices($oShop_Item);
+
+					$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$oShop_Item->Shop_Currency,
+						$oShop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
+
+					$amount += $price * $oShop_Item_Set->count;
+				}
+				else
+				{
+					$this->addMessage(Core_Message::get(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error'));
+				}
+			}
+
+			$this->_object->price = $amount;
 			$this->_object->save();
 		}
 		else
