@@ -38,6 +38,7 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
+		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -50,8 +51,38 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oDescriptionField->wysiwyg = TRUE;
 
-		$oMainTab->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1);
-		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1);
+		$oMainTab->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow1);
+		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow1);
+
+		$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = $this->_object->Siteuser;
+
+			$options = !is_null($oSiteuser->id)
+				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+				: array(0);
+
+			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Seller.siteuser_id'))
+				->options($options)
+				->name('siteuser_id')
+				->class('siteuser-tag')
+				->style('width: 100%')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+			$oMainRow1->add($oSiteuserSelect);
+
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			->type("text/javascript")
+			->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+			$oMainRow1->add($oCore_Html_Entity_Script);
+		}
 
 		$oMainTab->move($this->getField('contact_person')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow2);
 		$oMainTab->move($this->getField('address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow2);
@@ -126,6 +157,8 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+
 		parent::_applyObjectProperty();
 
 		$oShop = $this->_object->Shop;
