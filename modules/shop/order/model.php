@@ -831,11 +831,41 @@ class Shop_Order_Model extends Core_Entity
 
 			// Удалить зарезервированные товары
 			$this->deleteReservedItems();
+
+			// Уведомление о событии оплаты заказа
+			$this->_createNotification();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterPaid', $this);
 
 		return $this->save();
+	}
+
+	protected function _createNotification()
+	{
+		$oModule = Core::$modulesList['shop'];
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+
+		$sCompany = strlen($this->company)
+			? $this->company
+			: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
+
+		$oNotification = Core_Entity::factory('Notification');
+		$oNotification
+			->title(sprintf(Core::_('Shop_Order.notification_paid_order'), $this->invoice))
+			->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->sum()))
+			->datetime(Core_Date::timestamp2sql(time()))
+			->module_id($oModule->id)
+			->type(2) // Оплаченный заказ
+			->entity_id($this->id)
+			->save();
+
+		// Связываем уведомление с сотрудником
+		$oNotification_User = Core_Entity::factory('Notification_User');
+		$oNotification_User
+			->notification_id($oNotification->id)
+			->user_id($oUser->id)
+			->save();
 	}
 
 	/**

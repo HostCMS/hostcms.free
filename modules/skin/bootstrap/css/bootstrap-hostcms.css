@@ -2047,6 +2047,22 @@ table.table.table-popular-queries tr td:last-child {
 	width: 45%;
 }
 
+.notification-description {
+	display: block;
+	font-size: 10px;
+	color: #999;
+}
+
+.notification-ico
+{
+	border-radius: 50%;
+	height: 25px;
+	line-height: 24px;
+	text-align: center;
+	width: 25px;
+	font-size: 12px !important;
+}
+
 .clock {
 	margin: 0 auto;
 	color: #fff;

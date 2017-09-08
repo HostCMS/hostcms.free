@@ -514,10 +514,14 @@ abstract class Shop_Payment_System_Handler
 		$oModule = Core::$modulesList['shop'];
 		$oUser = Core_Entity::factory('User', 0)->getCurrent();
 
+		$sCompany = strlen($this->_shopOrder->company)
+			? $this->_shopOrder->company
+			: trim($this->_shopOrder->surname . ' ' . $this->_shopOrder->name . ' ' . $this->_shopOrder->patronymic);
+
 		$oNotification = Core_Entity::factory('Notification');
 		$oNotification
-			->title('Новый заказ №' . $this->_shopOrder->invoice)
-			->description('Описание заказа')
+			->title(sprintf(Core::_('Shop_Order.notification_new_order'), $this->_shopOrder->invoice))
+			->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->_shopOrder->sum()))
 			->datetime(Core_Date::timestamp2sql(time()))
 			->module_id($oModule->id)
 			->type(1) // Новый заказ

@@ -523,12 +523,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 					->type("text/javascript")
 					->value("$('.add-set-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
-						$('<input type=\'hidden\' name=\'set_item_id[]\'/>')
-							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
-							.insertAfter($('.set-item-table'));
-
 						$('.set-item-table > tbody').append(
-							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+							$('<tr><td>' + ui.item.label + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
 						);
 
 						ui.item.value = '';

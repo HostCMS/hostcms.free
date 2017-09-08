@@ -188,6 +188,9 @@ button.toast-close-button {
 .toast-blue {
   background-color: #5db2ff !important;
 }
+.toast-azure {
+  background-color: #2dc3e8 !important;
+}
 .toast-info {
   background-color: #57b5e3 !important;
 }

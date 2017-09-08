@@ -479,14 +479,19 @@ class Shop_Module extends Core_Module
 				$sIconIco = "fa-shopping-basket";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-azure";
+				$sNotificationColor = 'azure';
 			break;
 			case 2: // Оплата
-
+				$sIconIco = "fa-money";
+				$sIconColor = "white";
+				$sBackgroundColor = "bg-palegreen";
+				$sNotificationColor = 'palegreen';
 			break;
 			default:
 				$sIconIco = "fa-info";
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-themeprimary";
+				$sNotificationColor = 'info';
 		}
 
 		return array(
@@ -497,7 +502,7 @@ class Shop_Module extends Core_Module
 			),
 			'notification' => array(
 				'ico' => $sIconIco,
-				'background-color' => 'info'
+				'background-color' => $sNotificationColor
 			),
 			'href' => $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),
 			'onclick' => $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),

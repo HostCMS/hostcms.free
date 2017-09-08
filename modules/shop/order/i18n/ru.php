@@ -129,4 +129,7 @@ return array(
 	'most_ordered' => "Популярные товары за %s дней (в единицах)",
 	'popular_brands' => "Популярные бренды за %s дней (в единицах)",
 	'popover_title' => "Заказ № %s",
+	'notification_new_order' => 'Новый заказ №%s',
+	'notification_paid_order' => 'Оплачен заказ №%s',
+	'notification_new_order_description' => '%1$s на сумму %2$s',
 );
