@@ -319,9 +319,12 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Move item to another group
 	 * @param int $informationsystem_group_id group id
 	 * @return self
+	 * @hostcms-event informationsystem_item.onBeforeMove
 	 */
 	public function move($informationsystem_group_id)
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($informationsystem_group_id));
+
 		$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $informationsystem_group_id);
 
 		if ($this->shortcut_id)

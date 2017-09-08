@@ -842,9 +842,12 @@ class Shop_Item_Model extends Core_Entity
 	 * Move item to another group
 	 * @param int $iShopGroupId target group id
 	 * @return Core_Entity
+	 * @hostcms-event shop_item.onBeforeMove
 	 */
 	public function move($iShopGroupId)
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iShopGroupId));
+
 		$oShop_Group = Core_Entity::factory('Shop_Group', $iShopGroupId);
 
 		if ($this->shortcut_id)
@@ -1079,13 +1082,13 @@ class Shop_Item_Model extends Core_Entity
 		if ($this->type == 3)
 		{
 			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
-			
+
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
 				$oSearch_Page->text .= htmlspecialchars($oShop_Item_Set->Shop_Item->name) . ' ' . $oShop_Item_Set->Shop_Item->marking . ' ';
 			}
 		}
-		
+
 		// комментарии к товару
 		$aComments = $this->Comments->findAll(FALSE);
 		foreach ($aComments as $oComment)
@@ -1851,7 +1854,13 @@ class Shop_Item_Model extends Core_Entity
 				}
 
 				$oSetEntity->addEntity(
-					$oTmp_Shop_Item->id($oShop_Item->id)
+					$oTmp_Shop_Item
+						->id($oShop_Item->id)
+						->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('count')
+							->value($oShop_Item_Set->count)
+					)
 				);
 			}
 		}

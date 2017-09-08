@@ -411,7 +411,6 @@ $oAdmin_Form_Dataset->addCondition(
 
 // Список значений для фильтра и поля
 $aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
-//$sList = "0=…\n";
 $sList = "0=…\n";
 foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 {
@@ -420,7 +419,7 @@ foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 
 $oAdmin_Form_Dataset
 	->changeField('shop_order_status_id', 'list', trim($sList))
-	->changeField('paid', 'list', "0=" . Core::_('Admin_Form.no') . "\n" . "1=" . Core::_('Admin_Form.yes'));
+	->changeField('paid', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 
 $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)

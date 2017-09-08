@@ -93,4 +93,22 @@ class Admin_Form_Field_Model extends Core_Entity
 		$newObject->add($this->admin_word->copy());
 		return $newObject;
 	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$badge = $this->view
+			? '<i class="fa fa-filter fa-fw"></i>'
+			: '<i class="fa fa-bars fa-fw"></i>';
+
+		$badge && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square gray pull-right')
+			->value($badge)
+			->execute();
+	}
 }

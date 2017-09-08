@@ -501,9 +501,35 @@ abstract class Shop_Payment_System_Handler
 			$this->_applyBonuses();
 		}
 
+		// Уведомление о событии создания заказа
+		$this->_createNotification();
+
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
 
 		return $this;
+	}
+
+	protected function _createNotification()
+	{
+		$oModule = Core::$modulesList['shop'];
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+
+		$oNotification = Core_Entity::factory('Notification');
+		$oNotification
+			->title('Новый заказ №' . $this->_shopOrder->invoice)
+			->description('Описание заказа')
+			->datetime(Core_Date::timestamp2sql(time()))
+			->module_id($oModule->id)
+			->type(1) // Новый заказ
+			->entity_id($this->_shopOrder->id)
+			->save();
+
+		// Связываем уведомление с сотрудником
+		$oNotification_User = Core_Entity::factory('Notification_User');
+		$oNotification_User
+			->notification_id($oNotification->id)
+			->user_id($oUser->id)
+			->save();
 	}
 
 	/**

@@ -161,7 +161,7 @@ class Update_Entity extends Core_Entity
 		}*/
 
 		Core_Event::notify(get_class($this) . '.onBeforeInstall', $this);
-		
+
 		$data = Update_Controller::instance()
 			->setUpdateOptions()
 			->getUpdate($this->id);
@@ -331,6 +331,9 @@ class Update_Entity extends Core_Entity
 							Sql_Controller::instance()->execute($sql_code);
 						}
 
+						// Clear Core_ORM_ColumnCache
+						Core_ORM::clearColumnCache();
+
 						if (isset($aTmpUpdateItem['file']))
 						{
 							include($aTmpUpdateItem['file']);
@@ -381,7 +384,7 @@ class Update_Entity extends Core_Entity
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterInstall', $this);
-		
+
 		// Load new updates list
 		$this->loadUpdates();
 

@@ -61,6 +61,8 @@ class User_Model extends Core_Entity
 			'foreign_key' => 'responsible_user_id',
 			'model' => 'Helpdesk_Responsible_User'
 		),
+		'notification_user' => array(),
+		'notification' => array('through' => 'notification_user'),		
 	);
 
 	/**

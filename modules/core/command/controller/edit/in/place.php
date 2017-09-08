@@ -23,6 +23,9 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$result = 'Error';
 
 		if (Core::checkPanel())

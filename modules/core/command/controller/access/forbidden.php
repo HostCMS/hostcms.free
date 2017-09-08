@@ -21,6 +21,9 @@ class Core_Command_Controller_Access_Forbidden extends Core_Command_Controller
 	{
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oCore_Response
 			->status(403)
 			->header('Content-Type', "text/html; charset=UTF-8")

@@ -124,6 +124,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 						<?php
 						}
 						?>
+						<div class="clear"></div>
 					</div>
 
 					<?php $this->showChildren()?>

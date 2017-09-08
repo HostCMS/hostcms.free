@@ -1159,7 +1159,7 @@ border-left: 0 none;
 	font-style: italic;
 }
 
-.table-toolbar-right { margin-bottom: 20px }
+/*.table-toolbar-right { margin-bottom: 20px }*/
 .table-toolbar-right .btn-sm { font-size: 13px }
 .table-toolbar-right .btn-sm .badge {
 	background-color: #fb6e52;
@@ -2038,4 +2038,68 @@ table.table.table-popular-queries tr td:last-child {
 
 .table a.delete-associated-item:hover, .table a.add-associated-item:hover {
 	cursor: pointer;
+}
+
+.badge-hostcms.badge-square > i { font-size: 11px !important; }
+
+#notificationsListBox .footer .input-icon
+{
+	width: 45%;
+}
+
+.clock {
+	margin: 0 auto;
+	color: #fff;
+	font-size: 30px;
+	padding: 0 10px;
+}
+
+.clock ul {
+	margin: 0 auto;
+	padding: 0px;
+	list-style: none;
+}
+
+.clock ul li {
+	display: inline;
+	text-align: center;
+}
+
+.clock #point {
+	position: relative;
+	padding: 0 2px;
+}
+
+#notificationsListBox .footer .input-icon { width: 88% }
+
+#notificationsListBox, #notificationsClockListBox {
+	width: 400px;
+}
+
+@media screen and (max-width: 767px) {
+  #notificationsListBox, #notificationsClockListBox {
+    width: 50%;
+  }
+}
+
+.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu li.unread,
+.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu li.unread a
+{
+	background-color: #efefef;
+}
+
+
+#notificationsListBox  .notification-body .description, #notificationsListBox  .notification-body .title, #notificationsClockListBox  .notification-body .description, #notificationsClockListBox  .notification-body .title{
+	max-width: 290px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#notificationsListBox  .notification-body:hover .description, #notificationsListBox  .notification-body:hover .title, #notificationsClockListBox  .notification-body:hover .description, #notificationsClockListBox  .notification-body:hover .title {
+	white-space: normal;
+}
+
+.navbar .navbar-inner .navbar-header .navbar-account .account-area>li .dropdown-menu.dropdown-notifications li .notification-body .title{
+	font-size: 12px;
 }

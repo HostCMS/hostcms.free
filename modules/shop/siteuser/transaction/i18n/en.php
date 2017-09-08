@@ -21,7 +21,7 @@ return array(
 	'description' => '<acronym title="Text description of transaction">Description of transaction</acronym>',
 	'active' => '<acronym title="Activity status of transaction">Activity of transaction</acronym>',
 	'datetime' => '<acronym title="Processing time of transaction">Transaction time</acronym>',
-	'amount' => '<acronym title="Amount of currency units of transaction (character '-' is specified in case of withdrawal of cash from account)">Amount</acronym>',
+	'amount' => '<acronym title="Amount of currency units of transaction (character \'-\' is specified in case of withdrawal of cash from account)">Amount</acronym>',
 	'currency_name' => 'Currency',
 	'shop_order_id' => '<acronym title="Order ID paid using transaction">Order No.</acronym>',
 	'type' => 'Transaction type',

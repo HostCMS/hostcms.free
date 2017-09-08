@@ -20,7 +20,7 @@ class Shortcode_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-07-06';
+	public $date = '2017-09-07';
 	/**
 	 * Module name
 	 * @var string

@@ -231,9 +231,9 @@ $pageSeparator = Core_Array::get(Core_Page::instance()->libParams, 'separator')
 	? Core_Page::instance()->libParams['separator']
 	: ' / ';
 
-$aTitle = array($oShop->name);
-$aDescription = array($oShop->name);
-$aKeywords = array($oShop->name);
+$aTitle = array();
+$aDescription = array();
+$aKeywords = array();
 
 if (!is_null($Shop_Controller_Show->tag) && Core::moduleIsActive('tag'))
 {
@@ -256,44 +256,44 @@ if (!is_null($Shop_Controller_Show->tag) && Core::moduleIsActive('tag'))
 
 if ($Shop_Controller_Show->group)
 {
-	$oShop_Group = Core_Entity::factory('Shop_Group', $Shop_Controller_Show->group);
+    $oShop_Group = Core_Entity::factory('Shop_Group', $Shop_Controller_Show->group);
 
-	$bGroupTitle = $oShop_Group->seo_title != '';
-	$bGroupDescription = $oShop_Group->seo_description != '';
-	$bGroupKeywords = $oShop_Group->seo_keywords != '';
+    $bGroupTitle = $oShop_Group->seo_title != '';
+    $bGroupDescription = $oShop_Group->seo_description != '';
+    $bGroupKeywords = $oShop_Group->seo_keywords != '';
 
-	if (!$Shop_Controller_Show->item)
-	{
-		$bGroupTitle && Core_Page::instance()->title($oShop_Group->seo_title);
-		$bGroupDescription && Core_Page::instance()->description($oShop_Group->seo_description);
-		$bGroupKeywords && Core_Page::instance()->keywords($oShop_Group->seo_keywords);
-	}
+    if (!$Shop_Controller_Show->item)
+    {
+        $bGroupTitle && Core_Page::instance()->title($oShop_Group->seo_title);
+        $bGroupDescription && Core_Page::instance()->description($oShop_Group->seo_description);
+        $bGroupKeywords && Core_Page::instance()->keywords($oShop_Group->seo_keywords);
+    }
 
-	do {
-		($Shop_Controller_Show->item || !$bGroupTitle) && $aTitle[] = $oShop_Group->name;
+    do {
+        ($Shop_Controller_Show->item || !$bGroupTitle) && array_unshift($aTitle, $oShop_Group->name);
 
-		($Shop_Controller_Show->item || !$bGroupDescription) && $aDescription[] = $oShop_Group->name;
+        ($Shop_Controller_Show->item || !$bGroupDescription) && array_unshift($aDescription, $oShop_Group->name);
 
-		($Shop_Controller_Show->item || !$bGroupKeywords) && $aKeywords[] = $oShop_Group->name;
+        ($Shop_Controller_Show->item || !$bGroupKeywords) && array_unshift($aKeywords, $oShop_Group->name);
 
-	} while($oShop_Group = $oShop_Group->getParent());
+    } while($oShop_Group = $oShop_Group->getParent());
 }
 
 if ($Shop_Controller_Show->item)
 {
-	$oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
+    $oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
 
-	$oShop_Item->seo_title != ''
-		? Core_Page::instance()->title($oShop_Item->seo_title)
-		: $aTitle[] = $oShop_Item->name;
+    $oShop_Item->seo_title != ''
+        ? Core_Page::instance()->title($oShop_Item->seo_title) && $aTitle = array()
+        : $aTitle[] = $oShop_Item->name;
 
-	$oShop_Item->seo_description != ''
-		? Core_Page::instance()->description($oShop_Item->seo_description)
-		: $aDescription[] = $oShop_Item->name;
+    $oShop_Item->seo_description != ''
+        ? Core_Page::instance()->description($oShop_Item->seo_description) && $aDescription = array()
+        : $aDescription[] = $oShop_Item->name;
 
-	$oShop_Item->seo_keywords != ''
-		? Core_Page::instance()->keywords($oShop_Item->name)
-		: $aKeywords[] = $oShop_Item->name;
+    $oShop_Item->seo_keywords != ''
+        ? Core_Page::instance()->keywords($oShop_Item->name) && $aKeywords = array()
+        : $aKeywords[] = $oShop_Item->name;
 }
 
 if ($Shop_Controller_Show->producer)

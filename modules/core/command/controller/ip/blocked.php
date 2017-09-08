@@ -25,6 +25,9 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oCore_Response
 			->header('Content-Type', "text/html; charset=UTF-8")
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')

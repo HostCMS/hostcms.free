@@ -1445,7 +1445,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		$oShop_Order->system_information = intval($aOrderParams['id']);
-		$oShop_Order->shop_payment_system_id = Core_Array::get($this->paymentMethod, $aOrderParams['paymentMethod'], 0);
+
+		$oShop_Order->shop_payment_system_id = isset($aOrderParams['paymentMethod'])
+			? Core_Array::get($this->paymentMethod, $aOrderParams['paymentMethod'], 0)
+			: 0;
 
 		$oShop_Order->save();
 

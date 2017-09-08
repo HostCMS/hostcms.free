@@ -541,7 +541,7 @@ class Admin_Form_Controller
 	 * Is showing filter necessary
 	 * @var boolean
 	 */
-	protected $_showFilter = TRUE;
+	protected $_showFilter = FALSE;
 
 	/**
 	 * Show filter of the form
@@ -1685,7 +1685,7 @@ class Admin_Form_Controller
 				case 10: // Функция обратного вызова
 				case 3: // Checkbox.
 				case 8: // Выпадающий список
-					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field);
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field, $filterPrefix);
 				break;
 
 				case 5: // Дата-время.
@@ -1693,7 +1693,7 @@ class Admin_Form_Controller
 					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
 					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
 
-					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field);
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field, $filterPrefix);
 				break;
 			}
 		}
@@ -1713,7 +1713,7 @@ class Admin_Form_Controller
 					?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
 				break;
 
-				case 3: // Checkbox.
+				case 3: // Checkbox
 					?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
 						<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 						<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
@@ -1721,7 +1721,7 @@ class Admin_Form_Controller
 					</select><?php
 				break;
 
-				case 5: // Дата-время.
+				case 5: // Дата-время
 					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
 					$date_from = htmlspecialchars($date_from);
 
@@ -1746,7 +1746,7 @@ class Admin_Form_Controller
 					</script><?php
 				break;
 
-				case 6: // Дата.
+				case 6: // Дата
 					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
 					$date_from = htmlspecialchars($date_from);
 
@@ -1771,7 +1771,12 @@ class Admin_Form_Controller
 					</script>
 					<?php
 				break;
-				case 8: // Выпадающий список.
+				case 7: // Картинка-ссылка
+					if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
+					{
+						break;
+					}
+				case 8: // Выпадающий список
 					?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
 					<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 					<?php
@@ -1783,7 +1788,7 @@ class Admin_Form_Controller
 						// Каждую строку разделяем по равно
 						$str_explode = explode('=', $str_value);
 
-						if (/*$str_explode[0] != 0 && */$str_explode[1] != '…' && count($str_explode) > 1)
+						if (count($str_explode) > 1 /*&& $str_explode[0] != 0*/ && $str_explode[1] != '…')
 						{
 							// сохраняем в массив варинаты значений и ссылки для них
 							$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
@@ -1795,14 +1800,19 @@ class Admin_Form_Controller
 					</select>
 					<?php
 				break;
-
 				default:
-				?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
+					?><div style="color: #CEC3A3; text-align: center">—</div><?php
 				break;
 			}
 		}
 		
 		return $this;
+	}
+	
+	public function isCallable($oEntity, $fieldName)
+	{
+		return method_exists($oEntity, $fieldName)
+			|| method_exists($oEntity, 'isCallable') && $oEntity->isCallable($fieldName);
 	}
 	
 	/**
@@ -1846,10 +1856,17 @@ class Admin_Form_Controller
 
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
-				if ($oAdmin_Form_Field->allow_filter)
+				// Перекрытие параметров для данного поля
+				$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+				foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+				{
+					$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+				}
+									
+				if ($oAdmin_Form_Field_Changed->allow_filter)
 				{
 					// Если имя поля counter_pages.date, то остается date
-					$fieldName = $this->getFieldName($oAdmin_Form_Field->name);
+					$fieldName = $this->getFieldName($oAdmin_Form_Field_Changed->name);
 
 					$filterPrefix = $this->_filterId === ''
 						// Main Filter
@@ -1857,24 +1874,24 @@ class Admin_Form_Controller
 						// Top Filter
 						: 'topFilter_';
 					
-					$sFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}", NULL);
+					$sFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}", NULL);
 
 					// Функция обратного вызова для значения в фильтре
-					if (isset($this->_filterCallbacks[$oAdmin_Form_Field->name]))
+					if (isset($this->_filterCallbacks[$oAdmin_Form_Field_Changed->name]))
 					{
 						$sFilterValue = call_user_func(
-							$this->_filterCallbacks[$oAdmin_Form_Field->name], $sFilterValue, $oAdmin_Form_Field
+							$this->_filterCallbacks[$oAdmin_Form_Field_Changed->name], $sFilterValue, $oAdmin_Form_Field_Changed, $filterPrefix
 						);
 					}
 
 					if ($fieldName != '')
 					{
-						$sFilterType = $oAdmin_Form_Field->filter_type == 0
+						$sFilterType = $oAdmin_Form_Field_Changed->filter_type == 0
 							? 'where'
 							: 'having';
 
 						// для HAVING не проверяем наличие поля
-						if ($oAdmin_Form_Field->filter_type == 1
+						if ($oAdmin_Form_Field_Changed->filter_type == 1
 							|| isset($oEntity->$fieldName)
 							|| method_exists($oEntity, $fieldName)
 							|| property_exists($oEntity, $fieldName)
@@ -1882,7 +1899,7 @@ class Admin_Form_Controller
 						)
 						{
 							// Тип поля.
-							switch ($oAdmin_Form_Field->type)
+							switch ($oAdmin_Form_Field_Changed->type)
 							{
 								case 1: // Строка
 								case 2: // Поле ввода
@@ -1896,7 +1913,7 @@ class Admin_Form_Controller
 									$sFilterValue = str_replace(array('*', '?'), array('%', '_'), trim($sFilterValue));
 
 									$oAdmin_Form_Dataset->addCondition(
-										array($sFilterType => array($oAdmin_Form_Field->name, 'LIKE', $sFilterValue))
+										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $sFilterValue))
 									);
 								break;
 
@@ -1909,22 +1926,22 @@ class Admin_Form_Controller
 
 									if ($sFilterValue != 1)
 									{
-										$openName = $oAdmin_Form_Field->filter_type == 0
+										$openName = $oAdmin_Form_Field_Changed->filter_type == 0
 											? 'open'
 											: 'havingOpen';
 
-										$closeName = $oAdmin_Form_Field->filter_type == 0
+										$closeName = $oAdmin_Form_Field_Changed->filter_type == 0
 											? 'close'
 											: 'havingClose';
 
 										$oAdmin_Form_Dataset
 											->addCondition(array($openName => array()))
 											->addCondition(
-												array($sFilterType => array($oAdmin_Form_Field->name, '=', 0))
+												array($sFilterType => array($oAdmin_Form_Field_Changed->name, '=', 0))
 											)
 											->addCondition(array('setOr' => array()))
 											->addCondition(
-												array($sFilterType => array($oAdmin_Form_Field->name, 'IS', NULL))
+												array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'IS', NULL))
 											)
 											->addCondition(array($closeName => array()));
 									}
@@ -1932,7 +1949,7 @@ class Admin_Form_Controller
 									{
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field->name, '!=', 0)
+												array($oAdmin_Form_Field_Changed->name, '!=', 0)
 											)
 										);
 									}
@@ -1942,27 +1959,27 @@ class Admin_Form_Controller
 								case 6: // Дата.
 
 									// Дата от.
-									$date = trim(Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}"));
+									$date = trim(Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field_Changed->id}"));
 
 									if (!empty($date))
 									{
-										$date = $oAdmin_Form_Field->type == 5
+										$date = $oAdmin_Form_Field_Changed->type == 5
 											? Core_Date::datetime2sql($date)
 											: date('Y-m-d 00:00:00', Core_Date::date2timestamp($date));
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field->name, '>=', $date)
+												array($oAdmin_Form_Field_Changed->name, '>=', $date)
 											)
 										);
 									}
 
 									// Дата до.
-									$date = trim(Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}"));
+									$date = trim(Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field_Changed->id}"));
 
 									if (!empty($date))
 									{
-										$date = $oAdmin_Form_Field->type == 5
+										$date = $oAdmin_Form_Field_Changed->type == 5
 											// Преобразуем из d.m.Y H:i:s в SQL формат
 											? Core_Date::datetime2sql($date)
 											// Преобразуем из d.m.Y в SQL формат
@@ -1970,12 +1987,16 @@ class Admin_Form_Controller
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field->name, '<=', $date)
+												array($oAdmin_Form_Field_Changed->name, '<=', $date)
 											)
 										);
 									}
 								break;
-
+								case 7: // Картинка-ссылка
+									if ($this->_filterId === '' || !strlen($oAdmin_Form_Field_Changed->list))
+									{
+										break;
+									}
 								case 8: // Список
 								{
 									if (is_null($sFilterValue))
@@ -1983,11 +2004,11 @@ class Admin_Form_Controller
 										break;
 									}
 
-									if ($sFilterValue != 'HOST_CMS_ALL')
+									if ($sFilterValue != '' && $sFilterValue != 'HOST_CMS_ALL')
 									{
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field->name, 'LIKE', $sFilterValue)
+												array($oAdmin_Form_Field_Changed->name, 'LIKE', $sFilterValue)
 											)
 										);
 									}
@@ -2138,7 +2159,11 @@ class Admin_Form_Controller
 
 		if ($aChangedFields)
 		{
-			$aChanged = $aChangedFields + $oAdmin_Form_Field->toArray();
+			$aChanged = $aChangedFields + (
+				$oAdmin_Form_Field instanceof stdClass
+					? (array) $oAdmin_Form_Field
+					: $oAdmin_Form_Field->toArray()
+			);
 			$oAdmin_Form_Field_Changed = (object)$aChanged;
 		}
 		else

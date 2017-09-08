@@ -24,6 +24,9 @@ class Core_Command_Controller_Benchmark extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$result = 'Error';
 
 		if (defined('START_BENCHMARK') && START_BENCHMARK && Core::moduleIsActive('benchmark'))

@@ -23,4 +23,5 @@ return array(
 	'name' => "<acronym title=\"Name of group\">Name of group</acronym>",
 	'sorting' => "<acronym title=\"Sorting order\">Sorting order</acronym>",
 	'shop_id' => "Shop ID",
+	'move_success' => 'Manufacturer\'s dirs moved successfully',
 );

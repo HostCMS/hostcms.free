@@ -860,7 +860,10 @@ if(Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 }
 
 // Change field type
-$oAdmin_Form_Dataset->changeField('img', 'type', 10);
+$oAdmin_Form_Dataset
+	->changeField('img', 'type', 10)
+	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	;
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

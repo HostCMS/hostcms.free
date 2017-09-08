@@ -449,9 +449,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<table class="table table-striped table-hover set-item-table">
 						<thead>
 							<tr>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_name') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_marking') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_count') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.name') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
 								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
 								<th scope="col">  </th>
 							</tr>
@@ -1037,9 +1037,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<table class="table table-striped table-hover associated-item-table">
 						<thead>
 							<tr>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_name') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_marking') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_count') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.name') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
 								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
 								<th scope="col">  </th>
 							</tr>

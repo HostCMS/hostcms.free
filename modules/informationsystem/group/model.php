@@ -490,9 +490,12 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * Move group to another group
 	 * @param int $parent_id group id
 	 * @return self
+	 * @hostcms-event informationsystem_group.onBeforeMove
 	 */
 	public function move($parent_id)
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
+
 		$this->parent_id = $parent_id;
 		return $this->save();
 	}

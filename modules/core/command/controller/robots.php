@@ -54,6 +54,10 @@ class Core_Command_Controller_Robots extends Core_Command_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeShowAction', $this);
 
 		$oCore_Response = new Core_Response();
+		
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
 
 		$content = $this->getRobots();

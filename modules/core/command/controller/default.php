@@ -38,6 +38,9 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		$oCore_Page = Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
 
 		$this->_uri == '' && $this->_uri = '/';
@@ -346,10 +349,9 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->execute();
 		}
 
-		$oCore_Page = Core_Page::instance()
+		$oCore_Page
 			->template($oTemplate)
-			->structure($oStructure)
-			->response($oCore_Response);
+			->structure($oStructure);
 
 		$oStructure->setCorePageSeo($oCore_Page);
 		$oCore_Page->addChild($oStructure->getRelatedObjectByType());

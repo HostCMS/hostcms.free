@@ -216,19 +216,105 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						?><div class="navbar-account">
 							<ul class="account-area">
-								<?php
-								$oModule = Core_Entity::factory('Module')->getByPath('user');
-								?><li>
-									<a id="sound-switch" title="<?php echo Core::_('Admin.backend-sound')?>" href="#">
+								<li>
+									<a id="sound-switch" title="Sound" href="#">
 										<i class="icon fa fa-<?php echo $oUser->sound ? 'volume-up' : 'volume-off'?>"></i>
+									</a>
+
+									<?php
+									$oModule = Core_Entity::factory('Module')->getByPath('user');
+									?>
+									<script type="text/javascript">
+										$(function(){
+
+											$("#sound-switch")
+												.data('soundEnabled', <?php echo $oUser->sound ? 'true' : 'false'?>)
+												.on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=84'}, $.soundSwitch );
+										});
+									</script>
+								</li>
+								<li>
+									<a href="#" title="" data-toggle="dropdown" class="task-area dropdown-toggle">
+										<div class="clock">
+											<ul>
+												<li id="hours"> </li><li id="point">:</li><li id="min"> </li>
+											</ul>
+										</div>
 									</a>
 
 									<script type="text/javascript">
 										$(function(){
-											$("#sound-switch").on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=84'}, $.soundSwitch );
+											$(document).ready(
+												$.refreshClock()
+											);
 										});
 									</script>
 								</li>
+								<!-- Уведомления начало-->
+								<li id="notifications">
+									<a href="#" title="" data-toggle="dropdown" class="dropdown-toggle">
+										<i class="icon fa fa-bell"></i>
+										<!--<span class="badge <?php //if (!$iCountUnreadNotifications) echo ' hidden'?>"><?php //echo $iCountUnreadNotifications?></span>-->
+										<span class="badge hidden"></span>
+										<!-- <span class="badge">5</span> -->
+									</a>
+
+									<!--<ul id="dropdown-notifications" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">-->
+									<div id="notificationsListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">
+										<div class="scroll-notifications">
+										<ul>
+											<li id="0">
+												<a href="#">
+													<div class="clearfix">
+														<div class="notification-icon">
+															<i class="fa fa-info bg-themeprimary white"></i>
+														</div>
+														<div class="notification-body">
+															<span class="title margin-top-5"><?php echo Core::_('Notification.no_notifications')?></span>
+														</div>
+													</div>
+												</a>
+											</li>
+										</ul>
+										</div>
+										<div class="footer padding-10">
+											<span class="input-icon">
+												<input type="text" class="form-control input-xs" id="notification-search" />
+												<i class="glyphicon glyphicon-search"></i>
+												<i class="glyphicon glyphicon-remove palegreen" title="<?php echo Core::_('Notification.search_clear_button_tittle');?>" style="cursor:pointer; position: absolute; left: 93%;bottom: 0;line-height: 24px;font-size: 10px;width: 24px;padding-top: 0px;"></i>
+											</span>
+											<span class="pull-right darkorange" style="display: block; margin-right: 5px; cursor:pointer;"><i class="fa fa-trash-o" title="<?php echo Core::_('Notification.notifications_trash_title'); ?>"></i></span>
+											<!-- <button class="btn btn-xs btn-default shiny darkorange icon-only pull-right" title="<?php echo Core::_('Notification.notifications_trash_title'); ?>"><i class="fa fa-trash-o"></i></button>-->
+											<!--
+											<div class="btn-group">
+												<button class="btn btn-blue btn-sm "><i class="fa fa-volume-down no-margin"></i></button>
+												<button class="btn btn-palegreen btn-sm"><i class="fa fa-list-alt  no-margin"></i></button>
+												<button class="btn btn-darkorange btn-sm"><i class="fa fa-trash-o no-margin"></i></button>
+											</div>-->
+										</div>
+									</div>
+
+									<?php
+									$oModule = Core_Entity::factory('Module')->getByPath('notification');
+									?>
+									<!--/Notification Dropdown-->
+
+									<script type="text/javascript">
+									$(function (){
+											$('.navbar-account #notificationsListBox').data({
+												// Идентификатор последнего загруженного уведомления
+												'lastNotificationId': 0, //$('.navbar-account #notificationsListBox .scroll-notifications > ul li:first').attr('id'),
+												'currentUserId': <?php echo $oUser->id?>,
+												'moduleId': <?php echo $oModule->id?>
+											});
+
+											$.refreshNotificationsList();
+											//setInterval($.refreshNotificationsList, 5000);
+										}
+									);
+									</script>
+								</li>
+								<!-- Уведомления конец-->								
 								<li>
 								<?php
 								$oCurrentSite = Core_Entity::factory('Site', CURRENT_SITE);
@@ -399,7 +485,11 @@ class Skin_Bootstrap extends Core_Skin
 
 											$('.send-message textarea').on('keyup', { path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=79' }, $.chatSendMessage);
 
-											$.refreshChat({path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=80'});
+											$(document).ready(
+												$.refreshChat({path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=80'});
+
+												$.refreshClock();
+											);
 										});
 									</script>
 								</li>

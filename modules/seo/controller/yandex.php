@@ -163,7 +163,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 			if ($sAnswer === FALSE)
 			{
-				throw new Core_Exception("getUserId(), Server response: false", array(), 0, FALSE);
+				throw new Core_Exception("getUserId(), Server response: false. Error: %error", array('%error' => $Core_Http->getError()), $Core_Http->getErrno(), FALSE);
 			}
 
 			$aAnswer = json_decode($sAnswer, TRUE);
