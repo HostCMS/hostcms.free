@@ -25,6 +25,9 @@ class Core_Command_Controller_Favicon extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oSite = Core_Entity::factory('Site')->getByAlias(Core::$url['host']);
 
 		if ($oSite)

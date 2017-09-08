@@ -295,7 +295,7 @@ function showBlock($aTmpQueries, $aSeo_Sites, $counter)
 						}
 						?>
 					</tr>
-					<?
+					<?php
 					$counter++;
 				}
 			?>

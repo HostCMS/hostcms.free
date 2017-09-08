@@ -12,14 +12,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - groupsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств групп товаров, по умолчанию TRUE
  * - propertiesForGroups(array()) устанавливает дополнительное ограничение на вывод значений дополнительных свойств групп для массива идентификаторов групп (каким группам выводить доп. св-ва)
  * - groupsMode('tree') режим показа групп, может принимать следующие значения:
-	none - не показывать группы,
-	tree - показывать дерево групп и все группы на текущем уровне (по умолчанию),
-	all - показывать все группы.
+	none — не показывать группы,
+	tree — показывать дерево групп и все группы на текущем уровне (по умолчанию),
+	all — показывать все группы.
  * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
  * - item(123) идентификатор показываемого товара
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
+ * - warehouseMode('all'|'in-stock'|'in-stock-modification') режим вывода товаров:
+	'all' — все (по умолчанию),
+	'in-stock' — на складе,
+	'in-stock-modification' — на складе или модификация товара в наличии на складе.
  * - parentItem(123) идентификатор родительского товара для отображаемой модификации
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - modificationsList(TRUE|FALSE) показывать модификации товаров текущей группы на уровне товаров группы, по умолчанию FALSE
@@ -51,9 +55,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - tag($path) путь тега, с использованием которого ведется отбор товаров
  * - producer($producer_id) идентификатор производителя, с использованием которого ведется отбор товаров
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
- * - itemsActivity('active'|'inactive'|'all') отображать элементы: active - только активные, inactive - только неактивные, all - все, по умолчанию - active
- * - groupsActivity('active'|'inactive'|'all') отображать группы: active - только активные, inactive - только неактивные, all - все, по умолчанию - active
- * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active - только активные, inactive - только неактивные, all - все, по умолчанию - active
+ * - itemsActivity('active'|'inactive'|'all') отображать элементы: active — только активные, inactive — только неактивные, all — все, по умолчанию — active
+ * - groupsActivity('active'|'inactive'|'all') отображать группы: active — только активные, inactive — только неактивные, all — все, по умолчанию — active
+ * - commentsActivity('active'|'inactive'|'all') отображать комментарии: active — только активные, inactive — только неактивные, all — все, по умолчанию - active
  * - calculateTotal(TRUE|FALSE) вычислять общее количество найденных, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
  *
@@ -98,6 +102,7 @@ class Shop_Controller_Show extends Core_Controller
 		'itemsProperties',
 		'itemsPropertiesList',
 		'itemsForbiddenTags',
+		'warehouseMode',
 		'parentItem',
 		'modifications',
 		'modificationsList',
@@ -241,6 +246,7 @@ class Shop_Controller_Show extends Core_Controller
 		$this->viewedOrder = 'DESC';
 
 		$this->groupsMode = 'tree';
+		$this->warehouseMode = 'all';
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
@@ -577,6 +583,12 @@ class Shop_Controller_Show extends Core_Controller
 					);
 			}
 
+			// Delete current item
+			if (($currentKey = array_search($this->item, $hostcmsViewed)) !== FALSE)
+			{
+				unset($hostcmsViewed[$currentKey]);
+			}
+			
 			// Extract a slice of the array
 			$hostcmsViewed = array_slice($hostcmsViewed, 0, $this->viewedLimit);
 
@@ -584,7 +596,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($view_item_id, FALSE);
 
-				if (!is_null($oShop_Item->id) && $oShop_Item->id != $this->item && $oShop_Item->active)
+				if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
 				{
 					$this->applyItemsForbiddenTags($oShop_Item);
 
@@ -782,6 +794,35 @@ class Shop_Controller_Show extends Core_Controller
 
 			!$this->item && $this->_setLimits();
 
+			switch ($this->warehouseMode)
+			{
+				case 'in-stock':
+					$this->_Shop_Items
+						->queryBuilder()
+						->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+						->having('SUM(shop_warehouse_items.count)', '>', 0)
+						->groupBy('shop_items.id');
+				break;
+				case 'in-stock-modification':
+					$this->_Shop_Items
+						->queryBuilder()
+						// Модификации и остатки на складах модификаций
+						->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', 'shop_items.id')
+						->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
+						// Остатки на складах основного отвара
+						->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+						// Есть остатки на основном складе
+						->havingOpen()
+						->having('SUM(shop_warehouse_items.count)', '>', 0)
+						// Или
+						->setOr()
+						// Есть остатки на складах у модификаций
+						->having('SUM(modifications_shop_warehouse_items.count)', '>', 0)
+						->havingClose()
+						->groupBy('shop_items.id');
+				break;
+			}
+			
 			$aShop_Items = $this->_Shop_Items->findAll();
 
 			if (!$this->item)
@@ -987,7 +1028,7 @@ class Shop_Controller_Show extends Core_Controller
 		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 
 		$bCache && $oCore_Cache->set(
 			$cacheKey,
@@ -1179,6 +1220,8 @@ class Shop_Controller_Show extends Core_Controller
 	 */
 	protected function _groupCondition()
 	{
+		$oShop = $this->getEntity();
+
 		$shop_group_id = !$this->parentItem
 			? intval($this->group)
 			: 0;
@@ -1199,6 +1242,7 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			$oCore_QueryBuilder_Select_Modifications = Core_QueryBuilder::select('shop_items.id')
 				->from('shop_items')
+				->where('shop_items.shop_id', '=', $oShop->id)
 				->where('shop_items.deleted', '=', 0)
 				->where('shop_items.active', '=', 1)
 				->where('shop_items.shop_group_id', '=', $shop_group_id);
@@ -1207,12 +1251,30 @@ class Shop_Controller_Show extends Core_Controller
 			$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
 
 			Core_Event::notify(get_class($this) . '.onBeforeSelectModifications', $this, array($oCore_QueryBuilder_Select_Modifications));
-			
+
 			$this->_Shop_Items
 				->queryBuilder()
 				->setOr()
 				->where('shop_items.shop_group_id', '=', 0)
 				->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Modifications);
+				
+			// Совместное modificationsList + filterShortcuts
+			if ($this->filterShortcuts)
+			{
+				$oCore_QueryBuilder_Select_Shortcuts_For_Modifications = Core_QueryBuilder::select('shop_items.shortcut_id')
+					->from('shop_items')
+					->where('shop_items.shop_id', '=', $oShop->id)
+					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.active', '=', 1)
+					->where('shop_items.shop_group_id', '=', $shop_group_id)
+					->where('shop_items.shortcut_id', '>', 0);
+					
+				$this->_Shop_Items
+					->queryBuilder()
+					->setOr()
+					->where('shop_items.shop_group_id', '=', 0)
+					->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Shortcuts_For_Modifications);
+			}
 		}
 
 		if ($this->filterShortcuts)

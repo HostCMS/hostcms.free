@@ -290,7 +290,7 @@ class Structure_Controller_Show extends Core_Controller
 
 		$this->_addStructuresByParentId($this->parentId, $this);
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 		$bCache && $oCore_Cache->set($cacheKey, $content, $this->_cacheName, $this->_aTags);
 
 		// Clear

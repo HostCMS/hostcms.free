@@ -161,7 +161,7 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 		'email' => '/^[a-zA-Z0-9_\.\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$/',
 		'url' => '/^([A-Za-z]+:\/\/)?([A-Za-z0-9]+(:[A-Za-z0-9]+)?@)?([a-zA-Z0-9][-A-Za-z0-9.]*\.[A-Za-z]{2,7})(:[0-9]+)?(\/[-_.A-Za-z0-9]+)?(\?[A-Za-z0-9%&=]+)?(#\w+)?$/',
 		'integer' => '/^[\-|+]{0,1}[0-9]+$/',
-		'positiveInteger ' => '/^(0*[1-9])+[0-9]*$/',
+		'positiveInteger' => '/^(0*[1-9])+[0-9]*$/',
 		'path' => '/^[а-яіїєґА-ЯІЇЄҐёЁA-Za-z0-9_ \-\.\/]+$/',
 		'latinBase' => '/^[A-Za-z0-9_\-]+$/',
 		'decimal' => '/^[-+]?[0-9]{1,}\\.{0,1}[0-9]*$/',

@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-07-06';
+	public $date = '2017-09-07';
 
 	/**
 	 * Module name
@@ -366,9 +366,9 @@ class Shop_Module extends Core_Module
 
 						$oShop_Item->shop_group_id
 							&& $oSearch_Page->addEntity($oShop_Item->Shop_Group);
-							
+
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Item));
-						
+
 						$oSearch_Page->addEntity($oShop_Item);
 					}
 				break;
@@ -453,5 +453,58 @@ class Shop_Module extends Core_Module
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Get List of Notification
+	 * @param int $type
+	 * @param int $entityId
+	 * @return array
+	 */
+	public function getNotifications($type, $entityId)
+	{
+		// Идентификатор формы "Оформленные заказы"
+		$iAdmin_Form_Id = 75;
+		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
+
+		// Контроллер формы
+		$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+		$oAdmin_Form_Controller
+			->path('/admin/shop/order/index.php')
+			->window('id_content');
+
+		switch ($type)
+		{
+			case 1: // Новый заказ
+				$sIconIco = "fa-shopping-basket";
+				$sIconColor = "white";
+				$sBackgroundColor = "bg-azure";
+			break;
+			case 2: // Оплата
+
+			break;
+			default:
+				$sIconIco = "fa-info";
+				$sIconColor = "white";
+				$sBackgroundColor = "bg-themeprimary";
+		}
+
+		return array(
+			'icon' => array(
+				'ico' => "fa {$sIconIco}",
+				'color' => $sIconColor,
+				'background-color' => $sBackgroundColor
+			),
+			'notification' => array(
+				'ico' => $sIconIco,
+				'background-color' => 'info'
+			),
+			'href' => $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),
+			'onclick' => $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),
+			'extra' => array(
+				'icons' => array(),
+				'description' => NULL
+			)
+		);
 	}
 }

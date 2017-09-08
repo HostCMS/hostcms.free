@@ -800,6 +800,14 @@ display: inline-block;
 	padding: 3px 5px;
 }
 
+.admin_table_filter.disabled {
+	opacity: .5;
+}
+tr.admin_table_filter.disabled input,
+tr.admin_table_filter.disabled select {
+	pointer-events: none;
+}
+
 .table thead tr th .fa,
 .table tbody tr td .fa {
 	font-size: 14px;
@@ -1151,8 +1159,16 @@ border-left: 0 none;
 	font-style: italic;
 }
 
-#editabledatatable_length{
-	margin-bottom: 20px;
+/*.table-toolbar-right { margin-bottom: 20px }*/
+.table-toolbar-right .btn-sm { font-size: 13px }
+.table-toolbar-right .btn-sm .badge {
+	background-color: #fb6e52;
+    font-size: 8px !important;
+    height: 15px;
+    padding: 3px 5px;
+    position: absolute;
+    right: -7px;
+    top: -7px;
 }
 
 table input[type="checkbox"] + .text:before, table input[type="radio"] + .text:before {
@@ -1693,7 +1709,12 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	display: none;
 }
 
-.popover-content{
+.popover { max-width: 80%; font-size: 13px }
+.popover a{ cursor: pointer }
+/*.popover .popover-content table.table { background-color: #eee; }*/
+.popover .popover-content table.table tr td:last-child { text-align: right }
+.popover .popover-content table.table tr.footer { font-weight: bold }
+/*.popover-content{
 	background-color: #eee;
 }
 .popover.top > .arrow::after{
@@ -1707,10 +1728,7 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 }
 .popover.left> .arrow::after{
 	border-left-color: #eee;
-}
-.popover a{
-	cursor: pointer;
-}
+}*/
 
 .badge-hostcms {
 	background-color: #eee !important;
@@ -1881,8 +1899,8 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 	margin-top: 24px !important;
 }
 
-.siteuser_group_list_link>i, .structure_list_link>i { font-size:11px !important;margin-left:5px; }
-.siteuser_group_list_link>i:hover,.siteuser_group_list_link>i:focus, .structure_list_link>i:hover,.structure_list_link>i:focus { cursor:pointer; }
+.siteuser_group_list_link > i, .structure_list_link > i, .shop_order_link > i { font-size:11px !important;margin-left:5px; }
+.siteuser_group_list_link > i:hover,.siteuser_group_list_link > i:focus, .structure_list_link > i:hover,.structure_list_link > i:focus, .shop_order_link > i:hover,.shop_order_link > i:focus { cursor:pointer; }
 
 /* --- Autocomplete --- */
 .ui-autocomplete { position: absolute; top: 0; left: 0; cursor: default; padding: 0px; list-style: none; background-color: #fff; border: 1px solid #f5f5f5; }
@@ -2016,4 +2034,72 @@ table.table.table-popular-queries tr td:last-child {
 }
 .table.table-popular-queries > tbody > tr:first-child > td {
 	border-top: none;
+}
+
+.table a.delete-associated-item:hover, .table a.add-associated-item:hover {
+	cursor: pointer;
+}
+
+.badge-hostcms.badge-square > i { font-size: 11px !important; }
+
+#notificationsListBox .footer .input-icon
+{
+	width: 45%;
+}
+
+.clock {
+	margin: 0 auto;
+	color: #fff;
+	font-size: 30px;
+	padding: 0 10px;
+}
+
+.clock ul {
+	margin: 0 auto;
+	padding: 0px;
+	list-style: none;
+}
+
+.clock ul li {
+	display: inline;
+	text-align: center;
+}
+
+.clock #point {
+	position: relative;
+	padding: 0 2px;
+}
+
+#notificationsListBox .footer .input-icon { width: 88% }
+
+#notificationsListBox, #notificationsClockListBox {
+	width: 400px;
+}
+
+@media screen and (max-width: 767px) {
+  #notificationsListBox, #notificationsClockListBox {
+    width: 50%;
+  }
+}
+
+.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu li.unread,
+.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu li.unread a
+{
+	background-color: #efefef;
+}
+
+
+#notificationsListBox  .notification-body .description, #notificationsListBox  .notification-body .title, #notificationsClockListBox  .notification-body .description, #notificationsClockListBox  .notification-body .title{
+	max-width: 290px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#notificationsListBox  .notification-body:hover .description, #notificationsListBox  .notification-body:hover .title, #notificationsClockListBox  .notification-body:hover .description, #notificationsClockListBox  .notification-body:hover .title {
+	white-space: normal;
+}
+
+.navbar .navbar-inner .navbar-header .navbar-account .account-area>li .dropdown-menu.dropdown-notifications li .notification-body .title{
+	font-size: 12px;
 }

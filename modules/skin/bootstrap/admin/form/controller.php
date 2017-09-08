@@ -14,6 +14,219 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
 	/**
+	 * Apply form settings
+	 * @return self
+	 */
+	public function formSettings()
+	{
+		parent::formSettings();
+
+		// Filter: Main Option
+		if (!is_null(Core_Array::getPost('changeFilterStatus')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$this->_oAdmin_Form_Setting->filter = json_encode(
+					array('show' => intval(Core_Array::getPost('show')))
+						+ (is_array($this->_filter)
+							? $this->_filter
+							: array())
+				);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Fields
+		if (!is_null(Core_Array::getPost('changeFilterField')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				// Main Tab should be first
+				if (!isset($tabs['main']))
+				{
+					$tabs['main'] = array();
+				}
+
+				$tab = strval(Core_Array::getPost('tab'));
+				$field = strval(Core_Array::getPost('field'));
+				$show = intval(Core_Array::getPost('show'));
+
+				$tabs[$tab]['fields'][$field]['show'] = $show;
+
+				$this->_filter['tabs'] = $tabs;
+
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+				$this->_oAdmin_Form_Setting->save();
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Save As
+		if (!is_null(Core_Array::getPost('saveFilterAs')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				// Main Tab should be first
+				if (!isset($tabs['main']))
+				{
+					$tabs['main'] = array();
+				}
+
+				$aNewTab = array(
+					'caption' => Core_Array::getPost('filterCaption')
+				);
+
+				$bCreated = FALSE;
+				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				{
+					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+					{
+						$field = $oAdmin_Form_Field->name;
+
+						$value = isset($_POST['topFilter_' . $oAdmin_Form_Field->id])
+							? $_POST['topFilter_' . $oAdmin_Form_Field->id]
+							: NULL;
+
+						if (strlen($value))
+						{
+							$bCreated = TRUE;
+							$aNewTab['fields'][$field]['show'] = 1;
+							$aNewTab['fields'][$field]['value'] = $value;
+						}
+						else
+						{
+							$aNewTab['fields'][$field]['show'] = 0;
+						}
+					}
+				}
+
+				if ($bCreated)
+				{
+					$tabs[] = $aNewTab;
+
+					$this->_filter['tabs'] = $tabs;
+
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+					$this->_oAdmin_Form_Setting->save();
+
+					end($tabs);
+					// Change current filter
+					$this->filterId(key($tabs));
+					/*$aJSON = array('message' => 'OK', 'id' => key($tabs));*/
+				}
+				else
+				{
+					//$aJSON = array('message' => 'Error, empty conditions');
+				}
+			}
+			else
+			{
+				//$aJSON = array('message' => 'Error');
+			}
+
+			//Core::showJson($aJSON);
+		}
+
+		// Filter: Save
+		if (!is_null(Core_Array::getPost('saveFilter')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				// _filterId
+				$tabName = Core_Array::getPost('filterId');
+
+				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				{
+					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+					{
+						$field = $oAdmin_Form_Field->name;
+
+						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id);
+
+						if (strlen($value))
+						{
+							$tabs[$tabName]['fields'][$field]['show'] = 1;
+							$tabs[$tabName]['fields'][$field]['value'] = $value;
+						}
+						else
+						{
+							$tabs[$tabName]['fields'][$field]['show'] = 0;
+						}
+					}
+				}
+
+				$this->_filter['tabs'] = $tabs;
+
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+				$this->_oAdmin_Form_Setting->save();
+
+				end($tabs);
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		// Filter: Delete
+		if (!is_null(Core_Array::getPost('deleteFilter')))
+		{
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+
+				$tabName = Core_Array::getPost('filterId');
+
+				if (isset($tabs[$tabName]))
+				{
+					unset($tabs[$tabName]);
+
+					$this->_filter['tabs'] = $tabs;
+
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+					$this->_oAdmin_Form_Setting->save();
+				}
+
+				$aJSON = array('message' => 'OK');
+			}
+			else
+			{
+				$aJSON = array('message' => 'Error');
+			}
+
+			Core::showJson($aJSON);
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Show form content in administration center
 	 * @return self
 	 * @hostcms-event Admin_Form_Controller.onBeforeShowActions
@@ -31,13 +244,191 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		$windowId = $this->getWindowId();
 
-		$allow_filter = FALSE;
-
 		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
-		// div class="table-scrollable"
-		// table-bordered
+		if ($this->_showFilter)
+		{
+			$aHide = array();
+			$path = Core_Str::escapeJavascriptVariable($this->_path);
+			$aTabs = Core_Array::get($this->_filter, 'tabs', array());
+			?>
+			<div class="tabbable topFilter" style="display: none;">
+				<ul class="nav nav-tabs tabs-flat" id="filterTabs">
+					<?php
+					//print_r($aTabs);
+					!isset($aTabs['main']) && $aTabs['main'] = array();
+
+					foreach ($aTabs as $tabName => $aTab)
+					{
+						$tabName = strval($tabName);
+						$bMain = $tabName === 'main';
+
+						/*var_dump($tabName);
+						var_dump($this->_filterId);*/
+
+						$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
+
+						?><li id="filter-li-<?php echo htmlspecialchars($tabName)?>" <?php echo $bCurrent ? ' class="active tab-orange"' : ''?> data-filter-id="<?php echo $tabName?>">
+							<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
+								<?php echo htmlspecialchars(
+									$bMain
+										? Core::_('Admin_Form.filter')
+										: $aTab['caption']
+								)?>
+							</a>
+						</li>
+						<?php
+					}
+					?>
+				</ul>
+				<div class="tab-content tabs-flat">
+					<?php
+					$filterPrefix = 'topFilter_';
+					foreach ($aTabs as $tabName => $aTab)
+					{
+						$tabName = strval($tabName);
+						$bMain = $tabName === 'main';
+
+						$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
+
+						?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bCurrent ? ' in active' : ''?>">
+							<div id="horizontal-form">
+								<form class="form-horizontal" role="form" action="<?php echo htmlspecialchars($this->_path)?>" data-filter-id="<?php echo $tabName?>" method="POST">
+									<?php
+									// Top Filter
+									foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+									{
+										// Перекрытие параметров для данного поля
+										$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+										foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+										{
+											$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+										}
+
+										if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
+										{
+											$Admin_Word_Value = $oAdmin_Form_Field
+												->Admin_Word
+												->getWordByLanguage($this->_Admin_Language->id);
+
+											$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+												? htmlspecialchars($Admin_Word_Value->name)
+												: NULL;
+
+											if (!is_null($fieldName))
+											{
+												$sFormGroupId = $tabName . '-field-' . $oAdmin_Form_Field_Changed->id;
+
+												$bHide = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'])
+													&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['show'] == 0;
+
+												$bHide && $aHide[] = '#' . $sFormGroupId;
+
+												// Значение вначале берется из POST, если его там нет, то из данных в JSON
+												/*$value = !$bHide
+													? (isset($_POST['topFilter_' . $oAdmin_Form_Field_Changed->id]) && $bCurrent
+														? strval($_POST['topFilter_' . $oAdmin_Form_Field_Changed->id])
+														: (
+															isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['value'])
+																? $aTabs[$tabName]['fields'][$oAdmin_Form_Field_Changed->name]['value']
+																: ''
+														)
+													)
+													: '';*/
+
+												$sInputId = "id_{$filterPrefix}{$oAdmin_Form_Field_Changed->id}";
+												?><div class="form-group" id="<?php echo $sFormGroupId?>">
+													<label for="<?php echo $sInputId?>" class="col-sm-2 control-label no-padding-right">
+														<?php echo $fieldName?>
+													</label>
+													<div class="col-sm-10">
+														<?php
+														$this->_showFilterField($oAdmin_Form_Field_Changed, $filterPrefix, $tabName);
+														?>
+													</div>
+												</div><?php
+											}
+										}
+									}
+									?>
+									<div class="form-group text-align-right">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="submit" class="btn btn-default" onclick="<?php echo $this->getAdminLoadAjax($this->getPath())?>; return false"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
+
+											<div class="btn-group">
+												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+													<i class="fa fa-plus"></i>
+												</a>
+												<ul class="dropdown-menu dropdown-menu-right">
+													<?php
+													foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+													{
+														if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+														{
+															$Admin_Word_Value = $oAdmin_Form_Field
+																->Admin_Word
+																->getWordByLanguage($this->_Admin_Language->id);
+
+															$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+																? htmlspecialchars($Admin_Word_Value->name)
+																: NULL;
+
+															if (!is_null($fieldName))
+															{
+																$class = isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'])
+																	&& $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['show'] == 0
+																	? ''
+																	: ' fa-check';
+
+																?><li>
+																	<a data-filter-field-id="<?php echo $tabName . '-field-' . $oAdmin_Form_Field->id?>" onclick="$.changeFilterField({ path: '<?php echo $path?>', tab: '<?php echo $tabName?>', field: '<?php echo $oAdmin_Form_Field->name?>', context: this })"><i class="dropdown-icon fa<?php echo $class?>"></i> <?php echo $fieldName?></a>
+																</li><?php
+															}
+														}
+													}
+													?>
+												</ul>
+											</div>
+
+											<div class="btn-group">
+												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+													<i class="fa fa-gear"></i>
+												</a>
+												<ul class="dropdown-menu dropdown-menu-right">
+													<li>
+														<a href="javascript:void(0);" onclick="$.filterSaveAs('Введите название фильтра', $(this), '<?php echo Core_Str::escapeJavascriptVariable(str_replace(array('"'), array('&quot;'), $this->_additionalParams))?>')"><?php echo Core::_('Admin_Form.saveAs')?></a>
+														<?php if (!$bMain) {
+														?>
+														<a href="javascript:void(0);" onclick="$.filterSave($(this))"><?php echo Core::_('Admin_Form.save')?></a>
+														<?php
+														$sDelete = Core::_('Admin_Form.delete');
+														?>
+														<a href="javascript:void(0);" onclick="res = confirm('<?php echo htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $sDelete))?>'); if (res) { $.filterDelete($(this)) } return res;"><?php echo $sDelete?></a>
+														<?php
+														}
+														?>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						<?php
+					}
+
+					if (count($aHide))
+					{
+						?><script>$('<?php echo implode(',', $aHide)?>').hide();</script><?php
+					}
+					?>
+				</div>
+			</div>
+		<?php
+		}
 		?>
+
 		<div>
 			<table class="admin-table table table-hover table-striped">
 				<thead>
@@ -49,65 +440,70 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						?><th width="40">&nbsp;</th><?php
 					}
 
+					$allow_filter = FALSE;
 					foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 					{
-						// There is at least one filter
-						$oAdmin_Form_Field->allow_filter && $allow_filter = TRUE;
-
-						// Перекрытие параметров для данного поля
-						$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-						foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+						// Если столбец фрмы
+						if ($oAdmin_Form_Field->view == 0)
 						{
-							$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
-						}
+							// There is at least one filter
+							$oAdmin_Form_Field->allow_filter && $allow_filter = TRUE;
 
-						$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
-						$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
-
-						$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
-
-						$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-							? htmlspecialchars($Admin_Word_Value->name)
-							: '&mdash;';
-
-						// Change to Font Awesome
-						if (strlen($oAdmin_Form_Field_Changed->ico))
-						{
-							$fieldName = '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
-						}
-
-						$oAdmin_Form_Field_Changed->allow_sorting
-							&& is_object($this->_sortingAdmin_Form_Field)
-							&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
-							&& $class .= ' highlight';
-
-						$sSortingClass = $sSortingOnClick = '';
-
-						if ($oAdmin_Form_Field_Changed->allow_sorting)
-						{
-							//$hrefDown = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
-							$onclickDown = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
-
-							//$hrefUp = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
-							$onclickUp = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
-
-							if ($oAdmin_Form_Field->id == $this->_sortingFieldId)
+							// Перекрытие параметров для данного поля
+							$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+							foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 							{
-								$class .= $this->_sortingDirection == 1
-									? ' sorting_desc'
-									: ' sorting_asc';
+								$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+							}
 
-								$sSortingOnClick = $this->_sortingDirection == 1
-									? $onclickUp
-									: $onclickDown;
-							}
-							else
+							$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
+							$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
+
+							$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+
+							$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+								? htmlspecialchars($Admin_Word_Value->name)
+								: '&mdash;';
+
+							// Change to Font Awesome
+							if (strlen($oAdmin_Form_Field_Changed->ico))
 							{
-								$class .= ' sorting';
-								$sSortingOnClick = $onclickUp;
+								$fieldName = '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
 							}
+
+							$oAdmin_Form_Field_Changed->allow_sorting
+								&& is_object($this->_sortingAdmin_Form_Field)
+								&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+								&& $class .= ' highlight';
+
+							$sSortingClass = $sSortingOnClick = '';
+
+							if ($oAdmin_Form_Field_Changed->allow_sorting)
+							{
+								//$hrefDown = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
+								$onclickDown = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 1);
+
+								//$hrefUp = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
+								$onclickUp = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
+
+								if ($oAdmin_Form_Field->id == $this->_sortingFieldId)
+								{
+									$class .= $this->_sortingDirection == 1
+										? ' sorting_desc'
+										: ' sorting_asc';
+
+									$sSortingOnClick = $this->_sortingDirection == 1
+										? $onclickUp
+										: $onclickDown;
+								}
+								else
+								{
+									$class .= ' sorting';
+									$sSortingOnClick = $onclickUp;
+								}
+							}
+							?><th class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php echo $fieldName?></th><?php
 						}
-						?><th class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php echo $fieldName?></th><?php
 					}
 
 					$oUser = Core_Entity::factory('User')->getCurrent();
@@ -115,8 +511,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					// Доступные действия для пользователя
 					$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-					if ($this->_Admin_Form->show_operations && $this->_showOperations
-					|| $allow_filter && $this->_showFilter)
+					if ($this->_Admin_Form->show_operations && $this->_showOperations || $allow_filter && $this->_showFilter)
 					{
 							$iSingleActionCount = 0;
 
@@ -137,156 +532,42 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				<label><input type="checkbox" name="admin_forms_all_check" class="colored-black" id="id_admin_forms_all_check" onclick="$('#<?php echo $windowId?>').highlightAllRows(this.checked)" class="form-control"/><span class="text"></span></label></td><?php
 			}
 
-			// Filter
+			// Main Filter
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
-				// Перекрытие параметров для данного поля
-				foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+				// Если столбец формы
+				if ($oAdmin_Form_Field->view == 0)
 				{
-					$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
-				}
-
-				$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
-				$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
-
-				// Подсвечивать
-				$oAdmin_Form_Field_Changed->allow_sorting
-					&& is_object($this->_sortingAdmin_Form_Field)
-					&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
-					&& $class .= ' highlight';
-
-				?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
-
-				if ($oAdmin_Form_Field_Changed->allow_filter)
-				{
-					$value = trim(Core_Array::get($this->request, "admin_form_filter_{$oAdmin_Form_Field->id}"));
-
-					// Функция обратного вызова для фильтра
-					if (isset($this->_filters[$oAdmin_Form_Field_Changed->name]))
+					// Перекрытие параметров для данного поля
+					$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+					foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 					{
-						switch ($oAdmin_Form_Field_Changed->type)
-						{
-							case 1: // Строка
-							case 2: // Поле ввода
-							case 4: // Ссылка
-							case 10: // Функция обратного вызова
-							case 3: // Checkbox.
-							case 8: // Выпадающий список
-								echo call_user_func($this->_filters[$oAdmin_Form_Field_Changed->name], $value, $oAdmin_Form_Field);
-							break;
+						$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+					}
 
-							case 5: // Дата-время.
-							case 6: // Дата.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
+					$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
+					$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
 
-								echo call_user_func($this->_filters[$oAdmin_Form_Field_Changed->name], $date_from, $date_to, $oAdmin_Form_Field);
-							break;
-						}
+					// Подсвечивать
+					$oAdmin_Form_Field_Changed->allow_sorting
+						&& is_object($this->_sortingAdmin_Form_Field)
+						&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+						&& $class .= ' highlight';
+
+					?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
+
+					if ($oAdmin_Form_Field_Changed->allow_filter)
+					{
+						$filterPrefix = 'admin_form_filter_';
+						$this->_showFilterField($oAdmin_Form_Field_Changed, $filterPrefix);
 					}
 					else
 					{
-						$style = /*!empty($width)
-							? "width: {$width};"
-							: */"width: 100%;";
-
-						switch ($oAdmin_Form_Field->type)
-						{
-							case 1: // Строка
-							case 2: // Поле ввода
-							case 4: // Ссылка
-							case 10: // Функция обратного вызова
-								$value = htmlspecialchars($value);
-								?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
-							break;
-
-							case 3: // Checkbox.
-								?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
-									<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-									<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
-									<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
-								</select><?php
-							break;
-
-							case 5: // Дата-время.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_from = htmlspecialchars($date_from);
-
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = htmlspecialchars($date_to);
-
-								?><div class="input-group date">
-									<input name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
-								</div>
-								<div class="input-group date">
-									<input name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
-								</div>
-								<script type="text/javascript">
-								(function($) {
-									$('#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-									$('#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-								})(jQuery);
-								</script><?php
-							break;
-
-							case 6: // Дата.
-								$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-								$date_from = htmlspecialchars($date_from);
-
-								$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-								$date_to = htmlspecialchars($date_to);
-
-								?><div class="input-group date">
-									<input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm" />
-								</div>
-								<div class="input-group date">
-									<input type="text" name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="8" class="form-control input-sm" />
-								</div>
-								<script type="text/javascript">
-								(function($) {
-									$('#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-									$('#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-								})(jQuery);
-								</script>
-								<?php
-							break;
-							case 8: // Выпадающий список.
-								?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
-								<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-								<?php
-								$str_array = explode("\n", $oAdmin_Form_Field_Changed->list);
-								$value_array = array();
-
-								foreach ($str_array as $str_value)
-								{
-									// Каждую строку разделяем по равно
-									$str_explode = explode('=', $str_value);
-
-									if ($str_explode[0] != 0 && count($str_explode) > 1)
-									{
-										// сохраняем в массив варинаты значений и ссылки для них
-										$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-										?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
-									}
-								}
-								?>
-								</select>
-								<?php
-							break;
-
-							default:
-							?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
-							break;
-						}
+						// Фильтр не разрешен.
+						?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
 					}
+					?></td><?php
 				}
-				else
-				{
-					// Фильтр не разрешен.
-					?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
-				}
-				?></td><?php
 			}
 
 			// Фильтр показываем если есть события или хотя бы у одного есть фильтр
@@ -360,302 +641,307 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 						foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 						{
-							// Перекрытие параметров для данного поля
-							$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
-
-							// Параметры поля.
-							$width = htmlspecialchars(trim($oAdmin_Form_Field_Changed->width));
-							$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
-
-							$oAdmin_Form_Field->allow_sorting
-								&& is_object($this->_sortingAdmin_Form_Field)
-								&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
-								&& $class .= ' highlight';
-
-							?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
-
-							$fieldName = $this->getFieldName($oAdmin_Form_Field_Changed->name);
-
-							try
+							// Если столбец фрмы
+							if ($oAdmin_Form_Field->view == 0)
 							{
-								if ($oAdmin_Form_Field_Changed->type != 10)
+								// Перекрытие параметров для данного поля
+								$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+
+								// Параметры поля.
+								$width = htmlspecialchars(trim($oAdmin_Form_Field_Changed->width));
+								$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
+
+								$oAdmin_Form_Field->allow_sorting
+									&& is_object($this->_sortingAdmin_Form_Field)
+									&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+									&& $class .= ' highlight';
+
+								?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
+
+								$fieldName = $this->getFieldName($oAdmin_Form_Field_Changed->name);
+
+								try
 								{
-									if (isset($oEntity->$fieldName))
-									{
-										// Выведим значение свойства
-										$value = htmlspecialchars($oEntity->$fieldName);
-									}
-									elseif (method_exists($oEntity, $fieldName))
-									{
-										// Выполним функцию обратного вызова
-										$value = htmlspecialchars($oEntity->$fieldName());
-									}
-									else
-									{
-										$value = NULL;
-									}
-
-									$element_name = "apply_check_{$quotedDatasetKey}_{$quotedEntityKey}_fv_{$oAdmin_Form_Field_Changed->id}";
-
-									$sCheckSelector = "check_{$escapedDatasetKey}_{$escapedEntityKey}";
-									// Формат не экранируем, т.к. он может содержать теги
-									$sFormat = $oAdmin_Form_Field_Changed->format;
-
-									// Отображения элементов полей, в зависимости от их типа.
-									switch ($oAdmin_Form_Field_Changed->type)
-									{
-										case 1: // Текст.
-											if (!is_null($value))
-											{
-												?><span id="<?php echo $element_name?>"<?php echo 	$oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
-												echo $this->applyFormat($value, $sFormat)?></span><?php
-											}
-										break;
-										case 2: // Поле ввода.
-											if (!is_null($value))
-											{
-											?><input type="text" name="<?php echo $element_name?>" id="<?php echo $element_name?>" value="<?php echo $value?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" onkeydown="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" class="form-control input-xs" /><?php
-											}
-										break;
-										case 3: // Checkbox.
-											?><label><input type="checkbox" name="<?php echo $element_name?>" id="<?php echo $element_name?>" <?php echo intval($value) ? 'checked="checked"' : ''?> onclick="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();" value="1" /><span class="text"></span></label><?php
-										break;
-										case 4: // Ссылка.
-											$link = htmlspecialchars($oAdmin_Form_Field_Changed->link);
-											$onclick = htmlspecialchars($oAdmin_Form_Field_Changed->onclick);
-
-											//$link_text = trim($value);
-											$link_text = $this->applyFormat($value, $sFormat);
-
-											$link = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $link);
-											$onclick = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $onclick, 'onclick');
-
-											if (mb_strlen($link_text))
-											{
-												?><a href="<?php echo $link?>" <?php echo (!empty($onclick)) ? "onclick=\"{$onclick}\"" : ''?>><?php echo $link_text?></a><?php
-											}
-											else
-											{
-												?>&nbsp;<?php
-											}
-										break;
-										case 5: // Дата-время.
-											if (!is_null($value))
-											{
-												$value = $value == '0000-00-00 00:00:00' || $value == ''
-													? ''
-													: Core_Date::sql2datetime($value);
-												echo $this->applyFormat($value, $sFormat);
-											}
-										break;
-										case 6: // Дата.
-											if (!is_null($value))
-											{
-												$value = $value == '0000-00-00 00:00:00' || $value == ''
-													? ''
-													: Core_Date::sql2date($value);
-												echo $this->applyFormat($value, $sFormat);
-											}
-										break;
-										case 7: // Картинка-ссылка.
-											$link = $oAdmin_Form_Field_Changed->link;
-											$onclick = $oAdmin_Form_Field_Changed->onclick;
-
-											$link = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $link);
-											$onclick = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $onclick, 'onclick');
-
-											// ALT-ы к картинкам
-											// TITLE-ы к картинкам
-											$alt_array = $title_array = $value_array = $ico_array = array();
-
-											/*
-											Разделяем варианты значений на строки, т.к. они приходят к нам в виде:
-											0 = /images/off.gif
-											1 = /images/on.gif
-											*/
-											$str_array = explode("\n", $oAdmin_Form_Field_Changed->image);
-
-											foreach ($str_array as $str_value)
-											{
-												// Каждую строку разделяем по равно
-												$str_explode = explode('=', $str_value);
-
-												if (count($str_explode) > 1)
-												{
-													$mIndex = trim($str_explode[0]);
-													// сохраняем в массив варинаты значений и ссылки для них
-													$value_array[$mIndex] = trim($str_explode[1]);
-
-													// Если указано альтернативное значение для картинки - добавим его в alt и title
-													if (isset($str_explode[2])
-														&& trim($value) == $mIndex)
-													{
-														$alt_array[$mIndex] = $title_array[$mIndex] = trim($str_explode[2]);
-													}
-
-													isset($str_explode[3])
-														&& $ico_array[$mIndex] = $str_explode[3];
-												}
-											}
-
-											// Получаем заголовок столбца на случай, если для IMG не было указано alt-а или title
-											$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage(
-												$this->_Admin_Language->id
-											);
-
-											$fieldCaption = $Admin_Word_Value
-												? htmlspecialchars($Admin_Word_Value->name)
-												: "&mdash;";
-
-											if (empty($alt_array[$value]))
-											{
-												$alt_array[$value] = $fieldCaption;
-											}
-
-											if (empty($title_array[$value]))
-											{
-												$title_array[$value] = $fieldCaption;
-											}
-
-											if (isset($value_array[$value]))
-											{
-												$src = $value_array[$value];
-											}
-											elseif(isset($value_array['']))
-											{
-												$src = $value_array[''];
-											}
-											else
-											{
-												$src = NULL;
-											}
-
-											if (isset($ico_array[$value]))
-											{
-												$ico = $ico_array[$value];
-											}
-											elseif(isset($ico_array['']))
-											{
-												$ico = $ico_array[''];
-											}
-											else
-											{
-												$ico = NULL;
-											}
-
-											// Отображаем картинку ссылкой
-											if (!empty($link) && !is_null($src))
-											{
-												?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?>"><?php
-											}
-
-											// Отображаем картинку без ссылки
-											if (!is_null($ico))
-											{
-												?><i class="<?php echo htmlspecialchars($ico)?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>"></i><?php
-											}
-											elseif (!is_null($src))
-											{
-												?><img src="<?php echo htmlspecialchars($src)?>" alt="<?php echo htmlspecialchars(Core_Array::get($alt_array, $value))?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>" /><?php
-											}
-											/*elseif (!empty($link) && !isset($value_array[$value]))
-											{
-												// Картинки для такого значения не найдено, но есть ссылка
-												?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?> ">&mdash;</a><?php
-											}*/
-											else
-											{
-												// Картинки для такого значения не найдено
-												?>&mdash;<?php
-											}
-
-											if (!empty($link) && !is_null($src))
-											{
-												?></a><?php
-											}
-
-										break;
-										case 8: // Выпадающий список
-											/*
-											Разделяем варианты значений на строки, т.к. они приходят к нам в виде:
-											0 = /images/off.gif
-											1 = /images/on.gif
-											*/
-
-											$str_array = explode("\n", $oAdmin_Form_Field_Changed->list);
-
-											$value_array = array();
-
-											?><select name="<?php echo $element_name?>" id="<?php echo $element_name?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>')"><?php
-
-											foreach ($str_array as $str_value)
-											{
-												// Каждую строку разделяем по равно
-												$str_explode = explode('=', $str_value, 2);
-
-												if (count($str_explode) > 1)
-												{
-													// сохраняем в массив варинаты значений и ссылки для них
-													$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-													$selected = $value == $str_explode[0]
-														? ' selected = "" '
-														: '';
-
-													?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $selected?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
-												}
-											}
-											?>
-											</select>
-											<?php
-										break;
-										case 9: // Текст "AS IS"
-											if (mb_strlen($value) != 0)
-											{
-												echo html_entity_decode($value, ENT_COMPAT, 'UTF-8');
-											}
-											else
-											{
-												?>&nbsp;<?php
-											}
-										break;
-										default: // Тип не определен.
-											?>&nbsp;<?php
-										break;
-									}
-								}
-								// Вычисляемое поле с помощью функции обратного вызова
-								else
-								{
-									if (method_exists($oEntity, $fieldName)
-										|| method_exists($oEntity, 'isCallable') && $oEntity->isCallable($fieldName)
+									if ($oAdmin_Form_Field_Changed->type != 10
+										&& !$this->isCallable($oEntity, $oAdmin_Form_Field_Changed->name . 'Backend')
 									)
 									{
-										// Выполним функцию обратного вызова
-										echo $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+										if (isset($oEntity->$fieldName))
+										{
+											// Выведим значение свойства
+											$value = htmlspecialchars($oEntity->$fieldName);
+										}
+										elseif (method_exists($oEntity, $fieldName))
+										{
+											// Выполним функцию обратного вызова
+											$value = htmlspecialchars($oEntity->$fieldName());
+										}
+										else
+										{
+											$value = NULL;
+										}
+
+										$element_name = "apply_check_{$quotedDatasetKey}_{$quotedEntityKey}_fv_{$oAdmin_Form_Field_Changed->id}";
+
+										$sCheckSelector = "check_{$escapedDatasetKey}_{$escapedEntityKey}";
+										// Формат не экранируем, т.к. он может содержать теги
+										$sFormat = $oAdmin_Form_Field_Changed->format;
+
+										// Отображения элементов полей, в зависимости от их типа.
+										switch ($oAdmin_Form_Field_Changed->type)
+										{
+											case 1: // Текст.
+												if (!is_null($value))
+												{
+													?><span id="<?php echo $element_name?>"<?php echo 	$oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
+													echo $this->applyFormat($value, $sFormat)?></span><?php
+												}
+											break;
+											case 2: // Поле ввода.
+												if (!is_null($value))
+												{
+												?><input type="text" name="<?php echo $element_name?>" id="<?php echo $element_name?>" value="<?php echo $value?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" onkeydown="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" class="form-control input-xs" /><?php
+												}
+											break;
+											case 3: // Checkbox.
+												?><label><input type="checkbox" name="<?php echo $element_name?>" id="<?php echo $element_name?>" <?php echo intval($value) ? 'checked="checked"' : ''?> onclick="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();" value="1" /><span class="text"></span></label><?php
+											break;
+											case 4: // Ссылка.
+												$link = htmlspecialchars($oAdmin_Form_Field_Changed->link);
+												$onclick = htmlspecialchars($oAdmin_Form_Field_Changed->onclick);
+
+												//$link_text = trim($value);
+												$link_text = $this->applyFormat($value, $sFormat);
+
+												$link = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $link);
+												$onclick = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $onclick, 'onclick');
+
+												if (mb_strlen($link_text))
+												{
+													?><a href="<?php echo $link?>" <?php echo (!empty($onclick)) ? "onclick=\"{$onclick}\"" : ''?>><?php echo $link_text?></a><?php
+												}
+												else
+												{
+													?>&nbsp;<?php
+												}
+											break;
+											case 5: // Дата-время.
+												if (!is_null($value))
+												{
+													$value = $value == '0000-00-00 00:00:00' || $value == ''
+														? ''
+														: Core_Date::sql2datetime($value);
+													echo $this->applyFormat($value, $sFormat);
+												}
+											break;
+											case 6: // Дата.
+												if (!is_null($value))
+												{
+													$value = $value == '0000-00-00 00:00:00' || $value == ''
+														? ''
+														: Core_Date::sql2date($value);
+													echo $this->applyFormat($value, $sFormat);
+												}
+											break;
+											case 7: // Картинка-ссылка.
+												$link = $oAdmin_Form_Field_Changed->link;
+												$onclick = $oAdmin_Form_Field_Changed->onclick;
+
+												$link = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $link);
+												$onclick = $this->doReplaces($aAdmin_Form_Fields, $oEntity, $onclick, 'onclick');
+
+												// ALT-ы к картинкам
+												// TITLE-ы к картинкам
+												$alt_array = $title_array = $value_array = $ico_array = array();
+
+												/*
+												Разделяем варианты значений на строки, т.к. они приходят к нам в виде:
+												0 = /images/off.gif
+												1 = /images/on.gif
+												*/
+												$str_array = explode("\n", $oAdmin_Form_Field_Changed->image);
+
+												foreach ($str_array as $str_value)
+												{
+													// Каждую строку разделяем по равно
+													$str_explode = explode('=', $str_value);
+
+													if (count($str_explode) > 1)
+													{
+														$mIndex = trim($str_explode[0]);
+														// сохраняем в массив варинаты значений и ссылки для них
+														$value_array[$mIndex] = trim($str_explode[1]);
+
+														// Если указано альтернативное значение для картинки - добавим его в alt и title
+														if (isset($str_explode[2])
+															&& trim($value) == $mIndex)
+														{
+															$alt_array[$mIndex] = $title_array[$mIndex] = trim($str_explode[2]);
+														}
+
+														isset($str_explode[3])
+															&& $ico_array[$mIndex] = $str_explode[3];
+													}
+												}
+
+												// Получаем заголовок столбца на случай, если для IMG не было указано alt-а или title
+												$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage(
+													$this->_Admin_Language->id
+												);
+
+												$fieldCaption = $Admin_Word_Value
+													? htmlspecialchars($Admin_Word_Value->name)
+													: "&mdash;";
+
+												if (empty($alt_array[$value]))
+												{
+													$alt_array[$value] = $fieldCaption;
+												}
+
+												if (empty($title_array[$value]))
+												{
+													$title_array[$value] = $fieldCaption;
+												}
+
+												if (isset($value_array[$value]))
+												{
+													$src = $value_array[$value];
+												}
+												elseif(isset($value_array['']))
+												{
+													$src = $value_array[''];
+												}
+												else
+												{
+													$src = NULL;
+												}
+
+												if (isset($ico_array[$value]))
+												{
+													$ico = $ico_array[$value];
+												}
+												elseif(isset($ico_array['']))
+												{
+													$ico = $ico_array[''];
+												}
+												else
+												{
+													$ico = NULL;
+												}
+
+												// Отображаем картинку ссылкой
+												if (!empty($link) && !is_null($src))
+												{
+													?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?>"><?php
+												}
+
+												// Отображаем картинку без ссылки
+												if (!is_null($ico))
+												{
+													?><i class="<?php echo htmlspecialchars($ico)?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>"></i><?php
+												}
+												elseif (!is_null($src))
+												{
+													?><img src="<?php echo htmlspecialchars($src)?>" alt="<?php echo htmlspecialchars(Core_Array::get($alt_array, $value))?>" title="<?php echo htmlspecialchars(Core_Array::get($title_array, $value))?>" /><?php
+												}
+												/*elseif (!empty($link) && !isset($value_array[$value]))
+												{
+													// Картинки для такого значения не найдено, но есть ссылка
+													?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?> ">&mdash;</a><?php
+												}*/
+												else
+												{
+													// Картинки для такого значения не найдено
+													?>&mdash;<?php
+												}
+
+												if (!empty($link) && !is_null($src))
+												{
+													?></a><?php
+												}
+
+											break;
+											case 8: // Выпадающий список
+												/*
+												Разделяем варианты значений на строки, т.к. они приходят к нам в виде:
+												0 = /images/off.gif
+												1 = /images/on.gif
+												*/
+
+												$str_array = explode("\n", $oAdmin_Form_Field_Changed->list);
+
+												$value_array = array();
+
+												?><select name="<?php echo $element_name?>" id="<?php echo $element_name?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>')"><?php
+
+												foreach ($str_array as $str_value)
+												{
+													// Каждую строку разделяем по равно
+													$str_explode = explode('=', $str_value, 2);
+
+													if (count($str_explode) > 1)
+													{
+														// сохраняем в массив варинаты значений и ссылки для них
+														$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
+
+														$selected = $value == $str_explode[0]
+															? ' selected = "" '
+															: '';
+
+														?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $selected?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
+													}
+												}
+												?>
+												</select>
+												<?php
+											break;
+											case 9: // Текст "AS IS"
+												if (mb_strlen($value) != 0)
+												{
+													echo html_entity_decode($value, ENT_COMPAT, 'UTF-8');
+												}
+												else
+												{
+													?>&nbsp;<?php
+												}
+											break;
+											default: // Тип не определен.
+												?>&nbsp;<?php
+											break;
+										}
 									}
-									elseif (property_exists($oEntity, $fieldName))
+									// Вычисляемое поле с помощью функции обратного вызова
+									else
 									{
-										// Выведим значение свойства
-										echo $oEntity->$fieldName;
+										$backendName = $oAdmin_Form_Field_Changed->name . 'Backend';
+										if ($this->isCallable($oEntity, $backendName))
+										{
+											echo $oEntity->$backendName($oAdmin_Form_Field_Changed, $this);
+										}
+										elseif ($this->isCallable($oEntity, $fieldName))
+										{
+											echo $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+										}
+										elseif (property_exists($oEntity, $fieldName))
+										{
+											echo $oEntity->$fieldName;
+										}
 									}
 								}
-							}
-							catch (Exception $e)
-							{
-								Core_Message::show('Caught exception: ' . $e->getMessage() . "\n", 'error');
-							}
+								catch (Exception $e)
+								{
+									Core_Message::show('Caught exception: ' . $e->getMessage() . "\n", 'error');
+								}
 
-							// Badges
-							$badgesMethodName = $fieldName . 'Badge';
-							if (method_exists($oEntity, $badgesMethodName)
-								|| method_exists($oEntity, 'isCallable') && $oEntity->isCallable($badgesMethodName)
-							)
-							{
-								// Выполним функцию обратного вызова
-								$oEntity->$badgesMethodName($oAdmin_Form_Field, $this);
+								// Badges
+								$badgesMethodName = $fieldName . 'Badge';
+								if ($this->isCallable($oEntity, $badgesMethodName))
+								{
+									// Выполним функцию обратного вызова
+									$oEntity->$badgesMethodName($oAdmin_Form_Field, $this);
+								}
+								?></td><?php
 							}
-							?></td><?php
 						}
 
 						// Действия для строки в правом столбце
@@ -784,6 +1070,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		</div>
 		<?php
 
+		if (Core_Array::get($this->_filter, 'show'))
+		{
+			?><script>$.toggleFilter();</script><?php
+		}
+
 		Core_Event::notify('Admin_Form_Controller.onAfterShowContent', $this);
 
 		return $this;
@@ -889,14 +1180,44 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		);
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
+		if ($this->_showFilter)
+		{
+			$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')
+				//->name('admin_forms_on_page')
+				//->id('id_on_page')
+				->class('btn btn-sm btn-default margin-right-10')
+				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: "' . htmlspecialchars($this->_path) . '", show: + $(".topFilter").is(":visible") })')
+				->add(
+					Core::factory('Core_Html_Entity_I')
+						->class('fa fa-filter no-margin')
+				);
+
+			$iFilters = count(Core_Array::get($this->_filter, 'tabs', array()));
+
+			if ($iFilters > 1)
+			{
+				$oCore_Html_Entity_Span->add(
+					Core::factory('Core_Html_Entity_Span')
+						->class('badge badge-orange')
+						->value($iFilters - 1)
+				);
+			}
+
+			$oCore_Html_Entity_Span->execute();
+		}
+
+		?><label><?php
+
 		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
-			->name('admin_forms_on_page')
-			->id('id_on_page')
+			//->name('admin_forms_on_page')
+			//->id('id_on_page')
 			->class('form-control input-sm')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
 			->execute();
+
+		?></label><?php
 	}
 
 	/**
@@ -910,6 +1231,24 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			->children($this->_children)
 			->pageTitle($this->_pageTitle)
 			->module($this->_module);
+
+		// Is filter necessary
+		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+		{
+			// Перекрытие параметров для данного поля
+			$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
+			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+			{
+				$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+			}
+
+			if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
+			{
+				$this->_showFilter = TRUE;
+				break;
+			}
+		}
 
 		ob_start();
 		$this->_pageSelector();

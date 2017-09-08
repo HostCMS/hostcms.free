@@ -178,7 +178,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 
 		$this->addEntities($aTags);
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
 
 		return $this;

@@ -371,7 +371,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		$this->_aConfig = Core_Config::instance()->get('shop_csv', array()) + array(
 			'maxTime' => 20,
-			'maxCount' => 100
+			'maxCount' => 100,
+			'itemSearchFields' => array('marking', 'path', 'cml_id')
 		);
 
 		$this->_iCurrentShopId = $iCurrentShopId;
@@ -461,6 +462,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				{
 					continue;
 				}
+
+				$sData = trim($sData);
 
 				if ($sData != '')
 				{
@@ -1287,7 +1290,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									->save()
 									->id;
 						break;
-						// Дополнительные группы для товара (CML_ID), где нужно создавать ярлыки
+						// "Ярлыки GUID" - дополнительные группы для товара (CML_ID групп через запятую)
 						case 'additional_groups':
 							$aShortcuts = explode(',', $sData);
 							$this->_aAdditionalGroups = array_merge($this->_aAdditionalGroups, $aShortcuts);
@@ -1309,7 +1312,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								}
 							}
 						break;
-						// Передано название товара
+						// Название товара
 						case 'item_name':
 							$this->_oCurrentItem->name = $sData;
 						break;
@@ -1317,24 +1320,28 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						case 'item_marking':
 							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeFindByMarking', $this, array($this->_oCurrentShop, $this->_oCurrentItem));
 
-							$oTmpObject = $this->_oCurrentShop->Shop_Items;
-							$oTmpObject->queryBuilder()
-								->where('marking', 'LIKE', trim($sData))
-								->limit(1);
-
-							$aTmpObject = $oTmpObject->findAll(FALSE);
-
 							$this->_oCurrentItem->marking = $sData;
-							if (count($aTmpObject))
+							
+							if (in_array('marking', $this->_aConfig['itemSearchFields']))
 							{
-								$this->_oCurrentItem = $aTmpObject[0];
+								$oTmpObject = $this->_oCurrentShop->Shop_Items;
+								$oTmpObject->queryBuilder()
+									->where('marking', 'LIKE', trim($sData))
+									->limit(1);
 
-								// 2 - не обновлять существующие товары
-								if ($this->importAction == 2
-									&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
-								)
+								$aTmpObject = $oTmpObject->findAll(FALSE);
+
+								if (count($aTmpObject))
 								{
-									continue 3;
+									$this->_oCurrentItem = $aTmpObject[0];
+
+									// 2 - не обновлять существующие товары
+									if ($this->importAction == 2
+										&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
+									)
+									{
+										continue 3;
+									}
 								}
 							}
 
@@ -1407,26 +1414,29 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// путь товара
 						case 'item_path':
-							// Товар не был найден ранее, например, по артикулу
-							if (!$this->_oCurrentItem->id)
+							if (in_array('path', $this->_aConfig['itemSearchFields']))
 							{
-								$oTmpObject = $this->_oCurrentShop->Shop_Items;
-								$oTmpObject->queryBuilder()
-									->where('path', 'LIKE', $sData)
-									->where('shop_group_id', '=', $this->_oCurrentGroup->id);
-
-								$oTmpObject = $oTmpObject->findAll(FALSE);
-
-								if (count($oTmpObject))
+								// Товар не был найден ранее, например, по артикулу
+								if (!$this->_oCurrentItem->id)
 								{
-									$this->_oCurrentItem = $oTmpObject[0];
+									$oTmpObject = $this->_oCurrentShop->Shop_Items;
+									$oTmpObject->queryBuilder()
+										->where('path', 'LIKE', $sData)
+										->where('shop_group_id', '=', $this->_oCurrentGroup->id);
 
-									// 2 - не обновлять существующие товары
-									if ($this->importAction == 2
-										&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
-									)
+									$oTmpObject = $oTmpObject->findAll(FALSE);
+
+									if (count($oTmpObject))
 									{
-										continue 3;
+										$this->_oCurrentItem = $oTmpObject[0];
+
+										// 2 - не обновлять существующие товары
+										if ($this->importAction == 2
+											&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
+										)
+										{
+											continue 3;
+										}
 									}
 								}
 							}
@@ -1573,30 +1583,33 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$this->_oCurrentShopSpecialPrice->percent = $sData;
 						break;
 						case 'item_cml_id':
-							// Товар не был найден ранее, например, по артикулу
-							if (!$this->_oCurrentItem->id)
+							if (in_array('cml_id', $this->_aConfig['itemSearchFields']))
 							{
-								$oTmpObject = $this->_oCurrentShop->Shop_Items;
-								$oTmpObject->queryBuilder()
-									->where('guid', '=', $sData)
-									->limit(1);
-
-								$oTmpObject = $oTmpObject->findAll(FALSE);
-
-								if (count($oTmpObject))
+								// Товар не был найден ранее, например, по артикулу
+								if (!$this->_oCurrentItem->id)
 								{
-									$this->_oCurrentItem = $oTmpObject[0];
+									$oTmpObject = $this->_oCurrentShop->Shop_Items;
+									$oTmpObject->queryBuilder()
+										->where('guid', '=', $sData)
+										->limit(1);
 
-									// 2 - не обновлять существующие товары
-									if ($this->importAction == 2
-										&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
-									)
+									$oTmpObject = $oTmpObject->findAll(FALSE);
+
+									if (count($oTmpObject))
 									{
-										continue 3;
+										$this->_oCurrentItem = $oTmpObject[0];
+
+										// 2 - не обновлять существующие товары
+										if ($this->importAction == 2
+											&& !isset($this->_ShopItemCreatedIDs[$this->_oCurrentItem->id])
+										)
+										{
+											continue 3;
+										}
 									}
 								}
 							}
-
+							
 							$this->_oCurrentItem->guid = $sData;
 						break;
 						default:
@@ -2907,7 +2920,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			setlocale(LC_ALL, ALT_SITE_LOCALE);
 		}
 
-		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
+		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"');
 
 		if ($aCsvLine === FALSE)
 		{

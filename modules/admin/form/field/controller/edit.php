@@ -153,12 +153,12 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Admin_Form_Field.type'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10])");
 
 		$oMainTab->delete($this->getField('type'));
 
-		/*$oSelect_View = Admin_Form_Entity::factory('Select')
+		$oSelect_View = Admin_Form_Entity::factory('Select')
 			->options(
 				array(
 					0 => Core::_('Admin_Form_Field.field_view_column'),
@@ -168,16 +168,16 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 			->name('view')
 			->value($this->_object->view)
 			->caption(Core::_('Admin_Form_Field.view'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));*/
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 
-		// $oMainTab->delete($this->getField('view'));
+		$oMainTab->delete($this->getField('view'));
 
 		$this->getField('format')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 		$oMainRow2
 			->add($oSelect_Type)
-			// ->add($oSelect_View)
+			->add($oSelect_View)
 			;
 
 		$oMainTab->move($this->getField('format'), $oMainRow2);

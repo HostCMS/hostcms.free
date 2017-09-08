@@ -332,9 +332,6 @@ class Install_Controller
 		$copyInformationsystemItemId = intval($copyInformationsystemItemId);
 		$copyInformationsystemPropertyValueId = intval($copyInformationsystemPropertyValueId);
 
-		$information_propertys_items_value = '';
-		$information_propertys_items_value_small = '';
-
 		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $informationsystemItemId);
 
 		$item_dir = $oInformationsystem_Item->getItemPath();
@@ -347,37 +344,40 @@ class Install_Controller
 		{
 			$ext = '.' . $ext;
 		}
-
 		$information_item_property_image_from .= $ext;
 
 		$oProperty = Core_Entity::factory('Property')->find($informationsystemItemPropertyId);
+
 		$oValue = $oProperty->createNewValue($informationsystemItemId);
+		$oValue->save();
 
 		if (is_file($information_item_property_image_from))
 		{
-			$oValue->save();
-
-			$information_item_property_image_to = $item_dir . "information_items_property_" . $oValue->id . $ext;
-
+			$information_item_property_image_to = $item_dir . "information_items_property_{$oValue->id}" . $ext;
 			Core_File::copy($information_item_property_image_from, $information_item_property_image_to);
 
 			$oValue->file_name = $oValue->file = basename($information_item_property_image_to);
-			$oValue->save();
 		}
 
 		$information_item_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemItemId, 3) . "/item_{$copyInformationsystemItemId}/small_information_items_property_{$copyInformationsystemPropertyValueId}";
 
+		$ext = $this->getFileExtension($information_item_property_small_image_from);
+
+		if (!empty($ext))
+		{
+			$ext = '.' . $ext;
+		}
+		$information_item_property_small_image_from .= $ext;
+
 		if (is_file($information_item_property_small_image_from))
 		{
-			$oValue->save();
-
-			$information_item_property_small_image_to = $item_dir . "small_information_items_property_" . $oValue->id . $ext;
-
+			$information_item_property_small_image_to = $item_dir . "small_information_items_property_{$oValue->id}" . $ext;
 			Core_File::copy($information_item_property_small_image_from, $information_item_property_small_image_to);
 
 			$oValue->file_small_name = $oValue->file_small = basename($information_item_property_small_image_to);
-			$oValue->save();
 		}
+
+		$oValue->save();
 	}
 
 	/**
@@ -416,33 +416,37 @@ class Install_Controller
 		$information_group_property_image_from .= $ext;
 
 		$oProperty = Core_Entity::factory('Property')->find($informationsystemGroupPropertyId);
+
 		$oValue = $oProperty->createNewValue($informationsystemGroupId);
+		$oValue->save();
 
 		if (is_file($information_group_property_image_from))
 		{
-			$oValue->save();
-
 			$information_group_property_image_to = $group_dir . "information_groups_property_" . $oValue->id . $ext;
-
 			Core_File::copy($information_group_property_image_from, $information_group_property_image_to);
 
 			$oValue->file_name = $oValue->file = basename($information_group_property_image_to);
-			$oValue->save();
 		}
 
 		$information_group_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemGroupId, 3) . "/item_{$copyInformationsystemGroupId}/small_information_groups_property_{$copyInformationsystemPropertyValueId}";
 
+		$ext = $this->getFileExtension($information_group_property_small_image_from);
+
+		if (!empty($ext))
+		{
+			$ext = '.' . $ext;
+		}
+		$information_group_property_small_image_from .= $ext;
+
 		if (is_file($information_group_property_small_image_from))
 		{
-			$oValue->save();
-
 			$information_group_property_small_image_to = $group_dir . "small_information_items_property_" . $oValue->id . $ext;
-
 			Core_File::copy($information_group_property_small_image_from, $information_group_property_small_image_to);
 
 			$oValue->file_small_name = $oValue->file_small = basename($information_group_property_small_image_to);
-			$oValue->save();
 		}
+
+		$oValue->save();
 	}
 
 	 /**
@@ -772,95 +776,52 @@ class Install_Controller
 		$copyStructurePropertyValueId = intval($copyStructurePropertyValueId);
 
 		$oStructure = Core_Entity::factory('Structure', $structureId);
+		$structure_dir = $oStructure->getDirPath();
 
-		$file_path_to = '';
-		$small_file_path_to = '';
+		$structure_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, 3) . '/structure_' . $copyStructureId . '/structure_property_image_' . $copyStructurePropertyValueId;
 
-		// Директория с файлами доп. свойств копируемого узла структуры
-		$dir_structure_from = "tmp/upload/structure_site_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, 3) . '/structure_' . $copyStructureId . '/';
+		// Получаем расширение файла
+		$ext = $this->getFileExtension($structure_file_path_from);
 
-		if (is_dir($dir_structure_from))
+		if (!empty($ext))
 		{
-			// Путь к файлу доп. свойства без расширения
-			$file_path_from = $this->GetTemplatePath() . $dir_structure_from . 'structure_propertys_image_' . $copyStructurePropertyValueId;
-
-			// Получаем расширение файла
-			$ext = $this->getFileExtension($file_path_from);
-
-			if (!empty($ext))
-			{
-				$ext = '.' . $ext;
-			}
-
-			$file_path_from = $file_path_from . $ext;
-
-			// Файл существует
-			if (is_file($file_path_from))
-			{
-				// Вставляем пустое значение доп. свойства
-				$oProperty = Core_Entity::factory('Property', $structurePropertyImageId);
-
-				$oValue = $oProperty->createNewValue($structureId);
-				$oValue->save();
-
-				$structure_property_value_id = $oValue->id;
-
-				// Имя создаваемого файла
-				$file_name_to = 'structure_propertys_image_' . $structure_property_value_id . $ext;
-
-				// Путь к создаваемому файлу
-				$file_path_to = $oStructure->getDirPath() . $file_name_to;
-
-				// Копируем файл доп. свойства
-				Core_File::copy($file_path_from, $file_path_to);
-			}
-
-			// Путь к малому файлу доп. свойства без расширения
-			$small_file_path_from = $this->GetTemplatePath() . $dir_structure_from . 'structure_propertys_small_image_' . $copyStructurePropertyValueId;
-
-			// Получаем расширение файла
-			$ext = $this->getFileExtension($small_file_path_from);
-
-			if (!empty($ext))
-			{
-				$ext = '.' . $ext;
-			}
-
-			$small_file_path_from = $small_file_path_from . $ext;
-
-			// Файл существует
-			if (is_file($small_file_path_from))
-			{
-				if (!isset($structure_property_value_id))
-				{
-					// Вставляем пустое значение доп. свойства
-					$oProperty = Core_Entity::factory('Property', $structurePropertyImageId);
-
-					$oValue = $oProperty->createNewValue($structureId);
-					$oValue->save();
-
-					$structure_property_value_id = $oValue->id;
-				}
-
-				// Имя создаваемого файла
-				$small_file_name_to = 'structure_propertys_image_' . $structure_property_value_id . $ext;
-
-				// Путь к создаваемому файлу
-				$small_file_path_to = $oStructure->getDirPath() . $small_file_name_to;
-
-				// Копируем файл доп. свойства
-				Core_File::copy($small_file_path_from, $small_file_path_to);
-			}
-
-			if (isset($structure_property_value_id))
-			{
-				// Обновляем значение доп. свойства
-				$oValue->file = $oValue->file_name = $file_name_to;
-				$oValue->file_small = $oValue->file_small_name = $small_file_name_to;
-
-				$oValue->save();
-			}
+			$ext = '.' . $ext;
 		}
+		$structure_file_path_from .= $ext;
+
+		$oProperty = Core_Entity::factory('Property')->find($structurePropertyImageId);
+
+		$oValue = $oProperty->createNewValue($structureId);
+		$oValue->save();
+
+		if (is_file($structure_file_path_from))
+		{
+			$structure_file_path_to = $structure_dir . "structure_property_image_{$oValue->id}" . $ext;
+			Core_File::copy($structure_file_path_from, $structure_file_path_to);
+
+			$oValue->file_name = $oValue->file = basename($structure_file_path_to);
+		}
+
+		$structure_small_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, 3) . '/structure_' . $copyStructureId . '/small_structure_property_image_' . $copyStructurePropertyValueId;
+
+		// Получаем расширение файла
+		$ext = $this->getFileExtension($structure_small_file_path_from);
+
+		if (!empty($ext))
+		{
+			$ext = '.' . $ext;
+		}
+		$structure_small_file_path_from .= $ext;
+
+		if (is_file($structure_small_file_path_from))
+		{
+			$structure_small_file_path_to = $structure_dir . "small_structure_property_image_{$oValue->id}" . $ext;
+			Core_File::copy($structure_small_file_path_from, $structure_small_file_path_to);
+
+			$oValue->file_small_name = $oValue->file_small = basename($structure_small_file_path_to);
+		}
+
+		$oValue->save();
 	}
 
 	/**

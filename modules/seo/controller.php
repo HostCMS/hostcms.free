@@ -87,13 +87,13 @@ abstract class Seo_Controller{
 	 * Get popular queries
 	 * @return array
 	 */
-	abstract public function getSitePopularQueries($host_id, $limit);
+	abstract public function getSitePopularQueries($host_id);
 
 	/**
 	 * Get popular pages
 	 * @return array
 	 */
-	abstract public function getSitePopularPages($host_id, $limit);
+	abstract public function getSitePopularPages($host_id);
 
 	/**
 	 * Set token

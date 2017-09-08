@@ -74,99 +74,48 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
-			if ($oShop_Delivery->type == 0)
+			$aShop_Delivery_Conditions = $this->getShopDeliveryConditions($oShop_Delivery);
+
+			if ($oShop_Delivery->type == 1)
 			{
-				$oShop_Delivery_Condition_Controller = new Shop_Delivery_Condition_Controller();
-				$oShop_Delivery_Condition_Controller
-					->shop_country_id($this->shop_country_id)
-					->shop_country_location_id($this->shop_country_location_id)
-					->shop_country_location_city_id($this->shop_country_location_city_id)
-					->shop_country_location_city_area_id($this->shop_country_location_city_area_id)
-					->totalWeight($this->totalWeight)
-					->totalAmount($this->totalAmount);
-
-				// Условие доставки, подходящее под ограничения
-				$aShop_Delivery_Condition = array(
-					$oShop_Delivery_Condition_Controller->getShopDeliveryCondition($oShop_Delivery)
-				);
-			}
-			else
-			{
-				$aShop_Delivery_Condition = array();
-
-				try
+				foreach ($aShop_Delivery_Conditions as $key => $object)
 				{
-					$aPrice = Shop_Delivery_Handler::factory($oShop_Delivery)
-						->country($this->shop_country_id)
-						->location($this->shop_country_location_id)
-						->city($this->shop_country_location_city_id)
-						->weight($this->totalWeight)
-						->postcode($this->postcode)
-						->volume($this->volume)
-						->execute();
+					$_SESSION['hostcmsOrder']['deliveries'][$object->id] = array(
+						'shop_delivery_id' => $oShop_Delivery->id,
+						'price' => $object->price,
+						'rate' => isset($object->rate) ? intval($object->rate) : 0,
+						'name' => $object->description
+					);
 
-					if (!is_null($aPrice))
-					{
-						!is_array($aPrice) && $aPrice = array($aPrice);
-
-						foreach ($aPrice as $key => $object)
-						{
-							if (!is_object($object))
-							{
-								$tmp = $object;
-								$object = new StdClass();
-								$object->price = $tmp;
-								$object->rate = 0;
-								$object->description = NULL;
-							}
-
-							$sIndex = $oShop_Delivery->id . '-' . $key;
-
-							$_SESSION['hostcmsOrder']['deliveries'][$sIndex] = array(
-								'shop_delivery_id' => $oShop_Delivery->id,
-								'price' => $object->price,
-								'rate' => isset($object->rate) ? intval($object->rate) : 0,
-								'name' => $object->description
-							);
-
-							$oShop_Delivery_Condition = Core::factory('Core_Xml_Entity')
-								->name('shop_delivery_condition')
-								->addAttribute('id', $sIndex . '#')
-								->addEntity(
-									Core::factory('Core_Xml_Entity')
-										->name('shop_delivery_id')
-										->value($oShop_Delivery->id)
-								)->addEntity(
-									Core::factory('Core_Xml_Entity')
-										->name('shop_currency_id')
-										->value($oShop_Delivery->Shop->shop_currency_id)
-								)->addEntity(
-									Core::factory('Core_Xml_Entity')
-										->name('price')
-										->value($object->price)
-								)->addEntity(
-									Core::factory('Core_Xml_Entity')
-										->name('description')
-										->value($object->description)
-								);
-
-							$aShop_Delivery_Condition[] = $oShop_Delivery_Condition;
-						}
-					}
-				}
-				catch (Exception $e)
-				{
-					// Show error message just for backend users
-					Core_Auth::logged()
-						&& Core_Message::show($e->getMessage(), 'error');
-
-					$aShop_Delivery_Condition = array();
+					$oShop_Delivery_Condition = Core::factory('Core_Xml_Entity')
+						->name('shop_delivery_condition')
+						->addAttribute('id', $object->id . '#')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('shop_delivery_id')
+								->value($object->shop_delivery_id)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('shop_currency_id')
+								->value($object->shop_currency_id)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('price')
+								->value($object->price)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('description')
+								->value($object->description)
+						);
+						
+					// Replace $oShop_Delivery_Condition
+					$aShop_Delivery_Conditions[$key] = $oShop_Delivery_Condition;
 				}
 			}
-
-			if (count($aShop_Delivery_Condition))
+			
+			if (count($aShop_Delivery_Conditions))
 			{
-				foreach ($aShop_Delivery_Condition as $oShop_Delivery_Condition)
+				foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
 				{
 					if (!is_null($oShop_Delivery_Condition))
 					{
@@ -181,13 +130,82 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					}
 				}
 
-				$aShop_Delivery_Condition = array();
+				$aShop_Delivery_Conditions = array();
 			}
 		}
 
 		return parent::show();
 	}
 
+	public function getShopDeliveryConditions(Shop_Delivery_Model $oShop_Delivery)
+	{
+		if ($oShop_Delivery->type == 0)
+		{
+			$oShop_Delivery_Condition_Controller = new Shop_Delivery_Condition_Controller();
+			$oShop_Delivery_Condition_Controller
+				->shop_country_id($this->shop_country_id)
+				->shop_country_location_id($this->shop_country_location_id)
+				->shop_country_location_city_id($this->shop_country_location_city_id)
+				->shop_country_location_city_area_id($this->shop_country_location_city_area_id)
+				->totalWeight($this->totalWeight)
+				->totalAmount($this->totalAmount);
+
+			// Условие доставки, подходящее под ограничения
+			$aShop_Delivery_Conditions = array(
+				$oShop_Delivery_Condition_Controller->getShopDeliveryCondition($oShop_Delivery)
+			);
+		}
+		else
+		{
+			$aShop_Delivery_Conditions = array();
+
+			try
+			{
+				$aPrice = Shop_Delivery_Handler::factory($oShop_Delivery)
+					->country($this->shop_country_id)
+					->location($this->shop_country_location_id)
+					->city($this->shop_country_location_city_id)
+					->weight($this->totalWeight)
+					->postcode($this->postcode)
+					->volume($this->volume)
+					->execute();
+
+				if (!is_null($aPrice))
+				{
+					!is_array($aPrice) && $aPrice = array($aPrice);
+
+					foreach ($aPrice as $key => $oShop_Delivery_Condition)
+					{
+						if (!is_object($oShop_Delivery_Condition))
+						{
+							$tmp = $oShop_Delivery_Condition;
+							$oShop_Delivery_Condition = new StdClass();
+							$oShop_Delivery_Condition->price = $tmp;
+							$oShop_Delivery_Condition->rate = 0;
+							$oShop_Delivery_Condition->description = NULL;
+						}
+
+						$oShop_Delivery_Condition->id = $oShop_Delivery->id . '-' . $key;
+						$oShop_Delivery_Condition->shop_delivery_id = $oShop_Delivery->id;
+						$oShop_Delivery_Condition->shop_currency_id = $oShop_Delivery->Shop->shop_currency_id;
+
+						$aShop_Delivery_Conditions[] = $oShop_Delivery_Condition;
+					}
+				}
+			}
+			catch (Exception $e)
+			{
+				// Show error message just for backend users
+				Core_Auth::logged()
+					&& Core_Message::show($e->getMessage(), 'error');
+
+				$aShop_Delivery_Conditions = array();
+			}
+		}
+		
+		return $aShop_Delivery_Conditions;
+	}
+	
 	/**
 	 * Calculate total amount and weight
 	 * @return self
@@ -243,6 +261,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 					$weight += $oShop_Cart->Shop_Item->weight * $oShop_Cart->quantity;
 
+					// Расчет единицы измерения ведется в милиметрах
 					$this->volume += Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->length, $oShop->size_measure, 0) * Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->width, $oShop->size_measure, 0) * Shop_Controller::convertSizeMeasure($oShop_Cart->Shop_Item->height, $oShop->size_measure, 0);
 				}
 			}

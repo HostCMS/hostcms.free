@@ -992,6 +992,30 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Warehouse_Item->save();
 					}
 				}
+
+				// Комплект
+				if ($oShop_Item->type == 3)
+				{
+					if (!is_null($oShop_Warehouse) && $oShop_Item->id)
+					{
+						$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
+							? $oShop_Order_Item->Shop_Warehouse
+							: $oShop->Shop_Warehouses->getDefault();
+
+						$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
+
+						foreach ($aShop_Item_Sets as $oShop_Item_Set)
+						{
+							$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item_Set->shop_item_set_id);
+
+							if (!is_null($oShop_Warehouse_Item))
+							{
+								$oShop_Warehouse_Item->count -= $oShop_Item_Set->count * $mode;
+								$oShop_Warehouse_Item->save();
+							}
+						}
+					}
+				}
 			}
 
 			// Начисление/списание бонусов
@@ -1388,7 +1412,7 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 			$oOrderProperty->addChild('Наименование', $oPropertyValue->Property->name);
-		
+
 			// List
 			if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 			{
@@ -1462,6 +1486,185 @@ class Shop_Order_Model extends Core_Entity
 		return $this;
 	}
 
+
+	/**
+	 * Get Popover Content
+	 * @return string
+	 */
+	protected function _orderPopover()
+	{
+		ob_start();
+
+		$aAddress = array(
+			$this->postcode,
+			$this->Shop_Country->name,
+			$this->Shop_Country_Location_City->name,
+			$this->address
+		);
+		$aAddress = array_filter($aAddress, 'strlen');
+		$sFullAddress = implode(', ', $aAddress);
+
+		if (strlen($this->company))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.payer')?>:</b> <?php echo htmlspecialchars($this->company)?>
+			</div><?php
+		}
+
+		$person = trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
+
+		if (strlen($person))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_contact_person')?>:</b> <?php echo htmlspecialchars($person)?>
+			</div><?php
+		}
+
+		?><div>
+			<b><?php echo Core::_('Shop_Order.order_card_address')?>:</b> <?php echo htmlspecialchars($sFullAddress)?>
+		</div><?php
+
+		if (strlen($this->phone))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_phone')?>:</b> <?php echo htmlspecialchars($this->phone)?>
+			</div><?php
+		}
+
+		if (strlen($this->email))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_email')?>:</b> <?php echo htmlspecialchars($this->email)?>
+			</div><?php
+		}
+		?>
+		<div class="row">
+			<div class="col-xs-12">
+				<table class="table table-hover">
+					<thead class="bordered-palegreen">
+						<tr>
+							<th>
+								<?php echo "№"?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_description")?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_mark")?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_amount")?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_nds_tax")?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							</th>
+							<th>
+								<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php
+					$i = 1;
+
+					$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+
+					$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
+
+					if(count($aShop_Order_Items))
+					{
+						foreach ($aShop_Order_Items as $oShop_Order_Item)
+						{
+							$sShopTaxRate = $oShop_Order_Item->rate;
+
+							$fShopTaxValue = $sShopTaxRate
+								? $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity
+								: 0;
+
+							$fItemAmount = $oShop_Order_Item->getAmount();
+
+							$fShopTaxValueSum += $fShopTaxValue;
+							$fShopOrderItemSum += $fItemAmount;
+
+							?>
+							<tr>
+								<td>
+									<?php echo $i++?>
+								</td>
+								<td>
+									<?php echo htmlspecialchars($oShop_Order_Item->name)?>
+								</td>
+								<td>
+									<?php echo htmlspecialchars($oShop_Order_Item->marking)?>
+								</td>
+								<td>
+									<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
+								</td>
+								<td>
+									<?php echo $oShop_Order_Item->quantity?>
+								</td>
+								<td>
+									<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
+								</td>
+								<td>
+									<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
+								</td>
+								<td>
+									<?php echo number_format($fItemAmount, 2, '.', '')?>
+								</td>
+							</tr>
+							<?php
+						}
+					}
+					?>
+							<tr class="footer">
+							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="6">
+								<?php echo Core::_("Shop_Order.table_nds")?>
+							</td>
+							<td width="80%" align="right"  style="border-bottom: 1px solid #e9e9e9" colspan="3">
+								<?php echo sprintf("%.2f", $fShopTaxValueSum) . " " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							</td>
+						</tr>
+						<tr class="footer">
+							<td align="right" colspan="6">
+								<?php echo Core::_("Shop_Order.table_all_to_pay")?>
+							</td>
+							<td align="right" colspan="3">
+								<?php echo sprintf("%.2f", $fShopOrderItemSum) . " " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		<?php
+		$sOrderContent = ob_get_clean();
+
+		return $sOrderContent;
+	}
+
+	public function order_items($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$windowId = $oAdmin_Form_Controller->getWindowId();
+
+		$link = $oAdmin_Form_Field->link;
+		$onclick = $oAdmin_Form_Field->onclick;
+
+		$aAdmin_Form_Fields = $oAdmin_Form_Controller->getAdminForm()->Admin_Form_Fields->findAll();
+
+		$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $onclick, 'onclick');
+
+		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="body" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->_orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -1482,7 +1685,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Send order e-mails
 	 * @return self
-	 */	
+	 */
 	public function sendMail()
 	{
 		if ($this->shop_payment_system_id && $this->Shop_Order_items->getCount())
@@ -1501,7 +1704,7 @@ class Shop_Order_Model extends Core_Entity
 					->send();
 			}
 		}
-		
+
 		return $this;
 	}
 }

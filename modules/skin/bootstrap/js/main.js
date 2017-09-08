@@ -203,6 +203,28 @@ function isEmpty(str) {
 				}
 			}
 
+			// Расширенные фильтры
+			var filterId = $('.topFilter').is(':visible')
+				? $('#filterTabs li.active').data('filter-id')
+				: null;
+
+			data['hostcms[filterId]'] = filterId;
+
+			var jTopFiltersItems = jQuery("#"+settings.windowId+" #filter-" + filterId + " :input[name^='topFilter_']"),
+				iTopFiltersItemsCount = jTopFiltersItems.length;
+
+			for (var jFiltersItem, i=0; i < iTopFiltersItemsCount; i++)
+			{
+				jFiltersItem = jTopFiltersItems.eq(i);
+
+				// Если значение фильтра до 255 символов
+				if ((jFiltersItem.val() || '').length < 256)
+				{
+					// Дописываем к передаваемым данным
+					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+				}
+			}
+
 			// Текущая страница.
 			/*if (ALimit === false)
 			{
@@ -1011,10 +1033,12 @@ function radiogroupOnChange(windowId, value, values)
 		if (value != values[x])
 		{
 			$("#"+windowId+" .hidden-"+values[x]).show();
+			$("#"+windowId+" .shown-"+values[x]).hide();
 		}
 	}
 
 	$("#"+windowId+" .hidden-"+value).hide();
+	$("#"+windowId+" .shown-"+value).show();
 }
 
 // -- Проверка ячеек
@@ -1296,3 +1320,4 @@ function cookie_encode(string){
 	return ns;
 }
 /* /jQuery Cookie plugin */
+

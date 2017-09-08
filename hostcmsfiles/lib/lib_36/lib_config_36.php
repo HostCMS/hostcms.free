@@ -205,6 +205,7 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 			? SHOP_DEFAULT_CML_CURRENCY_NAME
 			: 'Розничная';
 		//$oShop_Item_Import_Cml_Controller->updateFields = array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id');
+		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
 		echo "{$BOM}" . $aReturn['status'];
@@ -224,14 +225,37 @@ elseif ($sType == 'sale' && $sMode == 'query')
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<КоммерческаяИнформация ВерсияСхемы=\"2.08\" ДатаФормирования=\"%s\"></КоммерческаяИнформация>",
 		date("Y-m-d")));
 
-	$aShopOrders = $oShop->Shop_Orders->getAllByUnloaded(0);
+	// Gwt Max Order Id
+	$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
+	$oCore_QueryBuilder_Select
+		->from('shop_orders')
+		->where('shop_orders.shop_id', '=', $oShop->id)
+		->where('shop_orders.unloaded', '=', 0)
+		->where('shop_orders.deleted', '=', 0);
 
-	foreach($aShopOrders as $oShopOrder)
-	{
-		$oShopOrder->addCml($oXml);
-		$oShopOrder->unloaded = 1;
-		$oShopOrder->save();
+	$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+
+	$maxId = $aRow['max_id'];
+
+	$iFrom = 0;
+	$onStep = 500;
+
+	do {
+		$oShop_Orders = $oShop->Shop_Orders;
+		$oShop_Orders->queryBuilder()
+			->where('shop_orders.id', 'BETWEEN', array($iFrom + 1, $iFrom + $onStep));
+
+		$aShop_Orders = $oShop_Orders->getAllByUnloaded(0);
+
+		foreach($aShop_Orders as $oShop_Order)
+		{
+			$oShop_Order->addCml($oXml);
+			$oShop_Order->unloaded = 1;
+			$oShop_Order->save();
+		}
+		$iFrom += $onStep;
 	}
+	while ($iFrom < $maxId);
 
 	header('Content-type: text/xml; charset=UTF-8');
 	echo $BOM, $oXml->asXML();

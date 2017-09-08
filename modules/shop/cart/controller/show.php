@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
+ * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  *
  * Доступные свойства:
  *
@@ -47,6 +48,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'itemsProperties',
 		'itemsPropertiesList',
 		'taxes',
+		'specialprices',
 		'cartUrl',
 		'amount',
 		'tax',
@@ -200,8 +202,12 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 			if (!is_null($oShop_Item->id))
 			{
-				$oShop_Cart->showXmlProperties($this->itemsProperties);
-				$this->addEntity($oShop_Cart->clearEntities());
+				$this->addEntity(
+					$oShop_Cart
+						->clearEntities()
+						->showXmlProperties($this->itemsProperties)
+						->showXmlSpecialprices($this->specialprices)
+				);
 
 				if ($oShop_Cart->postpone == 0)
 				{

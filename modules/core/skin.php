@@ -905,11 +905,12 @@ abstract class Core_Skin
 				Core::factory('Core_Html_Entity_Script')
 					->type('text/javascript')
 					->value(
-						'(function($){' .
+						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '";' . PHP_EOL .
+						'(function($){' . PHP_EOL .
 						'$("body").addClass("backendBody");' .
 						'$(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel").draggable({containment: "document"});' .
 						'$.sortWidget();' .
-						'$("*[hostcms\\\\:id]").hostcmsEditable({path: "/edit-in-place.php"});'.
+						'$("*[hostcms\\\\:id]").hostcmsEditable({path: "/edit-in-place.php"});' . PHP_EOL .
 						'})(hQuery);'
 					)
 			);

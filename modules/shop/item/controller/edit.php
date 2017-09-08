@@ -35,7 +35,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($modelName)
 		{
 			case 'shop_item':
-
 				$this
 					->addSkipColumn('image_large')
 					->addSkipColumn('image_small')
@@ -76,6 +75,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab = $this->getTab('main');
 				$oAdditionalTab = $this->getTab('additional');
 
+				$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+
 				$oAdditionalTab
 					->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -101,18 +102,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopItemTabSEO = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Item.tab_seo'))
 					->name('SEO');
-				$oShopItemTabTags = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Shop_Item.tab_tags'))
-					->name('Tags');
-				$oShopItemTabSpecialPrices = Admin_Form_Entity::factory('Tab')
+				$oShopItemTabAssociated = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Shop_Item.tab_associated'))
+					->name('Associateds');
+				/*$oShopItemTabSpecialPrices = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Item.tab_special_prices'))
-					->name('SpecialPrices');
+					->name('SpecialPrices');*/
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oSetBlock = Admin_Form_Entity::factory('Div')->class('well with-header hidden-0 hidden-1 hidden-2'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -148,17 +150,17 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopItemTabSEORow3 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-				$oShopItemTabTags
-					->add($oShopItemTabTagsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-				;
+				/*$oShopItemTabAssociated
+					->add($oShopItemTabAssociatedRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+				;*/
 
 				// Добавляем вкладки
 				$this
 					->addTabAfter($oShopItemTabDescription, $oMainTab)
 					->addTabAfter($oShopItemTabExportImport, $oShopItemTabDescription)
 					->addTabAfter($oShopItemTabSEO, $oShopItemTabExportImport)
-					->addTabAfter($oShopItemTabTags, $oShopItemTabSEO)
-					->addTabAfter($oShopItemTabSpecialPrices, $oShopItemTabTags)
+					->addTabAfter($oShopItemTabAssociated, $oShopItemTabSEO)
+					// ->addTabAfter($oShopItemTabSpecialPrices, $oShopItemTabSEO)
 				;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
@@ -313,7 +315,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->class('shortcut-group-tags')
 					->style('width: 100%')
 					->multiple('multiple')
-					->divAttr(array('class' => 'form-group col-xs-12'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-9'));
 
 				$this->addField($oAdditionalGroupsSelect);
 
@@ -362,18 +364,21 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->id('shopItemType' . time())
 					->caption(Core::_('Shop_Item.type'))
 					->value($this->_object->type)
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-7'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-10'))
 					->radio(array(
 						0 => Core::_('Shop_Item.item_type_selection_group_buttons_name_simple'),
 						2 => Core::_('Shop_Item.item_type_selection_group_buttons_name_divisible'),
-						1 => Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic')
+						1 => Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic'),
+						3 => Core::_('Shop_Item.item_type_selection_group_buttons_name_set')
 					))
 					->ico(
 						array(
 							0 => 'fa-file-text-o',
 							2 => 'fa-puzzle-piece',
 							1 => 'fa-table',
-					));
+							3 => 'fa-archive',
+					))
+					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3])");
 
 				// Добавляем тип товара
 				$oMainRow4->add($oRadioType);
@@ -406,7 +411,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->modification_id)
 					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
 
-				$oMainRow4->add($oModificationSelect);
+				$oMainRow3->add($oModificationSelect);
 
 				if (!$object->modification_id)
 				{
@@ -425,11 +430,117 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->shop_group_id = 0;
 				}
 
+				// Комплекты
+				$oSetBlock
+					->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-sky')
+						->value(Core::_('Shop_Item.set_item_header'))
+						->add(Admin_Form_Entity::factory('Checkbox')
+							->value(0)
+							->name('apply_recount_set')
+							->divAttr(array('class' => 'pull-right apply-recount-set'))
+							->caption(Core::_("Shop_Item.apply_recount_set"))
+						)
+					)
+					->add($oSetRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oSetRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$setTable = '
+					<table class="table table-striped table-hover set-item-table">
+						<thead>
+							<tr>
+								<th scope="col">' . Core::_('Shop_Item.name') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
+								<th scope="col">  </th>
+							</tr>
+						</thead>
+						<tbody>
+				';
+
+				$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
+
+				foreach ($aShop_Item_Sets as $oShop_Item_Set)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Set->shop_item_set_id);
+
+					if(!is_null($oShop_Item))
+					{
+						$oShop_Item = $oShop_Item->shortcut_id
+							? $oShop_Item->Shop_Item
+							: $oShop_Item;
+
+						$currencyName = $oShop_Item->Shop_Currency->name;
+
+						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteSetItem', NULL, 1, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
+
+						$externalLink = '';
+
+						$oSiteAlias = $oShop->Site->getCurrentAlias();
+						if ($oSiteAlias)
+						{
+							$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
+								. $oSiteAlias->name
+								. $oShop->Structure->getPath()
+								. $oShop_Item->getPath();
+
+							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+						}
+
+						$setTable .= '
+							<tr id="' . $oShop_Item_Set->id . '">
+								<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
+								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
+								<td width="25"><input class="set-item-count form-control" name="set_count_' . $oShop_Item_Set->id . '" value="' . $oShop_Item_Set->count . '" /></td>
+								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . htmlspecialchars($currencyName) . '</td>
+								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+							</tr>
+						';
+					}
+				}
+
+				$setTable .= '
+						</tbody>
+					</table>
+				';
+
+				$oSetRow1
+					->add(Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12')
+						->add(
+							Admin_Form_Entity::factory('Code')->html($setTable)
+						)
+				);
+
+				$oSetRow2->add(
+					Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->class('add-set-item form-control')
+						->name('set_item_name')
+				);
+
+				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.add-set-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+						$('<input type=\'hidden\' name=\'set_item_id[]\'/>')
+							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+							.insertAfter($('.set-item-table'));
+
+						$('.set-item-table > tbody').append(
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						);
+
+						ui.item.value = '';
+					  } );");
+
+				$oSetRow2->add($oCore_Html_Entity_Script);
+
 				$oMainTab
-					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
-					->move($this->getField('showed')->divAttr(array('class' => 'form-group col-lg-3 col-md-6 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
+					->move($this->getField('showed')->divAttr(array('class' => 'form-group col-lg-3 col-sm-6 col-xs-12')), $oMainRow5)
 				;
 
 				// Добавляем новое поле типа файл
@@ -484,8 +595,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
-					//->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oSpecialPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
 				;
 
 				// Удаляем группу доступа
@@ -510,7 +622,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopProducerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.shop_producer_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(self::fillProducersList($object->shop_id))
 					->name('shop_producer_id')
 						->value($this->_object->id
@@ -519,18 +631,48 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 
 				// Добавляем продавцов
-				$oMainRow9->add($oShopProducerSelect);
+				$oMainRow10->add($oShopProducerSelect);
 
 				// Создаем поле групп пользователей сайта как выпадающий список
 				$oSiteUserGroupSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_("Shop_Item.siteuser_group_id"))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(array(-1 => Core::_('Shop_Item.shop_users_group_parrent')) + $aSiteuser_Groups)
 					->name('siteuser_group_id')
 					->value($this->_object->siteuser_group_id);
 
 				// Добавляем группы пользователей сайта
-				$oMainRow9->add($oSiteUserGroupSelect);
+				$oMainRow10->add($oSiteUserGroupSelect);
+
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Item.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+
+					$oMainRow10->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow10->add($oCore_Html_Entity_Script);
+				}
 
 				// Удаляем продавцов
 				$oAdditionalTab->delete($this->getField('shop_seller_id'));
@@ -539,7 +681,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopSellerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.shop_seller_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options($this->_fillSellersList())
 					->name('shop_seller_id')
 					->value($this->_object->id
@@ -548,7 +690,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 
 				// Добавляем продавцов
-				$oMainRow9->add($oShopSellerSelect);
+				$oMainRow10->add($oShopSellerSelect);
 
 				// Перемещаем цену
 				$oPriceBlock
@@ -583,7 +725,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopTaxSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_("Shop_Item.shop_tax_id"))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options($this->fillTaxesList())
 					->name('shop_tax_id')
 					->value($this->_object->shop_tax_id);
@@ -597,6 +739,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oModificationPrice = Admin_Form_Entity::factory('Checkbox')
 						->value(0)
 						->name("apply_price_for_modification")
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21'))
 						->caption(Core::_("Shop_Item.apply_price_for_modification"));
 
 					$oMainTab->addAfter($oModificationPrice, $oShopTaxSelect);
@@ -604,11 +747,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
 				{
+					$oPriceBlock->add($oPricesRowN = Admin_Form_Entity::factory('Div')->class('row'));
+
 					$aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
+
 					foreach ($aShopPrices as $oShopPrice)
 					{
-						$oPriceBlock->add($oPricesRowN = Admin_Form_Entity::factory('Div')->class('row'));
-
 						// Получаем значение специальной цены для товара
 						$oShop_Item_Price = $this->_object->Shop_Item_Prices->getByPriceId($oShopPrice->id);
 
@@ -641,6 +785,109 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->add($oItemPriceCheckBox)
 							->add($oItemPriceTextBox);
 					}
+				}
+
+				// Перемещаем спеццену
+				$oSpecialPriceBlock
+					->add(Admin_Form_Entity::factory('Div')
+							->class('header bordered-azure')
+							->value(Core::_('Shop_Item.special_price_header'))
+						)
+					->add($oSpecialPriceRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				// Заполняем вкладку специальных цен
+				$aShop_Specialprices = $this->_object->Shop_Specialprices->findAll(FALSE);
+
+				// Выводим форму добавления новой спеццены
+				$oSpecMinQuantity = Admin_Form_Entity::factory('Input')
+					->caption(Core::_("Shop_Item.form_edit_add_shop_special_prices_from"))
+					->name('specMinQuantity_[]')
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'))
+					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'integer')));
+
+				$oSpecMaxQuantity = Admin_Form_Entity::factory('Input')
+					->caption(Core::_("Shop_Item.form_edit_add_shop_special_prices_to"))
+					->name('specMaxQuantity_[]')
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'))
+					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'integer')));
+
+				$oSpecPrice = Admin_Form_Entity::factory('Input')
+					->caption(Core::_("Shop_Item.form_edit_add_shop_special_pricess_price"))
+					->name('specPrice_[]')
+					->divAttr(array('class' => 'form-group col-xs-4 col-sm-2 col-md-2 col-lg-2'))
+					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'decimal')));
+
+				ob_start();
+				$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+					->style('float: left; padding-top: 30px;')
+					->value(Core::_("Shop_Item.or"))
+					->execute();
+				$oOR = Admin_Form_Entity::factory('Code')->html(ob_get_clean());
+
+				$oSpecPricePercent = Admin_Form_Entity::factory('Input')
+					->caption(Core::_("Shop_Item.form_edit_add_shop_special_pricess_percent"))
+					->name('specPercent_[]')
+					->divAttr(array('class' => 'form-group col-xs-4 col-sm-2 col-md-2 col-lg-2'))
+					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'decimal')));
+
+				$oDivOpen = Admin_Form_Entity::factory('Code')->html('<div class="row spec_prices item_div clear" width="600">');
+				$oDivClose = Admin_Form_Entity::factory('Code')->html('</div>');
+
+				$oSpecialPriceRow1->add($oSpecialPriceDiv = Admin_Form_Entity::factory('Div'));
+
+				if (count($aShop_Specialprices) > 0)
+				{
+					foreach ($aShop_Specialprices as $oShop_Specialprice)
+					{
+						$oSpecMinQuantity = clone $oSpecMinQuantity;
+						$oSpecMaxQuantity = clone $oSpecMaxQuantity;
+						$oSpecPrice = clone $oSpecPrice;
+						$oSpecPricePercent = clone $oSpecPricePercent;
+
+						$oSpecialPriceDiv
+							->class('col-xs-12')
+							->add($oDivOpen)
+							->add(
+								$oSpecMinQuantity
+									->value($oShop_Specialprice->min_quantity)
+									->name("specMinQuantity_{$oShop_Specialprice->id}")
+									->id("specMinQuantity_{$oShop_Specialprice->id}")
+							)
+							->add(
+								$oSpecMaxQuantity
+									->value($oShop_Specialprice->max_quantity)
+									->name("specMaxQuantity_{$oShop_Specialprice->id}")
+									->id("specMaxQuantity_{$oShop_Specialprice->id}")
+							)
+							->add(
+								$oSpecPrice
+									->value($oShop_Specialprice->price)
+									->name("specPrice_{$oShop_Specialprice->id}")
+									->id("specPrice_{$oShop_Specialprice->id}")
+							)
+							->add($oOR)
+							->add(
+								$oSpecPricePercent
+									->value($oShop_Specialprice->percent)
+									->name("specPercent_{$oShop_Specialprice->id}")
+									->id("specPercent_{$oShop_Specialprice->id}")
+							)
+							->add($this->imgBox())
+							->add($oDivClose);
+					}
+				}
+				else
+				{
+					$oSpecialPriceDiv
+						->class('col-xs-12')
+						->add($oDivOpen)
+						->add($oSpecMinQuantity)
+						->add($oSpecMaxQuantity)
+						->add($oSpecPrice)
+						->add($oOR)
+						->add($oSpecPricePercent)
+						->add($this->imgBox())
+						->add($oDivClose);
 				}
 
 				// Получаем список складов магазина
@@ -732,104 +979,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow8)
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
-					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow9)
-					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow9)
-					->move($this->getField('apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow9);
+					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
+					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
+					->move($this->getField('apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10);
 
-				// Заполняем вкладку специальных цен
-				$aShop_Specialprices = $this->_object->Shop_Specialprices->findAll();
-
-				// Выводим форму добавления новой спеццены
-				$oSpecMinQuantity = Admin_Form_Entity::factory('Input')
-					->caption(Core::_("Shop_Item.form_edit_add_shop_special_prices_from"))
-					->name('specMinQuantity_[]')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'))
-					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'integer')));
-
-				$oSpecMaxQuantity = Admin_Form_Entity::factory('Input')
-					->caption(Core::_("Shop_Item.form_edit_add_shop_special_prices_to"))
-					->name('specMaxQuantity_[]')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'))
-					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'integer')));
-
-				$oSpecPrice = Admin_Form_Entity::factory('Input')
-					->caption(Core::_("Shop_Item.form_edit_add_shop_special_pricess_price"))
-					->name('specPrice_[]')
-					->divAttr(array('class' => 'form-group col-xs-4 col-sm-2 col-md-2 col-lg-2'))
-					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'decimal')));
-
-				ob_start();
-				$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-					->style('float: left; padding-top: 30px;')
-					->value(Core::_("Shop_Item.or"))
-					->execute();
-				$oOR = Admin_Form_Entity::factory('Code')->html(ob_get_clean());
-
-				$oSpecPricePercent = Admin_Form_Entity::factory('Input')
-					->caption(Core::_("Shop_Item.form_edit_add_shop_special_pricess_percent"))
-					->name('specPercent_[]')
-					->divAttr(array('class' => 'form-group col-xs-4 col-sm-2 col-md-2 col-lg-2'))
-					->format(array('maxlen' => array('value' => 12), 'lib' => array('value' => 'decimal')));
-
-				$oDivOpen = Admin_Form_Entity::factory('Code')->html('<div class="row spec_prices item_div clear" width="600">');
-				$oDivClose = Admin_Form_Entity::factory('Code')->html('</div>');
-
-				$oShopItemTabSpecialPrices->add($oSpecialPriceDiv = Admin_Form_Entity::factory('Div'));
-
-				if (count($aShop_Specialprices) > 0)
-				{
-					foreach ($aShop_Specialprices as $oShop_Specialprice)
-					{
-						$oSpecMinQuantity = clone $oSpecMinQuantity;
-						$oSpecMaxQuantity = clone $oSpecMaxQuantity;
-						$oSpecPrice = clone $oSpecPrice;
-						$oSpecPricePercent = clone $oSpecPricePercent;
-
-						$oSpecialPriceDiv
-							->add($oDivOpen)
-							->add(
-								$oSpecMinQuantity
-									->value($oShop_Specialprice->min_quantity)
-									->name("specMinQuantity_{$oShop_Specialprice->id}")
-									->id("specMinQuantity_{$oShop_Specialprice->id}")
-							)
-							->add(
-								$oSpecMaxQuantity
-									->value($oShop_Specialprice->max_quantity)
-									->name("specMaxQuantity_{$oShop_Specialprice->id}")
-									->id("specMaxQuantity_{$oShop_Specialprice->id}")
-							)
-							->add(
-								$oSpecPrice
-									->value($oShop_Specialprice->price)
-									->name("specPrice_{$oShop_Specialprice->id}")
-									->id("specPrice_{$oShop_Specialprice->id}")
-							)
-							->add($oOR)
-							->add(
-								$oSpecPricePercent
-									->value($oShop_Specialprice->percent)
-									->name("specPercent_{$oShop_Specialprice->id}")
-									->id("specPercent_{$oShop_Specialprice->id}")
-							)
-							->add($this->imgBox())
-							->add($oDivClose);
-					}
-				}
-				else
-				{
-					$oSpecialPriceDiv
-						->add($oDivOpen)
-						->add($oSpecMinQuantity)
-						->add($oSpecMaxQuantity)
-						->add($oSpecPrice)
-						->add($oOR)
-						->add($oSpecPricePercent)
-						->add($this->imgBox())
-						->add($oDivClose);
-				}
-
-				//oShopItemTabTagsRow1
+				// Tags
 				if (Core::moduleIsActive('tag'))
 				{
 					$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
@@ -841,14 +995,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->multiple('multiple')
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oShopItemTabTagsRow1->add($oAdditionalGroupsSelect);
+					$oMainRow9->add($oAdditionalGroupsSelect);
 
 					$html = '
 						<script type="text/javascript">
 							$(function(){
 								$(".shop-item-tags").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
-									minimumInputLength: 2,
+									minimumInputLength: 1,
 									placeholder: "' . Core::_('Shop_Item.type_tag') . '",
 									tags: true,
 									allowClear: true,
@@ -874,8 +1028,94 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							})</script>
 						';
 
-					$oShopItemTabTagsRow1->add(Admin_Form_Entity::factory('Code')->html($html));
+					$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
+
+				$aShop_Item_Associateds = $this->_object->Shop_Item_Associateds->findAll(FALSE);
+
+				$associatedTable = '
+					<table class="table table-striped table-hover associated-item-table">
+						<thead>
+							<tr>
+								<th scope="col">' . Core::_('Shop_Item.name') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
+								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
+								<th scope="col">  </th>
+							</tr>
+						</thead>
+						<tbody>
+				';
+
+				foreach ($aShop_Item_Associateds as $oShop_Item_Associated)
+				{
+					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Associated->shop_item_associated_id);
+
+					if(!is_null($oShop_Item))
+					{
+						$oShop_Item = $oShop_Item->shortcut_id
+							? $oShop_Item->Shop_Item
+							: $oShop_Item;
+
+						$currencyName = $oShop_Item->Shop_Currency->name;
+
+						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
+
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+
+						$associatedTable .= '
+							<tr id="' . $oShop_Item_Associated->id . '">
+								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
+								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
+								<td>' . $oShop_Warehouse_Item->count . '</td>
+								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . $currencyName . '</td>
+								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+							</tr>
+						';
+					}
+				}
+
+				$associatedTable .= '
+						</tbody>
+					</table>
+				';
+
+				$oShopItemTabAssociated
+					->add($oShopItemTabAssociatedRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemTabAssociatedRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oShopItemTabAssociatedRow1
+					->add(Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12')
+						->add(
+							Admin_Form_Entity::factory('Code')->html($associatedTable)
+						)
+					);
+
+				$oShopItemTabAssociatedRow2->add(
+					Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->class('add-associated-item form-control')
+						->name('associated_item_name')
+				);
+
+				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+				->type("text/javascript")
+				->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+					$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
+						.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+						.insertAfter($('.associated-item-table'));
+
+					$('.associated-item-table > tbody').append(
+						$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+					);
+
+					ui.item.value = '';
+				  } );"
+				);
+
+				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
 
 				$this->getField('length')
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding-right'))
@@ -886,7 +1126,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					)
 					->caption(Core::_('Shop_Item.item_length'));
 
-				$oMainTab->move($this->getField('length'), $oMainRow10);
+				$oMainTab->move($this->getField('length'), $oMainRow11);
 
 				$this->getField('width')
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
@@ -897,7 +1137,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->value('×')
 					);
 
-				$oMainTab->move($this->getField('width'), $oMainRow10);
+				$oMainTab->move($this->getField('width'), $oMainRow11);
 
 				$this->getField('height')
 					->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4 no-padding'))
@@ -907,7 +1147,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->class('input-group-addon dimension_patch')
 							->value(Core::_('Shop.size_measure_'.$oShop->size_measure))
 					);
-				$oMainTab->move($this->getField('height'), $oMainRow10);
+				$oMainTab->move($this->getField('height'), $oMainRow11);
+
+				$oMainTab->add(
+					Admin_Form_Entity::factory('Code')
+						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->type}', [0,1,2,3])</script>")
+				);
 			break;
 
 			case 'shop_group':
@@ -1046,13 +1291,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow2->add($oImageField);
 
 				$this->getField("sorting")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				$this->getField("indexing")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$this->getField("active")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
 					->move($this->getField("indexing"), $oMainRow4)
@@ -1078,10 +1323,40 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->options(array(-1 => Core::_('Shop_Item.shop_users_group_parrent')) + $aSiteuser_Groups)
 					->name('siteuser_group_id')
 					->value($this->_object->siteuser_group_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 				// Добавляем группы пользователей сайта
 				$oMainRow5->add($oSiteUserGroupSelect);
+
+				$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = $this->_object->Siteuser;
+
+					$options = !is_null($oSiteuser->id)
+						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+						: array(0);
+
+					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Group.siteuser_id'))
+						->options($options)
+						->name('siteuser_id')
+						->class('siteuser-tag')
+						->style('width: 100%')
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+
+					$oMainRow5->add($oSiteuserSelect);
+
+					$placeholder = Core::_('Siteuser.select_siteuser');
+					$language = Core_i18n::instance()->getLng();
+
+					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+					$oMainRow5->add($oCore_Html_Entity_Script);
+				}
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
 				if ($oSiteAlias)
@@ -1090,7 +1365,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						. $oSiteAlias->name
 						. $oShop->Structure->getPath()
 						. $this->_object->getPath();
-						
+
 					$this->getField('path')
 						->add(
 							Admin_Form_Entity::factory('A')
@@ -1178,6 +1453,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
+
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
 		parent::_applyObjectProperty();
 
@@ -1360,6 +1637,63 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 				}
 
+				// Сопутствующие товары
+				$aAddAssociatedItems = Core_Array::getPost('associated_item_id', array());
+
+				if (count($aAddAssociatedItems))
+				{
+					foreach ($aAddAssociatedItems as $associated_item_id)
+					{
+						$iCount = $this->_object->Shop_Item_Associateds->getCountByshop_item_associated_id($associated_item_id);
+
+						if (!$iCount)
+						{
+							$oShop_Item_Associated = Core_Entity::factory('Shop_Item_Associated');
+							$oShop_Item_Associated
+								->shop_item_associated_id($associated_item_id)
+								->shop_item_id($this->_object->id)
+								->count(1)
+								->save();
+						}
+					}
+				}
+
+				// Существующие товары из сета
+				$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
+				foreach ($aShop_Item_Sets as $oShop_Item_Set)
+				{
+					$count = Core_Array::getPost('set_count_' . $oShop_Item_Set->id);
+
+					if ($count > 0)
+					{
+						$oShop_Item_Set->count = $count;
+						$oShop_Item_Set->save();
+					}
+					else
+					{
+						$oShop_Item_Set->delete();
+					}
+				}
+
+				// Новые товары в сете
+				$aAddSetItems = Core_Array::getPost('set_item_id', array());
+				foreach ($aAddSetItems as $key => $shop_item_set_id)
+				{
+					$iCount = $this->_object->Shop_Item_Sets->getCountByshop_item_set_id($shop_item_set_id);
+
+					if (!$iCount)
+					{
+						$oShop_Item_Set = Core_Entity::factory('Shop_Item_Set');
+						$oShop_Item_Set
+							->shop_item_set_id($shop_item_set_id)
+							->shop_item_id($this->_object->id)
+							->count(
+								isset($_POST['set_count'][$key]) ? $_POST['set_count'][$key] : 1
+							)
+							->save();
+					}
+				}
+
 				// Яндекс.Маркет доставка
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
 				$oShop_Item_Delivery_Option_Controller_Tab
@@ -1501,6 +1835,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oShop_ItemShortcut->save()->clearCache();
 					}
 				}
+
+				// Пересчет комплекта
+				Core_Array::getPost('apply_recount_set') && $this->recountSet();
 			break;
 			case 'shop_group':
 			default:
@@ -2288,7 +2625,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		ob_start();
 			Admin_Form_Entity::factory('Div')
-				->class('no-padding add-remove-property margin-top-20 pull-left')
+				->class('no-padding add-remove-property margin-top-23 pull-left')
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('btn btn-palegreen')
@@ -2304,5 +2641,51 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->execute();
 
 		return Admin_Form_Entity::factory('Code')->html(ob_get_clean());
+	}
+
+	/**
+	 * Пересчет цены комплекта
+	 */
+	public function recountSet()
+	{
+		if ($this->_object->shop_currency_id)
+		{
+			$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
+
+			$Shop_Item_Controller = new Shop_Item_Controller();
+
+			$amount = 0;
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oShop_Item = $oShop_Item->shortcut_id
+					? $oShop_Item->Shop_Item
+					: $oShop_Item;
+
+				if ($oShop_Item->shop_currency_id)
+				{
+					$aPrice = $Shop_Item_Controller->getPrices($oShop_Item);
+
+					$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$oShop_Item->Shop_Currency,
+						$oShop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
+
+					$amount += $price * $oShop_Item_Set->count;
+				}
+				else
+				{
+					$this->addMessage(Core_Message::get(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error'));
+				}
+			}
+
+			$this->_object->price = $amount;
+			$this->_object->save();
+		}
+		else
+		{
+			$this->addMessage(Core_Message::get(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error'));
+		}
 	}
 }

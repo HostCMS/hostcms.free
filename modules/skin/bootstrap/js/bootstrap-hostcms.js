@@ -144,8 +144,7 @@
 			}
 		},
 		// Добавление новой заметки
-		addNote: function()
-		{
+		addNote: function() {
 			// add ajax '_'
 			var data = jQuery.getData({});
 
@@ -160,8 +159,7 @@
 			});
 		},
 		// Создание заметки по id и value
-		createNote: function(settings)
-		{
+		createNote: function(settings) {
 			settings = $.extend({
 				'id': null,
 				'value': ''
@@ -208,8 +206,7 @@
 			});
 		},
 		// Удаление заметки
-		destroyNote: function(jDiv)
-		{
+		destroyNote: function(jDiv) {
 			jQuery.ajax({
 				url: '/admin/index.php?' + 'ajaxNote&action=delete'
 					+ '&entity_id=' + jDiv.data('user-note-id'),
@@ -238,6 +235,134 @@
 		},
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
+		},
+		filterToggleField: function(object)
+		{
+			var filterId = object.data('filter-field-id'),
+				filterFormGroup = $('#' + filterId);
+
+			filterFormGroup
+				// Hide/show filter value
+				.toggle()
+				// Clear filter value
+				.find("input,select,textarea").val('');
+
+			object.find('i').toggleClass('fa-check');
+		},
+		toggleFilter: function() {
+			$('.topFilter').toggle();
+			$('tr.admin_table_filter').toggleClass('disabled');
+		},
+		changeFilterStatus: function(settings) {
+			$.ajax({
+				url: settings.path,
+				data: {'_': Math.round(new Date().getTime()), changeFilterStatus: true, show: settings.show},
+				dataType: 'json',
+				type: 'POST'
+			});
+		},
+		changeFilterField: function(settings) {
+
+			var li = $(settings.context);
+
+			$.filterToggleField(li);
+
+			//path, filter, field, show
+			$.ajax({
+				url: settings.path,
+				data: {
+					'_': Math.round(new Date().getTime()),
+					changeFilterField: true,
+					tab: settings.tab,
+					field: settings.field,
+					show: +li.find('i').hasClass('fa-check')
+				},
+				dataType: 'json',
+				type: 'POST'
+			});
+		},
+		filterSaveAs: function(caption, object, additionalParams) {
+
+			bootbox.prompt(caption, function (result) {
+				if (result !== null) {
+
+					$.adminSendForm({
+						buttonObject: object,
+						additionalParams: additionalParams,
+						post: {
+							'hostcms[filterId]': $('#filterTabs li.active').data('filter-id'),
+							filterCaption: result,
+							saveFilterAs: true
+						}
+					});
+
+					/*$.loadingScreen('show');
+					//alert(object);
+
+					var FormNode = object.closest('form'),
+						data = { filterCaption: result, saveFilterAs: true },
+						path = FormNode.attr('action');
+
+					FormNode.ajaxSubmit({
+						data: data,
+						//context: jQuery('#'+settings.windowId),
+						url: path,
+						type: 'POST',
+						dataType: 'json',
+						cache: false,
+						success: function(data, status, jqXHR) {
+							alert(data.toSource());
+							$.loadingScreen('hide');
+						}
+					});*/
+				}
+			});
+		},
+		filterSave: function(object) {
+
+			$.loadingScreen('show');
+
+			var FormNode = object.closest('form'),
+				data = { saveFilter: true, filterId: FormNode.data('filter-id') },
+				path = FormNode.attr('action');
+
+			FormNode.ajaxSubmit({
+				data: data,
+				url: path,
+				type: 'POST',
+				dataType: 'json',
+				cache: false,
+				success: function(data, status, jqXHR) {
+					//alert(data.toSource());
+					$.loadingScreen('hide');
+				}
+			});
+		},
+		filterDelete: function(object) {
+
+			$.loadingScreen('show');
+
+			var FormNode = object.closest('form'),
+				filterId = FormNode.data('filter-id'),
+				data = { deleteFilter: true, filterId: filterId },
+				path = FormNode.attr('action');
+
+			FormNode.ajaxSubmit({
+				data: data,
+				//context: jQuery('#'+settings.windowId),
+				url: path,
+				type: 'POST',
+				dataType: 'json',
+				cache: false,
+				success: function(data, status, jqXHR) {
+					//alert(data.toSource());
+					$.loadingScreen('hide');
+				}
+			});
+
+			$('#filter-li-' + filterId).prev().find('a').tab('show');
+			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
+
 		},
 		/* -- CHAT -- */
 		chatGetUsersList: function(event)
@@ -1168,6 +1293,521 @@
 				},
 			});
 		},
+		refreshClock: function() {
+			setInterval( function() {
+				// Создаем объект newDate() и показывает минуты
+				var minutes = new Date().getMinutes();
+				// Добавляем ноль в начало цифры, которые до 10
+				$(".clock #min").html(( minutes < 10 ? "0" : "" ) + minutes);
+			}, 500);
+
+			setInterval( function() {
+				// Создаем объект newDate() и показывает часы
+				var hours = new Date().getHours();
+				// Добавляем ноль в начало цифры, которые до 10
+				$(".clock #hours").html(( hours < 10 ? "0" : "" ) + hours);
+			}, 500);
+		},
+		notificationsPrepare: function (){
+
+			setInterval($.refreshNotificationsList, 5000);
+
+			var jNotificationsListBox  = $('.navbar-account #notificationsListBox');
+
+			jNotificationsListBox.on({
+				'click': function (event){
+
+					event.stopPropagation();
+				},
+
+				'touchstart': function (event) {
+
+					$(this).data({'isTouchStart': true});
+				}
+			});
+
+			// Показ списка уведомлений
+			$('.navbar li#notifications').on('shown.bs.dropdown', function (event){
+
+				// Устанавливаем полосу прокрутки
+				$.setNotificationsSlimScroll();
+
+				// Устанавливаем соответствующие уведомления прочитанными
+				$.readNotifications();
+
+				var jInputSearch = $('#notification-search', this),
+					jButton = jInputSearch.nextAll('.glyphicon-remove'),
+
+					// Кнопка очистки списка уведомлений (кнопка корзины)
+					clearListNotificationsButton = $('.navbar-account #notificationsListBox .footer .fa-trash-o'),
+
+					// Поле фильтрации списка уведомлений
+					filterListNotificationsField = $('.navbar-account #notificationsListBox .footer #notification-search');
+
+				// Устанавливаем видимость кнопки очистки поля поиска (фильтрации) уведомлений
+				setVisibilityInputCleaningButton(jInputSearch, jButton);
+
+				if ($('#notificationsListBox .scroll-notifications li[id != 0]').length)
+				{
+					$('.navbar-account #notificationsListBox .footer').show();
+
+					/*filterListNotificationsField.show();
+					filterListNotificationsField.next('.glyphicon-search').show();
+					clearListNotificationsButton.show();*/
+				}
+				else
+				{
+					$('.navbar-account #notificationsListBox .footer').hide();
+
+					/*filterListNotificationsField.hide();
+					filterListNotificationsField.next('.glyphicon-search').hide();
+					clearListNotificationsButton.hide();*/
+				}
+
+			});
+
+			// Обработчик нажатия кнопки очистки списка уведомлений
+			jNotificationsListBox.find('.footer .fa-trash-o').on('click', $.clearNotifications);
+
+			$(document).on({
+				'mousemove': function (){
+					var jSlimScrollBar = $('#notificationsListBox .slimScrollBar');
+
+					// Была нажата кнопка на полосе прокрутки
+					if (jSlimScrollBar.data('isMousedown'))
+					{
+						// Делаем соответствующие уведомления прочитанными
+						$.readNotifications();
+					}
+				},
+
+				'mouseup': function (){
+
+					var jSlimScrollBar = $('#notificationsListBox .slimScrollBar');
+
+					// Была нажата кнопка на полосе прокрутки
+					if (jSlimScrollBar.data('isMousedown'))
+					{
+						// Делаем соответствующие уведомления прочитанными
+						$.readNotifications();
+						jSlimScrollBar.data({'isMousedown': false});
+					}
+				},
+
+				'touchend': function () {
+
+					var jNotificationsListBox  = $('.navbar-account #notificationsListBox');
+
+					if (jNotificationsListBox.data('isTouchStart'))
+					{
+						jNotificationsListBox.data('isTouchStart', false);
+					}
+				},
+
+				'touchmove': function (event) {
+
+					if ($('.navbar-account #notificationsListBox').data('isTouchStart'))
+					{
+						// Делаем соответствующие уведомления прочитанными
+						$.readNotifications();
+					}
+				}
+			});
+
+			var jNotificationsList = $('.navbar-account #notificationsListBox .scroll-notifications');
+
+			// Функция-обработчик прокрутки списка уведомлений
+			function onWheel(event)
+			{
+
+				var //jMessagesList = $('.chatbar-messages .messages-list'),
+					jNotificationsList = $('#notificationsListBox .scroll-notifications'),
+					//slimScrollBar = $('.chatbar-messages .slimScrollBar'),
+					slimScrollBar = $('#notificationsListBox .slimScrollBar'),
+					maxTop = jNotificationsList.outerHeight() - slimScrollBar.outerHeight(),
+					wheelDelta = 0, newTopScroll = 0, percentScroll;
+
+				if (event.wheelDelta)
+				{
+					wheelDelta = -event.wheelDelta / 120;
+				}
+
+				if (event.detail)
+				{
+					wheelDelta = event.detail / 3;
+				}
+
+				wheelStep = 20;
+
+				wheelDelta = parseInt(slimScrollBar.css('top')) + wheelDelta * wheelStep / 100 * slimScrollBar.outerHeight();
+				wheelDelta = Math.min(Math.max(wheelDelta, 0), maxTop);
+				wheelDelta = Math.ceil(wheelDelta);
+
+				percentScroll = wheelDelta / (jNotificationsList.outerHeight() - slimScrollBar.outerHeight());
+				newTopScroll = percentScroll * (jNotificationsList[0].scrollHeight - jNotificationsList.outerHeight());
+
+				wheelDelta = newTopScroll - jNotificationsList.scrollTop();
+
+				$.readNotifications(wheelDelta);
+			};
+
+			if (jNotificationsList[0].addEventListener)
+			{
+				jNotificationsList[0].addEventListener('DOMMouseScroll', onWheel, false);
+				jNotificationsList[0].addEventListener('mousewheel', onWheel, false);
+				jNotificationsList[0].addEventListener('MozMousePixelScroll', onWheel, false);
+			}
+			else
+			{
+				jNotificationsList[0].attachEvent("onmousewheel", onWheel);
+			};
+
+			// Установка показа/скрытия кнопки очистки поля
+			function setVisibilityInputCleaningButton(jInput, jButton)
+			{
+				if (jInput.val() == '')
+				{
+					// !jButton.hasClass('hide') && jButton.addClass('hide');
+					jButton.addClass('hide');
+				}
+				else
+				{
+					jButton.removeClass('hide');
+				}
+			}
+
+			// Обработчик нажатия в поле поиска (фильтрации) уведомлений
+			$('.navbar-account #notificationsListBox #notification-search').on('keyup', function (event){
+
+				var jInputSearch = $(this),
+					// Кнопка очистки списка уведомлений (кнопка корзины)
+					clearListNotificationsButton = $('.navbar-account #notificationsListBox .footer .fa-trash-o');
+
+				// Нажали Esc - очищаем поле фильтрации
+				event.keyCode == 27 && jInputSearch.val('');
+
+				// Скрываем кнопку очистки списка уведомлений при фильтрации
+				if (jInputSearch.val())
+				{
+					clearListNotificationsButton.hide();
+				}
+				else
+				{
+					clearListNotificationsButton.show();
+				}
+
+				setVisibilityInputCleaningButton(jInputSearch, jInputSearch.nextAll('.glyphicon-remove'));
+
+				$.filterNotifications(jInputSearch);
+			})
+
+			$('.navbar-account #notificationsListBox .glyphicon-remove')
+				.on({
+					'click': function (){
+						$.filterNotifications($(this).prevAll('#notification-search').val(''));
+						$(this).addClass('hide');
+						$('.navbar-account #notificationsListBox .footer .fa-trash-o').show();
+					},
+					'mouseover': function (){
+						$(this).toggleClass('green palegreen');
+					},
+					'mouseout': function (){
+						$(this).toggleClass('green palegreen');
+					}
+				});
+		},
+
+		// Добавление полосы прокрутки для списка уведомлений
+		setNotificationsSlimScroll: function (){
+
+			// Сохраняем данные .slimScrollBar
+			var slimScrollBarData = !$('#notificationsListBox .slimScrollBar').data() ? {'isMousedown': false} : $('#notificationsListBox .slimScrollBar').data();
+
+			// Удаляем slimscroll
+			if ($('#notificationsListBox > .slimScrollDiv').length)
+			{
+				$('#notificationsListBox .scroll-notifications').slimscroll({destroy: true});
+				$('#notificationsListBox .scroll-notifications').attr('style', '');
+			}
+
+			// Создаем slimscroll
+			$('#notificationsListBox .scroll-notifications').slimscroll({
+				height: $('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != 0]').length ? '220px' : '55px',
+				//height: 'auto',
+				color: 'rgba(0, 0, 0, 0.3)',
+				size: '5px'
+			});
+
+			//	Добавляем новому .slimScrollBar данные от удаленного
+			$('#notificationsListBox .slimScrollBar')
+				.data(slimScrollBarData)
+				.on({
+					'mousedown': function (){
+						$(this).data('isMousedown', true);
+					},
+
+					'mouseenter': function () {
+						$(this).css('width', '8px');
+					},
+
+					'mouseout': function () {
+						!$(this).data('isMousedown') &&	$(this).css('width', '5px');
+					}
+				});
+		},
+
+		// Определение вхождения элемента (element) в область другого элемента (box)
+		elementInBox: function (element, box, wheelDelta, delta){
+			// wheelDelta - величина прокрутки slimscroll'а
+			// delta - минимальный размер вхождения element в область элемента box
+			var delta = delta || 10,
+				wheelDelta = wheelDelta || 0,
+				boxTop = box.offset().top + parseInt(box.css('margin-top')) + parseInt(box.css('padding-top')),
+				boxBottom = boxTop + box.height(),
+				elementTop = element.offset().top + parseInt(element.css('margin-top')) + parseInt(element.css('padding-top')) - wheelDelta,
+				elementBottom = elementTop + element.height();
+
+			return elementTop >= boxTop && elementTop <= (boxBottom - delta) || (elementBottom >= boxTop + delta) && elementBottom <= boxBottom;
+		},
+
+		// Добавление уведомления
+		addNotification: function (oNotification, jBox, showAlertNotification){
+
+			var jBox = jBox || $('.navbar-account #notificationsListBox .scroll-notifications > ul'),
+				showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,
+				soundEnabled = $('#sound-switch').data('soundEnabled') === undefined ? true : !!$('#sound-switch').data('soundEnabled') ;
+
+			var notificationExtra = '';
+
+			if (oNotification['extra'].length)
+			{
+				var jNotificationExtra = $('<div class="notification-extra">');
+
+				oNotification['extra'].forEach(function(item) {
+					jNotificationExtra.append('<i class="fa ' + item + ' themeprimary"></i>');
+				})
+
+				oNotification['extra']['description'].length && jNotificationExtra.append('<span class="description">' + oNotification['extra']['description'] + '</span>')
+
+				notificationExtra = jNotificationExtra.html();
+			}
+
+			jBox.prepend(
+				'<li id="' + oNotification['id'] + '" class="' + (oNotification['read'] == 0 ? "unread" : "") + '">\
+					<a href="' + (oNotification['href'].length ? oNotification['href'] : '#') + '" onclick="' + (oNotification['onclick'].length ? oNotification['onclick'] : '') + '">\
+						<div class="clearfix">\
+							<div class="notification-icon">\
+								<i class="' + oNotification['icon']['ico'] + ' ' + oNotification['icon']['background-color'] + ' ' + oNotification['icon']['color'] + '"></i>\
+							</div>\
+							<div class="notification-body">\
+								<span class="title">' + oNotification['title'] + '</span>\
+								<span class="description"></span>\
+							</div>\
+							' + notificationExtra +
+						'</div>\
+					</a>\
+				</li>')
+				.find('li#' + oNotification['id'] + ' span.description').html((oNotification['description'].length ? (oNotification['description'] + '<br/>') : '') /* oNotification['datetime']*/ );
+
+			// Показываем всплывающее непрочитанное уведомление
+			!parseInt(oNotification['read']) && showAlertNotification && Notify(oNotification['title'], 'bottom-left', '5000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true, soundEnabled);
+
+			// Открыт выпадающий список уведомлений
+			if ($('.navbar li#notifications').hasClass('open'))
+			{
+				 // Если список уведомлений был пуст, устанавливаем полосу прокрутки
+				!$('.navbar-account #notificationsListBox .scroll-notifications > ul li').length && $.setNotificationsSlimScroll();
+
+				 // Делаем прочитанными уведомления, находящиеся в видимой части списка
+				 $.readNotifications();
+			}
+		},
+
+		// Автоматическое обновление списка уведомлений
+		refreshNotificationsList: function() {
+
+			// add ajax '_'
+			var data = jQuery.getData({}),
+				jNotificationsListBox  = $('.navbar-account #notificationsListBox');
+
+			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
+			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
+
+			$.ajax({
+				//context: textarea,
+				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: function(resultData){
+
+					var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+
+					if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId')
+					// Есть уведомления для сотрудника
+						&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length))
+					{
+
+						// Удаление записи об отсутствии уведомлений
+						$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
+
+						/*
+						if (jNotificationsListBox.data('lastNotificationId') == 0)
+						//if (jNotificationsListBox.find('.scroll-notifications > ul li:first').attr('id') == 0)
+						{
+							//$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').remove();
+							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
+						}*/
+
+						// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
+						var unreadNotifications = [];
+
+						$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').each(function (){
+							unreadNotifications.push($(this).attr('id'));
+						})
+
+						// Непрочитанные уведомления из БД
+						$.each(resultData['unreadNotifications'], function(index, notification ){
+
+							var searchIndex = -1;
+
+							if (~(searchIndex = unreadNotifications.indexOf(notification['id'])))
+							{
+								// Удаляем из массива уведомления, оставшиеся непрочитанными
+								unreadNotifications.splice(searchIndex, 1);
+							}
+						});
+
+						// Отмечаем ранее непрочитанные уведомления как прочитанные в соответствии с данными из БД
+						$.each(unreadNotifications, function (index, value){
+
+							$('.navbar-account #notificationsListBox .scroll-notifications > ul li#' + value + '.unread').removeClass('unread');
+						});
+
+						 // Есть новые уведомления
+						if (resultData['newNotifications'].length)
+						{
+							$.each(resultData['newNotifications'], function( index, notification ){
+
+								// Добавляем уведомление в список
+								$.addNotification(notification, $('.navbar-account #notificationsListBox .scroll-notifications > ul'));
+							});
+
+							// Обновление идентификатора последнего загруженного уведомления
+							jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][resultData['newNotifications'].length-1]['id']);
+
+							// Создаем slimscroll для нового списка, если список уведомлений открыт и при этом пуст
+							if ($('.navbar li#notifications').hasClass('open')
+								&& !$('.navbar-account #notificationsListBox .scroll-notifications > ul li').length)
+							{
+								$.setNotificationsSlimScroll();
+							}
+						}
+
+						var countUnreadNotifications = $('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').length;
+
+						// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
+						$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
+
+						//  Меняем значение баджа с числом непрочитанных уведомлений
+						$('.navbar li#notifications > a > span.badge')
+							.html(countUnreadNotifications)
+							.toggleClass('hidden', !countUnreadNotifications);
+
+						// Показываем значек корзины - очистки списка уведомлений.
+
+						jNotificationsListBox.find('.footer .fa-trash-o').show();
+
+						jNotificationsListBox.find('.footer #notification-search').show();
+						jNotificationsListBox.find('.footer .glyphicon-search').show();
+					}
+				}
+			});
+		},
+
+		// Метод устанавливает уведомления прочитанными
+		readNotifications: function (wheelDelta, delta){
+
+			var masVisibleUnreadNotifications = [];
+
+			// Список непрочитанныных уведомлений
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread > a').each(function (){
+
+				// Непрочитанное уведомление находится в области видимости выпадающего блока - делаем его прочитанным
+				if ($.elementInBox($(this), $('.navbar-account div#notificationsListBox'), wheelDelta, delta))
+				{
+					var notificationBox = $(this).parent('li.unread');
+						notificationBox.removeClass('unread');
+
+					masVisibleUnreadNotifications.push(notificationBox.attr('id'));
+				}
+			});
+
+			// Количество непрочитанных уведомлений
+			var countUnreadNotifications = $('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread > a').length;
+
+			// Нет непрочитанных уведомлений
+			!countUnreadNotifications && $('.navbar li#notifications > a').removeClass('wave in');
+
+			$('.navbar li#notifications > a > span.badge')
+				.html(countUnreadNotifications)
+				.toggleClass('hidden', !countUnreadNotifications);
+
+			if (masVisibleUnreadNotifications.length)
+			{
+				// add ajax '_'
+				var data = jQuery.getData({});
+
+				data['notificationsListId'] = masVisibleUnreadNotifications;
+				data['currentUserId'] = $('.navbar-account #notificationsListBox').data('currentUserId')
+
+				$.ajax({
+					//context: textarea,
+					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('.navbar-account #notificationsListBox').data('moduleId')  + '&type=1',
+					type: 'POST',
+					data: data,
+					dataType: 'json'
+				});
+			}
+		},
+
+		filterNotifications: function (jInputElement){
+
+			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != 0]');
+
+			if (jNotifications.length)
+			{
+				var searchString = jInputElement.val().toLocaleLowerCase();
+
+				jNotifications.show();
+
+				if (searchString.length)
+				{
+					jNotifications.each(function(){
+
+						var sourceText = $(this).text().toLocaleLowerCase();
+
+						!~sourceText.indexOf(searchString) && $(this).hide();
+					});
+				}
+			}
+		},
+
+		clearNotifications: function (){
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id!="0"]').remove();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').show();
+
+			// Нет непрочитанных уведомлений
+			$('.navbar li#notifications > a').removeClass('wave in');
+
+			$('.navbar li#notifications > a > span.badge')
+				.html(0)
+				.toggleClass('hidden', true);
+
+			$('.navbar-account #notificationsListBox .footer .fa-trash-o').hide();
+			$('.navbar-account #notificationsListBox .footer #notification-search').hide();
+			$('.navbar-account #notificationsListBox .footer .glyphicon-search').hide();
+		},
 		widgetRequest: function(settings){
 			$.loadingScreen('show');
 
@@ -1212,7 +1852,7 @@
 		{
 			var jProperies = jQuery('#' + windowId + ' #property_' + index),
 
-			//Объект окна настроек большого изображения
+			// Объект окна настроек большого изображения
 			oSpanFileSettings =  jProperies.find("span[id ^= 'file_large_settings_']");
 
 			// Закрываем окно настроек большого изображения
@@ -1221,7 +1861,7 @@
 				oSpanFileSettings.click();
 			}
 
-			//Объект окна настроек малого изображения
+			// Объект окна настроек малого изображения
 			oSpanFileSettings =  jProperies.find("span[id ^= 'file_small_settings_']");
 			// Закрываем окно настроек малого изображения
 			if (oSpanFileSettings.length && oSpanFileSettings.children('i').hasClass('fa-times'))
@@ -1233,7 +1873,7 @@
 			iRand = Math.floor(Math.random() * 999999);
 
 			jNewObject.insertAfter(
-				jQuery('#' + windowId).find('div[id="property_' + index + '"],div[id^="property_' + index + '_"]').eq(-1)
+				jQuery('#' + windowId).find('div.row[id="property_' + index + '"],div.row[id^="property_' + index + '_"]').eq(-1)
 			);
 
 			jNewObject.attr('id', 'property_' + index + '_' + iRand);
@@ -1294,7 +1934,84 @@
 			});
 		},
 		/* --- /CHAT --- */
+		selectSiteuser: function(settings)
+		{
+			settings = $.extend({
+				minimumInputLength: 1,
+				allowClear: true,
+				ajax: {
+					url: "/admin/siteuser/siteuser/index.php?siteuser",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				}
+			}, settings);
 
+			return this.each(function(){
+				jQuery(this).select2(settings);
+			});
+		},
+		autocompleteShopItem: function(shop_id, shop_currency_id, selectOption)
+		{
+			return this.each(function(){
+				 jQuery(this).autocomplete({
+					  source: function(request, response) {
+						$.ajax({
+						  url: '/admin/shop/index.php?autocomplete&shop_id=' + shop_id + '&shop_currency_id=' + shop_currency_id,
+						  dataType: 'json',
+						  data: {
+							queryString: request.term
+						  },
+						  success: function( data ) {
+							response( data );
+						  }
+						});
+					  },
+					  minLength: 1,
+					  create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+							return $('<li></li>')
+								.data('item.autocomplete', item)
+								.append($('<a>').text(item.label))
+								.append($('<span>').text(item.price_with_tax + ' ' + item.currency))
+								.append($('<span>').text(item.marking))
+								.appendTo(ul);
+						}
+
+						 $(this).prev('.ui-helper-hidden-accessible').remove();
+					  },
+					  /*select: function( event, ui ) {
+						$('<input type=\'hidden\' name=\'set_item_id[]\'/>')
+							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+							.insertAfter($('.set-item-table'));
+
+						$('.set-item-table > tbody').append(
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						);
+
+						ui.item.value = '';  // it will clear field
+					  },*/
+					  select: selectOption,
+					  open: function() {
+						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+					  },
+					  close: function() {
+						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+					  }
+				});
+			});
+		},
 		refreshEditor: function()
 		{
 			return this.each(function(){
@@ -1338,6 +2055,8 @@
 })(jQuery);
 
 $(function(){
+	$.notificationsPrepare();
+
 	/* --- CHAT --- */
 	$('#chatbar').length && $.chatPrepare();
 	/* --- /CHAT --- */
@@ -1377,7 +2096,6 @@ $(function(){
 	$('body').on('touchend', '.page-sidebar.menu-compact .sidebar-menu .submenu > li', function(e) {
 		$(this).find('a').click();
 	});
-
 });
 
 var methods = {

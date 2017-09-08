@@ -38,6 +38,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))			
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -146,7 +147,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					'fa-file-code-o'
 				)
 			)
-			->divAttr(array('class' => 'form-group col-xs-12'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21'))
 			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
 			->value($this->_object->type)
 			->name('type');
@@ -173,6 +174,26 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					->type("text/javascript")
 					->value("radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1])")
 			);
+
+		$oMainTab->delete($this->getField('method'));
+
+		$oSelect_Method = Admin_Form_Entity::factory('Select')
+			->options(
+				array(
+					0 => Core::_('Shop_Delivery.pickup'),
+					1 => Core::_('Shop_Delivery.post'),
+					2 => Core::_('Shop_Delivery.delivery')
+				)
+			)
+			->name('method')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->value($this->_object->method)
+			->caption(Core::_('Shop_Delivery.method'));
+
+		$oMainRow1->add($oSelect_Method);
+		
+		$oMainTab->move($this->getField('days_from')->divAttr(array('class' => 'form-group col-xs-12 col-md-2')), $oMainRow1);
+		$oMainTab->move($this->getField('days_to')->divAttr(array('class' => 'form-group col-xs-12 col-md-2')), $oMainRow1);		
 
 		return $this;
 	}
@@ -375,9 +396,10 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				// Платежная система связана с доставкой. Удаляем связь платежной системы с доставкой
 				if (in_array($oShop_Payment_System->id, $aDelivery_Payment_Systems))
 				{
-					$oShop_Delivery_Payment_Systems = $this->_object->Shop_Delivery_Payment_Systems->getByShop_payment_system_id($oShop_Payment_System->id);
+					// $oShop_Delivery_Payment_System = $this->_object->Shop_Delivery_Payment_Systems->getByShop_payment_system_id($oShop_Payment_System->id);
+					// !is_null($oShop_Delivery_Payment_System) && $oShop_Delivery_Payment_System->delete();
 
-					!is_null($oShop_Delivery_Payment_Systems) && $oShop_Delivery_Payment_Systems->delete();
+					$this->_object->remove($oShop_Payment_System);
 				}
 			}
 		}

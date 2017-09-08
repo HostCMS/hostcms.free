@@ -53,4 +53,7 @@ return array(
 	'active' => "<acronym title=\"Activity of manufacturer\">Active</acronym>",
 	'changeStatus_success' => "Information has been successfully changed",
 	'changeDefaultStatus_success' => "Information has been successfully changed",
+	'move_producers_groups_title' => "Move Producers",
+	'move_producers_groups_id' => "Parent Group",
+	'move_success' => 'Manufacturers moved successfully',
 );

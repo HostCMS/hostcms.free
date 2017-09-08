@@ -99,7 +99,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 
 		Core_Event::notify(get_class($this) . '.onAfterCalculatePrice', $this, array($oShop_Item));
 
-		// Округляем значения, переводим с научной нотации 1Е+10 в десятичную
+		// Округляем значения
 		if ($bRound)
 		{
 			$oShop_Controller = Shop_Controller::instance();
@@ -217,7 +217,9 @@ class Shop_Item_Controller extends Core_Servant_Properties
 					{
 						// То считаем цену с налогом
 						$this->_aPrice['tax'] = $oShop_Tax->rate / 100 * $this->_aPrice['price_discount'];
-						$this->_aPrice['price_tax'] = $this->_aPrice['price_discount'] = $this->_aPrice['price_discount'] + $this->_aPrice['tax'];
+						$this->_aPrice['price_tax']
+							= $this->_aPrice['price_discount']
+							= $this->_aPrice['price_discount'] + $this->_aPrice['tax'];
 					}
 					else
 					{

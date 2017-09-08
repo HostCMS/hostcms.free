@@ -56,6 +56,15 @@ class Core_Xml_Entity extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get children entities
+	 * @return array
+	 */
+	public function getEntities()
+	{
+		return $this->_childrenEntities;
+	}
+
+	/**
 	 * Attributes
 	 * @var array
 	 */

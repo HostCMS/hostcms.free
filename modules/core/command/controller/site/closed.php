@@ -34,6 +34,9 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 
 		$oCore_Response = new Core_Response();
 
+		Core_Page::instance()
+			->response($oCore_Response);
+		
 		$oCore_Response
 			->status(503)
 			->header('Content-Type', "text/html; charset=UTF-8")

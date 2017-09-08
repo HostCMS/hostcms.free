@@ -13,7 +13,7 @@
  * @copyright © 2005-2014 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
-@set_time_limit(90000);
+@set_time_limit(28800);
 
 require_once(dirname(__FILE__) . '/../' . 'bootstrap.php');
 
@@ -25,6 +25,8 @@ define('CURRENT_SITE', 1);
 $oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 Core::initConstants($oSite);
+
+Core_Database::instance()->query('SET SESSION wait_timeout = 28800');
 
 // Получаем список всех служб технической поддержки сайта
 $aHelpdesks = $oSite->Helpdesks->findAll();

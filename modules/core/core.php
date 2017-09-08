@@ -800,7 +800,8 @@ class Core
 		header('Content-Disposition: inline; filename="files.json"');
 		header('Vary: Accept');
 
-		if (strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
+		if (is_null(Core_Array::get($_SERVER, 'HTTP_ACCEPT'))
+			|| strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
 		{
 			header('Content-type: application/json; charset=utf-8');
 		}

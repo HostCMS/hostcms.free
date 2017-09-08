@@ -551,7 +551,10 @@ $oAdmin_Form_Dataset
 		array('where' =>
 			array('informationsystem_id', '=', $iInformationsystemId)
 		)
-	)/*->changeField('name', 'type', 1)*/;
+	)
+	//->changeField('name', 'type', 1)
+	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 	
 // Change field type
 $oAdmin_Form_Dataset->changeField('img', 'type', 10);	

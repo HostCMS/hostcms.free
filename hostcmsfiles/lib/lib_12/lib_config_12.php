@@ -1,9 +1,4 @@
 <?php
-// Stop buffering
-ob_get_clean();
-header('Content-Type: raw/data');
-header("Cache-Control: no-cache, must-revalidate");
-header('X-Accel-Buffering: no');
 
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
@@ -12,6 +7,10 @@ $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->lib
 
 $Shop_Controller_YandexMarket = new Shop_Controller_YandexMarket($oShop);
 // $Shop_Controller_YandexMarket->stdOut($oCore_Out_File);
-$Shop_Controller_YandexMarket->show();
+$Shop_Controller_YandexMarket
+	->token(Core_Array::get(Core_Page::instance()->libParams, 'token', ''))
+	// ->outlets(TRUE)
+	->parseUrl()
+	->show();
 
 exit();

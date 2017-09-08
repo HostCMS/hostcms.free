@@ -11,6 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - importGroups(TRUE|FALSE) импортировать группы товаров, по умолчанию TRUE
  * - createShopItems(TRUE|FALSE) создавать новые товары, по умолчанию TRUE
  * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id')
+ * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
  * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание. По умолчанию МалоеОписание
  * - timeout(30) время выполнения шага импорта, получается из настроек PHP.
@@ -31,6 +32,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'importGroups',
 		'createShopItems',
 		'updateFields',
+		'skipProperties',
 		'itemDescription',
 		'shortDescription',
 		'iShopId',
@@ -160,7 +162,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$this->itemDescription = 'text';
 		$this->shortDescription = 'МалоеОписание';
 
-		$this->updateFields = array();
+		$this->updateFields = $this->skipProperties = array();
 		$this->importGroups = $this->createShopItems = TRUE;
 
 		$this->importAction = 1;
@@ -320,19 +322,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		}
 		return $this;
 	}
-
-	/**
-	 * Add characteristic to item
-	 * @param object $oShop_Item shop item
-	 * @param object $oItemProperty item property
-	 * @return self
-	 */
-	/*protected function _addCharacteristic($oShop_Item, $oItemProperty)
-	{
-		$this->_addPredefinedAdditionalProperty($oShop_Item, strval($oItemProperty->Наименование), strval($oItemProperty->Значение), TRUE);
-
-		return $this;
-	}*/
 
 	/**
 	 * Check if property exists in array and save it if so
@@ -797,18 +786,30 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			return $this->_cacheProperty[$sPropertyGUID];
 		}
 
-		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
+		if ($sPropertyName == '' || !in_array($sPropertyName, $this->skipProperties))
+		{
+			$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
 
-		$oProperty = strlen($sPropertyGUID)
-			? $oShop_Item_Property_List->Properties->getByGuid($sPropertyGUID, FALSE)
-			// В версии 2.0.5 для ХарактеристикиТовара/ХарактеристикаТовара не передается ИД, только Наименование
-			: $oShop_Item_Property_List->Properties->getByName($sPropertyName, FALSE);
+			$oProperty = strlen($sPropertyGUID)
+				? $oShop_Item_Property_List->Properties->getByGuid($sPropertyGUID, FALSE)
+				// В версии 2.0.5 для ХарактеристикиТовара/ХарактеристикаТовара не передается ИД, только Наименование
+				: $oShop_Item_Property_List->Properties->getByName($sPropertyName, FALSE);
+
+			if ($oProperty && in_array($oProperty->name, $this->skipProperties))
+			{
+				$oProperty = NULL;
+			}
+		}
+		else
+		{
+			$oProperty = NULL;
+		}
 
 		if (strlen($sPropertyGUID))
 		{
 			$this->_cacheProperty[$sPropertyGUID] = $oProperty;
 		}
-
+		
 		return $oProperty;
 	}
 
@@ -1895,81 +1896,88 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$sPropertyGUID = strval($oItemProperty->Ид);
 			$sPropertyName = strval($oItemProperty->Наименование);
 
-			$oProperty = strlen($sPropertyGUID)
-				? $oShop_Item_Property_List->Properties->getByGuid($sPropertyGUID, FALSE)
-				// В версии 2.0.5 для ХарактеристикиТовара/ХарактеристикаТовара не передается ИД, только Наименование
-				: $oShop_Item_Property_List->Properties->getByName($sPropertyName, FALSE);
-
-			if (is_null($oProperty) && strlen($sPropertyGUID))
+			if ($sPropertyName == '' || !in_array($sPropertyName, $this->skipProperties))
 			{
-				$oProperty = Core_Entity::factory('Property');
-				$oProperty->name = $sPropertyName;
-				$oProperty->guid = $sPropertyGUID;
+				$oProperty = strlen($sPropertyGUID)
+					? $oShop_Item_Property_List->Properties->getByGuid($sPropertyGUID, FALSE)
+					// В версии 2.0.5 для ХарактеристикиТовара/ХарактеристикаТовара не передается ИД, только Наименование
+					: $oShop_Item_Property_List->Properties->getByName($sPropertyName, FALSE);
 
-				if (strval($oItemProperty->ТипЗначений) == 'Справочник' && Core::moduleIsActive('list'))
+				if (is_null($oProperty)
+					&& strlen($sPropertyGUID)
+					// Свойство может быть найдено по GUID
+					&& !in_array($sPropertyName, $this->skipProperties)
+				)
 				{
-					$oProperty->type = 3;
+					$oProperty = Core_Entity::factory('Property');
+					$oProperty->name = $sPropertyName;
+					$oProperty->guid = $sPropertyGUID;
 
-					// Check if list exists
-					$oList = $oShop->Site->Lists->getByName($sPropertyName, FALSE);
-
-					// Create new List
-					if (is_null($oList))
+					if (strval($oItemProperty->ТипЗначений) == 'Справочник' && Core::moduleIsActive('list'))
 					{
-						$oList = Core_Entity::factory('List');
-						$oList->name = $sPropertyName;
-						$oList->list_dir_id = 0;
-						$oList->site_id = $oShop->site_id;
-						$oList->save();
+						$oProperty->type = 3;
+
+						// Check if list exists
+						$oList = $oShop->Site->Lists->getByName($sPropertyName, FALSE);
+
+						// Create new List
+						if (is_null($oList))
+						{
+							$oList = Core_Entity::factory('List');
+							$oList->name = $sPropertyName;
+							$oList->list_dir_id = 0;
+							$oList->site_id = $oShop->site_id;
+							$oList->save();
+						}
+
+						$oProperty->list_id = $oList->id;
+					}
+					else
+					{
+						$oProperty->type = 1;
 					}
 
-					$oProperty->list_id = $oList->id;
+					$oProperty->tag_name = Core_Str::transliteration($oProperty->name);
+
+					// Для вновь создаваемого допсвойства размеры берем из магазина
+					$oProperty->image_large_max_width = $oShop->image_large_max_width;
+					$oProperty->image_large_max_height = $oShop->image_large_max_height;
+					$oProperty->image_small_max_width = $oShop->image_small_max_width;
+					$oProperty->image_small_max_height = $oShop->image_small_max_height;
+
+					$oShop_Item_Property_List->add($oProperty);
+				}
+
+				$this->_cacheProperty[$sPropertyGUID] = $oProperty;
+
+				foreach ($this->xpath($oItemProperty, 'ВариантыЗначений/Справочник') as $oValue)
+				{
+					$listValue = strval($oValue->Значение);
+					$this->_aPropertyValues[strval($oValue->ИдЗначения)] = $listValue;
+
+					if ($oProperty->type == 3 && $oProperty->list_id && Core::moduleIsActive('list'))
+					{
+						$oList_Item = $oProperty->List->List_Items->getByValue($listValue, FALSE);
+
+						if (is_null($oList_Item))
+						{
+							$oList_Item = Core_Entity::factory('List_Item');
+							$oList_Item->value = $listValue;
+							$oList_Item->list_id = $oProperty->list_id;
+							$oList_Item->save();
+						}
+					}
+				}
+
+				if (in_array(mb_strtoupper($sPropertyName), $this->_aPredefinedBaseProperties))
+				{
+					// Основное свойство товара
+					$this->_aBaseProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
 				}
 				else
 				{
-					$oProperty->type = 1;
+					$this->aAdditionalProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
 				}
-
-				$oProperty->tag_name = Core_Str::transliteration($oProperty->name);
-
-				// Для вновь создаваемого допсвойства размеры берем из магазина
-				$oProperty->image_large_max_width = $oShop->image_large_max_width;
-				$oProperty->image_large_max_height = $oShop->image_large_max_height;
-				$oProperty->image_small_max_width = $oShop->image_small_max_width;
-				$oProperty->image_small_max_height = $oShop->image_small_max_height;
-
-				$oShop_Item_Property_List->add($oProperty);
-			}
-
-			$this->_cacheProperty[$sPropertyGUID] = $oProperty;
-
-			foreach ($this->xpath($oItemProperty, 'ВариантыЗначений/Справочник') as $oValue)
-			{
-				$listValue = strval($oValue->Значение);
-				$this->_aPropertyValues[strval($oValue->ИдЗначения)] = $listValue;
-
-				if ($oProperty->type == 3 && $oProperty->list_id && Core::moduleIsActive('list'))
-				{
-					$oList_Item = $oProperty->List->List_Items->getByValue($listValue, FALSE);
-
-					if (is_null($oList_Item))
-					{
-						$oList_Item = Core_Entity::factory('List_Item');
-						$oList_Item->value = $listValue;
-						$oList_Item->list_id = $oProperty->list_id;
-						$oList_Item->save();
-					}
-				}
-			}
-
-			if (in_array(mb_strtoupper($sPropertyName), $this->_aPredefinedBaseProperties))
-			{
-				// Основное свойство товара
-				$this->_aBaseProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
-			}
-			else
-			{
-				$this->aAdditionalProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
 			}
 		}
 

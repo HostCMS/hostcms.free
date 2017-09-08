@@ -1,8 +1,9 @@
 <?php
+
 /**
  * Доставка PickPoint
  */
-class Shop_Delivery_Handler19 extends Shop_Delivery_Handler
+class Shop_Delivery_Handler6 extends Shop_Delivery_Handler
 {
 	/* Логин в системе PickPoint */
 	protected $_login = 'apitest';

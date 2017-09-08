@@ -168,57 +168,57 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			// 0-вая строка - заголовок CSV-файла
 			$this->_aCurrentData[$this->_iCurrentDataPosition] = array(
 				// 9 cells
-				'"Название раздела"',
-				'"CML GROUP ID идентификатор группы товаров"',
-				'"CML GROUP ID идентификатор родительской группы товаров"',
-				'"Заголовок раздела(title)"',
-				'"Описание раздела(description)"',
-				'"Ключевые слова раздела(keywords)"',
-				'"Описание раздела"',
-				'"Путь для раздела"',
-				'"Порядок сортировки раздела"',
+				'"' . Core::_('Shop_Item_Export.category_name') . '"',
+				'"' . Core::_('Shop_Item_Export.category_cml_id') . '"',
+				'"' . Core::_('Shop_Item_Export.category_parent_cml_id') . '"',
+				'"' . Core::_('Shop_Item_Export.category_meta_title') . '"',
+				'"' . Core::_('Shop_Item_Export.category_meta_description') . '"',
+				'"' . Core::_('Shop_Item_Export.category_meta_keywords') . '"',
+				'"' . Core::_('Shop_Item_Export.category_description') . '"',
+				'"' . Core::_('Shop_Item_Export.category_path') . '"',
+				'"' . Core::_('Shop_Item_Export.category_sorting') . '"',
 				// 36
-				'"CML ID идентификатор товара"',
-				'"Идентификатор товара"',
-				'"Артикул товара"',
-				'"Артикул родительского товара"',
-				'"Название товара"',
-				'"Описание товара"',
-				'"Текст для товара"',
-				'"Вес товара"',
-				'"Длина"',
-				'"Ширина"',
-				'"Высота"',
-				'"Тип товара"',
-				'"Метки"',
-				'"Цена товара"',
-				'"Активность товара"',
-				'"Порядок сортировки товара"',
-				'"Путь к товару"',
-				'"Идентификатор налога для товара"',
-				'"Идентификатор валюты"',
-				'"Название продавца"',
-				'"Название производителя"',
-				'"Название единицы измерения"',
-				'"Заголовок (title)"',
-				'"Значение мета-тега description для страницы с товаром"',
-				'"Значение мета-тега keywords для страницы с товаром"',
-				'"Флаг индексации"',
-				'"Флаг ""Экспортировать в Яндекс.Маркет"""',
-				'"Яндекс.Маркет основная расценка"',
-				'"Яндекс.Маркет расценка для карточек моделей"',
-				'"Дата"',
-				'"Дата публикации"',
-				'"Дата завершения публикации"',
-				'"Файл изображения для товара"',
-				'"Файл малого изображения для товара"',
-				'"Ярлыки"',
-				'"Идентификатор пользователя сайта"',
+				'"' . Core::_('Shop_Item_Export.item_cml_id') . '"',
+				'"' . Core::_('Shop_Item_Export.item_id') . '"',
+				'"' . Core::_('Shop_Item_Export.item_marking') . '"',
+				'"' . Core::_('Shop_Item_Export.item_parent_marking') . '"',
+				'"' . Core::_('Shop_Item_Export.item_name') . '"',
+				'"' . Core::_('Shop_Item_Export.item_description') . '"',
+				'"' . Core::_('Shop_Item_Export.item_text') . '"',
+				'"' . Core::_('Shop_Item_Export.item_weight') . '"',
+				'"' . Core::_('Shop_Item_Export.item_length') . '"',
+				'"' . Core::_('Shop_Item_Export.item_width') . '"',
+				'"' . Core::_('Shop_Item_Export.item_height') . '"',
+				'"' . Core::_('Shop_Item_Export.item_type') . '"',
+				'"' . Core::_('Shop_Item_Export.item_tags') . '"',
+				'"' . Core::_('Shop_Item_Export.item_price') . '"',
+				'"' . Core::_('Shop_Item_Export.item_activity') . '"',
+				'"' . Core::_('Shop_Item_Export.item_sorting') . '"',
+				'"' . Core::_('Shop_Item_Export.item_path') . '"',
+				'"' . Core::_('Shop_Item_Export.item_tax_id') . '"',
+				'"' . Core::_('Shop_Item_Export.item_currency_id') . '"',
+				'"' . Core::_('Shop_Item_Export.item_seller_name') . '"',
+				'"' . Core::_('Shop_Item_Export.item_producer_name') . '"',
+				'"' . Core::_('Shop_Item_Export.item_measure_name') . '"',
+				'"' . Core::_('Shop_Item_Export.item_meta_title') . '"',
+				'"' . Core::_('Shop_Item_Export.item_meta_description') . '"',
+				'"' . Core::_('Shop_Item_Export.item_meta_keywords') . '"',
+				'"' . Core::_('Shop_Item_Export.item_indexing') . '"',
+				'"' . Core::_('Shop_Item_Export.item_yandex_market') . '"',
+				'"' . Core::_('Shop_Item_Export.item_yandex_market_bid') . '"',
+				'"' . Core::_('Shop_Item_Export.item_yandex_market_cid') . '"',
+				'"' . Core::_('Shop_Item_Export.item_date') . '"',
+				'"' . Core::_('Shop_Item_Export.item_start_date') . '"',
+				'"' . Core::_('Shop_Item_Export.item_end_date') . '"',
+				'"' . Core::_('Shop_Item_Export.item_large_image') . '"',
+				'"' . Core::_('Shop_Item_Export.item_small_image') . '"',
+				'"' . Core::_('Shop_Item_Export.item_shortcuts') . '"',
+				'"' . Core::_('Shop_Item_Export.item_siteuser_id') . '"',
 				// 4
-				'"Количество товара от"',
-				'"Количество товара до"',
-				'"Значение цены"',
-				'"Процент от цены"',
+				'"' . Core::_('Shop_Item_Export.quantity_from') . '"',
+				'"' . Core::_('Shop_Item_Export.quantity_to') . '"',
+				'"' . Core::_('Shop_Item_Export.price_value') . '"',
+				'"' . Core::_('Shop_Item_Export.price_percent') . '"',
 			);
 
 			// Добавляем в заголовок информацию о свойствах товара
@@ -229,7 +229,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oProperty->type == 2)
 				{
-					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_item.import_small_images') . $oProperty->name));
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images') . $oProperty->name));
 					$this->_iItem_Properties_Count++;
 				}
 			}
@@ -242,7 +242,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oGroup_Property->type == 2)
 				{
-					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_item.import_small_images') . $oGroup_Property->name));
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images') . $oGroup_Property->name));
 					$this->_iGroup_Properties_Count++;
 				}
 			}
@@ -779,37 +779,37 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		else
 		{
 			$this->_aCurrentRow = array(
-				'"GUID заказа"',
-				'"Номер заказа"',
-				'"Страна"',
-				'"Область"',
-				'"Город"',
-				'"Район"',
-				'"Имя заказчика"',
-				'"Фамилия заказчика"',
-				'"Отчество заказчика"',
-				'"E-mail заказчика"',
-				'"Акт"',
-				'"Счет-фактура"',
-				'"Название компании"',
-				'"ИНН"',
-				'"КПП"',
-				'"Телефон"',
-				'"Факс"',
-				'"Адрес"',
-				'"Статус заказа"',
-				'"Валюта заказа"',
-				'"Идентификатор платежной системы"',
-				'"Дата заказа"',
-				'"Статус оплаты заказа"',
-				'"Дата оплаты заказа"',
-				'"Описание заказа"',
-				'"Информация о заказе"',
-				'"Заказ отменен"',
-				'"Дата изменения статуса заказа"',
-				'"Информация о доставке"',
-				'"Артикул товара заказа"',
-				'"Название товара заказа"',
+				'"' . Core::_('Shop_Item_Export.order_guid') . '"',
+				'"' . Core::_('Shop_Item_Export.order_invoice') . '"',
+				'"' . Core::_('Shop_Item_Export.order_country') . '"',
+				'"' . Core::_('Shop_Item_Export.order_location') . '"',
+				'"' . Core::_('Shop_Item_Export.order_city') . '"',
+				'"' . Core::_('Shop_Item_Export.order_city_area') . '"',
+				'"' . Core::_('Shop_Item_Export.order_name') . '"',
+				'"' . Core::_('Shop_Item_Export.order_surname') . '"',
+				'"' . Core::_('Shop_Item_Export.order_patronymic') . '"',
+				'"' . Core::_('Shop_Item_Export.order_email') . '"',
+				'"' . Core::_('Shop_Item_Export.order_acceptance_report_form') . '"',
+				'"' . Core::_('Shop_Item_Export.order_acceptance_report_invoice') . '"',
+				'"' . Core::_('Shop_Item_Export.order_company_name') . '"',
+				'"' . Core::_('Shop_Item_Export.order_tin') . '"',
+				'"' . Core::_('Shop_Item_Export.order_phone') . '"',
+				'"' . Core::_('Shop_Item_Export.order_fax') . '"',
+				'"' . Core::_('Shop_Item_Export.order_address') . '"',
+				'"' . Core::_('Shop_Item_Export.order_status') . '"',
+				'"' . Core::_('Shop_Item_Export.order_currency') . '"',
+				'"' . Core::_('Shop_Item_Export.order_paymentsystem') . '"',
+				'"' . Core::_('Shop_Item_Export.order_delivery') . '"',
+				'"' . Core::_('Shop_Item_Export.order_date') . '"',
+				'"' . Core::_('Shop_Item_Export.order_paid') . '"',
+				'"' . Core::_('Shop_Item_Export.order_paid_date') . '"',
+				'"' . Core::_('Shop_Item_Export.order_description') . '"',
+				'"' . Core::_('Shop_Item_Export.order_info') . '"',
+				'"' . Core::_('Shop_Item_Export.order_canceled') . '"',
+				'"' . Core::_('Shop_Item_Export.order_status_date') . '"',
+				'"' . Core::_('Shop_Item_Export.order_delivery_info') . '"',
+				'"' . Core::_('Shop_Item_Export.order_item_marking') . '"',
+				'"' . Core::_('Shop_Item_Export.order_item_name') . '"',
 			);
 
 			Core_Event::notify(get_class($this) . '.onBeforeExportOrdersTitleProperties', $this, array($oShop));
@@ -831,10 +831,11 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			Core_Event::notify(get_class($this) . '.onAfterExportOrdersTitleProperties', $this, array($oShop));
 
 			$this->_aCurrentRow = array_merge($this->_aCurrentRow, array(
-				'"Количество товара заказа"',
-				'"Цена товара заказа"',
-				'"Налог на товар заказа"',
-				'"Тип товара"')
+				'"' . Core::_('Shop_Item_Export.order_item_quantity') . '"',
+				'"' . Core::_('Shop_Item_Export.order_item_price') . '"',
+				'"' . Core::_('Shop_Item_Export.order_item_tax') . '"',
+				'"' . Core::_('Shop_Item_Export.order_item_type') . '"'
+				)
 			);
 
 			$this->_printRow($this->_aCurrentRow);
@@ -886,13 +887,13 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 						sprintf('"%s"', $this->prepareString($oShop_Order->vat_invoice)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->company)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->tin)),
-						sprintf('"%s"', $this->prepareString($oShop_Order->kpp)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->phone)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->fax)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->address)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->Shop_Order_Status->name)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->Shop_Currency->name)),
-						sprintf('"%s"', $this->prepareString($oShop_Order->shop_payment_system_id)),
+						sprintf('"%s"', $this->prepareString($oShop_Order->Shop_Payment_System->name)),
+						sprintf('"%s"', $this->prepareString($oShop_Order->Shop_Delivery->name)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->datetime)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->paid)),
 						sprintf('"%s"', $this->prepareString($oShop_Order->payment_datetime)),

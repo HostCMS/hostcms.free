@@ -689,7 +689,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$this->_aInformationsystem_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
-		echo $content = parent::get();
+		echo $content = $this->get();
 
 		$bCache && $oCore_Cache->set(
 			$cacheKey,

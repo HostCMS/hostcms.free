@@ -146,11 +146,29 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
+	 * Get external XML tags for entity.
+	 * @return array
+	 */
+	public function getXmlTags()
+	{
+		return $this->_xmlTags;
+	}
+
+	/**
 	 * Children entities
 	 *
 	 * @var array
 	 */
 	protected $_childrenEntities = array();
+
+	/**
+	 * Get children entities
+	 * @return array
+	 */
+	public function getEntities()
+	{
+		return $this->_childrenEntities;
+	}
 
 	/**
 	 * Clear enities

@@ -84,23 +84,49 @@ class Benchmark_Controller
 	}
 
 	/*
-	 * Clears/creates test table
+	 * Clears test table
 	 * @return self
 	 */
 	public function clearTable()
 	{
 		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
 
+		$this->_database->query("TRUNCATE TABLE {$sTableName}");
+
+		return $this;
+	}
+
+	/*
+	 * Creates test table
+	 * @return self
+	 */
+	public function createTable()
+	{
+		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
+
 		$this->_database->query("DROP TABLE IF EXISTS {$sTableName}");
 
+		$aConfig = $this->_database->getConfig();
+		
 		$this->_database->query(
 			"CREATE TABLE IF NOT EXISTS {$sTableName} (
 			`id` int(11) NOT NULL auto_increment,
 			`value` varchar(255) NOT NULL,
 			PRIMARY KEY (`id`)
-		) ENGINE=MyISAM DEFAULT CHARSET=utf8");
+		) ENGINE={$aConfig['storageEngine']} DEFAULT CHARSET=utf8");
 
-		$this->_database->query("TRUNCATE TABLE {$sTableName}");
+		return $this;
+	}
+
+	/*
+	 * Drop test table
+	 * @return self
+	 */
+	public function dropTable()
+	{
+		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
+
+		$this->_database->query("DROP TABLE IF EXISTS {$sTableName}");
 
 		return $this;
 	}

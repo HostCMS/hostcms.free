@@ -80,11 +80,7 @@ return array(
 	'table_all_to_pay' => "Total to Pay:",
 	'order_card_system_of_pay' => "Payment system",
 	'order_card_status_of_pay' => "Order has been paid",
-	'order_card_status_of_pay_yes' => "Yes",
-	'order_card_status_of_pay_no' => "No",
 	'order_card_cancel' => "Order canceled",
-	'order_card_cancel_yes' => "Yes",
-	'order_card_cancel_no' => "No",
 	'order_card_order_status' => "Order status",
 	'order_card_type_of_delivery' => "Delivery type",
 	'order_card_description' => "Order description",
@@ -137,4 +133,5 @@ return array(
 	'send_mail' => "Send order e-mail",
 	'most_ordered' => "Popular shop items (items)",
 	'popular_brands' => "Popular brands (items)",
+	'popover_title' => "Order # %s",
 );

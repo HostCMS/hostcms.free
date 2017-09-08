@@ -31,16 +31,16 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 	public $_rub_currency_id = 1;
 
 	/* Номер счета в платежной системе PayAnyWay */
-	private $_MNT_ID = '99999999';
+	private $_MNT_ID = '11493408';
 
 	/* Код проверки целостности данных */
-	private $_MNT_DATAINTEGRITY_CODE = 'xxxxx';
+	private $_MNT_DATAINTEGRITY_CODE = '12345';
 
 	/* URL сервера оплаты */
 	private $_MNT_PAYMENT_URL = 'www.payanyway.ru';
 
 	/* Тестовый режим, 0 - обычный, 1 - тестовый */
-	private $_MNT_TEST_MODE = '1';
+	private $_MNT_TEST_MODE = '0';
 
 	/**
 	 * Метод, вызываемый в коде настроек ТДС через Shop_Payment_System_Handler::checkBeforeContent($oShop);
@@ -62,28 +62,6 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 					->paymentProcessing();
 			}
 			exit();
-		}
-	}
-
-	/**
-	 * Метод, вызываемый в коде ТДС через Shop_Payment_System_Handler::checkAfterContent($oShop);
-	 */
-	public function checkPaymentAfterContent()
-	{
-		if (isset($_REQUEST['MNT_TRANSACTION_ID']))
-		{
-			// Получаем ID заказа
-			$order_id = intval(Core_Array::getRequest('MNT_TRANSACTION_ID'));
-
-			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
-			if (!is_null($oShop_Order->id))
-			{
-				// Вызов обработчика платежной системы
-				Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-					->shopOrder($oShop_Order)
-					->paymentProcessing();
-			}
 		}
 	}
 
@@ -116,12 +94,12 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 	public function getSumWithCoeff()
 	{
 		return Shop_Controller::instance()->round(($this->_rub_currency_id > 0
-				&& $this->_shopOrder->shop_currency_id > 0
-			? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-				$this->_shopOrder->Shop_Currency,
-				Core_Entity::factory('Shop_Currency', $this->_rub_currency_id)
-			)
-			: 0) * $this->_shopOrder->getAmount() );
+			&& $this->_shopOrder->shop_currency_id > 0
+				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+					$this->_shopOrder->Shop_Currency,
+					Core_Entity::factory('Shop_Currency', $this->_rub_currency_id)
+				)
+				: 0) * $this->_shopOrder->getAmount() );
 	}
 
 	protected function _processOrder()
@@ -157,7 +135,7 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 			if (Core_Array::getRequest('MNT_SIGNATURE') == $signature)
 			{
 				$Sum = number_format($this->getSumWithCoeff(), 2, '.', '');
-				if ($Sum == $_REQUEST['MNT_AMOUNT'])
+				if ($Sum == Core_Array::getRequest('MNT_AMOUNT'))
 				{
 					$this->shopOrder($oShop_Order)->shopOrderBeforeAction(clone $oShop_Order);
 
@@ -170,7 +148,73 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 					$this->changedOrder('changeStatusPaid');
 					ob_get_clean();
 
-					die("SUCCESS");
+					// данные для кассы
+					$kassa_inventory = null;
+					$kassa_customer = null;
+					$kassa_delivery = null;
+
+					$kassa_customer = $oShop_Order->email;
+					$inventory = array();
+					$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll();
+					if(count($aShopOrderItems))
+					{
+						foreach ($aShopOrderItems as $key => $oShopOrderItem)
+						{
+							$sItemAmount = $oShopOrderItem->getAmount();
+							$inventory[] = array("name" => str_replace('&quot;', "'", htmlspecialchars($oShopOrderItem->name)), "price" => floatval(number_format($sItemAmount, 2, '.', '')), "quantity" => $oShopOrderItem->quantity, "vatTag" => 1105);
+						}
+						$kassa_inventory = json_encode($inventory);
+					}
+
+					// сформировать xml ответ
+					if (is_array($inventory) && count($inventory) && $kassa_inventory) {
+						header("Content-type: application/xml");
+						$resultCode = 200;
+						$signature = md5($resultCode . Core_Array::getRequest('MNT_ID') . Core_Array::getRequest('MNT_TRANSACTION_ID') . $this->_MNT_DATAINTEGRITY_CODE);
+						$result = '<?xml version="1.0" encoding="UTF-8" ?>';
+						$result .= '<MNT_RESPONSE>';
+						$result .= '<MNT_ID>' . Core_Array::getRequest('MNT_ID') . '</MNT_ID>';
+						$result .= '<MNT_TRANSACTION_ID>' . Core_Array::getRequest('MNT_TRANSACTION_ID') . '</MNT_TRANSACTION_ID>';
+						$result .= '<MNT_RESULT_CODE>' . $resultCode . '</MNT_RESULT_CODE>';
+						$result .= '<MNT_SIGNATURE>' . $signature . '</MNT_SIGNATURE>';
+
+						if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
+							$result .= '<MNT_ATTRIBUTES>';
+						}
+
+						if ($kassa_inventory) {
+							$result .= '<ATTRIBUTE>';
+							$result .= '<KEY>INVENTORY</KEY>';
+							$result .= '<VALUE>' . $kassa_inventory . '</VALUE>';
+							$result .= '</ATTRIBUTE>';
+						}
+
+						if ($kassa_customer) {
+							$result .= '<ATTRIBUTE>';
+							$result .= '<KEY>CUSTOMER</KEY>';
+							$result .= '<VALUE>' . $kassa_customer . '</VALUE>';
+							$result .= '</ATTRIBUTE>';
+						}
+
+						if ($kassa_delivery) {
+							$result .= '<ATTRIBUTE>';
+							$result .= '<KEY>DELIVERY</KEY>';
+							$result .= '<VALUE>' . $kassa_delivery . '</VALUE>';
+							$result .= '</ATTRIBUTE>';
+						}
+
+						if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
+							$result .= '</MNT_ATTRIBUTES>';
+						}
+
+						$result .= '</MNT_RESPONSE>';
+					}
+					else {
+						$result = "SUCCESS";
+					}
+
+					die($result);
+
 				}
 				else
 				{
@@ -206,40 +250,63 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 		<?php
 	}
 
+	private function cleanProductName($value)
+	{
+		$result = preg_replace('/[^0-9a-zA-Zа-яА-Я ]/ui', '', htmlspecialchars_decode($value));
+		$result = trim(mb_substr($result, 0, 12));
+		return $result;
+	}
+
 	/* печатает форму отправки запроса на сайт платёжной системы */
 	public function getNotification()
 	{
 		$Sum = number_format($this->getSumWithCoeff(), 2, '.', '');
 		$Signature = md5("{$this->_MNT_ID}{$this->_shopOrder->id}{$Sum}{$this->_shopOrder->Shop_Currency->code}{$this->_MNT_TEST_MODE}{$this->_MNT_DATAINTEGRITY_CODE}");
+
+		$clientEmail = $this->_shopOrder->email;
+		$inventory = array();
+		$aShopOrderItems = $this->_shopOrder->Shop_Order_Items->findAll();
+		if(count($aShopOrderItems))
+		{
+			foreach ($aShopOrderItems as $key => $oShopOrderItem)
+			{
+				$sItemAmount = $oShopOrderItem->getAmount();
+				$inventory[] = array("n" => $this->cleanProductName($oShopOrderItem->name), "p" => floatval(number_format($sItemAmount, 2, '.', '')), "q" => $oShopOrderItem->quantity, "t" => 1105);
+			}
+		}
+
+		$data = array("customer" => $clientEmail, "items" => $inventory);
+
+		$jsonData = preg_replace_callback('/\\\\u(\w{4})/', function ($matches) {
+			return html_entity_decode('&#x' . $matches[1] . ';', ENT_COMPAT, 'UTF-8');
+		}, json_encode($data));
+
 		?>
 		<h2>Оплата через систему PayAnyWay</h2>
+		<form method="POST" action="https://<?php echo $this->_MNT_PAYMENT_URL; ?>/assistant.htm">
+			<input type="hidden" name="MNT_ID" value='<?php echo $this->_MNT_ID; ?>'>
+			<input type="hidden" name="MNT_TRANSACTION_ID" value='<?php echo $this->_shopOrder->id; ?>'>
+			<input type="hidden" name="MNT_CURRENCY_CODE" value='<?php echo $this->_shopOrder->Shop_Currency->code; ?>'>
+			<input type="hidden" name="MNT_AMOUNT" value='<?php echo $Sum; ?>'>
+			<input type="hidden" name="MNT_TEST_MODE" value='<?php echo $this->_MNT_TEST_MODE; ?>'>
+			<input type="hidden" name="MNT_SIGNATURE" value='<?php echo $Signature; ?>'>
+			<input type="hidden" name="MNT_CUSTOM1" value='<?php if (count($inventory) <= 10) echo '1'; ?>'>
+			<input type="hidden" name="MNT_CUSTOM2" value='<?php if (count($inventory) <= 10) echo $jsonData; ?>'>
 
-		<form method="POST" action="https://<?php echo $this->_MNT_PAYMENT_URL?>/assistant.htm">
-		<input type="hidden" name="MNT_ID" value="<?php echo $this->_MNT_ID?>">
-		<input type="hidden" name="MNT_TRANSACTION_ID" value="<?php echo $this->_shopOrder->id?>">
-		<input type="hidden" name="MNT_CURRENCY_CODE" value="<?php echo $this->_shopOrder->Shop_Currency->code?>">
-		<input type="hidden" name="MNT_TEST_MODE" value="<?php echo $this->_MNT_TEST_MODE?>">
-		<input type="hidden" name="MNT_SIGNATURE" value="<?php echo $Signature?>">
+			<table border = "1" cellspacing = "0" width = "400" bgcolor = "#FFFFFF" align = "center" bordercolor = "#000000">
+				<tr>
+					<td>Сумма, руб.</td>
+					<td><?php echo $Sum; ?></td>
+				</tr>
+				<tr>
+					<td>Номер заказа</td>
+					<td><?php echo $this->_shopOrder->invoice; ?></td>
+				</tr>
+			</table>
 
-		<table border = "1" cellspacing = "0" width = "400" bgcolor = "#FFFFFF" align = "center" bordercolor = "#000000">
-			<tr>
-				<td>Сумма, руб.</td>
-				<td> <input type="text" name="MNT_AMOUNT" value="<?php echo $Sum?>" readonly="readonly"> </td>
-			</tr>
-			<tr>
-				<td>Номер заказа</td>
-				<td> <input type="text" name="AccountNumber" value="<?php echo $this->_shopOrder->invoice?>" readonly="readonly"> </td>
-			</tr>
-		</table>
-
-		<table border="0" cellspacing="1" align="center" width="400" bgcolor="#CCCCCC" >
-			<tr bgcolor="#FFFFFF">
-				<td width="490"></td>
-				<td width="48"><input type="submit" name = "BuyButton" value = "Submit"></td>
-			</tr>
-		</table>
+			<input type="submit" name = "BuyButton" value = "Оплатить"></td>
 		</form>
-	<?php
+		<?php
 	}
 
 	public function getInvoice()

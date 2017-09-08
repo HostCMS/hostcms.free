@@ -1,7 +1,8 @@
 <?php
-/*
-	СДЭК http://www.edostavka.ru/clients/integrator.html
-*/
+
+/**
+ * СДЭК http://www.edostavka.ru/clients/integrator.html
+ */
 class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 {
 	// Login (для индивидуальных тарифов)
@@ -16,6 +17,9 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 	// весовой коэффициент (расчет ведется в килограммах)
 	// По умолчанию вес в системе указан в граммах. При указани в килограммах - измените коэффициент на 1
 	private $_coefficient = 0.001;
+	
+	// Объем по умолчанию (в куб.м)	
+	private $_defaultVolume = 0.001;
 
 	// Дата планируемой отправки
 	private $_dateExecute;
@@ -65,7 +69,11 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 		86 => 'Блиц-экспресс 21',
 		87 => 'Блиц-экспресс 22',
 		88 => 'Блиц-экспресс 23',
-		89 => 'Блиц-экспресс 24'
+		89 => 'Блиц-экспресс 24',
+		136=>'Посылка склад-склад',
+		137=>'Посылка склад-дверь',
+		138=>'Посылка дверь-склад',
+		139=>'Посылка дверь-дверь'
 	);
 
 	public function __construct() {
@@ -119,7 +127,7 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 						'goods' => array(
 							0 => array(
 								'weight' => $fOrderWeight,
-								'volume' => ($this->_volume ? $this->_volume * pow(10, -9) : 1)
+								'volume' => ($this->_volume ? $this->_volume * pow(10, -9) : $this->_defaultVolume)
 							)
 						)
 					);
@@ -127,11 +135,9 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 					// Авторизация для индивидуальных тарифов
 					if ($this->_authLogin && $this->_secure)
 					{
-						$data[] = array(
-							'dateExecute' => $this->_dateExecute,
-							'authLogin' => $this->_authLogin,
-							'secure' => md5($this->_dateExecute . '&' . $this->_secure),
-						);
+						$data['dateExecute'] = $this->_dateExecute;
+						$data['authLogin'] = $this->_authLogin;
+						$data['secure'] = md5($this->_dateExecute . '&' . $this->_secure);
 					}
 
 					// Отправляем запрос к СДЭК

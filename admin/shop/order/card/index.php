@@ -460,11 +460,11 @@ else
 			<?php
 			if ($oShop_Order->paid)
 			{
-				echo "<b>" . Core::_("Shop_Order.order_card_status_of_pay_yes") . "</b>";
+				echo "<b>" . Core::_("Admin_Form.yes") . "</b>";
 			}
 			else
 			{
-				echo Core::_("Shop_Order.order_card_status_of_pay_no");
+				echo Core::_("Admin_Form.no");
 			}
 			?>
 		</td>
@@ -477,11 +477,11 @@ else
 			<?php
 			if ($oShop_Order->canceled)
 			{
-				echo "<b>" . Core::_("Shop_Order.order_card_cancel_yes") . "</b>";
+				echo "<b>" . Core::_("Admin_Form.yes") . "</b>";
 			}
 			else
 			{
-				echo Core::_("Shop_Order.order_card_cancel_no");
+				echo Core::_("Admin_Form.no");
 			}
 
 			?>

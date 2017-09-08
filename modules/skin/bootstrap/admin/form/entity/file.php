@@ -138,11 +138,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		$this->smallImage += $aTypicalSmallParams;
 
 		// ----------
-
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oLarge_Core_Html_Entity_Div = new Core_Html_Entity_Div();
-
 
 		// Установим атрибуты div'a.
 		if (is_array($this->divAttr))
@@ -205,7 +203,6 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		if ($this->largeImage['path'] != '' || $this->largeImage['show_params'])
 		{
 			// Картинка с контролем большого изображения
-
 			if ($this->largeImage['path'] != '')
 			{
 				//$oLargeControl_Div->add(
@@ -478,7 +475,6 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						)
 			);
 		}
-
 		// -- Малое изображение
 
 		// Отображать поле загрузки малого изображения

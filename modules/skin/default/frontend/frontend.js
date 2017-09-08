@@ -108,12 +108,14 @@
 								setTimeout(function(){
 									jEditInPlace.tinymce({
 										theme: "modern",
+										language: backendLng,
+										language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
 										init_instance_callback: function (editor) {
 											editor.on('blur', function (e) {
 												settings.blur(jEditInPlace);
 											});
 										},
-										language: "ru", docs_language: "ru", script_url: "/admin/wysiwyg/tinymce.min.js"});
+										script_url: "/admin/wysiwyg/tinymce.min.js"});
 								}, 300);
 							}
 

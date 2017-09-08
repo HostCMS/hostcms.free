@@ -12,8 +12,8 @@ Shop_Delivery_Handler::checkAfterContent($oShop);
 // Вывод информации о статусе платежа после его совершения и перенаправления с платежной системы
 // ------------------------------------------------
 if (isset($_REQUEST['payment'])
-		|| isset($_GET['action']) && ($_GET['action'] == 'PaymentSuccess' || $_GET['action'] == 'PaymentFail')
-		|| isset($_REQUEST['pg_order_id'])
+	|| isset($_GET['action']) && ($_GET['action'] == 'PaymentSuccess' || $_GET['action'] == 'PaymentFail')
+	|| isset($_REQUEST['pg_order_id'])
 )
 {
 	// Получаем ID заказа
