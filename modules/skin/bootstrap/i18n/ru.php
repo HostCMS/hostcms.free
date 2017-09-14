@@ -14,7 +14,7 @@ return array(
 	'admin_menu_services' => 'Сервисы',
 	'admin_menu_tools' => 'Инструменты',
 	'admin_menu_seo' => 'Продвижение',
-	'admin_menu_users' => 'Пользователи',
+	'admin_menu_crm' => 'CRM',
 	'admin_menu_clouds' => 'Облака',
 	'admin_menu_market' => 'Магазин приложений',
 	'admin_menu_system' => 'Система',

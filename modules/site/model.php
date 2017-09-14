@@ -83,7 +83,9 @@ class Site_Model extends Core_Entity
 		'template_dir' => array(),
 		'user_module' => array(),
 		'user_group' => array(),
-		'user_group_action_access' => array(),
+		'company_department_action_access' => array(),
+		'company_site' => array(),
+		'company' => array('through' => 'company_site')
 	);
 
 	/**
@@ -292,7 +294,7 @@ class Site_Model extends Core_Entity
 		$this->Template_Dirs->deleteAll(FALSE);
 
 		$this->User_Groups->deleteAll(FALSE);
-		$this->User_Group_Action_Accesses->deleteAll(FALSE);
+		$this->Company_Department_Action_Accesses->deleteAll(FALSE);
 		$this->User_Modules->deleteAll(FALSE);
 
 		// Удаление доп. св-в структуры сайта

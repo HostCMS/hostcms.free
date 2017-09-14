@@ -60,4 +60,6 @@ return array(
 	'chat_count_new_message' => 'New messages: ',
 	'new_message_from' => 'New message from %s %s',	
 	'backend-field-caption' => 'Backend User',
+	
+	'root_dir' => '<acronym title="Root folder which restricts user access">Root folder for user</acronym>',
 );

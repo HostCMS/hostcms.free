@@ -59,8 +59,8 @@ class Benchmark_Controller
 		self::getConfig();
 
 		$this->_database = Core_Database::instance();
+
 		$this->_temporary_directory = CMS_FOLDER . TMP_DIR;
-		$this->clearTable();
 	}
 
 	public static function getConfig()
@@ -107,7 +107,7 @@ class Benchmark_Controller
 		$this->_database->query("DROP TABLE IF EXISTS {$sTableName}");
 
 		$aConfig = $this->_database->getConfig();
-		
+
 		$this->_database->query(
 			"CREATE TABLE IF NOT EXISTS {$sTableName} (
 			`id` int(11) NOT NULL auto_increment,

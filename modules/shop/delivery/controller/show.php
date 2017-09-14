@@ -107,12 +107,12 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 								->name('description')
 								->value($object->description)
 						);
-						
+
 					// Replace $oShop_Delivery_Condition
 					$aShop_Delivery_Conditions[$key] = $oShop_Delivery_Condition;
 				}
 			}
-			
+
 			if (count($aShop_Delivery_Conditions))
 			{
 				foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
@@ -139,6 +139,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 
 	public function getShopDeliveryConditions(Shop_Delivery_Model $oShop_Delivery)
 	{
+		$aShop_Delivery_Conditions = array();
+
 		if ($oShop_Delivery->type == 0)
 		{
 			$oShop_Delivery_Condition_Controller = new Shop_Delivery_Condition_Controller();
@@ -150,15 +152,14 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				->totalWeight($this->totalWeight)
 				->totalAmount($this->totalAmount);
 
+			$oShop_Delivery_Condition = $oShop_Delivery_Condition_Controller->getShopDeliveryCondition($oShop_Delivery);
+
 			// Условие доставки, подходящее под ограничения
-			$aShop_Delivery_Conditions = array(
-				$oShop_Delivery_Condition_Controller->getShopDeliveryCondition($oShop_Delivery)
-			);
+			!is_null($oShop_Delivery_Condition)
+				&& $aShop_Delivery_Conditions[] = $oShop_Delivery_Condition;
 		}
 		else
 		{
-			$aShop_Delivery_Conditions = array();
-
 			try
 			{
 				$aPrice = Shop_Delivery_Handler::factory($oShop_Delivery)
@@ -202,10 +203,10 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				$aShop_Delivery_Conditions = array();
 			}
 		}
-		
+
 		return $aShop_Delivery_Conditions;
 	}
-	
+
 	/**
 	 * Calculate total amount and weight
 	 * @return self

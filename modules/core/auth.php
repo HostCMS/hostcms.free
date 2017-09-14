@@ -350,8 +350,9 @@ class Core_Auth
 
 						$oSites->queryBuilder()
 							->select('sites.*')
-							->join('user_modules', 'user_modules.site_id', '=', 'sites.id')
-							->where('user_modules.user_group_id', '=', $oUser->user_group_id)
+							->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
+							->join('company_department_post_users', 'company_department_modules.company_department_id', '=', 'company_department_post_users.company_department_id')
+							->where('company_department_post_users.user_id', '=', $oUser->id)
 							->groupBy('sites.id')
 							->limit(1);
 

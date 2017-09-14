@@ -2365,6 +2365,21 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->type == 3 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-purple white')
+			->style('padding-left: 1px;')
+			->value('<i class="fa fa-archive fa-fw"></i>')
+			->execute();
+	}
+
+	/**
 	 * Backup revision
 	 * @return self
 	 */

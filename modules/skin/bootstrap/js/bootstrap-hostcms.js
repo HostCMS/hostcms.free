@@ -1808,6 +1808,392 @@
 			$('.navbar-account #notificationsListBox .footer #notification-search').hide();
 			$('.navbar-account #notificationsListBox .footer .glyphicon-search').hide();
 		},
+		eventsWidgetPrepare: function (){
+
+			var sSlimscrollBarWidth = '5px';
+
+			$('#eventsAdminPage')
+				.on({
+						'click': function (){ // Виджит развернут на весь экран
+
+							$('#eventsAdminPage .tasks-list-container').css({'max-height': 'none'});
+
+							$('#eventsAdminPage .tasks-list').slimscroll({destroy: true})
+							$('#eventsAdminPage .tasks-list').slimscroll({
+								height: $('#eventsAdminPage .widget-body').height(),
+								color: 'rgba(0,0,0,0.3)',
+								size: '5px'
+							});
+						}
+
+					}, '[data-toggle = "maximize"] i.fa-expand'
+				)
+				.on({
+						'click': function (){ // Виджет развернут на весь экран
+
+							$('#eventsAdminPage .tasks-list-container').css({'max-height': '500px'});
+
+
+							$('#eventsAdminPage .tasks-list').slimscroll({destroy: true})
+							$('#eventsAdminPage .tasks-list').slimscroll({
+									//height: '600px',
+									height: 'auto',
+									color: 'rgba(0,0,0,0.3)',
+									size: '5px'
+								});
+						}
+
+					}, '[data-toggle = "maximize"] i.fa-compress'
+				)
+				.on(
+					{
+						'mouseenter': function (){ // Наведение крсора мыши на полосу прокрутки дел
+							$(this).css('width', (parseInt(sSlimscrollBarWidth) + 3) + 'px')
+						},
+						'mouseleave': function (){ // Уход крсора мыши с полосы прокрутки дел
+							$(this).css('width', sSlimscrollBarWidth)
+						}
+					}, '.slimScrollBar'
+				)
+				.on(
+					{
+						'keyup': function (event){ // Фильтрация дел
+
+							var jInputSearch = $(this),
+								jEvents = jInputSearch.parents('.task-container').find('.tasks-list .task-item');
+
+							// Нажали Esc
+							if (event.keyCode == 27)
+							{
+								jInputSearch.val('');
+							}
+
+							if (jEvents.length)
+							{
+								var searchString = jInputSearch.val().toLocaleLowerCase();
+
+								jEvents.show();
+
+								if (searchString.length)
+								{
+									jEvents.each(function(){
+
+										var sourceText = $(this).find('.task-body').text().toLocaleLowerCase();
+
+										!~sourceText.indexOf(searchString) && $(this).hide();
+									});
+								}
+							}
+
+							if (!$('#eventsAdminPage .tasks-list-container').find('.slimScrollDiv').length)
+							{
+								jInputSearch.parents('.task-container').find('.tasks-list').slimscroll({
+									//height: '500px',
+									height: 'auto',
+									color: 'rgba(0,0,0,0.3)',
+									size: '5px'
+								});
+							}
+						}
+					}, '.search-event input'
+				)
+				.on(
+					{
+						'click': function (){ // Отметить выполненным
+
+							var jEventItem = $(this).find('i').toggleClass('fa-square-o fa-check-square-o').parents('.task-item');
+
+							jEventItem
+								.css({'width': '100%'})
+								.animate(
+									{
+										'margin-left': '-100%'
+									},
+									{
+										duration: 700,
+										specialEasing:
+										{
+										  //opacity: 'linear',
+										  'margin-left': 'swing'
+										},
+										complete: function (){
+
+											var jEventsList = $('#eventsAdminPage .tasks-list');
+												//jEventsListContainer = $('#eventsAdminPage  .tasks-list-container'),
+												//iMaxHeightEventsListContainer = parseInt(jEventsListContainer.css('max-height'));
+
+											// Отмечаем дело как выполненное
+											$(this).addClass('mark-completed');
+
+											//jEventsList.slimscroll({update: true});
+
+											// Нет незавершенных дел
+											// !jEventsList.find('.task-item[id != 0]:not(.mark-completed)').length && jEventsList.find('.task-item[id = 0]').toggleClass('hidden');
+
+											// Сохраняем новое положение ползунка после удаления дела из списка
+											//$('#eventsAdminPage').data({'topPositionSlimScrolBar': jEventsListContainer.find('.slimScrollBar').css('top')});
+
+											// Есть полоса прокрутки и высота списка дел меньше максимальной высоты для списка
+
+											/*
+											if (jEventsListContainer.find('.slimScrollDiv').length
+												&& iMaxHeightEventsListContainer >= jEventsList.get(0).scrollHeight)
+											{
+												jEventsList
+													.slimscroll({destroy: true})
+													.prop('style', '');
+											}*/
+
+
+											var ajaxData = $.getData({});
+
+											ajaxData['eventId'] = jEventItem.prop('id');
+
+											$.ajax({
+												//context: textarea,
+												url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=1',
+												type: 'POST',
+												data: ajaxData,
+												dataType: 'json',
+												success: function (resultData){
+
+													if (resultData['eventId'])
+													{
+														// Удаляем дело из списка
+														$('#eventsAdminPage .task-item[id = ' + resultData['eventId'] + ']').remove();
+
+														// Запоминаем положение полосы прокрутки в виджете дел
+														//$('#eventsAdminPage').data('slimScrollBarTop', jEventsList.scrollTop() + 'px');
+
+														// Обновляем список дел
+														$('#eventsAdminPage [data-toggle="upload"]').click();
+
+														// Нет незавершенных дел
+														!jEventsList.find('.task-item[id != 0]:not(.mark-completed)').length && jEventsList.find('.task-item[id = 0]').toggleClass('hidden');
+													}
+												}
+											});
+										}
+									}
+								);
+						}
+				}, '.task-check'
+			)
+			.on(
+				{
+					'click': function (event){ // Обновление списка дел
+
+						var jEventsAdminPage = $(this).parents('#eventsAdminPage'),
+							jEventsList = jEventsAdminPage.find('.tasks-list');
+
+						if (!event.isTrigger)
+						{
+							jEventsAdminPage.data('slimScrollBarTop', '0px');
+						}
+						else
+						{
+							jEventsAdminPage.data('slimScrollBarTop', jEventsList.scrollTop() + 'px');
+						}
+
+						$(this).find('i').addClass('fa-spin');
+						$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $(this).data('moduleId') + '&type=0', context: jEventsAdminPage});
+
+						//console.log("Обновление списка дел $(this).data('moduleId') = ", $(this).data('moduleId'));
+					}
+				}, '[data-toggle = "upload"]'
+			)
+			.on(
+				{
+					'click': function (event){  // Клик на значке переключения действий с делами (добавление/фильтрация)
+
+						//$(this).children('i').toggleClass('fa-plus fa-search');
+						$(this).children('i.fa-plus').toggleClass('hidden');
+						$(this).children('i.fa-search').toggleClass('hidden');
+
+
+						$('#eventsAdminPage .task-search .search-event').toggleClass('hidden');
+						$('#eventsAdminPage .task-search .add-event')
+							.toggleClass('hidden')
+							.find('input')
+							.focus();
+
+						event.preventDefault();
+
+					}
+				}, '[data-toggle = "toggle-actions"]'
+			)
+			.on(
+				{
+					'submit': function (event){ // Отправка формы добавления дела
+
+						event.preventDefault();
+
+						var eventName = $.trim($(this).find('input[name="event_name"]').val());
+
+						// Название дела не задано
+						if (!eventName.length)
+						{
+							return;
+						}
+
+						$('#sendForm i').toggleClass('fa-spinner fa-spin fa-check');
+
+						var ajaxData = $.getData({}),
+							formData = $(this).serializeArray();
+
+						$.each(formData, function (){
+
+							ajaxData[this.name] = $.trim(this.value);
+						});
+
+						$.ajax({
+							//context: textarea,
+							url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=3',
+							type: 'POST',
+							data: ajaxData,
+							dataType: 'json',
+							success: function (resultData){
+
+								$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=0', context: $('#eventsAdminPage') });
+							}
+						});
+					}
+				}, '.add-event form'
+			)
+		},
+
+		// Изменение статуса дела в виджете дел
+		eventsWidgetChangeStatus: function (dropdownMenu){
+
+			var ajaxData = $.getData({}),
+				jEventItem = $(dropdownMenu).parents('.task-item')
+				jEventStatus = $('[selected="selected"]', dropdownMenu);
+
+			ajaxData['eventId'] = jEventItem.prop('id');
+			ajaxData['eventStatusId'] = jEventStatus.prop('id');
+
+			$.ajax({
+				//context: textarea,
+				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=2',
+				type: 'POST',
+				data: ajaxData,
+				dataType: 'json',
+				success: function (resultData){
+
+					// Финальный статус
+					if (+resultData['finalStatus'])
+					{
+						jEventStatus.parents('li.task-item').children('.task-check').click();
+					}
+				}
+			});
+		},
+		// Обработчики событий календаря
+		calendarPrepare: function (){
+
+			$(document)
+				.on('shown.bs.popover', 'a.fc-event',  function() {
+
+					//console.log('shown.bs.popover');
+
+					$('.popover .calendar-event-description').slimscroll({
+						height: '75px',
+						//height: 'auto',
+						color: 'rgba(0,0,0,0.3)',
+						size: '5px',
+					});
+				})
+				// Удаление события календаря
+				.on('click', '.popover #deleteCalendarEvent', function () {
+
+
+					var eventId = $(this).data('eventId'),
+						moduleId = $(this).data('moduleId') ;
+
+					if (eventId && moduleId)
+					{
+						bootbox.confirm({
+							message: "Удалить событие?",
+							buttons: {
+								confirm: {
+									label: 'Да',
+									className: 'btn-success'
+								},
+								cancel: {
+									label: 'Нет',
+									className: 'btn-danger'
+								}
+							},
+							callback: function (result) {
+
+								// Удаление события
+								if (result)
+								{
+									$.loadingScreen('show');
+
+									var ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId});
+
+									$.ajax({
+
+										url: '/admin/calendar/index.php?eventDelete',
+										type: "POST",
+										dataType: 'json',
+										data: ajaxData,
+										success: function (result){
+
+											$.loadingScreen('hide');
+
+											if (!result['error'] && result['message'])
+											{
+												// Удаляем событие из календаря
+												$('#calendar').fullCalendar( 'removeEvents', eventId + '_' + moduleId)
+												Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+											}
+											else if (result['message']) // Ошибка, отменяем действие
+											{
+												result['error'] && revertFunc();
+												Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+											}
+										}
+									})
+								}
+							}
+						});
+					}
+				})
+				// Редактирование события календаря
+				.on('click', '.popover #editCalendarEvent', function () {
+
+					var eventId = $(this).data('eventId'),
+						moduleId = $(this).data('moduleId'),
+						dH = $(window).height(),
+						wH = $('#id_content').outerHeight(),
+						eventElement = $('[data-event-id="' + eventId + '_' + moduleId + '"]');
+
+						eventElement.popover && eventElement.popover('hide');
+
+					$.openWindow(
+						{
+							path: '/admin/calendar/index.php?addEntity&eventId=' + eventId + '&moduleId=' + moduleId,
+							addContentPadding: false,
+							width: $('#id_content').outerWidth() * 0.9, //0.8
+							height: (dH < wH ? dH : wH) * 0.9, //0.8
+							AppendTo: $('#id_content').parent().get(0),
+							positionOf: '#id_content',
+							Maximize: false,
+							dialogClass: 'hostcms6'
+						}
+					)
+					.addClass('modalwindow');
+				})
+				.on('click', '.popover-calendar-event button.close' , function(){
+
+					var popoverId = $(this).parents('.popover-calendar-event').attr('id'),
+						calendarEvent = $(".fc-event[aria-describedby='" + popoverId +"']");
+
+					calendarEvent.popover('hide');
+				})
+		},
 		widgetRequest: function(settings){
 			$.loadingScreen('show');
 
@@ -2031,7 +2417,8 @@
 
 			var dialog = bootbox.dialog({
 				message: object.html(),
-				title: settings.title
+				title: settings.title,
+				className: settings.className
 			}),
 			modalBody = dialog.find('.modal-body');
 
@@ -2056,6 +2443,7 @@
 
 $(function(){
 	$.notificationsPrepare();
+	$.calendarPrepare();
 
 	/* --- CHAT --- */
 	$('#chatbar').length && $.chatPrepare();
@@ -2096,6 +2484,189 @@ $(function(){
 	$('body').on('touchend', '.page-sidebar.menu-compact .sidebar-menu .submenu > li', function(e) {
 		$(this).find('a').click();
 	});
+
+
+	$('body')
+		.on('shown.bs.dropdown', '.admin-table td div', function (){
+
+			var td = $(this).closest('td').css('overflow', 'visible');
+		})
+		.on('hidden.bs.dropdown', '.admin-table td div', function (){
+
+			var td = $(this).closest('td').css('overflow', 'hidden');
+		})
+		// Выбор элемента dropdownlist
+		.on('click', '.form-element.dropdown-menu li', function (){
+
+			var li = $(this),
+				dropdownMenu = li.parent('.dropdown-menu'),
+				containerCurrentChoice = dropdownMenu.prev('[data-toggle="dropdown"]');
+
+			//  Не задан атрибут (current-selection), запрещающий выбирать выбранный элемент списка или он задан и запрещает выбор
+			//  при этом выбрали уже выбранный элемент
+			if ((!dropdownMenu.attr('current-selection') || dropdownMenu.attr('current-selection') != 'enable') && li.attr('selected'))
+			{
+				return;
+			}
+
+			// Меняем значение связанного с элементом скрытого input'а
+			dropdownMenu.next('input[type="hidden"]').val(li.attr('id'));
+
+			containerCurrentChoice.css('color', li.find('i').css('color'));
+			containerCurrentChoice.html(li.find('a').html() + '<i class="fa fa-angle-down icon-separator-left"></i>');
+
+			dropdownMenu.find('li[selected][id != ' + li.prop('id') + ']').removeAttr('selected');
+			li.attr('selected', 'selected');
+
+			// вызываем у родителя onchange()
+			dropdownMenu.trigger('change');
+		})
+		.on("keyup", ".bootbox.modal", function(event) {
+
+			if (event.which === 13 && $(this).find(event.target).filter('input:not([id *="filer_field"])').length)
+			{
+				$(this).find('[data-bb-handler = "success"]').click();
+			}
+		})
+		.on("click", "#filter-visibility-switch", function(event) {
+
+			$(".filter-form").slideToggle(500);
+		})
+		.on("click", '.context-menu a', function(event) {
+			 $(this).parents('.context-menu').hide();
+
+			 event.preventDefault();
+		})
+		.on("click", function(event) {
+
+			 if (!$(event.target).parents('.fc-body').length)
+			 {
+				 // Убираем контекстные меню
+				 $('.context-menu').hide();
+			 }
+		})
+		.on('keyup', function(event) {
+
+			// Нажали Esc - убираем контекстное меню
+			if (event.keyCode == 27)
+			{
+				$('.context-menu').hide();
+			}
+		})
+		.on('click', '[data-action="showListDealTemplateSteps"]', function() {
+
+			$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'addConversion', operation: 'showListDealTemplateSteps', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&hostcms[checked][0][' + $(this).attr('id').split('adding_conversion_to_')[1] + ']=1', windowId: 'id_content'});
+
+			return false;
+		})
+		.on('click', '[id ^= "conversion_"] .close', function() {
+
+			var wrapConversion = $(this).parent('[id ^="conversion_"]'), startAndEndStepId = wrapConversion.attr('id').split('_'), conversionStartStepId = startAndEndStepId[1], conversionEndStepId = startAndEndStepId[2];
+
+			$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'deleteConversion', operation: '', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
+		})
+		.on('click', '.dropdown-step-list .close', function() {
+
+			var dropdownStepList = $(this).parent('.dropdown-step-list');
+
+			dropdownStepList.prev("[id ^= 'adding_conversion_to_']").show();
+			dropdownStepList.remove();
+
+
+
+			console.log('.dropdown-step-list .close click');
+		})
+		.on('click', '.title_users', function() {
+
+			$(this)
+				//.toggleClass('collapsed')
+				.children('i')
+				.toggleClass('fa-caret-right fa-caret-down');
+
+			$(this)
+				.next('.list_users')
+				.slideToggle();
+			/*
+
+			if ($(this).hasClass('collapsed'))
+			{
+
+			}
+			else
+			{
+				$(this).children('i').toggleClass('fa-caret-down fa-caret-right');
+			}*/
+		})
+		.on(
+			{
+				'click': function(event) {
+
+					console.log('click!!!!');
+
+					var iconPermissionId = $(this).attr('id'), //department_5_2_3 или user_7_2_3
+						aPermissionProperties = iconPermissionId.split('_'),
+						objectTypePermission = aPermissionProperties[0] == 'department' ? 0 : 1,
+						objectIdPermission = aPermissionProperties[1], // идентификатор объекта (отдел или сотрудник), к которому применяются права
+						dealTemplateStepId = aPermissionProperties[2], // получаем идентификатор этапа сделки
+						actionType = aPermissionProperties[3], // тип действия (0 - создание, 1 - редактирование, 2 - просмотр, 3 - удаление)
+						sUrlParams = document.location.search,
+						dealTemplateId;
+
+					// Строка параметров
+					if (sUrlParams.length)
+					{
+						sUrlParams = sUrlParams.slice(1); // Убираем из строки начальный символ "?"
+
+						var aUrlParams = sUrlParams.split('&'),
+							aObjUrlParams = [];
+
+						for (var i = 0; i < aUrlParams.length; i++)
+						{
+							var aUrlParam = aUrlParams[i].split('=');
+
+							aObjUrlParams[aUrlParam[0]] = aUrlParam[1];
+						}
+
+						// Идентификатор типа сделки
+						dealTemplateId = aObjUrlParams['deal_template_id'];
+					}
+
+					//$('#id_content #row_0_9').toggleHighlight();
+					$.adminCheckObject({objectId: 'check_0_' + dealTemplateStepId, windowId: 'id_content'}); $.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType, windowId: 'id_content'});
+
+					console.log('mouseclick $(this).attr("class") = ' + $(this).attr('class'));
+				},
+
+				'mousedown': function(event) {
+
+					console.log('mousedown $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
+					$(this).removeClass('changed');
+				},
+
+				/*
+				'mouseup': function(event) {
+
+					console.log('mouseup $(this).attr("class") = ' + $(this).attr('class'));
+				},*/
+
+				'mouseover': function(event) {
+
+					console.log('mouseover $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
+
+					if ($(this).hasClass('changed'))
+					{
+						$(this).toggleClass('fa-circle-o fa-circle');
+					}
+				},
+				'mouseout': function() {
+
+					console.log('mouseout $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
+
+					$(this).removeClass('changed');
+				}
+			},
+			'.icons_permissions i'
+		);
 });
 
 var methods = {
@@ -2110,3 +2681,189 @@ var methods = {
 		}, 0);
 	}
 };
+
+function calendarDayClick(oDate, jsEvent)
+{
+	var contextMenu = $('body #calendarContextMenu').show(),
+		windowWidth = $(window).width(),
+		contextMenuWidth = contextMenu.outerWidth(),
+		positionLeft = (jsEvent.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : jsEvent.pageX;
+
+		contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
+
+	//
+
+
+	/*
+	 $("body").on("contextmenu", "table tr", function(e) {
+		$contextMenu.css({
+		  display: "block",
+		  left: e.pageX,
+		  top: e.pageY
+		});
+		return false;
+	  });
+	  */
+
+	// console.log('jsEvent = ', jsEvent);
+
+	 /*
+	var dH = $(window).height(),
+		wH = $('#id_content').outerHeight();
+	$.openWindow(
+		{
+			path: '/admin/calendar/index.php?addEntity',
+			addContentPadding: false,
+			width: $('#id_content').outerWidth() * 0.9, //0.8
+			height: (dH < wH ? dH : wH) * 0.9, //0.8
+			AppendTo: $('#id_content').parent().get(0),
+			positionOf: '#id_content',
+			Maximize: false,
+			dialogClass: 'hostcms6'
+		}
+	)
+	.addClass('modalwindow');*/
+}
+
+function calendarEventClick( event, jsEvent, view )
+{
+	// Убираем контекстные меню
+	$('.context-menu').hide();
+}
+
+function calendarEvents(start, end, timezone, callback)
+{
+	var ajaxData = $.getData({});
+
+	ajaxData['start'] = start.unix();
+	ajaxData['end'] = end.unix();
+
+	$.ajax({
+		url: '/admin/calendar/index.php?loadEvents',
+		type: 'POST',
+		dataType: 'json',
+		data: ajaxData,
+		success: function(result) {
+
+			var events = (result['events'] && result['events'].length) ? result['events'] : [];
+
+			callback(events);
+		}
+	});
+}
+
+function calendarEventRender(event, element)
+{
+	if (event.dragging || event.resizing)
+	{
+		element.popover('destroy');
+		return;
+	}
+
+	// Добавляем блоку, связанному с событием, идентификатор этого события для удобства поиска блока в последующей работе с календарем
+	element.attr('data-event-id', event.id);
+
+	$(element).css({'background-image': 'linear-gradient(to bottom,#fff 0,#ededed 100%)'});
+
+	element.popover({
+		title: event.title,
+		//placement: 'right',
+		content: event.htmlDetails || event.description || event.title,
+		html:true,
+		trigger: 'click',
+		container:'.fc-view .fc-body',
+		placement: 'auto right',
+		template: '<div class="popover popover-calendar-event " role="tooltip"><div class="arrow"></div><h3 class="popover-title" ' + (event.borderColor ? ('style="border-color: ' + event.borderColor + '"') : '')  + '></h3><button type="button" class="close">×</button><div class="popover-content bg-white"></div></div>'
+	});
+};
+
+function calendarEventDragStart( event, jsEvent, ui, view )
+{
+	event.dragging = true;
+};
+
+function calendarEventResizeStart( event, jsEvent, ui, view )
+{
+	event.resizing = true;
+};
+
+function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
+{
+
+	$.loadingScreen('show');
+
+	var eventIdParts = event.id.split('_'), // Идентификатор события календаря состоит из 2-х частей - id сущности и id модуля, разделенных '_'
+		eventId = eventIdParts[0],
+		moduleId = eventIdParts[1],
+
+		ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId, 'deltaSeconds': delta.asSeconds()}) ;
+
+		//console.log('event resize');
+
+		$.ajax({
+
+			url: '/admin/calendar/index.php?eventResize',
+			type: "POST",
+			dataType: 'json',
+			data: ajaxData,
+			success: function (result){
+
+				$.loadingScreen('hide');
+
+				if (!result['error'] && result['message'])
+				{
+					Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+
+					$('#calendar').fullCalendar( 'refetchEvents' );
+				}
+				else if (result['message']) // Ошибка, отменяем действие
+				{
+					result['error'] && revertFunc();
+					Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+				}
+			}
+		})
+
+};
+
+function calendarEventDrop( event, delta, revertFunc, jsEvent, ui, view )
+{
+
+	$.loadingScreen('show');
+
+	var eventIdParts = event.id.split('_'),
+		eventId = eventIdParts[0],
+		moduleId = eventIdParts[1],
+
+		ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId, startTimestamp: event.start.format('X'),  'allDay': +event.allDay}) ;
+
+	$.ajax({
+
+		url: '/admin/calendar/index.php?eventDrop',
+		type: "POST",
+		dataType: 'json',
+		data: ajaxData,
+		success: function (result){
+
+			$.loadingScreen('hide');
+
+			if (!result['error'] && result['message'])
+			{
+				Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+			}
+			else if (result['message']) // Ошибка, отменяем действие
+			{
+				result['error'] && revertFunc();
+				Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+			}
+
+			$('#calendar').fullCalendar( 'refetchEvents' );
+		}
+	})
+}
+
+function calendarEventDestroy( event, element, view )
+{
+	// Удаляем popover
+	element.popover('destroy');
+}

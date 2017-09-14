@@ -497,102 +497,107 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				break;
 
 				case 5: // ИС
-					// Директории
-					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("group_{$oProperty->id}[]")
-						->filter(TRUE);
-
-					// Элементы
-					$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
-						->name("property_{$oProperty->id}[]")
-						->value(NULL)
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->filter(TRUE);
-
-					$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("input_property_{$oProperty->id}[]")
-						->name("input_property_{$oProperty->id}[]");
-
-					// Значений св-в нет для объекта
-					if (count($aProperty_Values) == 0)
+					if (Core::moduleIsActive('informationsystem'))
 					{
-						$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
-					}
-					else
-					{
-						foreach ($aProperty_Values as $key => $oProperty_Value)
+						// Директории
+						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
+							->caption(htmlspecialchars($oProperty->name))
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("group_{$oProperty->id}[]")
+							->filter(TRUE);
+
+						// Элементы
+						$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
+							->name("property_{$oProperty->id}[]")
+							->value(NULL)
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->filter(TRUE);
+
+						$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("input_property_{$oProperty->id}[]")
+							->name("input_property_{$oProperty->id}[]");
+
+						// Значений св-в нет для объекта
+						if (count($aProperty_Values) == 0)
 						{
-							$value = $oProperty_Value->value;
+							$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
+						}
+						else
+						{
+							foreach ($aProperty_Values as $key => $oProperty_Value)
+							{
+								$value = $oProperty_Value->value;
 
-							$oNewAdmin_Form_Entity_InfGroups = clone $oAdmin_Form_Entity_InfGroups;
-							$oNewAdmin_Form_Entity_InfGroups
-								->id("group_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_InfGroups = clone $oAdmin_Form_Entity_InfGroups;
+								$oNewAdmin_Form_Entity_InfGroups
+									->id("group_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
-							$oNewAdmin_Form_Entity_InfItems
-								->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-								->value($value);
+								$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
+								$oNewAdmin_Form_Entity_InfItems
+									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+									->value($value);
 
-							$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
-							$oNewAdmin_Form_Entity_InfItemsInput
-								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
+								$oNewAdmin_Form_Entity_InfItemsInput
+									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+							}
 						}
 					}
-
 				break;
 
 				case 12: // Интернет-магазин
-					// Директории
-					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("group_{$oProperty->id}[]")
-						->filter(TRUE);
-
-					// Элементы
-					$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
-						->name("property_{$oProperty->id}[]")
-						->value(NULL)
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->filter(TRUE);
-
-					$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("input_property_{$oProperty->id}[]")
-						->name("input_property_{$oProperty->id}[]");
-
-					// Значений св-в нет для объекта
-					if (count($aProperty_Values) == 0)
+					if (Core::moduleIsActive('shop'))
 					{
-						$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
-					}
-					else
-					{
-						foreach ($aProperty_Values as $key => $oProperty_Value)
+						// Директории
+						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
+							->caption(htmlspecialchars($oProperty->name))
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("group_{$oProperty->id}[]")
+							->filter(TRUE);
+
+						// Элементы
+						$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
+							->name("property_{$oProperty->id}[]")
+							->value(NULL)
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->filter(TRUE);
+
+						$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("input_property_{$oProperty->id}[]")
+							->name("input_property_{$oProperty->id}[]");
+
+						// Значений св-в нет для объекта
+						if (count($aProperty_Values) == 0)
 						{
-							$value = $oProperty_Value->value;
+							$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
+						}
+						else
+						{
+							foreach ($aProperty_Values as $key => $oProperty_Value)
+							{
+								$value = $oProperty_Value->value;
 
-							$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
+								$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
 
-							$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
-							$oNewAdmin_Form_Entity_Shop_Items
-								->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-								->value($value);
+								$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
+								$oNewAdmin_Form_Entity_Shop_Items
+									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+									->value($value);
 
-							$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
-							$oNewAdmin_Form_Entity_Shop_Items_Input
-								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
+								$oNewAdmin_Form_Entity_Shop_Items_Input
+									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
+								$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
+							}
 						}
 					}
 				break;

@@ -50,7 +50,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group.ua_link_users_type'))
+		->name(Core::_('User.ua_show_users_title'))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/index.php', NULL, NULL, '')
 		)

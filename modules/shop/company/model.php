@@ -11,37 +11,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Shop_Company_Model extends Core_Entity
+class Shop_Company_Model extends Company_Model
 {
 	/**
-	 * One-to-many or many-to-many relations
-	 * @var array
+	 * Model name, e.g. 'book' for 'Book_Model'
+	 * @var mixed
 	 */
-	protected $_hasMany = array(
-		'shop' => array()
-	);
-
+	protected $_modelName = 'shop_company';
+	
 	/**
-	 * Belongs to relations
-	 * @var array
+	 * Table name, e.g. 'books' for 'Book_Model'
+	 * @var mixed
 	 */
-	protected $_belongsTo = array(
-		'user' => array()
-	);
-
+	protected $_tableName = 'companies';
+	
 	/**
-	 * Constructor.
-	 * @param int $id entity ID
+	 * Name of the tag in XML
+	 * @var string
 	 */
-	public function __construct($id = NULL)
-	{
-		parent::__construct($id);
-
-		if (is_null($id))
-		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
-			$this->_preloadValues['guid'] = Core_Guid::get();
-		}
-	}
+	protected $_tagName = 'shop_company';
 }

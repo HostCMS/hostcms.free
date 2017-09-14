@@ -22,11 +22,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		$children = $this->children;
 		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
-		$oAdmin_View = Admin_View::create();
+		/*$oAdmin_View = Admin_View::create();
 		$oAdmin_View
 			->children($children)
 			->pageTitle($this->title)
-			->module($Admin_Form_Controller->getModule());
+			->module($Admin_Form_Controller->getModule());*/
 
 		ob_start();
 		/*?>
@@ -74,21 +74,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		}
 
 		// Кнопки
-		/*$oAdmin_Form_Entity_Form->add(
-			$this->_addButtons()
-		);*/
 		!is_null($this->buttons) && $oAdmin_Form_Entity_Form->add(
 			$this->_addButtons()
 		);
 
 		$oAdmin_Form_Entity_Form->execute();
-		$content = ob_get_clean();
-
-		ob_start();
-		$oAdmin_View
-			->content($content)
-			->message($this->message)
-			->show();
 
 		return ob_get_clean();
 	}

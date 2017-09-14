@@ -32,11 +32,11 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 		
-		$oAdditionalTab->delete($this->getField('user_group_id'));
+		//$oAdditionalTab->delete($this->getField('user_group_id'));
 
-		$user_group_id = is_null($this->_object->id)
+		/*$user_group_id = is_null($this->_object->id)
 			? intval(Core_Array::getGet('user_group_id', 0))
-			: $this->_object->user_group_id;
+			: $this->_object->user_group_id;*/
 
 		$oMainTab
 			->add($oMainRow0 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -56,13 +56,13 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->move($this->getField('patronymic')->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-12')), $oMainRow1);
 
 		// Селектор с группами пользователей
-		$oSelect_User_Groups = Admin_Form_Entity::factory('Select')
+		/*$oSelect_User_Groups = Admin_Form_Entity::factory('Select')
 			->options($this->_fillUserGroup())
 			->name('user_group_id')
 			->value($user_group_id)
 			->caption(Core::_('User.users_type_form'));
 
-		$oMainRow2->add($oSelect_User_Groups);
+		$oMainRow2->add($oSelect_User_Groups);*/
 
 		$oMainTab->delete($this->getField('password'));
 
@@ -176,7 +176,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Fill user groups list
 	 * @return array
 	 */
-	protected function _fillUserGroup()
+	/*protected function _fillUserGroup()
 	{
 		$oSite = Core_Entity::factory('site', CURRENT_SITE);
 
@@ -189,7 +189,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $aReturnUserGroups;
-	}
+	}*/
 
 	/**
 	 * Processing of the form. Apply object fields.

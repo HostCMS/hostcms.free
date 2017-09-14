@@ -562,8 +562,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 								->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
 								->a
 									->class('btn btn-labeled btn-sky')
-									->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/user/index.php', 'edit', NULL, 0, $oUser->id, 'user_group_id=' . $oUser->user_group_id))
-									->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/user/index.php', 'edit', NULL, 0, $oUser->id, 'user_group_id=' . $oUser->user_group_id))
+									->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
+									->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
 									->value($oUser->login)
 									->target('_blank');
 							$oUserLink
@@ -645,6 +645,55 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$this->addMessage(ob_get_clean());
+				$return = TRUE;
+			break;
+			case 'modal':
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+				$newWindowId = 'Modal_' . time();
+
+				ob_start();
+				/*?>
+				<div id="<?php echo $newWindowId?>">
+				<?php*/
+				if (!$this->_prepeared)
+				{
+					$this->_prepareForm();
+
+					// Событие onAfterRedeclaredPrepareForm вызывается в двух местах
+					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+				}
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show
+					->Admin_Form_Controller($this->_Admin_Form_Controller)
+					->formId($this->_formId)
+					->tabs($this->_tabs)
+					->buttons($this->_addButtons());
+
+				echo $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
+				/*?>
+				</div>
+				<script type="text/javascript">
+				$(function() {
+					$('#<?php echo $newWindowId?>').HostCMSWindow({
+						autoOpen: true,
+						destroyOnClose: false,
+						title: '<?php echo $this->title?>',
+						AppendTo: '#<?php echo $windowId?>',
+						width: '80%',
+						// height: 140,
+						addContentPadding: true,
+						modal: false,
+						Maximize: false,
+						Minimize: false
+					});
+				});
+				</script>
+				<?php*/
+				$this->addContent(ob_get_clean());
+
 				$return = TRUE;
 			break;
 			default:
@@ -747,11 +796,24 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			->Admin_Form_Controller($this->_Admin_Form_Controller)
 			->formId($this->_formId)
 			->tabs($this->_tabs)
-			->buttons($this->_addButtons())
-			;
+			->buttons($this->_addButtons());
+
+		$content = $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
+
+		ob_start();
+
+		$oAdmin_View = Admin_View::create();
+		$oAdmin_View
+			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)
+			->pageTitle($oAdmin_Form_Action_Controller_Type_Edit_Show->title)
+			->module($this->_Admin_Form_Controller->getModule())
+			->content($content)
+			->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)
+			->show();
 
 		$this->addContent(
-			$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
+			//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
+			ob_get_clean()
 		);
 
 		return TRUE;

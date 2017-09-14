@@ -2,7 +2,6 @@
 
 return array (
 	'adminMenu' => array(
-
 		'content' => array(
 			'ico' => 'fa fa-newspaper-o',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_content'),
@@ -28,10 +27,10 @@ return array (
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_seo'),
 			'modules' => array('counter', 'advertisement', 'seo', 'oneps', 'roistat'),
 		),
-		'users' => array(
+		'crm' => array(
 			'ico' => 'fa fa-users',
-			'caption' => Core::_('Skin_Bootstrap.admin_menu_users'),
-			'modules' => array('user', 'siteuser'),
+			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
+			'modules' => array('event', 'siteuser', 'user', 'calendar', 'company'),
 		),
 		'clouds' => array(
 			'ico' => 'fa fa-cloud',
@@ -46,7 +45,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'benchmark', 'admin_form', 'module', 'constant', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'notification', 'benchmark', 'admin_form', 'module', 'constant', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

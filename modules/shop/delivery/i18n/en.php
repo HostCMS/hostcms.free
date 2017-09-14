@@ -38,7 +38,7 @@ return array(
 	'method' => 'Delivery Method',
 	'pickup' => 'Pickup',
 	'post' => 'Post',
-	'delivery' => 'Courier',
+	'courier' => 'Courier',
 	'days_from' => 'Delivery days from',
 	'days_to' => 'to',
 );

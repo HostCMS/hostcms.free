@@ -1692,7 +1692,7 @@ class Shop_Order_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $onclick, 'onclick');
 
-		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="body" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->_orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
+		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->_orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
 	}
 
 	/**

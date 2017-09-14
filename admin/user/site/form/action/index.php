@@ -17,10 +17,10 @@ $sAdminFormAction = '/admin/user/site/form/action/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$user_group_id = Core_Array::getGet('user_group_id');
-$site_id = Core_Array::getGet('site_id');
+$company_department_id = Core_Array::getGet('company_department_id');
+$oCompany_Department = Core_Entity::factory('Company_Department', $company_department_id);
 
-$oUser_Group = Core_Entity::factory('User_Group', $user_group_id);
+$site_id = Core_Array::getGet('site_id');
 $oSite = Core_Entity::factory('Site', $site_id);
 
 // Проверка возможности доступа пользователя к сайту
@@ -47,39 +47,39 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('User_Group_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oUser_Group->name))
-	->pageTitle(Core::_('User_Group_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oUser_Group->name));
+	->title(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
+	->pageTitle(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Путь к контроллеру формы групп пользователей
-$sUserGroupsPath = '/admin/user/index.php';
+// $sUserGroupsPath = '/admin/user/index.php';
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/user/user/index.php';
-$sAdditionalParamsUser = 'user_group_id=' . $user_group_id;
+$sUsersPath = '/admin/user/index.php';
+$sAdditionalParamsUser = 'company_department_id=' . $company_department_id;
 
 $sChoosingSitePath = '/admin/user/site/index.php';
-$sAdditionalChoosingSite = 'user_group_id=' . $user_group_id . '&mode=action';
+$sAdditionalChoosingSite = 'company_department_id=' . $company_department_id . '&mode=action';
 
 $sFormActionsPath = '/admin/user/site/form/index.php';
-$sAdditionalFormActions = 'user_group_id=' . $user_group_id . '&site_id=' . $site_id;
+$sAdditionalFormActions = 'company_department_id=' . $company_department_id . '&site_id=' . $site_id;
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group.ua_link_users_type'))
+		->name(Core::_('User.ua_show_users_title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUserGroupsPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUserGroupsPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, '')
 	)
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_users_title', $oUser_Group->name))
+		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, $sAdditionalParamsUser)
 		)
@@ -89,7 +89,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group.choosing_site'))
+		->name(Core::_('User.choosing_site'))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sChoosingSitePath, NULL, NULL, $sAdditionalChoosingSite)
 		)
@@ -99,7 +99,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add( // Список пользователей группы
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Module.ua_show_user_access_title', $oUser_Group->name, $oSite->name))
+		->name(Core::_('Company_Department_Module.ua_show_user_access_action_title', $oCompany_Department->name, $oSite->name))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sFormActionsPath, NULL, NULL, $sAdditionalFormActions)
 		)
@@ -109,7 +109,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oUser_Group->name))
+		->name(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)
@@ -153,18 +153,18 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 // Источник данных
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
-	Core_Entity::factory('User_Site_Form_Action')
+	Core_Entity::factory('Company_Department_Site_Form_Action')
 );
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('admin_form_actions.*', array('admin_word_values.name', 'text_name'),
-	array('admin_form_actions.name', 'action_name'), array('user_group_action_accesses.admin_form_action_id', 'access')))
+	array('admin_form_actions.name', 'action_name'), array('company_department_action_accesses.admin_form_action_id', 'access')))
 )->addCondition(
-	array('leftJoin' => array('user_group_action_accesses', 'admin_form_actions.id', '=', 'user_group_action_accesses.admin_form_action_id',
+	array('leftJoin' => array('company_department_action_accesses', 'admin_form_actions.id', '=', 'company_department_action_accesses.admin_form_action_id',
 		array(
-			array('AND' => array('user_group_action_accesses.user_group_id', '=', $user_group_id)),
-			array('AND' => array('user_group_action_accesses.site_id', '=', $site_id))
+			array('AND' => array('company_department_action_accesses.company_department_id', '=', $company_department_id)),
+			array('AND' => array('company_department_action_accesses.site_id', '=', $site_id))
 		)
 	))
 )->addCondition(

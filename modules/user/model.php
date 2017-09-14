@@ -20,13 +20,21 @@ class User_Model extends Core_Entity
 	protected $_nameColumn = 'login';
 
 	/**
+	 * Column consist full item's name
+	 * @var string
+	 */
+	public $fullname = NULL;
+
+	/**
 	 * Belongs to relations
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user_group' => array(),
+		//'user_group' => array(),
 		'user' => array(),
-		'user_module' => array()
+		'user_module' => array(),
+		'company' => array('through' => 'company_department_post_user'),
+		//'company_department' => array('through' => 'company_department_post_user')
 	);
 
 	/**
@@ -61,8 +69,23 @@ class User_Model extends Core_Entity
 			'foreign_key' => 'responsible_user_id',
 			'model' => 'Helpdesk_Responsible_User'
 		),
+		'company_department_post_user' => array(),
+		'company_post' => array('through' => 'company_department_post_user'),
+		'user_directory_email' => array(),
+		'directory_email' => array('through' => 'user_directory_email'),
+		'user_directory_phone' => array(),
+		'directory_phone' => array('through' => 'user_directory_phone'),
+		'user_directory_messenger' => array(),
+		'directory_messenger' => array('through' => 'user_directory_messenger'),
+		'user_directory_social' => array(),
+		'directory_social' => array('through' => 'user_directory_social'),
+		'user_directory_website' => array(),
+		'directory_website' => array('through' => 'user_directory_website'),
+		'event_user' => array(),
+		'event' => array('through' => 'event_user'),
 		'notification_user' => array(),
-		'notification' => array('through' => 'notification_user'),		
+		'notification' => array('through' => 'notification_user'),
+		'company_department' => array('through' => 'company_department_post_user')
 	);
 
 	/**
@@ -73,7 +96,8 @@ class User_Model extends Core_Entity
 		'superuser' => 1,
 		'only_access_my_own' => 0,
 		'read_only' => 0,
-		'settings' => 0
+		'settings' => 0,
+		'root_dir' => '/'
 	);
 
 	/**
@@ -131,28 +155,6 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get user by name
-	 * @param string $name name
-	 * @return User_Model|NULL
-	 */
-	public function getByName($name)
-	{
-		$this->queryBuilder()
-			->clear()
-			->where('name', '=', $name)
-			->limit(1);
-
-		$aUsers = $this->findAll();
-
-		if (isset($aUsers[0]))
-		{
-			return $aUsers[0];
-		}
-
-		return NULL;
-	}
-
-	/**
 	 * Check if user has access to site
 	 * @param Site_Model $oSite site
 	 * @return boolean
@@ -170,7 +172,7 @@ class User_Model extends Core_Entity
 
 		return count($aUser_Modules) == 1;
 	}
-
+	
 	/**
 	 * Check if user has access to module
 	 * @param array $aModuleNames module name
@@ -197,23 +199,28 @@ class User_Model extends Core_Entity
 				);
 			}
 
-			$access = $this->User_Group->issetModuleAccess(
-				$oModule, $oSite
-			);
-
-			// Если доступ разрешен
-			if ($access)
+			// Вынесено после проверки прав доступа, т.к. идет отдельная проверка на активность модуля
+			if ($this->superuser == 1)
 			{
-				// Прерываем проверку, т.к. доступ хотя бы к одному из указанных модулей уже есть
+				// SU разрешен доступ ко всем модулям
 				return TRUE;
 			}
-		}
-
-		// Вынесено после проверки прав доступа, т.к. идет отдельная проверка на активность модуля
-		if ($this->superuser == 1)
-		{
-			// SU разрешен доступ ко всем модулям
-			return TRUE;
+			
+			$aCompany_Departments = $this->Company_Departments->findAll();
+			
+			foreach ($aCompany_Departments as $oCompany_Department)
+			{
+				$access = $oCompany_Department/*->User_Group*/->issetModuleAccess(
+					$oModule, $oSite
+				);
+				
+				// Если доступ разрешен
+				if ($access)
+				{
+					// Прерываем проверку, т.к. доступ хотя бы к одному из указанных модулей уже есть
+					return TRUE;
+				}
+			}
 		}
 
 		return FALSE;
@@ -421,7 +428,7 @@ class User_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->User_Notes->deleteAll(FALSE);
 		$this->User_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
@@ -518,7 +525,7 @@ class User_Model extends Core_Entity
 		$lastActivity = $this->getLastActivity();
 		return !is_null($lastActivity) && $lastActivity < 300;
 	}
-	
+
 	/**
 	 * Get count of unread messages
 	 * @param User_Model $oUser
@@ -535,7 +542,48 @@ class User_Model extends Core_Entity
 			->where('user_messages.recipient_user_id', '=', $this->id);
 
 		$row = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
-		
+
 		return intval($row['count']);
+	}
+
+	/**
+	 * Get full name of user
+	 *
+	 * @return string
+	 */
+	public function getFullName()
+	{
+		$aPartsFullName = array();
+
+		!empty($this->surname) && $aPartsFullName[] = $this->surname;
+		!empty($this->name) && $aPartsFullName[] = $this->name;
+		!empty($this->patronymic) && $aPartsFullName[] = $this->patronymic;
+
+		// В случае отсутствия ФИО возвращаем логин
+		!count($aPartsFullName) && $aPartsFullName[] = $this->login;
+
+
+		//return (!empty($this->surname) ? $oUser->surname . ' ' : '' ) . (!empty($oUser->name) ? $oUser->name . ' ' : '' ) . (!empty($oUser->patronymic) ? $oUser->patronymic . ' ' : '' );
+
+		return implode(' ', $aPartsFullName);
+	}
+
+	/**
+	 * Get company posts for user by department
+	 * @return array
+	 */
+	public function getCompanyPostsByDepartment($iDepartmentId, $isHead = NULL)
+	{
+		$oCompany_Department_Posts = $this->Company_Posts; //->getAllByCompany_department_id($iDepartmentId);
+		$oCompany_Department_Posts
+			->queryBuilder()
+			->where('company_department_post_users.company_department_id', '=', $iDepartmentId);
+
+		!is_null($isHead)
+			&& $oCompany_Department_Posts
+			->queryBuilder()
+			->where('company_department_post_users.head', '=', intval($isHead));
+
+		return $oCompany_Department_Posts->findAll();
 	}
 }
