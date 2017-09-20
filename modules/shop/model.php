@@ -696,7 +696,92 @@ class Shop_Model extends Core_Entity
 
 		$this->_groupsTree = $this->_cacheGroups = $this->_cacheItems = array();
 
+		// Пересчет комплектов для магазина
+		$this->_shopRecountSet();
+
 		return $this;
+	}
+
+	/**
+	 * Prepare recount sets
+	 */
+	protected function _shopRecountSet()
+	{
+		$current_date = date('Y-m-d H:i:s');
+
+		$limit = 100;
+		$offset = 0;
+
+		do {
+			$oShop_Items = $this->Shop_Items;
+			$oShop_Items->queryBuilder()
+				->where('shop_items.active', '=', 1)
+				->where('shop_items.type', '=', 3)
+				->where('shop_items.start_datetime', '<=', $current_date)
+				->open()
+					->where('shop_items.end_datetime', '>=', $current_date)
+					->setOr()
+					->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
+				->close()
+				->limit($limit)
+				->offset($offset);
+
+			$aShop_Items = $oShop_Items->findAll(FALSE);
+
+			foreach ($aShop_Items as $oShop_Item)
+			{
+				$this->recountSet($oShop_Item);
+			}
+
+			$offset += $limit;
+		}
+		while(count($aShop_Items));
+	}
+
+	/**
+	 * Recount set
+	 */
+	public function recountSet(Shop_Item_Model $oShop_Item)
+	{
+		if ($oShop_Item->shop_currency_id)
+		{
+			$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
+
+			$Shop_Item_Controller = new Shop_Item_Controller();
+
+			$amount = 0;
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oTmp_Shop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oTmp_Shop_Item = $oShop_Item->shortcut_id
+					? $oTmp_Shop_Item->Shop_Item
+					: $oTmp_Shop_Item;
+
+				if ($oTmp_Shop_Item->shop_currency_id)
+				{
+					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
+
+					$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$oTmp_Shop_Item->Shop_Currency,
+						$oTmp_Shop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
+
+					$amount += $price * $oShop_Item_Set->count;
+				}
+				else
+				{
+					Core_Message::show(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name), 'error');
+				}
+			}
+
+			$oShop_Item->price = $amount;
+			$oShop_Item->save();
+		}
+		else
+		{
+			Core_Message::show(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error');
+		}
 	}
 
 	/**

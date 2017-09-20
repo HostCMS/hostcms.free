@@ -954,22 +954,25 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 				}
 
-				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if ($object->id)
 				{
-					$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oShop->Structure->getPath()
-						. $this->_object->getPath();
+					$oSiteAlias = $oShop->Site->getCurrentAlias();
+					if ($oSiteAlias)
+					{
+						$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
+							. $oSiteAlias->name
+							. $oShop->Structure->getPath()
+							. $this->_object->getPath();
 
-					$this->getField('path')
-						->add(
-							Admin_Form_Entity::factory('A')
-								->target('_blank')
-								->href($sItemUrl)
-								->class('input-group-addon bg-blue bordered-blue')
-								->value('<i class="fa fa-external-link"></i>')
-						);
+						$this->getField('path')
+							->add(
+								Admin_Form_Entity::factory('A')
+									->target('_blank')
+									->href($sItemUrl)
+									->class('input-group-addon bg-blue bordered-blue')
+									->value('<i class="fa fa-external-link"></i>')
+							);
+					}
 				}
 
 				$oMainTab
@@ -1833,7 +1836,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Пересчет комплекта
-				Core_Array::getPost('apply_recount_set') && $this->recountSet();
+				Core_Array::getPost('apply_recount_set') && $oShop->recountSet($this->_object);
 			break;
 			case 'shop_group':
 			default:
@@ -2642,7 +2645,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Пересчет цены комплекта
 	 */
-	public function recountSet()
+	/*public function recountSet()
 	{
 		if ($this->_object->shop_currency_id)
 		{
@@ -2683,5 +2686,5 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->addMessage(Core_Message::get(Core::_('Shop_Item.shop_item_set_not_currency', $oShop_Item->name), 'error'));
 		}
-	}
+	}*/
 }

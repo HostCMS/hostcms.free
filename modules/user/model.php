@@ -32,9 +32,9 @@ class User_Model extends Core_Entity
 	protected $_belongsTo = array(
 		//'user_group' => array(),
 		'user' => array(),
-		'user_module' => array(),
+		// 'user_module' => array(),
 		'company' => array('through' => 'company_department_post_user'),
-		//'company_department' => array('through' => 'company_department_post_user')
+		'company_department' => array('through' => 'company_department_post_user')
 	);
 
 	/**
@@ -172,7 +172,7 @@ class User_Model extends Core_Entity
 
 		return count($aUser_Modules) == 1;
 	}
-	
+
 	/**
 	 * Check if user has access to module
 	 * @param array $aModuleNames module name
@@ -205,15 +205,15 @@ class User_Model extends Core_Entity
 				// SU разрешен доступ ко всем модулям
 				return TRUE;
 			}
-			
+
 			$aCompany_Departments = $this->Company_Departments->findAll();
-			
+
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
 				$access = $oCompany_Department/*->User_Group*/->issetModuleAccess(
 					$oModule, $oSite
 				);
-				
+
 				// Если доступ разрешен
 				if ($access)
 				{
@@ -585,5 +585,66 @@ class User_Model extends Core_Entity
 			->where('company_department_post_users.head', '=', intval($isHead));
 
 		return $oCompany_Department_Posts->findAll();
+	}
+
+	/**
+	 * Backend
+	 * @return self
+	 */
+	public function smallAvatar()
+	{
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			->class('fm_preview');
+
+		$oCore_Html_Entity_Div
+			->add(
+				Core::factory('Core_Html_Entity_Img')
+					->src($this->getImageHref())
+					->width(30)
+					->height(30)
+			);
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
+	public function loginBadge()
+	{
+		$lastActivity = $this->getLastActivity();
+		$sStatus = !is_null($lastActivity) && $lastActivity < 60 * 20
+			? 'online'
+			: 'offline';
+
+		echo "&nbsp;<span class=\"{$sStatus}\"></span>";
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function department()
+	{
+		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
+
+		$aTempDepartmentPost = array();
+
+		$i = 0;
+
+		foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		{
+			$aTempDepartmentPost[] = '<div ' . ( $i ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
+				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
+				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star pointer head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+
+			$i++;
+		}
+
+		echo implode('', $aTempDepartmentPost);
 	}
 }
