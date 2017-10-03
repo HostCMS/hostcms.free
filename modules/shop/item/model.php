@@ -860,12 +860,12 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->Shop_Group->decCountItems();
+		$this->shop_group_id && $this->Shop_Group->decCountItems();
 
 		$this->shop_group_id = $iShopGroupId;
 		$this->save()->clearCache();
 
-		$oShop_Group->incCountItems();
+		$iShopGroupId && $oShop_Group->incCountItems();
 
 		return $this;
 	}
@@ -1856,11 +1856,12 @@ class Shop_Item_Model extends Core_Entity
 				$oSetEntity->addEntity(
 					$oTmp_Shop_Item
 						->id($oShop_Item->id)
+						->showXmlAssociatedItems(FALSE)
 						->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('count')
-							->value($oShop_Item_Set->count)
-					)
+							Core::factory('Core_Xml_Entity')
+								->name('count')
+								->value($oShop_Item_Set->count)
+						)
 				);
 			}
 		}
@@ -2514,5 +2515,54 @@ class Shop_Item_Model extends Core_Entity
 		{
 			return '<i class="fa fa-file-text-o"></i>';
 		}
+	}
+
+	/**
+	 * Recount set
+	 * @return self
+	 */
+	public function recountSet()
+	{
+		if ($this->shop_currency_id)
+		{
+			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
+
+			$Shop_Item_Controller = new Shop_Item_Controller();
+
+			$amount = 0;
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oTmp_Shop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oTmp_Shop_Item = $this->shortcut_id
+					? $oTmp_Shop_Item->Shop_Item
+					: $oTmp_Shop_Item;
+
+				if ($oTmp_Shop_Item->shop_currency_id)
+				{
+					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
+
+					$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$oTmp_Shop_Item->Shop_Currency,
+						$oTmp_Shop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
+
+					$amount += $price * $oShop_Item_Set->count;
+				}
+				else
+				{
+					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name));
+				}
+			}
+
+			$this->price = $amount;
+			$this->save();
+		}
+		else
+		{
+			throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $this->name));
+		}
+
+		return $this;
 	}
 }

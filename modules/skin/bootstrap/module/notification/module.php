@@ -83,6 +83,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					//$aUnreadNotificationsId = Core_Array::getPost('unreadNotificationsId');
 
 					$oNotifications = $oCurrent_User->Notifications;
+					
+					
 					$oNotifications->queryBuilder()
 						->select('notifications.*', array('notification_users.read', 'read'))
 						/*

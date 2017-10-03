@@ -64,6 +64,7 @@ return array(
 	'order_card_fax' => 'Fax',
 	'order_card_email' => 'E-mail',
 	'order_card_site' => "Website",
+	'order_card_paymentsystem' => "Payment system",
 	'payer' => "Payer",
 	'order_card_contact_person' => "Contact person",
 	'order_card_site_user' => "Site user",

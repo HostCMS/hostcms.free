@@ -66,7 +66,7 @@ class Skin_Default extends Core_Skin
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.crosshair.js')
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.resize.js')
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.selection.js')
-			->addJs('/modules/skin/bootstrap/js/jquery.slimscroll.min.js')
+			->addJs('/modules/skin/bootstrap/js/jquery.slimscroll.js')
 
 			;
 

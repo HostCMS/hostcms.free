@@ -1632,6 +1632,8 @@
 
 			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
 			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
+			
+			console.log("data['lastNotificationId'] = " + data['lastNotificationId']);
 
 			$.ajax({
 				//context: textarea,
@@ -1642,6 +1644,8 @@
 				success: function(resultData){
 
 					var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+					
+					console.log(resultData);
 
 					if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId')
 					// Есть уведомления для сотрудника
@@ -2042,7 +2046,6 @@
 							formData = $(this).serializeArray();
 
 						$.each(formData, function (){
-
 							ajaxData[this.name] = $.trim(this.value);
 						});
 
@@ -2053,7 +2056,6 @@
 							data: ajaxData,
 							dataType: 'json',
 							success: function (resultData){
-
 								$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=0', context: $('#eventsAdminPage') });
 							}
 						});
@@ -2303,6 +2305,41 @@
 			{
 				jNewObject.find('script').remove();
 				jNewObject.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').datetimepicker({locale: 'ru', format: oDateTimePicker.format()});
+			}
+		},
+		cloneFormRow: function(cloningElement){
+			if (cloningElement)
+			{
+				var	originalRow = $(cloningElement).closest('.row'),
+					newRow = originalRow.clone();
+
+				newRow.find('input').each(function(){
+					$(this).val('');
+				});
+
+				newRow.find('select').each(function(){
+					$(':selected', this).removeAttr("selected");
+					$(':first', this).attr("selected", "selected");
+				});
+
+				newRow.find('input[name *= "#"], select[name *= "#"]').each(function(){
+					this.name = this.name.split('#')[0] + '[]';
+				});
+
+				newRow.find('.btn-delete').removeClass('hide');
+				newRow.insertAfter(originalRow);
+
+				return newRow;
+			}
+		},
+		deleteFormRow: function(deleteElement){
+			if (deleteElement)
+			{
+				// Удаляемая строка, с элементами формы
+				var objectRow = $(deleteElement).closest('.row');
+
+				!objectRow.siblings('.row').size() && $.cloneFormRow(deleteElement).find('.btn-delete').addClass('hide');
+				objectRow.remove();
 			}
 		}
 	});

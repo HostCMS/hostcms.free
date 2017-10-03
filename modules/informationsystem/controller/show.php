@@ -452,11 +452,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$oInformationsystem->showXmlCounts($this->calculateCounts);
 
-		// Ticket 253874, php 7.1.9
-		$part = is_numeric($this->part)
-			? intval($this->part - 1)
-			: 0;
-
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('group')
@@ -468,7 +463,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('part')
-				->value($part)
+				->value(intval($this->part) - 1)
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('limit')

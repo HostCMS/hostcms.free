@@ -812,6 +812,9 @@ tr.admin_table_filter.disabled select {
 .table tbody tr td .fa {
 	font-size: 14px;
 }
+.table tbody tr td .badge.badge-square .fa {
+	font-size: inherit !important;
+}
 .table tbody tr td a:not(.btn) .fa:not(.btn-sm), .fa-active {
 	color: #333;
 }
@@ -896,8 +899,9 @@ td.importantField a {
 	height: auto;
 	padding-bottom: 10px;
 }
-.task-container .tasks-list .task-item .task-creator a{
-	color: #fff;
+.task-container .tasks-list .task-item .task-creator span{
+	color: #999;
+	font-size: 12px;
 }
 
 .task-container .tasks-list .task-item .task-body{
@@ -1801,6 +1805,7 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 .market-item	.databox .databox-text > p {line-height: 16px }
 .market-item	.market-item-price { font-size: 12pt; font-weight: 300; margin-top: 6px }
 .market-item-image {background-clip: padding-box !important; border-radius: 10px !important }
+.market { margin-top: 20px; }
 /* --- /Market --- */
 
 /* --- Badge --- */
@@ -2323,6 +2328,7 @@ table.table.table-popular-queries tr td:last-child {
 .admin-table td .event-status
 {
 	margin: 5px 0px;
+	display: inline-block;
 }
 .admin-table td .small .fa
 {
@@ -2354,23 +2360,32 @@ table.table.table-popular-queries tr td:last-child {
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
 	background-color: #F3F3F3 /*#E7F5FE*/ !important;
-	color: #999 /*#11A0F8*/ !important;
+	color: #777 /*#11A0F8*/ !important;
 	border-color: #eee /*#c2e8ff*/ !important;
 	font-weight: 600 !important;
 	font-size: 11px !important;
 	margin-top: 6px !important;
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-	color: #999 /*#11a0f8*/ !important;
+	color: #777 /*#11a0f8*/ !important;
 	float: right;
 	font-size: 11px;
 	margin-left: 5px;
 	margin-right: 0;
 }
-.select2-container--default .select2-selection--multiple .select2-selection__choice.event-author { background-color: #f1faed !important; color: #6aa74a !important; border-color: #c2e7ae !important; }
+.select2-container--default .select2-selection--multiple .select2-selection__choice.event-author {
+	background-color: #d9edf7 !important;
+	color: #31708f !important;
+	border-color: #C8E6F7 !important;
+
+	/*background-color: #f1faed !important;
+	color: #6aa74a !important;
+	border-color: #c2e7ae !important;*/
+}
 
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-body .description i { margin:0 }
-.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-time {
+/* .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-time { */
+.notification-time {
     color: #2dc3e8;
 }
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-clock { position: relative; margin: 5px 0; }
@@ -2391,7 +2406,8 @@ table.table.table-popular-queries tr td:last-child {
 .event-notification-type-3 { background-color: #ed7589 }
 .event-notification-type-4 { background-color: #4fa6ba }
 
-#eventStartButtonsGroup .btn-palegreen.active { background-color: #a0d468 !important; border-color: #a0d468 !important; }
+#eventStartButtonsGroup .btn { background-color: #f5f5f5; color: #777; border-color: #eee }
+#eventStartButtonsGroup /*.btn-palegreen*/.active { color: #FFF; background-color: #F29595 !important; border-color: #F29797 !important; }
 #eventStartButtonsGroup .btn.active { box-shadow: none; }
 
 .control-buttons i { font-size: 11px; }
@@ -2706,10 +2722,13 @@ li.select2-results__option.company-department{
 	margin-left: 15px;
 }
 
+li.select2-selection__choice .user-post {
+	font-weight: 400;
+}
 
 li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
-	/* margin-left: 10px; */
 	font-size: 10px;
+	overflow: hidden;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected] {
@@ -2814,3 +2833,23 @@ li.select2-selection__choice .user-post, li.select2-selection__choice .company-d
 
 .tickets-container .tickets-list .ticket-item .ticket-user .fa-chevron-down.profile-details { font-size: 10px; }
 .users-list.btn:hover { color: #fff; background-color: #88d3f6; border-color: #88d3f6; }
+
+.search-query-input span.caption { display:none; }
+
+.deadline { color: #f04618; font-weight: 600 }
+
+.time-slider .current-time-caret {
+	background-color: #F29595 !important;
+}
+.time-slider .timecell-event.hover {
+    border: 1px dashed #B6DA39 !important;
+}
+.time-slider .timecell-event.moving {
+    border-color: #F29595 !important;
+}
+
+.tab-content .profile-container .row-title {
+    margin-left: -20px;
+    margin-top: 25px;
+}
+input.checkbox-slider[type="checkbox"] ~ .text::before { content:"" !important; }

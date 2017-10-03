@@ -32,4 +32,5 @@ return array(
 	'select_section' => 'Select a section',
 	'module-options' => 'Settings "%s"',
 	'version_absent' => 'Version absent',
+	'search_placeholder' => 'Search',
 );

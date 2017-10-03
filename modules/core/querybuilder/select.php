@@ -585,7 +585,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 */
 	public function clear()
 	{
-		$this->_distinct = FALSE;
+		$this->_distinct = $this->_unbuffered = FALSE;
 
 		$this->_unionLimit = $this->_unionOffset = $this->_highPriority = $this->_straightJoin
 			= $this->_sqlCalcFoundRows = NULL;

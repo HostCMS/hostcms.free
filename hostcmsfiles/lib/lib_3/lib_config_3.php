@@ -20,7 +20,8 @@ if (Core::moduleIsActive('search'))
 			->where('shop_items.active', '=', 1)
 			->where('shop_items.indexing', '=', 1)
 			->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(10)
+			->clearOrderBy();
 
 		$aShop_Items = $oShop_Items->findAll();
 
@@ -62,7 +63,7 @@ if (Core::moduleIsActive('search'))
 		->parseUrl()
 		->len(Core_Page::instance()->libParams['maxlen'])
 		->query(Core_Array::getGet('text'));
-	
+
 	$text = Core_Array::getGet('text');
 	if (!is_null($text))
 	{

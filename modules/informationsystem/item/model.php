@@ -337,13 +337,13 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->Informationsystem_Group->decCountItems();
+		$this->informationsystem_group_id && $this->Informationsystem_Group->decCountItems();
 
 		$this->informationsystem_group_id = $informationsystem_group_id;
 
 		$this->save()->clearCache();
 
-		$oInformationsystem_Group->incCountItems();
+		$informationsystem_group_id && $oInformationsystem_Group->incCountItems();
 
 		return $this;
 	}

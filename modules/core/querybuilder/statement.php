@@ -26,6 +26,25 @@ abstract class Core_QueryBuilder_Statement
 	public function __construct(array $args = array())
 	{
 		$this->setDataBase(Core_DataBase::instance());
+		return $this;
+	}
+
+	/**
+	 * Query without fetching and buffering the result rows
+	 */
+	protected $_unbuffered = FALSE;
+
+	/**
+	 * Query without fetching and buffering the result rows
+	 * @param bool $unbuffered
+	 * @return self
+	 */
+	public function unbuffered($unbuffered)
+	{
+		$this->_unbuffered = $unbuffered;
+
+		$this->_dataBase
+			->unbuffered($this->_unbuffered);
 
 		return $this;
 	}

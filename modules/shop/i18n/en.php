@@ -140,4 +140,5 @@ return array(
 	'confirm_user_subject' => 'Paid order customer\'s email subject',
 	'cancel_admin_subject' => 'Cancel order email subject',
 	'cancel_user_subject' => 'Cancel order customer\'s email subject',
+	'shopRecountSet_success' => 'Sets recalculated successfully!',
 );

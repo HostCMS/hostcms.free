@@ -45,7 +45,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.resize.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.selection.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.pie.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
 
@@ -265,8 +265,8 @@ class Skin_Bootstrap extends Core_Skin
 														->where('events.finish', '<', $dateTime . ' 23:59:59')
 													->close()
 													->clearOrderBy()
-													->orderBy('start', 'ASC')
-													->orderBy('important', 'ASC');
+													->orderBy('start', 'DESC')
+													->orderBy('important', 'DESC');
 
 												$aEvents = $oEvents->findAll(FALSE);
 
@@ -283,7 +283,7 @@ class Skin_Bootstrap extends Core_Skin
 																	</div>
 																	<div class="notification-body">
 																		<span class="title"><?php echo $oEvent->name?></span>
-																		<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDate($oEvent->start)?> &mdash; <span class="notification-time"><?php echo Event_Controller::getDate($oEvent->finish)?></span></span>
+																		<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> &mdash; <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->finish)?></span></span>
 																	</div>
 																</div>
 															</a>

@@ -175,7 +175,9 @@ class Shortcode_List
 	{
 		if ($matches[1] == '[[')
 		{
-			return '[' . $matches[2] . $matches[3] . ']';
+			return count($matches) == 6
+				? '[' . $matches[2] . $matches[3] . ']' . $matches[5] . '[/' . $matches[2] . ']'
+				: '[' . $matches[2] . $matches[3] . ']';
 		}
 
 		$methodName = $matches[2];

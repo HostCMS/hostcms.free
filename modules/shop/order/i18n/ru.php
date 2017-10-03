@@ -65,6 +65,7 @@ return array(
 	'order_card_fax' => "Факс",
 	'order_card_email' => "E-Mail",
 	'order_card_site' => "Сайт",
+	'order_card_paymentsystem' => "Способ оплаты",
 	'payer' => "Компания",
 	'order_card_contact_person' => "Контактное лицо",
 	'order_card_site_user' => "Пользователь",

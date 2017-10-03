@@ -300,9 +300,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 									{
 										// Перекрытие параметров для данного поля
 										$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-										foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+										foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 										{
-											$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+											$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 										}
 
 										if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
@@ -451,9 +451,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 							// Перекрытие параметров для данного поля
 							$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-							foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+							foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 							{
-								$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+								$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 							}
 
 							$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
@@ -540,9 +540,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				{
 					// Перекрытие параметров для данного поля
 					$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-					foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+					foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 					{
-						$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+						$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 					}
 
 					$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
@@ -1238,9 +1238,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			// Перекрытие параметров для данного поля
 			$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+			foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 			{
-				$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+				$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 			}
 
 			if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)

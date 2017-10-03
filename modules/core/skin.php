@@ -382,7 +382,7 @@ abstract class Core_Skin
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js" type="text/javascript"></script><?php
 		?><script src="/admin/wysiwyg/jquery.tinymce.min.js" type="text/javascript"></script><?php
 		?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js" type="text/javascript"></script><?php
-		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.min.js" type="text/javascript"></script><?php
+		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js" type="text/javascript"></script><?php
 		?><script src="/modules/skin/bootstrap/js/toastr/toastr.js" type="text/javascript"></script><?php
 		?><script type="text/javascript">var hQuery = $.noConflict(true);</script><?php
 		?><script src="/modules/skin/default/frontend/frontend.js" type="text/javascript"></script>

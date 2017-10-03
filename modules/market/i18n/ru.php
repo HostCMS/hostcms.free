@@ -32,4 +32,5 @@ return array(
 	'select_section' => 'Выбрать категорию',
 	'module-options' => 'Параметры установки "%s"',
 	'version_absent' => 'Нет версии',
+	'search_placeholder' => 'Поиск',
 );

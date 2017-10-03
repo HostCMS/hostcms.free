@@ -20,6 +20,12 @@ class Comment_Model extends Core_Entity
 	public $view = '';
 
 	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $fulltext = '';
+
+	/**
 	 * Column consist item's name
 	 * @var string
 	 */
@@ -200,7 +206,7 @@ class Comment_Model extends Core_Entity
 		{
 			$this->Comment_Shop_Item->Shop_Item->clearCache();
 		}
-		
+
 		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
 
 		return $this;
@@ -212,7 +218,7 @@ class Comment_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function short_text($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function fulltextBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		ob_start();
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
@@ -253,8 +259,9 @@ class Comment_Model extends Core_Entity
 						->value(htmlspecialchars($this->ip))
 				);
 		}
-			
+
 		$oCore_Html_Entity_Div->execute();
+
 		return ob_get_clean();
 	}
 

@@ -300,12 +300,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										}
 										*/
 
-										if (!is_null($oEvent->Event_Type->id))
-										{
-											?>
-											<span class="margin-right-10 badge badge-square" style="color: <?php echo $oEvent->Event_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oEvent->Event_Type->color, 0.88)?>"><i class="<?php echo $oEvent->Event_Type->icon?>" /><?php echo $oEvent->Event_Type->name?></span>
-											<?php
-										}
+										$oEvent->event_type_id && $oEvent->showType();
 
 										// Статус дела не задан или список статусов пуст
 										//$iEventStatusId = intval($oEvent->event_status_id);
@@ -313,7 +308,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										// Список статусов дел
 										$aEventStatuses = Core_Entity::factory('Event_Status')->findAll();
 
-										$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#eee'));
+										$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
 
 										foreach ($aEventStatuses as $oEventStatus)
 										{
@@ -346,7 +341,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 													// Создатель дела
 													$oUser_Creator = $oEvent_Creator->User;
 												?>
-												&#8226; <span class="task-creator"><a href=""><?php echo htmlspecialchars($oUser_Creator->getFullName())?></a></span>
+												&#8226; <span class="task-creator"><span><?php echo htmlspecialchars($oUser_Creator->getFullName())?></span></span>
 												<?php
 												}
 											}

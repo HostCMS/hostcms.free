@@ -129,9 +129,9 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 		{
 			// Перекрытие параметров для данного поля
-			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+			foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 			{
-				$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+				$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field);
 			}
 
 			$width = htmlspecialchars($oAdmin_Form_Field->width);

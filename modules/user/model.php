@@ -34,7 +34,7 @@ class User_Model extends Core_Entity
 		'user' => array(),
 		// 'user_module' => array(),
 		'company' => array('through' => 'company_department_post_user'),
-		'company_department' => array('through' => 'company_department_post_user')
+		'company_department' => array('through' => 'company_department_post_user'),
 	);
 
 	/**
@@ -640,7 +640,7 @@ class User_Model extends Core_Entity
 		{
 			$aTempDepartmentPost[] = '<div ' . ( $i ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
-				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star pointer head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
 
 			$i++;
 		}

@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - shop_item_id($id) идентификатор товара
  * - quantity($value) количество товара
+ * - marking($value) артикул товара в заказе, если отличается от артикула товара
  * - postpone(TRUE|FALSE) товар отложен
  * - shop_warehouse_id($id) идентификатор склада
  * - siteuser_id($id) идентификатор пользователя сайта

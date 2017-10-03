@@ -1567,6 +1567,12 @@ class Shop_Order_Model extends Core_Entity
 				<b><?php echo Core::_('Shop_Order.order_card_email')?>:</b> <?php echo htmlspecialchars($this->email)?>
 			</div><?php
 		}
+		if ($this->shop_payment_system_id)
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+			</div><?php
+		}
 		?>
 		<div class="row">
 			<div class="col-xs-12">

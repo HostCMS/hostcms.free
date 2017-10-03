@@ -47,9 +47,9 @@ return array(
 	'description' => '<acronym title="Характеристика, дополнительная информация">Характеристика</acronym>',
 
 	//'icq' => '<acronym title="Номер ICQ пользователя">ICQ</acronym>',
-	'active' => "<acronym title=\"Активность пользователя\">Активность пользователя</acronym>",
+	'active' => "<acronym title=\"Активность пользователя\">Активен</acronym>",
 	'position' => '<acronym title="Должность пользователя">Должность</acronym>',
-	'only_access_my_own' => '<acronym title="Доступ только к созданным пользователем элементам">Доступ только к созданным пользователем элементам</acronym>',
+	'only_access_my_own' => '<acronym title="Доступ только к созданным пользователем элементам">Доступ только к элементам пользователя </acronym>',
 	'read_only' => '<acronym title="Доступ только для чтения для непривилегированных пользователей">Только чтение</acronym>',
 	'markDeleted_success' => 'Пользователь успешено удален',
 	'markDeleted_error' => 'Ошибка! Пользователь не удален!',

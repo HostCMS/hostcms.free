@@ -66,7 +66,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 			isset($aHost[1])
 				&& $dsn .= ";port={$aHost[1]}";
-			
+
 			!is_null($this->_config['database'])
 				&& $dsn .= ";dbname={$this->_config['database']}";
 
@@ -569,6 +569,21 @@ class Core_DataBase_Pdo extends Core_DataBase
 	}
 
 	/**
+	 * Query without fetching and buffering the result rows
+	 * @param bool $unbuffered
+	 * @return self
+	 */
+	public function unbuffered($unbuffered)
+	{
+		parent::unbuffered($unbuffered);
+
+		$this->_connection
+			->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, !$this->_unbuffered);
+
+		return $this;
+	}
+
+	/**
 	 * Send a query
 	 * @param string $sql An SQL query. The query string should not end with a semicolon. Data inside the query should be properly escaped.
 	 * @return self
@@ -635,7 +650,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 					$this->_asObject = $_asObject;
 				}
 			}
-			
+
 			$this->_free($result);
 		}
 
@@ -771,7 +786,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 	}
 
 	/**
-	 * Returns the number of columns in the result set 
+	 * Returns the number of columns in the result set
 	 * @return integer|null number of columns in the result set
 	 */
 	public function getColumnCount()
@@ -780,7 +795,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 			? $this->_result->columnCount()
 			: NULL;
 	}
-	
+
 	/**
 	 * Free last result memory
 	 * @return self
@@ -792,7 +807,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 
 		return $this;
 	}
-	
+
 	/**
 	 * Free result memory
 	 * @return self

@@ -19,6 +19,13 @@ $sAdminFormAction = '/admin/market/index.php';
 
 $category_id = intval(Core_Array::getRequest('category_id'));
 
+$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getRequest('search_query'))));
+
+$additionalParam = '';
+
+$additionalParam .= $category_id ? 'category_id=' . $category_id : '';
+$additionalParam .= $sQuery ? '&search_query=' . $sQuery . '&hostcms[action]=sendSearchQuery' : '';
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
@@ -26,7 +33,7 @@ $oAdmin_Form_Controller
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Market.title'))
-	->setAdditionalParam($category_id ? 'category_id=' . $category_id : '');
+	->setAdditionalParam($additionalParam);
 
 ob_start();
 
@@ -36,6 +43,13 @@ $oMarket_Controller
 	->setMarketOptions()
 	->category_id($category_id)
 	->page($oAdmin_Form_Controller->getCurrent());
+
+if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery'
+	&& !is_null(Core_Array::getRequest('search_query'))
+)
+{
+	$oMarket_Controller->search($sQuery);
+}
 
 $oAdmin_View = Admin_View::create()->module(Core_Module::factory($sModule));
 
@@ -147,7 +161,7 @@ if (Core_Array::getRequest('install'))
 							->getMarket()
 							->showItemsList();
 					}
-					
+
 					// Reload list of sites
 					$oAdmin_View->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
 				}

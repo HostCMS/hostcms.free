@@ -23,7 +23,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			//->addSkipColumn('email')
 			->addSkipColumn('sound')
 			->addSkipColumn('last_activity')
-			->addSkipColumn('image');
+			->addSkipColumn('image')
+			->addSkipColumn('user_group_id');
 
 		return parent::setObject($object);
 	}
@@ -37,7 +38,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$oMainTab->delete($this->getField('user_group_id'));
+		// $oMainTab->delete($this->getField('user_group_id'));
 		/*$oAdditionalTab->delete($this->getField('user_group_id'));
 
 		$user_group_id = is_null($this->_object->user_group_id)
@@ -110,13 +111,13 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->delete($this->getField('settings'));
 
 		$oMainTab
-			->move($this->getField('root_dir'), $oMainRow4)
-			->move($this->getField('active'), $oMainRow4)
-			->move($this->getField('superuser'), $oMainRow5)
-			->move($this->getField('only_access_my_own'), $oMainRow6)
-			->move($this->getField('read_only'), $oMainRow7)
-			->move($this->getField('freelance'), $oMainRow8)
-			->move($this->getField('dismissed'), $oMainRow9);
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
+			->move($this->getField('superuser')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
+			->move($this->getField('only_access_my_own')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
+			->move($this->getField('freelance')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
+			->move($this->getField('dismissed')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
+			->move($this->getField('read_only')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
+			->move($this->getField('root_dir'), $oMainRow5);
 
 		$oPersonalDataTab = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('User.users_type_form_tab_2'))
@@ -191,8 +192,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			))
 			->ico(
 				array(
-					0 => 'fa-male',
-					1 => 'fa-female',
+					0 => 'fa-mars',
+					1 => 'fa-venus',
 			));
 
 		$oPersonalDataRow3->add($oUserSex);
@@ -487,12 +488,12 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (!empty($sSocial_Address))
 			{
 				$aUrl = parse_url($sSocial_Address);
-				
+
 				// Если не был указан протокол, или
 				// указанный протокол некорректен для url
-				!array_key_exists('scheme', $aUrl) 
+				!array_key_exists('scheme', $aUrl)
 					&& $sSocial_Address = 'http://' . $sSocial_Address;
-				
+
 				$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
 				$oDirectory_Social
 					->directory_social_type_id(intval(Core_Array::getPost("social#{$oUser_Directory_Social->id}", 0)))
@@ -528,12 +529,12 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if (!empty($sSocial_Address))
 				{
 					$aUrl = parse_url($sSocial_Address);
-				
+
 					// Если не был указан протокол, или
 					// указанный протокол некорректен для url
-					!array_key_exists('scheme', $aUrl) 
+					!array_key_exists('scheme', $aUrl)
 						&& $sSocial_Address = 'http://' . $sSocial_Address;
-						
+
 					$oDirectory_Social = Core_Entity::factory('Directory_Social')
 						->directory_social_type_id(intval(Core_Array::get($aSocials, $key)))
 						->value($sSocial_Address)

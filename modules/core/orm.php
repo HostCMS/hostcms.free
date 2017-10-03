@@ -1028,7 +1028,14 @@ class Core_ORM
 		self::$_columnCacheDefaultValues[$this->_modelName] = array();
 		foreach (self::$_columnCache[$this->_modelName] as $key => $aColumn)
 		{
-			!is_null($aColumn['default']) && $aColumn['default'] != 'CURRENT_TIMESTAMP'
+			!is_null($aColumn['default'])
+				&& $aColumn['default'] != 'CURRENT_TIMESTAMP'
+				&& $aColumn['default'] != 'now()'
+				&& $aColumn['default'] != 'LOCALTIME'
+				&& $aColumn['default'] != 'localtime()'
+				&& $aColumn['default'] != 'LOCALTIMESTAMP'
+				&& $aColumn['default'] != 'localtimestamp()'
+				&& $aColumn['default'] != 'current_timestamp()' // MariaDB
 				&& self::$_columnCacheDefaultValues[$this->_modelName][$key] = $aColumn['default'];
 		}
 

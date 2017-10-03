@@ -95,6 +95,22 @@ abstract class Core_Module
 						.....
 					),
 				),
+				'actions' => array(
+					'edit' => array(									//-- ключевое наименование действия для формы
+						'name' => array(								//-- название действия в админке
+							1 => 'Редактировать',						//-- по-русски - 1=идентификатор языка
+							2 => 'Edit'									//-- по-английски - 2=идентификатор языка
+						),
+						'sorting' => 10,								//-- сортировка для действий
+						'picture' => '',								
+						'icon' => 'fa fa-pencil',
+						'color' => 'palegreen',
+						'single' => 1,
+						'group' => 0,
+						'dataset' => 0,
+						'confirm' => 0,
+					),
+				),
 			),
 	 		'form2' => array( ... )
 		)
@@ -205,7 +221,7 @@ abstract class Core_Module
 			)
 		);
 	}
-	
+
 	/**
 	 * Notify module on the action on schedule
 	 * @param int $action action number
@@ -224,7 +240,7 @@ abstract class Core_Module
 	{
 		// do smth
 	}
-	
+
 	/**
 	 * Install module
 	 * @return self
@@ -290,12 +306,25 @@ abstract class Core_Module
 				$oAdmin_Form->default_order_direction = Core_Array::get($aForm, 'default_order_direction', 0);
 				$oAdmin_Form->guid = $aForm['guid'];
 				$oAdmin_Form->save();
-				
-				foreach ($aForm['fields'] as $fieldName => $aField)
+
+				if (isset($aForm['fields']))
 				{
-					$oAdmin_Form->add(
-						$this->_addAdminFormField($fieldName, $aField)
-					);
+					foreach ($aForm['fields'] as $fieldName => $aField)
+					{
+						$oAdmin_Form->add(
+							$this->_addAdminFormField($fieldName, $aField)
+						);
+					}
+				}
+
+				if (isset($aForm['actions']))
+				{
+					foreach ($aForm['actions'] as $functionName => $aAction)
+					{
+						$oAdmin_Form->add(
+							$this->_addAdminFormAction($functionName, $aAction)
+						);
+					}
 				}
 			}
 		}
@@ -334,6 +363,33 @@ abstract class Core_Module
 		$oAdmin_Form_Field->save();
 
 		return $oAdmin_Form_Field;
+	}
+
+	/**
+	 * Add Admin Form Action
+	 *
+	 * @param string $functionName
+	 * @param array $aAction Array of attributes
+	 * @return Admin_Form_Action_Model
+	 */
+	protected function _addAdminFormAction($functionName, $aAction)
+	{
+		$oAdmin_Word_Form = $this->_addAdminWord($aAction['name']);
+
+		$oAdmin_Form_Action = Core_Entity::factory('Admin_Form_Action');
+		$oAdmin_Form_Action->admin_word_id = $oAdmin_Word_Form->id;
+		$oAdmin_Form_Action->name = $functionName;
+		$oAdmin_Form_Action->picture = Core_Array::get($aAction, 'picture', '');
+		$oAdmin_Form_Action->icon = Core_Array::get($aAction, 'icon', '');
+		$oAdmin_Form_Action->color = Core_Array::get($aAction, 'color', '');
+		$oAdmin_Form_Action->single = Core_Array::get($aAction, 'single', 0);
+		$oAdmin_Form_Action->group = Core_Array::get($aAction, 'group', 0);
+		$oAdmin_Form_Action->sorting = Core_Array::get($aAction, 'sorting', 1000);
+		$oAdmin_Form_Action->dataset = Core_Array::get($aAction, 'dataset', '-1');
+		$oAdmin_Form_Action->confirm = Core_Array::get($aAction, 'confirm', 0);
+		$oAdmin_Form_Action->save();
+
+		return $oAdmin_Form_Action;
 	}
 
 	/**
