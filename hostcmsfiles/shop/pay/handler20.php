@@ -95,7 +95,7 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			return FALSE;
 		}
 
-		$public_key = $_POST['public_key'];
+		/*$public_key = $_POST['public_key'];
 		$amount = $_POST['amount'];
 		$currency = $_POST['currency'];
 		$description = $_POST['description'];
@@ -110,11 +110,13 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			'description'    => $description,
 			'order_id'       => $order_id,
 			'type'           => $type
-		));
+		));*/
+
+		$our_signature = base64_encode(sha1($this->_private_key . $_POST['data'] . $this->_private_key , 1));
 
 		$lp_signature = $_POST['signature'];
 
-		$status_t = array('success'=>'успешный платеж','failure'=>'неуспешный платеж','wait_secure'=>'платеж на проверке','sandbox'=>'тестовый платеж');
+		$status_t = array('success'=>'Успешный платеж','failure'=>'Неуспешный платеж','wait_secure'=>'Платеж на проверке','sandbox'=>'Тестовый платеж');
 		$r_stat = $status_t[$status];
 
 		if($lp_signature != '' && $our_signature == $lp_signature && $status == 'success')

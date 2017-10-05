@@ -63,7 +63,8 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 					Core_Entity::factory('Event', $iEventId)
 						->completed(1)
-						->save();
+						->save()
+						->changeCompletedSendNotification();
 
 					$aJson['eventId'] = $iEventId;
 					Core::showJson($aJson);
@@ -302,6 +303,10 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 										$oEvent->event_type_id && $oEvent->showType();
 
+										if ($oEvent->deadline())
+										{
+											?><div class="btn-group"><i class="fa fa-exclamation-circle red margin-right-10"></i></div><?php
+										}
 										// Статус дела не задан или список статусов пуст
 										//$iEventStatusId = intval($oEvent->event_status_id);
 
@@ -341,7 +346,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 													// Создатель дела
 													$oUser_Creator = $oEvent_Creator->User;
 												?>
-												&#8226; <span class="task-creator"><span><?php echo htmlspecialchars($oUser_Creator->getFullName())?></span></span>
+												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1" onclick="$.adminLoad({path: '/admin/user/index.php', additionalParams: 'hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oUser_Creator->getFullName())?></a></span>
 												<?php
 												}
 											}

@@ -84,33 +84,7 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-)/*->add(
-		Admin_Form_Entity::factory('Menu')
-			->name(Core::_('User.ua_link_user_access'))
-			->icon('fa fa-user')
-
-			->add(
-				Admin_Form_Entity::factory('Menu')
-					->name(Core::_('User.ua_link_user_modules_access'))
-					->icon('fa fa-puzzle-piece')
-					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref($sUserSiteChoosePath, NULL, NULL, '')
-					)
-					->onclick(
-						$oAdmin_Form_Controller->getAdminLoadAjax($sUserSiteChoosePath, NULL, NULL, '')
-					)
-			)->add(
-				Admin_Form_Entity::factory('Menu')
-					->name(Core::_('User.ua_link_user_forms_access'))
-					->icon('fa fa-flash')
-					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref($sUserSiteChoosePath, NULL, NULL, $sActionAdditionalParam)
-					)
-					->onclick(
-						$oAdmin_Form_Controller->getAdminLoadAjax($sUserSiteChoosePath, NULL, NULL, $sActionAdditionalParam)
-					)
-			)
-)*/->add(
+)->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('User.wallpaper'))
 		->icon('fa fa-image')
@@ -175,6 +149,24 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oUserControllerApply);
+}
+
+// Действие "Просмотр"
+$oAdminFormActionView = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('view');
+
+if ($oAdminFormActionView && $oAdmin_Form_Controller->getAction() == 'view')
+{
+	$oUserControllerView = Admin_Form_Action_Controller::factory(
+		'User_Controller_View', $oAdminFormActionView
+	);
+	
+	$oUserControllerView
+		->addEntity($oAdmin_Form_Entity_Breadcrumbs);	
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oUserControllerView);
 }
 
 // Действие "Копировать"

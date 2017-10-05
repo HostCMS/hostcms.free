@@ -622,6 +622,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 			break;
 			case 'save':
+			case 'saveModal':
 				$primaryKeyName = $this->_object->getPrimaryKeyName();
 
 				// Значение первичного ключа до сохранения
@@ -694,6 +695,14 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				<?php*/
 				$this->addContent(ob_get_clean());
 
+				$return = TRUE;
+			break;
+			case 'applyModal':
+				$this->_applyObjectProperty();
+				
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').remove();</script>');
+				
 				$return = TRUE;
 			break;
 			default:

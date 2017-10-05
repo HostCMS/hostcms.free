@@ -404,6 +404,24 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		return $oShop_Group;
 	}
 
+	protected function _uploadHttpFile($sSourceFile)
+	{
+		$Core_Http = Core_Http::instance()
+			->clear()
+			->url($sSourceFile)
+			->timeout(5)
+			->execute();
+
+		$content = $Core_Http->getBody();
+
+		// Файл из WEB'а, создаем временный файл
+		$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
+
+		Core_File::write($sTempFileName, $content);
+
+		return $sTempFileName;
+	}
+
 	/**
 	* Импорт CSV
 	* @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImport
@@ -913,7 +931,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							);
 							$sSourceFileBaseName = basename($sSourceFile, '');
 
-							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
+							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0
+								|| strpos(strtolower($sSourceFile), "https://") === 0;
 
 							if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 							{
@@ -922,12 +941,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 								if ($bHttp)
 								{
-									// Файл из WEB'а, создаем временный файл
-									$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-									// Копируем содержимое WEB-файла в локальный временный файл
-									file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-									// Файл-источник равен временному файлу
-									$sSourceFile = $sTempFileName;
+									try {
+										$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+									}
+									catch (Exception $e)
+									{
+										Core_Message::show($e->getMessage(), 'error');
+										$sSourceFile = NULL;
+									}
 								}
 								else
 								{
@@ -1025,7 +1046,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								{
 									$this->_oCurrentGroup->image_large = $sTargetFileName;
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setLargeImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										&& $this->_oCurrentGroup->setLargeImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
 								if ($result['small_image'])
@@ -1068,12 +1091,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 								if ($bHttp)
 								{
-									// Файл из WEB'а, создаем временный файл
-									$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-									// Копируем содержимое WEB-файла в локальный временный файл
-									file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-									// Файл-источник равен временному файлу
-									$sSourceFile = $sTempFileName;
+									try {
+										$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+									}
+									catch (Exception $e)
+									{
+										Core_Message::show($e->getMessage(), 'error');
+										$sSourceFile = NULL;
+									}
 								}
 								else
 								{
@@ -1321,7 +1346,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeFindByMarking', $this, array($this->_oCurrentShop, $this->_oCurrentItem));
 
 							$this->_oCurrentItem->marking = $sData;
-							
+
 							if (in_array('marking', $this->_aConfig['itemSearchFields']))
 							{
 								$oTmpObject = $this->_oCurrentShop->Shop_Items;
@@ -1609,7 +1634,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									}
 								}
 							}
-							
+
 							$this->_oCurrentItem->guid = $sData;
 						break;
 						default:
@@ -1692,12 +1717,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 											if ($bHttp)
 											{
-												// Файл из WEB'а, создаем временный файл
-												$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-												// Копируем содержимое WEB-файла в локальный временный файл
-												file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-												// Файл-источник равен временному файлу
-												$sSourceFile = $sTempFileName;
+												try {
+													$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+												}
+												catch (Exception $e)
+												{
+													Core_Message::show($e->getMessage(), 'error');
+													$sSourceFile = NULL;
+												}
 											}
 											else
 											{
@@ -2123,12 +2150,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						if ($bHttp)
 						{
-							// Файл из WEB'а, создаем временный файл
-							$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-							// Копируем содержимое WEB-файла в локальный временный файл
-							file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-							// Файл-источник равен временному файлу
-							$sSourceFile = $sTempFileName;
+							try {
+								$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+								$sSourceFile = NULL;
+							}
 						}
 						else
 						{
@@ -2266,12 +2295,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						if ($bHttp)
 						{
-							// Файл из WEB'а, создаем временный файл
-							$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-							// Копируем содержимое WEB-файла в локальный временный файл
-							file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-							// Файл-источник равен временному файлу
-							$sSourceFile = $sTempFileName;
+							try {
+								$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+								$sSourceFile = NULL;
+							}
 						}
 						else
 						{
@@ -2438,12 +2469,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 								if ($bHttp)
 								{
-									// Файл из WEB'а, создаем временный файл
-									$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-									// Копируем содержимое WEB-файла в локальный временный файл
-									file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-									// Файл-источник равен временному файлу
-									$sSourceFile = $sTempFileName;
+									try {
+										$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+									}
+									catch (Exception $e)
+									{
+										Core_Message::show($e->getMessage(), 'error');
+										$sSourceFile = NULL;
+									}
 								}
 								else
 								{
@@ -2502,12 +2535,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 										if ($bHttp)
 										{
-											// Файл из WEB'а, создаем временный файл
-											$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-											// Копируем содержимое WEB-файла в локальный временный файл
-											file_put_contents($sTempFileName, file_get_contents($sSourceFileSmall));
-											// Файл-источник равен временному файлу
-											$sSourceFileSmall = $sTempFileName;
+											try {
+												$sSourceFileSmall = $this->_uploadHttpFile($sSourceFileSmall);
+											}
+											catch (Exception $e)
+											{
+												Core_Message::show($e->getMessage(), 'error');
+												$sSourceFileSmall = NULL;
+											}
 										}
 										else
 										{
@@ -2724,12 +2759,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						if ($bHttp)
 						{
-							// Файл из WEB'а, создаем временный файл
-							$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
-							// Копируем содержимое WEB-файла в локальный временный файл
-							file_put_contents($sTempFileName, file_get_contents($sSourceFile));
-							// Файл-источник равен временному файлу
-							$sSourceFile = $sTempFileName;
+							try {
+								$sSourceFile = $this->_uploadHttpFile($sSourceFile);
+							}
+							catch (Exception $e)
+							{
+								Core_Message::show($e->getMessage(), 'error');
+								$sSourceFile = NULL;
+							}
 						}
 						else
 						{
@@ -2920,7 +2957,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			setlocale(LC_ALL, ALT_SITE_LOCALE);
 		}
 
-		$aCsvLine = @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"');
+		$aCsvLine = PHP_VERSION_ID >= 50300
+			? @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter, '"')
+			: @fgetcsv($fileDescriptor, 0, $this->separator, $this->limiter);
 
 		if ($aCsvLine === FALSE)
 		{

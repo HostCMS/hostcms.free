@@ -55,7 +55,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/sparkline/jquery.sparkline.js')
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/nestable/jquery.nestable.min.js')			
+			->addJs('/modules/skin/' . $this->_skinName . '/js/nestable/jquery.nestable.min.js')
 
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/raphael-2.0.2.min.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris.js')
@@ -99,7 +99,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')			
+			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			;
 	}
 
@@ -698,6 +698,11 @@ class Skin_Bootstrap extends Core_Skin
 						appendTo: '.sidebar-header-wrapper',
 						source: function(request, response) {
 
+							$('i.searchicon')
+								.removeClass('fa-search')
+								.addClass('fa-spinner')
+								.addClass('fa-spin');
+
 							$.ajax({
 							  url: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oSearchModule->id?>&type=1&autocomplete=1',
 							  dataType: 'json',
@@ -705,6 +710,11 @@ class Skin_Bootstrap extends Core_Skin
 								queryString: request.term
 							  },
 							  success: function( data ) {
+								$('i.searchicon')
+									.removeClass('fa-spinner')
+									.removeClass('fa-spin')
+									.addClass('fa-search');
+
 								response( data );
 							  }
 							});

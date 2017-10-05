@@ -95,6 +95,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 
 		if ($this->buttons === TRUE)
 		{
+			$sOperaion = $this->Admin_Form_Controller->getOperation();
+			$sOperaionSufix = $sOperaion == 'modal'
+				? 'Modal'
+				: '';
+			
 			// Кнопки
 			$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
 
@@ -105,7 +110,7 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 				->class('btn btn-blue')
 				->value(Core::_('admin_form.save'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save')
+					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save' . $sOperaionSufix)
 				);
 
 			$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
@@ -115,7 +120,7 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 				->type('submit')
 				->value(Core::_('admin_form.apply'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply' . $sOperaionSufix)
 				);
 
 			$oAdmin_Form_Entity_Buttons

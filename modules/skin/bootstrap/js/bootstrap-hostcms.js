@@ -1632,8 +1632,6 @@
 
 			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
 			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
-			
-			console.log("data['lastNotificationId'] = " + data['lastNotificationId']);
 
 			$.ajax({
 				//context: textarea,
@@ -1644,16 +1642,15 @@
 				success: function(resultData){
 
 					var jNotificationsListBox = $('.navbar-account #notificationsListBox');
-					
-					console.log(resultData);
 
 					if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId')
 					// Есть уведомления для сотрудника
-						&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length))
+						//&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length)
+					)
 					{
 
 						// Удаление записи об отсутствии уведомлений
-						$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
+						//$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
 
 						/*
 						if (jNotificationsListBox.data('lastNotificationId') == 0)
@@ -1691,6 +1688,9 @@
 						 // Есть новые уведомления
 						if (resultData['newNotifications'].length)
 						{
+							// Удаление записи об отсутствии уведомлений
+							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
+
 							$.each(resultData['newNotifications'], function( index, notification ){
 
 								// Добавляем уведомление в список
@@ -1706,6 +1706,12 @@
 							{
 								$.setNotificationsSlimScroll();
 							}
+
+							// Показываем значек корзины - очистки списка уведомлений
+
+							jNotificationsListBox.find('.footer .fa-trash-o').show();
+							jNotificationsListBox.find('.footer #notification-search').show();
+							jNotificationsListBox.find('.footer .glyphicon-search').show();
 						}
 
 						var countUnreadNotifications = $('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').length;
@@ -1719,11 +1725,13 @@
 							.toggleClass('hidden', !countUnreadNotifications);
 
 						// Показываем значек корзины - очистки списка уведомлений.
+						/*
 
 						jNotificationsListBox.find('.footer .fa-trash-o').show();
 
 						jNotificationsListBox.find('.footer #notification-search').show();
 						jNotificationsListBox.find('.footer .glyphicon-search').show();
+						*/
 					}
 				}
 			});
@@ -1738,7 +1746,7 @@
 			$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread > a').each(function (){
 
 				// Непрочитанное уведомление находится в области видимости выпадающего блока - делаем его прочитанным
-				if ($.elementInBox($(this), $('.navbar-account div#notificationsListBox'), wheelDelta, delta))
+				if ($.elementInBox($(this), $('.navbar-account div#notificationsListBox .slimScrollDiv'), wheelDelta, delta))
 				{
 					var notificationBox = $(this).parent('li.unread');
 						notificationBox.removeClass('unread');
@@ -1763,7 +1771,7 @@
 				var data = jQuery.getData({});
 
 				data['notificationsListId'] = masVisibleUnreadNotifications;
-				data['currentUserId'] = $('.navbar-account #notificationsListBox').data('currentUserId')
+				data['currentUserId'] = $('.navbar-account #notificationsListBox').data('currentUserId');
 
 				$.ajax({
 					//context: textarea,
@@ -1929,26 +1937,6 @@
 											// Отмечаем дело как выполненное
 											$(this).addClass('mark-completed');
 
-											//jEventsList.slimscroll({update: true});
-
-											// Нет незавершенных дел
-											// !jEventsList.find('.task-item[id != 0]:not(.mark-completed)').length && jEventsList.find('.task-item[id = 0]').toggleClass('hidden');
-
-											// Сохраняем новое положение ползунка после удаления дела из списка
-											//$('#eventsAdminPage').data({'topPositionSlimScrolBar': jEventsListContainer.find('.slimScrollBar').css('top')});
-
-											// Есть полоса прокрутки и высота списка дел меньше максимальной высоты для списка
-
-											/*
-											if (jEventsListContainer.find('.slimScrollDiv').length
-												&& iMaxHeightEventsListContainer >= jEventsList.get(0).scrollHeight)
-											{
-												jEventsList
-													.slimscroll({destroy: true})
-													.prop('style', '');
-											}*/
-
-
 											var ajaxData = $.getData({});
 
 											ajaxData['eventId'] = jEventItem.prop('id');
@@ -2001,8 +1989,6 @@
 
 						$(this).find('i').addClass('fa-spin');
 						$.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $(this).data('moduleId') + '&type=0', context: jEventsAdminPage});
-
-						//console.log("Обновление списка дел $(this).data('moduleId') = ", $(this).data('moduleId'));
 					}
 				}, '[data-toggle = "upload"]'
 			)
@@ -2095,8 +2081,6 @@
 
 			$(document)
 				.on('shown.bs.popover', 'a.fc-event',  function() {
-
-					//console.log('shown.bs.popover');
 
 					$('.popover .calendar-event-description').slimscroll({
 						height: '75px',
@@ -2608,10 +2592,6 @@ $(function(){
 
 			dropdownStepList.prev("[id ^= 'adding_conversion_to_']").show();
 			dropdownStepList.remove();
-
-
-
-			console.log('.dropdown-step-list .close click');
 		})
 		.on('click', '.title_users', function() {
 
@@ -2637,8 +2617,6 @@ $(function(){
 		.on(
 			{
 				'click': function(event) {
-
-					console.log('click!!!!');
 
 					var iconPermissionId = $(this).attr('id'), //department_5_2_3 или user_7_2_3
 						aPermissionProperties = iconPermissionId.split('_'),
@@ -2670,25 +2648,14 @@ $(function(){
 
 					//$('#id_content #row_0_9').toggleHighlight();
 					$.adminCheckObject({objectId: 'check_0_' + dealTemplateStepId, windowId: 'id_content'}); $.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType, windowId: 'id_content'});
-
-					console.log('mouseclick $(this).attr("class") = ' + $(this).attr('class'));
 				},
 
 				'mousedown': function(event) {
 
-					console.log('mousedown $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
 					$(this).removeClass('changed');
 				},
 
-				/*
-				'mouseup': function(event) {
-
-					console.log('mouseup $(this).attr("class") = ' + $(this).attr('class'));
-				},*/
-
 				'mouseover': function(event) {
-
-					console.log('mouseover $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
 
 					if ($(this).hasClass('changed'))
 					{
@@ -2696,8 +2663,6 @@ $(function(){
 					}
 				},
 				'mouseout': function() {
-
-					console.log('mouseout $(this).attr("data-allowed") = ' + $(this).attr("data-allowed") + ' $(this).attr("class") = ' + $(this).attr('class'));
 
 					$(this).removeClass('changed');
 				}
@@ -2834,8 +2799,6 @@ function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
 		moduleId = eventIdParts[1],
 
 		ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId, 'deltaSeconds': delta.asSeconds()}) ;
-
-		//console.log('event resize');
 
 		$.ajax({
 

@@ -647,4 +647,24 @@ class User_Model extends Core_Entity
 
 		echo implode('', $aTempDepartmentPost);
 	}
+
+	/**
+	 * Get user age
+	 * @return string
+	 */
+	public function getAge()
+	{
+		return floor((time() - strtotime($this->birthday)) / 31556926);
+	}
+
+	/**
+	 * Get user sex
+	 * @return string
+	 */
+	public function getSex()
+	{
+		return $this->sex
+			? '<i class="fa fa-venus pink"></i>'
+			: '<i class="fa fa-mars sky"></i>';
+	}
 }

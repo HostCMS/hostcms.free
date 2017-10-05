@@ -899,10 +899,16 @@ td.importantField a {
 	height: auto;
 	padding-bottom: 10px;
 }
-.task-container .tasks-list .task-item .task-creator span{
+.task-container .tasks-list .task-item .task-creator {
 	color: #999;
 	font-size: 12px;
 }
+.task-container .tasks-list .task-item .task-creator a {
+	color: inherit;
+	font-size: inherit;
+}
+
+.task-container .tasks-list .task-item .task-creator a:hover { text-decoration: underline; /*cursor: pointer;*/ }
 
 .task-container .tasks-list .task-item .task-body{
 	height: auto;
@@ -1897,7 +1903,8 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 	background-color: #a0d468;
 }
 .offline {
-	background-color: #d73d32;
+	/* background-color: #d73d32; */
+	background-color: #ddd;
 }
 
 .margin-top-23 {
@@ -2853,3 +2860,27 @@ li.select2-selection__choice .user-post, li.select2-selection__choice .company-d
     margin-top: 25px;
 }
 input.checkbox-slider[type="checkbox"] ~ .text::before { content:"" !important; }
+.event-title { margin-top: 5px; }
+.event-title-deadline::before { color: #f04618; margin-right: 5px; }
+.event-description { display: block; color: #999; font-size: 11px; line-height: 17px; margin-top: 5px; }
+.event-date { color: #555; font-size: 85%; margin-top: 5px; }
+.event-date a { color: #999; font-size: inherit; }
+.red { color: #f04618 !important; }
+
+.profile-container .profile-contacts .contact-info p {	padding-top: 0; padding-bottom: 0; }
+.profile-container .profile-header .profile-info .header-information { margin-top: 5px; }
+.profile-container .profile-header .profile-stats { border-right: 0 !important; border-left: 1px solid #eee; }
+.profile-container .profile-header .profile-info { border-right: 0 !important; }
+
+.gold { color: #d0c38a !important; }
+
+.facebook { color: #4267B2 !important; }
+.vk { color:#507299 !important; }
+.odnoklassniki { color:#EE8208 !important; }
+.instagram { color: #CB3E6D !important; }
+.twitter { color:#1DA1F2 !important; }
+.google-plus { color:#DD4B39 !important; }
+
+.skype { color: #03AFEF !important; }
+.whatsapp { color: #00E676 !important;  }
+.telegram { color: #279DD8 !important;  }

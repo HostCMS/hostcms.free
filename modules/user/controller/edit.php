@@ -492,7 +492,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Если не был указан протокол, или
 				// указанный протокол некорректен для url
 				!array_key_exists('scheme', $aUrl)
-					&& $sSocial_Address = 'http://' . $sSocial_Address;
+					&& $sSocial_Address = /*'http://' .*/ $sSocial_Address;
 
 				$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
 				$oDirectory_Social
@@ -533,7 +533,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Если не был указан протокол, или
 					// указанный протокол некорректен для url
 					!array_key_exists('scheme', $aUrl)
-						&& $sSocial_Address = 'http://' . $sSocial_Address;
+						&& $sSocial_Address = /*'http://' .*/ $sSocial_Address;
 
 					$oDirectory_Social = Core_Entity::factory('Directory_Social')
 						->directory_social_type_id(intval(Core_Array::get($aSocials, $key)))
@@ -569,9 +569,11 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (!empty($sMessenger_Address))
 			{
 				$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
+				
+				var_dump(intval(Core_Array::getPost("messenger#{$oDirectory_Messenger->id}")));
 
 				$oDirectory_Messenger
-					->directory_messenger_type_id(intval(Core_Array::getPost("messenger#{$oDirectory_Messenger->id}", 0)))
+					->directory_messenger_type_id(intval(Core_Array::getPost("messenger#{$oUser_Directory_Messenger->id}", 0)))
 					->value($sMessenger_Address)
 					->save();
 			}
