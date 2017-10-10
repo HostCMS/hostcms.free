@@ -44,13 +44,64 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 		switch ($operation)
 		{
+			case 'modal':
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+				//$newWindowId = 'Modal_' . time();
+
+				//ob_start();
+				/*?>
+				<div id="<?php echo $newWindowId?>">
+				<?php*/
+				/*if (!$this->_prepeared)
+				{
+					$this->_prepareForm();
+
+					// Событие onAfterRedeclaredPrepareForm вызывается в двух местах
+					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+				}*/
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show
+					->Admin_Form_Controller($this->_Admin_Form_Controller)
+					//->formId($this->_formId)
+					//->tabs($this->_tabs)
+					//->buttons($this->_addButtons())
+					;
+
+				//echo ;
+				$this->addContent($this->_showEditForm());
+
+				$return = TRUE;
+			break;
+
 			default:
 			case NULL: // Показ формы
+			
+				ob_start();
+
+				$content = $this->_showEditForm();
+					
+				$oAdmin_View = Admin_View::create();
+				$oAdmin_View
+					->children($this->_children)
+					->pageTitle($this->title)
+					->module($this->_Admin_Form_Controller->getModule())
+					->content($content)
+					// ->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)
+					->show();
+
+				$this->addContent(
+					//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
+					ob_get_clean()
+				);
+				
 				$this->_Admin_Form_Controller
 					->title($this->title)
 					->pageTitle($this->title);
 
-				$return = $this->_showEditForm();
+				$return = TRUE;
 			break;
 		}
 
@@ -314,24 +365,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 			</div>
 		</div>
 		<?php
-		$content = ob_get_clean();
-
-		ob_start();
-
-		$oAdmin_View = Admin_View::create();
-		$oAdmin_View
-			->children($this->_children)
-			->pageTitle($this->title)
-			->module($this->_Admin_Form_Controller->getModule())
-			->content($content)
-			// ->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)
-			->show();
-
-		$this->addContent(
-			//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
-			ob_get_clean()
-		);
-
-		return TRUE;
+	
+		return ob_get_clean();
 	}
 }

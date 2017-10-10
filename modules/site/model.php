@@ -125,7 +125,7 @@ class Site_Model extends Core_Entity
 		'error' => 'E_ALL',
 		'error404' => 0,
 		'error403' => 0,
-		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404",
+		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
 		'closed' => 0,
 		'safe_email' => 1,
 		'html_cache_use' => 0,

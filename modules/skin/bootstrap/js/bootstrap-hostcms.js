@@ -2092,7 +2092,6 @@
 				// Удаление события календаря
 				.on('click', '.popover #deleteCalendarEvent', function () {
 
-
 					var eventId = $(this).data('eventId'),
 						moduleId = $(this).data('moduleId') ;
 
@@ -2754,6 +2753,23 @@ function calendarEvents(start, end, timezone, callback)
 	});
 }
 
+function calendarEventClick(event, jsEvent, view)
+{
+	console.log(event);
+
+	var eventIdParts = event.id.split('_'), // Идентификатор события календаря состоит из 2-х частей - id сущности и id модуля, разделенных '_'
+		eventId = eventIdParts[0],
+		moduleId = eventIdParts[1];
+
+	$.modalLoad({
+		path: event.path,
+		action: 'edit',
+		operation: 'modal',
+		additionalParams: 'hostcms[checked][0][' + eventId + ']=1&event_user_id[]=' + event.event_user_id,
+		windowId: 'id_content'
+	});
+}
+
 function calendarEventRender(event, element)
 {
 	if (event.dragging || event.resizing)
@@ -2767,7 +2783,7 @@ function calendarEventRender(event, element)
 
 	$(element).css({'background-image': 'linear-gradient(to bottom,#fff 0,#ededed 100%)'});
 
-	element.popover({
+	/*element.popover({
 		title: event.title,
 		//placement: 'right',
 		content: event.htmlDetails || event.description || event.title,
@@ -2776,7 +2792,7 @@ function calendarEventRender(event, element)
 		container:'.fc-view .fc-body',
 		placement: 'auto right',
 		template: '<div class="popover popover-calendar-event " role="tooltip"><div class="arrow"></div><h3 class="popover-title" ' + (event.borderColor ? ('style="border-color: ' + event.borderColor + '"') : '')  + '></h3><button type="button" class="close">×</button><div class="popover-content bg-white"></div></div>'
-	});
+	});*/
 };
 
 function calendarEventDragStart( event, jsEvent, ui, view )

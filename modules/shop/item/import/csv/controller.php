@@ -1223,7 +1223,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// идентификатор валюты
 						case 'currency_id':
-							$oTmpObject = Core_Entity::factory("Shop_Currency")->find($sData);
+							$oTmpObject = Core_Entity::factory('Shop_Currency')->find($sData);
 							if (!is_null($oTmpObject->id))
 							{
 								$this->_oCurrentItem->shop_currency_id = $oTmpObject->id;
@@ -1231,7 +1231,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// идентификатор налога
 						case 'tax_id':
-							$oTmpObject = Core_Entity::factory("Shop_Tax")->find($sData);
+							$oTmpObject = Core_Entity::factory('Shop_Tax')->find($sData);
 							if (!is_null($oTmpObject->id))
 							{
 								$this->_oCurrentItem->shop_tax_id = $oTmpObject->id;
@@ -1239,7 +1239,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// идентификатор производителя
 						case 'producer_id':
-							$oTmpObject = Core_Entity::factory("Shop_Producer")->find($sData);
+							$oTmpObject = Core_Entity::factory('Shop_Producer')->find($sData);
 							if (!is_null($oTmpObject->id))
 							{
 								$this->_oCurrentItem->shop_producer_id = $oTmpObject->id;
@@ -2076,7 +2076,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					$aShopGroups
 						->queryBuilder()
 						->where('guid', 'IN', $this->_aAdditionalGroups);
-
+	
 					$aShopGroups = $aShopGroups->findAll(FALSE);
 
 					foreach ($aShopGroups as $oShopGroup)

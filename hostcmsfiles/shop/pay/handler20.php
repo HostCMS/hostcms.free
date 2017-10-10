@@ -95,13 +95,14 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			return FALSE;
 		}
 
-		/*$public_key = $_POST['public_key'];
+		$public_key = $_POST['public_key'];
 		$amount = $_POST['amount'];
 		$currency = $_POST['currency'];
 		$description = $_POST['description'];
 		$order_id = $_POST['order_id'];
-		$type = $_POST['type'];
-		$status = $_POST['status'];
+		$action = $_POST['action'];
+
+		/*$status = $_POST['status'];
 
 		$liqpay = new LiqPay($this->_public_key, $this->_private_key);
 		$our_signature = $liqpay->cnb_signature(array(
@@ -112,7 +113,21 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			'type'           => $type
 		));*/
 
-		$our_signature = base64_encode(sha1($this->_private_key . $_POST['data'] . $this->_private_key , 1));
+		$status = $_POST['status'];
+
+		// $our_signature = base64_encode(sha1($this->_private_key . $_POST['data'] . $this->_private_key , 1));
+
+		$aParams = array(
+			'amount'         => floatval($amount),
+			'currency'       => strval($currency),
+			'description'    => strval($description),
+			'order_id'       => strval($order_id),
+			'action'         => strval($action),
+			'version'        => 3
+		);
+
+		$liqpay = new LiqPay($public_key, $private_key);
+		$our_signature = $liqpay->cnb_signature($aParams);
 
 		$lp_signature = $_POST['signature'];
 
@@ -132,6 +147,16 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			$this->_shopOrder->system_information = sprintf("Заказ НЕ оплачен через LiqPay\n\nID платежа в системе LiqPay:\t{$_POST['transaction_id']}\nТелефон плательщика в международном формате:\t{$_POST['sender_phone']}\nСтатус платежа:\t{$r_stat}\n\n");
 			$this->_shopOrder->save();
 		}
+
+		// ----------------
+		ob_start();
+		print_r($_POST);
+		$xxx = ob_get_clean();
+
+		$this->_shopOrder->system_information = $this->_shopOrder->system_information . $xxx;
+		$this->_shopOrder->save();
+		// ----------------
+
 	}
 
 	public function getInvoice()
@@ -166,12 +191,20 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 		// формируем форму оплаты
 		$liqpay = new LiqPay($this->_public_key, $this->_private_key);
 		echo $liqpay->cnb_form(array(
-			'amount'      => $sum,
+			/*'amount'      => $sum,
 			'currency'    => $this->_currency_name,
 			'description' => "Оплата заказа №{$this->_shopOrder->id}",
 			'order_id'    => "order_id_{$this->_shopOrder->id}",
 			'type'        => 'buy',
 			//'sandbox'     => 1,
+			'server_url'  => $handler_url*/
+
+			'amount'         => floatval($sum),
+			'currency'       => $this->_currency_name,
+			'description'    => "Оплата заказа №{$this->_shopOrder->id}",
+			'order_id'       => "order_id_{$this->_shopOrder->id}",
+			'action'         => 'pay',
+			'version'        => 3,
 			'server_url'  => $handler_url
 		));
 	}

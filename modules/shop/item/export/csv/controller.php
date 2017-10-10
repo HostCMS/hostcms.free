@@ -372,7 +372,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			$aShortcuts = $oShopItem->Shop_Items->findAll(FALSE);
 			foreach ($aShortcuts as $oShortcut_Item)
 			{
-				$aTmpShortcuts[] = $oShortcut_Item->guid;
+				$aTmpShortcuts[] = $oShortcut_Item->shop_group_id
+					? $oShortcut_Item->Shop_Group->guid
+					: 0;
 				$oShortcut_Item->clear();
 			}
 			unset($aShortcuts);

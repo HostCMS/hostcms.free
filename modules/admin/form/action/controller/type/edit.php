@@ -651,7 +651,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			case 'modal':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-				$newWindowId = 'Modal_' . time();
+				//$newWindowId = 'Modal_' . time();
 
 				ob_start();
 				/*?>
@@ -699,10 +699,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			break;
 			case 'applyModal':
 				$this->_applyObjectProperty();
-				
+
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').remove();</script>');
-				
+
 				$return = TRUE;
 			break;
 			default:

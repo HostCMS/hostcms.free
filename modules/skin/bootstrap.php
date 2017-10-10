@@ -698,7 +698,7 @@ class Skin_Bootstrap extends Core_Skin
 						appendTo: '.sidebar-header-wrapper',
 						source: function(request, response) {
 
-							$('i.searchicon')
+							$('.sidebar-header-wrapper i.searchicon')
 								.removeClass('fa-search')
 								.addClass('fa-spinner')
 								.addClass('fa-spin');
@@ -710,7 +710,7 @@ class Skin_Bootstrap extends Core_Skin
 								queryString: request.term
 							  },
 							  success: function( data ) {
-								$('i.searchicon')
+								$('.sidebar-header-wrapper i.searchicon')
 									.removeClass('fa-spinner')
 									.removeClass('fa-spin')
 									.addClass('fa-search');
