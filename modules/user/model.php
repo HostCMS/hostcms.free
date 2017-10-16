@@ -85,7 +85,8 @@ class User_Model extends Core_Entity
 		'event' => array('through' => 'event_user'),
 		'notification_user' => array(),
 		'notification' => array('through' => 'notification_user'),
-		'company_department' => array('through' => 'company_department_post_user')
+		'company_department' => array('through' => 'company_department_post_user'),
+		'deal_template_step_access_user'  => array(),
 	);
 
 	/**

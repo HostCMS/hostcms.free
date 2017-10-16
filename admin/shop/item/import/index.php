@@ -11,6 +11,7 @@ require_once('../../../../bootstrap.php');
 
 Core_Auth::authorization($sModule = 'shop');
 
+$shop_groups_parent_id = Core_Array::getRequest('shop_groups_parent_id', 0);
 $oShop = Core_Entity::factory('Shop', Core_Array::getRequest('shop_id', 0));
 $oShopDir = $oShop->Shop_Dir;
 $shop_group_id = Core_Array::getRequest('shop_group_id', 0);
@@ -127,430 +128,6 @@ Admin_Form_Entity::factory('Breadcrumb')
 	)
 );
 
-// Формируем массивы данных
-$aLangConstNames = array(
-	Core::_('Shop_Exchange.!download'),
-
-	// groups
-	Core::_('Shop_Exchange.group_id'),
-	Core::_('Shop_Exchange.group_name'),
-	Core::_('Shop_Exchange.group_path'),
-	Core::_('Shop_Exchange.group_sorting'),
-	Core::_('Shop_Exchange.group_description'),
-	Core::_('Shop_Exchange.group_active'),
-	Core::_('Shop_Exchange.group_seo_title'),
-	Core::_('Shop_Exchange.group_seo_description'),
-	Core::_('Shop_Exchange.group_seo_keywords'),
-	Core::_('Shop_Exchange.group_image_large'),
-	Core::_('Shop_Exchange.group_image_small'),
-	Core::_('Shop_Exchange.group_guid'),
-	Core::_('Shop_Exchange.parent_group_guid'),
-
-	// currency
-	Core::_('Shop_Exchange.currency_id'),
-
-	// tax
-	Core::_('Shop_Exchange.tax_id'),
-
-	// producer
-	Core::_('Shop_Exchange.producer_id'),
-	Core::_('Shop_Exchange.producer_name'),
-
-	// seller
-	Core::_('Shop_Exchange.seller_id'),
-	Core::_('Shop_Exchange.seller_name'),
-
-	// measure
-	Core::_('Shop_Exchange.measure_id'),
-	Core::_('Shop_Exchange.measure_value'),
-
-	// items
-	Core::_('Shop_Exchange.item_id'),
-	Core::_('Shop_Exchange.item_name'),
-	Core::_('Shop_Exchange.item_marking'),
-	Core::_('Shop_Exchange.item_datetime'),
-	Core::_('Shop_Exchange.item_description'),
-	Core::_('Shop_Exchange.item_text'),
-	Core::_('Shop_Exchange.item_image_large'),
-	Core::_('Shop_Exchange.item_image_small'),
-	Core::_('Shop_Exchange.item_tags'),
-	Core::_('Shop_Exchange.item_weight'),
-	Core::_('Shop_Exchange.item_length'),
-	Core::_('Shop_Exchange.item_width'),
-	Core::_('Shop_Exchange.item_height'),
-	Core::_('Shop_Exchange.item_price'),
-	Core::_('Shop_Exchange.item_active'),
-	Core::_('Shop_Exchange.item_sorting'),
-	Core::_('Shop_Exchange.item_path'),
-	Core::_('Shop_Exchange.item_seo_title'),
-	Core::_('Shop_Exchange.item_seo_description'),
-	Core::_('Shop_Exchange.item_seo_keywords'),
-	Core::_('Shop_Exchange.item_indexing'),
-	Core::_('Shop_Exchange.item_yandex_market'),
-	Core::_('Shop_Exchange.item_yandex_market_bid'),
-	Core::_('Shop_Exchange.item_yandex_market_cid'),
-	Core::_('Shop_Exchange.item_yandex_market_manufacturer_warranty'),
-	Core::_('Shop_Exchange.item_yandex_market_vendorcode'),
-	Core::_('Shop_Exchange.item_yandex_market_country_of_origin'),
-	Core::_('Shop_Exchange.item_parent_marking'),
-	Core::_('Shop_Exchange.item_parent_guid'),
-	Core::_('Shop_Exchange.digital_item_name'),
-	Core::_('Shop_Exchange.digital_item_value'),
-	Core::_('Shop_Exchange.digital_item_filename'),
-	Core::_('Shop_Exchange.digital_item_count'),
-	Core::_('Shop_Exchange.item_end_datetime'),
-	Core::_('Shop_Exchange.item_start_datetime'),
-	Core::_('Shop_Exchange.item_type'),
-	Core::_('Shop_Exchange.siteuser_id'),
-	Core::_('Shop_Exchange.item_yandex_market_sales_notes'),
-	Core::_('Shop_Exchange.item_additional_group'),
-	Core::_('Shop_Exchange.item_guid'),
-
-	// item special prices
-	Core::_('Shop_Exchange.specialprices_min_quantity'),
-	Core::_('Shop_Exchange.specialprices_max_quantity'),
-	Core::_('Shop_Exchange.specialprices_price'),
-	Core::_('Shop_Exchange.specialprices_percent'),
-
-	// item associated
-	Core::_('Shop_Exchange.item_parent_associated'),
-	Core::_('Shop_Exchange.item_associated_markings'),
-
-	// order
-	Core::_('Shop_Exchange.order_guid'),
-	Core::_('Shop_Exchange.order_number'),
-	Core::_('Shop_Exchange.order_country'),
-	Core::_('Shop_Exchange.order_location'),
-	Core::_('Shop_Exchange.order_city'),
-	Core::_('Shop_Exchange.order_city_area'),
-	Core::_('Shop_Exchange.order_name'),
-	Core::_('Shop_Exchange.order_surname'),
-	Core::_('Shop_Exchange.order_patronymic'),
-	Core::_('Shop_Exchange.order_email'),
-	Core::_('Shop_Exchange.order_akt'),
-	Core::_('Shop_Exchange.order_schet_fak'),
-	Core::_('Shop_Exchange.order_company_name'),
-	Core::_('Shop_Exchange.order_inn'),
-	Core::_('Shop_Exchange.order_kpp'),
-	Core::_('Shop_Exchange.order_phone'),
-	Core::_('Shop_Exchange.order_fax'),
-	Core::_('Shop_Exchange.order_address'),
-	Core::_('Shop_Exchange.order_order_status'),
-	Core::_('Shop_Exchange.order_currency'),
-	Core::_('Shop_Exchange.order_payment_system_id'),
-	Core::_('Shop_Exchange.order_date'),
-	Core::_('Shop_Exchange.order_pay_status'),
-	Core::_('Shop_Exchange.order_pay_date'),
-	Core::_('Shop_Exchange.order_description'),
-	Core::_('Shop_Exchange.order_info'),
-	Core::_('Shop_Exchange.order_canceled'),
-	Core::_('Shop_Exchange.order_pay_status_change_date'),
-	Core::_('Shop_Exchange.order_delivery_info'),
-
-	// order items
-	Core::_('Shop_Exchange.order_item_marking'),
-	Core::_('Shop_Exchange.order_item_name'),
-	Core::_('Shop_Exchange.order_item_quantity'),
-	Core::_('Shop_Exchange.order_item_price'),
-	Core::_('Shop_Exchange.order_item_rate'),
-	Core::_('Shop_Exchange.order_item_type')
-);
-
-$aColors = array(
-	'#F5F5F5',
-
-	// groups
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-	'#E6EE9C',
-
-	// currency
-	'#80CBC4',
-
-	// tax
-	'#80DEEA',
-
-	// producer
-	'#9FA8DA',
-	'#9FA8DA',
-
-	// seller
-	'#B39DDB',
-	'#B39DDB',
-
-	// measure
-	'#F48FB1',
-	'#F48FB1',
-
-	// items
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-	'#FFCC80',
-
-	// item special prices
-	'#FFB74D',
-	'#FFB74D',
-	'#FFB74D',
-	'#FFB74D',
-
-	// item associated
-	'#B0BEC5',
-	'#B0BEC5',
-
-	// order
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-
-	// order items
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7',
-	'#A5D6A7'
-);
-
-$aEntities = array(
-	'',
-
-	'group_id',
-	'group_name',
-	'group_path',
-	'group_sorting',
-	'group_description',
-	'group_active',
-	'group_seo_title',
-	'group_seo_description',
-	'group_seo_keywords',
-	'group_image',
-	'group_small_image',
-	'group_cml_id',
-	'group_parent_cml_id',
-
-	'currency_id',
-
-	'tax_id',
-
-	'producer_id',
-	'producer_name',
-
-	'seller_id',
-	'seller_name',
-
-	'mesure_id',
-	'mesure_name',
-
-	'item_id',
-	'item_name',
-	'item_marking',
-	'item_datetime',
-	'item_description',
-	'item_text',
-	'item_image',
-	'item_small_image',
-	'item_tags',
-	'item_weight',
-	'item_length',
-	'item_width',
-	'item_height',
-	'item_price',
-	'item_active',
-	'item_sorting',
-	'item_path',
-	'item_seo_title',
-	'item_seo_description',
-	'item_seo_keywords',
-	'item_indexing',
-	'item_yandex_market_allow',
-	'item_yandex_market_bid',
-	'item_yandex_market_cid',
-	'item_manufacturer_warranty',
-	'item_vendorcode',
-	'item_country_of_origin',
-	'item_parent_marking',
-	'item_parent_guid',
-	'item_digital_name',
-	'item_digital_text',
-	'item_digital_file',
-	'item_digital_count',
-	'item_end_datetime',
-	'item_start_datetime',
-	'item_type',
-	'item_siteuser_id',
-	'item_yandex_market_sales_notes',
-	'additional_groups',
-	'item_cml_id',
-
-	'item_special_price_from',
-	'item_special_price_to',
-	'item_special_price_price',
-	'item_special_price_percent',
-
-	'item_parent_associated',
-	'item_associated_markings',
-
-	'order_guid',
-	'order_invoice',
-	'order_shop_country_id',
-	'order_shop_country_location_id',
-	'order_shop_country_location_city_id',
-	'order_shop_country_location_city_area_id',
-	'order_name',
-	'order_surname',
-	'order_patronymic',
-	'order_email',
-	'order_acceptance_report',
-	'order_vat_invoice',
-	'order_company',
-	'order_tin',
-	'order_kpp',
-	'order_phone',
-	'order_fax',
-	'order_address',
-	'order_shop_order_status_id',
-	'order_shop_currency_id',
-	'order_shop_payment_system_id',
-	'order_datetime',
-	'order_paid',
-	'order_payment_datetime',
-	'order_description',
-	'order_system_information',
-	'order_canceled',
-	'order_status_datetime',
-	'order_delivery_information',
-
-	'order_item_marking',
-	'order_item_name',
-	'order_item_quantity',
-	'order_item_price',
-	'order_item_rate',
-	'order_item_type'
-);
-
-$aGroupProperties = Core_Entity::factory('Shop_Group_Property_List', $oShop->id)->Properties->findAll();
-foreach ($aGroupProperties as $oGroupProperty)
-{
-	$oPropertyDir = $oGroupProperty->Property_Dir;
-
-	$aLangConstNames[] = $oGroupProperty->name . "&nbsp;[" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Shop_item.root_folder')) . "]";
-	$aColors[] = "#E6EE9C";
-	$aEntities[] = 'prop_group-' . $oGroupProperty->id;
-
-	if ($oGroupProperty->type == 2)
-	{
-		$aLangConstNames[] = Core::_('Shop_Item.import_small_images') . $oGroupProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Shop_item.root_folder')) . "]";
-		$aColors[] = "#E6EE9C";
-		$aEntities[] = 'propsmall-' . $oGroupProperty->id;
-	}
-}
-
-$aItemProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties->findAll();
-foreach ($aItemProperties as $oItemProperty)
-{
-	$oPropertyDir = $oItemProperty->Property_Dir;
-
-	$aLangConstNames[] = $oItemProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Shop_item.root_folder')) . "]";
-	$aColors[] = "#FFD54F";
-	$aEntities[] = 'prop-' . $oItemProperty->id;
-
-	if ($oItemProperty->type == 2)
-	{
-		$aLangConstNames[] = Core::_('Shop_Item.import_small_images') . $oItemProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Shop_item.root_folder')) . "]";
-		$aColors[] = "#FFD54F";
-		$aEntities[] = 'propsmall-' . $oItemProperty->id;
-	}
-}
-
-$aShopPrices = Core_Entity::factory('Shop', $oShop->id)->Shop_prices->findAll();
-foreach ($aShopPrices as $oShopPrice)
-{
-	$aLangConstNames[] = $oShopPrice->name;
-	$aColors[] = "#B0BEC5";
-	$aEntities[] = 'price-' . $oShopPrice->id;
-}
-
-// Выводим склады
-$aShopWarehouses = Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->findAll();
-foreach ($aShopWarehouses as $oShopWarehouse)
-{
-	$aLangConstNames[] = Core::_('Shop_Item.warehouse_import_field', $oShopWarehouse->name);
-	$aColors[] = "#F48FB1";
-	$aEntities[] = 'warehouse-' . $oShopWarehouse->id;
-}
 
 $oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 
@@ -623,10 +200,12 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						}
 
 						$sLocale = Core_Array::getPost('import_price_encoding');
-						$oShop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, Core_Array::getPost('shop_groups_parent_id', 0));
-						$oShop_Item_Import_Csv_Controller->encoding(
-							$sLocale
-						)->separator($sSeparator)->limiter($sLimiter);
+						$oShop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, $shop_groups_parent_id);
+						
+						$oShop_Item_Import_Csv_Controller
+							->encoding($sLocale)
+							->separator($sSeparator)
+							->limiter($sLimiter);
 
 						$aCsvLine = $oShop_Item_Import_Csv_Controller->getCSVLine($fInputFile);
 
@@ -636,7 +215,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 						if ($iFieldCount)
 						{
-							$iValuesCount = count($aLangConstNames);
+							$iValuesCount = count($oShop_Item_Import_Csv_Controller->aCaptions);
 
 							$pos = 0;
 
@@ -662,19 +241,21 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								{
 									$aCsvLine[$i] = trim($aCsvLine[$i]);
 
+									$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
+									
 									if (!$isset_selected
-									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($aLangConstNames[$j])
-									|| (strlen($aLangConstNames[$j]) > 0
+									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($sCaption)
+									|| (strlen($sCaption) > 0
 									&& strlen($aCsvLine[$i]) > 0
 									&&
-									(strpos($aCsvLine[$i], $aLangConstNames[$j]) !== FALSE
-									|| strpos($aLangConstNames[$j], $aCsvLine[$i]) !== FALSE)
+									(strpos($aCsvLine[$i], $sCaption) !== FALSE
+									|| strpos($sCaption, $aCsvLine[$i]) !== FALSE)
 									// Чтобы не было срабатывания "Город" -> "Городской телефон"
 									// Если есть целиком подходящее поле
-									&& !array_search($aCsvLine[$i], $aLangConstNames))
+									&& !array_search($aCsvLine[$i], $oShop_Item_Import_Csv_Controller->aCaptions))
 									))
 									{
-										$selected = $aEntities[$j];
+										$selected = $oShop_Item_Import_Csv_Controller->aEntities[$j];
 
 										// Для исключения двойного указания selected для одного списка
 										$isset_selected = TRUE;
@@ -684,7 +265,14 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 										$selected = -1;
 									}
 
-									$aOptions[$aEntities[$j]] = array('value' => $aLangConstNames[$j], 'attr' => array('style' => 'background-color: ' . (!empty($aColors[$pos]) ? $aColors[$j] : '#000')));
+									$aOptions[$oShop_Item_Import_Csv_Controller->aEntities[$j]] = array(
+										'value' => $sCaption,
+										'attr' => array('style' => 'background-color: ' . (
+											!empty($oShop_Item_Import_Csv_Controller->aColors[$pos])
+												? $oShop_Item_Import_Csv_Controller->aColors[$j]
+												: '#000')
+										)
+									);
 
 									$pos++;
 								}
@@ -711,7 +299,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_count')->value(Core_Array::getPost('import_price_max_count')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_load_files_path')->value(Core_Array::getPost('import_price_load_files_path')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_items')->value(Core_Array::getPost('import_price_action_items')))
-								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_groups_parent_id')->value(Core_Array::getPost('shop_groups_parent_id')))
+								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_groups_parent_id')->value($shop_groups_parent_id))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
 							);
@@ -752,7 +340,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sTmpFileName);
 					$oShop_Item_Import_Cml_Controller->timeout = 0;
 					$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
-					$oShop_Item_Import_Cml_Controller->iShopGroupId = Core_Array::getPost('shop_groups_parent_id', 0);
+					$oShop_Item_Import_Cml_Controller->iShopGroupId = $shop_groups_parent_id;
 					$oShop_Item_Import_Cml_Controller->sPicturesPath = Core_Array::getPost('import_price_load_files_path');
 					$oShop_Item_Import_Cml_Controller->importAction = Core_Array::getPost('import_price_action_items');
 					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
@@ -801,7 +389,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		}
 		else
 		{
-			$Shop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller(Core_Array::getRequest('shop_id', 0), Core_Array::getRequest('shop_groups_parent_id', 0));
+			$Shop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, $shop_groups_parent_id);
 
 			$aConformity = array();
 

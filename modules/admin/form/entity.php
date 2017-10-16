@@ -187,7 +187,7 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 		if (!is_null($this->format))
 		{
 			// Блок для ошибок выводим только при указании условий формата
-			?><div id="<?php echo $this->id?>_error" class="div_message_error"></div><?php
+			?><div id="<?php echo $this->id?>_error" class="fieldcheck-error"></div><?php
 
 			$array_field = array();
 			$message_field = array();

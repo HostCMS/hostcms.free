@@ -560,6 +560,16 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 
 	/**
+	 * Clear HAVING list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearHaving()
+	{
+		$this->_having = array();
+		return $this;
+	}
+	
+	/**
 	 * Clear SELECT list
 	 * @return Core_QueryBuilder_Select
 	 */

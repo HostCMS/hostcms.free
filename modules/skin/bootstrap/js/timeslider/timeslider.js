@@ -119,8 +119,8 @@ if (typeof jQuery === 'undefined') {
     TimeSlider.prototype.time_duration = function(ms) {
 
 		var millisecondsDay = 3600 * 1000 * 24,
-			delta = (millisecondsDay - ms % millisecondsDay); // - 1000 * 60; // Число миллисекунд, недостающих интервалу времени до полных суток	
-		
+			delta = (millisecondsDay - ms % millisecondsDay); // - 1000 * 60; // Число миллисекунд, недостающих интервалу времени до полных суток
+
 		// До целых суток не достает не более 1 секунды
 		if (delta <= 1000)
 		{
@@ -243,7 +243,7 @@ if (typeof jQuery === 'undefined') {
             ('0' + (datetime.getUTCMonth() + 1).toString()).substr(-2) + '.' +
             datetime.getUTCFullYear() + ' ' +
             ('0' + datetime.getUTCHours().toString()).substr(-2) + ':' +
-            ('0' + datetime.getUTCMinutes().toString()).substr(-2);/* + ':' +
+            ('0' + datetime.getUTCMinutes().toString()).substr(-2) + /* + ':' +
             ('0' + datetime.getUTCSeconds().toString()).substr(-2) +*/
             (this.options.show_ms ? ('.' + ('00' + datetime.getUTCMilliseconds().toString()).substr(-3)) : '');
     };

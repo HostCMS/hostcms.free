@@ -106,7 +106,6 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 			// Кнопка Сохранить
 			$oAdmin_Form_Entity_Button_Save = Admin_Form_Entity::factory('Button')
 				->name('save')
-				//->class('saveButton')
 				->class('btn btn-blue')
 				->value(Core::_('admin_form.save'))
 				->onclick(
@@ -115,7 +114,6 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 
 			$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
 				->name('apply')
-				//->class('applyButton')
 				->class('btn btn-palegreen')
 				->type('submit')
 				->value(Core::_('admin_form.apply'))

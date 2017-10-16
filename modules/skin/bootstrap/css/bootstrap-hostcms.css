@@ -2884,3 +2884,16 @@ input.checkbox-slider[type="checkbox"] ~ .text::before { content:"" !important; 
 .skype { color: #03AFEF !important; }
 .whatsapp { color: #00E676 !important;  }
 .telegram { color: #279DD8 !important;  }
+
+.fc-h-event, .fc-v-event { border-radius: 0 2px 2px 0 !important; }
+.fc-event .fc-title { font-weight: 400 !important; }
+a.fc-day-number { color: #999 !important; }
+.fc-unthemed .fc-today { background: #e9f6fe !important; }
+.fc-event:hover { cursor: pointer; }
+.fc-event.fc-draggable { cursor: move; }
+.fc-state-default { background-color: #fbfbfb !important; background-image: none !important; box-shadow: none !important; border: 0px solid; }
+.fc-state-default.fc-state-active, .fc-state-default.fc-state-hover { background-color: #F29595 !important; color: #fff; text-shadow: none; }
+.fc button { height: 2.5em; }
+.fc-state-default.fc-corner-left { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.fc-state-default.fc-corner-right { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.fc-state-disabled { background-color: #f5f5f5 !important; /*color: #fff;*/ text-shadow: none; }

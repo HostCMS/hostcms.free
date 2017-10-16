@@ -3,7 +3,7 @@
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
 // Проверять остаток на складе при добавлении в корзину
-$bCheckStock = FALSE;
+$bCheckStock = TRUE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 

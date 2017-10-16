@@ -412,6 +412,36 @@
 				}
 			});
 		},
+		modalWindow: function(settings)
+		{
+			settings = jQuery.extend({
+				title: '',
+				message: '',
+				className: ''
+			}, settings);
+
+			var dialog = bootbox.dialog({
+				message: settings.message,
+				title: settings.title,
+				className: settings.className
+			}),
+			modalBody = dialog.find('.modal-body'),
+			content = dialog.find('.modal-body .bootbox-body div');
+
+			/*windowId = content.attr('id');
+			dialog.prop('id', windowId);
+			content.removeProp('id');*/
+
+			if (typeof settings.width != 'undefined')
+			{
+				dialog.find('.modal-dialog').width(settings.width);
+			}
+
+			if (typeof settings.height != 'undefined')
+			{
+				modalBody.height(settings.height);
+			}
+		},
 		chatClearMessagesList: function()
 		{
 			// Delete messages
@@ -1308,20 +1338,139 @@
 				$(".clock #hours").html(( hours < 10 ? "0" : "" ) + hours);
 			}, 500);
 		},
+		eventsPrepare: function (){
+			setInterval($.refreshEventsList, 10000);
+
+			var jEventsListBox  = $('.navbar-account #notificationsClockListBox');
+
+			jEventsListBox.on({
+				'click': function (event){
+					event.stopPropagation();
+				},
+
+				'touchstart': function (event) {
+					$(this).data({'isTouchStart': true});
+				}
+			});
+
+			// Показ списка дел
+			$('.navbar li#notifications-clock').on('shown.bs.dropdown', function (event){
+				// Устанавливаем полосу прокрутки
+				$.setEventsSlimScroll();
+			});
+		},
+		refreshEventsList: function (){
+			// add ajax '_'
+			var data = jQuery.getData({}),
+				jNotificationsClockListBox = $('.navbar-account #notificationsClockListBox');
+
+			data['currentUserId'] = jNotificationsClockListBox.data('currentUserId');
+
+			$.ajax({
+				//context: textarea,
+				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsClockListBox.data('moduleId') + '&type=4',
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: function(resultData){
+					if (resultData['userId'] && resultData['userId'] == jNotificationsClockListBox.data('currentUserId'))
+					{
+						 // Есть новые дела
+						if (resultData['newEvents'].length)
+						{
+							var jEventUl = $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
+
+							$('li[id!="0"]', jEventUl).remove();
+							
+							// Удаление записи об отсутствии дел
+							$('li[id="0"]', jEventUl).hide();
+							
+							$.each(resultData['newEvents'], function( index, event ){
+								// Добавляем дело в список
+								$.addEvent(event, jEventUl);
+							});
+						}
+					}
+				}
+			});
+		},
+		// Добавление полосы прокрутки для списка дел
+		setEventsSlimScroll: function (){
+			// Сохраняем данные .slimScrollBar
+			var jSlimScrollBar = $('#notificationsClockListBox .slimScrollBar'),
+				slimScrollBarData = !jSlimScrollBar.data() ? {'isMousedown': false} : jSlimScrollBar.data(),
+				jScrollNotificationClock = $('#notificationsClockListBox .scroll-notifications-clock');
+
+			// Удаляем slimscroll
+			if ($('#notificationsClockListBox > .slimScrollDiv').length)
+			{
+				jScrollNotificationClock.slimscroll({destroy: true});
+				jScrollNotificationClock.attr('style', '');
+			}
+
+			// Создаем slimscroll
+			jScrollNotificationClock.slimscroll({
+				height: $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul li[id != 0]').length ? '220px' : '55px',
+				//height: 'auto',
+				color: 'rgba(0, 0, 0, 0.3)',
+				size: '5px',
+				wheelStep: 5
+			});
+
+			//	Добавляем новому .slimScrollBar данные от удаленного
+			jSlimScrollBar
+				.data(slimScrollBarData)
+				.on({
+					'mousedown': function (){
+						$(this).data('isMousedown', true);
+					},
+
+					'mouseenter': function () {
+						$(this).css('width', '8px');
+					},
+
+					'mouseout': function () {
+						!$(this).data('isMousedown') &&	$(this).css('width', '5px');
+					}
+				});
+		},
+		addEvent: function (oEvent, jBox){
+			// var jBox = jBox || $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
+
+			jBox.append(
+				'<li id="' + oEvent['id'] + '">\
+					<a href="' + (oEvent['href'].length ? oEvent['href'] : '#') + '" onclick="' + (oEvent['onclick'].length ? oEvent['onclick'] : '') + '">\
+						<div class="clearfix notification-clock">\
+							<div class="notification-icon">\
+								<i class="' + oEvent['icon'] + ' fa-fw white" style="background-color: ' + oEvent['background-color'] + '"></i>\
+							</div>\
+							<div class="notification-body">\
+								<span class="title">' + oEvent['name'] + '</span>\
+								<span class="description"><i class="fa fa-clock-o"></i> ' + oEvent['start'] + ' — <span class="notification-time">' + oEvent['finish'] + '</span>\
+							</div>\
+						</div>\
+					</a>\
+				</li>'
+			);
+
+			// Открыт выпадающий список дел
+			if ($('.navbar li#notifications-clock').hasClass('open'))
+			{
+				 // Если список дел был пуст, устанавливаем полосу прокрутки
+				!$('li', jBox).length && $.setEventsSlimScroll();
+			}
+		},
 		notificationsPrepare: function (){
 
-			setInterval($.refreshNotificationsList, 5000);
+			setInterval($.refreshNotificationsList, 10000);
 
 			var jNotificationsListBox  = $('.navbar-account #notificationsListBox');
 
 			jNotificationsListBox.on({
 				'click': function (event){
-
 					event.stopPropagation();
 				},
-
 				'touchstart': function (event) {
-
 					$(this).data({'isTouchStart': true});
 				}
 			});
@@ -1380,9 +1529,7 @@
 						$.readNotifications();
 					}
 				},
-
 				'mouseup': function (){
-
 					var jSlimScrollBar = $('#notificationsListBox .slimScrollBar');
 
 					// Была нажата кнопка на полосе прокрутки
@@ -1393,9 +1540,7 @@
 						jSlimScrollBar.data({'isMousedown': false});
 					}
 				},
-
 				'touchend': function () {
-
 					var jNotificationsListBox  = $('.navbar-account #notificationsListBox');
 
 					if (jNotificationsListBox.data('isTouchStart'))
@@ -1403,9 +1548,7 @@
 						jNotificationsListBox.data('isTouchStart', false);
 					}
 				},
-
 				'touchmove': function (event) {
-
 					if ($('.navbar-account #notificationsListBox').data('isTouchStart'))
 					{
 						// Делаем соответствующие уведомления прочитанными
@@ -1419,7 +1562,6 @@
 			// Функция-обработчик прокрутки списка уведомлений
 			function onWheel(event)
 			{
-
 				var //jMessagesList = $('.chatbar-messages .messages-list'),
 					jNotificationsList = $('#notificationsListBox .scroll-notifications'),
 					//slimScrollBar = $('.chatbar-messages .slimScrollBar'),
@@ -1521,7 +1663,8 @@
 		setNotificationsSlimScroll: function (){
 
 			// Сохраняем данные .slimScrollBar
-			var slimScrollBarData = !$('#notificationsListBox .slimScrollBar').data() ? {'isMousedown': false} : $('#notificationsListBox .slimScrollBar').data();
+			var jSlimScrollBar = $('#notificationsListBox .slimScrollBar'),
+				slimScrollBarData = !jSlimScrollBar.data() ? {'isMousedown': false} : jSlimScrollBar.data();
 
 			// Удаляем slimscroll
 			if ($('#notificationsListBox > .slimScrollDiv').length)
@@ -1539,23 +1682,20 @@
 			});
 
 			//	Добавляем новому .slimScrollBar данные от удаленного
-			$('#notificationsListBox .slimScrollBar')
+			jSlimScrollBar
 				.data(slimScrollBarData)
 				.on({
 					'mousedown': function (){
 						$(this).data('isMousedown', true);
 					},
-
 					'mouseenter': function () {
 						$(this).css('width', '8px');
 					},
-
 					'mouseout': function () {
 						!$(this).data('isMousedown') &&	$(this).css('width', '5px');
 					}
 				});
 		},
-
 		// Определение вхождения элемента (element) в область другого элемента (box)
 		elementInBox: function (element, box, wheelDelta, delta){
 			// wheelDelta - величина прокрутки slimscroll'а
@@ -1575,7 +1715,7 @@
 
 			var jBox = jBox || $('.navbar-account #notificationsListBox .scroll-notifications > ul'),
 				showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,
-				soundEnabled = $('#sound-switch').data('soundEnabled') === undefined ? true : !!$('#sound-switch').data('soundEnabled') ;
+				soundEnabled = $('#sound-switch').data('soundEnabled') === undefined ? true : !!$('#sound-switch').data('soundEnabled');
 
 			var notificationExtra = '';
 
@@ -1622,7 +1762,6 @@
 				 $.readNotifications();
 			}
 		},
-
 		// Автоматическое обновление списка уведомлений
 		refreshNotificationsList: function() {
 
@@ -1640,8 +1779,7 @@
 				data: data,
 				dataType: 'json',
 				success: function(resultData){
-
-					var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+					//var jNotificationsListBox = $('.navbar-account #notificationsListBox');
 
 					if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId')
 					// Есть уведомления для сотрудника
@@ -1736,7 +1874,6 @@
 				}
 			});
 		},
-
 		// Метод устанавливает уведомления прочитанными
 		readNotifications: function (wheelDelta, delta){
 
@@ -2432,28 +2569,13 @@
 			var object = $(this);
 
 			settings = jQuery.extend({
-				title: ''
+				title: '',
+				message: '<div id="' + object.attr('id') + '"><div id="id_message"></div>' + object.html() + '</div>'
+				/*message: object.html(),
+				windowId: object.attr('id')*/
 			}, settings);
 
-			var dialog = bootbox.dialog({
-				message: object.html(),
-				title: settings.title,
-				className: settings.className
-			}),
-			modalBody = dialog.find('.modal-body');
-
-			// Calculate window ID
-			dialog.attr('id', object.attr('id'));
-
-			if (typeof settings.width != 'undefined')
-			{
-				dialog.find('.modal-dialog').width(settings.width);
-			}
-
-			if (typeof settings.height != 'undefined')
-			{
-				modalBody.height(settings.height);
-			}
+			$.modalWindow(settings);
 
 			object.remove();
 		}
@@ -2463,7 +2585,8 @@
 
 $(function(){
 	$.notificationsPrepare();
-	$.calendarPrepare();
+	$.eventsPrepare();
+	// $.calendarPrepare();
 
 	/* --- CHAT --- */
 	$('#chatbar').length && $.chatPrepare();
@@ -2726,11 +2849,12 @@ function calendarDayClick(oDate, jsEvent)
 	.addClass('modalwindow');*/
 }
 
+/*
 function calendarEventClick( event, jsEvent, view )
 {
 	// Убираем контекстные меню
 	$('.context-menu').hide();
-}
+}*/
 
 function calendarEvents(start, end, timezone, callback)
 {
@@ -2745,7 +2869,6 @@ function calendarEvents(start, end, timezone, callback)
 		dataType: 'json',
 		data: ajaxData,
 		success: function(result) {
-
 			var events = (result['events'] && result['events'].length) ? result['events'] : [];
 
 			callback(events);
@@ -2755,8 +2878,6 @@ function calendarEvents(start, end, timezone, callback)
 
 function calendarEventClick(event, jsEvent, view)
 {
-	console.log(event);
-
 	var eventIdParts = event.id.split('_'), // Идентификатор события календаря состоит из 2-х частей - id сущности и id модуля, разделенных '_'
 		eventId = eventIdParts[0],
 		moduleId = eventIdParts[1];
@@ -2765,7 +2886,7 @@ function calendarEventClick(event, jsEvent, view)
 		path: event.path,
 		action: 'edit',
 		operation: 'modal',
-		additionalParams: 'hostcms[checked][0][' + eventId + ']=1&event_user_id[]=' + event.event_user_id,
+		additionalParams: 'hostcms[checked][0][' + eventId + ']=1',
 		windowId: 'id_content'
 	});
 }
@@ -2781,7 +2902,8 @@ function calendarEventRender(event, element)
 	// Добавляем блоку, связанному с событием, идентификатор этого события для удобства поиска блока в последующей работе с календарем
 	element.attr('data-event-id', event.id);
 
-	$(element).css({'background-image': 'linear-gradient(to bottom,#fff 0,#ededed 100%)'});
+	// $(element).css({'background-image': 'linear-gradient(to bottom,#fff 0,#ededed 100%)'});
+	$(element).css({'background-color': '#fbfbfb'});
 
 	/*element.popover({
 		title: event.title,
@@ -2882,4 +3004,148 @@ function calendarEventDestroy( event, element, view )
 {
 	// Удаляем popover
 	element.popover('destroy');
+}
+
+// Отмена опции "Весь день"
+function cancelAllDay(windowId)
+{
+	// Если выбран параметр "Весь день", снимаем его
+	if ($('#' + windowId + " input[name='all_day']").prop("checked"))
+	{
+		$('#' + windowId + " input[name='all_day']").prop("checked", false);
+
+		$('#' + windowId +  " select[name='duration_type']").parent("div").removeClass("invisible");
+		$('#' + windowId +  " input[name='duration']").parent("div").removeClass("invisible");
+
+		var formatDateTimePicker = "DD.MM.YYYY HH:mm:ss";
+
+		$('#' + windowId +  ' input[name="start"]').parent().data("DateTimePicker").format(formatDateTimePicker);
+		$('#' + windowId +  ' input[name="finish"]').parent().data("DateTimePicker").format(formatDateTimePicker);
+	}
+}
+
+function setDuration(start, end, windowId)
+{
+	var duration = 0,
+		start = Math.floor(start / 1000) * 1000,
+		end = Math.floor(end / 1000) * 1000,
+		durationInMinutes = (end > start) ? Math.floor((end - start) / 1000 / 60) : 0;
+
+	if (durationInMinutes)
+	{
+		// Дни
+		if ((durationInMinutes / 60) % 24 == 0)
+		{
+			durationType = 2;
+			duration = durationInMinutes / 60 / 24;
+		}
+		else if (durationInMinutes % 60 == 0 ) // Часы
+		{
+			durationType = 1;
+			duration = durationInMinutes / 60;
+		}
+		else
+		{
+			durationType = 0;
+			duration = durationInMinutes;
+		}
+
+		$('#' + windowId +  " select[name='duration_type']").val(durationType);
+	}
+
+	$('#' + windowId +  " input[name='duration']").val(duration);
+}
+
+//
+function changeDuration(event)
+{
+	var startTimeCell = +$('#' + event.data.windowId + " #" + event.data.cellId).attr("start_timestamp") - event.data.timeZoneOffset,
+		stopTimeCell = startTimeCell + getDurationMilliseconds(event.data.windowId);
+
+	// Изменяем значение поля даты-времени завершения
+	$('#' + event.data.windowId + ' input[name="finish"]').parent().data("DateTimePicker").date(new Date(stopTimeCell));
+}
+
+// Получение продолжительности события в миллисекундах
+function getDurationMilliseconds(windowId)
+{
+	var duration = +$('#' + windowId + ' input[name="duration"]').val(), // продолжительность
+		durationType = +$('#' + windowId + ' select[name="duration_type"]').val(), // тип интервала продолжительности
+		durationMillisecondsCoeff = 1000 * 60, // минуты
+		additionalForAllDay = $('#' + windowId + " input[name='all_day']").prop("checked") ? (60 * 1000) : 0;
+
+	switch (durationType)
+	{
+		case 1: // часы
+
+			durationMillisecondsCoeff *= 60;
+			additionalForAllDay *= 60
+			break;
+
+		case 2: // дни
+
+			durationMillisecondsCoeff *= 60 * 24;
+			break;
+	}
+
+	if (additionalForAllDay)
+	{
+		additionalForAllDay -= 1;
+	}
+
+	return duration * durationMillisecondsCoeff + additionalForAllDay;
+}
+
+function setStartAndFinish(start, end, windowId)
+{
+
+	$('#' + windowId + ' input[name="start"]').parent().data("DateTimePicker").date(new Date(start));
+	$('#' + windowId + ' input[name="finish"]').parent().data("DateTimePicker").date(new Date(end));
+
+	setEventStartButtons(start, windowId);
+}
+
+// Установка быстрых кнопок начала события
+function setEventStartButtons(start, windowId)
+{
+	var oCurrentDate = new Date(),
+		millisecondsDay = 3600 * 24 * 1000,
+		aDates = []; // массив дат - сегодня, завтра, послезавтра и т.д.
+
+	for (var i = 0; i < 4; i++)
+	{
+		var oTmpDate = new Date(+oCurrentDate + millisecondsDay * i);
+
+		aDates.push(new Date(oTmpDate.getFullYear(), oTmpDate.getMonth(), oTmpDate.getDate()));
+	}
+
+	var oCurrentStartDate = new Date(start),
+		oCurrentStartDateWithoutTime = new Date(oCurrentStartDate.getFullYear(), oCurrentStartDate.getMonth(), oCurrentStartDate.getDate());
+
+	if (aDates.length)
+	{
+		// Дата начала события находится в диапозоне дат "сегодя и через 2 дня",
+		if (+oCurrentStartDateWithoutTime >= +aDates[0] && +oCurrentStartDateWithoutTime <= +aDates[aDates.length - 1])
+		{
+			aDates.forEach(function (date, index){
+
+				if (+date == +oCurrentStartDateWithoutTime)
+				{
+					var eventButton = $('#' + windowId + ' #eventStartButtonsGroup a[data-start-day=' + index  + ']:not(.active)');
+
+					if (eventButton.length)
+					{
+						$(eventButton.eq(0))
+							.addClass("active")
+							.siblings(".active")
+							.removeClass("active");
+					}
+				}
+			});
+		}
+		else
+		{
+			$('#' + windowId + ' #eventStartButtonsGroup a.active').removeClass("active");
+		}
+	}
 }

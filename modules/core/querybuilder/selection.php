@@ -162,7 +162,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	protected function _join($type, $table, $column = NULL, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -192,7 +192,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function join($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -212,7 +212,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function leftJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -233,7 +233,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function rightJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -249,7 +249,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * $Core_QueryBuilder_Select->crossJoin('join1');
 	 * </code>
 	 * @param string $table table name
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function crossJoin($table)
 	{
@@ -263,7 +263,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * $Core_QueryBuilder_Select->naturalJoin('join1');
 	 * </code>
 	 * @param string $table table name
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function naturalJoin($table)
 	{
@@ -589,7 +589,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Clear ORDER BY
-	 * @return Core_QueryBuilder_Select
+	 * @return Core_QueryBuilder_Selection
 	 */
 	public function clearOrderBy()
 	{
@@ -597,6 +597,16 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		return $this;
 	}
 
+	/**
+	 * Clear WHERE list
+	 * @return Core_QueryBuilder_Selection
+	 */
+	public function clearWhere()
+	{
+		$this->_where = array();
+		return $this;
+	}
+	
 	/**
 	 * Clear
 	 *

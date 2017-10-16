@@ -69,8 +69,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					$aJson['eventId'] = $iEventId;
 					Core::showJson($aJson);
 				}
-				break;
-
+			break;
 			case 2: // Изменение статуса дела
 
 				if ($ajax)
@@ -91,11 +90,8 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 					Core::showJson($aJson);
 				}
-
-				break;
-
+			break;
 			case 3: // Добавление дела
-
 				if ($ajax)
 				{
 					Core_Session::close();
@@ -163,7 +159,61 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 					Core::showJson($aJson);
 				}
-				break;
+			break;
+			case 4:
+				$oUser = Core_Entity::factory('User', 0)->getCurrent();
+
+				Core_Session::close();
+
+				$aJson = array();
+
+				$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
+
+				if (!is_null($oUser) && $oUser->id == $iRequestUserId)
+				{
+					$aJson['userId'] = $oUser->id;
+					$aJson['newEvents'] = array();
+
+					$dateTime = date('Y-m-d');
+
+					// Дела пользователя (сотрудника)
+					/*$oEvents = $oUser->Events;
+
+					$oEvents->queryBuilder()
+						->where('events.completed', '=', 0)
+						->open()
+							->where('events.start', '>', $dateTime . ' 00:00:00')
+							->setOr()
+							->where('events.finish', '<', $dateTime . ' 23:59:59')
+						->close()
+						->clearOrderBy()
+						//->orderBy('id', 'ASC')
+						->orderBy('start', 'DESC')
+						->orderBy('important', 'DESC');
+
+					$aEvents = $oEvents->findAll(FALSE);*/
+
+					$aEvents = $oUser->Events->getToday(FALSE);
+
+					foreach ($aEvents as $oEvent)
+					{
+						$aEvent = array(
+							'id' => $oEvent->id,
+							'name' => $oEvent->name,
+							'start' => Event_Controller::getDateTime($oEvent->start),
+							'finish' => Event_Controller::getDateTime($oEvent->finish),
+							'href' => "/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1",
+							'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&amp;hostcms[operation]=&amp;hostcms[current]=1&amp;hostcms[checked][0][{$oEvent->id}]=1'}); return false",
+							'icon' => $oEvent->Event_Type->icon,
+							'background-color' => $oEvent->Event_Type->color
+						);
+
+						$aJson['newEvents'][] = $aEvent;
+					}
+				}
+
+				Core::showJson($aJson);
+			break;
 
 			default:
 				if ($ajax)
@@ -333,7 +383,14 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 									<div class="task-body">
 
 										<!-- echo '<div class="notification-title editable" id="apply_check_0_' . $this->id . '_fv_1142">' . htmlspecialchars($this->name) . '</div>'; -->
-										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1142"><?php echo htmlspecialchars($oEvent->name);?></span>
+										<?php
+										$deadlineIcon = $oEvent->deadline()
+											? '<i class="fa fa-clock-o event-title-deadline"></i>'
+											: '';
+
+										?>
+
+										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1142"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
 										<?php
 											$isCreator = is_null($oEvent_User) ? 0 : $oEvent_User->creator;
 											// Текущий пользователь - не создатель дела
@@ -346,7 +403,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 													// Создатель дела
 													$oUser_Creator = $oEvent_Creator->User;
 												?>
-												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1" onclick="$.adminLoad({path: '/admin/user/index.php', additionalParams: 'hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oUser_Creator->getFullName())?></a></span>
+												<div class="<?php echo $oUser_Creator->isOnline() ? 'online margin-left-5 margin-right-5' : 'offline margin-left-5 margin-right-5'; ?>"></div><span class="task-creator"><a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oUser_Creator->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oUser_Creator->getFullName())?></a></span>
 												<?php
 												}
 											}

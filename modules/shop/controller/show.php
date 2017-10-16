@@ -784,6 +784,11 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
+		if ($this->limit == 0 && $this->page)
+		{
+			return $this->error404();
+		}
+		
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
 		{

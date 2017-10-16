@@ -279,6 +279,8 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					defaultView: 'agendaDay',
 					//defaultView: 'month',
 
+					timeFormat: 'H:mm',
+
 					navLinks: true,
 
 					// Интервал (шаг) изменения времени при перетаскивании события

@@ -146,7 +146,7 @@ function isEmpty(str) {
 				data = jQuery.getData(
 					jQuery.extend({}, settings, {windowId: modalId})
 				);
-			
+
 			if (settings.additionalParams != ' ' && settings.additionalParams != '')
 			{
 				path += '?' + settings.additionalParams;
@@ -163,24 +163,33 @@ function isEmpty(str) {
 				abortOnRetry: 1,
 				success: [function(returnedData) {
 					$.loadingScreen('hide');
-					
-					var context = $(this),
+
+					/*var context = $(this),
 						modalDiv = $('<div>').attr('id', modalId).html(returnedData.form_html);
-					
-					context.append(modalDiv);
-					
-					modalDiv.HostCMSWindow({
-						autoOpen: true,
-						destroyOnClose: false,
+
+					context.append(modalDiv);*/
+
+					settings = jQuery.extend({
 						title: returnedData.title,
-						AppendTo: context,
+						message: '<div id="' + modalId + '"><div id="id_message"></div>' + returnedData.form_html + '</div>',
+						//windowId: modalId,
 						width: '80%',
-						// height: 140,
-						addContentPadding: true,
-						modal: false,
-						Maximize: false,
-						Minimize: false
-					});
+					}, settings);
+
+					$.modalWindow(settings);
+
+					/*modalDiv.HostCMSWindow({
+						//autoOpen: true,
+						//destroyOnClose: false,
+						title: returnedData.title,
+						//AppendTo: context,
+						width: '80%',
+						// // height: 140,
+						//addContentPadding: true,
+						//modal: false,
+						//Maximize: false,
+						//inimize: false
+					});*/
 				}]
 			});
 

@@ -234,14 +234,13 @@ class Skin_Bootstrap extends Core_Skin
 									?>
 									<script type="text/javascript">
 										$(function(){
-
 											$("#sound-switch")
 												.data('soundEnabled', <?php echo $oUser->sound ? 'true' : 'false'?>)
 												.on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=84'}, $.soundSwitch );
 										});
 									</script>
 								</li>
-								<li>
+								<li id="notifications-clock">
 									<a href="#" title="" data-toggle="dropdown" class="task-area dropdown-toggle">
 										<div class="clock">
 											<ul>
@@ -254,59 +253,59 @@ class Skin_Bootstrap extends Core_Skin
 										<div class="scroll-notifications-clock">
 											<ul>
 											<?php
-												$dateTime = date('Y-m-d');
 
-												$oEvents = Core_Entity::factory('Event');
-												$oEvents->queryBuilder()
+												$aEvents = $oUser->Events->getToday(FALSE);
+												
+												/*$oEvents->queryBuilder()
 													->where('events.completed', '=', 0)
 													->open()
 														->where('events.start', '>', $dateTime . ' 00:00:00')
-														->setOr()
+														//->setOr()
 														->where('events.finish', '<', $dateTime . ' 23:59:59')
+														->setOr()
+														->where('events.all_day', '=', 1)
+														->where('events.start', '<', $dateTime . ' 23:59:59')
+														->where('events.finish', '>', $dateTime . ' 00:00:00')
 													->close()
 													->clearOrderBy()
 													->orderBy('start', 'DESC')
 													->orderBy('important', 'DESC');
 
-												$aEvents = $oEvents->findAll(FALSE);
+												$aEvents = $oEvents->findAll(FALSE);*/
 
 												if (count($aEvents))
 												{
 													foreach ($aEvents as $oEvent)
 													{
-													?>
-														<li id="<?php echo $oEvent->id?>">
+														?><li id="<?php echo $oEvent->id?>">
 															<a href="/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1'}); return false">
 																<div class="clearfix notification-clock">
 																	<div class="notification-icon">
 																		<i class="<?php echo $oEvent->Event_Type->icon /*$oEvent->getTypeBadge()*/ ?> white" style="background-color: <?php echo $oEvent->Event_Type->color?>"></i>
 																	</div>
 																	<div class="notification-body">
-																		<span class="title"><?php echo $oEvent->name?></span>
-																		<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> &mdash; <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->finish)?></span></span>
+																		<span class="title"><?php echo htmlspecialchars($oEvent->name)?></span>
+																		<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> — <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->finish)?></span></span>
 																	</div>
 																</div>
 															</a>
-														</li>
-													<?php
+														</li><?php
 													}
 												}
 												else
 												{
-												?>
-												<li id="0">
-													<a href="#">
-														<div class="clearfix">
-															<div class="notification-icon">
-																<i class="fa fa-info bg-themeprimary white"></i>
+													?><li id="0">
+														<a href="#">
+															<div class="clearfix">
+																<div class="notification-icon">
+																	<i class="fa fa-info bg-themeprimary white"></i>
+																</div>
+																<div class="notification-body">
+																	<span class="title margin-top-5"><?php echo Core::_('Notification.no_notifications')?></span>
+																</div>
 															</div>
-															<div class="notification-body">
-																<span class="title margin-top-5"><?php echo Core::_('Notification.no_notifications')?></span>
-															</div>
-														</div>
-													</a>
-												</li>
-												<?php
+														</a>
+													</li><?php
 												}
 												?>
 												<li class="all-tasks">
@@ -315,24 +314,26 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</div>
 									</div>
-
+									<?php
+									$oModule = Core_Entity::factory('Module')->getByPath('event');
+									?>
 									<script type="text/javascript">
 										$(function(){
-											$(document).ready(
-												$.refreshClock()
-											);
-
 											var notificationsClockListBox = document.getElementById('notificationsClockListBox');
 											notificationsClockListBox.onclick = function(event){
 												event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
 											};
-											$('.scroll-notifications-clock').slimscroll({
-												height: '200px',
-												// height: 'auto',
-												color: 'rgba(0,0,0,0.3)',
-												size: '5px',
-												wheelStep: 5
+
+											$('.navbar-account #notificationsClockListBox').data({
+												// Идентификатор последнего загруженного дела
+												// 'lastEventId': 0,
+												'currentUserId': <?php echo $oUser->id?>,
+												'moduleId': <?php echo $oModule->id?>
 											});
+											
+											$.refreshClock();
+											
+											$.refreshEventsList();
 										});
 									</script>
 								</li>
