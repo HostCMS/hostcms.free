@@ -167,6 +167,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					->location($this->shop_country_location_id)
 					->city($this->shop_country_location_city_id)
 					->weight($this->totalWeight)
+					->amount($this->totalAmount)
 					->postcode($this->postcode)
 					->volume($this->volume)
 					->execute();

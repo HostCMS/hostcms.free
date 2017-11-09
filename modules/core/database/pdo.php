@@ -141,8 +141,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 	{
 		$this->connect();
 
-		$unescapedString = strval($unescapedString);
-		$unescapedString = addcslashes($unescapedString, "\000\032");
+		$unescapedString = addcslashes(strval($unescapedString), "\000\032");
 
 		return $this->_connection->quote($unescapedString);
 	}

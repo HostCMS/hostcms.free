@@ -95,6 +95,8 @@
 			// Change window id
 			data['hostcms[window]'] = jDivWin.attr('id');
 
+			console.log(data);
+
 			jQuery.ajax({
 				context: jDivWin,
 				url: cmsrequest,
@@ -1381,10 +1383,10 @@
 							var jEventUl = $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
 
 							$('li[id!="0"]', jEventUl).remove();
-							
+
 							// Удаление записи об отсутствии дел
 							$('li[id="0"]', jEventUl).hide();
-							
+
 							$.each(resultData['newEvents'], function( index, event ){
 								// Добавляем дело в список
 								$.addEvent(event, jEventUl);
@@ -2628,6 +2630,11 @@ $(function(){
 		$(this).find('a').click();
 	});
 
+	$('.page-container').on('click', '.fa.profile-details', function (){
+		$(this).closest('.ticket-item').next('li.profile-details').toggle(400, function() {
+			$(this).prev('.ticket-item').find('.fa.profile-details').toggleClass('fa-chevron-down fa-chevron-up')
+		});
+	});
 
 	$('body')
 		.on('shown.bs.dropdown', '.admin-table td div', function (){

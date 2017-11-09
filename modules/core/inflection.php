@@ -44,7 +44,13 @@ abstract class Core_Inflection
 	 */
 	static public function getPlural($word, $count = NULL, $lng = 'en')
 	{
-		return self::_getDriver($lng)->__getPlural($word, $count);
+		$aWord = explode('_', $word);
+
+		$last = self::_getDriver($lng)->__getPlural(array_pop($aWord), $count);
+
+		return isset($aWord[0])
+			? implode('_', $aWord) . '_' . $last
+			: $last;
 	}
 
 	/**
@@ -56,7 +62,13 @@ abstract class Core_Inflection
 	 */
 	static public function getSingular($word, $count = NULL, $lng = 'en')
 	{
-		return self::_getDriver($lng)->__getSingular($word, $count);
+		$aWord = explode('_', $word);
+
+		$last = self::_getDriver($lng)->__getSingular(array_pop($aWord), $count);
+
+		return isset($aWord[0])
+			? implode('_', $aWord) . '_' . $last
+			: $last;
 	}
 
 	/**
@@ -89,7 +101,7 @@ abstract class Core_Inflection
 		{
 			$this->_pluralCache = array_slice($this->_pluralCache, floor(self::$_maxObjects / 4));
 		}
-		
+
 		$plural = $this->_getPlural($word, $count);
 		is_null($count) && $this->_pluralCache[$word] = $plural;
 
@@ -122,7 +134,7 @@ abstract class Core_Inflection
 
 		$singular = $this->_getSingular($word, $count);
 		is_null($count) && $this->_singularCache[$word] = $singular;
-		
+
 		return $singular;
 	}
 

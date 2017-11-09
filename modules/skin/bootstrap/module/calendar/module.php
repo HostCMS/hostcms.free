@@ -160,47 +160,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 			default:
 
 				Calendar_Controller::createContextMenu();
-				/*
-				// Формируем контекстное меню календаря
-				$aModules = Core_Entity::factory('Module')->getAllByActive(1);
-
-				$aContextMenuActions = array();
-
-				// Для каждого модуля получаем массив действий для отображения в контекстном меню календаря
-				foreach($aModules as $oModule)
-				{
-					if (method_exists($oModule->Core_Module, 'getCalendarContextMenuActions'))
-					{
-						$aContextMenuActions = array_merge($aContextMenuActions, $oModule->Core_Module->getCalendarContextMenuActions());
-					}
-				}
-
-				// Есть список элементов контекстного меню
-				if (count($aContextMenuActions))
-				{
-				?>
-				<script type="text/javascript">
-				// Контекстное меню отсутствует
-				if (!$('#calendarContextMenu').length)
-				{
-					var calendarContextMenuDiv = $('<div id="calendarContextMenu" class="dropdown clearfix context-menu" style="display:none">'),
-						calendarContextMenuUl = $('<ul class="dropdown-menu dropdown-info" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">');
-					<?php
-					foreach($aContextMenuActions as $sContextMenuAction)
-					{
-						?>
-						calendarContextMenuUl.append('<li><?php echo $sContextMenuAction ?></li>');
-						<?php
-					}
-					?>
-					calendarContextMenuDiv.append(calendarContextMenuUl);
-
-					$('body').append(calendarContextMenuDiv);
-				}
-				</script>
-				<?php
-				}
-				*/
 
 				if ($ajax)
 				{

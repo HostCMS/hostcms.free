@@ -51,7 +51,7 @@ if (Core_Array::getRequest('_', FALSE)
 				Core_Array::get(Core_Page::instance()->libParams, 'littleCartXsl')
 			)
 		)
-		->couponText(Core_Array::get($_SESSION, 'coupon_text'))
+		->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : NULL)
 		->show();
 
 	echo json_encode(ob_get_clean());

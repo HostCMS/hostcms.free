@@ -841,10 +841,13 @@ class Shop_Order_Model extends Core_Entity
 		return $this->save();
 	}
 
+	/**
+	 * Create notification for subscribers
+	 * @return self
+	 */
 	protected function _createNotification()
 	{
 		$oModule = Core::$modulesList['shop'];
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
 
 		$sCompany = strlen($this->company)
 			? $this->company
@@ -860,12 +863,25 @@ class Shop_Order_Model extends Core_Entity
 			->entity_id($this->id)
 			->save();
 
-		// Связываем уведомление с сотрудником
-		$oNotification_User = Core_Entity::factory('Notification_User');
-		$oNotification_User
-			->notification_id($oNotification->id)
-			->user_id($oUser->id)
-			->save();
+		$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+		$oNotification_Subscribers->queryBuilder()
+			->where('notification_subscribers.module_id', '=', $oModule->id)
+			->where('notification_subscribers.type', '=', 0)
+			->where('notification_subscribers.entity_id', '=', $this->Shop->id);
+
+		$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+
+		foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+		{
+			// Связываем уведомление с сотрудником
+			$oNotification_User = Core_Entity::factory('Notification_User');
+			$oNotification_User
+				->notification_id($oNotification->id)
+				->user_id($oNotification_Subscriber->user_id)
+				->save();
+		}
+
+		return $this;
 	}
 
 	/**

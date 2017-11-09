@@ -38,13 +38,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		// $oMainTab->delete($this->getField('user_group_id'));
-		/*$oAdditionalTab->delete($this->getField('user_group_id'));
-
-		$user_group_id = is_null($this->_object->user_group_id)
-			? intval(Core_Array::getGet('user_group_id', 0))
-			: $this->_object->user_group_id;*/
-
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -98,15 +91,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainRow2
 			->add($oPasswordFirst)
 			->add($oPasswordSecond);
-
-		// Селектор с группами пользователей
-		/*$oSelect_User_Groups = Admin_Form_Entity::factory('Select')
-			->options($this->_fillUserGroup())
-			->name('user_group_id')
-			->value($user_group_id)
-			->caption(Core::_('User.users_type_form'));
-
-		$oMainRow3->add($oSelect_User_Groups);*/
 
 		$oMainTab->delete($this->getField('settings'));
 
@@ -216,7 +200,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(
 					'max_width' => $aConfig['max_width'],
 					'max_height' => $aConfig['max_height'],
-					'path' => is_file($this->_object->getImageFilePath())
+					'path' => $this->_object->image != ''
 						? $this->_object->getImageFileHref()
 						: '',
 					'show_params' => TRUE,

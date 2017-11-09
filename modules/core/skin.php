@@ -306,11 +306,10 @@ abstract class Core_Skin
 				->select('modules.*')
 				->join('company_department_modules', 'modules.id', '=', 'company_department_modules.module_id')
 				->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
-				//->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
 				->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
-				//->where('company_department_id', '=', 'company_departments.id')
 				->where('site_id', '=', CURRENT_SITE)
 				->where('company_department_post_users.user_id', '=', $oUser->id)
+				->where('company_departments.deleted', '=', 0)
 				/*->join('company_department_modules', 'modules.id', '=', 'company_department_modules.module_id',
 				array(
 					array('AND' => array('company_department_id', '=', $oUser->user_group_id)),

@@ -201,7 +201,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 						$sLocale = Core_Array::getPost('import_price_encoding');
 						$oShop_Item_Import_Csv_Controller = new Shop_Item_Import_Csv_Controller($oShop->id, $shop_groups_parent_id);
-						
+
 						$oShop_Item_Import_Csv_Controller
 							->encoding($sLocale)
 							->separator($sSeparator)
@@ -242,7 +242,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									$aCsvLine[$i] = trim($aCsvLine[$i]);
 
 									$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
-									
+
 									if (!$isset_selected
 									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($sCaption)
 									|| (strlen($sCaption) > 0
@@ -296,6 +296,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_price_name_field_f']) ? 1 : 0))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('locale')->value($sLocale))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_time')->value(Core_Array::getPost('import_price_max_time')))
+								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_delay')->value(Core_Array::getPost('import_price_delay')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_count')->value(Core_Array::getPost('import_price_max_count')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_load_files_path')->value(Core_Array::getPost('import_price_load_files_path')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_items')->value(Core_Array::getPost('import_price_action_items')))
@@ -380,6 +381,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 	{
 		Core_Session::start();
 
+		$import_price_delay = intval(Core_Array::getRequest('import_price_delay'));
+
 		if (isset($_SESSION['Shop_Item_Import_Csv_Controller']))
 		{
 			$Shop_Item_Import_Csv_Controller = $_SESSION['Shop_Item_Import_Csv_Controller'];
@@ -443,7 +446,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$_SESSION['Shop_Item_Import_Csv_Controller'] = $Shop_Item_Import_Csv_Controller;
 
-			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}");
+			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&import_price_delay={$import_price_delay}");
 
 			showStat($Shop_Item_Import_Csv_Controller);
 		}
@@ -462,7 +465,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 		if ($sRedirectAction)
 		{
-			$iRedirectTime = 1000;
+			$iRedirectTime = 1000 * $import_price_delay;
 			Core::factory('Core_Html_Entity_Script')
 				->type('text/javascript')
 				->value('setTimeout(function (){ ' . $sRedirectAction . '}, ' . $iRedirectTime . ')')
@@ -622,14 +625,21 @@ else
 					->name("import_price_max_time")
 					->caption(Core::_('Shop_Item.import_price_list_max_time'))
 					->value($aConfig['maxTime'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
 					->name("import_price_max_count")
 					->caption(Core::_('Shop_Item.import_price_list_max_count'))
 					->value($aConfig['maxCount'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name("import_price_delay")
+					->caption(Core::_('Shop_Item.import_price_list_delay'))
+					->value(1)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
 			)
 		)
 	)

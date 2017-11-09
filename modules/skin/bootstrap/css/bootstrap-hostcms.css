@@ -2897,3 +2897,172 @@ a.fc-day-number { color: #999 !important; }
 .fc-state-default.fc-corner-left { border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .fc-state-default.fc-corner-right { border-top-right-radius: 0; border-bottom-right-radius: 0; }
 .fc-state-disabled { background-color: #f5f5f5 !important; /*color: #fff;*/ text-shadow: none; }
+
+
+/* Deals */
+
+[data-action="showListDealTemplateSteps"]
+{
+	cursor: pointer;	
+	margin: 0 5px 0 0;
+}
+
+.deal-template-step-conversion [data-action="showListDealTemplateSteps"] .fa
+{
+	font-size: 12px;
+}
+
+.deal-template-step
+{
+	margin: 0 5px 5px 0;
+}
+
+.label.deal-template-step .close
+{
+	font-size: 12px;
+	margin-left: 5px; 
+}
+
+.label.deal-template-step .close i
+{
+	font-size: 10px;
+}
+
+.dropdown-step-list
+{
+	display: inline-block;
+}
+
+.dropdown-step-list .close
+{
+	font-size: 14px;
+	line-height: inherit;
+}
+
+.cursor-pointer
+{
+	cursor: pointer;
+}
+
+.title_department, .title_users
+{
+	cursor: pointer;
+	display: inline-block;	
+}
+
+.title_department
+{
+	font-size: 14px;
+	/*margin-bottom: 10px;*/
+}
+
+.depatment_info
+{
+	margin-bottom: 10px;
+}
+
+.departments .list_users .user:hover, .departments .depatment_info:hover
+{
+	background-color: #eee;
+}
+
+.list_users
+{
+	margin: 0 0 0 17px;
+}
+
+.departments .users .user_details, .list_users .user_ico, .company_permissions .user_ico
+{
+	display:table-cell;
+}
+
+.list_users .user_ico, .company_permissions .user_ico
+{
+	/*display:table-cell;*/
+	float: left;
+	margin: 0 10px 0 0; 
+	width: 35px;
+}
+
+.company_permissions
+{	
+	margin: 10px;
+}
+
+.users
+{
+	margin: 0 0 10px 15px;	
+}
+
+.departments
+{
+	margin: 0 0 0 15px;
+}
+
+.company_permissions .department, .company_permissions .user, .departments .list_users .user
+{	
+	margin: 10px 0 0 0;	
+}
+
+.icons_permissions
+{	
+	float: right;	
+	margin: 0 30px 0 10px;		
+}
+
+.icons_permissions i
+{
+	cursor: pointer;
+	margin: 0 3px;
+}
+
+.icons_permissions i
+/*.icons_permissions i[data-action="create"], .icons_permissions i[data-action="edit"], .icons_permissions i[data-action="show"], .icons_permissions i[data-action="delete"], .icons_permissions i[data-action="create"][data-allowed="1"]:not(.changed):hover, .icons_permissions i[data-action="edit"][data-allowed="1"]:not(.changed):hover, .icons_permissions i[data-action="show"][data-allowed="1"]:not(.changed):hover , .icons_permissions i[data-action="delete"][data-allowed="1"]:hover */
+/*,.icons_permissions i[data-action="create"][data-allowed="1"]:hover, .icons_permissions i[data-action="edit"][data-allowed="1"]:hover, .icons_permissions i[data-action="show"][data-allowed="1"]:hover, .icons_permissions i[data-action="delete"][data-allowed="1"]:hover
+*/
+{
+	color: #ccc;
+}
+
+.icons_permissions i[data-action="create"][data-allowed="1"]
+/*,.icons_permissions i[data-action="create"][data-allowed="0"]:not(.changed):hover*/
+{
+	color: #5db2ff;
+}
+
+.icons_permissions i[data-action="edit"][data-allowed="1"]
+/*,.icons_permissions i[data-action="edit"][data-allowed="0"]:not(.changed):hover*/
+{
+	color: #8cc474;
+}
+
+.icons_permissions i[data-action="show"][data-allowed="1"]
+/*,.icons_permissions i[data-action="show"][data-allowed="0"]:not(.changed):hover*/
+{
+	color: #ffce55;
+}
+
+.icons_permissions i[data-action="delete"][data-allowed="1"]
+/*.icons_permissions i[data-action="delete"][data-allowed="0"]:hover*/
+{
+	color: #ed4e2a;
+}
+
+.departments .users .user_info
+{
+	display: inline-block;
+	/*float:left;*/
+	width: 70%;
+}
+
+.contracrot .contracrot-ico
+{
+	background-clip: padding-box;
+	border-radius: 3px;
+	float: left;
+	height: 30px;
+	margin-right: 5px; 	
+	width: 30px;    
+}
+
+/* End Deals */

@@ -78,11 +78,11 @@ class User_Controller_View extends Admin_Form_Action_Controller
 
 			default:
 			case NULL: // Показ формы
-			
+
 				ob_start();
 
 				$content = $this->_showEditForm();
-					
+
 				$oAdmin_View = Admin_View::create();
 				$oAdmin_View
 					->children($this->_children)
@@ -96,7 +96,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 					//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
 					ob_get_clean()
 				);
-				
+
 				$this->_Admin_Form_Controller
 					->title($this->title)
 					->pageTitle($this->title);
@@ -142,10 +142,10 @@ class User_Controller_View extends Admin_Form_Action_Controller
 								<div class="col-xs-12 stats-col">
 									<!-- <div class="stats-value pink">284</div>-->
 									<!-- <div class="stats-title">FOLLOWING</div>-->
-									
+
 									<?php
 									$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->findAll();
-									
+
 									foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 									{
 										?>
@@ -246,7 +246,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 																	? htmlspecialchars($oDirectory_Email_Type->name) . ": "
 																	: '<i class="fa fa-envelope-o palegreen margin-right-10"></i>';
 															?>
-																<p><?php echo $sEmailType?><span class="semi-bold"><?php echo htmlspecialchars($oDirectory_Email->value)?></span></p>
+																<p><?php echo $sEmailType?><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><span class="semi-bold"><?php echo htmlspecialchars($oDirectory_Email->value)?></span></a></p>
 															<?php
 															}
 															?>
@@ -281,7 +281,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 																	? '<i class="' . htmlspecialchars($oDirectory_Social_Type->ico) . ' margin-right-10"></i>'
 																	: '<i class="fa fa-envelope-o azure margin-right-10"></i>';
 															?>
-																<p><?php echo $sSocialType?><a href="<?php echo htmlspecialchars($oDirectory_Social_Type->address) . htmlspecialchars($oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Social->value)?></a></p>
+																<p><?php echo $sSocialType?><a href="<?php echo htmlspecialchars($oDirectory_Social->value)?>" target="_blank"><?php echo htmlspecialchars($oDirectory_Social->value)?></a></p>
 															<?php
 															}
 															?>
@@ -365,7 +365,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 			</div>
 		</div>
 		<?php
-	
+
 		return ob_get_clean();
 	}
 }

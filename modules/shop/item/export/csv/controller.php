@@ -490,6 +490,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	}
 
 	protected $_cacheGetListValue = array();
+
 	protected function _getListValue($list_item_id)
 	{
 		return $list_item_id && Core::moduleIsActive('list')
@@ -752,6 +753,8 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 							// Добавляем информацию о модификациях
 							foreach ($aModifications as $oModification)
 							{
+								$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
+
 								// Кэш всех значений свойств товара
 								$this->_cachePropertyValues[$oModification->id] = array();
 								foreach ($this->_aItem_Properties as $oProperty)
@@ -760,12 +763,47 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 										= $oProperty->getValues($oModification->id, FALSE);
 								}
 
-								$this->_printRow(
-									$this->_getItemData($oModification)
-								);
+								$this->_printRow($this->_getItemData($oModification));
+
+								$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
+
+								// CML ID МОДИФИКАЦИИ
+								$aCurrentPropertyLine[9] = $oModification->guid;
+
+								foreach ($this->_aItem_Properties as $oProperty)
+								{
+									foreach ($this->_cachePropertyValues[$oModification->id][$oProperty->id] as $oProperty_Value)
+									{
+										$aCurrentPropertyLine[$iPropertyFieldOffset] = sprintf(
+											'"%s"',
+											$this->prepareString($this->_getPropertyValue($oProperty, $oProperty_Value, $oModification))
+										);
+
+										if ($oProperty->type == 2)
+										{
+											$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oModification->getItemHref())->getSmallFileHref()));
+										}
+
+										$this->_printRow($aCurrentPropertyLine);
+									}
+
+									if ($oProperty->type == 2)
+									{
+										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+										$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = '""';
+										$iPropertyFieldOffset += 2;
+									}
+									else
+									{
+										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+										$iPropertyFieldOffset++;
+									}
+
+									unset($this->_cachePropertyValues[$oModification->id][$oProperty->id]);
+								}
+								unset($this->_cachePropertyValues[$oShopItem->id]);
 
 								$oModification->clear();
-								unset($this->_cachePropertyValues[$oModification->id]);
 							}
 
 							unset($aModifications);

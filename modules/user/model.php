@@ -30,9 +30,7 @@ class User_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		//'user_group' => array(),
 		'user' => array(),
-		// 'user_module' => array(),
 		'company' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 	);
@@ -162,16 +160,18 @@ class User_Model extends Core_Entity
 	 */
 	public function checkSiteAccess(Site_Model $oSite)
 	{
-		$oUser_Module = $this->User_Group->User_Modules;
-
-		$oUser_Module
-			->queryBuilder()
+		$oCompany_Department_Module = Core_Entity::factory('Company_Department_Module');
+		$oCompany_Department_Module->queryBuilder()
+			->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+			->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
 			->where('site_id', '=', $oSite->id)
+			->where('company_department_post_users.user_id', '=', $this->id)
+			->where('company_departments.deleted', '=', 0)
 			->limit(1);
 
-		$aUser_Modules = $oUser_Module->findAll();
-
-		return count($aUser_Modules) == 1;
+		$aCompany_Department_Modules = $oCompany_Department_Module->findAll();
+		
+		return count($aCompany_Department_Modules) == 1;
 	}
 
 	/**
@@ -256,7 +256,7 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get allowed sites for user
+	 * Get allowed sites for User
 	 * @return array
 	 */
 	public function getSites()
@@ -267,8 +267,11 @@ class User_Model extends Core_Entity
 		{
 			$oSite->queryBuilder()
 				->select('sites.*')
-				->join('user_modules', 'sites.id', '=', 'user_modules.site_id')
-				->where('user_modules.user_group_id', '=', $this->user_group_id)
+				->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
+				->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+				->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
+				->where('company_department_post_users.user_id', '=', $this->id)
+				->where('company_departments.deleted', '=', 0)
 				->groupBy('sites.id');
 		}
 
@@ -475,16 +478,8 @@ class User_Model extends Core_Entity
 
 		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
 
-		$oUsers = Core_Entity::factory('User');
-		$oUsers->queryBuilder()
-			->select('users.*')
-			->join('user_groups', 'users.user_group_id', '=', 'user_groups.id')
-			->where('users.active', '=', 1)
-			->where('user_groups.site_id', '=', CURRENT_SITE)
-			->where('user_groups.deleted', '=', 0);
-
 		if (!$this->active
-			|| (!$oCurrentUser || $oCurrentUser->id != $this->id) && $oUsers->getCount() > 0
+			|| (!$oCurrentUser || $oCurrentUser->id != $this->id)
 		)
 		{
 			$this->active = 1 - $this->active;

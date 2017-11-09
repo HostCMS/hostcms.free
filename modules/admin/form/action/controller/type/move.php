@@ -107,7 +107,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 				->class('applyButton btn btn-blue')
 				->value($this->buttonName)
 				->onclick(
-					'$("#' . $newWindowId . '").remove(); '
+					'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
 				)
 				->controller($this->_Admin_Form_Controller);

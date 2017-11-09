@@ -327,6 +327,15 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get $this->_oCurrentItem
+	 * @return Shop_Item_Model $oCurrentItem
+	 */
+	public function getCurrentItem()
+	{
+		return $this->_oCurrentItem;
+	}
+
+	/**
 	 * Initialization
 	 * @return self
 	 */
@@ -521,7 +530,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			Core::_('Shop_Exchange.order_item_rate'),
 			Core::_('Shop_Exchange.order_item_type')
 		);
-		
+
 		$aGroupProperties = Core_Entity::factory('Shop_Group_Property_List', $oShop->id)->Properties->findAll();
 		foreach ($aGroupProperties as $oGroupProperty)
 		{
@@ -574,7 +583,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$this->aColors[] = "#F48FB1";
 			$this->aEntities[] = 'warehouse-' . $oShopWarehouse->id;
 		}
-		
+
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterConstruct', $this);
 	}
 
@@ -583,10 +592,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->aCaptions[] = $sCaption;
 		$this->aColors[] = $sColor;
 		$this->aEntities[] = $sEntityName;
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Save group
 	 * @param Shop_Group_Model $oShop_Group group
@@ -627,6 +636,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportGroupProperty
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportItemProperty
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.oBeforeCaseDefault
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeAssociated
 	 */
 	public function import()
 	{
@@ -663,14 +673,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$bMarkingItemSearchFields = in_array('marking', $this->_aConfig['itemSearchFields']);
 		$bPathItemSearchFields = in_array('path', $this->_aConfig['itemSearchFields']);
 		$bCmlIdItemSearchFields = in_array('cml_id', $this->_aConfig['itemSearchFields']);
-		
+
 		// Позиция CML GROUP ID
 		$sNeedKeyGroupCml = array_search('group_cml_id', $this->csv_fields);
 		// Позиция названия группы
 		$sNeedKeyGroupName = array_search('group_name', $this->csv_fields);
 		// CML_ID родительской (!) группы товаров
 		$sNeedKeyGroupParentCMLId = array_search('group_parent_cml_id', $this->csv_fields);
-		
+
 		while((Core::getmicrotime() - $timeout + 3 < $this->time)
 			&& $iCounter < $this->step
 			&& ($aCsvLine = $this->getCSVLine($fInputFile)))
@@ -1502,7 +1512,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						// Передано название единицы измерения
 						case 'mesure_name':
 							$oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sData);
-							
+
 							$this->_oCurrentItem->shop_measure_id = !is_null($oShop_Measure)
 								? $oShop_Measure->id
 								: Core_Entity::factory('Shop_Measure')
@@ -1835,7 +1845,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						default:
 							$sFieldName = $this->csv_fields[$iKey];
-							
+
 							Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeCaseDefault', $this, array($sFieldName, $sData));
 
 							if (strpos($sFieldName, "price-") === 0)
@@ -2077,6 +2087,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				}
 			}
 
+			if ($this->searchIndexation && $this->_oCurrentGroup->id)
+			{
+				Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->index();
+			}
+
 			!$this->_oCurrentItem->modification_id
 				&& !$this->_oCurrentItem->id
 				&& $this->_oCurrentItem->shop_group_id = intval($this->_oCurrentGroup->id);
@@ -2198,13 +2213,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$this->_oCurrentItem->save();
 			}
 
-			if ($this->searchIndexation && $this->_oCurrentGroup->id)
-			{
-				Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->index();
-			}
-
 			if ($this->_oCurrentItem->id)
 			{
+				Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAssociated', $this, array($this->_oCurrentShop, $this->_oCurrentItem, $aCsvLine));
+
 				if ($this->_sAssociatedItemMark)
 				{
 					$oShop_Item = $this->_oCurrentShop->Shop_Items->getByMarking($this->_sAssociatedItemMark, FALSE);
@@ -3265,7 +3277,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		return $sLine;
 	}
-	
+
 	public $aCaptions = array();
 
 	public $aColors = array(
@@ -3395,7 +3407,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'#A5D6A7',
 		'#A5D6A7');
 
-	
+
 	public $aEntities = array(
 		'',
 

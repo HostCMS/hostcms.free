@@ -139,4 +139,6 @@ return array(
 	'cancel_admin_subject' => 'Тема письма об отмене заказа куратору магазина',
 	'cancel_user_subject' => 'Тема письма об отмене заказа пользователю',
 	'shopRecountSet_success' => 'Комплекты пересчитаны успешно!',
+	'notification_subscribers' => 'Подписчики на уведомления',
+	'type_subscriber' => 'Введите логин сотрудника',
 );

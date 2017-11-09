@@ -1066,7 +1066,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							<tr id="' . $oShop_Item_Associated->id . '">
 								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
 								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
-								<td>' . $oShop_Warehouse_Item->count . '</td>
+								<td>' . (!is_null($oShop_Warehouse_Item) ? $oShop_Warehouse_Item->count : 0) . '</td>
 								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . $currencyName . '</td>
 								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
 							</tr>

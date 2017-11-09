@@ -20,8 +20,11 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 	 */
 	public function setObject($object)
 	{
+		// Generate Unique Random Coupon Code
+		!$object->id && $object->generateCode();
+		
 		parent::setObject($object);
-
+		
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 

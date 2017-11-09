@@ -2551,12 +2551,8 @@ class Shop_Item_Model extends Core_Entity
 				if ($oTmp_Shop_Item->shop_currency_id)
 				{
 					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
-
-					$price = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-						$oTmp_Shop_Item->Shop_Currency,
-						$oTmp_Shop_Item->Shop->Shop_Currency) * $aPrice['price_discount'];
-
-					$amount += $price * $oShop_Item_Set->count;
+					
+					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
 				}
 				else
 				{
