@@ -231,8 +231,8 @@ class Market_Controller extends Core_Servant_Properties
 
 						$oObject->name = strval($value->name);
 						$oObject->description = strval($value->description);
-						$oObject->image_large = 'http://' . $this->update_server . strval($value->dir) . strval($value->image_large);
-						$oObject->image_small = 'http://' . $this->update_server . strval($value->dir) . strval($value->image_small);
+						$oObject->image_large = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_large);
+						$oObject->image_small = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_small);
 						$oObject->url = 'http://' . $this->update_server . strval($value->url) . '?contract=' . $md5_contract . '&pin=' . $md5_pin;
 						$oObject->siteuser_id = intval($value->siteuser_id);
 						$oObject->price = strval($value->price);

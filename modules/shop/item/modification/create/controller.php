@@ -216,6 +216,21 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 				}
 			}
 
+			// Копировать количество на складе
+			if (!is_null(Core_Array::getPost('copy_warehouse_count')))
+			{
+				$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getDefault();
+				if(!is_null($oShop_Warehouse))
+				{
+					$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
+					$oShop_Warehouse_Item
+						->shop_warehouse_id($oShop_Warehouse->id)
+						->shop_item_id($oShopItem->id)
+						->count(floatval(Core_Array::getPost('count')))
+						->save();
+				}
+			}
+
 			// Значения св-в для создаваемых модификаций
 			foreach ($aTmpResult as $aTmpList)
 			{

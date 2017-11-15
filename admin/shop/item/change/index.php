@@ -247,10 +247,10 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 	{
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
 		$increase_price_rate = Shop_Controller::instance()->convertFloat($increase_price_rate);
-		
+
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
 		$multiply_price_rate = Shop_Controller::instance()->convertFloat($multiply_price_rate);
-		
+
 		$iDiscountID = Core_Array::getPost('shop_discount_id', 0);
 		$iBonusID = Core_Array::getPost('shop_bonus_id', 0);
 		$iProducerID = Core_Array::getPost('shop_producers_list_id');
@@ -280,7 +280,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 
 			$iParentGroup
 				&& $oCore_QueryBuilder_Update->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
-				
+
 			$oCore_QueryBuilder_Update->execute();
 
 			// Special Prices
@@ -304,7 +304,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 
 				$iParentGroup
 					&& $oCore_QueryBuilder_Update->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
-					
+
 				$oCore_QueryBuilder_Update->execute();
 			}
 		}
@@ -320,6 +320,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 
 			$iProducerID
 				&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $iProducerID);
+
+			Core_Event::notify('Shop_Item_Change.onBeforeSelectShopItems', NULL, array($oShop_Items));
 
 			// Step-by-step
 			$offset = 0;

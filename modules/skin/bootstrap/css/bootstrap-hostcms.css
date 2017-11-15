@@ -2367,7 +2367,7 @@ table.table.table-popular-queries tr td:last-child {
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
 	background-color: #F3F3F3 /*#E7F5FE*/ !important;
-	color: #777 /*#11A0F8*/ !important;
+	color: #333 /*#11A0F8*/ !important;
 	border-color: #eee /*#c2e8ff*/ !important;
 	font-weight: 600 !important;
 	font-size: 11px !important;
@@ -2717,11 +2717,11 @@ td.user-avatar img
 }
 
 li.select2-results__option .user-name, li.select2-selection__choice.user-name{
-	font-weight: 700;
+	font-weight: 600;
 }
 
 li.select2-results__option .user-post, li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
-	font-weight: 300;
+	/* font-weight: 300; */
 	display: block;
 }
 
@@ -2730,7 +2730,7 @@ li.select2-results__option.company-department{
 }
 
 li.select2-selection__choice .user-post {
-	font-weight: 400;
+	font-weight: 300;
 }
 
 li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
@@ -3066,3 +3066,6 @@ a.fc-day-number { color: #999 !important; }
 }
 
 /* End Deals */
+
+.select2-container--default .select2-results__option[aria-selected="true"] { background-color: #F3F3F3 !important; margin-bottom: 1px; }
+.select2-results__group { font-weight: 600; }

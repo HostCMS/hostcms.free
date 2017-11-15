@@ -66,33 +66,6 @@ if (!is_null(Core_Array::getPost('wallpaper-id')))
 	Core::showJson('OK');
 }
 
-if (!is_null(Core_Array::getGet('loadSubscribersList')) && !is_null(Core_Array::getGet('term')))
-{
-	$aJSON = array();
-
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('term'))));
-
-	if (strlen($sQuery))
-	{
-		$oUsers = Core_Entity::factory('User');
-		$oUsers->queryBuilder()
-			->where('users.login', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
-
-		$aUsers = $oUsers->findAll(FALSE);
-
-		foreach ($aUsers as $oUser)
-		{
-			$aJSON[] = array(
-				'id' => $oUser->id,
-				'text' => $oUser->login . ' [' . $oUser->id . ']',
-			);
-		}
-	}
-
-	Core::showJson($aJSON);
-}
-
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -188,9 +161,9 @@ if ($oAdminFormActionView && $oAdmin_Form_Controller->getAction() == 'view')
 	$oUserControllerView = Admin_Form_Action_Controller::factory(
 		'User_Controller_View', $oAdminFormActionView
 	);
-	
+
 	$oUserControllerView
-		->addEntity($oAdmin_Form_Entity_Breadcrumbs);	
+		->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oUserControllerView);

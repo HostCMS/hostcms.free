@@ -68,6 +68,15 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get Admin_Form_Controller
+	 * @return Admin_Form_Controller
+	 */
+	public function getController()
+	{
+		return $this->_Admin_Form_Controller;
+	}
+
+	/**
 	 * Children entities list
 	 * @var array
 	 */

@@ -426,11 +426,41 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
 				{
+					$aSelectSubscribers = $aSubscribers = array();
+
+					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+					$aCompanies = $oSite->Companies->findAll();
+					foreach($aCompanies as $oCompany)
+					{
+						$oOptgroupCompany = new stdClass();
+						$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
+						$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
+
+						$aSelectSubscribers[] = $oOptgroupCompany;
+					}
+
+					$oModule = Core::$modulesList['shop'];
+
+					$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+					$oNotification_Subscribers->queryBuilder()
+						->where('notification_subscribers.module_id', '=', $oModule->id)
+						->where('notification_subscribers.type', '=', 0)
+						->where('notification_subscribers.entity_id', '=', $this->_object->id);
+
+					$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+
+					foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+					{
+						$aSubscribers[] = $oNotification_Subscriber->user_id;
+					}
+
 					$oNotificationSubscribersSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop.notification_subscribers'))
-						->options($this->_fillNotificationSubscribersList())
+						// ->options($this->_fillNotificationSubscribersList())
+						->options($aSelectSubscribers)
 						->name('notification_subscribers[]')
 						->class('shop-notification-subscribers')
+						->value($aSubscribers)
 						->style('width: 100%')
 						->multiple('multiple')
 						->divAttr(array('class' => 'form-group col-xs-12'));
@@ -440,30 +470,77 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$html = '
 						<script type="text/javascript">
 							$(function(){
+								// Формирование элементов выпадающего списка
+								function templateResultItemSubscribers(data, item){
+
+									var arraySelectItemParts = data.text.split("%%%"),
+										className = data.element && $(data.element).attr("class");
+
+									if (data.element && $(data.element).attr("style"))
+									{
+										// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+										($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+									}
+
+									// Компания, отдел, ФИО сотрудника
+									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
+
+									if (arraySelectItemParts[2])
+									{
+										// Список должностей через запятую
+										resultHtml += \'<span class="user-post">\' + arraySelectItemParts[2].split(\'###\').join(\', \')  + \'</span>\';
+									}
+
+									if (arraySelectItemParts[3])
+									{
+										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-right-5">\' + resultHtml;
+									}
+
+									return resultHtml;
+								}
+
+								// Формирование результатов выбора
+								function templateSelectionItemSubscribers(data, item){
+
+									var arraySelectItemParts = data.text.split("%%%"),
+										className = data.element && $(data.element).attr("class");
+
+									// Компания, отдел, ФИО сотрудника
+									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
+
+									// Устанавливает title для элемента
+									data.title = arraySelectItemParts[0];
+									
+									if (arraySelectItemParts[1])
+									{
+										resultHtml += \'<span class="company-department">\' + arraySelectItemParts[1] + \'</span>\';
+										data.title += " - " + arraySelectItemParts[1];
+									}									
+
+									// Список должностей через запятую
+									if (arraySelectItemParts[2])
+									{
+										var departmentPosts = arraySelectItemParts[2].split(\'###\').join(\', \');
+
+										resultHtml += \'<span class="user-post">\' + departmentPosts  + \'</span>\';
+										data.title += " - " + departmentPosts;
+									}
+
+									if (arraySelectItemParts[3])
+									{
+										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-top-5 margin-right-5">\' + resultHtml;
+									}
+
+									return resultHtml;
+								}
+
 								$(".shop-notification-subscribers").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
-									minimumInputLength: 1,
 									placeholder: "' . Core::_('Shop.type_subscriber') . '",
-									tags: true,
 									allowClear: true,
-									multiple: true,
-									ajax: {
-										url: "/admin/user/index.php?loadSubscribersList",
-										dataType: "json",
-										type: "GET",
-										processResults: function (data) {
-											var aResults = [];
-											$.each(data, function (index, item) {
-												aResults.push({
-													"id": item.id,
-													"text": item.text
-												});
-											});
-											return {
-												results: aResults
-											};
-										}
-									},
+									templateResult: templateResultItemSubscribers,
+									escapeMarkup: function(m) { return m; },
+									templateSelection: templateSelectionItemSubscribers
 								});
 							})</script>
 						';
@@ -1018,7 +1095,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * @param Shop_Model $oShop shop
 	 * @return array
 	 */
-	protected function _fillNotificationSubscribersList()
+	/*protected function _fillNotificationSubscribersList()
 	{
 		$aReturnArray = array();
 
@@ -1038,11 +1115,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oUser = $oNotification_Subscriber->User;
 
 			$aReturnArray[$oUser->id] = array(
-				'value' => $oUser->login . ' [' . $oUser->id . ']',
+				'value' => $oUser->getFullName() . '%%%' . ($oUser->image ? $oUser->getImageFileHref() : ''),
 				'attr' => array('selected' => 'selected')
 			);
 		}
 
 		return $aReturnArray;
-	}
+	}*/
 }

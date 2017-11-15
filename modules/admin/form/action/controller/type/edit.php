@@ -584,6 +584,14 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		return $this;
 	}
 
+	protected $_return = NULL;
+	
+	public function setReturn($return)
+	{
+		$this->_return = $return;
+		return $this;
+	}
+	
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation for action
@@ -618,7 +626,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					->title($this->title)
 					->pageTitle($this->title);
 
-				$return = $this->_showEditForm();
+				$this->_return = $this->_showEditForm();
 
 			break;
 			case 'save':
@@ -646,7 +654,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$this->addMessage(ob_get_clean());
-				$return = TRUE;
+				$this->_return = TRUE;
 			break;
 			case 'modal':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -695,7 +703,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				<?php*/
 				$this->addContent(ob_get_clean());
 
-				$return = TRUE;
+				$this->_return = TRUE;
 			break;
 			case 'applyModal':
 				$this->_applyObjectProperty();
@@ -703,17 +711,17 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
 				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
 
-				$return = TRUE;
+				$this->_return = TRUE;
 			break;
 			default:
 				$this->_applyObjectProperty();
-				$return = FALSE; // Показываем форму
+				$this->_return = FALSE; // Показываем форму
 			break;
 		}
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterExecute', $this, array($operation, $this->_Admin_Form_Controller));
 
-		return $return;
+		return $this->_return;
 	}
 
 	/**

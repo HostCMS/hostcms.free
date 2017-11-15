@@ -2463,6 +2463,122 @@
 				!objectRow.siblings('.row').size() && $.cloneFormRow(deleteElement).find('.btn-delete').addClass('hide');
 				objectRow.remove();
 			}
+		},
+
+		// Метод показа элементов (сотрудников) в списке select2
+		templateResultItemResponsibleEmployees: function (data, item){
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			if (data.id)
+			{
+
+				// Регулярное выражение для получения id select-а, на базе которого создан данный select2
+				var regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
+					myArray = regExp.exec(data._resultId);
+
+				if (myArray)
+				{
+					// Объект select, на базе которого создан данный select2
+					var selectControlElement = $("#" + myArray[1]),
+						templateResultOptions = selectControlElement.data("templateResultOptions");
+
+					// Убираем из списка создателя дела, чтобы исключить возможность его удаления
+					if (templateResultOptions && ~templateResultOptions.excludedItems.indexOf(+data.id))
+					{
+						item.remove();
+						return;
+					}
+				}
+			}
+
+			if (data.element && $(data.element).attr("style"))
+			{
+				// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+				($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+			}
+
+			// Компания, отдел, ФИО сотрудника
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			if (arraySelectItemParts[2])
+			{
+				// Список должностей через запятую
+				resultHtml += '<span class="user-post">' + arraySelectItemParts[2].split('###').join(', ')  + '</span>';
+			}
+
+			// Изображение
+			if (arraySelectItemParts[3])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5">' + resultHtml;
+			}
+
+			// Удаляем часть с названием отдела
+			arraySelectItemParts[1] && delete(arraySelectItemParts[1]);
+
+			return resultHtml; //arraySelectItemParts.join(\'\');
+		},
+
+		// Метод формирования выбранных элементов (сотрудников) в select2
+		templateSelectionItemResponsibleEmployees: function (data, item){
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class"),
+				//arraySelectItemIdParts = data.id.split("_"),
+				isCreator = false;
+
+			// Регулярное выражение для получения id select-а, на базе которого создан данный select2
+			var regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
+				myArray = regExp.exec(data._resultId);
+
+			if (myArray)
+			{
+				// Объект select, на базе которого создан данный select2
+				var selectControlElement = $("#" + myArray[1]),
+					templateSelectionOptions = selectControlElement.data("templateSelectionOptions");
+
+				// Убираем элемент удаления (крестик) для создателя дела
+				if (templateSelectionOptions && ~templateSelectionOptions.unavailableItems.indexOf(+data.id))
+				{
+					//item.find("span.select2-selection__choice__remove").remove();
+					item
+						.addClass("bordered-primary event-author")
+						.find("span.select2-selection__choice__remove").remove();
+
+					isCreator = true;
+				}
+			}
+
+			// Компания, отдел, ФИО сотрудника
+			// arraySelectItemParts[0] = \'<span class="\' + className + \'">\' + (className == "user-name" && isCreator ? \'<i class="fa fa-flag"></i> \' : "") + arraySelectItemParts[0] + \'</span>\';
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			// Формируем title элемента
+			data.title = arraySelectItemParts[0];
+
+			if (arraySelectItemParts[1])
+			{
+				resultHtml += '<span class="company-department">' + arraySelectItemParts[1] + '</span>';
+				data.title += " - " + arraySelectItemParts[1];
+			}
+
+			// Список должностей через запятую
+			if (arraySelectItemParts[2])
+			{
+				var departmentPosts = arraySelectItemParts[2].split('###').join(', ');
+
+				resultHtml += '<span class="user-post">' + departmentPosts  + '</span>';
+				data.title += " - " + departmentPosts;
+			}
+
+			// Изображение
+			if (arraySelectItemParts[3])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5">' + resultHtml;
+			}
+
+			return resultHtml;
 		}
 	});
 

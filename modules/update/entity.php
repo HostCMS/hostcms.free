@@ -331,8 +331,9 @@ class Update_Entity extends Core_Entity
 							Sql_Controller::instance()->execute($sql_code);
 						}
 
-						// Clear Core_ORM_ColumnCache
+						// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
 						Core_ORM::clearColumnCache();
+						Core_ORM::clearRelationModelCache();
 
 						if (isset($aTmpUpdateItem['file']))
 						{
@@ -346,8 +347,9 @@ class Update_Entity extends Core_Entity
 					$update_file = Update_Controller::instance()->getFilePath();
 					is_file($update_file) && Core_File::delete($update_file);
 
-					// Clear Core_ORM_ColumnCache
+					// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
 					Core_ORM::clearColumnCache();
+					Core_ORM::clearRelationModelCache();
 
 					/*$aCore_Orm_Config = Core::$config->get('core_orm') + array(
 						'cache' => 'memory',

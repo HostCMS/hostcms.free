@@ -124,6 +124,11 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 			$this->changedOrder('changeStatusPaid');
 			ob_get_clean();
 		}
+		else
+		{
+			$this->_shopOrder->system_information = 'RBKMoney хэш не совпал!';
+			$this->_shopOrder->save();
+		}
 	}
 
 	/* печатает форму отправки запроса на сайт платёжной системы */

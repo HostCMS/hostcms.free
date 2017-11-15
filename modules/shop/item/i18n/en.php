@@ -308,4 +308,5 @@ return array(
 	'apply_recount_set' => 'Recount Set',
 	'shop_item_set_not_currency' => 'There is no currency for "%s"',
 	'import_price_list_delay' => 'Delay (sec.)',
+	'create_modification_copy_warehouse_count' => 'Copy the same warehouse rest',	
 );
