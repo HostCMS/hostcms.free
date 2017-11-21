@@ -1381,7 +1381,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$sTaxGUID = md5(mb_strtoupper($oPrice->Налог->Наименование));
 						$oShopTax = Core_Entity::factory('Shop_Tax')->getByGuid($sTaxGUID, FALSE);
 
-						// код введён в эксплуатацию 10.06.2015 для совместимости с МойСклад
+						// для совместимости с МойСклад
 						if (!is_null($oShopTax))
 						{
 							// В связи с разницей логик HostCMS и 1С по хранению налогов, поле "учтено в сумме" больше не будет импортироваться

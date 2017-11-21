@@ -101,7 +101,7 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 
 				$bDebug && Core_Log::instance()->clear()
 					->status(Core_Log::$MESSAGE)
-					->write('1С, удаление файлов предыдущего месяца ' . $i);
+					->write('1С, удаление директорий предыдущего месяца ' . $i);
 
 				// Удаляем файлы предыдущего месяца
 				if (is_dir($sTmpDir)
@@ -118,7 +118,7 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 		{
 			$bDebug && Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write('1С, удаление файлов предыдущего обмена');
+				->write('1С, удаление XML-файлов предыдущего обмена');
 
 			try
 			{
@@ -191,7 +191,7 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 {
 	$bDebug && Core_Log::instance()->clear()
 		->status(Core_Log::$MESSAGE)
-		->write('1С, type=catalog, mode=import');
+		->write('1С, type=catalog, mode=import, file=' . $sFileName);
 
 	try
 	{
@@ -208,6 +208,12 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
+		
+		if ($aReturn['status'] == 'success')
+		{
+			Core_File::delete($sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName));
+		}
+		
 		echo "{$BOM}" . $aReturn['status'];
 	}
 	catch(Exception $exc)

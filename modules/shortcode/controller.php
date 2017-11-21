@@ -5,7 +5,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shortcode Controller
  *
- * @package HostCMS 6\Shortcode
+ * @package HostCMS
+ * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru

@@ -187,6 +187,24 @@
 						</div>
 					</xsl:if>
 
+					<xsl:if test="@id > 0 and count(siteuser_company) > 0">
+						<div class="row">
+						<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>Компании</strong></div>
+							<div class="field">
+								<xsl:apply-templates select="siteuser_company"></xsl:apply-templates>
+							</div>
+						</div>
+					</xsl:if>
+
+					<xsl:if test="@id > 0 and count(siteuser_person) > 0">
+						<div class="row">
+						<div class="caption" style="vertical-align: top; padding-top: 27px"><strong>Представители</strong></div>
+							<div class="field">
+								<xsl:apply-templates select="siteuser_person"></xsl:apply-templates>
+							</div>
+						</div>
+					</xsl:if>
+
 					<!-- Page Redirect after login -->
 					<xsl:if test="location/node()">
 						<input name="location" type="hidden" value="{location}" />
@@ -229,7 +247,7 @@
 				</option>
 			</select>
 
-	<input name="maillist_{@id}" type="checkbox" value="1" id="maillist_{@id}"><xsl:if test="$maillist_siteuser/node()" ><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input>
+			<input name="maillist_{@id}" type="checkbox" value="1" id="maillist_{@id}"><xsl:if test="$maillist_siteuser/node()" ><xsl:attribute name="checked">checked</xsl:attribute></xsl:if></input>
 
 			<label for="maillist_{@id}">&labelSubscribe;</label>
 		</fieldset>
@@ -288,7 +306,6 @@
 				</div>
 			</div>
 		</xsl:if>
-
 	</xsl:template>
 
 	<xsl:template match="list/list_item">
@@ -300,4 +317,147 @@
 		</option>
 	</xsl:template>
 
+	<xsl:template match="siteuser_company">
+		<div style="margin-bottom: 15px;">
+			<div class="row">
+				<div class="field">
+					<input type="text" name="company_{@id}_name" value="{name}" class="width2" style="width: 95%"/>
+				</div>
+			</div>
+
+			<xsl:apply-templates select="directory_address"/>
+
+			<xsl:apply-templates select="directory_phone" mode="siteuser_company">
+				<xsl:with-param name="siteuser_company_id" select="@id" />
+			</xsl:apply-templates>
+
+			<xsl:apply-templates select="directory_email"/>
+
+			<xsl:apply-templates select="directory_website"/>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="siteuser_person">
+		<div style="margin-bottom: 15px;">
+			<div class="row">
+				<div class="field">
+					<input type="text" name="person_{@id}_name" value="{name}" class="width1" />
+					<input type="text" name="person_{@id}_surname" value="{surname}" class="width1" />
+					<input type="text" name="person_{@id}_patronymic" value="{patronymic}" class="width1" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="field">
+					<input type="text" name="person_{@id}_postcode" value="{postcode}" class="width1" />
+					<input type="text" name="person_{@id}_country" value="{country}" class="width1" />
+					<input type="text" name="person_{@id}_city" value="{city}" class="width1" />
+				</div>
+			</div>
+			<div class="row">
+				<div class="field">
+					<input type="text" name="person_{@id}_address" value="{address}" class="width2" style="width: 95%"/>
+				</div>
+			</div>
+
+			<xsl:apply-templates select="directory_phone" mode="siteuser_person">
+				<xsl:with-param name="siteuser_person_id" select="@id" />
+			</xsl:apply-templates>
+
+			<xsl:apply-templates select="directory_email"/>
+
+			<xsl:apply-templates select="directory_website"/>
+
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_address">
+		<div class="row">
+			<div class="field">
+				<input type="text" name="address_{@id}[]" value="{value}" class="width1" />
+				<select name="directory_address_type_{@id}">
+					<xsl:apply-templates select="/siteuser/directory_address_types/directory_address_type">
+						<xsl:with-param name="directory_address_type_id" select="directory_address_type_id" />
+					</xsl:apply-templates>
+				</select>
+			</div>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_address_type">
+		<xsl:param name="directory_address_type_id"/>
+
+		<option value="{@id}">
+			<xsl:if test="@id = $directory_address_type_id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+			<xsl:value-of select="name"/>
+		</option>
+	</xsl:template>
+
+	<xsl:template match="directory_phone" mode="siteuser_person">
+		<xsl:param name="siteuser_person_id"/>
+
+		<div class="row">
+			<div class="field">
+				<input type="text" name="person_{$siteuser_person_id}_phone_{@id}" value="{value}" class="width1" />
+				<select name="directory_phone_type_{@id}">
+					<xsl:apply-templates select="/siteuser/directory_phone_types/directory_phone_type">
+						<xsl:with-param name="directory_phone_type_id" select="directory_phone_type_id" />
+					</xsl:apply-templates>
+				</select>
+			</div>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_phone" mode="siteuser_company">
+		<xsl:param name="siteuser_company_id"/>
+
+		<div class="row">
+			<div class="field">
+				<input type="text" name="phone_{@id}[]" value="{value}" class="width1" />
+				<select name="directory_phone_type_{@id}">
+					<xsl:apply-templates select="/siteuser/directory_phone_types/directory_phone_type">
+						<xsl:with-param name="directory_phone_type_id" select="directory_phone_type_id" />
+					</xsl:apply-templates>
+				</select>
+			</div>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_phone_type">
+		<xsl:param name="directory_phone_type_id"/>
+
+		<option value="{@id}">
+			<xsl:if test="@id = $directory_phone_type_id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+			<xsl:value-of select="name"/>
+		</option>
+	</xsl:template>
+
+	<xsl:template match="directory_email">
+		<div class="row">
+			<div class="field">
+				<input type="text" name="email_{@id}[]" value="{value}" class="width1" />
+				<select name="directory_email_type_{@id}">
+					<xsl:apply-templates select="/siteuser/directory_email_types/directory_email_type">
+						<xsl:with-param name="directory_email_type_id" select="directory_email_type_id" />
+					</xsl:apply-templates>
+				</select>
+			</div>
+		</div>
+	</xsl:template>
+
+	<xsl:template match="directory_email_type">
+		<xsl:param name="directory_email_type_id"/>
+
+		<option value="{@id}">
+			<xsl:if test="@id = $directory_email_type_id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+			<xsl:value-of select="name"/>
+		</option>
+	</xsl:template>
+
+	<xsl:template match="directory_website">
+		<div class="row">
+			<div class="field">
+				<input type="text" name="website_{@id}[]" value="{value}" class="width1" />
+			</div>
+		</div>
+	</xsl:template>
 </xsl:stylesheet>

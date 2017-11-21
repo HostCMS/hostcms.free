@@ -57,9 +57,9 @@
 		<h2>&labelData;</h2>
 		
 		<p>
-			<b>&labelName;</b><xsl:text> </xsl:text><xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/>
+<b>&labelName;</b><xsl:text> </xsl:text><xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/>
 			
-			<br /><b>&labelEmail;</b><xsl:text> </xsl:text><xsl:value-of select="email"/>
+		<br /><b>&labelEmail;</b><xsl:text> </xsl:text><xsl:value-of select="email"/>
 			
 			<xsl:if test="phone != ''">
 			<br /><b>&labelPhone;</b><xsl:text> </xsl:text><xsl:value-of select="phone"/>
@@ -74,7 +74,7 @@
 			<xsl:variable name="city_area">, <xsl:value-of select="shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name"/></xsl:variable>
 			<xsl:variable name="adres">, <xsl:value-of select="address"/></xsl:variable>
 			
-			<br /><b>&labelDeliveryAddress;</b><xsl:text> </xsl:text><xsl:if test="postcode != ''"><xsl:value-of select="postcode"/>, </xsl:if>
+	<br /><b>&labelDeliveryAddress;</b><xsl:text> </xsl:text><xsl:if test="postcode != ''"><xsl:value-of select="postcode"/>, </xsl:if>
 			<xsl:if test="shop_country/name != ''">
 				<xsl:value-of select="shop_country/name"/>
 			</xsl:if>

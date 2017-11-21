@@ -151,7 +151,7 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 			->where('shop_id', '=', $this->shop_id)
 			->where('siteuser_id', '=', $this->siteuser_id)
 			->where('active', '=', 1)
-			->where('id', '<=', $this->id)
+			->where('datetime', '<=', $this->datetime)
 			->execute()->asAssoc()->current();
 
 		return round($aTmp['amount'], 2);

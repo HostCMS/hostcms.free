@@ -927,7 +927,6 @@ class Structure_Model extends Core_Entity
 			$aBackup = array(
 				'structure_menu_id' => $this->structure_menu_id,
 				'template_id' => $this->template_id,
-				'data_template_id' => $this->data_template_id,
 				'site_id' => $this->site_id,
 				'lib_id' => $this->lib_id,
 				'parent_id' => $this->parent_id,
@@ -971,13 +970,27 @@ class Structure_Model extends Core_Entity
 
 			if (is_array($aBackup))
 			{
-				$this->name = Core_Array::get($aBackup, 'name');
+				$this->structure_menu_id = Core_Array::get($aBackup, 'structure_menu_id');
+				$this->template_id = Core_Array::get($aBackup, 'template_id');
+				$this->site_id = Core_Array::get($aBackup, 'site_id');
+				$this->lib_id = Core_Array::get($aBackup, 'lib_id');
+				$this->parent_id = Core_Array::get($aBackup, 'parent_id');
 				$this->options = Core_Array::get($aBackup, 'options');
-				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->name = Core_Array::get($aBackup, 'name');
 				$this->seo_title = Core_Array::get($aBackup, 'seo_title');
 				$this->seo_description = Core_Array::get($aBackup, 'seo_description');
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
+				$this->show = Core_Array::get($aBackup, 'show');
+				$this->url = Core_Array::get($aBackup, 'url');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
 				$this->path = Core_Array::get($aBackup, 'path');
+				$this->type = Core_Array::get($aBackup, 'type');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->https = Core_Array::get($aBackup, 'https');
+				$this->active = Core_Array::get($aBackup, 'active');
+				$this->indexing = Core_Array::get($aBackup, 'indexing');
+				$this->changefreq = Core_Array::get($aBackup, 'changefreq');
+				$this->priority = Core_Array::get($aBackup, 'priority');
 				$this->save();
 			}
 		}

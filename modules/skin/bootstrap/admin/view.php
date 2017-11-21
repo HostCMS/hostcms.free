@@ -106,7 +106,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 					? Core_Array::get($this->module->menu[0], 'ico', 'fa-barcode')
 					: 'fa-barcode';
 
-				?><h5 class="row-title before-pink"><i class="fa <?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars($this->pageTitle)?></h5><?php
+				?><h5 class="row-title before-pink"><i class="fa <?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
 			}
 			?>
 			<div id="id_message"><?php echo $this->message?></div>

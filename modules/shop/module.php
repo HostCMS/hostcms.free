@@ -494,6 +494,8 @@ class Shop_Module extends Core_Module
 				$sNotificationColor = 'info';
 		}
 
+		$oShop = Core_Entity::factory('Shop_Order', $entityId)->Shop;
+
 		return array(
 			'icon' => array(
 				'ico' => "fa {$sIconIco}",
@@ -504,8 +506,8 @@ class Shop_Module extends Core_Module
 				'ico' => $sIconIco,
 				'background-color' => $sNotificationColor
 			),
-			'href' => $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),
-			'onclick' => $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId),
+			'href' => $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId, "shop_id={$oShop->id}"),
+			'onclick' => $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $entityId, "shop_id={$oShop->id}"),
 			'extra' => array(
 				'icons' => array(),
 				'description' => NULL

@@ -592,8 +592,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
-					->add($oSpecialPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oPriceBlock = Admin_Form_Entity::factory('Div')->id('prices')->class('well with-header'))
+					->add($oSpecialPriceBlock = Admin_Form_Entity::factory('Div')->id('special_prices')->class('well with-header'))
 				;
 
 				// Удаляем группу доступа
@@ -892,7 +892,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if (count($aWarehouses))
 				{
 					$oMainTab
-						->add($oWarehouseBlock = Admin_Form_Entity::factory('Div')->class('well with-header shop-item-warehouses-list'));
+						->add($oWarehouseBlock = Admin_Form_Entity::factory('Div')->id('warehouses')->class('well with-header shop-item-warehouses-list'));
 
 					$oWarehouseBlock
 						->add($oHeaderDiv = Admin_Form_Entity::factory('Div')

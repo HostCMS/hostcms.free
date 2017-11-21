@@ -47,7 +47,7 @@ if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
 	$oDefault_Router_Route->controller('Core_Command_Controller_Hostcms5_Default');
 }
 
-if (!((~Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & (~1835217467)))
+if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~1835217467)))
 {
 	$oSite = Core_Entity::factory('Site');
 	$oSite->queryBuilder()
@@ -58,9 +58,9 @@ if (!((~Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & (~1835
 	{
 		Core_Router::add('sitecount', '()')
 			->controller('Core_Command_Controller_Sitecount')
-				->execute()
-				->header('X-Powered-By', Core::xPoweredBy())
-				->sendHeaders()->showBody();
+			->execute()
+			->header('X-Powered-By', Core::xPoweredBy())
+			->sendHeaders()->showBody();
 		exit();
 	}
 }
@@ -79,7 +79,7 @@ if (!function_exists('xslt_create')
 	exit();
 }
 
-if (!((~Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & (~2983120818)))
+if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~2983120818)))
 {
 	$oSite = Core_Entity::factory('Site');
 	$oSite->queryBuilder()

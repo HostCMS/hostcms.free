@@ -244,6 +244,47 @@ if (!is_null(Core_Array::getPost('apply')))
 									}
 								}
 
+								$aSiteuser_Companies = $oSiteuser->Siteuser_Companies->findAll(FALSE);
+
+								foreach ($aSiteuser_Companies as $oSiteuser_Company)
+								{
+									if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_name")))
+									{
+										$oSiteuser_Company->name = Core_Array::getPost("company_{$oSiteuser_Company->id}_name");
+										$oSiteuser_Company->save();
+									}
+								}
+
+								$aSiteuser_People = $oSiteuser->Siteuser_People->findAll(FALSE);
+
+								foreach ($aSiteuser_People as $oSiteuser_Person)
+								{
+									if (!is_null(Core_Array::getPost("person_{$oSiteuser_Person->id}_name")))
+									{
+										$oSiteuser_Person->name = Core_Array::getPost("person_{$oSiteuser_Person->id}_name");
+										$oSiteuser_Person->surname = Core_Array::getPost("person_{$oSiteuser_Person->id}_surname");
+										$oSiteuser_Person->patronymic = Core_Array::getPost("person_{$oSiteuser_Person->id}_patronymic");
+										$oSiteuser_Person->postcode = Core_Array::getPost("person_{$oSiteuser_Person->id}_postcode");
+										$oSiteuser_Person->country = Core_Array::getPost("person_{$oSiteuser_Person->id}_country");
+										$oSiteuser_Person->city = Core_Array::getPost("person_{$oSiteuser_Person->id}_city");
+										$oSiteuser_Person->address = Core_Array::getPost("person_{$oSiteuser_Person->id}_address");
+
+										$oSiteuser_Person->save();
+									}
+
+									$aDirectory_Phones = $oSiteuser_Person->Directory_Phones->findAll();
+
+									foreach ($aDirectory_Phones as $oDirectory_Phone)
+									{
+										if (!is_null(Core_Array::getPost("person_{$oSiteuser_Person->id}_phone_{$oDirectory_Phone->id}")))
+										{
+											$oDirectory_Phone->value = Core_Array::getPost("person_{$oSiteuser_Person->id}_phone_{$oDirectory_Phone->id}");
+
+											$oDirectory_Phone->save();
+										}
+									}
+								}
+
 								// Регистрация нового пользователя
 								if ($bNewUser)
 								{
@@ -278,7 +319,7 @@ if (!is_null(Core_Array::getPost('apply')))
 
 									return;
 								}
-								else
+								/*else
 								{
 									?><h1>Ваши анкетные данные успешно изменены</h1>
 									<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдете в <a href="../">кабинет пользователя</a>.</p>
@@ -286,7 +327,7 @@ if (!is_null(Core_Array::getPost('apply')))
 									<?php
 
 									return;
-								}
+								}*/
 							}
 							else
 							{

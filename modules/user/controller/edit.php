@@ -3,12 +3,13 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Administration center users.
+ * User_Controller_Edit
  *
- * @package HostCMS 6\User
+ * @package HostCMS
+ * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2015 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -152,9 +153,9 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oPersonalDataWebsitesRow);
 
 		$oMainTab
-			->move($this->getField('surname')->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-12')), $oPersonalDataRow1)
-			->move($this->getField('name')->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-12')), $oPersonalDataRow1)
-			->move($this->getField('patronymic')->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-12')), $oPersonalDataRow1)
+			->move($this->getField('surname')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oPersonalDataRow1)
+			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oPersonalDataRow1)
+			->move($this->getField('patronymic')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oPersonalDataRow1)
 			->move($this->getField('address'), $oPersonalDataRow2);
 
 		$oMainTab
