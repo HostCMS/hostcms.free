@@ -56,7 +56,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			{
 				$aPropertyValues = is_array($propertyValue)
 					? $propertyValue
-					: array();
+					: array('');
 			}
 			else
 			{

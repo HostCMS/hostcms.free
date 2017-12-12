@@ -321,11 +321,19 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
-		if ($oProperty_Value->Property->type == 2)
+		switch ($oProperty_Value->Property->type)
 		{
-			$oProperty_Value
-				->setHref($this->getItemHref())
-				->setDir($this->getItemPath());
+			case 2:
+				$oProperty_Value
+					->setHref($this->getItemHref())
+					->setDir($this->getItemPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
 		}
 	}
 

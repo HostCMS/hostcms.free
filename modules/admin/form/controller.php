@@ -74,6 +74,31 @@ class Admin_Form_Controller
 	}
 
 	/**
+	 * 48 icons
+	 */
+	static protected $_icon = array('fa fa-address-book', 'fa fa-address-card', 'fa fa-barcode', 'fa fa-bars', 'fa fa-beer', 'fa fa-bell', 'fa fa-bicycle', 'fa fa-binoculars', 'fa fa-birthday-cake', 'fa fa-bolt', 'fa fa-book', 'fa fa-bookmark', 'fa fa-briefcase', 'fa fa-bullseye', 'fa fa-camera', 'fa fa-car', 'fa fa-certificate', 'fa fa-cloud', 'fa fa-code', 'fa fa-coffee', 'fa fa-cube', 'fa fa-dashboard', 'fa fa-database', 'fa fa-dot-circle-o', 'fa fa-flask', 'fa fa-futbol-o', 'fa fa-gift', 'fa fa-glass', 'fa fa-heart', 'fa fa-hourglass', 'fa fa-leaf', 'fa fa-location-arrow', 'fa fa-magic', 'fa fa-magnet', 'fa fa-paper-plane', 'fa fa-paw', 'fa fa-plane', 'fa fa-plug', 'fa fa-road', 'fa fa-rocket', 'fa fa-smile-o', 'fa fa-snowflake-o', 'fa fa-space-shuttle', 'fa fa-star', 'fa fa-thumbs-up', 'fa fa-tree', 'fa fa-trophy', 'fa fa-wrench');
+	
+	/**
+	 * Get Icon for object ID
+	 * @param int $id object ID
+	 * @return string
+	 */
+	static public function getIcon($id)
+	{
+		return self::$_icon[$id % 48];
+	}
+	
+	/** 
+	 * Get background color class for object ID
+	 * @param int $id object ID
+	 * @return string
+	 */
+	static public function getBackgroundColorClass($id)
+	{
+		return 'bg-' . ($id % 20);
+	}
+	
+	/**
 	 * Add additional param
 	 * @param string $key param name
 	 * @param string $value param value

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 {
@@ -38,22 +38,31 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 	protected $_unlimitedProperties = TRUE;
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+		
+		$this->class = 'btn-group';
+	}
+	
+	/**
 	 * Executes the business logic.
 	 */
 	public function execute()
 	{
 		echo PHP_EOL;
 
+		$aAttr = $this->getAttrsString();
 		?>
-		<div class="btn-group">
+		<div <?php echo implode(' ', $aAttr)?>>
 		<?php
 		$aOptions = $this->options;
 
 		if (is_array($aOptions) && count($aOptions))
 		{
-			$this->class = 'dropdown-menu form-element ' . $this->class;
-
-			$aAttr = $this->getAttrsString();
+			//$this->class = 'dropdown-menu form-element ' . $this->class;
 
 			// Индекс элемента массива, который показываем как выбранное значение
 			$indexValueItem = isset($aOptions[$this->value])

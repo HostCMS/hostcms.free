@@ -241,6 +241,20 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oDocument_Controller_Edit);
 }
 
+// Действие "Применить"
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('apply');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'apply')
+{
+	$oApplyController = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Apply', $oAdmin_Form_Action
+	);
+
+	$oAdmin_Form_Controller->addAction($oApplyController);
+}
+
 // Действие создание директории
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions

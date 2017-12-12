@@ -14,6 +14,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 {
 	/**
+	 * Allowed object properties
+	 * @var array
+	 */
+	protected $_allowedProperties = array(
+		'generatePassword'
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct()
@@ -21,7 +29,68 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 		parent::__construct();
 
 		$this
+			->generatePassword(FALSE)
 			->type('password')
 			->size(30);
+	}
+
+	/**
+	 * Executes the business logic.
+	 */
+	public function execute()
+	{
+		is_null($this->size) && is_null($this->style) && $this->style('width: 100%');
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		if (is_null($this->onkeydown))
+		{
+			$this->onkeydown = $this->onkeyup = $this->onblur = "FieldCheck('{$windowId}', this)";
+		}
+
+		$aAttr = $this->getAttrsString();
+
+		$aDefaultDivAttr = array('class' => 'item_div');
+		$this->divAttr = Core_Array::union($this->divAttr, $aDefaultDivAttr);
+
+		$aDivAttr = array();
+		// Установим атрибуты div'a.
+		if (is_array($this->divAttr))
+		{
+			foreach ($this->divAttr as $attrName => $attrValue)
+			{
+				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
+			}
+		}
+
+		?><div <?php echo implode(' ', $aDivAttr)?>><?php
+		?><span class="caption"><?php echo $this->caption?></span><?php
+
+		if (count($this->_children))
+		{
+			?><div class="input-group"><?php
+		}
+
+		?>
+		<input <?php echo implode(' ', $aAttr) ?>/>
+		<?php
+		if ($this->generatePassword)
+		{
+			?>
+			<a class="generate-password" onclick="$.generatePassword();"><i class="fa fa-keyboard-o"></i></a>
+			<?php
+		}
+
+		// Могут быть дочерние элементы элементы
+		$this->executeChildren();
+
+		$this->_showFormat();
+
+		if (count($this->_children))
+		{
+			?></div><?php
+		}
+
+		?></div><?php
 	}
 }

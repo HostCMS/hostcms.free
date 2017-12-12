@@ -889,7 +889,8 @@ td.importantField a {
 }
 
 .tickets-container .tickets-list .ticket-item .ticket-user{
-	white-space: normal;
+	/* white-space: normal; */
+	overflow: unset;
 }
 
 .tickets-container .tickets-list .ticket-item .ticket-type i{
@@ -1334,6 +1335,10 @@ body.body-blank .page-breadcrumbs, body.body-blank .page-header {display:none}
 
 .radio-group input[type="radio"]:checked +span.btn-sky{
 	border-color: #109ebe;
+}
+
+.radio-group input[type="radio"]:checked +span.btn-pink{
+	border-color: #f95a93;
 }
 
 .typograph_result{font-size:110%;height:150px;overflow:auto;margin:15px 0;padding:0 0 0 15px;border-left:3px solid #db1905;}
@@ -2427,6 +2432,11 @@ table.table.table-popular-queries tr td:last-child {
 }
 .admin-table td .small .fa { margin-right: 3px; }
 
+.badge-circle { display: inline-block; width: 28px; height: 28px; background-color: #CCC; -webkit-border-radius: 50%; -moz-border-radius: 50%; border-radius: 50%; background-clip: padding-box; text-align: center }
+.badge-circle i { line-height: 27px; font-size: 14px }
+
+.badge-circle.badge-circle-lg i { line-height: 120px; font-size: 50px }
+
 /* Full Calendar */
 .fc-toolbar h2
 {
@@ -2675,7 +2685,8 @@ a.fc-day-number
 	cursor: pointer;
 }
 
-.profile-container.tickets-container .tickets-list .ticket-item  .ticket-user .user-avatar{
+.profile-container.tickets-container .tickets-list .ticket-item  .ticket-user .user-avatar,
+.profile-container.tickets-container .tickets-list .ticket-item  .ticket-user .badge-circle {
 	margin-right: 5px;
 }
 
@@ -2719,7 +2730,7 @@ td.user-avatar img
 li.select2-results__option .user-name, li.select2-selection__choice.user-name{
 	font-weight: 600;
 }
-
+li.select2-results__option .user-post { font-weight: 300; }
 li.select2-results__option .user-post, li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
 	/* font-weight: 300; */
 	display: block;
@@ -2903,7 +2914,7 @@ a.fc-day-number { color: #999 !important; }
 
 [data-action="showListDealTemplateSteps"]
 {
-	cursor: pointer;	
+	cursor: pointer;
 	margin: 0 5px 0 0;
 }
 
@@ -2919,8 +2930,9 @@ a.fc-day-number { color: #999 !important; }
 
 .label.deal-template-step .close
 {
+	float: none;
 	font-size: 12px;
-	margin-left: 5px; 
+	margin-left: 5px;
 }
 
 .label.deal-template-step .close i
@@ -2947,7 +2959,7 @@ a.fc-day-number { color: #999 !important; }
 .title_department, .title_users
 {
 	cursor: pointer;
-	display: inline-block;	
+	display: inline-block;
 }
 
 .title_department
@@ -2980,18 +2992,18 @@ a.fc-day-number { color: #999 !important; }
 {
 	/*display:table-cell;*/
 	float: left;
-	margin: 0 10px 0 0; 
+	margin: 0 10px 0 0;
 	width: 35px;
 }
 
 .company_permissions
-{	
+{
 	margin: 10px;
 }
 
 .users
 {
-	margin: 0 0 10px 15px;	
+	margin: 0 0 10px 15px;
 }
 
 .departments
@@ -3000,14 +3012,14 @@ a.fc-day-number { color: #999 !important; }
 }
 
 .company_permissions .department, .company_permissions .user, .departments .list_users .user
-{	
-	margin: 10px 0 0 0;	
+{
+	margin: 10px 0 0 0;
 }
 
 .icons_permissions
-{	
-	float: right;	
-	margin: 0 30px 0 10px;		
+{
+	float: right;
+	margin: 0 30px 0 10px;
 }
 
 .icons_permissions i
@@ -3061,11 +3073,93 @@ a.fc-day-number { color: #999 !important; }
 	border-radius: 3px;
 	float: left;
 	height: 30px;
-	margin-right: 5px; 	
-	width: 30px;    
+	margin-right: 5px;
+	width: 30px;
+}
+
+/*.btn-group.deal_template_steps .deal_step.available:hover*/
+.btn-group.deal_template_steps .deal_step.available:hover
+{
+	box-shadow: -1px -3px 0 0px #ccc, -1px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
+}
+
+.btn-group.deal_template_steps .deal_step.available:first-child:hover
+{
+	box-shadow: -3px 0px 0 0px #ccc, -3px -3px 0 0px #ccc, -3px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
+}
+
+.btn-group.deal_template_steps .deal_step.available:last-child:hover
+{
+	box-shadow: -1px -3px 0 0px #ccc, -1px 3px 0 0px #ccc, 3px 0px 0 0px #ccc, 3px -3px 0 0px #ccc, 3px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
+}
+
+.deal_step.available:not(.current)
+{
+	background-color: #fff;
+}
+
+.deal_step.unavailable
+{	
+	cursor: default;
+}
+
+.deal_step.unavailable:not(.current)
+{
+	background-color: #eee;
+}
+
+.deal_step.current
+{
+	background-color: #43a047;
+	cursor: default;
+}
+
+.deal_step.complete:not(.current)
+{
+	background-color: #9ccc65;
+	/*#00c853;*/
 }
 
 /* End Deals */
 
 .select2-container--default .select2-results__option[aria-selected="true"] { background-color: #F3F3F3 !important; margin-bottom: 1px; }
 .select2-results__group { font-weight: 600; }
+
+.bg-0 { background-color: #00e5ff !important; }
+.bg-1 { background-color: #f44336 !important; }
+.bg-2 { background-color: #e91e63 !important; }
+.bg-3 { background-color: #9c27b0 !important; }
+.bg-4 { background-color: #673ab7 !important; }
+.bg-5 { background-color: #3f51b5 !important; }
+.bg-6 { background-color: #2196f3 !important; }
+.bg-7 { background-color: #03a9f4 !important; }
+.bg-8 { background-color: #00bcd4 !important; }
+.bg-9 { background-color: #009688 !important; }
+.bg-10 { background-color: #4caf50 !important; }
+.bg-11 { background-color: #8bc34a !important; }
+.bg-12 { background-color: #cddc39 !important; }
+.bg-13 { background-color: #fdd835 !important; }
+.bg-14 { background-color: #ffc107 !important; }
+.bg-15 { background-color: #ff9800 !important; }
+.bg-16 { background-color: #ff5722 !important; }
+.bg-16 { background-color: #795548 !important; }
+.bg-17 { background-color: #9e9e9e !important; }
+.bg-18 { background-color: #607d8b !important; }
+.bg-19 { background-color: #ffea00 !important; }
+.bg-20 { background-color: #ef9a9a !important; }
+
+.select2-container { font-size: 12px !important; }
+
+.btn-pink, .btn-pink:focus {
+    background-color: #e75b8d !important;
+    border-color: #e75b8d;
+    color: #fff;
+}
+
+.btn-pink:hover, .open .btn-pink.dropdown-toggle {
+    background-color: #e75b8d !important;
+    border-color: #e75b8d;
+    color: #fff;
+}
+
+.generate-password > i { color: #2dc3e8; position: absolute; right: 32px; top: 32px; cursor: pointer; }

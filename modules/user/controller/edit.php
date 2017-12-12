@@ -69,7 +69,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('User.password'))
 			->id('password_first')
 			->name('password_first')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6 col-lg-6'))
+			->generatePassword(TRUE);
 
 		!$this->_object->id && $oPasswordFirst->format($aPasswordFormat);
 
@@ -179,7 +180,13 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				array(
 					0 => 'fa-mars',
 					1 => 'fa-venus',
-			));
+			))
+			->colors(
+				array(
+					0 => 'btn-sky',
+					1 => 'btn-pink'
+				)
+			);
 
 		$oPersonalDataRow3->add($oUserSex);
 
@@ -554,7 +561,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (!empty($sMessenger_Address))
 			{
 				$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
-				
+
 				var_dump(intval(Core_Array::getPost("messenger#{$oDirectory_Messenger->id}")));
 
 				$oDirectory_Messenger

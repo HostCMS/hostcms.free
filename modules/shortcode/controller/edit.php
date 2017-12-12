@@ -197,21 +197,22 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
-		parent::_applyObjectProperty();
-
 		$modelName = $this->_object->getModelName();
+
+		// Backup revision
+		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		{
+			$modelName = 'shortcode'
+				&& $this->_object->backupRevision();
+		}
+		
+		parent::_applyObjectProperty();
 
 		switch ($modelName)
 		{
 			case 'shortcode':
 				// Rebuild shortcodes list
 				Shortcode_Controller::instance()->rebuild();
-
-				// Backup revision
-				if (Core::moduleIsActive('revision'))
-				{
-					$this->_object->backupRevision();
-				}
 			break;
 		}
 

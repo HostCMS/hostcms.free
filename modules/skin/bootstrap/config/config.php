@@ -17,6 +17,11 @@ return array (
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
 			'modules' => array('helpdesk', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'message'),
 		),
+		'crm' => array(
+			'ico' => 'fa fa-users',
+			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
+			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'company'),
+		),		
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_tools'),
@@ -26,11 +31,6 @@ return array (
 			'ico' => 'fa fa-rocket',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_seo'),
 			'modules' => array('counter', 'advertisement', 'seo', 'oneps', 'roistat'),
-		),
-		'crm' => array(
-			'ico' => 'fa fa-users',
-			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
-			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'company'),
 		),
 		'clouds' => array(
 			'ico' => 'fa fa-cloud',

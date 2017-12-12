@@ -175,4 +175,35 @@ class Property_Dir_Model extends Core_Entity
 
 		return NULL;
 	}
+	
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->getChildrenCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value($count)
+			->execute();
+	}
+	/**
+	 * Get count of items all levels
+	 * @return int
+	 */
+	public function getChildrenCount()
+	{
+		$count = $this->Properties->getCount();
+
+		$aProperty_Dirs = $this->Property_Dirs->findAll(FALSE);
+		foreach ($aProperty_Dirs as $oProperty_Dir)
+		{			
+			$count += $oProperty_Dir->getChildrenCount();
+		}
+
+		return $count;
+	}	
 }

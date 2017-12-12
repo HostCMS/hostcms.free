@@ -108,7 +108,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		</xsl:template>
 
 	</xsl:stylesheet>';
-				
+
 				$oTextarea_Xsl
 					->value($xslContent)
 					->rows(30)
@@ -259,9 +259,16 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
-		parent::_applyObjectProperty();
-
 		$modelName = $this->_object->getModelName();
+
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$modelName == 'xsl'
+				&& $this->_object->backupRevision();
+		}
+
+		parent::_applyObjectProperty();
 
 		switch ($modelName)
 		{
@@ -283,12 +290,6 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$content = Core_Array::getPost('lng_' . $sLng);
 
 					$this->_object->saveLngDtdFile($sLng, $content);
-				}
-
-				// Backup revision
-				if (Core::moduleIsActive('revision'))
-				{
-					$this->_object->backupRevision();
 				}
 			break;
 		}

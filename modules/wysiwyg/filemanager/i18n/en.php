@@ -35,4 +35,5 @@ return array(
 	'root' => 'Root',
 	'chmod' => 'Permissions',
 	'upload_message' => 'Drop files here or click to upload',
+	'apply_success' => "Information has been successfully changed",	
 );

@@ -66,6 +66,15 @@ if (!is_null(Core_Array::getPost('wallpaper-id')))
 	Core::showJson('OK');
 }
 
+if (!is_null(Core_Array::getPost('generate-password')))
+{
+	Core::showJson(
+		array(
+			'password' => Core_Password::get()
+		)
+	);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 

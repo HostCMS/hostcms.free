@@ -48,6 +48,15 @@ class Core_Mail_Smtp extends Core_Mail
 				return FALSE;
 			}
 
+			// Может быть много 220-х, последний отделяется пробелом, а не минусом
+			do {
+				$server_response = $this->_serverFgets($fp);
+			}
+			while(!feof($fp)
+				&& $this->_getResponseStatus($server_response) == "220"
+				&& substr($server_response, 3, 1) != ' '
+			);
+
 			fputs($fp, "EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
 
 			$server_response = $this->_serverFgets($fp);

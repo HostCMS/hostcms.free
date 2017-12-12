@@ -120,3 +120,4 @@ modules/core/config/*
 #!templates/**
 #
 #!upload/**
+/nbproject/private/

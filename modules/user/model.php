@@ -170,7 +170,7 @@ class User_Model extends Core_Entity
 			->limit(1);
 
 		$aCompany_Department_Modules = $oCompany_Department_Module->findAll();
-		
+
 		return count($aCompany_Department_Modules) == 1;
 	}
 
@@ -444,6 +444,15 @@ class User_Model extends Core_Entity
 			$this->Helpdesk_User_Letter_Templates->deleteAll(FALSE);
 		}
 
+		$this->Company_Department_Post_Users->deleteAll(FALSE);
+		$this->Directory_Emails->deleteAll(FALSE);
+		$this->Directory_Phones->deleteAll(FALSE);
+		$this->Directory_Messengers->deleteAll(FALSE);
+		$this->Directory_Socials->deleteAll(FALSE);
+		$this->Directory_Websites->deleteAll(FALSE);
+		$this->Events->deleteAll(FALSE);
+		$this->Notifications->deleteAll(FALSE);
+
 		// Удаляем директорию
 		$this->deleteDir();
 
@@ -557,9 +566,6 @@ class User_Model extends Core_Entity
 
 		// В случае отсутствия ФИО возвращаем логин
 		!count($aPartsFullName) && $aPartsFullName[] = $this->login;
-
-
-		//return (!empty($this->surname) ? $oUser->surname . ' ' : '' ) . (!empty($oUser->name) ? $oUser->name . ' ' : '' ) . (!empty($oUser->patronymic) ? $oUser->patronymic . ' ' : '' );
 
 		return implode(' ', $aPartsFullName);
 	}

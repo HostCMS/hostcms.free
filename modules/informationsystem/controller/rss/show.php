@@ -7,10 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - channelEntities(array) массив дополнительных элементов, добавляемых в channel
+ * - channelEntities(array) массив дополнительных элементов, добавляемых в channel, каждый элемент массив с атрибутами 'name', 'value', 'attributes'.
  * - group($id) идентификатор информационной группы, если FALSE, то вывод инофрмационных элементов
  * осуществляется из всех групп
  * - yandex(TRUE|FALSE) экспорт в Яндекс.Новости, по умолчанию FALSE
+ * - turbo(TRUE|FALSE) выгрузка для Яндекс.Турбо, по умолчанию FALSE
  * - stripTags(TRUE|FALSE) удалять HTML-теги из экспортируемых данных, по умолчанию TRUE
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - tag($path) путь тега, с использованием которого ведется отбор информационных элементов
@@ -50,6 +51,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		'offset',
 		'limit',
 		'yandex',
+		'turbo',
 		'stripTags',
 		'cache',
 	);
@@ -154,7 +156,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			->close()
 			->where('informationsystem_items.siteuser_group_id', 'IN', $aSiteuserGroups);
 
-		$this->group = $this->yandex = FALSE;
+		$this->group = $this->yandex = $this->turbo = FALSE;
 		$this->stripTags = $this->cache = TRUE;
 		$this->offset = 0;
 
@@ -265,7 +267,9 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			}
 		}
 
-		$this->yandex && $this->_Core_Rss->xmlns('yandex', 'http://news.yandex.ru');
+		$this->yandex
+			&& $this->_Core_Rss->xmlns('yandex', 'http://news.yandex.ru')
+			&& $this->_Core_Rss->xmlns('media', 'http://search.yahoo.com/mrss/');
 
 		if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 		{
@@ -313,6 +317,8 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{
+			$attributes = array();
+			
 			$this->_currentItem = array();
 			$this->_currentItem['pubDate'] = date('r', Core_Date::sql2timestamp($oInformationsystem_Item->datetime));
 			$this->_currentItem['title'] = Core_Str::str2ncr(
@@ -365,9 +371,11 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 				$this->_currentItem[] = $enclosure;
 			}
 
+			$this->turbo && $attributes['turbo'] = 'true';
+			
 			Core_Event::notify(get_class($this) . '.onBeforeAddItem', $this, array($oInformationsystem_Item, $this->_currentItem));
 
-			$this->_Core_Rss->add('item', $this->_currentItem);
+			$this->_Core_Rss->add('item', $this->_currentItem, $attributes);
 		}
 
 		$content = $this->_Core_Rss->get();

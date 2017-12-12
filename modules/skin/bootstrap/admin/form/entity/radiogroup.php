@@ -11,8 +11,23 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup {
+class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
+{
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		// Add label propery
+		$this->_allowedProperties[] = 'colors';
 
+		$this->_skipProperies[] = 'colors';
+
+		parent::__construct();
+
+		$this->colors(array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky'));
+	}
+	
 	/**
 	 * Executes the business logic.
 	 */
@@ -44,7 +59,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		<div class="radio-group">
 		<?php
 
-		$aClassBtnColors = array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky');
+		//$aClassBtnColors = array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky');
+		$aClassBtnColors = $this->colors;
 		$i = 0;
 
 		foreach ($this->radio as $key => $value)

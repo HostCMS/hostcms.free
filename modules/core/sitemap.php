@@ -829,7 +829,7 @@ class Core_Sitemap extends Core_Servant_Properties
 	 */
 	protected function _getIndexFilePath()
 	{
-		return CMS_FOLDER . sprintf($this->fileName, $this->_oSite->id);
+		return CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'sitemap' . DIRECTORY_SEPARATOR . sprintf($this->fileName, $this->_oSite->id);
 	}
 
 	public function createSitemapDir()

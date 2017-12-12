@@ -1340,6 +1340,32 @@
 				$(".clock #hours").html(( hours < 10 ? "0" : "" ) + hours);
 			}, 500);
 		},
+		generatePassword: function() {
+			var jFirstPassword = $("[name = 'password_first']"),
+				jSecondPassword = $("[name = 'password_second']");
+
+			$.ajax({
+				url: '/admin/user/index.php',
+				type: 'POST',
+				data: {'generate-password':1},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+
+					jFirstPassword
+						.prop('type', 'text')
+						.val(answer.password)
+						.focus();
+
+					jSecondPassword
+						.prop('type', 'text')
+						.val(answer.password)
+						.focus();
+				
+					jFirstPassword.focus();
+				}
+			});
+		},
 		eventsPrepare: function (){
 			setInterval($.refreshEventsList, 10000);
 
@@ -2579,6 +2605,37 @@
 			}
 
 			return resultHtml;
+		},
+
+		dealsPrepare: function (){
+
+			$("body").popover({
+				container: "body",
+				selector: "button[id ^= \'deal_template_step_\']",
+				placement: "bottom",
+				template: "<div class=\"popover\"><div class=\"arrow\"></div><div class=\"popover-content\"></div></div>",
+				html: true,
+				trigger: "hover"
+			});
+
+			$("body").on("click", ".deal_template_steps .deal_step", function (){
+
+				console.log("deal_step click");
+
+
+				// Идентификатор этапа сделки
+				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0;
+
+				if (dealTemplateStepId)
+				{
+					// Идентификатор сделки
+					var dealId = $(this).parent('.deal_template_steps').data('deal-id');
+
+					//$.adminLoad({path: '/admin/deal/step/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
+					$('#id_content #row_0_' + dealId).toggleHighlight(); $.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
+					$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
+				}
+			});
 		}
 	});
 
@@ -2704,6 +2761,8 @@
 $(function(){
 	$.notificationsPrepare();
 	$.eventsPrepare();
+	$.dealsPrepare();
+
 	// $.calendarPrepare();
 
 	/* --- CHAT --- */

@@ -558,7 +558,7 @@
 			<xsl:if test="$i != $page">
 				<xsl:if test="($page - $pre_count_page) &lt;= $i and $i &lt; $n">
 					<!-- Pagination item -->
-					<a href="{$group_link}{$number_link}{$tag_path}{$shop_producer_path}{$filter}{$on_page}" class="page_link">
+					<a href="{$group_link}{$tag_path}{$number_link}{$shop_producer_path}{$filter}{$on_page}" class="page_link">
 						<xsl:value-of select="$i + 1"/>
 					</a>
 				</xsl:if>

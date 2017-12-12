@@ -509,6 +509,12 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup structure revision
+		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		$this->_object->saveStructureFile(Core_Array::getPost('structure_source'));
@@ -521,7 +527,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oDocument = $this->_object->Document;
 
 				// Backup document revision
-				if (Core::moduleIsActive('revision'))
+				if (Core::moduleIsActive('revision')  && $this->_object->id)
 				{
 					$oDocument->backupRevision();
 				}
@@ -594,12 +600,6 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Search_Controller::indexingSearchPages(array(
 				$this->_object->indexing()
 			));
-		}
-
-		// Backup structure revision
-		if (Core::moduleIsActive('revision'))
-		{
-			$this->_object->backupRevision();
 		}
 
 		$this->_object->clearCache();

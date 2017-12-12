@@ -219,6 +219,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	 * @param int $parent_id ID of parent directory of properties
 	 * @param object $parentObject
 	 * @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
+	 * @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
+	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
 	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
 	 * @hostcms-event Property_Controller_Tab.onSetPropertyType
 	 */
@@ -261,6 +263,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 11: // Float
 
 					$width = 410;
+
+					Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
 
 					switch ($oProperty->type)
 					{
@@ -373,6 +377,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
 						break;
 					}
+
+					Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
 
 					if ($oAdmin_Form_Entity)
 					{
@@ -1219,14 +1225,22 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								->type("text/javascript")
 								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Description
 								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Large
 								"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oFileValue->id}');"
+								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Small
+								"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oFileValue->id}');"
 								)
 								->execute();
 

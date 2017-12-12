@@ -1455,6 +1455,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		$oShop = /*$bNewObject
@@ -2139,12 +2145,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oSchedule->save();
 				}
 			}
-		}
-
-		// Backup revision
-		if (Core::moduleIsActive('revision'))
-		{
-			$this->_object->backupRevision();
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

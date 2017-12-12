@@ -1047,6 +1047,12 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	{
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		$informationsystem_id = Core_Array::getGet('informationsystem_id');
@@ -1549,12 +1555,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			$oMaillist_Fascicle->save();
 			$oMaillist->add($oMaillist_Fascicle);
-		}
-
-		// Backup revision
-		if (Core::moduleIsActive('revision'))
-		{
-			$this->_object->backupRevision();
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

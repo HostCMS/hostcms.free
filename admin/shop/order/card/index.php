@@ -127,6 +127,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 					->showXmlSiteuser(TRUE)
 					->showXmlOrderStatus(TRUE)
 					->showXmlDelivery(TRUE)
+					->showXmlProperties(TRUE)
 					->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('shop_tax_value_sum')
@@ -145,6 +146,8 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 			);
 
 		$sXml = $oShop->getXml();
+
+		Core::setLng($oShop->Site->lng);
 
 		$return = Xsl_Processor::instance()
 				->xml($sXml)
@@ -539,6 +542,26 @@ else
 			</td>
 		</tr>
 		<?php
+	}
+
+	if (defined('SHOP_ORDER_CARD_PROPERTY'))
+	{
+		$aProperty_Values = $oShop_Order->getPropertyValues();
+
+		if (count($aProperty_Values))
+		{
+			?><tr><td colspan="2"></td></tr><?php
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				if ($oProperty_Value->Property->type != 2)
+				{
+					?><tr>
+						<td><?php echo htmlspecialchars($oProperty_Value->Property->name)?>:</td>
+						<td><?php echo htmlspecialchars($oProperty_Value->value)?></td>
+					</tr><?php
+				}
+			}
+		}
 	}
 
 	if ($oShop_Order->source_id)
