@@ -50,6 +50,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$object->shop_id = Core_Array::getGet('shop_id');
 					$object->shop_group_id = Core_Array::getGet('shop_group_id', 0);
 					$object->shop_currency_id = $oShop->shop_currency_id;
+					$object->shop_tax_id = $oShop->shop_tax_id;
 				}
 
 				if ($iShopItemId)
@@ -2546,6 +2547,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->from('shop_items')
 			->where('shop_id', '=', $oShop_Item->shop_id)
 			->where('shop_group_id', '=', $iShopGroupId)
+			// Self exclusion
+			->where('id', '!=', $oShop_Item->id)
 			->where('modification_id', '=', 0)
 			->where('shortcut_id', '=', 0)
 			->where('deleted', '=', 0)

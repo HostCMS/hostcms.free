@@ -89,7 +89,10 @@ class Admin_Form_Action_Model extends Core_Entity
 
 		$this->Admin_Word->delete();
 
-		$this->Company_Department_Action_Accesses->deleteAll(FALSE);
+		if (Core::moduleIsActive('company'))
+		{
+			$this->Company_Department_Action_Accesses->deleteAll(FALSE);
+		}
 
 		return parent::delete($primaryKey);
 	}

@@ -3099,7 +3099,7 @@ a.fc-day-number { color: #999 !important; }
 }
 
 .deal_step.unavailable
-{	
+{
 	cursor: default;
 }
 
@@ -3163,3 +3163,15 @@ a.fc-day-number { color: #999 !important; }
 }
 
 .generate-password > i { color: #2dc3e8; position: absolute; right: 32px; top: 32px; cursor: pointer; }
+
+.fc-icon-fa {
+  font-family: FontAwesome;
+}
+
+.fc .fc-button-group > .dropdown { float: none !important; }
+
+.fc-dropdown-menu {
+	top: -1px !important;
+}
+
+#caldav-dropdown li > a:hover { cursor: pointer; }

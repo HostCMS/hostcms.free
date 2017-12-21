@@ -1149,6 +1149,7 @@ abstract class Shop_Payment_System_Handler
 
 		$oCore_Mail
 			->from($from)
+			->senderName($oShop->name)
 			->header('Reply-To', $replyTo)
 			->subject($admin_subject)
 			->message($sInvoice)
@@ -1258,6 +1259,7 @@ abstract class Shop_Payment_System_Handler
 
 			$oCore_Mail
 				->from($from)
+				->senderName($oShop->name)
 				->to($to)
 				->subject($user_subject)
 				->message($sInvoice)

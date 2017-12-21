@@ -270,8 +270,11 @@ class Informationsystem_Item_Model extends Core_Entity
 		// Удаляем ярлыки
 		$this->Informationsystem_Items->deleteAll(FALSE);
 
-		// Удаляем теги
-		$this->Tag_Informationsystem_Items->deleteAll(FALSE);
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем теги
+			$this->Tag_Informationsystem_Items->deleteAll(FALSE);
+		}
 
 		// Удаляем директорию информационного элемента
 		$this->deleteDir();

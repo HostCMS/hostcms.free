@@ -713,6 +713,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 				$this->_return = TRUE;
 			break;
+			case 'markDeleted':
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
+
+				$this->_return = TRUE;
+			break;			
 			default:
 				$this->_applyObjectProperty();
 				$this->_return = FALSE; // Показываем форму

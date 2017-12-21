@@ -50,32 +50,36 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
 
+		Core_Session::close();
+
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+
 		switch ($type)
 		{
 			case 1: // Завершение дела
 				if ($ajax)
 				{
-					Core_Session::close();
-
 					$iEventId = intval(Core_Array::getPost('eventId'));
 
 					$aJson = array();
 
-					Core_Entity::factory('Event', $iEventId)
-						->completed(1)
-						->save()
-						->changeCompletedSendNotification();
+					$oEvent = Core_Entity::factory('Event', $iEventId);
 
-					$aJson['eventId'] = $iEventId;
+					if ($oEvent->Event_Users->getCountByUser_id($oUser->id) > 0)
+					{
+						$oEvent
+							->completed(1)
+							->save()
+							->changeCompletedSendNotification();
+
+						$aJson['eventId'] = $iEventId;
+					}
 					Core::showJson($aJson);
 				}
 			break;
 			case 2: // Изменение статуса дела
-
 				if ($ajax)
 				{
-					Core_Session::close();
-
 					$iEventId = intval(Core_Array::getPost('eventId'));
 					$iEventStatusId = intval(Core_Array::getPost('eventStatusId'));
 
@@ -94,8 +98,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 			case 3: // Добавление дела
 				if ($ajax)
 				{
-					Core_Session::close();
-
 					$aJson = array();
 
 					//$iEventId = intval(Core_Array::getPost('eventId'));
@@ -161,10 +163,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 				}
 			break;
 			case 4:
-				$oUser = Core_Entity::factory('User', 0)->getCurrent();
-
-				Core_Session::close();
-
 				$aJson = array();
 
 				$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
@@ -270,8 +268,9 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 						<span class="add-event hidden">
 							<form>
-								<div class="input-group">
+								<div class="input-group input-icon">
 									<input type="text" name="event_name" class="form-control" placeholder="<?php echo Core::_('Event.placeholderEventName');?>">
+									<i class="fa fa-plus gray"></i>
 									<span id="sendForm" class="input-group-addon bg-azure bordered-azure" onclick="$(this).parents('form').submit()">
 										<i class="fa fa-check no-margin"></i>
 									</span>

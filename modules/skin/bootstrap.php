@@ -81,7 +81,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
 			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.js')
 			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/ru.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
+			// Уже подключается выше из datetime
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')

@@ -1389,8 +1389,11 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем специальные цены
 		$this->Shop_Specialprices->deleteAll(FALSE);
 
-		// Удаляем метки
-		$this->Tag_Shop_Items->deleteAll(FALSE);
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем метки
+			$this->Tag_Shop_Items->deleteAll(FALSE);
+		}
 
 		// Удаляем значения из складов
 		$this->Shop_Warehouse_Items->deleteAll(FALSE);

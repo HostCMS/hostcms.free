@@ -21,11 +21,15 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	public function setObject($object)
 	{
 		$this
-			//->addSkipColumn('email')
 			->addSkipColumn('sound')
 			->addSkipColumn('last_activity')
 			->addSkipColumn('image')
-			->addSkipColumn('user_group_id');
+			->addSkipColumn('user_group_id')
+
+			->addSkipColumn('~email')
+			->addSkipColumn('~icq')
+			->addSkipColumn('~site')
+			;
 
 		return parent::setObject($object);
 	}
@@ -51,10 +55,11 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oMainTab
-			->delete($this->getField('email'))
+			// ->delete($this->getField('email'))
 			->delete($this->getField('position'))
-			->delete($this->getField('icq'))
-			->delete($this->getField('site'));
+			// ->delete($this->getField('icq'))
+			// ->delete($this->getField('site'))
+			;
 
 		$oMainTab->move($this->getField('login'), $oMainRow1);
 

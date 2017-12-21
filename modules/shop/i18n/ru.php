@@ -141,4 +141,5 @@ return array(
 	'shopRecountSet_success' => 'Комплекты пересчитаны успешно!',
 	'notification_subscribers' => 'Подписчики на уведомления',
 	'type_subscriber' => 'Введите логин сотрудника',
+	'shop_tax_id' => 'Налог по умолчанию',
 );

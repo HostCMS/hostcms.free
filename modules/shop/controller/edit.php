@@ -245,10 +245,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Удаляем компании
 					->delete($this->getField('shop_company_id'));
 
-				// Удаляем тип URL
-				$oMainTab->delete(
-					$this->getField('url_type')
-				);
+				$oMainTab
+					// Удаляем тип URL
+					->delete($this->getField('url_type'))
+					// Удаляем налог
+					->delete($this->getField('shop_tax_id'));
 
 				// Удаляем поле сортировки товара
 				$oShopTabOrders->delete(
@@ -347,6 +348,18 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow4->add($oCurrencyField);
 
+				// Добавляем налоги
+				$oTaxField = Admin_Form_Entity::factory('Select')
+					->name('shop_tax_id')
+					->caption(Core::_('Shop.shop_tax_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->options(
+						$this->fillTaxes()
+					)
+					->value($this->_object->shop_tax_id);
+
+				$oMainRow5->add($oTaxField);
+
 				// Добавляем страны
 				$oCountriesField = Admin_Form_Entity::factory('Select')
 					->name('shop_country_id')
@@ -370,19 +383,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->shop_order_status_id);
 
 				$oMainRow5->add($oOrderStatusField);
-
-				// Добавляем единицы измерения
-				$oMeasuresField = Admin_Form_Entity::factory('Select')
-					->name('shop_measure_id')
-					->caption(Core::_('Shop.shop_measure_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					->options(
-						$this->fillMeasures()
-					)
-					->value($this->_object->shop_measure_id);
-
-				$oMainRow5->add($oMeasuresField);
-
 
 				$oMainTab->move($this->getField('email')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
@@ -418,6 +418,18 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						Core::_('Shop.size_measure_3'),
 						Core::_('Shop.size_measure_4')))
 					->value($this->_object->size_measure), $oUrlTypeField);
+
+				// Добавляем единицы измерения
+				$oMeasuresField = Admin_Form_Entity::factory('Select')
+					->name('shop_measure_id')
+					->caption(Core::_('Shop.shop_measure_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->options(
+						$this->fillMeasures()
+					)
+					->value($this->_object->shop_measure_id);
+
+				$oMainRow7->add($oMeasuresField);
 
 				$oMainTab->delete($this->getField('reserve_hours'));
 
@@ -510,12 +522,12 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 									// Устанавливает title для элемента
 									data.title = arraySelectItemParts[0];
-									
+
 									if (arraySelectItemParts[1])
 									{
 										resultHtml += \'<span class="company-department">\' + arraySelectItemParts[1] + \'</span>\';
 										data.title += " - " + arraySelectItemParts[1];
-									}									
+									}
 
 									// Список должностей через запятую
 									if (arraySelectItemParts[2])
@@ -857,6 +869,30 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $aCurrencyArray;
+	}
+
+	/**
+	 * Get tax array
+	 * @return array
+	 */
+	public function fillTaxes()
+	{
+		$oShop_Taxes = Core_Entity::factory('Shop_Tax');
+
+		$oShop_Taxes->queryBuilder()
+			->orderBy('name')
+			->orderBy('id');
+
+		$aTaxArray = array(' … ');
+		// $aTaxArray = array();
+
+		$aShop_Taxes = $oShop_Taxes->findAll(FALSE);
+		foreach($aShop_Taxes as $oShop_Tax)
+		{
+			$aTaxArray[$oShop_Tax->id] = $oShop_Tax->name;
+		}
+
+		return $aTaxArray;
 	}
 
 	/**

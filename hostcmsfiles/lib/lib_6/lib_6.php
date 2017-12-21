@@ -77,7 +77,7 @@ if ($Shop_Controller_Show->item == 0)
 					$oShop_Currency, $oShop->Shop_Currency
 				);
 
-				$query_currency_switch = "IF (`shop_items`.`shop_currency_id` = '{$oShop_Currency->id}', IF (COUNT(`shop_discounts`.`id`), ((`shop_items`.`price` + {$query_tax}) * (1 - SUM(IF(`shop_discounts`.`type` = 0, `shop_discounts`.`value`, 0)) / 100)) * {$currency_coefficient} - SUM(IF(`shop_discounts`.`type`, `shop_discounts`.`value`, 0)), (`shop_items`.`price`) * {$currency_coefficient}), {$query_currency_switch})";
+				$query_currency_switch = "IF (`shop_items`.`shop_currency_id` = '{$oShop_Currency->id}', IF (COUNT(`shop_discounts`.`id`), ((`shop_items`.`price` + {$query_tax}) * (1 - SUM(DISTINCT IF(`shop_discounts`.`type` = 0, `shop_discounts`.`value`, 0)) / 100)) * {$currency_coefficient} - SUM(DISTINCT IF(`shop_discounts`.`type`, `shop_discounts`.`value`, 0)), (`shop_items`.`price`) * {$currency_coefficient}), {$query_currency_switch})";
 			}
 
 			$current_date = date('Y-m-d H:i:s');

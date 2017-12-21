@@ -18,7 +18,10 @@ class Module_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user' => array()
+		'user' => array(),
+		'company_department_module' => array(),
+		'notification' => array(),
+		'notification_subscriber' => array(),
 	);
 
 	/**
@@ -227,5 +230,36 @@ class Module_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return Core_Entity
+	 * @hostcms-event module.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		if (Core::moduleIsActive('company'))
+		{
+			$this->Company_Department_Modules->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('notification'))
+		{
+			$this->Notifications->deleteAll(FALSE);
+			$this->Notification_Subscribers->deleteAll(FALSE);
+		}
+
+		return parent::delete($primaryKey);
 	}
 }

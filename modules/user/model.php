@@ -40,12 +40,12 @@ class User_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'user_note' => array(),
-		'user_setting' => array(),
-		'user_message' => array(),
 		'admin_form_setting' => array(),
-		'informationsystem_dir' => array(),
-		'informationsystem' => array(),
+		'company_post' => array('through' => 'company_department_post_user'),
+		'company_department' => array('through' => 'company_department_post_user'),
+		'company_department_post_user' => array(),
+		'event' => array('through' => 'event_user'),
+		'event_user' => array(),
 		'forum' => array(),
 		'forum_group' => array(),
 		'forum_category_siteuser_group' => array(),
@@ -67,8 +67,9 @@ class User_Model extends Core_Entity
 			'foreign_key' => 'responsible_user_id',
 			'model' => 'Helpdesk_Responsible_User'
 		),
-		'company_department_post_user' => array(),
-		'company_post' => array('through' => 'company_department_post_user'),
+		'informationsystem_dir' => array(),
+		'informationsystem' => array(),
+
 		'user_directory_email' => array(),
 		'directory_email' => array('through' => 'user_directory_email'),
 		'user_directory_phone' => array(),
@@ -79,12 +80,15 @@ class User_Model extends Core_Entity
 		'directory_social' => array('through' => 'user_directory_social'),
 		'user_directory_website' => array(),
 		'directory_website' => array('through' => 'user_directory_website'),
-		'event_user' => array(),
-		'event' => array('through' => 'event_user'),
 		'notification_user' => array(),
+		'notification_subscriber' => array(),
 		'notification' => array('through' => 'notification_user'),
-		'company_department' => array('through' => 'company_department_post_user'),
 		'deal_template_step_access_user'  => array(),
+		'user_note' => array(),
+		'user_setting' => array(),
+		'user_message' => array(),
+		'siteuser_user' => array(),
+		'calendar_caldav_user' => array(),
 	);
 
 	/**
@@ -444,14 +448,64 @@ class User_Model extends Core_Entity
 			$this->Helpdesk_User_Letter_Templates->deleteAll(FALSE);
 		}
 
-		$this->Company_Department_Post_Users->deleteAll(FALSE);
+		if (Core::moduleIsActive('company'))
+		{
+			$this->Company_Department_Post_Users->deleteAll(FALSE);
+		}
+
 		$this->Directory_Emails->deleteAll(FALSE);
-		$this->Directory_Phones->deleteAll(FALSE);
 		$this->Directory_Messengers->deleteAll(FALSE);
+		$this->Directory_Phones->deleteAll(FALSE);
 		$this->Directory_Socials->deleteAll(FALSE);
 		$this->Directory_Websites->deleteAll(FALSE);
-		$this->Events->deleteAll(FALSE);
-		$this->Notifications->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('event'))
+		{
+			$aEvent_Users = $this->Event_Users->findAll(FALSE);
+			foreach ($aEvent_Users as $oEvent_User)
+			{
+				$oEvent = $oEvent_User->Event;
+
+				if ($oEvent->Event_Users->getCount(FALSE) == 1)
+				{
+					$oEvent->delete();
+				}
+				else
+				{
+					$oEvent_User->delete();
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('notification'))
+		{
+			$this->Notification_Subscribers->deleteAll(FALSE);
+
+			$aNotification_Users = $this->Notification_Users->findAll(FALSE);
+			foreach ($aNotification_Users as $oNotification_User)
+			{
+				$oNotification = $oNotification_User->Notification;
+
+				if ($oNotification->Notification_Users->getCount(FALSE) == 1)
+				{
+					$oNotification->delete();
+				}
+				else
+				{
+					$oNotification_User->delete();
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$this->Siteuser_Users->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('calendar'))
+		{
+			$this->Calendar_Caldav_Users->deleteAll(FALSE);
+		}
 
 		// Удаляем директорию
 		$this->deleteDir();
