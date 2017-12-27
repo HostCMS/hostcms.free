@@ -3078,17 +3078,17 @@ a.fc-day-number { color: #999 !important; }
 }
 
 /*.btn-group.deal_template_steps .deal_step.available:hover*/
-.btn-group.deal_template_steps .deal_step.available:hover
+.btn-group.deal_template_steps .deal_step.available:hover, .btn-group.deal_template_steps .deal_step.clicked
 {
 	box-shadow: -1px -3px 0 0px #ccc, -1px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
 }
 
-.btn-group.deal_template_steps .deal_step.available:first-child:hover
+.btn-group.deal_template_steps .deal_step.available:first-child:hover, .btn-group.deal_template_steps .deal_step.clicked:first-child
 {
 	box-shadow: -3px 0px 0 0px #ccc, -3px -3px 0 0px #ccc, -3px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
 }
 
-.btn-group.deal_template_steps .deal_step.available:last-child:hover
+.btn-group.deal_template_steps .deal_step.available:last-child:hover, .btn-group.deal_template_steps .deal_step.clicked:last-child
 {
 	box-shadow: -1px -3px 0 0px #ccc, -1px 3px 0 0px #ccc, 3px 0px 0 0px #ccc, 3px -3px 0 0px #ccc, 3px 3px 0 0px #ccc, 0px -3px 0 0px #ccc, 0px 3px 0 0px #ccc;
 }
@@ -3118,6 +3118,11 @@ a.fc-day-number { color: #999 !important; }
 {
 	background-color: #9ccc65;
 	/*#00c853;*/
+}
+
+form.adminForm .deal_step 
+{
+	padding: 15px 25px;
 }
 
 /* End Deals */

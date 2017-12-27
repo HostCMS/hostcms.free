@@ -66,6 +66,21 @@ if (!is_null(Core_Array::getPost('wallpaper-id')))
 	Core::showJson('OK');
 }
 
+if (!is_null(Core_Array::getPost('loadNavSidebarMenu')))
+{
+	ob_start();
+
+	Core_Skin::instance()->navSidebarMenu();
+
+	$oAdmin_Answer = Core_Skin::instance()->answer();
+	$oAdmin_Answer
+		->content(ob_get_clean())
+		->ajax(TRUE)
+		->execute();
+
+	exit();
+}
+
 if (!is_null(Core_Array::getPost('generate-password')))
 {
 	Core::showJson(

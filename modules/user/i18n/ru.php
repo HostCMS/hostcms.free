@@ -7,7 +7,7 @@
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */ 
+ */
 return array(
 	'model_name' => 'Сотрудники',
 	'menu' => 'Сотрудники',
@@ -17,12 +17,12 @@ return array(
 	'ua_link_user_access' => 'Права доступа',
 	'ua_link_user_modules_access' => 'К модулям',
 	'ua_link_user_forms_access' => 'К действиям',
-	'ua_add_user_form_title' => 'Добавление информации о пользователе',
-	'ua_edit_user_form_title' => 'Редактирование информации о пользователе',
+	'ua_add_user_form_title' => 'Добавление информации о сотруднике',
+	'ua_edit_user_form_title' => 'Редактирование информации о сотруднике',
 	'ua_show_users_title' => 'Сотрудники',
 	'id' => 'Идентификатор',
 	'login' => "<acronym title=\"Логин сотрудника\">Логин</acronym>",
-	'users_type_form' => 'Группа пользователей',
+	'users_type_form' => 'Группа сотрудникей',
 	'password' => "<acronym title=\"Поле ввода пароля\">Пароль</acronym>",
 	'password_second' => "<acronym title=\"Поле подтверждения пароля\">Подтверждение пароля</acronym>",
 	'ua_add_edit_user_form_password_second_message' => "Введенные пароли не совпадают.",
@@ -30,9 +30,9 @@ return array(
 	'siteusers_parent_site_id' => "<acronym title=\"Родительский сайт элемента\">Сайт</acronym>",
 	'users_type_form_tab_2' => 'Личные данные',
 
-	'name' => '<acronym title="Имя пользователя">Имя</acronym>',
-	'patronymic' => '<acronym title="Отчество пользователя">Отчество</acronym>',
-	'surname' => '<acronym title="Фамилия пользователя">Фамилия</acronym>',
+	'name' => '<acronym title="Имя сотрудника">Имя</acronym>',
+	'patronymic' => '<acronym title="Отчество сотрудника">Отчество</acronym>',
+	'surname' => '<acronym title="Фамилия сотрудника">Фамилия</acronym>',
 	'caption' => '<acronym title="ФИО сотрудника">Сотрудник</acronym>',
 	'head' => '<acronym title="Назначить сотрудника начальником отдела">Начальник отдела</acronym>',
 	'head_title' => 'Начальник отдела',
@@ -47,21 +47,21 @@ return array(
 	'image' => '<acronym title="Фотография">Фотография</acronym>',
 	'description' => '<acronym title="Характеристика, дополнительная информация">Характеристика</acronym>',
 
-	//'icq' => '<acronym title="Номер ICQ пользователя">ICQ</acronym>',
-	'active' => "<acronym title=\"Активность пользователя\">Активен</acronym>",
-	'position' => '<acronym title="Должность пользователя">Должность</acronym>',
-	'only_access_my_own' => '<acronym title="Доступ только к созданным пользователем элементам">Доступ только к элементам пользователя </acronym>',
-	'read_only' => '<acronym title="Доступ только для чтения для непривилегированных пользователей">Только чтение</acronym>',
+	//'icq' => '<acronym title="Номер ICQ сотрудника">ICQ</acronym>',
+	'active' => "<acronym title=\"Активность сотрудника\">Активен</acronym>",
+	'position' => '<acronym title="Должность сотрудника">Должность</acronym>',
+	'only_access_my_own' => '<acronym title="Доступ только к созданным сотрудникем элементам">Доступ только к элементам сотрудника </acronym>',
+	'read_only' => '<acronym title="Доступ только для чтения для непривилегированных сотрудникей">Только чтение</acronym>',
 	'markDeleted_success' => 'Пользователь успешено удален',
 	'markDeleted_error' => 'Ошибка! Пользователь не удален!',
-	'edit_success' => 'Информация о пользователе изменена!',
+	'edit_success' => 'Информация о сотруднике изменена!',
 	'changeActive_success' => "Информация успешно изменена",
 	'apply_success' => 'Информация изменена!',
 	'error_superuser' => 'Ошибка! В системе должен быть хотя бы один superuser!',
 	'user_has_already_registered' => 'Ошибка! Пользователь с данным именем уже зарегистрирован!',
 	'error_superuser' => 'Ошибка! В системе должен быть хотя бы один superuser!',
-	'error_changes_superuser' => 'Ошибка изменения статуса привилегированного пользователя для пользователя %s',
-	'error_delete_end_users' => 'Ошибка! Удаление последнего пользователя',
+	'error_changes_superuser' => 'Ошибка изменения статуса привилегированного сотрудника для сотрудника %s',
+	'error_delete_end_users' => 'Ошибка! Удаление последнего сотрудника',
 	'error_row_delete_users' => 'Ошибка! Вы не имеете полномочий на совершение данной операции!',
 	'demo_mode' => 'Демонстрационный режим, доступ запрещен!',
 	'delete_success' => 'Элемент удален!',
@@ -76,7 +76,15 @@ return array(
 	'backend-field-caption' => 'Пользователь',
 
 	'choosing_site' => 'Выбор сайта',
-	'ua_show_user_form_events_access_title' => 'Доступ к событиям формы "%s"',
-	
-	'root_dir' => '<acronym title="Корневая директория, выше которой пользователь не может подниматься">Корневая директория для пользователя</acronym>',
+	'ua_show_user_form_events_access_title' => 'Access rights for actions "%s"',
+
+	'root_dir' => '<acronym title="Корневая директория, выше которой пользователь не может подниматься">Корневая директория для сотрудника</acronym>',
+
+	'view_sex' => 'Пол:',
+	'view_age' => 'Возраст:',
+	'view_phones' => 'Телефоны',
+	'view_emails' => 'Электронные адреса',
+	'view_socials' => 'Социальные сети',
+	'view_messengers' => 'Мессенджеры',
+	'view_websites' => 'Сайты',
 );

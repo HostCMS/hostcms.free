@@ -38,8 +38,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('User.ua_show_user_form_access_title', $oCompany_Department->name, $oSite->name))
-	->pageTitle(Core::_('User.ua_show_user_form_access_title', $oCompany_Department->name, $oSite->name));
+	->title(Core::_('Company_Department_Action_Access.ua_show_user_form_access_title', $oCompany_Department->name, $oSite->name))
+	->pageTitle(Core::_('Company_Department_Action_Access.ua_show_user_form_access_title', $oCompany_Department->name, $oSite->name));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

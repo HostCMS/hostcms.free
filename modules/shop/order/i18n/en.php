@@ -135,4 +135,7 @@ return array(
 	'most_ordered' => "Popular shop items (items)",
 	'popular_brands' => "Popular brands (items)",
 	'popover_title' => "Order # %s",
+	'notification_new_order' => 'New order №%s',
+	'notification_paid_order' => 'Paid order №%s',
+	'notification_new_order_description' => '%1$s on %2$s',	
 );

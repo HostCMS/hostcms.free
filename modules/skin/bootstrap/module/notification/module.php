@@ -132,11 +132,10 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 							if (!is_null($oCore_Module))
 							{
-
 								$aNotificationDecorations = $oCore_Module->getNotifications($oNotification->type, $oNotification->entity_id);
 
 								$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
-								$aNotification['onclick'] = Core_Array::get($aNotificationDecorations, 'onclick');
+								$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
 								$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
 								$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
 								$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');

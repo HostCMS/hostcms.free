@@ -29,6 +29,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addSkipColumn('~email')
 			->addSkipColumn('~icq')
 			->addSkipColumn('~site')
+			->addSkipColumn('~position')
 			;
 
 		return parent::setObject($object);
@@ -54,12 +55,12 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oMainTab
-			// ->delete($this->getField('email'))
+		/*$oMainTab
+			->delete($this->getField('email'))
 			->delete($this->getField('position'))
-			// ->delete($this->getField('icq'))
-			// ->delete($this->getField('site'))
-			;
+			->delete($this->getField('icq'))
+			->delete($this->getField('site'))
+			;*/
 
 		$oMainTab->move($this->getField('login'), $oMainRow1);
 

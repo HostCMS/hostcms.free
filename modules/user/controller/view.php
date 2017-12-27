@@ -168,14 +168,14 @@ class User_Controller_View extends Admin_Form_Action_Controller
 								?>
 								</div>
 								<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 inlinestats-col">
-									Пол: <strong><?php echo $this->_object->getSex()?></strong>
+									<?php echo Core::_("User.view_sex")?> <strong><?php echo $this->_object->getSex()?></strong>
 								</div>
 								<div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 inlinestats-col">
 								<?php
-								if ($this->_object->birthday != '0000-00-00')
+								if (!is_null($this->_object->birthday) && $this->_object->birthday != '0000-00-00')
 								{
 								?>
-									Возраст: <strong><?php echo $this->_object->getAge()?></strong>
+									<?php echo Core::_("User.view_age")?> <strong><?php echo $this->_object->getAge()?></strong>
 								<?php
 								}
 								?>
@@ -202,7 +202,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 														<div class="profile-contacts">
 															<div class="profile-badge orange">
 																<i class="fa fa-phone orange"></i>
-																<span>Телефоны</span>
+																<span><?php echo Core::_("User.view_phones")?></span>
 															</div>
 															<div class="contact-info">
 															<?php
@@ -234,7 +234,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 														<div class="profile-contacts">
 															<div class="profile-badge palegreen">
 																<i class="fa fa-envelope-o palegreen"></i>
-																<span>Электронные адреса</span>
+																<span><?php echo Core::_("User.view_emails")?></span>
 															</div>
 															<div class="contact-info">
 															<?php
@@ -269,7 +269,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 														<div class="profile-contacts">
 															<div class="profile-badge azure">
 																<i class="fa fa-share-alt azure"></i>
-																<span>Социальные сети</span>
+																<span><?php echo Core::_("User.view_socials")?></span>
 															</div>
 															<div class="contact-info">
 															<?php
@@ -301,7 +301,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 														<div class="profile-contacts">
 															<div class="profile-badge yellow">
 																<i class="fa fa-comments-o yellow"></i>
-																<span>Мессенджеры</span>
+																<span><?php echo Core::_("User.view_messengers")?></span>
 															</div>
 															<div class="contact-info">
 															<?php
@@ -336,7 +336,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 														<div class="profile-contacts">
 															<div class="profile-badge magenta">
 																<i class="fa fa-globe magenta"></i>
-																<span>Сайты</span>
+																<span><?php echo Core::_("User.view_websites")?></span>
 															</div>
 															<div class="contact-info">
 															<?php

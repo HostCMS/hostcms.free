@@ -141,5 +141,7 @@ return array(
 	'cancel_admin_subject' => 'Cancel order email subject',
 	'cancel_user_subject' => 'Cancel order customer\'s email subject',
 	'shopRecountSet_success' => 'Sets recalculated successfully!',
+	'notification_subscribers' => 'Notification subscribers',
+	'type_subscriber' => 'Type subscriber login',	
 	'shop_tax_id' => 'Default tax',
 );

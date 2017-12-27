@@ -2340,7 +2340,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					$sDestinationFolder = $this->_oCurrentItem->getItemPath();
 
 					// Файл-источник
-					$sSourceFile = $this->imagesPath . (
+					$sSourceFile = $sOriginalSourceFile = $this->imagesPath . (
 						strtoupper($this->encoding) == 'UTF-8'
 							? $this->_sBigImageFile
 							: Core_File::convertfileNameToLocalEncoding($this->_sBigImageFile)
@@ -2439,9 +2439,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						}
 						catch (Exception $e)
 						{
+							$sMessage = 'File: ' . $sOriginalSourceFile . PHP_EOL . $e->getMessage();
+
 							Core_Message::show(strtoupper($this->encoding) == 'UTF-8'
-								? $e->getMessage()
-								: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $e->getMessage())
+								? $sMessage
+								: @iconv($this->encoding, "UTF-8//IGNORE//TRANSLIT", $sMessage)
 							, 'error');
 
 							$result = array('large_image' => FALSE, 'small_image' => FALSE);

@@ -1765,8 +1765,8 @@ class Admin_Form_Controller
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
 					})(jQuery);
 					</script><?php
 				break;
@@ -1790,8 +1790,8 @@ class Admin_Form_Controller
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
 					})(jQuery);
 					</script>
 					<?php

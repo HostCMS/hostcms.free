@@ -782,6 +782,8 @@ class Market_Controller extends Core_Servant_Properties
 
 				// install() для модуля, если есть
 				$oAdminModule->setupModule();
+
+				echo '<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($oAdminModule->path) . '\'})</script>';
 			}
 			else
 			{

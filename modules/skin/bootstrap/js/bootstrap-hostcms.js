@@ -1302,7 +1302,28 @@
 					  size: '5px',
 					  wheelStep: 2
 					});
-				},
+				}
+			});
+		},
+		loadNavSidebarMenu: function(data) {
+
+			data.loadNavSidebarMenu = 1;
+
+			$.ajax({
+				url: '/admin/user/index.php',
+				type: "POST",
+				data: data,
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$('.nav.sidebar-menu').html(answer.form_html);
+
+					if (typeof data.moduleName != 'undefined')
+					{
+						var menuDropdown = $('li#menu-' + data.moduleName).parents('ul').prev();
+						menuDropdown.effect('pulsate', {times: 3}, 3000);
+					}
+				}
 			});
 		},
 		changeWallpaper: function(img) {
@@ -1361,7 +1382,7 @@
 						.prop('type', 'text')
 						.val(answer.password)
 						.focus();
-				
+
 					jFirstPassword.focus();
 				}
 			});
@@ -2619,21 +2640,38 @@
 			});
 
 			$("body").on("click", ".deal_template_steps .deal_step", function (){
-
-				console.log("deal_step click");
-
-
+							
 				// Идентификатор этапа сделки
 				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0;
 
 				if (dealTemplateStepId)
 				{
 					// Идентификатор сделки
-					var dealId = $(this).parent('.deal_template_steps').data('deal-id');
-
-					//$.adminLoad({path: '/admin/deal/step/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
-					$('#id_content #row_0_' + dealId).toggleHighlight(); $.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
-					$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
+					var dealTemplateSteps = $(this).parent('.deal_template_steps'),
+						dealId = dealTemplateSteps.data('deal-id');					
+					
+					if (dealTemplateSteps.data('change-by-click'))
+					{
+						//$.adminLoad({path: '/admin/deal/step/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
+						$('#id_content #row_0_' + dealId).toggleHighlight(); 
+						$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
+						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
+					}
+					else
+					{
+						if ($(this).hasClass('available') || $(this).hasClass('current'))
+						{
+							dealTemplateSteps.next('[name="deal_template_step_id"]').val(dealTemplateStepId);
+							
+							
+							dealTemplateSteps.children('.deal_step.clicked').each(function(){
+								
+								$(this).removeClass('clicked')
+							})
+							
+							$(this).hasClass('available') && $(this).addClass('clicked');							
+						}						
+					}
 				}
 			});
 		}
@@ -2759,8 +2797,8 @@
 })(jQuery);
 
 $(function(){
-	$.notificationsPrepare();
-	$.eventsPrepare();
+	//$.notificationsPrepare();
+	//$.eventsPrepare();
 	$.dealsPrepare();
 
 	// $.calendarPrepare();

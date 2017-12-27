@@ -227,7 +227,7 @@ class Shop_Delivery_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->deleteImage();
 
 		// Удаляем обработчик
@@ -301,5 +301,47 @@ class Shop_Delivery_Model extends Core_Entity
 		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
 
 		return parent::getXml();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function conditionsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Delivery_Conditions->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-azure white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+	
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$aShop_Payment_Systems = $this->Shop_Payment_Systems->findAll(FALSE);
+		
+		if (count($aShop_Payment_Systems))
+		{
+			$aTmp = array();
+			foreach ($aShop_Payment_Systems as $oShop_Payment_System)
+			{
+				$aTmp[] = $oShop_Payment_System->name;
+			}
+			
+			?><span class="margin-left-5 small darkgray"><?php echo htmlspecialchars(implode(', ', $aTmp))?></span><?php
+		}
+		else
+		{
+			?><span class="margin-left-5 small darkorange"><?php echo Core::_('Shop_Delivery.payment_systems_not_specified')?></span><?php
+		}
 	}
 }

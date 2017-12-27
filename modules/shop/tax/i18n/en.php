@@ -15,7 +15,7 @@ return array(
 	'show_tax_title' => "Taxation reference",
 	'tax_add_form_title' => "Add tax information",
 	'tax_edit_form_title' => "Edit tax information",
-	'name' => "<acronym title=\"Название налога\">Название налога</acronym>",
+	'name' => "<acronym title=\"Tax name\">Tax name</acronym>",
 	'rate' => "<acronym title=\"Tax rate\">Tax rate</acronym>",
 	'tax_is_included' => "<acronym title=\"Whether included in price\">Included</acronym>",
 	'guid' => '<acronym title="Tax identifier for CommerceML format, e.g. ID00006831">CommerceML tax identifier</acronym>',

@@ -16,6 +16,7 @@ return array(
 	'type_of_delivery_add_form_title' => "Добавление типа доставки",
 	'type_of_delivery_edit_form_title' => "Редактирование типа доставки",
 	'payment_systems' => "Платежные системы",
+	'payment_systems_not_specified' => 'Платежные системы не указаны',
 	'name' => "<acronym title=\"Название типа доставки\">Название</acronym>",
 	'sorting' => "Порядок сортировки",
 	'active' => "<acronym title=\"Активность типа доставки\">Активность типа доставки</acronym>",

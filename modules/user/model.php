@@ -104,6 +104,17 @@ class User_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'~email',
+		'~icq',
+		'~site',
+		'~position'
+	);
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */

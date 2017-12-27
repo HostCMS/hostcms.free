@@ -849,36 +849,42 @@ class Shop_Order_Model extends Core_Entity
 	{
 		$oModule = Core::$modulesList['shop'];
 
-		$sCompany = strlen($this->company)
-			? $this->company
-			: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
-
-		$oNotification = Core_Entity::factory('Notification');
-		$oNotification
-			->title(sprintf(Core::_('Shop_Order.notification_paid_order'), $this->invoice))
-			->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->sum()))
-			->datetime(Core_Date::timestamp2sql(time()))
-			->module_id($oModule->id)
-			->type(2) // Оплаченный заказ
-			->entity_id($this->id)
-			->save();
-
-		$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
-		$oNotification_Subscribers->queryBuilder()
-			->where('notification_subscribers.module_id', '=', $oModule->id)
-			->where('notification_subscribers.type', '=', 0)
-			->where('notification_subscribers.entity_id', '=', $this->Shop->id);
-
-		$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
-		foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+		if ($oModule)
 		{
-			// Связываем уведомление с сотрудником
-			$oNotification_User = Core_Entity::factory('Notification_User');
-			$oNotification_User
-				->notification_id($oNotification->id)
-				->user_id($oNotification_Subscriber->user_id)
-				->save();
+			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+			$oNotification_Subscribers->queryBuilder()
+				->where('notification_subscribers.module_id', '=', $oModule->id)
+				->where('notification_subscribers.type', '=', 0)
+				->where('notification_subscribers.entity_id', '=', $this->Shop->id);
+
+			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+			
+			if (count($aNotification_Subscribers))
+			{
+				$sCompany = strlen($this->company)
+					? $this->company
+					: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
+
+				$oNotification = Core_Entity::factory('Notification');
+				$oNotification
+					->title(sprintf(Core::_('Shop_Order.notification_paid_order'), $this->invoice))
+					->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->sum()))
+					->datetime(Core_Date::timestamp2sql(time()))
+					->module_id($oModule->id)
+					->type(2) // Оплаченный заказ
+					->entity_id($this->id)
+					->save();
+				
+				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+				{
+					// Связываем уведомление с сотрудником
+					$oNotification_User = Core_Entity::factory('Notification_User');
+					$oNotification_User
+						->notification_id($oNotification->id)
+						->user_id($oNotification_Subscriber->user_id)
+						->save();
+				}
+			}
 		}
 
 		return $this;

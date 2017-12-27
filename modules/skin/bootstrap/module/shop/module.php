@@ -298,7 +298,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							</div>
 
 							<?php
-							$aConfig = Core::$config->get('shop_order_config') + array(
+							$aConfig = Core::$config->get('shop_order_config', array()) + array(
 								'indexMostOrderedDays' => 10,
 								'indexBrandDays' => 30,
 								'Pie3D' => array(
@@ -318,7 +318,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								'cutNames' => 20
 							);
 
-							$aColors = Core_Array::get(Core::$config->get('shop_order_config'), 'Pie3D', array());
+							$aColors = Core_Array::get($aConfig, 'Pie3D', array());
 							$iCountColors = count($aColors);
 							$sWindowId = 'id_content';
 
@@ -389,7 +389,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 														{
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->name, $aConfig['cutNames'])))?>',
 															data:[<?php echo $oShop_Order_Item->sum?>],
-															color: '#<?php echo $aColors[$key % $iCountColors]?>'
+															color: '#<?php echo $iCountColors
+																? $aColors[$key % $iCountColors]
+																: 'E75B8D'?>'
 														}
 													);
 													<?php
@@ -467,7 +469,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 														{
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
 															data:[<?php echo $oShop_Order_Item->sum?>],
-															color: '#<?php echo $aColors[$key % $iCountColors]?>'
+															color: '#<?php echo $iCountColors
+																? $aColors[$key % $iCountColors]
+																: 'E75B8D'?>'
 														}
 													);
 													<?php

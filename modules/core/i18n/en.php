@@ -151,10 +151,10 @@ return array(
 	
 	'timePeriodSeconds' => '%ssec later',
 	'timePeriodMinutes' => '%smin later',
-	'timePeriodHours' => '%sh later',
-	'timePeriodDays' => '%sd later',
+	'timePeriodHours' => '%shours later',
+	'timePeriodDays' => '%sdays later',
 	'timePeriodYesterday' => 'yesterday',
-	'timePeriodMonths' => '%smon назад',
-	'timePeriodYears' => '%sy назад',
-	'timePeriodYearMonths' => '%sy %smon назад',
+	'timePeriodMonths' => '%smon later',
+	'timePeriodYears' => '%syears later',
+	'timePeriodYearMonths' => '%sy %smon later',
 );
