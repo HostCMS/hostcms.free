@@ -886,6 +886,7 @@ td.importantField a {
 
 .tickets-container .tickets-list .ticket-item .ticket-user .user-name{
 	display: inline-block;
+	white-space: normal;
 }
 
 .tickets-container .tickets-list .ticket-item .ticket-user{

@@ -45,8 +45,8 @@ $oAdmin_Form_Controller
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/user/index.php';
-$sAdditionalUsersParams = 'company_department_id=' . $company_department_id;
+$sUsersPath = '/admin/company/index.php';
+$sAdditionalUsersParams = 'company_id=' . $oCompany_Department->Company->id;
 
 $sChoosingSitePath = '/admin/user/site/index.php';
 $sAdditionalChoosingSiteParams = 'company_department_id=' . $company_department_id;
@@ -61,7 +61,7 @@ if (!is_null($form_mode))
 $oAdmin_Form_Entity_Breadcrumbs
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_users_title'))
+		->name(Core::_('Company.company_show_title2'))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
 		)
@@ -73,10 +73,10 @@ $oAdmin_Form_Entity_Breadcrumbs
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, $sAdditionalUsersParams)
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalUsersParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, $sAdditionalUsersParams)
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/company/department/index.php', NULL, NULL, $sAdditionalUsersParams)
 	)
 )
 ->add(

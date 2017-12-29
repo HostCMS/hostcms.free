@@ -266,11 +266,11 @@ class Skin_Bootstrap extends Core_Skin
 													{
 														foreach ($aEvents as $oEvent)
 														{
-															?><li id="<?php echo $oEvent->id?>">
+															?><li id="event-<?php echo $oEvent->id?>">
 																<a href="/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1'}); return false">
 																	<div class="clearfix notification-clock">
 																		<div class="notification-icon">
-																			<i class="<?php echo $oEvent->Event_Type->icon /*$oEvent->getTypeBadge()*/ ?> white" style="background-color: <?php echo $oEvent->Event_Type->color?>"></i>
+																			<i class="<?php echo htmlspecialchars($oEvent->Event_Type->icon)?> white" style="background-color: <?php echo htmlspecialchars($oEvent->Event_Type->color)?>"></i>
 																		</div>
 																		<div class="notification-body">
 																			<span class="title"><?php echo htmlspecialchars($oEvent->name)?></span>
@@ -283,7 +283,7 @@ class Skin_Bootstrap extends Core_Skin
 													}
 													else
 													{
-														?><li id="0">
+														?><li id="event-0">
 															<a href="#">
 																<div class="clearfix">
 																	<div class="notification-icon">
@@ -342,7 +342,7 @@ class Skin_Bootstrap extends Core_Skin
 									<div id="notificationsListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">
 										<div class="scroll-notifications">
 										<ul>
-											<li id="0">
+											<li id="notification-0">
 												<a href="#">
 													<div class="clearfix">
 														<div class="notification-icon">
@@ -383,7 +383,6 @@ class Skin_Bootstrap extends Core_Skin
 										});
 
 										$.refreshNotificationsList();
-										//setInterval($.refreshNotificationsList, 5000);
 									});
 									</script>
 									<?php

@@ -100,7 +100,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 				{
 					$aJson = array();
 
-					//$iEventId = intval(Core_Array::getPost('eventId'));
 					$sEventName = Core_Array::getPost('event_name');
 
 					$aJson['event_name'] = $sEventName;
@@ -119,45 +118,16 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					$iCurrentTimestamp = time();
 
 					$oEvent->datetime = Core_Date::timestamp2sql($iCurrentTimestamp);
-					$oEvent->start =  Core_Date::timestamp2sql($iCurrentTimestamp);
-
-					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-					// Компании, связанные с текущим сайтом
-					$aCompanies = $oSite->Companies->findAll();
-
-					$aCompaniesId = array();
-
-					foreach($aCompanies as $oCompany)
-					{
-						$aCompaniesId[] = $oCompany->id;
-					}
+					$oEvent->start = Core_Date::timestamp2sql($iCurrentTimestamp);
+					$oEvent->save();
 
 					$oUser = Core_Entity::factory('User', 0)->getCurrent();
 
-					// Получаем список должностей пользователя (сотрудника)
-					$oCompany_Department_Post_Users = $oUser->Company_Department_Post_Users;
+					$oEventUser = Core_Entity::factory('Event_User')
+						->user_id($oUser->id)
+						->creator(1);
 
-					$oCompany_Department_Post_Users
-						->queryBuilder()
-						->where('company_id', 'IN', $aCompaniesId);
-
-					$aCompany_Department_Post_Users = $oCompany_Department_Post_Users->findAll();
-
-					$oEvent->save();
-
-					if (isset($aCompany_Department_Post_Users[0]))
-					{
-						$aResponsibleEmployees[] = $aCompany_Department_Post_Users[0]->company_id . '_' . $aCompany_Department_Post_Users[0]->company_department_id . '_' . $oUser->id;
-
-						$oEventUser = Core_Entity::factory('Event_User')
-							->company_id($aCompany_Department_Post_Users[0]->company_id)
-							->company_department_id($aCompany_Department_Post_Users[0]->company_department_id)
-							->user_id($oUser->id)
-							->creator(1);
-
-						$oEvent->add($oEventUser);
-					}
+					$oEvent->add($oEventUser);
 
 					Core::showJson($aJson);
 				}
@@ -173,23 +143,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					$aJson['newEvents'] = array();
 
 					$dateTime = date('Y-m-d');
-
-					// Дела пользователя (сотрудника)
-					/*$oEvents = $oUser->Events;
-
-					$oEvents->queryBuilder()
-						->where('events.completed', '=', 0)
-						->open()
-							->where('events.start', '>', $dateTime . ' 00:00:00')
-							->setOr()
-							->where('events.finish', '<', $dateTime . ' 23:59:59')
-						->close()
-						->clearOrderBy()
-						//->orderBy('id', 'ASC')
-						->orderBy('start', 'DESC')
-						->orderBy('important', 'DESC');
-
-					$aEvents = $oEvents->findAll(FALSE);*/
 
 					$aEvents = $oUser->Events->getToday(FALSE);
 
@@ -247,7 +200,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					<a data-toggle="maximize">
 						<i class="fa fa-expand gray"></i>
 					</a>
-					<!--<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#eventsAdminPage')});">-->
 					<a data-toggle="upload" data-module-id="<?php echo $oModule->id?>">
 						<i class="fa fa-refresh gray"></i>
 					</a>
@@ -274,13 +226,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 									<span id="sendForm" class="input-group-addon bg-azure bordered-azure" onclick="$(this).parents('form').submit()">
 										<i class="fa fa-check no-margin"></i>
 									</span>
-									<!--
-									<span class="input-group-btn">
-										<button class="btn btn-azure" type="submit">
-											<i class="fa fa-check no-margin fa-spin"></i>
-										</button>
-									</span>
-									-->
 								</div>
 							</form>
 						</span>
@@ -324,49 +269,28 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										<?php
 										$aColorEventTypes = array('success', 'primary', 'azure', 'magenta', 'sky');
 
-
-										/*
-										switch ($oEvent->type)
-										{
-											case 0:
-												$sNameEventType = Core::_('Event.eventTypePrivate');
-												$eventIcon = 'fa fa-user';
-												break;
-											case 1:
-												$sNameEventType = Core::_('Event.eventTypeMeeting');
-												$eventIcon = 'fa fa-users';
-												break;
-											case 2:
-												$sNameEventType = Core::_('Event.eventTypeCall');
-												$eventIcon = 'fa fa-phone';
-												break;
-											case 3:
-												$sNameEventType = Core::_('Event.eventTypeTask');
-												$eventIcon = 'fa fa-clock-o';
-												break;
-											case 4:
-												$sNameEventType = Core::_('Event.eventTypeBriefing');
-												$eventIcon = 'fa fa-handshake-o';
-										}
-										*/
-
 										$oEvent->event_type_id && $oEvent->showType();
 
 										if ($oEvent->deadline())
 										{
 											?><div class="btn-group"><i class="fa fa-exclamation-circle red margin-right-10"></i></div><?php
 										}
-										// Статус дела не задан или список статусов пуст
-										//$iEventStatusId = intval($oEvent->event_status_id);
-
 										// Список статусов дел
 										$aEventStatuses = Core_Entity::factory('Event_Status')->findAll();
 
-										$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
+										$aMasEventStatuses = array(
+											array(
+												'value' => Core::_('Event.notStatus'),
+												'color' => '#aebec4'
+											)
+										);
 
 										foreach ($aEventStatuses as $oEventStatus)
 										{
-											$aMasEventStatuses[$oEventStatus->id] = array('value' => $oEventStatus->name, 'color' => $oEventStatus->color);
+											$aMasEventStatuses[$oEventStatus->id] = array(
+												'value' => $oEventStatus->name,
+												'color' => $oEventStatus->color
+											);
 										}
 
 										$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
@@ -380,15 +304,11 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 									</div>
 									<div class="task-time"><i class="fa fa-clock-o"></i> <?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($oEvent->datetime)) ?></div>
 									<div class="task-body">
-
-										<!-- echo '<div class="notification-title editable" id="apply_check_0_' . $this->id . '_fv_1142">' . htmlspecialchars($this->name) . '</div>'; -->
 										<?php
 										$deadlineIcon = $oEvent->deadline()
 											? '<i class="fa fa-clock-o event-title-deadline"></i>'
 											: '';
-
 										?>
-
 										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1142"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
 										<?php
 											$isCreator = is_null($oEvent_User) ? 0 : $oEvent_User->creator;

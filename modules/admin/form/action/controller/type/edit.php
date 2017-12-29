@@ -662,9 +662,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				//$newWindowId = 'Modal_' . time();
 
 				ob_start();
-				/*?>
-				<div id="<?php echo $newWindowId?>">
-				<?php*/
+
 				if (!$this->_prepeared)
 				{
 					$this->_prepareForm();
@@ -682,25 +680,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					->buttons($this->_addButtons());
 
 				echo $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
-				/*?>
-				</div>
-				<script type="text/javascript">
-				$(function() {
-					$('#<?php echo $newWindowId?>').HostCMSWindow({
-						autoOpen: true,
-						destroyOnClose: false,
-						title: '<?php echo $this->title?>',
-						AppendTo: '#<?php echo $windowId?>',
-						width: '80%',
-						// height: 140,
-						addContentPadding: true,
-						modal: false,
-						Maximize: false,
-						Minimize: false
-					});
-				});
-				</script>
-				<?php*/
+
 				$this->addContent(ob_get_clean());
 
 				$this->_return = TRUE;

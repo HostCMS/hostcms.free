@@ -34,13 +34,13 @@ $company_department_id = Core_Array::getGet('company_department_id');
 $oCompany_Department = Core_Entity::factory('Company_Department', $company_department_id);
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/user/index.php';
+$sUsersPath = '/admin/company/index.php';
 $sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_users_title', $oCompany_Department->name))
+		->name(Core::_('Company.company_show_title2', $oCompany_Department->name))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
 		)

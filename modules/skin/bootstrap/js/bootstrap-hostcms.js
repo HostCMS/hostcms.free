@@ -1429,10 +1429,10 @@
 						{
 							var jEventUl = $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
 
-							$('li[id!="0"]', jEventUl).remove();
+							$('li[id!="event-0"]', jEventUl).remove();
 
 							// Удаление записи об отсутствии дел
-							$('li[id="0"]', jEventUl).hide();
+							$('li[id="event-0"]', jEventUl).hide();
 
 							$.each(resultData['newEvents'], function( index, event ){
 								// Добавляем дело в список
@@ -1487,7 +1487,7 @@
 			// var jBox = jBox || $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
 
 			jBox.append(
-				'<li id="' + oEvent['id'] + '">\
+				'<li id="event-' + oEvent['id'] + '">\
 					<a href="' + (oEvent['href'].length ? oEvent['href'] : '#') + '" onclick="' + (oEvent['onclick'].length ? oEvent['onclick'] : '') + '">\
 						<div class="clearfix notification-clock">\
 							<div class="notification-icon">\
@@ -1782,7 +1782,7 @@
 			}
 
 			jBox.prepend(
-				'<li id="' + oNotification['id'] + '" class="' + (oNotification['read'] == 0 ? "unread" : "") + '">\
+				'<li id="notification-' + oNotification['id'] + '" class="' + (oNotification['read'] == 0 ? "unread" : "") + '">\
 					<a href="' + (oNotification['href'].length ? oNotification['href'] : '#') + '" onclick="' + (oNotification['onclick'].length ? oNotification['onclick'] : '') + '">\
 						<div class="clearfix">\
 							<div class="notification-icon">\
@@ -1835,18 +1835,6 @@
 						//&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length)
 					)
 					{
-
-						// Удаление записи об отсутствии уведомлений
-						//$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
-
-						/*
-						if (jNotificationsListBox.data('lastNotificationId') == 0)
-						//if (jNotificationsListBox.find('.scroll-notifications > ul li:first').attr('id') == 0)
-						{
-							//$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').remove();
-							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
-						}*/
-
 						// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
 						var unreadNotifications = [];
 
@@ -1876,7 +1864,7 @@
 						if (resultData['newNotifications'].length)
 						{
 							// Удаление записи об отсутствии уведомлений
-							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').hide();
+							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').hide();
 
 							$.each(resultData['newNotifications'], function( index, notification ){
 
@@ -1992,8 +1980,8 @@
 		},
 
 		clearNotifications: function (){
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id!="0"]').remove();
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="0"]').show();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id!="notification-0"]').remove();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').show();
 
 			// Нет непрочитанных уведомлений
 			$('.navbar li#notifications > a').removeClass('wave in');
