@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2016 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -83,43 +83,32 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					//$aUnreadNotificationsId = Core_Array::getPost('unreadNotificationsId');
 
 					$oNotifications = $oCurrent_User->Notifications;
-					$oNotifications->queryBuilder()
-						->select('notifications.*', array('notification_users.read', 'read'))
-						/*
-						->open()
-						// Больше уже выведенного
-						->where('notifications.id', '>', $iLastNotificationId)
-						->setOr()
-						// Непрочитанные
-						->where('notification_users.read', '=', 0)
-						->close()
-						*/
-						->orderBy('notifications.id', 'ASC');
-						//->orderBy('datetime');
 
 					$oNotifications->queryBuilder()
-							->where('notification_users.read', '=', 0);
+						->select('notifications.*', array('notification_users.read', 'read'))
+						->orderBy('notifications.id', 'ASC');
+						//->orderBy('datetime');
 
 					// При наличии ранее загруженных уведомлений загружаем новые и непрочитанные
 					if ($iLastNotificationId)
 					{
 						$oNotifications->queryBuilder()
 							//->where('notification_users.read', '=', 0)
-							->where('notifications.id', '>', $iLastNotificationId)
-							/*->open()
+							//->where('notifications.id', '>', $iLastNotificationId)
+							->open()
 							// Больше уже выведенного
 							->where('notifications.id', '>', $iLastNotificationId)
 							->setOr()
 							// Непрочитанные
 							->where('notification_users.read', '=', 0)
-							->close()*/;
+							->close();
 
 					}
-					/*else // При отсутствии ранее загруженных уведомлений загружаем непрочитанные
+					else // При отсутствии ранее загруженных уведомлений загружаем непрочитанные
 					{
 						$oNotifications->queryBuilder()
 							->where('notification_users.read', '=', 0);
-					}*/
+					}
 
 					$aNotifications = $oNotifications->findAll();
 
@@ -143,11 +132,10 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 							if (!is_null($oCore_Module))
 							{
-
 								$aNotificationDecorations = $oCore_Module->getNotifications($oNotification->type, $oNotification->entity_id);
 
 								$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
-								$aNotification['onclick'] = Core_Array::get($aNotificationDecorations, 'onclick');
+								$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
 								$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
 								$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
 								$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');
@@ -176,6 +164,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 				$aNotificationsListId = Core_Array::getPost('notificationsListId');
 				$iCurrentUserId = intval(Core_Array::getPost('currentUserId'));
+
 
 				foreach ($aNotificationsListId as $iNotificationId)
 				{

@@ -704,7 +704,7 @@ background:linear-gradient(top,#FFE707 0,#FFD012);
 .hostcms6 .li_lev_1 ul li{background-color:#fff;margin:0;padding:4px 40px 4px 0}
 .hostcms6 .light_table,.hostcms6 .light_table td{border-collapse:collapse;empty-cells:show;border:1px solid #E1E1E1;margin:0 2px}
 .hostcms6 .from_ie{background:url(/admin/images/fon_li.png) repeat-y 0 0}
-.hostcms6 .div_message_error{color:#777}
+.hostcms6 .fieldcheck-error { color:#777 }
 /* End стилей для меню центра администрирования */
 
 .hostcms6 .shadowed{zoom:1;z-index:9999;position:absolute!important;margin-top:10px;background-color:#FFF;font-size:9pt}

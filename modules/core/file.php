@@ -902,7 +902,7 @@ class Core_File
 					throw new Core_Exception(Core::_('Core.error_resize'));
 				}
 
-				@chmod($large_image_target, CHMOD_FILE);
+				//@chmod($large_image_target, CHMOD_FILE);
 
 				// Если не передан флаг ватермарка для маленькой картинки - то копируем ее до наложения ватермарка
 				if (!$small_image_watermark)
@@ -931,7 +931,7 @@ class Core_File
 							{
 								throw new Core_Exception(Core::_('Core.error_resize'));
 							}
-							@chmod($small_image_target, CHMOD_FILE);
+							//@chmod($small_image_target, CHMOD_FILE);
 						}
 						else
 						{
@@ -982,7 +982,7 @@ class Core_File
 						{
 							throw new Core_Exception(Core::_('Core.error_resize'));
 						}
-						@chmod($small_image_target, CHMOD_FILE);
+						//@chmod($small_image_target, CHMOD_FILE);
 					}
 					else
 					{

@@ -48,6 +48,40 @@ class Property_Value_Datetime_Model extends Core_Entity
 	);
 
 	/**
+	 * Date format.
+	 * @var string
+	 */
+	protected $_dateFormat = '%m.%Y.%d';
+
+	/**
+	 * Set date format
+	 * @param string $dateFormat
+	 * @return self
+	 */
+	public function dateFormat($dateFormat)
+	{
+		$this->_dateFormat = $dateFormat;
+		return $this;
+	}
+
+	/**
+	 * DateTime format.
+	 * @var string
+	 */
+	protected $_dateTimeFormat = '%d.%m.%Y %H:%M:%S';
+
+	/**
+	 * Set DateTime format
+	 * @param string $dateTimeFormat
+	 * @return self
+	 */
+	public function dateTimeFormat($dateTimeFormat)
+	{
+		$this->_dateTimeFormat = $dateTimeFormat;
+		return $this;
+	}
+	
+	/**
 	 * Set value
 	 * @param string $value value
 	 * @return self
@@ -81,8 +115,8 @@ class Property_Value_Datetime_Model extends Core_Entity
 		if ($this->value != '0000-00-00 00:00:00')
 		{
 			$value = $this->Property->type == 8
-				? Core_Date::sql2date($this->value)
-				: Core_Date::sql2datetime($this->value);
+				? strftime($this->_dateFormat, Core_Date::sql2timestamp($this->value))
+				: strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->value));
 		}
 
 		$this->addXmlTag('value', $value);

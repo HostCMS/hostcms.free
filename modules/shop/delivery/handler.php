@@ -38,10 +38,16 @@ abstract class Shop_Delivery_Handler
 	protected $_shopCity = NULL;
 
 	/**
-	 * weight
-	 * @var string
+	 * Total Weight
+	 * @var mixed
 	 */
 	protected $_weight = NULL;
+	
+	/**
+	 * Total Amount
+	 * @var mixed
+	 */
+	protected $_amount = NULL;
 
 	/**
 	 * postcode
@@ -56,13 +62,24 @@ abstract class Shop_Delivery_Handler
 	protected $_volume = NULL;
 
 	/**
-	 * Set weight
-	 * @param string $fWeight weight
+	 * Set Weight
+	 * @param string $weight
 	 * @return self
 	 */
-	public function weight($fWeight)
+	public function weight($weight)
 	{
-		$this->_weight = $fWeight;
+		$this->_weight = $weight;
+		return $this;
+	}
+	
+	/**
+	 * Set Amount
+	 * @param string $amount
+	 * @return self
+	 */
+	public function amount($amount)
+	{
+		$this->_amount = $amount;
 		return $this;
 	}
 

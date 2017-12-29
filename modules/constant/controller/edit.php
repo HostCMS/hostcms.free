@@ -45,7 +45,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->filter(TRUE);
 
 				// Добавляем группу товаров
-				$oMainTab->addAfter($oGroupSelect, $this->getField('name'));
+				$oMainTab->addAfter($oGroupSelect, $this->getField('value'));
 
 				$this->title(
 					$this->_object->id

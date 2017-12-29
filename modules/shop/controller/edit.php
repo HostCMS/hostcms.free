@@ -120,6 +120,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRowNotification = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -244,10 +245,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Удаляем компании
 					->delete($this->getField('shop_company_id'));
 
-				// Удаляем тип URL
-				$oMainTab->delete(
-					$this->getField('url_type')
-				);
+				$oMainTab
+					// Удаляем тип URL
+					->delete($this->getField('url_type'))
+					// Удаляем налог
+					->delete($this->getField('shop_tax_id'));
 
 				// Удаляем поле сортировки товара
 				$oShopTabOrders->delete(
@@ -346,6 +348,18 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow4->add($oCurrencyField);
 
+				// Добавляем налоги
+				$oTaxField = Admin_Form_Entity::factory('Select')
+					->name('shop_tax_id')
+					->caption(Core::_('Shop.shop_tax_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->options(
+						$this->fillTaxes()
+					)
+					->value($this->_object->shop_tax_id);
+
+				$oMainRow5->add($oTaxField);
+
 				// Добавляем страны
 				$oCountriesField = Admin_Form_Entity::factory('Select')
 					->name('shop_country_id')
@@ -369,19 +383,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->shop_order_status_id);
 
 				$oMainRow5->add($oOrderStatusField);
-
-				// Добавляем единицы измерения
-				$oMeasuresField = Admin_Form_Entity::factory('Select')
-					->name('shop_measure_id')
-					->caption(Core::_('Shop.shop_measure_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					->options(
-						$this->fillMeasures()
-					)
-					->value($this->_object->shop_measure_id);
-
-				$oMainRow5->add($oMeasuresField);
-
 
 				$oMainTab->move($this->getField('email')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
@@ -418,9 +419,146 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						Core::_('Shop.size_measure_4')))
 					->value($this->_object->size_measure), $oUrlTypeField);
 
+				// Добавляем единицы измерения
+				$oMeasuresField = Admin_Form_Entity::factory('Select')
+					->name('shop_measure_id')
+					->caption(Core::_('Shop.shop_measure_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->options(
+						$this->fillMeasures()
+					)
+					->value($this->_object->shop_measure_id);
+
+				$oMainRow7->add($oMeasuresField);
+
 				$oMainTab->delete($this->getField('reserve_hours'));
 
 				$oMainRow7->add($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')));
+
+				// Notification subscribers
+				if (Core::moduleIsActive('notification'))
+				{
+					$aSelectSubscribers = $aSubscribers = array();
+
+					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+					$aCompanies = $oSite->Companies->findAll();
+					foreach($aCompanies as $oCompany)
+					{
+						$oOptgroupCompany = new stdClass();
+						$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
+						$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
+
+						$aSelectSubscribers[] = $oOptgroupCompany;
+					}
+
+					$oModule = Core::$modulesList['shop'];
+
+					$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+					$oNotification_Subscribers->queryBuilder()
+						->where('notification_subscribers.module_id', '=', $oModule->id)
+						->where('notification_subscribers.type', '=', 0)
+						->where('notification_subscribers.entity_id', '=', $this->_object->id);
+
+					$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+
+					foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+					{
+						$aSubscribers[] = $oNotification_Subscriber->user_id;
+					}
+
+					$oNotificationSubscribersSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop.notification_subscribers'))
+						// ->options($this->_fillNotificationSubscribersList())
+						->options($aSelectSubscribers)
+						->name('notification_subscribers[]')
+						->class('shop-notification-subscribers')
+						->value($aSubscribers)
+						->style('width: 100%')
+						->multiple('multiple')
+						->divAttr(array('class' => 'form-group col-xs-12'));
+
+					$oMainRowNotification->add($oNotificationSubscribersSelect);
+
+					$html = '
+						<script type="text/javascript">
+							$(function(){
+								// Формирование элементов выпадающего списка
+								function templateResultItemSubscribers(data, item){
+
+									var arraySelectItemParts = data.text.split("%%%"),
+										className = data.element && $(data.element).attr("class");
+
+									if (data.element && $(data.element).attr("style"))
+									{
+										// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+										($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+									}
+
+									// Компания, отдел, ФИО сотрудника
+									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
+
+									if (arraySelectItemParts[2])
+									{
+										// Список должностей через запятую
+										resultHtml += \'<span class="user-post">\' + arraySelectItemParts[2].split(\'###\').join(\', \')  + \'</span>\';
+									}
+
+									if (arraySelectItemParts[3])
+									{
+										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-right-5">\' + resultHtml;
+									}
+
+									return resultHtml;
+								}
+
+								// Формирование результатов выбора
+								function templateSelectionItemSubscribers(data, item){
+
+									var arraySelectItemParts = data.text.split("%%%"),
+										className = data.element && $(data.element).attr("class");
+
+									// Компания, отдел, ФИО сотрудника
+									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
+
+									// Устанавливает title для элемента
+									data.title = arraySelectItemParts[0];
+
+									if (arraySelectItemParts[1])
+									{
+										resultHtml += \'<span class="company-department">\' + arraySelectItemParts[1] + \'</span>\';
+										data.title += " - " + arraySelectItemParts[1];
+									}
+
+									// Список должностей через запятую
+									if (arraySelectItemParts[2])
+									{
+										var departmentPosts = arraySelectItemParts[2].split(\'###\').join(\', \');
+
+										resultHtml += \'<span class="user-post">\' + departmentPosts  + \'</span>\';
+										data.title += " - " + departmentPosts;
+									}
+
+									if (arraySelectItemParts[3])
+									{
+										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-top-5 margin-right-5">\' + resultHtml;
+									}
+
+									return resultHtml;
+								}
+
+								$(".shop-notification-subscribers").select2({
+									language: "' . Core_i18n::instance()->getLng() . '",
+									placeholder: "' . Core::_('Shop.type_subscriber') . '",
+									allowClear: true,
+									templateResult: templateResultItemSubscribers,
+									escapeMarkup: function(m) { return m; },
+									templateSelection: templateSelectionItemSubscribers
+								});
+							})</script>
+						';
+
+					$oMainRowNotification->add(Admin_Form_Entity::factory('Code')->html($html));
+				}
 
 				$oMainTab->move($this->getField('reserve'), $oMainRow8);
 				$oMainTab->move($this->getField('send_order_email_admin'), $oMainRow9);
@@ -627,6 +765,58 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_applyObjectProperty();
 
+		if (Core::moduleIsActive('notification'))
+		{
+			$oModule = Core::$modulesList['shop'];
+
+			$aRecievedNotificationSubscribers = Core_Array::getPost('notification_subscribers', array());
+			!is_array($aRecievedNotificationSubscribers) && $aRecievedNotificationSubscribers = array();
+
+			$aTmp = array();
+
+			// Выбранные сотрудники
+			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+			$oNotification_Subscribers->queryBuilder()
+				->where('notification_subscribers.module_id', '=', $oModule->id)
+				->where('notification_subscribers.type', '=', 0)
+				->where('notification_subscribers.entity_id', '=', $this->_object->id)
+				;
+
+			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+
+			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+			{
+				!in_array($oNotification_Subscriber->user_id, $aRecievedNotificationSubscribers)
+					? $oNotification_Subscriber->delete()
+					: $aTmp[] = $oNotification_Subscriber->user_id;
+			}
+
+			$aNewRecievedNotificationSubscribers = array_diff($aRecievedNotificationSubscribers, $aTmp);
+
+			foreach ($aRecievedNotificationSubscribers as $user_id)
+			{
+				$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+				$oNotification_Subscribers->queryBuilder()
+					->where('notification_subscribers.module_id', '=', $oModule->id)
+					->where('notification_subscribers.user_id', '=', intval($user_id))
+					->where('notification_subscribers.entity_id', '=', $this->_object->id)
+					;
+
+				$iCount = $oNotification_Subscribers->getCount();
+
+				if (!$iCount)
+				{
+					$oNotification_Subscriber = Core_Entity::factory('Notification_Subscriber');
+					$oNotification_Subscriber
+						->module_id($oModule->id)
+						->type(0)
+						->entity_id($this->_object->id)
+						->user_id($user_id)
+						->save();
+				}
+			}
+		}
+
 		if(
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
@@ -679,6 +869,30 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $aCurrencyArray;
+	}
+
+	/**
+	 * Get tax array
+	 * @return array
+	 */
+	public function fillTaxes()
+	{
+		$oShop_Taxes = Core_Entity::factory('Shop_Tax');
+
+		$oShop_Taxes->queryBuilder()
+			->orderBy('name')
+			->orderBy('id');
+
+		$aTaxArray = array(' … ');
+		// $aTaxArray = array();
+
+		$aShop_Taxes = $oShop_Taxes->findAll(FALSE);
+		foreach($aShop_Taxes as $oShop_Tax)
+		{
+			$aTaxArray[$oShop_Tax->id] = $oShop_Tax->name;
+		}
+
+		return $aTaxArray;
 	}
 
 	/**
@@ -911,4 +1125,37 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $aReturn;
 	}
+
+	/**
+	 * Fill notification subscribers list
+	 * @param Shop_Model $oShop shop
+	 * @return array
+	 */
+	/*protected function _fillNotificationSubscribersList()
+	{
+		$aReturnArray = array();
+
+		$oModule = Core::$modulesList['shop'];
+
+		$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+		$oNotification_Subscribers->queryBuilder()
+			->where('notification_subscribers.module_id', '=', $oModule->id)
+			->where('notification_subscribers.type', '=', 0)
+			->where('notification_subscribers.entity_id', '=', $this->_object->id)
+			;
+
+		$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
+
+		foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+		{
+			$oUser = $oNotification_Subscriber->User;
+
+			$aReturnArray[$oUser->id] = array(
+				'value' => $oUser->getFullName() . '%%%' . ($oUser->image ? $oUser->getImageFileHref() : ''),
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturnArray;
+	}*/
 }

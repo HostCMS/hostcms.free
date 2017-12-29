@@ -45,7 +45,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.resize.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.selection.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.pie.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
 
@@ -55,6 +55,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/sparkline/jquery.sparkline.js')
 
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/nestable/jquery.nestable.min.js')
 
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/raphael-2.0.2.min.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris.js')
@@ -78,6 +79,13 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
+			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.js')
+			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/ru.js')
+			// Уже подключается выше из datetime
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			;
 
 		$this
@@ -92,6 +100,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			;
 	}
 
@@ -226,14 +235,13 @@ class Skin_Bootstrap extends Core_Skin
 									?>
 									<script type="text/javascript">
 										$(function(){
-
 											$("#sound-switch")
 												.data('soundEnabled', <?php echo $oUser->sound ? 'true' : 'false'?>)
 												.on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=84'}, $.soundSwitch );
 										});
 									</script>
 								</li>
-								<li>
+								<li id="notifications-clock">
 									<a href="#" title="" data-toggle="dropdown" class="task-area dropdown-toggle">
 										<div class="clock">
 											<ul>
@@ -241,29 +249,100 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</div>
 									</a>
-
 									<script type="text/javascript">
-										$(function(){
-											$(document).ready(
-												$.refreshClock()
-											);
-										});
+									$(function(){
+										$.refreshClock();
+									});
 									</script>
+									<?php
+									if (Core::moduleIsActive('event'))
+									{
+										?><div id="notificationsClockListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">
+											<div class="scroll-notifications-clock">
+												<ul>
+												<?php
+													$aEvents = $oUser->Events->getToday(FALSE);
+													if (count($aEvents))
+													{
+														foreach ($aEvents as $oEvent)
+														{
+															?><li id="event-<?php echo $oEvent->id?>">
+																<a href="/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][<?php echo $oEvent->id?>]=1'}); return false">
+																	<div class="clearfix notification-clock">
+																		<div class="notification-icon">
+																			<i class="<?php echo htmlspecialchars($oEvent->Event_Type->icon)?> white" style="background-color: <?php echo htmlspecialchars($oEvent->Event_Type->color)?>"></i>
+																		</div>
+																		<div class="notification-body">
+																			<span class="title"><?php echo htmlspecialchars($oEvent->name)?></span>
+																			<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> — <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->finish)?></span></span>
+																		</div>
+																	</div>
+																</a>
+															</li><?php
+														}
+													}
+													else
+													{
+														?><li id="event-0">
+															<a href="#">
+																<div class="clearfix">
+																	<div class="notification-icon">
+																		<i class="fa fa-info bg-themeprimary white"></i>
+																	</div>
+																	<div class="notification-body">
+																		<span class="title margin-top-5"><?php echo Core::_('Notification.no_notifications')?></span>
+																	</div>
+																</div>
+															</a>
+														</li><?php
+													}
+													?>
+													<li class="all-tasks">
+														<a href="/admin/event/index.php" onclick="$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php'}); return false"> <?php echo Core::_('Event.all-tasks')?></a>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<?php
+										$oModule = Core_Entity::factory('Module')->getByPath('event');
+										if ($oModule)
+										{
+											?><script type="text/javascript">
+												$(function(){
+													$.eventsPrepare();
+
+													var notificationsClockListBox = document.getElementById('notificationsClockListBox');
+													notificationsClockListBox.onclick = function(event){
+														event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
+													};
+
+													$('.navbar-account #notificationsClockListBox').data({
+														// Идентификатор последнего загруженного дела
+														// 'lastEventId': 0,
+														'currentUserId': <?php echo $oUser->id?>,
+														'moduleId': <?php echo $oModule->id?>
+													});
+
+													$.refreshEventsList();
+												});
+												</script><?php
+										}
+									}
+									?>
 								</li>
-								<!-- Уведомления начало-->
+								<?php
+								if (Core::moduleIsActive('notification'))
+								{
+								?>
 								<li id="notifications">
 									<a href="#" title="" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-bell"></i>
-										<!--<span class="badge <?php //if (!$iCountUnreadNotifications) echo ' hidden'?>"><?php //echo $iCountUnreadNotifications?></span>-->
 										<span class="badge hidden"></span>
-										<!-- <span class="badge">5</span> -->
 									</a>
-
-									<!--<ul id="dropdown-notifications" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">-->
 									<div id="notificationsListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications">
 										<div class="scroll-notifications">
 										<ul>
-											<li id="0">
+											<li id="notification-0">
 												<a href="#">
 													<div class="clearfix">
 														<div class="notification-icon">
@@ -284,37 +363,35 @@ class Skin_Bootstrap extends Core_Skin
 												<i class="glyphicon glyphicon-remove palegreen" title="<?php echo Core::_('Notification.search_clear_button_tittle');?>" style="cursor:pointer; position: absolute; left: 93%;bottom: 0;line-height: 24px;font-size: 10px;width: 24px;padding-top: 0px;"></i>
 											</span>
 											<span class="pull-right darkorange" style="display: block; margin-right: 5px; cursor:pointer;"><i class="fa fa-trash-o" title="<?php echo Core::_('Notification.notifications_trash_title'); ?>"></i></span>
-											<!-- <button class="btn btn-xs btn-default shiny darkorange icon-only pull-right" title="<?php echo Core::_('Notification.notifications_trash_title'); ?>"><i class="fa fa-trash-o"></i></button>-->
-											<!--
-											<div class="btn-group">
-												<button class="btn btn-blue btn-sm "><i class="fa fa-volume-down no-margin"></i></button>
-												<button class="btn btn-palegreen btn-sm"><i class="fa fa-list-alt  no-margin"></i></button>
-												<button class="btn btn-darkorange btn-sm"><i class="fa fa-trash-o no-margin"></i></button>
-											</div>-->
 										</div>
 									</div>
 
 									<?php
 									$oModule = Core_Entity::factory('Module')->getByPath('notification');
+									if ($oModule)
+									{
 									?>
 									<!--/Notification Dropdown-->
-
 									<script type="text/javascript">
 									$(function (){
-											$('.navbar-account #notificationsListBox').data({
-												// Идентификатор последнего загруженного уведомления
-												'lastNotificationId': 0, //$('.navbar-account #notificationsListBox .scroll-notifications > ul li:first').attr('id'),
-												'currentUserId': <?php echo $oUser->id?>,
-												'moduleId': <?php echo $oModule->id?>
-											});
+										$.notificationsPrepare();
+										$('.navbar-account #notificationsListBox').data({
+											// Идентификатор последнего загруженного уведомления
+											'lastNotificationId': 0, //$('.navbar-account #notificationsListBox .scroll-notifications > ul li:first').attr('id'),
+											'currentUserId': <?php echo $oUser->id?>,
+											'moduleId': <?php echo $oModule->id?>
+										});
 
-											$.refreshNotificationsList();
-											//setInterval($.refreshNotificationsList, 5000);
-										}
-									);
+										$.refreshNotificationsList();
+									});
 									</script>
+									<?php
+									}
+									?>
 								</li>
-								<!-- Уведомления конец-->								
+								<?php
+								}
+								?>
 								<li>
 								<?php
 								$oCurrentSite = Core_Entity::factory('Site', CURRENT_SITE);
@@ -485,11 +562,7 @@ class Skin_Bootstrap extends Core_Skin
 
 											$('.send-message textarea').on('keyup', { path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=79' }, $.chatSendMessage);
 
-											$(document).ready(
-												$.refreshChat({path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=80'});
-
-												$.refreshClock();
-											);
+											$.refreshChat({path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=80'});
 										});
 									</script>
 								</li>
@@ -612,6 +685,11 @@ class Skin_Bootstrap extends Core_Skin
 						appendTo: '.sidebar-header-wrapper',
 						source: function(request, response) {
 
+							$('.sidebar-header-wrapper i.searchicon')
+								.removeClass('fa-search')
+								.addClass('fa-spinner')
+								.addClass('fa-spin');
+
 							$.ajax({
 							  url: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oSearchModule->id?>&type=1&autocomplete=1',
 							  dataType: 'json',
@@ -619,6 +697,11 @@ class Skin_Bootstrap extends Core_Skin
 								queryString: request.term
 							  },
 							  success: function( data ) {
+								$('.sidebar-header-wrapper i.searchicon')
+									.removeClass('fa-spinner')
+									.removeClass('fa-spin')
+									.addClass('fa-search');
+
 								response( data );
 							  }
 							});
@@ -656,128 +739,134 @@ class Skin_Bootstrap extends Core_Skin
 			<?php
 			}
 			?>
-
 			<!-- /Page Sidebar Header -->
 			<!-- Sidebar Menu -->
 			<ul class="nav sidebar-menu">
-				<li id="menu-dashboard">
-					<a href="/admin/index.php" onclick="$.adminLoad({path: '/admin/index.php'}); return false">
-						<i class="menu-icon glyphicon glyphicon-home"></i>
-						<span class="menu-text"><?php echo Core::_('Admin.home')?></span>
-					</a>
-				</li>
 				<?php
-				// Список основных меню скина
-				$this->_config = Core_Config::instance()->get('skin_bootstrap_config');
+				$this->navSidebarMenu();
+				?>
+			</ul>
+		</div>
+		<!-- /Page Sidebar -->
+		<?php
+	}
 
-				$aModules = $this->_getAllowedModules();
+	public function navSidebarMenu()
+	{
+		?><li id="menu-dashboard">
+			<a href="/admin/index.php" onclick="$.adminLoad({path: '/admin/index.php'}); return false">
+				<i class="menu-icon glyphicon glyphicon-home"></i>
+				<span class="menu-text"><?php echo Core::_('Admin.home')?></span>
+			</a>
+		</li>
+		<?php
+		// Список основных меню скина
+		$this->_config = Core_Config::instance()->get('skin_bootstrap_config');
 
-				$aModuleList = $aCore_Module = array();
-				foreach ($aModules as $key => $oModule)
+		$aModules = $this->_getAllowedModules();
+
+		$aModuleList = $aCore_Module = array();
+		foreach ($aModules as $key => $oModule)
+		{
+			$aModuleList[$oModule->path] = $oModule;
+			// До onLoadSkinConfig, чтобы отработать навешенные в конструкторе Skin_Module_... хуки
+			$aCore_Module[$oModule->path] = $this->getSkinModule($oModule->path);
+			// Не для каждого модуля определен Skin_ класс
+			is_null($aCore_Module[$oModule->path]) && $aCore_Module[$oModule->path] = Core_Module::factory($oModule->path);
+		}
+		unset($aModules);
+
+		Core_Event::notify(get_class($this) . '.onLoadSkinConfig', $this);
+
+		if (isset($this->_config['adminMenu']))
+		{
+			foreach ($this->_config['adminMenu'] as $key => $aAdminMenu)
+			{
+				$aAdminMenu += array('ico' => 'fa-file-o',
+					'modules' => array()
+				);
+
+				$subItems = array();
+				foreach($aAdminMenu['modules'] as $sModulePath)
 				{
-					$aModuleList[$oModule->path] = $oModule;
-					// До onLoadSkinConfig, чтобы отработать навешенные в конструкторе Skin_Module_... хуки
-					$aCore_Module[$oModule->path] = $this->getSkinModule($oModule->path);
-					// Не для каждого модуля определен Skin_ класс
-					is_null($aCore_Module[$oModule->path]) && $aCore_Module[$oModule->path] = Core_Module::factory($oModule->path);
-				}
-				unset($aModules);
-
-				Core_Event::notify(get_class($this) . '.onLoadSkinConfig', $this);
-
-				if (isset($this->_config['adminMenu']))
-				{
-					foreach ($this->_config['adminMenu'] as $key => $aAdminMenu)
+					if (isset($aModuleList[$sModulePath]))
 					{
-						$aAdminMenu += array('ico' => 'fa-file-o',
-							'modules' => array()
-						);
-
-						$subItems = array();
-						foreach($aAdminMenu['modules'] as $sModulePath)
-						{
-							if (isset($aModuleList[$sModulePath]))
-							{
-								$subItems[] = $aModuleList[$sModulePath];
-								unset($aModuleList[$sModulePath]);
-							}
-						}
-
-						if (count($subItems))
-						{
-							?><li>
-								<a class="menu-dropdown">
-									<i class="menu-icon <?php echo $aAdminMenu['ico']?>"></i>
-									<span class="menu-text"> <?php echo nl2br(htmlspecialchars(
-										Core_Array::get($aAdminMenu, 'caption', Core::_("Skin_Bootstrap.admin_menu_{$key}"))
-									))?> </span>
-									<i class="menu-expand"></i>
-								</a>
-
-								<ul class="submenu">
-								<?php
-								foreach ($subItems as $oModule)
-								{
-									//$oCore_Module = Core_Module::factory($oModule->path);
-									$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
-
-									if ($oCore_Module && is_array($oCore_Module->menu))
-									{
-										foreach ($oCore_Module->menu as $aMenu)
-										{
-											$aMenu += array(
-												'sorting' => 0,
-												'block' => 0,
-												'ico' => 'fa-file-o'
-											);
-											?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-												<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>">
-													<i class="menu-icon <?php echo $aMenu['ico']?>"></i>
-													<span class="menu-text"><?php echo $aMenu['name']?></span>
-												</a>
-											</li><?php
-										}
-									}
-								}
-								?></ul>
-							</li><?php
-						}
+						$subItems[] = $aModuleList[$sModulePath];
+						unset($aModuleList[$sModulePath]);
 					}
+				}
 
-					// Невошедшие в другие группы
-					foreach ($aModuleList as $oModule)
-					{
-						//$oCore_Module = Core_Module::factory($oModule->path);
-						$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
+				if (count($subItems))
+				{
+					?><li>
+						<a class="menu-dropdown">
+							<i class="menu-icon <?php echo $aAdminMenu['ico']?>"></i>
+							<span class="menu-text"> <?php echo nl2br(htmlspecialchars(
+								Core_Array::get($aAdminMenu, 'caption', Core::_("Skin_Bootstrap.admin_menu_{$key}"))
+							))?> </span>
+							<i class="menu-expand"></i>
+						</a>
 
-						if ($oCore_Module && is_array($oCore_Module->menu))
+						<ul class="submenu">
+						<?php
+						foreach ($subItems as $oModule)
 						{
-							foreach ($oCore_Module->menu as $aMenu)
+							//$oCore_Module = Core_Module::factory($oModule->path);
+							$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
+
+							if ($oCore_Module && is_array($oCore_Module->menu))
 							{
-								if (isset($aMenu['name']))
+								foreach ($oCore_Module->menu as $aMenu)
 								{
 									$aMenu += array(
 										'sorting' => 0,
 										'block' => 0,
 										'ico' => 'fa-file-o'
 									);
-									?><li>
-										<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>" class="menu-icon">
-											<i class="menu-icon fa <?php echo $aMenu['ico']?>"></i>
+									?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
+										<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>">
+											<i class="menu-icon <?php echo $aMenu['ico']?>"></i>
 											<span class="menu-text"><?php echo $aMenu['name']?></span>
 										</a>
-									</li>
-									<?php
+									</li><?php
 								}
 							}
 						}
+						?></ul>
+					</li><?php
+				}
+			}
+
+			// Невошедшие в другие группы
+			foreach ($aModuleList as $oModule)
+			{
+				//$oCore_Module = Core_Module::factory($oModule->path);
+				$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
+
+				if ($oCore_Module && is_array($oCore_Module->menu))
+				{
+					foreach ($oCore_Module->menu as $aMenu)
+					{
+						if (isset($aMenu['name']))
+						{
+							$aMenu += array(
+								'sorting' => 0,
+								'block' => 0,
+								'ico' => 'fa-file-o'
+							);
+							?><li>
+								<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>" class="menu-icon">
+									<i class="menu-icon fa <?php echo $aMenu['ico']?>"></i>
+									<span class="menu-text"><?php echo $aMenu['name']?></span>
+								</a>
+							</li>
+							<?php
+						}
 					}
 				}
+			}
+		}
 
-			?></ul>
-		</div>
-		<!-- /Page Sidebar -->
-		<?php
 	}
 
 	public function loadingContainer()
@@ -1032,21 +1121,24 @@ class Skin_Bootstrap extends Core_Skin
 				$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($moduleId, $type, 0);
 				!is_null($oUser_Setting) && $oUser_Setting->active(1)->save();
 
-				$modulePath = $moduleId == 0
-					? 'core'
-					: Core_Entity::factory('Module', $moduleId)->path;
-
-				Core_Session::close();
-
-				$Core_Module = $this->getSkinModule($modulePath);
-
-				if (!is_null($Core_Module))
+				if ($moduleId == 0 || Core_Entity::factory('Module', $moduleId)->active)
 				{
-					$Core_Module->adminPage($type, $bAjax && is_null(Core_Array::getGet('widgetAjax')));
-				}
-				else
-				{
-					throw new Core_Exception('SkinModuleName does not found.');
+					$modulePath = $moduleId == 0
+						? 'core'
+						: Core_Entity::factory('Module', $moduleId)->path;
+
+					Core_Session::close();
+
+					$Core_Module = $this->getSkinModule($modulePath);
+
+					if (!is_null($Core_Module))
+					{
+						$Core_Module->adminPage($type, $bAjax && is_null(Core_Array::getGet('widgetAjax')));
+					}
+					else
+					{
+						throw new Core_Exception('SkinModuleName does not found.');
+					}
 				}
 			}
 			else

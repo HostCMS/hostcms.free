@@ -153,21 +153,22 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
-		parent::_applyObjectProperty();
-
 		$modelName = $this->_object->getModelName();
+		
+		// Backup revision
+		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		{
+			$modelName == 'lib'
+				&& $this->_object->backupRevision();
+		}
+		
+		parent::_applyObjectProperty();
 
 		switch ($modelName)
 		{
 			case 'lib':
 				$this->_object->saveLibFile(Core_Array::getRequest('lib_php_code'));
 				$this->_object->saveLibConfigFile(Core_Array::getRequest('lib_php_code_config'));
-
-				// Backup revision
-				if (Core::moduleIsActive('revision'))
-				{
-					$this->_object->backupRevision();
-				}
 			break;
 		}
 

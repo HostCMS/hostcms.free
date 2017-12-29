@@ -700,6 +700,36 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
+	 * Recount sets
+	 * @return self
+	 */
+	public function recountSets()
+	{
+		$limit = 100;
+		$offset = 0;
+
+		do {
+			$oShop_Items = $this->Shop_Items;
+			$oShop_Items->queryBuilder()
+				->where('shop_items.type', '=', 3)
+				->limit($limit)
+				->offset($offset);
+
+			$aShop_Items = $oShop_Items->findAll(FALSE);
+
+			foreach ($aShop_Items as $oShop_Item)
+			{
+				$oShop_Item->recountSet();
+			}
+
+			$offset += $limit;
+		}
+		while(count($aShop_Items));
+
+		return $this;
+	}
+
+	/**
 	 * Delete empty groups in UPLOAD path for shop
 	 */
 	public function deleteEmptyDirs()

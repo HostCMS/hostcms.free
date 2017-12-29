@@ -2,7 +2,6 @@
 
 return array (
 	'adminMenu' => array(
-
 		'content' => array(
 			'ico' => 'fa fa-newspaper-o',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_content'),
@@ -18,6 +17,11 @@ return array (
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
 			'modules' => array('helpdesk', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'message'),
 		),
+		'crm' => array(
+			'ico' => 'fa fa-users',
+			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
+			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'company'),
+		),		
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_tools'),
@@ -27,11 +31,6 @@ return array (
 			'ico' => 'fa fa-rocket',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_seo'),
 			'modules' => array('counter', 'advertisement', 'seo', 'oneps', 'roistat'),
-		),
-		'users' => array(
-			'ico' => 'fa fa-users',
-			'caption' => Core::_('Skin_Bootstrap.admin_menu_users'),
-			'modules' => array('user', 'siteuser'),
 		),
 		'clouds' => array(
 			'ico' => 'fa fa-cloud',
@@ -46,7 +45,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'benchmark', 'admin_form', 'module', 'constant', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'notification', 'benchmark', 'admin_form', 'module', 'constant', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

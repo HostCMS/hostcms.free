@@ -5,7 +5,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shortcode Controller
  *
- * @package HostCMS 6\Shortcode
+ * @package HostCMS
+ * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
@@ -175,7 +176,9 @@ class Shortcode_List
 	{
 		if ($matches[1] == '[[')
 		{
-			return '[' . $matches[2] . $matches[3] . ']';
+			return count($matches) == 6
+				? '[' . $matches[2] . $matches[3] . ']' . $matches[5] . '[/' . $matches[2] . ']'
+				: '[' . $matches[2] . $matches[3] . ']';
 		}
 
 		$methodName = $matches[2];

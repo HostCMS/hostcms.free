@@ -220,7 +220,7 @@ class Core_Auth
 		Core_Event::notify('Core_Auth.onBeforeSystemInit');
 
 		// Если не используется HTTPS-доступ
-		if (defined('USE_ONLY_HTTPS_AUTHORIZATION') && !Core::httpsUses())
+		if (defined('USE_ONLY_HTTPS_AUTHORIZATION') && USE_ONLY_HTTPS_AUTHORIZATION && !Core::httpsUses())
 		{
 			$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
 			$url = str_replace(array("\r", "\n", "\0"), '', $url);
@@ -350,8 +350,9 @@ class Core_Auth
 
 						$oSites->queryBuilder()
 							->select('sites.*')
-							->join('user_modules', 'user_modules.site_id', '=', 'sites.id')
-							->where('user_modules.user_group_id', '=', $oUser->user_group_id)
+							->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
+							->join('company_department_post_users', 'company_department_modules.company_department_id', '=', 'company_department_post_users.company_department_id')
+							->where('company_department_post_users.user_id', '=', $oUser->id)
 							->groupBy('sites.id')
 							->limit(1);
 

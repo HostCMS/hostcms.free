@@ -65,6 +65,7 @@ return array(
 	'order_card_fax' => "Факс",
 	'order_card_email' => "E-Mail",
 	'order_card_site' => "Сайт",
+	'order_card_paymentsystem' => "Способ оплаты",
 	'payer' => "Компания",
 	'order_card_contact_person' => "Контактное лицо",
 	'order_card_site_user' => "Пользователь",
@@ -129,4 +130,7 @@ return array(
 	'most_ordered' => "Популярные товары за %s дней (в единицах)",
 	'popular_brands' => "Популярные бренды за %s дней (в единицах)",
 	'popover_title' => "Заказ № %s",
+	'notification_new_order' => 'Новый заказ №%s',
+	'notification_paid_order' => 'Оплачен заказ №%s',
+	'notification_new_order_description' => '%1$s на сумму %2$s',
 );

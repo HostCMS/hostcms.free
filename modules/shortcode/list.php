@@ -29,7 +29,7 @@ class Shortcode_List
 		
 		ob_start();
 		?>
-		<script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 		<script type="text/javascript">
 			ymaps.ready(init);
 		
@@ -260,11 +260,15 @@ class Shortcode_List
 		);
 		
 		ob_start();
+		
+		if (isset($args['url']))
+		{
 		?>
-		<iframe src="http://docs.google.com/viewer?url=<?php echo rawurlencode($args['url'])?>&embedded=true" style="width:<?php echo htmlspecialchars($args['width'])?>; height:<?php echo htmlspecialchars($args['height'])?>;" 
+		<iframe src="https://docs.google.com/viewer?url=<?php echo rawurlencode($args['url'])?>&embedded=true" style="width:<?php echo htmlspecialchars($args['width'])?>; height:<?php echo htmlspecialchars($args['height'])?>;" 
 		frameborder="0">Ваш браузер не поддерживает фреймы</iframe>
 		<?php
-			
+		}
+		
 		return ob_get_clean();
 	}
 
@@ -276,9 +280,12 @@ class Shortcode_List
 		);
 		
 		ob_start();
+		if (isset($args['src']))
+		{
 		?>
 		<iframe width="<?php echo htmlspecialchars($args['width'])?>" height="<?php echo htmlspecialchars($args['height'])?>" src="<?php echo htmlspecialchars($args['src'])?>" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
 		<?php 
+		}
 		
 		return ob_get_clean();
 	}

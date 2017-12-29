@@ -44,5 +44,5 @@ return array(
 	'item_guid' => "GUID identifier",
 	'group_active' => "Group activity",
 
-	'siteuser_id' => "Идентификатор пользователя сайта",
+	'siteuser_id' => "Siteuser ID",
 );

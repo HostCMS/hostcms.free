@@ -112,25 +112,28 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
-/*ob_start();
-
-$oAdmin_Form_Entity_Title = Admin_Form_Entity::factory('Title');
-$oAdmin_Form_Entity_Title->name = Core::_('Shop_Item.create_modification_title');
-$oAdmin_Form_Entity_Title->execute();*/
-
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 		->controller($oAdmin_Form_Controller)
 		->action('/admin/shop/item/modification/index.php')
 		->enctype('multipart/form-data');
 
-//$oAdmin_Form_Entity_Form->add($oAdmin_Form_Entity_Breadcrumbs);
 $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
 
-$aProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->getPropertiesForGroup($oShopItemParent->shop_group_id);
+$aProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)
+	->getPropertiesForGroup($oShopItemParent->shop_group_id);
 
+Core_Event::notify('Shop_Item_Modification_Create.onAfterSelectProperties', $oAdmin_Form_Entity_Form, array($aProperties, $oShopItemParent->shop_group_id));
+
+$eventResult = Core_Event::getLastReturn();
+
+if (is_array($eventResult))
+{
+	$aProperties = $eventResult;
+}
+	
 $aNamePattern = array();
 
-foreach($aProperties as $oProperty)
+foreach ($aProperties as $oProperty)
 {
 	// Если тип свойства - "Список" и модуль списков активен
 	if($oProperty->type == 3 && Core::moduleIsActive('list'))
@@ -139,7 +142,7 @@ foreach($aProperties as $oProperty)
 
 		$aListItems = $oProperty->List->List_Items->getAllByActive(1);
 		$aValues = array();
-		foreach($aListItems as $oListItem)
+		foreach ($aListItems as $oListItem)
 		{
 			$aValues[$oListItem->id] = array('value' => $oListItem->value, 'attr' => array('selected' => 'selected'));
 		}
@@ -162,7 +165,7 @@ foreach($aProperties as $oProperty)
 
 $aCurrencies = array(' … ');
 $aShop_Currencies = Core_Entity::factory('Shop_Currency')->findAll();
-foreach($aShop_Currencies as $oShop_Currency)
+foreach ($aShop_Currencies as $oShop_Currency)
 {
 	$aCurrencies[$oShop_Currency->id] = $oShop_Currency->name;
 }
@@ -170,7 +173,7 @@ foreach($aShop_Currencies as $oShop_Currency)
 $aMeasures = array(' … ');
 $aShop_Measures = Core_Entity::factory('Shop_Measure')->findAll();
 
-foreach($aShop_Measures as $oShop_Measure)
+foreach ($aShop_Measures as $oShop_Measure)
 {
 	$aMeasures[$oShop_Measure->id] = $oShop_Measure->name;
 }
@@ -256,9 +259,23 @@ $oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		->caption(Core::_('Shop_Item.create_modification_copy_tags'))
 		->value(0)
 		->divAttr(array('class' => 'form-group col-xs-12'))
+))->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+	Admin_Form_Entity::factory('Checkbox')
+		->name('copy_warehouse_count')
+		->caption(Core::_('Shop_Item.create_modification_copy_warehouse_count'))
+		->value(0)
+		->divAttr(array('class' => 'form-group col-xs-12'))
 ))->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_item_id')->value($oShopItemParent->id))
 );
+
+$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShop_item_id($oShopItemParent->id);
+if (!is_null($oShop_Warehouse_Item))
+{
+	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
+			->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('count')->value($oShop_Warehouse_Item->count))
+	);
+}
 
 /*$oAdmin_Form_Entity_Form->add(
 	Admin_Form_Entity::factory('Input')

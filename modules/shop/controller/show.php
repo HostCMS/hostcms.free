@@ -784,6 +784,11 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
+		if ($this->limit == 0 && $this->page)
+		{
+			return $this->error404();
+		}
+		
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
 		{
@@ -1615,17 +1620,27 @@ class Shop_Controller_Show extends Core_Controller
 				{
 					$aProperty_Values = $oShop_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
 
-					if ($bIsArrayGroupsProperties)
+					foreach ($aProperty_Values as $oProperty_Value)
 					{
-						foreach ($aProperty_Values as $oProperty_Value)
+						$dAdd = $bIsArrayGroupsProperties
+							? isset($this->groupsProperties[$oProperty_Value->property_id])
+							: TRUE;
+						
+						if ($dAdd)
 						{
-							isset($this->groupsProperties[$oProperty_Value->property_id])
-								&& $oShop_Group->addEntity($oProperty_Value);
+							$type = $oProperty_Value->Property->type;
+
+							if ($type == 8)
+							{
+								$oProperty_Value->dateFormat($oInformationsystem->format_date);
+							}
+							elseif ($type == 9)
+							{
+								$oProperty_Value->dateTimeFormat($oInformationsystem->format_datetime);
+							}
+
+							$oShop_Group->addEntity($oProperty_Value);
 						}
-					}
-					else
-					{
-						$oShop_Group->addEntities($aProperty_Values);
 					}
 				}
 				else

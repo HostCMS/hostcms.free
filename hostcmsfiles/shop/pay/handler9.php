@@ -45,8 +45,8 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	// Использовать расчёт суммы к получению магазином.
 	protected $_calc_out_summ = FALSE;
 
-    /* Отправлять в Робокассу данные для чеков (54-ФЗ) */
-    protected $sendCheck = 1;
+	/* Отправлять в Робокассу данные для чеков (54-ФЗ). ВКЛЮЧАТЬ ТОЛЬКО ЕСЛИ НАСТРОИЛИ В РОБОКАССЕ! */
+	protected $sendCheck = 0;
 
 	/*
 	Система налогообложения.
@@ -60,7 +60,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	*/
 	protected $robokassa_sno = 'osn';
 
-    /*
+	/*
 	Налог в ККТ по-умолчанию.
 	Перечисление со значениями:
 		«none» – без НДС;
@@ -70,14 +70,14 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		«vat110» – НДС чека по расчетной ставке 10/110;
 		«vat118» – НДС чека по расчетной ставке 18/118.
 	*/
-    protected $default_vat = 'vat118';
+	protected $default_vat = 'vat118';
 
-    /* Массив отношений ставки налога в заказе и названия налога (none, vat0, vat110 или vat118)*/
-    protected $robokassa_vat = array(
-        0 => 'none',
-        10 => 'vat110',
-        18 => 'vat118'
-    );
+	/* Массив отношений ставки налога в заказе и названия налога (none, vat0, vat110 или vat118)*/
+	protected $robokassa_vat = array(
+		0 => 'none',
+		10 => 'vat110',
+		18 => 'vat118'
+	);
 
 	/**
 	 * Метод, вызываемый в коде настроек ТДС через Shop_Payment_System_Handler::checkBeforeContent($oShop);
@@ -228,7 +228,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 			]
 		}*/
 
-        if ($this->sendCheck)
+		if ($this->sendCheck)
 		{
 			$receipt = array(
 				'sno' => $this->robokassa_sno
@@ -305,7 +305,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 			<input type="hidden" name="SignatureValue" value="<?php echo $SignatureValue?>">
 			<input type="hidden" name="IncCurrLabel" value="<?php echo $this->_in_curr?>">
 			<input type="hidden" name="Culture" value="<?php echo $this->_culture?>">
-            <?php if ($this->sendCheck){ ?> <input type="hidden" name="Receipt" value="<?php echo htmlspecialchars($sReceiptJson)?>"><?php } ?>
+			<?php if ($this->sendCheck){ ?> <input type="hidden" name="Receipt" value="<?php echo htmlspecialchars($sReceiptJson)?>"><?php } ?>
 			<input type="submit" value="Оплатить">
 		</form>
 		<?php

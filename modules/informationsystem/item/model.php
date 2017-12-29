@@ -215,11 +215,19 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
-		if ($oProperty_Value->Property->type == 2)
+		switch ($oProperty_Value->Property->type)
 		{
-			$oProperty_Value
-				->setHref($this->getItemHref())
-				->setDir($this->getItemPath());
+			case 2:
+				$oProperty_Value
+					->setHref($this->getItemHref())
+					->setDir($this->getItemPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Informationsystem->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Informationsystem->format_datetime);
+			break;
 		}
 	}
 
@@ -253,14 +261,20 @@ class Informationsystem_Item_Model extends Core_Entity
 			$oPropertyValue->delete();
 		}
 
-		// Удаляем комментарии
-		$this->Comments->deleteAll(FALSE);
+		if (Core::moduleIsActive('comment'))
+		{
+			// Удаляем комментарии
+			$this->Comments->deleteAll(FALSE);
+		}
 
 		// Удаляем ярлыки
 		$this->Informationsystem_Items->deleteAll(FALSE);
 
-		// Удаляем теги
-		$this->Tag_Informationsystem_Items->deleteAll(FALSE);
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем теги
+			$this->Tag_Informationsystem_Items->deleteAll(FALSE);
+		}
 
 		// Удаляем директорию информационного элемента
 		$this->deleteDir();
@@ -337,13 +351,13 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->Informationsystem_Group->decCountItems();
+		$this->informationsystem_group_id && $this->Informationsystem_Group->decCountItems();
 
 		$this->informationsystem_group_id = $informationsystem_group_id;
 
 		$this->save()->clearCache();
 
-		$oInformationsystem_Group->incCountItems();
+		$informationsystem_group_id && $oInformationsystem_Group->incCountItems();
 
 		return $this;
 	}
@@ -957,10 +971,13 @@ class Informationsystem_Item_Model extends Core_Entity
 		$oSearch_Page->title = $this->name;
 
 		// комментарии к информационному элементу
-		$aComments = $this->Comments->findAll();
-		foreach ($aComments as $oComment)
+		if (Core::moduleIsActive('comment'))
 		{
-			$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
+			$aComments = $this->Comments->findAll();
+			foreach ($aComments as $oComment)
+			{
+				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
+			}
 		}
 
 		if (Core::moduleIsActive('tag'))
@@ -1284,7 +1301,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->addEntities($this->Tags->findAll());
 		}
 
-		if ($this->_showXmlComments)
+		if ($this->_showXmlComments && Core::moduleIsActive('comment'))
 		{
 			$this->_aComments = array();
 
@@ -1507,12 +1524,15 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$count = $this->Comments->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-azure white')
-			->value($count < 100 ? $count : '∞')
-			->title($count)
-			->execute();
+		if (Core::moduleIsActive('comment'))
+		{
+			$count = $this->Comments->getCount();
+			$count && Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-ico badge-azure white')
+				->value($count < 100 ? $count : '∞')
+				->title($count)
+				->execute();
+		}
 	}
 
 	/**

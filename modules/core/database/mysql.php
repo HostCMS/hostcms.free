@@ -642,7 +642,9 @@ class Core_DataBase_Mysql extends Core_DataBase
 			fclose($f_log);
 		}*/
 
-		$this->_result = mysql_query($sql, $this->_connection);
+		$this->_result = $this->_unbuffered
+			? mysql_unbuffered_query($sql, $this->_connection)
+			: mysql_query($sql, $this->_connection);
 
 		if (!$this->_result)
 		{

@@ -562,8 +562,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 								->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
 								->a
 									->class('btn btn-labeled btn-sky')
-									->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/user/index.php', 'edit', NULL, 0, $oUser->id, 'user_group_id=' . $oUser->user_group_id))
-									->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/user/index.php', 'edit', NULL, 0, $oUser->id, 'user_group_id=' . $oUser->user_group_id))
+									->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
+									->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
 									->value($oUser->login)
 									->target('_blank');
 							$oUserLink
@@ -584,6 +584,14 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		return $this;
 	}
 
+	protected $_return = NULL;
+	
+	public function setReturn($return)
+	{
+		$this->_return = $return;
+		return $this;
+	}
+	
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation for action
@@ -618,10 +626,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					->title($this->title)
 					->pageTitle($this->title);
 
-				$return = $this->_showEditForm();
+				$this->_return = $this->_showEditForm();
 
 			break;
 			case 'save':
+			case 'saveModal':
 				$primaryKeyName = $this->_object->getPrimaryKeyName();
 
 				// Значение первичного ключа до сохранения
@@ -645,17 +654,60 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$this->addMessage(ob_get_clean());
-				$return = TRUE;
+				$this->_return = TRUE;
 			break;
+			case 'modal':
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+				//$newWindowId = 'Modal_' . time();
+
+				ob_start();
+
+				if (!$this->_prepeared)
+				{
+					$this->_prepareForm();
+
+					// Событие onAfterRedeclaredPrepareForm вызывается в двух местах
+					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+				}
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
+
+				$oAdmin_Form_Action_Controller_Type_Edit_Show
+					->Admin_Form_Controller($this->_Admin_Form_Controller)
+					->formId($this->_formId)
+					->tabs($this->_tabs)
+					->buttons($this->_addButtons());
+
+				echo $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
+
+				$this->addContent(ob_get_clean());
+
+				$this->_return = TRUE;
+			break;
+			case 'applyModal':
+				$this->_applyObjectProperty();
+
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
+
+				$this->_return = TRUE;
+			break;
+			case 'markDeleted':
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
+
+				$this->_return = TRUE;
+			break;			
 			default:
 				$this->_applyObjectProperty();
-				$return = FALSE; // Показываем форму
+				$this->_return = FALSE; // Показываем форму
 			break;
 		}
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterExecute', $this, array($operation, $this->_Admin_Form_Controller));
 
-		return $return;
+		return $this->_return;
 	}
 
 	/**
@@ -747,11 +799,24 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			->Admin_Form_Controller($this->_Admin_Form_Controller)
 			->formId($this->_formId)
 			->tabs($this->_tabs)
-			->buttons($this->_addButtons())
-			;
+			->buttons($this->_addButtons());
+
+		$content = $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
+
+		ob_start();
+
+		$oAdmin_View = Admin_View::create();
+		$oAdmin_View
+			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)
+			->pageTitle($oAdmin_Form_Action_Controller_Type_Edit_Show->title)
+			->module($this->_Admin_Form_Controller->getModule())
+			->content($content)
+			->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)
+			->show();
 
 		$this->addContent(
-			$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
+			//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
+			ob_get_clean()
 		);
 
 		return TRUE;

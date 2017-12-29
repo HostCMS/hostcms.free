@@ -50,8 +50,12 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Items = $oShop->Shop_Items;
 		$oShop_Items->queryBuilder()
-			->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->open()
+				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+				->setOr()
+				->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+			->close()
+			->limit(15);
 
 		$aShop_Items = $oShop_Items->findAll(FALSE);
 		foreach ($aShop_Items as $oShop_Item)
@@ -158,7 +162,7 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCountriesFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
-		->add(
+		/*->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Company.company_shop_title'))
 				->icon('fa fa-building-o')
@@ -169,7 +173,7 @@ $oAdmin_Form_Entity_Menus->add(
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCompaniesFormPath, NULL, NULL, '')
 				)
-		)
+		)*/
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop.show_finance'))

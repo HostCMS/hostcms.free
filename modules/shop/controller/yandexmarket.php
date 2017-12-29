@@ -590,7 +590,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 						do {
 							$oModifications = $oShop_Item->Modifications;
 							$oModifications->queryBuilder()
+								->where('shop_items.active', '=', 1)
 								->where('shop_items.yandex_market', '=', 1)
+								->where('shop_items.siteuser_id', 'IN', $this->_aSiteuserGroups)
 								->clearOrderBy()
 								->orderBy('shop_items.id', 'ASC')
 								->offset($iModificationOffset)

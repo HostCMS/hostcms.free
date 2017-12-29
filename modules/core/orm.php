@@ -230,6 +230,12 @@ class Core_ORM
 	static public $columnCache = NULL;
 
 	/**
+	 * ORM relation cache
+	 * @var Core_Cache
+	 */
+	static public $relationCache = NULL;
+
+	/**
 	 * Objects cache for _hasOne and _belongsTo
 	 * @var array
 	 */
@@ -784,6 +790,27 @@ class Core_ORM
 			return $this;
 		}
 
+		// Relation cache
+		$bCache = Core::moduleIsActive('cache');
+
+		if ($bCache)
+		{
+			$cacheName = 'Core_ORM_RelationCache';
+			$inCache = $bCache
+				? self::$relationCache->get($this->_modelName, $cacheName)
+				: NULL;
+
+			if (is_array($inCache))
+			{
+				$this->_relations = self::$_relationModelCache[$this->_modelName] = $inCache;
+
+				// Clear belongs to
+				$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
+
+				return $this;
+			}
+		}
+
 		foreach ($this->_hasOne as $modelName => $condition)
 		{
 			$model = isset($condition['model']) ? strtolower($condition['model']) : $modelName;
@@ -844,6 +871,10 @@ class Core_ORM
 
 		// Clear belongs to
 		$this->_belongsTo = array();
+
+		$bCache
+			&& is_null($inCache)
+			&& self::$relationCache->set($this->_modelName, $this->_relations, $cacheName);
 
 		Core_Event::notify($this->_modelName . '.onAfterRelations', $this);
 
@@ -913,11 +944,13 @@ class Core_ORM
 			{
 				self::$config = Core::$config->get('core_orm') + array(
 					'cache' => 'memory',
-					'columnCache' => 'memory'
+					'columnCache' => 'memory',
+					'relationCache' => 'memory'
 				);
 
 				self::$cache = Core_Cache::instance(self::$config['cache']);
 				self::$columnCache = Core_Cache::instance(self::$config['columnCache']);
+				self::$relationCache = Core_Cache::instance(self::$config['relationCache']);
 			}
 
 			$this->_init = TRUE;
@@ -1005,7 +1038,7 @@ class Core_ORM
 	}
 
 	/**
-	 * Clear self::$_columnCache
+	 * Clear self::$_columnCache and Core_ORM_ColumnCache
 	 */
 	static public function clearColumnCache()
 	{
@@ -1013,8 +1046,20 @@ class Core_ORM
 
 		if (Core::moduleIsActive('cache'))
 		{
-			$cacheName = 'Core_ORM_ColumnCache';
-			self::$columnCache->deleteAll($cacheName);
+			self::$columnCache->deleteAll('Core_ORM_ColumnCache');
+		}
+	}
+	
+	/**
+	 * Clear self::$_relationModelCache and Core_ORM_RelationCache
+	 */
+	static public function clearRelationModelCache()
+	{
+		self::$_relationModelCache = array();
+
+		if (Core::moduleIsActive('cache'))
+		{
+			self::$relationCache->deleteAll('Core_ORM_RelationCache');
 		}
 	}
 
@@ -1028,7 +1073,14 @@ class Core_ORM
 		self::$_columnCacheDefaultValues[$this->_modelName] = array();
 		foreach (self::$_columnCache[$this->_modelName] as $key => $aColumn)
 		{
-			!is_null($aColumn['default']) && $aColumn['default'] != 'CURRENT_TIMESTAMP'
+			!is_null($aColumn['default'])
+				&& $aColumn['default'] != 'CURRENT_TIMESTAMP'
+				&& $aColumn['default'] != 'now()'
+				&& $aColumn['default'] != 'LOCALTIME'
+				&& $aColumn['default'] != 'localtime()'
+				&& $aColumn['default'] != 'LOCALTIMESTAMP'
+				&& $aColumn['default'] != 'localtimestamp()'
+				&& $aColumn['default'] != 'current_timestamp()' // MariaDB
 				&& self::$_columnCacheDefaultValues[$this->_modelName][$key] = $aColumn['default'];
 		}
 

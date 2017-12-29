@@ -296,6 +296,8 @@ class Document_Model extends Core_Entity
 
 			if (is_array($aBackup))
 			{
+				$this->document_status_id = Core_Array::get($aBackup, 'document_status_id');
+				$this->template_id = Core_Array::get($aBackup, 'template_id');
 				$this->name = Core_Array::get($aBackup, 'name');
 				$this->text = Core_Array::get($aBackup, 'text');
 				$this->save();

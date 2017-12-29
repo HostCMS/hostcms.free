@@ -583,7 +583,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							);
 							$sSourceFileBaseName = basename($sSourceFile, '');
 
-							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://");
+							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 							if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 							{
@@ -729,7 +729,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							);
 							$sSourceFileBaseName = basename($sSourceFile, '');
 
-							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0;
+							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 							if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 							{
@@ -1366,7 +1366,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 					);
 					$sSourceFileBaseName = basename($sSourceFile, '');
 
-					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0;
+					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 					if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension'])
 						|| $bHttp)
@@ -1513,7 +1513,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 					$sSourceFileBaseName = basename($sSourceFile, '');
 
-					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0;
+					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 					if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 					{
@@ -1669,7 +1669,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 							$sSourceFileBaseName = basename($sSourceFile, '');
 
-							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0;
+							$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 							if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 							{

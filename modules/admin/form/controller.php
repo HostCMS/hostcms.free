@@ -74,6 +74,31 @@ class Admin_Form_Controller
 	}
 
 	/**
+	 * 48 icons
+	 */
+	static protected $_icon = array('fa fa-address-book', 'fa fa-address-card', 'fa fa-barcode', 'fa fa-bars', 'fa fa-beer', 'fa fa-bell', 'fa fa-bicycle', 'fa fa-binoculars', 'fa fa-birthday-cake', 'fa fa-bolt', 'fa fa-book', 'fa fa-bookmark', 'fa fa-briefcase', 'fa fa-bullseye', 'fa fa-camera', 'fa fa-car', 'fa fa-certificate', 'fa fa-cloud', 'fa fa-code', 'fa fa-coffee', 'fa fa-cube', 'fa fa-dashboard', 'fa fa-database', 'fa fa-dot-circle-o', 'fa fa-flask', 'fa fa-futbol-o', 'fa fa-gift', 'fa fa-glass', 'fa fa-heart', 'fa fa-hourglass', 'fa fa-leaf', 'fa fa-location-arrow', 'fa fa-magic', 'fa fa-magnet', 'fa fa-paper-plane', 'fa fa-paw', 'fa fa-plane', 'fa fa-plug', 'fa fa-road', 'fa fa-rocket', 'fa fa-smile-o', 'fa fa-snowflake-o', 'fa fa-space-shuttle', 'fa fa-star', 'fa fa-thumbs-up', 'fa fa-tree', 'fa fa-trophy', 'fa fa-wrench');
+	
+	/**
+	 * Get Icon for object ID
+	 * @param int $id object ID
+	 * @return string
+	 */
+	static public function getIcon($id)
+	{
+		return self::$_icon[$id % 48];
+	}
+	
+	/** 
+	 * Get background color class for object ID
+	 * @param int $id object ID
+	 * @return string
+	 */
+	static public function getBackgroundColorClass($id)
+	{
+		return 'bg-' . ($id % 20);
+	}
+	
+	/**
 	 * Add additional param
 	 * @param string $key param name
 	 * @param string $value param value
@@ -1740,8 +1765,8 @@ class Admin_Form_Controller
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY HH:mm:ss'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
 					})(jQuery);
 					</script><?php
 				break;
@@ -1765,8 +1790,8 @@ class Admin_Form_Controller
 					</div>
 					<script type="text/javascript">
 					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: 'DD.MM.YYYY'});
+						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
 					})(jQuery);
 					</script>
 					<?php
@@ -1858,9 +1883,9 @@ class Admin_Form_Controller
 			{
 				// Перекрытие параметров для данного поля
 				$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-				foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+				foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 				{
-					$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+					$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 				}
 									
 				if ($oAdmin_Form_Field_Changed->allow_filter)

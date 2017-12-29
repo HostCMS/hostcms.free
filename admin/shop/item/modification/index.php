@@ -215,6 +215,25 @@ if ($oAdmin_Form_Action_generateModifications && $oAdmin_Form_Controller->getAct
 	$oAdmin_Form_Controller->addAction($oShop_Item_Modification_Create_Controller);
 }
 
+// Действие "Скидка"
+$oAdminFormActionApplyDiscount = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('apply_discount');
+
+if ($oAdminFormActionApplyDiscount && $oAdmin_Form_Controller->getAction() == 'apply_discount')
+{
+	$Shop_Item_Controller_Apply_Discount = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Apply_Discount', $oAdminFormActionApplyDiscount
+	);
+
+	$Shop_Item_Controller_Apply_Discount
+		->title(Core::_('Shop_Item.apply_discount_items_title'))
+		->Shop($oShop);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Item_Controller_Apply_Discount);
+}
+
 // Действие "Удаление значения свойства"
 $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions

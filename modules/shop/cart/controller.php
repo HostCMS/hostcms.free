@@ -10,6 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - shop_item_id($id) идентификатор товара
  * - quantity($value) количество товара
+ * - marking($value) артикул товара в заказе, если отличается от артикула товара
  * - postpone(TRUE|FALSE) товар отложен
  * - shop_warehouse_id($id) идентификатор склада
  * - siteuser_id($id) идентификатор пользователя сайта
@@ -371,33 +372,32 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 			// Проверяем право пользователя добавить этот товар в корзину
 			if (in_array($oShop_Item->getSiteuserGroupId(), $aSiteuserGroups))
 			{
-				// Если передано количество товара и товар обычный или электронный
-				if ($oShop_Item->type == 1 || $oShop_Item->type == 0)
+				// Нужно получить реальное количество товара, если товар электронный
+				if ($oShop_Item->type == 1)
 				{
-					// Нужно получить реальное количество товара, если товар электронный
-					if ($oShop_Item->type == 1)
+					// Получаем количество электронного товара на складе
+					$iShop_Item_Digitals = $oShop_Item->Shop_Item_Digitals->getCountDigitalItems();
+
+					if ($iShop_Item_Digitals != -1 && $iShop_Item_Digitals < $this->quantity)
 					{
-						// Получаем количество электронного товара на складе
-						$iShop_Item_Digitals = $oShop_Item->Shop_Item_Digitals->getCountDigitalItems();
-
-						if ($iShop_Item_Digitals != -1 && $iShop_Item_Digitals < $this->quantity)
-						{
-							$this->quantity = $iShop_Item_Digitals;
-						}
+						$this->quantity = $iShop_Item_Digitals;
 					}
-
-					// Товар обычный, поэтому intval()
-					$this->quantity = intval($this->quantity);
 				}
+					
 				// Если делимый товар
-				elseif ($oShop_Item->type == 2)
+				if ($oShop_Item->type == 2)
 				{
 					// Товар делимый, поэтому floatval()
 					$this->quantity = floatval($this->quantity);
 				}
+				else
+				{
+					// Товар обычный, поэтому intval()
+					$this->quantity = intval($this->quantity);
+				}
 
 				// Проверять остаток для обычных товаров
-				if ($this->checkStock && ($oShop_Item->type == 0 || $oShop_Item->type == 2))
+				if ($this->checkStock && $oShop_Item->type != 1)
 				{
 					$iRest = $oShop_Item->getRest() - $oShop_Item->getReserved();
 					$iRest < $this->quantity && $this->quantity = $iRest;

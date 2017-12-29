@@ -124,7 +124,9 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 
 			foreach ($aChecked as $datasetKey => $checkedItems)
 			{
-				if ($datasetKey == 1)
+				$oAdmin_Form_Dataset_Entity = $this->_Admin_Form_Controller->getDataset($datasetKey);
+
+				if ($oAdmin_Form_Dataset_Entity && get_class($oAdmin_Form_Dataset_Entity->getEntity()) == 'Shop_Item_Model')
 				{
 					foreach ($checkedItems as $key => $value)
 					{
@@ -144,7 +146,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 				->class('applyButton btn btn-blue')
 				->value($this->buttonName)
 				->onclick(
-					'$("#' . $newWindowId . '").remove(); '
+					'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
 				)
 				->controller($this->_Admin_Form_Controller);

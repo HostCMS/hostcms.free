@@ -99,7 +99,11 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
 				->options($Shop_Controller_Edit->fillCurrencies())
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-				->value($this->_object->shop_currency_id)
+				->value(
+					is_null($this->_object->id)
+						? $this->_object->Shop->shop_currency_id
+						: $this->_object->shop_currency_id
+				)
 		);
 
 		$oMainRow6->add(

@@ -12,9 +12,8 @@ require_once('../../bootstrap.php');
 Core_Auth::authorization($sModule = 'user');
 
 // Код формы
-$iAdmin_Form_Id = 7;
+$iAdmin_Form_Id = 8;
 $sAdminFormAction = '/admin/user/index.php';
-
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 // Контроллер формы
@@ -23,8 +22,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('User.ua_link_users_site'))
-	->pageTitle(Core::_('User.ua_link_users_site'));
+	->title(Core::_('User.ua_show_users_title'))
+	->pageTitle(Core::_('User.ua_show_users_title'));
 
 // Смена бэкграунда
 if (!is_null(Core_Array::getPost('wallpaper-id')))
@@ -67,29 +66,51 @@ if (!is_null(Core_Array::getPost('wallpaper-id')))
 	Core::showJson('OK');
 }
 
+if (!is_null(Core_Array::getPost('loadNavSidebarMenu')))
+{
+	ob_start();
+
+	Core_Skin::instance()->navSidebarMenu();
+
+	$oAdmin_Answer = Core_Skin::instance()->answer();
+	$oAdmin_Answer
+		->content(ob_get_clean())
+		->ajax(TRUE)
+		->execute();
+
+	exit();
+}
+
+if (!is_null(Core_Array::getPost('generate-password')))
+{
+	Core::showJson(
+		array(
+			'password' => Core_Password::get()
+		)
+	);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
+$sUserSiteChoosePath = '/admin/user/site/index.php';
+
+$sActionAdditionalParam = '&mode=action';
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('User_Group.ua_link_users_type'))
-		->icon('fa fa-users')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('User_Group.ua_link_add_users_type'))
-				//->img('/admin/images/users_group_add.gif')
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->name(Core::_('Admin_Form.add'))
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('User_Group.wallpaper'))
+		->name(Core::_('User.wallpaper'))
 		->icon('fa fa-image')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/wallpaper/index.php', NULL, NULL, '')
@@ -102,6 +123,25 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+// Элементы строки навигации
+$oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
+
+// Элементы строки навигации
+$oAdmin_Form_Entity_Breadcrumbs
+->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('User.ua_show_users_title'))
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())
+	)
+);
+
+// Добавляем все хлебные крошки контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
 // Действие редактирования
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -109,30 +149,15 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
-	$oUser_Group_Controller_Edit = Admin_Form_Action_Controller::factory(
-		'User_Group_Controller_Edit', $oAdmin_Form_Action
+	$oUser_Controller_Edit = Admin_Form_Action_Controller::factory(
+		'User_Controller_Edit', $oAdmin_Form_Action
 	);
 
-	// Элементы строки навигации
-	$oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-
-	// Элементы строки навигации
-	$oAdmin_Form_Entity_Breadcrumbs->add(
-		Admin_Form_Entity::factory('Breadcrumb')
-			->name(Core::_('User_Group.ua_link_users_types'))
-			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
-			)
-			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
-		)
-	);
-
-	$oUser_Group_Controller_Edit
+	$oUser_Controller_Edit
 		->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oUser_Group_Controller_Edit);
+	$oAdmin_Form_Controller->addAction($oUser_Controller_Edit);
 }
 
 // Действие "Применить"
@@ -142,12 +167,30 @@ $oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
-	$oControllerApply = Admin_Form_Action_Controller::factory(
+	$oUserControllerApply = Admin_Form_Action_Controller::factory(
 		'Admin_Form_Action_Controller_Type_Apply', $oAdminFormActionApply
 	);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oControllerApply);
+	$oAdmin_Form_Controller->addAction($oUserControllerApply);
+}
+
+// Действие "Просмотр"
+$oAdminFormActionView = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('view');
+
+if ($oAdminFormActionView && $oAdmin_Form_Controller->getAction() == 'view')
+{
+	$oUserControllerView = Admin_Form_Action_Controller::factory(
+		'User_Controller_View', $oAdminFormActionView
+	);
+
+	$oUserControllerView
+		->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oUserControllerView);
 }
 
 // Действие "Копировать"
@@ -165,15 +208,35 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
-// Источник данных
+// Действие "Удалить файл изображения"
+$oAdminFormActionDeleteImageFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteImageFile');
+
+if ($oAdminFormActionDeleteImageFile && $oAdmin_Form_Controller->getAction() == 'deleteImageFile')
+{
+	$oUserControllerDeleteImageFile = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Delete_File', $oAdminFormActionDeleteImageFile
+	);
+
+	$oUserControllerDeleteImageFile
+		->methodName('deleteImageFile')
+		->divId(array('preview_large_image', 'delete_large_image'));
+
+	// Добавляем контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oUserControllerDeleteImageFile);
+}
+
+
+// Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
-	Core_Entity::factory('User_Group')
+	Core_Entity::factory('User')
 );
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('site_id', '=', CURRENT_SITE)
+	array(
+		'select' => array('users.*', array(Core_QueryBuilder::expression('CONCAT_WS(" ", `surname`, `name`, `patronymic`)'), 'fullname'))
 	)
 );
 

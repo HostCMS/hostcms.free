@@ -5,7 +5,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shortcode.
  *
- * @package HostCMS 6\Shortcode
+ * @package HostCMS
+ * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
@@ -20,7 +21,7 @@ class Shortcode_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-09-07';
+	public $date = '2017-12-25';
 	/**
 	 * Module name
 	 * @var string

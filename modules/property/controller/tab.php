@@ -219,6 +219,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	 * @param int $parent_id ID of parent directory of properties
 	 * @param object $parentObject
 	 * @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
+	 * @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
+	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
 	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
 	 * @hostcms-event Property_Controller_Tab.onSetPropertyType
 	 */
@@ -261,6 +263,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 11: // Float
 
 					$width = 410;
+
+					Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
 
 					switch ($oProperty->type)
 					{
@@ -373,6 +377,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
 						break;
 					}
+
+					Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
 
 					if ($oAdmin_Form_Entity)
 					{
@@ -497,102 +503,107 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				break;
 
 				case 5: // ИС
-					// Директории
-					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("group_{$oProperty->id}[]")
-						->filter(TRUE);
-
-					// Элементы
-					$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
-						->name("property_{$oProperty->id}[]")
-						->value(NULL)
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->filter(TRUE);
-
-					$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("input_property_{$oProperty->id}[]")
-						->name("input_property_{$oProperty->id}[]");
-
-					// Значений св-в нет для объекта
-					if (count($aProperty_Values) == 0)
+					if (Core::moduleIsActive('informationsystem'))
 					{
-						$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
-					}
-					else
-					{
-						foreach ($aProperty_Values as $key => $oProperty_Value)
+						// Директории
+						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
+							->caption(htmlspecialchars($oProperty->name))
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("group_{$oProperty->id}[]")
+							->filter(TRUE);
+
+						// Элементы
+						$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
+							->name("property_{$oProperty->id}[]")
+							->value(NULL)
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->filter(TRUE);
+
+						$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("input_property_{$oProperty->id}[]")
+							->name("input_property_{$oProperty->id}[]");
+
+						// Значений св-в нет для объекта
+						if (count($aProperty_Values) == 0)
 						{
-							$value = $oProperty_Value->value;
+							$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
+						}
+						else
+						{
+							foreach ($aProperty_Values as $key => $oProperty_Value)
+							{
+								$value = $oProperty_Value->value;
 
-							$oNewAdmin_Form_Entity_InfGroups = clone $oAdmin_Form_Entity_InfGroups;
-							$oNewAdmin_Form_Entity_InfGroups
-								->id("group_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_InfGroups = clone $oAdmin_Form_Entity_InfGroups;
+								$oNewAdmin_Form_Entity_InfGroups
+									->id("group_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
-							$oNewAdmin_Form_Entity_InfItems
-								->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-								->value($value);
+								$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
+								$oNewAdmin_Form_Entity_InfItems
+									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+									->value($value);
 
-							$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
-							$oNewAdmin_Form_Entity_InfItemsInput
-								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
+								$oNewAdmin_Form_Entity_InfItemsInput
+									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+							}
 						}
 					}
-
 				break;
 
 				case 12: // Интернет-магазин
-					// Директории
-					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-						->caption(htmlspecialchars($oProperty->name))
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("group_{$oProperty->id}[]")
-						->filter(TRUE);
-
-					// Элементы
-					$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
-						->name("property_{$oProperty->id}[]")
-						->value(NULL)
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->filter(TRUE);
-
-					$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
-						->divAttr(array('class' => 'form-group col-xs-12'))
-						->id("input_property_{$oProperty->id}[]")
-						->name("input_property_{$oProperty->id}[]");
-
-					// Значений св-в нет для объекта
-					if (count($aProperty_Values) == 0)
+					if (Core::moduleIsActive('shop'))
 					{
-						$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
-					}
-					else
-					{
-						foreach ($aProperty_Values as $key => $oProperty_Value)
+						// Директории
+						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
+							->caption(htmlspecialchars($oProperty->name))
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("group_{$oProperty->id}[]")
+							->filter(TRUE);
+
+						// Элементы
+						$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
+							->name("property_{$oProperty->id}[]")
+							->value(NULL)
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->filter(TRUE);
+
+						$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("input_property_{$oProperty->id}[]")
+							->name("input_property_{$oProperty->id}[]");
+
+						// Значений св-в нет для объекта
+						if (count($aProperty_Values) == 0)
 						{
-							$value = $oProperty_Value->value;
+							$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
+						}
+						else
+						{
+							foreach ($aProperty_Values as $key => $oProperty_Value)
+							{
+								$value = $oProperty_Value->value;
 
-							$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
+								$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
 
-							$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
-							$oNewAdmin_Form_Entity_Shop_Items
-								->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-								->value($value);
+								$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
+								$oNewAdmin_Form_Entity_Shop_Items
+									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+									->value($value);
 
-							$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
-							$oNewAdmin_Form_Entity_Shop_Items_Input
-								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
+								$oNewAdmin_Form_Entity_Shop_Items_Input
+									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
-							$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
+								$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
+							}
 						}
 					}
 				break;
@@ -1214,14 +1225,22 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								->type("text/javascript")
 								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Description
 								"$(\"#{$windowId} input[name='description_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='description_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'description_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Large
 								"$(\"#{$windowId} input[name='large_max_width_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_width_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_max_height_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_max_height_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_preserve_aspect_ratio_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_preserve_aspect_ratio_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='large_place_watermark_checkbox_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'large_place_watermark_checkbox_property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} input[name='watermark_position_x_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_x_property_{$oProperty->id}_{$oFileValue->id}');" .
-								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oFileValue->id}');"
+								"$(\"#{$windowId} input[name='watermark_position_y_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'watermark_position_y_property_{$oProperty->id}_{$oFileValue->id}');" .
+								// Small
+								"$(\"#{$windowId} input[name='small_max_width_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_width_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_max_height_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_max_height_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_preserve_aspect_ratio_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_preserve_aspect_ratio_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='small_place_watermark_checkbox_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_place_watermark_checkbox_small_property_{$oProperty->id}_{$oFileValue->id}');" .
+								"$(\"#{$windowId} input[name='create_small_image_from_large_small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'create_small_image_from_large_small_property_{$oProperty->id}_{$oFileValue->id}');"
 								)
 								->execute();
 

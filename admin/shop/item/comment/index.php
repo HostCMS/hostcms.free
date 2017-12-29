@@ -342,7 +342,7 @@ $bItem = !is_null($oShop_Item->id);
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('comments.*'))
+	array('select' => array('comments.*', array(Core_QueryBuilder::expression('CONCAT_WS(\' \', `comments`.`subject`, `comments`.`text`)'), 'fulltext')))
 )->addCondition(
 	array('join' => array('comment_shop_items', 'comments.id', '=', 'comment_shop_items.comment_id'))
 );

@@ -245,54 +245,112 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 {
 	if (!$oUser->read_only)
 	{
-		$oShop_Items = Core_Entity::factory('Shop', $oShop->id)->Shop_Items;
-		$oShop_Items->queryBuilder()->where('modification_id', '=', 0);
-
-		if ($iParentGroup = Core_Array::getPost('shop_groups_parent_id'))
-		{
-			$oShop_Items
-				->queryBuilder()
-				->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
-		}
-
-		$iProducerID = Core_Array::getPost('shop_producers_list_id');
-		$iProducerID && $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $iProducerID);
-
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
+		$increase_price_rate = Shop_Controller::instance()->convertFloat($increase_price_rate);
+
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
+		$multiply_price_rate = Shop_Controller::instance()->convertFloat($multiply_price_rate);
+
 		$iDiscountID = Core_Array::getPost('shop_discount_id', 0);
 		$iBonusID = Core_Array::getPost('shop_bonus_id', 0);
+		$iProducerID = Core_Array::getPost('shop_producers_list_id');
+
+		$iParentGroup = Core_Array::getPost('shop_groups_parent_id');
 
 		$bSpecialPrices = !is_null(Core_Array::getPost('flag_include_spec_prices'));
 
-		// Step-by-step
-		$offset = 0;
-		$limit = 500;
+		// Если только увеличение цены в N раз и не указаны скидки или бонусы
+		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID)
+		{
+			// Items
+			$oCore_QueryBuilder_Update = Core_QueryBuilder::update('shop_items')
+				->set('shop_items.price', Core_QueryBuilder::expression('`shop_items`.`price` * ' . Core_DataBase::instance()->quote($multiply_price_rate)))
+				->where('shop_items.shop_id', '=', $oShop->id)
+				->where('shop_items.deleted', '=', 0);
 
-		do {
-			$oShop_Items->queryBuilder()
-				->offset($offset)
-				->limit($limit);
+			// Учитывать модификации не установлено
+			is_null(Core_Array::getPost('flag_include_modifications'))
+				&& $oCore_QueryBuilder_Update->where('shop_items.modification_id', '=', 0);
 
-			$aShopItems = $oShop_Items->findAll(FALSE);
+			$oUser->only_access_my_own
+				&& $oCore_QueryBuilder_Update->where('shop_items.user_id', '=', $oUser->id);
 
-			foreach($aShopItems as $oShop_Item)
+			$iProducerID
+				&& $oCore_QueryBuilder_Update->where('shop_items.shop_producer_id', '=', $iProducerID);
+
+			$iParentGroup
+				&& $oCore_QueryBuilder_Update->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
+
+			$oCore_QueryBuilder_Update->execute();
+
+			// Special Prices
+			if ($bSpecialPrices)
 			{
-				applySettings($oUser, $oShop_Item, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+				$oCore_QueryBuilder_Update = Core_QueryBuilder::update('shop_specialprices')
+					->set('shop_specialprices.price', Core_QueryBuilder::expression('`shop_specialprices`.`price` * ' . Core_DataBase::instance()->quote($multiply_price_rate)))
+					->join('shop_items', 'shop_specialprices.shop_item_id', '=', 'shop_items.id')
+					->where('shop_items.shop_id', '=', $oShop->id)
+					->where('shop_items.deleted', '=', 0);
 
-				if(!is_null(Core_Array::getPost('flag_include_modifications')))
+				// Учитывать модификации не установлено
+				is_null(Core_Array::getPost('flag_include_modifications'))
+					&& $oCore_QueryBuilder_Update->where('shop_items.modification_id', '=', 0);
+
+				$oUser->only_access_my_own
+					&& $oCore_QueryBuilder_Update->where('shop_items.user_id', '=', $oUser->id);
+
+				$iProducerID
+					&& $oCore_QueryBuilder_Update->where('shop_items.shop_producer_id', '=', $iProducerID);
+
+				$iParentGroup
+					&& $oCore_QueryBuilder_Update->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
+
+				$oCore_QueryBuilder_Update->execute();
+			}
+		}
+		else
+		{
+			$oShop_Items = Core_Entity::factory('Shop', $oShop->id)->Shop_Items;
+			$oShop_Items
+				->queryBuilder()
+				->where('modification_id', '=', 0);
+
+			$iParentGroup
+				&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
+
+			$iProducerID
+				&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $iProducerID);
+
+			Core_Event::notify('Shop_Item_Change.onBeforeSelectShopItems', NULL, array($oShop_Items));
+
+			// Step-by-step
+			$offset = 0;
+			$limit = 500;
+
+			do {
+				$oShop_Items->queryBuilder()
+					->offset($offset)
+					->limit($limit);
+
+				$aShopItems = $oShop_Items->findAll(FALSE);
+				foreach($aShopItems as $oShop_Item)
 				{
-					$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
-					foreach($aShopItemModifications as $oShopItemModification)
+					applySettings($oUser, $oShop_Item, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+
+					if (!is_null(Core_Array::getPost('flag_include_modifications')))
 					{
-						applySettings($oUser, $oShopItemModification, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+						$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
+						foreach($aShopItemModifications as $oShopItemModification)
+						{
+							applySettings($oUser, $oShopItemModification, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+						}
 					}
 				}
-			}
 
-			// Inc offset
-			$offset += $limit;
-		} while (count($aShopItems));
+				// Inc offset
+				$offset += $limit;
+			} while (count($aShopItems));
+		}
 
 		Core_Message::show(Core::_('Shop_Item.accepted_prices'));
 	}
@@ -319,10 +377,6 @@ Core_Skin::instance()
 
 function applySettings(User_Model $oUser, Shop_Item_Model $oShop_Item, $sTextAddition, $sTextMultiplication, $iDiscountID, $iBonusID, $bSpecialPrices)
 {
-	$oShop_Discount = Core_Entity::factory('Shop_Discount', $iDiscountID);
-
-	$oShop_Bonus = Core_Entity::factory('Shop_Bonus', $iBonusID);
-
 	// Проверка через user_id на право выполнения действия над объектом
 	if ($oUser->checkObjectAccess($oShop_Item))
 	{
@@ -383,6 +437,8 @@ function applySettings(User_Model $oUser, Shop_Item_Model $oShop_Item, $sTextAdd
 
 		if ($iDiscountID)
 		{
+			$oShop_Discount = Core_Entity::factory('Shop_Discount', $iDiscountID);
+
 			if (!is_null(Core_Array::getPost('flag_delete_discount')))
 			{
 				$oShop_Item->remove($oShop_Discount);
@@ -401,6 +457,8 @@ function applySettings(User_Model $oUser, Shop_Item_Model $oShop_Item, $sTextAdd
 
 		if ($iBonusID)
 		{
+			$oShop_Bonus = Core_Entity::factory('Shop_Bonus', $iBonusID);
+
 			if (!is_null(Core_Array::getPost('flag_delete_bonus')))
 			{
 				$oShop_Item->remove($oShop_Bonus);

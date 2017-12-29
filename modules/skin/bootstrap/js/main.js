@@ -138,6 +138,63 @@ function isEmpty(str) {
 
 			return settings;
 		},
+		modalLoad: function(settings) {
+			settings = jQuery.requestSettings(settings);
+
+			var path = settings.path,
+				modalId = 'Modal_' + Date.now(),
+				data = jQuery.getData(
+					jQuery.extend({}, settings, {windowId: modalId})
+				);
+
+			if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}
+
+			$.loadingScreen('show');
+
+			jQuery.ajax({
+				context: jQuery('#'+settings.windowId),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				abortOnRetry: 1,
+				success: [function(returnedData) {
+					$.loadingScreen('hide');
+
+					/*var context = $(this),
+						modalDiv = $('<div>').attr('id', modalId).html(returnedData.form_html);
+
+					context.append(modalDiv);*/
+
+					settings = jQuery.extend({
+						title: returnedData.title,
+						message: '<div id="' + modalId + '"><div id="id_message"></div>' + returnedData.form_html + '</div>',
+						//windowId: modalId,
+						width: '80%',
+					}, settings);
+
+					$.modalWindow(settings);
+
+					/*modalDiv.HostCMSWindow({
+						//autoOpen: true,
+						//destroyOnClose: false,
+						title: returnedData.title,
+						//AppendTo: context,
+						width: '80%',
+						// // height: 140,
+						//addContentPadding: true,
+						//modal: false,
+						//Maximize: false,
+						//inimize: false
+					});*/
+				}]
+			});
+
+			return false;
+		},
 		adminLoad: function(settings) {
 			settings = jQuery.requestSettings(settings);
 

@@ -321,11 +321,19 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	protected function _preparePropertyValue($oProperty_Value)
 	{
-		if ($oProperty_Value->Property->type == 2)
+		switch ($oProperty_Value->Property->type)
 		{
-			$oProperty_Value
-				->setHref($this->getItemHref())
-				->setDir($this->getItemPath());
+			case 2:
+				$oProperty_Value
+					->setHref($this->getItemHref())
+					->setDir($this->getItemPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
 		}
 	}
 
@@ -860,12 +868,12 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->Shop_Group->decCountItems();
+		$this->shop_group_id && $this->Shop_Group->decCountItems();
 
 		$this->shop_group_id = $iShopGroupId;
 		$this->save()->clearCache();
 
-		$oShop_Group->incCountItems();
+		$iShopGroupId && $oShop_Group->incCountItems();
 
 		return $this;
 	}
@@ -1090,10 +1098,13 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		// комментарии к товару
-		$aComments = $this->Comments->findAll(FALSE);
-		foreach ($aComments as $oComment)
+		if (Core::moduleIsActive('comment'))
 		{
-			$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
+			$aComments = $this->Comments->findAll(FALSE);
+			foreach ($aComments as $oComment)
+			{
+				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
+			}
 		}
 
 		if (Core::moduleIsActive('tag'))
@@ -1345,8 +1356,11 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Favorites->deleteAll(FALSE);
 
-		// Удаляем комментарии
-		$this->Comments->deleteAll(FALSE);
+		if (Core::moduleIsActive('comment'))
+		{
+			// Удаляем комментарии
+			$this->Comments->deleteAll(FALSE);
+		}
 
 		// Удаляем связи с бонусами
 		$this->Shop_Item_Bonuses->deleteAll(FALSE);
@@ -1375,8 +1389,11 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем специальные цены
 		$this->Shop_Specialprices->deleteAll(FALSE);
 
-		// Удаляем метки
-		$this->Tag_Shop_Items->deleteAll(FALSE);
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем метки
+			$this->Tag_Shop_Items->deleteAll(FALSE);
+		}
 
 		// Удаляем значения из складов
 		$this->Shop_Warehouse_Items->deleteAll(FALSE);
@@ -1856,11 +1873,12 @@ class Shop_Item_Model extends Core_Entity
 				$oSetEntity->addEntity(
 					$oTmp_Shop_Item
 						->id($oShop_Item->id)
+						->showXmlAssociatedItems(FALSE)
 						->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('count')
-							->value($oShop_Item_Set->count)
-					)
+							Core::factory('Core_Xml_Entity')
+								->name('count')
+								->value($oShop_Item_Set->count)
+						)
 				);
 			}
 		}
@@ -2077,7 +2095,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		if ($this->_showXmlComments)
+		if ($this->_showXmlComments && Core::moduleIsActive('comment'))
 		{
 			$this->_aComments = array();
 
@@ -2356,11 +2374,29 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function reviewsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$count = $this->Comments->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico white')
-			->value($count < 100 ? $count : '∞')
-			->title($count)
+		if (Core::moduleIsActive('comment'))
+		{
+			$count = $this->Comments->getCount();
+			$count && Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-ico white')
+				->value($count < 100 ? $count : '∞')
+				->title($count)
+				->execute();
+		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->type == 3 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-purple white')
+			->style('padding-left: 1px;')
+			->value('<i class="fa fa-archive fa-fw"></i>')
 			->execute();
 	}
 
@@ -2499,5 +2535,50 @@ class Shop_Item_Model extends Core_Entity
 		{
 			return '<i class="fa fa-file-text-o"></i>';
 		}
+	}
+
+	/**
+	 * Recount set
+	 * @return self
+	 */
+	public function recountSet()
+	{
+		if ($this->shop_currency_id)
+		{
+			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
+
+			$Shop_Item_Controller = new Shop_Item_Controller();
+
+			$amount = 0;
+
+			foreach ($aShop_Item_Sets as $oShop_Item_Set)
+			{
+				$oTmp_Shop_Item = Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id);
+
+				$oTmp_Shop_Item = $this->shortcut_id
+					? $oTmp_Shop_Item->Shop_Item
+					: $oTmp_Shop_Item;
+
+				if ($oTmp_Shop_Item->shop_currency_id)
+				{
+					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
+					
+					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
+				}
+				else
+				{
+					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name));
+				}
+			}
+
+			$this->price = $amount;
+			$this->save();
+		}
+		else
+		{
+			throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $this->name));
+		}
+
+		return $this;
 	}
 }

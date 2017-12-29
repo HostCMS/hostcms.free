@@ -26,6 +26,6 @@ return array(
 	'edit_success' => "Print Form information edited successfully!",
 	'edit_form_title' => "Edit print form",
 	'add_form_title' => "Add print form",
-	'print_form_handler' => "<acronym title=\"Обработчик печатной формы\">Обработчик</acronym>",
 	'attention' => 'Attention! The class name depends on the print form\s ID, e.g. the print form 17 should has name<br/><b>class Shop_Print_Form_Handler17 extends Shop_Print_Form_Handler</b>',
+	'print_form_handler' => "<acronym title=\"Print form handler\">Handler</acronym>",	
 );

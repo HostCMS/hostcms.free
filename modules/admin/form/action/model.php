@@ -23,7 +23,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'user_group_action_access' => array()
+		'company_department_action_access' => array()
 	);
 
 	/**
@@ -89,7 +89,10 @@ class Admin_Form_Action_Model extends Core_Entity
 
 		$this->Admin_Word->delete();
 
-		$this->User_Group_Action_Accesses->deleteAll(FALSE);
+		if (Core::moduleIsActive('company'))
+		{
+			$this->Company_Department_Action_Accesses->deleteAll(FALSE);
+		}
 
 		return parent::delete($primaryKey);
 	}
@@ -129,9 +132,11 @@ class Admin_Form_Action_Model extends Core_Entity
 			$this
 				->queryBuilder()
 				->select('admin_form_actions.*')
-				->join('user_group_action_accesses', 'admin_form_actions.id', '=', 'user_group_action_accesses.admin_form_action_id')
-				->where('user_group_id', '=', $oUser->user_group_id)
-				->where('site_id', '=', CURRENT_SITE);
+				->join('company_department_action_accesses', 'admin_form_actions.id', '=', 'company_department_action_accesses.admin_form_action_id')
+				->join('company_department_post_users', 'company_department_action_accesses.company_department_id', '=', 'company_department_post_users.company_department_id')
+				->where('company_department_post_users.user_id', '=', $oUser->id)
+				->where('company_department_action_accesses.site_id', '=', CURRENT_SITE)
+				->groupBy('admin_form_actions.id');
 		}
 
 		$aAdmin_Form_Actions = $this->findAll();

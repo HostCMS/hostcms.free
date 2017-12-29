@@ -232,7 +232,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			if ($this->Shop_Item->modification_id)
 			{
 				$oModification = Core_Entity::factory('Shop_Item')->find($this->Shop_Item->modification_id);
-				!is_null($oModification) && $oShop_Item->addEntity(
+				!is_null($oModification->id) && $oShop_Item->addEntity(
 					$oModification->showXmlProperties($this->_showXmlProperties)
 				);
 			}

@@ -62,6 +62,22 @@ class Lib_Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Save object.
+	 *
+	 * @return Core_Entity
+	 */
+	public function save()
+	{
+		if ($this->type == 6)
+		{
+			$this->type = 0;
+			$this->multivalue = 1;
+		}
+
+		return parent::save();
+	}
+
+	/**
 	 * Copy object
 	 * @return Core_Entity
 	 */
@@ -94,7 +110,7 @@ class Lib_Property_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Lib_Property_List_Values->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);

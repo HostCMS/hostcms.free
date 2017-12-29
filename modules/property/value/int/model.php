@@ -134,26 +134,27 @@ class Property_Value_Int_Model extends Core_Entity
 
 			if ($this->value != 0)
 			{
-				// Allow all kinds of properties except informationsystem
-				$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $this->Informationsystem_Item->informationsystem_id);
-
-				$aTmp = array();
-				$aItemProperties = $oInformationsystem_Item_Property_List->Properties->findAll();
-				foreach ($aItemProperties as $oItemProperty)
-				{
-					// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
-					($oItemProperty->type != 5 && $oItemProperty->type != 12
-						|| self::$aConfig['recursive_properties'] && $oItemProperty->informationsystem_id != $oProperty->informationsystem_id
-					) && $aTmp[] = $oItemProperty->id;
-				}
-
 				$oInformationsystem_Item = $this->Informationsystem_Item;
+
 				if ($oInformationsystem_Item->id)
 				{
+					// Allow all kinds of properties except informationsystem
+					$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $oInformationsystem_Item->informationsystem_id);
+
+					$aTmp = array();
+					$aItemProperties = $oInformationsystem_Item_Property_List->Properties->findAll();
+					foreach ($aItemProperties as $oItemProperty)
+					{
+						// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
+						($oItemProperty->type != 5 && $oItemProperty->type != 12
+							|| self::$aConfig['recursive_properties'] && $oItemProperty->informationsystem_id != $oProperty->informationsystem_id
+						) && $aTmp[] = $oItemProperty->id;
+					}
+
 					$oInformationsystem_Item->shortcut_id && $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 
 					$oNew_Informationsystem_Item = clone $oInformationsystem_Item;
-					
+
 					$oNew_Informationsystem_Item
 						->id($oInformationsystem_Item->id)
 						->clearEntities()
@@ -180,36 +181,39 @@ class Property_Value_Int_Model extends Core_Entity
 
 			if ($this->value != 0)
 			{
-				// Allow all kinds of properties except shop
-				$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->Shop_Item->shop_id);
-
-				$aTmp = array();
-
-				//$aItemProperties = $oShop_Item_Property_List->Properties->findAll();
-				$aItemProperties = $oShop_Item_Property_List->getPropertiesForGroup($this->Shop_Item->shop_group_id);
-				foreach ($aItemProperties as $oItemProperty)
-				{
-					// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
-					if ($oItemProperty->type != 12 && $oItemProperty->type != 5
-						|| self::$aConfig['recursive_properties'] && $oItemProperty->shop_id != $oProperty->shop_id
-					)
-					{
-						$oShop_Item_Property = $oItemProperty->Shop_Item_Property;
-
-						if ($oShop_Item_Property->show_in_item)
-						{
-							$aTmp[] = $oItemProperty->id;
-						}
-					}
-				}
-
 				$oShop_Item = $this->Shop_Item;
+
+				// Shop_Item exists
 				if ($oShop_Item->id)
 				{
+					// Allow all kinds of properties except shop
+					$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop_Item->shop_id);
+
+					$aTmp = array();
+
+					//$aItemProperties = $oShop_Item_Property_List->Properties->findAll();
+					$aItemProperties = $oShop_Item_Property_List->getPropertiesForGroup($oShop_Item->shop_group_id);
+					foreach ($aItemProperties as $oItemProperty)
+					{
+						// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
+						if ($oItemProperty->type != 12 && $oItemProperty->type != 5
+							|| self::$aConfig['recursive_properties'] && $oItemProperty->shop_id != $oProperty->shop_id
+						)
+						{
+							$oShop_Item_Property = $oItemProperty->Shop_Item_Property;
+
+							if ($oShop_Item_Property->show_in_item)
+							{
+								$aTmp[] = $oItemProperty->id;
+							}
+						}
+					}
+
+
 					$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
 
 					$oNew_Shop_Item = clone $oShop_Item;
-					
+
 					$oNew_Shop_Item
 						->id($oShop_Item->id)
 						->clearEntities()

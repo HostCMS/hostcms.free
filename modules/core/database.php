@@ -202,11 +202,11 @@ abstract class Core_DataBase
 	abstract public function getAffectedRows();
 
 	/**
-	 * Returns the number of columns in the result set 
+	 * Returns the number of columns in the result set
 	 * @return integer|null number of columns in the result set
 	 */
 	abstract public function getColumnCount();
-	
+
 	/**
 	 * Free last result memory
 	 * @return self
@@ -339,6 +339,22 @@ abstract class Core_DataBase
 	}
 
 	/**
+	 * Query without fetching and buffering the result rows
+	 */
+	protected $_unbuffered = FALSE;
+
+	/**
+	 * Query without fetching and buffering the result rows
+	 * @param bool $unbuffered
+	 * @return self
+	 */
+	public function unbuffered($unbuffered)
+	{
+		$this->_unbuffered = $unbuffered;
+		return $this;
+	}
+
+	/**
 	 * Destructor
 	 */
 	public function __destruct()
@@ -467,9 +483,9 @@ abstract class Core_DataBase
 			"-- \r\n\r\n" .
 			"DROP TABLE IF EXISTS " . $sColumnName . ";\r\n"
 		);
-		
+
 		$aCreate = $this->query("SHOW CREATE TABLE {$sColumnName}")->asAssoc()->current();
-		
+
 		$stdOut->write(
 			"{$aCreate['Create Table']};\r\n\r\n" .
 			"-- \r\n" .
@@ -479,6 +495,7 @@ abstract class Core_DataBase
 
 		$oCore_QueryBuilderSelect = Core_QueryBuilder::select()
 			->from($tableName)
+			->unbuffered(TRUE)
 			->execute()
 			->asAssoc();
 
@@ -527,10 +544,12 @@ abstract class Core_DataBase
 				$stdOut->write($content);
 				$content = '';
 			}
-			
+
 			$i++;
 		}
-		
+
+		$oCore_QueryBuilderSelect->unbuffered(FALSE)->free();
+
 		if ($i > 0)
 		{
 			$stdOut->write($content . ";\r\n");

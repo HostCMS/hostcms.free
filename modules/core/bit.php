@@ -17,7 +17,7 @@ class Core_Bit
 	 * Set bit value
 	 * @param int $int source integer
 	 * @param int $bitNumber number of the bit
-	 * @param int $value value 
+	 * @param int $value value
 	 * @return int
 	 */
 	static public function setBit($int, $bitNumber, $value = 1)

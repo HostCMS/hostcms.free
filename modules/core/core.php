@@ -641,8 +641,9 @@ class Core
 	 */
 	static public function getmicrotime()
 	{
-		list($usec, $sec) = explode(' ', microtime());
-		return ((float)$usec + (float)$sec);
+		/*list($usec, $sec) = explode(' ', microtime());
+		return ((float)$usec + (float)$sec);*/
+		return microtime(TRUE);
 	}
 
 	/**

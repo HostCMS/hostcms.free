@@ -3,7 +3,7 @@
 /**
  * Shop.
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC

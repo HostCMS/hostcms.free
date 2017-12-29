@@ -50,8 +50,7 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 				Core::_('Lib_Property.lib_property_type_2'),
 				Core::_('Lib_Property.lib_property_type_3'),
 				Core::_('Lib_Property.lib_property_type_4'),
-				Core::_('Lib_Property.lib_property_type_5'),
-				Core::_('Lib_Property.lib_property_type_6')
+				Core::_('Lib_Property.lib_property_type_5')
 			))
 			->name('type')
 			->value($this->_object->type)
@@ -84,6 +83,7 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			->move($this->getField('varible_name')->divAttr(array('class' => 'form-group col-md-6 col-xs-12')), $oMainRow3)
 			->move($this->getField('default_value')->divAttr(array('class' => 'form-group col-md-6 col-xs-12')), $oMainRow5)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-md-3 col-xs-12')), $oMainRow5)
+			->move($this->getField('multivalue')->divAttr(array('class' => 'margin-top-21 form-group col-md-3 col-xs-12')), $oMainRow5)
 			->move($this->getField('sql_request'), $oMainRow6)
 			->move($this->getField('sql_caption_field'), $oMainRow7)
 			->move($this->getField('sql_value_field'), $oMainRow7);

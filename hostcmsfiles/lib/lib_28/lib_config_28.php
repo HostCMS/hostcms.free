@@ -2,17 +2,24 @@
 
 if (Core::moduleIsActive('siteuser'))
 {
-	$login = Core_Array::end(explode('/', trim(Core::$url['path'], '/')));
+	$Core_Router_Route = new Core_Router_Route(rawurldecode($oCore_Page->structure->getPath()) . '({login}/)', array());
+	$matches = $Core_Router_Route->applyPattern(Core::$url['path']);
 
-	$oSiteuser = Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLogin($login);
-	if (is_null($oSiteuser) && $login == '')
+	$login = Core_Array::get($matches, 'login');
+	
+	$oSiteuser = strlen($login)
+		? Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLogin($login)
+		: NULL;
+	
+	if (!$oSiteuser)
 	{
-		// Current siteuser
-		$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+		// Error 404
+		$oCore_Page->error404();
+		return;
 	}
 
 	// Empty siteuser
-	is_null($oSiteuser) && $oSiteuser = Core_Entity::factory('Siteuser');
+	//is_null($oSiteuser) && $oSiteuser = Core_Entity::factory('Siteuser');
 
 	$Siteuser_Controller_Show = new Siteuser_Controller_Show(
 		$oSiteuser

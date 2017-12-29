@@ -57,18 +57,18 @@ if (!is_null(Core_Array::getPost('apply')))
 	$oSiteuser->login = $login;
 	strlen($password) > 0 && $oSiteuser->password = Core_Hash::instance()->hash($password);
 	$oSiteuser->email = $email;
-	$oSiteuser->name = Core_Str::stripTags(strval(Core_Array::getPost('name')));
-	$oSiteuser->surname = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
-	$oSiteuser->patronymic = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
-	$oSiteuser->company = Core_Str::stripTags(strval(Core_Array::getPost('company')));
-	$oSiteuser->phone = Core_Str::stripTags(strval(Core_Array::getPost('phone')));
-	$oSiteuser->fax = Core_Str::stripTags(strval(Core_Array::getPost('fax')));
-	$oSiteuser->website = Core_Str::stripTags(strval(Core_Array::getPost('website')));
-	$oSiteuser->icq = Core_Str::stripTags(strval(Core_Array::getPost('icq')));
-	$oSiteuser->country = Core_Str::stripTags(strval(Core_Array::getPost('country')));
-	$oSiteuser->postcode = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
-	$oSiteuser->city = Core_Str::stripTags(strval(Core_Array::getPost('city')));
-	$oSiteuser->address = Core_Str::stripTags(strval(Core_Array::getPost('address')));
+	// $oSiteuser->name = Core_Str::stripTags(strval(Core_Array::getPost('name')));
+	// $oSiteuser->surname = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
+	// $oSiteuser->patronymic = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
+	// $oSiteuser->company = Core_Str::stripTags(strval(Core_Array::getPost('company')));
+	// $oSiteuser->phone = Core_Str::stripTags(strval(Core_Array::getPost('phone')));
+	// $oSiteuser->fax = Core_Str::stripTags(strval(Core_Array::getPost('fax')));
+	// $oSiteuser->website = Core_Str::stripTags(strval(Core_Array::getPost('website')));
+	// $oSiteuser->icq = Core_Str::stripTags(strval(Core_Array::getPost('icq')));
+	// $oSiteuser->country = Core_Str::stripTags(strval(Core_Array::getPost('country')));
+	// $oSiteuser->postcode = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
+	// $oSiteuser->city = Core_Str::stripTags(strval(Core_Array::getPost('city')));
+	// $oSiteuser->address = Core_Str::stripTags(strval(Core_Array::getPost('address')));
 
 	// Проверка корректности email
 	if (Core_Valid::email($email))
@@ -103,14 +103,14 @@ if (!is_null(Core_Array::getPost('apply')))
 								$bAntispamAnswer = $Antispam_Controller
 									->addText($oSiteuser->login)
 									->addText($oSiteuser->email)
-									->addText($oSiteuser->name)
+									/*->addText($oSiteuser->name)
 									->addText($oSiteuser->patronymic)
 									->addText($oSiteuser->surname)
 									->addText($oSiteuser->company)
 									->addText($oSiteuser->website)
 									->addText($oSiteuser->country)
 									->addText($oSiteuser->city)
-									->addText($oSiteuser->address)
+									->addText($oSiteuser->address)*/
 									->execute();
 							}
 							else
@@ -244,6 +244,111 @@ if (!is_null(Core_Array::getPost('apply')))
 									}
 								}
 
+								// Companies
+								$aSiteuser_Companies = $oSiteuser->Siteuser_Companies->findAll(FALSE);
+
+								foreach ($aSiteuser_Companies as $oSiteuser_Company)
+								{
+									if (!is_null(Core_Array::getPost("company_name{$oSiteuser_Company->id}")))
+									{
+										$oSiteuser_Company->name = strval(Core_Array::getPost("company_name{$oSiteuser_Company->id}"));
+										$oSiteuser_Company->save();
+									}
+
+									$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
+									foreach ($aDirectory_Addresses as $oDirectory_Address)
+									{
+										if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_address_{$oDirectory_Address->id}")))
+										{
+											$oDirectory_Address->value = strval(Core_Array::getPost("company_{$oSiteuser_Company->id}_address_{$oDirectory_Address->id}"));
+											$oDirectory_Address->directory_address_type_id = intval(Core_Array::getPost("company_{$oSiteuser_Company->id}_directory_address_type_{$oDirectory_Address->id}"));
+											$oDirectory_Address->save();
+										}
+									}
+
+									$aDirectory_Phones = $oSiteuser_Company->Directory_Phones->findAll();
+									foreach ($aDirectory_Phones as $oDirectory_Phone)
+									{
+										if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_phone_{$oDirectory_Phone->id}")))
+										{
+											$oDirectory_Phone->value = strval(Core_Array::getPost("company_{$oSiteuser_Company->id}_phone_{$oDirectory_Phone->id}"));
+											$oDirectory_Phone->directory_phone_type_id = intval(Core_Array::getPost("company_{$oSiteuser_Company->id}_directory_phone_type_{$oDirectory_Phone->id}"));
+											$oDirectory_Phone->save();
+										}
+									}
+
+									$aDirectory_Emails = $oSiteuser_Company->Directory_Emails->findAll();
+									foreach ($aDirectory_Emails as $oDirectory_Email)
+									{
+										if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_email_{$oDirectory_Email->id}")))
+										{
+											$oDirectory_Email->value = strval(Core_Array::getPost("company_{$oSiteuser_Company->id}_email_{$oDirectory_Email->id}"));
+											$oDirectory_Email->directory_email_type_id = intval(Core_Array::getPost("company_{$oSiteuser_Company->id}_directory_email_type_{$oDirectory_Email->id}"));
+											$oDirectory_Email->save();
+										}
+									}
+
+									$aDirectory_Websites = $oSiteuser_Company->Directory_Websites->findAll();
+									foreach ($aDirectory_Websites as $oDirectory_Website)
+									{
+										if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_website_{$oDirectory_Website->id}")))
+										{
+											$oDirectory_Website->value = strval(Core_Array::getPost("company_{$oSiteuser_Company->id}_website_{$oDirectory_Website->id}"));
+											$oDirectory_Website->save();
+										}
+									}
+								}
+
+								// People
+								$aSiteuser_People = $oSiteuser->Siteuser_People->findAll(FALSE);
+
+								foreach ($aSiteuser_People as $oSiteuser_Person)
+								{
+									if (!is_null(Core_Array::getPost("person_name{$oSiteuser_Person->id}")))
+									{
+										$oSiteuser_Person->name = strval(Core_Array::getPost("person_name{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->surname = strval(Core_Array::getPost("person_surname{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->patronymic = strval(Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->postcode = strval(Core_Array::getPost("person_postcode{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->country = strval(Core_Array::getPost("person_country{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->city = strval(Core_Array::getPost("person_city{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->address = strval(Core_Array::getPost("person_address{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->save();
+									}
+
+									$aDirectory_Phones = $oSiteuser_Person->Directory_Phones->findAll();
+									foreach ($aDirectory_Phones as $oDirectory_Phone)
+									{
+										if (!is_null(Core_Array::getPost("person_{$oSiteuser_Person->id}_phone_{$oDirectory_Phone->id}")))
+										{
+											$oDirectory_Phone->value = strval(Core_Array::getPost("person_{$oSiteuser_Person->id}_phone_{$oDirectory_Phone->id}"));
+											$oDirectory_Phone->directory_phone_type_id = intval(Core_Array::getPost("person_{$oSiteuser_Person->id}_directory_phone_type_{$oDirectory_Phone->id}"));
+											$oDirectory_Phone->save();
+										}
+									}
+
+									$aDirectory_Emails = $oSiteuser_Person->Directory_Emails->findAll();
+									foreach ($aDirectory_Emails as $oDirectory_Email)
+									{
+										if (!is_null(Core_Array::getPost("person_{$oSiteuser_Person->id}_email_{$oDirectory_Email->id}")))
+										{
+											$oDirectory_Email->value = strval(Core_Array::getPost("person_{$oSiteuser_Person->id}_email_{$oDirectory_Email->id}"));
+											$oDirectory_Email->directory_email_type_id = intval(Core_Array::getPost("person_{$oSiteuser_Person->id}_directory_email_type_{$oDirectory_Email->id}"));
+											$oDirectory_Email->save();
+										}
+									}
+
+									$aDirectory_Websites = $oSiteuser_Person->Directory_Websites->findAll();
+									foreach ($aDirectory_Websites as $oDirectory_Website)
+									{
+										if (!is_null(Core_Array::getPost("person_{$oSiteuser_Person->id}_website_{$oDirectory_Website->id}")))
+										{
+											$oDirectory_Website->value = strval(Core_Array::getPost("person_{$oSiteuser_Person->id}_website_{$oDirectory_Website->id}"));
+											$oDirectory_Website->save();
+										}
+									}
+								}
+
 								// Регистрация нового пользователя
 								if ($bNewUser)
 								{
@@ -256,6 +361,115 @@ if (!is_null(Core_Array::getPost('apply')))
 										!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
 											strval(Core_Array::getPost('location'))
 										);
+									}
+
+									if (!is_null(Core_Array::getPost("company_name")))
+									{
+										$aSiteuserCompanies = Core_Array::getPost("company_name");
+										$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
+										$aSiteuserCompanyPhone = Core_Array::getPost("company_phone");
+										$aSiteuserCompanyEmail = Core_Array::getPost("company_email");
+										$aSiteuserCompanyWebsite = Core_Array::getPost("company_website");
+
+										foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
+										{
+											if (strlen($sSiteuserCompanyName))
+											{
+												$oSiteuser_Company = Core_Entity::factory('Siteuser_Company');
+												$oSiteuser_Company->name = strval($sSiteuserCompanyName);
+												$oSiteuser_Company->siteuser_id = $oSiteuser->id;
+												$oSiteuser_Company->save();
+
+												$value = strval(Core_Array::get($aSiteuserCompanyAddress, $key));
+												if ($value != '')
+												{
+													$oDirectory_Address = Core_Entity::factory('Directory_Address');
+													$oDirectory_Address->value = $value;
+													$oSiteuser_Company->add($oDirectory_Address);
+												}
+
+												$value = strval(Core_Array::get($aSiteuserCompanyPhone, $key));
+												if ($value != '')
+												{
+													$oDirectory_Phone = Core_Entity::factory('Directory_Phone');
+													$oDirectory_Phone->value = strval(Core_Array::get($aSiteuserCompanyPhone, $key));
+													$oSiteuser_Company->add($oDirectory_Phone);
+												}
+
+												$value = strval(Core_Array::get($aSiteuserCompanyEmail, $key));
+												if ($value != '')
+												{
+													$oDirectory_Email = Core_Entity::factory('Directory_Email');
+													$oDirectory_Email->value = strval(Core_Array::get($aSiteuserCompanyEmail, $key));
+													$oSiteuser_Company->add($oDirectory_Email);
+												}
+
+												$value = strval(Core_Array::get($aSiteuserCompanyWebsite, $key));
+												if ($value != '')
+												{
+													$oDirectory_Website = Core_Entity::factory('Directory_Website');
+													$oDirectory_Website->value = strval(Core_Array::get($aSiteuserCompanyWebsite, $key));
+													$oSiteuser_Company->add($oDirectory_Website);
+												}
+											}
+										}
+									}
+
+									if (!is_null(Core_Array::getPost("person_name")))
+									{
+										$aSiteuserPeopleNames = Core_Array::getPost("person_name");
+										$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
+										$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
+										$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
+										$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
+										$aSiteuserPeopleCities = Core_Array::getPost("person_city");
+										$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
+
+										$aSiteuserPeoplePhone = Core_Array::getPost("person_phone");
+										$aSiteuserPeopleEmail = Core_Array::getPost("person_email");
+										$aSiteuserPeopleWebsite = Core_Array::getPost("person_website");
+
+										foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
+										{
+											if (strlen($sSiteuserPersonName))
+											{
+												$oSiteuser_Person = Core_Entity::factory('Siteuser_Person');
+												$oSiteuser_Person->name = strval($sSiteuserPersonName);
+												$oSiteuser_Person->siteuser_id = $oSiteuser->id;
+
+												$oSiteuser_Person->surname = strval(Core_Array::get($aSiteuserPeopleSurnames, $key));
+												$oSiteuser_Person->patronymic = strval(Core_Array::get($aSiteuserPeoplePatronymics, $key));
+												$oSiteuser_Person->postcode = strval(Core_Array::get($aSiteuserPeoplePostcodes, $key));
+												$oSiteuser_Person->country = strval(Core_Array::get($aSiteuserPeopleCountries, $key));
+												$oSiteuser_Person->city = strval(Core_Array::get($aSiteuserPeopleCities, $key));
+												$oSiteuser_Person->address = strval(Core_Array::get($aSiteuserPeopleAddresses, $key));
+												$oSiteuser_Person->save();
+
+												$value = strval(Core_Array::get($aSiteuserPeoplePhone, $key));
+												if ($value != '')
+												{
+													$oDirectory_Phone = Core_Entity::factory('Directory_Phone');
+													$oDirectory_Phone->value = strval(Core_Array::get($aSiteuserPeoplePhone, $key));
+													$oSiteuser_Person->add($oDirectory_Phone);
+												}
+
+												$value = strval(Core_Array::get($aSiteuserPeopleEmail, $key));
+												if ($value != '')
+												{
+													$oDirectory_Email = Core_Entity::factory('Directory_Email');
+													$oDirectory_Email->value = strval(Core_Array::get($aSiteuserPeopleEmail, $key));
+													$oSiteuser_Person->add($oDirectory_Email);
+												}
+
+												$value = strval(Core_Array::get($aSiteuserPeopleWebsite, $key));
+												if ($value != '')
+												{
+													$oDirectory_Website = Core_Entity::factory('Directory_Website');
+													$oDirectory_Website->value = strval(Core_Array::get($aSiteuserPeopleWebsite, $key));
+													$oSiteuser_Person->add($oDirectory_Website);
+												}
+											}
+										}
 									}
 
 									// Отправка письма

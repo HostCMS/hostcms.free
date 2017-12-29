@@ -273,9 +273,16 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
-		parent::_applyObjectProperty();
-
 		$modelName = $this->_object->getModelName();
+		
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$modelName == 'template'
+				&& $this->_object->backupRevision();
+		}
+			
+		parent::_applyObjectProperty();
 
 		if ($modelName == 'template')
 		{
@@ -316,12 +323,6 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if (Core::moduleIsActive('compression'))
 			{
 				Compression_Controller::instance('js')->deleteAllJs();
-			}
-
-			// Backup revision
-			if (Core::moduleIsActive('revision'))
-			{
-				$this->_object->backupRevision();
 			}
 		}
 

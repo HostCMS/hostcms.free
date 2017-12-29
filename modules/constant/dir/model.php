@@ -5,7 +5,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Constant_Dir_Model
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Constant
  * @version 6.x
  * @author Hostmake LLC

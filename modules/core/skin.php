@@ -296,17 +296,25 @@ abstract class Core_Skin
 		}
 
 		$oModule = Core_Entity::factory('Module');
-		$oModule->queryBuilder()->where('active', '=', 1);
+		$oModule
+			->queryBuilder()
+			->where('active', '=', 1);
 
 		if ($oUser->superuser == 0)
 		{
 			$oModule->queryBuilder()
 				->select('modules.*')
-				->join('user_modules', 'modules.id', '=', 'user_modules.module_id',
+				->join('company_department_modules', 'modules.id', '=', 'company_department_modules.module_id')
+				->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+				->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
+				->where('site_id', '=', CURRENT_SITE)
+				->where('company_department_post_users.user_id', '=', $oUser->id)
+				->where('company_departments.deleted', '=', 0)
+				/*->join('company_department_modules', 'modules.id', '=', 'company_department_modules.module_id',
 				array(
-					array('AND' => array('user_group_id', '=', $oUser->user_group_id)),
+					array('AND' => array('company_department_id', '=', $oUser->user_group_id)),
 					array('AND' => array('site_id', '=', CURRENT_SITE))
-				));
+				))*/;
 		}
 
 		return $oModule->findAll();
@@ -331,7 +339,7 @@ abstract class Core_Skin
 				$oAdmin_Language = Core_Entity::factory('Admin_Language')->getCurrent();
 				!is_null($oAdmin_Language) && $this->_lng = htmlspecialchars($oAdmin_Language->shortname);
 			}
-			
+
 			is_null($this->_lng)
 				&& $this->_lng = Core_I18n::instance()->getLng();
 		}
@@ -373,7 +381,7 @@ abstract class Core_Skin
 		?><script src="/modules/skin/default/frontend/jquery-ui.min.js" type="text/javascript"></script><?php
 		?><script src="/admin/wysiwyg/jquery.tinymce.min.js" type="text/javascript"></script><?php
 		?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js" type="text/javascript"></script><?php
-		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.min.js" type="text/javascript"></script><?php
+		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js" type="text/javascript"></script><?php
 		?><script src="/modules/skin/bootstrap/js/toastr/toastr.js" type="text/javascript"></script><?php
 		?><script type="text/javascript">var hQuery = $.noConflict(true);</script><?php
 		?><script src="/modules/skin/default/frontend/frontend.js" type="text/javascript"></script>

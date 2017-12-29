@@ -14,7 +14,7 @@ return array(
 	'admin_menu_services' => 'Services',
 	'admin_menu_tools' => 'Tools',
 	'admin_menu_seo' => 'SEO',
-	'admin_menu_users' => 'Users',
+	'admin_menu_crm' => 'CRM',
 	'admin_menu_clouds' => 'Clouds',
 	'admin_menu_market' => 'Hostmarket',
 	'admin_menu_system' => 'System',

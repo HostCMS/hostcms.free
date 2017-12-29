@@ -197,7 +197,9 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			foreach ($aImap_fetchheader as $key => $value)
 			{
 				$aValue = explode(':', $value);
-				isset($aValue[1]) && $fetchheader[strtolower(trim(strval($aValue[0])))] = strtolower(trim(strval($aValue[1])));
+				
+				isset($aValue[1])
+					&& $fetchheader[strtolower(trim(strval($aValue[0])))] = strtolower(trim(strval($aValue[1])));
 			}
 			$this->_aMessages[$i]['fetchheader'] = $fetchheader;
 
@@ -235,7 +237,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				foreach ($reply_to as $key => $value)
 				{
 					// Почтовый ящик отправителя
-					$this->_aMessages[$i]['from'] = $value->mailbox . "@" . $value->host;
+					$this->_aMessages[$i]['reply_to'] = $value->mailbox . "@" . $value->host;
 				}
 			}
 
@@ -413,125 +415,126 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			[6] = "video"
 			[7] = "other"
 			*/
-			$body = imap_fetchbody($this->_stream, $i + 1, $iStructurePartNumber + 1);
-			$body = $this->_bodyDecode($body, $aStructurePart['encoding']);
-
-			// $aStructurePart encoding
-			$charset = isset($aStructurePart['charset']) && $aStructurePart['charset'] != ''
-				? $aStructurePart['charset']
-				: NULL;
-
-			is_null($charset) && $charset = isset($aStructurePart['parameters']['charset'])
-				&& $aStructurePart['parameters']['charset'] != ''
-					? $aStructurePart['parameters']['charset']
-					: NULL;
-
-			!is_null($charset)
-				&& $body = mb_convert_encoding($body, 'UTF-8', $charset);
-
 			$partType = Core_Array::get($aStructurePart, 'type', 0);
-
-			switch ($partType)
+			
+			// multipart
+			if ($partType == 1)
 			{
-				// multipart
-				case 1:
-					if (isset($aStructurePart['parts']))
+				if (isset($aStructurePart['parts']))
+				{
+					// Можно добавить параметр с предпочтительной кодировкой
+					foreach ($aStructurePart['parts'] as $iPartNumber => $aPart)
 					{
-						// Можно добавить параметр с предпочтительной кодировкой
-						foreach ($aStructurePart['parts'] as $iPartNumber => $aPart)
-						{
-							// $aPart encoding
-							$partCharset = isset($aPart['charset']) && $aPart['charset'] != ''
-								? $aPart['charset']
+						// $aPart encoding
+						$partCharset = isset($aPart['charset']) && $aPart['charset'] != ''
+							? $aPart['charset']
+							: NULL;
+
+						is_null($partCharset) && $partCharset = isset($aPart['parameters']['charset'])
+							&& $aPart['parameters']['charset'] != ''
+								? $aPart['parameters']['charset']
 								: NULL;
 
-							is_null($partCharset) && $partCharset = isset($aPart['parameters']['charset'])
-								&& $aPart['parameters']['charset'] != ''
-									? $aPart['parameters']['charset']
-									: NULL;
+						/*
+						()Root Message Part (multipart/related)
+						(1) The text parts of the message (multipart/alternative)
+						(1.1) Plain text version (text/plain)
+						(1.2) HTML version (text/html)
+						(2) The background stationary (image/gif)
+						*/
+						$messageNumber = ($iStructurePartNumber + 1) . '.' . ($iPartNumber + 1);
 
-							/*
-							()Root Message Part (multipart/related)
-							(1) The text parts of the message (multipart/alternative)
-							(1.1) Plain text version (text/plain)
-							(1.2) HTML version (text/html)
-							(2) The background stationary (image/gif)
-							*/
-							$massageNumber = $iStructurePartNumber + 1 + (
-								($iPartNumber + 1) / 10
-							);
-
-							$sPartBody = $this->_bodyDecode(
-								imap_fetchbody($this->_stream, $i + 1, $massageNumber), $aPart['encoding']
-							);
-
-							!is_null($partCharset)
-								&& $sPartBody = mb_convert_encoding($sPartBody, 'UTF-8', $partCharset);
-
-							$this->_aMessages[$i]['multipart'][$aPart['subtype']] = $sPartBody;
-						}
-
-						if (isset($this->_aMessages[$i]['multipart']['HTML']))
-						{
-							$this->_aMessages[$i]['subtype'] = 'HTML';
-							$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][
-								$this->_aMessages[$i]['subtype']
-							];
-						}
-						elseif (isset($this->_aMessages[$i]['multipart']['PLAIN']))
-						{
-							$this->_aMessages[$i]['subtype'] = 'PLAIN';
-							$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][
-								$this->_aMessages[$i]['subtype']
-							];
-						}
-						else
-						{
-							// В сообщение идет первый блок
-							$defaultPart = $aStructurePart['parts'][0];
-
-							$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][
-								$defaultPart['subtype']
-							];
-
-							$this->_aMessages[$i]['subtype'] = $defaultPart['subtype'];
-						}
-					}
-				break;
-				// text
-				case 0:
-				// message
-				case 2:
-					// Если уже было тело письма, остальные идут как вложения
-					if (!strlen($this->_aMessages[$i]['body']))
-					{
-						$this->_aMessages[$i]['subtype'] = Core_Array::get($aStructurePart, 'subtype', 'text');
-						$this->_aMessages[$i]['body'] .= $body;
-
-						// Если было тело письма, то остальное пойдет во вложения
-						break;
-					}
-				// Other files
-				default:
-					// Тип вложения
-					$this->_aMessages[$i]['attachments'][$n]['type'] = $partType;
-					$this->_aMessages[$i]['attachments'][$n]['body'] = $body;
-
-					if (isset($aStructurePart['parameters']['name']))
-					{
-						$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
-							$aStructurePart['parameters']['name']
+						$sPartBody = $this->_bodyDecode(
+							imap_fetchbody($this->_stream, $i + 1, $messageNumber), $aPart['encoding']
 						);
 
+						!is_null($partCharset)
+							&& $sPartBody = mb_convert_encoding($sPartBody, 'UTF-8', $partCharset);
+
+						$this->_aMessages[$i]['multipart'][$aPart['subtype']] = $sPartBody;
 					}
-					elseif (isset($aStructurePart['dparameters']['filename']))
+
+					if (isset($this->_aMessages[$i]['multipart']['HTML']))
 					{
-						$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
-							$aStructurePart['dparameters']['filename']
-						);
+						$this->_aMessages[$i]['subtype'] = 'HTML';
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['HTML'];
 					}
-					$n++;
-				break;
+					elseif (isset($this->_aMessages[$i]['multipart']['PLAIN']))
+					{
+						$this->_aMessages[$i]['subtype'] = 'PLAIN';
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart']['PLAIN'];
+					}
+					else
+					{
+						// В сообщение идет первый блок
+						$defaultPart = $aStructurePart['parts'][0];
+
+						$this->_aMessages[$i]['body'] = $this->_aMessages[$i]['multipart'][
+							$defaultPart['subtype']
+						];
+
+						$this->_aMessages[$i]['subtype'] = $defaultPart['subtype'];
+					}
+				}
+			}
+			else
+			{
+				$body = imap_fetchbody($this->_stream, $i + 1, strval($iStructurePartNumber + 1));
+				$body = $this->_bodyDecode($body, $aStructurePart['encoding']);
+
+				// $aStructurePart encoding
+				$charset = isset($aStructurePart['charset']) && $aStructurePart['charset'] != ''
+					? $aStructurePart['charset']
+					: NULL;
+
+				is_null($charset) && $charset = isset($aStructurePart['parameters']['charset'])
+					&& $aStructurePart['parameters']['charset'] != ''
+						? $aStructurePart['parameters']['charset']
+						: NULL;
+
+				!is_null($charset)
+					&& $body = mb_convert_encoding($body, 'UTF-8', $charset);
+
+				switch ($partType)
+				{
+					// multipart
+					//case 1:
+					//break;
+					// text
+					case 0:
+					// message
+					case 2:
+						// Если уже было тело письма, остальные идут как вложения
+						if (!strlen($this->_aMessages[$i]['body']))
+						{
+							$this->_aMessages[$i]['subtype'] = Core_Array::get($aStructurePart, 'subtype', 'text');
+							$this->_aMessages[$i]['body'] = $body;
+
+							// Если было тело письма, то остальное пойдет во вложения
+							break;
+						}
+					// Other files
+					default:
+						// Тип вложения
+						$this->_aMessages[$i]['attachments'][$n]['type'] = $partType;
+						$this->_aMessages[$i]['attachments'][$n]['body'] = $body;
+
+						if (isset($aStructurePart['parameters']['name']))
+						{
+							$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
+								$aStructurePart['parameters']['name']
+							);
+
+						}
+						elseif (isset($aStructurePart['dparameters']['filename']))
+						{
+							$this->_aMessages[$i]['attachments'][$n]['name'] = mb_decode_mimeheader(
+								$aStructurePart['dparameters']['filename']
+							);
+						}
+						$n++;
+					break;
+				}
 			}
 		}
 

@@ -20,13 +20,19 @@ class User_Model extends Core_Entity
 	protected $_nameColumn = 'login';
 
 	/**
+	 * Column consist full item's name
+	 * @var string
+	 */
+	public $fullname = NULL;
+
+	/**
 	 * Belongs to relations
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user_group' => array(),
 		'user' => array(),
-		'user_module' => array()
+		'company' => array('through' => 'company_department_post_user'),
+		'company_department' => array('through' => 'company_department_post_user'),
 	);
 
 	/**
@@ -34,12 +40,12 @@ class User_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'user_note' => array(),
-		'user_setting' => array(),
-		'user_message' => array(),
 		'admin_form_setting' => array(),
-		'informationsystem_dir' => array(),
-		'informationsystem' => array(),
+		'company_post' => array('through' => 'company_department_post_user'),
+		'company_department' => array('through' => 'company_department_post_user'),
+		'company_department_post_user' => array(),
+		'event' => array('through' => 'event_user'),
+		'event_user' => array(),
 		'forum' => array(),
 		'forum_group' => array(),
 		'forum_category_siteuser_group' => array(),
@@ -61,8 +67,28 @@ class User_Model extends Core_Entity
 			'foreign_key' => 'responsible_user_id',
 			'model' => 'Helpdesk_Responsible_User'
 		),
+		'informationsystem_dir' => array(),
+		'informationsystem' => array(),
+
+		'user_directory_email' => array(),
+		'directory_email' => array('through' => 'user_directory_email'),
+		'user_directory_phone' => array(),
+		'directory_phone' => array('through' => 'user_directory_phone'),
+		'user_directory_messenger' => array(),
+		'directory_messenger' => array('through' => 'user_directory_messenger'),
+		'user_directory_social' => array(),
+		'directory_social' => array('through' => 'user_directory_social'),
+		'user_directory_website' => array(),
+		'directory_website' => array('through' => 'user_directory_website'),
 		'notification_user' => array(),
-		'notification' => array('through' => 'notification_user'),		
+		'notification_subscriber' => array(),
+		'notification' => array('through' => 'notification_user'),
+		'deal_template_step_access_user'  => array(),
+		'user_note' => array(),
+		'user_setting' => array(),
+		'user_message' => array(),
+		'siteuser_user' => array(),
+		'calendar_caldav_user' => array(),
 	);
 
 	/**
@@ -73,7 +99,19 @@ class User_Model extends Core_Entity
 		'superuser' => 1,
 		'only_access_my_own' => 0,
 		'read_only' => 0,
-		'settings' => 0
+		'settings' => 0,
+		'root_dir' => '/'
+	);
+
+	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'~email',
+		'~icq',
+		'~site',
+		'~position'
 	);
 
 	/**
@@ -131,44 +169,24 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get user by name
-	 * @param string $name name
-	 * @return User_Model|NULL
-	 */
-	public function getByName($name)
-	{
-		$this->queryBuilder()
-			->clear()
-			->where('name', '=', $name)
-			->limit(1);
-
-		$aUsers = $this->findAll();
-
-		if (isset($aUsers[0]))
-		{
-			return $aUsers[0];
-		}
-
-		return NULL;
-	}
-
-	/**
 	 * Check if user has access to site
 	 * @param Site_Model $oSite site
 	 * @return boolean
 	 */
 	public function checkSiteAccess(Site_Model $oSite)
 	{
-		$oUser_Module = $this->User_Group->User_Modules;
-
-		$oUser_Module
-			->queryBuilder()
+		$oCompany_Department_Module = Core_Entity::factory('Company_Department_Module');
+		$oCompany_Department_Module->queryBuilder()
+			->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+			->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
 			->where('site_id', '=', $oSite->id)
+			->where('company_department_post_users.user_id', '=', $this->id)
+			->where('company_departments.deleted', '=', 0)
 			->limit(1);
 
-		$aUser_Modules = $oUser_Module->findAll();
+		$aCompany_Department_Modules = $oCompany_Department_Module->findAll();
 
-		return count($aUser_Modules) == 1;
+		return count($aCompany_Department_Modules) == 1;
 	}
 
 	/**
@@ -197,23 +215,28 @@ class User_Model extends Core_Entity
 				);
 			}
 
-			$access = $this->User_Group->issetModuleAccess(
-				$oModule, $oSite
-			);
-
-			// Если доступ разрешен
-			if ($access)
+			// Вынесено после проверки прав доступа, т.к. идет отдельная проверка на активность модуля
+			if ($this->superuser == 1)
 			{
-				// Прерываем проверку, т.к. доступ хотя бы к одному из указанных модулей уже есть
+				// SU разрешен доступ ко всем модулям
 				return TRUE;
 			}
-		}
 
-		// Вынесено после проверки прав доступа, т.к. идет отдельная проверка на активность модуля
-		if ($this->superuser == 1)
-		{
-			// SU разрешен доступ ко всем модулям
-			return TRUE;
+			$aCompany_Departments = $this->Company_Departments->findAll();
+
+			foreach ($aCompany_Departments as $oCompany_Department)
+			{
+				$access = $oCompany_Department/*->User_Group*/->issetModuleAccess(
+					$oModule, $oSite
+				);
+
+				// Если доступ разрешен
+				if ($access)
+				{
+					// Прерываем проверку, т.к. доступ хотя бы к одному из указанных модулей уже есть
+					return TRUE;
+				}
+			}
 		}
 
 		return FALSE;
@@ -248,7 +271,7 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Get allowed sites for user
+	 * Get allowed sites for User
 	 * @return array
 	 */
 	public function getSites()
@@ -259,8 +282,11 @@ class User_Model extends Core_Entity
 		{
 			$oSite->queryBuilder()
 				->select('sites.*')
-				->join('user_modules', 'sites.id', '=', 'user_modules.site_id')
-				->where('user_modules.user_group_id', '=', $this->user_group_id)
+				->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
+				->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+				->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
+				->where('company_department_post_users.user_id', '=', $this->id)
+				->where('company_departments.deleted', '=', 0)
 				->groupBy('sites.id');
 		}
 
@@ -421,7 +447,7 @@ class User_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->User_Notes->deleteAll(FALSE);
 		$this->User_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
@@ -431,6 +457,65 @@ class User_Model extends Core_Entity
 		{
 			$this->Helpdesk_Responsible_User_Seconds->deleteAll(FALSE);
 			$this->Helpdesk_User_Letter_Templates->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('company'))
+		{
+			$this->Company_Department_Post_Users->deleteAll(FALSE);
+		}
+
+		$this->Directory_Emails->deleteAll(FALSE);
+		$this->Directory_Messengers->deleteAll(FALSE);
+		$this->Directory_Phones->deleteAll(FALSE);
+		$this->Directory_Socials->deleteAll(FALSE);
+		$this->Directory_Websites->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('event'))
+		{
+			$aEvent_Users = $this->Event_Users->findAll(FALSE);
+			foreach ($aEvent_Users as $oEvent_User)
+			{
+				$oEvent = $oEvent_User->Event;
+
+				if ($oEvent->Event_Users->getCount(FALSE) == 1)
+				{
+					$oEvent->delete();
+				}
+				else
+				{
+					$oEvent_User->delete();
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('notification'))
+		{
+			$this->Notification_Subscribers->deleteAll(FALSE);
+
+			$aNotification_Users = $this->Notification_Users->findAll(FALSE);
+			foreach ($aNotification_Users as $oNotification_User)
+			{
+				$oNotification = $oNotification_User->Notification;
+
+				if ($oNotification->Notification_Users->getCount(FALSE) == 1)
+				{
+					$oNotification->delete();
+				}
+				else
+				{
+					$oNotification_User->delete();
+				}
+			}
+		}
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$this->Siteuser_Users->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('calendar'))
+		{
+			$this->Calendar_Caldav_Users->deleteAll(FALSE);
 		}
 
 		// Удаляем директорию
@@ -467,16 +552,8 @@ class User_Model extends Core_Entity
 
 		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
 
-		$oUsers = Core_Entity::factory('User');
-		$oUsers->queryBuilder()
-			->select('users.*')
-			->join('user_groups', 'users.user_group_id', '=', 'user_groups.id')
-			->where('users.active', '=', 1)
-			->where('user_groups.site_id', '=', CURRENT_SITE)
-			->where('user_groups.deleted', '=', 0);
-
 		if (!$this->active
-			|| (!$oCurrentUser || $oCurrentUser->id != $this->id) && $oUsers->getCount() > 0
+			|| (!$oCurrentUser || $oCurrentUser->id != $this->id)
 		)
 		{
 			$this->active = 1 - $this->active;
@@ -518,7 +595,7 @@ class User_Model extends Core_Entity
 		$lastActivity = $this->getLastActivity();
 		return !is_null($lastActivity) && $lastActivity < 300;
 	}
-	
+
 	/**
 	 * Get count of unread messages
 	 * @param User_Model $oUser
@@ -535,7 +612,126 @@ class User_Model extends Core_Entity
 			->where('user_messages.recipient_user_id', '=', $this->id);
 
 		$row = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
-		
+
 		return intval($row['count']);
+	}
+
+	/**
+	 * Get full name of user
+	 *
+	 * @return string
+	 */
+	public function getFullName()
+	{
+		$aPartsFullName = array();
+
+		!empty($this->surname) && $aPartsFullName[] = $this->surname;
+		!empty($this->name) && $aPartsFullName[] = $this->name;
+		!empty($this->patronymic) && $aPartsFullName[] = $this->patronymic;
+
+		// В случае отсутствия ФИО возвращаем логин
+		!count($aPartsFullName) && $aPartsFullName[] = $this->login;
+
+		return implode(' ', $aPartsFullName);
+	}
+
+	/**
+	 * Get company posts for user by department
+	 * @return array
+	 */
+	public function getCompanyPostsByDepartment($iDepartmentId, $isHead = NULL)
+	{
+		$oCompany_Department_Posts = $this->Company_Posts; //->getAllByCompany_department_id($iDepartmentId);
+		$oCompany_Department_Posts
+			->queryBuilder()
+			->where('company_department_post_users.company_department_id', '=', $iDepartmentId);
+
+		!is_null($isHead)
+			&& $oCompany_Department_Posts
+			->queryBuilder()
+			->where('company_department_post_users.head', '=', intval($isHead));
+
+		return $oCompany_Department_Posts->findAll();
+	}
+
+	/**
+	 * Backend
+	 * @return self
+	 */
+	public function smallAvatar()
+	{
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			->class('fm_preview');
+
+		$oCore_Html_Entity_Div
+			->add(
+				Core::factory('Core_Html_Entity_Img')
+					->src($this->getImageHref())
+					->width(30)
+					->height(30)
+			);
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 */
+	public function loginBadge()
+	{
+		$lastActivity = $this->getLastActivity();
+		$sStatus = !is_null($lastActivity) && $lastActivity < 60 * 20
+			? 'online'
+			: 'offline';
+
+		echo "&nbsp;<span class=\"{$sStatus}\"></span>";
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function department()
+	{
+		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
+
+		$aTempDepartmentPost = array();
+
+		$i = 0;
+
+		foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		{
+			$aTempDepartmentPost[] = '<div ' . ( $i ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
+				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
+				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
+
+			$i++;
+		}
+
+		echo implode('', $aTempDepartmentPost);
+	}
+
+	/**
+	 * Get user age
+	 * @return string
+	 */
+	public function getAge()
+	{
+		return floor((time() - strtotime($this->birthday)) / 31556926);
+	}
+
+	/**
+	 * Get user sex
+	 * @return string
+	 */
+	public function getSex()
+	{
+		return $this->sex
+			? '<i class="fa fa-venus pink"></i>'
+			: '<i class="fa fa-mars sky"></i>';
 	}
 }

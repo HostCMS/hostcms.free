@@ -145,38 +145,4 @@ class Tag_Dir_Model extends Core_Entity
 		$this->save();
 		return $this;
 	}
-
-	/**
-	 * Copy object
-	 * @return Core_Entity
-	 */
-	public function copy()
-	{
-		$newObject = parent::copy();
-
-		// Копируем права доступа группы пользователей к модулю
-		$aAllRelatedUserModules = $this->User_Modules->findAll();
-
-		$oUser = Core_Entity::factory('User')->getCurrent();
-		$user_id = is_null($oUser) ? 0 : $oUser->id;
-
-		foreach ($aAllRelatedUserModules as $oUserModule)
-		{
-			$oNewUserModule = clone $oUserModule;
-			$oNewUserModule->user_id = $user_id;
-			$newObject->add($oNewUserModule);
-		}
-
-		// Копируем права доступа группы пользователей к действиям
-		$aAllRelatedUserGroupActionAccesses = $this->User_Group_Action_Access->findAll();
-
-		foreach ($aAllRelatedUserGroupActionAccesses as $oUserGroupActionAccess)
-		{
-			$oNewUserGroupActionAccess = clone $oUserGroupActionAccess;
-			$oNewUserGroupActionAccess->user_id = $user_id;
-			$newObject->add($oNewUserGroupActionAccess);
-		}
-
-		return $newObject;
-	}
 }

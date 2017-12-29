@@ -140,11 +140,19 @@ class Informationsystem_Group_Model extends Core_Entity
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
 		{
-			if ($oProperty_Value->Property->type == 2)
+			switch ($oProperty_Value->Property->type)
 			{
-				$oProperty_Value
-					->setHref($this->getGroupHref())
-					->setDir($this->getGroupPath());
+				case 2:
+					$oProperty_Value
+						->setHref($this->getGroupHref())
+						->setDir($this->getGroupPath());
+				break;
+				case 8:
+					$oProperty_Value->dateFormat($this->Informationsystem->format_date);
+				break;
+				case 9:
+					$oProperty_Value->dateTimeFormat($this->Informationsystem->format_datetime);
+				break;
 			}
 		}
 

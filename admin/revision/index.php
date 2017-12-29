@@ -40,7 +40,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Добавляем все хлебные крошки контроллеру
-$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);	
+// $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);	
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Revision_Dataset();

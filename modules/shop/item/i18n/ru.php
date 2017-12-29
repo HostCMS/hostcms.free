@@ -307,4 +307,6 @@ return array(
 	'set_item_header' => 'Комплект',
 	'apply_recount_set' => 'Пересчитать комплект',
 	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара "%s"',
+	'import_price_list_delay' => 'Задержка (в сек.)',
+	'create_modification_copy_warehouse_count' => 'Копировать остаток на складе',
 );

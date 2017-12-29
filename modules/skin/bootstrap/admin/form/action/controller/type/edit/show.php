@@ -22,11 +22,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		$children = $this->children;
 		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
-		$oAdmin_View = Admin_View::create();
+		/*$oAdmin_View = Admin_View::create();
 		$oAdmin_View
 			->children($children)
 			->pageTitle($this->title)
-			->module($Admin_Form_Controller->getModule());
+			->module($Admin_Form_Controller->getModule());*/
 
 		ob_start();
 		/*?>
@@ -74,21 +74,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		}
 
 		// Кнопки
-		/*$oAdmin_Form_Entity_Form->add(
-			$this->_addButtons()
-		);*/
 		!is_null($this->buttons) && $oAdmin_Form_Entity_Form->add(
 			$this->_addButtons()
 		);
 
 		$oAdmin_Form_Entity_Form->execute();
-		$content = ob_get_clean();
-
-		ob_start();
-		$oAdmin_View
-			->content($content)
-			->message($this->message)
-			->show();
 
 		return ob_get_clean();
 	}
@@ -105,27 +95,30 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 
 		if ($this->buttons === TRUE)
 		{
+			$sOperaion = $this->Admin_Form_Controller->getOperation();
+			$sOperaionSufix = $sOperaion == 'modal'
+				? 'Modal'
+				: '';
+			
 			// Кнопки
 			$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
 
 			// Кнопка Сохранить
 			$oAdmin_Form_Entity_Button_Save = Admin_Form_Entity::factory('Button')
 				->name('save')
-				//->class('saveButton')
 				->class('btn btn-blue')
 				->value(Core::_('admin_form.save'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save')
+					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save' . $sOperaionSufix)
 				);
 
 			$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
 				->name('apply')
-				//->class('applyButton')
 				->class('btn btn-palegreen')
 				->type('submit')
 				->value(Core::_('admin_form.apply'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply' . $sOperaionSufix)
 				);
 
 			$oAdmin_Form_Entity_Buttons

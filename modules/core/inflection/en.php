@@ -35,6 +35,7 @@ class Core_Inflection_En extends Core_Inflection
 		'man' => 'men',
 		'mouse' => 'mice',
 		'ox' => 'oxen',
+		'people' => 'people',
 		'person' => 'people',
 		'quiz' => 'quizzes',
 		'scarf' => 'scarves',
@@ -119,7 +120,6 @@ class Core_Inflection_En extends Core_Inflection
 		'tongs' => 'tongs',
 		'shorts' => 'shorts',
 		'tweezers' => 'tweezers',
-		'people' => 'people',
 		'pajamas' => 'pajamas',
 		'police' => 'police',
 		'shorts' => 'shorts',
@@ -176,12 +176,10 @@ class Core_Inflection_En extends Core_Inflection
 	);
 
 	/**
-	 * Array of irregular form plural => singular
+	 * Array of irregular form plural => singular, based on self::$pluralIrregular
 	 * @var array
 	 */
-	static public $singularIrregular = array(
-		'people' => 'person'
-	);
+	static public $singularIrregular = array();
 
 	/**
 	 * Constructor.

@@ -32,22 +32,28 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 	 */
 	public function checkPaymentAfterContent()
 	{
-		if (isset($_REQUEST['order_id']))
+		if (isset($_POST['signature']) && isset($_POST['data']))
 		{
-			// Получаем ID заказа
-			$aTmpExplode = explode('_', (Core_Array::getRequest('order_id')));
-			if(count($aTmpExplode) == 3)
+			$aJsonData = base64_decode(strval($_POST['data']));
+			$aData = json_decode($aJsonData, TRUE);
+
+			if (isset($aData['order_id']))
 			{
-				$order_id = $aTmpExplode[2];
-
-				$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-
-				if (!is_null($oShop_Order->id))
+				// Получаем ID заказа
+				$aTmpExplode = explode('_', $aData['order_id']);
+				if(count($aTmpExplode) == 3)
 				{
-					// Вызов обработчика платежной системы
-					Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-						->shopOrder($oShop_Order)
-						->paymentProcessing();
+					$order_id = $aTmpExplode[2];
+
+					$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+
+					if (!is_null($oShop_Order->id))
+					{
+						// Вызов обработчика платежной системы
+						Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
+							->shopOrder($oShop_Order)
+							->paymentProcessing();
+					}
 				}
 			}
 		}
@@ -95,31 +101,23 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 			return FALSE;
 		}
 
-		$public_key = $_POST['public_key'];
-		$amount = $_POST['amount'];
-		$currency = $_POST['currency'];
-		$description = $_POST['description'];
-		$order_id = $_POST['order_id'];
-		$type = $_POST['type'];
-		$status = $_POST['status'];
+		$aJsonData = base64_decode(strval($_POST['data']));
+		$aData = json_decode($aJsonData, TRUE);
 
-		$liqpay = new LiqPay($this->_public_key, $this->_private_key);
-		$our_signature = $liqpay->cnb_signature(array(
-			'amount'         => $amount,
-			'currency'       => $currency,
-			'description'    => $description,
-			'order_id'       => $order_id,
-			'type'           => $type
-		));
+		$status = isset($aData['status'])
+			? strval($aData['status'])
+			: 'failure';
+
+		$our_signature = base64_encode(sha1($this->_private_key . $_POST['data'] . $this->_private_key , 1));
 
 		$lp_signature = $_POST['signature'];
 
-		$status_t = array('success'=>'успешный платеж','failure'=>'неуспешный платеж','wait_secure'=>'платеж на проверке','sandbox'=>'тестовый платеж');
+		$status_t = array('success'=>'Успешный платеж','failure'=>'Неуспешный платеж','wait_secure'=>'Платеж на проверке','sandbox'=>'Тестовый платеж');
 		$r_stat = $status_t[$status];
 
 		if($lp_signature != '' && $our_signature == $lp_signature && $status == 'success')
 		{
-			$this->_shopOrder->system_information = sprintf("Заказ оплачен через LiqPay\n\nID платежа в системе LiqPay:\t{$_POST['transaction_id']}\nТелефон плательщика в международном формате:\t{$_POST['sender_phone']}\nСтатус платежа:\t{$r_stat}\n\n");
+			$this->_shopOrder->system_information = sprintf("Заказ оплачен через LiqPay\n\nID платежа в системе LiqPay:\t{$aData['transaction_id']}\nСтатус платежа:\t{$r_stat}\n\n");
 
 			$this->_shopOrder->paid();
 			$this->setXSLs();
@@ -127,7 +125,7 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 		}
 		else
 		{
-			$this->_shopOrder->system_information = sprintf("Заказ НЕ оплачен через LiqPay\n\nID платежа в системе LiqPay:\t{$_POST['transaction_id']}\nТелефон плательщика в международном формате:\t{$_POST['sender_phone']}\nСтатус платежа:\t{$r_stat}\n\n");
+			$this->_shopOrder->system_information = sprintf("Заказ НЕ оплачен через LiqPay\n\nID платежа в системе LiqPay:\t{$aData['transaction_id']}\nСтатус платежа:\t{$r_stat}\n\n");
 			$this->_shopOrder->save();
 		}
 	}
@@ -164,13 +162,13 @@ class Shop_Payment_System_Handler20 extends Shop_Payment_System_Handler
 		// формируем форму оплаты
 		$liqpay = new LiqPay($this->_public_key, $this->_private_key);
 		echo $liqpay->cnb_form(array(
-			'amount'      => $sum,
-			'currency'    => $this->_currency_name,
-			'description' => "Оплата заказа №{$this->_shopOrder->id}",
-			'order_id'    => "order_id_{$this->_shopOrder->id}",
-			'type'        => 'buy',
-			//'sandbox'     => 1,
-			'server_url'  => $handler_url
+			'amount'         => floatval($sum),
+			'currency'       => $this->_currency_name,
+			'description'    => "Оплата заказа №{$this->_shopOrder->id}",
+			'order_id'       => "order_id_{$this->_shopOrder->id}",
+			'action'         => 'pay',
+			'version'        => 3,
+			'server_url'     => $handler_url
 		));
 	}
 }

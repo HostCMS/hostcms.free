@@ -21,9 +21,9 @@ class Core_Rss
 
 	/**
 	 * XMLNS
-	 * @var string
+	 * @var array
 	 */
-	protected $_xmlns = NULL;
+	protected $_xmlns = array();
 
 	/**
 	 * Set XMLNS value
@@ -33,7 +33,7 @@ class Core_Rss
 	 */
 	public function xmlns($name, $value)
 	{
-		$this->_xmlns = $name . '="' . $value . '"';
+		$this->_xmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($value) . '"';
 		return $this;
 	}
 
@@ -156,7 +156,11 @@ class Core_Rss
 	public function get()
 	{
 		$oRss = simplexml_load_string('<?xml version="1.0" encoding="' . $this->_encoding . '"?>' .
-			'<rss version="2.0"' . (is_null($this->_xmlns) ? '' : ' xmlns:' . $this->_xmlns) . '>' .
+			'<rss version="2.0"' . (
+				count($this->_xmlns)
+					? ' ' . implode(' ', $this->_xmlns)
+					: ''
+				) . '>' .
 			'<channel></channel>' .
 			'</rss>');
 

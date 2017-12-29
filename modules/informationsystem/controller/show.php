@@ -463,7 +463,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('part')
-				->value(intval($this->part - 1))
+				->value(intval($this->part) - 1)
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('limit')
@@ -1024,6 +1024,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$bIsArrayGroupsProperties = is_array($this->groupsProperties);
 			$bIsArrayPropertiesForGroups = is_array($this->propertiesForGroups);
 
+			$oInformationsystem = $this->getEntity();
+			
 			foreach ($this->_aInformationsystem_Groups[$parent_id] as $oInformationsystem_Group)
 			{
 				// Properties for informationsystem's group entity
@@ -1032,17 +1034,27 @@ class Informationsystem_Controller_Show extends Core_Controller
 				{
 					$aProperty_Values = $oInformationsystem_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
 
-					if ($bIsArrayGroupsProperties)
+					foreach ($aProperty_Values as $oProperty_Value)
 					{
-						foreach ($aProperty_Values as $oProperty_Value)
+						$dAdd = $bIsArrayGroupsProperties
+							? isset($this->groupsProperties[$oProperty_Value->property_id])
+							: TRUE;
+						
+						if ($dAdd)
 						{
-							isset($this->groupsProperties[$oProperty_Value->property_id])
-								&& $oInformationsystem_Group->addEntity($oProperty_Value);
+							$type = $oProperty_Value->Property->type;
+
+							if ($type == 8)
+							{
+								$oProperty_Value->dateFormat($oInformationsystem->format_date);
+							}
+							elseif ($type == 9)
+							{
+								$oProperty_Value->dateTimeFormat($oInformationsystem->format_datetime);
+							}
+
+							$oInformationsystem_Group->addEntity($oProperty_Value);
 						}
-					}
-					else
-					{
-						$oInformationsystem_Group->addEntities($aProperty_Values);
 					}
 				}
 				else

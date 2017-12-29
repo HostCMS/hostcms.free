@@ -3,7 +3,7 @@
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
 // Проверять остаток на складе при добавлении в корзину
-$bCheckStock = FALSE;
+$bCheckStock = TRUE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 
@@ -51,7 +51,7 @@ if (Core_Array::getRequest('_', FALSE)
 				Core_Array::get(Core_Page::instance()->libParams, 'littleCartXsl')
 			)
 		)
-		->couponText(Core_Array::get($_SESSION, 'coupon_text'))
+		->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : NULL)
 		->show();
 
 	echo json_encode(ob_get_clean());

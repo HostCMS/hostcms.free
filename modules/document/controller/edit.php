@@ -207,6 +207,12 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($modelName)
 		{
 			case 'document':
+				// Backup revision
+				if (Core::moduleIsActive('revision') && $this->_object->id)
+				{
+					$this->_object->backupRevision();
+				}
+
 				$text = Core_Array::getPost('text');
 
 				if (Core::moduleIsActive('typograph') && Core_Array::getPost('use_typograph'))
@@ -215,12 +221,6 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				$this->_object->text = $text;
-
-				// Backup revision
-				if (Core::moduleIsActive('revision'))
-				{
-					$this->_object->backupRevision();
-				}
 			break;
 		}
 

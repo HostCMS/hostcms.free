@@ -42,9 +42,10 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 		$oUsers = Core_Entity::factory('User');
 		$oUsers->queryBuilder()
 			->select('users.*')
-			->join('user_groups', 'users.user_group_id', '=', 'user_groups.id')
-			->where('users.superuser', '=', 1)
-			->where('user_groups.site_id', '!=', $this->_object->id);
+			->join('company_department_post_users', 'company_department_post_users.user_id', '=', 'users.id')
+			->join('company_sites', 'company_sites.company_id', '=', 'company_department_post_users.company_id')
+			->where('company_sites.site_id', '!=', $this->_object->id)
+			->where('users.superuser', '=', 1);
 
 		// All superusers belong to current site
 		if ($oUsers->getCount() == 0)

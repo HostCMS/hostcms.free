@@ -11,8 +11,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Skin_Bootstrap_Admin_Form_Entity_Input extends Skin_Default_Admin_Form_Entity_Input {
-
+class Skin_Bootstrap_Admin_Form_Entity_Input extends Skin_Default_Admin_Form_Entity_Input
+{
+	/**
+	 * Object has unlimited number of properties
+	 * @var boolean
+	 */
+	protected $_unlimitedProperties = TRUE;
+	
 	/**
 	 * Executes the business logic.
 	 */

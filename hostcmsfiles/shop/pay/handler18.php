@@ -88,10 +88,22 @@ class Shop_Payment_System_Handler18 extends Shop_Payment_System_Handler
 			: 0) * $this->_shopOrder->getAmount());
 	}
 
+	public function toFloat($amount)
+	{ 
+		$amount = round(floatval($amount), 2);
+		$amount = sprintf('%01.2f', $amount);
+
+		if (substr($amount, -1) == '0')
+		{
+			$amount = sprintf('%01.1f', $amount);
+		}
+		return $amount;
+	}
+	
 	public function getNotification()
 	{
 		$im_sum = $this->getSumWithCoeff();
-		$currency_name = Core_Entity::factory('Shop_Currency', $this->_rubleCurrencyId)->name;
+		$currency_name = Core_Entity::factory('Shop_Currency', $this->_rubleCurrencyId)->code;
 		$destinationUrl = sprintf("http://secure.onpay.ru/pay/%s/", htmlspecialchars($this->_userId));
 		$order_id = $this->_shopOrder->id;
 
@@ -100,7 +112,9 @@ class Shop_Payment_System_Handler18 extends Shop_Payment_System_Handler
 		$shop_path = $this->_shopOrder->Shop->Structure->getPath();
 		$handler_url = 'http://'.$site_alias.$shop_path.'cart/';
 
-		$sum_for_md5 = $im_sum . '.0';  // В магазине круглые цены, без копеек.
+		/* Сумма платежа.
+		Внимание! При формировании контрольной подписи число содержит не менее 1-го знака после запятой. Т.е. «100» в подписи будет «100.0», а не «100». Внимание! Все суммы в платежках и платежах округляются вниз до 2-ух знаков после запятой. Т.е., число «100.1155» будет округлено до «100.11». */
+		$sum_for_md5 = $this->toFloat($im_sum);
 		$md5check = md5("fix;{$sum_for_md5};{$currency_name};{$order_id};yes;{$this->_secretKey}");
 		$email = $this->_shopOrder->email;
 

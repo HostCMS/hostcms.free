@@ -86,6 +86,8 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($oldActive != $this->_object->active)
 		{
 			$this->_object->setupModule();
+			
+			$this->addMessage('<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
 		}
 
 		$this->_object->saveConfigFile(Core_Array::getPost('parameters'));

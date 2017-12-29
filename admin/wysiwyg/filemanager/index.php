@@ -27,8 +27,9 @@ $oAdmin_Form_Controller
 	->pageTitle(Core::_('Wysiwyg_Filemanager.title'));
 
 // Корневая директория для пользователя
-$oUser_Group = Core_Entity::factory('User')->getCurrent()->User_Group;
-$root_dir = ltrim(Core_File::pathCorrection($oUser_Group->root_dir), DIRECTORY_SEPARATOR);
+//$oUser_Group = Core_Entity::factory('User')->getCurrent()->User_Group;
+$oUser = Core_Entity::factory('User')->getCurrent();
+$root_dir = ltrim(Core_File::pathCorrection($oUser->root_dir), DIRECTORY_SEPARATOR);
 
 $cdir = Core_Array::getRequest('cdir', '');
 
@@ -238,6 +239,20 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oDocument_Controller_Edit);
+}
+
+// Действие "Применить"
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('apply');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'apply')
+{
+	$oApplyController = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Apply', $oAdmin_Form_Action
+	);
+
+	$oAdmin_Form_Controller->addAction($oApplyController);
 }
 
 // Действие создание директории

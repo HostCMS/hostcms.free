@@ -138,4 +138,8 @@ return array(
 	'confirm_user_subject' => 'Тема письма подтверждения оплаты пользователю',
 	'cancel_admin_subject' => 'Тема письма об отмене заказа куратору магазина',
 	'cancel_user_subject' => 'Тема письма об отмене заказа пользователю',
+	'shopRecountSet_success' => 'Комплекты пересчитаны успешно!',
+	'notification_subscribers' => 'Подписчики на уведомления',
+	'type_subscriber' => 'Введите логин сотрудника',
+	'shop_tax_id' => 'Налог по умолчанию',
 );

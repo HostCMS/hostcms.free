@@ -110,11 +110,12 @@ class Admin_Form_Model extends Core_Entity
 	 */
 	public function getSettingForUser($user_id)
 	{
-		$admin_form_settings = $this->admin_form_settings;
-		$admin_form_settings->queryBuilder()
+		$oAdmin_Form_Settings = $this->Admin_Form_Settings;
+		$oAdmin_Form_Settings
+			->queryBuilder()
 			->where('user_id', '=', $user_id);
 
-		$aAdmin_Form_Setting = $admin_form_settings->findAll();
+		$aAdmin_Form_Setting = $oAdmin_Form_Settings->findAll(FALSE);
 
 		$count = count($aAdmin_Form_Setting);
 
@@ -128,12 +129,14 @@ class Admin_Form_Model extends Core_Entity
 		}
 		else
 		{
-			array_shift($aAdmin_Form_Setting);
+			$oAdmin_Form_Setting = array_shift($aAdmin_Form_Setting);
 
-			foreach ($aAdmin_Form_Setting as $oAdmin_Form_Setting)
+			foreach ($aAdmin_Form_Setting as $oTmp_Admin_Form_Setting)
 			{
-				$oAdmin_Form_Setting->delete();
+				$oTmp_Admin_Form_Setting->delete();
 			}
+			
+			return $oAdmin_Form_Setting;
 		}
 	}
 }

@@ -112,6 +112,21 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Изменить активность"
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('changeActive');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'changeActive')
+{
+	$oSite_Controller_Changeactive = Admin_Form_Action_Controller::factory(
+		'Module_Controller_Changeactive', $oAdmin_Form_Action
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oSite_Controller_Changeactive);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Module')

@@ -331,7 +331,7 @@ class AvisosmsMCommerce {
 	 *
 	 * @return  boolean TRUE
 	 */
-	function AvisosmsMCommerce($username, $secure_hash, $service_id)
+	public function __construct($username, $secure_hash, $service_id)
 	{
 		$this->username     = $username;
 		$this->secure_hash  = $secure_hash;
@@ -363,7 +363,7 @@ class AvisosmsMCommerce {
 	 *
 	 * @return  boolean Возвращает TRUE, если status = 0, иначе FALSE
 	 */
-	function createOrder($description, $price, $success_message, $phone, $merchant_order_id = '')
+	public function createOrder($description, $price, $success_message, $phone, $merchant_order_id = '')
 	{
 		$data = array(
 			'description'       => $description,
@@ -395,7 +395,7 @@ class AvisosmsMCommerce {
 	 *
 	 * @return  boolean Возвращает TRUE, если status = 0, иначе FALSE
 	 */
-	function getOrderStatus($phone, $order_id)
+	public function getOrderStatus($phone, $order_id)
 	{
 		$data = array(
 			'phone'             => $phone,
@@ -424,7 +424,7 @@ class AvisosmsMCommerce {
 	 *
 	 * @return  boolean Возвращает TRUE, если status = 0, иначе FALSE
 	 */
-	function updateOrderStatus($data = NULL)
+	public function updateOrderStatus($data = NULL)
 	{
 		$options = array(
 			'order_id' => '',
@@ -467,7 +467,7 @@ class AvisosmsMCommerce {
 	 * @param   string      Название функции
 	 * @return  boolean Возвращает TRUE, если status = 0, иначе FALSE
 	 */
-	function send($data, $postfix)
+	public function send($data, $postfix)
 	{
 		if ($this->test) {
 			$data['test'] = true;

@@ -182,7 +182,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				array(
 					0 => Core::_('Shop_Delivery.pickup'),
 					1 => Core::_('Shop_Delivery.post'),
-					2 => Core::_('Shop_Delivery.delivery')
+					2 => Core::_('Shop_Delivery.courier')
 				)
 			)
 			->name('method')

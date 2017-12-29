@@ -18,7 +18,7 @@ class Document_Dir_Model extends Core_Entity
 	 * @var mixed
 	 */
 	public $img = 0;
-	
+
 	/**
 	 * Backend property
 	 * @var mixed
@@ -122,7 +122,7 @@ class Document_Dir_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Documents->deleteAll(FALSE);
 		$this->Document_Dirs->deleteAll(FALSE);
 
@@ -152,5 +152,36 @@ class Document_Dir_Model extends Core_Entity
 		}
 
 		return $newObject;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->getChildrenCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value($count)
+			->execute();
+	}
+	/**
+	 * Get count of items all levels
+	 * @return int
+	 */
+	public function getChildrenCount()
+	{
+		$count = $this->Documents->getCount();
+
+		$aDocument_Dirs = $this->Document_Dirs->findAll(FALSE);
+		foreach ($aDocument_Dirs as $oDocument_Dir)
+		{
+			$count += $oDocument_Dir->getChildrenCount();
+		}
+
+		return $count;
 	}
 }

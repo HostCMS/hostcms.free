@@ -23,47 +23,44 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('User_Group.choosing_site'))
-	->pageTitle(Core::_('User_Group.choosing_site'));
+	->title(Core::_('User.choosing_site'))
+	->pageTitle(Core::_('User.choosing_site'));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
-// Путь к контроллеру формы групп пользователей
-$sUserGroupsPath = '/admin/user/index.php';
+$company_department_id = Core_Array::getGet('company_department_id');
 
-$user_group_id = Core_Array::getGet('user_group_id');
+$oCompany_Department = Core_Entity::factory('Company_Department', $company_department_id);
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/user/user/index.php';
-$sAdditionalUsersParams = 'user_group_id=' . $user_group_id;
-
-$oUser_Group = Core_Entity::factory('User_Group', $user_group_id);
+$sUsersPath = '/admin/company/index.php';
+$sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group.ua_link_users_type'))
+		->name(Core::_('Company.company_show_title2', $oCompany_Department->name))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUserGroupsPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUserGroupsPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, '')
+	)
+)
+->add( // Отдел
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
 	)
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_users_title', $oUser_Group->name))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, $sAdditionalUsersParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, $sAdditionalUsersParams)
-	)
-)
-->add(
-	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User_Group.choosing_site'))
+		->name(Core::_('User.choosing_site'))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)
@@ -118,9 +115,11 @@ if ($oUser->superuser == 0)
 	$oAdmin_Form_Dataset->addCondition(
 		array('select' => array('sites.*'))
 	)->addCondition(
-		array('join' => array('user_modules', 'sites.id', '=', 'user_modules.site_id'))
+		array('join' => array('company_department_modules', 'sites.id', '=', 'company_department_modules.site_id'))
 	)->addCondition(
-		array('where' => array('user_modules.user_group_id', '=', $oUser->user_group_id))
+		array('join' => array('company_department_post_users', 'company_department_modules.company_department_id', '=', 'company_department_post_users.company_department_id'))
+	)->addCondition(
+		array('where' => array('company_department_post_users.user_id', '=', $oUser->id))
 	)->addCondition(
 		array('groupBy' => array('sites.id'))
 	);
@@ -130,13 +129,13 @@ if ($oUser->superuser == 0)
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Внешняя заменя для onclick и href
-$oAdmin_Form_Controller->addExternalReplace('{user_group_id}', $user_group_id);
+$oAdmin_Form_Controller->addExternalReplace('{company_department_id}', $company_department_id);
 
 // Change links to other form
 if (Core_Array::getGet('mode') == 'action')
 {
-	$oAdmin_Form_Dataset->changeField('name', 'link', '/admin/user/site/form/index.php?user_group_id={user_group_id}&site_id={id}&mode=action');
-	$oAdmin_Form_Dataset->changeField('name', 'onclick', "$.adminLoad({path: '/admin/user/site/form/index.php', additionalParams: 'user_group_id={user_group_id}&site_id={id}&mode=action', windowId: '{windowId}'}); return false");
+	$oAdmin_Form_Dataset->changeField('name', 'link', '/admin/user/site/form/index.php?company_department_id={company_department_id}&site_id={id}&mode=action');
+	$oAdmin_Form_Dataset->changeField('name', 'onclick', "$.adminLoad({path: '/admin/user/site/form/index.php', additionalParams: 'company_department_id={company_department_id}&site_id={id}&mode=action', windowId: '{windowId}'}); return false");
 
 	$oAdmin_Form_Controller->addExternalReplace('{mode}', 'action');
 }

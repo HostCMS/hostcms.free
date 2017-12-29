@@ -33,6 +33,7 @@ class Market_Controller extends Core_Servant_Properties
 		'total',
 		'page',
 		'limit',
+		'search',
 		'installMode',
 		'error',
 		'controller',
@@ -178,6 +179,11 @@ class Market_Controller extends Core_Servant_Properties
 			"&current=" . intval($this->page) .
 			"&limit=" . intval($this->limit);
 
+		if (strlen($this->search))
+		{
+			$url .= "&search=" . rawurlencode($this->search);
+		}
+
 		if (is_numeric($this->category_id))
 		{
 			$url .= "&category_id=" . intval($this->category_id);
@@ -225,8 +231,8 @@ class Market_Controller extends Core_Servant_Properties
 
 						$oObject->name = strval($value->name);
 						$oObject->description = strval($value->description);
-						$oObject->image_large = 'http://' . $this->update_server . strval($value->dir) . strval($value->image_large);
-						$oObject->image_small = 'http://' . $this->update_server . strval($value->dir) . strval($value->image_small);
+						$oObject->image_large = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_large);
+						$oObject->image_small = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_small);
 						$oObject->url = 'http://' . $this->update_server . strval($value->url) . '?contract=' . $md5_contract . '&pin=' . $md5_pin;
 						$oObject->siteuser_id = intval($value->siteuser_id);
 						$oObject->price = strval($value->price);
@@ -776,6 +782,8 @@ class Market_Controller extends Core_Servant_Properties
 
 				// install() для модуля, если есть
 				$oAdminModule->setupModule();
+
+				echo '<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($oAdminModule->path) . '\'})</script>';
 			}
 			else
 			{
@@ -892,15 +900,26 @@ class Market_Controller extends Core_Servant_Properties
 				$aTmp[$object->id] = $object->name;
 			}*/
 
-			$oMainTab/*->add(
-				Admin_Form_Entity::factory('Div')->class('row')*/->add(
+			$oMainTab->add(
+				Admin_Form_Entity::factory('Div')->class('row')
+				->add(
 					Admin_Form_Entity::factory('Select')
 						->name('category_id')
 						->value($this->category_id)
 						->onchange('changeCategory(this)')
 						->options($this->_aTmpOptions)
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-				// )
+						->divAttr(array('class' => 'col-xs-12 col-sm-6'))
+				)->add(
+					Admin_Form_Entity::factory('Input')
+						->name('search_query')
+						->class('form-control search-query')
+						->placeholder(Core::_('Market.search_placeholder'))
+						->divAttr(array('class' => 'col-xs-12 col-sm-6 search-query-input'))
+						->add(
+							Admin_Form_Entity::factory('Code')->html('<span class="input-group-btn"><button class="btn btn-default" type="submit" onclick="$.adminSendForm({buttonObject: $(this), action: \'sendSearchQuery\', windowId: \'id_content\'}); return false"><i class="fa fa-search fa-fw"></i></button></span>')
+					)
+					->value(Core_Array::getRequest('search_query'))
+				)
 			);
 
 			$sHtml = $this->getMarketItemsHtml();
@@ -964,7 +983,7 @@ class Market_Controller extends Core_Servant_Properties
 
 	public function getMarketItemsHtml()
 	{
-		$sHtml = '<div class="market col-xs-12">';
+		$sHtml = '<div class="market">';
 		foreach ($this->items as $object)
 		{
 			$sHtml .= $this->_getMarketItemHtml($object);
