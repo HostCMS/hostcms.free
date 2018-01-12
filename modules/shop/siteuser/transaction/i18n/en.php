@@ -27,6 +27,7 @@ return array(
 	'type' => 'Transaction type',
 	'type_typical' => 'Typical',
 	'type_bonus' => 'Bonus',
+	'type_affiliate_bonus' => 'Affiliate bonus',	
 	'changeActive_success' => 'Status changed successfully!',
 	'edit_success' => 'Transaction information modified successfully.',
 	'edit_success' => 'Transaction modified successfully.',

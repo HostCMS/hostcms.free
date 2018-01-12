@@ -541,7 +541,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$sGUID = 'ADDITIONAL-IMAGES';
 
 			$oShop = $oShopItem->Shop;
-		
+
 			clearstatcache();
 
 			$this->debug && Core_Log::instance()->clear()
@@ -812,7 +812,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		{
 			$this->_cacheProperty[$sPropertyGUID] = $oProperty;
 		}
-		
+
 		return $oProperty;
 	}
 
@@ -989,7 +989,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$aNamespaces = $this->_oSimpleXMLElement->getNamespaces(true);
 		if (count($aNamespaces))
 		{
-			list(, $this->namespace) = each($aNamespaces);
+			reset($aNamespaces);
+			$this->namespace = current($aNamespaces);
 		}
 
 		$timeout = Core::getmicrotime();
@@ -1116,6 +1117,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 						// Подменяем товар на модификацию
 						$oShopItem = $oModificationItem;
+					}
+
+					// Отключение товара после определения модификация или нет
+					$oAttributes = $oXmlItem->attributes();
+					if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален')
+					{
+						$oShopItem->active = 0;
+						$oShopItem->save();
+						continue;
 					}
 
 					$this->_checkUpdateField('marking') && $oShopItem->marking = strval($oXmlItem->Артикул);

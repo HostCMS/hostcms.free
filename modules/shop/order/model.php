@@ -1097,7 +1097,7 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Siteuser_Transaction->shop_currency_id = $this->shop_currency_id;
 					$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $fCurrencyCoefficient;
 					$oShop_Siteuser_Transaction->shop_order_id = $this->id;
-					$oShop_Siteuser_Transaction->type = 0;
+					$oShop_Siteuser_Transaction->type = 2;
 					$oShop_Siteuser_Transaction->description = Core::_('Shop_Bonus.bonus_transaction_name', $this->invoice);
 					$oShop_Siteuser_Transaction->save();
 				}

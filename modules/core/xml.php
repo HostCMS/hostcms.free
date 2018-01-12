@@ -42,7 +42,7 @@ class Core_Xml
 			{
 				$array['attr'] = array();
 
-				foreach($oXml->attributes() as $key => $attr_name)
+				foreach ($oXml->attributes() as $key => $attr_name)
 				{
 					$array['attr'][$key] = (string)$attr_name;
 				}

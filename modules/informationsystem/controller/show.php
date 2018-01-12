@@ -196,7 +196,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
-		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(/part-{part}/)(page-{page}/)(tag/{tag}/)';
+		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)(part-{part}/)(page-{page}/)(tag/{tag}/)';
+
 		$this->patternExpressions = array(
 			'part' => '\d+',
 			'page' => '\d+',
@@ -813,7 +814,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		}
 
 		$path = isset($matches['path'])
-			? Core_Str::rtrimUri($matches['path'])
+			? Core_Str::ltrimUri($matches['path'])
 			: NULL;
 
 		$this->group = 0;
@@ -1025,7 +1026,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$bIsArrayPropertiesForGroups = is_array($this->propertiesForGroups);
 
 			$oInformationsystem = $this->getEntity();
-			
+
 			foreach ($this->_aInformationsystem_Groups[$parent_id] as $oInformationsystem_Group)
 			{
 				// Properties for informationsystem's group entity
@@ -1039,7 +1040,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 						$dAdd = $bIsArrayGroupsProperties
 							? isset($this->groupsProperties[$oProperty_Value->property_id])
 							: TRUE;
-						
+
 						if ($dAdd)
 						{
 							$type = $oProperty_Value->Property->type;

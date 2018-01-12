@@ -27,6 +27,7 @@ return array(
 	'type' => 'Тип транзакции',
 	'type_typical' => 'Обычная',
 	'type_bonus' => 'Бонус',
+	'type_affiliate_bonus' => 'Партнерские начисления',
 	'changeActive_success' => 'Активность транзакции изменена.',
 	'edit_success' => 'Транзакция изменена',
 	'delete_success' => 'Элемент удален!',

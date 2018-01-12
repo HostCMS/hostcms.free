@@ -211,7 +211,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->address)?>
+					<?php
+					$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+					if (isset($aDirectory_Addresses[0]))
+					{
+						echo htmlspecialchars($aDirectory_Addresses[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -221,17 +227,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->phone)?>
-				</b>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top">
-				<?php echo Core::_("Shop_Order.order_card_fax") . ":"?>
-			</td>
-			<td valign="top">
-				<b>
-					<?php echo htmlspecialchars($oCompany->fax)?>
+					<?php
+					$aDirectory_Phones = $oCompany->Directory_Phones->findAll();
+					if (isset($aDirectory_Phones[0]))
+					{
+						echo htmlspecialchars($aDirectory_Phones[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -241,7 +243,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->email)?>
+					<?php
+					$aDirectory_Emails = $oCompany->Directory_Emails->findAll(FALSE);
+					if (isset($aDirectory_Emails[0]))
+					{
+						echo htmlspecialchars($aDirectory_Emails[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -251,7 +259,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->site)?>
+					<?php
+					$aDirectory_Websites = $oCompany->Directory_Websites->findAll(FALSE);
+					if (isset($aDirectory_Websites[0]))
+					{
+						echo htmlspecialchars($aDirectory_Websites[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>

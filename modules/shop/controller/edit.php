@@ -1125,37 +1125,4 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $aReturn;
 	}
-
-	/**
-	 * Fill notification subscribers list
-	 * @param Shop_Model $oShop shop
-	 * @return array
-	 */
-	/*protected function _fillNotificationSubscribersList()
-	{
-		$aReturnArray = array();
-
-		$oModule = Core::$modulesList['shop'];
-
-		$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
-		$oNotification_Subscribers->queryBuilder()
-			->where('notification_subscribers.module_id', '=', $oModule->id)
-			->where('notification_subscribers.type', '=', 0)
-			->where('notification_subscribers.entity_id', '=', $this->_object->id)
-			;
-
-		$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
-		foreach ($aNotification_Subscribers as $oNotification_Subscriber)
-		{
-			$oUser = $oNotification_Subscriber->User;
-
-			$aReturnArray[$oUser->id] = array(
-				'value' => $oUser->getFullName() . '%%%' . ($oUser->image ? $oUser->getImageFileHref() : ''),
-				'attr' => array('selected' => 'selected')
-			);
-		}
-
-		return $aReturnArray;
-	}*/
 }

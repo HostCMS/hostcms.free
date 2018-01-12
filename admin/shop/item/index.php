@@ -72,6 +72,33 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 	Core::showJson($aJSON);
 }
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_modification'))
+	&& !is_null(Core_Array::getGet('queryString'))
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$iShopItemId = intval(Core_Array::getGet('shop_item_id'));
+	$oShop_Item = Core_Entity::factory('Shop_Item', $iShopItemId);
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aTmp = Shop_Item_Controller_Edit::fillModificationList($oShop_Item, $sQuery);
+
+		foreach ($aTmp as $key => $value)
+		{
+			$key && $aJSON[] = array(
+				'id' => $key,
+				'label' => $value
+			);
+		}
+	}
+	
+	Core::showJson($aJSON);
+}
+
 if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));

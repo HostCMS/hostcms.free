@@ -108,11 +108,11 @@ class Core_Rss_Read
 	 */
 	public function fetchOpen($parser, $name, $attrs)
 	{
-		if (sizeof($attrs))
+		if (count($attrs))
 		{
-			while (list($k, $v) = each($attrs))
+			foreach ($attrs as $key => $value)
 			{
-				$this->_items[$this->_itemCount][mb_strtolower($name)][mb_strtolower($k)] = $v;
+				$this->_items[$this->_itemCount][mb_strtolower($name)][mb_strtolower($key)] = $value;
 			}
 		}
 

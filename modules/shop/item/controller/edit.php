@@ -403,16 +403,92 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем модификацию
 				$oAdditionalTab->delete($this->getField('modification_id'));
 
-				$oModificationSelect = Admin_Form_Entity::factory('Select');
+				$iShopGroupId = $this->_object->modification_id
+					? $this->_object->Modification->shop_group_id
+					: $this->_object->shop_group_id;
 
-				$oModificationSelect
-					->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
-					->options($this->_fillModificationList($this->_object))
-					->name('modification_id')
-					->value($this->_object->modification_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
+				$oShop_Items = Core_Entity::factory('Shop_Item');
+				$oShop_Items->queryBuilder()
+					->where('shop_id', '=', $this->_object->shop_id)
+					->where('shop_group_id', '=', $iShopGroupId);
 
-				$oMainRow3->add($oModificationSelect);
+				$iCountModifications = $oShop_Items->getCount();
+
+				if ($iCountModifications < Core::$mainConfig['switchSelectToAutocomplete'])
+				{
+					$oModificationSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
+						->options(self::fillModificationList($this->_object))
+						->name('modification_id')
+						->value($this->_object->modification_id)
+						->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
+
+					$oMainRow3->add($oModificationSelect);
+				}
+				else
+				{
+					$oModificationInput = Admin_Form_Entity::factory('Input')
+						->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
+						->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'))
+						->name('modification_name');
+
+					if ($this->_object->modification_id)
+					{
+						$oModification = Core_Entity::factory('Shop_Item', $this->_object->modification_id);
+						$oModificationInput->value($oModification->name . ' [' . $oModification->id . ']');
+					}
+
+					$oModificationInputHidden = Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+						->name('modification_id')
+						->value($this->_object->modification_id)
+						->type('hidden');
+
+					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("
+						$('[name = modification_name]').autocomplete({
+							  source: function(request, response) {
+
+								$.ajax({
+								  url: '/admin/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
+								  dataType: 'json',
+								  data: {
+									queryString: request.term
+								  },
+								  success: function( data ) {
+									response( data );
+								  }
+								});
+							  },
+							  minLength: 1,
+							  create: function() {
+								$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+									return $('<li></li>')
+										.data('item.autocomplete', item)
+										.append($('<a>').text(item.label))
+										.appendTo(ul);
+								}
+
+								 $(this).prev('.ui-helper-hidden-accessible').remove();
+							  },
+							  select: function( event, ui ) {
+								$('[name = modification_id]').val(ui.item.id);
+							  },
+							  open: function() {
+								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+							  },
+							  close: function() {
+								$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+							  }
+						});
+					");
+
+					$oMainRow3
+						->add($oModificationInput)
+						->add($oModificationInputHidden)
+						->add($oCore_Html_Entity_Script_Modification);
+				}
 
 				if (!$object->modification_id)
 				{
@@ -1061,7 +1137,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
 
-						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 						$associatedTable .= '
 							<tr id="' . $oShop_Item_Associated->id . '">
@@ -2510,7 +2586,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Fill tags list
-	 * @param Informationsystem_Item_Model $oInformationsystem_Item item
+	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
 	 */
 	protected function _fillTagsList($oShop_Item)
@@ -2535,7 +2611,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
 	 */
-	protected function _fillModificationList($oShop_Item)
+	static public function fillModificationList($oShop_Item, $like = NULL)
 	{
 		$aReturnArray = array(' … ');
 
@@ -2543,7 +2619,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $oShop_Item->Modification->shop_group_id
 			: $oShop_Item->shop_group_id;
 
-		$aTmp = Core_QueryBuilder::select('id', 'name')
+		$oQB = Core_QueryBuilder::select('id', 'name')
 			->from('shop_items')
 			->where('shop_id', '=', $oShop_Item->shop_id)
 			->where('shop_group_id', '=', $iShopGroupId)
@@ -2554,8 +2630,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->where('deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('sorting')
-			->orderBy('name')
-			->execute()->asAssoc()->result();
+			->orderBy('name');
+
+		strlen($like)
+			&& $oQB->where('shop_items.name', 'LIKE', '%' . $like . '%')->limit(10);
+
+		$aTmp = $oQB->execute()->asAssoc()->result();
 
 		foreach ($aTmp as $aItem)
 		{

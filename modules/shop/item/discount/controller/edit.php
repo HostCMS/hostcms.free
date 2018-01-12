@@ -115,7 +115,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	protected function _fillDiscounts($iShopId)
 	{
 		$aReturn = array(" … ");
-		
+
 		$aShop_Discounts = Core_Entity::factory('Shop', $iShopId)->Shop_Discounts->findAll(FALSE);
 		foreach($aShop_Discounts as $oShop_Discount)
 		{
@@ -162,8 +162,8 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				if ($shop_discount_id)
 				{
 					$oObject = Core_Entity::factory('Shop_Discount', $shop_discount_id);
-					$oShop_Item_Discount = $oShop_Item->Shop_Item_Discounts->getByDiscountId($oObject->id);
-					is_null($oShop_Item_Discount) && $oShop_Item->add($oObject);
+					is_null($oShop_Item->Shop_Item_Discounts->getByDiscountId($oObject->id))
+						&& $oShop_Item->add($oObject);
 				}
 			break;
 			case 'shop_bonus':
@@ -172,8 +172,8 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				if ($shop_bonus_id)
 				{
 					$oObject = Core_Entity::factory('Shop_Bonus', $shop_bonus_id);
-					$oShop_Item_Bonus = $oShop_Item->Shop_Item_Bonuses->getByBonusId($oObject->id);
-					is_null($oShop_Item_Bonus) && $oShop_Item->add($oObject);
+					is_null($oShop_Item->Shop_Item_Bonuses->getByBonusId($oObject->id))
+						&& $oShop_Item->add($oObject);
 				}
 			break;
 		}
@@ -189,7 +189,8 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			case 1:
 				foreach ($aModifications as $oModification)
 				{
-					$oModification->add($oObject);
+					is_null($oModification->Shop_Item_Discounts->getByDiscountId($oObject->id))
+						&& $oModification->add($oObject);
 				}
 			break;
 			case 2:

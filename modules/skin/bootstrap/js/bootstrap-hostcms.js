@@ -95,7 +95,7 @@
 			// Change window id
 			data['hostcms[window]'] = jDivWin.attr('id');
 
-			console.log(data);
+			//console.log(data);
 
 			jQuery.ajax({
 				context: jDivWin,
@@ -2558,20 +2558,33 @@
 		// Метод формирования выбранных элементов (сотрудников) в select2
 		templateSelectionItemResponsibleEmployees: function (data, item){
 
+			//console.log('$(item).parents(".select2-selection--single") = ', $(item).parents(".select2-selection--single"));
+
+			//$(item).parents(".select2-selection--single").css('{height: auto}');
+
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class"),
 				//arraySelectItemIdParts = data.id.split("_"),
-				isCreator = false;
+				isCreator = false,
 
-			// Регулярное выражение для получения id select-а, на базе которого создан данный select2
-			var regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
+				// Регулярное выражение для получения id select-а, на базе которого создан данный select2
+				regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
 				myArray = regExp.exec(data._resultId);
 
 			if (myArray)
 			{
 				// Объект select, на базе которого создан данный select2
 				var selectControlElement = $("#" + myArray[1]),
-					templateSelectionOptions = selectControlElement.data("templateSelectionOptions");
+					templateSelectionOptions = selectControlElement.data("templateSelectionOptions"),
+					selectionSingle = selectControlElement.next('.select2-container').find('.select2-selection--single');
+
+				// Если не мультиселект, добавляем контейнеру выбранного элемента класс
+				if (selectionSingle.length)
+				{
+					selectionSingle.addClass('user-container');
+				}
+
+				//console.log('selectionSingle = ', selectionSingle);
 
 				// Убираем элемент удаления (крестик) для создателя дела
 				if (templateSelectionOptions && ~templateSelectionOptions.unavailableItems.indexOf(+data.id))
@@ -2628,7 +2641,7 @@
 			});
 
 			$("body").on("click", ".deal_template_steps .deal_step", function (){
-							
+
 				// Идентификатор этапа сделки
 				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0;
 
@@ -2636,12 +2649,12 @@
 				{
 					// Идентификатор сделки
 					var dealTemplateSteps = $(this).parent('.deal_template_steps'),
-						dealId = dealTemplateSteps.data('deal-id');					
-					
+						dealId = dealTemplateSteps.data('deal-id');
+
 					if (dealTemplateSteps.data('change-by-click'))
 					{
 						//$.adminLoad({path: '/admin/deal/step/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
-						$('#id_content #row_0_' + dealId).toggleHighlight(); 
+						$('#id_content #row_0_' + dealId).toggleHighlight();
 						$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
 						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
 					}
@@ -2650,15 +2663,15 @@
 						if ($(this).hasClass('available') || $(this).hasClass('current'))
 						{
 							dealTemplateSteps.next('[name="deal_template_step_id"]').val(dealTemplateStepId);
-							
-							
+
+
 							dealTemplateSteps.children('.deal_step.clicked').each(function(){
-								
+
 								$(this).removeClass('clicked')
 							})
-							
-							$(this).hasClass('available') && $(this).addClass('clicked');							
-						}						
+
+							$(this).hasClass('available') && $(this).addClass('clicked');
+						}
 					}
 				}
 			});

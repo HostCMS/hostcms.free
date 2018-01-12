@@ -2061,7 +2061,7 @@ class Admin_Form_Controller
 			if (count($this->_datasets) == 1)
 			{
 				reset($this->_datasets);
-				list(, $oAdmin_Form_Dataset) = each($this->_datasets);
+				$oAdmin_Form_Dataset = current($this->_datasets);
 
 				$oAdmin_Form_Dataset
 					->limit($this->_limit)

@@ -112,12 +112,13 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 
 		foreach ($this->_conditions as $condition)
 		{
-			list($operator, $args) = each($condition);
-
-			if ($operator == 'orderBy')
+			foreach ($condition as $operator => $args)
 			{
-				$sortField = $args[0];
-				$sortDirection = strtoupper($args[1]);
+				if ($operator == 'orderBy')
+				{
+					$sortField = $args[0];
+					$sortDirection = strtoupper($args[1]);
+				}
 			}
 		}
 

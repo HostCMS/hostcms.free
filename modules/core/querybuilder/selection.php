@@ -317,23 +317,24 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		{
 			if (is_array($aCondition))
 			{
-				list($operator, $aWhere) = each($aCondition);
+				foreach ($aCondition as $operator => $aWhere)
+				{
+					// Skip first expression
+					if ($key)
+					{
+						$sql .= ' ' . $operator;
+					}
 
-				// Skip first expression
-				if ($key)
-				{
-					$sql .= ' ' . $operator;
-				}
-
-				if (count($aWhere) == 3 && !is_null($aWhere[1]))
-				{
-					list($column, $expression, $value) = $aWhere;
-					$sql .= ' ' . $this->_buildWhere($column, $expression, $value);
-				}
-				else
-				{
-					list($column) = $aWhere;
-					$sql .= ' ' . (is_object($column) ? $column->build() : $column);
+					if (count($aWhere) == 3 && !is_null($aWhere[1]))
+					{
+						list($column, $expression, $value) = $aWhere;
+						$sql .= ' ' . $this->_buildWhere($column, $expression, $value);
+					}
+					else
+					{
+						list($column) = $aWhere;
+						$sql .= ' ' . (is_object($column) ? $column->build() : $column);
+					}
 				}
 			}
 		}

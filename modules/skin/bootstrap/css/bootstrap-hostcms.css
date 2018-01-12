@@ -2371,13 +2371,21 @@ table.table.table-popular-queries tr td:last-child {
 	z-index: 10;
 }
 
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
+.select2-container .select2-selection--single.user-container
+{
+	height: auto;
+	padding-bottom: 6px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice,
+.select2-container--default .select2-selection__rendered
+ {
 	background-color: #F3F3F3 /*#E7F5FE*/ !important;
 	color: #333 /*#11A0F8*/ !important;
 	border-color: #eee /*#c2e8ff*/ !important;
 	font-weight: 600 !important;
 	font-size: 11px !important;
-	margin-top: 6px !important;
+	margin-top: 6px !important;	
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
 	color: #777 /*#11a0f8*/ !important;
@@ -2732,7 +2740,10 @@ li.select2-results__option .user-name, li.select2-selection__choice.user-name{
 	font-weight: 600;
 }
 li.select2-results__option .user-post { font-weight: 300; }
-li.select2-results__option .user-post, li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
+li.select2-results__option .user-post, 
+/*li.select2-selection__choice .user-post, li.select2-selection__choice .company-department*/
+.select2-selection__rendered .user-post, .select2-selection__rendered .company-department
+{
 	/* font-weight: 300; */
 	display: block;
 }

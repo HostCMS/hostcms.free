@@ -250,7 +250,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->itemsActivity = $this->groupsActivity = $this->commentsActivity = 'active'; // inactive, all
 
-		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(user-{user}/)(page-{page}/)(tag/{tag}/)(producer-{producer}/)';
+		$this->pattern = rawurldecode(Core_Str::rtrimUri($this->getEntity()->Structure->getPath())) . '({path}/)(user-{user}/)(page-{page}/)(tag/{tag}/)(producer-{producer}/)';
+
 		$this->patternExpressions = array(
 			'page' => '\d+',
 			'producer' => '\d+',
@@ -473,7 +474,7 @@ class Shop_Controller_Show extends Core_Controller
 			// Extract a slice of the array
 			$hostcmsCompare = array_slice($hostcmsCompare, 0, $this->comparingLimit, TRUE);
 
-			while (list($key) = each($hostcmsCompare))
+			foreach ($hostcmsCompare as $key => $value)
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($key);
 				if (!is_null($oShop_Item->id))
@@ -588,7 +589,7 @@ class Shop_Controller_Show extends Core_Controller
 			{
 				unset($hostcmsViewed[$currentKey]);
 			}
-			
+
 			// Extract a slice of the array
 			$hostcmsViewed = array_slice($hostcmsViewed, 0, $this->viewedLimit);
 
@@ -726,7 +727,7 @@ class Shop_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$oShop->showXmlCounts($this->calculateCounts);
-		
+
 		$this->taxes && $oShop->showXmlTaxes(TRUE);
 
 		$this->addEntity(
@@ -788,7 +789,7 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			return $this->error404();
 		}
-		
+
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
 		{
@@ -827,7 +828,7 @@ class Shop_Controller_Show extends Core_Controller
 						->groupBy('shop_items.id');
 				break;
 			}
-			
+
 			$aShop_Items = $this->_Shop_Items->findAll();
 
 			if (!$this->item)
@@ -1262,7 +1263,7 @@ class Shop_Controller_Show extends Core_Controller
 				->setOr()
 				->where('shop_items.shop_group_id', '=', 0)
 				->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Modifications);
-				
+
 			// Совместное modificationsList + filterShortcuts
 			if ($this->filterShortcuts)
 			{
@@ -1273,7 +1274,7 @@ class Shop_Controller_Show extends Core_Controller
 					->where('shop_items.active', '=', 1)
 					->where('shop_items.shop_group_id', '=', $shop_group_id)
 					->where('shop_items.shortcut_id', '>', 0);
-					
+
 				$this->_Shop_Items
 					->queryBuilder()
 					->setOr()
@@ -1364,7 +1365,7 @@ class Shop_Controller_Show extends Core_Controller
 		}
 
 		$path = isset($matches['path'])
-			? Core_Str::rtrimUri($matches['path'])
+			? Core_Str::ltrimUri($matches['path'])
 			: NULL;
 
 		$this->group = 0;
@@ -1612,6 +1613,8 @@ class Shop_Controller_Show extends Core_Controller
 			$bIsArrayGroupsProperties = is_array($this->groupsProperties);
 			$bIsArrayPropertiesForGroups = is_array($this->propertiesForGroups);
 
+			$oShop = $this->getEntity();
+
 			foreach ($this->_aShop_Groups[$parent_id] as $oShop_Group)
 			{
 				// Properties for shop's group entity
@@ -1625,18 +1628,18 @@ class Shop_Controller_Show extends Core_Controller
 						$dAdd = $bIsArrayGroupsProperties
 							? isset($this->groupsProperties[$oProperty_Value->property_id])
 							: TRUE;
-						
+
 						if ($dAdd)
 						{
 							$type = $oProperty_Value->Property->type;
 
 							if ($type == 8)
 							{
-								$oProperty_Value->dateFormat($oInformationsystem->format_date);
+								$oProperty_Value->dateFormat($oShop->format_date);
 							}
 							elseif ($type == 9)
 							{
-								$oProperty_Value->dateTimeFormat($oInformationsystem->format_datetime);
+								$oProperty_Value->dateTimeFormat($oShop->format_datetime);
 							}
 
 							$oShop_Group->addEntity($oProperty_Value);
@@ -1856,7 +1859,7 @@ class Shop_Controller_Show extends Core_Controller
 							->title($sTitle)
 					)
 			);
-			
+
 			// Delete
 			$sPath = '/admin/shop/item/index.php';
 			$sAdditional = "hostcms[action]=markDeleted&shop_id={$oShop->id}&shop_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
@@ -1961,7 +1964,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			// Стандартные ограничения для товаров
 			$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
-			
+
 			$oSubMinMaxQueryBuilder
 				->setOr()
 				->where('shop_items.shop_group_id', '=', 0)

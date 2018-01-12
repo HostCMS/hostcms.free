@@ -1132,7 +1132,7 @@ class Shop_Group_Model extends Core_Entity
 				'seo_title' => $this->seo_title,
 				'seo_description' => $this->seo_description,
 				'seo_keywords' => $this->seo_keywords,
-				'informationsystem_id' => $this->shop_id,
+				'shop_id' => $this->shop_id,
 				'siteuser_group_id' => $this->siteuser_group_id,
 				'user_id' => $this->user_id
 			);

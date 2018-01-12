@@ -1275,9 +1275,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		if (is_array($this->_POST[$name]))
 		{
-			list(, $val) = each($this->_POST[$name]);
+			reset($this->_POST[$name]);
+			$val = current($this->_POST[$name]);
+
 			return $val;
 		}
+
 		return $this->_POST[$name];
 	}
 

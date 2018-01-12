@@ -40,7 +40,7 @@ return array(
 	'sex' => '<acronym title="Пол сотрудника">Пол</acronym>',
 	'male' => 'Мужской',
 	'female' => 'Женский',
-	'dismissed' => '<acronym title="Числится уволенным">Уволен</acronym>',
+	'dismissed' => '<acronym title="Сотрудник уволен">Уволен</acronym>',
 	'freelance' => '<acronym title="Работает вне штата компании">Внештатный</acronym>',
 	'birthday' => '<acronym title="Дата рождения">День рождения</acronym>',
 	'address' => '<acronym title="Адрес проживания">Адрес</acronym>',

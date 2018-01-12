@@ -577,6 +577,17 @@ class Core_Str
 	}
 
 	/**
+	 * Cut first and last slash
+	 * @param string URI
+	 * @return string
+	 */
+	static public function trimUri($uri)
+	{
+		return self::ltrimUri(self::rtrimUri($uri));
+	}
+
+	
+	/**
 	 * Cut first slash
 	 * @param string URI
 	 * @return string

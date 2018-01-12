@@ -895,10 +895,6 @@ class Market_Controller extends Core_Servant_Properties
 		{
 			$this->_aTmpOptions = array(Core::_('Market.select_section'));
 			$this->_getCategoryOptions(0);
-			/*foreach($this->_categories as $object)
-			{
-				$aTmp[$object->id] = $object->name;
-			}*/
 
 			$oMainTab->add(
 				Admin_Form_Entity::factory('Div')->class('row')

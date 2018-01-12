@@ -142,6 +142,7 @@ class User_Model extends Core_Entity
 			->where('users.login', '=', $login)
 			->where('users.password', '=', Core_Hash::instance()->hash($password))
 			->where('users.active', '=', 1)
+			->where('users.dismissed', '=', 0)
 			->limit(1);
 
 		$aUsers = $this->findAll(FALSE);
