@@ -642,8 +642,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopTabExport->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')),$oGuidRow);
 				$oShopTabExport->move($this->getField('yandex_market_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
 				$oShopTabExport->move($this->getField('yandex_market_sales_notes_default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
-				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabExportRow2);
-				$oShopTabExport->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
 
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
 

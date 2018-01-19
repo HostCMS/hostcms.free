@@ -64,7 +64,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	protected $_sorting = array(
 		'shop_order_items.id' => 'ASC',
 	);
-	
+
 	/**
 	 * Forbidden tags. If list of tags is empty, all tags will show.
 	 * @var array
@@ -140,7 +140,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Order_Item_Digitals->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -222,24 +222,27 @@ class Shop_Order_Item_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		if ($this->_showXmlItem && $this->Shop_Item->id)
+		if ($this->_showXmlItem && $this->shop_item_id)
 		{
-			$oShop_Item = $this->Shop_Item
-				->clearEntities()
-				->showXmlProperties($this->_showXmlProperties);
+			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			// Parent item for modification
-			if ($this->Shop_Item->modification_id)
+			if (!is_null($oShop_Item) && $oShop_Item->active)
 			{
-				$oModification = Core_Entity::factory('Shop_Item')->find($this->Shop_Item->modification_id);
-				!is_null($oModification->id) && $oShop_Item->addEntity(
-					$oModification->showXmlProperties($this->_showXmlProperties)
-				);
-			}
-
-			$this->addEntity(
 				$oShop_Item
-			);
+					->clearEntities()
+					->showXmlProperties($this->_showXmlProperties);
+
+				// Parent item for modification
+				if ($oShop_Item->modification_id)
+				{
+					$oModification = Core_Entity::factory('Shop_Item')->find($oShop_Item->modification_id);
+					!is_null($oModification->id) && $oShop_Item->addEntity(
+						$oModification->showXmlProperties($this->_showXmlProperties)
+					);
+				}
+
+				$this->addEntity($oShop_Item);
+			}
 		}
 
 		$this->clearXmlTags()
