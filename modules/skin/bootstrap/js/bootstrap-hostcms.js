@@ -238,6 +238,10 @@
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
 		},
+		insertSeoTemplate: function(el, text) {
+			if (el == undefined) { return; }
+			el.insertAtCaret(text);
+		},
 		filterToggleField: function(object)
 		{
 			var filterId = object.data('filter-field-id'),
@@ -2558,7 +2562,7 @@
 		// Метод формирования выбранных элементов (сотрудников) в select2
 		templateSelectionItemResponsibleEmployees: function (data, item){
 
-			//console.log('$(item).parents(".select2-selection--single") = ', $(item).parents(".select2-selection--single"));
+			console.log('$(item).parents(".select2-selection--single") = ', $(item).parents(".select2-selection--single"));
 
 			//$(item).parents(".select2-selection--single").css('{height: auto}');
 
@@ -2679,6 +2683,31 @@
 	});
 
 	jQuery.fn.extend({
+		insertAtCaret: function(newValue){
+		  return this.each(function(i) {
+			if (document.selection) {
+			  //For browsers like Internet Explorer
+			  this.focus();
+			  sel = document.selection.createRange();
+			  sel.text = newValue;
+			  this.focus();
+			}
+			else if (this.selectionStart || this.selectionStart == '0') {
+			  //For browsers like Firefox and Webkit based
+			  var startPos = this.selectionStart;
+			  var endPos = this.selectionEnd;
+			  var scrollTop = this.scrollTop;
+			  this.value = this.value.substring(0, startPos) + newValue + this.value.substring(endPos, this.value.length);
+			  this.focus();
+			  this.selectionStart = startPos + newValue.length;
+			  this.selectionEnd = startPos + newValue.length;
+			  this.scrollTop = scrollTop;
+			} else {
+			  this.value += newValue;
+			  this.focus();
+			}
+		  })
+		},
 		/* --- CHAT --- */
 		addChatBadge: function(count)
 		{

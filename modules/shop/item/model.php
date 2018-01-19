@@ -465,7 +465,7 @@ class Shop_Item_Model extends Core_Entity
 	}*/
 
 	/**
-	 * Show item's currency
+	 * Get item's currency
 	 * @return string
 	 */
 	public function adminCurrency()
@@ -475,6 +475,39 @@ class Shop_Item_Model extends Core_Entity
 			: $this;
 
 		return htmlspecialchars($oShopItem->Shop_Currency->name);
+	}
+
+	/**
+	 * Get currency name
+	 * @return string
+	 */
+	public function currencyName()
+	{
+		return $this->shop_currency_id
+			? $this->Shop_Currency->name
+			: '';
+	}
+
+	/**
+	 * Get producer name
+	 * @return string
+	 */
+	public function producerName()
+	{
+		return $this->shop_producer_id
+			? $this->Shop_Producer->name
+			: '';
+	}
+
+	/**
+	 * Get seller name
+	 * @return string
+	 */
+	public function sellerName()
+	{
+		return $this->shop_seller_id
+			? $this->Shop_Seller->name
+			: '';
 	}
 
 	/**
@@ -2562,7 +2595,7 @@ class Shop_Item_Model extends Core_Entity
 				if ($oTmp_Shop_Item->shop_currency_id)
 				{
 					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
-					
+
 					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
 				}
 				else

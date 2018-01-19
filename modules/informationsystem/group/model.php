@@ -220,6 +220,26 @@ class Informationsystem_Group_Model extends Core_Entity
 	}
 
 	/**
+	 * Get group path with separator
+	 * @return string
+	 */
+	public function groupPathWithSeparator($separator = ' → ')
+	{
+		$aParentGroups = array();
+
+		$aTmpGroup = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentGroups[] = $aTmpGroup->name;
+		} while($aTmpGroup = $aTmpGroup->getParent());
+
+		$sParents = implode($separator, array_reverse($aParentGroups));
+
+		return $sParents;
+	}
+
+	/**
 	 * Save object.
 	 *
 	 * @return Core_Entity

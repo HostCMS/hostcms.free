@@ -228,4 +228,104 @@ class Shop_Controller
 
 		return $aTmp[$sourceMeasure] * $value / $aTmp[$destMeasure];
 	}
+
+	static public function showGroupButton()
+	{
+		$html = '
+			<script>
+				var lastFocusedGroup;
+				$("textarea[name^=\'seo_group_\']").focus(function() {
+				  lastFocusedGroup = $(document.activeElement);
+				});
+			</script>
+			<div class="btn-group pull-right">
+				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-default" role="menu">
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{shop.name\}\')">' . Core::_("Shop.seo_template_shop_name") . '</a>
+					</li>
+					<li class="divider"></li>
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_group") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.name\}\')">' . Core::_("Shop.seo_template_group_name") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
+					</li>
+				</ul>
+			</div>
+		';
+
+		return $html;
+	}
+
+	static public function showItemButton()
+	{
+		$html = '
+			<script>
+				var lastFocusedItem;
+				$("textarea[name^=\'seo_item_\']").focus(function() {
+				  lastFocusedItem = $(document.activeElement);
+				});
+			</script>
+			<div class="btn-group pull-right">
+				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
+				<a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-default" role="menu">
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_shop") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{shop.name\}\')">' . Core::_("Shop.seo_template_shop_name") . '</a>
+					</li>
+					<li class="divider"></li>
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_group") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.name\}\')">' . Core::_("Shop.seo_template_group_name") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
+					</li>
+					<li class="divider"></li>
+					<li class="disabled">
+						<a class="bold">' . Core::_("Shop.seo_template_item") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.name\}\')">' . Core::_("Shop.seo_template_item_name") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.description\}\')">' . Core::_("Shop.seo_template_item_description") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.text\}\')">' . Core::_("Shop.seo_template_item_text") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.currencyName\}\')">' . Core::_("Shop.seo_template_item_currency") . '</a>
+					</li>
+				</ul>
+			</div>
+		';
+
+		return $html;
+	}
 }

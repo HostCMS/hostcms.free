@@ -347,10 +347,10 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		$price->addChild('ИдТипаЦены', $this->_retailPriceGUID);
 		$price->addChild('ЦенаЗаЕдиницу', $oShopItem->price);
 		$price->addChild('Представление',
-						sprintf('%s %s за %s',
-								$oShopItem->price,
-								$oShopItem->Shop_Currency->code,
-								$oShopItem->Shop_Measure->name));
+			sprintf('%s %s за %s',
+					$oShopItem->price,
+					$oShopItem->Shop_Currency->code,
+					$oShopItem->Shop_Measure->name));
 		$price->addChild('Единица', $oShopItem->Shop_Measure->name);
 		$proposal->addChild('Количество', $oShopItem->getRest());
 

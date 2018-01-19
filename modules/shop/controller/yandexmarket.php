@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
  * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
+ * - purchase(TRUE|FALSE) экспортировать товары в «Заказ на Маркете».
  * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
  * - recommended(TRUE|FALSE) экспортировать рекомендованные товары, по умолчанию FALSE.
@@ -57,6 +58,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	protected $_allowedProperties = array(
 		'itemsProperties',
 		'outlets',
+		'purchase',
 		'paymentMethod',
 		'modifications',
 		'recommended',
@@ -98,18 +100,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @var array
 	 */
 	protected $_aSiteuserGroups = array();
-
-	/**
-	 * List's offer tags
-	 * @var array
-	 */
-	public $aOfferTags = array(
-		'adult' => 'adult',
-		'cpa' => 'cpa',
-		'age-year' => 'age-year',
-		'age-month' => 'age-month',
-		'barcode' => 'barcode',
-	);
 
 	/**
 	 * List's vendor tags
@@ -271,7 +261,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->itemsProperties = $this->modifications = $this->deliveryOptions
 			= $this->checkAvailable = TRUE;
 
-		$this->recommended = $this->checkRest = $this->outlets = FALSE;
+		$this->recommended = $this->checkRest = $this->outlets = $this->purchase = FALSE;
 
 		$this->paymentMethod = array();
 
@@ -358,6 +348,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				->groupBy('shop_items.id')
 				->having(Core_QueryBuilder::expression('SUM(shop_warehouse_items.count)'), '>', 0);
 		}
+
+		$this->purchase && $oShop_Item->queryBuilder()->where('shop_items.cpa', '=', 1);
 
 		Core_Event::notify(get_class($this) . '.onBeforeSelectShopItems', $this, array($oShop_Item));
 
@@ -780,6 +772,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
 		}
+
+		/* cpa */
+		$this->stdOut->write('<cpa>' . $oShop_Item->cpa .  '</cpa>' . "\n");
 
 		/* rec */
 		if ($this->recommended)
@@ -1619,6 +1614,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
 		}
+
+		$this->stdOut->write('<cpa>' . $oShop->cpa . '</cpa>' . "\n");
 
 		/* Товары */
 		$this->_offers();

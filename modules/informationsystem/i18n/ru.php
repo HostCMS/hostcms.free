@@ -107,7 +107,7 @@ return array(
 	'comment_mail_subject' => 'Добавление комментария/ответа на сайт',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	
+
 	'widget_title' => 'Комментарии',
 	'widget_other_comments' => 'Другие комментарии',
 	'date' => 'Дата',
@@ -115,10 +115,33 @@ return array(
 	'subject_not_found' => 'Тема отсутствует',
 	'tag' => 'Метка: %s',
 	'deleteEmptyDirs_success' => 'Пустые директории удалены!',
-	
+
 	'structureIsExist' => 'Уже существует информационная система, связанная с узлом структуры "%s"!',
-	
+
 	'schedule-searchIndexItem' => 'Индексировать информационный элемент',
 	'schedule-searchIndexGroup' => 'Индексировать группу информационных элементов',
-	'schedule-searchUnindexItem' => 'Снять информационный элемент с индексации',	
+	'schedule-searchUnindexItem' => 'Снять информационный элемент с индексации',
+
+	'tab_seo_templates' => 'Шаблоны SEO',
+	'seo_group_header' => 'Шаблоны информационных групп',
+	'seo_item_header' => 'Шаблоны информационных элементов',
+	'seo_group_title_template' => 'Шаблон title',
+	'seo_group_description_template' => 'Шаблон description',
+	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_item_title_template' => 'Шаблон title',
+	'seo_item_description_template' => 'Шаблон description',
+	'seo_item_keywords_template' => 'Шаблон keywords',
+
+	'seo_template_informationsystem' => 'Информационная система',
+	'seo_template_informationsystem_name' => 'Название системы',
+	'seo_template_group' => 'Группа',
+	'seo_template_group_name' => 'Название группы',
+	'seo_template_group_description' => 'Описание группы',
+	'seo_template_group_path' => 'Путь группы',
+	'seo_template_group_page_number' => 'Номер страницы',
+	'seo_template_group_page' => 'страница',
+	'seo_template_item' => 'Элемент',
+	'seo_template_item_name' => 'Название элемента',
+	'seo_template_item_description' => 'Описание элемента',
+	'seo_template_item_text' => 'Текст элемента',
 );

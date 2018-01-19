@@ -772,6 +772,14 @@ class Informationsystem_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	protected $_seoGroupTitle = NULL;
+	protected $_seoGroupDescription = NULL;
+	protected $_seoGroupKeywords = NULL;
+
+	protected $_seoItemTitle = NULL;
+	protected $_seoItemDescription = NULL;
+	protected $_seoItemKeywords = NULL;
+
 	/**
 	 * Parse URL and set controller properties
 	 * @return informationsystem_Controller_Show
@@ -783,6 +791,22 @@ class Informationsystem_Controller_Show extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
 		$oInformationsystem = $this->getEntity();
+
+		// Group: set shop's SEO templates
+		$oInformationsystem->seo_group_title_template != ''
+			&& $this->_seoGroupTitle = $oInformationsystem->seo_group_title_template;
+		$oInformationsystem->seo_group_description_template != ''
+			&& $this->_seoGroupDescription = $oInformationsystem->seo_group_description_template;
+		$oInformationsystem->seo_group_keywords_template != ''
+			&& $this->_seoGroupKeywords = $oInformationsystem->seo_group_keywords_template;
+
+		// Item: set shop's SEO templates
+		$oInformationsystem->seo_item_title_template != ''
+			&& $this->_seoItemTitle = $oInformationsystem->seo_item_title_template;
+		$oInformationsystem->seo_item_description_template != ''
+			&& $this->_seoItemDescription = $oInformationsystem->seo_item_description_template;
+		$oInformationsystem->seo_item_keywords_template != ''
+			&& $this->_seoItemKeywords = $oInformationsystem->seo_item_keywords_template;
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
@@ -842,6 +866,22 @@ class Informationsystem_Controller_Show extends Core_Controller
 					if (in_array($oInformationsystem_Group->getSiteuserGroupId(), $this->_aSiteuserGroups))
 					{
 						$this->group = $oInformationsystem_Group->id;
+
+						// Group: set informationsystem's SEO templates
+						$oInformationsystem_Group->seo_group_title_template != ''
+							&& $this->_seoGroupTitle = $oInformationsystem_Group->seo_group_title_template;
+						$oInformationsystem_Group->seo_group_description_template != ''
+							&& $this->_seoGroupDescription = $oInformationsystem_Group->seo_group_description_template;
+						$oInformationsystem_Group->seo_group_keywords_template != ''
+							&& $this->_seoGroupKeywords = $oInformationsystem_Group->seo_group_keywords_template;
+
+						// Item: set informationsystem's SEO templates
+						$oInformationsystem->seo_item_title_template != ''
+							&& $this->_seoItemTitle = $oInformationsystem->seo_item_title_template;
+						$oInformationsystem->seo_item_description_template != ''
+							&& $this->_seoItemDescription = $oInformationsystem->seo_item_description_template;
+						$oInformationsystem->seo_item_keywords_template != ''
+							&& $this->_seoItemKeywords = $oInformationsystem->seo_item_keywords_template;
 					}
 					else
 					{
@@ -886,14 +926,139 @@ class Informationsystem_Controller_Show extends Core_Controller
 				}
 			}
 		}
-		elseif (is_null($path))
+		elseif (is_null($path) && Core::$url['path'] != '/')
 		{
 			return $this->error404();
 		}
 
+		$seo_title = $seo_description = $seo_keywords = NULL;
+
+		// Apply SEO templates
+		if ($this->item)
+		{
+			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
+
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('informationsystem', $oInformationsystem)
+				->addObject('group', $oInformationsystem_Item->Informationsystem_Group)
+				->addObject('item', $oInformationsystem_Item)
+				->addObject('this', $this);
+
+			// Title
+			if ($oInformationsystem_Item->seo_title != '')
+			{
+				$seo_title = $oInformationsystem_Item->seo_title;
+			}
+			elseif ($this->_seoItemTitle != '')
+			{
+				$seo_title = $oCore_Meta->apply($this->_seoItemTitle);
+			}
+			else
+			{
+				$seo_title = $oInformationsystem_Item->name;
+			}
+
+			// Description
+			if ($oInformationsystem_Item->seo_description != '')
+			{
+				$seo_description = $oInformationsystem_Item->seo_description;
+			}
+			elseif ($this->_seoItemDescription != '')
+			{
+				$seo_description = $oCore_Meta->apply($this->_seoItemDescription);
+			}
+			else
+			{
+				$seo_description = $oInformationsystem_Item->name;
+			}
+
+			// Keywords
+			if ($oInformationsystem_Item->seo_keywords != '')
+			{
+				$seo_keywords = $oInformationsystem_Item->seo_keywords ;
+			}
+			elseif ($this->_seoItemKeywords != '')
+			{
+				$seo_keywords = $oCore_Meta->apply($this->_seoItemKeywords);
+			}
+			else
+			{
+				$seo_keywords = $oInformationsystem_Item->name;
+			}
+		}
+		elseif ($this->group)
+		{
+			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+
+			$oCore_Meta = new Core_Meta();
+			$oCore_Meta
+				->addObject('informationsystem', $oInformationsystem)
+				->addObject('group', $oInformationsystem_Group)
+				->addObject('this', $this);
+
+			// Title
+			if ($oInformationsystem_Group->seo_title != '')
+			{
+				$seo_title = $oInformationsystem_Group->seo_title;
+			}
+			elseif ($this->_seoGroupTitle != '')
+			{
+				$seo_title = $oCore_Meta->apply($this->_seoGroupTitle);
+			}
+			else
+			{
+				$seo_title = $oInformationsystem_Group->name;
+			}
+
+			// Description
+			if ($oInformationsystem_Group->seo_description != '')
+			{
+				$seo_description = $oInformationsystem_Group->seo_description;
+			}
+			elseif ($this->_seoGroupDescription != '')
+			{
+				$seo_description = $oCore_Meta->apply($this->_seoGroupDescription);
+			}
+			else
+			{
+				$seo_description = $oInformationsystem_Group->name;
+			}
+
+			// Keywords
+			if ($oInformationsystem_Group->seo_keywords != '')
+			{
+				$seo_keywords = $oInformationsystem_Group->seo_keywords ;
+			}
+			elseif ($this->_seoGroupKeywords != '')
+			{
+				$seo_keywords = $oCore_Meta->apply($this->_seoGroupKeywords);
+			}
+			else
+			{
+				$seo_keywords = $oInformationsystem_Group->name;
+			}
+		}
+
+		$seo_title != '' && Core_Page::instance()->title($seo_title);
+		$seo_description != '' && Core_Page::instance()->description($seo_description);
+		$seo_keywords != '' && Core_Page::instance()->keywords($seo_keywords);
+
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Get page number with template $template
+	 * @param $template template, e.g. ", page %d"
+	 * @return string
+	 */
+	public function pageNumber($template = "%d")
+	{
+		return $this->page > 0
+			? sprintf($template, $this->page + 1)
+			: '';
 	}
 
 	/**

@@ -50,4 +50,13 @@ return array(
 	'move_success' => 'Product groups transferred successfully',
 	'items_catalog_image' => "<acronym title=\"Group image\">Group image</acronym>",
 	'items_catalog_image_small' => "<acronym title=\"Small group image\">Small group image</acronym>",
+	'tab_seo_templates' => 'SEO templates',
+	'seo_group_header' => 'Group templates',
+	'seo_item_header' => 'Item templates',
+	'seo_group_title_template' => 'TITLE template',
+	'seo_group_description_template' => 'DESCRIPTION template',
+	'seo_group_keywords_template' => 'KEYWORDS template',
+	'seo_item_title_template' => 'TITLE template',
+	'seo_item_description_template' => 'DESCRIPTION template',
+	'seo_item_keywords_template' => 'KEYWORDS template',
 );

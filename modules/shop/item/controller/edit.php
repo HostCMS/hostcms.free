@@ -194,6 +194,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('pickup'), $oShopItemTabExportImport)
 					->move($this->getField('store'), $oShopItemTabExportImport)
 					->move($this->getField('adult'), $oShopItemTabExportImport)
+					->move($this->getField('cpa'), $oShopItemTabExportImport)
 					->move($this->getField('seo_title')->rows(3), $oShopItemTabSEO)
 					->move($this->getField('seo_description')->rows(3), $oShopItemTabSEO)
 					->move($this->getField('seo_keywords')->rows(3), $oShopItemTabSEO)
@@ -212,6 +213,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('pickup')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow5)
 					->move($this->getField('store')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow5)
 					->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemTabExportImportRow6)
+					->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemTabExportImportRow6)
 				;
 
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
@@ -1270,6 +1272,51 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->addTabAfter($oShopGroupSeoTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Group.tab_group_seo'))
 					->name('SEO'), $oShopGroupDescriptionTab);
+
+				$this->addTabAfter($oShopTabSeoTemplates = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Shop_Group.tab_seo_templates'))
+					->name('Seo_Templates'), $oShopGroupSeoTab);
+
+				$oShopTabSeoTemplates
+					->add($oShopGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+				$oShopGroupBlock
+					->add($oShopGroupHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Shop_Group.seo_group_header"))
+					)
+					->add($oShopGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopGroupHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showGroupButton()
+					));
+
+				$oShopItemBlock
+					->add($oShopItemHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Shop_Group.seo_item_header"))
+					)
+					->add($oShopItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopItemHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showItemButton()
+					));
+
+				// Seo templates
+				$oMainTab
+					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow1)
+					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow2)
+					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow3)
+					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow1)
+					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow2)
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow3);
 
 				$this->addTabAfter($oShopGroupImportExportTab =
 					Admin_Form_Entity::factory('Tab')

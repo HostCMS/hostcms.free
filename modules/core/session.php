@@ -66,7 +66,7 @@ class Core_Session
 	public function __construct()
 	{
 		$this->_dataBase = Core_DataBase::instance();
-
+		
 		if (is_null($this->_lockPrefix))
 		{
 			$aDataBaseConfig = $this->_dataBase->getConfig();
@@ -88,6 +88,13 @@ class Core_Session
 	{
 		if (!self::$_started)
 		{
+			// Destroy existing session started by session.auto_start
+			if (session_id())
+			{
+				session_unset();
+				session_destroy();
+			}
+			
 			$oCore_Session = new self();
 			session_set_save_handler(
 				array($oCore_Session, 'sessionOpen'),
@@ -342,7 +349,7 @@ class Core_Session
 	{
 		self::$_maxlifetime = $maxlifetime;
 
-		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		if (!self::$_started && (!defined('DENY_INI_SET') || !DENY_INI_SET))
 		{
 			ini_set('session.gc_maxlifetime', $maxlifetime);
 		}

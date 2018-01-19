@@ -1349,7 +1349,7 @@ div.wrongTime {color: #AAA}
 div.inactive, .line-through {text-decoration: line-through}
 .thin { font-weight: 300 }
 .semi-bold {font-weight: 600}
-.bold {font-weight: 700}
+.bold {font-weight: 700 !important;}
 .extra-bold {font-weight: 800}
 
 .large-link {font-weight: 400; font-size: 20px }
@@ -2371,10 +2371,16 @@ table.table.table-popular-queries tr td:last-child {
 	z-index: 10;
 }
 
-.select2-container .select2-selection--single.user-container
+/*.select2-container .select2-selection--single.user-container*/
+.select2-container .select2-selection--single
 {
 	height: auto;
 	padding-bottom: 6px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered
+{
+	margin-top: 6px !important;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice,
@@ -2385,7 +2391,7 @@ table.table.table-popular-queries tr td:last-child {
 	border-color: #eee /*#c2e8ff*/ !important;
 	font-weight: 600 !important;
 	font-size: 11px !important;
-	margin-top: 6px !important;	
+	/*margin-top: 6px !important;*/
 }
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
 	color: #777 /*#11a0f8*/ !important;
@@ -2736,16 +2742,33 @@ td.user-avatar img
     width: 30px;
 }
 
+
+
+.select2-container--default .select2-selection--single.user-container .select2-selection__rendered
+{
+	line-height: normal;
+}
+.select2-container--default .select2-selection--single.user-container .select2-selection__clear
+{
+	line-height: 34px;
+}
+
 li.select2-results__option .user-name, li.select2-selection__choice.user-name{
 	font-weight: 600;
 }
-li.select2-results__option .user-post { font-weight: 300; }
-li.select2-results__option .user-post, 
+li.select2-results__option .user-post, .select2-selection--single.user-container .user-post { font-weight: 300; }
+li.select2-results__option .user-post,
 /*li.select2-selection__choice .user-post, li.select2-selection__choice .company-department*/
 .select2-selection__rendered .user-post, .select2-selection__rendered .company-department
 {
 	/* font-weight: 300; */
 	display: block;
+}
+
+.select2-selection__rendered .select2-selection__placeholder
+{
+	display: block;
+	height: 32px;
 }
 
 li.select2-results__option.company-department{
@@ -2756,7 +2779,9 @@ li.select2-selection__choice .user-post {
 	font-weight: 300;
 }
 
-li.select2-selection__choice .user-post, li.select2-selection__choice .company-department{
+li.select2-selection__choice .user-post, li.select2-selection__choice .company-department,
+.select2-selection--single.user-container .user-post, .select2-selection--single.user-container  .company-department
+{
 	font-size: 10px;
 	overflow: hidden;
 }
@@ -3132,7 +3157,7 @@ a.fc-day-number { color: #999 !important; }
 	/*#00c853;*/
 }
 
-form.adminForm .deal_step 
+form.adminForm .deal_step
 {
 	padding: 15px 25px;
 }
@@ -3192,3 +3217,49 @@ form.adminForm .deal_step
 }
 
 #caldav-dropdown li > a:hover { cursor: pointer; }
+
+.dropdown-menu > li > a:hover { cursor: pointer; }
+
+/*.dropdown-submenu {
+    position:relative;
+}
+.dropdown-submenu > .dropdown-menu {
+    top:0;
+    left:100%;
+    margin-top:-6px;
+    margin-left:-1px;
+    -webkit-border-radius:0 6px 6px 6px;
+    -moz-border-radius:0 6px 6px 6px;
+    border-radius:0 6px 6px 6px;
+}
+.dropdown-submenu > .dropdown-menu a:hover { cursor: pointer; }
+.dropdown-menu > li.dropdown-submenu > a { padding-right: 20px; }
+.dropdown-submenu:hover>.dropdown-menu {
+    display:block;
+}
+.dropdown-submenu > a:after {
+    display:block;
+    content:" ";
+    float:right;
+    width:0;
+    height:0;
+    border-color:transparent;
+    border-style:solid;
+    border-width:5px 0 5px 5px;
+    border-left-color:#cccccc;
+    margin-top:5px;
+    margin-right:-10px;
+}
+.dropdown-submenu:hover > a:after {
+    border-left-color:#ffffff;
+}
+.dropdown-submenu.pull-left {
+    float:none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+    left:-100%;
+    margin-left:10px;
+    -webkit-border-radius:6px 0 6px 6px;
+    -moz-border-radius:6px 0 6px 6px;
+    border-radius:6px 0 6px 6px;
+}*/

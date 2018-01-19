@@ -50,16 +50,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
-			$aParentGroups = array();
-
-			$aTmpGroup = $oInformationsystem_Group;
-
-			// Добавляем все директории от текущей до родителя.
-			do {
-				$aParentGroups[] = $aTmpGroup->name;
-			} while($aTmpGroup = $aTmpGroup->getParent());
-
-			$sParents = implode(' → ', array_reverse($aParentGroups));
+			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
 
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
@@ -555,9 +546,9 @@ $oAdmin_Form_Dataset
 	//->changeField('name', 'type', 1)
 	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
 	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
-	
+
 // Change field type
-$oAdmin_Form_Dataset->changeField('img', 'type', 10);	
+$oAdmin_Form_Dataset->changeField('img', 'type', 10);
 
 	// Добавляем источник данных контроллеру формы
 	$oAdmin_Form_Controller->addDataset(

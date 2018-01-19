@@ -698,19 +698,14 @@ class User_Model extends Core_Entity
 	 */
 	public function department()
 	{
-		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
-
 		$aTempDepartmentPost = array();
 
-		$i = 0;
-
-		foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
+		foreach($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
 		{
-			$aTempDepartmentPost[] = '<div ' . ( $i ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
+			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
 				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
-
-			$i++;
 		}
 
 		echo implode('', $aTempDepartmentPost);

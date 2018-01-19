@@ -51,16 +51,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 
 		foreach ($aShop_Groups as $oShop_Group)
 		{
-			$aParentGroups = array();
-
-			$aTmpGroup = $oShop_Group;
-
-			// Добавляем все директории от текущей до родителя.
-			do {
-				$aParentGroups[] = $aTmpGroup->name;
-			} while($aTmpGroup = $aTmpGroup->getParent());
-
-			$sParents = implode(' → ', array_reverse($aParentGroups));
+			$sParents = $oShop_Group->groupPathWithSeparator();
 
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
@@ -95,7 +86,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			);
 		}
 	}
-	
+
 	Core::showJson($aJSON);
 }
 

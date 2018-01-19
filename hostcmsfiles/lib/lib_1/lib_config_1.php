@@ -115,7 +115,7 @@ if (!is_null($Informationsystem_Controller_Show->tag) && Core::moduleIsActive('t
 	}
 }
 
-if ($Informationsystem_Controller_Show->group)
+/*if ($Informationsystem_Controller_Show->group)
 {
 	$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $Informationsystem_Controller_Show->group);
 
@@ -155,7 +155,7 @@ if ($Informationsystem_Controller_Show->item)
 if ($Informationsystem_Controller_Show->page)
 {
 	array_unshift($aTitle, $pageName . ' ' . ($Informationsystem_Controller_Show->page + 1));
-}
+}*/
 
 if (count($aTitle) > 1)
 {

@@ -70,4 +70,13 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'tab_export' => 'Экспорт/Импорт',
 	'guid' => '<acronym title="Уникальный идентификатор элемента, например ID00029527">GUID</acronym>',
+	'tab_seo_templates' => 'Шаблоны SEO',
+	'seo_group_header' => 'Шаблоны информационных групп',
+	'seo_item_header' => 'Шаблоны информационных элементов',
+	'seo_group_title_template' => 'Шаблон title',
+	'seo_group_description_template' => 'Шаблон description',
+	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_item_title_template' => 'Шаблон title',
+	'seo_item_description_template' => 'Шаблон description',
+	'seo_item_keywords_template' => 'Шаблон keywords',
 );

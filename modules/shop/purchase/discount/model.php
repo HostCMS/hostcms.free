@@ -197,4 +197,43 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 
 		return parent::getXml();
 	}
+	
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->type == 0
+			? $this->value . '%'
+			: $this->value . htmlspecialchars($this->shop_currency_id ? ' ' . $this->Shop_Currency->name : '');
+	}
+	
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function min_amountBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->min_amount == 0
+			? '—'
+			: $this->min_amount;
+	}
+	
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function max_amountBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->max_amount == 0
+			? '—'
+			: $this->max_amount;
+	}
 }

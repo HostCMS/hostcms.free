@@ -81,8 +81,6 @@ class Site_Model extends Core_Entity
 		'structure_menu' => array(),
 		'template' => array(),
 		'template_dir' => array(),
-		'user_module' => array(),
-		'user_group' => array(),
 		'company_department_action_access' => array(),
 		'company_department_module' => array(),
 		'company_site' => array(),
@@ -300,10 +298,6 @@ class Site_Model extends Core_Entity
 
 		$this->Templates->deleteAll(FALSE);
 		$this->Template_Dirs->deleteAll(FALSE);
-
-		$this->User_Groups->deleteAll(FALSE);
-		
-		$this->User_Modules->deleteAll(FALSE);
 
 		// Удаление доп. св-в структуры сайта
 		$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $this->id);
