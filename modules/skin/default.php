@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -108,7 +108,7 @@ class Skin_Default extends Core_Skin
 			?><link type="text/css" href="<?php echo $sPath . '?' . $timestamp?>" rel="stylesheet" /><?php
 			echo PHP_EOL;
 		}?>
-		<script type="text/javascript">if(!window.jQuery) {document.write('<scri'+'pt type="text/javascript" src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
+		<script type="text/javascript">if (!window.jQuery) {document.write('<scri'+'pt type="text/javascript" src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
 
 		<?php
 		$this->addJs("/modules/skin/bootstrap/js/lng/{$lng}/{$lng}.js");

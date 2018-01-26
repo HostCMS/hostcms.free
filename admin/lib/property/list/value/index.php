@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -97,7 +97,7 @@ if ($iLibDirId)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, $additionalParams)
 				);
-		} while($oLibDir = $oLibDir->getParent());
+		} while ($oLibDir = $oLibDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

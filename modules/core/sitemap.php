@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -414,7 +414,7 @@ class Core_Sitemap extends Core_Servant_Properties
 				$aTags = $oTags->findAll(FALSE);
 				foreach ($aTags as $oTag)
 				{
-					$this->addNode($path . 'tag/' . $oTag->path . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
+					$this->addNode($path . 'tag/' . rawurlencode($oTag->path) . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
 				}
 
 				$iFrom += $this->limit;
@@ -585,7 +585,7 @@ class Core_Sitemap extends Core_Servant_Properties
 				$aTags = $oTags->findAll(FALSE);
 				foreach ($aTags as $oTag)
 				{
-					$this->addNode($path . 'tag/' . $oTag->path . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
+					$this->addNode($path . 'tag/' . rawurlencode($oTag->path) . '/', $oStructure->changefreq, $oStructure->priority, $oTag);
 				}
 
 				$iFrom += $this->limit;

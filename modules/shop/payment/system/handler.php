@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -377,6 +377,7 @@ abstract class Shop_Payment_System_Handler
 	 * Создание нового заказа на основе данных, указанных в orderParams
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeProcessOrder
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
+	 * @hostcms-event Shop_Payment_System_Handler.onAfterAddShopOrderItem
 	 */
 	protected function _processOrder()
 	{
@@ -464,6 +465,8 @@ abstract class Shop_Payment_System_Handler
 						$oShop_Item_Reserved->save();
 					}
 
+					Core_Event::notify('Shop_Payment_System_Handler.onAfterAddShopOrderItem', $this, array($oShop_Order_Item, $oShop_Cart));
+					
 					// Delete item from the cart
 					$Shop_Cart_Controller
 						->shop_item_id($oShop_Cart->shop_item_id)

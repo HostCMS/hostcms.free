@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Property_Model extends Core_Entity
 {
@@ -86,7 +86,7 @@ class Lib_Property_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aLibPropertyListValues = $this->lib_property_list_values->findAll();
-		foreach($aLibPropertyListValues as $oLibPropertyListValue)
+		foreach ($aLibPropertyListValues as $oLibPropertyListValue)
 		{
 			$newObject->add(clone $oLibPropertyListValue);
 		}

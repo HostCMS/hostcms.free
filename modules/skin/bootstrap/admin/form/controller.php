@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -807,7 +807,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 												{
 													$src = $value_array[$value];
 												}
-												elseif(isset($value_array['']))
+												elseif (isset($value_array['']))
 												{
 													$src = $value_array[''];
 												}
@@ -820,7 +820,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 												{
 													$ico = $ico_array[$value];
 												}
-												elseif(isset($ico_array['']))
+												elseif (isset($ico_array['']))
 												{
 													$ico = $ico_array[''];
 												}

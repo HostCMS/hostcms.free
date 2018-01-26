@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-01-26';
 
 	/**
 	 * Module name
@@ -191,7 +191,7 @@ class Shop_Module extends Core_Module
 		$aShopGroups = $oShopGroup->findAll(FALSE);
 
 		$result = array();
-		foreach($aShopGroups as $oShopGroup)
+		foreach ($aShopGroups as $oShopGroup)
 		{
 			$result[] = $oShopGroup->indexing();
 		}
@@ -257,7 +257,7 @@ class Shop_Module extends Core_Module
 
 		$result = array();
 
-		foreach($aShopItems as $oShopItem)
+		foreach ($aShopItems as $oShopItem)
 		{
 			$result[] = $oShopItem->indexing();
 		}
@@ -297,7 +297,7 @@ class Shop_Module extends Core_Module
 		$aShopSellers = $oShopSeller->findAll();
 
 		$result = array();
-		foreach($aShopSellers as $oShopSeller)
+		foreach ($aShopSellers as $oShopSeller)
 		{
 			$result[] = $oShopSeller->indexing();
 		}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -117,7 +117,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$aReturn = array(" … ");
 
 		$aShop_Discounts = Core_Entity::factory('Shop', $iShopId)->Shop_Discounts->findAll(FALSE);
-		foreach($aShop_Discounts as $oShop_Discount)
+		foreach ($aShop_Discounts as $oShop_Discount)
 		{
 			$aReturn[$oShop_Discount->id] = $oShop_Discount->name;
 		}
@@ -135,7 +135,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$aReturn = array(" … ");
 
 		$aShop_Bonuses = Core_Entity::factory('Shop', $iShopId)->Shop_Bonuses->findAll(FALSE);
-		foreach($aShop_Bonuses as $oShop_Bonus)
+		foreach ($aShop_Bonuses as $oShop_Bonus)
 		{
 			$aReturn[$oShop_Bonus->id] = $oShop_Bonus->name;
 		}

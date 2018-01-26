@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -198,7 +198,7 @@ class Shop_Delivery_Model extends Core_Entity
 			$oShop_Delivery_Conditions->queryBuilder()->offset($offset)->limit($limit);
 			$aShop_Delivery_Conditions = $oShop_Delivery_Conditions->findAll(FALSE);
 
-			foreach($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
+			foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
 			{
 				$oNew_Shop_Delivery_Condition = $oShop_Delivery_Condition->copy();
 				$newObject->add($oNew_Shop_Delivery_Condition);
@@ -231,7 +231,7 @@ class Shop_Delivery_Model extends Core_Entity
 		$this->deleteImage();
 
 		// Удаляем обработчик
-		if(is_file($this->getHandlerFilePath()))
+		if (is_file($this->getHandlerFilePath()))
 		{
 			try
 			{

@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -66,7 +66,7 @@ Admin_Form_Entity::factory('Breadcrumb')
 );
 
 // Крошки по директориям магазинов
-if($oInformationsystem_Dir->id)
+if ($oInformationsystem_Dir->id)
 {
 	$oInformationsystemDirBreadcrumbs = $oInformationsystem_Dir;
 
@@ -83,7 +83,7 @@ if($oInformationsystem_Dir->id)
 				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		));
 	}
-	while($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
+	while ($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -123,7 +123,7 @@ if ($oInformationsystem_Group->id)
 					'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 			));
 	}
-	while($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
+	while ($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

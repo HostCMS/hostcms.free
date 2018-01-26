@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller
 {
@@ -259,7 +259,7 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
-						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>
@@ -301,7 +301,7 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
-						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.pageNumber \x22, ' . Core::_("Shop.seo_template_group_page") . ' %d\x22\}\')">' . Core::_("Shop.seo_template_group_page_number") . '</a>

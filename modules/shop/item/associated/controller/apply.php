@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Associated_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {
@@ -47,7 +47,7 @@ class Shop_Item_Associated_Controller_Apply extends Admin_Form_Action_Controller
 
 				$oShopItemAssociated = $oShopItem->Shop_Item_Associateds->getByAssociatedId($this->_object->id);
 
-				if(is_null($oShopItemAssociated))
+				if (is_null($oShopItemAssociated))
 				{
 					$oShopItemAssociated = Core_Entity::factory('Shop_Item_Associated');
 

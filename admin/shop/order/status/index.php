@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -63,7 +63,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
-if($iShopDirId)
+if ($iShopDirId)
 {
 	// Далее генерируем цепочку хлебных крошек от текущей группы к корневой
 	$oShopDir = Core_Entity::factory('Shop_Dir')->find($iShopDirId);
@@ -91,7 +91,7 @@ if($iShopDirId)
 					$sNextFormPath, NULL, NULL, $additionalParams
 				)
 			);
-	} while($oShopDir = $oShopDir->getParent());
+	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

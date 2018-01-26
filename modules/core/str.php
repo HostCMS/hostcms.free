@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Str
 {
@@ -303,6 +303,14 @@ class Core_Str
 	}
 
 	/**
+	 * Callback function
+	 */
+	static protected function _callbackChr($matches)
+	{
+		return chr($matches[1]);
+	}
+
+	/**
 	 * Метод очищает HTML от ненужных тегов, хеширует и возвращает массив хэшей слов
 	 *
 	 * @param string $text исходный текст;
@@ -391,7 +399,7 @@ class Core_Str
 
 		$text = preg_replace($search, $replace, $text);
 
-		$text = preg_replace_callback('(&#(\d+);)', create_function('$matches', 'return chr($matches[1]);'), $text);
+		$text = preg_replace_callback('(&#(\d+);)', 'Core_Str::_callbackChr', $text);
 
 		$text = str_replace($aConfig['separators'], ' ', $text);
 
@@ -457,6 +465,11 @@ class Core_Str
 			: $int % 10;
 
 		return $word . $aEndings[$lastInt];
+	}
+
+	static protected function _stripTagsCallback($matches)
+	{
+
 	}
 
 	/**
@@ -586,7 +599,7 @@ class Core_Str
 		return self::ltrimUri(self::rtrimUri($uri));
 	}
 
-	
+
 	/**
 	 * Cut first slash
 	 * @param string URI
@@ -646,7 +659,7 @@ class Core_Str
 		{
 			$hex = str_split($hex, 2);
 		}
-		elseif(strlen($hex) == 3)
+		elseif (strlen($hex) == 3)
 		{
 			$hex = array($hex[0] . $hex[0], $hex[1] . $hex[1], $hex[2] . $hex[2]);
 		}
@@ -672,9 +685,9 @@ class Core_Str
 
 		return $return;
 	}
-	
+
 	/**
-	 * Lighter HEX color 
+	 * Lighter HEX color
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
 	 * @param float opacity between 0 and 1, e.g. 0.85
 	 */
@@ -694,7 +707,7 @@ class Core_Str
 		{
 			$hex = str_split($hex, 2);
 		}
-		elseif(strlen($hex) == 3)
+		elseif (strlen($hex) == 3)
 		{
 			$hex = array($hex[0] . $hex[0], $hex[1] . $hex[1], $hex[2] . $hex[2]);
 		}
@@ -711,9 +724,9 @@ class Core_Str
 			$k = $iColor + floor((255 - $iColor) * $opacity);
 			$rgb[$key] = $k < 255 ? $k : 255;
 		}
-		
+
 		$rgb = array_map('dechex', $rgb);
-		
+
 		return '#' . implode('', $rgb);
 	}
 }

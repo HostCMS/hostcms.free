@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Affiliate
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Level_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -96,7 +96,7 @@ class Affiliate_Plan_Level_Controller_Edit extends Admin_Form_Action_Controller_
 
 		$aReturn = array();
 
-		foreach($aAffiliatePlans as $oAffiliatePlan)
+		foreach ($aAffiliatePlans as $oAffiliatePlan)
 		{
 			$aReturn[$oAffiliatePlan->id] = $oAffiliatePlan->name;
 		}

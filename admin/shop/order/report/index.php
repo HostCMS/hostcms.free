@@ -6,7 +6,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -42,7 +42,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 ;
 
 // Крошки по директориям магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$oShopDirBreadcrumbs = $oShopDir;
 
@@ -56,7 +56,7 @@ if($oShopDir->id)
 					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -74,7 +74,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}")));
 
 // Крошки по группам товаров
-if($oShopGroup->id)
+if ($oShopGroup->id)
 {
 	$oShopGroupBreadcrumbs = $oShopGroup;
 	$aBreadcrumbs = array();
@@ -87,7 +87,7 @@ if($oShopGroup->id)
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 					'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -116,7 +116,7 @@ $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
 
 
 // Обработка данных формы
-if(!is_null(Core_Array::getPost('do_show_report')))
+if (!is_null(Core_Array::getPost('do_show_report')))
 {
 	$sDateFrom = Core_Date::datetime2sql(Core_Array::getPost('sales_order_begin_date') . ' 00:00:00');
 	$sDateTo = Core_Date::datetime2sql(Core_Array::getPost('sales_order_end_date') . ' 23:59:59');
@@ -156,25 +156,25 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 		->orderBy('order_title')
 	;
 
-	if($shop_system_of_pay_id = Core_Array::getPost('shop_system_of_pay_id',0))
+	if ($shop_system_of_pay_id = Core_Array::getPost('shop_system_of_pay_id',0))
 	{
 		$oQueryBuilderSelect->where('shop_orders.shop_payment_system_id', '=', $shop_system_of_pay_id);
 	}
 
-	if(!is_null($iSeller = Core_Array::getPost('shop_seller_id')) && $iSeller > 0)
+	if (!is_null($iSeller = Core_Array::getPost('shop_seller_id')) && $iSeller > 0)
 	{
 		$oQueryBuilderSelect
 			->join('shop_items', 'shop_items.id', '=', 'shop_order_items.shop_item_id')
 			->where('shop_items.shop_seller_id', '=', $iSeller);
 	}
 
-	if(!is_null(Core_Array::getPost('sales_order_show_only_paid_items')))
+	if (!is_null(Core_Array::getPost('sales_order_show_only_paid_items')))
 	{
 		$oQueryBuilderSelect->where('shop_orders.paid', '=', 1);
 	}
 
 	$iOrderStatusID = Core_Array::getPost('shop_order_status_id', 0);
-	if($iOrderStatusID != 0)
+	if ($iOrderStatusID != 0)
 	{
 		$oQueryBuilderSelect->where('shop_orders.shop_order_status_id', '=', $iOrderStatusID);
 	}
@@ -194,7 +194,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 
 	$aOrdersResultPeriodParsed = array();
 
-	foreach($aOrdersResultPeriod as $aTmpArray)
+	foreach ($aOrdersResultPeriod as $aTmpArray)
 	{
 		$aOrdersResultPeriodParsed[
 			$aTmpArray['date_title'].' ' . $aTmpArray['year']
@@ -219,7 +219,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 	</div>
 	<?php
 
-	if(count($aOrdersResult) > 0)
+	if (count($aOrdersResult) > 0)
 	{
 		?>
 		<div class="widget counter">
@@ -293,7 +293,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 					$StWeekJ = $StJ - ($DayStJ-1) * $DayLen;
 
 					// Если 1 января относится к 1й неделе, то в $week получается одна "лишняя" неделя
-					if( gmdate("W",$StJ) == "01" )$week--;
+					if ( gmdate("W",$StJ) == "01" )$week--;
 
 					// прибавили к началу "январской" недели номер нашей недели
 					$start = $StWeekJ + $week * $WeekLen;
@@ -329,9 +329,9 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 			<?php
 			++$i;
 
-			if(!is_null(Core_Array::getPost('sales_order_show_list_items')))
+			if (!is_null(Core_Array::getPost('sales_order_show_list_items')))
 			{
-				if(count($aOrdersResultPeriodParsed[$rowOrdersResult['date_title'] . ' ' . $rowOrdersResult['year']]) > 0)
+				if (count($aOrdersResultPeriodParsed[$rowOrdersResult['date_title'] . ' ' . $rowOrdersResult['year']]) > 0)
 				{
 					$oShop_Orders = Core_Entity::factory('Shop_Order');
 					$oShop_Orders->queryBuilder()
@@ -347,7 +347,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 							{
 								$payment_system_string = '';
 
-								if(!is_null(Core_Entity::factory('Shop_Payment_System')->find($oShop_Order->shop_payment_system_id)->id))
+								if (!is_null(Core_Entity::factory('Shop_Payment_System')->find($oShop_Order->shop_payment_system_id)->id))
 								{
 									$payment_system_string = ' (' . htmlspecialchars(Core_Entity::factory('Shop_Payment_System', $oShop_Order->shop_payment_system_id)->name) . ')';
 								}
@@ -364,7 +364,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 						// Получаем список товаров данного заказа
 						$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll(FALSE);
 
-						foreach($aShopOrderItems as $oShopOrderItem)
+						foreach ($aShopOrderItems as $oShopOrderItem)
 						{
 							?>
 							<tr class="row_table report_height">
@@ -583,7 +583,7 @@ else
 
 	$aSellers = array(' … ');
 	$aShop_Sellers = $oShop->Shop_Sellers->findAll();
-	foreach($aShop_Sellers as $oShop_Seller)
+	foreach ($aShop_Sellers as $oShop_Seller)
 	{
 		$aSellers[$oShop_Seller->id] = $oShop_Seller->name;
 	}
@@ -598,7 +598,7 @@ else
 
 	$aPaySystems = array(' … ');
 	$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
-	foreach($aShop_Payment_Systems as $oShop_Payment_System)
+	foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 	{
 		$aPaySystems[$oShop_Payment_System->id] = $oShop_Payment_System->name;
 	}

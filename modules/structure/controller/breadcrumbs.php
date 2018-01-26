@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Breadcrumbs extends Core_Controller
 {
@@ -412,7 +412,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			$this->addBreadcrumb($oStructure->clearEntities());
 
 			Core_Event::notify(get_class($this) . '.onAfterAddStructure', $this, array($oStructure));
-		} while($oStructure = $oStructure->getParent());
+		} while ($oStructure = $oStructure->getParent());
 
 		$this->_breadcrumbs = array_reverse($this->_breadcrumbs);
 

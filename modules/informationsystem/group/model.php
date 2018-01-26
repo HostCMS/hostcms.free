@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -223,7 +223,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * Get group path with separator
 	 * @return string
 	 */
-	public function groupPathWithSeparator($separator = ' → ')
+	public function groupPathWithSeparator($separator = ' → ', $offset = 0)
 	{
 		$aParentGroups = array();
 
@@ -232,8 +232,11 @@ class Informationsystem_Group_Model extends Core_Entity
 		// Добавляем все директории от текущей до родителя.
 		do {
 			$aParentGroups[] = $aTmpGroup->name;
-		} while($aTmpGroup = $aTmpGroup->getParent());
+		} while ($aTmpGroup = $aTmpGroup->getParent());
 
+		$offset > 0
+			&& $aParentGroups = array_slice($aParentGroups, $offset);
+		
 		$sParents = implode($separator, array_reverse($aParentGroups));
 
 		return $sParents;
@@ -292,7 +295,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getGroupPath());
 			$oPropertyValue->delete();
@@ -330,7 +333,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		}
 
 		$aChildrenGroups = $this->Informationsystem_Groups->findAll();
-		foreach($aChildrenGroups as $oChildrenGroup)
+		foreach ($aChildrenGroups as $oChildrenGroup)
 		{
 			$oChild = $oChildrenGroup->copy();
 			$oChild->parent_id = $newObject->id;
@@ -338,7 +341,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		}
 
 		$aInformationsystem_Items = $this->Informationsystem_Items->findAll();
-		foreach($aInformationsystem_Items as $oInformationsystem_Item)
+		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{
 			$newObject->add($oInformationsystem_Item->copy());
 			// Recount for current group
@@ -346,7 +349,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -1044,7 +1047,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		$aGroupIDs = array();
 
 		$aInformationsystem_Groups = $this->findAll();
-		foreach($aInformationsystem_Groups as $oInformationsystem_Group)
+		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$aGroupIDs = array_merge($aGroupIDs, array($oInformationsystem_Group->id), $oInformationsystem_Group->Informationsystem_Groups->getGroupChildrenId());
 		}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Dir_Model extends Core_Entity
 {
@@ -148,13 +148,13 @@ class Property_Dir_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aChildrenDirs = $this->Property_Dirs->findAll();
-		foreach($aChildrenDirs as $oChildrenDir)
+		foreach ($aChildrenDirs as $oChildrenDir)
 		{
 			$newObject->add($oChildrenDir->copy());
 		}
 
 		$aProperties = $this->Properties->findAll();
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$newObject->add($oProperty->copy(FALSE));
 		}

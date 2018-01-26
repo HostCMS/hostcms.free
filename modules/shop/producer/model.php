@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -310,7 +310,7 @@ class Shop_Producer_Model extends Core_Entity
 
 		$aShop_Producers = $oShop_Producers->findAll();
 
-		foreach($aShop_Producers as $oShop_Producer)
+		foreach ($aShop_Producers as $oShop_Producer)
 		{
 			$oShop_Producer->default = 0;
 			$oShop_Producer->update();

@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session
 {
@@ -66,7 +66,7 @@ class Core_Session
 	public function __construct()
 	{
 		$this->_dataBase = Core_DataBase::instance();
-		
+
 		if (is_null($this->_lockPrefix))
 		{
 			$aDataBaseConfig = $this->_dataBase->getConfig();
@@ -89,21 +89,13 @@ class Core_Session
 		if (!self::$_started)
 		{
 			// Destroy existing session started by session.auto_start
-			if (session_id())
+			if (is_null(self::$_handler) && session_id())
 			{
 				session_unset();
 				session_destroy();
 			}
-			
-			$oCore_Session = new self();
-			session_set_save_handler(
-				array($oCore_Session, 'sessionOpen'),
-				array($oCore_Session, 'sessionClose'),
-				array($oCore_Session, 'sessionRead'),
-				array($oCore_Session, 'sessionWrite'),
-				array($oCore_Session, 'sessionDestroyer'),
-				array($oCore_Session, 'sessionGc')
-			);
+
+			self::_setSessionHandler();
 
 			//$expires = self::getMaxLifeTime();
 			$expires = 31536000;
@@ -142,6 +134,29 @@ class Core_Session
 		}
 
 		return TRUE;
+	}
+
+	static protected $_handler = NULL;
+
+	/**
+	 * Registers session handler
+	 */
+	static protected function _setSessionHandler()
+	{
+		//if (is_null(self::$_handler))
+		//{
+			self::$_handler = TRUE;
+
+			$oCore_Session = new self();
+			session_set_save_handler(
+				array($oCore_Session, 'sessionOpen'),
+				array($oCore_Session, 'sessionClose'),
+				array($oCore_Session, 'sessionRead'),
+				array($oCore_Session, 'sessionWrite'),
+				array($oCore_Session, 'sessionDestroyer'),
+				array($oCore_Session, 'sessionGc')
+			);
+		//}
 	}
 
 	/**

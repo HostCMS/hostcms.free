@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -117,11 +117,11 @@ $aSeo_Sites = $oSeo_Sites->findAll(FALSE);
 
 function mysort($a, $b)
 {
-	if($a['total'] > $b['total'])
+	if ($a['total'] > $b['total'])
 	{
 		return -1;
 	}
-	elseif($a['total'] == $b['total'])
+	elseif ($a['total'] == $b['total'])
 	{
 		return 0;
 	}
@@ -412,7 +412,7 @@ if (count($aTmpPagesFirstBlock))
 <?php
 }
 
-if(count($aLinks))
+if (count($aLinks))
 {
 ?>
 <div class="row">

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -17,7 +17,7 @@ $sAdminFormAction = '/admin/benchmark/url/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-if(!is_null($constantValue = Core_Array::getPost('constantValue', NULL))
+if (!is_null($constantValue = Core_Array::getPost('constantValue', NULL))
 	&& isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 	&& $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest')
 {
@@ -174,7 +174,7 @@ $iTmpTimestamp = strtotime(date('Y-m-d 00:00:00', $iOneMonthAgo));
 $endTime = strtotime(date('Y-m-d 23:59:59'));
 
 $aTmp = array();
-while($iTmpTimestamp < $endTime)
+while ($iTmpTimestamp < $endTime)
 {
 	$aTmp[$iTmpTimestamp] = 0;
 	$iTmpTimestamp += 3600 * 24;
@@ -202,14 +202,14 @@ $iStructureId && $oBenchmark_Url
 
 $aBenchmark_Urls = $oBenchmark_Url->findAll(FALSE);
 
-foreach($aBenchmark_Urls as $oBenchmark_Url)
+foreach ($aBenchmark_Urls as $oBenchmark_Url)
 {
 	$aTmp[strtotime(date('Y-m-d 00:00:00', Core_Date::sql2timestamp($oBenchmark_Url->datetime)))] = $oBenchmark_Url;
 }
 
 $aTitlesPerDay = $aLoadDomValuesPerDay = $aLoadPageValuesPerDay = $aDnsValuesPerDay = $aServerValuesPerDay = array();
 
-foreach($aTmp as $key => $oBenchmark_Url)
+foreach ($aTmp as $key => $oBenchmark_Url)
 {
 	$aTitlesPerDay[] = $key * 1000;
 	$aLoadDomValuesPerDay[] = is_object($oBenchmark_Url) ? $oBenchmark_Url->waiting_time_avr : 0;
@@ -248,18 +248,18 @@ $aTitlesPerHour = $aLoadDomValuesPerHour = $aLoadPageValuesPerHour
 $iTmpTimestamp = strtotime(date('Y-m-d H:59:59', $iOneDayAgo));
 $aTmp = array();
 
-while($iTmpTimestamp < time())
+while ($iTmpTimestamp < time())
 {
 	$aTmp[$iTmpTimestamp] = 0;
 	$iTmpTimestamp += 3600;
 }
 
-foreach($aBenchmark_Urls as $oBenchmark_Url)
+foreach ($aBenchmark_Urls as $oBenchmark_Url)
 {
 	$aTmp[strtotime(date('Y-m-d H:59:59', Core_Date::sql2timestamp($oBenchmark_Url->datetime)))] = $oBenchmark_Url;
 }
 
-foreach($aTmp as $key => $oBenchmark_Url)
+foreach ($aTmp as $key => $oBenchmark_Url)
 {
 	$aTitlesPerHour[] = $key * 1000;
 	$aLoadDomValuesPerHour[] = is_object($oBenchmark_Url) ? $oBenchmark_Url->waiting_time_avr : 0;

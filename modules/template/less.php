@@ -294,7 +294,7 @@ class Template_Less {
 		$unique = array();
 		$comments = array();
 
-		foreach($lines as $line) {
+		foreach ($lines as $line) {
 			if (strpos($line, '/*') === 0) {
 				$comments[] = $line;
 				continue;
@@ -995,20 +995,20 @@ class Template_Less {
 
 		$fullpath = $this->findImport($url);
 
-		if($fullpath && ($fsize = filesize($fullpath)) !== false) {
+		if ($fullpath && ($fsize = filesize($fullpath)) !== false) {
 			// IE8 can't handle data uris larger than 32KB
-			if($fsize/1024 < 32) {
-				if(is_null($mime)) {
-					if(class_exists('finfo')) { // php 5.3+
+			if ($fsize/1024 < 32) {
+				if (is_null($mime)) {
+					if (class_exists('finfo')) { // php 5.3+
 						$finfo = new finfo(FILEINFO_MIME);
 						$mime = explode('; ', $finfo->file($fullpath));
 						$mime = $mime[0];
-					} elseif(function_exists('mime_content_type')) { // PHP 5.2
+					} elseif (function_exists('mime_content_type')) { // PHP 5.2
 						$mime = mime_content_type($fullpath);
 					}
 				}
 
-				if(!is_null($mime)) // fallback if the mime type is still unknown
+				if (!is_null($mime)) // fallback if the mime type is still unknown
 					$url = sprintf('data:%s;base64,%s', $mime, base64_encode(file_get_contents($fullpath)));
 			}
 		}
@@ -1074,7 +1074,7 @@ class Template_Less {
 	}
 
 	protected function lib_round($arg) {
-		if($arg[0] != "list") {
+		if ($arg[0] != "list") {
 			$value = $this->assertNumber($arg);
 			return array("number", round($value), $arg[2]);
 		} else {
@@ -1580,7 +1580,7 @@ class Template_Less {
 				if (isset(self::$cssColors[$name])) {
 					$rgba = explode(',', self::$cssColors[$name]);
 
-					if(isset($rgba[3]))
+					if (isset($rgba[3]))
 						return array('color', $rgba[0], $rgba[1], $rgba[2], $rgba[3]);
 
 					return array('color', $rgba[0], $rgba[1], $rgba[2]);

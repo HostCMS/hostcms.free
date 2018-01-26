@@ -164,6 +164,30 @@
 		{
 			$.clientRequest({path: path + '?ajaxLoad&shop_country_location_city_id=' + shop_country_location_city_id, 'callBack': $.clientSelectOptionsCallback, context: $('#shop_country_location_city_area_id')});
 		},
+		loadCityByName: function(shopCountryId, cityName, cartUrl)
+		{
+			$('#shop_country_location_city_area_id').clearSelect();
+			$.clientRequest({path: cartUrl + '?ajaxLoad&shop_country_id=' + shopCountryId + '&city_name=' + cityName, 'callBack': $.loadCityByNameCallback, context: $('#shop_country_location_city_id')});
+		},
+		loadCityByNameCallback: function(data, status, jqXHR) {
+			$.loadingScreen('hide');
+
+			if (data.result)
+			{
+				$('select[name = shop_country_location_id]')
+					.find('option[value = "' + data.result.shop_country_location_id + '"]')
+					.prop("selected", true);
+
+				for (var key in data.cities)
+				{
+					jQuery(this).append(jQuery('<option>').attr('value', key.substr(1)).text(data.cities[key]));
+				}
+				
+				$('select[name = shop_country_location_city_id]')
+					.find('option[value = "' + data.result.shop_country_location_city_id + '"]')
+					.prop("selected", true);				
+			}
+		},
 		friendOperations: function(data, status, jqXHR) {
 			$.loadingScreen('hide');
 			var $this = jQuery(this);

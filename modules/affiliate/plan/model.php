@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Affiliate
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Model extends Core_Entity
 {
@@ -103,7 +103,7 @@ class Affiliate_Plan_Model extends Core_Entity
 			->Shop_Affiliate_Plans
 			->getByShop_id($oShop->id);
 
-		if(is_null($oShopAffiliatePlan))
+		if (is_null($oShopAffiliatePlan))
 		{
 			$this->add($oShop);
 		}
@@ -120,7 +120,7 @@ class Affiliate_Plan_Model extends Core_Entity
 			->Shop_Affiliate_Plans
 			->getByShop_id($oShop->id);
 
-		if(!is_null($oShopAffiliatePlan))
+		if (!is_null($oShopAffiliatePlan))
 		{
 			$oShopAffiliatePlan->delete();
 		}
@@ -139,7 +139,7 @@ class Affiliate_Plan_Model extends Core_Entity
 			->Shop_Affiliate_Plans
 			->getByShop_id($oShop->id);
 
-		if(is_null($oShopAffiliatePlan))
+		if (is_null($oShopAffiliatePlan))
 		{
 			$oAffiliatePlan->add($oShop);
 		}

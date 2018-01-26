@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -144,7 +144,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					break;
 				}
 				array_shift($b);
-			} while(count($b) > 1);
+			} while (count($b) > 1);
 
 			if (hexdec($a[1]) & (~(Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & abs(Core::crc32($c)) ^ Core::convert64b32(hexdec($a[2])))))
 			{
@@ -254,7 +254,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			if ($oSiteuser)
 			{
 				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
-				foreach($aSiteuser_Groups as $aSiteuserGroup)
+				foreach ($aSiteuser_Groups as $aSiteuserGroup)
 				{
 					$aSiteuserGroups[] = $aSiteuserGroup->id;
 				}

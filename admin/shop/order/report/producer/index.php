@@ -6,7 +6,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../../bootstrap.php');
 
@@ -40,7 +40,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 ;
 
 // Крошки по директориям магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$oShopDirBreadcrumbs = $oShopDir;
 
@@ -54,7 +54,7 @@ if($oShopDir->id)
 					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -72,7 +72,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}")));
 
 // Крошки по группам товаров
-if($oShopGroup->id)
+if ($oShopGroup->id)
 {
 	$oShopGroupBreadcrumbs = $oShopGroup;
 	$aBreadcrumbs = array();
@@ -85,7 +85,7 @@ if($oShopGroup->id)
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 					'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -112,7 +112,7 @@ $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
 
 
 // Обработка данных формы
-if(!is_null(Core_Array::getPost('do_show_report')))
+if (!is_null(Core_Array::getPost('do_show_report')))
 {
 	$iDateFrom = Core_Date::datetime2timestamp(Core_Array::getPost('sales_order_begin_date') . ' 00:00:00');
 	$iDateTo = Core_Date::datetime2timestamp(Core_Array::getPost('sales_order_end_date') . ' 23:59:59');
@@ -248,7 +248,7 @@ if(!is_null(Core_Array::getPost('do_show_report')))
 	</div>
 	<?php
 
-	if(count($aOrdered))
+	if (count($aOrdered))
 	{
 		?>
 		<div class="widget counter">

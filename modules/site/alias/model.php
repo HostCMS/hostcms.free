@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -84,7 +84,7 @@ class Site_Alias_Model extends Core_Entity
 			->where('current', '=', 1);
 
 		$aSiteAliases = $siteAliases->findAll();
-		foreach($aSiteAliases as $oSiteAlias)
+		foreach ($aSiteAliases as $oSiteAlias)
 		{
 			$oSiteAlias->current = 0;
 			$oSiteAlias->update();

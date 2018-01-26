@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -104,7 +104,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$aShop_Warehouses = $oShop_Warehouses->findAll();
 
-		foreach($aShop_Warehouses as $oShop_Warehouse)
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
 			$oShop_Warehouse->default = 0;
 			$oShop_Warehouse->update();

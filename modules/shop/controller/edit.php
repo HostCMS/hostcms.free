@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -486,7 +486,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 					$aCompanies = $oSite->Companies->findAll();
-					foreach($aCompanies as $oCompany)
+					foreach ($aCompanies as $oCompany)
 					{
 						$oOptgroupCompany = new stdClass();
 						$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
@@ -862,7 +862,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		if(
+		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
 			// и передан файл
@@ -908,7 +908,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aCurrencyArray = array();
 
 		$aCurrencies = $oCurrency->findAll();
-		foreach($aCurrencies as $oCurrency)
+		foreach ($aCurrencies as $oCurrency)
 		{
 			$aCurrencyArray[$oCurrency->id] = $oCurrency->name;
 		}
@@ -932,7 +932,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// $aTaxArray = array();
 
 		$aShop_Taxes = $oShop_Taxes->findAll(FALSE);
-		foreach($aShop_Taxes as $oShop_Tax)
+		foreach ($aShop_Taxes as $oShop_Tax)
 		{
 			$aTaxArray[$oShop_Tax->id] = $oShop_Tax->name;
 		}
@@ -954,7 +954,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aOrderStatusArray = array(' … ');
 
 		$aOrderStatuses = $oOrderStatus->findAll();
-		foreach($aOrderStatuses as $oOrderStatus)
+		foreach ($aOrderStatuses as $oOrderStatus)
 		{
 			$aOrderStatusArray[$oOrderStatus->id] = $oOrderStatus->name;
 		}
@@ -977,7 +977,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aMeasureArray = array(' … ');
 
-		foreach($aMeasures as $oMeasure)
+		foreach ($aMeasures as $oMeasure)
 		{
 			$aMeasureArray[$oMeasure->id] = $oMeasure->name;
 		}
@@ -1001,7 +1001,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryArray = array(' … ');
 
-		foreach($aCountries as $oCountry)
+		foreach ($aCountries as $oCountry)
 		{
 			$aCountryArray[$oCountry->id] = $oCountry->name;
 		}
@@ -1029,7 +1029,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationArray = array(' … ');
 
-		foreach($oCountryLocations as $oCountryLocation)
+		foreach ($oCountryLocations as $oCountryLocation)
 		{
 			$aCountryLocationArray[$oCountryLocation->id] = $oCountryLocation->name;
 		}
@@ -1057,7 +1057,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationCityArray = array(' … ');
 
-		foreach($oCountryLocationCities as $oCountryLocationCity)
+		foreach ($oCountryLocationCities as $oCountryLocationCity)
 		{
 			$aCountryLocationCityArray[$oCountryLocationCity->id] = $oCountryLocationCity->name;
 		}
@@ -1085,7 +1085,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationCityAreaArray = array(' … ');
 
-		foreach($oCountryLocationCityAreas as $oCountryLocationCityArea)
+		foreach ($oCountryLocationCityAreas as $oCountryLocationCityArea)
 		{
 			$aCountryLocationCityAreaArray[$oCountryLocationCityArea->id] = $oCountryLocationCityArea->name;
 		}
@@ -1107,7 +1107,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aCompanies = $oCompany->findAll();
 
 		$aCompanyArray = array(' … ');
-		foreach($aCompanies as $oCompany)
+		foreach ($aCompanies as $oCompany)
 		{
 			$aCompanyArray[$oCompany->id] = $oCompany->name;
 		}

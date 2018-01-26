@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -617,7 +617,7 @@ class Shop_Group_Model extends Core_Entity
 	 * Get group path with separator
 	 * @return string
 	 */
-	public function groupPathWithSeparator($separator = ' → ')
+	public function groupPathWithSeparator($separator = ' → ', $offset = 0)
 	{
 		$aParentGroups = array();
 
@@ -626,7 +626,10 @@ class Shop_Group_Model extends Core_Entity
 		// Добавляем все директории от текущей до родителя.
 		do {
 			$aParentGroups[] = $aTmpGroup->name;
-		} while($aTmpGroup = $aTmpGroup->getParent());
+		} while ($aTmpGroup = $aTmpGroup->getParent());
+
+		$offset > 0
+			&& $aParentGroups = array_slice($aParentGroups, $offset);
 
 		$sParents = implode($separator, array_reverse($aParentGroups));
 
@@ -909,7 +912,7 @@ class Shop_Group_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->delete();
 		}
@@ -949,7 +952,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aChildrenGroups = $this->Shop_Groups->findAll();
-		foreach($aChildrenGroups as $oChildrenGroup)
+		foreach ($aChildrenGroups as $oChildrenGroup)
 		{
 			$oChild = $oChildrenGroup->copy();
 			$oChild->parent_id = $newObject->id;
@@ -957,7 +960,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aShop_Items = $this->Shop_Items->findAll();
-		foreach($aShop_Items as $oShop_Item)
+		foreach ($aShop_Items as $oShop_Item)
 		{
 			$newObject->add($oShop_Item->copy());
 			// Recount for current group
@@ -965,7 +968,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;

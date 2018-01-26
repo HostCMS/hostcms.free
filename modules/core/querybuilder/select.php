@@ -34,7 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -589,6 +589,16 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		return $this;
 	}
 
+	/**
+	 * Clear GROUP BY list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearGroupBy()
+	{
+		$this->_groupBy = array();
+		return $this;
+	}
+	
 	/**
 	 * Clear
 	 * @return Core_QueryBuilder_Select

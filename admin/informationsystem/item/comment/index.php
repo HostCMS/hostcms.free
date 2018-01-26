@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -130,7 +130,7 @@ if ($oInformationsystem->informationsystem_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemDirPath, NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemDir = $oInformationsystemDir->getParent());
+		} while ($oInformationsystemDir = $oInformationsystemDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -182,7 +182,7 @@ if ($iInformationsystemGroupId)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemPath, NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemGroup = $oInformationsystemGroup->getParent());
+		} while ($oInformationsystemGroup = $oInformationsystemGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -254,7 +254,7 @@ if ($comment_parent_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oComment = $oComment->getParent());
+		} while ($oComment = $oComment->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

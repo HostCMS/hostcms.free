@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Dir_Model extends Core_Entity
 {
@@ -110,13 +110,13 @@ class Informationsystem_Dir_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aChildrenDirs = $this->Informationsystem_Dirs->findAll();
-		foreach($aChildrenDirs as $oChildrenDir)
+		foreach ($aChildrenDirs as $oChildrenDir)
 		{
 			$newObject->add($oChildrenDir->copy());
 		}
 
 		$aInformationsystems = $this->Informationsystems->findAll();
-		foreach($aInformationsystems as $oInformationsystem)
+		foreach ($aInformationsystems as $oInformationsystem)
 		{
 			$newObject->add($oInformationsystem->copy());
 		}

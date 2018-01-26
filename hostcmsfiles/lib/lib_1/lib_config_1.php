@@ -9,14 +9,14 @@ $Informationsystem_Controller_Show
 	->parseUrl();
 
 // Текстовая информация для указания номера страницы, например "страница"
-$pageName = Core_Array::get(Core_Page::instance()->libParams, 'page')
+/*$pageName = Core_Array::get(Core_Page::instance()->libParams, 'page')
 	? Core_Array::get(Core_Page::instance()->libParams, 'page')
 	: 'страница';
 
 // Разделитель в заголовке страницы
 $pageSeparator = Core_Array::get(Core_Page::instance()->libParams, 'separator')
 	? Core_Page::instance()->libParams['separator']
-	: ' / ';
+	: ' / ';*/
 
 if (!is_null(Core_Array::getGet('vote')))
 {
@@ -99,7 +99,7 @@ if (!is_null(Core_Array::getGet('vote')))
 		exit();
 	}
 }
-
+/*
 $aTitle = array($oInformationsystem->name);
 $aDescription = array($oInformationsystem->name);
 $aKeywords = array($oInformationsystem->name);
@@ -115,7 +115,7 @@ if (!is_null($Informationsystem_Controller_Show->tag) && Core::moduleIsActive('t
 	}
 }
 
-/*if ($Informationsystem_Controller_Show->group)
+if ($Informationsystem_Controller_Show->group)
 {
 	$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $Informationsystem_Controller_Show->group);
 
@@ -155,7 +155,7 @@ if ($Informationsystem_Controller_Show->item)
 if ($Informationsystem_Controller_Show->page)
 {
 	array_unshift($aTitle, $pageName . ' ' . ($Informationsystem_Controller_Show->page + 1));
-}*/
+}
 
 if (count($aTitle) > 1)
 {
@@ -167,5 +167,5 @@ if (count($aTitle) > 1)
 	Core_Page::instance()->description(implode($pageSeparator, $aDescription));
 	Core_Page::instance()->keywords(implode($pageSeparator, $aKeywords));
 }
-
+*/
 Core_Page::instance()->object = $Informationsystem_Controller_Show;

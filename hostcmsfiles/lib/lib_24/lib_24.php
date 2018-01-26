@@ -258,10 +258,13 @@ if (!is_null(Core_Array::getPost('apply')))
 									$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
 									foreach ($aDirectory_Addresses as $oDirectory_Address)
 									{
-										if (!is_null(Core_Array::getPost("company_{$oSiteuser_Company->id}_address_{$oDirectory_Address->id}")))
+										if (!is_null(Core_Array::getPost("company_address{$oSiteuser_Company->id}")))
 										{
-											$oDirectory_Address->value = strval(Core_Array::getPost("company_{$oSiteuser_Company->id}_address_{$oDirectory_Address->id}"));
-											$oDirectory_Address->directory_address_type_id = intval(Core_Array::getPost("company_{$oSiteuser_Company->id}_directory_address_type_{$oDirectory_Address->id}"));
+											$oDirectory_Address->postcode = intval(Core_Array::getPost("company_postcode{$oSiteuser_Company->id}"));
+											$oDirectory_Address->country = strval(Core_Array::getPost("company_country{$oSiteuser_Company->id}"));
+											$oDirectory_Address->city = strval(Core_Array::getPost("company_city{$oSiteuser_Company->id}"));
+											$oDirectory_Address->value = strval(Core_Array::getPost("company_address{$oSiteuser_Company->id}"));
+											// $oDirectory_Address->directory_address_type_id = intval(Core_Array::getPost("company_{$oSiteuser_Company->id}_directory_address_type_{$oDirectory_Address->id}"));
 											$oDirectory_Address->save();
 										}
 									}
@@ -367,6 +370,9 @@ if (!is_null(Core_Array::getPost('apply')))
 									{
 										$aSiteuserCompanies = Core_Array::getPost("company_name");
 										$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
+										$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
+										$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
+										$aSiteuserCompanyCity = Core_Array::getPost("company_city");
 										$aSiteuserCompanyPhone = Core_Array::getPost("company_phone");
 										$aSiteuserCompanyEmail = Core_Array::getPost("company_email");
 										$aSiteuserCompanyWebsite = Core_Array::getPost("company_website");
@@ -384,6 +390,9 @@ if (!is_null(Core_Array::getPost('apply')))
 												if ($value != '')
 												{
 													$oDirectory_Address = Core_Entity::factory('Directory_Address');
+													$oDirectory_Address->country = strval(Core_Array::get($aSiteuserCompanyCountry, $key));
+													$oDirectory_Address->postcode = strval(Core_Array::get($aSiteuserCompanyPostcode, $key));
+													$oDirectory_Address->city = strval(Core_Array::get($aSiteuserCompanyCity, $key));
 													$oDirectory_Address->value = $value;
 													$oSiteuser_Company->add($oDirectory_Address);
 												}

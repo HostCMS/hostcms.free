@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -701,7 +701,7 @@ class User_Model extends Core_Entity
 		$aTempDepartmentPost = array();
 
 		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
-		foreach($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
+		foreach ($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
 		{
 			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'

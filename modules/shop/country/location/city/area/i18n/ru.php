@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Районы города',
@@ -26,6 +26,8 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'id' => 'Идентификатор',
+	'active' => 'Активность',
+	'changeActive_success' => "Информация успешно изменена",	
 
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',

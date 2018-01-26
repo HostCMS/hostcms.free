@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - importGroups(TRUE|FALSE) импортировать группы товаров, по умолчанию TRUE
  * - createShopItems(TRUE|FALSE) создавать новые товары, по умолчанию TRUE
- * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id')
+ * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
  * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
  * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание. По умолчанию МалоеОписание
@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 {
@@ -1475,8 +1475,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$oShopItem = $oModificationItem;
 
 							// Для модификации обновляется название и артикул
-							$oShopItem->marking = strval($oProposal->Артикул);
-							$oShopItem->name = strval($oProposal->Наименование);
+							$this->_checkUpdateField('marking') && $oShopItem->marking = strval($oProposal->Артикул);
+							$this->_checkUpdateField('name') && $oShopItem->name = strval($oProposal->Наименование);
 						}
 
 						// Товар найден, начинаем обновление
@@ -1502,56 +1502,96 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$this->_importPropertyValues($oShopItem, $oItemProperty);
 						}
 
-						foreach ($this->xpath($oProposal, 'Цены/Цена') as $oPrice)
+						if ($this->_checkUpdateField('prices'))
 						{
-							// Ищем цену
-							$oShopPrice = $oShop
-								->Shop_Prices
-								->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
-
-							if (!is_null($oShopPrice)
-								&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
+							foreach ($this->xpath($oProposal, 'Цены/Цена') as $oPrice)
 							{
-								$oShop_Item_Price = $oShopItem
-									->Shop_Item_Prices
-									->getByPriceId($oShopPrice->id, FALSE);
+								// Ищем цену
+								$oShopPrice = $oShop
+									->Shop_Prices
+									->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
 
-								if (is_null($oShop_Item_Price))
+								if (!is_null($oShopPrice)
+									&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
 								{
-									$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
-									$oShop_Item_Price->shop_item_id = $oShopItem->id;
-									$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+									$oShop_Item_Price = $oShopItem
+										->Shop_Item_Prices
+										->getByPriceId($oShopPrice->id, FALSE);
+
+									if (is_null($oShop_Item_Price))
+									{
+										$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
+										$oShop_Item_Price->shop_item_id = $oShopItem->id;
+										$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+									}
+
+									$itemPrice = strval($oPrice->ЦенаЗаЕдиницу);
+
+									// Валюта товара в основной цене
+									$baseCurrencyNode = $this->xpath($oProposal, "Цены/Цена[ИдТипаЦены='{$this->sShopDefaultPriceGUID}']");
+
+									if (isset($baseCurrencyNode[0]))
+									{
+										// Валюта у цены по умолчанию
+										$sCurrency = strval($baseCurrencyNode[0]->Валюта);
+
+										// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
+										if (!strlen($sCurrency))
+										{
+											$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='{$this->sShopDefaultPriceGUID}']");
+
+											is_object($topCurrencyNode)
+												&& $sCurrency = strval($topCurrencyNode->Валюта);
+										}
+
+										// Указан числовой код валюты, получаем по нему
+										if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
+										{
+											$sCurrency = $this->_aCurrencyCodes[$sCurrency];
+										}
+
+										$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')
+											->getByLike($sCurrency, FALSE);
+
+										// Валюта у самого товара
+										$sCurrency = strval($oPrice->Валюта);
+
+										// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
+										if (!strlen($sCurrency))
+										{
+											$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='" . strval($oPrice->ИдТипаЦены) . "']");
+
+											is_object($topCurrencyNode)
+												&& $sCurrency = strval($topCurrencyNode->Валюта);
+										}
+
+										// Указан числовой код валюты, получаем по нему
+										if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
+										{
+											$sCurrency = $this->_aCurrencyCodes[$sCurrency];
+										}
+
+										// Валюта спеццены
+										$oPrice_Currency = Core_Entity::factory('Shop_Currency')
+											->getByLike($sCurrency, FALSE);
+
+										if (!is_null($oItem_Shop_Currency)
+											&& !is_null($oPrice_Currency)
+											&& $oItem_Shop_Currency->exchange_rate
+											&& $oPrice_Currency->exchange_rate)
+										{
+											$currencyCoefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency($oPrice_Currency, $oItem_Shop_Currency);
+
+											$itemPrice *= $currencyCoefficient;
+										}
+									}
+
+									$oShop_Item_Price->value = $itemPrice;
+
+									$oShopItem->add($oShop_Item_Price);
 								}
-
-								$itemPrice = strval($oPrice->ЦенаЗаЕдиницу);
-
-								// Валюта товара в основной цене
-								$baseCurrencyNode = $this->xpath($oProposal, "Цены/Цена[ИдТипаЦены='{$this->sShopDefaultPriceGUID}']");
-
-								if (isset($baseCurrencyNode[0]))
+								elseif ($this->sShopDefaultPriceGUID == strval($oPrice->ИдТипаЦены))
 								{
-									// Валюта у цены по умолчанию
-									$sCurrency = strval($baseCurrencyNode[0]->Валюта);
-
-									// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
-									if (!strlen($sCurrency))
-									{
-										$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='{$this->sShopDefaultPriceGUID}']");
-
-										is_object($topCurrencyNode)
-											&& $sCurrency = strval($topCurrencyNode->Валюта);
-									}
-
-									// Указан числовой код валюты, получаем по нему
-									if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
-									{
-										$sCurrency = $this->_aCurrencyCodes[$sCurrency];
-									}
-
-									$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')
-										->getByLike($sCurrency, FALSE);
-
-									// Валюта у самого товара
 									$sCurrency = strval($oPrice->Валюта);
 
 									// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
@@ -1569,141 +1609,107 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 										$sCurrency = $this->_aCurrencyCodes[$sCurrency];
 									}
 
-									// Валюта спеццены
-									$oPrice_Currency = Core_Entity::factory('Shop_Currency')
-										->getByLike($sCurrency, FALSE);
+									$oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
 
-									if (!is_null($oItem_Shop_Currency)
-										&& !is_null($oPrice_Currency)
-										&& $oItem_Shop_Currency->exchange_rate
-										&& $oPrice_Currency->exchange_rate)
+									if (is_null($oShop_Currency))
 									{
-										$currencyCoefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency($oPrice_Currency, $oItem_Shop_Currency);
-
-										$itemPrice *= $currencyCoefficient;
+										$oShop_Currency = Core_Entity::factory('Shop_Currency');
+										$oShop_Currency->name = $sCurrency;
+										$oShop_Currency->code = $sCurrency;
+										$oShop_Currency->exchange_rate = 1;
 									}
-								}
 
-								$oShop_Item_Price->value = $itemPrice;
+									$oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
 
-								$oShopItem->add($oShop_Item_Price);
-							}
-							elseif ($this->sShopDefaultPriceGUID == strval($oPrice->ИдТипаЦены))
-							{
-								$sCurrency = strval($oPrice->Валюта);
+									$oShopItem->add($oShop_Currency);
 
-								// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
-								if (!strlen($sCurrency))
-								{
-									$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='" . strval($oPrice->ИдТипаЦены) . "']");
-
-									is_object($topCurrencyNode)
-										&& $sCurrency = strval($topCurrencyNode->Валюта);
-								}
-
-								// Указан числовой код валюты, получаем по нему
-								if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
-								{
-									$sCurrency = $this->_aCurrencyCodes[$sCurrency];
-								}
-
-								$oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
-
-								if (is_null($oShop_Currency))
-								{
-									$oShop_Currency = Core_Entity::factory('Shop_Currency');
-									$oShop_Currency->name = $sCurrency;
-									$oShop_Currency->code = $sCurrency;
-									$oShop_Currency->exchange_rate = 1;
-								}
-
-								$oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
-
-								$oShopItem->add($oShop_Currency);
-
-								if (!is_null($this->_oTaxForBasePrice))
-								{
-									$oShopItem->add($this->_oTaxForBasePrice);
-									$this->_oTaxForBasePrice = NULL;
-								}
-
-								// Импортируется только через "БазоваяЕдиница"
-								/*if (($sMeasureName = strval($oPrice->Единица)) != '')
-								{
-									if (is_null($oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasureName, FALSE)))
+									if (!is_null($this->_oTaxForBasePrice))
 									{
-										$oShop_Measure = Core_Entity::factory('Shop_Measure')->name($sMeasureName)->save();
+										$oShopItem->add($this->_oTaxForBasePrice);
+										$this->_oTaxForBasePrice = NULL;
 									}
-									$oShopItem->add($oShop_Measure);
-								}*/
+
+									// Импортируется только через "БазоваяЕдиница"
+									/*if (($sMeasureName = strval($oPrice->Единица)) != '')
+									{
+										if (is_null($oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasureName, FALSE)))
+										{
+											$oShop_Measure = Core_Entity::factory('Shop_Measure')->name($sMeasureName)->save();
+										}
+										$oShopItem->add($oShop_Measure);
+									}*/
+								}
 							}
 						}
 
-						$aWarehouses = $this->xpath($oProposal, 'Склад');
-
-						// Явно переданы остатки по каждому складу
-						if (count($aWarehouses))
+						if ($this->_checkUpdateField('warehouses'))
 						{
-							/* <Склад ИдСклада="xxx" КоличествоНаСкладе="10"></Склад>
-							<Склад ИдСклада="yyy" КоличествоНаСкладе="15"></Склад> */
+							$aWarehouses = $this->xpath($oProposal, 'Склад');
 
-							foreach ($aWarehouses as $oWarehouseCount)
+							// Явно переданы остатки по каждому складу
+							if (count($aWarehouses))
 							{
-								$sWarehouseGuid = strval($oWarehouseCount['ИдСклада']);
-								$sWarehouseCount = strval($oWarehouseCount['КоличествоНаСкладе']);
+								/* <Склад ИдСклада="xxx" КоличествоНаСкладе="10"></Склад>
+								<Склад ИдСклада="yyy" КоличествоНаСкладе="15"></Склад> */
 
-								$oShopWarehouse = Core_Entity::factory('Shop', $this->iShopId)
-									->Shop_Warehouses
-									->getByGuid($sWarehouseGuid, FALSE);
-
-								if (!is_null($oShopWarehouse))
+								foreach ($aWarehouses as $oWarehouseCount)
 								{
-									$oShop_Warehouse_Item = $oShopWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
-									if (is_null($oShop_Warehouse_Item))
+									$sWarehouseGuid = strval($oWarehouseCount['ИдСклада']);
+									$sWarehouseCount = strval($oWarehouseCount['КоличествоНаСкладе']);
+
+									$oShopWarehouse = Core_Entity::factory('Shop', $this->iShopId)
+										->Shop_Warehouses
+										->getByGuid($sWarehouseGuid, FALSE);
+
+									if (!is_null($oShopWarehouse))
 									{
-										$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
-											->shop_warehouse_id($oShopWarehouse->id)
-											->shop_item_id($oShopItem->id);
+										$oShop_Warehouse_Item = $oShopWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+										if (is_null($oShop_Warehouse_Item))
+										{
+											$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
+												->shop_warehouse_id($oShopWarehouse->id)
+												->shop_item_id($oShopItem->id);
+										}
+										$oShop_Warehouse_Item->count(floatval($sWarehouseCount))->save();
 									}
-									$oShop_Warehouse_Item->count(floatval($sWarehouseCount))->save();
 								}
 							}
-						}
-						// Общее количество на складе по умолчанию
-						else
-						{
-							$iItemCount = 0;
-
-							foreach ($this->xpath($oProposal, 'Количество') as $oCount)
+							// Общее количество на складе по умолчанию
+							else
 							{
-								$iItemCount = $oCount;
+								$iItemCount = 0;
+
+								foreach ($this->xpath($oProposal, 'Количество') as $oCount)
+								{
+									$iItemCount = $oCount;
+								}
+
+								// если нет тега "Количество", ставим количество товара на главном складе равным нулю
+								// Ищем главный склад
+								$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault("1", FALSE);
+
+								if (is_null($oWarehouse))
+								{
+									// Склад не обнаружен
+									$oWarehouse = Core_Entity::factory('Shop_Warehouse');
+									$oWarehouse->name = Core::_("Shop_Warehouse.warehouse_default_name");
+									$oWarehouse->active = 1;
+									$oWarehouse->default = 1;
+									$oWarehouse->shop_id = $this->iShopId;
+									$oWarehouse->save();
+								}
+
+								$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+
+								if (is_null($oShop_Warehouse_Item))
+								{
+									$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
+										->shop_warehouse_id($oWarehouse->id)
+										->shop_item_id($oShopItem->id);
+								}
+
+								$oShop_Warehouse_Item->count(floatval($iItemCount))->save();
 							}
-
-							// если нет тега "Количество", ставим количество товара на главном складе равным нулю
-							// Ищем главный склад
-							$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault("1", FALSE);
-
-							if (is_null($oWarehouse))
-							{
-								// Склад не обнаружен
-								$oWarehouse = Core_Entity::factory('Shop_Warehouse');
-								$oWarehouse->name = Core::_("Shop_Warehouse.warehouse_default_name");
-								$oWarehouse->active = 1;
-								$oWarehouse->default = 1;
-								$oWarehouse->shop_id = $this->iShopId;
-								$oWarehouse->save();
-							}
-
-							$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
-
-							if (is_null($oShop_Warehouse_Item))
-							{
-								$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
-									->shop_warehouse_id($oWarehouse->id)
-									->shop_item_id($oShopItem->id);
-							}
-
-							$oShop_Warehouse_Item->count(floatval($iItemCount))->save();
 						}
 
 						$oShopItem->save();

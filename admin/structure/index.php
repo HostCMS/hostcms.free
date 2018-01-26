@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -27,7 +27,7 @@ if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('docu
 
 		do{
 			$aCSS[] = "/templates/template{$oTemplate->id}/style.css?" . Core_Date::sql2timestamp($oTemplate->timestamp);
-		} while($oTemplate = $oTemplate->getParent());
+		} while ($oTemplate = $oTemplate->getParent());
 	}
 
 	$aJson = array(
@@ -139,7 +139,7 @@ if ($parent_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oStructure = $oStructure->getParent());
+		} while ($oStructure = $oStructure->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

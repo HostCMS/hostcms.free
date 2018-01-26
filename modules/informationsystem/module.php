@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-01-26';
 
 	/**
 	 * Module name
@@ -167,7 +167,7 @@ class Informationsystem_Module extends Core_Module
 		$aInformationsystemGroups = $oInformationsystemGroup->findAll(FALSE);
 
 		$result = array();
-		foreach($aInformationsystemGroups as $oInformationsystemGroup)
+		foreach ($aInformationsystemGroups as $oInformationsystemGroup)
 		{
 			$result[] = $oInformationsystemGroup->indexing();
 		}
@@ -232,7 +232,7 @@ class Informationsystem_Module extends Core_Module
 		$aInformationsystemItems = $oInformationsystemItem->findAll(FALSE);
 
 		$result = array();
-		foreach($aInformationsystemItems as $oInformationsystemItem)
+		foreach ($aInformationsystemItems as $oInformationsystemItem)
 		{
 			$result[] = $oInformationsystemItem->indexing();
 		}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_Group_Model extends Property_Model
 {
@@ -81,7 +81,7 @@ class Shop_Item_Property_Group_Model extends Property_Model
 
 		$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group')->getByShopItemPropertyIdAndGroupId($this->Shop_Item_Property->id, $shop_group_id);
 
-		if(!is_null($oShop_Item_Property_For_Group))
+		if (!is_null($oShop_Item_Property_For_Group))
 		{
 			$oShop_Item_Property_For_Group->delete();
 		}

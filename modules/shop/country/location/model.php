@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_Model extends Core_Entity
 {
@@ -99,6 +99,40 @@ class Shop_Country_Location_Model extends Core_Entity
 		}
 
 		return $name;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function citiesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Country_Location_Cities->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-azure white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+
+	/**
+	 * Change active status
+	 * @return self
+	 * @hostcms-event shop_country_location.onBeforeChangeActive
+	 * @hostcms-event shop_country_location.onAfterChangeActive
+	 */
+	public function changeActive()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
+
+		$this->active = 1 - $this->active;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
 	}
 
 	/**

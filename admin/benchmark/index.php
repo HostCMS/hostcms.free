@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -130,7 +130,7 @@ $oBenchmark
 
 $aBenchmarks = $oBenchmark->findAll(FALSE);
 
-if(count($aBenchmarks))
+if (count($aBenchmarks))
 {
 	$oBenchmark = $aBenchmarks[0];
 
@@ -374,7 +374,7 @@ if(count($aBenchmarks))
 				$ico = 'fa fa-check';
 				$caption = Core::_('Admin_Form.enabled');
 			}
-			elseif(Core_Array::get(Core::$config->get('core_hostcms'), 'integration', 0) > $integration)
+			elseif (Core_Array::get(Core::$config->get('core_hostcms'), 'integration', 0) > $integration)
 			{
 				$alert = 'btn-darkorange';
 				$status = FALSE;

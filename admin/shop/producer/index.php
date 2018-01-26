@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -103,7 +103,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Добавляем крошки для групп магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$aBreadcrumbs = array();
 
@@ -130,7 +130,7 @@ if($oShopDir->id)
 				)
 			)
 		;
-	}while($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
+	}while ($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -169,7 +169,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
-if($shop_group_id)
+if ($shop_group_id)
 {
 	$oShopGroup = Core_Entity::factory('Shop_Group', $shop_group_id);
 
@@ -198,7 +198,7 @@ if($shop_group_id)
 					$sShopItemFormPath, NULL, NULL, $additionalParams
 				)
 			);
-	} while($oShopGroup = $oShopGroup->getParent());
+	} while ($oShopGroup = $oShopGroup->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -233,7 +233,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		)
 );
 
-if($producer_dir_id)
+if ($producer_dir_id)
 {
 	$oShop_Producer_Dir = Core_Entity::factory('Shop_Producer_Dir', $producer_dir_id);
 
@@ -249,7 +249,7 @@ if($producer_dir_id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				$sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&producer_dir_id={$oShop_Producer_Dir->id}"
 		));
-	}while($oShop_Producer_Dir = $oShop_Producer_Dir->getParent());
+	}while ($oShop_Producer_Dir = $oShop_Producer_Dir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Typograph
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Typograph_Controller
 {
@@ -91,6 +91,31 @@ class Typograph_Controller
 		return $str;
 	}
 
+	protected function _quotesTagCallback($matches)
+	{
+		return "<" . str_replace("\"", "¬", $matches[1]) . ">";
+	}
+
+	protected function _quotesSquareBracketsCallback($matches)
+	{
+		return "[" . str_replace("\"", "¬", $matches[1]) . "]";
+	}
+
+	protected function _quotesBracketsCallback($matches)
+	{
+		return "<" . str_replace("(", chr(0x01), $matches[1]) . ">";
+	}
+
+	protected function _herringboneQuotesCallback($matches)
+	{
+		return "<" . str_replace("«", chr(0x02), $matches[1]) . ">";
+	}
+
+	protected function _germanQuotesCallback($matches)
+	{
+		return "<" . str_replace("„", chr(0x03), $matches[1]) . ">";
+	}
+	
 	/**
 	 * Execute the typograph
 	 * @param string $str source text
@@ -120,10 +145,10 @@ class Typograph_Controller
 
 		// кавычки в html-тегах на символ '¬'
 		//$str = preg_replace("/<([^>]*)>/esu", "'<'.str_replace('\\\"', '¬','\\1').'>'", $str);
-		$str = preg_replace_callback("/<([^>]*)>/su", create_function('$matches', 'return "<" . str_replace("\"", "¬", $matches[1]) . ">";'), $str);
+		$str = preg_replace_callback("/<([^>]*)>/su", array($this, '_quotesTagCallback'), $str);
 
 		// кавычки в квадратных скобках [] на символ '¬'
-		$str = preg_replace_callback("/\[([^>]*)\]/su", create_function('$matches', 'return "[" . str_replace("\"", "¬", $matches[1]) . "]";'), $str);
+		$str = preg_replace_callback("/\[([^>]*)\]/su", array($this, '_quotesSquareBracketsCallback'), $str);
 
 		// Расстановка заков в скобках перед добавлением висячей пунктуации
 		$str = str_replace(
@@ -504,7 +529,7 @@ class Typograph_Controller
 		{
 			// Заменяем СКОБКИ В ТЕГАХ на непечатные символы
 			//$str = preg_replace("/<([^>]*)>/esu", "'<'.str_replace('(', chr(0x01),'\\1').'>'", $str);
-			$str = preg_replace_callback("/<([^>]*)>/su", create_function('$matches', 'return "<" . str_replace("(", chr(0x01), $matches[1]) . ">";'), $str);
+			$str = preg_replace_callback("/<([^>]*)>/su", array($this, '_quotesBracketsCallback'), $str);
 
 			$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
@@ -528,7 +553,7 @@ class Typograph_Controller
 
 			// Заменяем ЁЛОЧКИ В ТЕГАХ на непечатные символы.
 			//$str = preg_replace("/<([^>]*)>/esu", "'<'.str_replace('«', chr(0x02),'\\1').'>'", $str);
-			$str = preg_replace_callback("/<([^>]*)>/su", create_function('$matches', 'return "<" . str_replace("«", chr(0x02), $matches[1]) . ">";'), $str);
+			$str = preg_replace_callback("/<([^>]*)>/su", array($this, '_herringboneQuotesCallback'), $str);
 
 			// Добавляем висячие елочки.
 			// возможно проблема вылезания за <p>, пример изменения см. выше
@@ -537,10 +562,11 @@ class Typograph_Controller
 
 			// Восстанавливаем елочки в тегах.
 			$str = str_replace(chr(0x02), "«", $str);
-
+			
+			
 			// Заменяем ЛАПКИ В ТЕГАХ на непечатные символы.
 			//$str = preg_replace("/<([^>]*)>/esu", "'<'.str_replace('„', chr(0x03),'\\1').'>'", $str);
-			$str = preg_replace_callback("/<([^>]*)>/su", create_function('$matches', 'return "<" . str_replace("„", chr(0x03), $matches[1]) . ">";'), $str);
+			$str = preg_replace_callback("/<([^>]*)>/su", array($this, '_germanQuotesCallback'), $str);
 
 			// Добавляем висячие лапки.
 			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)(\s)?(\„\w*)/iseu", "'{$right_span} </span> \\2{$left_span}'.str_replace('„', chr(0x03), '\\4').'</span>\\5'", $str);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Company_Model extends Company_Model
 {
@@ -42,7 +42,7 @@ class Shop_Company_Model extends Company_Model
 		'~site',
 		'~email'
 	);
-	
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -56,7 +56,17 @@ class Shop_Company_Model extends Company_Model
 		$aDirectory_Addresses = $this->Directory_Addresses->findAll();
 		if (isset($aDirectory_Addresses[0]))
 		{
-			$this->addXmlTag('address', $aDirectory_Addresses[0]->value);
+			$aCompanyAddress = array(
+				$aDirectory_Addresses[0]->postcode,
+				$aDirectory_Addresses[0]->country,
+				$aDirectory_Addresses[0]->city,
+				$aDirectory_Addresses[0]->value
+			);
+
+			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+
+			$this->addXmlTag('address', $sFullCompanyAddress);
 		}
 
 		// Directory_Phones
@@ -65,13 +75,13 @@ class Shop_Company_Model extends Company_Model
 		{
 			$this->addXmlTag('phone', $aDirectory_Phones[0]->value);
 		}
-		
+
 		// Directory_Emails
 		$aDirectory_Emails = $this->Directory_Emails->findAll();
 		if (isset($aDirectory_Emails[0]))
 		{
 			$this->addXmlTag('email', $aDirectory_Emails[0]->value);
-		}		
+		}
 
 		// Directory_Websites
 		$aDirectory_Websites = $this->Directory_Websites->findAll();
@@ -82,7 +92,7 @@ class Shop_Company_Model extends Company_Model
 
 		return parent::getXml();
 	}
-	
+
 	static protected $_oldFields = array('address', 'phone', 'fax', 'site', 'email');
 
 	public function __get($property)
@@ -122,13 +132,13 @@ class Shop_Company_Model extends Company_Model
 				default:
 					$return = NULL;
 			}
-			
+
 			return $return;
 		}
-		
+
 		return parent::__get($property);
 	}
-	
+
 	public function __call($name, $arguments)
 	{
 		if (in_array($name, self::$_oldFields))

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -169,9 +169,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		// Путь к картинкам
 		'imagesPath',
 		// Действие с существующими товарами:
-		// 0 - удалить содержимое магазина до импорта
 		// 1 - обновить существующие товары
 		// 2 - не обновлять существующие товары
+		// 3 - удалить содержимое магазина до импорта
 		'importAction',
 		// Флаг, указывающий, включена ли индексация
 		'searchIndexation',
@@ -642,7 +642,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	{
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeImport', $this, array($this->_oCurrentShop));
 
-		if ($this->importAction == 0)
+		// Clear Shop
+		if ($this->importAction == 3)
 		{
 			Core_QueryBuilder::update('shop_groups')
 				->set('deleted', 1)
@@ -681,7 +682,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		// CML_ID родительской (!) группы товаров
 		$sNeedKeyGroupParentCMLId = array_search('group_parent_cml_id', $this->csv_fields);
 
-		while((Core::getmicrotime() - $timeout + 3 < $this->time)
+		while ((Core::getmicrotime() - $timeout + 3 < $this->time)
 			&& $iCounter < $this->step
 			&& ($aCsvLine = $this->getCSVLine($fInputFile)))
 		{

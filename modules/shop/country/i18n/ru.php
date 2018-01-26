@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Страны',
@@ -24,21 +24,23 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'apply_success' => "Информация успешно изменена.",
-	'alpha2'=>'Коды государства',
-	
-	'language_tab'=>'Языковые версии',
-	'name_en'=>'На английском',
-	'name_ru'=>'На русском',
-	'name_de'=>'На немецком',
-	'name_fr'=>'На французском',
-	'name_it'=>'На итальянском',
-	'name_es'=>'На испанском',
-	'name_pt'=>'На португальском',
-	'name_ua'=>'На украинском',
-	'name_be'=>'На белорусском',
-	'name_pl'=>'На польском',
-	'name_lt'=>'На литовском',
-	'name_lv'=>'На латышском',
-	'name_cz'=>'На чешском',
-	'name_ja'=>'На японском',
+	'alpha2' => 'Код государства',
+	'active' => 'Активность',
+	'changeActive_success' => "Информация успешно изменена",
+
+	'language_tab' => 'Языковые версии',
+	'name_en' => 'На английском',
+	'name_ru' => 'На русском',
+	'name_de' => 'На немецком',
+	'name_fr' => 'На французском',
+	'name_it' => 'На итальянском',
+	'name_es' => 'На испанском',
+	'name_pt' => 'На португальском',
+	'name_ua' => 'На украинском',
+	'name_be' => 'На белорусском',
+	'name_pl' => 'На польском',
+	'name_lt' => 'На литовском',
+	'name_lv' => 'На латышском',
+	'name_cz' => 'На чешском',
+	'name_ja' => 'На японском',
 );

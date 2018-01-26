@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_Ru extends Core_Inflection
 {
@@ -189,7 +189,7 @@ class Core_Inflection_Ru extends Core_Inflection
 		if (intval($iInteger))
 		{
 			$aSplit = str_split($iInteger, 3);
-			foreach($aSplit as $uk => $value)
+			foreach ($aSplit as $uk => $value)
 			{
 				if (!intval($value))
 				{

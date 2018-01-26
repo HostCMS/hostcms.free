@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -544,7 +544,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Set->shop_item_set_id);
 
-					if(!is_null($oShop_Item))
+					if (!is_null($oShop_Item))
 					{
 						$oShop_Item = $oShop_Item->shortcut_id
 							? $oShop_Item->Shop_Item
@@ -1129,7 +1129,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Associated->shop_item_associated_id);
 
-					if(!is_null($oShop_Item))
+					if (!is_null($oShop_Item))
 					{
 						$oShop_Item = $oShop_Item->shortcut_id
 							? $oShop_Item->Shop_Item
@@ -1904,18 +1904,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}", 0);
 
 					$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-
 					if (is_null($oShopItemWarehouse))
 					{
 						$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
-
 						$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
-
 						$oShopItemWarehouse->shop_item_id = $this->_object->id;
 					}
 
 					$oShopItemWarehouse->count = $iWarehouseValue;
-
 					$oShopItemWarehouse->save();
 				}
 
@@ -2608,7 +2604,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Добавляем все директории от текущей до родителя.
 			do {
 				$aParentGroups[] = $aTmpGroup->name;
-			} while($aTmpGroup = $aTmpGroup->getParent());
+			} while ($aTmpGroup = $aTmpGroup->getParent());
 
 			$sParents = implode(' → ', array_reverse($aParentGroups));
 

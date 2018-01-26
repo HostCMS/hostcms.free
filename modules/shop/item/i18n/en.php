@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products',
@@ -308,5 +308,7 @@ return array(
 	'apply_recount_set' => 'Recount Set',
 	'shop_item_set_not_currency' => 'There is no currency for "%s"',
 	'import_price_list_delay' => 'Delay (sec.)',
-	'create_modification_copy_warehouse_count' => 'Copy the same warehouse rest',	
+	'create_modification_copy_warehouse_count' => 'Copy the same warehouse rest',
+	'markDeleted' => "Delete item",
+	'items_catalog_copy_form_title' => 'Copy item',	
 );

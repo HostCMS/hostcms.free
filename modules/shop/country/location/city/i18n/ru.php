@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Города',
@@ -26,7 +26,9 @@ return array(
 	'markDeleted_success' => "Информация о городе успешно удалена!",
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	
+	'active' => 'Активность',
+	'changeActive_success' => "Информация успешно изменена",
+
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',
 	'name_ru'=>'На русском',
@@ -41,5 +43,5 @@ return array(
 	'name_lt'=>'На литовском',
 	'name_lv'=>'На латышском',
 	'name_cz'=>'На чешском',
-	'name_ja'=>'На японском',	
+	'name_ja'=>'На японском',
 );

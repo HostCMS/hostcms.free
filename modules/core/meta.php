@@ -9,43 +9,57 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Meta
 {
+	/**
+	 * Array of objects [name] => $object
+	 * @var array
+	 */
 	protected $_objects = array();
 
+	/**
+	 * Predefined functions
+	 * @var array
+	 */
 	protected $_replaceFunctions = array(
 		'toUpper' => 'mb_strtoupper',
 		'toLower' => 'mb_strtolower',
 	);
 
 	/**
-	 *
+	 * Add object
+	 * @param string $name
+	 * @param string $object
+	 * @return self
 	 */
 	public function addObject($name, $object)
 	{
 		$this->_objects[$name] = $object;
-
 		return $this;
 	}
 
+	/**
+	 * Apply template, e.g. {group.name}, {toLower group.name}, {toLower group.groupPathWithSeparator " / " 1}
+	 *
+	 * @param string $str
+	 * @return string
+	 */
 	public function apply($str)
 	{
-		//
-		// (\s(?:\"[^\"]*))
-
-		// {group.name}
-		// {toLower group.name}
-		//$pattern = '/\{([A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(\s"?[^"\}]+"?)*\}/u';
-		//$pattern = '/\{([A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([a-zA-Z0-9_\-]+|"[^"\}]+"))*\}/';
 		$pattern = '/\{([A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([^\}]+))*\}/';
-
+		
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
 		return $string;
 	}
 
+	/**
+	 * Replace callback function
+	 * @param array $matches
+	 * @return string
+	 */
 	protected function _callback($matches)
 	{
 		// function

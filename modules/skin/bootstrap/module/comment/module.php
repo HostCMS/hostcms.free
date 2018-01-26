@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -162,7 +162,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								->window('id_content');
 							$sInformationsystemCommentsHref = '/admin/informationsystem/item/comment/index.php';
 
-							foreach($aComments as $oComment)
+							foreach ($aComments as $oComment)
 							{
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
@@ -299,7 +299,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								->window('id_content');
 							$sShopCommentsHref = '/admin/shop/item/comment/index.php';
 
-							foreach($aComments as $oComment)
+							foreach ($aComments as $oComment)
 							{
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);

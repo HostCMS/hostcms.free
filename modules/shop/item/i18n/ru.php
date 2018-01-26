@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -95,6 +95,7 @@ return array(
 	'adminSetAssociated_success' => "Информация успешно изменена",
 	'adminUnsetAssociated_success' => "Информация успешно изменена",
 	'markDeleted_success' => "Информация о товаре успешно удалена!",
+	'markDeleted' => "Удалить товар",
 	'shortcut_success' => "Ярлык товара успешно добавлен",
 	'edit_success' => "Товар успешно добавлен!",
 	'copy_success' => "Товар успешно скопирован!",
@@ -310,4 +311,5 @@ return array(
 	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара "%s"',
 	'import_price_list_delay' => 'Задержка (в сек.)',
 	'create_modification_copy_warehouse_count' => 'Копировать остаток на складе',
+	'items_catalog_copy_form_title' => 'Копировать товар',
 );

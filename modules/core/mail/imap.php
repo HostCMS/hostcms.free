@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Imap extends Core_Servant_Properties
 {
@@ -295,7 +295,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 							}
 						}
 					}
-					elseif(is_object($attributeValue))
+					elseif (is_object($attributeValue))
 					{
 						foreach ($attributeValue as $parameter_values_part_num => $parameter_values_part_values)
 						{

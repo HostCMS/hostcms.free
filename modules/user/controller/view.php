@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_View extends Admin_Form_Action_Controller
 {
@@ -146,7 +146,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 									<?php
 									$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->findAll();
 
-									foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+									foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 									{
 										?>
 										<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>

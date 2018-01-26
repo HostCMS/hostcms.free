@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -215,7 +215,17 @@ else
 					$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
 					if (isset($aDirectory_Addresses[0]))
 					{
-						echo htmlspecialchars($aDirectory_Addresses[0]->value);
+						$aCompanyAddress = array(
+							$aDirectory_Addresses[0]->postcode,
+							$aDirectory_Addresses[0]->country,
+							$aDirectory_Addresses[0]->city,
+							$aDirectory_Addresses[0]->value
+						);
+
+						$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+						$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+						
+						echo htmlspecialchars($sFullCompanyAddress);
 					}
 					?>
 				</b>
@@ -391,7 +401,7 @@ else
 
 	$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-	if(count($aShopOrderItems))
+	if (count($aShopOrderItems))
 	{
 		foreach ($aShopOrderItems as $oShop_OrderItem)
 		{

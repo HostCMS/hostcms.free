@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -130,7 +130,7 @@ if ($oShop->shop_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams)
 				);
-		} while($oShopDir = $oShopDir->getParent());
+		} while ($oShopDir = $oShopDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -181,7 +181,7 @@ if ($iShopGroupId)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
 				);
-		} while($oShopGroup = $oShopGroup->getParent());
+		} while ($oShopGroup = $oShopGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -196,7 +196,7 @@ if ($iShopGroupId)
 
 // Если товар - модификация, значит мы пришли из формы списка модификаций,
 // добавляем соответствующую крошку
-if($oShop_Item->modification_id)
+if ($oShop_Item->modification_id)
 {
 	// Крошка на текущую форму
 	$oAdmin_Form_Entity_Breadcrumbs->add(
@@ -269,7 +269,7 @@ if ($comment_parent_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oComment = $oComment->getParent());
+		} while ($oComment = $oComment->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

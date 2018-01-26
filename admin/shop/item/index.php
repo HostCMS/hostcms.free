@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -148,6 +148,11 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 		}
 		else
 		{
+			$aJSON = array(
+				'id' => 0,
+				'label' => Core::_('Shop_Item.root'),
+			);
+
 			$oShop_Groups = $oShop->Shop_Groups;
 			$oShop_Groups->queryBuilder()
 				->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
@@ -164,7 +169,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 				// Добавляем все директории от текущей до родителя.
 				do {
 					$aParentGroups[] = $aTmpGroup->name;
-				} while($aTmpGroup = $aTmpGroup->getParent());
+				} while ($aTmpGroup = $aTmpGroup->getParent());
 
 				$sParents = implode(' → ', array_reverse($aParentGroups));
 
@@ -530,7 +535,7 @@ Admin_Form_Entity::factory('Breadcrumb')
 );
 
 // Крошки по директориям магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$oShopDirBreadcrumbs = $oShopDir;
 
@@ -546,7 +551,7 @@ if($oShopDir->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 		));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -571,7 +576,7 @@ Admin_Form_Entity::factory('Breadcrumb')
 );
 
 // Крошки по группам товаров
-if($oShopGroup->id)
+if ($oShopGroup->id)
 {
 	$oShopGroupBreadcrumbs = $oShopGroup;
 
@@ -589,7 +594,7 @@ if($oShopGroup->id)
 			(
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 			));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -862,7 +867,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 $oAdmin_Form_Dataset
 	->addCondition(
 		array(
-				'select' => array('shop_items.*', array('price', 'adminPrice')
+				'select' => array('shop_items.*', array('shop_items.price', 'adminPrice')
 			)
 		)
 	)
@@ -872,7 +877,7 @@ $oAdmin_Form_Dataset
 ;
 
 // Change field type
-if(Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
+if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 {
 	$oAdmin_Form_Dataset->changeField('adminRest', 'type', 2);
 }

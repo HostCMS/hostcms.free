@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -264,9 +264,9 @@ abstract class Core_DataBase
 	 */
 	public function highlightSql($sql)
 	{
-		foreach(self::$_colors as $key => $color)
+		foreach (self::$_colors as $key => $color)
 		{
-			foreach(self::$_words[$key] as $word)
+			foreach (self::$_words[$key] as $word)
 			{
 				//$sql = str_ireplace(" {$word} " , ' <span style="color: ' . $color . '">' . $word . '</span> ', $sql);
 				$sql = preg_replace("/(\s?)({$word})(\s)/iu", "\\1<span style=\"color: {$color}\">\\2</span>\\3", $sql);

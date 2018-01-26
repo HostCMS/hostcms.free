@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные группы',
@@ -79,4 +79,5 @@ return array(
 	'seo_item_title_template' => 'Шаблон title',
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
+	'markDeleted' => 'Удалить группу',
 );

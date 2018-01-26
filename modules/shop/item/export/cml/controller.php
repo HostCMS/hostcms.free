@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 {
@@ -416,7 +416,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$aShop_Item_Prices = $oShop_Item->Shop_Item_Prices->findAll(FALSE);
-			foreach($aShop_Item_Prices as $oShop_Item_Price)
+			foreach ($aShop_Item_Prices as $oShop_Item_Price)
 			{
 				$price = $prices->addChild('Цена');
 

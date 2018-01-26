@@ -74,7 +74,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 				<ul <?php echo implode(' ', $aAttr)?>>
 				<?php
 
-				foreach($aOptions as $key => $value)
+				foreach ($aOptions as $key => $value)
 				{
 					// Получаем информацию о элементе - значение, ико, цвет
 					$aItemInfo = $this->_getItemInfo($key);

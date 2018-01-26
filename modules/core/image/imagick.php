@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -159,7 +159,7 @@ class Core_Image_Imagick extends Core_Image
 
 				$oImagick->sharpenImage(floatval(self::$_config['imagick']['sharpenImage']['radius']), floatval(self::$_config['imagick']['sharpenImage']['sigma']));
 			}
-			elseif(is_array(self::$_config['imagick']['adaptiveSharpenImage']))
+			elseif (is_array(self::$_config['imagick']['adaptiveSharpenImage']))
 			{
 				self::$_config['imagick']['adaptiveSharpenImage'] += array('radius' => 0, 'sigma' => 1);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -152,7 +152,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aShop_Purchase_Discount_Coupons = $this->Shop_Purchase_Discount_Coupons->findAll();
-		foreach($aShop_Purchase_Discount_Coupons as $oShop_Purchase_Discount_Coupon)
+		foreach ($aShop_Purchase_Discount_Coupons as $oShop_Purchase_Discount_Coupon)
 		{
 			$oNew_Shop_Purchase_Discount_Coupon = $oShop_Purchase_Discount_Coupon->copy();
 			$newObject->add($oNew_Shop_Purchase_Discount_Coupon);

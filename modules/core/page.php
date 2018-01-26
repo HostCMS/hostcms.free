@@ -80,7 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -513,7 +513,7 @@ class Core_Page extends Core_Servant_Properties
 			$aCss[] = $oTemplate->getTemplateCssFileHref();
 			$aJs[] = array($oTemplate->getTemplateJsFileHref(), FALSE);
 
-		} while($oTemplate = $oTemplate->getParent());
+		} while ($oTemplate = $oTemplate->getParent());
 
 		$this->css = array_merge($this->css, array_reverse($aCss));
 

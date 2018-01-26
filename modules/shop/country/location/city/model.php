@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_City_Model extends Core_Entity
 {
@@ -64,7 +64,7 @@ class Shop_Country_Location_City_Model extends Core_Entity
 		'name_pl', 'name_lt', 'name_lv',
 		'name_cz', 'name_ja', 'name'
 	);
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -97,10 +97,10 @@ class Shop_Country_Location_City_Model extends Core_Entity
 		{
 			$name = $this->name;
 		}
-		
+
 		return $name;
 	}
-	
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -109,13 +109,47 @@ class Shop_Country_Location_City_Model extends Core_Entity
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-		
+
 		$this->clearXmlTags()
 			->addXmlTag('name', $this->getName());
-			
+
 		return parent::getXml();
 	}
-	
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function districtsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Country_Location_City_Areas->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-azure white')
+			->value($count < 100 ? $count : '∞')
+			->title($count)
+			->execute();
+	}
+
+	/**
+	 * Change active status
+	 * @return self
+	 * @hostcms-event shop_country_location_city.onBeforeChangeActive
+	 * @hostcms-event shop_country_location_city.onAfterChangeActive
+	 */
+	public function changeActive()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
+
+		$this->active = 1 - $this->active;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
+	}
+
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
@@ -131,7 +165,7 @@ class Shop_Country_Location_City_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Country_Location_City_Areas->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);

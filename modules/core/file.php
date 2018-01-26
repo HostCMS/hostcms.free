@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_File
 {
@@ -412,7 +412,7 @@ class Core_File
 				'.' . DIRECTORY_SEPARATOR,
 				DIRECTORY_SEPARATOR
 				), '', $fileName, $count);
-		} while($count);
+		} while ($count);
 
 		$fileName = ($fileName == '.') ? '' : $fileName;
 
@@ -442,7 +442,7 @@ class Core_File
 				//DIRECTORY_SEPARATOR,
 				//DIRECTORY_SEPARATOR
 				), $path, $count);
-		} while($count);
+		} while ($count);
 
 		$path = ($path == '.') ? '' : $path;
 
@@ -966,7 +966,7 @@ class Core_File
 						// или из загруженной малой.
 						$flag_success = FALSE;
 
-						if(isset($create_small_from_small) && $create_small_from_small)
+						if (isset($create_small_from_small) && $create_small_from_small)
 						{
 							Core_Image::instance()->addWatermark($small_image_target, $small_image_target, $watermark_file_path, $watermark_position_x, $watermark_position_y);
 

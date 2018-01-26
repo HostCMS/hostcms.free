@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -108,7 +108,7 @@ if ($structure_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sStructurePath, NULL, NULL, $additionalParams)
 				);
-		} while($oStructure = $oStructure->getParent());
+		} while ($oStructure = $oStructure->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -159,7 +159,7 @@ if ($property_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oProperty_Dir = $oProperty_Dir->getParent());
+		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -311,7 +311,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo phpversion() ?></span>
 									</div>
 									<?php
-									if(version_compare(phpversion(), '5.2.2', ">="))
+									if (version_compare(phpversion(), '5.2.2', ">="))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -334,7 +334,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $dbVersion ?></span>
 									</div>
 									<?php
-									if(version_compare($dbVersion, '5.0.0', ">=") )
+									if (version_compare($dbVersion, '5.0.0', ">=") )
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -357,7 +357,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo $gdVersion ?></span>
 									</div>
 									<?php
-									if(version_compare($gdVersion, '2.0', ">="))
+									if (version_compare($gdVersion, '2.0', ">="))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -381,7 +381,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(version_compare($pcreVersion, '7.0', ">="))
+									if (version_compare($pcreVersion, '7.0', ">="))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -405,7 +405,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(!$maxExecutionTime || $maxExecutionTime >= 30)
+									if (!$maxExecutionTime || $maxExecutionTime >= 30)
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -429,7 +429,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(Core_Str::convertSizeToBytes($memoryLimit) >= Core_Str::convertSizeToBytes('16M'))
+									if (Core_Str::convertSizeToBytes($memoryLimit) >= Core_Str::convertSizeToBytes('16M'))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -453,7 +453,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(function_exists('mb_internal_encoding'))
+									if (function_exists('mb_internal_encoding'))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -477,7 +477,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(function_exists('json_encode'))
+									if (function_exists('json_encode'))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -501,7 +501,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(function_exists('simplexml_load_string'))
+									if (function_exists('simplexml_load_string'))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';
@@ -525,7 +525,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 
 									<?php
-									if(function_exists('iconv'))
+									if (function_exists('iconv'))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';

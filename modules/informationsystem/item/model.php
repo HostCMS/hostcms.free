@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -255,7 +255,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getItemPath());
 			$oPropertyValue->delete();
@@ -386,7 +386,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -418,7 +418,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('tag'))
 		{
 			$aTags = $this->Tags->findAll();
-			foreach($aTags as $oTag)
+			foreach ($aTags as $oTag)
 			{
 				$newObject->add($oTag);
 			}
@@ -740,7 +740,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		$this->save();
 
 		$aItemShortcuts = $this->Informationsystem_Items->findAll();
-		foreach($aItemShortcuts as $oItemShortcut)
+		foreach ($aItemShortcuts as $oItemShortcut)
 		{
 			$oItemShortcut->active = 1 - $oItemShortcut->active;
 			$oItemShortcut->save();

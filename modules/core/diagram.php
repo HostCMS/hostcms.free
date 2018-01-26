@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Diagram extends Core_Servant_Properties
 {
@@ -136,7 +136,7 @@ class Core_Diagram extends Core_Servant_Properties
 		$count_value = 0;
 
 		// Рассчитываем минимальные и максимальные значения
-		foreach($this->values as $key => $arr_val)
+		foreach ($this->values as $key => $arr_val)
 		{
 			if ($count_value < count($this->values[$key]))
 			{
@@ -147,7 +147,7 @@ class Core_Diagram extends Core_Servant_Properties
 
 			$countValues++ ;
 
-			foreach($arr_val as $key2 => $val)
+			foreach ($arr_val as $key2 => $val)
 			{
 				if ($val > $max_val)
 				{
@@ -171,7 +171,7 @@ class Core_Diagram extends Core_Servant_Properties
 		$this->values = $values;
 
 		$abscissa = $this->abscissa;
-		foreach($abscissa as $key2 => $val)
+		foreach ($abscissa as $key2 => $val)
 		{
 			if ($max_leght_x < mb_strlen($val))
 			{
@@ -294,7 +294,7 @@ class Core_Diagram extends Core_Servant_Properties
 		for ($i = 0; $i < $count_value; $i++)
 		{
 			$values = $this->values;
-			foreach($values as $key => $arr_val)
+			foreach ($values as $key => $arr_val)
 			{
 				if (!isset($values[$key][$i]))
 				{
@@ -305,7 +305,7 @@ class Core_Diagram extends Core_Servant_Properties
 		}
 
 		$legend = $this->legend;
-		foreach($legend as $key => $name)
+		foreach ($legend as $key => $name)
 		{
 			// Обрезаем длинные надписи легенды
 			if (mb_strlen($name) > $max_length_legend)
@@ -592,7 +592,7 @@ class Core_Diagram extends Core_Servant_Properties
 			$m =($x2 - $x1) / $max_division_x;
 
 			// Построение графика
-			foreach($this->values as $key => $arr_val)
+			foreach ($this->values as $key => $arr_val)
 			{
 				// Расстояние между делениями
 				$lenght = 0;
@@ -727,7 +727,7 @@ class Core_Diagram extends Core_Servant_Properties
 		// Значений меньше, чем максимально возможное
 		else
 		{
-			foreach($this->values as $key => $arr_val)
+			foreach ($this->values as $key => $arr_val)
 			{
 				// Расстояние между делениями
 				$lenght = 0;
@@ -1252,7 +1252,7 @@ class Core_Diagram extends Core_Servant_Properties
 
 		// Высчитываем длину максимальной подписи и в соответствии с ней изменяем ширину диаграммы.
 		/*$max_legth = 0;
-		foreach($this->legend as $key => $val)
+		foreach ($this->legend as $key => $val)
 		{
 			if ($max_legth < mb_strlen($val))
 			{
@@ -1288,7 +1288,7 @@ class Core_Diagram extends Core_Servant_Properties
 		// Число значений элементов диаграммы
 		$countValues = 0;
 
-		foreach($this->values as $key => $value)
+		foreach ($this->values as $key => $value)
 		{
 			if (isset($this->legend[$key]))
 			{
@@ -1475,7 +1475,7 @@ class Core_Diagram extends Core_Servant_Properties
 		$joint_space = 5;
 
 		// Рисование сегментов и надписей диаграммы
-		foreach($diagramm_array as $key => $array)
+		foreach ($diagramm_array as $key => $array)
 		{
 			// Расчет координат для точек сегментов
 			// Х - координата верхней части сегмента
@@ -1547,7 +1547,7 @@ class Core_Diagram extends Core_Servant_Properties
 
 		// Рисование сегментов
 		// Низ диаграммы
-		foreach($diagramm_array as $key => $array)
+		foreach ($diagramm_array as $key => $array)
 		{
 			// Рисование многоугольника
 			imagefilledpolygon($im, $BotParts[$key],(count($BotParts[$key])) / 2, $this->_getShade($im, $key, - 20));
@@ -1565,13 +1565,13 @@ class Core_Diagram extends Core_Servant_Properties
 
 		for ($i = $joint_height - 1; $i >= 1; $i--) // По всей высоте диаграммы
 		{
-			foreach($diagramm_array as $key => $array)
+			foreach ($diagramm_array as $key => $array)
 			{
 				$Parts = array();
 				$Part = 0;
 
 				// Смещение четных вершин слоев сегмента
-				foreach($TopParts[$key] as $val2)
+				foreach ($TopParts[$key] as $val2)
 				{
 					$Part++ ;
 					if ($Part % 2 == 1)
@@ -1817,7 +1817,7 @@ class Core_Diagram extends Core_Servant_Properties
 		$prev = 100000;
 		// $twidth = $LW * $max_strlen + 6;
 		$i = $X0 + $RW - $DX;
-		while($i > $X0 - $DX)
+		while ($i > $X0 - $DX)
 		{
 			if ($prev - $twidth > $i)
 			{
@@ -1879,7 +1879,7 @@ class Core_Diagram extends Core_Servant_Properties
 			$y = $l_y1 + 3;
 			$i = 0;
 
-			foreach($this->legend as $v)
+			foreach ($this->legend as $v)
 			{
 				$dy = $y +($i * $font_h);
 				imagettftext($im,$fontSize,0,$text_x, $dy + $font_h, $black, $this->_fontPath . $this->fontName, $v);

@@ -221,6 +221,7 @@ if (!is_null(Core_Array::getGet('vote')))
 	}
 }
 
+/*
 // Текстовая информация для указания номера страницы, например "страница"
 $pageName = Core_Array::get(Core_Page::instance()->libParams, 'page')
 	? Core_Array::get(Core_Page::instance()->libParams, 'page')
@@ -254,7 +255,6 @@ if (!is_null($Shop_Controller_Show->tag) && Core::moduleIsActive('tag'))
 	}
 }
 
-/*
 if ($Shop_Controller_Show->group)
 {
     $oShop_Group = Core_Entity::factory('Shop_Group', $Shop_Controller_Show->group);
@@ -295,7 +295,7 @@ if ($Shop_Controller_Show->item)
     $oShop_Item->seo_keywords != ''
         ? Core_Page::instance()->keywords($oShop_Item->name) && $aKeywords = array()
         : $aKeywords[] = $oShop_Item->name;
-}*/
+}
 
 if ($Shop_Controller_Show->producer)
 {
@@ -303,10 +303,10 @@ if ($Shop_Controller_Show->producer)
 	$aKeywords[] = $aDescription[] = $aTitle[] = $oShop_Producer->name;
 }
 
-/*if ($Shop_Controller_Show->page)
+if ($Shop_Controller_Show->page)
 {
 	array_unshift($aTitle, $pageName . ' ' . ($Shop_Controller_Show->page + 1));
-}*/
+}
 
 if (count($aTitle) > 1)
 {
@@ -317,6 +317,6 @@ if (count($aTitle) > 1)
 	Core_Page::instance()->title(implode($pageSeparator, $aTitle));
 	Core_Page::instance()->description(implode($pageSeparator, $aDescription));
 	Core_Page::instance()->keywords(implode($pageSeparator, $aKeywords));
-}
+}*/
 
 Core_Page::instance()->object = $Shop_Controller_Show;

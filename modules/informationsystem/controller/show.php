@@ -61,7 +61,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -1039,6 +1039,20 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$seo_keywords = $oInformationsystem_Group->name;
 			}
 		}
+		elseif (!is_null($this->tag) && Core::moduleIsActive('tag'))
+		{
+			$seo_title = $oTag->seo_title != ''
+				? $oTag->seo_title
+				: Core::_('Informationsystem.tag', $oTag->name);
+
+			$seo_description = $oTag->seo_description != ''
+				? $oTag->seo_description
+				: $oTag->name;
+
+			$seo_keywords = $oTag->seo_keywords != ''
+				? $oTag->seo_keywords
+				: $oTag->name;
+		}
 
 		$seo_title != '' && Core_Page::instance()->title($seo_title);
 		$seo_description != '' && Core_Page::instance()->description($seo_description);
@@ -1169,7 +1183,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->applyGroupsForbiddenTags($oInformationsystem_Group);
 
 				$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
-			} while($oInformationsystem_Group = $oInformationsystem_Group->getParent());
+			} while ($oInformationsystem_Group = $oInformationsystem_Group->getParent());
 		}
 
 		$this->_addGroupsByParentId(0, $this);
@@ -1344,8 +1358,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			if ($this->group)
 			{
+				$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group);
+
 				$sPath = '/admin/informationsystem/item/index.php';
-				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][0][{$this->group}]=1";
+				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
 				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title');
 
 				$oXslSubPanel->add(
@@ -1356,6 +1372,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 							Core::factory('Core_Html_Entity_Img')
 								->width(16)->height(16)
 								->src('/admin/images/folder_edit.gif')
+								->alt($sTitle)
+								->title($sTitle)
+						)
+				);
+
+				// Delete
+				$sPath = '/admin/informationsystem/item/index.php';
+				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
+				$sTitle = Core::_('Informationsystem_Group.markDeleted');
+
+				$oXslSubPanel->add(
+					Core::factory('Core_Html_Entity_A')
+						->href("{$sPath}?{$sAdditional}")
+						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
+						->add(
+							Core::factory('Core_Html_Entity_Img')
+								->width(16)->height(16)
+								->src('/admin/images/delete.gif')
 								->alt($sTitle)
 								->title($sTitle)
 						)
@@ -1394,6 +1428,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 						Core::factory('Core_Html_Entity_Img')
 							->width(16)->height(16)
 							->src('/admin/images/edit.gif')
+							->alt($sTitle)
+							->title($sTitle)
+					)
+			);
+
+			// Copy
+			$sPath = '/admin/informationsystem/item/index.php';
+			$sAdditional = "hostcms[action]=copy&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
+			$sTitle = Core::_('Informationsystem_Item.information_items_copy_form_title');
+
+			$oXslSubPanel->add(
+				Core::factory('Core_Html_Entity_A')
+					->href("{$sPath}?{$sAdditional}")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->add(
+						Core::factory('Core_Html_Entity_Img')
+							->width(16)->height(16)
+							->src('/admin/images/copy.gif')
 							->alt($sTitle)
 							->title($sTitle)
 					)

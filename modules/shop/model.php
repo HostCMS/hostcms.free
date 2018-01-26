@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -397,7 +397,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oProperty_Dir->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			//$oNewProperty_Dir = $oProperty_Dir->copy();
 			$oNewProperty_Dir = clone $oProperty_Dir;
@@ -408,7 +408,7 @@ class Shop_Model extends Core_Entity
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Item_Property_List->Property_Dirs->findAll();
 
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -421,7 +421,7 @@ class Shop_Model extends Core_Entity
 		//$oProperty->queryBuilder()->where('property_dir_id', '=', 0);
 		$aProperties = $oProperty->findAll();
 
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			//$oNewProperty = $oProperty->copy(FALSE);
 			$oNewProperty = clone $oProperty;
@@ -429,7 +429,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperties = $oNewObject_Shop_Item_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -447,7 +447,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oProperty_Dir->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			$oNewProperty_Dir = clone $oProperty_Dir;
 
@@ -463,7 +463,7 @@ class Shop_Model extends Core_Entity
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Group_Property_List->Property_Dirs->findAll();
 
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -476,7 +476,7 @@ class Shop_Model extends Core_Entity
 		//$oProperty->queryBuilder()->where('property_dir_id', '=', 0);
 		$aProperties = $oProperty->findAll();
 
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$oNewProperty = clone $oProperty;
 
@@ -489,7 +489,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperties = $oNewObject_Shop_Group_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -505,7 +505,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			$oNewProperty_Dir = clone $oProperty_Dir;
 			$oNewObject_Shop_Order_Property_List->add($oNewProperty_Dir);
@@ -513,7 +513,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Order_Property_List->Property_Dirs->findAll();
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -523,14 +523,14 @@ class Shop_Model extends Core_Entity
 		}
 
 		$aProperties = $oShop_Order_Property_List->Properties->findAll();
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$oNewProperty = clone $oProperty;
 			$oNewObject_Shop_Order_Property_List->add($oNewProperty);
 		}
 
 		$oNewProperties = $oNewObject_Shop_Order_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -541,14 +541,14 @@ class Shop_Model extends Core_Entity
 
 		// Копирование связи (!) с партнерскими программами
 		$aAffiliate_Plans = $this->Affiliate_Plans->findAll();
-		foreach($aAffiliate_Plans as $oAffiliate_Plan)
+		foreach ($aAffiliate_Plans as $oAffiliate_Plan)
 		{
 			$newObject->add($oAffiliate_Plan);
 		}
 
 		// Копирование типов и условий доставки
 		$aShop_Deliveries = $this->Shop_Deliveries->findAll();
-		foreach($aShop_Deliveries as $oShop_Delivery)
+		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
 			$newObject->add(
 				$oShop_Delivery->copy()
@@ -557,7 +557,7 @@ class Shop_Model extends Core_Entity
 
 		// Копирование бонусов
 		$aShop_Bonuses = $this->Shop_Bonuses->findAll();
-		foreach($aShop_Bonuses as $oShop_Bonus)
+		foreach ($aShop_Bonuses as $oShop_Bonus)
 		{
 			$newObject->add(
 				$oShop_Bonus->copy()
@@ -566,7 +566,7 @@ class Shop_Model extends Core_Entity
 
 		// Копирование скидок на товары
 		$aShop_Discounts = $this->Shop_Discounts->findAll();
-		foreach($aShop_Discounts as $oShop_Discount)
+		foreach ($aShop_Discounts as $oShop_Discount)
 		{
 			$newObject->add(
 				$oShop_Discount->copy()
@@ -575,42 +575,42 @@ class Shop_Model extends Core_Entity
 
 		// Копирование платежных систем
 		$aShop_Payment_Systems = $this->Shop_Payment_Systems->findAll();
-		foreach($aShop_Payment_Systems as $oShop_Payment_System)
+		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
 			$newObject->add($oShop_Payment_System->copy());
 		}
 
 		// Копирование цен
 		$aShop_Prices = $this->Shop_Prices->findAll();
-		foreach($aShop_Prices as $Shop_Price)
+		foreach ($aShop_Prices as $Shop_Price)
 		{
 			$newObject->add($Shop_Price->copy());
 		}
 
 		// Копирование производителей
 		$aShop_Producers = $this->Shop_Producers->findAll();
-		foreach($aShop_Producers as $oShop_Producer)
+		foreach ($aShop_Producers as $oShop_Producer)
 		{
 			$newObject->add($oShop_Producer->copy());
 		}
 
 		// Копирование скидок от суммы заказа
 		$aShop_Purchase_Discounts = $this->Shop_Purchase_Discounts->findAll();
-		foreach($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
 			$newObject->add($oShop_Purchase_Discount->copy());
 		}
 
 		// Копирование продавцов
 		$aShop_Sellers = $this->Shop_Sellers->findAll();
-		foreach($aShop_Sellers as $oShop_Seller)
+		foreach ($aShop_Sellers as $oShop_Seller)
 		{
 			$newObject->add($oShop_Seller->copy());
 		}
 
 		// Копирование складов
 		$aShop_Warehouses = $this->Shop_Warehouses->findAll();
-		foreach($aShop_Warehouses as $oShop_Warehouse)
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
 			$newObject->add($oShop_Warehouse->copy());
 		}
@@ -641,7 +641,7 @@ class Shop_Model extends Core_Entity
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
 
-		foreach($aShop_Groups as $aShop_Group)
+		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_groupsTree[$aShop_Group['parent_id']][] = $aShop_Group['id'];
 		}
@@ -657,7 +657,7 @@ class Shop_Model extends Core_Entity
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
 
-		foreach($aShop_Groups as $aShop_Group)
+		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_cacheGroups[$aShop_Group['parent_id']] = $aShop_Group['count'];
 		}
@@ -681,7 +681,7 @@ class Shop_Model extends Core_Entity
 			->groupBy('shop_group_id');
 
 		$aShop_Items = $queryBuilder->execute()->asAssoc()->result();
-		foreach($aShop_Items as $Shop_Item)
+		foreach ($aShop_Items as $Shop_Item)
 		{
 			$this->_cacheItems[$Shop_Item['shop_group_id']] = $Shop_Item['count'];
 		}
@@ -724,7 +724,7 @@ class Shop_Model extends Core_Entity
 
 			$offset += $limit;
 		}
-		while(count($aShop_Items));
+		while (count($aShop_Items));
 
 		return $this;
 	}
@@ -754,7 +754,7 @@ class Shop_Model extends Core_Entity
 
 		if (isset($this->_groupsTree[$parent_id]))
 		{
-			foreach($this->_groupsTree[$parent_id] as $groupId)
+			foreach ($this->_groupsTree[$parent_id] as $groupId)
 			{
 				$aTmp = $this->_callSubgroup($groupId);
 				$return['subgroups_total'] += $aTmp['subgroups_total'];

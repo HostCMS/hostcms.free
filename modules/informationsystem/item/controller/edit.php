@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -1141,7 +1141,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					// Получаем список меток
 					$aTags = $oTags->findAll(FALSE);
 
-					foreach($aTags as $oTag)
+					foreach ($aTags as $oTag)
 					{
 						// Получаем хэш тэга
 						$array_tags = Core_Str::getHashes($oTag->name, array('hash_function' => 'crc32'));
@@ -1628,7 +1628,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			// Добавляем все директории от текущей до родителя.
 			do {
 				$aParentGroups[] = $aTmpGroup->name;
-			} while($aTmpGroup = $aTmpGroup->getParent());
+			} while ($aTmpGroup = $aTmpGroup->getParent());
 
 			$sParents = implode(' → ', array_reverse($aParentGroups));
 

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -72,7 +72,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 );*/
 
 // Крошки по группам
-if($oShortcode_Dir->id)
+if ($oShortcode_Dir->id)
 {
 	$oShortcode_Dir_Breadcrumbs = $oShortcode_Dir;
 
@@ -85,7 +85,7 @@ if($oShortcode_Dir->id)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shortcode/index.php', NULL, NULL, "shortcode_dir_id={$oShortcode_Dir_Breadcrumbs->id}"));
 	}
-	while($oShortcode_Dir_Breadcrumbs = $oShortcode_Dir_Breadcrumbs->getParent());
+	while ($oShortcode_Dir_Breadcrumbs = $oShortcode_Dir_Breadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Command_Controller extends Core_Command_Controller
 {
@@ -47,7 +47,7 @@ class Template_Section_Lib_Command_Controller extends Core_Command_Controller
 					$oTemplate_Section_Lib->execute();
 					$result = ob_get_clean();
 				}
-				elseif(!is_null($delete))
+				elseif (!is_null($delete))
 				{
 					$oTemplate_Section = $oTemplate_Section_Lib->Template_Section;
 

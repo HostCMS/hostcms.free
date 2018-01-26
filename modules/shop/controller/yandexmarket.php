@@ -46,7 +46,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -1357,7 +1357,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			$oShop_Order = $this->createOrder($aResponse['order']);
 
-			if(!is_null($oShop_Order->id))
+			if (!is_null($oShop_Order->id))
 			{
 				$aAnswer['order'] = array(
 					"accepted" => TRUE,

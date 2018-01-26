@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -63,7 +63,7 @@ if ($oShopDir->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 		));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -102,7 +102,7 @@ if ($oShopGroup->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 			'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 		));
-	} while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -344,6 +344,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$oShop_Item_Import_Cml_Controller->iShopGroupId = $shop_groups_parent_id;
 					$oShop_Item_Import_Cml_Controller->sPicturesPath = Core_Array::getPost('import_price_load_files_path');
 					$oShop_Item_Import_Cml_Controller->importAction = Core_Array::getPost('import_price_action_items');
+					
 					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
 						? SHOP_DEFAULT_CML_CURRENCY_NAME
 						: 'Розничная';
@@ -439,7 +440,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		{
 			$Shop_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
 
-			if ($Shop_Item_Import_Csv_Controller->importAction == 0)
+			if ($Shop_Item_Import_Csv_Controller->importAction == 3)
 			{
 				$Shop_Item_Import_Csv_Controller->importAction = 1;
 			}
@@ -595,18 +596,18 @@ else
 				->radio(array(
 					1 => Core::_('Shop_Item.import_price_action_items1'),
 					2 => Core::_('Shop_Item.import_price_action_items2'),
-					0 => Core::_('Shop_Item.import_price_action_items0')
+					3 => Core::_('Shop_Item.import_price_action_items0')
 				))
 				->ico(array(
 					1 => 'fa-refresh',
 					2 => 'fa-ban',
-					0 => 'fa-trash',
+					3 => 'fa-trash',
 				))
 				->caption(Core::_('Shop_Item.import_price_list_action_items'))
 				->name('import_price_action_items')
 				->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
 				->value(1)
-				->onclick("if (this.value == 0) { res = confirm('" . Core::_('Shop_Item.empty_shop') . "'); if (!res) { return false; } } ")
+				->onclick("if (this.value == 3) { res = confirm('" . Core::_('Shop_Item.empty_shop') . "'); if (!res) { return false; } } ")
 			)
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')

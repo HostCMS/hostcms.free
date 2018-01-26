@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -167,7 +167,7 @@ class Shop_Order_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getOrderPath());
 			$oPropertyValue->delete();
@@ -248,7 +248,7 @@ class Shop_Order_Model extends Core_Entity
 		$fAmount = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$fAmount += $oShop_Order_Item->getAmount();
 		}
@@ -265,7 +265,7 @@ class Shop_Order_Model extends Core_Entity
 		$quantity = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$quantity += $oShop_Order_Item->quantity;
 		}
@@ -304,7 +304,7 @@ class Shop_Order_Model extends Core_Entity
 		$weight = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$weight += $oShop_Order_Item->Shop_Item->weight * $oShop_Order_Item->quantity;
 		}
@@ -1124,7 +1124,7 @@ class Shop_Order_Model extends Core_Entity
 					break;
 				}
 				$level++;
-			} while($oSiteuserAffiliate->id && $level < 30);
+			} while ($oSiteuserAffiliate->id && $level < 30);
 
 			// Есть аффилиаты, приведшие пользователя
 			if (count($aSiteusers))
@@ -1310,7 +1310,7 @@ class Shop_Order_Model extends Core_Entity
 		$newObject->save();
 
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aShop_Order_Items as $oShop_Order_Item)
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			$newObject->add(clone $oShop_Order_Item);
 		}
@@ -1635,7 +1635,7 @@ class Shop_Order_Model extends Core_Entity
 
 					$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-					if(count($aShop_Order_Items))
+					if (count($aShop_Order_Items))
 					{
 						foreach ($aShop_Order_Items as $oShop_Order_Item)
 						{

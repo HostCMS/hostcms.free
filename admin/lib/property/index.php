@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -72,7 +72,7 @@ $oAdminFormEntityBreadcrumbs->add(
 );
 
 // Если передан идентификатор группы ТДС, тогда строим дополнительные хлебные крошки
-if($iLibDirId)
+if ($iLibDirId)
 {
 	$oLibDir = Core_Entity::factory('Lib_Dir')->find($iLibDirId);
 
@@ -93,7 +93,7 @@ if($iLibDirId)
 						$oAdmin_Form_Controller->getAdminLoadAjax($sLibPath, NULL, NULL, $additionalParams)
 					);
 
-		} while($oLibDir = $oLibDir->getParent());
+		} while ($oLibDir = $oLibDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

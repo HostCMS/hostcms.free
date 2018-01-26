@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -122,10 +122,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		'csv_fields',
 		// Путь к картинкам
 		'imagesPath',
-		// Действие с существующими товарами:
-		// 0 - удалить содержимое магазина до импорта
-		// 1 - обновить существующие товары
-		// 2 - не обновлять существующие товары
+		// Действие с существующими инфорамционными элементами:
+		// 1 - обновить существующие инфорамционные элементамы
+		// 2 - не обновлять существующие инфорамционные элементамы
+		// 3 - удалить содержимое инфорамционной системы до импорта
 		'importAction',
 		// Флаг, указывающий, включена ли индексация
 		'searchIndexation',
@@ -283,11 +283,11 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	{
 		$this->_oCurrentInformationsystem = Core_Entity::factory('Informationsystem')->find($this->_iCurrentInformationsystemId);
 
-		// Инициализация текущей группы товаров
+		// Инициализация текущей группы
 		$this->_oCurrentGroup = Core_Entity::factory('Informationsystem_Group', $this->_iCurrentGroupId);
 		$this->_oCurrentGroup->informationsystem_id = $this->_oCurrentInformationsystem->id;
 
-		// Инициализация текущего товара
+		// Инициализация текущего инфоэлемента
 		$this->_oCurrentItem = Core_Entity::factory('Informationsystem_Item');
 		$this->_oCurrentItem->informationsystem_group_id = intval($this->_oCurrentGroup->id);
 
@@ -355,7 +355,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	{
 		Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImport', $this, array($this->_oCurrentInformationsystem));
 
-		if ($this->importAction == 0)
+		if ($this->importAction == 3)
 		{
 			Core_QueryBuilder::update('informationsystem_groups')
 				->set('deleted', 1)
@@ -383,7 +383,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 		$aCsvLine = array();
 
-		while((Core::getmicrotime() - $timeout + 3 < $this->time)
+		while ((Core::getmicrotime() - $timeout + 3 < $this->time)
 			&& $iCounter < $this->step
 			&& ($aCsvLine = $this->getCSVLine($fInputFile)))
 		{
@@ -404,7 +404,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 				{
 					switch ($this->csv_fields[$iKey])
 					{
-						// Идентификатор группы товаров
+						// Идентификатор группы
 						case 'informationsystem_groups_id':
 							if (intval($sData))
 							{
@@ -416,7 +416,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								}
 							}
 						break;
-						// Название группы товаров
+						// Название группы
 						case 'informationsystem_groups_value':
 							// Позиция GUID
 							$sNeedKeyCML = array_search('informationsystem_groups_guid', $this->csv_fields);
@@ -436,7 +436,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							}
 							else
 							{
-								// CML_ID родительской (!) группы товаров
+								// CML_ID родительской (!) группы
 								$sNeedKeyParentCMLId = array_search('informationsystem_groups_parent_guid', $this->csv_fields);
 								if ($sNeedKeyParentCMLId !== FALSE
 									&& ($sCMLID = Core_Array::get($aCsvLine, $sNeedKeyParentCMLId, '')) != '')
@@ -513,7 +513,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							$this->_oCurrentItem->informationsystem_group_id = $this->_oCurrentGroup->id;
 
 						break;
-						// Путь группы товаров
+						// Путь группы
 						case 'informationsystem_groups_path':
 							$oTmpObject = Core_Entity::factory('Informationsystem_Group');
 							$oTmpObject
@@ -536,37 +536,37 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 							}
 						break;
-						// Порядок сортировки группы товаров
+						// Порядок сортировки группы
 						case 'informationsystem_groups_order':
 							$this->_oCurrentGroup->sorting = intval($sData);
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// Описание группы товаров
+						// Описание группы
 						case 'informationsystem_groups_description':
 							$this->_oCurrentGroup->description = $sData;
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// SEO Title группы товаров
+						// SEO Title группы
 						case 'informationsystem_groups_seo_title':
 							$this->_oCurrentGroup->seo_title = $sData;
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// SEO Description группы товаров
+						// SEO Description группы
 						case 'informationsystem_groups_seo_description':
 							$this->_oCurrentGroup->seo_description = $sData;
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// SEO Keywords группы товаров
+						// SEO Keywords группы
 						case 'informationsystem_groups_seo_keywords':
 							$this->_oCurrentGroup->seo_keywords = $sData;
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// Активность группы товаров
+						// Активность группы
 						case 'informationsystem_groups_activity':
 							$this->_oCurrentGroup->active = intval($sData) >= 1 ? 1 : 0;
 							$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 						break;
-						// Картинка группы товаров
+						// Картинка группы
 						case 'informationsystem_groups_image':
 							// Для гарантии получения идентификатора группы
 							$this->_oCurrentGroup->save();
@@ -712,7 +712,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								}
 							}
 						break;
-						// Малая картинка группы товаров
+						// Малая картинка группы
 						case 'informationsystem_groups_small_image':
 							// Для гарантии получения идентификатора группы
 							$this->_oCurrentGroup->save();
@@ -817,7 +817,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								}
 							}
 						break;
-						// Передан GUID группы товаров
+						// Передан GUID группы
 						case 'informationsystem_groups_guid':
 							if ($sData == 'ID00000000')
 							{
@@ -846,7 +846,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_oCurrentGroup->id && $this->_doSaveGroup($this->_oCurrentGroup);
 							}
 						break;
-						// Передан GUID родительской группы товаров
+						// Передан GUID родительской группы
 						case 'informationsystem_groups_parent_guid':
 							$oTmpObject = Core_Entity::factory('Informationsystem_Group', 0);
 							if ($sData != 'ID00000000')
@@ -866,12 +866,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								//$this->_oCurrentItem->Informationsystem_Group_id = $oTmpObject->id;
 							}
 						break;
-						// Дополнительные группы для товара (CML_ID), где нужно создавать ярлыки
+						// Дополнительные группы для инфоэлемента (CML_ID), где нужно создавать ярлыки
 						case 'additional_group':
 							$aShortcuts = explode(',', $sData);
 							$this->_aAdditionalGroups = array_merge($this->_aAdditionalGroups, $aShortcuts);
 						break;
-						// Идентификатор товара
+						// Идентификатор инфоэлемента
 						case 'informationsystem_items_item_id':
 							$oTmpObject = Core_Entity::factory("Informationsystem_Item")->find($sData);
 							if (!is_null($oTmpObject->id))
@@ -880,11 +880,11 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_oCurrentItem = $oTmpObject;
 							}
 						break;
-						// Передано название товара
+						// Передано название инфоэлемента
 						case 'informationsystem_items_name':
 							$this->_oCurrentItem->name = $sData;
 						break;
-						// Передана дата добавления товара
+						// Передана дата добавления инфоэлемента
 						case 'informationsystem_items_date_time':
 							if (preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData))
 							{
@@ -895,35 +895,35 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_oCurrentItem->datetime = Core_Date::datetime2sql($sData);
 							}
 						break;
-						// Передано описание товара
+						// Передано описание инфоэлемента
 						case 'informationsystem_items_description':
 							$this->_oCurrentItem->description = $sData;
 						break;
-						// Передан текст товара
+						// Передан текст инфоэлемента
 						case 'informationsystem_items_text':
 							$this->_oCurrentItem->text = $sData;
 						break;
-						// Передана большая картинка товара, обработка будет после вставки товара
+						// Передана большая картинка инфоэлемента, обработка будет после вставки инфоэлемента
 						case 'informationsystem_items_image':
 							$this->_sBigImageFile = $sData;
 						break;
-						// Передана малая картинка товара, обработка будет после вставки товара
+						// Передана малая картинка инфоэлемента, обработка будет после вставки инфоэлемента
 						case 'informationsystem_items_small_image':
 							$this->_sSmallImageFile = $sData;
 						break;
-						// Переданы метки товара, обработка будет после вставки товара
+						// Переданы метки инфоэлемента, обработка будет после вставки инфоэлемента
 						case 'informationsystem_items_label':
 							$this->_sCurrentTags = $sData;
 						break;
-						// Передана активность товара
+						// Передана активность инфоэлемента
 						case 'informationsystem_items_is_active':
 							$this->_oCurrentItem->active = $sData;
 						break;
-						// Передан порядок сортировки товара
+						// Передан порядок сортировки инфоэлемента
 						case 'informationsystem_items_order':
 							$this->_oCurrentItem->sorting = $sData;
 						break;
-						// Передан путь товара
+						// Передан путь инфоэлемента
 						case 'informationsystem_items_path':
 							// Товар не был найден ранее, например, по артикулу
 							if (!$this->_oCurrentItem->id)
@@ -940,19 +940,19 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 							$this->_oCurrentItem->path = $sData;
 						break;
-						// Передан Seo Title для товара
+						// Передан Seo Title для инфоэлемента
 						case 'informationsystem_items_seo_title':
 							$this->_oCurrentItem->seo_title = $sData;
 						break;
-						// Передан Seo Description для товара
+						// Передан Seo Description для инфоэлемента
 						case 'informationsystem_items_seo_description':
 							$this->_oCurrentItem->seo_description = $sData;
 						break;
-						// Передан Seo Keywords для товара
+						// Передан Seo Keywords для инфоэлемента
 						case 'informationsystem_items_seo_keywords':
 							$this->_oCurrentItem->seo_keywords = $sData;
 						break;
-						// Передан флаг индексации товара
+						// Передан флаг индексации инфоэлемента
 						case 'informationsystem_items_indexation':
 							$this->_oCurrentItem->indexing = $sData;
 						break;
@@ -1009,7 +1009,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 							if (strpos($sFieldName, "prop_group-") === 0)
 							{
-								// Дополнительное свойство группы товаров
+								// Дополнительное свойство группы
 								$iPropertyId = explode("-", $sFieldName);
 
 								$iPropertyId = $iPropertyId[1];
@@ -1975,7 +1975,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 				$this->_aExternalProperties =
 				$this->_aAdditionalGroups = array();
 
-			// Список меток для текущего товара
+			// Список меток для текущего инфоэлемента
 			$this->_sCurrentTags = '';
 		} // end line
 
@@ -2089,7 +2089,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	{
 		date_default_timezone_set(Core::$mainConfig['timezone']);
 
-		// Инициализация текущей группы товаров
+		// Инициализация текущей группы
 		$this->_oCurrentGroup = Core_Entity::factory('Informationsystem_Group', $this->_iCurrentGroupId
 			? $this->_iCurrentGroupId
 			: NULL);
@@ -2098,7 +2098,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 		$this->_oCurrentGroup->informationsystem_id = $this->_oCurrentInformationsystem->id;
 
-		// Инициализация текущего товара
+		// Инициализация текущего инфоэлемента
 		$this->_oCurrentItem = Core_Entity::factory('Informationsystem_Item');
 		$this->_oCurrentItem->informationsystem_group_id = intval($this->_oCurrentGroup->id);
 

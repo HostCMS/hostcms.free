@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Word_Model extends Core_Entity
 {
@@ -114,7 +114,7 @@ class Admin_Word_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aAdmin_Word_Values = $this->Admin_Word_Values->findAll();
-		foreach($aAdmin_Word_Values as $oAdmin_Word_Value)
+		foreach ($aAdmin_Word_Values as $oAdmin_Word_Value)
 		{
 			$newObject->add(clone $oAdmin_Word_Value);
 		}

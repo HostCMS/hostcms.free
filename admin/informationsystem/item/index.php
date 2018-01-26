@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -110,7 +110,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 				// Добавляем все директории от текущей до родителя.
 				do {
 					$aParentGroups[] = $aTmpGroup->name;
-				} while($aTmpGroup = $aTmpGroup->getParent());
+				} while ($aTmpGroup = $aTmpGroup->getParent());
 
 				$sParents = implode(' → ', array_reverse($aParentGroups));
 
@@ -283,7 +283,7 @@ if ($iInformationsystemDirId)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemDirPath, NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemDir = $oInformationsystemDir->getParent());
+		} while ($oInformationsystemDir = $oInformationsystemDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -331,7 +331,7 @@ if ($iInformationsystemGroupId)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemGroup = $oInformationsystemGroup->getParent());
+		} while ($oInformationsystemGroup = $oInformationsystemGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

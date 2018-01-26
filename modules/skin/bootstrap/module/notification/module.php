@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -58,7 +58,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				$aModules = Core_Entity::factory('Module')->getAllByActive(1);
 
 				// Для каждого модуля получаем актуальные на данный момент уведомления
-				foreach($aModules as $oModule)
+				foreach ($aModules as $oModule)
 				{
 					if (method_exists($oModule->Core_Module, 'callNotifications'))
 					{
@@ -148,7 +148,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							$aJson['newNotifications'][] = $aNotification;
 						}
 						// Непрочитанное ранее загруженное сообщение
-						else/*if(!$oNotification->read)*/
+						else/*if (!$oNotification->read)*/
 						{
 							$aJson['unreadNotifications'][] = $aNotification;
 						}

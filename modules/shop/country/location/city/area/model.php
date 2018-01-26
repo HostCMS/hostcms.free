@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Model extends Core_Entity
 {
@@ -56,7 +56,7 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 		'name_pl', 'name_lt', 'name_lv',
 		'name_cz', 'name_ja', 'name'
 	);
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -71,7 +71,7 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 		}
 	}
-	
+
 	/**
 	 * Get name depending on SITE_LNG
 	 * @return string
@@ -89,10 +89,28 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 		{
 			$name = $this->name;
 		}
-		
+
 		return $name;
 	}
-	
+
+	/**
+	 * Change active status
+	 * @return self
+	 * @hostcms-event shop_country_location_city_area.onBeforeChangeActive
+	 * @hostcms-event shop_country_location_city_area.onAfterChangeActive
+	 */
+	public function changeActive()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
+
+		$this->active = 1 - $this->active;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
+	}
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -101,10 +119,10 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-		
+
 		$this->clearXmlTags()
 			->addXmlTag('name', $this->getName());
-			
+
 		return parent::getXml();
 	}
 }

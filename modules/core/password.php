@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Password
 {
@@ -53,10 +53,10 @@ class Core_Password
 			? strtolower(preg_replace('/[^a-zA-Z0-9]/', '', substr($prefix, 0, $len - 1)))
 			: $aRange[rand(0, count($aRange) - 1)];
 		
-		while(strlen($return) < $len)
+		while (strlen($return) < $len)
 		{
 			$tmpFuzzy = $fuzzy;
-			while(
+			while (
 				substr_count($return, substr($return, strlen($return) - 1, 1) .
 				($k = substr($aRangeAlphabet[substr($return, strlen($return) - 1, 1)], rand(0, $tmpFuzzy % 11), 1)))
 			)

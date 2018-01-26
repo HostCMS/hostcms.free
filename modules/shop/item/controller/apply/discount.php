@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 {
@@ -67,7 +67,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			// Получение списка скидок
 			$aDiscounts = array(" … ");
 			$aShop_Discounts = $this->Shop->Shop_Discounts->findAll(FALSE);
-			foreach($aShop_Discounts as $oShop_Discount)
+			foreach ($aShop_Discounts as $oShop_Discount)
 			{
 				$aDiscounts[$oShop_Discount->id] = $oShop_Discount->name;
 			}
@@ -98,7 +98,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			{
 				$aBonuses = array(" … ");
 				$aShop_Bonuses = $this->Shop->Shop_Bonuses->findAll(FALSE);
-				foreach($aShop_Bonuses as $oShop_Bonus)
+				foreach ($aShop_Bonuses as $oShop_Bonus)
 				{
 					$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->name;
 				}

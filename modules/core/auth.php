@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -124,9 +124,6 @@ class Core_Auth
 				Core::factory('Core_Html_Entity_Div')
 					->class('indexMessage')
 					->add(Core::factory('Core_Html_Entity_H1')->value($title))
-					/*->add(Core::factory('Core_Html_Entity_P')->value(
-						Core::_('Core.getting_key')
-					))*/
 					->execute();
 
 				$oSkin->footer();

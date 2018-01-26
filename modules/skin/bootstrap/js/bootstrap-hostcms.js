@@ -1463,7 +1463,7 @@
 
 			// Создаем slimscroll
 			jScrollNotificationClock.slimscroll({
-				height: $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul li[id != 0]').length ? '220px' : '55px',
+				height: $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul li[id != "notification-0"]').length ? '220px' : '55px',
 				//height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px',
@@ -1549,7 +1549,7 @@
 				// Устанавливаем видимость кнопки очистки поля поиска (фильтрации) уведомлений
 				setVisibilityInputCleaningButton(jInputSearch, jButton);
 
-				if ($('#notificationsListBox .scroll-notifications li[id != 0]').length)
+				if ($('#notificationsListBox .scroll-notifications li[id != "notification-0"]').length)
 				{
 					$('.navbar-account #notificationsListBox .footer').show();
 
@@ -1714,10 +1714,12 @@
 
 		// Добавление полосы прокрутки для списка уведомлений
 		setNotificationsSlimScroll: function (){
-
+						
 			// Сохраняем данные .slimScrollBar
 			var jSlimScrollBar = $('#notificationsListBox .slimScrollBar'),
 				slimScrollBarData = !jSlimScrollBar.data() ? {'isMousedown': false} : jSlimScrollBar.data();
+				
+			console.log('jSlimScrollBar = ', jSlimScrollBar);
 
 			// Удаляем slimscroll
 			if ($('#notificationsListBox > .slimScrollDiv').length)
@@ -1728,17 +1730,18 @@
 
 			// Создаем slimscroll
 			$('#notificationsListBox .scroll-notifications').slimscroll({
-				height: $('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != 0]').length ? '220px' : '55px',
+				height: $('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != "notification-0"]').length ? '220px' : '55px',
 				//height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px'
 			});
 
-			//	Добавляем новому .slimScrollBar данные от удаленного
-			jSlimScrollBar
+			// Добавляем новому .slimScrollBar данные от удаленного
+			//jSlimScrollBar
+			$('#notificationsListBox .slimScrollBar')
 				.data(slimScrollBarData)
 				.on({
-					'mousedown': function (){
+					'mousedown': function (){						
 						$(this).data('isMousedown', true);
 					},
 					'mouseenter': function () {
@@ -1825,6 +1828,8 @@
 			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
 			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
 
+			//console.log("data['lastNotificationId'] = ", data['lastNotificationId']);
+
 			$.ajax({
 				//context: textarea,
 				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
@@ -1839,6 +1844,8 @@
 						//&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length)
 					)
 					{
+						//console.log('!!!!!!');
+
 						// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
 						var unreadNotifications = [];
 
@@ -1846,12 +1853,14 @@
 							unreadNotifications.push($(this).attr('id'));
 						})
 
+						//console.log('unreadNotifications = ', unreadNotifications);
+
 						// Непрочитанные уведомления из БД
 						$.each(resultData['unreadNotifications'], function(index, notification ){
 
 							var searchIndex = -1;
 
-							if (~(searchIndex = unreadNotifications.indexOf(notification['id'])))
+							if (~(searchIndex = unreadNotifications.indexOf('notification-' + notification['id'])))
 							{
 								// Удаляем из массива уведомления, оставшиеся непрочитанными
 								unreadNotifications.splice(searchIndex, 1);
@@ -1898,10 +1907,13 @@
 						// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
 						$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
 
+						//console.log('countUnreadNotifications = ', countUnreadNotifications);
+
 						//  Меняем значение баджа с числом непрочитанных уведомлений
 						$('.navbar li#notifications > a > span.badge')
 							.html(countUnreadNotifications)
 							.toggleClass('hidden', !countUnreadNotifications);
+
 
 						// Показываем значек корзины - очистки списка уведомлений.
 						/*
@@ -1917,7 +1929,7 @@
 		},
 		// Метод устанавливает уведомления прочитанными
 		readNotifications: function (wheelDelta, delta){
-
+						
 			var masVisibleUnreadNotifications = [];
 
 			// Список непрочитанныных уведомлений
@@ -1929,7 +1941,7 @@
 					var notificationBox = $(this).parent('li.unread');
 						notificationBox.removeClass('unread');
 
-					masVisibleUnreadNotifications.push(notificationBox.attr('id'));
+					masVisibleUnreadNotifications.push(notificationBox.attr('id').split('-')[1]);
 				}
 			});
 
@@ -1963,7 +1975,7 @@
 
 		filterNotifications: function (jInputElement){
 
-			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != 0]');
+			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != "notification-0"]');
 
 			if (jNotifications.length)
 			{
@@ -1984,8 +1996,8 @@
 		},
 
 		clearNotifications: function (){
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id!="notification-0"]').remove();
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').show();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != "notification-0"]').remove();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id = "notification-0"]').show();
 
 			// Нет непрочитанных уведомлений
 			$('.navbar li#notifications > a').removeClass('wave in');
@@ -2037,10 +2049,10 @@
 				)
 				.on(
 					{
-						'mouseenter': function (){ // Наведение крсора мыши на полосу прокрутки дел
+						'mouseenter': function (){ // Наведение курсора мыши на полосу прокрутки дел
 							$(this).css('width', (parseInt(sSlimscrollBarWidth) + 3) + 'px')
 						},
-						'mouseleave': function (){ // Уход крсора мыши с полосы прокрутки дел
+						'mouseleave': function (){ // Уход курсора мыши с полосы прокрутки дел
 							$(this).css('width', sSlimscrollBarWidth)
 						}
 					}, '.slimScrollBar'
@@ -2504,7 +2516,7 @@
 			}
 		},
 
-		// Метод показа элементов (сотрудников) в списке select2
+		// Показ сотрудников в списке select2
 		templateResultItemResponsibleEmployees: function (data, item){
 
 			var arraySelectItemParts = data.text.split("%%%"),
@@ -2556,15 +2568,11 @@
 			// Удаляем часть с названием отдела
 			arraySelectItemParts[1] && delete(arraySelectItemParts[1]);
 
-			return resultHtml; //arraySelectItemParts.join(\'\');
+			return resultHtml;
 		},
 
-		// Метод формирования выбранных элементов (сотрудников) в select2
+		// Показ выбранных сотрудников в select2
 		templateSelectionItemResponsibleEmployees: function (data, item){
-
-			console.log('$(item).parents(".select2-selection--single") = ', $(item).parents(".select2-selection--single"));
-
-			//$(item).parents(".select2-selection--single").css('{height: auto}');
 
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class"),
@@ -2628,6 +2636,49 @@
 			if (arraySelectItemParts[3])
 			{
 				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5">' + resultHtml;
+			}
+
+			return resultHtml;
+		},
+
+		// Показ клиентов выпадающего списка select2
+		templateResultItemSiteusers: function (data, item){
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			if (data.element && $(data.element).attr("style"))
+			{
+				// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+				($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+			}
+
+			// Компания/ФИО клиента
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			if (arraySelectItemParts[1])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-right-5">' + resultHtml;
+			}
+
+			return resultHtml;
+		},
+
+		// Формирование результатов выбора клиентов в select2
+		templateSelectionItemSiteusers: function (data, item){
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			// Компания/ФИО клиента
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			// Устанавливает title для элемента
+			data.title = arraySelectItemParts[0];
+
+			if (arraySelectItemParts[1])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-top-5 margin-right-5 margin-bottom-5">' + resultHtml;
 			}
 
 			return resultHtml;

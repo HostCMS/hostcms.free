@@ -173,7 +173,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location
 			->queryBuilder()
 			->where('shop_country_id', '=', intval(Core_Array::getGet('shop_country_id')));
-		$aObjects = $oShop_Country_Location->findAll();
+		$aObjects = $oShop_Country_Location->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_id'))
 	{
@@ -181,7 +181,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City
 			->queryBuilder()
 			->where('shop_country_location_id', '=', intval(Core_Array::getGet('shop_country_location_id')));
-		$aObjects = $oShop_Country_Location_City->findAll();
+		$aObjects = $oShop_Country_Location_City->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_city_id'))
 	{
@@ -189,7 +189,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City_Area
 			->queryBuilder()
 			->where('shop_country_location_city_id', '=', intval(Core_Array::getGet('shop_country_location_city_id')));
-		$aObjects = $oShop_Country_Location_City_Area->findAll();
+		$aObjects = $oShop_Country_Location_City_Area->getAllByActive(1);
 	}
 
 	$aArray = array('…');

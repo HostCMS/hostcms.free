@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -51,7 +51,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки по директориям магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$oShopDirBreadcrumbs = $oShopDir;
 
@@ -67,7 +67,7 @@ if($oShopDir->id)
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 			));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -90,7 +90,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки по группам товаров
-if($oShopGroup->id)
+if ($oShopGroup->id)
 {
 	$oShopGroupBreadcrumbs = $oShopGroup;
 
@@ -106,7 +106,7 @@ if($oShopGroup->id)
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 			));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -118,7 +118,7 @@ if($oShopGroup->id)
 
 // Если товар - модификация, значит мы пришли из формы списка модификаций,
 // добавляем соответствующую крошку
-if($oShopItem->modification_id)
+if ($oShopItem->modification_id)
 {
 	// Крошка на текущую форму
 	$oAdmin_Form_Entity_Breadcrumbs->add(
@@ -146,7 +146,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки по группам товаров при выборе сопутствующего товара
-if($oShopGroupAssociated->id)
+if ($oShopGroupAssociated->id)
 {
 	$aBreadcrumbs = array();
 
@@ -162,7 +162,7 @@ if($oShopGroupAssociated->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 		));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

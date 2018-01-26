@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
@@ -51,7 +51,7 @@ class Core_Mail_Smtp extends Core_Mail
 					return FALSE;
 				}
 			}
-			while(!feof($fp)
+			while (!feof($fp)
 				//&& $this->_getResponseStatus($server_response) == "220"
 				&& substr($server_response, 3, 1) != ' '
 			);
@@ -68,7 +68,7 @@ class Core_Mail_Smtp extends Core_Mail
 					return FALSE;
 				}
 			}
-			while(!feof($fp)
+			while (!feof($fp)
 				//&& $this->_getResponseStatus($server_response) == "250"
 				&& substr($server_response, 3, 1) != ' '
 			);

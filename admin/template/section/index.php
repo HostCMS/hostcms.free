@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -72,7 +72,7 @@ $oAdminFormEntityBreadcrumbs->add(
 );
 
 // Если передан идентификатор группы макетов, тогда строим дополнительные хлебные крошки
-if($iTemplateDirId)
+if ($iTemplateDirId)
 {
 	$oTemplate_Dir = Core_Entity::factory('Template_Dir')->find($iTemplateDirId);
 
@@ -93,7 +93,7 @@ if($iTemplateDirId)
 						$oAdmin_Form_Controller->getAdminLoadAjax($sTemplatePath, NULL, NULL, $additionalParams)
 					);
 
-		} while($oTemplate_Dir = $oTemplate_Dir->getParent());
+		} while ($oTemplate_Dir = $oTemplate_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
