@@ -1941,7 +1941,7 @@
 					var notificationBox = $(this).parent('li.unread');
 						notificationBox.removeClass('unread');
 
-					masVisibleUnreadNotifications.push(notificationBox.attr('id').split('-')[1]);
+					masVisibleUnreadNotifications.push(notificationBox.attr('id').split('notification-')[1]);
 				}
 			});
 
@@ -2129,7 +2129,7 @@
 
 											var ajaxData = $.getData({});
 
-											ajaxData['eventId'] = jEventItem.prop('id');
+											ajaxData['eventId'] = jEventItem.prop('id').split('event-')[1];
 
 											$.ajax({
 												//context: textarea,
@@ -2142,7 +2142,7 @@
 													if (resultData['eventId'])
 													{
 														// Удаляем дело из списка
-														$('#eventsAdminPage .task-item[id = ' + resultData['eventId'] + ']').remove();
+														$('#eventsAdminPage .task-item[id = "event-' + resultData['eventId'] + '"]').remove();
 
 														// Запоминаем положение полосы прокрутки в виджете дел
 														//$('#eventsAdminPage').data('slimScrollBarTop', jEventsList.scrollTop() + 'px');
@@ -2151,7 +2151,7 @@
 														$('#eventsAdminPage [data-toggle="upload"]').click();
 
 														// Нет незавершенных дел
-														!jEventsList.find('.task-item[id != 0]:not(.mark-completed)').length && jEventsList.find('.task-item[id = 0]').toggleClass('hidden');
+														!jEventsList.find('.task-item[id != "event-0"]:not(.mark-completed)').length && jEventsList.find('.task-item[id = "event-0"]').toggleClass('hidden');
 													}
 												}
 											});

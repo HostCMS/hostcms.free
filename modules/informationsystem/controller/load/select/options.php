@@ -4,7 +4,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
  *
- * Контроллер загрузки значений списка инф. элементов для <select> доп. св-в
+ * Контроллер загрузки значений списка инф. элементов для select доп. св-в
  *
  * @package HostCMS
  * @subpackage Informationsystem

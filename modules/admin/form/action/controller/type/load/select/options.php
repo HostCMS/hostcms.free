@@ -4,7 +4,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
  * Admin forms.
- * Типовой контроллер загрузки значений списка для <select>
+ * Типовой контроллер загрузки значений списка для select
  *
  * @package HostCMS
  * @subpackage Admin

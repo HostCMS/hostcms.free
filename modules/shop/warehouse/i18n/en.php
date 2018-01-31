@@ -34,4 +34,11 @@ return array(
 	'warehouse_default_name' => "Primary",
 	'warehouse_default_count' => "<acronym title=\"Set a zero rest in the warehouse\">Set rest in the warehouse</acronym>",
 	'guid' => '<acronym title="Warehouse identifier">Warehouse identifier</acronym>',
+	'name_other' => 'Additional name',
+	'address_info' => 'Additional information',
+	'latitude' => 'Latitude',
+	'longitude' => 'Longitude',
+	'phone' => 'Phone',
+	'website' => 'Website',
+	'working_time' => 'Working time',
 );

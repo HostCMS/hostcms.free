@@ -34,6 +34,12 @@ class Antispam_Log_Model extends Core_Entity
 	protected $_modelName = 'antispam_log';
 
 	/**
+	 * Column consist item's name
+	 * @var string
+	 */
+	protected $_nameColumn = 'user_agent';
+
+	/**
 	 * Default sorting for models
 	 * @var array
 	 */

@@ -417,8 +417,18 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			: intval($oShopItem->Modification->Shop_Group->id)
 		));
 
-		$value = isset($this->_aPropertyValues[$sValue])
-			? $this->_aPropertyValues[$sValue]
+		// Свойство список, но из 1С приходит не в виде справочника
+		if (isset($this->_aPropertyValues[$oProperty->id])
+			// Значение меняем/устанавливаем только в случае явного наличия элемента в значениях справочника!
+			&& !isset($this->_aPropertyValues[$oProperty->id][$sValue])
+		)
+		{
+			return $this;
+		}
+		
+		// в _aPropertyValues не всегда выгружается весь перечень значений справочника!
+		$value = isset($this->_aPropertyValues[$oProperty->id][$sValue])
+			? $this->_aPropertyValues[$oProperty->id][$sValue]
 			: $sValue;
 
 		switch ($oProperty->type)
@@ -834,47 +844,43 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		if (isset($this->_aBaseProperties[$sPropertyGUID]))
 		{
-			$sPropertyValue = isset($this->_aPropertyValues[$sValue])
-				? $this->_aPropertyValues[$sValue]
-				: $sValue;
-
 			switch (mb_strtoupper($this->_aBaseProperties[$sPropertyGUID]))
 			{
 				case 'HOSTCMS_TITLE':
-					$oShop_Item->seo_title = $sPropertyValue;
+					$oShop_Item->seo_title = $sValue;
 				break;
 				case 'HOSTCMS_DESCRIPTION':
-					$oShop_Item->seo_description = $sPropertyValue;
+					$oShop_Item->seo_description = $sValue;
 				break;
 				case 'HOSTCMS_KEYWORDS':
-					$oShop_Item->seo_keywords = $sPropertyValue;
+					$oShop_Item->seo_keywords = $sValue;
 				break;
 				case 'HOSTCMS_МЕТКИ':
-					$oShop_Item->applyTags($sPropertyValue);
+					$oShop_Item->applyTags($sValue);
 				break;
 				case 'YANDEX_MARKET':
-					$oShop_Item->yandex_market = $sPropertyValue;
+					$oShop_Item->yandex_market = $sValue;
 				break;
 				case 'ПРОДАВЕЦ':
-					$oSeller = Core_Entity::factory('Shop', $this->iShopId)->Shop_Sellers->getByName($sPropertyValue, FALSE);
+					$oSeller = Core_Entity::factory('Shop', $this->iShopId)->Shop_Sellers->getByName($sValue, FALSE);
 
 					if (is_null($oSeller))
 					{
 						$oSeller = Core_Entity::factory('Shop_Seller');
-						$oSeller->shop_id($this->iShopId)->name($sPropertyValue)->path(Core_Guid::get())->save();
+						$oSeller->shop_id($this->iShopId)->name($sValue)->path(Core_Guid::get())->save();
 					}
 
 					$oShop_Item->shop_seller_id = $oSeller->id;
 				break;
 				case 'ПРОИЗВОДИТЕЛЬ':
 
-					if (trim($sPropertyValue) != '')
+					if (trim($sValue) != '')
 					{
-						$this->_setProducer($sPropertyValue, $oShop_Item);
+						$this->_setProducer($sValue, $oShop_Item);
 					}
 				break;
 				case 'АКТИВНОСТЬ':
-					$oShop_Item->active = $sPropertyValue;
+					$oShop_Item->active = $sValue;
 				break;
 			}
 
@@ -1969,10 +1975,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				$this->_cacheProperty[$sPropertyGUID] = $oProperty;
 
+				if (strval($oItemProperty->ТипЗначений) == 'Справочник')
+				{
+					$this->_aPropertyValues[$oProperty->id] = array();
+				}
+				
 				foreach ($this->xpath($oItemProperty, 'ВариантыЗначений/Справочник') as $oValue)
 				{
 					$listValue = strval($oValue->Значение);
-					$this->_aPropertyValues[strval($oValue->ИдЗначения)] = $listValue;
+					$this->_aPropertyValues[$oProperty->id][strval($oValue->ИдЗначения)] = $listValue;
 
 					if ($oProperty->type == 3 && $oProperty->list_id && Core::moduleIsActive('list'))
 					{

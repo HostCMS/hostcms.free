@@ -496,9 +496,9 @@ abstract class Shop_Payment_System_Handler
 
 		// Частичная оплата с лицевого счета
 		if (Core::moduleIsActive('siteuser')
-				&& isset($this->_orderParams['partial_payment_by_personal_account'])
-				&& $this->_orderParams['partial_payment_by_personal_account']
-				&& $this->_shopOrder->Siteuser->id
+			&& isset($this->_orderParams['partial_payment_by_personal_account'])
+			&& $this->_orderParams['partial_payment_by_personal_account']
+			&& $this->_shopOrder->Siteuser->id
 		)
 		{
 			$this->_applyBonuses();

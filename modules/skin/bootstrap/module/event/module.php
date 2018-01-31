@@ -247,7 +247,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 						$aEvents = $oEvents->findAll();
 
 						?>
-						<li id="0" class="task-item empty-item gray<?php echo count($aEvents) ? ' hidden' : '' ?>">
+						<li id="event-0" class="task-item empty-item gray<?php echo count($aEvents) ? ' hidden' : '' ?>">
 							<?php echo Core::_('Event.widget_empty') ?>
 						</li>
 						<?php
@@ -261,7 +261,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 							{
 								$oEvent_User = $oEvent->Event_Users->getByUser_id($oUser->id);
 								?>
-								<li id="<?php echo $oEvent_User->event_id?>" class="task-item">
+								<li id="event-<?php echo $oEvent_User->event_id?>" class="task-item">
 									<div class="task-check">
 										<i class="fa <?php echo $oEvent->completed ? 'fa-check-square-o success' : 'fa-square-o'?> fa-lg" title="<?php echo Core::_('Event.titleCompleted')?>"></i>
 									</div>

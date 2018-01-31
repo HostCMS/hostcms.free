@@ -3265,3 +3265,13 @@ form.adminForm .deal_step
     -moz-border-radius:6px 0 6px 6px;
     border-radius:6px 0 6px 6px;
 }*/
+
+.input-group-addon.user-link
+{
+	background-image: none !important;
+	padding-left: 10px !important;
+	background-color: transparent;
+	border: 0;
+	padding: 0;
+	width: 40%;
+}

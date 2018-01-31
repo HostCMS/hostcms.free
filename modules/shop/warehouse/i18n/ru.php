@@ -34,4 +34,11 @@ return array(
 	'warehouse_default_name' => "Основной",
 	'warehouse_default_count' => "<acronym title=\"Устанавливаем всем товарам количество 0 на данном складе\">Установить количество товара на складе</acronym>",
 	'guid' => '<acronym title="Идентификатор склада CommerceML">Идентификатор склада CommerceML</acronym>',
+	'name_other' => 'Альтернативное название',
+	'address_info' => 'Дополнительная информация',
+	'latitude' => 'Широта',
+	'longitude' => 'Долгота',
+	'phone' => 'Телефон',
+	'website' => 'Сайт',
+	'working_time' => 'Часы работы',
 );
