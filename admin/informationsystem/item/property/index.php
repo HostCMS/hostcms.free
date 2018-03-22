@@ -238,7 +238,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
 	$oProperty_Controller_Edit = Admin_Form_Action_Controller::factory(
-		'Property_Controller_Edit', $oAdmin_Form_Action
+		'Informationsystem_Item_Property_Controller_Edit', $oAdmin_Form_Action
 	);
 
 	$oProperty_Controller_Edit

@@ -92,7 +92,7 @@ class Tag_Dir_Model extends Core_Entity
 	}
 
 	/**
-	 * Get parent comment
+	 * Get parent dir
 	 * @return Tag_Dir_Model|NULL
 	 */
 	public function getParent()
@@ -144,5 +144,28 @@ class Tag_Dir_Model extends Core_Entity
 		$this->parent_id = $tag_dir_id;
 		$this->save();
 		return $this;
+	}
+
+	/**
+	 * Get group path with separator
+	 * @return string
+	 */
+	public function dirPathWithSeparator($separator = ' → ', $offset = 0)
+	{
+		$aParentDirs = array();
+
+		$aTmpDir = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentDirs[] = $aTmpDir->name;
+		} while ($aTmpDir = $aTmpDir->getParent());
+
+		$offset > 0
+			&& $aParentDirs = array_slice($aParentDirs, $offset);
+
+		$sParents = implode($separator, array_reverse($aParentDirs));
+
+		return $sParents;
 	}
 }

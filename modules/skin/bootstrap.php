@@ -207,7 +207,7 @@ class Skin_Bootstrap extends Core_Skin
 					<!-- Navbar Barnd -->
 					<div class="navbar-header pull-left">
 						<a href="/admin/" <?php echo isset($_SESSION['valid_user'])
-							? 'onclick="'."$.adminLoad({path: '/admin/index.php'}); return false".'"'
+							? 'onclick="' . "$.adminLoad({path: '/admin/index.php'}); return false" . '"'
 							: ''?> class="navbar-brand"><?php
 							$sLogoTitle = Core_Auth::logged() ? ' v. ' . htmlspecialchars(CURRENT_VERSION) : '';
 							?><img src="/modules/skin/bootstrap/img/logo-white.png" alt="(^) HostCMS" title="HostCMS <?php echo $sLogoTitle?>" /></a>
@@ -225,8 +225,101 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						?><div class="navbar-account">
 							<ul class="account-area">
+								<li id="bookmarks">
+									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
+										<i class="icon fa fa-star-o"></i>
+										<span class="badge hidden"></span>
+									</a>
+									<div id="bookmarksListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
+										<div class="scroll-bookmarks">
+											<ul>
+											<?php
+											$oUser_Bookmarks = $oUser->User_Bookmarks;
+											$oUser_Bookmarks->queryBuilder()
+												->clearOrderBy()
+												->orderBy('user_bookmarks.id', 'ASC');
+
+											$aUser_Bookmarks = $oUser_Bookmarks->findAll(FALSE);
+
+											if (count($aUser_Bookmarks))
+											{
+												foreach ($aUser_Bookmarks as $oUser_Bookmark)
+												{
+													$oModule = Core_Entity::factory('Module')->getById($oUser_Bookmark->module_id);
+
+													if ($oModule)
+													{
+														$oCore_Module = Core_Module::factory($oModule->path);
+
+														if ($oModule->active && $oCore_Module)
+														{
+															$aMenu = $oCore_Module->getMenu();
+
+															$ico = is_array($aMenu) && isset($aMenu[0])
+																? strval(Core_Array::get($aMenu[0], 'ico'))
+																: 'fa fa-bookmark';
+
+															?><li id="bookmark-<?php echo $oUser_Bookmark->id?>">
+																<a href="<?php echo htmlspecialchars($oUser_Bookmark->path)?>">
+																	<div class="clearfix notification-bookmark">
+																		<div class="notification-icon">
+																			<i class="<?php echo htmlspecialchars($ico)?> bg-darkorange white"></i>
+																		</div>
+																		<div class="notification-body">
+																			<span class="title"><?php echo htmlspecialchars($oUser_Bookmark->name)?></span>
+																			<span class="description"><?php echo htmlspecialchars($oUser_Bookmark->path)?></span>
+																		</div>
+																		<div class="notification-extra">
+																			<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: '<?php echo Core::_("User_Bookmark.remove_message")?>', submit: '<?php echo Core::_("User_Bookmark.remove_submit")?>', cancel: '<?php echo Core::_("User_Bookmark.cancel")?>', bookmark_id: <?php echo $oUser_Bookmark->id?>, path: '/admin/user/index.php'})"></i>
+																		</div>
+																	</div>
+																</a>
+															</li><?php
+														}
+													}
+												}
+											}
+											else
+											{
+												?><li id="bookmark-0">
+													<a href="#">
+														<div class="clearfix">
+															<div class="notification-icon">
+																<i class="fa fa-info bg-themeprimary white"></i>
+															</div>
+															<div class="notification-body">
+																<span class="title margin-top-5"><?php echo Core::_('User_Bookmark.no_bookmarks')?></span>
+															</div>
+														</div>
+													</a>
+												</li><?php
+											}
+											?>
+											</ul>
+										</div>
+									</div>
+
+									<?php
+									$oModule = Core_Entity::factory('Module')->getByPath('user');
+									if ($oModule)
+									{
+									?>
+									<!--/Bookmark Dropdown-->
+									<script type="text/javascript">
+									$(function (){
+										$.bookmarksPrepare();
+
+										$('.navbar-account #bookmarksListBox').data({
+											moduleId: <?php echo $oModule->id?>
+										});
+									});
+									</script>
+									<?php
+									}
+									?>
+								</li>
 								<li>
-									<a id="sound-switch" title="Sound" href="#">
+									<a id="sound-switch" title="<?php echo Core::_('Admin.sound')?>" href="#">
 										<i class="icon fa fa-<?php echo $oUser->sound ? 'volume-up' : 'volume-off'?>"></i>
 									</a>
 
@@ -241,8 +334,8 @@ class Skin_Bootstrap extends Core_Skin
 										});
 									</script>
 								</li>
-								<li id="notifications-clock">
-									<a href="#" title="" data-toggle="dropdown" class="task-area dropdown-toggle">
+								<li id="notifications-clock" class="hidden-xs">
+									<a href="#" title="<?php echo Core::_('Admin.events')?>" data-toggle="dropdown" class="task-area dropdown-toggle">
 										<div class="clock">
 											<ul>
 												<li id="hours"> </li><li id="point">:</li><li id="min"> </li>
@@ -323,7 +416,7 @@ class Skin_Bootstrap extends Core_Skin
 														'moduleId': <?php echo $oModule->id?>
 													});
 
-													$.refreshEventsList();
+													// $.refreshEventsList();
 												});
 												</script><?php
 										}
@@ -335,7 +428,7 @@ class Skin_Bootstrap extends Core_Skin
 								{
 								?>
 								<li id="notifications">
-									<a href="#" title="" data-toggle="dropdown" class="dropdown-toggle">
+									<a href="#" title="<?php echo Core::_('Admin.notifications')?>" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-bell"></i>
 										<span class="badge hidden"></span>
 									</a>
@@ -406,7 +499,7 @@ class Skin_Bootstrap extends Core_Skin
 								?>
 								</li>
 								<li>
-									<span class="account-area-site-name hidden-xs">
+									<span class="account-area-site-name hidden-xs hidden-sm hidden-md">
 										<?php echo htmlspecialchars($oCurrentSite->name)?>
 									</span>
 
@@ -574,7 +667,7 @@ class Skin_Bootstrap extends Core_Skin
 										<div class="avatar" title="<?php echo Core::_('Admin.profile')?>">
 											<img src="<?php echo $oUser->getImageHref()?>">
 										</div>
-										<section>
+										<section class="hidden-xs hidden-sm hidden-md">
 											<h2><span class="profile"><span><?php echo htmlspecialchars(
 												$oUser->name != '' || $oUser->surname != ''
 													? $oUser->name . ' ' . $oUser->surname
@@ -624,11 +717,11 @@ class Skin_Bootstrap extends Core_Skin
 								<!--Note: notice that setting div must start right after account area list.
 								no space must be between these elements-->
 								<!-- Settings -->
-							</ul><div class="setting">
+							</ul><div class="setting hidden-xs">
 								<a id="btn-setting" title="<?php echo Core::_('Admin.settings')?>" href="#">
 									<i class="icon glyphicon glyphicon-cog"></i>
 								</a>
-							</div><div class="setting-container">
+							</div><div class="setting-container hidden-xs">
 								<label>
 									<span class="text"><?php echo Core::_('Admin.fixed')?></span>
 								</label>
@@ -814,21 +907,26 @@ class Skin_Bootstrap extends Core_Skin
 							//$oCore_Module = Core_Module::factory($oModule->path);
 							$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
-							if ($oCore_Module && is_array($oCore_Module->menu))
+							if ($oCore_Module)
 							{
-								foreach ($oCore_Module->menu as $aMenu)
+								$aMenu = $oCore_Module->getMenu();
+
+								if (is_array($aMenu))
 								{
-									$aMenu += array(
-										'sorting' => 0,
-										'block' => 0,
-										'ico' => 'fa-file-o'
-									);
-									?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-										<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>">
-											<i class="menu-icon <?php echo $aMenu['ico']?>"></i>
-											<span class="menu-text"><?php echo $aMenu['name']?></span>
-										</a>
-									</li><?php
+									foreach ($aMenu as $aTmpMenu)
+									{
+										$aTmpMenu += array(
+											'sorting' => 0,
+											'block' => 0,
+											'ico' => 'fa-file-o'
+										);
+										?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
+											<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
+												<i class="menu-icon <?php echo $aTmpMenu['ico']?>"></i>
+												<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
+											</a>
+										</li><?php
+									}
 								}
 							}
 						}
@@ -843,24 +941,29 @@ class Skin_Bootstrap extends Core_Skin
 				//$oCore_Module = Core_Module::factory($oModule->path);
 				$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
-				if ($oCore_Module && is_array($oCore_Module->menu))
+				if ($oCore_Module)
 				{
-					foreach ($oCore_Module->menu as $aMenu)
+					$aMenu = $oCore_Module->getMenu();
+
+					if (is_array($aMenu))
 					{
-						if (isset($aMenu['name']))
+						foreach ($aMenu as $aTmpMenu)
 						{
-							$aMenu += array(
-								'sorting' => 0,
-								'block' => 0,
-								'ico' => 'fa-file-o'
-							);
-							?><li>
-								<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>" class="menu-icon">
-									<i class="menu-icon fa <?php echo $aMenu['ico']?>"></i>
-									<span class="menu-text"><?php echo $aMenu['name']?></span>
-								</a>
-							</li>
-							<?php
+							if (isset($aTmpMenu['name']))
+							{
+								$aTmpMenu += array(
+									'sorting' => 0,
+									'block' => 0,
+									'ico' => 'fa-file-o'
+								);
+								?><li>
+									<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>" class="menu-icon">
+										<i class="menu-icon fa <?php echo $aTmpMenu['ico']?>"></i>
+										<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
+									</a>
+								</li>
+								<?php
+							}
 						}
 					}
 				}

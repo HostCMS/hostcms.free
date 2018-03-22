@@ -20,6 +20,7 @@ return array(
 	'tab_2' => 'CSS/LESS',
 	'tab_3' => 'Javascript',
 	'tab_4' => 'Манифест',
+	'tab_5' => 'Язык',
 	'breadCrumb' => 'Макет "%s"',
 	'id' => 'Идентификатор',
 	'name' => '<acronym title="Название макета">Название макета</acronym>',
@@ -44,4 +45,5 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'error_less_off' => 'LESS выключен для данного макета. Отредактируйте макет и включите его.',
 	'error_access_forbidden' => 'Доступ к редактированию макета запрещен.',
+	'language' => '%s.php',
 );

@@ -155,7 +155,7 @@ class Shop_Controller_YandexRealty extends Core_Controller
 		parent::__construct($oShop->clearEntities());
 
 		$this->protocol = Core::httpsUses() ? 'https' : 'http';
-		
+
 		$this->_Shop_Items = $oShop->Shop_Items;
 
 		$siteuser_id = 0;
@@ -332,7 +332,7 @@ class Shop_Controller_YandexRealty extends Core_Controller
 		}
 
 		$oShop_Item_Controller = new Shop_Item_Controller();
-		
+
 		/* Описание параметров, входящих в элемент */
 		do {
 			$oShop_Items = $this->_Shop_Items;
@@ -414,7 +414,7 @@ class Shop_Controller_YandexRealty extends Core_Controller
 
 				/* Информация о сделке */
 				$aPrices = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
-				
+
 				echo '<price>'."\n";
 					echo '<value>' . $aPrices['price_discount'] . '</value>'."\n";
 					echo '<currency>' . $oShop_Item->Shop_Currency->code . '</currency>'."\n";
@@ -442,9 +442,9 @@ class Shop_Controller_YandexRealty extends Core_Controller
 					}
 				}
 
-				if ($oShop_Item->description != '')
+				if (strlen($oShop_Item->description))
 				{
-					echo '<description>' . $oShop_Item->description . '</description>'."\n";
+					echo '<description>' . html_entity_decode(strip_tags($oShop_Item->description), ENT_COMPAT, 'UTF-8') . '</description>'."\n";
 				}
 
 				foreach ($this->aAreaTags as $areaTagName)

@@ -50,9 +50,13 @@ class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 
 			foreach ($aTags as $oTag)
 			{
+				$sParents = $oTag->Tag_Dir->dirPathWithSeparator();
+
+				$postfix = strlen($sParents) ? ' [' . $sParents . ']' : '';
+
 				$aJSON[] = array(
 					'id' => $oTag->name,
-					'text' => $oTag->name,
+					'text' => $oTag->name . $postfix,
 				);
 			}
 		}

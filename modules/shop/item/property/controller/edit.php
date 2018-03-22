@@ -165,6 +165,8 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 					$oShop_Items
 						->queryBuilder()
+						->clearOrderBy()
+						->orderBy('id', 'ASC')
 						->offset($offset)->limit($limit);
 
 					$aShop_Items = $oShop_Items->findAll(FALSE);

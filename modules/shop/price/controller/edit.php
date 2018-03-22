@@ -30,6 +30,13 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
+		$oMainTab
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
+			;
+
 		$oImportExportTab = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Shop_Price.import_export_tab'))
 			->name('ImportExport');
@@ -39,7 +46,9 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->addTabAfter($oImportExportTab, $oMainTab);
 
-		$oMainTab->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oImportExportTabRow1);
+		$oMainTab
+			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oImportExportTabRow1)
+			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
 		// Удаляем группу доступа
 		$oAdditionalTab->delete($this->getField('siteuser_group_id'));
@@ -59,6 +68,7 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Создаем поле групп пользователей сайта как выпадающий список
 		$oSiteUserGroupSelect = Admin_Form_Entity::factory('Select');
 		$oSiteUserGroupSelect
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->caption(Core::_("Shop_Item.siteuser_group_id"))
 			->options(
 				array(
@@ -69,16 +79,18 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->value($this->_object->siteuser_group_id);
 
 		// Добавляем группы пользователей сайта
-		$oMainTab->addAfter(
-			$oSiteUserGroupSelect, $this->getField('name')
-		);
+		$oMainRow2->add($oSiteUserGroupSelect);
+
+		$oMainTab
+			->move($this->getField('percent')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
 
 		$oApplyForAll = Admin_Form_Entity::factory('Checkbox')
 			->name('apply_for_all')
 			->caption(Core::_("Shop_Item.prices_add_form_apply_for_all"))
 			->value($object->id ? 0 : 1);
 
-		$oMainTab->addAfter($oApplyForAll, $this->getField('percent'));
+		$oMainRow3->add($oApplyForAll);
 
 		if (!is_null($object->id))
 		{
@@ -87,7 +99,7 @@ class Shop_Price_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->caption(Core::_("Shop_Item.prices_add_form_recalculate"))
 				->value(0);
 
-			$oMainTab->addAfter($oRecalculatePrice, $oApplyForAll);
+			$oMainRow3->add($oRecalculatePrice);
 		}
 
 		$title = $this->_object->id

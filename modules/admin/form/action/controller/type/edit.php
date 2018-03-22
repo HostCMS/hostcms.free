@@ -100,6 +100,20 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	}
 
 	/**
+	 * Remove skiping column
+	 * @param string $column column name
+	 * @return self
+	 */
+	public function removeSkipColumn($column)
+	{
+		if (isset($this->skipColumns[$column]))
+		{
+			unset($this->skipColumns[$column]);
+		}
+		return $this;
+	}
+
+	/**
 	 * Get model's key list
 	 * Получение списка ключей модели (PK и FK)
 	 * @return self

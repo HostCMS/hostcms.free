@@ -78,6 +78,12 @@ class Shop_Group_Model extends Core_Entity
 	 * @var int
 	 */
 	public $adminPrice = NULL;
+	
+	/**
+	 * Backend property
+	 * @var int
+	 */
+	public $adminRest = NULL;	
 
 	/**
 	 * One-to-many or many-to-many relations

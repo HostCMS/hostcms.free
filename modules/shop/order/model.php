@@ -707,30 +707,17 @@ class Shop_Order_Model extends Core_Entity
 
 		if ($this->_showXmlProperties)
 		{
-			if (is_array($this->_showXmlProperties))
-			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+			$aProperty_Values = is_array($this->_showXmlProperties)
+				? Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id)
+				: $this->getPropertyValues();
 
-				foreach ($aProperty_Values as $oProperty_Value)
-				{
-					if ($oProperty_Value->Property->type == 2)
-					{
-						$oProperty_Value
-							->setHref($this->getOrderHref())
-							->setDir($this->getOrderPath());
-					}
-
-					/*isset($this->_showXmlProperties[$oProperty_Value->property_id]) && */$this->addEntity(
-						$oProperty_Value
-					);
-				}
-			}
-			else
+			foreach ($aProperty_Values as $oProperty_Value)
 			{
-				$aProperty_Values = $this->getPropertyValues();
-				// Add all values
-				$this->addEntities($aProperty_Values);
+				$this->_preparePropertyValue($oProperty_Value);
 			}
+
+			// Add all values
+			$this->addEntities($aProperty_Values);
 		}
 
 		if ($this->_showXmlCountry && $this->shop_country_id)
@@ -812,6 +799,28 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getItemHref())
+					->setDir($this->getItemPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
+		}
+	}
+
+	/**
 	 * Pay the order
 	 * @return self
 	 * @hostcms-event shop_order.onBeforePaid
@@ -849,7 +858,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		$oModule = Core::$modulesList['shop'];
 
-		if ($oModule)
+		if ($oModule && Core::moduleIsActive('notification'))
 		{
 			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 			$oNotification_Subscribers->queryBuilder()
@@ -858,7 +867,7 @@ class Shop_Order_Model extends Core_Entity
 				->where('notification_subscribers.entity_id', '=', $this->Shop->id);
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-			
+
 			if (count($aNotification_Subscribers))
 			{
 				$sCompany = strlen($this->company)
@@ -867,14 +876,14 @@ class Shop_Order_Model extends Core_Entity
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
-					->title(sprintf(Core::_('Shop_Order.notification_paid_order'), $this->invoice))
-					->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->sum()))
+					->title(Core::_('Shop_Order.notification_paid_order', $this->invoice))
+					->description(Core::_('Shop_Order.notification_new_order_description', $sCompany , $this->sum()))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(2) // Оплаченный заказ
 					->entity_id($this->id)
 					->save();
-				
+
 				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
 					// Связываем уведомление с сотрудником

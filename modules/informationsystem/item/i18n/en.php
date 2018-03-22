@@ -136,5 +136,6 @@ return array(
 	'create_catalog' => 'Catalogue sections created',
 	'update_catalog' => 'Catalogue sections updated',
 	'msg_download_complete' => "Import has finished!",
-	'information_items_copy_form_title' => 'Copy item',	
+	'information_items_copy_form_title' => 'Copy item',
+	'add_value'=>'Add the default property values ​​for the items with unset values',
 );

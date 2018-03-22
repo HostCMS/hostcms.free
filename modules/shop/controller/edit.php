@@ -163,7 +163,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopTabWatermarkRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabOrders
 					->add($oShopTabOrdersRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -247,6 +248,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('watermark_default_use_large_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_use_small_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_position_x'), $oShopTabWatermark)
+					->move($this->getField('create_small_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_position_y'), $oShopTabWatermark)
 					// Orders
 					->move($this->getField('items_sorting_field'), $oShopTabOrders)
@@ -691,6 +693,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopTabWatermark->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
 				$oShopTabWatermark->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
+
+				$oShopTabWatermark->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow6);
 
 				// Добавляем поле сортировки товара
 				$oShopTabOrdersRow1->add(Admin_Form_Entity::factory('Select')

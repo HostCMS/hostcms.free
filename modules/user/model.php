@@ -84,11 +84,14 @@ class User_Model extends Core_Entity
 		'notification_subscriber' => array(),
 		'notification' => array('through' => 'notification_user'),
 		'deal_template_step_access_user'  => array(),
+		'deal_attachment' => array(),
 		'user_note' => array(),
 		'user_setting' => array(),
 		'user_message' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
+		'deal_user' => array(),
+		'user_bookmark' => array()
 	);
 
 	/**
@@ -518,6 +521,8 @@ class User_Model extends Core_Entity
 		{
 			$this->Calendar_Caldav_Users->deleteAll(FALSE);
 		}
+
+		$this->User_Bookmarks->deleteAll(FALSE);
 
 		// Удаляем директорию
 		$this->deleteDir();

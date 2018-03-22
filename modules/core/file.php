@@ -476,7 +476,7 @@ class Core_File
 		}
 		else
 		{
-			foreach ($aExtensions AS $extension)
+			foreach ($aExtensions as $extension)
 			{
 				if (strtolower($sExtension) == strtolower($extension))
 				{

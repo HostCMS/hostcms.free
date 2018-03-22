@@ -21,8 +21,10 @@ return array(
 	'guid' => '<acronym title="Price identifier for CommerceML format, e.g. ID00006831">CommerceML price identifier</acronym>',
 	'shop_id' => 'Shop id',
 	'id' => 'Id',
+	'sorting' => 'Sorting',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-'edit_success' => "Price information added successfully!",
-'markDeleted_success' => "Price information deleted successfully!",
+	'edit_success' => "Price information added successfully!",
+	'markDeleted_success' => "Price information deleted successfully!",
+	'apply_success' => "Information successfully changed",	
 );

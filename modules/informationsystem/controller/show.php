@@ -876,12 +876,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 							&& $this->_seoGroupKeywords = $oInformationsystem_Group->seo_group_keywords_template;
 
 						// Item: set informationsystem's SEO templates
-						$oInformationsystem->seo_item_title_template != ''
-							&& $this->_seoItemTitle = $oInformationsystem->seo_item_title_template;
-						$oInformationsystem->seo_item_description_template != ''
-							&& $this->_seoItemDescription = $oInformationsystem->seo_item_description_template;
-						$oInformationsystem->seo_item_keywords_template != ''
-							&& $this->_seoItemKeywords = $oInformationsystem->seo_item_keywords_template;
+						$oInformationsystem_Group->seo_item_title_template != ''
+							&& $this->_seoItemTitle = $oInformationsystem_Group->seo_item_title_template;
+						$oInformationsystem_Group->seo_item_description_template != ''
+							&& $this->_seoItemDescription = $oInformationsystem_Group->seo_item_description_template;
+						$oInformationsystem_Group->seo_item_keywords_template != ''
+							&& $this->_seoItemKeywords = $oInformationsystem_Group->seo_item_keywords_template;
 					}
 					else
 					{
@@ -1372,6 +1372,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 							Core::factory('Core_Html_Entity_Img')
 								->width(16)->height(16)
 								->src('/admin/images/folder_edit.gif')
+								->alt($sTitle)
+								->title($sTitle)
+						)
+				);
+
+				// Folder
+				$sPath = '/admin/informationsystem/item/index.php';
+				$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
+				$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
+
+				$oXslSubPanel->add(
+					Core::factory('Core_Html_Entity_A')
+						->href("{$sPath}?{$sAdditional}")
+						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+						->add(
+							Core::factory('Core_Html_Entity_Img')
+								->width(16)->height(16)
+								->src('/admin/images/folder.gif')
 								->alt($sTitle)
 								->title($sTitle)
 						)

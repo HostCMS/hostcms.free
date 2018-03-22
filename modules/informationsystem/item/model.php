@@ -1263,6 +1263,17 @@ class Informationsystem_Item_Model extends Core_Entity
 			{
 				$this->_showXmlPart > $iPartsCount && $this->_showXmlPart = $iPartsCount;
 
+				if (Core::moduleIsActive('shortcode'))
+				{
+					$oShortcode_Controller = Shortcode_Controller::instance();
+					$iCountShortcodes = $oShortcode_Controller->getCount();
+					
+					if ($iCountShortcodes)
+					{
+						$aParts[$this->_showXmlPart - 1] = $oShortcode_Controller->applyShortcodes($aParts[$this->_showXmlPart - 1]);
+					}
+				}
+				
 				$this->addForbiddenTag('text')
 					->addXmlTag('parts_count', $iPartsCount)
 					->addXmlTag('text', $aParts[$this->_showXmlPart - 1]);

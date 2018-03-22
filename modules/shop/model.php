@@ -832,13 +832,14 @@ class Shop_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop.onBeforeRedeclaredGetXml
+	 * @hostcms-event shop.onBeforeSelectShopWarehouses
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		$this->clearXmlTags()
-			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
 			->addXmlTag('captcha_id', $this->use_captcha ? Core_Captcha::getCaptchaId() : 0);
 
@@ -857,7 +858,13 @@ class Shop_Model extends Core_Entity
 		);
 
 		// Warehouses
-		$this->addEntities($this->Shop_Warehouses->findAll());
+		$oShop_Warehouses = $this->Shop_Warehouses;
+
+		Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouses', $this, array($oShop_Warehouses));
+
+		$aShop_Warehouses = $oShop_Warehouses->findAll();
+
+		$this->addEntities($aShop_Warehouses);
 
 		$this->_showXmlTaxes && $this->addEntities(Core_Entity::factory('Shop_Tax')->findAll());
 
@@ -905,6 +912,20 @@ class Shop_Model extends Core_Entity
 		!$this->structure_id && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-darkorange badge-ico white')
 			->add(Core::factory('Core_Html_Entity_I')->class('fa fa-chain-broken'))
+			->execute();
+
+		$countShopGroups = $this->Shop_Groups->getCount();
+		$countShopGroups && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-folder-open-o"></i> ' . $countShopGroups)
+			->title(Core::_('Shop.all_groups_count', $countShopGroups))
+			->execute();
+
+		$countShopItems = $this->Shop_Items->getCount();
+		$countShopItems && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-file-o"></i> ' . $countShopItems)
+			->title(Core::_('Shop.all_items_count', $countShopItems))
 			->execute();
 	}
 }

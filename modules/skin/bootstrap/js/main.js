@@ -131,6 +131,7 @@ function isEmpty(str) {
 				current: '',
 				sortingFieldId: '',
 				sortingDirection: '',
+				view: '',
 				post: {},
 				loadingScreen: true
 				//callBack: ''
@@ -419,6 +420,11 @@ function isEmpty(str) {
 			if (settings.sortingDirection != '')
 			{
 				data['hostcms[sortingdirection]'] = settings.sortingDirection;
+			}
+			
+			if (settings.view != '')
+			{
+				data['hostcms[view]'] = settings.view;
 			}
 
 			data['hostcms[window]'] = settings.windowId;

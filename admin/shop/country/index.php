@@ -112,12 +112,10 @@ if ($iShopDirId)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . $iShopDirId)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -167,8 +165,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 	// Хлебные крошки для контроллера редактирования
 	$ShopCountry_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

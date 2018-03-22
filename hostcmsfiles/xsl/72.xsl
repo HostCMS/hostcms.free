@@ -40,7 +40,7 @@
 				<th>&labelDescription;</th>
 				<xsl:apply-templates select="comparing/shop_item" mode="text"/>
 			</tr>
-			<xsl:apply-templates select="shop_item_properties//property"/>
+			<xsl:apply-templates select="shop_item_properties//property[type != 10]"/>
 			<tr>
 				<th>
 					&labelCompare;
@@ -83,17 +83,32 @@
 
 	<!-- Шаблон вывода значений свойств -->
 	<xsl:template match="property_value">
+		<xsl:variable name="property_id" select="property_id" />
+		<xsl:variable name="type" select="/shop/shop_item_properties//property[@id=$property_id]/type" />
+		
 		<xsl:choose>
-			<xsl:when test="not(file)">
-				<xsl:value-of disable-output-escaping="yes" select="value"/>
-			</xsl:when>
-			<xsl:when test="file/node()">
+			<!-- File -->
+			<xsl:when test="$type = 2">
 				<a target="_blank" href="{../dir}{file}"><xsl:value-of select="file_name"/></a>
 			</xsl:when>
+			<!-- Wysiwyg -->
+			<xsl:when test="$type = 6">
+				<xsl:value-of disable-output-escaping="yes" select="value"/>
+			</xsl:when>
+			<!-- Checkbox -->
+			<xsl:when test="$type = 7">
+				<xsl:choose>
+					<xsl:when test="value = 1">✓</xsl:when>
+					<xsl:otherwise>—</xsl:otherwise>
+				</xsl:choose>
+			</xsl:when>
+			<!-- Other types -->
+			<xsl:otherwise>
+				<xsl:value-of select="value"/>
+			</xsl:otherwise>
 		</xsl:choose>
 		<xsl:if test="position() != last()">, </xsl:if>
 	</xsl:template>
-
 
 	<!-- Шаблон, формирующий названия товаров -->
 	<xsl:template match="comparing/shop_item" mode="name">

@@ -491,4 +491,6 @@ $Shop_Controller_Show
 	//->filterShortcuts(TRUE)
 	// Учет остатка товаров на складе
 	//->warehouseMode('in-stock')
+	// Только доступные элементы списков в фильтре
+	//->itemsPropertiesListJustAvailable(TRUE)
 	->show();

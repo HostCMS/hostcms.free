@@ -135,8 +135,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 	// Хлебные крошки для контроллера редактирования
 	$ShopMeasure_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

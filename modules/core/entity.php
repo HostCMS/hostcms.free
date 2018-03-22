@@ -326,6 +326,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Mark entity as deleted
 	 * @return Core_Entity
+	 * @hostcms-event modelname.onBeforeMarkDeleted
+	 * @hostcms-event modelname.onAfterMarkDeleted
 	 */
 	public function markDeleted()
 	{
@@ -354,6 +356,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Turn off deleted status
 	 * @return self
+	 * @hostcms-event modelname.onBeforeUndelete
+	 * @hostcms-event modelname.onAfterUndelete
 	 */
 	public function undelete()
 	{
@@ -544,8 +548,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
-	 * @hostcms-event Core_Entity.onBeforeGetXml
-	 * @hostcms-event Core_Entity.onAfterGetXml
+	 * @hostcms-event modelname.onBeforeGetXml
+	 * @hostcms-event modelname.onAfterGetXml
 	 */
 	public function getXml()
 	{

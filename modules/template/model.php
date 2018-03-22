@@ -356,6 +356,62 @@ class Template_Model extends Core_Entity
 	 * Create directory for template
 	 * @return self
 	 */
+	protected function _createLngDir($lng)
+	{
+		$sDirPath = dirname($this->getLngPath($lng));
+
+		if (!is_dir($sDirPath))
+		{
+			try
+			{
+				Core_File::mkdir($sDirPath, CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get language path
+	 * @param string $lng
+	 * @return string
+	 */
+	public function getLngPath($lng)
+	{
+		return CMS_FOLDER . "templates/template" . intval($this->id) . "/i18n/" . $lng . ".php";
+	}
+
+	/**
+	 * Get language file content
+	 * @param string $lng
+	 * @return string|NULL
+	 */
+	public function loadLngFile($lng)
+	{
+		$path = $this->getLngPath($lng);
+
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
+	}
+
+	/**
+	 * Set language file content
+	 * @param string $lng
+	 * @param string $content content
+	 */
+	public function saveLngFile($lng, $content)
+	{
+		$this->save();
+		$this->_createLngDir($lng);
+		$content = trim($content);
+		Core_File::write($this->getLngPath($lng), $content);
+	}
+
+	/**
+	 * Create directory for template
+	 * @return self
+	 */
 	protected function _createDir()
 	{
 		$sDirPath = dirname($this->getTemplateFilePath());
@@ -824,5 +880,40 @@ class Template_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get i18n value
+	 */
+	public function _($name)
+	{
+		$aValues = $this->_getLngFile(SITE_LNG);
+		return isset($aValues[$name]) ? $aValues[$name] : $name;
+	}
+
+	protected $_i18n = array();
+
+	/**
+	 * Include lng file
+	 * @param string $className class name
+	 * @param string $lng language name
+	 * @return array
+	 */
+	protected function _getLngFile($lng)
+	{
+		if (!isset($this->_i18n[$lng]))
+		{
+			$this->_i18n[$lng] = array();
+
+			$path = CMS_FOLDER . $this->_getDir() . DIRECTORY_SEPARATOR . 'i18n' . DIRECTORY_SEPARATOR . $lng . '.php';
+			$path = Core_File::pathCorrection($path);
+
+			if (is_file($path))
+			{
+				$this->_i18n[$lng] = require($path);
+			}
+		}
+
+		return $this->_i18n[$lng];
 	}
 }

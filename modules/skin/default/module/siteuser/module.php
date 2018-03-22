@@ -77,7 +77,7 @@ class Skin_Default_Module_Siteuser_Module extends Siteuser_Module
 			$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 			$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 
-			$sSiteuserHref = '/admin/siteuser/siteuser/index.php';
+			$sSiteuserHref = '/admin/siteuser/index.php';
 
 			foreach ($aSiteusers as $key => $oSiteuser)
 			{

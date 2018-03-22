@@ -56,7 +56,7 @@ class Core_Zip
 						// Reopen
 						$this->_ZipArchive->close();
 						$this->_ZipArchive->open($this->_outputPath);
-						
+
 						$this->_iFiles = 0;
 					}
 				}
@@ -106,7 +106,7 @@ class Core_Zip
 
 		$this->_ZipArchive = new ZipArchive();
 		$result = $this->_ZipArchive->open($this->_outputPath, ZIPARCHIVE::CREATE);
-		
+
 		if ($result === TRUE)
 		{
 			$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));

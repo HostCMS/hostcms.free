@@ -600,27 +600,32 @@ if ($this->_mode != 'blank')
 			{
 				$oCore_Module = Core_Module::factory($oModule->path);
 
-				if ($oModule->active && $oCore_Module && is_array($oCore_Module->menu))
+				if ($oModule->active && $oCore_Module)
 				{
-					foreach ($oCore_Module->menu as $aMenu)
+					$aMenu = $oCore_Module->getMenu();
+
+					if (is_array($aMenu))
 					{
-						if (isset($aMenu['href']))
+						foreach ($aMenu as $aTmpMenu)
 						{
-							$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, 99, 0);
+							if (isset($aTmpMenu['href']))
+							{
+								$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, 99, 0);
 
-							$block = is_null($oUser_Setting) ? floor($iMenuCount % 3) : $oUser_Setting->position_x;
+								$block = is_null($oUser_Setting) ? floor($iMenuCount % 3) : $oUser_Setting->position_x;
 
-							$aMainMenu
-								[$block]
-								['sub'][] = array(
-										'position' => is_null($oUser_Setting) ? 999 : $oUser_Setting->position_y,
-										'block' => $block
-									) + $aMenu + array(
-									'sorting' => 0,
-									'moduleId' => $oModule->id,
-									'image' => $oModule->path . '.png'
-								);
-							$iMenuCount++;
+								$aMainMenu
+									[$block]
+									['sub'][] = array(
+											'position' => is_null($oUser_Setting) ? 999 : $oUser_Setting->position_y,
+											'block' => $block
+										) + $aTmpMenu + array(
+										'sorting' => 0,
+										'moduleId' => $oModule->id,
+										'image' => $oModule->path . '.png'
+									);
+								$iMenuCount++;
+							}
 						}
 					}
 				}

@@ -237,7 +237,8 @@ class Core_Image_Imagick extends Core_Image
 				$sourceImage->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$sourceImage->setImageCompressionQuality(PNG_QUALITY);
 			}
-			elseif ($ext == 'gif'){}
+			elseif ($ext == 'gif')
+			{}
 			else
 			{
 				$sourceImage->clear();

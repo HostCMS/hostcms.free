@@ -118,6 +118,7 @@ return array(
 	'schedule-searchIndexItem' => 'Index informationsystem item',
 	'schedule-searchIndexGroup' => 'Index informationsystem group',
 	'schedule-searchUnindexItem' => 'Unindex informationsystem item',
+	'schedule-recountShop' => 'Recount informationsystem groups and items',
 
 	'tab_seo_templates' => 'SEO templates',
 	'seo_group_header' => 'Group templates',
@@ -141,4 +142,9 @@ return array(
 	'seo_template_item_name' => 'Item name',
 	'seo_template_item_description' => 'Item description',
 	'seo_template_item_text' => 'Item text',
+
+	'all_groups_count' => 'Groups: %s',
+	'all_items_count' => 'Items: %s',
+
+	'create_small_image' => 'Create small image from large image',
 );

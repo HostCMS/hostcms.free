@@ -43,7 +43,7 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$domain = Core::$url['host'];
+		$domain = htmlspecialchars(Core::$url['host']);
 
 		$title = "Сайт {$domain} отключен администратором и в данный момент недоступен!";
 

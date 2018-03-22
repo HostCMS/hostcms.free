@@ -60,7 +60,7 @@ if (is_null($oSiteuser))
 $Forum_Controller_Show->category && $oForum_Category = Core_Entity::factory('Forum_Category', $Forum_Controller_Show->category);
 
 // Показ списка тем
-if ($Forum_Controller_Show->myPosts )
+if ($Forum_Controller_Show->myPosts)
 {
 	if ($oSiteuser)
 	{

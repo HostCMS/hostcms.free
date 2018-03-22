@@ -111,12 +111,10 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}")
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams)
 		)
 );
@@ -160,12 +158,10 @@ if ($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}")
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams)
 		)
 );

@@ -133,6 +133,7 @@ return array(
 	'schedule-searchIndexItem' => 'Индексировать товар',
 	'schedule-searchIndexGroup' => 'Индексировать группу товаров',
 	'schedule-searchUnindexItem' => 'Снять товар с индексации',
+	'schedule-recountShop' => 'Пересчет групп и товаров',
 	'order_admin_subject' => 'Тема письма о поступившем заказе куратору магазина',
 	'order_user_subject' => 'Тема письма о поступившем заказе пользователю',
 	'confirm_admin_subject' => 'Тема письма подтверждения оплаты куратору магазина',
@@ -166,4 +167,9 @@ return array(
 	'seo_template_item_description' => 'Описание товара',
 	'seo_template_item_text' => 'Текст товара',
 	'seo_template_item_currency' => 'Валюта товара',
+
+	'all_groups_count' => 'Всего групп: %s',
+	'all_items_count' => 'Всего товаров: %s',
+	
+	'create_small_image' => 'Создавать малое изображение из большого',	
 );

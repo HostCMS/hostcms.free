@@ -1180,6 +1180,19 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 											$oProperty_Value->setValue($oListItem->id);
 										}
 									break;
+									case 5: // Informationsystem
+										$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sPropertyValue);
+										if ($oInformationsystem_Item)
+										{
+											$oProperty_Value->setValue($oInformationsystem_Item->id);
+										}
+										elseif (is_numeric($sPropertyValue))
+										{
+											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
+											
+											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
+										}
+									break;
 									case 8:
 										if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sData))
 										{
@@ -1199,6 +1212,19 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									case 11: // Float
 										$sData = Shop_Controller::instance()->convertFloat($sData);
 										$oProperty_Value->setValue($sData);
+									break;
+									case 12: // Shop
+										$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
+										if ($oShop_Item)
+										{
+											$oProperty_Value->setValue($oShop_Item->id);
+										}
+										elseif (is_numeric($sPropertyValue))
+										{
+											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
+											
+											$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
+										}
 									break;
 									default:
 										$oProperty_Value->setValue($sData);
@@ -1821,6 +1847,19 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								}
 							}
 						break;
+						case 5: // Informationsystem
+							$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sPropertyValue);
+							if ($oInformationsystem_Item)
+							{
+								$oProperty_Value->setValue($oInformationsystem_Item->id);
+							}
+							elseif (is_numeric($sPropertyValue))
+							{
+								$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
+								
+								$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
+							}
+						break;
 						case 8:
 							if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
 							{
@@ -1840,6 +1879,19 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 						case 11: // Float
 							$sPropertyValue = Shop_Controller::instance()->convertFloat($sPropertyValue);
 							$oProperty_Value->setValue($sPropertyValue);
+						break;
+						case 12: // Shop
+							$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
+							if ($oShop_Item)
+							{
+								$oProperty_Value->setValue($oShop_Item->id);
+							}
+							elseif (is_numeric($sPropertyValue))
+							{
+								$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
+								
+								$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
+							}
 						break;
 						default:
 							$oProperty_Value->setValue($sPropertyValue);

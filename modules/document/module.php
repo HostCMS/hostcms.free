@@ -23,7 +23,7 @@ class Document_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-01-26';
+	public $date = '2018-03-02';
 
 	/**
 	 * Module name
@@ -32,12 +32,11 @@ class Document_Module extends Core_Module
 	protected $_moduleName = 'document';
 
 	/**
-	 * Constructor.
+	 * Get Module's Menu
+	 * @return array
 	 */
-	public function __construct()
+	public function getMenu()
 	{
-		parent::__construct();
-
 		$this->menu = array(
 			array(
 				'sorting' => 20,
@@ -48,6 +47,8 @@ class Document_Module extends Core_Module
 				'onclick' => "$.adminLoad({path: '/admin/document/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 
 	/**

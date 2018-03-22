@@ -384,8 +384,8 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 
 				$oShop_Order->system_information = "Товар оплачен через ROBOKASSA.\n";
 				$oShop_Order->paid();
-				$this->setXSLs();
-				$this->send();
+				//$this->setXSLs();
+				//$this->send();
 				echo "OK{$oShop_Order->id}\n";
 
 				ob_start();

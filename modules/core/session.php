@@ -86,7 +86,7 @@ class Core_Session
 	 */
 	static public function start()
 	{
-		if (!self::$_started)
+		if (!self::isStarted())
 		{
 			// Destroy existing session started by session.auto_start
 			if (is_null(self::$_handler) && session_id())
@@ -114,8 +114,6 @@ class Core_Session
 				strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
 
 				// Явное указание domain возможно только для домена второго и более уровня
-				// http://wp.netscape.com/newsref/std/cookie_spec.html
-				// http://web-notes.ru/2008/07/cookies_within_local_domains/
 				$domain = strpos($domain, '.') !== FALSE && !Core_Valid::ip($domain)
 					? '.' . $domain
 					: '';
@@ -194,11 +192,17 @@ class Core_Session
 	 */
 	static public function close()
 	{
+		self::$_started = FALSE;
+
+		$bStarted = function_exists('session_status')
+			? session_status() == PHP_SESSION_ACTIVE
+			: session_id() !== '';
+
 		//if (self::$_started)
-		//{
-			self::$_started = FALSE;
+		if ($bStarted)
+		{
 			session_write_close();
-		//}
+		}
 		return TRUE;
 	}
 
@@ -364,13 +368,13 @@ class Core_Session
 	{
 		self::$_maxlifetime = $maxlifetime;
 
-		if (!self::$_started && (!defined('DENY_INI_SET') || !DENY_INI_SET))
+		if (!self::isStarted() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
 		{
 			ini_set('session.gc_maxlifetime', $maxlifetime);
 		}
 
 		// Для уже запущенной сесии обновляем время жизни
-		if (self::$_started)
+		if (self::isStarted())
 		{
 			$oCore_QueryBuilder = Core_QueryBuilder::update('sessions')
 				->set('maxlifetime', $maxlifetime)

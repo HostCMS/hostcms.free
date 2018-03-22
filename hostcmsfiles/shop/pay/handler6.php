@@ -263,8 +263,8 @@ class Shop_Payment_System_Handler6 extends Shop_Payment_System_Handler
 
 				$oShop_Order->system_information = "Товар оплачен через ASSIST.\n";
 				$oShop_Order->paid();
-				$this->setXSLs();
-				$this->send();
+				//$this->setXSLs();
+				//$this->send();
 
 				echo '<?xml version="1.0" encoding="UTF-8"?>
 				<pushpaymentresult firstcode="0" secondcode="0">

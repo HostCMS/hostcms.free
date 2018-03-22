@@ -14,6 +14,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
 	/**
+	 * Count of elements on page
+	 * @var array
+	 */
+	protected $_onPage = array (10 => 10, 20 => 20, 30 => 30, 50 => 50, 100 => 100, 500 => 500, 1000 => 1000);
+	
+	/**
+	 * Is showing filter necessary
+	 * @var boolean
+	 */
+	protected $_showFilter = FALSE;
+	
+	/**
 	 * Apply form settings
 	 * @return self
 	 */
@@ -28,8 +40,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$this->_oAdmin_Form_Setting->filter = json_encode(
 					array('show' => intval(Core_Array::getPost('show')))
-						+ (is_array($this->_filter)
-							? $this->_filter
+						+ (is_array($this->filterSettings)
+							? $this->filterSettings
 							: array())
 				);
 				$this->_oAdmin_Form_Setting->save();
@@ -49,7 +61,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			if ($this->_oAdmin_Form_Setting)
 			{
-				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
 
 				// Main Tab should be first
 				if (!isset($tabs['main']))
@@ -63,9 +75,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 				$tabs[$tab]['fields'][$field]['show'] = $show;
 
-				$this->_filter['tabs'] = $tabs;
+				$this->filterSettings['tabs'] = $tabs;
 
-				$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
 				$this->_oAdmin_Form_Setting->save();
 
 				$aJSON = array('message' => 'OK');
@@ -83,7 +95,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			if ($this->_oAdmin_Form_Setting)
 			{
-				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
 
 				// Main Tab should be first
 				if (!isset($tabs['main']))
@@ -124,9 +136,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				{
 					$tabs[] = $aNewTab;
 
-					$this->_filter['tabs'] = $tabs;
+					$this->filterSettings['tabs'] = $tabs;
 
-					$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
 					$this->_oAdmin_Form_Setting->save();
 
 					end($tabs);
@@ -152,7 +164,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			if ($this->_oAdmin_Form_Setting)
 			{
-				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
 
 				// _filterId
 				$tabName = Core_Array::getPost('filterId');
@@ -178,9 +190,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					}
 				}
 
-				$this->_filter['tabs'] = $tabs;
+				$this->filterSettings['tabs'] = $tabs;
 
-				$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+				$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
 				$this->_oAdmin_Form_Setting->save();
 
 				end($tabs);
@@ -199,7 +211,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			if ($this->_oAdmin_Form_Setting)
 			{
-				$tabs = Core_Array::get($this->_filter, 'tabs', array());
+				$tabs = Core_Array::get($this->filterSettings, 'tabs', array());
 
 				$tabName = Core_Array::getPost('filterId');
 
@@ -207,9 +219,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				{
 					unset($tabs[$tabName]);
 
-					$this->_filter['tabs'] = $tabs;
+					$this->filterSettings['tabs'] = $tabs;
 
-					$this->_oAdmin_Form_Setting->filter = json_encode($this->_filter);
+					$this->_oAdmin_Form_Setting->filter = json_encode($this->filterSettings);
 					$this->_oAdmin_Form_Setting->save();
 				}
 
@@ -233,7 +245,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * @hostcms-event Admin_Form_Controller.onBeforeShowContent
 	 * @hostcms-event Admin_Form_Controller.onAfterShowContent
 	 */
-	public function showContent()
+	public function showContent777()
 	{
 		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
 
@@ -243,6 +255,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		}
 
 		$windowId = $this->getWindowId();
+		
+		$oSortingField = $this->getSortingField();
 
 		Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
 
@@ -250,12 +264,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			$aHide = array();
 			$path = Core_Str::escapeJavascriptVariable($this->_path);
-			$aTabs = Core_Array::get($this->_filter, 'tabs', array());
+			$aTabs = Core_Array::get($this->filterSettings, 'tabs', array());
 			?>
 			<div class="tabbable topFilter" style="display: none;">
 				<ul class="nav nav-tabs tabs-flat" id="filterTabs">
 					<?php
-					//print_r($aTabs);
 					!isset($aTabs['main']) && $aTabs['main'] = array();
 
 					foreach ($aTabs as $tabName => $aTab)
@@ -264,9 +277,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						$bMain = $tabName === 'main';
 
 						/*var_dump($tabName);
-						var_dump($this->_filterId);*/
+						var_dump($this->filterId);*/
 
-						$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
+						$bCurrent = $this->filterId === $tabName || $this->filterId === '' && $bMain;
 
 						?><li id="filter-li-<?php echo htmlspecialchars($tabName)?>" <?php echo $bCurrent ? ' class="active tab-orange"' : ''?> data-filter-id="<?php echo $tabName?>">
 							<a data-toggle="tab" href="#filter-<?php echo htmlspecialchars($tabName)?>">
@@ -289,7 +302,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						$tabName = strval($tabName);
 						$bMain = $tabName === 'main';
 
-						$bCurrent = $this->_filterId === $tabName || $this->_filterId === '' && $bMain;
+						$bCurrent = $this->filterId === $tabName || $this->filterId === '' && $bMain;
 
 						?><div id="filter-<?php echo htmlspecialchars($tabName)?>" class="tab-pane<?php echo $bCurrent ? ' in active' : ''?>">
 							<div id="horizontal-form">
@@ -302,7 +315,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 										$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
 										foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 										{
-											$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+											$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 										}
 
 										if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
@@ -343,7 +356,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 													</label>
 													<div class="col-sm-10">
 														<?php
-														$this->_showFilterField($oAdmin_Form_Field_Changed, $filterPrefix, $tabName);
+														$this->showFilterField($oAdmin_Form_Field_Changed, $filterPrefix, $tabName);
 														?>
 													</div>
 												</div><?php
@@ -396,7 +409,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 												</a>
 												<ul class="dropdown-menu dropdown-menu-right">
 													<li>
-														<a href="javascript:void(0);" onclick="$.filterSaveAs('Введите название фильтра', $(this), '<?php echo Core_Str::escapeJavascriptVariable(str_replace(array('"'), array('&quot;'), $this->_additionalParams))?>')"><?php echo Core::_('Admin_Form.saveAs')?></a>
+														<a href="javascript:void(0);" onclick="$.filterSaveAs('Введите название фильтра', $(this), '<?php echo Core_Str::escapeJavascriptVariable(str_replace(array('"'), array('&quot;'), $this->additionalParams))?>')"><?php echo Core::_('Admin_Form.saveAs')?></a>
 														<?php if (!$bMain) {
 														?>
 														<a href="javascript:void(0);" onclick="$.filterSave($(this))"><?php echo Core::_('Admin_Form.save')?></a>
@@ -435,7 +448,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				<tr>
 					<?php
 					// Ячейку над групповыми чекбоксами показываем только при наличии действий
-					if ($this->_Admin_Form->show_operations && $this->_showOperations)
+					if ($this->_Admin_Form->show_operations && $this->showOperations)
 					{
 						?><th width="40">&nbsp;</th><?php
 					}
@@ -453,7 +466,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
 							foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 							{
-								$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+								$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 							}
 
 							$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
@@ -472,8 +485,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							}
 
 							$oAdmin_Form_Field_Changed->allow_sorting
-								&& is_object($this->_sortingAdmin_Form_Field)
-								&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+								&& is_object($oSortingField)
+								&& $oAdmin_Form_Field->id == $oSortingField->id
 								&& $class .= ' highlight';
 
 							$sSortingClass = $sSortingOnClick = '';
@@ -486,13 +499,13 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 								//$hrefUp = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
 								$onclickUp = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
 
-								if ($oAdmin_Form_Field->id == $this->_sortingFieldId)
+								if ($oAdmin_Form_Field->id == $this->sortingFieldId)
 								{
-									$class .= $this->_sortingDirection == 1
+									$class .= $this->sortingDirection == 1
 										? ' sorting_desc'
 										: ' sorting_asc';
 
-									$sSortingOnClick = $this->_sortingDirection == 1
+									$sSortingOnClick = $this->sortingDirection == 1
 										? $onclickUp
 										: $onclickDown;
 								}
@@ -511,7 +524,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					// Доступные действия для пользователя
 					$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-					if ($this->_Admin_Form->show_operations && $this->_showOperations || $allow_filter && $this->_showFilter)
+					if ($this->_Admin_Form->show_operations && $this->showOperations || $allow_filter && $this->_showFilter)
 					{
 							$iSingleActionCount = 0;
 
@@ -526,7 +539,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				</tr><?php
 			?><tr class="admin_table_filter"><?php
 			// Чекбокс "Выбрать все" показываем только при наличии действий
-			if ($this->_Admin_Form->show_operations && $this->_showOperations)
+			if ($this->_Admin_Form->show_operations && $this->showOperations)
 			{
 				?><td align="center" width="40">
 				<label><input type="checkbox" name="admin_forms_all_check" class="colored-black" id="id_admin_forms_all_check" onclick="$('#<?php echo $windowId?>').highlightAllRows(this.checked)" class="form-control"/><span class="text"></span></label></td><?php
@@ -542,7 +555,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
 					foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 					{
-						$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+						$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 					}
 
 					$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
@@ -550,8 +563,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 					// Подсвечивать
 					$oAdmin_Form_Field_Changed->allow_sorting
-						&& is_object($this->_sortingAdmin_Form_Field)
-						&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+						&& is_object($oSortingField)
+						&& $oAdmin_Form_Field->id == $oSortingField->id
 						&& $class .= ' highlight';
 
 					?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
@@ -559,7 +572,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					if ($oAdmin_Form_Field_Changed->allow_filter)
 					{
 						$filterPrefix = 'admin_form_filter_';
-						$this->_showFilterField($oAdmin_Form_Field_Changed, $filterPrefix);
+						$this->showFilterField($oAdmin_Form_Field_Changed, $filterPrefix);
 					}
 					else
 					{
@@ -571,7 +584,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			// Фильтр показываем если есть события или хотя бы у одного есть фильтр
-			if ($this->_Admin_Form->show_operations && $this->_showOperations
+			if ($this->_Admin_Form->show_operations && $this->showOperations
 				|| $allow_filter && $this->_showFilter)
 			{
 				$onclick = $this->getAdminLoadAjax($this->getPath());
@@ -630,7 +643,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						?><tr id="row_<?php echo $quotedDatasetKey?>_<?php echo $quotedEntityKey?>">
 						<?php
 						// Чекбокс "Для элемента" показываем только при наличии действий
-						if ($this->_Admin_Form->show_operations && $this->_showOperations)
+						if ($this->_Admin_Form->show_operations && $this->showOperations)
 						{
 							?><td align="center" width="25">
 								<label>
@@ -645,15 +658,15 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							if ($oAdmin_Form_Field->view == 0)
 							{
 								// Перекрытие параметров для данного поля
-								$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+								$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
 
 								// Параметры поля.
 								$width = htmlspecialchars(trim($oAdmin_Form_Field_Changed->width));
 								$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
 
 								$oAdmin_Form_Field->allow_sorting
-									&& is_object($this->_sortingAdmin_Form_Field)
-									&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+									&& is_object($oSortingField)
+									&& $oAdmin_Form_Field->id == $oSortingField->id
 									&& $class .= ' highlight';
 
 								?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
@@ -776,9 +789,18 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 														if (isset($str_explode[2])
 															&& trim($value) == $mIndex)
 														{
-															$alt_array[$mIndex] = $title_array[$mIndex] = trim($str_explode[2]);
+															$sTmp = trim($str_explode[2]);
+
+															$lngAltName = 'Admin_Form.' . $sTmp;
+															if (Core_I18n::instance()->check($lngAltName))
+															{
+																$sTmp = Core::_($lngAltName);
+															}
+
+															$alt_array[$mIndex] = $title_array[$mIndex] = $sTmp;
 														}
 
+														// ICO
 														isset($str_explode[3])
 															&& $ico_array[$mIndex] = $str_explode[3];
 													}
@@ -945,8 +967,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						}
 
 						// Действия для строки в правом столбце
-						if ($this->_Admin_Form->show_operations
-						&& $this->_showOperations
+						if ($this->_Admin_Form->show_operations && $this->showOperations
 						|| $allow_filter && $this->_showFilter)
 						{
 							// Определяем ширину столбца для действий.
@@ -1070,7 +1091,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		</div>
 		<?php
 
-		if (Core_Array::get($this->_filter, 'show'))
+		if (Core_Array::get($this->filterSettings, 'show'))
 		{
 			?><script>$.toggleFilter();</script><?php
 		}
@@ -1084,11 +1105,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * Show action panel in administration center
 	 * @return self
 	 */
-	public function bottomActions()
+	public function bottomActions777()
 	{
 		// Строка с действиями
-		if ($this->_showBottomActions)
-		{
+		//if ($this->_showBottomActions)
+		//{
 			$windowId = $this->getWindowId();
 
 			// Текущий пользователь
@@ -1162,7 +1183,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			</div>
 			<?php
 			}
-		}
+		//}
 
 		return $this;
 	}
@@ -1170,49 +1191,22 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	/**
 	 * Show items count selector
 	 */
-	protected function _pageSelector()
+	public function pageSelector()
 	{
-		$sCurrentValue = $this->_limit;
+		$sCurrentValue = $this->limit;
 
+ 		$path = Core_Str::escapeJavascriptVariable($this->getPath());
+ 		$view = Core_Str::escapeJavascriptVariable($this->view);
 		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
 		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $this->_additionalParams)
+			str_replace(array('"'), array('&quot;'), $this->additionalParams)
 		);
- 		$path = Core_Str::escapeJavascriptVariable($this->getPath());
-
-		if ($this->_showFilter)
-		{
-			$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')
-				//->name('admin_forms_on_page')
-				//->id('id_on_page')
-				->class('btn btn-sm btn-default margin-right-10')
-				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: "' . htmlspecialchars($this->_path) . '", show: + $(".topFilter").is(":visible") })')
-				->add(
-					Core::factory('Core_Html_Entity_I')
-						->class('fa fa-filter no-margin')
-				);
-
-			$iFilters = count(Core_Array::get($this->_filter, 'tabs', array()));
-
-			if ($iFilters > 1)
-			{
-				$oCore_Html_Entity_Span->add(
-					Core::factory('Core_Html_Entity_Span')
-						->class('badge badge-orange')
-						->value($iFilters - 1)
-				);
-			}
-
-			$oCore_Html_Entity_Span->execute();
-		}
-
+		
 		?><label><?php
 
 		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
-			//->name('admin_forms_on_page')
-			//->id('id_on_page')
 			->class('form-control input-sm')
-			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
+			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
 			->execute();
@@ -1221,16 +1215,70 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	}
 
 	/**
+	 * Show children elements
+	 * @return self
+	 */
+	public function showFormMenus()
+	{
+		// Связанные с формой элементы (меню, строка навигации и т.д.)
+		foreach ($this->_children as $oAdmin_Form_Entity)
+		{
+			if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+			{
+				$oAdmin_Form_Entity->execute();
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Show Change View buttonset
+	 * @return self
+	 */
+	public function showChangeViews()
+	{
+		if (count($this->viewList) > 1)
+		{
+			?><div class="view-selector pull-left"><?php
+			foreach ($this->viewList as $viewName => $className)
+			{
+				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, $viewName);
+				
+				?><input type="radio" onclick="<?php echo $onclick?>" id="<?php echo htmlspecialchars($viewName)?>" data-view="<?php echo htmlspecialchars($viewName)?>" name="selector" <?php if ($viewName == $this->view) { echo 'checked="checked"'; }?> /><label for="<?php echo htmlspecialchars($viewName)?>"><?php echo Core::_('Admin_Form.' . $viewName)?></label><?php
+			}
+
+			/*	?><input type="radio" id="kanban" data-view="1" name="selector"><label for="kanban"><?php echo Core::_('Admin_Form.kanban')?></label>*/
+			?></div><?php
+		}
+
+		return $this;
+	}
+	
+	/**
 	 * Get form
 	 * @return string
 	 */
 	protected function _getForm()
 	{
-		$oAdmin_View = Admin_View::create();
-		$oAdmin_View
-			->children($this->_children)
-			->pageTitle($this->_pageTitle)
-			->module($this->_module);
+		$oAdmin_View = Admin_View::create($this->Admin_View)
+			->pageTitle($this->pageTitle)
+			->module($this->module);
+
+		$aAdminFormControllerChildren = array();
+
+		foreach ($this->_children as $oAdmin_Form_Entity)
+		{
+			if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs
+				|| $oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+			{
+				$oAdmin_View->addChild($oAdmin_Form_Entity);
+			}
+			else
+			{
+				$aAdminFormControllerChildren[] = $oAdmin_Form_Entity;
+			}
+		}
 
 		// Is filter necessary
 		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
@@ -1240,7 +1288,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
 			foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 			{
-				$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
+				$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 			}
 
 			if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
@@ -1250,33 +1298,42 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			}
 		}
 
-		ob_start();
-		$this->_pageSelector();
-		$oAdmin_View->pageSelector(ob_get_clean());
-
 		// При показе формы могут быть добавлены сообщения в message, поэтому message показывается уже после отработки формы
 		ob_start();
+		?>
+		<div class="table-toolbar">
+			<?php $this->showFormMenus()?>
+			<div class="table-toolbar-right pull-right">
+				<?php $this->_pageSelector()?>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<?php
+		foreach ($aAdminFormControllerChildren as $oAdmin_Form_Entity)
+		{
+			$oAdmin_Form_Entity->execute();
+		}
+
 		$this->showContent();
-		$this->showFooter();
+		$this->showFooter777();
 		$content = ob_get_clean();
 
-		ob_start();
 		$oAdmin_View
 			->content($content)
 			->message($this->getMessage())
 			->show();
 
-		$this->_applyEditable();
+		$this->applyEditable();
 
-		return ob_get_clean();
+		return $this;
 	}
 
 	/**
 	 * Show form footer
 	 */
-	public function showFooter()
+	public function showFooter777()
 	{
-		$sShowNavigation = $this->getTotalCount() > $this->_limit;
+		$sShowNavigation = $this->getTotalCount() > $this->limit;
 
 		?><div class="DTTTFooter">
 			<div class="row">
@@ -1303,13 +1360,13 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 * Показ строки ссылок
 	 * @return self
 	 */
-	public function pageNavigation()
+	public function pageNavigation777()
 	{
 		$total_count = $this->getTotalCount();
-		$total_page = $total_count / $this->_limit;
+		$total_page = $total_count / $this->limit;
 
 		// Округляем в большую сторону
-		if ($total_count % $this->_limit != 0)
+		if ($total_count % $this->limit != 0)
 		{
 			$total_page = intval($total_page) + 1;
 		}
@@ -1317,7 +1374,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		// Отображаем строку ссылок, если общее число страниц больше 1.
 		if ($total_page > 1)
 		{
-			$this->_current > $total_page && $this->_current = $total_page;
+			$this->current > $total_page && $this->current = $total_page;
 
 			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
 				->class('dataTables_paginate paging_bootstrap');
@@ -1328,14 +1385,14 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oCore_Html_Entity_Div->add($oCore_Html_Entity_Ul);
 
 			// Ссылка на предыдущую страницу
-			$page = $this->_current - 1 ? $this->_current - 1 : 1;
+			$page = $this->current - 1 ? $this->current - 1 : 1;
 
 			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
 			$oCore_Html_Entity_Li
-				->class('prev' . ($this->_current == 1 ? ' disabled' : ''))
+				->class('prev' . ($this->current == 1 ? ' disabled' : ''))
 				->add(
 					$oCore_Html_Entity_A
 						->id('id_prev')
@@ -1344,7 +1401,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						)
 				);
 
-			if ($this->_current != 1)
+			if ($this->current != 1)
 			{
 				$oCore_Html_Entity_A
 					->href($this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $page))
@@ -1352,12 +1409,12 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			// Определяем номер ссылки, с которой начинается строка ссылок.
-			$link_num_begin = ($this->_current - $this->_pageNavigationDelta < 1)
+			$link_num_begin = ($this->current - $this->_pageNavigationDelta < 1)
 				? 1
-				: $this->_current - $this->_pageNavigationDelta;
+				: $this->current - $this->_pageNavigationDelta;
 
 			// Определяем номер ссылки, которой заканчивается строка ссылок.
-			$link_num_end = $this->_current + $this->_pageNavigationDelta;
+			$link_num_end = $this->current + $this->_pageNavigationDelta;
 			$link_num_end > $total_page && $link_num_end = $total_page;
 
 			// Определяем число ссылок выводимых на страницу.
@@ -1369,7 +1426,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
 			$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
-			if ($this->_current == 1)
+			if ($this->current == 1)
 			{
 				$oCore_Html_Entity_Li->class('active');
 
@@ -1415,7 +1472,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					->value($link_number);
 				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
-				if ($link_number == $this->_current)
+				if ($link_number == $this->current)
 				{
 					// Страница является текущей
 					$oCore_Html_Entity_Li->class('active');
@@ -1435,7 +1492,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 			// Если последняя страница является текущей
-			if ($this->_current == $total_page)
+			if ($this->current == $total_page)
 			{
 				$oCore_Html_Entity_Li->class('active');
 
@@ -1483,9 +1540,9 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
 
 			// Ссылка на следующую страницу
-			$page = $this->_current + 1 ? $this->_current + 1 : 1;
+			$page = $this->current + 1 ? $this->current + 1 : 1;
 			$oCore_Html_Entity_Li
-				->class('next' . ($this->_current == $total_page ? ' disabled' : ''))
+				->class('next' . ($this->current == $total_page ? ' disabled' : ''))
 				->add(
 					$oCore_Html_Entity_A
 						->id('id_next')
@@ -1494,7 +1551,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 							)
 				);
 
-			if ($this->_current != $total_page)
+			if ($this->current != $total_page)
 			{
 				$oCore_Html_Entity_A
 					->href($this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $page))

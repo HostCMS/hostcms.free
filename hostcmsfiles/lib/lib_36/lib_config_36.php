@@ -208,12 +208,12 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
-		
+
 		if ($aReturn['status'] == 'success')
 		{
 			Core_File::delete($sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName));
 		}
-		
+
 		echo "{$BOM}" . $aReturn['status'];
 	}
 	catch(Exception $exc)
@@ -287,28 +287,46 @@ elseif ($sType == 'sale' && $sMode == 'file' && ($sFileName = Core_Array::get($_
 	parse_str($sFileName, $_myGet);
 	$sFileName = $_myGet['filename'];
 
-	$sFullFileName = $sCmsFolderTemporaryDirectory . $sFileName;
+	$sFullFileName = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
 	Core_File::mkdir(dirname($sFullFileName), CHMOD, TRUE);
 
 	$bDebug && Core_Log::instance()->clear()
 		->status(Core_Log::$MESSAGE)
 		->write('1С, type=sale, mode=file, destination=' . $sFullFileName);
 
-	is_file($sFullFileName) && Core_File::delete($sFullFileName);
-
 	if (file_put_contents($sFullFileName, file_get_contents("php://input"), FILE_APPEND) !== FALSE
 		&& @chmod($sFullFileName, CHMOD_FILE))
 	{
-		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sCmsFolderTemporaryDirectory . $sFileName);
-		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
-		$oShop_Item_Import_Cml_Controller->itemDescription = 'text';
-		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
-		$oShop_Item_Import_Cml_Controller->importOrders();
 		echo "{$BOM}success";
 	}
 	else
 	{
 		echo "{$BOM}failure\nCan't save incoming data to file: {$sFullFileName}";
+	}
+}
+elseif ($sType == 'sale' && $sMode == 'import' && !is_null($sFileName = Core_Array::getGet('filename')))
+{
+	$bDebug && Core_Log::instance()->clear()
+		->status(Core_Log::$MESSAGE)
+		->write('1С, type=sale, mode=import, file=' . $sFileName);
+
+	$sFullFileName = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
+
+	try
+	{
+		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullFileName);
+		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
+		$oShop_Item_Import_Cml_Controller->itemDescription = 'text';
+		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
+		$oShop_Item_Import_Cml_Controller->importOrders();
+
+		is_file($sFullFileName) && Core_File::delete($sFullFileName);
+
+		echo "{$BOM}success";
+	}
+	catch(Exception $exc)
+	{
+		echo sprintf("{$BOM}failure\n%s", $exc/*->getMessage()*/);
 	}
 }
 

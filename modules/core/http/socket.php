@@ -97,18 +97,20 @@ class Core_Http_Socket extends Core_Http
 
 		while (!feof($fp))
 		{
-			if (($line = fgets($fp, 65536)) === FALSE)
+			$line = fgets($fp, 65536);
+			
+			/*if ($line === FALSE)
 			{
 				throw new Core_Exception("HostCMS: Socket closed by the server!");
-			}
+			}*/
 			
 			$datastr .= $line;
 			
-			/*$socketStatus = stream_get_meta_data($fp);
+			$socketStatus = stream_get_meta_data($fp);
 			if ($socketStatus['timed_out'])
 			{
-				// Socket closed by the server
-			}*/
+				throw new Exception("HostCMS: Timed Out, socket closed by the server!");
+			}
 		}
 
 		fclose($fp);

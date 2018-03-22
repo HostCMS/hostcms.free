@@ -14,14 +14,21 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Module_Model extends Core_Entity
 {
 	/**
+	 * One-to-many or many-to-many relations
+	 * @var array
+	 */
+	protected $_hasMany = array(
+		'company_department_module' => array(),
+		'notification' => array(),
+		'notification_subscriber' => array()
+	);
+
+	/**
 	 * Belongs to relations
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user' => array(),
-		'company_department_module' => array(),
-		'notification' => array(),
-		'notification_subscriber' => array(),
+		'user' => array()
 	);
 
 	/**
@@ -65,6 +72,15 @@ class Module_Model extends Core_Entity
 		}
 
 		$this->_getModuleInformation();
+	}
+
+	/**
+	 * Get module name
+	 * @return string
+	 */
+	public function getModuleName()
+	{
+		return $this->_moduleName;
 	}
 
 	/**

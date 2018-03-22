@@ -131,7 +131,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->execute();
 
 		return $Core_Http;
@@ -158,7 +158,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->execute();
 
 		return $Core_Http->getBody();
@@ -259,7 +259,7 @@ class Update_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->method('POST');
 
 		if (is_array($this->keys))

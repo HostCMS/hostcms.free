@@ -296,6 +296,18 @@ $oMenu->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/card/index.php', NULL, NULL, $additionalParams)
 				)
 		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.item_warehouse'))
+				->icon('fa fa-balance-scale')
+				->img('/admin/images/export.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Group.links_groups'))
@@ -845,7 +857,7 @@ $oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 $oAdmin_Form_Dataset
 	->addCondition(
 		array(
-				'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice')
+				'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
 			)
 		)
 	)
@@ -866,15 +878,46 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array(
-				'select' => array('shop_items.*', array('shop_items.price', 'adminPrice')
-			)
-		)
+		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest')))
+	)
+	->addCondition(
+		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
 	->addCondition(array('where' => array('shop_group_id', '=', $oShopGroup->id)))
 	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 	->addCondition(array('where' => array('modification_id', '=', 0)))
+	->addCondition(array('groupBy' => array('shop_items.id')))
 ;
+
+$oShop_Producers = $oShop->Shop_Producers;
+$oShop_Producers->queryBuilder()
+	->distinct()
+	->select('shop_producers.*')
+	->join('shop_items', 'shop_producers.id', '=', 'shop_items.shop_producer_id')
+	// ->where('shop_producers.active', '=', 1)
+	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+	->where('shop_items.modification_id', '=', 0)
+	->where('shop_items.shortcut_id', '=', 0)
+	//->groupBy('shop_producers.id')
+	->clearOrderBy()
+	->orderBy('shop_producers.sorting', 'ASC')
+	->orderBy('shop_producers.name', 'ASC');
+
+$aShop_Producers = $oShop_Producers->findAll(FALSE);
+
+if (count($aShop_Producers))
+{
+	$options = '';
+
+	foreach ($aShop_Producers as $oShop_Producer)
+	{
+		$options .= $oShop_Producer->id . "=" . $oShop_Producer->name . "\n";
+	}
+
+	$oAdmin_Form_Dataset
+		->changeField('shop_producer_id', 'list', $options)
+	;
+}
 
 // Change field type
 if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)

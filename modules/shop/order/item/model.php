@@ -226,7 +226,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			if (!is_null($oShop_Item) && $oShop_Item->active)
+			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
 				$oShop_Item
 					->clearEntities()

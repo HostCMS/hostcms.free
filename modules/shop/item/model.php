@@ -62,6 +62,12 @@ class Shop_Item_Model extends Core_Entity
 	public $absolute_price = NULL;
 
 	/**
+	 * Callback property_id
+	 * @var string
+	 */
+	public $adminRest = NULL;
+
+	/**
 	 * Triggered by calling isset() or empty() on inaccessible properties
 	 * @param string $property property name
 	 * @return boolean
@@ -355,6 +361,11 @@ class Shop_Item_Model extends Core_Entity
 		return $aResult['count'];
 	}
 
+	public function reservedBackend()
+	{
+		return $this->getReserved();
+	}
+
 	/**
 	 * Get the quantity of reserved items
 	 * @return float
@@ -390,7 +401,8 @@ class Shop_Item_Model extends Core_Entity
 		// Get value
 		if (is_null($value) || is_object($value))
 		{
-			return $this->getRest();
+			//return $this->getRest();
+			return $this->adminRest;
 		}
 
 		// Save value for default warehouse
@@ -475,6 +487,19 @@ class Shop_Item_Model extends Core_Entity
 			: $this;
 
 		return htmlspecialchars($oShopItem->Shop_Currency->name);
+	}
+
+	/**
+	 * Get item's measure
+	 * @return string
+	 */
+	public function adminMeasure()
+	{
+		$oShopItem = $this->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			: $this;
+
+		return htmlspecialchars($oShopItem->Shop_Measure->name);
 	}
 
 	/**
@@ -884,6 +909,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @param int $iShopGroupId target group id
 	 * @return Core_Entity
 	 * @hostcms-event shop_item.onBeforeMove
+	 * @hostcms-event shop_item.onAfterMove
 	 */
 	public function move($iShopGroupId)
 	{
@@ -907,6 +933,8 @@ class Shop_Item_Model extends Core_Entity
 		$this->save()->clearCache();
 
 		$iShopGroupId && $oShop_Group->incCountItems();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
 		return $this;
 	}
@@ -1808,9 +1836,11 @@ class Shop_Item_Model extends Core_Entity
 	 * @return string
 	 * @hostcms-event shop_item.onBeforeRedeclaredGetXml
 	 * @hostcms-event shop_item.onBeforeShowXmlModifications
+	 * @hostcms-event shop_item.onBeforeSelectModifications
 	 * @hostcms-event shop_item.onBeforeAddModification
 	 * @hostcms-event shop_item.onBeforeSelectAssociatedItems
 	 * @hostcms-event shop_item.onBeforeAddAssociatedEntity
+	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 */
 	public function getXml()
 	{
@@ -1869,7 +1899,14 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->_showXmlTags && Core::moduleIsActive('tag') && $this->addEntities($this->Tags->findAll());
 
-		$this->_showXmlWarehousesItems && $this->addEntities($this->Shop_Warehouse_Items->findAll());
+		if ($this->_showXmlWarehousesItems)
+		{
+			$oShop_Warehouse_Items = $this->Shop_Warehouse_Items;
+
+			Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouseItems', $this, array($oShop_Warehouse_Items));
+
+			$this->addEntities($oShop_Warehouse_Items->findAll());
+		}
 
 		// Digital item
 		if ($this->type == 1)
@@ -2015,6 +2052,7 @@ class Shop_Item_Model extends Core_Entity
 			$dateTime = Core_Date::timestamp2sql(time());
 			$oShop_Items_Modifications
 				->queryBuilder()
+				->where('shop_items.active', '=', 1)
 				->open()
 					->where('shop_items.start_datetime', '<', $dateTime)
 					->setOr()
@@ -2027,7 +2065,9 @@ class Shop_Item_Model extends Core_Entity
 					->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
 				->close();
 
-			$aShop_Items_Modifications = $oShop_Items_Modifications->getAllByActive(1);
+			Core_Event::notify($this->_modelName . '.onBeforeSelectModifications', $this, array($oShop_Items_Modifications));
+
+			$aShop_Items_Modifications = $oShop_Items_Modifications->findAll();
 
 			if (count($aShop_Items_Modifications))
 			{

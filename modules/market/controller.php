@@ -936,7 +936,6 @@ class Market_Controller extends Core_Servant_Properties
 				$this->controller
 					->limit($this->limit)
 					->setTotalCount($this->total)
-					//->showBottomActions(FALSE)
 					->pageNavigation();
 
 				$sFooter = '<div class="col-xs-12">' . ob_get_clean() . '</div>';

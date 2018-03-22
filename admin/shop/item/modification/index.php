@@ -297,14 +297,15 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array(
-				'select' => array('*', array('price', 'adminPrice')
-			)
-		)
+		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest')))
+	)
+	->addCondition(
+		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
 	->addCondition(
 		array('where' => array('modification_id', '=', $oShopItemParent->id))
-	);
+	)
+	->addCondition(array('groupBy' => array('shop_items.id')));
 
 // Change field type
 if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)

@@ -101,4 +101,8 @@ return array(
 	'chat' => 'Chat',
 	'profile' => 'Profile',
 	'settings' => 'Settings',
+	'notifications' => 'Notifications',
+	'events' => 'Events',
+	'bookmarks' => 'Bookmarks',
+	'sound' => 'Sound',
 );

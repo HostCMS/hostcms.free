@@ -21,7 +21,7 @@ class Shortcode_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-01-26';
+	public $date = '2018-03-02';
 	/**
 	 * Module name
 	 * @var string
@@ -29,10 +29,11 @@ class Shortcode_Module extends Core_Module{	/**
 	protected $_moduleName = 'shortcode';
 
 	/**
-	 * Constructor.
-	 */	public function __construct()	{
-		parent::__construct();
-
+	 * Get Module's Menu
+	 * @return array
+	 */
+	public function getMenu()
+	{
 		$this->menu = array(
 			array(
 				'sorting' => 150,
@@ -42,4 +43,7 @@ class Shortcode_Module extends Core_Module{	/**
 				'href' => "/admin/shortcode/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/shortcode/index.php'}); return false"
 			)
-		);	}}
+		);
+
+		return parent::getMenu();
+	}}

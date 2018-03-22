@@ -23,7 +23,7 @@ class Template_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-01-26';
+	public $date = '2018-03-02';
 
 	/**
 	 * Module name
@@ -38,17 +38,6 @@ class Template_Module extends Core_Module
 	{
 		parent::__construct();
 
-		$this->menu = array(
-			array(
-				'sorting' => 70,
-				'block' => 0,
-				'ico' => 'fa fa-th',
-				'name' => Core::_('template.menu'),
-				'href' => "/admin/template/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/template/index.php'}); return false"
-			)
-		);
-
 		if (Core_Auth::logged())
 		{
 			Core_Router::add('template-section-lib.php', '/template-section-lib.php')
@@ -60,5 +49,25 @@ class Template_Module extends Core_Module
 			Core_Router::add('template-less.php', '/template-less.php')
 				->controller('Template_Less_Command_Controller');
 		}
+	}
+
+	/**
+	 * Get Module's Menu
+	 * @return array
+	 */
+	public function getMenu()
+	{
+		$this->menu = array(
+			array(
+				'sorting' => 70,
+				'block' => 0,
+				'ico' => 'fa fa-th',
+				'name' => Core::_('template.menu'),
+				'href' => "/admin/template/index.php",
+				'onclick' => "$.adminLoad({path: '/admin/template/index.php'}); return false"
+			)
+		);
+
+		return parent::getMenu();
 	}
 }

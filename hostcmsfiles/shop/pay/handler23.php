@@ -141,8 +141,6 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 
 					$oShop_Order->system_information = "Товар оплачен через PayAnyWay.\n";
 					$oShop_Order->paid();
-					$this->setXSLs();
-					$this->send();
 
 					ob_start();
 					$this->changedOrder('changeStatusPaid');

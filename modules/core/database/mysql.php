@@ -574,48 +574,6 @@ class Core_DataBase_Mysql extends Core_DataBase
 	}
 
 	/**
-	 * Get list of columns in a table
-	 *
-	 * @param string $tableName Table name
-	 * @param mixed $selectionCondition Selection condition
-	 * @return array
-	 */
-	public function getColumns($tableName, $selectionCondition = NULL)
-	{
-		$this->connect();
-
-		$query = "SHOW FULL COLUMNS FROM " . $this->quoteColumnName($tableName);
-
-		if (!is_null($selectionCondition))
-		{
-			$query .= ' LIKE ' . $this->quote($selectionCondition);
-		}
-
-		$result = $this->query($query)->asAssoc()->result();
-
-		$return = array();
-		foreach ($result as $row)
-		{
-			$column = $this->getColumnType($row['Type']);
-
-			// [Field][Type][Collation][Null][Key][Default][Extra][Privileges][Comment]
-			$column['name'] = $row['Field'];
-			$column['columntype'] = $row['Type'];
-			$column['collation'] = $row['Collation'];
-			$column['null'] = ($row['Null'] == 'YES');
-			$column['key'] = $row['Key'];
-			$column['default'] = $row['Default'];
-			$column['extra'] = $row['Extra'];
-			$column['privileges'] = $row['Privileges'];
-			$column['comment'] = $row['Comment'];
-
-			$return[$column['name']] = $column;
-		}
-
-		return $return;
-	}
-
-	/**
 	 * Send a MySQL query
 	 * @param string $sql An SQL query. The query string should not end with a semicolon. Data inside the query should be properly escaped.
 	 * @return self

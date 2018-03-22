@@ -108,9 +108,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemTabSeoTemplates
 					->add($oInformationsystemGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
@@ -408,21 +406,15 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oImageRow1->add($oWatermarkFileField);
 
 				$oMainTab
-					->move($this->getField('preserve_aspect_ratio'), $oImageRow2)
-					->move($this->getField('preserve_aspect_ratio_small'), $oImageRow3)
-					->move($this->getField('preserve_aspect_ratio_group'), $oImageRow4)
-					->move($this->getField('preserve_aspect_ratio_group_small'), $oImageRow5)
-					->move($this->getField('watermark_default_use_large_image'), $oImageRow6)
-					->move($this->getField('watermark_default_use_small_image'), $oImageRow7)
-					->move($this->getField('watermark_default_position_x'), $oImageRow8)
-					->move($this->getField('watermark_default_position_y'), $oImageRow8);
-
-				$this->getField('watermark_default_position_x')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
-				$this->getField('watermark_default_position_y')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
+					->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
+					->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
+					->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
+					->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
+					->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
+					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
+					->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
+					->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
+					->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow6);
 			break;
 			case 'informationsystem_dir':
 			default:

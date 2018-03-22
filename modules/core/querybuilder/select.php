@@ -570,6 +570,15 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 	
 	/**
+	 * Get SELECT
+	 * @return array
+	 */
+	public function getSelect()
+	{
+		return $this->_select;
+	}
+	
+	/**
 	 * Clear SELECT list
 	 * @return Core_QueryBuilder_Select
 	 */

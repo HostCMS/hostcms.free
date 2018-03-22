@@ -111,12 +111,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	protected $_aBaseProperties = array();
 
 	/**
-	 * List of additional properties
-	 * @var array
-	 */
-	protected $aAdditionalProperties = array();
-
-	/**
 	 * Tax for default price
 	 * @var object
 	 */
@@ -425,7 +419,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		{
 			return $this;
 		}
-		
+
 		// в _aPropertyValues не всегда выгружается весь перечень значений справочника!
 		$value = isset($this->_aPropertyValues[$oProperty->id][$sValue])
 			? $this->_aPropertyValues[$oProperty->id][$sValue]
@@ -435,7 +429,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		{
 			// целое число
 			case 0:
-				$changedValue = Shop_Controller::instance()->convertPrice($value);
+				$changedValue = intval(Shop_Controller::instance()->convertPrice($value));
 			break;
 			// Файл
 			case 2:
@@ -862,21 +856,39 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oShop_Item->yandex_market = $sValue;
 				break;
 				case 'ПРОДАВЕЦ':
-					$oSeller = Core_Entity::factory('Shop', $this->iShopId)->Shop_Sellers->getByName($sValue, FALSE);
-
-					if (is_null($oSeller))
-					{
-						$oSeller = Core_Entity::factory('Shop_Seller');
-						$oSeller->shop_id($this->iShopId)->name($sValue)->path(Core_Guid::get())->save();
-					}
-
-					$oShop_Item->shop_seller_id = $oSeller->id;
-				break;
-				case 'ПРОИЗВОДИТЕЛЬ':
-
 					if (trim($sValue) != '')
 					{
-						$this->_setProducer($sValue, $oShop_Item);
+						$oProperty = $this->_getProperty($oPropertyValue);
+
+						$sPropertyValue = $oProperty && isset($this->_aPropertyValues[$oProperty->id][$sValue])
+							? $this->_aPropertyValues[$oProperty->id][$sValue]
+							: $sValue;
+
+						$oSeller = Core_Entity::factory('Shop', $this->iShopId)->Shop_Sellers->getByName($sPropertyValue, FALSE);
+
+						if (is_null($oSeller))
+						{
+							$oSeller = Core_Entity::factory('Shop_Seller');
+							$oSeller
+								->shop_id($this->iShopId)
+								->name($sPropertyValue)
+								->path(Core_Guid::get())
+								->save();
+						}
+
+						$oShop_Item->shop_seller_id = $oSeller->id;
+					}
+				break;
+				case 'ПРОИЗВОДИТЕЛЬ':
+					if (trim($sValue) != '')
+					{
+						$oProperty = $this->_getProperty($oPropertyValue);
+
+						$sPropertyValue = $oProperty && isset($this->_aPropertyValues[$oProperty->id][$sValue])
+							? $this->_aPropertyValues[$oProperty->id][$sValue]
+							: $sValue;
+
+						$this->_setProducer($sPropertyValue, $oShop_Item);
 					}
 				break;
 				case 'АКТИВНОСТЬ':
@@ -955,6 +967,12 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	/**
 	 * Import import.xml, offers.xml
 	 * @return array
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImport
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportShopItem
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportShopItem
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeOffer
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterOffersShopItem
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImport
 	 */
 	public function import()
 	{
@@ -1017,6 +1035,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				Core_Session::close();
 
+				$currentMonth = date('n');
+				$sTmpPath = CMS_FOLDER . TMP_DIR . '1c_exchange_files/' . 'month-' . $currentMonth . '/';
+
 				if (isset($this->_oSimpleXMLElement->Классификатор) && $importPosition == 0)
 				{
 					$classifier = $this->_oSimpleXMLElement->Классификатор;
@@ -1056,6 +1077,31 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 					// Импортируем дополнительные свойства товаров
 					$this->_importProperties($classifier);
+
+					// Сохраняем классификатор
+					$sJsonFilePath = $sTmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Классификатор->Ид) . '.json';
+
+					Core_File::mkdir($sTmpPath, CHMOD, TRUE);
+
+					Core_File::write($sJsonFilePath, json_encode(
+						array(
+							'_aPropertyValues' => $this->_aPropertyValues,
+							'_aBaseProperties' => $this->_aBaseProperties
+						)
+					));
+				}
+				// Классификатора не было, но указан его ИД
+				elseif (isset($this->_oSimpleXMLElement->Каталог->ИдКлассификатора))
+				{
+					$sJsonFilePath = $sTmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Каталог->ИдКлассификатора) . '.json';
+
+					if (is_file($sJsonFilePath))
+					{
+						$aJSON = json_decode(Core_File::read($sJsonFilePath), TRUE);
+
+						$this->_aPropertyValues = Core_Array::get($aJSON, '_aPropertyValues', array());
+						$this->_aBaseProperties = Core_Array::get($aJSON, '_aBaseProperties', array());
+					}
 				}
 
 				$xPath = $importPosition == 0
@@ -1134,7 +1180,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						continue;
 					}
 
-					$this->_checkUpdateField('marking') && $oShopItem->marking = strval($oXmlItem->Артикул);
+					$this->_checkUpdateField('marking') && strval($oXmlItem->Артикул) != ''
+						&& $oShopItem->marking = strval($oXmlItem->Артикул);
 						/*? strval($oXmlItem->Артикул)
 						: (strlen(strval($oXmlItem->Штрихкод))
 							? strval($oXmlItem->Штрихкод)
@@ -1277,7 +1324,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$this->_checkUpdateField('images') && $this->importImages($oShopItem, $this->xpath($oXmlItem, 'Картинка'));
 
 					// До обработки свойств из 1С нужно записать значения "по умолчанию" для всех свойств, заданных данной группе товара
-					$aProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties;
+					/*$aProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties;
 					$aProperties
 						->queryBuilder()
 						->join('shop_item_property_for_groups', 'shop_item_property_for_groups.shop_item_property_id', '=', 'shop_item_properties.id')
@@ -1301,7 +1348,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$oProperty_Value->setValue($oProperty->default_value);
 							$oProperty_Value->save();
 						}
-					}
+					}*/
 
 					// Добавляем значения для общих свойств всех товаров
 					foreach ($this->xpath($oXmlItem, 'ЗначенияСвойств/ЗначенияСвойства') as $ItemPropertyValue)
@@ -1481,7 +1528,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$oShopItem = $oModificationItem;
 
 							// Для модификации обновляется название и артикул
-							$this->_checkUpdateField('marking') && $oShopItem->marking = strval($oProposal->Артикул);
+							$this->_checkUpdateField('marking') && strval($oProposal->Артикул) != ''
+								&& $oShopItem->marking = strval($oProposal->Артикул);
+							
 							$this->_checkUpdateField('name') && $oShopItem->name = strval($oProposal->Наименование);
 						}
 
@@ -1979,7 +2028,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				{
 					$this->_aPropertyValues[$oProperty->id] = array();
 				}
-				
+
 				foreach ($this->xpath($oItemProperty, 'ВариантыЗначений/Справочник') as $oValue)
 				{
 					$listValue = strval($oValue->Значение);
@@ -2003,10 +2052,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				{
 					// Основное свойство товара
 					$this->_aBaseProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
-				}
-				else
-				{
-					$this->aAdditionalProperties[strval($oItemProperty->Ид)] = strval($oItemProperty->Наименование);
 				}
 			}
 		}
@@ -2098,6 +2143,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 	/**
 	 * Import orders.xml
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportOrders
 	 */
 	public function importOrders()
 	{

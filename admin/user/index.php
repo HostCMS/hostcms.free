@@ -66,6 +66,39 @@ if (!is_null(Core_Array::getPost('wallpaper-id')))
 	Core::showJson('OK');
 }
 
+if (!is_null(Core_Array::getPost('add_bookmark')) && Core_Array::getPost('name'))
+{
+	$oUser = Core_Entity::factory('User')->getCurrent();
+
+	if (!is_null($oUser))
+	{
+		$oUser_Bookmark = Core_Entity::factory('User_Bookmark');
+		$oUser_Bookmark->module_id = intval(Core_Array::getPost('module_id', 0));
+		$oUser_Bookmark->name = strval(Core_Array::getPost('name'));
+		$oUser_Bookmark->path = strval(Core_Array::getPost('path'));
+		$oUser_Bookmark->user_id = $oUser->id;
+		$oUser_Bookmark->save();
+	}
+
+	Core::showJson('OK');
+}
+
+if (!is_null(Core_Array::getPost('remove_bookmark')) && Core_Array::getPost('bookmark_id'))
+{
+	$oUser = Core_Entity::factory('User')->getCurrent();
+
+	$bookmark_id = intval(Core_Array::getPost('bookmark_id'));
+
+	$oUser_Bookmark = $oUser->User_Bookmarks->getById($bookmark_id);
+
+	if (!is_null($oUser_Bookmark))
+	{
+		$oUser_Bookmark->markDeleted();
+	}
+
+	Core::showJson('OK');
+}
+
 if (!is_null(Core_Array::getPost('loadNavSidebarMenu')))
 {
 	ob_start();

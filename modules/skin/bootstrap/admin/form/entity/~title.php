@@ -38,6 +38,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Title extends Skin_Default_Admin_Form_Ent
 				<a href="#" id="fullscreen-toggler" class="fullscreen">
 					<i class="glyphicon glyphicon-fullscreen"></i>
 				</a>
+				<a id="bookmark-toggler" class="bookmark" onclick="$.addUserBookmark();">
+					<i class="glyphicon glyphicon-star"></i>
+				</a>
 			</div><?php
 			}
 			?>

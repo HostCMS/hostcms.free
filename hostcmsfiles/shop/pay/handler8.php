@@ -117,8 +117,8 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 				$recipientCurrency, $eshopAccount, $paymentData);
 
 			$this->_shopOrder->paid();
-			$this->setXSLs();
-			$this->send();
+			//$this->setXSLs();
+			//$this->send();
 
 			ob_start();
 			$this->changedOrder('changeStatusPaid');

@@ -409,6 +409,61 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 				Core::showJson($aJson);
 			break;
+			// Получение закладок
+			case 85:
+				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+
+				$aJson = array();
+
+				if (!is_null($oCurrentUser))
+				{
+					$aJson['userId'] = $oCurrentUser->id;
+					$aJson['Bookmarks'] = array();
+
+					$oUser_Bookmarks = $oCurrentUser->User_Bookmarks;
+					$oUser_Bookmarks->queryBuilder()
+						->clearOrderBy()
+						->orderBy('user_bookmarks.id', 'ASC');
+
+					$aUser_Bookmarks = $oUser_Bookmarks->findAll(FALSE);
+
+					foreach ($aUser_Bookmarks as $oUser_Bookmark)
+					{
+						$oModule = Core_Entity::factory('Module')->getById($oUser_Bookmark->module_id);
+
+						if($oModule)
+						{
+							$oCore_Module = Core_Module::factory($oModule->path);
+
+							if ($oModule->active && $oCore_Module)
+							{
+								$aMenu = $oCore_Module->getMenu();
+
+								$ico = is_array($aMenu) && isset($aMenu[0])
+									? strval(Core_Array::get($aMenu[0], 'ico'))
+									: 'fa fa-bookmark';
+
+								$aBookmark = array(
+									'id' => $oUser_Bookmark->id,
+									'name' => htmlspecialchars($oUser_Bookmark->name),
+									'href' => htmlspecialchars($oUser_Bookmark->path),
+									'ico' => htmlspecialchars($ico),
+									'onclick' => htmlspecialchars("$(this).parents('li.open').click(); $.adminLoad({path: '"
+										. Core_Str::escapeJavascriptVariable($oUser_Bookmark->path)
+										. "'}); return false"),
+									'remove-title' => htmlspecialchars(Core::_("User_Bookmark.remove_message")),
+									'remove-submit' => htmlspecialchars(Core::_("User_Bookmark.remove_submit")),
+									'remove-cancel' => htmlspecialchars(Core::_("User_Bookmark.cancel"))
+								);
+
+								$aJson['Bookmarks'][] = $aBookmark;
+							}
+						}
+					}
+				}
+
+				Core::showJson($aJson);
+			break;
 		}
 	}
 }

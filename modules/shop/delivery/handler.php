@@ -197,10 +197,14 @@ abstract class Shop_Delivery_Handler
 
 		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
-			$oHandler = self::factory($oShop_Delivery);
-			if ($oHandler && method_exists($oHandler, $methodName))
+			// Associated with Shop_Payment_System
+			if ($oShop_Delivery->Shop_Payment_Systems->getCount())
 			{
-				$oHandler->$methodName();
+				$oHandler = self::factory($oShop_Delivery);
+				if ($oHandler && method_exists($oHandler, $methodName))
+				{
+					$oHandler->$methodName();
+				}
 			}
 		}
 	}

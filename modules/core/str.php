@@ -467,11 +467,20 @@ class Core_Str
 		return $word . $aEndings[$lastInt];
 	}
 
+	/**
+	 * Array for _stripTagsCallback()
+	 * @var array
+	 */
+	static protected $_aDisabledAttributes = array();
+
+	/**
+	 * stripTags() callback
+	 */
 	static protected function _stripTagsCallback($matches)
 	{
-
+		return '<' . preg_replace(array('/javascript:[^"\']*/iu', '/(' . implode('|', self::$_aDisabledAttributes) . ')[ \t\n]*=[ \t\n]*["\'][^"\']*["\']/i', '/\s+/'), array('', '', ' '), stripslashes($matches[1])) . '>';
 	}
-
+	
 	/**
 	 * Удаление HTML-тегов вместе с атрибутами
 	 *
@@ -491,7 +500,9 @@ class Core_Str
 		}
 		else
 		{
-			$result = preg_replace_callback('/<(.*?)>/iu', create_function('$matches', "return '<' . preg_replace(array('/javascript:[^\"\']*/iu', '/(" . implode('|', $aDisabledAttributes) . ")[ \\t\\n]*=[ \\t\\n]*[\"\'][^\"\']*[\"\']/i', '/\s+/'), array('', '', ' '), stripslashes(" . '$matches[1]' . ")) . '>';"), strip_tags($source, $allowedTags));
+			self::$_aDisabledAttributes = $aDisabledAttributes;
+			
+			$result = preg_replace_callback('/<(.*?)>/iu', 'Core_Str::_stripTagsCallback', strip_tags($source, $allowedTags));
 		}
 
 		return $result;

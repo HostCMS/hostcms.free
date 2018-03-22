@@ -26,6 +26,7 @@ class Core_Meta
 	protected $_replaceFunctions = array(
 		'toUpper' => 'mb_strtoupper',
 		'toLower' => 'mb_strtolower',
+		'uppercaseFirst' => 'Core_Str::ucfirst',
 	);
 
 	/**
@@ -48,7 +49,7 @@ class Core_Meta
 	 */
 	public function apply($str)
 	{
-		$pattern = '/\{([A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([^\}]+))*\}/';
+		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([^\}]+))*\}/';
 		
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
@@ -70,7 +71,7 @@ class Core_Meta
 			isset($this->_replaceFunctions[$functionName])
 				&& $functionName = $this->_replaceFunctions[$functionName];
 
-			if (!function_exists($functionName))
+			if (!function_exists($functionName) && !is_callable($functionName))
 			{
 				// skip replacing
 				return $matches[0];
@@ -89,9 +90,12 @@ class Core_Meta
 
 			if (isset($object->$fieldName))
 			{
+				$return = strip_tags($object->$fieldName);
+
 				return is_null($functionName)
-					? $object->$fieldName
-					: $functionName($object->$fieldName);
+					? $return
+					: call_user_func($functionName, $return);
+					//: $functionName($return);
 			}
 			elseif (method_exists($object, $fieldName))
 			{
@@ -122,11 +126,12 @@ class Core_Meta
 					}
 				}
 
-				//print_r($attr);
+				$return = strip_tags(call_user_func_array(array($object, $fieldName), $attr));
 
 				return is_null($functionName)
-					? call_user_func_array(array($object, $fieldName), $attr) //$object->$fieldName()
-					: $functionName(call_user_func_array(array($object, $fieldName), $attr));
+					? $return
+					: call_user_func($functionName, $return);
+					//: $functionName($return);
 			}
 			else
 			{

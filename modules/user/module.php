@@ -23,7 +23,7 @@ class User_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-01-26';
+	public $date = '2018-03-02';
 
 	/**
 	 * Module name
@@ -32,12 +32,11 @@ class User_Module extends Core_Module
 	protected $_moduleName = 'user';
 	
 	/**
-	 * Constructor.
+	 * Get Module's Menu
+	 * @return array
 	 */
-	public function __construct()
+	public function getMenu()
 	{
-		parent::__construct();
-		
 		$this->menu = array(
 			array(
 				'sorting' => 10,
@@ -48,5 +47,7 @@ class User_Module extends Core_Module
 				'onclick' => "$.adminLoad({path: '/admin/user/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 }

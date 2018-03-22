@@ -161,8 +161,7 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref
 			(
 				'/admin/shop/item/index.php',
@@ -171,8 +170,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0"
 			)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax
 			(
 				'/admin/shop/item/index.php',
@@ -230,8 +228,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 	->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_("Shop_Delivery.show_type_of_delivery_title"))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref
 			(
 				$sPrevFormPath = '/admin/shop/delivery/index.php',
@@ -240,8 +237,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"
 			)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax
 			(
 				$sPrevFormPath,
@@ -255,8 +251,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 	->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref
 			(
 				$oAdmin_Form_Controller->getPath(),
@@ -265,8 +260,7 @@ $oAdmin_Form_Entity_Breadcrumbs
 				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&delivery_id={$shop_delivery_id}"
 			)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax
 			(
 				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams

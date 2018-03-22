@@ -69,12 +69,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Tax.show_tax_title'))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
 		)
 );

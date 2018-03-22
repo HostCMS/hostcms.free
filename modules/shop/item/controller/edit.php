@@ -640,7 +640,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio)
 					)
 					->smallImage(array('max_width' => $oShop->image_small_max_width, 'max_height' => $oShop->image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
-							$this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
+							$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 							$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small)
 					);
@@ -824,7 +824,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oPriceBlock->add($oPricesRowN = Admin_Form_Entity::factory('Div')->class('row'));
 
-					$aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
+					$oShop_Prices = $oShop->Shop_Prices;
+					$oShop_Prices->queryBuilder()
+						->clearOrderBy()
+						->orderBy('shop_prices.sorting', 'ASC');
+
+					$aShopPrices = $oShop_Prices->findAll(FALSE);
 
 					foreach ($aShopPrices as $oShopPrice)
 					{
@@ -1406,21 +1411,16 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oShop->watermark_default_use_large_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group))
 					->smallImage(array('max_width' => $oShop->group_image_small_max_width, 'max_height' => $oShop->group_image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
-						$this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
+						$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 						$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small));
 
 				// Добавляем поле картинки группы товаров
 				$oMainRow2->add($oImageField);
 
-				$this->getField("sorting")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-				$this->getField("indexing")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
-				$this->getField("active")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+				$this->getField("sorting")->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+				$this->getField("indexing")->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+				$this->getField("active")->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
 					->move($this->getField("indexing"), $oMainRow4)
@@ -1741,6 +1741,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
 				{
 					$aAdditionalPrices = $this->_object->Shop->Shop_Prices->findAll();
+
 					foreach ($aAdditionalPrices as $oAdditionalPrice)
 					{
 						$oAdditionalPriceValue = $this->_object

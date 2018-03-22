@@ -28,8 +28,10 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		'exportOrders',
 		'producer',
 		'shopId',
-		'start_order_date',
-		'end_order_date'
+		'startOrderDate',
+		'endOrderDate',
+		'startItemDate',
+		'endItemDate'
 	);
 
 	/**
@@ -229,7 +231,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oProperty->type == 2)
 				{
-					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images') . $oProperty->name));
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images', $oProperty->name)));
 					$this->_iItem_Properties_Count++;
 				}
 			}
@@ -242,7 +244,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oGroup_Property->type == 2)
 				{
-					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images') . $oGroup_Property->name));
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images', $oGroup_Property->name)));
 					$this->_iGroup_Properties_Count++;
 				}
 			}
@@ -678,7 +680,25 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				$offset = 0;
 				$limit = 500;
 
+				if (strlen($this->startItemDate) && strlen($this->endItemDate))
+				{
+					$sStartDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->startItemDate . " 00:00:00"));
+					$sEndDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->endItemDate . " 23:59:59"));
+				}
+				else
+				{
+					$sStartDate = $sEndDate = NULL;
+				}
+
 				do {
+
+					if (!is_null($sStartDate) && !is_null($sEndDate))
+					{
+						$oShopItems
+							->queryBuilder()
+							->where('datetime', 'BETWEEN', array($sStartDate, $sEndDate));
+					}
+
 					$oShopItems
 						->queryBuilder()
 						->offset($offset)
@@ -883,10 +903,10 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			$offset = 0;
 			$limit = 100;
 
-			if (!is_null($this->start_order_date) && !is_null($this->end_order_date))
+			if (!is_null($this->startOrderDate) && !is_null($this->endOrderDate))
 			{
-				$sStartDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->start_order_date . " 00:00:00"));
-				$sEndDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->end_order_date . " 23:59:59"));
+				$sStartDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->startOrderDate . " 00:00:00"));
+				$sEndDate = Core_Date::timestamp2sql(Core_Date::datetime2timestamp($this->endOrderDate . " 23:59:59"));
 			}
 			else
 			{
@@ -896,7 +916,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			do {
 				$oShop_Orders = $oShop->Shop_Orders;
 
-				if (!is_null($this->start_order_date) && !is_null($this->end_order_date))
+				if (!is_null($sStartDate) && !is_null($sEndDate))
 				{
 					$oShop_Orders
 						->queryBuilder()

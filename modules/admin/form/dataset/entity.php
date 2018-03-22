@@ -238,7 +238,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		{
 			if (isset($condition['where'][0]))
 			{
-				if (strpos($condition['where'][0], '.') === FALSE)
+				if (is_string($condition['where'][0])
+					&& strpos($condition['where'][0], '.') === FALSE
+				)
 				{
 					$condition['where'][0] = $this->_entity->getTableName() . '.' . $condition['where'][0];
 				}

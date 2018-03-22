@@ -15,7 +15,16 @@ else
 	$Informationsystem_Controller_Rss_Show
 		->offset(Core_Page::instance()->libParams['begin'])
 		->limit(Core_Page::instance()->libParams['count'])
+		// Экспорт в Яндекс.Новости
 		->yandex(Core_Page::instance()->libParams['yandexFullText'])
+		// Выгрузка для Яндекс.Турбо
+		//->turbo(TRUE)
+		// Счетчик системы статистики для учета посещаемости Турбо-страниц
+		/*->channelEntities(
+			array(
+				array('name' => 'yandex:analytics', 'attributes' => array('type' => 'Yandex', 'id' => '00000000'))
+			)
+		)*/
 		->group(Core_Page::instance()->libParams['informationGroupId'] == 0
 			? FALSE
 			: Core_Page::instance()->libParams['informationGroupId']
@@ -53,15 +62,18 @@ else
 			
 			if (Core_Page::instance()->libParams['yandexFullText'])
 			{
-				$Informationsystem_Controller_Rss_Show->channelEntities = array(
+				$Informationsystem_Controller_Rss_Show->channelEntities = array_merge(
+					$Informationsystem_Controller_Rss_Show->channelEntities,
 					array(
-						'name' => 'yandex:logo',
-						'value' => Core_Page::instance()->libParams['rssImage']
-					),
-					array(
-						'name' => 'yandex:logo',
-						'value' => Core_Page::instance()->libParams['rssImage'],
-						'attributes' => array('type' => 'square')
+						array(
+							'name' => 'yandex:logo',
+							'value' => Core_Page::instance()->libParams['rssImage']
+						),
+						array(
+							'name' => 'yandex:logo',
+							'value' => Core_Page::instance()->libParams['rssImage'],
+							'attributes' => array('type' => 'square')
+						)
 					)
 				);
 			}

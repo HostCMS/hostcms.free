@@ -16,9 +16,10 @@ class Skin_Default_Admin_View extends Admin_View
 	public function showTitle()
 	{
 		// Заголовок формы
-		strlen($this->pageTitle) && Admin_Form_Entity::factory('Title')
-			->name($this->pageTitle)
-			->execute();
+		if (strlen($this->pageTitle))
+		{
+			?><h1><?php echo htmlspecialchars($this->pageTitle)?></h1><?php
+		}
 
 		return $this;
 	}

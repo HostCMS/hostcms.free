@@ -66,9 +66,14 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 //$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
-$oAdmin_View->addChild($oAdmin_Form_Entity_Menus);
+//$oAdmin_View->addChild($oAdmin_Form_Entity_Menus);
 //ob_start();
-
+?>
+<div class="table-toolbar">
+	<?php $oAdmin_Form_Entity_Menus->execute()?>
+	<div class="clear"></div>
+</div>
+<?php
 $iCount = 0;
 
 $sText = Core_Array::getPost('text');
@@ -94,7 +99,11 @@ try
 	{
 		if (strlen(trim($sText)) > 0)
 		{
+			$startTime = Core::getmicrotime();
+
 			$iCount = Sql_Controller::instance()->execute($sText);
+
+			$fTime = Core::getmicrotime() - $startTime;
 
 			$iAffectedRows = Core_DataBase::instance()->getAffectedRows();
 
@@ -161,7 +170,7 @@ try
 					$oDiv->execute();
 
 					Core::factory('Core_Html_Entity_P')
-						->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine))
+						->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
 						->execute();
 				}
 			}
@@ -186,7 +195,7 @@ $oMainTab
 			->name('text')
 			->caption(Core::_('sql.text'))
 			->rows(15)
-			->divAttr(array('class' => 'form-group col-lg-12 col-md-12 col-sm-12 col-xs-12'))
+			->divAttr(array('class' => 'form-group col-xs-12'))
 			->value(
 			($iCount == 0 || mb_strlen($sText) < 10240)
 				? $sText
@@ -199,7 +208,7 @@ $oMainTab
 			->caption(Core::_('sql.load_file'))
 			->largeImage(array('show_params' => FALSE))
 			->smallImage(array('show' => FALSE))
-			->divAttr(array('class' => 'form-group col-lg-12 col-md-12 col-sm-12 col-xs-12'))
+			->divAttr(array('class' => 'form-group col-xs-12'))
 	))
 ;
 

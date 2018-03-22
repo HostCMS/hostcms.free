@@ -121,6 +121,7 @@ return array(
 	'schedule-searchIndexItem' => 'Индексировать информационный элемент',
 	'schedule-searchIndexGroup' => 'Индексировать группу информационных элементов',
 	'schedule-searchUnindexItem' => 'Снять информационный элемент с индексации',
+	'schedule-recountInformationsystem' => 'Пересчет групп и элементов',
 
 	'tab_seo_templates' => 'Шаблоны SEO',
 	'seo_group_header' => 'Шаблоны информационных групп',
@@ -144,4 +145,9 @@ return array(
 	'seo_template_item_name' => 'Название элемента',
 	'seo_template_item_description' => 'Описание элемента',
 	'seo_template_item_text' => 'Текст элемента',
+
+	'all_groups_count' => 'Всего групп: %s',
+	'all_items_count' => 'Всего элементов: %s',
+
+	'create_small_image' => 'Создавать малое изображение из большого',
 );

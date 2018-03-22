@@ -246,10 +246,11 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 	if (!$oUser->read_only)
 	{
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
-		$increase_price_rate = Shop_Controller::instance()->convertFloat($increase_price_rate);
+		// Shop_Controller::instance()->convertFloat нельзя использовать, т.к. может быть ведущий минус -1.0 => .1.0
+		$increase_price_rate = str_replace(',', '.', $increase_price_rate);
 
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
-		$multiply_price_rate = Shop_Controller::instance()->convertFloat($multiply_price_rate);
+		$multiply_price_rate = str_replace(',', '.', $multiply_price_rate);
 
 		$iDiscountID = Core_Array::getPost('shop_discount_id', 0);
 		$iBonusID = Core_Array::getPost('shop_bonus_id', 0);

@@ -665,7 +665,7 @@ class Structure_Model extends Core_Entity
 
 		$this->clearXmlTags()
 			->addXmlTag('link', $this->getPath())
-			->addXmlTag('dir', Core_Page::instance()->shopCDN . '/' . $this->getDirHref());
+			->addXmlTag('dir', Core_Page::instance()->structureCDN . '/' . $this->getDirHref());
 
 		if ($this->_showXmlProperties)
 		{

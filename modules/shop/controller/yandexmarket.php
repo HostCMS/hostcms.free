@@ -734,7 +734,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if (strlen($description))
 		{
 			$description = Core_Str::cutSentences(
-				html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 175
+				html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
 			);
 
 			$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
@@ -771,6 +771,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		/* cpa */
 		$this->stdOut->write('<cpa>' . $oShop_Item->cpa .  '</cpa>' . "\n");
+
+		/* weight */
+		if ($oShop_Item->weight > 0)
+		{
+			$this->stdOut->write('<weight>' . $oShop_Item->weight .  '</weight>' . "\n");
+		}
 
 		/* rec */
 		if ($this->recommended)
@@ -1545,17 +1551,40 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Headers Already Sent
+	 * @var boolean
+	 */
+	protected $_headersSent = FALSE;
+
+	/**
+	 * Send Headers
+	 * @return self
+	 */
+	public function sendHeaders()
+	{
+		if (!$this->_headersSent && !headers_sent())
+		{
+			// Stop buffering
+			ob_get_clean();
+
+			header('Content-Type: raw/data');
+			header("Cache-Control: no-cache, must-revalidate");
+			header('X-Accel-Buffering: no');
+
+			$this->_headersSent = TRUE;
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Show UML built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
 	 */
 	public function showYml()
 	{
-		// Stop buffering
-		ob_get_clean();
-		header('Content-Type: raw/data');
-		header("Cache-Control: no-cache, must-revalidate");
-		header('X-Accel-Buffering: no');
+		$this->sendHeaders();
 
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShowYml', $this);
 

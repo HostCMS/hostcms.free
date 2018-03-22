@@ -36,7 +36,7 @@
 			<xsl:variable name="link">
 				<xsl:choose>
 					<!-- External link -->
-					<xsl:when test="url != ''">
+					<xsl:when test="type = 3 and url != ''">
 						<xsl:value-of disable-output-escaping="yes" select="url"/>
 					</xsl:when>
 					<!-- Internal link -->

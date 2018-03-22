@@ -45,7 +45,9 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$this->_uri == '' && $this->_uri = '/';
 
-		if ($this->_uri == '/index.php' && !Core::isIIS())
+		if ($this->_uri == '/index.php' && !Core::isIIS()
+			|| $this->_uri == '/index.htm'
+			|| $this->_uri == '/index.html')
 		{
 			$oCore_Response
 				->status(301)
@@ -575,7 +577,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			$sTmpContent = preg_replace($search, ' ', str_replace(array("\r", "\n"), ' ', $sContent));
 
 			$pattern_index = "(?<!noindex)(?<!display)(?<!visible)";
-			$pat = "#<a(?:[^>]{$pattern_index})*?href=[\"]?http://(?:www.)?hostcms.(?:ru|org)[/]?[\"]?(?:[^>]{$pattern_index})*?>(.{3,})</a>#si";
+			$pat = "#<a(?:[^>]{$pattern_index})*?href=[\"]?http[s]?://(?:www.)?hostcms.(?:ru|org)[/]?[\"]?(?:[^>]{$pattern_index})*?>(.{3,})</a>#si";
 
 			if (!Core_Auth::logged() && !preg_match_all($pat, $sTmpContent, $matches))
 			{
@@ -584,7 +586,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					<div style="box-sizing: border-box; width: 740px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;"><div style="width: 75px; float: left"><img src="http://www.ie6nomore.com/files/theme/ie6nomore-warning.jpg" alt="Warning!"/></div>
 					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.4 лицензионого договора присоединения</div>
 					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Халява обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
-					<div><b>' . htmlspecialchars('<a href="http://www.hostcms.ru" target="_blank">Система управления сайтом HostCMS</a>') . '</b></div> на сайт производителя <a href="http://www.hostcms.ru" target="_blank">http://www.hostcms.ru</a>.</div>
+					<div><b>' . htmlspecialchars('Система управления сайтом <a href="https://www.hostcms.ru" target="_blank">HostCMS</a>') . '</b></div> на сайт производителя <a href="https://www.hostcms.ru" target="_blank">https://www.hostcms.ru</a>.</div>
 					</div>
 					</div>
 				</div>' . $sContent;

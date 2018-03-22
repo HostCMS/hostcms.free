@@ -290,7 +290,7 @@ class Site_Model extends Core_Entity
 			$this->Company_Department_Action_Accesses->deleteAll(FALSE);
 			$this->Company_Department_Modules->deleteAll(FALSE);
 		}
-		
+
 		$this->Site_Aliases->deleteAll(FALSE);
 
 		$this->Structures->deleteAll(FALSE);
@@ -532,6 +532,8 @@ class Site_Model extends Core_Entity
 		}
 		catch (Exception $e) {}
 
+		$aReplace = array();
+
 		// Advertisement
 		if (Core::moduleIsActive('advertisement'))
 		{
@@ -575,6 +577,8 @@ class Site_Model extends Core_Entity
 						$oNewAdvertisement->add($oAdvertisement_Group_List);
 					}
 				}
+
+				$aReplace["'Advertisement_Group', {$oAdvertisement_Group->id})"] = "'Advertisement_Group', " . $oNewAdvertisement_Group->id . ")";
 			}
 
 			unset($aMatchAdvertisements);
@@ -652,6 +656,8 @@ class Site_Model extends Core_Entity
 			$newObject->add($oNewDocument);
 
 			$aMatch_Documents[$oDocument->id] = $oNewDocument;
+
+			$aReplace["'Document', {$oDocument->id})"] = "'Document', " . $oNewDocument->id . ")";
 		}
 
 		unset($aMatchDocument_Statuses);
@@ -667,6 +673,8 @@ class Site_Model extends Core_Entity
 			$newObject->add($oNewStructure_Menu);
 
 			$aMatchStructure_Menus[$oStructure_Menu->id] = $oNewStructure_Menu;
+
+			$aReplace["->menu({$oStructure_Menu->id})"] = "->menu({$oNewStructure_Menu->id})";
 		}
 
 		// Structures
@@ -854,6 +862,8 @@ class Site_Model extends Core_Entity
 			{
 				$oNewPoll_Group = $oPoll_Group->copy();
 				$newObject->add($oNewPoll_Group);
+
+				$aReplace["'Poll_Group', {$oPoll_Group->id})"] = "'Poll_Group', " . $oNewPoll_Group->id . ")";
 			}
 		}
 
@@ -1087,6 +1097,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewInformationsystem);
 
 				$aMatchInformationsystems[$oInformationsystem->id] = $oNewInformationsystem;
+
+				$aReplace["'Informationsystem', {$oInformationsystem->id})"] = "'Informationsystem', " . $oNewInformationsystem->id . ")";
 			}
 
 			unset($aMatchInformationsystem_Dirs);
@@ -1135,6 +1147,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewShop);
 
 				$aMatchShops[$oShop->id] = $oNewShop;
+
+				$aReplace["'Shop', {$oShop->id})"] = "'Shop', " . $oNewShop->id . ")";
 			}
 
 			unset($aMatchShop_Dirs);
@@ -1356,7 +1370,7 @@ class Site_Model extends Core_Entity
 			$oNewTemplate = clone $oTemplate;
 
 			$oNewTemplate->saveTemplateCssFile($oTemplate->loadTemplateCssFile());
-			$oNewTemplate->saveTemplateFile($oTemplate->loadTemplateFile());
+			$oNewTemplate->saveTemplateFile(str_replace(array_keys($aReplace), array_values($aReplace), $oTemplate->loadTemplateFile()));
 
 			if (isset($aMatchTemplate_Dirs[$oNewTemplate->template_dir_id]))
 			{
@@ -1513,13 +1527,6 @@ class Site_Model extends Core_Entity
 		unset($aMatchTemplates);
 		unset($aMatch_Documents);
 		unset($aMatchSiteuser_Groups);
-
-		// Users
-		$aUser_Groups = $this->User_Groups->findAll(FALSE);
-		foreach ($aUser_Groups as $oUser_Group)
-		{
-			$newObject->add($oUser_Group->copy());
-		}
 
 		return $newObject;
 	}

@@ -39,6 +39,8 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 			return NULL;
 		}
 
+		/*
+		// Сотрудники теперь не разделены по сайтам
 		$oUsers = Core_Entity::factory('User');
 		$oUsers->queryBuilder()
 			->select('users.*')
@@ -55,7 +57,7 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 			);
 
 			return NULL;
-		}
+		}*/
 
 		$this->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
 

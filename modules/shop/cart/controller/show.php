@@ -11,6 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
+ * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
  *
  * Доступные свойства:
  *
@@ -49,6 +50,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'itemsPropertiesList',
 		'taxes',
 		'specialprices',
+		'associatedItems',
 		'cartUrl',
 		'amount',
 		'tax',
@@ -101,7 +103,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 		);
 
-		$this->itemsProperties = $this->taxes = FALSE;
+		$this->itemsProperties = $this->taxes = $this->specialprices = $this->associatedItems = FALSE;
 		$this->itemsPropertiesList = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
@@ -190,12 +192,12 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			->where('end_datetime', '>=', Core_Date::timestamp2sql(time()))
 			->clearOrderBy()
 			->limit(1);
-		
+
 		// Есть скидки на N-й товар
 		$bPositionDiscount = $oShop_Purchase_Discounts->getCount() > 0;
-		
+
 		$Shop_Cart_Controller = $this->_getCartController();
-		
+
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
 		foreach ($aShop_Cart as $oShop_Cart)
 		{
@@ -207,6 +209,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 						->clearEntities()
 						->showXmlProperties($this->itemsProperties)
 						->showXmlSpecialprices($this->specialprices)
+						->showXmlAssociatedItems($this->associatedItems)
 				);
 
 				if ($oShop_Cart->postpone == 0)

@@ -25,10 +25,10 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
 		// Заголовок формы добавляется до вывода крошек, которые могут быть добавлены в контроллере
-		array_unshift($children,
+		/*array_unshift($children,
 			Admin_Form_Entity::factory('Title')
 				->name($this->title)
-			);
+			);*/
 
 		// Форма
 		$oAdmin_Form_Entity_Form = $this->form->controller(

@@ -26,7 +26,7 @@ return array(
 	'exec_typograph_description' => '<acronym title="Use prepress service to description of information group">Use prepress service</acronym>',
 	'use_trailing_punctuation' => '<acronym title="Optical text alignment function moves punctuation characters beyond the typing borders">Optical alignment</acronym>',
 	'parent_id' => '<acronym title="Parent group of information group">Parent group</acronym>',
-	'sorting' => '<acronym title="Order number of information group">Order number</acronym>',
+	'sorting' => '<acronym title="Sorting order of information group">Sorting order</acronym>',
 	'path' => '<acronym title="URL item of information system for group">Path</acronym>',
 	'indexing' => '<acronym title="Checkbox to specify whether information group should be indexed">Index</acronym>',
 	'active' => '<acronym title="Activity status of information group">Active</acronym>',

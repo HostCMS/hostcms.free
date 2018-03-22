@@ -252,7 +252,7 @@ class Property_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		// Relations
 		$this->Structure_Property->delete();
 		$this->Informationsystem_Item_Property->delete();
@@ -345,6 +345,23 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Limit List Items in XML
+	 * @var array|Core_QueryBuilder_Select
+	 */
+	protected $_limitListItems = NULL;
+
+	/**
+	 * Limit List Items in XML
+	 * @param array|Core_QueryBuilder_Select $limitListItems
+	 * @return self
+	 */
+	public function limitListItems($limitListItems)
+	{
+		$this->_limitListItems = $limitListItems;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event property.onBeforeRedeclaredGetXml
@@ -382,9 +399,15 @@ class Property_Model extends Core_Entity
 				$oList_Items = $this->List->List_Items;
 				$oList_Items->queryBuilder()
 					->where('list_items.active', '=', 1);
-				
+
+				if (!is_null($this->_limitListItems))
+				{
+					$oList_Items->queryBuilder()
+						->where('list_items.id', 'IN', $this->_limitListItems);
+				}
+
 				Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
-				
+
 				$this->List->addEntities(
 					$oList_Items->findAll()
 				);
@@ -392,5 +415,10 @@ class Property_Model extends Core_Entity
 		}
 
 		return parent::getXml();
+	}
+
+	public function typeBackend()
+	{
+		return Core::_('Property.type' . $this->type);
 	}
 }

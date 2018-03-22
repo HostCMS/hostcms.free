@@ -605,7 +605,7 @@ class Informationsystem_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		$this->clearXmlTags()
-			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
 			->addXmlTag('captcha_id', $this->use_captcha ? Core_Captcha::getCaptchaId() : 0);
 
@@ -653,6 +653,20 @@ class Informationsystem_Model extends Core_Entity
 		!$this->structure_id && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-darkorange badge-ico white')
 			->add(Core::factory('Core_Html_Entity_I')->class('fa fa-chain-broken'))
+			->execute();
+
+		$countInformationsystemGroups = $this->Informationsystem_Groups->getCount();
+		$countInformationsystemGroups && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-folder-open-o"></i> ' . $countInformationsystemGroups)
+			->title(Core::_('Informationsystem.all_groups_count', $countInformationsystemGroups))
+			->execute();
+
+		$countInformationsystemItems = $this->Informationsystem_Items->getCount();
+		$countInformationsystemItems && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-file-o"></i> ' . $countInformationsystemItems)
+			->title(Core::_('Informationsystem.all_items_count', $countInformationsystemItems))
 			->execute();
 	}
 }

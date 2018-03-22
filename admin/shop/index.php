@@ -54,6 +54,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
 				->setOr()
 				->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+				->setOr()
+				->where('shop_items.id', 'LIKE', $sQuery)
 			->close()
 			->limit(15);
 
@@ -194,12 +196,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Shop_Currency.show_currency_link'))
 		->icon('fa fa-eur')
 		->img('/admin/images/money_euro.gif')
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/admin/shop/currency/index.php', NULL, NULL, '')
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCurrenciesFormPath, NULL, NULL, '')
 		)
 	)

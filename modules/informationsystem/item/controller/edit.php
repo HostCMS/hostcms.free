@@ -321,7 +321,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'path' => $oSmallFilePath,
 
 							// make_small_image_from_big_checked - вид ображения checkbox'а с подписью "Создать малое изображение из большого" выбранным (1 - отображать выбранным (по умолчанию), 0 - невыбранным);
-							'create_small_image_from_large_checked' => $this->_object->image_small == '',
+							'create_small_image_from_large_checked' => $oInformationsystem->create_small_image && $this->_object->image_small == '',
 
 							// small_image_watermark_checked - вид ображения checkbox'а с подписью "Наложить водяной знак на малое изображение" (1 - отображать выбранным (по умолчанию), 0 - невыбранным);
 							'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
@@ -799,7 +799,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						'path' => $oSmallFilePath,
 
 						// make_small_image_from_big_checked - вид ображения checkbox'а с подписью "Создать малое изображение из большого" выбранным (1 - отображать выбранным (по умолчанию), 0 - невыбранным);
-						'create_small_image_from_large_checked' => $this->_object->image_small == '',
+						'create_small_image_from_large_checked' => $oInformationsystem->create_small_image && $this->_object->image_small == '',
 
 						// small_image_watermark_checked - вид ображения checkbox'а с подписью "Наложить водяной знак на малое изображение" (1 - отображать выбранным (по умолчанию), 0 - невыбранным);
 						'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
@@ -1591,8 +1591,20 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			$oMaillist = Core_Entity::factory('Maillist', Core_Array::getPost('maillist_id'));
 			$oMaillist_Fascicle = Core_Entity::factory('Maillist_Fascicle');
 
+			$html = str_replace("%TEXT", $this->_object->text, $oMaillist->template);
+
+			$oCurrentAlias = $this->_object->Informationsystem->Site->getCurrentAlias();
+
+			if ($oCurrentAlias)
+			{
+				$href = ($this->_object->Informationsystem->Structure->https ? 'https://' : 'http://')
+					. $oCurrentAlias->name;
+
+				$html = preg_replace('~(href|src)=(["\'])(?!#)(?!https?://)([^\2]*?)\2~i','$1="' . $href . '$3"', $html);
+			}
+
 			$oMaillist_Fascicle->subject = $this->_object->name;
-			$oMaillist_Fascicle->html = str_replace("%TEXT", $this->_object->text, $oMaillist->template);
+			$oMaillist_Fascicle->html = $html;
 			$oMaillist_Fascicle->createTextFromHtml();
 			$oMaillist_Fascicle->datetime = Core_Date::timestamp2sql(time());
 			$oMaillist_Fascicle->sent_datetime = '0000-00-00 00:00:00';

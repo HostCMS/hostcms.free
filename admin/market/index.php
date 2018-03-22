@@ -45,8 +45,7 @@ $oMarket_Controller
 	->page($oAdmin_Form_Controller->getCurrent());
 
 if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery'
-	&& !is_null(Core_Array::getRequest('search_query'))
-)
+	&& !is_null(Core_Array::getRequest('search_query')))
 {
 	$oMarket_Controller->search($sQuery);
 }

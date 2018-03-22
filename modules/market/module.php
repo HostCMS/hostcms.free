@@ -23,21 +23,20 @@ class Market_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-01-26';
+	public $date = '2018-03-02';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'market';
-	
-	/**
-	 * Constructor.
-	 */
-	public function __construct()
-	{
-		parent::__construct();
 
+	/**
+	 * Get Module's Menu
+	 * @return array
+	 */
+	public function getMenu()
+	{
 		$this->menu = array(
 			array(
 				'sorting' => 150,
@@ -48,5 +47,7 @@ class Market_Module extends Core_Module
 				'onclick' => "$.adminLoad({path: '/admin/market/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 }

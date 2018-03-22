@@ -134,6 +134,7 @@ return array(
 	'schedule-searchIndexItem' => 'Index shop item',
 	'schedule-searchIndexGroup' => 'Index shop group',
 	'schedule-searchUnindexItem' => 'Unindex shop item',
+	'schedule-recountShop' => 'Recount shop groups and items',	
 	'order_admin_subject' => 'New order email subject',
 	'order_user_subject' => 'New order customer\'s email subject',
 	'confirm_admin_subject' => 'Paid order email subject',
@@ -167,4 +168,9 @@ return array(
 	'seo_template_item_description' => 'Item description',
 	'seo_template_item_text' => 'Item text',
 	'seo_template_item_currency' => 'Item currency',
+
+	'all_groups_count' => 'Groups: %s',
+	'all_items_count' => 'Items: %s',
+
+	'create_small_image' => 'Create small image from large image',
 );

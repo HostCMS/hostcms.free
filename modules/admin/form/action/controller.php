@@ -127,6 +127,16 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 		$this->_content .= $content;
 		return $this;
 	}
+	
+	/**
+	 * Clear content
+	 * @return self
+	 */
+	public function clearContent()
+	{
+		$this->_content = NULL;
+		return $this;
+	}
 
 	/**
 	 * Get message

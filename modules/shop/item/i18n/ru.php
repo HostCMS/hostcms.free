@@ -171,7 +171,8 @@ return array(
 	'import_price_list_button_load' => "Загрузить",
 	'move_success' => 'Товары перенесены',
 	'root_folder' => 'Корневая группа',
-	'import_small_images' => "Малое изображение для ",
+	'import_small_images' => "Малое изображение для %s",
+	'import_file_description' => "Описание файла для %s",
 	'count_insert_item' => 'Загружено товаров',
 	'count_update_item' => 'Обновлено товаров',
 	'create_catalog' => 'Создано разделов каталога',
@@ -312,4 +313,6 @@ return array(
 	'import_price_list_delay' => 'Задержка (в сек.)',
 	'create_modification_copy_warehouse_count' => 'Копировать остаток на складе',
 	'items_catalog_copy_form_title' => 'Копировать товар',
+	'item_warehouse' => 'Остатки по складам',
+	'item_warehouse_title' => 'Остатки по складам в магазине "%s"',
 );

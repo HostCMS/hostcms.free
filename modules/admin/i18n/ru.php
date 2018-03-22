@@ -101,4 +101,8 @@ return array(
 	'chat' => 'Чат',
 	'profile' => 'Профиль',
 	'settings' => 'Настройки',
+	'notifications' => 'Уведомления',
+	'events' => 'Дела',
+	'bookmarks' => 'Закладки',
+	'sound' => 'Звук',
 );

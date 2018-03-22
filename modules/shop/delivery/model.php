@@ -290,6 +290,23 @@ class Shop_Delivery_Model extends Core_Entity
 	}
 
 	/**
+	 * Show payment systems in XML
+	 * @var boolean
+	 */
+	protected $_showXmlShopPaymentSystems = FALSE;
+
+	/**
+	 * Add payment systems XML to delivery
+	 * @param boolean $showXmlShopPaymentSystems mode
+	 * @return self
+	 */
+	public function showXmlShopPaymentSystems($showXmlShopPaymentSystems = TRUE)
+	{
+		$this->_showXmlShopPaymentSystems = $showXmlShopPaymentSystems;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_delivery.onBeforeRedeclaredGetXml
@@ -299,6 +316,16 @@ class Shop_Delivery_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
+
+		if ($this->_showXmlShopPaymentSystems)
+		{
+			$oShopPaymentSystemsEntity = Core::factory('Core_Xml_Entity')
+					->name('shop_payment_systems');
+
+			$this->addEntity($oShopPaymentSystemsEntity);
+
+			$oShopPaymentSystemsEntity->addEntities($this->Shop_Payment_Systems->getAllByActive(1));
+		}
 
 		return parent::getXml();
 	}
@@ -318,7 +345,7 @@ class Shop_Delivery_Model extends Core_Entity
 			->title($count)
 			->execute();
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -328,7 +355,7 @@ class Shop_Delivery_Model extends Core_Entity
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$aShop_Payment_Systems = $this->Shop_Payment_Systems->findAll(FALSE);
-		
+
 		if (count($aShop_Payment_Systems))
 		{
 			$aTmp = array();
@@ -336,7 +363,7 @@ class Shop_Delivery_Model extends Core_Entity
 			{
 				$aTmp[] = $oShop_Payment_System->name;
 			}
-			
+
 			?><span class="margin-left-5 small darkgray"><?php echo htmlspecialchars(implode(', ', $aTmp))?></span><?php
 		}
 		else
