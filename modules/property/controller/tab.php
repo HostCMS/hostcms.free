@@ -315,12 +315,15 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$smallImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnSmallImage();
 							}
 
-							if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
+							$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
+							$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
+
+							/*if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
 								&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
 							{
 								$largeImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfLargeImage();
 								$smallImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfSmallImage();
-							}
+							}*/
 
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 								->style('width: 340px')

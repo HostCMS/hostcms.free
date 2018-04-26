@@ -43,6 +43,7 @@ return array(
 	'time_database_select' => "database select: <strong>%.3f</strong> sec",
 	'time_sql_execution' => "SQL execution: <strong>%.3f</strong> sec",
 	'time_xml_execution' => "XML execution: <strong>%.3f</strong> sec",
+	'time_tpl_execution' => "TPL execution: <strong>%.3f</strong> sec",
 	'memory_usage' => "Memory usage: <strong>%.2f</strong> M.",
 	'number_of_queries' => "Number of queries: <strong>%d</strong>.",
 	'compression' => 'Compression: <strong>%s</strong>.',

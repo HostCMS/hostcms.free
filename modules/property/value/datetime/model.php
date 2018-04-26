@@ -44,6 +44,7 @@ class Property_Value_Datetime_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'entity_id',
 		'value'
 	);
 

@@ -17,13 +17,13 @@ class Informationsystem_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-03-02';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name
@@ -52,7 +52,7 @@ class Informationsystem_Module extends Core_Module
 			array(
 				'sorting' => 30,
 				'block' => 0,
-				'ico' => 'fa fa-tasks',
+				'ico' => 'fa fa-newspaper-o',
 				'name' => Core::_('Informationsystem.menu'),
 				'href' => "/admin/informationsystem/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/informationsystem/index.php'}); return false"
@@ -291,7 +291,7 @@ class Informationsystem_Module extends Core_Module
 	 */
 	public function backendSearchCallback($oSearch_Page)
 	{
-		$href = $onclick = NULL;
+		$href = $onclick = $icon = NULL;
 
 		$iAdmin_Form_Id = 12;
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
@@ -311,6 +311,7 @@ class Informationsystem_Module extends Core_Module
 						$additionalParams = "informationsystem_id={$oInformationsystem_Group->Informationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->id}";
 						$href = $oAdmin_Form_Controller->getAdminLoadHref($sPath, NULL, NULL, $additionalParams);
 						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($sPath, NULL, NULL, $additionalParams);
+						$icon = "fa fa-folder-open-o";
 					}
 				break;
 				case 2: // Информационые элементы
@@ -321,15 +322,15 @@ class Informationsystem_Module extends Core_Module
 						$additionalParams = "informationsystem_id={$oInformationsystem_Item->Informationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}";
 
 						$href = $oAdmin_Form_Controller->getAdminActionLoadHref($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
-
 						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
+						$icon = "fa fa-file-text-o";
 					}
 				break;
 			}
 		}
 
 		return array(
-			'icon' => 'fa-tasks',
+			'icon' => $icon,
 			'href' => $href,
 			'onclick' => $onclick
 		);

@@ -30,6 +30,7 @@ return array(
 	'lib_property_type_3' => 'List',
 	'lib_property_type_4' => 'SQL query',
 	'lib_property_type_5' => 'Large text field',
+	'lib_property_type_7' => 'TPL template',	
 	'value' => 'Value',
 	'multivalue' => 'Multiple values',
 	'copy_from' => ' [Copy of %s]',

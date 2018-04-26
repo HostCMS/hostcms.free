@@ -201,32 +201,32 @@ class Shop_Cart_Controller_Onestep extends Core_Controller
 					$totalDiscount += $oShop_Purchase_Discount->getDiscountAmount();
 				}
 			}
+
+			// Скидка больше суммы заказа
+			$totalDiscount > $aTotal['amount'] && $totalDiscount = $aTotal['amount'];
+
+			// Total order amount
+			$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('total_amount')
+					->value($aTotal['amount'] - $totalDiscount)
+			)->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('total_tax')
+					->value($aTotal['tax'])
+			)->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('total_quantity')
+					->value($this->quantity)
+			)->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('total_weight')
+					->value($aTotal['weight'])
+			);
 		}
 
 		$this->taxes && $oShop->showXmlTaxes(TRUE);
-
-		// Скидка больше суммы заказа
-		$totalDiscount > $aTotal['amount'] && $totalDiscount = $aTotal['amount'];
-
-		// Total order amount
-		$this->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_amount')
-				->value($aTotal['amount'] - $totalDiscount)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_tax')
-				->value($aTotal['tax'])
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_quantity')
-				->value($this->quantity)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_weight')
-				->value($aTotal['weight'])
-		);
-
+		
 		// Свойства заказа
 		if ($this->orderProperties)
 		{

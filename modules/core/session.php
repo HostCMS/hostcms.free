@@ -192,17 +192,20 @@ class Core_Session
 	 */
 	static public function close()
 	{
-		self::$_started = FALSE;
-
-		$bStarted = function_exists('session_status')
-			? session_status() == PHP_SESSION_ACTIVE
-			: session_id() !== '';
-
 		//if (self::$_started)
-		if ($bStarted)
-		{
-			session_write_close();
-		}
+		//{
+			self::$_started = FALSE;
+
+			$bStarted = function_exists('session_status')
+				? session_status() == PHP_SESSION_ACTIVE
+				: session_id() !== '';
+
+			if ($bStarted)
+			{
+				session_write_close();
+			}
+		//}
+
 		return TRUE;
 	}
 
@@ -241,9 +244,14 @@ class Core_Session
 	 */
 	protected function _error($content)
 	{
-		Core_Array::getRequest('_', FALSE)
-			? Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL))
-			: exit($content);
+		if (Core_Array::getRequest('_', FALSE))
+		{
+			Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL));
+		}
+		else
+		{
+			throw new Core_Exception($content);
+		}
 	}
 
 	/**
@@ -411,7 +419,7 @@ class Core_Session
 	 */
 	public function sessionWrite($id, $value)
 	{
-		if ($this->_read && $this->_lock($id))
+		if ($this->_read/* && $this->_lock($id)*/)
 		{
 			$oDataBase = Core_QueryBuilder::update('sessions')
 				//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
@@ -434,6 +442,8 @@ class Core_Session
 			}
 
 			$this->_unlock($id);
+			
+			$this->_read = FALSE;
 		}
 
 		return TRUE;

@@ -30,6 +30,7 @@ return array(
 	'lib_property_type_3' => 'Список',
 	'lib_property_type_4' => 'SQL-запрос',
 	'lib_property_type_5' => 'Большое текстовое поле',
+	'lib_property_type_7' => 'TPL-шаблон',
 	'value' => 'Значение',
 	'multivalue' => 'Множественные значения',
 	'copy_from' => ' [Копия от %s]' ,

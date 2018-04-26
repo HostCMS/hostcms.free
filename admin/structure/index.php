@@ -278,11 +278,32 @@ if ($oAdminFormActionLoadXslList && $oAdmin_Form_Controller->getAction() == 'loa
 		->model(Core_Entity::factory('Xsl'))
 		->defaultValue(' … ')
 		->addCondition(
-			array('where' => array('xsl_dir_id', '=', Core_Array::getGet('xsl_dir_id')))
+			array('where' => array('xsl_dir_id', '=', intval(Core_Array::getGet('xsl_dir_id'))))
 		)
 		->addIDs(TRUE);
 
 	$oAdmin_Form_Controller->addAction($oStructureControllerLoadXslList);
+}
+
+// Действие "Загрузка списка TPL-шаблонов для раздела"
+$oAdminFormActionLoadTplList = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('loadTplList');
+
+if ($oAdminFormActionLoadTplList && $oAdmin_Form_Controller->getAction() == 'loadTplList')
+{
+	$oStructureControllerLoadTplList = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Load_Select_Options', $oAdminFormActionLoadTplList
+	);
+	$oStructureControllerLoadTplList
+		->model(Core_Entity::factory('Tpl'))
+		->defaultValue(' … ')
+		->addCondition(
+			array('where' => array('tpl_dir_id', '=', intval(Core_Array::getGet('tpl_dir_id'))))
+		)
+		->addIDs(TRUE);
+
+	$oAdmin_Form_Controller->addAction($oStructureControllerLoadTplList);
 }
 
 // Действие "Удаление значения свойства"

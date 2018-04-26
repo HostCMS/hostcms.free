@@ -57,6 +57,7 @@ class Property_Value_File_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'entity_id',
 		'file',
 		'file_small',
 	);

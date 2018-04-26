@@ -68,6 +68,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/clike/clike.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/php/php.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/xml/xml.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/smarty/smarty.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/selection/active-line.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/search.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/searchcursor.js')
@@ -91,6 +92,7 @@ class Skin_Bootstrap extends Core_Skin
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/font-awesome.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/open-sans/open-sans.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/hostcms.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/animate.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/dataTables.bootstrap.css')
@@ -128,10 +130,9 @@ class Skin_Bootstrap extends Core_Skin
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
+		/*<!-- Fonts -->
+		<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">*/
 		?>
-		<!-- Fonts -->
-		<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">
-
 		<script type="text/javascript">
 		<?php
 		$bLogged = Core_Auth::logged();
@@ -233,55 +234,7 @@ class Skin_Bootstrap extends Core_Skin
 									<div id="bookmarksListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
 										<div class="scroll-bookmarks">
 											<ul>
-											<?php
-											$oUser_Bookmarks = $oUser->User_Bookmarks;
-											$oUser_Bookmarks->queryBuilder()
-												->clearOrderBy()
-												->orderBy('user_bookmarks.id', 'ASC');
-
-											$aUser_Bookmarks = $oUser_Bookmarks->findAll(FALSE);
-
-											if (count($aUser_Bookmarks))
-											{
-												foreach ($aUser_Bookmarks as $oUser_Bookmark)
-												{
-													$oModule = Core_Entity::factory('Module')->getById($oUser_Bookmark->module_id);
-
-													if ($oModule)
-													{
-														$oCore_Module = Core_Module::factory($oModule->path);
-
-														if ($oModule->active && $oCore_Module)
-														{
-															$aMenu = $oCore_Module->getMenu();
-
-															$ico = is_array($aMenu) && isset($aMenu[0])
-																? strval(Core_Array::get($aMenu[0], 'ico'))
-																: 'fa fa-bookmark';
-
-															?><li id="bookmark-<?php echo $oUser_Bookmark->id?>">
-																<a href="<?php echo htmlspecialchars($oUser_Bookmark->path)?>">
-																	<div class="clearfix notification-bookmark">
-																		<div class="notification-icon">
-																			<i class="<?php echo htmlspecialchars($ico)?> bg-darkorange white"></i>
-																		</div>
-																		<div class="notification-body">
-																			<span class="title"><?php echo htmlspecialchars($oUser_Bookmark->name)?></span>
-																			<span class="description"><?php echo htmlspecialchars($oUser_Bookmark->path)?></span>
-																		</div>
-																		<div class="notification-extra">
-																			<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: '<?php echo Core::_("User_Bookmark.remove_message")?>', submit: '<?php echo Core::_("User_Bookmark.remove_submit")?>', cancel: '<?php echo Core::_("User_Bookmark.cancel")?>', bookmark_id: <?php echo $oUser_Bookmark->id?>, path: '/admin/user/index.php'})"></i>
-																		</div>
-																	</div>
-																</a>
-															</li><?php
-														}
-													}
-												}
-											}
-											else
-											{
-												?><li id="bookmark-0">
+												<li id="bookmark-0">
 													<a href="#">
 														<div class="clearfix">
 															<div class="notification-icon">
@@ -292,9 +245,7 @@ class Skin_Bootstrap extends Core_Skin
 															</div>
 														</div>
 													</a>
-												</li><?php
-											}
-											?>
+												</li>
 											</ul>
 										</div>
 									</div>
@@ -312,6 +263,8 @@ class Skin_Bootstrap extends Core_Skin
 										$('.navbar-account #bookmarksListBox').data({
 											moduleId: <?php echo $oModule->id?>
 										});
+
+										$.refreshBookmarksList();
 									});
 									</script>
 									<?php

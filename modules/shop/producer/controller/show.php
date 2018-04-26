@@ -136,6 +136,8 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		$bXsl = !is_null($this->_xsl);
+
 		$oShop = $this->getEntity();
 
 		$this->addEntity(
@@ -149,6 +151,12 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		);
 
 		$this->dirsList && $this->addDirs();
+
+		if (!$bXsl)
+		{
+			$this->assign('controller', $this);
+			$this->assign('aShop_Producers', array());
+		}
 
 		// До вывода свойств групп
 		if ($this->limit > 0)
@@ -187,15 +195,19 @@ class Shop_Producer_Controller_Show extends Core_Controller
 						->value(intval($this->total))
 				);
 			}
-		}
 
-		if ($this->limit > 0)
-		{
 			foreach ($aShop_Producers as $oShop_Producer)
 			{
-				$this->addEntity(
-					$oShop_Producer->clearEntities()
-				);
+				if ($bXsl)
+				{
+					$this->addEntity(
+						$oShop_Producer->clearEntities()
+					);
+				}
+				else
+				{
+					$this->append('aShop_Producers', $oShop_Producer);
+				}
 			}
 		}
 

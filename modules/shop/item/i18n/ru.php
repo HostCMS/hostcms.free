@@ -315,4 +315,5 @@ return array(
 	'items_catalog_copy_form_title' => 'Копировать товар',
 	'item_warehouse' => 'Остатки по складам',
 	'item_warehouse_title' => 'Остатки по складам в магазине "%s"',
+	'shop_item_not_currency' => 'Остутствует указание валюты!',
 );

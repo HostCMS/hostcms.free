@@ -19,6 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - onStep(3000) количество товаров, выбираемых запросом за 1 шаг, по умолчанию 500
  * - stdOut() поток вывода, может использоваться для записи результата в файл. По умолчанию Core_Out_Std
  * - sno() система налогообложения (СНО) магазина. По умолчанию OSN — общая система налогообложения (ОСН).
+ * - delay() временная задержка в микросекундах, используется на виртульных хостингах с ограничнием на ресурсы в единицу времени, по умолчанию 0. значение 10000 - 0,01 секунда.
  *
  *
  * <code>
@@ -70,6 +71,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'mode',
 		'token',
 		'sno',
+		'delay',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -273,6 +275,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->mode = NULL;
 		$this->token = '';
 		$this->sno = 'OSN';
+		$this->delay = 0;
 
 		Core_Session::close();
 	}
@@ -499,6 +502,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 
 			$iFrom += $this->onStep;
+			
+			// Delay execution
+			$this->delay && usleep($this->delay);
 		}
 		while ($iFrom < $maxId);
 
@@ -614,6 +620,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 			//Core_File::flush();
 			$iFrom += $this->onStep;
+			
+			// Delay execution
+			$this->delay && usleep($this->delay);
 		}
 		while ($iFrom < $maxId);
 
@@ -907,9 +916,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected function _getCacheListItem($oProperty, $listItemId)
 	{
-		if (!isset($this->_cacheListItems[$oProperty->list_id][$listItemId]))
+		if (!isset($this->_cacheListItems[$listItemId]))
 		{
-			$this->_cacheListItems[$oProperty->list_id][$listItemId] = NULL;
+			$this->_cacheListItems[$listItemId] = NULL;
 
 			if ($listItemId)
 			{
@@ -918,11 +927,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				);
 
 				!is_null($oList_Item)
-					&& $this->_cacheListItems[$oProperty->list_id][$listItemId] = $oList_Item->value;
+					&& $this->_cacheListItems[$listItemId] = $oList_Item->value;
 			}
 		}
 
-		return $this->_cacheListItems[$oProperty->list_id][$listItemId];
+		return $this->_cacheListItems[$listItemId];
 	}
 
 	/**
@@ -966,7 +975,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					//$value = !is_null($oList_Item)
 					//	? $oList_Item->value
 					//	: NULL;
-					$value = $this->_getCacheListItem($oProperty, $oProperty_Value->value);
+					$value = Core::moduleIsActive('list')
+						? $this->_getCacheListItem($oProperty, $oProperty_Value->value)
+						: NULL;
 				break;
 
 				case 7: // Checkbox
@@ -1060,6 +1071,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
+		// Поле URL API https://www.site.com/shop/yandex_market/?action=
 		$action = Core_Array::getGet('action');
 
 		$path = NULL;
@@ -1076,12 +1088,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 				if ($this->token != Core_Array::get($request, 'auth-token'))
 				{
-					return $this->error404();
+					//return $this->error404();
+					throw new Core_Exception("Wrong auth-token!");
 				}
 			}
 			else
 			{
-				return $this->error404();
+				//return $this->error404();
+				throw new Core_Exception("Empty query!");
 			}
 		}
 
@@ -1307,7 +1321,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 						foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
 						{
-							$count += $oShop_Warehouse_Item->count;
+							if ($oShop_Warehouse_Item->Shop_Warehouse->active)
+							{
+								$count += $oShop_Warehouse_Item->count;
+							}
 						}
 
 						$aAnswer['cart']['items'][] = array(
@@ -1453,6 +1470,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		if (count($aOrderParams['items']))
 		{
+			$oSiteuser = Core::moduleIsActive('siteuser')
+				? Core_Entity::factory('Siteuser')->getCurrent()
+				: NULL;
+
 			foreach ($aOrderParams['items'] as $orderItem)
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($orderItem['offerId']);
@@ -1469,8 +1490,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					// Prices
 					$oShop_Item_Controller = new Shop_Item_Controller();
 
-					Core::moduleIsActive('siteuser') && $oSiteuser
-						&& $oShop_Item_Controller->siteuser($oSiteuser);
+					$oSiteuser && $oShop_Item_Controller->siteuser($oSiteuser);
 
 					$oShop_Item_Controller->count($orderItem['count']);
 

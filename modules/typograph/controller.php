@@ -33,13 +33,16 @@ class Typograph_Controller
 		return self::$instance;
 	}
 
+	protected $_left_span = NULL;
+	protected $_right_span = NULL;
+	
 	/**
 	 * Метод для удаления тегов предыдущего оптического выравнивания
 	 *
 	 * @param string $str исходная строка
 	 * <code>
 	 * <?php
-	 * $str = '<span style="margin-right: 0.3em"> </span> <span style="margin-left: -0.3em">«Типограф</span>»&nbsp;&mdash; удобный инструмент для&nbsp;автоматического типографирования в&nbsp;соответствии с&nbsp;правилами, принятыми для&nbsp;экранной типографики. Может применяться как&nbsp;для&nbsp;обычного текста, так&nbsp;и&nbsp;HTML-кода.';
+	 * $str = '<span style="margin-right: 0.3em"> </span> <span style="margin-left: -0.3em">«Типограф</span>» — удобный инструмент для автоматического типографирования в соответствии с правилами, принятыми для экранной типографики. Может применяться как для обычного текста, так и HTML-кода.';
 	 *
 	 * echo Typograph_Controller::instance()->eraseOpticalAlignment($str);
 	 *
@@ -115,7 +118,7 @@ class Typograph_Controller
 	{
 		return "<" . str_replace("„", chr(0x03), $matches[1]) . ">";
 	}
-	
+
 	/**
 	 * Execute the typograph
 	 * @param string $str source text
@@ -131,10 +134,6 @@ class Typograph_Controller
 			"RAQUO" => "H3ew2Qwdw4",
 			"LDQUO" => "H3ew2Qwdw5",
 			"RDQUO" => "H3ew2Qwdw6",
-			"MDASH" => "H3ew2Qwdw7",
-			"NDASH" => "H3ew2Qwdw8",
-			"APOS" => "H3ew2Qwdw9",
-			"HELLIP" => "H3ew2Qwds1"
 		);
 
 		// Удаляем теги от предыдущей типографики.
@@ -152,45 +151,19 @@ class Typograph_Controller
 
 		// Расстановка заков в скобках перед добавлением висячей пунктуации
 		$str = str_replace(
-			array(
-				"(R)",
-				"(r)",
-				"(TM)",
-				"(tm)",
-				"(C)",
-				"(c)"
-			),
-			array(
-				"<sup><small>&#174;</small></sup>",
-				"<sup><small>&#174;</small></sup>",
-				"<sup><small>&#8482;</small></sup>",
-				"<sup><small>&#8482;</small></sup>",
-				"&#169;",
-				"&#169;"
-			),
+			array("(R)",	"(r)",	"(TM)",	"(tm)",	"(C)",	"(c)"),
+			array("®",		"®",	"™",	"™",	"©",	"©"),
 		$str);
 
 		// Расстановка квадратных и кубических метров м2 м3.
 		$str = str_replace(
-			array(
-				"кв.м.",
-				"кв.м",
-				"кв м.",
-				"кв м",
-				"м2"
-			),
-			"м&sup2;",
+			array("кв.м.", "кв.м", "кв м.", "кв м", "м2"),
+			"м²",
 		$str);
 
 		$str = str_replace(
-			array(
-				"куб.м.",
-				"куб.м",
-				"куб м.",
-				"куб м",
-				"м3"
-			),
-			"м&sup3;",
+			array("куб.м.", "куб.м", "куб м.", "куб м", "м3"),
+			"м³",
 		$str);
 
 		// ... заменяем до работы с кавычками
@@ -201,22 +174,10 @@ class Typograph_Controller
 		* Открывающиеся кавычки могут встречаться:
 		* в начале строки, после скобок "([{", дефиса, пробелов и ещё одной кавычки
 		*/
-		$str = str_replace('&quot;', '"', $str);
-
-		// Заменяем на сущности
-		/*$str = str_replace(
-			array('«', '»',
-				'”', '„',
-				'“'),
-			array('&laquo;', '&raquo;',
-				'&rdquo;', '&bdquo;',
-				'&ldquo;'),
-			$str);*/
-
 		// Заменяем сущности на простые кавычки
 		$str = str_replace(
 			array(
-				'&laquo;', '&raquo;', '&rdquo;', '&bdquo;', '&ldquo;',
+				'&quot;', '&laquo;', '&raquo;', '&rdquo;', '&bdquo;', '&ldquo;',
 				'«', '»', '”', '„', '“'
 			),
 			'"', $str
@@ -237,7 +198,6 @@ class Typograph_Controller
 		 * "foo". Сами утверждения 'назад' ограничены так, чтобы все подстроки, которым они соответствуют,
 		 * имели фиксированную длину.
 		 */
-
 		// В диапазоне <a-zA-Zа-яА-ЯёЁ0-9 добавлено начало тега "<", т.к. перед текстом может быть ссылка
 		$str = preg_replace('/(?<='.$prequote.')"(?=[<a-zA-Zа-яА-ЯёЁ0-9]|\.{3,5})/u', $aEntries['LAQUO'], $str);
 		//$str = preg_replace('/(?:[a-zA-Zа-яА-ЯёЁ0-9_])"/u', $aEntries['LAQUO'], $str);
@@ -245,72 +205,54 @@ class Typograph_Controller
 		// Определяем закрывающиеся кавычки
 		$str = preg_replace("/(<\/[^\/][^>]*>)".$aEntries['LAQUO']."/u", '\1"', $str);
 
-		$str = preg_replace('{^((?:'.$aEntries['TAG1'].'\d+'.$aEntries['TAG2'].')+)"}u', '\1'.$aEntries['LAQUO'], $str);
-		$str = preg_replace('{(?<='.$prequote.')((?:'.$aEntries['TAG1'].'\d+'.$aEntries['TAG2'].')+)"}u', '\1'.$aEntries['LAQUO'], $str);
+		$str = preg_replace('{^((?:' . $aEntries['TAG1'] . '\d+' . $aEntries['TAG2'] . ')+)"}u', '\1' . $aEntries['LAQUO'], $str);
+		$str = preg_replace('{(?<=' . $prequote . ')((?:' . $aEntries['TAG1'] . '\d+' . $aEntries['TAG2'] . ')+)"}u', '\1' . $aEntries['LAQUO'], $str);
 
 		// Закрывающиеся кавычки - все остальные
 		$str = str_replace('"', $aEntries['RAQUO'], $str);
 
-		// Заменяем ”
-		$str = str_replace('”', $aEntries['RAQUO'], $str);
-
 		// исправляем ошибки в расстановке кавычек типа ""... и ...""
-		$str = preg_replace('/'.$aEntries['LAQUO'].$aEntries['RAQUO'].$aEntries['RAQUO'].'/u', $aEntries['LAQUO'], $str);
+		$str = preg_replace('/' . $aEntries['LAQUO'] . $aEntries['RAQUO'] . $aEntries['RAQUO'] . '/u', $aEntries['LAQUO'], $str);
 
 		// Вложенные кавычки
 		// «Текст», „Текст“
 		//$regex = '/'.$aEntries['LAQUO'].'(.*?)'.$aEntries['LAQUO'].'(.*?)'.$aEntries['RAQUO'].'/u'; // без s
 		// «Текст», «Текст», но «Текст, „Текст“»
-		$regex = '/'.$aEntries['LAQUO'] . '([^'.$aEntries['RAQUO'].']*?)'.$aEntries['LAQUO'].'(.*?)'.$aEntries['RAQUO'].'/u'; // без s
-		$replace = $aEntries['LAQUO'].'\\1'.$aEntries['LDQUO'].'\\2'.$aEntries['RDQUO'];
+		$regex = '/' . $aEntries['LAQUO'] . '([^' . $aEntries['RAQUO'] . ']*?)' . $aEntries['LAQUO'] . '(.*?)' . $aEntries['RAQUO'] . '/u'; // без s
+		$replace = $aEntries['LAQUO'] . '\\1' . $aEntries['LDQUO'] . '\\2' . $aEntries['RDQUO'];
 
-		// NEW, заменяет два нижних цикла
 		$i = 0; // защита от зацикливания при неправильно расставленных кавычках
 		while (($i++ < 10) && ($str = preg_replace($regex, $replace, $str, -1, $count)) && $count){}
 
-		/*$regex = '/'.$aEntries['LAQUO'].'([^'.$aEntries['RAQUO'].']*?)'.$aEntries['LAQUO'].'(.*?)'.$aEntries['RAQUO'].'/u'; // без модификатора s
-		$replace = $aEntries['LAQUO'].'\\1'.$aEntries['LDQUO'].'\\2'.$aEntries['RDQUO'];
-
-		$i = 0; // защита от зацикливания при неправильно расставленных кавычках
-		while (($i++ < 10) && preg_match('/'.$aEntries['LAQUO'].'(?:[^'.$aEntries['RAQUO'].']*?)'.$aEntries['LAQUO'].'/u', $str))
-		{
-			$str = preg_replace($regex, $replace, $str);
-		}
-
-		$regex = '/'.$aEntries['RAQUO'].'([^'.$aEntries['LAQUO'].']*?)'.$aEntries['RAQUO'].'/u'; // без модификатора s
-		$replace = $aEntries['RDQUO'].'\1'.$aEntries['RAQUO'];
-
-		$i = 0;
-		while (($i++ < 10) && preg_match('/'.$aEntries['RAQUO'].'(?:[^'.$aEntries['LAQUO'].']*?)'.$aEntries['RAQUO'].'/u', $str))
-		{
-			$str = preg_replace($regex, $replace, $str);
-		}*/
-
 		// заменяем коды символов на HTML-entities.
 		$str = str_replace(
-		array($aEntries['LAQUO'], $aEntries['RAQUO'], $aEntries['LDQUO'], $aEntries['RDQUO'], $aEntries['MDASH'], $aEntries['NDASH'], $aEntries['APOS']),
-		array('«','»','„','“','&mdash;','&#8211;','&#8217;'), $str);
+		array($aEntries['LAQUO'], $aEntries['RAQUO'], $aEntries['LDQUO'], $aEntries['RDQUO']),
+		array('«', '»', '„', '“'), $str);
 		// / расстановка кавычек
 
-		// расстанавливаем правильные коды, тире и многоточия
-		$str = str_replace(' - ','&nbsp;&mdash; ', $str);
-		$str = str_replace(' - ','&nbsp;&mdash; ', $str);
-		$str = str_replace('&nbsp;- ','&nbsp;&mdash; ', $str);
-		$str = str_replace('&nbsp;-&nbsp;','&nbsp;&mdash; ', $str);
-		//$str = str_replace('- ','&mdash; ', $str); // заменяет <!-- на <!-&mdash;
+		// Все на неразрывный пробел (0x00A0)
+		$str = str_replace(array('&nbsp;', '&thinsp;', '&#160;'), ' ', $str);
 
-		$str = str_replace('...', '&hellip;', $str);
-		$str = str_replace(' -- ', ' &mdash; ', $str);
-		$str = str_replace('&nbsp;-- ', ' &mdash; ', $str);
+		// (!) в замене и источниках ипользованы неразрывные пробелы " "
+		$str = str_replace(array(' - ', ' - ', ' - ', ' -- ', ' -- ', ' — '), ' — ', $str);
+		//$str = str_replace('- ','— ', $str); // заменяет <!-- на <!-—
+
+		// Множественные знаки !!!!, ????, ....
+		$str = preg_replace('/([\.\!\?]){4,}/', '\1\1\1', $str);
+
+		// Удаляем парные запятые и точки с запятой
+		$str = preg_replace('/([,]|[;]){2,}/', '\1', $str);
+		
+		// Многоточие
+		$str = str_replace('...', '…', $str);
 
 		// МИНУС-ПЛЮС.
-		$str = str_replace('+-', '&#177;', $str);
-		$str = str_replace('-+', '&#177;', $str);
+		$str = str_replace(array('+-', '-+'), '±', $str);
 
 		// Стрелки с равно <==, ==>, <==>
-		$str = str_replace('&lt;==&gt;', '&hArr;', $str);
-		$str = str_replace('&lt;==', '&lArr;', $str);
-		$str = str_replace('==&gt;', '&rArr;', $str);
+		$str = str_replace('&lt;==&gt;', '⇔', $str);
+		$str = str_replace('&lt;==', '⇐', $str);
+		$str = str_replace('==&gt;', '⇒', $str);
 
 		// меньше или равно
 		$str = str_replace('&lt;=', '&le;', $str);
@@ -319,20 +261,20 @@ class Typograph_Controller
 		$str = str_replace('=&gt;', '&ge;', $str);
 
 		// Стрелки с минусом.
-		$str = str_replace('--&gt;', '&rarr;', $str);
-		$str = str_replace('&lt;--', '&larr;', $str);
+		$str = str_replace('--&gt;', '→', $str);
+		$str = str_replace('&lt;--', '←', $str);
 
-		$str = str_replace('&lt;-&gt;', '&harr;', $str);
+		$str = str_replace(array('&lt;-&gt;', '&harr;'), '↔', $str);
 
 		// Дроби.
-		$str = str_replace(' 1/4 ', ' &#188; ', $str);
-		$str = str_replace(' 1/2 ', ' &#189; ', $str);
-		$str = str_replace(' 3/4 ', ' &#190; ', $str);
-		$str = str_replace(' 2/3 ', ' &#8532; ', $str);
-		$str = str_replace(' 1/8 ', ' &#8539; ', $str);
-		$str = str_replace(' 3/8 ', ' &#8540; ', $str);
-		$str = str_replace(' 5/8 ', ' &#8541; ', $str);
-		$str = str_replace(' 7/8 ', ' &#8542; ', $str);
+		$str = str_replace(array(' 1/4 ', ' &#188; '), ' ¼ ', $str);
+		$str = str_replace(array(' 1/2 ', ' &#189; '), ' ½ ', $str);
+		$str = str_replace(array(' 3/4 ', ' &#190; '), ' ¾ ', $str);
+		$str = str_replace(array(' 2/3 ', ' &#8532; '), ' ⅔ ', $str);
+		$str = str_replace(array(' 1/8 ', ' &#8539; '), ' ⅛ ', $str);
+		$str = str_replace(array(' 3/8 ', ' &#8540; '), ' ⅜ ', $str);
+		$str = str_replace(array(' 5/8 ', ' &#8541; '), ' ⅝ ', $str);
+		$str = str_replace(array(' 7/8 ', ' &#8542; '), ' ⅞ ', $str);
 
 		// Все замены с пробелами перед знаками препинания пишем до удаления двойного пробела
 		$str = str_replace(' ,', ', ', $str);
@@ -368,28 +310,29 @@ class Typograph_Controller
 		$str = str_replace(' .', '. ', $str);
 		$str = str_replace(' . ', '. ', $str);
 		$str = str_replace('. </nobr>', '.</nobr>', $str);
-		/*$str = str_replace('§', '&sect;&nbsp;', $str);
-		$str = str_replace('№', '&#8470;&nbsp;', $str);
-		$str = str_replace('€', '&nbsp;&euro;', $str);*/
-		$str = str_replace(' dpi', '&nbsp;dpi', $str);
-		$str = str_replace(' lpi', '&nbsp;lpi', $str);
-		$str = str_replace('м&sup3;', '&nbsp;м&sup3; ', $str);
-		$str = str_replace('м&sup2;', '&nbsp;м&sup2; ', $str);
+		$str = str_replace(' dpi', ' dpi', $str);
+		$str = str_replace(' lpi', ' lpi', $str);
 
 		// Заменяет + в адресах URL вместо пробела
-		//$str = str_replace("+", "&nbsp;+&nbsp;", $str);
-		//$str = str_replace("-", "&nbsp;-&nbsp;", $str);
+		//$str = str_replace("+", " + ", $str);
+		//$str = str_replace("-", " - ", $str);
 
 		$str = preg_replace("/(\d) %/u", "\\1%", $str);
 
 		// Убираем лишние пробелы
-		while (mb_strpos($str, "  ") !== FALSE)
+		while (mb_strpos($str, '  ') !== FALSE)
 		{
-			$str = str_replace("  ", " ", $str);
+			$str = str_replace('  ', ' ', $str);
 		}
 
-		// Обработка ФИО: Иванов А.А. -> Иванов&nbsp;А.&nbsp;А.
-		$str = preg_replace("/([А-ЯA-Z][а-яa-z]+)\s+([А-ЯA-Z]\.)\s*([А-ЯA-Z]\.)/su", "\\1&nbsp;\\2&nbsp;\\3", $str);
+		// Убираем лишние неразрывные пробелы
+		while (mb_strpos($str, '  ') !== FALSE)
+		{
+			$str = str_replace('  ', ' ', $str);
+		}
+
+		// Обработка ФИО: Иванов А.А. -> Иванов А. А.
+		$str = preg_replace("/([А-ЯA-Z][а-яa-z]+)\s+([А-ЯA-Z]\.)\s*([А-ЯA-Z]\.)/su", "\\1 \\2 \\3", $str);
 
 		// 10 x 12 -> 10&times;12
 		// [xх] - английская и русская Хэ - "х"
@@ -402,104 +345,104 @@ class Typograph_Controller
 			$str = $str2;
 		}*/
 
-		// s/(\d{4})\s+(г.|год)/$1&nbsp;$2/gms
-		// 2000 г -> 2000&nbsp;г
+		// s/(\d{4})\s+(г.|год)/$1 $2/gms
+		// 2000 г -> 2000 г
 		// + всяческие другие комбинации
 		// ^\w чтобы не было проблем с <h1 class="first">   </h1>
-		$str = preg_replace("/(^\w\d)\s+(\w*)/su", "\\1&nbsp;\\2", $str);
+		$str = preg_replace("/(^\w\d)\s+(\w*)/su", "\\1 \\2", $str);
 
 		// $str = str_replace(" %", "%", $str);
 		// $str = preg_replace("/(\d) %/u", "\\1%", $str);
 		// $str = str_replace(" ,", ",", $str);
 		$str = str_replace(" )", ")", $str);
 		$str = str_replace("( ", "(", $str);
-		/*$str = str_replace(") &nbsp;", ")&nbsp;", $str);
-		 $str = str_replace("&nbsp; (", "&nbsp;(", $str);*/
+		/*$str = str_replace(")  ", ") ", $str);
+		 $str = str_replace("  (", " (", $str);*/
 		$str = str_replace(" : ", ": ", $str);
 
 		$str = str_replace(" :", ": ", $str);
 
-		$str = str_replace("что-то", "<nobr>что-то</nobr>&nbsp;", $str);
-		$str = str_replace("чтото", "<nobr>что-то</nobr>&nbsp;", $str);
-		$str = str_replace("что то ", "<nobr>что-то</nobr>&nbsp;", $str);
-		$str = str_replace("где-то", "<nobr>где-то</nobr>&nbsp;", $str);
-		$str = str_replace("гдето", "<nobr>где-то</nobr>&nbsp;", $str);
-		$str = str_replace("где то ", "<nobr>где-то</nobr>&nbsp;", $str);
-		$str = str_replace("кем-то", "<nobr>кем-то</nobr>&nbsp;", $str);
-		$str = str_replace("кемто ", "<nobr>кем-то</nobr>&nbsp;", $str);
-		$str = str_replace("кем то ", "<nobr>кем-то</nobr>&nbsp;", $str);
-		$str = str_replace("кому-то", "<nobr>кому-то</nobr>&nbsp;", $str);
-		$str = str_replace("комуто", "<nobr>кому-то</nobr>&nbsp;", $str);
-		$str = str_replace("кому то ", "<nobr>кому-то</nobr>&nbsp;", $str);
-		$str = str_replace("как-то", "<nobr>как-то</nobr>&nbsp;", $str);
-		$str = str_replace("както", "<nobr>как-то</nobr>&nbsp;", $str);
-		$str = str_replace("как то ", "<nobr>как-то</nobr>&nbsp;", $str);
-		$str = str_replace("когда-то", "<nobr>когда-то</nobr>&nbsp;", $str);
-		$str = str_replace("когдато", "<nobr>когда-то</nobr>&nbsp;", $str);
-		$str = str_replace("когда то ", "<nobr>когда-то</nobr>&nbsp;", $str);
-		$str = str_replace("чем-то", "<nobr>чем-то</nobr>&nbsp;", $str);
-		$str = str_replace("чемто", "<nobr>чем-то</nobr>&nbsp;", $str);
-		$str = str_replace("чем то ", "<nobr>чем-то</nobr>&nbsp;", $str);
-		$str = str_replace("кто-то", "<nobr>кто-то</nobr>&nbsp;", $str);
-		$str = str_replace("ктото", "<nobr>кто-то</nobr>&nbsp;", $str);
-		$str = str_replace("кто то ", "<nobr>кто-то</nobr>&nbsp;", $str);
-		$str = str_replace("чего-то", "<nobr>чего-то</nobr>&nbsp;", $str);
-		$str = str_replace("чегото", "<nobr>чего-то</nobr>&nbsp;", $str);
-		$str = str_replace("чего то ", "<nobr>чего-то</nobr>&nbsp;", $str);
-		$str = str_replace("что-либо", "<nobr>что-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чтолибо", "<nobr>что-либо</nobr>&nbsp;", $str);
-		$str = str_replace("что либо", "<nobr>что-либо</nobr>&nbsp;", $str);
-		$str = str_replace("где-либо", "<nobr>где-либо</nobr>&nbsp;", $str);
-		$str = str_replace("гделибо", "<nobr>где-либо</nobr>&nbsp;", $str);
-		$str = str_replace("где либо", "<nobr>где-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кем-либо", "<nobr>кем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кемлибо", "<nobr>кем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кем либо", "<nobr>кем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кому-либо", "<nobr>кому-либо</nobr>&nbsp;", $str);
-		$str = str_replace("комулибо", "<nobr>кому-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кому либо", "<nobr>кому-либо</nobr>&nbsp;", $str);
-		$str = str_replace("как-либо", "<nobr>как-либо</nobr>&nbsp;", $str);
-		$str = str_replace("каклибо", "<nobr>как-либо</nobr>&nbsp;", $str);
-		$str = str_replace("как либо", "<nobr>как-либо</nobr>&nbsp;", $str);
-		$str = str_replace("когда-либо", "<nobr>когда-либо</nobr>&nbsp;", $str);
-		$str = str_replace("когдалибо", "<nobr>когда-либо</nobr>&nbsp;", $str);
-		$str = str_replace("когда либо", "<nobr>когда-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чем-либо", "<nobr>чем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чемлибо", "<nobr>чем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чем либо", "<nobr>чем-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кто-либо", "<nobr>кто-либо</nobr>&nbsp;", $str);
-		$str = str_replace("ктолибо", "<nobr>кто-либо</nobr>&nbsp;", $str);
-		$str = str_replace("кто либо", "<nobr>кто-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чего-либо", "<nobr>чего-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чеголибо", "<nobr>чего-либо</nobr>&nbsp;", $str);
-		$str = str_replace("чего либо", "<nobr>чего-либо</nobr>&nbsp;", $str);
-		$str = str_replace("что-нибудь", "<nobr>что-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чтонибудь", "<nobr>что-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("что нибудь", "<nobr>что-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("где-нибудь", "<nobr>где-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("гденибудь", "<nobr>где-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("где нибудь", "<nobr>где-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кем-нибудь", "<nobr>кем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кемнибудь", "<nobr>кем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кем нибудь", "<nobr>кем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кому-нибудь", "<nobr>кому-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("комунибудь", "<nobr>кому-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кому нибудь", "<nobr>кому-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("как-нибудь", "<nobr>как-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("какнибудь", "<nobr>как-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("как нибудь", "<nobr>как-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("когда-нибудь", "<nobr>когда-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("когданибудь", "<nobr>когда-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("когда нибудь", "<nobr>когда-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чем-нибудь", "<nobr>чем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чемнибудь", "<nobr>чем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чем нибудь", "<nobr>чем-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кто-нибудь", "<nobr>кто-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("ктонибудь", "<nobr>кто-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("кто нибудь", "<nobr>кто-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чего-нибудь", "<nobr>чего-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чегонибудь", "<nobr>чего-нибудь</nobr>&nbsp;", $str);
-		$str = str_replace("чего нибудь", "<nobr>чего-нибудь</nobr>&nbsp;", $str);
+		$str = str_replace("что-то", "<nobr>что-то</nobr> ", $str);
+		$str = str_replace("чтото", "<nobr>что-то</nobr> ", $str);
+		$str = str_replace("что то ", "<nobr>что-то</nobr> ", $str);
+		$str = str_replace("где-то", "<nobr>где-то</nobr> ", $str);
+		$str = str_replace("гдето", "<nobr>где-то</nobr> ", $str);
+		$str = str_replace("где то ", "<nobr>где-то</nobr> ", $str);
+		$str = str_replace("кем-то", "<nobr>кем-то</nobr> ", $str);
+		$str = str_replace("кемто ", "<nobr>кем-то</nobr> ", $str);
+		$str = str_replace("кем то ", "<nobr>кем-то</nobr> ", $str);
+		$str = str_replace("кому-то", "<nobr>кому-то</nobr> ", $str);
+		$str = str_replace("комуто", "<nobr>кому-то</nobr> ", $str);
+		$str = str_replace("кому то ", "<nobr>кому-то</nobr> ", $str);
+		$str = str_replace("как-то", "<nobr>как-то</nobr> ", $str);
+		$str = str_replace("както", "<nobr>как-то</nobr> ", $str);
+		$str = str_replace("как то ", "<nobr>как-то</nobr> ", $str);
+		$str = str_replace("когда-то", "<nobr>когда-то</nobr> ", $str);
+		$str = str_replace("когдато", "<nobr>когда-то</nobr> ", $str);
+		$str = str_replace("когда то ", "<nobr>когда-то</nobr> ", $str);
+		$str = str_replace("чем-то", "<nobr>чем-то</nobr> ", $str);
+		$str = str_replace("чемто", "<nobr>чем-то</nobr> ", $str);
+		$str = str_replace("чем то ", "<nobr>чем-то</nobr> ", $str);
+		$str = str_replace("кто-то", "<nobr>кто-то</nobr> ", $str);
+		$str = str_replace("ктото", "<nobr>кто-то</nobr> ", $str);
+		$str = str_replace("кто то ", "<nobr>кто-то</nobr> ", $str);
+		$str = str_replace("чего-то", "<nobr>чего-то</nobr> ", $str);
+		$str = str_replace("чегото", "<nobr>чего-то</nobr> ", $str);
+		$str = str_replace("чего то ", "<nobr>чего-то</nobr> ", $str);
+		$str = str_replace("что-либо", "<nobr>что-либо</nobr> ", $str);
+		$str = str_replace("чтолибо", "<nobr>что-либо</nobr> ", $str);
+		$str = str_replace("что либо", "<nobr>что-либо</nobr> ", $str);
+		$str = str_replace("где-либо", "<nobr>где-либо</nobr> ", $str);
+		$str = str_replace("гделибо", "<nobr>где-либо</nobr> ", $str);
+		$str = str_replace("где либо", "<nobr>где-либо</nobr> ", $str);
+		$str = str_replace("кем-либо", "<nobr>кем-либо</nobr> ", $str);
+		$str = str_replace("кемлибо", "<nobr>кем-либо</nobr> ", $str);
+		$str = str_replace("кем либо", "<nobr>кем-либо</nobr> ", $str);
+		$str = str_replace("кому-либо", "<nobr>кому-либо</nobr> ", $str);
+		$str = str_replace("комулибо", "<nobr>кому-либо</nobr> ", $str);
+		$str = str_replace("кому либо", "<nobr>кому-либо</nobr> ", $str);
+		$str = str_replace("как-либо", "<nobr>как-либо</nobr> ", $str);
+		$str = str_replace("каклибо", "<nobr>как-либо</nobr> ", $str);
+		$str = str_replace("как либо", "<nobr>как-либо</nobr> ", $str);
+		$str = str_replace("когда-либо", "<nobr>когда-либо</nobr> ", $str);
+		$str = str_replace("когдалибо", "<nobr>когда-либо</nobr> ", $str);
+		$str = str_replace("когда либо", "<nobr>когда-либо</nobr> ", $str);
+		$str = str_replace("чем-либо", "<nobr>чем-либо</nobr> ", $str);
+		$str = str_replace("чемлибо", "<nobr>чем-либо</nobr> ", $str);
+		$str = str_replace("чем либо", "<nobr>чем-либо</nobr> ", $str);
+		$str = str_replace("кто-либо", "<nobr>кто-либо</nobr> ", $str);
+		$str = str_replace("ктолибо", "<nobr>кто-либо</nobr> ", $str);
+		$str = str_replace("кто либо", "<nobr>кто-либо</nobr> ", $str);
+		$str = str_replace("чего-либо", "<nobr>чего-либо</nobr> ", $str);
+		$str = str_replace("чеголибо", "<nobr>чего-либо</nobr> ", $str);
+		$str = str_replace("чего либо", "<nobr>чего-либо</nobr> ", $str);
+		$str = str_replace("что-нибудь", "<nobr>что-нибудь</nobr> ", $str);
+		$str = str_replace("чтонибудь", "<nobr>что-нибудь</nobr> ", $str);
+		$str = str_replace("что нибудь", "<nobr>что-нибудь</nobr> ", $str);
+		$str = str_replace("где-нибудь", "<nobr>где-нибудь</nobr> ", $str);
+		$str = str_replace("гденибудь", "<nobr>где-нибудь</nobr> ", $str);
+		$str = str_replace("где нибудь", "<nobr>где-нибудь</nobr> ", $str);
+		$str = str_replace("кем-нибудь", "<nobr>кем-нибудь</nobr> ", $str);
+		$str = str_replace("кемнибудь", "<nobr>кем-нибудь</nobr> ", $str);
+		$str = str_replace("кем нибудь", "<nobr>кем-нибудь</nobr> ", $str);
+		$str = str_replace("кому-нибудь", "<nobr>кому-нибудь</nobr> ", $str);
+		$str = str_replace("комунибудь", "<nobr>кому-нибудь</nobr> ", $str);
+		$str = str_replace("кому нибудь", "<nobr>кому-нибудь</nobr> ", $str);
+		$str = str_replace("как-нибудь", "<nobr>как-нибудь</nobr> ", $str);
+		$str = str_replace("какнибудь", "<nobr>как-нибудь</nobr> ", $str);
+		$str = str_replace("как нибудь", "<nobr>как-нибудь</nobr> ", $str);
+		$str = str_replace("когда-нибудь", "<nobr>когда-нибудь</nobr> ", $str);
+		$str = str_replace("когданибудь", "<nobr>когда-нибудь</nobr> ", $str);
+		$str = str_replace("когда нибудь", "<nobr>когда-нибудь</nobr> ", $str);
+		$str = str_replace("чем-нибудь", "<nobr>чем-нибудь</nobr> ", $str);
+		$str = str_replace("чемнибудь", "<nobr>чем-нибудь</nobr> ", $str);
+		$str = str_replace("чем нибудь", "<nobr>чем-нибудь</nobr> ", $str);
+		$str = str_replace("кто-нибудь", "<nobr>кто-нибудь</nobr> ", $str);
+		$str = str_replace("ктонибудь", "<nobr>кто-нибудь</nobr> ", $str);
+		$str = str_replace("кто нибудь", "<nobr>кто-нибудь</nobr> ", $str);
+		$str = str_replace("чего-нибудь", "<nobr>чего-нибудь</nobr> ", $str);
+		$str = str_replace("чегонибудь", "<nobr>чего-нибудь</nobr> ", $str);
+		$str = str_replace("чего нибудь", "<nobr>чего-нибудь</nobr> ", $str);
 
 		$str = str_replace(" кое ", " кое-", $str);
 		$str = str_replace(" кой ", " кой-", $str);
@@ -509,20 +452,12 @@ class Typograph_Controller
 		$str = str_replace(" де,", "-де,", $str);
 		$str = str_replace(" кась ", "-кась ", $str);
 		$str = str_replace(" кась,", "-кась,", $str);
-
-		// Удаляем парные запятые
-		while (mb_strpos($str, ",,") !== FALSE)
-		{
-			$str = str_replace(",,", ",", $str);
-		}
-
-		$str = str_replace(array(" &nbsp;", "&nbsp; "), "&nbsp;", $str);
+	
+		// (' &nbsp;', '&nbsp; ') => '&nbsp;'
+		$str = str_replace(array('  ', '  '), ' ', $str);
 
 		// тире в начале строки (диалоги)
-		$str = preg_replace ('/([>|\s])- /u',"\\1&mdash; ", $str);
-
-		// " &mdash; " меняем на "&nbsp;&mdash; "
-		$str = str_replace(' &mdash; ', '&nbsp;&mdash; ', $str);
+		$str = preg_replace('/([>|\s])- /u',"\\1— ", $str);
 
 		// Оптическое выравнивание
 		if ($bTrailingPunctuation)
@@ -533,21 +468,21 @@ class Typograph_Controller
 
 			$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-			$left_span = !empty($oSite->css_left)
+			$this->_left_span = !empty($oSite->css_left)
 				? '<span class=¬'.$oSite->css_left.'¬>'
 				: '<span style=¬margin-left: -0.3em¬>';
 
-			$right_span = !empty($oSite->css_right)
+			$this->_right_span = !empty($oSite->css_right)
 				? '<span class=¬' . $oSite->css_right . '¬>'
 				: '<span style=¬margin-right: 0.3em¬>';
 
 			// Добавляем висячие скобки
-			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)?(\s)?(\(\w*)/iseu", "'{$right_span} </span> \\2{$left_span}'.str_replace('(', chr(0x01), '\\4').'</span>'", $str);
+			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)?(\s)?(\(\w*)/iseu", "'{$this->_right_span} </span> \\2{$this->_left_span}'.str_replace('(', chr(0x01), '\\4').'</span>'", $str);
 			// исключено (\s)?(<[^\/][^>]*>)?
 			// т.к. тогда span вылезает слева за <p>
-			//$str = preg_replace("/(\s)?(\(\w*)/iseu", "'{$right_span} </span> {$left_span}'.str_replace('(', chr(0x01), '\\2').'</span>'", $str);
-			$str = preg_replace_callback("/(\s)?(\(\w*)/isu", create_function('$matches', "return '{$right_span} </span> {$left_span}' . str_replace('(', chr(0x01), \$matches[2]) . '</span>';"), $str);
-
+			//$str = preg_replace("/(\s)?(\(\w*)/iseu", "'{$this->_right_span} </span> {$this->_left_span}'.str_replace('(', chr(0x01), '\\2').'</span>'", $str);
+			$str = preg_replace_callback("/(\s)?(\(\w*)/isu", array($this, '_trailingPunctuationBrackets'), $str);
+	
 			// Восстанавливаем скобки в тегах.
 			$str = str_replace(chr(0x01), '(', $str);
 
@@ -557,34 +492,29 @@ class Typograph_Controller
 
 			// Добавляем висячие елочки.
 			// возможно проблема вылезания за <p>, пример изменения см. выше
-			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/iseu", "'{$right_span} </span> \\2{$left_span}'.str_replace('«', chr(0x02), '\\4').'</span>'", $str);
-			$str = preg_replace_callback("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/isu", create_function('$matches', "return '{$right_span} </span> ' . \$matches[2] . '{$left_span}' . str_replace('«', chr(0x02), \$matches[4]).'</span>';"), $str);
-
+			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/iseu", "'{$this->_right_span} </span> \\2{$this->_left_span}'.str_replace('«', chr(0x02), '\\4').'</span>'", $str);
+			$str = preg_replace_callback("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/isu", array($this, '_trailingPunctuationFrenchQuotes'), $str);
+			
 			// Восстанавливаем елочки в тегах.
-			$str = str_replace(chr(0x02), "«", $str);
-			
-			
+			$str = str_replace(chr(0x02), '«', $str);
+
 			// Заменяем ЛАПКИ В ТЕГАХ на непечатные символы.
 			//$str = preg_replace("/<([^>]*)>/esu", "'<'.str_replace('„', chr(0x03),'\\1').'>'", $str);
 			$str = preg_replace_callback("/<([^>]*)>/su", array($this, '_germanQuotesCallback'), $str);
 
-			// Добавляем висячие лапки.
-			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)(\s)?(\„\w*)/iseu", "'{$right_span} </span> \\2{$left_span}'.str_replace('„', chr(0x03), '\\4').'</span>\\5'", $str);
-			// $str = preg_replace_callback("/(\s)?(<[^\/][^>]*>)(\s)?(\„\w*)/isu", create_function('$matches', "return '{$right_span} </span> ' . \$matches[2] . '{$left_span}' . str_replace('„', chr(0x03), \$matches[4]) . '</span>' . \$matches[5];"), $str);
-
 			// Восстанавливаем лапки в тегах.
-			$str = str_replace(chr(0x03), "„", $str);
+			$str = str_replace(chr(0x03), '„', $str);
 		}
 
 		// меняем "¬" обратно на кавычки
-		$str = str_replace('¬','"', $str);
+		$str = str_replace('¬', '"', $str);
 
 		$replace = array(
 			// неразрывный пробел перед словами
-			"/(\s+)(ж|же|ли|либо|или)(?=\s)/iu" => '&nbsp;$2', //2
+			"/(\s+)(ж|же|ли|либо|или)(?=\s)/iu" => ' $2', //2
 
 			// Неразрывный пробел после РУССКИХ слов, длиной 3 и менее символов.
-			"/(?<=\s)([а-яА-ЯёЁ]{1,3}|если|однако)(\s+)/iu" => '$1&nbsp;'
+			"/(?<=\s)([а-яА-ЯёЁ]{1,3}|если|однако)(\s+)/iu" => '$1 '
 		);
 
 		/* Предлоги вместе со словом (слово не переносится на другую строку
@@ -592,5 +522,15 @@ class Typograph_Controller
 		$str = preg_replace(array_keys($replace), array_values($replace), $str);
 
 		return $str;
+	}
+	
+	protected function _trailingPunctuationBrackets($matches)
+	{
+		return "{$this->_right_span} </span> {$this->_left_span}" . str_replace('(', chr(0x01), $matches[2]) . '</span>';
+	}
+	
+	protected function _trailingPunctuationFrenchQuotes($matches)
+	{
+		return "{$this->_right_span} </span> " . $matches[2] . $this->_left_span . str_replace('«', chr(0x02), $matches[4]) . '</span>';
 	}
 }

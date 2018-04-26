@@ -36,11 +36,13 @@ class Shop_Company_Model extends Company_Model
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
-		'~address',
+		'deleted',
+		'user_id',
+		/*'~address',
 		'~phone',
 		'~fax',
 		'~site',
-		'~email'
+		'~email'*/
 	);
 
 	/**

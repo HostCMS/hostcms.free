@@ -30,7 +30,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 	/**
 	 * Show menu item
 	 */
-	protected function _showMenuItem($subMenu)
+	protected function _showMenuItem($bTop)
 	{
 		$aFirstColors = array(
 			'btn-success',
@@ -69,8 +69,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			Core::factory('Core_Html_Entity_I')->class("{$this->icon} icon-separator")
 		);
 		
-		!$subMenu && $oCore_Html_Entity_A
-			->class("btn {$aFirstColors[$index]}")
+		$bTop && $oCore_Html_Entity_A
+			->class("btn {$aFirstColors[$index]}");
+		
+		$bHasSubmenu = !empty($this->_children);
+		
+		$bHasSubmenu && $oCore_Html_Entity_A
 			->set('data-toggle', 'dropdown');
 
 		$oCore_Html_Entity_A->add(
@@ -84,14 +88,14 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			?><a class="btn <?php echo $aSecondColors[$index]?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
 		}
 
-		if (!empty($this->_children))
+		if ($bHasSubmenu)
 		{
 			?><ul class="dropdown-menu <?php echo $aDropdownColors[$index]?>"><?php
 
 			// Вывод подменю
 			foreach ($this->_children as $subMenu)
 			{
-				?><li><?php $subMenu->_showMenuItem(TRUE)?></li><?php
+				?><li><?php $subMenu->_showMenuItem(FALSE)?></li><?php
 			}
 			?></ul><?php
 		}
@@ -102,6 +106,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 	 */
 	public function execute()
 	{
-		?><div class="btn-group"><?php $this->_showMenuItem(FALSE)?></div><?php
+		?><div class="btn-group"><?php $this->_showMenuItem(TRUE)?></div><?php
 	}
 }

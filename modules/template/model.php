@@ -518,8 +518,14 @@ class Template_Model extends Core_Entity
 	{
 		$newObject = parent::copy();
 
-		$newObject->saveTemplateCssFile($this->loadTemplateCssFile());
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
 		$newObject->saveTemplateFile($this->loadTemplateFile());
+		$newObject->saveTemplateCssFile($this->loadTemplateCssFile());
+		$newObject->saveTemplateLessFile($this->loadTemplateLessFile());
+		$newObject->saveTemplateJsFile($this->loadTemplateJsFile());
+		$newObject->saveManifestFile($this->loadManifestFile());
+		$newObject->saveLngFile($oSite->lng, $this->loadLngFile($oSite->lng));
 
 		$aTemplates = $this->Templates->findAll();
 
@@ -815,8 +821,49 @@ class Template_Model extends Core_Entity
 				{
 					?><div class="row panel-item">
 						<div class="col-xs-12">
-							<label for="<?php echo $fieldName?>"><?php echo strval($oOptionName[0])?></label>
-							<input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo $fieldName?>" value="<?php echo htmlspecialchars($lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id ?>" />
+							<label for="<?php echo htmlspecialchars($fieldName)?>"><?php echo htmlspecialchars(strval($oOptionName[0]))?></label>
+							<?php
+							switch ($fieldType)
+							{
+								case 'select':
+									?>
+									<select name="<?php echo htmlspecialchars($fieldName)?>" class="form-control" data-template="<?php echo $this->id?>">
+										<?php
+											$aSelectOptions = $oOption->xpath('select/option');
+
+											if (isset($aSelectOptions[0]))
+											{
+												foreach ($aSelectOptions as $key => $oOption)
+												{
+													$value = !is_null($oOption->attributes()->value)
+														? strval($oOption->attributes()->value)
+														: $key;
+
+													$sName = strval($oOption[0]);
+
+													$sSelected = $value == $lessFieldValue
+														? 'selected="selected"'
+														: '';
+
+													?>
+													<option value="<?php echo htmlspecialchars($value)?>" <?php echo $sSelected?>><?php echo htmlspecialchars($sName)?></option>
+													<?php
+												}
+											}
+											else
+											{
+											?>
+												<option value="">...</option>
+											<?php
+											}
+										?>
+									</select>
+									<?php
+								break;
+								default:
+									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo htmlspecialchars($fieldName)?>" value="<?php echo htmlspecialchars($lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
+							}
+							?>
 						</div>
 					</div>
 					<?php

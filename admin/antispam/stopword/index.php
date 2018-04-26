@@ -31,16 +31,27 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
-		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Admin_Form.add'))
+				->icon('fa fa-plus')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+				)
 		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-		)
-);
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Antispam_Stopword.export'))
+				->icon('fa fa-upload')
+				->img('/admin/images/export.gif')
+				->target('_blank')
+				->onclick('')
+				->href(
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportStopwordsList', NULL, 0, 0)
+				)
+		);
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -105,6 +116,17 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Antispam_Country_Controller_Edit);
+}
+
+// Действие экспорта
+$oAdminFormActionExport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('exportStopwordsList');
+
+if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportStopwordsList')
+{
+	$Antispam_Stopword_Export_Controller = new Antispam_Stopword_Export_Controller();
+	$Antispam_Stopword_Export_Controller->execute();
 }
 
 // Источник данных 0

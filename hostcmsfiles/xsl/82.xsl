@@ -73,21 +73,19 @@
 					<p><img src="http://{/shop/site/site_alias/name}/images/logo.png" border="0" /></p>
 
 					<p>
-						<b>&labelProviderName;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/name"/>
+						<b>&labelProviderName;:</b><xsl:text> </xsl:text><xsl:value-of select="company/name"/>
 						<br />
-						<b>&labelTinKpp;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/>/<xsl:value-of select="/shop/shop_company/kpp"/>
+						<b>&labelTinKpp;:</b><xsl:text> </xsl:text><xsl:value-of select="company/tin"/>/<xsl:value-of select="company/kpp"/>
 						<br />
-						<b>&labelPsrn;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/psrn"/>
+						<b>&labelPsrn;:</b><xsl:text> </xsl:text><xsl:value-of select="company/psrn"/>
 						<br />
-						<b>&labelAddress;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/address"/>
+						<b>&labelAddress;:</b><xsl:text> </xsl:text><xsl:value-of select="company/directory_address/full_address"/>
 						<br />
-						<b>&labelPhone;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/phone"/>
+						<b>&labelPhone;:</b><xsl:text> </xsl:text><xsl:value-of select="company/directory_phone/value"/>
 						<br />
-						<b>&labelFax;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/fax"/>
+						<b>&labelEmail;:</b><xsl:text> </xsl:text><xsl:value-of select="company/directory_email/value"/>
 						<br />
-						<b>&labelEmail;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/email"/>
-						<br />
-						<b>&labelSite;:</b><xsl:text> </xsl:text><xsl:value-of select="shop_company/site"/>
+						<b>&labelSite;:</b><xsl:text> </xsl:text><xsl:value-of select="company/directory_website/value"/>
 					</p>
 					<p>
 						<table cellpadding="1" cellspacing="0" width="100%">
@@ -97,8 +95,8 @@
 								</td>
 							</tr>
 							<tr>
-								<td class="td_main">&labelTin;<xsl:text> </xsl:text><xsl:value-of select="shop_company/tin"/></td>
-								<td class="td_main">&labelKpp;<xsl:text> </xsl:text><xsl:value-of select="shop_company/kpp"/></td>
+								<td class="td_main">&labelTin;<xsl:text> </xsl:text><xsl:value-of select="company/tin"/></td>
+								<td class="td_main">&labelKpp;<xsl:text> </xsl:text><xsl:value-of select="company/kpp"/></td>
 								<td class="td_main" style="border-right: black 1px solid;" rowspan="2" colspan="2"></td>
 							</tr>
 							<tr>
@@ -108,13 +106,13 @@
 							</tr>
 							<tr>
 								<td class="td_main" colspan="2">
-									<xsl:value-of select="shop_company/name"/>
+									<xsl:value-of select="company/name"/>
 								</td>
 								<td class="td_main" width="100">
 									<b>&labelAccountNumber;</b>
 								</td>
 								<td class="td_main" style="border-right: black 1px solid;">
-									<xsl:value-of select="shop_company/current_account"/>
+									<xsl:value-of select="company/current_account"/>
 								</td>
 							</tr>
 							<tr>
@@ -125,18 +123,18 @@
 									<b>&labelBic;</b>
 								</td>
 								<td class="td_main" style="border-right: black 1px solid;">
-									<xsl:value-of select="shop_company/bic"/>
+									<xsl:value-of select="company/bic"/>
 								</td>
 							</tr>
 							<tr>
 								<td class="td_main" style="border-bottom: black 1px solid;" colspan="2">
-									<xsl:value-of select="shop_company/bank_name"/><xsl:text> </xsl:text><xsl:value-of select="shop_company/bank_address"/>
+									<xsl:value-of select="company/bank_name"/><xsl:text> </xsl:text><xsl:value-of select="company/bank_address"/>
 								</td>
 								<td class="td_main" style="border-bottom: black 1px solid;">
 									<b>&labelCorrespondentAccount;</b>
 								</td>
 								<td class="td_main" style="border-bottom: black 1px solid; border-right: black 1px solid">
-									<xsl:value-of select="/shop/shop_company/correspondent_account"/>
+									<xsl:value-of select="company/correspondent_account"/>
 								</td>
 							</tr>
 						</table>
@@ -246,14 +244,14 @@
 							<td width="200" height="50">&labelOrderDirector;</td>
 							<td style="border-bottom: black 1px solid;"></td>
 							<td width="200">
-								<xsl:value-of select="shop_company/legal_name"/>
+								<xsl:value-of select="company/legal_name"/>
 							</td>
 						</tr>
 						<tr>
 							<td width="200" height="50">&labelOrderChiefAccountant;</td>
 							<td style="border-bottom: black 1px solid;"> </td>
 							<td>
-								<xsl:value-of select="shop_company/accountant_legal_name"/>
+								<xsl:value-of select="company/accountant_legal_name"/>
 							</td>
 						</tr>
 						<tr>

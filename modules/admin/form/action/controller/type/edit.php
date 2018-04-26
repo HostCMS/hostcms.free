@@ -704,13 +704,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_applyObjectProperty();
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
+				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
 			case 'markDeleted':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">/*setTimeout(function() {*/ $(\'#' . $windowId . '\').parents(\'.bootbox\').remove(); /*}, 300);*/</script>');
+				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
@@ -820,7 +820,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		ob_start();
 
-		$oAdmin_View = Admin_View::create();
+		$sAdmin_View = !is_null($this->_Admin_Form_Controller)
+			? $this->_Admin_Form_Controller->Admin_View
+			: NULL;
+		
+		$oAdmin_View = Admin_View::create($sAdmin_View);
 		$oAdmin_View
 			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)
 			->pageTitle($oAdmin_Form_Action_Controller_Type_Edit_Show->title)

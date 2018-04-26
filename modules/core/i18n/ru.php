@@ -43,6 +43,7 @@ return array(
 	'time_database_select' => "выбора БД: <strong>%.3f</strong> с",
 	'time_sql_execution' => "выполнения запросов: <strong>%.3f</strong> с",
 	'time_xml_execution' => "обработки XML: <strong>%.3f</strong> с",
+	'time_tpl_execution' => "обработки TPL: <strong>%.3f</strong> с",
 	'memory_usage' => "Использовано памяти: <strong>%.2f</strong> Мб.",
 	'number_of_queries' => "Количество запросов: <strong>%d</strong>.",
 	'compression' => 'Компрессия: <strong>%s</strong>.',

@@ -65,9 +65,6 @@
 
 		<xsl:variable name="n" select="$total div $limit"/>
 
-		<!-- Заносим в переменную $parent_group_id идентификатор текущей группы -->
-		<xsl:variable name="parent_group_id" select="/document/parent_group_id"/>
-
 		<!-- Links before current -->
 		<xsl:variable name="pre_count_page">
 			<xsl:choose>

@@ -71,4 +71,6 @@ return array(
 	'allowAccessChildren_success' => 'Доступ разрешен.',
 	'denyAccessChildren_success' => 'Доступ запрещен.',
 	'multiple' => 'Разрешить множественные значения для свойства',
+	'preserve_aspect_ratio' => 'Сохранять пропорции изображения',
+	'preserve_aspect_ratio_small' => 'Сохранять пропорции малого изображения',	
 );

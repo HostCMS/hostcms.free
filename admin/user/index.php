@@ -91,12 +91,16 @@ if (!is_null(Core_Array::getPost('remove_bookmark')) && Core_Array::getPost('boo
 
 	$oUser_Bookmark = $oUser->User_Bookmarks->getById($bookmark_id);
 
+	$message = 'Error';
+
 	if (!is_null($oUser_Bookmark))
 	{
 		$oUser_Bookmark->markDeleted();
+
+		$message = 'OK';
 	}
 
-	Core::showJson('OK');
+	Core::showJson($message);
 }
 
 if (!is_null(Core_Array::getPost('loadNavSidebarMenu')))

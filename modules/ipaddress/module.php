@@ -17,13 +17,13 @@ class Ipaddress_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-03-02';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name

@@ -110,6 +110,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected $_aInformationsystem_Groups = array();
 
 	/**
+	 * Get _aInformationsystem_Groups set
+	 * @return array
+	 */
+	public function getInformationsystemGroups()
+	{
+		return $this->_aInformationsystem_Groups;
+	}
+
+	/**
 	 * List of properties for item
 	 * @var array
 	 */
@@ -122,6 +131,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected $_aItem_Property_Dirs = array();
 
 	/**
+	 * Get _aItem_Properties set
+	 * @return array
+	 */
+	public function getItemProperties()
+	{
+		return $this->_aItem_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getItemPropertyDirs()
+	{
+		return $this->_aItem_Property_Dirs;
+	}
+
+	/**
 	 * List of properties for group
 	 * @var array
 	 */
@@ -132,6 +159,24 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * @var array
 	 */
 	protected $_aGroup_Property_Dirs = array();
+
+	/**
+	 * Get _aGroup_Properties set
+	 * @return array
+	 */
+	public function getGroupProperties()
+	{
+		return $this->_aGroup_Properties;
+	}
+
+	/**
+	 * Get _aGroup_Property_Dirs set
+	 * @return array
+	 */
+	public function getGroupPropertyDirs()
+	{
+		return $this->_aGroup_Property_Dirs;
+	}
 
 	/**
 	 * Information system's items object
@@ -430,6 +475,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->showPanel && Core::checkPanel() && $this->_showPanel();
 
+		$bXsl = !is_null($this->_xsl);
+
 		$this->item && $this->_incShowed();
 
 		$bCache = $this->cache && Core::moduleIsActive('cache');
@@ -528,12 +575,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			$Informationsystem_Group_Properties = Core::factory('Core_Xml_Entity')
-				->name('informationsystem_group_properties');
+			if ($bXsl)
+			{
+				$Informationsystem_Group_Properties = Core::factory('Core_Xml_Entity')
+					->name('informationsystem_group_properties');
 
-			$this->addEntity($Informationsystem_Group_Properties);
+				$this->addEntity($Informationsystem_Group_Properties);
 
-			$this->_addGroupsPropertiesList(0, $Informationsystem_Group_Properties);
+				$this->_addGroupsPropertiesList(0, $Informationsystem_Group_Properties);
+			}
 		}
 
 		is_array($this->groupsProperties) && $this->groupsProperties = array_combine($this->groupsProperties, $this->groupsProperties);
@@ -584,18 +634,30 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
-				->name('informationsystem_item_properties');
+			if ($bXsl)
+			{
+				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
+					->name('informationsystem_item_properties');
 
-			$this->addEntity($Informationsystem_Item_Properties);
+				$this->addEntity($Informationsystem_Item_Properties);
 
-			$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
+				$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
+			}
 		}
 
 		$this->_shownIDs = array();
 
+		if (!$bXsl)
+		{
+			$this->assign('controller', $this);
+			$this->assign('aInformationsystem_Items', array());
+		}
+
 		if ($this->limit > 0)
 		{
+			//Ярлык может ссылаться на элемент с истекшим или не наступившим сроком публикации
+			$iCurrentTimestamp = time();
+
 			foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 			{
 				$this->_shownIDs[] = $oInformationsystem_Item->id;
@@ -612,83 +674,85 @@ class Informationsystem_Controller_Show extends Core_Controller
 					$oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 				}
 
-				// Ярлык может ссылаться на отключенный элемент
-				$desiredActivity = strtolower($this->itemsActivity) == 'active'
-					? 1
-					: (strtolower($this->itemsActivity) == 'all' ? $oInformationsystem_Item->active : 0);
-
-				//Ярлык может ссылаться на элемент с истекшим или не наступившим сроком публикации
-				$iCurrentTimestamp = time();
-
 				$oInformationsystem_Item->clearEntities();
 
-				// ID оригинального ярлыка
-				if ($iShortcut)
+				if ($bXsl)
 				{
-					$oOriginal_Informationsystem_Item = $oInformationsystem_Item;
+					// Ярлык может ссылаться на отключенный элемент
+					$desiredActivity = strtolower($this->itemsActivity) == 'active'
+						? 1
+						: (strtolower($this->itemsActivity) == 'all' ? $oInformationsystem_Item->active : 0);
 
-					$oInformationsystem_Item = clone $oInformationsystem_Item;
-					$oInformationsystem_Item
-						->id($oOriginal_Informationsystem_Item->id)
-						->addForbiddenTag('shortcut_id')
-						->addForbiddenTag('informationsystem_group_id')
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('shortcut_id')
-								->value($oShortcut_Item->id)
-						)
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('informationsystem_group_id')
-								->value($oShortcut_Item->informationsystem_group_id)
-						);
-				}
-
-				if ($oInformationsystem_Item->id // Can be shortcut on markDeleted item
-					&& $oInformationsystem_Item->active == $desiredActivity
-					&& (!$iShortcut
-						|| (Core_Date::sql2timestamp($oInformationsystem_Item->end_datetime) >= $iCurrentTimestamp
-							|| $oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00')
-						&& (Core_Date::sql2timestamp($oInformationsystem_Item->start_datetime) <= $iCurrentTimestamp
-							|| $oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00')
-					)
-				)
-				{
-					$this->applyItemsForbiddenTags($oInformationsystem_Item);
-
-					// Comments
-					$oInformationsystem_Item
-						->showXmlComments($this->comments)
-						->commentsActivity($this->commentsActivity);
-
-					// Properties for informationsystem's item entity
-					$oInformationsystem_Item->showXmlProperties($this->itemsProperties);
-
-					// Tags
-					$oInformationsystem_Item->showXmlTags($this->tags);
-
-					// votes
-					$oInformationsystem_Item->showXmlVotes($this->votes);
-
-					// Siteuser
-					$oInformationsystem_Item
-						->showXmlSiteuser($this->siteuser)
-						->showXmlSiteuserProperties($this->siteuserProperties);
-
-					// <!-- pagebreak -->
-					if ($this->part || $this->item)
+					// ID оригинального ярлыка
+					if ($iShortcut)
 					{
-						$oInformationsystem_Item->showXmlPart($this->part);
+						$oOriginal_Informationsystem_Item = $oInformationsystem_Item;
+
+						$oInformationsystem_Item = clone $oInformationsystem_Item;
+						$oInformationsystem_Item
+							->id($oOriginal_Informationsystem_Item->id)
+							->addForbiddenTag('shortcut_id')
+							->addForbiddenTag('informationsystem_group_id')
+							->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('shortcut_id')
+									->value($oShortcut_Item->id)
+							)
+							->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('informationsystem_group_id')
+									->value($oShortcut_Item->informationsystem_group_id)
+							);
 					}
 
-					$this->addEntity($oInformationsystem_Item);
+					if ($oInformationsystem_Item->id // Can be shortcut on markDeleted item
+						&& $oInformationsystem_Item->active == $desiredActivity
+						&& (!$iShortcut
+							|| (Core_Date::sql2timestamp($oInformationsystem_Item->end_datetime) >= $iCurrentTimestamp
+								|| $oInformationsystem_Item->end_datetime == '0000-00-00 00:00:00')
+							&& (Core_Date::sql2timestamp($oInformationsystem_Item->start_datetime) <= $iCurrentTimestamp
+								|| $oInformationsystem_Item->start_datetime == '0000-00-00 00:00:00')
+						)
+					)
+					{
+						$this->applyItemsForbiddenTags($oInformationsystem_Item);
+
+						// Comments
+						$oInformationsystem_Item
+							->showXmlComments($this->comments)
+							->commentsActivity($this->commentsActivity);
+
+						// Properties for informationsystem's item entity
+						$oInformationsystem_Item->showXmlProperties($this->itemsProperties);
+
+						// Tags
+						$oInformationsystem_Item->showXmlTags($this->tags);
+
+						// votes
+						$oInformationsystem_Item->showXmlVotes($this->votes);
+
+						// Siteuser
+						$oInformationsystem_Item
+							->showXmlSiteuser($this->siteuser)
+							->showXmlSiteuserProperties($this->siteuserProperties);
+
+						// <!-- pagebreak -->
+						if ($this->part || $this->item)
+						{
+							$oInformationsystem_Item->showXmlPart($this->part);
+						}
+
+						$this->addEntity($oInformationsystem_Item);
+					}
+				}
+				else
+				{
+					$this->append('aInformationsystem_Items', $oInformationsystem_Item);
 				}
 			}
-		}
 
-		// Clear
-		$this->_aInformationsystem_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
-			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
+			unset($aInformationsystem_Items);
+		}
 
 		echo $content = $this->get();
 
@@ -698,6 +762,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_cacheName,
 			$aTags
 		);
+
+		// Clear
+		$this->_aInformationsystem_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
+			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
 		return $this;
 	}
@@ -712,13 +780,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 			->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
 			->where('id', '=', $this->item)
 			->execute();
-
-		/*$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item')->find($this->item);
-		if (!is_null($oInformationsystem_Item->id))
-		{
-			$oInformationsystem_Item->showed += 1;
-			$oInformationsystem_Item->save();
-		}*/
 
 		return $this;
 	}
@@ -1151,7 +1212,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
-		$this->_addGroupsByParentId(0, $this);
+		$bXsl = !is_null($this->_xsl);
+		if ($bXsl)
+		{
+			$this->_addGroupsByParentId(0, $this);
+		}
 
 		return $this;
 	}
@@ -1186,7 +1251,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			} while ($oInformationsystem_Group = $oInformationsystem_Group->getParent());
 		}
 
-		$this->_addGroupsByParentId(0, $this);
+		$bXsl = !is_null($this->_xsl);
+		if ($bXsl)
+		{
+			$this->_addGroupsByParentId(0, $this);
+		}
 
 		return $this;
 	}

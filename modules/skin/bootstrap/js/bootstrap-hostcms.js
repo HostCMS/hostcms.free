@@ -236,7 +236,7 @@
 			});
 		},
 		bookmarksPrepare: function (){
-			setInterval($.refreshBookmarksList, 1000);
+			setInterval($.refreshBookmarksList, 120000);
 
 			var jBookmarksListBox  = $('.navbar-account #bookmarksListBox');
 
@@ -382,7 +382,7 @@
 								<span class="description">' + oBookmark['href'] + '</span>\
 							</div>\
 							<div class="notification-extra">\
-								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + oBookmark['remove-title'] +'\', submit: \'' + oBookmark['remove-submit'] + '\', cancel: \'' + oBookmark['remove-cancel'] + '\', bookmark_id: ' + oBookmark['id'] + '})"></i>\
+								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + oBookmark['remove-title'] +'\', submit: \'' + oBookmark['remove-submit'] + '\', cancel: \'' + oBookmark['remove-cancel'] + '\', bookmark_id: ' + oBookmark['id'] + '}); event.stopPropagation(); event.preventDefault();"></i>\
 							</div>\
 						</div>\
 					</a>\
@@ -423,6 +423,7 @@
 							success: function (result) {
 								if (result.length)
 								{
+									$.removeLocalStorageItem('bookmarks');
 									$.refreshBookmarksList();
 
 									$('li#bookmarks > a').addClass('wave in');
@@ -469,9 +470,12 @@
 							dataType: 'json',
 							error: function(){},
 							success: function (result) {
-								if (result.length)
+								if (result.length && result == 'OK')
 								{
-									$('li#bookmark-' + settings.bookmark_id).remove();
+									// $('li#bookmark-' + settings.bookmark_id).remove();
+
+									$.removeLocalStorageItem('bookmarks');
+									$.refreshBookmarksList();
 								}
 							}
 						});
@@ -484,6 +488,12 @@
 					$('.delete-bookmark-btn').trigger('click');
 				}
 			});
+		},
+		removeLocalStorageItem: function(name) {
+			if (typeof localStorage !== 'undefined')
+			{
+				localStorage.removeItem(name);
+			}
 		},
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
@@ -551,26 +561,6 @@
 							saveFilterAs: true
 						}
 					});
-
-					/*$.loadingScreen('show');
-					//alert(object);
-
-					var FormNode = object.closest('form'),
-						data = { filterCaption: result, saveFilterAs: true },
-						path = FormNode.attr('action');
-
-					FormNode.ajaxSubmit({
-						data: data,
-						//context: jQuery('#'+settings.windowId),
-						url: path,
-						type: 'POST',
-						dataType: 'json',
-						cache: false,
-						success: function(data, status, jqXHR) {
-							alert(data.toSource());
-							$.loadingScreen('hide');
-						}
-					});*/
 				}
 			});
 		},
@@ -589,7 +579,6 @@
 				dataType: 'json',
 				cache: false,
 				success: function(data, status, jqXHR) {
-					//alert(data.toSource());
 					$.loadingScreen('hide');
 				}
 			});
@@ -2701,7 +2690,6 @@
 						});
 
 						$.ajax({
-							//context: textarea,
 							url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=3',
 							type: 'POST',
 							data: ajaxData,
@@ -2726,7 +2714,6 @@
 			ajaxData['eventStatusId'] = jEventStatus.prop('id');
 
 			$.ajax({
-				//context: textarea,
 				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=2',
 				type: 'POST',
 				data: ajaxData,
@@ -2784,7 +2771,6 @@
 									var ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId});
 
 									$.ajax({
-
 										url: '/admin/calendar/index.php?eventDelete',
 										type: "POST",
 										dataType: 'json',
@@ -3178,7 +3164,8 @@
 
 			$("body").on("click", ".deal-steps li", function (){
 				// Идентификатор этапа сделки
-				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0;
+				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0,
+					dealTemplateStepName;				
 
 				if (dealTemplateStepId)
 				{
@@ -3186,7 +3173,7 @@
 					var dealTemplateSteps = $(this).parent('.deal-steps'),
 						dealId = dealTemplateSteps.data('deal-id');
 
-					if (dealTemplateSteps.data('change-by-click') && $(this).children('a.available'))
+					if (dealTemplateSteps.data('change-by-click') && $(this).children('a.available').length)
 					{
 						$('#id_content #row_0_' + dealId).toggleHighlight();
 						$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
@@ -3194,26 +3181,61 @@
 					}
 					// При редактировании сделки
 					else
-					{
-						if ($(this).children('a.available') || $(this).children('a.current'))
-						{
-							dealTemplateSteps.parent('div').next('[name="deal_template_step_id"]').val(dealTemplateStepId);
-
-							$('a.current', dealTemplateSteps).each(function(){
-								$(this).removeClass('current')
+					{						
+						if ($(this).children('a.available').length)
+						{	
+							$('a.clear-next', dealTemplateSteps).each(function(){
+								$(this).removeClass('clear-next')
 							});
+					
+							// Нажали на шаг уже отмеченный как "следующий",
+							// снимаем отметку для перехода
+							if ($(this).children('a').hasClass('next'))
+							{
+								//$(this).children('a').removeClass('next');
+								$(this).children('a').toggleClass('next clear-next');
+								
+								dealTemplateStepId = parseInt($(this).parent('.deal-steps').data('stepId'));
+																
+								dealTemplateStepName = $(this).parent('.deal-steps').find('li#deal_template_step_' + dealTemplateStepId + ' a').prop('title');
+							}
+							else
+							{
+								dealTemplateStepName = $(this).children('a').prop('title');
 
-							$(this).children('a.available') && $(this).children('a').addClass('current');
+								$('a.next', dealTemplateSteps).each(function(){
+									$(this).removeClass('next')
+								});
 
-							$('.deal-template-step-name.deal-template-step-name-inner').text($(this).children('a').prop('title'));
+								$(this).children('a.available') && $(this).children('a').addClass('next').removeClass('clear-next');
+							}
+							
+							dealTemplateSteps.parent('div').next('[name="deal_template_step_id"]').val(dealTemplateStepId);
+							$('.deal-template-step-name.deal-template-step-name-inner').text(dealTemplateStepName);
 						}
 					}
 				}
 			})
+			.on('mouseover', '.deal-steps li a.available:not(.current):not(.next)',  function (){
+												
+				$(this)
+					.parents('.deal-steps')
+					.find('li a.next')
+					.toggleClass('next clear-next');				
+			})
+			.on('mouseout', '.deal-steps li a.available:not(.current):not(.next)',  function (){						
+								
+				$(this)
+					.removeClass('clear-next')
+					.parents('.deal-steps')
+					.find('li a.clear-next')
+					.toggleClass('next clear-next');
+				
+			})
 			// Добавление дела(события) к сделке
 			.on('click', '[id = "addDealEvent"]', function (){
 
-				console.log('!!! click addDealEvent = ', $(this).data('dealId'));
+				//console.log('!!! click addDealEvent = ', $(this).data('dealId'));
 
 				var dealId = $(this).data('dealId');
 
@@ -3507,6 +3529,7 @@ $(function(){
 
 			return false;
 		})
+		// Удаление перехода сделки
 		.on('click', '[id ^= "conversion_"] .close', function() {
 
 			var wrapConversion = $(this).parent('[id ^="conversion_"]'), startAndEndStepId = wrapConversion.attr('id').split('_'), conversionStartStepId = startAndEndStepId[1], conversionEndStepId = startAndEndStepId[2];
@@ -3969,4 +3992,4 @@ function setEventStartButtons(start, windowId)
 			$('#' + windowId + ' #eventStartButtonsGroup a.active').removeClass("active");
 		}
 	}
-}
+}

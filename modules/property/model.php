@@ -65,6 +65,26 @@ class Property_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
+		'list_id',
+		'informationsystem_id',
+		'shop_id',
+		'guid',
+		'image_large_max_width',
+		'image_large_max_height',
+		'image_small_max_width',
+		'image_small_max_height',
+		'hide_small_image',
+		'preserve_aspect_ratio',
+		'preserve_aspect_ratio_small'
+	);
+
+	/**
 	 * Default sorting for models
 	 * @var array
 	 */
@@ -90,7 +110,9 @@ class Property_Model extends Core_Entity
 		'default_value' => '',
 		'hide_small_image' => 0,
 		'sorting' => 0,
-		'multiple' => 1
+		'multiple' => 1,
+		'preserve_aspect_ratio' => 1,
+		'preserve_aspect_ratio_small' => 1
 	);
 
 	/**
@@ -378,14 +400,14 @@ class Property_Model extends Core_Entity
 
 		$this->clearXmlTags();
 
-		if ($this->type != 2)
+		/*if ($this->type != 2)
 		{
 			$this->addForbiddenTag('image_large_max_width')
 				->addForbiddenTag('image_large_max_height')
 				->addForbiddenTag('image_small_max_width')
 				->addForbiddenTag('image_small_max_height')
 				->addForbiddenTag('hide_small_image');
-		}
+		}*/
 
 		// List
 		if ($bIsList)

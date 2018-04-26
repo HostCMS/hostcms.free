@@ -31,6 +31,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		'template_id', // ID макета для визуального редактора
 		'syntaxHighlighter',
 		'syntaxHighlighterOptions',
+		'wysiwygOptions',
 	);
 
 	/**
@@ -39,6 +40,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 	 */
 	protected $_allowedProperties = array(
 		'wysiwyg',
+		'wysiwygOptions',
 		'syntaxHighlighter',
 		'syntaxHighlighterOptions'
 	);
@@ -159,7 +161,9 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				$lng = Core_I18n::instance()->getLng();
 
-				$this->_init = Core_Config::instance()->get('core_wysiwyg');
+				$this->_init = is_null($this->wysiwygOptions)
+					? Core_Config::instance()->get('core_wysiwyg')
+					: $this->wysiwygOptions;
 
 				// add
 				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";

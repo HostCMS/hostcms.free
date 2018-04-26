@@ -463,6 +463,15 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->_externalReplace[$key] = $value;
 		return $this;
 	}
+	
+	/**
+	* Get external replacement
+	* @return array
+	*/
+	public function getExternalReplace()
+	{
+		return $this->_externalReplace;
+	}
 
 	/**
 	 * Get Admin_Form
@@ -776,23 +785,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Action name
-	 * @var string
-	 */
-	//protected $_action = NULL;
-
-	/**
-	 * Set action
-	 * @param string $action action
-	 * @return self
-	 */
-	/*public function action($action)
-	{
-		$this->action = $action;
-		return $this;
-	}*/
-
-	/**
 	 * Get action
 	 * @return string
 	 */
@@ -800,22 +792,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		return $this->action;
 	}
-
-	/**
-	 * Action's operation e.g. "save" or "apply"
-	 */
-	//protected $_operation = NULL;
-
-	/**
-	 * Set operation
-	 * @param string $operation operation
-	 * @return self
-	 */
-	/*public function operation($operation)
-	{
-		$this->operation = $operation;
-		return $this;
-	}*/
 
 	/**
 	 * Get operation
@@ -1166,7 +1142,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 								if (!$bAccessToObject)
 								{
 									throw new Core_Exception(
-										Core::_('User_Module.error_object_owned_another_user'), array(), 0, FALSE
+										Core::_('User.error_object_owned_another_user'), array(), 0, FALSE
 									);
 								}
 
@@ -1326,7 +1302,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		Core::factory('Core_Html_Entity_Script')
 			->type("text/javascript")
 			->value("(function($){
-				//$('#{$windowId} table.admin_table .admin_table_filter :input').on('keydown', $.filterKeyDown);
 				$('#{$windowId} table .admin_table_filter :input').on('keydown', $.filterKeyDown);
 			})(jQuery);")
 			->execute();
@@ -1465,7 +1440,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * @return string
 	 */
 	public function getAdminActionLoadAjax($path, $action, $operation, $datasetKey, $datasetValue,
-		$additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL)
+		$additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
 	{
 		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
 		$datasetKey = Core_Str::escapeJavascriptVariable($this->jQueryEscape($datasetKey));
@@ -1473,7 +1448,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		return "$('#{$windowId} #row_{$datasetKey}_{$datasetValue}').toggleHighlight(); "
 			. "$.adminCheckObject({objectId: 'check_{$datasetKey}_{$datasetValue}', windowId: '{$windowId}'}); "
-			. $this->getAdminLoadAjax($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection);
+			. $this->getAdminLoadAjax($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection, $view);
 	}
 
 	/**
@@ -1561,6 +1536,28 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aData[] = "windowId: '{$windowId}'";
 
 		return "$.adminLoad({" . implode(',', $aData) . "}); return false";
+	}
+
+	public function showSettings()
+	{
+		$aTmp = array();
+		$aTmp[] = "path:'" . Core_Str::escapeJavascriptVariable($this->_path) . "'";
+		$aTmp[] = "action:'" . Core_Str::escapeJavascriptVariable($this->action) . "'";
+		$aTmp[] = "operation:'" . Core_Str::escapeJavascriptVariable($this->operation) . "'";
+		$aTmp[] = "additionalParams:'" . Core_Str::escapeJavascriptVariable($this->additionalParams) . "'";
+		$aTmp[] = "limit:'" . Core_Str::escapeJavascriptVariable($this->limit) . "'";
+		$aTmp[] = "current:'" . Core_Str::escapeJavascriptVariable($this->current) . "'";
+		$aTmp[] = "sortingFieldId:'" . Core_Str::escapeJavascriptVariable($this->sortingFieldId) . "'";
+		$aTmp[] = "sortingDirection:'" . Core_Str::escapeJavascriptVariable($this->sortingDirection) . "'";
+		$aTmp[] = "view:'" . Core_Str::escapeJavascriptVariable($this->view) . "'";
+		$aTmp[] = "windowId:'" . Core_Str::escapeJavascriptVariable($this->windowId) . "'";
+
+		?><script type="text/javascript">//<![CDATA[
+var _windowSettings={<?php echo implode(',', $aTmp)?>}
+//]]></script>
+		<?php
+
+		return $this;
 	}
 
 	/**
@@ -1738,7 +1735,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		is_null($view) && $view = $this->view;
 		$aData[] = "view: '{$view}'";
-		
+
 		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
 		$aData[] = "windowId: '{$windowId}'";
 

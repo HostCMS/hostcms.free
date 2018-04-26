@@ -148,7 +148,7 @@ $sShopPath = '/admin/shop/item/index.php';
 
 if ($oShop->id)
 {
-	// Ссылка на название ИС
+	// Ссылка на название магазина
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShop->name)
@@ -200,14 +200,14 @@ if ($oShop_Item->modification_id)
 {
 	// Крошка на текущую форму
 	$oAdmin_Form_Entity_Breadcrumbs->add(
-	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_("Shop_Item.item_modification_title", $oShop_Item->Modification->name))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-					'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-					'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
-	))
+		Admin_Form_Entity::factory('Breadcrumb')
+			->name(Core::_("Shop_Item.item_modification_title", $oShop_Item->Modification->name))
+			->href($oAdmin_Form_Controller->getAdminLoadHref(
+				'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
+			))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
+				'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
+			))
 	);
 }
 
@@ -282,7 +282,6 @@ if ($comment_parent_id)
 	}
 }
 
-// Добавляем все хлебные крошки контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования

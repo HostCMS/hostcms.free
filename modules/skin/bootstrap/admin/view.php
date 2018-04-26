@@ -80,7 +80,6 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 	public function showTitle()
 	{
 		$title = !is_null($this->module)
-			//&& method_exists($this->module, 'getMenu') // Убрать в обновлении 6.8.0
 			&& ($aMenu = $this->module->getMenu())
 			&& isset($aMenu[0])
 			? Core_Array::get($aMenu[0], 'name')
@@ -106,14 +105,17 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$sPagePath = strval(Core_Array::get($_SERVER,'REQUEST_URI'));
 
 				$oUser = Core_Entity::factory('User')->getCurrent();
-				$oUser_Bookmark = $oUser->User_Bookmarks->getByPath($sPagePath);
+				$oUser_Bookmark = isset($oUser->User_Bookmarks)
+					// Удалить isset в 6.8.1
+					? $oUser->User_Bookmarks->getByPath($sPagePath)
+					: NULL;
 				$class = !is_null($oUser_Bookmark) ? 'active' : '';
 
 				?><div class="header-buttons">
 					<a href="#" class="sidebar-toggler">
 						<i class="fa fa-arrows-h"></i>
 					</a>
-					<a href="" id="refresh-toggler" class="refresh">
+					<a href="#" id="refresh-toggler" class="refresh">
 						<i class="glyphicon glyphicon-refresh"></i>
 					</a>
 					<a href="#" id="fullscreen-toggler" class="fullscreen">
@@ -143,7 +145,6 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 			if (strlen($this->pageTitle))
 			{
 				$ico = !is_null($this->module)
-					&& method_exists($this->module, 'getMenu') // Убрать в обновлении 6.8.0
 					&& ($aMenu = $this->module->getMenu())
 					&& isset($aMenu[0])
 					? Core_Array::get($aMenu[0], 'ico', 'fa-barcode')

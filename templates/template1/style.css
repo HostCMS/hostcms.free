@@ -4,7 +4,7 @@ body {
   min-width: 936px;
   font-family: Arial;
   font-size: 10pt;
-  color: #3b3b3b;
+  color: #333333;
 }
 @font-face {
   font-family: 'Open Sans Condensed';
@@ -209,6 +209,7 @@ ol.search li a {
   text-align: center;
   font-weight: bold;
 }
+.top_menu li:last-child { background-image: none; }
 .top_menu a:hover,
 .top_menu a {
   color: #FFF;

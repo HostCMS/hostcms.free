@@ -111,10 +111,12 @@ class User_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
-		'~email',
+		'deleted',
+		'user_id',
+		/*'~email',
 		'~icq',
 		'~site',
-		'~position'
+		'~position'*/
 	);
 
 	/**
@@ -227,10 +229,9 @@ class User_Model extends Core_Entity
 			}
 
 			$aCompany_Departments = $this->Company_Departments->findAll();
-
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
-				$access = $oCompany_Department/*->User_Group*/->issetModuleAccess(
+				$access = $oCompany_Department->issetModuleAccess(
 					$oModule, $oSite
 				);
 

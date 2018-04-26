@@ -13,9 +13,20 @@ Core_Auth::authorization('shop');
 
 $sAdminFormAction = '/admin/shop/order/card/index.php';
 
-$oShop_Order = Core_Entity::factory('Shop_Order', Core_Array::getGet('shop_order_id', 0));
+$shop_order_id = intval(Core_Array::getGet('shop_order_id'));
+
+$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+
+if (is_null($oShop_Order))
+{
+	throw new Core_Exception('Shop_Order does not exist');
+}
+
 $oShop = $oShop_Order->Shop;
-$oCompany = $oShop->Shop_Company;
+
+$oCompany = $oShop_Order->company_id
+	? $oShop_Order->Shop_Company
+	: $oShop->Shop_Company;
 
 $aFullAddress = array(
 	trim($oShop_Order->postcode),
@@ -113,7 +124,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 		}
 
 		$oShop
-			// ->addEntity($oShop->Shop_Company->clearEntities())
+			// ->addEntity($oCompany->clearEntities())
 			->addEntity(
 				$oShop->Site->clearEntities()->showXmlAlias()
 			)
@@ -171,6 +182,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 }
 else
 {
+	
 	?>
 	<p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p>
 
@@ -181,7 +193,7 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oShop->Shop_Company->name)?>
+					<?php echo htmlspecialchars($oCompany->name)?>
 				</b>
 			</td>
 		</tr>

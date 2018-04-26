@@ -65,6 +65,22 @@ class Informationsystem_Group_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
+		'seo_group_title_template',
+		'seo_group_keywords_template',
+		'seo_group_description_template',
+		'seo_item_title_template',
+		'seo_item_keywords_template',
+		'seo_item_description_template'
+	);
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -236,7 +252,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		$offset > 0
 			&& $aParentGroups = array_slice($aParentGroups, $offset);
-		
+
 		$sParents = implode($separator, array_reverse($aParentGroups));
 
 		return $sParents;
@@ -880,7 +896,6 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function indexing()
 	{
-		//$oSearch_Page = Core_Entity::factory('Search_Page');
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
@@ -898,7 +913,7 @@ class Informationsystem_Group_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem
@@ -924,6 +939,11 @@ class Informationsystem_Group_Model extends Core_Entity
 						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 					}
 				}
+			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)

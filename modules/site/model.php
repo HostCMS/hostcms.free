@@ -31,8 +31,20 @@ class Site_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'robots',
 		'key',
+		'error',
+		'error404',
+		'error403',
+		'closed',
+		'safe_email',
+		'css_left',
+		'css_right',
+		'notes',
+		'uploaddir',
+		'nesting_level',
 		'html_cache_use',
 		'html_cache_with',
 		'html_cache_without',

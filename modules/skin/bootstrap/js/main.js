@@ -310,7 +310,7 @@ function isEmpty(str) {
 					var pjax = window.history && window.history.pushState && window.history.replaceState /*&& !navigator.userAgent.match(/(WebApps\/.+CFNetwork)/)*/;
 
 					/*if (settings.windowId == 'id_content'){*/
-					if (pjax)
+					if (pjax && settings.windowId == 'id_content')
 					{
 						var state = {
 							windowId: settings.windowId,

@@ -35,6 +35,7 @@ return array(
 	'show_order_status' => '<acronym title="Статус заказа">Статус заказа</acronym>',
 	'print' => "Печать",
 	'order_card' => "Карточка заказа",
+	'company_id' => 'Организация продавца',
 	'status_datetime' => '<acronym title="Дата-время именения статуса заказа">Дата изменения статуса заказа</acronym>',
 	'ip' => '<acronym title="IP-адрес заказчика">IP-адрес заказчика</acronym>',
 	'type_of_delivery' => "<acronym title=\"Типы доставок\">Типы доставок</acronym>",

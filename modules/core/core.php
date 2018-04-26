@@ -215,6 +215,9 @@ class Core
 		foreach ($aModules as $oModule)
 		{
 			self::$modulesList[$oModule->path] = $oModule;
+			
+			// Call module's __construct()
+			$oModule->active && $oModule->loadModule();
 		}
 
 		Core_Event::notify('Core.onAfterLoadModuleList');

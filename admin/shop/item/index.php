@@ -64,6 +64,91 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 }
 
 if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_move_groups'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+
+	$oShop = Core_Entity::factory('Shop', $entity_id);
+
+	strlen(Core_Array::getGet('exclude')) && $aExcludeTmp = json_decode(Core_Array::getGet('exclude'), TRUE);
+
+	$aExclude = is_array($aExcludeTmp)
+		? $aExcludeTmp
+		: array();
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Shop_Item.root') . ' [0]'
+		);
+
+		$oShop_Groups = $oShop->Shop_Groups;
+		$oShop_Groups->queryBuilder()
+			->where('shop_groups.id', 'NOT IN', $aExclude)
+			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10);
+
+		$aShop_Groups = $oShop_Groups->findAll();
+
+		foreach ($aShop_Groups as $oShop_Group)
+		{
+			$aJSON[] = array(
+				'id' => $oShop_Group->id,
+				'label' => $oShop_Group->name . " [" . $oShop_Group->id . "]"
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_shortcut_groups'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+
+	$oShop = Core_Entity::factory('Shop', $entity_id);
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Shop_Item.root') . ' [0]'
+		);
+
+		$oShop_Groups = $oShop->Shop_Groups;
+		$oShop_Groups->queryBuilder()
+			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10);
+
+		$aShop_Groups = $oShop_Groups->findAll();
+
+		foreach ($aShop_Groups as $oShop_Group)
+		{
+			$aJSON[] = array(
+				'id' => $oShop_Group->id,
+				'label' => $oShop_Group->name . " [" . $oShop_Group->id . "]"
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('show_modification'))
 	&& !is_null(Core_Array::getGet('queryString'))
 )
@@ -646,8 +731,18 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'shortcut' && $oEditActi
 	$oShortcutController
 		->title(Core::_('Shop_Item.shortcut_creation_window_caption'))
 		->selectCaption(Core::_('Shop_Item.add_item_shortcut_shop_groups_id'))
-		->selectOptions(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
 		->value($oShopGroup->id);
+
+	$iCount = $oShop->Shop_Groups->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$oShortcutController->selectOptions(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id));
+	}
+	else
+	{
+		$oShortcutController->autocomplete(TRUE);
+	}
 
 	$oAdmin_Form_Controller->addAction($oShortcutController);
 }
@@ -720,28 +815,39 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
 	);
 
-	$aExclude = array();
-
-	$aChecked = $oAdmin_Form_Controller->getChecked();
-
-	foreach ($aChecked as $datasetKey => $checkedItems)
-	{
-		// Exclude just dirs
-		if ($datasetKey == 0)
-		{
-			foreach ($checkedItems as $key => $value)
-			{
-				$aExclude[] = $key;
-			}
-		}
-	}
-
 	$Admin_Form_Action_Controller_Type_Move
 		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
 		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
-		// Список директорий генерируется другим контроллером
-		->selectOptions(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id, 0, $aExclude))
 		->value($oShopGroup->id);
+
+	$iCount = $oShop->Shop_Groups->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$aExclude = array();
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			// Exclude just dirs
+			if ($datasetKey == 0)
+			{
+				foreach ($checkedItems as $key => $value)
+				{
+					$aExclude[] = $key;
+				}
+			}
+		}
+
+		$Admin_Form_Action_Controller_Type_Move
+			// Список директорий генерируется другим контроллером
+			->selectOptions(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id, 0, $aExclude));
+	}
+	else
+	{
+		$Admin_Form_Action_Controller_Type_Move->autocomplete(TRUE);
+	}
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);

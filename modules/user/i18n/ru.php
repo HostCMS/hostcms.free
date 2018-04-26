@@ -87,4 +87,5 @@ return array(
 	'view_socials' => 'Социальные сети',
 	'view_messengers' => 'Мессенджеры',
 	'view_websites' => 'Сайты',
+	'error_object_owned_another_user' => 'Объект принадлежит другому пользователю, доступ запрещен.',
 );

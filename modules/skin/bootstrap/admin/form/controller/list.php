@@ -24,7 +24,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$oAdmin_View = Admin_View::create()
+		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
@@ -92,6 +92,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		$oAdmin_Form_Controller->applyEditable();
 		
+		$oAdmin_Form_Controller->showSettings();
+		
 		return $this;
 	}
 
@@ -115,7 +117,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		{
 			$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')
 				->class('btn btn-sm btn-default margin-right-10')
-				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: \'' . $path . '\', show: + $(".topFilter").is(":visible") })')
+				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: \'' . $path . '\', show: +$(".topFilter").is(":visible") })')
 				->add(
 					Core::factory('Core_Html_Entity_I')
 						->class('fa fa-filter no-margin')
@@ -156,7 +158,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				if ($sShowNavigation)
 				{
 					?><div class="col-xs-12 col-sm-6 col-md-4">
-						<?php $this->pageNavigation()?>
+						<?php $oAdmin_Form_Controller->pageNavigation()?>
 					</div><?php
 				}
 				?>
@@ -166,219 +168,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		return $this;
 	}
 
-	protected $_pageNavigationDelta = 2;
 
-	/**
-	 * Показ строки ссылок
-	 * @return self
-	 */
-	public function pageNavigation()
-	{
-		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
-		
-		$total_count = $oAdmin_Form_Controller->getTotalCount();
-		$total_page = $total_count / $oAdmin_Form_Controller->limit;
-
-		// Округляем в большую сторону
-		if ($total_count % $oAdmin_Form_Controller->limit != 0)
-		{
-			$total_page = intval($total_page) + 1;
-		}
-
-		// Отображаем строку ссылок, если общее число страниц больше 1.
-		if ($total_page > 1)
-		{
-			$oAdmin_Form_Controller->current > $total_page && $oAdmin_Form_Controller->current = $total_page;
-
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-				->class('dataTables_paginate paging_bootstrap');
-
-			$oCore_Html_Entity_Ul = Core::factory('Core_Html_Entity_Ul')
-				->class('pagination');
-
-			$oCore_Html_Entity_Div->add($oCore_Html_Entity_Ul);
-
-			// Ссылка на предыдущую страницу
-			$page = $oAdmin_Form_Controller->current - 1 ? $oAdmin_Form_Controller->current - 1 : 1;
-
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
-			$oCore_Html_Entity_Li
-				->class('prev' . ($oAdmin_Form_Controller->current == 1 ? ' disabled' : ''))
-				->add(
-					$oCore_Html_Entity_A
-						->id('id_prev')
-						->add(Admin_Form_Entity::factory('Code')
-							->html('<i class="fa fa-angle-left"></i>')
-						)
-				);
-
-			if ($oAdmin_Form_Controller->current != 1)
-			{
-				$oCore_Html_Entity_A
-					->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $page))
-					->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $page));
-			}
-
-			// Определяем номер ссылки, с которой начинается строка ссылок.
-			$link_num_begin = ($oAdmin_Form_Controller->current - $this->_pageNavigationDelta < 1)
-				? 1
-				: $oAdmin_Form_Controller->current - $this->_pageNavigationDelta;
-
-			// Определяем номер ссылки, которой заканчивается строка ссылок.
-			$link_num_end = $oAdmin_Form_Controller->current + $this->_pageNavigationDelta;
-			$link_num_end > $total_page && $link_num_end = $total_page;
-
-			// Определяем число ссылок выводимых на страницу.
-			$count_link = $link_num_end - $link_num_begin + 1;
-
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
-			$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
-
-			if ($oAdmin_Form_Controller->current == 1)
-			{
-				$oCore_Html_Entity_Li->class('active');
-
-				$oCore_Html_Entity_A
-					->class('current')
-					->value($link_num_begin);
-			}
-			else
-			{
-				$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, 1);
-				$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, 1);
-
-				$oCore_Html_Entity_A
-					->href($href)
-					->onclick($onclick)
-					//->class('page_link')
-					->value(1);
-
-				// Выведем … со ссылкой на 2-ю страницу, если показываем с 3-й
-				if ($link_num_begin > 1)
-				{
-					$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, 2);
-					$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, 2);
-
-					$oCore_Html_Entity_A
-						->href($href)
-						->onclick($onclick)
-						//->class('page_link')
-						->value('…');
-				}
-			}
-
-			// Страница не является первой и не является последней.
-			for ($i = 1; $i < $count_link - 1; $i++)
-			{
-				$link_number = $link_num_begin + $i;
-
-				$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-				$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-
-
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
-					->value($link_number);
-				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
-
-				if ($link_number == $oAdmin_Form_Controller->current)
-				{
-					// Страница является текущей
-					$oCore_Html_Entity_Li->class('active');
-				}
-				else
-				{
-					$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $link_number);
-					$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $link_number);
-
-					$oCore_Html_Entity_A
-						->href($href)
-						->onclick($onclick);
-				}
-			}
-
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-
-			// Если последняя страница является текущей
-			if ($oAdmin_Form_Controller->current == $total_page)
-			{
-				$oCore_Html_Entity_Li->class('active');
-
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
-					->value($total_page);
-
-				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
-			}
-			else
-			{
-				// Выведем … со ссылкой на предпоследнюю страницу
-				if ($link_num_end < $total_page)
-				{
-					$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $total_page - 1);
-					$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $total_page - 1);
-
-					$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A')
-						->href($href)
-						->onclick($onclick)
-						->value('…');
-
-					$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
-				}
-
-				$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $total_page);
-				$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $total_page);
-
-				$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
-
-				// Последняя страница не является текущей
-				$oCore_Html_Entity_A
-					->href($href)
-					->onclick($onclick)
-					->value($total_page);
-
-				$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-				$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-				$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
-			}
-
-			// Формируем скрытые ссылки навигации для перехода по Ctrl + стрелка
-			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li');
-			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
-
-			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
-
-			// Ссылка на следующую страницу
-			$page = $oAdmin_Form_Controller->current + 1 ? $oAdmin_Form_Controller->current + 1 : 1;
-			$oCore_Html_Entity_Li
-				->class('next' . ($oAdmin_Form_Controller->current == $total_page ? ' disabled' : ''))
-				->add(
-					$oCore_Html_Entity_A
-						->id('id_next')
-						->add(Admin_Form_Entity::factory('Code')
-								->html('<i class="fa fa-angle-right"></i>')
-							)
-				);
-
-			if ($oAdmin_Form_Controller->current != $total_page)
-			{
-				$oCore_Html_Entity_A
-					->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $page))
-					->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, NULL, NULL, $page));
-			}
-
-			$oCore_Html_Entity_Div->execute();
-		}
-
-		return $this;
-	}
-	
 	protected function _showContent()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
@@ -508,7 +298,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									?>
 									<div class="form-group text-align-right">
 										<div class="col-sm-offset-2 col-sm-10">
-											<button type="submit" class="btn btn-default" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>; return false"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
+										
+											<button type="submit" class="btn btn-default" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
 
 											<div class="btn-group">
 												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">

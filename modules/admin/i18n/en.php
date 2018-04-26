@@ -41,6 +41,7 @@ return array(
 	'index_tech_date_gd' => 'GD version: ',
 	'index_tech_date_pcre' => 'PCRE version: ',
 	'index_tech_date_mb' => 'Multibyte String: ',
+	'index_tech_date_mb_overload' => 'MbString Overload: ',
 	'index_tech_date_json' => 'JSON: ',
 	'index_tech_date_simplexml' => 'SimpleXML:',
 	'index_tech_date_iconv' => 'Iconv:',

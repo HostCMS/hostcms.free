@@ -197,17 +197,17 @@ class Informationsystem_Item_Property_List_Model extends Informationsystem_Model
 	 * Preserve aspect ratio of large image
 	 * @return int
 	 */
-	public function preserveAspectRatioOfLargeImage()
+	/*public function preserveAspectRatioOfLargeImage()
 	{
 		return $this->preserve_aspect_ratio;
-	}
+	}*/
 
 	/**
 	 * Preserve aspect ratio of small image
 	 * @return int
 	 */
-	public function preserveAspectRatioOfSmallImage()
+	/*public function preserveAspectRatioOfSmallImage()
 	{
 		return $this->preserve_aspect_ratio_small;
-	}
+	}*/
 }

@@ -505,22 +505,45 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 	protected function _getPropertyValue($oProperty, $oProperty_Value, $object)
 	{
-		return $oProperty->type != 2
-			? ($oProperty->type == 3 /*&& $oProperty_Value->value != 0 && Core::moduleIsActive('list')*/
-				? $this->_getListValue($oProperty_Value->value) /*$oProperty_Value->List_Item->value*/
-				: ($oProperty->type == 8
-					? Core_Date::sql2date($oProperty_Value->value)
-					: ($oProperty->type == 9
-						? Core_Date::sql2datetime($oProperty_Value->value)
-						: $oProperty_Value->value
-					)
-				)
-			)
-			: (
-				$oProperty_Value->file == ''
+		switch ($oProperty->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 4: // Textarea
+			case 6: // Wysiwyg
+			case 7: // Checkbox
+			case 10: // Hidden field
+			case 11: // Float
+			default:
+				$result = $oProperty_Value->value;
+			break;
+			case 2: // File
+				$result = $oProperty_Value->file == ''
 					? ''
-					: $oProperty_Value->setHref($object->getItemHref())->getLargeFileHref()
-			);
+					: $oProperty_Value->setHref($object->getItemHref())->getLargeFileHref();
+			break;
+			case 3: // List
+				$result = $this->_getListValue($oProperty_Value->value);
+			break;
+			case 5: // Informationsystem
+				$result = $oProperty_Value->value
+					? $oProperty_Value->Informationsystem_Item->name
+					: '';
+			break;
+			case 8: // Date
+				$result = Core_Date::sql2date($oProperty_Value->value);
+			break;
+			case 9: // Datetime
+				$result = Core_Date::sql2datetime($oProperty_Value->value);
+			break;
+			case 12: // Shop
+				$result = $oProperty_Value->value
+					? $oProperty_Value->Shop_Item->name
+					: '';
+			break;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -1006,45 +1029,14 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 						foreach ($aCheckedProperties as $oProperty)
 						{
-							$aPropertyValues = $oProperty->getValues($oShop_Order_Item->Shop_Item->id, FALSE);
+							$oShop_Item = $oShop_Order_Item->Shop_Item;
+							$aPropertyValues = $oProperty->getValues($oShop_Item->id, FALSE);
 
 							if (count($aPropertyValues))
 							{
-								switch ($oProperty->type)
-								{
-									case 0: // Int
-									case 1: // String
-									case 4: // Textarea
-									case 6: // Wysiwyg
-									case 7: // Checkbox
-									case 10: // Hidden field
-									case 11: // Float
-										$this->_aCurrentRow[] = sprintf('"%s"', $this->prepareString($aPropertyValues[0]->value));
-									break;
-									case 3: // List
-										if (Core::moduleIsActive('list'))
-										{
-											$oListItems = $oProperty->List->List_Items->getById($aPropertyValues[0]->value);
-
-											$this->_aCurrentRow[] = !is_null($oListItems)
-												? sprintf('"%s"', $this->prepareString($oListItems->value))
-												: '""';
-										}
-									break;
-									case 8: // Date
-										$this->_aCurrentRow[] = sprintf('"%s"', $this->prepareString(
-											Core_Date::sql2date($aPropertyValues[0]->value)
-										));
-									break;
-									case 9: // Datetime
-										$this->_aCurrentRow[] = sprintf('"%s"', $this->prepareString(
-											Core_Date::sql2datetime($aPropertyValues[0]->value)
-										));
-									break;
-									case 2: // File
-									default:
-										$this->_aCurrentRow[] = '""';
-								}
+								$oProperty_Value = $aPropertyValues[0];
+								
+								$this->_aCurrentRow[] = sprintf('"%s"', $this->prepareString($this->_getPropertyValue($oProperty, $oProperty_Value, $oShop_Item)));
 							}
 							else
 							{

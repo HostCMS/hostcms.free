@@ -33,7 +33,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem.show_comments_link3'))
-		->icon('fa fa-tasks')
+		->icon('fa fa-newspaper-o')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem.show_information_systems_link'))

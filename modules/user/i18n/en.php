@@ -82,4 +82,5 @@ return array(
 	'wallpaper' => 'Wallpaper',
 	'choosing_site' => 'Site choosing',	
 	'ua_show_user_form_events_access_title' => 'Доступ к событиям формы "%s"',	
+	'error_object_owned_another_user' => 'Object belongs to another user, access denied.',
 );

@@ -71,7 +71,7 @@
 					<table  rules="none" border="0" cellspacing="0" cellpadding="0" width="100%">
 						<tr>
 							<td>
-							<font size="2"><b><xsl:value-of select="/shop/shop_company/name"/></b></font>
+							<font size="2"><b><xsl:value-of select="/shop/company/name"/></b></font>
 							</td>
 						</tr>
 						<tr>
@@ -87,12 +87,12 @@
 						<tr>
 							<!-- ИНН / КПП -->
 							<td width="150">
-								<font size="2"><xsl:value-of select="/shop/shop_company/tin"/>/<xsl:value-of select="/shop/shop_company/kpp"/></font>
+								<font size="2"><xsl:value-of select="/shop/company/tin"/>/<xsl:value-of select="/shop/company/kpp"/></font>
 							</td>
 							<td rowspan="3" width="20"></td>
 							<!-- Счет -->
 							<td>
-								<font size="2"><xsl:value-of select="/shop/shop_company/current_account"/></font>
+								<font size="2"><xsl:value-of select="/shop/company/current_account"/></font>
 							</td>
 						</tr>
 						<tr>
@@ -114,14 +114,14 @@
 							<td width="5"></td>
 							<!-- Название/город банка -->
 							<td width="320">
-							<font size="2"><xsl:value-of select="/shop/shop_company/bank_name"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_company/bank_address"/></font>
+							<font size="2"><xsl:value-of select="/shop/company/bank_name"/><xsl:text> </xsl:text><xsl:value-of select="/shop/company/bank_address"/></font>
 							</td>
 							<td width="10" rowspan="3"></td>
 						<td width="20"><font size="2">БИК</font></td>
 							<td width="5" rowspan="3"></td>
 							<!-- БИК -->
 							<td>
-								<font size="2"><xsl:value-of select="/shop/shop_company/bic"/></font>
+								<font size="2"><xsl:value-of select="/shop/company/bic"/></font>
 							</td>
 						</tr>
 						<tr>
@@ -147,7 +147,7 @@
 							<td width="10"></td>
 							<td>
 								<!-- Корр. счет -->
-								<font size="2"><xsl:value-of select="/shop/shop_company/correspondent_account"/></font>
+								<font size="2"><xsl:value-of select="/shop/company/correspondent_account"/></font>
 							</td>
 						</tr>
 						<tr>

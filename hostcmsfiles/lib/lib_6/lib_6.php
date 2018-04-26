@@ -180,9 +180,9 @@ if ($Shop_Controller_Show->item == 0)
 				->setAnd()
 				->open();
 
-			reset($aTmpProperties);
-			while(list(, list($oProperty, $aPropertyValues)) = each($aTmpProperties))
+			foreach ($aTmpProperties as $aTmpProperty)
 			{
+				list($oProperty, $aPropertyValues) = $aTmpProperty;
 				$tableName = $oProperty->createNewValue(0)->getTableName();
 
 				!in_array($tableName, $aTableNames) && $aTableNames[] = $tableName;

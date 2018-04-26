@@ -439,7 +439,7 @@ abstract class Core_Skin
 				});
 			});
 
-			hQuery('.bootstrap-iso input:not(.colorpicker)').on('change', hQuery.sendLessVariable);
+			hQuery('.bootstrap-iso input:not(.colorpicker), .bootstrap-iso select').on('change', hQuery.sendLessVariable);
 
 			hQuery('.scroll-template-settings').slimscroll({
 				height: '100%',
@@ -651,11 +651,19 @@ abstract class Core_Skin
 			->add(
 				Core::factory('Core_Html_Entity_Li')
 					->liValue(Core::_('Core.time_sql_execution', $oCore_Registry->get('Core_DataBase.queryTime', 0)))
-			)
-			->add(
-				Core::factory('Core_Html_Entity_Li')
-					->liValue(Core::_('Core.time_xml_execution',$oCore_Registry->get('Xsl_Processor.process', 0)))
 			);
+			
+		$fXslExecution = $oCore_Registry->get('Xsl_Processor.process', 0);
+		$fXslExecution && $oDebugWindowUl->add(
+			Core::factory('Core_Html_Entity_Li')
+				->liValue(Core::_('Core.time_xml_execution', $fXslExecution))
+		);
+			
+		$fTplExecution = $oCore_Registry->get('Tpl_Processor.process', 0);
+		$fTplExecution && $oDebugWindowUl->add(
+			Core::factory('Core_Html_Entity_Li')
+				->liValue(Core::_('Core.time_tpl_execution', $fTplExecution))
+		);
 
 		if (function_exists('memory_get_usage') && substr(PHP_OS, 0, 3) != 'WIN')
 		{

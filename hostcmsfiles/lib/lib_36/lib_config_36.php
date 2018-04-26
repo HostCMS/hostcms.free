@@ -177,6 +177,23 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 		->status(Core_Log::$MESSAGE)
 		->write('1С, type=catalog, mode=file, destination=' . $sFullFileName);
 
+	clearstatcache();
+
+	if (is_file($sFullFileName)
+		// Размер меньше блока или прошло 5 минут с даты последнего изменения
+		&& (filesize($sFullFileName) < $iFileLimit || (filemtime($sFullFileName) + 60*5) < time())
+	)
+	{
+		$bDebug && Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write('1С, DELETE previous file, type=catalog, mode=file, destination=' . $sFullFileName
+				. ', filesize: ' . filesize($sFullFileName) . ', fileLimit: ' . $iFileLimit
+				. ', time: ' . filemtime($sFullFileName) . ', current: ' . time()
+			);
+
+		Core_File::delete($sFullFileName);
+	}
+
 	if (file_put_contents($sFullFileName, file_get_contents("php://input"), FILE_APPEND) !== FALSE
 		&& @chmod($sFullFileName, CHMOD_FILE))
 	{
@@ -211,6 +228,10 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 
 		if ($aReturn['status'] == 'success')
 		{
+			$bDebug && Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('1С, type=catalog, mode=import, file=' . $sFileName . ', import success, DELETE FILE');
+
 			Core_File::delete($sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName));
 		}
 

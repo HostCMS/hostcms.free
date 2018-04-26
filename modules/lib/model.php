@@ -304,6 +304,38 @@ class Lib_Model extends Core_Entity
 	}
 
 	/**
+	 * Search indexation
+	 * @return Search_Page_Model
+	 * @hostcms-event xsl.onBeforeIndexing
+	 * @hostcms-event xsl.onAfterIndexing
+	 */
+	public function indexing()
+	{
+		$oSearch_Page = new stdClass();
+
+		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
+
+		$oSearch_Page->text = $this->name . ' ' . $this->description;
+
+		$oSearch_Page->title = $this->name;
+
+		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
+		$oSearch_Page->site_id = 0; // Lib не принадлежит сайту
+		$oSearch_Page->datetime = date('Y-m-d H:i:s');
+		$oSearch_Page->module = 9;
+		$oSearch_Page->module_id = 0;
+		$oSearch_Page->inner = 1;
+		$oSearch_Page->module_value_type = 0; // search_page_module_value_type
+		$oSearch_Page->module_value_id = $this->id; // search_page_module_value_id
+		$oSearch_Page->url = 'lib-' . $this->id; // Уникальный номер
+		$oSearch_Page->siteuser_groups = array(0);
+
+		Core_Event::notify($this->_modelName . '.onAfterIndexing', $this, array($oSearch_Page));
+
+		return $oSearch_Page;
+	}
+	
+	/**
 	 * Backup revision
 	 * @return self
 	 */

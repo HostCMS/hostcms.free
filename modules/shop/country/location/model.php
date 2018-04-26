@@ -58,6 +58,8 @@ class Shop_Country_Location_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'name_en', 'name_ru', 'name_de',
 		'name_fr', 'name_it', 'name_es',
 		'name_pt', 'name_ua', 'name_be',

@@ -89,7 +89,6 @@ class Shop_Seller_Model extends Core_Entity
 	 */
 	public function indexing()
 	{
-		//$oSearch_Page = Core_Entity::factory('Search_Page');
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));

@@ -122,7 +122,7 @@ class Xsl_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		// Удаляем файл
 		$filename = $this->getXslFilePath();
 
@@ -177,23 +177,35 @@ class Xsl_Model extends Core_Entity
 	}
 
 	/**
-	 * Get XSL by name
-	 * @param string $name name
-	 * @return Xsl_Model|NULL
+	 * Search indexation
+	 * @return Search_Page_Model
+	 * @hostcms-event xsl.onBeforeIndexing
+	 * @hostcms-event xsl.onAfterIndexing
 	 */
-	public function getByName($name)
+	public function indexing()
 	{
-		$this->queryBuilder()
-			->clear()
-			->where('name', '=', $name)
-			->clearOrderBy()
-			->limit(1);
+		$oSearch_Page = new stdClass();
 
-		$aXsls = $this->findAll();
+		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
-		return isset($aXsls[0])
-			? $aXsls[0]
-			: NULL;
+		$oSearch_Page->text = $this->name . ' ' . $this->description;
+
+		$oSearch_Page->title = $this->name;
+
+		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
+		$oSearch_Page->site_id = 0; // XSL не принадлежит сайту
+		$oSearch_Page->datetime = date('Y-m-d H:i:s');
+		$oSearch_Page->module = 7;
+		$oSearch_Page->module_id = 0;
+		$oSearch_Page->inner = 1;
+		$oSearch_Page->module_value_type = 0; // search_page_module_value_type
+		$oSearch_Page->module_value_id = $this->id; // search_page_module_value_id
+		$oSearch_Page->url = 'xsl-' . $this->id; // Уникальный номер
+		$oSearch_Page->siteuser_groups = array(0);
+
+		Core_Event::notify($this->_modelName . '.onAfterIndexing', $this, array($oSearch_Page));
+
+		return $oSearch_Page;
 	}
 
 	/**

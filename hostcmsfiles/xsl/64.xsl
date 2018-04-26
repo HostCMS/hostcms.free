@@ -63,7 +63,8 @@
 						<input type="checkbox" name="poll_response_{@id}" id="poll_response_{@id}" value="{@id}"></input>
 					</xsl:otherwise>
 				</xsl:choose>
-			<xsl:text> </xsl:text><span hostcms:id="{@id}" hostcms:field="name" hostcms:entity="poll_response"><xsl:value-of select="name"/></span>
+				
+				<xsl:text> </xsl:text><span hostcms:id="{@id}" hostcms:field="name" hostcms:entity="poll_response"><xsl:value-of select="name"/></span>
 			</label>
 		</p>
 	</xsl:template>

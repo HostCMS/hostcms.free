@@ -78,7 +78,7 @@ class Core_Entity extends Core_ORM
 	 *
 	 * @var array
 	 */
-	protected $_forbiddenTags = array('deleted');
+	protected $_forbiddenTags = array('deleted', 'user_id');
 
 	/**
 	 * Add tag to forbidden tags list
@@ -98,10 +98,12 @@ class Core_Entity extends Core_ORM
 	 */
 	public function addForbiddenTags(array $aTags)
 	{
-		foreach ($aTags as $tag)
+		/*foreach ($aTags as $tag)
 		{
 			$this->_forbiddenTags[$tag] = $tag;
-		}
+		}*/
+		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+
 		return $this;
 	}
 

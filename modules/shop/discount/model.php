@@ -46,6 +46,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'start_datetime',
 		'end_datetime',
 	);

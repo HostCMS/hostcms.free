@@ -1959,6 +1959,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * Import list of properties
 	 * @param object $classifier
 	 * @return self
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeCreateProperty
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterCreateProperty
 	 */
 	protected function _importProperties($classifier)
 	{
@@ -2011,7 +2013,22 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$oProperty->type = 1;
 					}
 
-					$oProperty->tag_name = Core_Str::transliteration($oProperty->name);
+					$sTagName = Core_Str::transliteration($oProperty->name);
+					
+					// Уже может быть свойство с таким же tag_name внтури одного магазина,
+					// например, разные справочники с одинаковым названием, но разными значениями
+					$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
+					$iCount = $linkedObject->Properties->getCountBytag_name($sTagName, FALSE);
+					
+					// Добавляем к названию тега "-{количество+1}"
+					if ($iCount)
+					{
+						$iCount = $linkedObject->Properties->getCountBytag_name($sTagName . '-%', FALSE, 'LIKE');
+						// +2, т.к. одно свойство без минуса уже было найдено, а счет ведем с единицы
+						$sTagName .= '-' . ($iCount + 2);
+					}
+
+					$oProperty->tag_name = $sTagName;
 
 					// Для вновь создаваемого допсвойства размеры берем из магазина
 					$oProperty->image_large_max_width = $oShop->image_large_max_width;
@@ -2019,7 +2036,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oProperty->image_small_max_width = $oShop->image_small_max_width;
 					$oProperty->image_small_max_height = $oShop->image_small_max_height;
 
+					Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeCreateProperty', $this, array($oProperty, $oItemProperty));
+					
 					$oShop_Item_Property_List->add($oProperty);
+					
+					Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterCreateProperty', $this, array($oProperty, $oItemProperty));
 				}
 
 				$this->_cacheProperty[$sPropertyGUID] = $oProperty;

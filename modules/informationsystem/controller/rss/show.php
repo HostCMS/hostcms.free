@@ -331,7 +331,11 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			$iCountShortcodes = 0;
 		}
 
-		$sAllowedTags = '<h1><p><br><ul><ol><b><strong><i><em><sup><sub><ins><del><small><big><pre><abbr><u><a><img><blockquote>';
+		// https://yandex.ru/support/webmaster/turbo/rss-elements.html#turbo-content-details
+		$sAllowedTags = '<h1><h2><p><br><ul><ol><li><b><strong><i><em><sup><sub><ins>'
+			. '<del><small><big><pre><abbr><u><a><img><blockquote>'
+			. '<figure><figcaption><iframe><div><header><video><source>'
+			. '<table><tr><th><td><menu><script>';
 
 		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{

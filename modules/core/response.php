@@ -212,8 +212,7 @@ class Core_Response
 
 				if ($encoding)
 				{
-					$this->header('Content-Encoding', $encoding);
-					$this->_body = $oCompression_Controller->compress($this->_body);
+					$this->_body = $oCompression_Controller->compress($this->_body, $encoding);
 				}
 			}
 		}

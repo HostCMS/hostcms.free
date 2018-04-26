@@ -223,7 +223,7 @@
 													<tr>
 														<td class="font_family_serif oneline tiny_width align_v_bottom font_size_9 font_weight_bold font_family_serif font_style_italic line_height_1">Кому:</td>
 														<td class="font_size_9 font_settings">
-															<span class="oneline"><xsl:value-of select="shop_company/name"></xsl:value-of></span>
+															<span class="oneline"><xsl:value-of select="company/name"></xsl:value-of></span>
 														</td>
 													</tr>
 													<tr>
@@ -236,7 +236,7 @@
 													<tr>
 														<td class="font_family_serif oneline tiny_width align_v_bottom font_size_9 font_weight_bold font_family_serif font_style_italic line_height_1">Куда:</td>
 														<td class="font_size_9 font_settings">
-															<span class="oneline"><xsl:value-of select="shop_company/address"></xsl:value-of></span>
+															<span class="oneline"><xsl:value-of select="company/directory_address/full_address"></xsl:value-of></span>
 														</td>
 													</tr>
 													<tr>
@@ -297,121 +297,121 @@
 																			<tr>
 																				<td class="cell width_8">
 																					 <xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 1, 1)=''">
+																					  <xsl:when test="substring(company/tin, 1, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 1, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 1, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 2, 1)=''">
+																					  <xsl:when test="substring(company/tin, 2, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 2, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 2, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 3, 1)=''">
+																					  <xsl:when test="substring(company/tin, 3, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 3, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 3, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 4, 1)=''">
+																					  <xsl:when test="substring(company/tin, 4, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 4, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 4, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 5, 1)=''">
+																					  <xsl:when test="substring(company/tin, 5, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 5, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 5, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 6, 1)=''">
+																					  <xsl:when test="substring(company/tin, 6, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 6, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 6, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 7, 1)=''">
+																					  <xsl:when test="substring(company/tin, 7, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 7, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 7, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 8, 1)=''">
+																					  <xsl:when test="substring(company/tin, 8, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 8, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 8, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 9, 1)=''">
+																					  <xsl:when test="substring(company/tin, 9, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 9, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 9, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 10, 1)=''">
+																					  <xsl:when test="substring(company/tin, 10, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 10, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 10, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 11, 1)=''">
+																					  <xsl:when test="substring(company/tin, 11, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 11, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 11, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_8">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/tin, 12, 1)=''">
+																					  <xsl:when test="substring(company/tin, 12, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/tin, 12, 1)"/>
+																						<xsl:value-of select="substring(company/tin, 12, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
@@ -424,201 +424,201 @@
 																			<tr>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 1, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 1, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 1, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 1, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 2, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 2, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 2, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 2, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 3, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 3, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 3, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 3, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 4, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 4, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 4, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 4, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 5, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 5, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 5, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 5, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 6, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 6, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 6, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 6, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 7, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 7, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 7, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 7, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 8, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 8, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 8, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 8, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 9, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 9, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 9, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 9, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 10, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 10, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 10, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 10, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 11, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 11, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 11, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 11, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 12, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 12, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 12, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 12, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 13, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 13, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 13, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 13, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 14, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 14, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 14, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 14, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 15, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 15, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 15, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 15, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 16, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 16, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 16, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 16, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 17, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 17, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 17, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 17, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 18, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 18, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 18, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 18, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 19, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 19, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 19, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 19, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/correspondent_account, 20, 1)=''">
+																					  <xsl:when test="substring(company/correspondent_account, 20, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/correspondent_account, 20, 1)"/>
+																						<xsl:value-of select="substring(company/correspondent_account, 20, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
@@ -635,7 +635,7 @@
 																<tr>
 																	<td class="font_family_serif oneline tiny_width align_v_bottom font_size_9 font_weight_bold font_family_serif font_style_italic line_height_1">Наименование&#160;банка:</td>
 																	<td class="font_settings font_size_8">
-																		<span class="oneline"><xsl:value-of select="shop_company/bank_name"/></span>
+																		<span class="oneline"><xsl:value-of select="company/bank_name"/></span>
 																	</td>
 																</tr>
 															</table>
@@ -651,201 +651,201 @@
 																			<tr>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 1, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 1, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 1, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 1, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 2, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 2, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 2, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 2, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 3, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 3, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 3, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 3, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 4, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 4, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 4, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 4, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 5, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 5, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 5, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 5, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 6, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 6, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 6, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 6, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 7, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 7, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 7, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 7, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 8, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 8, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 8, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 8, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 9, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 9, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 9, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 9, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 10, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 10, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 10, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 10, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 11, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 11, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 11, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 11, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 12, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 12, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 12, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 12, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 13, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 13, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 13, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 13, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 14, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 14, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 14, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 14, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 15, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 15, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 15, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 15, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 16, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 16, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 16, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 16, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 17, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 17, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 17, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 17, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 18, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 18, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 18, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 18, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 19, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 19, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 19, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 19, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell width_5">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/current_account, 20, 1)=''">
+																					  <xsl:when test="substring(company/current_account, 20, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/current_account, 20, 1)"/>
+																						<xsl:value-of select="substring(company/current_account, 20, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
@@ -858,91 +858,91 @@
 																			<tr>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 1, 1)=''">
+																					  <xsl:when test="substring(company/bic, 1, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 1, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 1, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 2, 1)=''">
+																					  <xsl:when test="substring(company/bic, 2, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 2, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 2, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 3, 1)=''">
+																					  <xsl:when test="substring(company/bic, 3, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 3, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 3, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 4, 1)=''">
+																					  <xsl:when test="substring(company/bic, 4, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 4, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 4, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 5, 1)=''">
+																					  <xsl:when test="substring(company/bic, 5, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 5, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 5, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 6, 1)=''">
+																					  <xsl:when test="substring(company/bic, 6, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 6, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 6, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 7, 1)=''">
+																					  <xsl:when test="substring(company/bic, 7, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 7, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 7, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 8, 1)=''">
+																					  <xsl:when test="substring(company/bic, 8, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 8, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 8, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>
 																				<td class="cell" style="width: 11%;">
 																					<xsl:choose>
-																					  <xsl:when test="substring(shop_company/bic, 9, 1)=''">
+																					  <xsl:when test="substring(company/bic, 9, 1)=''">
 																						&#160;
 																					  </xsl:when>
 																					  <xsl:otherwise>
-																						<xsl:value-of select="substring(shop_company/bic, 9, 1)"/>
+																						<xsl:value-of select="substring(company/bic, 9, 1)"/>
 																					  </xsl:otherwise>
 																					</xsl:choose>
 																				</td>

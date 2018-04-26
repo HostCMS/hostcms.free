@@ -20,4 +20,6 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'delete_success' => 'Стоп-слово успешно удалено!',
 	'markDeleted_success' => 'Стоп-слово успешно удалено!',
+	'export' => 'Экспорт',
+	'link' => 'Стоп-слово',
 );

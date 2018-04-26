@@ -53,14 +53,11 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetXml
+	 * Get reserved items
+	 * @return int
 	 */
-	public function getXml()
+	public function getReserved()
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
 		$oShop_Item_Reserveds = Core_Entity::factory('Shop_Item_Reserved');
 		$oShop_Item_Reserveds->queryBuilder()
 			->where('shop_item_id', '=', $this->shop_item_id)
@@ -74,6 +71,20 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		{
 			$reserved += $oShop_Item_Reserved->count;
 		}
+
+		return $reserved;
+	}
+
+	/**
+	 * Get XML for entity and children entities
+	 * @return string
+	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$reserved = $this->getReserved();
 
 		$this
 			->clearXmlTags()

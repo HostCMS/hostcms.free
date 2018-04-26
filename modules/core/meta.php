@@ -27,6 +27,7 @@ class Core_Meta
 		'toUpper' => 'mb_strtoupper',
 		'toLower' => 'mb_strtolower',
 		'uppercaseFirst' => 'Core_Str::ucfirst',
+		'lowercaseFirst' => 'Core_Str::lcfirst',
 	);
 
 	/**
@@ -50,7 +51,7 @@ class Core_Meta
 	public function apply($str)
 	{
 		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([^\}]+))*\}/';
-		
+
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
 		return $string;

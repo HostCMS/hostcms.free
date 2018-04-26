@@ -20,4 +20,6 @@ return array(
 	'delete_success' => 'Stopword deleted successfully!',
 	'undelete_success' => 'Stopword restored successfully!',
 	'markDeleted_success' => 'Stopword deleted successfully.',
+	'export' => 'Export',
+	'link' => 'Stopword',
 );

@@ -153,6 +153,15 @@ class Shop_Controller_Show extends Core_Controller
 	protected $_aShop_Groups = array();
 
 	/**
+	 * Get _aShop_Groups set
+	 * @return array
+	 */
+	public function getShopGroups()
+	{
+		return $this->_aShop_Groups;
+	}
+
+	/**
 	 * List of properties for item
 	 * @var array
 	 */
@@ -165,6 +174,24 @@ class Shop_Controller_Show extends Core_Controller
 	protected $_aItem_Property_Dirs = array();
 
 	/**
+	 * Get _aItem_Properties set
+	 * @return array
+	 */
+	public function getItemProperties()
+	{
+		return $this->_aItem_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getItemPropertyDirs()
+	{
+		return $this->_aItem_Property_Dirs;
+	}
+
+	/**
 	 * List of properties for group
 	 * @var array
 	 */
@@ -175,6 +202,24 @@ class Shop_Controller_Show extends Core_Controller
 	 * @var array
 	 */
 	protected $_aGroup_Property_Dirs = array();
+
+	/**
+	 * Get _aGroup_Properties set
+	 * @return array
+	 */
+	public function getGroupProperties()
+	{
+		return $this->_aGroup_Properties;
+	}
+
+	/**
+	 * Get _aGroup_Property_Dirs set
+	 * @return array
+	 */
+	public function getGroupPropertyDirs()
+	{
+		return $this->_aGroup_Property_Dirs;
+	}
 
 	/**
 	 * Shop's items object
@@ -710,6 +755,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->showPanel && Core::checkPanel() && $this->_showPanel();
 
+		$bXsl = !is_null($this->_xsl);
+
 		$this->item && $this->_incShowed();
 
 		$bCache = $this->cache && Core::moduleIsActive('cache');
@@ -789,6 +836,12 @@ class Shop_Controller_Show extends Core_Controller
 		}
 
 		$this->_shownIDs = array();
+
+		if (!$bXsl)
+		{
+			$this->assign('controller', $this);
+			$this->assign('aShop_Items', array());
+		}
 
 		if ($this->limit == 0 && $this->page)
 		{
@@ -882,12 +935,15 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			$Shop_Group_Properties = Core::factory('Core_Xml_Entity')
-				->name('shop_group_properties');
+			if ($bXsl)
+			{
+				$Shop_Group_Properties = Core::factory('Core_Xml_Entity')
+					->name('shop_group_properties');
 
-			$this->addEntity($Shop_Group_Properties);
+				$this->addEntity($Shop_Group_Properties);
 
-			$this->_addGroupsPropertiesList(0, $Shop_Group_Properties);
+				$this->_addGroupsPropertiesList(0, $Shop_Group_Properties);
+			}
 		}
 
 		is_array($this->groupsProperties) && $this->groupsProperties = array_combine($this->groupsProperties, $this->groupsProperties);
@@ -939,6 +995,9 @@ class Shop_Controller_Show extends Core_Controller
 				$mShowPropertyIDs = FALSE;
 			}
 
+			// Ярлык может ссылаться на товар с истекшим или не наступившим сроком публикации
+			$iCurrentTimestamp = time();
+
 			foreach ($aShop_Items as $oShop_Item)
 			{
 				$this->_shownIDs[] = $oShop_Item->id;
@@ -955,89 +1014,89 @@ class Shop_Controller_Show extends Core_Controller
 					$oShop_Item = $oShop_Item->Shop_Item;
 				}
 
-				// Ярлык может ссылаться на отключенный товар
-				$desiredActivity = strtolower($this->itemsActivity) == 'active'
-					? 1
-					: (strtolower($this->itemsActivity) == 'all' ? $oShop_Item->active : 0);
-
-				// Ярлык может ссылаться на товар с истекшим или не наступившим сроком публикации
-				$iCurrentTimestamp = time();
-
 				$oShop_Item->clearEntities();
 
-				if ($oShop_Item->id // Can be shortcut on markDeleted item
-					&& $oShop_Item->active == $desiredActivity
-					&& (!$iShortcut
-						|| (Core_Date::sql2timestamp($oShop_Item->end_datetime) >= $iCurrentTimestamp
-							|| $oShop_Item->end_datetime == '0000-00-00 00:00:00')
-						&& (Core_Date::sql2timestamp($oShop_Item->start_datetime) <= $iCurrentTimestamp
-							|| $oShop_Item->start_datetime == '0000-00-00 00:00:00')
-					)
-				)
+				if ($bXsl)
 				{
-					// ID оригинального ярлыка
-					if ($iShortcut)
+					// Ярлык может ссылаться на отключенный товар
+					$desiredActivity = strtolower($this->itemsActivity) == 'active'
+						? 1
+						: (strtolower($this->itemsActivity) == 'all' ? $oShop_Item->active : 0);
+
+					if ($oShop_Item->id // Can be shortcut on markDeleted item
+						&& $oShop_Item->active == $desiredActivity
+						&& (!$iShortcut
+							|| (Core_Date::sql2timestamp($oShop_Item->end_datetime) >= $iCurrentTimestamp
+								|| $oShop_Item->end_datetime == '0000-00-00 00:00:00')
+							&& (Core_Date::sql2timestamp($oShop_Item->start_datetime) <= $iCurrentTimestamp
+								|| $oShop_Item->start_datetime == '0000-00-00 00:00:00')
+						)
+					)
 					{
-						$oOriginal_Shop_Item = $oShop_Item;
+						// ID оригинального ярлыка
+						if ($iShortcut)
+						{
+							$oOriginal_Shop_Item = $oShop_Item;
 
-						$oShop_Item = clone $oShop_Item;
+							$oShop_Item = clone $oShop_Item;
+							$oShop_Item
+								->id($oOriginal_Shop_Item->id)
+								->addForbiddenTag('shortcut_id')
+								->addForbiddenTag('shop_group_id')
+								->addEntity(
+									Core::factory('Core_Xml_Entity')
+										->name('shortcut_id')
+										->value($oShortcut_Item->id)
+								)
+								->addEntity(
+									Core::factory('Core_Xml_Entity')
+										->name('shop_group_id')
+										->value($oShortcut_Item->shop_group_id)
+								);
+						}
+
+						$this->applyItemsForbiddenTags($oShop_Item);
+
+						// Comments
 						$oShop_Item
-							->id($oOriginal_Shop_Item->id)
-							->addForbiddenTag('shortcut_id')
-							->addForbiddenTag('shop_group_id')
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('shortcut_id')
-									->value($oShortcut_Item->id)
-							)
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('shop_group_id')
-									->value($oShortcut_Item->shop_group_id)
-							);
+							->showXmlComments($this->comments)
+							->commentsActivity($this->commentsActivity);
+
+						$oShop_Item->showXmlBonuses($this->bonuses);
+						$oShop_Item->showXmlWarehousesItems($this->warehousesItems);
+						$oShop_Item->showXmlAssociatedItems($this->associatedItems);
+						$oShop_Item->showXmlModifications($this->modifications);
+						$oShop_Item->showXmlSpecialprices($this->specialprices);
+						$oShop_Item->showXmlTags($this->tags);
+						$oShop_Item->showXmlVotes($this->votes);
+
+						$oShop_Item->showXmlProperties($mShowPropertyIDs);
+
+						// Siteuser
+						$oShop_Item->showXmlSiteuser($this->siteuser)
+							->showXmlSiteuserProperties($this->siteuserProperties);
+
+						$this->addEntity($oShop_Item);
+
+						// Parent item for modification
+						$this->parentItem && $oShop_Item->addEntity(
+							Core_Entity::factory('Shop_Item', $this->parentItem)
+								->showXmlProperties($this->itemsProperties)
+								->showXmlTags($this->tags)
+								->showXmlWarehousesItems($this->warehousesItems)
+								->showXmlAssociatedItems($this->associatedItems)
+								->showXmlModifications($this->modifications)
+								->showXmlSpecialprices($this->specialprices)
+								->showXmlVotes($this->votes)
+						);
 					}
-
-					$this->applyItemsForbiddenTags($oShop_Item);
-
-					// Comments
-					$oShop_Item
-						->showXmlComments($this->comments)
-						->commentsActivity($this->commentsActivity);
-
-					$oShop_Item->showXmlBonuses($this->bonuses);
-					$oShop_Item->showXmlWarehousesItems($this->warehousesItems);
-					$oShop_Item->showXmlAssociatedItems($this->associatedItems);
-					$oShop_Item->showXmlModifications($this->modifications);
-					$oShop_Item->showXmlSpecialprices($this->specialprices);
-					$oShop_Item->showXmlTags($this->tags);
-					$oShop_Item->showXmlVotes($this->votes);
-
-					$oShop_Item->showXmlProperties($mShowPropertyIDs);
-
-					// Siteuser
-					$oShop_Item->showXmlSiteuser($this->siteuser)
-						->showXmlSiteuserProperties($this->siteuserProperties);
-
-					$this->addEntity($oShop_Item);
-
-					// Parent item for modification
-					$this->parentItem && $oShop_Item->addEntity(
-						Core_Entity::factory('Shop_Item', $this->parentItem)
-							->showXmlProperties($this->itemsProperties)
-							->showXmlTags($this->tags)
-							->showXmlWarehousesItems($this->warehousesItems)
-							->showXmlAssociatedItems($this->associatedItems)
-							->showXmlModifications($this->modifications)
-							->showXmlSpecialprices($this->specialprices)
-							->showXmlVotes($this->votes)
-					);
+				}
+				else
+				{
+					$this->append('aShop_Items', $oShop_Item);
 				}
 			}
 		}
-
-		// Clear
-		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
-			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
 		echo $content = $this->get();
 
@@ -1047,6 +1106,10 @@ class Shop_Controller_Show extends Core_Controller
 			$this->_cacheName,
 			$aTags
 		);
+		
+		// Clear
+		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
+			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
 
 		return $this;
 	}
@@ -1061,6 +1124,8 @@ class Shop_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
+
+		$bXsl = !is_null($this->_xsl);
 
 		//if ($this->itemsProperties)
 		//{
@@ -1084,22 +1149,25 @@ class Shop_Controller_Show extends Core_Controller
 
 				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
 
-				$oProperty->addEntity(
-					Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Item_Property->prefix)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('filter')->value($oShop_Item_Property->filter)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('show_in_group')->value($oShop_Item_Property->show_in_group)
-				)
-				->addEntity(
-					Core::factory('Core_Xml_Entity')->name('show_in_item')->value($oShop_Item_Property->show_in_item)
-				);
+				if ($bXsl)
+				{
+					$oProperty->addEntity(
+						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Item_Property->prefix)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('filter')->value($oShop_Item_Property->filter)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('show_in_group')->value($oShop_Item_Property->show_in_group)
+					)
+					->addEntity(
+						Core::factory('Core_Xml_Entity')->name('show_in_item')->value($oShop_Item_Property->show_in_item)
+					);
 
-				$oShop_Item_Property->shop_measure_id && $oProperty->addEntity(
-					$oShop_Item_Property->Shop_Measure
-				);
+					$oShop_Item_Property->shop_measure_id && $oProperty->addEntity(
+						$oShop_Item_Property->Shop_Measure
+					);
+				}
 			}
 		//}
 
@@ -1113,12 +1181,15 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
-				->name('shop_item_properties');
+			if ($bXsl)
+			{
+				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
+					->name('shop_item_properties');
 
-			$this->addEntity($Shop_Item_Properties);
+				$this->addEntity($Shop_Item_Properties);
 
-			$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
+				$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
+			}
 		}
 
 		return $aShowPropertyIDs;
@@ -1134,13 +1205,6 @@ class Shop_Controller_Show extends Core_Controller
 			->set('showed', Core_QueryBuilder::expression('`showed` + 1'))
 			->where('id', '=', $this->item)
 			->execute();
-
-		/*$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->item);
-		if (!is_null($oShop_Item->id))
-		{
-			$oShop_Item->showed += 1;
-			$oShop_Item->save();
-		}*/
 
 		return $this;
 	}
@@ -1646,7 +1710,7 @@ class Shop_Controller_Show extends Core_Controller
 		elseif (!is_null($this->producer))
 		{
 			$oShop_Producer = Core_Entity::factory('Shop_Producer', $this->producer);
-			
+
 			$seo_title = $oShop_Producer->seo_title != ''
 				? $oShop_Producer->seo_title
 				: $oShop_Producer->name;
@@ -1919,6 +1983,8 @@ class Shop_Controller_Show extends Core_Controller
 						$oCore_QueryBuilder_Select
 							->setOr()
 							->where('shop_items.shop_group_id', '=', 0)
+							->where('shop_items.deleted', '=', 0)
+							->where('shop_items.active', '=', 1)
 							->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Modifications);
 
 						// Совместное modificationsList + filterShortcuts

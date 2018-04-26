@@ -27,6 +27,22 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		parent::setObject($object);
 
+		return $this;
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
+		$object = $this->_object;
+
+		$modelName = $object->getModelName();
+
 		$this->title(
 			$this->_object->id
 				? Core::_('Comment.edit_title')
@@ -47,32 +63,40 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->wysiwyg(TRUE)
 			->rows(10)
 			->divAttr(array('class' => 'form-group col-xs-12'));
-			
+
 		$oMainTab->move($this->getField('text'), $oMainRow1);
 
 		$oMainTab->move($this->getField('author')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow2);
 
-		$oAdditionalTab->move($this->getField('siteuser_id')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4')), $oMainRow2);
+		$oAdditionalTab->delete($this->getField('siteuser_id'));
 
-		if ($this->_object->siteuser_id && Core::moduleIsActive('siteuser'))
+		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = $this->_object->Siteuser;
 
-			$oSiteuserLink = Admin_Form_Entity::factory('Link');
-			$oSiteuserLink
-				->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
-				->a
-					->class('btn btn-labeled btn-sky')
-					->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/index.php', 'edit', NULL, 0, $oSiteuser->id))
-					->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/index.php', additionalParams: 'hostcms[checked][0][{$oSiteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
-					->value($oSiteuser->login)
-					->target('_blank');
-			$oSiteuserLink
-				->icon
-					->class('btn-label fa fa-user');
+			$options = !is_null($oSiteuser->id)
+				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+				: array(0);
 
-			$oMainRow2->add($oSiteuserLink);
+			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Order.siteuser_id'))
+				->options($options)
+				->name('siteuser_id')
+				->class('siteuser-tag')
+				->style('width: 100%')
+				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+
+			$oMainRow2->add($oSiteuserSelect);
+
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			->type("text/javascript")
+			->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
+
+			$oMainRow2->add($oCore_Html_Entity_Script);
 		}
 
 		$oMainTab->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
@@ -102,24 +126,12 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+
 		parent::_applyObjectProperty();
 
-		// Clear tagged cache
-		if ($this->_object->Comment_Informationsystem_Item->id)
-		{
-			$this->_object
-				->Comment_Informationsystem_Item
-				->Informationsystem_Item
-				->clearCache();
-		}
-		elseif ($this->_object->Comment_Shop_Item->id)
-		{
-			$this->_object
-				->Comment_Shop_Item
-				->Shop_Item
-				->clearCache();
-		}
-
+		// Informationsystem_Item_Comment_Controller_Edit + Shop_Item_Comment_Controller_Edit Clears Cache
+		
 		return $this;
 	}
 }

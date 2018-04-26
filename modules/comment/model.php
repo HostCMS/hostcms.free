@@ -77,6 +77,8 @@ class Comment_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'datetime'
 	);
 

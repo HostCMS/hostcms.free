@@ -88,6 +88,8 @@ class Structure_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'options'
 	);
 
@@ -667,6 +669,9 @@ class Structure_Model extends Core_Entity
 			->addXmlTag('link', $this->getPath())
 			->addXmlTag('dir', Core_Page::instance()->structureCDN . '/' . $this->getDirHref());
 
+		$this->type != 3
+			&& $this->addForbiddenTag('url');
+			
 		if ($this->_showXmlProperties)
 		{
 			$this->addEntities($this->getPropertyValues());
@@ -757,7 +762,7 @@ class Structure_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem

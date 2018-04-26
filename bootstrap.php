@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -56,6 +56,8 @@ if (Core_Auth::logged())
 	// Observers
 	Core_Event::attach('Xsl_Processor.onBeforeProcess', array('Xsl_Processor_Observer', 'onBeforeProcess'));
 	Core_Event::attach('Xsl_Processor.onAfterProcess', array('Xsl_Processor_Observer', 'onAfterProcess'));
+	Core_Event::attach('Tpl_Processor.onBeforeProcess', array('Tpl_Processor_Observer', 'onBeforeProcess'));
+	Core_Event::attach('Tpl_Processor.onAfterProcess', array('Tpl_Processor_Observer', 'onAfterProcess'));
 	Core_Event::attach('Core_Cache.onBeforeGet', array('Core_Cache_Observer', 'onBeforeGet'));
 	Core_Event::attach('Core_Cache.onAfterGet', array('Core_Cache_Observer', 'onAfterGet'));
 	Core_Event::attach('Core_Cache.onBeforeSet', array('Core_Cache_Observer', 'onBeforeSet'));

@@ -71,6 +71,7 @@ $('#btn-setting')
 
 /*Toggle FullScreen*/
 $('.page-content')
+	// fullscreen
 	.on('click', '#fullscreen-toggler', function (e) {
 		var element = document.documentElement;
 		if (!$('body')
@@ -105,6 +106,18 @@ $('.page-content')
 				document.webkitExitFullscreen();
 			}
 
+		}
+	})
+	// refresh
+	.on('click', '#refresh-toggler', function (e) {
+
+		if (typeof _windowSettings == 'undefined')
+		{
+			window.location.reload();
+		}
+		else
+		{
+			$.adminLoad(_windowSettings);
 		}
 	});
 
@@ -575,7 +588,8 @@ function hasClass(elem, cls) {
 	return (str.indexOf(testCls) != -1);
 }
 
-$('.page-content')
+// Удалено 26/03/2018, проблема с вкладкой во вкладке
+/*$('.page-content')
 	.on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
 		$($(this).attr('href')).find('button[type="submit"]').click();
-	});
+	});*/

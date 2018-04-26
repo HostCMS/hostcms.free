@@ -21,6 +21,9 @@
 }
 .hostcmsXsl div.hostcmsButton div {margin-top: 1px; font-weight: bold; vertical-align: top; display: inline-block; }
 
+ul.tpl-template-variables { list-style-type: none; padding-left: 20px;}
+ul.tpl-template-variables span.bold { font-weight: bold; }
+
 /*.hostcmsWindowUI {position: absolute; z-index: 999;}*/
 .hostcmsWindow { -webkit-overflow-scrolling: touch; overflow-y: scroll } /* Scroll IFRAMEs on iOS */
 .hostcmsWindow, .hostcmsWindow textarea {font-family:Arial,Verdana,'MS Sans Serif'; line-height: normal }

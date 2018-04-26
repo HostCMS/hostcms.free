@@ -136,12 +136,12 @@ class Core_Image_Imagick extends Core_Image
 			if ($ext == 'jpg' || $ext == 'jpeg')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
-				$oImagick->setImageCompressionQuality(is_null($quality)?JPG_QUALITY:intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? JPG_QUALITY : intval($quality));
 			}
 			elseif ($ext == 'png')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
-				$oImagick->setImageCompressionQuality(is_null($quality)?PNG_QUALITY:intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? PNG_QUALITY : intval($quality));
 			}
 			elseif ($ext == 'gif'){}
 			else

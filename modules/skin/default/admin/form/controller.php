@@ -163,7 +163,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
 		if ($this->_Admin_Form->show_operations && $this->showOperations
-		|| $allow_filter && $this->_showFilter)
+			|| $allow_filter && $this->_showFilter)
 		{
 				// min width action column
 				$width = 10;
@@ -723,16 +723,13 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 									continue;
 								}
 
-								$Admin_Word_Value = $o_Admin_Form_Action->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+								$Admin_Word_Value = $o_Admin_Form_Action
+									->Admin_Word
+									->getWordByLanguage($this->_Admin_Language->id);
 
-								if ($Admin_Word_Value && strlen($Admin_Word_Value->name) > 0)
-								{
-									$name = $Admin_Word_Value->name;
-								}
-								else
-								{
-									$name = '';
-								}
+								$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+									? htmlspecialchars($Admin_Word_Value->name)
+									: '';
 
 								$href = $this->getAdminActionLoadHref($this->getPath(), $o_Admin_Form_Action->name, NULL, $datasetKey, $key_field_value);
 

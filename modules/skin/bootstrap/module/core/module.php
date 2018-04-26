@@ -127,6 +127,13 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 		$oCore_Log = Core_Log::instance();
 		$file_name = $oCore_Log->getLogName(date('Y-m-d'));
 
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$access = Core::moduleIsActive('eventlog')
+			? $oUser->checkModuleAccess(array('eventlog'), $oSite)
+			: FALSE;
+		
 		?><div class="widget">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
 				<i class="widget-icon fa fa-tasks themeprimary"></i>
@@ -228,12 +235,12 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 							?>
 							</ul>
 							<?php
-							if (Core::moduleIsActive('eventlog'))
+							if ($access)
 							{
 								$sEventlogHref = '/admin/eventlog/index.php';
 								?>
 								<br />
-								<div class="footer">
+								<div class="footer">						
 									<a class="btn btn-info" href="<?php echo $sEventlogHref?>" onclick="$.adminLoad({path: '<?php echo $sEventlogHref?>'}); return false"><i class="fa fa-book"></i><?php echo Core::_('Admin.index_events_journal_link')?></a>
 								</div>
 								<?php
@@ -469,6 +476,23 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 									</div>
 								</div>
 							</li>
+							<?php
+							$mb_overload = ini_get('mbstring.func_overload');
+							if ($mb_overload)
+							{
+								?><li class="ticket-item">
+									<div class="row">
+										<div class="ticket-user">
+											<span class="user-name"><?php echo Core::_('Admin.index_tech_date_mb_overload')?></span>
+											<span class="user-company"><?php echo htmlspecialchars($mb_overload)?></span>
+										</div>
+										<div class="ticket-state bg-darkorange">
+											<i class="fa fa-times"></i>
+										</div>
+									</div>
+								</li><?php
+							}
+							?>
 							<li class="ticket-item">
 								<div class="row">
 									<div class="ticket-user">

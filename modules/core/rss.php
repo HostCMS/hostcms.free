@@ -33,7 +33,8 @@ class Core_Rss
 	 */
 	public function xmlns($name, $value)
 	{
-		$this->_xmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($value) . '"';
+		//$this->_xmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($value) . '"';
+		$this->_xmlns[$name] = $value;
 		return $this;
 	}
 
@@ -91,7 +92,10 @@ class Core_Rss
 
 			// if isset namespace
 			$newChild = isset($aTmp[1])
-				? $object->addChild($name, $bCDATA ? NULL : $sTmpValue, $aTmp[0])
+				? $object->addChild($name, $bCDATA ? NULL : $sTmpValue, isset($this->_xmlns[$aTmp[0]])
+					? $this->_xmlns[$aTmp[0]]
+					: $aTmp[0]
+				)
 				: $object->addChild($name, $bCDATA ? NULL : $sTmpValue);
 
 			if ($bCDATA)
@@ -165,15 +169,21 @@ class Core_Rss
 	 */
 	public function get()
 	{
+		$aXmlns = array();
+		foreach ($this->_xmlns as $name => $url)
+		{
+			$aXmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($url) . '"';
+		}
+		
 		$oRss = simplexml_load_string('<?xml version="1.0" encoding="' . $this->_encoding . '"?>' .
 			'<rss version="2.0"' . (
 				count($this->_xmlns)
-					? ' ' . implode(' ', $this->_xmlns)
+					? ' ' . implode(' ', $aXmlns)
 					: ''
 				) . '>' .
 			'<channel></channel>' .
 			'</rss>');
-
+			
 		$this->_addChild($oRss->channel, $this->_entities);
 
 		// $xml = $oRss->asXML();

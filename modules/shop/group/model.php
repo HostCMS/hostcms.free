@@ -78,12 +78,12 @@ class Shop_Group_Model extends Core_Entity
 	 * @var int
 	 */
 	public $adminPrice = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
-	public $adminRest = NULL;	
+	public $adminRest = NULL;
 
 	/**
 	 * One-to-many or many-to-many relations
@@ -105,6 +105,22 @@ class Shop_Group_Model extends Core_Entity
 		'siteuser_group' => array(),
 		'siteuser' => array(),
 		'user' => array()
+	);
+
+	/**
+	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
+		'seo_group_title_template',
+		'seo_group_keywords_template',
+		'seo_group_description_template',
+		'seo_item_title_template',
+		'seo_item_keywords_template',
+		'seo_item_description_template'
 	);
 
 	/**
@@ -666,7 +682,6 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function indexing()
 	{
-		//$oSearch_Page = Core_Entity::factory('Search_Page');
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
@@ -684,7 +699,7 @@ class Shop_Group_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem
@@ -710,6 +725,11 @@ class Shop_Group_Model extends Core_Entity
 						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 					}
 				}
+			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)

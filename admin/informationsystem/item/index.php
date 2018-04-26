@@ -62,6 +62,91 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 	Core::showJson($aJSON);
 }
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_move_groups'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+
+	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
+
+	strlen(Core_Array::getGet('exclude')) && $aExcludeTmp = json_decode(Core_Array::getGet('exclude'), TRUE);
+
+	$aExclude = is_array($aExcludeTmp)
+		? $aExcludeTmp
+		: array();
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Informationsystem_Item.root') . ' [0]'
+		);
+
+		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
+		$oInformationsystem_Groups->queryBuilder()
+			->where('informationsystem_groups.id', 'NOT IN', $aExclude)
+			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10);
+
+		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
+
+		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
+		{
+			$aJSON[] = array(
+				'id' => $oInformationsystem_Group->id,
+				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_shortcut_groups'))
+	&& !is_null(Core_Array::getGet('queryString'))
+	&& Core_Array::getGet('entity_id')
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$entity_id = intval(Core_Array::getGet('entity_id'));
+
+	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
+
+	$aJSON = array();
+
+	if (strlen($sQuery))
+	{
+		$aJSON[0] = array(
+			'id' => 0,
+			'label' => Core::_('Informationsystem_Item.root') . ' [0]'
+		);
+
+		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
+		$oInformationsystem_Groups->queryBuilder()
+			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->limit(10);
+
+		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
+
+		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
+		{
+			$aJSON[] = array(
+				'id' => $oInformationsystem_Group->id,
+				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
@@ -406,27 +491,39 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
 	);
 
-	$aExclude = array();
-	$aChecked = $oAdmin_Form_Controller->getChecked();
-	foreach ($aChecked as $datasetKey => $checkedItems)
-	{
-		// Exclude just dirs
-		if ($datasetKey == 0)
-		{
-			foreach ($checkedItems as $key => $value)
-			{
-				$aExclude[] = $key;
-			}
-		}
-	}
-
 	$oInformationsystemItemControllerMove
 		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
 		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
+		->value($iInformationsystemGroupId);
+
+	$iCount = $oInformationsystem->Informationsystem_Groups->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		$aExclude = array();
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		foreach ($aChecked as $datasetKey => $checkedItems)
+		{
+			// Exclude just dirs
+			if ($datasetKey == 0)
+			{
+				foreach ($checkedItems as $key => $value)
+				{
+					$aExclude[] = $key;
+				}
+			}
+		}
+
 		// Список директорий генерируется другим контроллером
-		->selectOptions(array(' … ') + $oInformationsystem_Item_Controller_Edit->fillInformationsystemGroup($iInformationsystemId, 0, $aExclude))
-		->value($iInformationsystemGroupId)
-	;
+		$oInformationsystemItemControllerMove
+			->selectOptions(array(' … ') + $oInformationsystem_Item_Controller_Edit->fillInformationsystemGroup($iInformationsystemId, 0, $aExclude));
+	}
+	else
+	{
+		$oInformationsystemItemControllerMove->autocomplete(TRUE);
+	}
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oInformationsystemItemControllerMove);
@@ -446,9 +543,19 @@ if ($oAdminFormActionShortcut && $oAdmin_Form_Controller->getAction() == 'shortc
 	$oInformationsystemItemControllerShortcut
 		->title(Core::_('Informationsystem_Item.add_information_item_shortcut_title'))
 		->selectCaption(Core::_('Informationsystem_Item.add_item_shortcut_information_groups_id'))
-		// Список директорий генерируется другим контроллером
-		->selectOptions(array(' … ') + $oInformationsystem_Item_Controller_Edit->fillInformationsystemGroup($iInformationsystemId))
 		->value($iInformationsystemGroupId);
+
+	$iCount = $oInformationsystem->Informationsystem_Groups->getCount();
+
+	if ($iCount < Core::$mainConfig['switchSelectToAutocomplete'])
+	{
+		// Список директорий генерируется другим контроллером
+		$oInformationsystemItemControllerShortcut->selectOptions(array(' … ') + $oInformationsystem_Item_Controller_Edit->fillInformationsystemGroup($iInformationsystemId));
+	}
+	else
+	{
+		$oInformationsystemItemControllerShortcut->autocomplete(TRUE);
+	}
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oInformationsystemItemControllerShortcut);

@@ -71,6 +71,8 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	protected $_forbiddenTags = array(
 		'price',
+		'deleted',
+		'user_id',
 	);
 
 	/**

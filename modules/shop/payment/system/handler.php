@@ -159,7 +159,7 @@ abstract class Shop_Payment_System_Handler
 			$this->_processOrder();
 
 			$_SESSION['last_order_id'] = $this->_shopOrder->id;
-			
+
 			// Уведомление о событии создания заказа
 			$this->_createNotification();
 		}
@@ -556,7 +556,7 @@ abstract class Shop_Payment_System_Handler
 				}
 			}
 		}
-		
+
 		return $this;
 	}
 
@@ -875,8 +875,12 @@ abstract class Shop_Payment_System_Handler
 
 		$this->_addPropertiesList(0, $Shop_Order_Properties);
 
+		$oCompany = $this->_shopOrder->company_id
+			? $this->_shopOrder->Shop_Company // Returns Company_Model
+			: $oShop->Company;
+
 		$oShop
-			->addEntity($oShop->Shop_Company)
+			->addEntity($oCompany)
 			->addEntity(
 				$oShop->Site->clearEntities()->showXmlAlias()
 			)
@@ -1028,6 +1032,38 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
+	 * Имя отправителя
+	 */
+	protected $_senderName = NULL;
+
+	/**
+	 * Set subject to user e-mail
+	 * @param string $subject subject
+	 * @return self
+	 */
+	public function senderName($senderName)
+	{
+		$this->_senderName = $senderName;
+		return $this;
+	}
+
+	/**
+	 * Адреса отправителя
+	 */
+	protected $_from = NULL;
+
+	/**
+	 * Set FROM
+	 * @param string $from
+	 * @return self
+	 */
+	public function from($from)
+	{
+		$this->_from = $from;
+		return $this;
+	}
+
+	/**
 	 * Тема письма пользователю о заказе
 	 */
 	protected $_siteuserMailSubject = NULL;
@@ -1155,7 +1191,9 @@ abstract class Shop_Payment_System_Handler
 
 		// В адрес "ОТ КОГО" для администратора указывается адрес магазина,
 		// а в Reply-To указывается email пользователя
-		$from = $this->_getEmailFrom();
+		$from = !is_null($this->_from)
+			? $this->_from
+			: $this->_getEmailFrom();
 
 		$replyTo = Core_Valid::email($oShopOrder->email)
 			? $oShopOrder->email
@@ -1171,9 +1209,13 @@ abstract class Shop_Payment_System_Handler
 			? $this->_adminMailSubject
 			: sprintf($oShop->order_admin_subject, $oShopOrder->invoice, $oShop->name, $date_str);
 
+		$senderName = !is_null($this->_senderName)
+				? $this->_senderName
+				: $oShop->name;
+
 		$oCore_Mail
 			->from($from)
-			->senderName($oShop->name)
+			->senderName($senderName)
 			->header('Reply-To', $replyTo)
 			->subject($admin_subject)
 			->message($sInvoice)
@@ -1263,7 +1305,9 @@ abstract class Shop_Payment_System_Handler
 		if (Core_Valid::email($to))
 		{
 			// Адрес "ОТ КОГО" для пользователя
-			$from = $this->_getEmailFrom();
+			$from = !is_null($this->_from)
+				? $this->_from
+				: $this->_getEmailFrom();
 
 			$this->xsl($this->_xslSiteuserMail);
 			$sInvoice = $this->_processXml();
@@ -1275,6 +1319,10 @@ abstract class Shop_Payment_System_Handler
 				? $this->_siteuserMailSubject
 				: sprintf($oShop->order_user_subject, $oShopOrder->invoice, $oShop->name, $date_str);
 
+			$senderName = !is_null($this->_senderName)
+				? $this->_senderName
+				: $oShop->name;
+
 			// Attach digitals items
 			if ($this->_shopOrder->paid == 1 && $this->_shopOrder->Shop->attach_digital_items == 1)
 			{
@@ -1283,7 +1331,7 @@ abstract class Shop_Payment_System_Handler
 
 			$oCore_Mail
 				->from($from)
-				->senderName($oShop->name)
+				->senderName($senderName)
 				->to($to)
 				->subject($user_subject)
 				->message($sInvoice)

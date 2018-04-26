@@ -75,6 +75,7 @@ class Shop_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'shop_item_property_for_group' => array(),
 		'shop_item_delivery_option' => array(),
+		//'deal' => array()
 	);
 
 	/**
@@ -131,7 +132,8 @@ class Shop_Model extends Core_Entity
 		'shop_measure' => array(),
 		'user' => array(),
 		'siteuser_group' => array(),
-		'shop_company' => array(),
+		'shop_company' => array(), // old relation
+		'company' => array('foreign_key' => 'shop_company_id'), // new relation
 		'shop_country' => array()
 	);
 
@@ -145,12 +147,65 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'size_measure',
+		'yandex_market_name',
+		'items_sorting_direction',
+		'items_sorting_field',
+		'groups_sorting_direction',
+		'groups_sorting_field',
+		'image_large_max_width',
+		'image_large_max_height',
+		'image_small_max_width',
+		'image_small_max_height',
+		'siteuser_group_id',
+		'watermark_file',
+		'watermark_default_use_large_image',
+		'watermark_default_use_small_image',
+		'watermark_default_position_x',
+		'watermark_default_position_y',
+		'create_small_image',
+		'typograph_default_items',
+		'typograph_default_groups',
+		'apply_tags_automatically',
+		'change_filename',
+		'apply_keywords_automatically',
+		'group_image_small_max_width',
+		'group_image_large_max_width',
+		'group_image_small_max_height',
+		'group_image_large_max_height',
+		'producer_image_small_max_width',
+		'producer_image_large_max_width',
+		'producer_image_small_max_height',
+		'producer_image_large_max_height',
+		'preserve_aspect_ratio',
+		'preserve_aspect_ratio_small',
+		'preserve_aspect_ratio_group',
+		'preserve_aspect_ratio_group_small',
+		'seo_group_title_template',
+		'seo_group_keywords_template',
+		'seo_group_description_template',
+		'seo_item_title_template',
+		'seo_item_keywords_template',
+		'seo_item_description_template',
+		'order_admin_subject',
+		'order_user_subject',
+		'confirm_admin_subject',
+		'confirm_user_subject',
+		'cancel_admin_subject',
+		'cancel_user_subject',
+		'shop_order_status_id',
+		'send_order_email_admin',
+		'send_order_email_user',
+		'guid',
+		'yandex_market_sales_notes_default',
 	);
-
+	
 	/**
 	 * Tree of groups
 	 * @var array

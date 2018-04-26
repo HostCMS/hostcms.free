@@ -43,6 +43,14 @@ class Property_Value_Int_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'entity_id'
+	);
+	
+	/**
 	 * Default sorting for models
 	 * @var array
 	 */
@@ -119,10 +127,13 @@ class Property_Value_Int_Model extends Core_Entity
 				{
 					Core_Event::notify($this->_modelName . '.onBeforeAddListItem', $this, array($oList_Item));
 
-					$this
-						->addXmlTag('value', $oList_Item->value)
-						->addXmlTag('description', $oList_Item->description)
-						->addXmlTag('icon', $oList_Item->icon);
+					$this->addXmlTag('value', $oList_Item->value);
+
+					$oList_Item->description != ''
+						&& $this->addXmlTag('description', $oList_Item->description);
+						
+					$oList_Item->icon != ''
+						&& $this->addXmlTag('icon', $oList_Item->icon);
 				}
 			}
 		}

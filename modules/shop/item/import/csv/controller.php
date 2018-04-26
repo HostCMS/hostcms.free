@@ -634,9 +634,20 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			->clear()
 			->url($sSourceFile)
 			->timeout(5)
+			->addOption(CURLOPT_FOLLOWLOCATION, TRUE)
 			->execute();
 
 		$content = $Core_Http->getBody();
+
+		$aHeaders = $Core_Http->parseHeaders();
+		$sStatus = Core_Array::get($aHeaders, 'status');
+		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
+
+		if ($iStatusCode != 200)
+		{
+			throw new Core_Exception("HTTP %code ERROR: %body.\nSource URL: %url",
+				array('%code' => $iStatusCode, '%body' => strip_tags($content), '%url' => $sSourceFile));
+		}
 
 		// Файл из WEB'а, создаем временный файл
 		$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
@@ -2087,7 +2098,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-											
+
 											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
 									break;
@@ -2112,7 +2123,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										$oProperty_Value->setValue($sData);
 									break;
 									case 12: // Shop
-									$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
+										$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
 										if ($oShop_Item)
 										{
 											$oProperty_Value->setValue($oShop_Item->id);
@@ -2120,7 +2131,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-											
+
 											$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 										}
 									break;
@@ -2439,10 +2450,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						if ($this->_oCurrentItem->image_large != '')
 						{
-							try
+							if ($sDestinationFolder . $this->_oCurrentItem->image_large != $sSourceFile)
 							{
-								Core_File::delete($sDestinationFolder . $this->_oCurrentItem->image_large);
-							} catch (Exception $e) {}
+								try
+								{
+									Core_File::delete($sDestinationFolder . $this->_oCurrentItem->image_large);
+								} catch (Exception $e) {}
+							}
 						}
 
 						// Создаем массив параметров для загрузки картинок элементу
@@ -2589,10 +2603,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							// Удаляем старое малое изображение
 							if ($this->_oCurrentItem->image_small != '')
 							{
-								try
+								if ($sDestinationFolder . $this->_oCurrentItem->image_small != $sSourceFile)
 								{
-									Core_File::delete($this->_oCurrentItem->getItemPath() . $this->_oCurrentItem->image_small);
-								} catch (Exception $e) {}
+									try
+									{
+										Core_File::delete($sDestinationFolder . $this->_oCurrentItem->image_small);
+									} catch (Exception $e) {}
+								}
 							}
 
 							$aPicturesParam = array();
@@ -2781,8 +2798,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									// Малое изображение передано
 									$aPicturesParam['create_small_image_from_large'] = FALSE;
 
-									// ------------------------------------------
-									// Файл-источник
+										// Файл-источник
 									$sSourceFileSmall = $this->imagesPath . $this->_aExternalPropertiesSmall[$iPropertyID];
 
 									$sSourceFileBaseNameSmall = basename($sSourceFileSmall, '');
@@ -2862,19 +2878,25 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								// Удаляем старое большое изображение
 								if ($oProperty_Value->file != '')
 								{
-									try
+									if ($sDestinationFolder . $oProperty_Value->file != $sSourceFile)
 									{
-										Core_File::delete($sDestinationFolder . $oProperty_Value->file);
-									} catch (Exception $e) {}
+										try
+										{
+											Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+										} catch (Exception $e) {}
+									}
 								}
 
 								// Удаляем старое малое изображение
 								if ($oProperty_Value->file_small != '')
 								{
-									try
+									if ($sDestinationFolder . $oProperty_Value->file_small != $sSourceFileSmall)
 									{
-										Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
-									} catch (Exception $e) {}
+										try
+										{
+											Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+										} catch (Exception $e) {}
+									}
 								}
 
 								try {
@@ -2966,7 +2988,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-								
+
 								$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 							}
 						break;
@@ -2999,7 +3021,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-								
+
 								$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 							}
 						break;
@@ -3286,7 +3308,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->_aTags = NULL;
 
 		$this->_aClearedPropertyValues = array();
-		
+
 		return $this;
 	}
 

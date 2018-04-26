@@ -88,14 +88,12 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 			)
 			->show();
 
-		echo json_encode(
+		Core::showJson(
 			array(
 				'html' => ob_get_clean(),
 				'id' => $shop_item_id
 			)
 		);
-
-		exit();
 	}
 
 	// Список доставок
@@ -113,8 +111,9 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 
 			$aDelivery = $Shop_Cart_Controller_Onestep->showDelivery($shop_country_id, $shop_country_location_id, $shop_country_location_city_id, $shop_country_location_city_area_id, $aTotal['weight'], $aTotal['amount']);
 
-			echo json_encode(array('delivery' => $aDelivery));
-			exit();
+			Core::showJson(
+				array('delivery' => $aDelivery)
+			);
 		}
 	}
 
@@ -131,8 +130,7 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 			$aPaymentSystems = $Shop_Cart_Controller_Onestep->showPaymentSystem($oShop_Delivery_Condition->shop_delivery_id);
 		}
 
-		echo json_encode(array('payment_systems' => $aPaymentSystems));
-		exit();
+		Core::showJson(array('payment_systems' => $aPaymentSystems));
 	}
 }
 
@@ -199,8 +197,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$aArray['_' . $Object->id] = $Object->getName();
 	}
 
-	echo json_encode($aArray);
-	exit();
+	Core::showJson($aArray);
 }
 
 // Удаляение товара из корзины

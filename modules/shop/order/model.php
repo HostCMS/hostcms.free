@@ -59,6 +59,7 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop' => array(),
+		'shop_company' => array('model' => 'Company', 'foreign_key' => 'company_id'),
 		'shop_country_location' => array(),
 		'shop_country' => array(),
 		'shop_country_location_city' => array(),
@@ -86,6 +87,8 @@ class Shop_Order_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'datetime',
 		'payment_datetime',
 		'status_datetime',
@@ -808,8 +811,8 @@ class Shop_Order_Model extends Core_Entity
 		{
 			case 2:
 				$oProperty_Value
-					->setHref($this->getItemHref())
-					->setDir($this->getItemPath());
+					->setHref($this->getOrderHref())
+					->setDir($this->getOrderPath());
 			break;
 			case 8:
 				$oProperty_Value->dateFormat($this->Shop->format_date);
@@ -1498,6 +1501,11 @@ class Shop_Order_Model extends Core_Entity
 					: ''
 				);
 			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
 			{
@@ -1552,7 +1560,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Get Popover Content
 	 * @return string
 	 */
-	protected function _orderPopover()
+	public function orderPopover()
 	{
 		ob_start();
 
@@ -1606,7 +1614,7 @@ class Shop_Order_Model extends Core_Entity
 		}
 		?>
 		<div class="row">
-			<div class="col-xs-12">
+			<div class="col-xs-12 table-responsive">
 				<table class="table table-hover">
 					<thead class="bordered-palegreen">
 						<tr>
@@ -1729,7 +1737,7 @@ class Shop_Order_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $onclick, 'onclick');
 
-		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->_orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
+		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
 	}
 
 	/**

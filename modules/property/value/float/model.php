@@ -40,6 +40,14 @@ class Property_Value_Float_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'entity_id'
+	);
+	
+	/**
 	 * Default sorting for models
 	 * @var array
 	 */
