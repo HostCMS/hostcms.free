@@ -181,6 +181,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 				$oShop_Items
 					->queryBuilder()
+					->where('shop_items.shortcut_id', '=', 0)
 					->offset($offset)->limit($limit);
 
 				$aShop_Items = $oShop_Items->findAll(FALSE);

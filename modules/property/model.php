@@ -443,4 +443,22 @@ class Property_Model extends Core_Entity
 	{
 		return Core::_('Property.type' . $this->type);
 	}
+
+	/**
+	 * Change multiple status
+	 * @return self
+	 * @hostcms-event property.onBeforeChangeMultiple
+	 * @hostcms-event property.onAfterChangeMultiple
+	 */
+	public function changeMultiple()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeMultiple', $this);
+
+		$this->multiple = 1 - $this->multiple;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeMultiple', $this);
+
+		return $this;
+	}
 }

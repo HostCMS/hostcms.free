@@ -121,7 +121,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			return sprintf(
 				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
-				htmlspecialchars($this->Shop_Item->name)
+				htmlspecialchars($this->name)
 			);
 		}
 	}

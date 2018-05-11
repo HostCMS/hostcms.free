@@ -79,6 +79,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				'price_with_tax' => $aPrice['price_tax'],
 				'rate' => $aPrice['rate'],
 				'marking' => $oShop_Item->marking,
+				'currency_id' => $oShop_Currency->id,
 				'currency' => $oShop_Currency->name,
 				'count' => $oShop_Item->getRest()
 			);

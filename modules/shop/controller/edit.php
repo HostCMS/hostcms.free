@@ -137,13 +137,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopTabFormats
 					->add($oShopTabFormatsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabExport
 					->add($oGuidRow = Admin_Form_Entity::factory('Div')->class('row'))
@@ -159,9 +153,15 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oShopTabWatermark
-					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize5 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -218,18 +218,18 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Перемещаем поля на их вкладки
 				$oMainTab
 					// Formats
-					->move($this->getField('image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('image_large_max_height'), $oShopTabFormats)
-					->move($this->getField('group_image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('group_image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('group_image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('group_image_large_max_height'), $oShopTabFormats)
-					->move($this->getField('producer_image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('producer_image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('producer_image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('producer_image_large_max_height'), $oShopTabFormats)
+					->move($this->getField('image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('image_large_max_height'), $oShopTabWatermark)
+					->move($this->getField('group_image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('group_image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('group_image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('group_image_large_max_height'), $oShopTabWatermark)
+					->move($this->getField('producer_image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('producer_image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('producer_image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('producer_image_large_max_height'), $oShopTabWatermark)
 					->move($this->getField('format_date'), $oShopTabFormats)
 					->move($this->getField('format_datetime'), $oShopTabFormats)
 					->move($this->getField('typograph_default_items'), $oShopTabFormats)
@@ -611,35 +611,35 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('send_order_email_user'), $oMainRow10);
 				$oMainTab->move($this->getField('comment_active'), $oMainRow11);
 				$oMainTab->move($this->getField('apply_tags_automatically'), $oMainRow12);
-				$oMainTab->move($this->getField('write_off_paid_items'), $oMainRow13);
-				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow14);
+				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow13);
+				$oMainTab->move($this->getField('write_off_paid_items'), $oMainRow14);
 				$oMainTab->move($this->getField('change_filename'), $oMainRow15);
 				$oMainTab->move($this->getField('attach_digital_items'), $oMainRow16);
 				$oMainTab->move($this->getField('use_captcha'), $oMainRow17);
+				
+				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
+				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);				
 
-				$oShopTabFormats->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
-				$oShopTabFormats->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
+				$oShopTabWatermark->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
+				$oShopTabWatermark->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
+				
+				$oShopTabWatermark->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
+				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);				
 
-				$oShopTabFormats->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
-				$oShopTabFormats->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
+				
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);				
 
-				$oShopTabFormats->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow3);
-				$oShopTabFormats->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow3);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
 
-				$oShopTabFormats->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow4);
-				$oShopTabFormats->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow4);
+				$oShopTabFormats->move($this->getField('format_date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
+				$oShopTabFormats->move($this->getField('format_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
 
-				$oShopTabFormats->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow5);
-				$oShopTabFormats->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow5);
-
-				$oShopTabFormats->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow6);
-				$oShopTabFormats->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow6);
-
-				$oShopTabFormats->move($this->getField('format_date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow7);
-				$oShopTabFormats->move($this->getField('format_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow7);
-
-				$oShopTabFormats->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow8);
-				$oShopTabFormats->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow8);
+				$oShopTabFormats->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
+				$oShopTabFormats->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
 
 				$oShopTabExport->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')),$oGuidRow);
 				$oShopTabExport->move($this->getField('yandex_market_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);

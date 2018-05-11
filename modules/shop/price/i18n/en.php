@@ -26,5 +26,6 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'edit_success' => "Price information added successfully!",
 	'markDeleted_success' => "Price information deleted successfully!",
-	'apply_success' => "Information successfully changed",	
+	'apply_success' => "Information successfully changed",
+	'recount_success' => "Price recount successfully!",
 );

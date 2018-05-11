@@ -75,7 +75,7 @@ class Shop_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'shop_item_property_for_group' => array(),
 		'shop_item_delivery_option' => array(),
-		//'deal' => array()
+		'deal' => array()
 	);
 
 	/**

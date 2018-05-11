@@ -333,6 +333,11 @@ $oAdmin_Form_Dataset->addCondition(
 	)
 );
 
+$oAdmin_Form_Dataset
+->changeField('multiple', 'link', "/admin/shop/item/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={property_dir_id}")
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+;
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset

@@ -74,10 +74,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 	$oShop = Core_Entity::factory('Shop', $entity_id);
 
-	strlen(Core_Array::getGet('exclude')) && $aExcludeTmp = json_decode(Core_Array::getGet('exclude'), TRUE);
-
-	$aExclude = is_array($aExcludeTmp)
-		? $aExcludeTmp
+	$aExclude = strlen(Core_Array::getGet('exclude'))
+		? json_decode(Core_Array::getGet('exclude'), TRUE)
 		: array();
 
 	$aJSON = array();
@@ -91,9 +89,11 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('shop_groups.id', 'NOT IN', $aExclude)
 			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(10);
+
+		count($aExclude) && $oShop_Groups->queryBuilder()
+			->where('shop_groups.id', 'NOT IN', $aExclude);
 
 		$aShop_Groups = $oShop_Groups->findAll();
 

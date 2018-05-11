@@ -14,6 +14,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Shop_Warehouse_Model extends Core_Entity
 {
 	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $items = 1;	
+	
+	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -157,5 +163,26 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$queryBuilder = Core_QueryBuilder::select(array('SUM(count)', 'count'))
+			->from('shop_warehouse_items')
+			->where('shop_warehouse_items.shop_warehouse_id', '=', $this->id);
+
+		$aResult = $queryBuilder->execute()->asAssoc()->current();
+
+		$aResult['count'] && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value($aResult['count'])
+			->title(Core::_('Shop_Warehouse.shop_items_count'))
+			->execute();
 	}
 }

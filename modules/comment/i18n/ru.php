@@ -40,4 +40,6 @@ return array(
 	'changeActive_success' => 'Активность комментария изменена',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'ban' => 'Заблокировать',
+	'ban_comment' => 'Заблокирован за комментарий: %s',
 );

@@ -77,5 +77,6 @@ return array(
 	'denyAccessChildren_success' => 'Access denied.',
 	'multiple' => 'Allow multiple values for property',
 	'preserve_aspect_ratio' => 'Preserve aspect ratio',
-	'preserve_aspect_ratio_small' => 'Preserve aspect ratio for small images',	
+	'preserve_aspect_ratio_small' => 'Preserve aspect ratio for small images',
+	'changeMultiple_success' => 'Multiple have been changed.',
 );

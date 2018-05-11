@@ -12,6 +12,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
+ * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  *
  * Доступные свойства:
  *
@@ -56,6 +57,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'tax',
 		'quantity',
 		'weight',
+		'calculateCounts',
 	);
 
 	/**
@@ -121,7 +123,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 		);
 
-		$this->itemsProperties = $this->taxes = $this->specialprices = $this->associatedItems = FALSE;
+		$this->itemsProperties = $this->taxes = $this->specialprices
+			= $this->calculateCounts = $this->associatedItems = FALSE;
+
 		$this->itemsPropertiesList = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
@@ -148,6 +152,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$bXsl = !is_null($this->_xsl);
 
 		$oShop = $this->getEntity();
+
+		$oShop->showXmlCounts($this->calculateCounts);
 
 		// Coupon text
 		!is_null($this->couponText) && $this->addEntity(

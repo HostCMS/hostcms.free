@@ -73,10 +73,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
 
-	strlen(Core_Array::getGet('exclude')) && $aExcludeTmp = json_decode(Core_Array::getGet('exclude'), TRUE);
-
-	$aExclude = is_array($aExcludeTmp)
-		? $aExcludeTmp
+	$aExclude = strlen(Core_Array::getGet('exclude'))
+		? json_decode(Core_Array::getGet('exclude'), TRUE)
 		: array();
 
 	$aJSON = array();
@@ -90,10 +88,12 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.id', 'NOT IN', $aExclude)
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(10);
 
+		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
+			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
+			
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)

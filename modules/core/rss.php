@@ -149,7 +149,6 @@ class Core_Rss
 
 		$oCore_Response
 			->body($rss)
-			->compress()
 			->sendHeaders()
 			->showBody();
 	}

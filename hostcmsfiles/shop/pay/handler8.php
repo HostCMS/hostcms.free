@@ -1,31 +1,43 @@
 <?php
 /**
  * RBK Money
+ * Личный кабинет https://dashboard.rbk.money/
  */
-class Shop_Payment_System_Handler34 extends Shop_Payment_System_Handler
+class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 {
-	// Приватный ключ для доступа к API
-	protected $_apiKey = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICIzaG14MU95bjJWc2psTEZRNTNLYk5Nek12RGZUcjdzcGxYelJDeDRERVR3In0.eyJqdGkiOiI4ZTRkNDZjNC0yZjcwLTQyYTctYjhiYS1kN2RmMTcyYzBlYWIiLCJleHAiOjE1NTYxNzkwMjQsIm5iZiI6MCwiaWF0IjoxNTI0NjQzMDI0LCJpc3MiOiJodHRwczovL2F1dGgucmJrLm1vbmV5L2F1dGgvcmVhbG1zL2V4dGVybmFsIiwiYXVkIjoia29mZmluZyIsInN1YiI6ImJiNzY2ODQ0LTY2NWQtNGY5Zi1hYTRiLTUwNzQ4NzU3NjI5YSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImtvZmZpbmciLCJub25jZSI6ImFiMmM5NzJhLTk1MzktNDdkNy04NDRjLTBhYmJiM2RlYzAzMyIsImF1dGhfdGltZSI6MTUyNDY0MzAxNSwic2Vzc2lvbl9zdGF0ZSI6IjFmNWNlNzUwLWUxOTctNGU2OC05YzRhLTNiNjUwYjFjZjI0OCIsImFjciI6IjAiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cHM6Ly9kYXNoYm9hcmQucmJrLm1vbmV5Il0sInJlc291cmNlX2FjY2VzcyI6eyJjb21tb24tYXBpIjp7InJvbGVzIjpbImludm9pY2VzLioucGF5bWVudHM6d3JpdGUiLCJjdXN0b21lcnMuKi5iaW5kaW5nczp3cml0ZSIsInBhcnR5OnJlYWQiLCJpbnZvaWNlcy4qLnBheW1lbnRzOnJlYWQiLCJjdXN0b21lcnM6d3JpdGUiLCJwYXJ0eTp3cml0ZSIsImN1c3RvbWVycy4qLmJpbmRpbmdzOnJlYWQiLCJjdXN0b21lcnM6cmVhZCIsImludm9pY2VzOndyaXRlIiwiaW52b2ljZXM6cmVhZCJdfSwidXJsLXNob3J0ZW5lciI6eyJyb2xlcyI6WyJzaG9ydGVuZWQtdXJsczp3cml0ZSIsInNob3J0ZW5lZC11cmxzOnJlYWQiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sIm5hbWUiOiLQkNC70LXQutGB0LDQvdC00YAg0JXQs9C-0YDQvtCyIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWxleGFuZGVyQGhvc3RjbXMucnUiLCJnaXZlbl9uYW1lIjoi0JDQu9C10LrRgdCw0L3QtNGAIiwiZmFtaWx5X25hbWUiOiLQldCz0L7RgNC-0LIiLCJlbWFpbCI6ImFsZXhhbmRlckBob3N0Y21zLnJ1In0.lRGwYmDA1s1pR7WxA8UOqwY04-HiD181PQUw-uxVyZH2xOxUM0GoFnjkWZKhrU3iHjfQlKn-TMvRop00guzUOYWedK5Sn72epiS-AyhIq3BHBLD4n-ZRu6k9QZ1ni4XkPR1UCBp9W3iwLuGxM1gBxzUzRaqqLill_3QD3ZB-tnQDQb0QdFnu_pNhc3G1Feeu0ajm4gpYwWcqVBmsfdomFdv3yN53JtVGeB_NZ1Vd_pi8wn8EOrSjVJ7FrbQpqi2l45BECdoUnUtB09XUtVpMzEFfwo0lNNisw_Pezt8UU5OVnqfu9kbiJghSuY448jpW7B0ZiZ1OpXWJUa6kNkZqjvyBAdcf-D8NTBWmiQVbFPE9ldq5MrrorJYLZNig3l_x_l77g7HjVk06zCxAFzjHV-CpsPGVlUbWrRmj2BAFdm_C6e99TKMxe3wXa76gFDdGbxLpNucr7PXHF5DQ5SbpOAyc3OY18K3IYIEnHw7vea7kKVPzG367LIWRFUDo-5z564UmaObgpDxHM85x5wNgkaNng6zonuE6fAyMkwc6yD2LK0UtNqfJa74so9NlVqYV1F_D8qKRtjwC6kFE0HlfwVHhr5U9Fu-tqewdNxYpcZoQgveLJAEjdq9G6n1uMDVwfJpmA84IVd0wPR_bjXtTRGgYugJrN3Z7rw1PVC_0Q9M';
+	/**
+	 * Приватный ключ для доступа к API
+	 * Доступен в разделе "API ключ", поле "Ваш приватный ключ для доступа к API"
+	 */
+	protected $_apiKey = '%apiKey%';
 
-	// Идентификатор магазина
-	protected $_rbkShopId = '94ffc421-cdd4-4a3c-a2d9-8dfecab2f5c1';
+	/**
+	 * Идентификатор магазина
+	 * Доступен в разделе "Детали магазина", строка "Идентификатор"
+	 */
+	protected $_rbkShopId = '%rbkShopId%';
 
-	// Публичный ключ (Webhook)
-	protected $_publicKey = '-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt2Th8ZbRwZPF3cNSmz0N
-28gcL154DnxLcAyCx9h5KbAsXoxqCrXxf7zloVlGpjkkVJfwYtYadl4sEe96A2gW
-Rw26y3hdqMTk8C36RW36M8E6xvMJH6u006Yqx62Z+0FlxpSvm0EUtToZ7uiAquky
-ApK4ahNAfBH6peknLTE+bsGJnS/lI2ia6SqGF1bIJQc0vCG6heMuMbFJ8bVbLaM/
-Wro7qrP/D7fLUlxO8ULrMOaDIaR0hl4g/8kOLuZPmK4lfBGhZMfs0ryWp94C5Mhs
-pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
-+wIDAQAB
------END PUBLIC KEY-----';
+	/**
+	 * Публичный ключ (Webhook)
+	 * Создается в разделе "Webhooks". При создании выбираем события:
+	 *
+	 * - PaymentProcessed
+	 * - PaymentCaptured
+	 * - PaymentCancelled
+	 *
+	 * После сохранения ключ будет в поле "Публичный ключ". Нажмите "Скопировать ключ"
+	 */
+	protected $_publicKey = '%publicKey%';
 
-	/* Идентификатор валюты, в которой будет производиться платеж.
-	 Сумма к оплате будет пересчитана из валюты магазина в указанную валюту */
+	/**
+	 * Идентификатор валюты, в которой будет производиться платеж.
+	 * Сумма к оплате будет пересчитана из валюты магазина в указанную валюту
+	 */
 	protected $_rbkmoney_currency_id = 1;
 
-	/* Определяем коэффициент перерасчета цены */
+	/**
+	 * Определяем коэффициент перерасчета цены
+	 */
 	protected $_coefficient = 1;
 
 	/**
@@ -39,12 +51,12 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 			$content = file_get_contents('php://input');
 
 			// Достаем сигнатуру из заголовка и декодируем
-			$signatureFromHeader = $this->getSignatureFromHeader($_SERVER['HTTP_CONTENT_SIGNATURE']);
+			$signatureFromHeader = $this->_getSignatureFromHeader($_SERVER['HTTP_CONTENT_SIGNATURE']);
 
 			// Декодируем данные
-			$decodedSignature = $this->urlsafe_b64decode($signatureFromHeader);
+			$decodedSignature = $this->_urlsafe_b64decode($signatureFromHeader);
 
-			if(!$this->verificationSignature($content, $decodedSignature, $this->_publicKey))
+			if (!$this->_verificationSignature($content, $decodedSignature, $this->_publicKey))
 			{
 				http_response_code(400);
 				echo json_encode(['message' => 'Webhook notification signature mismatch']);
@@ -54,6 +66,9 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 			// Преобразуем данные в массив
 			$aResponse = json_decode($content, TRUE);
 
+			// PaymentProcessed - платеж успешно обработан (средства захолдированы)
+			// PaymentCaptured - платеж успешно принят (захолдированные средства списаны)
+			// PaymentCancelled - платеж отменен (захолдированные средства возвращены)
 			if (isset($aResponse['eventType']) && $aResponse['eventType'] == 'PaymentProcessed'
 				&& isset($aResponse['invoice']))
 			{
@@ -65,9 +80,7 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 				if (!is_null($oShop_Order->id))
 				{
 					$request = json_encode(
-						array(
-							'reason' => 'capture'
-						)
+						array('reason' => 'capture')
 					);
 
 					try {
@@ -94,7 +107,7 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 							// Вызов обработчика платежной системы
 							Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
 								->shopOrder($oShop_Order)
-								->paymentProcessing();
+								->paymentProcessing($aResponse);
 						}
 						else
 						{
@@ -108,7 +121,9 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		}
 	}
 
-	/* Вызывается на 4-ом шаге оформления заказа*/
+	/**
+	 * Вызывается на 4-ом шаге оформления заказа
+	 */
 	public function execute()
 	{
 		parent::execute();
@@ -131,7 +146,9 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		return $this;
 	}
 
-	/* вычисление суммы товаров заказа */
+	/**
+	 * Вычисление суммы товаров заказа
+	 */
 	public function getSumWithCoeff()
 	{
 		return Shop_Controller::instance()->round(($this->_rbkmoney_currency_id > 0
@@ -143,29 +160,39 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 			: 0) * $this->_shopOrder->getAmount() * $this->_coefficient);
 	}
 
-	/* обработка ответа от платёжной системы */
-	public function paymentProcessing()
+	/**
+	 * Обработка ответа от платёжной системы
+	 */
+	public function paymentProcessing($aResponse)
 	{
-		$this->ProcessResult();
+		$amount = isset($aResponse['invoice']['amount'])
+			? intval($aResponse['invoice']['amount']) / 100
+			: '';
 
-		return TRUE;
-	}
+		$currency = isset($aResponse['invoice']['currency'])
+			? strval($aResponse['invoice']['currency'])
+			: '';
 
-	/* оплачивает заказ */
-	function ProcessResult()
-	{
+		$id = isset($aResponse['invoice']['id'])
+			? strval($aResponse['invoice']['id'])
+			: '';
+
 		$this->shopOrderBeforeAction(clone $this->_shopOrder);
 
-		$this->_shopOrder->system_information = sprintf("Товар оплачен через RBK Money");
+		$this->_shopOrder->system_information = sprintf("Товар оплачен через RBK Money. Данные платежа - amount:{$amount}, currency:{$currency}, id:{$id}");
 
 		$this->_shopOrder->paid();
 
 		ob_start();
 		$this->changedOrder('changeStatusPaid');
 		ob_get_clean();
+
+		return TRUE;
 	}
 
-	/* печатает форму отправки запроса на сайт платёжной системы */
+	/**
+	 * Печатает форму отправки запроса на сайт платёжной системы
+	 */
 	public function getNotification()
 	{
 		$oShop_Order = $this->_shopOrder;
@@ -186,11 +213,11 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 
 		$oShop_Currency = Core_Entity::factory('Shop_Currency')->find($this->_rbkmoney_currency_id);
 
-		if(!is_null($oShop_Currency->id))
+		if (!is_null($oShop_Currency->id))
 		{
 			$serviceName = 'Оплата счета N ' . $oShop_Order->invoice;
 
-			$aItems = $this->getOrderItems($oShop_Order);
+			$aItems = $this->_getOrderItems($oShop_Order);
 
 			$dueDate = date('Y-m-d\TH:i:s\Z', Core_Date::sql2timestamp($oShop_Order->datetime));
 
@@ -248,15 +275,15 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 					?>
 					<form action="<?php echo $handler_url?>" method="GET">
 						<script src="https://checkout.rbk.money/checkout.js" class="rbkmoney-checkout"
-								data-invoice-id="<?php echo $invoice_id?>"
-								data-invoice-access-token="<?php echo $access_token?>"
+								data-invoice-id="<?php echo htmlspecialchars($invoice_id)?>"
+								data-invoice-access-token="<?php echo htmlspecialchars($access_token)?>"
 								data-payment-flow-hold="true"
 								data-hold-expiration="capture"
-								data-name="<?php echo strval($aAnswer['invoice']['product'])?>"
-								data-email="<?php echo $oShop_Order->email?>"
+								data-name="<?php echo htmlspecialchars(strval($aAnswer['invoice']['product']))?>"
+								data-email="<?php echo htmlspecialchars($oShop_Order->email)?>"
 								data-logo="https://checkout.rbk.money/images/logo.png"
 								data-label="Оплатить с карты"
-								data-description="<?php echo strval($aAnswer['invoice']['description'])?>"
+								data-description="<?php echo htmlspecialchars(strval($aAnswer['invoice']['description']))?>"
 								data-pay-button-label="Оплатить">
 						</script>
 					</form>
@@ -276,7 +303,10 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		return $this->getNotification();
 	}
 
-	public function getOrderItems($oShop_Order)
+	/**
+	 * Получаем товары из заказа
+	 */
+	protected function _getOrderItems($oShop_Order)
 	{
 		$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll(FALSE);
 
@@ -302,9 +332,6 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 			)
 			: 0;
 
-		//echo "\ndiscount = ", $discount, "\n";
-
-		// -----------------
 		$aItems = array();
 
 		// Рассчитываемая сумма с учетом скидок
@@ -334,15 +361,12 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		$totalAmount = $oShop_Order->getAmount();
 		if ($calcAmount != $totalAmount)
 		{
-			//echo "\nРАЗНИЦА В СУММАХ! calc = {$calcAmount}, total= {$totalAmount}";
-
 			$delta = $totalAmount - $calcAmount;
 
 			end($aItems);
 			$lastKey = key($aItems);
 
 			$deltaPerOneItem = round($delta / $aItems[$lastKey]['quantity'], 2);
-			//echo "\ndelta=", $deltaPerOneItem;
 
 			$aItems[$lastKey]['price'] += $deltaPerOneItem;
 
@@ -365,7 +389,10 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		return $aItems;
 	}
 
-	public function getSignatureFromHeader($contentSignature)
+	/**
+	 * Получаем сигнатуру из заголовка
+	 */
+	protected function _getSignatureFromHeader($contentSignature)
 	{
 		$signature = preg_replace("/alg=(\S+);\sdigest=/", '', $contentSignature);
 
@@ -376,13 +403,18 @@ pSqMMFRKvqb8e9/FP+iETvXiPkvIi1y38ODaelZ/X1Yohm6N8jP/lW+lXmfmxG+U
 		return $signature;
 	}
 
-	public function urlsafe_b64decode($string)
+	/**
+	 * Декодируем сигнатуру
+	 */
+	protected function _urlsafe_b64decode($string)
 	{
 		return base64_decode(strtr($string, '-_,', '+/='));
 	}
 
-	// Проверяем сигнатуру
-	public function verificationSignature($data, $signature, $public_key)
+	/**
+	 * Проверяем сигнатуру
+	 */
+	protected function _verificationSignature($data, $signature, $public_key)
 	{
 		if (empty($data) || empty($signature) || empty($public_key)) {
 			return FALSE;

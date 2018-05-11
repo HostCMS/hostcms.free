@@ -87,6 +87,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
 			;
 
 		$this
@@ -103,6 +104,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
 			;
 	}
 

@@ -189,7 +189,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * Data set from _REQUEST
 	 * @var array
 	 */
-	//public $request = array();
+	public $request = array();
 
 	/**
 	 * Admin_Form_Setting
@@ -198,7 +198,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	protected $_oAdmin_Form_Setting = NULL;
 
 	protected $_allowedProperties = array(
-		'request',
+		//'request', // Нельзя, т.к. к request используется прямой доступ в различных index.php
 		// Page title <h1>
 		'title',
 		// Page title <title>

@@ -82,6 +82,13 @@ class Document_Version_Model extends Core_Entity
 		return $this;
 	}
 	
+	public function execute()
+	{
+		$this->Document->execute();
+
+		return $this;
+	}
+	
 	/**
 	 * Save document file
 	 * @param string $content content

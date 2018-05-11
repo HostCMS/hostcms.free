@@ -39,5 +39,7 @@ return array(
 	'markDeleted_success' => 'Comment deleted successfully!',
 	'changeActive_success' => 'Status changed successfully!',
 	'delete_success' => 'Item deleted successfully!',
-	'undelete_success' => 'Item restored successfully!'
+	'undelete_success' => 'Item restored successfully!',
+	'ban' => 'Ban',
+	'ban_comment' => 'Blocked for comment: %s',	
 );

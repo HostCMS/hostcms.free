@@ -100,12 +100,17 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->add($oFormatsRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					// ->add($oFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'))
+					;
 
 				$oInformationsystemTabImage
+					->add($oImageRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))					
+					->add($oImageRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))					
 					->add($oImageRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -328,8 +333,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_large_max_width'), $oFormatsRow2)
-					->move($this->getField('image_large_max_height'), $oFormatsRow2);
+					->move($this->getField('image_large_max_width'), $oImageRowSize1)
+					->move($this->getField('image_large_max_height'), $oImageRowSize1);
 
 				$this->getField('image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -337,8 +342,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_small_max_width'), $oFormatsRow3)
-					->move($this->getField('image_small_max_height'), $oFormatsRow3);
+					->move($this->getField('image_small_max_width'), $oImageRowSize2)
+					->move($this->getField('image_small_max_height'), $oImageRowSize2);
 
 				$this->getField('group_image_large_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -347,21 +352,21 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('group_image_large_max_width'), $oFormatsRow4)
-					->move($this->getField('group_image_large_max_height'), $oFormatsRow4);
+					->move($this->getField('group_image_large_max_width'), $oImageRowSize3)
+					->move($this->getField('group_image_large_max_height'), $oImageRowSize3);
 
 				$this->getField('group_image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$this->getField('group_image_small_max_height')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$oMainTab
-					->move($this->getField('group_image_small_max_width'), $oFormatsRow5)
-					->move($this->getField('group_image_small_max_height'), $oFormatsRow5);
+					->move($this->getField('group_image_small_max_width'), $oImageRowSize4)
+					->move($this->getField('group_image_small_max_height'), $oImageRowSize4);
 
 				$oMainTab
-					->move($this->getField('use_captcha'), $oFormatsRow6)
-					->move($this->getField('typograph_default_items'), $oFormatsRow7)
-					->move($this->getField('typograph_default_groups'), $oFormatsRow8);
+					->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
+					->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
+					->move($this->getField('use_captcha'), $oFormatsRow7);
 
 
 				// Seo templates

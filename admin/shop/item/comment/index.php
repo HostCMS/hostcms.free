@@ -332,6 +332,21 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Блокировка IP-адреса
+$oAdminFormActionBlock = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('blockIp');
+
+if ($oAdminFormActionBlock && $oAdmin_Form_Controller->getAction() == 'blockIp')
+{
+	$oComment_Controller_Block = Admin_Form_Action_Controller::factory(
+		'Comment_Controller_Block', $oAdminFormActionBlock
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oComment_Controller_Block);
+}
+
 // Источник данных
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Item_Comment')

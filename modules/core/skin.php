@@ -181,6 +181,13 @@ abstract class Core_Skin
 			? $_SESSION['skin']
 			: Core::$mainConfig['skin'];
 
+		// Check skin exists
+		$aConfig = Core_Config::instance()->get('skin_config');
+		if (!isset($aConfig[$name]))
+		{
+			$name = Core::$mainConfig['skin'];
+		}
+			
 		if (!is_string($name))
 		{
 			throw new Core_Exception('Wrong argument type (expected String)');

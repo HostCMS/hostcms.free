@@ -173,11 +173,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * @param SimpleXMLElement $oXMLNode node
 	 * @param int $iParentId parent ID
 	 * @return self
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportShopGroup
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportShopGroup
 	 */
 	protected function _importGroups($oXMLNode, $iParentId = 0)
 	{
 		foreach ($this->xpath($oXMLNode, 'Группа') as $oXMLGroupNode)
 		{
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopGroup', $this, array($oXMLGroupNode));
+			
 			$oShopGroup = Core_Entity::factory('Shop', $this->iShopId)
 				->Shop_Groups
 				->getByGuid(strval($oXMLGroupNode->Ид), FALSE);
@@ -309,11 +313,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			}
 
 			// Дочерние группы
-			foreach ($this->xpath($oXMLGroupNode, 'Группы') as $Groups)
+			foreach ($this->xpath($oXMLGroupNode, 'Группы') as $oSubGroup)
 			{
-				$this->_importGroups($Groups, $oShopGroup->id);
+				$this->_importGroups($oSubGroup, $oShopGroup->id);
 			}
+			
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopGroup', $this, array($oXMLGroupNode));
 		}
+		
 		return $this;
 	}
 

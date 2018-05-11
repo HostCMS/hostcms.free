@@ -174,6 +174,11 @@ $oAdmin_Form_Dataset
 	->addCondition(array('join' => array('shop_order_properties', 'shop_order_properties.property_id', '=', 'properties.id')))
 	->addCondition(array('where' =>array('shop_order_properties.shop_id', '=', $oShop->id)))
 	->addCondition(array('where' =>array('property_dir_id', '=', $oPropertyDir->id)));
+
+$oAdmin_Form_Dataset	
+	->changeField('multiple', 'link', "/admin/shop/order/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");	
+	
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 $oAdmin_Form_Controller->execute();

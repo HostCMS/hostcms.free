@@ -2480,6 +2480,7 @@ table.table.table-popular-queries tr td:last-child {
 .btn-group [data-toggle="dropdown"] .fa , .btn-group ul.dropdown-menu > li > a i.fa {
 	color: inherit !important;
 }
+
 .admin-table td .small .fa { margin-right: 3px; }
 
 .badge-circle { display: inline-block; width: 28px; height: 28px; background-color: #CCC; -webkit-border-radius: 50%; -moz-border-radius: 50%; border-radius: 50%; background-clip: padding-box; text-align: center }
@@ -2987,12 +2988,10 @@ a.fc-day-number { color: #999 !important; }
 [data-action="showListDealTemplateSteps"]
 {
 	cursor: pointer;
-	margin: 0 5px 0 0;
 }
 
 .deal-template-step-conversion [data-action="showListDealTemplateSteps"] .fa
 {
-	font-size: 10px;
 	line-height: 0 !important;
 }
 
@@ -3000,6 +2999,8 @@ a.fc-day-number { color: #999 !important; }
 {
 	margin: 0 5px 5px 0;
 }
+
+.deal-template-step-conversion .dropdown-step-list .close i { font-size: 10px; }
 
 .label.deal-template-step .close
 {
@@ -3378,7 +3379,7 @@ form.adminForm .deal_step
 	list-style: none;
 	display: inline-block;
 	padding-left: 0;
-	margin-top: 10px;
+	margin-top: 5px;
 	margin-bottom: 0;
 
 	-ms-box-orient: horizontal;
@@ -3399,65 +3400,39 @@ form.adminForm .deal_step
 .deal-steps li a  {
 	color: #FFF;
 	display: block;
-	background: #ccc;
+	background-color: #ccc;
 	text-decoration: none;
 	position: relative;
-	/*height: 20px;
-	line-height: 20px;
-	padding: 0 10px 0 5px;*/
 	height: 14px;
 	line-height: 14px;
-	/*padding: 0 10px 0 5px;*/
 	padding: 0 5px 0 5px;
 	text-align: center;
-	/*margin-right: 23px;*/
 	margin-right: 17px;
 }
-.deal-steps.deal-successful li a {
-	background: #9ccc65;
+
+.deal-steps.deal-successful li a:not(:hover) {
+	background-color: #9ccc65 !important;
+	border-color: #9ccc65 !important;
 }
 
-.deal-steps.deal-failed li a {
-	background: #fb7d77;
+.deal-steps.deal-failed li a:not(:hover) {
+	background-color: #fb7d77 !important;
+	border-color: #fb7d77 !important;
 }
 
-.deal-steps li:nth-child(even) a {
-	background-color: #ccc;
+.deal-steps li a:not(.complete):not(.current):not(:hover) {
+	background-color: #ccc !important;
+	border-color: #ccc !important;
 }
-
-.deal-steps.deal-successful li:nth-child(even) a {
-	background-color: #9ccc65;
-}
-
-.deal-steps.deal-failed li:nth-child(even) a {
-	background-color: #fb7d77;
-}
-
 
 .deal-steps li:nth-child(even) a:before,
 .deal-steps.deal-successful li:nth-child(even) a:before,
 .deal-steps.deal-failed li:nth-child(even) a:before {
-
 	border-left-color: transparent;
 }
-
-/*
-.deal-steps li:nth-child(even) a:before {
-	border-left-color: transparent;
-	border-color: #ccc;
-}
-.deal-steps.deal-successful li:nth-child(even) a:before {
-	border-left-color: transparent;
-	border-color: #9ccc65;
-}
-
-.deal-steps.deal-failed li:nth-child(even) a:before {
-	border-left-color: transparent;
-	border-color: #fb7d77;
-}*/
 
 .deal-steps li:nth-child(even) a:after {
-	border-left-color: #ccc;
+	border-left-color: inherit;
 }
 .deal-steps li:first-child a {
 	padding-left: 15px;
@@ -3471,7 +3446,6 @@ form.adminForm .deal_step
 	border: none;
 }
 .deal-steps li:last-child a{
-	/*padding-right: 15px;*/
 	padding-right: 10px;
 	-moz-border-radius: 0 2px 2px 0;
 	-webkit-border-radius: 0;
@@ -3489,134 +3463,112 @@ form.adminForm .deal_step
 	content: "";
 	position: absolute;
 	top: 0;
-	/*border: 0 solid #ccc;*/
-	/*border-width: 7px 10px;*/
 	border-width: 7px 7px;
 	border-style: solid;
 	width: 0;
 	height: 0;
 }
 .deal-steps li a:before, .deal-steps li a:after {
-
-	border-color: #ccc;
-	/*border-width: 7px 7px;*/
+	border-color: inherit;
 }
-
 .deal-steps.deal-successful li a:before, .deal-steps.deal-successful li a:after {
-
-	border-color: #9ccc65;
-	/*border-width: 7px 7px;*/
+	border-color: inherit;
 }
 .deal-steps.deal-failed li a:before, .deal-steps.deal-failed li a:after {
-
-	border-color: #fb7d77;
-	/*border-width: 7px 7px;*/
+	border-color: inherit;
 }
-
 .deal-steps li a:before, .deal-steps.deal-successful li a:before, .deal-steps.deal-failed li a:before {
-	/*left: -20px;	*/
 	left: -14px;
 	border-left-color: transparent;
 }
-
 .deal-steps li a:after, .deal-steps.deal-successful li a:after, .deal-steps.deal-failed li a:after {
-
 	left: 100%;
 	border-color: transparent;
 }
-
 .deal-steps li a:after {
-	/* left: 100%; */
-	/* border-color: transparent; */
-	border-left-color: #ccc;
+	border-left-color: inherit;
 }
-
 .deal-steps.deal-successful li a:after {
-	/* left: 100%; */
-	/* border-color: transparent; */
-	border-left-color: #9ccc65;
+	border-left-color: inherit;
 }
 .deal-steps.deal-failed li a:after {
-	/* left: 100%; */
-	/* border-color: transparent; */
-	border-left-color: #fb7d77;
+	border-left-color: inherit;
 }
-
 .deal-steps li a:not(.unavailable):not(.clear-next):hover {
-	/* background-color: #43a047; */
-	background-color: #427fed;
 	cursor: pointer;
 }
+.deal-steps li a.unavailable:not(.current) {
+	opacity: 0.3;
+}
+
+/*
 .deal-steps li a:not(.unavailable):not(.clear-next):hover:before {
-	/* border-color: #43a047; */
-	border-color: #427fed;
+	border-color: inherit;
 	border-left-color: transparent;
 }
 .deal-steps li a:not(.unavailable):not(.clear-next):hover:after {
-	/* border-left-color: #43a047; */
-	border-left-color: #427fed;
+	border-left-color: inherit;
 }
+
+*/
+
+
 /* Active */
+
+/*
 .deal-steps li a.current, .deal-steps li a.current.complete, .deal-steps li a.next {
-	/* background-color: #43a047 !important; */
 	background-color: #427fed !important;
 }
 .deal-steps.deal-successful li a.current, .deal-steps.deal-successful li a.current.complete {
-	/* background-color: #43a047 !important; */
 	background-color: #9ccc65 !important;
 }
 .deal-steps.deal-failed li a.current, .deal-steps.deal-failed li a.current.complete {
-	/* background-color: #43a047 !important; */
 	background-color: #fb7d77 !important;
 }
 
 .deal-steps li a.current:before, .deal-steps li a.current.complete:before, .deal-steps li a.next:before {
-	/*border-color: #43a047 !important;*/
 	border-color: #427fed !important;
 	border-left-color: transparent !important;
 }
 
 .deal-steps.deal-successful li a.current:before, .deal-steps.deal-successful li a.current.complete:before {
-
 	border-color: #9ccc65 !important;
 	border-left-color: transparent !important;
 }
 .deal-steps.deal-failed li a.current:before, .deal-steps.deal-failed li a.current.complete:before {
-
 	border-color: #fb7d77 !important;
 	border-left-color: transparent !important;
 }
 
-
 .deal-steps li a.current:after, .deal-steps li a.current.complete:after, .deal-steps li a.next:after {
-	/*border-left-color: #43a047 !important;*/
 	border-left-color: #427fed !important;
 }
 
 .deal-steps.deal-successful li a.current:after, .deal-steps.deal-successful li a.current.complete:after {
-	/*border-left-color: #43a047 !important;*/
 	border-left-color: #9ccc65 !important;
 }
 .deal-steps.deal-failed li a.current:after, .deal-steps.deal-failed li a.current.complete:after {
-	/*border-left-color: #43a047 !important;*/
 	border-left-color: #fb7d77 !important;
 }
 
+
+*/
+
 /* Complete */
+
+/*
 .deal-steps li a.complete{
-	/*background: #9ccc65;*/
-	background: #6db7f9;
+	background-color: #6db7f9;
 }
 
 .deal-steps.deal-successful li a.complete{
-	background: #9ccc65;
+	background-color: #9ccc65;
 }
 .deal-steps.deal-failed li a.complete{
-	background: #fb7d77;
+	background-color: #fb7d77;
 }
 
 .deal-steps li:nth-child(even) a.complete {
-	/*background-color: #9ccc65;*/
 	border-color: #6db7f9;
 }
 .deal-steps.deal-successful li:nth-child(even) a.complete {
@@ -3627,7 +3579,6 @@ form.adminForm .deal_step
 }
 
 .deal-steps li:nth-child(even) a.complete:before {
-	/*border-color: #9ccc65;*/
 	border-color: #6db7f9;
 	border-left-color: transparent;
 }
@@ -3641,7 +3592,6 @@ form.adminForm .deal_step
 }
 
 .deal-steps li:nth-child(even) a.complete:after {
-	/*border-left-color: #9ccc65;*/
 	border-left-color: #6db7f9;
 }
 .deal-steps.deal-successful li:nth-child(even) a.complete:after {
@@ -3652,7 +3602,6 @@ form.adminForm .deal_step
 }
 
 .deal-steps li a.complete:after {
-	/*border-left-color: #9ccc65;*/
 	border-left-color: #6db7f9;
 }
 .deal-steps.deal-successful li a.complete:after {
@@ -3662,16 +3611,7 @@ form.adminForm .deal_step
 	border-left-color: #fb7d77;
 }
 
-/*
-.deal-steps li a.complete:before,
-.deal-steps.deal-successful li a.complete:before,
-.deal-steps.deal-failed li a.complete:before {
-
-	border-left-color: transparent;
-}*/
-
 .deal-steps li a.complete:before {
-	/*border-color: #9ccc65;*/
 	border-color: #6db7f9;
 	border-left-color: transparent;
 }
@@ -3684,35 +3624,29 @@ form.adminForm .deal_step
 	border-left-color: transparent;
 }
 
-
 .deal-steps li a.complete:not(.unavailable):not(.clear-next):hover {
-	/* background-color: #43a047; */
 	background-color: #427fed;
 }
 
-
 .deal-steps li a.complete:not(.unavailable):not(.clear-next):hover:before {
-	/* border-color: #43a047; */
-	border-color: #427fed;
+	border-color: inherit;
 	border-left-color: transparent;
 }
 .deal-steps li a.complete:not(.unavailable):not(.clear-next):hover:after {
-	/* border-left-color: #43a047; */
-	border-left-color: #427fed;
+	border-left-color: inherit;
 }
+*/
 
-/* .deal-steps:not(.deal-successful):not(.deal-failed) li a.unavailable:not(.current) */
-.deal-steps li a.unavailable:not(.current)
-{
-	opacity: 0.5;
-}
 
-.deal-template-step-name { color: #999; /*font-size: 11px;*/ margin-top: 3px; }
+
+
+.deal-template-step-name { color: #999; font-size: 12px; margin-top: 5px; display: inline-block; }
+.deal-template-step-name.deal-template-step-name-inner { margin-top: 3px; }
 .label.deal-template-step { padding-top: 3px; }
 .label.deal-template-step .close { opacity: 1; text-shadow: none; color: #fff; }
 
 .deal-template-step-bar { display: inline-block; }
-.deal-template-step-name-inner { position: absolute; top: 7px; display: inline-block; }
+.deal-template-step-name-inner { position: absolute; top: 0; display: inline-block; }
 .deal-amount > div:first-child { display: inline-block; width: 70%; }
 .deal-amount > div:last-child { display: inline-block; width: 30%; }
 
@@ -3789,3 +3723,15 @@ form.adminForm .deal_step
 }
 .timeline > li > .timeline-panel .timeline-header .timeline-entity-actions span i { font-size: 11px; }
 .timeline > li > .timeline-panel .timeline-header .timeline-entity-actions span:hover { cursor: pointer; }
+
+.well .add-deal-attachment > div:first-child { padding-left: 0 !important; }
+
+.noUi-horizontal.slider-xs { top: 5px; }
+.noUi-connect { background: #2dc3e8 !important; }
+.noUi-target { box-shadow: none !important; }
+.noUi-value { cursor: pointer; font-size: 10px; margin-top: 5px; }
+.perspective-slider-wrap { height: 80px; }
+
+#informationsystemCommentsAdminPage .task-container .tasks-list .task-item .task-creator a:hover, #shopCommentsAdminPage .task-container .tasks-list .task-item .task-creator a:hover { text-decoration: none; }
+
+.span-blocked { font-size: 12px; }

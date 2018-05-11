@@ -750,11 +750,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		/* sales_notes */
-		$sales_notes = mb_strlen($oShop_Item->yandex_market_sales_notes) > 0
-			? $oShop_Item->yandex_market_sales_notes
-			: $oShop->yandex_market_sales_notes_default;
+		$sales_notes = $oShop_Item->yandex_market_sales_notes != ''
+			? trim($oShop_Item->yandex_market_sales_notes)
+			: trim($oShop->yandex_market_sales_notes_default);
 
-		$this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
+		$sales_notes != ''
+			&& $this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
 
 		if ($oShop_Item->manufacturer_warranty)
 		{
