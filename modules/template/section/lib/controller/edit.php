@@ -40,7 +40,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$this->title($this->_object->id
-			? Core::_('Template_Section_Lib.widget_form_title_edit')
+			? Core::_('Template_Section_Lib.widget_form_title_edit', $this->_object->widget())
 			: Core::_('Template_Section_Lib.widget_form_title_add'));
 
 		// Получаем основную вкладку

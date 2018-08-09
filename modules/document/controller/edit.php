@@ -64,7 +64,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'document':
 				$title = $this->_object->id
-					? Core::_('Document.edit')
+					? Core::_('Document.edit', $this->_object->name)
 					: Core::_('Document.add');
 
 				$oMainTab->move($this->getField('name'), $oMainRow1);
@@ -165,7 +165,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'document_dir':
 			default:
 				$title = $this->_object->id
-						? Core::_('Document_Dir.edit_title')
+						? Core::_('Document_Dir.edit_title', $this->_object->name)
 						: Core::_('Document_Dir.add_title');
 
 				// Удаляем стандартный <input>

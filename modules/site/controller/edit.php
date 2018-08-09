@@ -323,7 +323,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		);
 
 		$this->title($this->_object->id
-			? Core::_('Site.site_edit_site_form_title')
+			? Core::_('Site.site_edit_site_form_title', $this->_object->name)
 			: Core::_('Site.site_add_site_form_title'));
 
 		return $this;

@@ -116,6 +116,12 @@ class Core_ORM
 	protected $_changedColumns = array();
 
 	/**
+	 * data-values, e.g. dataMyValue
+	 * @var array
+	 */
+	protected $_dataValues = array();
+
+	/**
 	 * List of all relations are created by _relations() based on _hasOne, _hasMany and _belongsTo
 	 * array('field_name' =>
 			array(
@@ -369,18 +375,28 @@ class Core_ORM
 	}
 
 	/**
+	 * Get Model CallsName
+	 * @param $modelName Model name
+	 * @return string
+	 */
+	static public function getClassName($modelName)
+	{
+		return ucfirst($modelName) . '_Model';
+	}
+
+	/**
 	 * Create and return an object of model
 	 * @param $modelName Model name
 	 * @param $primaryKey Primary key
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
-		$modelName = ucfirst($modelName) . '_Model';
+		$modelName = self::getClassName($modelName);
 
 		if (!class_exists($modelName))
 		{
 			throw new Core_Exception("Model '%modelName' does not exist",
-					array('%modelName' => $modelName));
+				array('%modelName' => $modelName));
 		}
 
 		return new $modelName($primaryKey);
@@ -1089,6 +1105,17 @@ class Core_ORM
 	}
 
 	/**
+	 * Get tableColumns
+	 * @return array
+	 */
+	public function getTableColumns()
+	{
+		$this->_loadColumns();
+
+		return $this->_tableColumns;
+	}
+
+	/**
 	 * Load columns list for model
 	 * @return Core_ORM
 	 */
@@ -1348,6 +1375,12 @@ class Core_ORM
 			return $this->_modelColumns[$lowerProperty];
 		}
 
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
+		{
+			return Core_Array::get($this->_dataValues, $property);
+		}
+
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this))
 		{
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
@@ -1363,7 +1396,8 @@ class Core_ORM
 	 */
 	public function isCallable($methodName)
 	{
-		return method_exists($this, $methodName) || Core_Event::getCount($this->_modelName . '.onCall' . $methodName);
+		return method_exists($this, $methodName)
+			|| Core_Event::getCount($this->_modelName . '.onCall' . $methodName);
 	}
 
 	/**
@@ -1392,6 +1426,12 @@ class Core_ORM
 		}
 
 		if (Core_Event::getCount($this->_modelName . '.onCall' . $property))
+		{
+			return TRUE;
+		}
+
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
 		{
 			return TRUE;
 		}
@@ -1439,6 +1479,13 @@ class Core_ORM
 			return $this;
 		}
 
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
+		{
+			$this->_dataValues[$property] = $value;
+			return $this;
+		}
+
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this, array($value)))
 		{
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
@@ -1462,6 +1509,13 @@ class Core_ORM
 		if (isset($this->_tableColumns[$name]) && array_key_exists(0, $arguments))
 		{
 			return $this->__set($name, $arguments[0]);
+		}
+
+		// data-property, e.g. dataMyValue
+		if (strpos($name, 'data') === 0 && $name != 'data')
+		{
+			$this->_dataValues[$name] = $arguments[0];
+			return $this;
 		}
 
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $name, $this, $arguments))
@@ -1750,7 +1804,20 @@ class Core_ORM
 	 */
 	public function setRelations(array $relations)
 	{
-		$this->_relations = $relations;
+		$this->_relations
+			= self::$_relationModelCache[$this->_modelName]
+			= $relations;
+
+		// Relation cache
+		$bCache = Core::moduleIsActive('cache');
+
+		if ($bCache)
+		{
+			$cacheName = 'Core_ORM_RelationCache';
+
+			self::$relationCache->set($this->_modelName, $this->_relations, $cacheName);
+		}
+
 		return $this;
 	}
 

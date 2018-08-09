@@ -223,6 +223,14 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->service(Core_Array::getGet('from'))
 				->apply();
 		}
+		elseif (!is_null(Core_Array::getGet('gclid')))
+		{
+			$oSource_Controller = new Source_Controller();
+			$oSource_Controller
+				->type(3)
+				->service('google')
+				->apply();
+		}
 
 		// Если доступ к узлу структуры только по HTTPS, а используется HTTP,
 		// то делаем 301 редирект
@@ -407,7 +415,10 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		// Проверка на передачу GET-параметров для статичного документа
 		if (defined('ERROR_404_GET_REQUESTS') && ERROR_404_GET_REQUESTS
-			&& $oStructure->type == 0 && count($_GET) && !($bLogged && isset($_GET['hostcmsAction'])))
+			&& $oStructure->type == 0 && count($_GET) && !($bLogged && isset($_GET['hostcmsAction']))
+			&& !isset($_GET['_openstat']) && !isset($_GET['utm_source'])
+			&& !isset($_GET['gclid']) && !isset($_GET['from'])
+		)
 		{
 			$oCore_Page->error404();
 		}
@@ -584,7 +595,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				$sContent = '<div style="box-sizing: border-box; border: 1px solid #E83531; z-index: 999999; border-radius: 5px; background: #FEEFDA; text-align: center; clear: both; height: 120px; position: relative;' . (Core::checkPanel() ? 'margin-top: 38px;' : '') . '">
 					<div style="position: absolute; right: 3px; top: 3px; font-family: courier new; font-weight: bold;"><a href="#" onclick="javascript:this.parentNode.parentNode.style.display=\'none\'; return false;"><img src="/admin/images/wclose.gif" style="border: none;" alt="Close this notice"/></a></div>
 					<div style="box-sizing: border-box; width: 740px; margin: 0 auto; text-align: left; padding: 0; overflow: hidden; color: black;"><div style="width: 75px; float: left"><img src="http://www.ie6nomore.com/files/theme/ie6nomore-warning.jpg" alt="Warning!"/></div>
-					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.4 лицензионого договора присоединения</div>
+					<div style="width: 600px; float: left; font-family: Arial, sans-serif"><div style="font-size: 14px; font-weight: bold; margin-top: 12px;">Нарушение п. 3.3 лицензионого договора присоединения</div>
 					<div style="font-size: 12px; margin-top: 6px; line-height: 12px">Пользователь бесплатной редакции HostCMS.Халява обязуется разместить на каждом сайте, работающем с использованием Программного продукта, активную, индексируемую и видимую при просмотре сайта ссылку
 					<div><b>' . htmlspecialchars('Система управления сайтом <a href="https://www.hostcms.ru" target="_blank">HostCMS</a>') . '</b></div> на сайт производителя <a href="https://www.hostcms.ru" target="_blank">https://www.hostcms.ru</a>.</div>
 					</div>

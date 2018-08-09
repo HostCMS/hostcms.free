@@ -42,7 +42,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	// Режим работы, 0 - Тестовый, 1 - Рабочий
 	protected $_mode = 1;
 
-	// Использовать расчёт суммы к получению магазином.
+	// Использовать расчёт суммы к получению магазином (ТОЛЬКО ДЛЯ ФИЗИЧЕСКИХ ЛИЦ)
 	protected $_calc_out_summ = FALSE;
 
 	/* Отправлять в Робокассу данные для чеков (54-ФЗ). ВКЛЮЧАТЬ ТОЛЬКО ЕСЛИ НАСТРОИЛИ В РОБОКАССЕ! */
@@ -293,7 +293,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		<?php
 		$SignatureValue = md5(
 			$this->sendCheck
-				? "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:" . rawurlencode($sReceiptJson) . ":{$this->_mrh_pass1}"
+				? "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:" . $sReceiptJson . ":{$this->_mrh_pass1}"
 				: "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:{$this->_mrh_pass1}"
 		);
 		?>

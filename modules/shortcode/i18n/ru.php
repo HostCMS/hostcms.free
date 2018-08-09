@@ -16,7 +16,7 @@ return array(
 	'add_shortcode' => 'Шорткод',
 	'add_shortcode_dir' => 'Группа',
 	'shortcode_add_form_title' => 'Добавление шорткода',
-	'shortcode_edit_form_title' => 'Редактирование шорткода',
+	'shortcode_edit_form_title' => 'Редактирование шорткода "%s"',
 	'name' => 'Название',
 	'sorting' => 'Порядок сортировки',
 	'active' => 'Активность',

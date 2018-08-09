@@ -117,6 +117,12 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->addTabAfter($oPersonalDataTab, $oMainTab);
 
+		$oWorktimeTab = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('User.users_type_form_tab_3'))
+			->name('tab_worktime');
+
+		$this->addTabAfter($oWorktimeTab, $oPersonalDataTab);
+
 		// Email'ы сотрудника
 		$oPersonalDataEmailsRow = Directory_Controller_Tab::instance('email')
 			->title(Core::_('Directory_Email.emails'))
@@ -235,8 +241,150 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oPersonalDataRow3->add($oImageField);
 
+		// Расписание
+		for ($day = 1; $day <= 7; $day++)
+		{
+			$oWorktimeTab
+				->add($oWorktimeRow = Admin_Form_Entity::factory('Div')->class('row'));
+
+			// День недели
+			$oDayDiv = Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-md-2 margin-top-10')
+				->value(Core::_('Admin_Form.day' . $day));
+
+			$oUser_Worktime = $this->_object->User_Worktimes->getByDay($day);
+
+			$from = !is_null($oUser_Worktime)
+				? $oUser_Worktime->from
+				: '00 : 00';
+
+			// Начало рабочего дня
+			$oDayStart = Admin_Form_Entity::factory('Input')
+				->id("timepicker_{$day}_start")
+				->name("day_{$day}_from")
+				->value($from)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			$to = !is_null($oUser_Worktime)
+				? $oUser_Worktime->to
+				: '00 : 00';
+
+			// Конец рабочего дня
+			$oDayEnd = Admin_Form_Entity::factory('Input')
+				->id("timepicker_{$day}_end")
+				->name("day_{$day}_to")
+				->value($to)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			// Перерыв
+			$oDayBreakDiv = Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-md-2 margin-top-10')
+				->value(Core::_('User.break'));
+
+			// Начало перерыва
+			$break_from = !is_null($oUser_Worktime)
+				? $oUser_Worktime->break_from
+				: '00 : 00';
+
+			$oDayBreakStart = Admin_Form_Entity::factory('Input')
+				->id("timepicker_break_{$day}_start")
+				->name("day_break_{$day}_from")
+				->value($break_from)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			// Конец перерыва
+			$break_to = !is_null($oUser_Worktime)
+				? $oUser_Worktime->break_to
+				: '00 : 00';
+
+			$oDayBreakEnd = Admin_Form_Entity::factory('Input')
+				->id("timepicker_break_{$day}_end")
+				->name("day_break_{$day}_to")
+				->value($break_to)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			$html = "
+				<script type='text/javascript'>
+					$(function(){
+						$('#timepicker_{$day}_start').wickedpicker({
+							now: '{$from}',
+							twentyFour: true,  //Display 24 hour format, defaults to false
+							upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+							downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+							close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+							hoverState: 'hover-state', //The hover state class to use, for custom CSS
+							title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+							showSeconds: false, //Whether or not to show seconds,
+							timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+							secondsInterval: 1, //Change interval for seconds, defaults to 1,
+							minutesInterval: 1, //Change interval for minutes, defaults to 1
+							clearable: false //Make the picker's input clearable (has clickable 'x')
+						});
+
+						$('#timepicker_{$day}_end').wickedpicker({
+							now: '{$to}',
+							twentyFour: true,  //Display 24 hour format, defaults to false
+							upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+							downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+							close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+							hoverState: 'hover-state', //The hover state class to use, for custom CSS
+							title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+							showSeconds: false, //Whether or not to show seconds,
+							timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+							secondsInterval: 1, //Change interval for seconds, defaults to 1,
+							minutesInterval: 1, //Change interval for minutes, defaults to 1
+							clearable: false //Make the picker's input clearable (has clickable 'x')
+						});
+
+						$('#timepicker_break_{$day}_start').wickedpicker({
+							now: '{$break_from}',
+							twentyFour: true,  //Display 24 hour format, defaults to false
+							upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+							downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+							close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+							hoverState: 'hover-state', //The hover state class to use, for custom CSS
+							title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+							showSeconds: false, //Whether or not to show seconds,
+							timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+							secondsInterval: 1, //Change interval for seconds, defaults to 1,
+							minutesInterval: 1, //Change interval for minutes, defaults to 1
+							clearable: false //Make the picker's input clearable (has clickable 'x')
+						});
+
+						$('#timepicker_break_{$day}_end').wickedpicker({
+							now: '{$break_to}',
+							twentyFour: true,  //Display 24 hour format, defaults to false
+							upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+							downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+							close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+							hoverState: 'hover-state', //The hover state class to use, for custom CSS
+							title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+							showSeconds: false, //Whether or not to show seconds,
+							timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+							secondsInterval: 1, //Change interval for seconds, defaults to 1,
+							minutesInterval: 1, //Change interval for minutes, defaults to 1
+							clearable: false //Make the picker's input clearable (has clickable 'x')
+						});
+					})
+				</script>
+			";
+
+			$oWorktimeRow
+				->add($oDayDiv)
+				->add($oDayStart)
+				->add($oDayEnd)
+				->add($oDayBreakDiv)
+				->add($oDayBreakStart)
+				->add($oDayBreakEnd)
+				->add(Admin_Form_Entity::factory('Code')->html($html));
+		}
+
+		$name = strlen($this->_object->getFullName())
+			? $this->_object->getFullName()
+			: $this->_object->login;
+
 		$title = $this->_object->id
-			? Core::_('User.ua_edit_user_form_title')
+			? Core::_('User.ua_edit_user_form_title', $name)
 			: Core::_('User.ua_add_user_form_title');
 
 		$this->title($title);
@@ -711,6 +859,45 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$i++;
 				}
+			}
+		}
+
+		// Расписание
+		for ($day = 1; $day <= 7; $day++)
+		{
+			$from = Core_Array::getPost("day_{$day}_from");
+			$to = Core_Array::getPost("day_{$day}_to");
+
+			$from = str_replace(' ', '', $from);
+			$to = str_replace(' ', '', $to);
+
+			// Перерыв
+			$break_from = Core_Array::getPost("day_break_{$day}_from");
+			$break_to = Core_Array::getPost("day_break_{$day}_to");
+
+			$break_from = str_replace(' ', '', $break_from);
+			$break_to = str_replace(' ', '', $break_to);
+
+			$oUser_Worktime = $this->_object->User_Worktimes->getByDay($day);
+
+			if ($from != '00:00' && $to != '00:00')
+			{
+				if (is_null($oUser_Worktime))
+				{
+					$oUser_Worktime = Core_Entity::factory('User_Worktime');
+					$oUser_Worktime->user_id = $this->_object->id;
+					$oUser_Worktime->day = $day;
+				}
+
+				$oUser_Worktime->from = $from . ':00';
+				$oUser_Worktime->to = $to . ':00';
+				$oUser_Worktime->break_from = $break_from . ':00';
+				$oUser_Worktime->break_to = $break_to . ':00';
+				$oUser_Worktime->save();
+			}
+			elseif (!is_null($oUser_Worktime))
+			{
+				$oUser_Worktime->delete();
 			}
 		}
 

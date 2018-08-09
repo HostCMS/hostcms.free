@@ -155,6 +155,34 @@ class Core_Image_Gd extends Core_Image
 
 				if ($sourceResource)
 				{
+					// Image Rotate
+					if (function_exists('exif_read_data'))
+					{
+						$aEXIF = @exif_read_data($sourceFile, 'IFD0');
+
+						if (isset($aEXIF['Orientation']))
+						{
+							switch ($aEXIF['Orientation'])
+							{
+								case 3: // Поворот на 180 градусов
+									$sourceResource = imagerotate($sourceResource, 180, 0);
+								break;
+								case 6: // Поворот вправо на 90 градусов
+									$sourceResource = imagerotate($sourceResource, -90, 0);
+									$tmp = $destX;
+									$destX = $destY;
+									$destY = $tmp;
+								break;
+								case 8: // Поворот влево на 90 градусов
+									$sourceResource = imagerotate($sourceResource, 90, 0);
+									$tmp = $destX;
+									$destX = $destY;
+									$destY = $tmp;
+								break;
+							}
+						}
+					}
+
 					// Изменяем размер оригинальной картинки и копируем в созданую картинку
 					imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 

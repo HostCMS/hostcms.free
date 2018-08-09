@@ -49,7 +49,7 @@ class Property_Value_Int_Model extends Core_Entity
 	protected $_forbiddenTags = array(
 		'entity_id'
 	);
-	
+
 	/**
 	 * Default sorting for models
 	 * @var array
@@ -131,9 +131,19 @@ class Property_Value_Int_Model extends Core_Entity
 
 					$oList_Item->description != ''
 						&& $this->addXmlTag('description', $oList_Item->description);
-						
+
 					$oList_Item->icon != ''
 						&& $this->addXmlTag('icon', $oList_Item->icon);
+
+					$oParentListItem = $oList_Item->getParent();
+					$oParentObject = $this;
+
+					while ($oParentListItem)
+					{
+						$oParentObject->addEntity($oParentListItem->clearEntities());
+						$oParentObject = $oParentListItem;
+						$oParentListItem = $oParentListItem->getParent();
+					}
 				}
 			}
 		}

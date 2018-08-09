@@ -24,7 +24,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->title(
 			$this->_object->id
-				? Core::_('Schedule.edit_title')
+				? Core::_('Schedule.edit_title', $this->_object->getActionName())
 				: Core::_('Schedule.add_title')
 		);
 

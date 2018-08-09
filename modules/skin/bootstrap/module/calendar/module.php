@@ -214,7 +214,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					y = date.getFullYear();
 
 				 $('#calendar').fullCalendar({
-					locale: 'ru',
+					locale: '<?php echo Core_i18n::instance()->getLng()?>',
 					timezone: 'local',
 					//height: 'auto',
 					height: 'parent',

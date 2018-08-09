@@ -162,6 +162,11 @@ class Core
 			'translate' => TRUE,
 			'chat' => TRUE,
 			'switchSelectToAutocomplete' => 100,
+			'autocompleteItems' => 10,
+			'session' => array(
+				'driver' => 'database',
+				'class' => 'Core_Session_Database',
+			),
 			'backendSessionLifetime' => 14400
 		);
 	}
@@ -545,7 +550,7 @@ class Core
 		if (!defined('ALLOW_SET_LOCALE') || ALLOW_SET_LOCALE)
 		{
 			setlocale(LC_ALL, SITE_LOCAL);
-			setlocale(LC_NUMERIC, 'POSIX');
+			setlocale(LC_NUMERIC, 'C'); // POSIX depends on OS settings
 		}
 
 		// Временная зона сайта
@@ -687,7 +692,10 @@ class Core
 
 		if (strlen($aDomain[0]))
 		{
-			$sUrl = 'http://' . $aDomain[0];
+			$scheme = /*(Core_Array::get($_SERVER, 'HTTPS') == 'on' || Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO') == 'https')*/
+				self::httpsUses() ? 'https' : 'http';
+			
+			$sUrl = $scheme . '://' . $aDomain[0];
 			if (!empty($_SERVER['HTTP_X_ORIGINAL_URL']))
 			{
 				$sUrl .= $_SERVER['HTTP_X_ORIGINAL_URL'];

@@ -36,7 +36,7 @@ class Shop_Order_Item_Digital_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}

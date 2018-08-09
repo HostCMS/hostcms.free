@@ -228,7 +228,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -571,6 +571,18 @@ class Shop_Item_Model extends Core_Entity
 			: '';
 	}
 
+	/**
+	 * Get price with currency for SEO-templates
+	 * @param string $format
+	 * @return string
+	 */
+	public function priceWithCurrency($format = '%s %s')
+	{
+		$aPrices = $this->getPrices();
+		
+		return sprintf($format, $aPrices['price_discount'], $this->Shop->Shop_Currency->name);
+	}
+	
 	/**
 	 * Get producer name
 	 * @return string
@@ -1219,7 +1231,7 @@ class Shop_Item_Model extends Core_Entity
 		// комментарии к товару
 		if (Core::moduleIsActive('comment'))
 		{
-			$aComments = $this->Comments->findAll(FALSE);
+			$aComments = $this->Comments->getAllByActive(1, FALSE);
 			foreach ($aComments as $oComment)
 			{
 				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
@@ -2443,9 +2455,18 @@ class Shop_Item_Model extends Core_Entity
 				$oSiteAlias = $oSite->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					$url = $oSiteAlias->name
-						. $this->Shop->Structure->getPath()
-						. $this->getPath();
+					if ($this->shop_group_id)
+					{
+						$url = $oSiteAlias->name
+							. $this->Shop->Structure->getPath()
+							. $this->Shop_Group->getPath();
+					}
+					else
+					{
+						$url = $oSiteAlias->name
+							. $this->Shop->Structure->getPath()
+							. $this->getPath();
+					}
 
 					$oCache_Static = Core_Cache::instance('static');
 					$oCache_Static->delete($url);
@@ -2470,7 +2491,7 @@ class Shop_Item_Model extends Core_Entity
 
 		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-ico badge-darkorange white')
-			->value('<i class="fa fa-exclamation fa-fw"></i>')
+			->value('<i class="fa fa-exclamation"></i>')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
 	}
@@ -2741,5 +2762,75 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param int $property_id Property ID
+	 * @return string
+	 */
+	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
+	{
+		$oProperty = Core_Entity::factory('Property', $property_id);
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+
+		if (count($aProperty_Values))
+		{
+			$aTmp = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+					case 11: // Float
+						$aTmp[] = $oProperty_Value->value;
+					break;
+					case 8: // Date
+						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 9: // Datetime
+						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 3: // List
+						$oList_Item = $oProperty->List->List_Items->getById(
+							$oProperty_Value->value, FALSE
+						);
+
+						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+					break;
+					case 7: // Checkbox
+					break;
+					case 5: // Informationsystem
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Informationsystem_Item->name;
+						}
+					break;
+					case 12: // Shop
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Shop_Item->name;
+						}
+					break;
+					case 2: // File
+					case 10: // Hidden field
+					default:
+					break;
+				}
+			}
+			
+			if (count($aTmp))
+			{
+				return sprintf($format, $oProperty->name, implode($separator, $aTmp));
+			}
+		}
+
+		return NULL;
 	}
 }

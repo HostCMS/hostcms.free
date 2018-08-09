@@ -11,10 +11,10 @@
 return array(
 	'model_name' => 'Print Forms',
 	'title' => 'Print Forms',
-	'id' => 'Id',
+	'id' => 'ID',
 	'shop_id' => 'Shop id',
 	'name' => "Name",
-	'sorting' => "Sort order",
+	'sorting' => 'Sort',
 	'description' => "Description",
 	'active' => "Active",
 	'changeStatus_success' => "Information has been successfully changed",

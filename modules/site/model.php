@@ -61,7 +61,16 @@ class Site_Model extends Core_Entity
 		'advertisement_group' => array(),
 		'cloud' => array(),
 		'counter' => array(),
+		'counter_browser' => array(),
+		'counter_device' => array(),
+		'counter_display' => array(),
+		'counter_os' => array(),
 		'counter_page' => array(),
+		'counter_referrer' => array(),
+		'counter_searchquery' => array(),
+		'counter_session' => array(),
+		'counter_useragent' => array(),
+		'counter_visit' => array(),
 		'cdn_site' => array(),
 		'document' => array(),
 		'document_dir' => array(),
@@ -155,7 +164,7 @@ class Site_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -222,7 +231,16 @@ class Site_Model extends Core_Entity
 		if (Core::moduleIsActive('counter'))
 		{
 			$this->Counters->deleteAll(FALSE);
+			$this->Counter_Browsers->deleteAll(FALSE);
+			$this->Counter_Devices->deleteAll(FALSE);
+			$this->Counter_Displays->deleteAll(FALSE);
+			$this->Counter_Oses->deleteAll(FALSE);
 			$this->Counter_Pages->deleteAll(FALSE);
+			$this->Counter_Referrers->deleteAll(FALSE);
+			$this->Counter_Searchqueries->deleteAll(FALSE);
+			$this->Counter_Sessions->deleteAll(FALSE);
+			$this->Counter_Useragents->deleteAll(FALSE);
+			$this->Counter_Visits->deleteAll(FALSE);
 		}
 
 		$this->Documents->deleteAll(FALSE);

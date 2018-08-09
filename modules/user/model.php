@@ -90,8 +90,10 @@ class User_Model extends Core_Entity
 		'user_message' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
-		'deal_user' => array(),
-		'user_bookmark' => array()
+		'deal_step_user' => array(),
+		'user_bookmark' => array(),
+		'restapi_token' => array(),
+		'user_worktime' => array()
 	);
 
 	/**
@@ -127,7 +129,7 @@ class User_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -254,7 +256,7 @@ class User_Model extends Core_Entity
 	 */
 	public function checkObjectAccess(Core_Entity $oObject)
 	{
-		if ($this->read_only)
+		if ($this->read_only || $this->dismissed)
 		{
 			return FALSE;
 		}
@@ -337,6 +339,17 @@ class User_Model extends Core_Entity
 		return $this->image
 			? $this->getImageFileHref()
 			: '/modules/skin/bootstrap/img/default_user.png';
+	}
+
+	/**
+	 * Get user avatar
+	 * @return string
+	 */
+	public function getAvatar()
+	{
+		return strlen($this->image)
+			? $this->getImageHref()
+			: "/admin/user/index.php?loadUserAvatar={$this->id}";
 	}
 
 	/**
@@ -523,7 +536,20 @@ class User_Model extends Core_Entity
 			$this->Calendar_Caldav_Users->deleteAll(FALSE);
 		}
 
+		if (Core::moduleIsActive('restapi'))
+		{
+			$this->Restapi_Tokens->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('deal'))
+		{
+			$this->Deal_Attachments->deleteAll(FALSE);
+			$this->Deal_Template_Step_Access_User->deleteAll(FALSE);
+			$this->Deal_Step_Users->deleteAll(FALSE);
+		}
+
 		$this->User_Bookmarks->deleteAll(FALSE);
+		$this->User_Worktimes->deleteAll(FALSE);
 
 		// Удаляем директорию
 		$this->deleteDir();
@@ -537,15 +563,14 @@ class User_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function login($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	/*public function login($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$lastActivity = $this->getLastActivity();
-		$sStatus = !is_null($lastActivity) && $lastActivity < 60 * 20
+		$sStatus = $this->isOnline()
 			? 'online'
 			: 'offline';
 
 		return "{$this->login}&nbsp;<div class=\"{$sStatus}\"></div>";
-	}
+	}*/
 
 	/**
 	 * Change user status
@@ -600,7 +625,7 @@ class User_Model extends Core_Entity
 	public function isOnline()
 	{
 		$lastActivity = $this->getLastActivity();
-		return !is_null($lastActivity) && $lastActivity < 300;
+		return !is_null($lastActivity) && $lastActivity < 60 * 20;
 	}
 
 	/**
@@ -668,12 +693,12 @@ class User_Model extends Core_Entity
 	public function smallAvatar()
 	{
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-			->class('fm_preview');
+			->class('avatar-user');
 
 		$oCore_Html_Entity_Div
 			->add(
 				Core::factory('Core_Html_Entity_Img')
-					->src($this->getImageHref())
+					->src($this->getAvatar())
 					->width(30)
 					->height(30)
 			);
@@ -688,8 +713,7 @@ class User_Model extends Core_Entity
 	 */
 	public function loginBadge()
 	{
-		$lastActivity = $this->getLastActivity();
-		$sStatus = !is_null($lastActivity) && $lastActivity < 60 * 20
+		$sStatus = $this->isOnline()
 			? 'online'
 			: 'offline';
 

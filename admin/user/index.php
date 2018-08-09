@@ -127,6 +127,50 @@ if (!is_null(Core_Array::getPost('generate-password')))
 	);
 }
 
+if (!is_null(Core_Array::getGet('loadUserAvatar')))
+{
+	$id = intval(Core_Array::getGet('loadUserAvatar'));
+	$oUser = Core_Entity::factory('User')->getById($id);
+	if ($oUser)
+	{
+		$name = strlen($oUser->name) && strlen($oUser->surname)
+			? $oUser->name . ' ' . $oUser->surname
+			: $oUser->login;
+	}
+	else
+	{
+		Core_Message::show('Wrong ID', 'error');
+	}
+
+	$aBackgounds = array(
+		'#f44336',
+		'#E91E63',
+		'#9C27B0',
+		'#673AB7',
+		'#3F51B5',
+		'#2196F3',
+		'#03A9F4',
+		'#00BCD4',
+		'#009688',
+		'#4CAF50',
+		'#8BC34A',
+		'#CDDC39',
+		'#FFC107',
+		'#FF9800',
+		'#FF5722'
+	);
+
+	// Get initials
+	$initials = Core_Str::getInitials($name);
+
+	// Choose a background color for the circle
+	$bgColor = isset($aBackgounds[$id % 15])
+		? $aBackgounds[$id % 15]
+		: '#f44336';
+
+	Core_Image::avatar($initials, $bgColor, $width = 130, $height = 130);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 

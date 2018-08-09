@@ -76,8 +76,10 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 		139=>'Посылка дверь-дверь'
 	);
 
-	public function __construct() {
-	     $this->_dateExecute = date('Y-m-d');
+	public function __construct(Shop_Delivery_Model $oShop_Delivery_Model) {
+		 parent::__construct($oShop_Delivery_Model);
+		 
+		 $this->_dateExecute = date('Y-m-d');
 	}
 
 	private function _getData($aParams)

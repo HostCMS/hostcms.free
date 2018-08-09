@@ -45,7 +45,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
 			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aShop_Groups = $oShop_Groups->findAll(FALSE);
 
@@ -90,7 +90,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
 			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		count($aExclude) && $oShop_Groups->queryBuilder()
 			->where('shop_groups.id', 'NOT IN', $aExclude);
@@ -132,7 +132,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
 			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aShop_Groups = $oShop_Groups->findAll();
 
@@ -197,7 +197,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oShop_Items->queryBuilder()
 				->where('shop_items.shop_group_id', '=', $iShopGroupId)
 				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Items = $oShop_Items->findAll(FALSE);
 
@@ -241,7 +241,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oShop_Groups = $oShop->Shop_Groups;
 			$oShop_Groups->queryBuilder()
 				->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Groups = $oShop_Groups->findAll(FALSE);
 
@@ -1021,8 +1021,7 @@ if (count($aShop_Producers))
 	}
 
 	$oAdmin_Form_Dataset
-		->changeField('shop_producer_id', 'list', $options)
-	;
+		->changeField('shop_producer_id', 'list', $options);
 }
 
 // Change field type

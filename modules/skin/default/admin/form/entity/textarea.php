@@ -174,7 +174,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				!isset($this->_init['height'])
 					&& $this->_init['height'] = '"' . ($this->rows * 30) . '"';
 
-				//$this->_init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
+				// $this->_init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
 
 				$userCss = trim(Core_Array::get($this->_init, 'content_css', ''), '\'"');
 

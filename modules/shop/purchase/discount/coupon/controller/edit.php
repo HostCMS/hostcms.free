@@ -48,7 +48,7 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 		$oMainTab->addAfter($oCouponSelect, $this->getField('name'));
 
 		$title = $this->_object->id
-			? Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_edit')
+			? Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_edit', $this->_object->name)
 			: Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_add');
 
 		$this->title($title);

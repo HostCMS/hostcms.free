@@ -18,6 +18,8 @@ return array(
 	'category_meta_keywords' => 'Ключевые слова раздела(keywords)',
 	'category_description' => 'Описание раздела',
 	'category_path' => 'Путь для раздела',
+	'category_large_image' => 'Файл изображения раздела',
+	'category_small_image' => 'Файл малого изображения раздела',
 	'category_sorting' => 'Порядок сортировки раздела',
 
 	'item_cml_id' => 'CML ID идентификатор товара',

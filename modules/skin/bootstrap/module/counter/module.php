@@ -82,7 +82,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 							<a href="#website_traffic" data-toggle="tab"><?php echo Core::_('Counter.website_traffic')?></a>
 						</li>
 						<li class="">
-							<a href="#search_bots" data-toggle="tab"><?php echo Core::_('Counter.search_bots')?></a>
+							<a href="#search_bots" data-toggle="tab"><?php echo Core::_('Counter.crawlers')?></a>
 						</li>
 					</ul>
 

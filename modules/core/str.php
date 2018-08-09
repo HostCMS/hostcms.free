@@ -757,4 +757,60 @@ class Core_Str
 
 		return '#' . implode('', $rgb);
 	}
+
+	/**
+	 * Возвращает строку согласно падежам
+	 * @param int $number number
+	 * @param string $nominative Nominative case
+	 * @param $genitive_singular Genitive singular case
+	 * @param $genitive_plural Genitive plural case
+	 * @return string
+	 */
+	static public function declensionNumber($number = 0, $nominative, $genitive_singular, $genitive_plural)
+	{
+		$last_digit = $number % 10;
+		$last_two_digits = $number % 100;
+
+		if ($last_digit == 1 && $last_two_digits != 11)
+		{
+			return $nominative;
+		}
+		elseif (($last_digit == 2 && $last_two_digits != 12) || ($last_digit == 3 && $last_two_digits != 13) || ($last_digit == 4 && $last_two_digits != 14))
+		{
+			return $genitive_singular;
+		}
+		else
+		{
+			return $genitive_plural;
+		}
+	}
+
+	/**
+	 * Remove emoji (UTF8 4 Byte characters)
+	 * @param string $str source string
+	 * @return string
+	 */
+	static public function removeEmoji($str)
+	{
+		return preg_replace('/[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F1E0}-\x{1F1FF}]/u', '', $str);
+	}
+
+	static public function getInitials($fullName, $length = 2)
+	{
+		$fullName = mb_strtoupper(trim($fullName));
+		$aFullName = explode(' ', $fullName);
+
+		$initials = array_reduce(str_replace(array('*', '"'), '', $aFullName), array('Core_Str', '_getInitialsReduce'));
+
+		$initials = mb_strlen($initials) < $length
+			? mb_substr($fullName, 0, $length)
+			: mb_substr($initials, 0, $length);
+
+		return $initials;
+	}
+
+	static protected function _getInitialsReduce($str, $item)
+	{
+		return $str . mb_substr($item, 0, 1);
+	}
 }

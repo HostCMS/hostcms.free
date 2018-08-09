@@ -13,8 +13,8 @@ return array(
 	'title' => 'SQL queries',
 	'warning' => 'Attention! SQL queries can damage CMS! <br>
 	It\'s recommended to create a reserve copy before executing queries.',
-	'text' => '<acronym title="Text of SQL query">Query text</acronym>',
-	'load_file' => '<acronym title="File with SQL queries">Upload file</acronym>',
+	'text' => 'Query text',
+	'load_file' => 'Upload file',
 	'warningButton' => 'Are you sure you would like to execute this query?',
 	'button' => 'Go',
 	'success_message' => 'Your query has been performed successfully. Commands performed: %d.',

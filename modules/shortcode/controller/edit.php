@@ -33,7 +33,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_('Shortcode.shortcode_edit_form_title')
+					? Core::_('Shortcode.shortcode_edit_form_title', $this->_object->name)
 					: Core::_('Shortcode.shortcode_add_form_title');
 
 				$oMainTab = $this->getTab('main');
@@ -99,7 +99,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				parent::setObject($object);
 
 				$title = $this->_object->id
-					? Core::_("Shortcode_Dir.shortcode_dir_edit_form_title")
+					? Core::_("Shortcode_Dir.shortcode_dir_edit_form_title", $this->_object->name)
 					: Core::_("Shortcode_Dir.shortcode_dir_add_form_title");
 
 				// Получаем стандартные вкладки

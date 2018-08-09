@@ -38,23 +38,18 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Bonus.bonus'))
-		->icon('fa fa-star')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/money_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
+		->name(Core::_('Admin_Form.add'))
+		->icon('fa fa-plus')
+		->img('/admin/images/money_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref(
+				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
+			)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax(
+				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
+			)
 		)
 	)
 ;

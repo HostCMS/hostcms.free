@@ -29,7 +29,7 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 		parent::setObject($object);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Country_Location_City_Area.edit_city_area_tytle')
+			? Core::_('Shop_Country_Location_City_Area.edit_city_area_tytle', $this->_object->name)
 			: Core::_('Shop_Country_Location_City_Area.add_city_area_tytle');
 
 		$oMainTab = $this->getTab('main');

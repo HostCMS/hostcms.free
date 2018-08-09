@@ -34,7 +34,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 * Form's ID
 	 * @var string
 	 */
-	protected $_formId = 'formEdit';
+	protected $_formId = NULL;
 
 	/**
 	 * Stores POST, which can change the controller
@@ -70,6 +70,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	{
 		parent::__construct($oAdmin_Form_Action);
 
+		is_null($this->_formId)
+			&& $this->_formId = 'formEdit' . rand(0, 99999);
+		
 		// Set default title
 		$oAdmin_Word = $this->_Admin_Form_Action->Admin_Word->getWordByLanguage(
 			Core_Entity::factory('Admin_Language')->getCurrent()->id

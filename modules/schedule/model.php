@@ -43,7 +43,7 @@ class Schedule_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -69,10 +69,10 @@ class Schedule_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
-	 * @return string
+	 * Get action name
+	 * @return string|NULL
 	 */
-	public function actionName()
+	public function getActionName()
 	{
 		$oModule = Core_Entity::factory('Module')->find($this->module_id);
 
@@ -81,10 +81,18 @@ class Schedule_Model extends Core_Entity
 			$oSchedule_Controller = new Schedule_Controller();
 			$aModuleActions = $oSchedule_Controller->getModuleActions($oModule->id);
 
-			if (isset($aModuleActions[$this->action]))
-			{
-				echo htmlspecialchars($aModuleActions[$this->action]);
-			}
+			return isset($aModuleActions[$this->action])
+				? $aModuleActions[$this->action]
+				: NULL;
 		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function actionName()
+	{
+		return htmlspecialchars($this->getActionName());
 	}
 }

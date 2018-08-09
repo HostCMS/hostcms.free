@@ -50,14 +50,14 @@ return array(
 	'form_edit_forms_title' => 'Редактирование формы центра администрирования "%s"',
 
 	'admin_form_tab_0' => 'Название',
-	'form_forms_lng_name' => '<acronym title="Название формы центра администрирования">Название формы</acronym>',
-	'form_forms_lng_description' => '<acronym title="Описание формы центра администрирования">Описание формы</acronym>',
-	'on_page' => '<acronym title="Количество элементов на страницу">Количество элементов на страницу</acronym>',
-	'key_field' => '<acronym title="Название ключевого поля">Название ключевого поля</acronym>',
-	'show_operations' => '<acronym title="Отображать кнопки для выполнения операций">Отображать действия</acronym>',
-	'show_group_operations' => '<acronym title="Отображать список групповых операций">Групповые операции</acronym>',
-	'default_order_field' => '<acronym title="Название поля по умолчанию для сортировки">Название поля сортировки</acronym>',
-	'default_order_direction' => '<acronym title="Направление сортировки">Направление сортировки</acronym>',
+	'form_forms_lng_name' => 'Название формы',
+	'form_forms_lng_description' => 'Описание формы',
+	'on_page' => 'Количество элементов на страницу',
+	'key_field' => 'Название ключевого поля',
+	'show_operations' => '<acronym title="Отображать кнопки действий">Отображать действия</acronym>',
+	'show_group_operations' => '<acronym title="Отображать в форме групповые операций">Групповые операции</acronym>',
+	'default_order_field' => '<acronym title="Поле для сортировки по умолчанию ">Поле сортировки</acronym>',
+	'default_order_direction' => 'Направление сортировки',
 	'id' => 'Идентификатор',
 	'guid' => 'GUID',
 
@@ -72,11 +72,7 @@ return array(
 	'edit_error' => 'Информация о форме не добавлена!',
 
 	'show_form_menu_admin_forms_top1' => 'Форма',
-	'show_form_menu_admin_forms_sub_add' => 'Добавить',
-
 	'show_form_menu_admin_forms_top2' => 'Язык',
-	'show_form_menu_admin_forms_top2_sub_add' => 'Языки',
-	'show_form_menu_admin_forms_add' => 'Добавить',
 
 	// Подписи к размерам загружаемых изображений.
 	'window_large_image' => 'Большое изображение',
@@ -87,12 +83,12 @@ return array(
 	'small_image_max_width' => '<acronym title="Максимальная ширина малого изображения, получающегося при уменьшении большого">Максимальная ширина малого изображения</acronym>',
 	'small_image_max_height' => '<acronym title="Максимальная высота малого изображения, получающегося при уменьшении большого">Максимальная высота малого изображения</acronym>',
 
-	'small_image' => "<acronym title=\"Малое изображение.\">Малое изображение</acronym>",
+	'small_image' => '<acronym title="Малое изображение.">Малое изображение</acronym>',
 
-	'information_items_add_form_image_watermark_is_use' => '<acronym title="Водяной знак, указанный для информационной системы, накладывается на изображение с целью идентификации загруженного изображения Вашему сайту">Наложить водяной знак на изображение</acronym>',
+	'place_watermark' => 'Наложить водяной знак на изображение',
 
-	'image_preserve_aspect_ratio' => '<acronym title="Сохранять пропорции изображения">Сохранять пропорции изображения</acronym>',
-	'create_thumbnail' => '<acronym title="Создать малое изображение из большого">Создать малое изображение из большого</acronym>',
+	'image_preserve_aspect_ratio' => 'Сохранять пропорции изображения',
+	'create_thumbnail' => 'Создать малое изображение из большого',
 
 	'msg_file_view' => 'Просмотреть',
 	'msg_file_settings' => 'Настройки изображения',
@@ -100,13 +96,11 @@ return array(
 	'msg_information_delete' => 'Вы уверены, что хотите удалить?',
 
 	'watermark_position_x' => '<acronym title="Свойство, определяющее положение водяного знака по оси X (в пикселях или процентах)">По оси X</acronym>',
-
 	'watermark_position_y' => '<acronym title="Свойство, определяющее положение водяного знака по оси Y (в пикселях или процентах)">По оси Y</acronym>',
 
 	'msg_error_access' => 'У Вас недостаточно прав для совершения этого действия или действие для формы отсутствует.',
 
 	'input_clear_filter' => 'Очистить',
-
 	'input_case_sensitive' => 'Учитывать регистр',
 
 	'filter_selected_all' => 'Все',
@@ -123,4 +117,12 @@ return array(
 	'note-bad-password' => 'В системе существует сотрудник со стандартными логином и паролем, необходимо изменить пароль сотрудника "admin".',
 	'list' => 'Список',
 	'kanban' => 'Канбан',
+	
+	'day1' => 'Понедельник',
+	'day2' => 'Вторник',
+	'day3' => 'Среда',
+	'day4' => 'Четверг',
+	'day5' => 'Пятница',
+	'day6' => 'Суббота',
+	'day7' => 'Воскресенье',
 );

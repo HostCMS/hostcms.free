@@ -276,8 +276,12 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		// UTM, Openstat or From
-		$oSource_Controller = new Source_Controller();
-		$this->_shopOrder->source_id = $oSource_Controller->getId();
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		if (is_null($oUser))
+		{
+			$oSource_Controller = new Source_Controller();
+			$this->_shopOrder->source_id = $oSource_Controller->getId();
+		}
 
 		// Номер заказа
 		$bInvoice = strlen($this->_orderParams['invoice']) > 0;

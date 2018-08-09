@@ -10,7 +10,7 @@
  */
 return array(
 	'shortcode_dir_add_form_title' => 'Добавление группы шорткодов',
-	'shortcode_dir_edit_form_title' => 'Редактирование группы шорткодов',
+	'shortcode_dir_edit_form_title' => 'Редактирование группы шорткодов "%s"',
 	'name' => 'Название',
 	'sorting' => 'Порядок сортировки',
 	'parent_id' => 'Группа',

@@ -41,7 +41,7 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 	protected $_coefficient = 1;
 
 	/**
-	 * Метод, вызываемый в коде ТДС через Shop_Payment_System_Handler::checkAfterContent($oShop);
+	 * Метод, вызываемый в коде настроек ТДС через Shop_Payment_System_Handler::checkPaymentBeforeContent($oShop);
 	 */
 	public function checkPaymentBeforeContent()
 	{
@@ -59,7 +59,7 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 			if (!$this->_verificationSignature($content, $decodedSignature, $this->_publicKey))
 			{
 				http_response_code(400);
-				echo json_encode(['message' => 'Webhook notification signature mismatch']);
+				echo json_encode(array('message' => 'Webhook notification signature mismatch'));
 				exit();
 			}
 
@@ -69,7 +69,7 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 			// PaymentProcessed - платеж успешно обработан (средства захолдированы)
 			// PaymentCaptured - платеж успешно принят (захолдированные средства списаны)
 			// PaymentCancelled - платеж отменен (захолдированные средства возвращены)
-			if (isset($aResponse['eventType']) && $aResponse['eventType'] == 'PaymentProcessed'
+			if (isset($aResponse['eventType']) && $aResponse['eventType'] == 'PaymentCaptured'
 				&& isset($aResponse['invoice']))
 			{
 				// Получаем ID заказа
@@ -79,43 +79,10 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 
 				if (!is_null($oShop_Order->id))
 				{
-					$request = json_encode(
-						array('reason' => 'capture')
-					);
-
-					try {
-						$Core_Http = Core_Http::instance('curl')
-							->clear()
-							->method('POST')
-							->timeout(30)
-							->url("https://api.rbk.money/v1/processing/invoices/{$aResponse['invoice']['id']}/payments/{$aResponse['payment']['id']}/capture")
-							->additionalHeader('X-Request-ID', uniqid())
-							->additionalHeader('Authorization', 'Bearer ' . $this->_apiKey)
-							->additionalHeader('Content-type', 'application/json; charset=utf-8')
-							->additionalHeader('Accept', 'application/json')
-							->rawData($request)
-							->execute();
-
-						$aHeaders = $Core_Http->parseHeaders();
-
-						$sStatus = Core_Array::get($aHeaders, 'status');
-
-						$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
-
-						if ($iStatusCode == 202)
-						{
-							// Вызов обработчика платежной системы
-							Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-								->shopOrder($oShop_Order)
-								->paymentProcessing($aResponse);
-						}
-						else
-						{
-							$oShop_Order->system_information = "RBKMoney неверный ответ! Код: {$iStatusCode}";
-							$oShop_Order->save();
-						}
-					}
-					catch (Exception $e) {}
+					// Вызов обработчика платежной системы
+					Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
+						->shopOrder($oShop_Order)
+						->paymentProcessing($aResponse);
 				}
 			}
 		}
@@ -277,8 +244,6 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 						<script src="https://checkout.rbk.money/checkout.js" class="rbkmoney-checkout"
 								data-invoice-id="<?php echo htmlspecialchars($invoice_id)?>"
 								data-invoice-access-token="<?php echo htmlspecialchars($access_token)?>"
-								data-payment-flow-hold="true"
-								data-hold-expiration="capture"
 								data-name="<?php echo htmlspecialchars(strval($aAnswer['invoice']['product']))?>"
 								data-email="<?php echo htmlspecialchars($oShop_Order->email)?>"
 								data-logo="https://checkout.rbk.money/images/logo.png"
@@ -288,6 +253,10 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 						</script>
 					</form>
 					<?php
+				}
+				else
+				{
+					echo "<p>Wrong JSON answer</p>";
 				}
 			}
 			catch (Exception $e) {}

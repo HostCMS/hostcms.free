@@ -12,7 +12,7 @@ return array(
 	'model_name' => 'Виджеты секции макета сайта',
 	'form_title' => 'Виджеты секции макета сайта',
 	'current_breadcrumbs' => 'Виджеты секции макета сайта',
-	'widget_form_title_edit' => 'Редактирование виджета',
+	'widget_form_title_edit' => 'Редактирование виджета "%s"',
 	'widget_form_title_add' => 'Добавление виджета',
 	'template_section_id' => 'Идентификатор секции макета',
 	'id' => 'Идентификатор',

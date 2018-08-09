@@ -456,7 +456,12 @@ class Core_Page extends Core_Servant_Properties
 			$sAsync = $async ? ' async="async"' : '';
 
 			$sPath = $oCompression_Controller->getPath();
-			$sReturn .= '<script type="text/javascript"' . $sAsync . ' src="' . $this->jsCDN . $sPath . '"></script>' . "\n";
+
+			$timestamp = $this->fileTimestamp && is_file(CMS_FOLDER . $sPath)
+				? filemtime(CMS_FOLDER . $sPath)
+				: NULL;
+
+			$sReturn .= '<script type="text/javascript"' . $sAsync . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 		catch (Exception $e)
 		{

@@ -15,7 +15,7 @@ return array(
 	'edit_title' => 'Edit stopword',
 	'value' => 'Stopword',
 	'values' => 'Stopword/List of stopwords',
-	'id' => 'Id',
+	'id' => 'ID',
 	'edit_success' => "Stopword modified successfully!",
 	'delete_success' => 'Stopword deleted successfully!',
 	'undelete_success' => 'Stopword restored successfully!',

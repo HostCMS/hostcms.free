@@ -25,7 +25,7 @@ return array(
 	'site_parameters' => 'Parameters',
 	'name' => '<acronym title="Domain (without http://, e.g., site.ru)">Domain (without http://)</acronym>',
 	'current' => '<acronym title="Main domain is used in a number of system modules and in administration section. Used to generate direct links">Main domain</acronym>',
-	'id' => 'Id',
+	'id' => 'ID',
 	'site_id' => 'Site id',
 	'site_link_site' => 'Website',
 	'error_current_alias' => '	Attention! Website should have a main domain!',

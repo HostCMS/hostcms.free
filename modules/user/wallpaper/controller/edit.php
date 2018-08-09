@@ -75,7 +75,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
 
 		$title = $this->_object->id
-			? Core::_('User_Wallpaper.edit_title')
+			? Core::_('User_Wallpaper.edit_title', $this->_object->name)
 			: Core::_('User_Wallpaper.add_title');
 
 		$this->title($title);

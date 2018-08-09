@@ -89,7 +89,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 							'login' => htmlspecialchars($oUser->login),
 							'firstName' => htmlspecialchars($oUser->name),
 							'lastName' => htmlspecialchars($oUser->surname),
-							'avatar' => htmlspecialchars($oUser->getImageHref()),
+							'avatar' => htmlspecialchars($oUser->getAvatar()),
 							'lastChatTime' => Core_Date::time2string($iLastMessageTime),
 							'lastActivity' => Core_Date::time2string($oUser->getLastActivity()),
 							'online' => intval($oUser->isOnline()),
@@ -134,7 +134,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 							'login' => $oRecipient_User->login,
 							'firstName' => strval($oRecipient_User->name),
 							'lastName' => strval($oRecipient_User->surname),
-							'avatar' => $oRecipient_User->getImageHref(),
+							'avatar' => $oRecipient_User->getAvatar(),
 							'lastChatTime' => Core_Date::time2string($iLastMessageTime),
 							'lastActivity' => Core_Date::time2string($oRecipient_User->getLastActivity()),
 							'online' => intval($oRecipient_User->isOnline()),
@@ -260,7 +260,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 						$aJson['info'] = array(
 							'user_id' => $oUser_Message->User->id,
-							'avatar' => $oUser_Message->User->getImageHref(),
+							'avatar' => $oUser_Message->User->getAvatar(),
 							'text' => Core::_('User.new_message_from', $oUser_Message->User->name, $oUser_Message->User->surname),
 							'sound' => intval($oCurrentUser->sound),
 						);
@@ -317,7 +317,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 							'login' => $oRecipient_User->login,
 							'firstName' => $oRecipient_User->name,
 							'lastName' => $oRecipient_User->surname,
-							'avatar' => $oRecipient_User->getImageHref(),
+							'avatar' => $oRecipient_User->getAvatar(),
 							'online' => intval($oRecipient_User->isOnline()),
 						);
 					}

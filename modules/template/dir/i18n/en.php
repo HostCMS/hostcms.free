@@ -15,10 +15,10 @@ return array(
 	'title_add' => 'Add template section',
 	'title_edit' => 'Edit remplate section',
 
-	'id' => 'Id',
-	'name' => '<acronym title="Section name">Section name</acronym>',
-	'parent_id' => '<acronym title="Section in which this section should be placed">Parent section</acronym>',
-	'sorting' => '<acronym title="Field according to which Template sections should be sorted">Sorting order</acronym>',
+	'id' => 'ID',
+	'name' => 'Section name',
+	'parent_id' => 'Parent section',
+	'sorting' => 'Sort',
 	'site_id' => 'Site Id',
 
 	'edit_success' => 'Section modified successfully!',

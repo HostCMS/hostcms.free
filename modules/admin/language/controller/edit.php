@@ -24,7 +24,7 @@ class Admin_Language_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$title = is_null($this->_object->id)
 			? Core::_('Admin_Language.form_add_forms_add_language_title')
-			: Core::_('Admin_Language.form_add_forms_edit_language_title');
+			: Core::_('Admin_Language.form_add_forms_edit_language_title', $this->_object->name);
 
 		$this->title($title);
 

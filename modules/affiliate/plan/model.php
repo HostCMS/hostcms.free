@@ -62,7 +62,7 @@ class Affiliate_Plan_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -85,7 +85,7 @@ class Affiliate_Plan_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Affiliate_Plans->deleteAll(FALSE);
 		$this->Affiliate_Plan_Levels->deleteAll(FALSE);
 
@@ -163,5 +163,20 @@ class Affiliate_Plan_Model extends Core_Entity
 			->addEntities($this->Affiliate_Plan_Levels->findAll());
 
 		return parent::getXml();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function levelsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Affiliate_Plan_Levels->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-azure white')
+			->value($count)
+			->execute();
 	}
 }

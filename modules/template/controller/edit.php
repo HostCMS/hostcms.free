@@ -235,7 +235,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$manifest = $this->_object->loadManifestFile();
 
-					!strlen($manifest) && $manifest = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+					!strlen($manifest)
+						&& $manifest = '<?xml version="1.0" encoding="UTF-8"?>' . "\n<manifest>\n</manifest>";
 
 					$oTextarea_Manifest
 						->value($manifest)
@@ -287,7 +288,7 @@ EOD;
 			case 'template_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Template_Dir.title_edit')
+					? Core::_('Template_Dir.title_edit', $this->_object->name)
 					: Core::_('Template_Dir.title_add');
 
 				$oMainTab

@@ -20,6 +20,30 @@ class Shop_Cart_Model extends Core_Entity
 	protected $_marksDeleted = NULL;
 
 	/**
+	 * Column consist item's name
+	 * @var string
+	 */
+	public $name = NULL;
+
+	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $postpone_flag = NULL;
+
+	/**
+	 * Column consist item's marking
+	 * @var string
+	 */
+	public $marking = NULL;
+
+	/**
+	 * Column consist item's price
+	 * @var string
+	 */
+	public $price = NULL;
+
+	/**
 	 * List of preloaded values
 	 * @var array
 	 */
@@ -38,6 +62,88 @@ class Shop_Cart_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'siteuser' => array()
 	);
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if (is_null($this->Shop_Item->id))
+		{
+			return htmlspecialchars($this->name);
+		}
+		else
+		{
+			$sShopItemPath = '/admin/shop/item/index.php';
+			$iShopItemId = $this->Shop_Item->id;
+
+			return sprintf(
+				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
+				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
+				htmlspecialchars($this->name)
+			);
+		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function rest($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->Shop_Item->getRest();
+	}
+
+	/**
+	 * Get shop item price
+	 * @return float
+	 */
+	public function getPrice()
+	{
+		$oSiteuser = $this->Siteuser;
+
+		$Shop_Item_Controller = new Shop_Item_Controller();
+		$Shop_Item_Controller
+			->siteuser($oSiteuser)
+			->count($this->quantity);
+
+		$oShop_Item = $this->Shop_Item;
+
+		$aPrice = $Shop_Item_Controller->getPrices($oShop_Item);
+
+		return $aPrice['price_discount'];
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function price($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$price = $this->getPrice();
+
+		$sPrice = Shop_Controller::instance()->round($price) . ' ' . $this->Shop->Shop_Currency->name;
+
+		return $sPrice;
+	}
+
+	/**
+	 * Get amount with currency name
+	 * @return string
+	 */
+	public function amount()
+	{
+		return htmlspecialchars(
+			sprintf("%.2f %s", $this->getPrice() * $this->quantity, $this->Shop->Shop_Currency->name)
+		);
+	}
 
 	/**
 	 * Get Shop_Cart by item $shop_item_id and site user $siteuser_id
@@ -107,7 +213,7 @@ class Shop_Cart_Model extends Core_Entity
 		$this->_showXmlSpecialprices = $showXmlSpecialprices;
 		return $this;
 	}
-	
+
 	/**
 	 * Show special prices data in XML
 	 * @var boolean
@@ -123,8 +229,8 @@ class Shop_Cart_Model extends Core_Entity
 	{
 		$this->_showXmlAssociatedItems = $showXmlAssociatedItems;
 		return $this;
-	}	
-	
+	}
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string

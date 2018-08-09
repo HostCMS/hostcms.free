@@ -14,11 +14,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Admin_Form_Controller_View
 {
 	protected $_Admin_Form_Controller = NULL;
-	
+
 	public function __construct($oAdmin_Form_Controller)
 	{
 		$this->_Admin_Form_Controller = $oAdmin_Form_Controller;
 	}
-	
-	
 }

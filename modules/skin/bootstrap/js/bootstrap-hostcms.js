@@ -2330,13 +2330,13 @@
 		// Автоматическое обновление списка уведомлений
 		refreshNotificationsList: function() {
 			// add ajax '_'
+
 			var data = jQuery.getData({}),
-				jNotificationsListBox  = $('.navbar-account #notificationsListBox');
+				jNotificationsListBox  = $('.navbar-account #notificationsListBox'),
 
-			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
-			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
+				lastNotificationId = jNotificationsListBox.data('lastNotificationId') ? +jNotificationsListBox.data('lastNotificationId') : 0;
 
-			var bLocalStorage = typeof localStorage !== 'undefined',
+				bLocalStorage = typeof localStorage !== 'undefined',
 				bNeedsRequest = false;
 
 			if (bLocalStorage)
@@ -2346,15 +2346,16 @@
 
 				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
 				{
-					storageObj = {expired_in: 0};
+					storageObj = {expired_in: 0, lastNotificationId: 0};
 				}
 
-				if (Date.now() > storageObj['expired_in'])
+				// При окрытии новой вкладки (!lastNotificationId) загружаем данные из БД, а не из хранилища
+				if (Date.now() > storageObj['expired_in'] || !lastNotificationId)
 				{
-					storageObj['expired_in'] = Date.now() + 10000;
+					//storageObj['expired_in'] = Date.now() + 10000;
 					bNeedsRequest = true;
 				}
-				else
+				else if(lastNotificationId < storageObj['lastNotificationId'])
 				{
 					storageObj['localStorage'] = true;
 					$.refreshNotificationsCallback(storageObj);
@@ -2367,6 +2368,9 @@
 
 			if (bNeedsRequest)
 			{
+				data['lastNotificationId'] = lastNotificationId;
+				data['currentUserId'] = jNotificationsListBox.data('currentUserId');
+
 				$.ajax({
 					//context: textarea,
 					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
@@ -2375,9 +2379,10 @@
 					dataType: 'json',
 					error: function(){},
 					success: [function(resultData){
+
 						if (bLocalStorage)
 						{
-							resultData['expired_in'] = storageObj['expired_in'];
+							resultData['expired_in'] = Date.now() + 10000;
 						}
 
 						try {
@@ -2387,6 +2392,7 @@
 								console.log('localStorage: QUOTA_EXCEEDED_ERR');
 							}
 						}
+
 					}, $.refreshNotificationsCallback]
 				});
 			}
@@ -2918,7 +2924,7 @@
 
 			jNewObject.find("input[id^='field_id'],select,textarea").attr('name', 'property_' + index + '[]');
 			jNewObject.find("div[id^='file_small'] input[id^='small_field_id']").attr('name', 'small_property_' + index + '[]').val('');
-			jNewObject.find("input[id^='field_id'][type!=checkbox],input[id^='property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[id^='description'][type!=checkbox],select,textarea").val('');
+			jNewObject.find("input[id^='field_id'][type!=checkbox],input[id^='property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea").val('');
 
 			jNewObject.find("input[id^='create_small_image_from_large_small_property']").attr('checked', true);
 
@@ -2930,8 +2936,8 @@
 			});
 
 			jNewObject.find("div.img_control div,div.img_control div").remove();
-			jNewObject.find("input[type='text']#description_large").attr('name', 'description_property_' + index + '[]');
-			jNewObject.find("input[type='text']#description_small").attr('name', 'description_small_property_' + index + '[]');
+			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
+			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
 
 			var oDateTimePicker = jProperies.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
 
@@ -3034,7 +3040,6 @@
 
 		// Показ выбранных сотрудников в select2
 		templateSelectionItemResponsibleEmployees: function (data, item){
-
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class"),
 				//arraySelectItemIdParts = data.id.split("_"),
@@ -3056,8 +3061,6 @@
 				{
 					selectionSingle.addClass('user-container');
 				}
-
-				//console.log('selectionSingle = ', selectionSingle);
 
 				// Убираем элемент удаления (крестик) для создателя дела
 				if (templateSelectionOptions && ~templateSelectionOptions.unavailableItems.indexOf(+data.id))
@@ -3151,7 +3154,6 @@
 		},
 
 		dealsPrepare: function (){
-
 		/*
 			$("body").popover({
 				container: "body",
@@ -3176,8 +3178,8 @@
 					if (dealTemplateSteps.data('change-by-click') && $(this).children('a.available').length)
 					{
 						$('#id_content #row_0_' + dealId).toggleHighlight();
-						$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
-						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
+						/*$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});*/
+						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId + '&hostcms[checked][0][' + dealId + ']=1', windowId: 'id_content'});
 					}
 					// При редактировании сделки
 					else
@@ -3239,8 +3241,6 @@
 			// Добавление дела(события) к сделке
 			.on('click', '[id = "addDealEvent"]', function (){
 
-				//console.log('!!! click addDealEvent = ', $(this).data('dealId'));
-
 				var dealId = $(this).data('dealId');
 
 				if (dealId)
@@ -3251,8 +3251,6 @@
 			// Добавление комментария к сделке
 			.on('click', '[id = "addDealNote"]', function (){
 
-				console.log('click addDealNote dealId = ', $(this).data('dealId'));
-
 				var dealId = $(this).data('dealId');
 
 				if (dealId)
@@ -3261,13 +3259,86 @@
 				}
 			});
 		},
+		joinUser2DealStep: function(deal_step_id)
+		{
+			$.ajax({
+				url: '/admin/deal/index.php',
+				type: "POST",
+				dataType: 'json',
+				data: {'join_user': 1, 'deal_step_id': deal_step_id},
+				success: function(result) {
+					if (result['success'])
+					{
+						var i = 'times',
+							a = 'darkorange';
+					}
+					else
+					{
+						var i = 'check',
+							a = 'azure';
+					}
+
+					$('.join-user').html('<a onclick="$.joinUser2DealStep(' + deal_step_id + '); $(this).find(\'i\').toggleClass(\'fa-' + i + ' fa-spinner\').addClass(\'fa-spin\');" class="btn btn-sm btn-' + a + ' pull-right"><i class="fa fa-' + i + ' right"></i> ' + result['name'] + '</a>');
+
+					// Reload users list
+					$.loadDealStepUsers(deal_step_id);
+				}
+			});
+		},
+		loadDealStepUsers: function(deal_step_id)
+		{
+			$.ajax({
+				url: '/admin/deal/index.php',
+				type: "POST",
+				dataType: 'json',
+				data: {'load_deal_step_users': 1, 'deal_step_id': deal_step_id},
+				success: function(result) {
+					// Clear container
+					$('.deal-step-users-list').html('');
+
+					if (result['users'])
+					{
+						$('.deal-step-users-list').append(
+							'<div class="row profile-container">\
+								<div class="col-xs-12"><h6 class="row-title before-palegreen no-margin-top">' + result['title'] + '</div>\
+							</div>\
+							<div class="row">\
+							</div>'
+						);
+
+						$.each(result['users'], function(i, oUser){
+							$('.deal-step-users-list').append(
+								'<div class="col-xs-12 col-sm-4">\
+									<div class="databox databox-graded">\
+										<div class="databox-left no-padding">\
+											<img src="' + oUser['avatar'] + '" style="width:65px; height:65px;">\
+										</div>\
+										<div class="databox-right padding-top-20 bg-whitesmoke">\
+											<div class="databox-stat orange radius-bordered" style="right: 0; left: 7px">\
+												<div class="databox-text black semi-bold"><a class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + oUser['name'] + '</a></div>\
+												<div class="databox-text darkgray">' + oUser['post'] + '</div>\
+											</div>\
+										</div>\
+									</div>\
+								</div>'
+							);
+						});
+
+						$('.deal-step-users-list').removeClass('hidden');
+					}
+				}
+			});
+		},
 		rgb2hex: function(rgb)
 		{
-			rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-			function hex(x) {
-				return ("0" + parseInt(x).toString(16)).slice(-2);
+			if (typeof rgb !== 'undefined')
+			{
+				rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+				function hex(x) {
+					return ("0" + parseInt(x).toString(16)).slice(-2);
+				}
+				return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 			}
-			return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 		},
 		changeDealTemplateName: function (jDeal)
 		{
@@ -3426,6 +3497,16 @@ $(function(){
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
 	$.dealsPrepare();
+
+	$(window).on('resize', function(event) {
+
+		// Если ширина окна менее 570px, скрываем чекбоксы с настройками фиксации элеметов системы
+		// и показываем пиктограммы, появляющиеся в верхней части окна по умолчанию
+		if ($(this).innerWidth() < 570)
+		{
+			$('.navbar .navbar-inner .navbar-header .navbar-account .account-area').parent('.navbar-account.setting-open').removeClass('setting-open');
+		}
+	});
 
 	// $.calendarPrepare();
 
@@ -3630,7 +3711,7 @@ $(function(){
 					}
 
 					//$('#id_content #row_0_9').toggleHighlight();
-					$.adminCheckObject({objectId: 'check_0_' + dealTemplateStepId, windowId: 'id_content'}); $.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType, windowId: 'id_content'});
+					/*$.adminCheckObject({objectId: 'check_0_' + dealTemplateStepId, windowId: 'id_content'});*/ $.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
 				},
 
 				'mousedown': function(event) {
@@ -3691,8 +3772,6 @@ function calendarDayClick(oDate, jsEvent)
 		return false;
 	  });
 	  */
-
-	// console.log('jsEvent = ', jsEvent);
 
 	 /*
 	var dH = $(window).height(),

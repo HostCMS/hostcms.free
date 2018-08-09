@@ -72,7 +72,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'shop_dir':
 				$title = $object->id
-					? Core::_('Shop_Dir.edit_title')
+					? Core::_('Shop_Dir.edit_title', $object->name)
 					: Core::_('Shop_Dir.add_title');
 
 				$oAdditionalTab->delete($this->getField('parent_id'));
@@ -93,7 +93,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			case 'shop':
 				$title = $object->id
-					? Core::_('Shop.edit_title')
+					? Core::_('Shop.edit_title', $object->name)
 					: Core::_('Shop.add_title');
 
 				$oShopTabFormats = Admin_Form_Entity::factory('Tab')
@@ -598,7 +598,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									allowClear: true,
 									templateResult: templateResultItemSubscribers,
 									escapeMarkup: function(m) { return m; },
-									templateSelection: templateSelectionItemSubscribers
+									templateSelection: templateSelectionItemSubscribers,
+									width: "100%"
 								});
 							})</script>
 						';

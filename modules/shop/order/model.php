@@ -102,7 +102,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -1333,6 +1333,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Add order CommerceML
 	 * @param Core_SimpleXMLElement $oXml
+	 * @hostcms-event shop_order.onBeforeGetCmlUserName
 	 */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
@@ -1357,13 +1358,20 @@ class Shop_Order_Model extends Core_Entity
 
 		$bCompany = strlen(trim($this->company)) > 0;
 
-		$aTmpArray = array();
-		$this->surname != '' && $aTmpArray[] = $this->surname;
-		$this->name != '' && $aTmpArray[] = $this->name;
-		$this->patronymic != '' && $aTmpArray[] = $this->patronymic;
-		!count($aTmpArray) && $aTmpArray[] = $this->email;
+		Core_Event::notify($this->_modelName . '.onBeforeGetCmlUserName', $this);
 
-		$sUserFullName = implode(' ', $aTmpArray);
+		$sUserFullName = Core_Event::getLastReturn();
+
+		if (!strlen($sUserFullName))
+		{
+			$aTmpArray = array();
+			$this->surname != '' && $aTmpArray[] = $this->surname;
+			$this->name != '' && $aTmpArray[] = $this->name;
+			$this->patronymic != '' && $aTmpArray[] = $this->patronymic;
+			!count($aTmpArray) && $aTmpArray[] = $this->email;
+
+			$sUserFullName = implode(' ', $aTmpArray);
+		}
 
 		// При отсутствии модуля "Пользователи сайта" ИД пользователя рассчитывается как crc32()
 		$sContractorId = $this->siteuser_id
@@ -1518,38 +1526,59 @@ class Shop_Order_Model extends Core_Entity
 
 		$oOrderItemsXml = $oOrderXml->addChild('Товары');
 
+		$aDiscount_Shop_Order_Items = array();
+		
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
-
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
-			$oCurrentItemXml = $oOrderItemsXml->addChild('Товар');
-			$oCurrentItemXml->addChild('Ид',
-				$oShop_Order_Item->Shop_Item->modification_id
-					? sprintf('%s#%s', $oShop_Order_Item->Shop_Item->Modification->guid, $oShop_Order_Item->Shop_Item->guid)
-					: ($oShop_Order_Item->type == 1
-						? 'ORDER_DELIVERY'
-						: $oShop_Order_Item->Shop_Item->guid
-					)
-			);
-			$oCurrentItemXml->addChild('Артикул', $oShop_Order_Item->marking);
-			$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
+			if ($oShop_Order_Item->getPrice() >= 0)
+			{
+				$oCurrentItemXml = $oOrderItemsXml->addChild('Товар');
+				$oCurrentItemXml->addChild('Ид',
+					$oShop_Order_Item->Shop_Item->modification_id
+						? sprintf('%s#%s', $oShop_Order_Item->Shop_Item->Modification->guid, $oShop_Order_Item->Shop_Item->guid)
+						: ($oShop_Order_Item->type == 1
+							? 'ORDER_DELIVERY'
+							: $oShop_Order_Item->Shop_Item->guid
+						)
+				);
+				$oCurrentItemXml->addChild('Артикул', $oShop_Order_Item->marking);
+				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
 
-			$oShop_Measure = $oShop_Order_Item->Shop_Item->Shop_Measure;
-			$oXmlMeasure = $oCurrentItemXml->addChild('БазоваяЕдиница', $oShop_Measure->name);
-			$oShop_Measure->okei && $oXmlMeasure->addAttribute('Код', $oShop_Measure->okei);
-			strlen($oShop_Measure->description) && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
+				$oShop_Measure = $oShop_Order_Item->Shop_Item->Shop_Measure;
+				$oXmlMeasure = $oCurrentItemXml->addChild('БазоваяЕдиница', $oShop_Measure->name);
+				$oShop_Measure->okei && $oXmlMeasure->addAttribute('Код', $oShop_Measure->okei);
+				strlen($oShop_Measure->description) && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
 
-			$oCurrentItemXml->addChild('ЦенаЗаЕдиницу', $oShop_Order_Item->getPrice());
-			$oCurrentItemXml->addChild('Количество', $oShop_Order_Item->quantity);
-			$oCurrentItemXml->addChild('Сумма', $oShop_Order_Item->getAmount());
+				$oCurrentItemXml->addChild('ЦенаЗаЕдиницу', $oShop_Order_Item->getPrice());
+				$oCurrentItemXml->addChild('Количество', $oShop_Order_Item->quantity);
+				$oCurrentItemXml->addChild('Сумма', $oShop_Order_Item->getAmount());
 
-			$oProperty = $oCurrentItemXml->addChild('ЗначенияРеквизитов');
-			$oValue = $oProperty->addChild('ЗначениеРеквизита');
-			$oValue->addChild('Наименование', 'ВидНоменклатуры');
-			$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
-			$oValue = $oProperty->addChild('ЗначениеРеквизита');
-			$oValue->addChild('Наименование', 'ТипНоменклатуры');
-			$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+				$oProperty = $oCurrentItemXml->addChild('ЗначенияРеквизитов');
+				$oValue = $oProperty->addChild('ЗначениеРеквизита');
+				$oValue->addChild('Наименование', 'ВидНоменклатуры');
+				$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+				$oValue = $oProperty->addChild('ЗначениеРеквизита');
+				$oValue->addChild('Наименование', 'ТипНоменклатуры');
+				$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+			}
+			else
+			{
+				$aDiscount_Shop_Order_Items[] = $oShop_Order_Item;
+			}
+		}
+
+		if (count($aDiscount_Shop_Order_Items))
+		{
+			$oDiscountXml = $oOrderXml->addChild('Скидки');
+			
+			foreach ($aDiscount_Shop_Order_Items as $oShop_Order_Item)
+			{
+				$oCurrentItemXml = $oDiscountXml->addChild('Скидка');
+				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
+				$oCurrentItemXml->addChild('Сумма', -1 * $oShop_Order_Item->getPrice() * $oShop_Order_Item->quantity);
+				$oCurrentItemXml->addChild('УчтеноВСумме', 'true');
+			}
 		}
 
 		return $this;
@@ -1610,6 +1639,12 @@ class Shop_Order_Model extends Core_Entity
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+			</div><?php
+		}
+		if (strlen($this->description))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_description')?>:</b> <?php echo htmlspecialchars($this->description)?>
 			</div><?php
 		}
 		?>

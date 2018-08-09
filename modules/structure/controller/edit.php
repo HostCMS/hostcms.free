@@ -491,7 +491,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->fillTab();
 
 		$this->title($this->_object->id
-			? Core::_('Structure.edit_title')
+			? Core::_('Structure.edit_title', $this->_object->name)
 			: Core::_('Structure.add_title')
 		);
 

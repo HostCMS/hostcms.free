@@ -149,6 +149,11 @@ return array(
 	'redaction5' => 'Бизнес',
 	'redaction7' => 'Корпорация',
 
+	'byte' => 'Байт',
+	'kbyte' => 'КБ',
+	'mbyte' => 'МБ',
+	'gbyte' => 'ГБ',
+	
 	'timePeriodSeconds' => '%s сек. назад',
 	'timePeriodMinutes' => '%s мин. назад',
 	'timePeriodHours' => '%s час. назад',
@@ -158,8 +163,31 @@ return array(
 	'timePeriodYears' => '%s г. назад',
 	'timePeriodYearMonths' => '%s г. %s мес. назад',
 
-	'byte' => 'Байт',
-	'kbyte' => 'КБ',
-	'mbyte' => 'МБ',
-	'gbyte' => 'ГБ'
+	'now' => 'Сейчас',
+	'ago' => '%1$s %2$s назад',
+	'today' => 'Cегодня в %s',
+	'yesterday' => 'Вчера в %s',
+	'tomorrow' => 'Завтра в %s',
+	'estimate_date' => '%1$d %2$s в %3$s',
+	'estimate_date_year' => '%1$d %2$s %3$d г. в %4$s',
+
+	'month1' => 'января',
+	'month2' => 'февраля',
+	'month3' => 'марта',
+	'month4' => 'апреля',
+	'month5' => 'мая',
+	'month6' => 'июня',
+	'month7' => 'июля',
+	'month8' => 'августа',
+	'month9' => 'сентября',
+	'month10' => 'октября',
+	'month11' => 'ноября',
+	'month12' => 'декабря',
+
+	'hour_nominative' => 'час',
+	'hour_genitive_singular' => 'часа',
+	'hour_genitive_plural' => 'часов',
+	'minute_nominative' => 'минуту',
+	'minute_genitive_singular' => 'минуты',
+	'minute_genitive_plural' => 'минут',
 );

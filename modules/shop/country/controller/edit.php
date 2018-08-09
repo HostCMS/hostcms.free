@@ -24,7 +24,7 @@ class Shop_Country_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 		parent::setObject($object);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Country.country_edit_form_title')
+			? Core::_('Shop_Country.country_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Country.country_add_form_title');
 
 		$oMainTab = $this->getTab('main');

@@ -259,6 +259,9 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
@@ -301,6 +304,9 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
@@ -318,6 +324,12 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.text\}\')">' . Core::_("Shop.seo_template_item_text") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.priceWithCurrency\}\')">' . Core::_("Shop.seo_template_item_price_with_currency") . '</a>
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.currencyName\}\')">' . Core::_("Shop.seo_template_item_currency") . '</a>

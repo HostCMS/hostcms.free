@@ -38,7 +38,7 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 		parent::setObject($object);
 
 		$this->title($this->_object->id
-			? Core::_('Lib_Property.lib_property_form_title_edit')
+			? Core::_('Lib_Property.lib_property_form_title_edit', $this->_object->name)
 			: Core::_('Lib_Property.lib_property_form_title_add'));
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();

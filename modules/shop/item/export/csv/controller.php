@@ -148,7 +148,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			// Название раздела - Порядок сортировки раздела
 			$this->_aGroupBase_Properties = array(
-				"","","","","","","","",""
+				"", "", "", "", "", "", "", "", "", "", ""
 			);
 
 			// CML ID идентификатор товара - Ярлыки
@@ -169,7 +169,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			// 0-вая строка - заголовок CSV-файла
 			$this->_aCurrentData[$this->_iCurrentDataPosition] = array(
-				// 9 cells
+				// 11 cells
 				'"' . Core::_('Shop_Item_Export.category_name') . '"',
 				'"' . Core::_('Shop_Item_Export.category_cml_id') . '"',
 				'"' . Core::_('Shop_Item_Export.category_parent_cml_id') . '"',
@@ -178,6 +178,8 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				'"' . Core::_('Shop_Item_Export.category_meta_keywords') . '"',
 				'"' . Core::_('Shop_Item_Export.category_description') . '"',
 				'"' . Core::_('Shop_Item_Export.category_path') . '"',
+				'"' . Core::_('Shop_Item_Export.category_large_image') . '"',
+				'"' . Core::_('Shop_Item_Export.category_small_image') . '"',
 				'"' . Core::_('Shop_Item_Export.category_sorting') . '"',
 				// 36
 				'"' . Core::_('Shop_Item_Export.item_cml_id') . '"',
@@ -231,6 +233,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oProperty->type == 2)
 				{
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_file_description', $oProperty->name)));
+					$this->_iItem_Properties_Count++;
+
 					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images', $oProperty->name)));
 					$this->_iItem_Properties_Count++;
 				}
@@ -244,6 +249,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				if ($oGroup_Property->type == 2)
 				{
+					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_file_description', $oGroup_Property->name)));
+					$this->_iGroup_Properties_Count++;
+
 					$this->_aCurrentData[$this->_iCurrentDataPosition][] = sprintf('"%s"', $this->prepareString(Core::_('Shop_Item.import_small_images', $oGroup_Property->name)));
 					$this->_iGroup_Properties_Count++;
 				}
@@ -281,14 +289,14 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		);
 
 		// CML ID ТОВАРА
-		$aTmpArray[9] = $oShopItem->guid;
+		$aTmpArray[11] = $oShopItem->guid;
 
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{
-			$aTmpArray[41] = $oShop_Specialprice->min_quantity;
-			$aTmpArray[42] = $oShop_Specialprice->max_quantity;
-			$aTmpArray[43] = $oShop_Specialprice->price;
-			$aTmpArray[44] = $oShop_Specialprice->percent;
+			$aTmpArray[43] = $oShop_Specialprice->min_quantity;
+			$aTmpArray[44] = $oShop_Specialprice->max_quantity;
+			$aTmpArray[45] = $oShop_Specialprice->price;
+			$aTmpArray[46] = $oShop_Specialprice->percent;
 
 			$this->_printRow($aTmpArray);
 
@@ -321,6 +329,10 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			if ($oProperty->type == 2)
 			{
+				$aItemProperties[] = $oProperty_Value
+					? sprintf('"%s"', $oProperty_Value->file_description)
+					: '';
+
 				$aItemProperties[] = $oProperty_Value
 					? ($oProperty_Value->file_small == ''
 						? ''
@@ -628,6 +640,8 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 						sprintf('"%s"', $this->prepareString($oShopGroup->seo_keywords)),
 						sprintf('"%s"', $this->prepareString($oShopGroup->description)),
 						sprintf('"%s"', $this->prepareString($oShopGroup->path)),
+						sprintf('"%s"', ($oShopGroup->image_large == '') ? '' : $oShopGroup->getLargeFileHref()),
+						sprintf('"%s"', ($oShopGroup->image_small == '') ? '' : $oShopGroup->getSmallFileHref()),
 						sprintf('"%s"', $this->prepareString($oShopGroup->sorting))
 					);
 
@@ -678,6 +692,10 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 						if ($oGroup_Property->type == 2)
 						{
+							$aTmpArray[] = $iProperty_Values_Count
+								? sprintf('"%s"', $aProperty_Values[0]->file_description)
+								: '';
+
 							$aTmpArray[] = $iProperty_Values_Count
 								? ($aProperty_Values[0]->file_small == ''
 									? ''
@@ -747,7 +765,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 						$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
 
 						// CML ID ТОВАРА
-						$aCurrentPropertyLine[9] = $oShopItem->guid;
+						$aCurrentPropertyLine[11] = $oShopItem->guid;
 
 						foreach ($this->_aItem_Properties as $oProperty)
 						{
@@ -760,7 +778,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 								if ($oProperty->type == 2)
 								{
-									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oShopItem->getItemHref())->getSmallFileHref()));
+									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
+									
+									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oShopItem->getItemHref())->getSmallFileHref()));
 								}
 
 								$this->_printRow($aCurrentPropertyLine);
@@ -768,9 +788,17 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 							if ($oProperty->type == 2)
 							{
+								// File
 								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-								$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = '""';
-								$iPropertyFieldOffset += 2;
+								$iPropertyFieldOffset++;
+								
+								// Description
+								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+								$iPropertyFieldOffset++;
+								
+								// Small File
+								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+								$iPropertyFieldOffset++;
 							}
 							else
 							{
@@ -811,7 +839,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 								$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
 
 								// CML ID МОДИФИКАЦИИ
-								$aCurrentPropertyLine[9] = $oModification->guid;
+								$aCurrentPropertyLine[11] = $oModification->guid;
 
 								foreach ($this->_aItem_Properties as $oProperty)
 								{
@@ -824,7 +852,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 										if ($oProperty->type == 2)
 										{
-											$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oModification->getItemHref())->getSmallFileHref()));
+											$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
+											
+											$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oModification->getItemHref())->getSmallFileHref()));
 										}
 
 										$this->_printRow($aCurrentPropertyLine);
@@ -832,9 +862,17 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 									if ($oProperty->type == 2)
 									{
+										// File
 										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
-										$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = '""';
-										$iPropertyFieldOffset += 2;
+										$iPropertyFieldOffset++;
+										
+										// Description
+										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+										$iPropertyFieldOffset++;
+										
+										// Small File
+										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
+										$iPropertyFieldOffset++;
 									}
 									else
 									{
@@ -1035,7 +1073,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 							if (count($aPropertyValues))
 							{
 								$oProperty_Value = $aPropertyValues[0];
-								
+
 								$this->_aCurrentRow[] = sprintf('"%s"', $this->prepareString($this->_getPropertyValue($oProperty, $oProperty_Value, $oShop_Item)));
 							}
 							else

@@ -70,7 +70,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: 0;
 
 				$title = $this->_object->id
-					? Core::_('Shop_Item.items_catalog_edit_form_title')
+					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name)
 					: Core::_('Shop_Item.items_catalog_add_form_title');
 
 				$oMainTab = $this->getTab('main');
@@ -735,18 +735,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-2 no-padding-right'));
 
 					$oMainRow10->add($oSiteuserSelect);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow10->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow10, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Удаляем продавцов
@@ -1232,6 +1226,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 				$oMainTab->move($this->getField('height'), $oMainRow11);
 
+				$oMainTab
+					->move($this->getField('min_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					->move($this->getField('max_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					->move($this->getField('quantity_step')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					;
+
 				$oMainTab->add(
 					Admin_Form_Entity::factory('Code')
 						->html("<script>radiogroupOnChange('{$windowId}', '{$this->_object->type}', [0,1,2,3])</script>")
@@ -1467,18 +1467,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 no-padding-right'));
 
 					$oMainRow5->add($oSiteuserSelect);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow5->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow5, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
@@ -1557,7 +1551,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Выводим заголовок формы
 				$title = $this->_object->id
-					? Core::_("Shop_Group.groups_edit_form_title")
+					? Core::_("Shop_Group.groups_edit_form_title", $this->_object->name)
 					: Core::_("Shop_Group.groups_add_form_title");
 
 			break;

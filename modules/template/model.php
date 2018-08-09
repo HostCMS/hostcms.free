@@ -71,7 +71,7 @@ class Template_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -534,7 +534,6 @@ class Template_Model extends Core_Entity
 			$subTemplate = $oTemplate->copy();
 			$subTemplate->template_id = $newObject->id;
 			$subTemplate->save();
-			//$newObject->add();
 		}
 
 		return $newObject;
@@ -656,8 +655,8 @@ class Template_Model extends Core_Entity
 
 		if (!is_null($oTemplate_Section))
 		{
-			//$bUserAccess = $this->checkUserAccess();
-			$bUserAccess = Core::checkPanel() && Core_Auth::logged();
+			$bUserAccess = $this->checkUserAccess();
+			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
 
 			if ($bUserAccess)
 			{

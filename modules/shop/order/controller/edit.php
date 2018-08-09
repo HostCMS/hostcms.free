@@ -164,18 +164,12 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->name('siteuser_id')
 				->class('siteuser-tag')
 				->style('width: 100%')
-				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 no-padding-right'));
 
 			$oMainRow1->add($oSiteuserSelect);
 
-			$placeholder = Core::_('Siteuser.select_siteuser');
-			$language = Core_i18n::instance()->getLng();
-
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
-			->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-			$oMainRow1->add($oCore_Html_Entity_Script);
+			// Show button
+			Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow1, $oSiteuser, $this->_Admin_Form_Controller);
 		}
 
 		$oMainRow2
@@ -262,14 +256,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('status_datetime')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
 
-			
+
 		$aTmpCompanies = array(" … ");
 		$aCompanies = $object->Shop->Site->Companies->findAll();
 		foreach ($aCompanies as $oCompany)
 		{
 			$aTmpCompanies[$oCompany->id] = $oCompany->name;
 		}
-		
+
 		$oMainRow5->add(
 			Admin_Form_Entity::factory('Select')
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
@@ -278,7 +272,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->name('company_id')
 				->value($this->_object->company_id)
 		);
-			
+
 		$oMainTab->move($this->getField('ip')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
 
@@ -576,7 +570,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->fillTab();
 
 		$title = $this->_object->id
-			? Core::_('Shop_Order.order_edit_form_title')
+			? Core::_('Shop_Order.order_edit_form_title', $this->_object->invoice)
 			: Core::_('Shop_Order.order_add_form_title');
 
 		$this->title($title);

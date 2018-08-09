@@ -129,7 +129,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 		$oMainTab->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow7);
 
 		$this->title($this->_object->id
-			? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title')
+			? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title', $this->_object->name)
 			: Core::_('Shop_Purchase_Discount.add_order_discount_form_title'));
 
 		return $this;

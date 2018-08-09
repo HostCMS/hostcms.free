@@ -44,7 +44,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 
@@ -89,7 +89,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
@@ -131,7 +131,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
@@ -165,7 +165,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Items->queryBuilder()
 				->where('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)
 				->where('informationsystem_items.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Items = $oInformationsystem_Items->findAll(FALSE);
 
@@ -182,7 +182,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
 				->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 

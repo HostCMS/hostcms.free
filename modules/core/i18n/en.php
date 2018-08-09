@@ -81,7 +81,7 @@ return array(
 	. "User login: %s\n"
 	. "Site: %s\n"
 	. "Page: %s\n"
-	. "IP-address: %s\n"
+	. "IP: %s\n"
 	. "Content management system %s,\n"
 	. "http://%s/\n",
 
@@ -158,4 +158,32 @@ return array(
 	'timePeriodMonths' => '%smon later',
 	'timePeriodYears' => '%syears later',
 	'timePeriodYearMonths' => '%sy %smon later',
+	
+	'now' => 'Now',
+	'ago' => '%1$s %2$s ago',
+	'today' => 'Today at %s',
+	'yesterday' => 'Yesterday at %s',
+	'tomorrow' => 'Tomorrow at %s',
+	'estimate_date' => '%1$d %2$s at %3$s',
+	'estimate_date_year' => '%1$d %2$s %3$d at %4$s',
+
+	'month1' => 'January',
+	'month2' => 'February',
+	'month3' => 'March',
+	'month4' => 'April',
+	'month5' => 'May',
+	'month6' => 'June',
+	'month7' => 'July',
+	'month8' => 'August',
+	'month9' => 'September',
+	'month10' => 'October',
+	'month11' => 'November',
+	'month12' => 'December',
+
+	'hour_nominative' => 'hour',
+	'hour_genitive_singular' => 'hour',
+	'hour_genitive_plural' => 'hours',
+	'minute_nominative' => 'minute',
+	'minute_genitive_singular' => 'minutes',
+	'minute_genitive_plural' => 'minutes',
 );

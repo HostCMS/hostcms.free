@@ -20,6 +20,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - stdOut() поток вывода, может использоваться для записи результата в файл. По умолчанию Core_Out_Std
  * - sno() система налогообложения (СНО) магазина. По умолчанию OSN — общая система налогообложения (ОСН).
  * - delay() временная задержка в микросекундах, используется на виртульных хостингах с ограничнием на ресурсы в единицу времени, по умолчанию 0. значение 10000 - 0,01 секунда.
+ * - utm_source() определяет рекламодателя, например, market
+ * - utm_medium() определяет рекламный или маркетинговый канал (цена за клик, баннер, рассылка по электронной почте).
  *
  *
  * <code>
@@ -72,6 +74,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'token',
 		'sno',
 		'delay',
+		'utm_source',
+		'utm_medium',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -631,6 +635,20 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Get UTM
+	 */
+	protected function _getUtm()
+	{
+		return !is_null($this->utm_source)
+			? '?utm_source=' . $this->utm_source . (
+				!is_null($this->utm_medium)
+					? '&utm_medium=' . $this->utm_medium
+					: ''
+			)
+			: '';
+	}
+	
 	protected function _showOffer($oShop_Item)
 	{
 		$oShop = $this->getEntity();
@@ -655,7 +673,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
 
 		/* URL */
-		$this->stdOut->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Item->getPath()) . '</url>'. "\n");
+		$this->stdOut->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Item->getPath() . $this->_getUtm()) . '</url>'. "\n");
 
 		/* Определяем цену со скидкой */
 		$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);

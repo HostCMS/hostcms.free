@@ -60,7 +60,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
-/*$oAdmin_Form_Entity_Breadcrumbs->add(
+$oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shortcode.menu'))
 		->href(
@@ -69,7 +69,7 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
 		)
-);*/
+);
 
 // Крошки по группам
 if ($oShortcode_Dir->id)

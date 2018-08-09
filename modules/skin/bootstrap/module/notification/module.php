@@ -68,9 +68,11 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				}
 
 				$aJson = array();
-
+				
 				// Идентификатор последнего загруженного уведомления для пользователя
 				$iLastNotificationId = intval(Core_Array::getPost('lastNotificationId'));
+				
+				//$iLocalStorage = intval(Core_Array::getPost('localStorage'));
 
 				if (!is_null($oCurrent_User) && $oCurrent_User->id == $iRequestUserId)
 				{
@@ -149,9 +151,12 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 						{
 							$aJson['unreadNotifications'][] = $aNotification;
 						}
+						
 					}
-				}
 
+					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;
+				}
+								
 				Core::showJson($aJson);
 			break;
 

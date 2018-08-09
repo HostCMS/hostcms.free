@@ -69,7 +69,8 @@ class Comment_Model extends Core_Entity
 		'text' => '',
 		'siteuser_id' => 0,
 		'parent_id' => 0,
-		'grade' => 0
+		'grade' => 0,
+		'active' => 1
 	);
 
 	/**
@@ -141,7 +142,7 @@ class Comment_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 
@@ -259,6 +260,16 @@ class Comment_Model extends Core_Entity
 					Core::factory('Core_Html_Entity_Span')
 						->class('small darkgray')
 						->value(htmlspecialchars($this->ip))
+				);
+		}
+
+		if ($this->grade)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_Span')
+						->class('small green')
+						->value(str_repeat('★', $this->grade) . str_repeat('☆', 5 - $this->grade))
 				);
 		}
 

@@ -1106,7 +1106,7 @@ class Shop_Controller_Show extends Core_Controller
 			$this->_cacheName,
 			$aTags
 		);
-		
+
 		// Clear
 		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
@@ -2125,7 +2125,7 @@ class Shop_Controller_Show extends Core_Controller
 				// Edit
 				$sPath = '/admin/shop/item/index.php';
 				$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
-				$sTitle = Core::_('Shop_Group.groups_edit_form_title');
+				$sTitle = Core::_('Shop_Group.groups_edit_form_title', $oShop_Group->name);
 
 				$oXslSubPanel->add(
 					Core::factory('Core_Html_Entity_A')
@@ -2196,10 +2196,12 @@ class Shop_Controller_Show extends Core_Controller
 		}
 		else
 		{
+			$oShop_Item = Core_Entity::factory('Shop_Item', $this->item);
+			
 			// Edit
 			$sPath = '/admin/shop/item/index.php';
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
-			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title');
+			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title', $oShop_Item->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

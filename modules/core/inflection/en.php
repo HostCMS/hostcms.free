@@ -17,7 +17,7 @@ class Core_Inflection_En extends Core_Inflection
 	 * Array of irregular form singular => plural
 	 * @var array
 	 */
-	static public $pluralIrregular = array (
+	static public $pluralIrregular = array(
 		'bus' => 'busses',
 		'child' => 'children',
 		'calf' => 'calves',
@@ -174,20 +174,6 @@ class Core_Inflection_En extends Core_Inflection
 
 		'my' => 'my'
 	);
-
-	/**
-	 * Array of irregular form plural => singular, based on self::$pluralIrregular
-	 * @var array
-	 */
-	static public $singularIrregular = array();
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct()
-	{
-		self::$singularIrregular = array_flip(self::$pluralIrregular);
-	}
 
 	/**
 	 * Rules for convert singular to plural form

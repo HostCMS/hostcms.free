@@ -138,7 +138,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oMainRow5->add($Admin_Form_Entity_Textarea);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Payment_System.system_of_pay_edit_form_title')
+			? Core::_('Shop_Payment_System.system_of_pay_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Payment_System.system_of_pay_add_form_title');
 
 		$this->title($title);

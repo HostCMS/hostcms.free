@@ -1431,7 +1431,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$sPath = '/admin/informationsystem/item/index.php';
 				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
-				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title');
+				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name);
 
 				$oXslSubPanel->add(
 					Core::factory('Core_Html_Entity_A')
@@ -1502,10 +1502,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 		}
 		else
 		{
+			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
+			
 			// Edit
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
-			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title');
+			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

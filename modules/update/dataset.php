@@ -70,29 +70,34 @@ class Update_Dataset extends Admin_Form_Dataset
 		$expiration_of_support = $aReturn['expiration_of_support'];
 		$this->_objects = $aReturn['entities'];
 
+		// 
+
+		$sDatetime = !is_null($aReturn['datetime'])
+			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
+			: '';
+		
 		if ($error > 0 && $error != 5)
 		{
 			$this->_Admin_Form_Controller->addMessage(
-				Core_Message::show(Core::_('Update.server_error_respond_' . $error), 'error')
+				Core_Message::show(Core::_('Update.server_error_respond_' . $error, $sDatetime), 'error')
 			);
-			//throw new Core_Exception(Core::_('Update.server_error_respond_' . $error), array(), 0, FALSE);
 		}
 		// Ошибок нет и количество обновления тоже 0
 		elseif (count($this->_objects) == 0)
 		{
 			$this->_Admin_Form_Controller->addMessage(
-				Core_Message::show(Core::_('Update.isLastUpdate'), 'message')
+				Core_Message::show(Core::_('Update.isLastUpdate', $sDatetime), 'message')
 			);
 		}
 
-		if ($expiration_of_support && !defined('IS_HOSTCMS_FREE'))
+		if ($expiration_of_support)
 		{
 			$f_expiration_of_support = Core_Date::sql2date($expiration_of_support);
 
 			$this->_Admin_Form_Controller->addMessage(
 				Core_Date::sql2timestamp($expiration_of_support) > time()
-					? Core_Message::get(Core::_('Update.support_available', $f_expiration_of_support))
-					: Core_Message::get(Core::_('Update.support_has_expired', $f_expiration_of_support, 'www.hostcms.ru'), 'error')
+					? Core_Message::get(Core::_('Update.support_available', $f_expiration_of_support, $sDatetime))
+					: Core_Message::get(Core::_('Update.support_has_expired', $f_expiration_of_support, 'www.hostcms.ru', $sDatetime), 'error')
 			);
 		}
 

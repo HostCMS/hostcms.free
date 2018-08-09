@@ -41,7 +41,7 @@ class Shop_Currency_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Currency.currency_edit_form_title')
+			? Core::_('Shop_Currency.currency_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Currency.currency_add_form_title');
 
 		$this->title($title);

@@ -468,7 +468,10 @@ abstract class Core_DataBase
 				throw new Core_Exception('Database configuration doesn\'t defined');
 			}
 
-			$driver = self::_getDriverName($aConfig[$name]['driver']);
+			$driver = isset($aConfig[$name]['class'])
+				? $aConfig[$name]['class']
+				: self::_getDriverName($aConfig[$name]['driver']);
+
 			self::$instance[$name] = new $driver($aConfig[$name]);
 		}
 

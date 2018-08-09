@@ -28,7 +28,7 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */}
 	.navbar .navbar-inner .navbar-header .navbar-account .account-area {
 		padding: 0;
 		margin: 0;
-		width: 100%;
+		/*width: 100%;*/
 		-ms-box-orient: horizontal;
 		display: -webkit-box;
 		display: -moz-box;
@@ -42,6 +42,32 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */}
 		-webkit-flex-wrap: nowrap;
 		flex-wrap: nowrap;
 	}
+
+	.navbar .navbar-inner .navbar-header {
+		float: none !important;
+		display: block;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area {
+		top: 45px;
+	}
+
+	.navbar {
+		height:90px;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .setting {
+		top: 45px !important;
+	}
+
+	.navbar .sidebar-collapse {
+		left: auto;
+		right: 0;
+		width: 50px;
+	}
+
+
+
 }
 
 @media (min-width:767px){
@@ -52,6 +78,50 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */}
 	th.filter-action-6{width: 190px}
 	th.filter-action-7{width: 220px}
 }
+
+@media only screen and (max-width: 929px){
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area section {
+		display: none;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area .avatar {
+		margin-right: 0;
+		margin-left: 1px;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area {
+		padding: 8px;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area+.dropdown-menu {
+		min-width: 200px;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area+.dropdown-menu:before {
+		width: 50px;
+	}
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-login-area > li.username {
+		display: block;
+	}
+}
+
+@media only screen and (max-width: 569px){
+	.navbar .navbar-inner .navbar-header .navbar-account .setting,
+	.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container {
+		display: none;
+	}
+
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area {
+		right: 0px;
+	}
+}
+
+@media only screen and (max-width: 515px){
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area #notifications-clock {
+		display: none;
+	}
+}
+
 
 .black {
 	color: #000 !important;
@@ -165,24 +235,24 @@ div.form-group acronym { text-decoration: none; /*border-bottom: 1px dashed #D0D
 	margin-bottom:5px;
 }
 
-form#formEdit label{
+form.adminForm label{
 	cursor: pointer;
 	font-weight: normal;
 }
 
-form#formEdit .popover{
+form.adminForm .popover{
 	max-width:370px;
 }
 
-form#formEdit .popover .form-horizontal .control-label{
+form.adminForm .popover .form-horizontal .control-label{
 	text-align: left;
 }
 
-form#formEdit .popover .form-horizontal .control-label,
-form#formEdit .popover .form-horizontal .radio,
-form#formEdit .popover .form-horizontal .checkbox,
-form#formEdit .popover .form-horizontal .radio-inline,
-form#formEdit .popover .form-horizontal .checkbox-inline{
+form.adminForm .popover .form-horizontal .control-label,
+form.adminForm .popover .form-horizontal .radio,
+form.adminForm .popover .form-horizontal .checkbox,
+form.adminForm .popover .form-horizontal .radio-inline,
+form.adminForm .popover .form-horizontal .checkbox-inline{
 	padding-top: 0;
 }
 
@@ -196,10 +266,12 @@ form#formEdit .popover .form-horizontal .checkbox-inline{
 	margin: 0;
 	white-space: nowrap;
 }*/
+/*
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-login-area > li.username {
 	display: block;
 	text-align: left;
 }
+*/
 
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu li.dropdown-header span {
 	line-height: 34px;
@@ -211,6 +283,17 @@ form#formEdit .popover .form-horizontal .checkbox-inline{
 	display: block;
 	font-weight: 300;
 }
+
+.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting {
+	right: 470px;
+}
+.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container {
+
+	width:470px;
+	/*padding:0 5px;*/
+	text-align:left;
+}
+
 .navbar .navbar-inner .navbar-header .navbar-account .setting-container label .text {
 	color: #fff;
 	font-weight: 300;
@@ -697,7 +780,8 @@ body.hostcms-bootstrap1:before {
 {
 	top: 14px !important;
 }
-.page-sidebar.menu-compact~.page-content{margin-left:47px}
+
+/*.page-sidebar.menu-compact~.page-content{margin-left:47px}*/
 
 .DTTTFooter{
 	padding-left: 5px;
@@ -705,6 +789,7 @@ body.hostcms-bootstrap1:before {
 	padding-bottom: 10px;
 	overflow: visible;
 	background: none;
+	border: 0;
 }
 
 .dataTables_actions{
@@ -1041,8 +1126,17 @@ input[type="file"].form-control + .input-group-addon{
 }
 */
 
-@media (min-width: 1200px) {
+@media (max-width: 1199px) {
+	/*
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area {
+		padding: 8px;
+	}*/
 
+	/*
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area .avatar {
+		margin-right: 0;
+		margin-left: 1px;
+	}*/
 }
 
 .loading-container {background: none repeat scroll 0 0 rgba(50, 50, 50, 0.5)}
@@ -1926,6 +2020,30 @@ i.chatbar-message-spinner { position: absolute; top: 350px; left: 130px }
 @media only screen and (max-width: 530px) {
 	#chatbar {
 		top: 90px;
+	}
+
+}
+
+@media only screen and (max-width: 530px) {
+	.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container {
+		width: 270px;
+		/*
+		top: 0;
+		padding: 0 5px;
+		text-align: left;
+		*/
+	}
+}
+
+/*@media only screen and (max-width:759px){*/
+@media only screen and (max-width:768px) and (min-width: 530px) {
+	.navbar .navbar-inner .navbar-header .navbar-account.setting-open .setting-container{
+
+		top:45px;
+		width:470px;
+		padding-top:11px;
+		/*padding:0 5px;*/
+		/*text-align:left*/
 	}
 }
 
@@ -3057,14 +3175,14 @@ a.fc-day-number { color: #999 !important; }
 	margin: 0 0 0 17px;
 }
 
-.departments .users .user_details, .list_users .user_ico, .company_permissions .user_ico
+/*.departments .users .user_details,*/ .list_users .user_ico, .company_permissions .user_ico
 {
 	display:table-cell;
 }
 
 .list_users .user_ico, .company_permissions .user_ico
 {
-	/*display:table-cell;*/
+	display:table-cell;
 	float: left;
 	margin: 0 10px 0 0;
 	width: 35px;
@@ -3085,22 +3203,34 @@ a.fc-day-number { color: #999 !important; }
 	margin: 0 0 0 15px;
 }
 
-.company_permissions .department, .company_permissions .user, .departments .list_users .user
+.company_permissions .department, .company_permissions .user
 {
 	margin: 10px 0 0 0;
 }
 
-.icons_permissions
+.departments .list_users .user
+{
+	margin: 0;
+}
+
+
+/*.icons_permissions
 {
 	float: right;
-	margin: 0 30px 0 10px;
-}
+	margin: 12px 30px 0 10px;
+}*/
 
 .icons_permissions i
 {
 	cursor: pointer;
 	margin: 0 3px;
 }
+
+.company_permissions .depatment_info, .company_permissions .user_details { position: relative; }
+.company_permissions .depatment_info .title_department .icons_permissions, .company_permissions .user_details .icons_permissions { right: 0; position: absolute; }
+.company_permissions .user_details .icons_permissions { top: 8px; font-size: 14px; }
+
+.depatment_info > .icons_permissions { margin-top: 0; }
 
 .icons_permissions i
 /*.icons_permissions i[data-action="create"], .icons_permissions i[data-action="edit"], .icons_permissions i[data-action="show"], .icons_permissions i[data-action="delete"], .icons_permissions i[data-action="create"][data-allowed="1"]:not(.changed):hover, .icons_permissions i[data-action="edit"][data-allowed="1"]:not(.changed):hover, .icons_permissions i[data-action="show"][data-allowed="1"]:not(.changed):hover , .icons_permissions i[data-action="delete"][data-allowed="1"]:hover */
@@ -3136,31 +3266,33 @@ a.fc-day-number { color: #999 !important; }
 
 .departments .users .user_info
 {
-	display: inline-block;
+	/* display: inline-block; */
 	/*float:left;*/
-	width: 70%;
+	/* width: 70%; */
 }
 
 .contracrot {
-	display: block;
-	text-align: center;
+	display: flex;
+}
+.contracrot .user-image {
+	margin-right: 10px;
+	flex: 1;
+	margin-top: 2px;
 }
 .contracrot .contracrot-ico
 {
 	background-clip: padding-box;
 	border-radius: 50%;
-	/* float: left; */
 	height: 30px;
-	/* margin-right: 5px; */
 	width: 30px;
-	margin: 0 auto;
+	/* margin: 0 auto; */
 }
 .contracrot .user-name
 {
-	display: block;
+	/* display: block; */
 	font-size: 11px;
 	color: #999;
-	margin-top: 5px;
+	/* margin-top: 5px; */
 }
 
 /*.btn-group.deal_template_steps .deal_step.available:hover*/
@@ -3212,6 +3344,13 @@ form.adminForm .deal_step
 {
 	padding: 15px 25px;
 }
+
+table.deals-aggregate-info tr td:last-child
+{
+	/* text-align: left; */
+}
+table.deals-aggregate-info tr td:not(:first-child) { text-align: right }
+table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 
 /* End Deals */
 
@@ -3716,13 +3855,13 @@ form.adminForm .deal_step
 	display: none;
 }
 .timeline > li > .timeline-panel:hover div.timeline-entity-actions { display: block; }
-.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions span {
+.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions a {
 	color: #d0d0d0;
 	display: inline-block;
 	margin-left: 3px;
 }
-.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions span i { font-size: 11px; }
-.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions span:hover { cursor: pointer; }
+.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions a i { font-size: 11px; }
+.timeline > li > .timeline-panel .timeline-header .timeline-entity-actions a:hover { cursor: pointer; }
 
 .well .add-deal-attachment > div:first-child { padding-left: 0 !important; }
 
@@ -3735,3 +3874,123 @@ form.adminForm .deal_step
 #informationsystemCommentsAdminPage .task-container .tasks-list .task-item .task-creator a:hover, #shopCommentsAdminPage .task-container .tasks-list .task-item .task-creator a:hover { text-decoration: none; }
 
 .span-blocked { font-size: 12px; }
+
+div.table-scrollable.no-border { border: 0 !important; }
+
+.deal-start-datetime { font-size: 11px; color: #666; }
+.users .user_info { padding: 5px 0 5px 10px; }
+
+.page-body .databox .databox-stat i { float: right; }
+.databox .databox-stat { right: 0 !important; left: 7px !important; }
+.deal-step-comment { font-size: 11px; }
+.scroll-history table.table tr td:last-child { text-align: left; }
+
+.modal-dialog .legend-footer { padding: 0 0 20px 0; margin-top: 30px; text-align: center; }
+.modal-dialog .legend-footer div { display: inline-block; margin-right: 20px; }
+.modal-dialog .legend-footer i.create { color: #5db2ff; }
+.modal-dialog .legend-footer i.edit { color: #8cc474; }
+.modal-dialog .legend-footer i.show-action { color: #ffce55; }
+.modal-dialog .legend-footer i.delete { color: #ed4e2a; }
+
+.deal-executors span { margin-right: 5px; }
+
+.deal-executors span:first-child {
+	background: none;
+	color: #999;
+	padding-left: 0;
+	margin-right: 0;
+}
+
+.large-link.siteuser-link i { margin-right: 0; }
+.large-link.siteuser-link a { margin: 1px 0 0 1px; }
+.cursor-pointer {cursor: pointer}
+
+/* .view-property-table th { text-align:center; } */
+.view-property-table td:first-child { width: 40%; }
+.view-property-table td:last-child { width: 60%; text-align: left !important; }
+
+#dealsStatus .legend > div, #dealsSum .legend > div { background-color: inherit !important; }
+#dealsStatus .legend > table, #dealsSum .legend > table { right: 25px !important; }
+#dealsStatus .legendLabel, #dealsSum .legendLabel { font-size: 13px; padding-bottom: 5px; }
+#salesFunnel { background-color: inherit; }
+.tab-content.sales-funnel { padding-top: 10px !important; }
+.tab-content.sales-funnel .chart-container {
+    display: table;
+    width: 100%;
+	/* margin-top: 10px; */
+}
+
+.tab-content.sales-funnel .well .header .analitics-title {
+	font-size: 16px;
+	margin: 0;
+}
+.sales-funnel { position: relative; }
+.tab-content.sales-funnel .chart-container .chart {
+	display: table-cell;
+	white-space: nowrap;
+	vertical-align: top;
+	font-size: 11px;
+	height: 40px;
+	position: relative;
+	border-right: 1px solid #fff;
+}
+.tab-content.sales-funnel .chart-container .chart:first-child { border-radius: 3px 0 0 3px; }
+.tab-content.sales-funnel .chart-container .chart:last-child { border-radius: 0 3px 3px 0; }
+.tab-content.sales-funnel .chart-container .chart > div {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.tab-content.sales-funnel .chart-container .chart .chart-tooltip {
+	background-color: transparent;
+	position: absolute;
+	top: 50px;
+	left: 50%;
+	padding: 10px 20px;
+	border: 1px solid #fff;
+	z-index: 9999;
+}
+.tab-content.sales-funnel .chart-container.funnel-bar .chart { border-radius: 0 3px 3px 0; box-shadow: inset 30px 0px 30px -30px rgba(0,0,0,0.75); }
+.tab-content.sales-funnel .chart-container.funnel-bar .chart > div { left: 20px; font-size: 13px; font-weight: 600; }
+.tab-content.sales-funnel .chart-container.funnel-bar { height: 40px; }
+.tab-content.sales-funnel .header-row span {
+	font-size: 11px;
+	color: #999;
+}
+.tab-content.sales-funnel .data-row .funnel-step-name, .tab-content.sales-funnel .data-row .funnel-step-time {
+	margin-top: 7px;
+}
+.tab-content.sales-funnel .data-row .funnel-step-name { position: relative; }
+.tab-content.sales-funnel .data-row .funnel-step-name > div { position: absolute; top: 50%; right: 0; transform: translate(0, 25%); }
+.tab-content.sales-funnel .data-row { margin-bottom: 1px; }
+.analitics-title {
+	font-size: 20px;
+	margin: 10px 0;
+	font-weight: 600;
+}
+.tooltip.init {
+	visibility: hidden;
+}
+.siteuser-shop-cart {
+	margin-top: 10px;
+	padding: 5px 0 0 5px;
+}
+
+table.deals-aggregate-user-info thead th:not(:first-child) { text-align: center; }
+table.deals-aggregate-user-info thead th:not(:last-child), table.deals-aggregate-user-info tbody td:not(:last-child) { border-right: 1px solid #e9e9e9 }
+table.deals-aggregate-user-info tbody td.border-left { border-left: 1px solid #e9e9e9 }
+table.deals-aggregate-user-info thead th[rowspan]:first-child, table.deals-aggregate-user-info tbody td:first-child, table.deals-aggregate-user-info .border-right-none { border-right: 0 !important; }
+table.deals-aggregate-user-info thead th[colspan] { border-bottom: 2px solid #2dc3e8; }
+table.deals-aggregate-user-info thead th.border-bottom-success { border-bottom-color: #7cba00; }
+table.deals-aggregate-user-info thead th.border-bottom-failed { border-bottom-color: #f01818; }
+table.deals-aggregate-user-info thead th { font-size: 12px; }
+table.deals-aggregate-user-info tbody td { text-align: center; }
+table.deals-aggregate-user-info tbody td:nth-child(2)  { text-align: left; }
+table.deals-aggregate-user-info .deals-aggregate-user-department { text-align: left !important; font-size: 14px; font-weight: 600; }
+
+.agregate-user-tab .tab-content { padding: 0 !important; margin-top: 10px; border-top: 0; }
+ul#agregate-user-info li a { border-radius: 0; }
+
+.avatar-user img { border-radius: 50%; }
+.avatar.avatar-user { border-left: 0 !important; }

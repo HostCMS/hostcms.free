@@ -11,6 +11,27 @@ class Shop_Print_Form_Handler2 extends Shop_Print_Form_Handler
 		parent::execute();
 
 		$oShop_Order = $this->_Shop_Order;
+		$oShop = $oShop_Order->Shop;
+
+		$oCompany = $oShop_Order->company_id
+			? $oShop_Order->Shop_Company
+			: $oShop->Shop_Company;
+
+		$sFullCompanyAddress = '';
+
+		$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+		if (isset($aDirectory_Addresses[0]))
+		{
+			$aCompanyAddress = array(
+				$aDirectory_Addresses[0]->postcode,
+				$aDirectory_Addresses[0]->country,
+				$aDirectory_Addresses[0]->city,
+				$aDirectory_Addresses[0]->value
+			);
+
+			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+		}
 		?>
 
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -46,14 +67,14 @@ class Shop_Print_Form_Handler2 extends Shop_Print_Form_Handler
 			<body class="base_font">
 			<div class="small_font align_right">Унифицированная форма № ТОРГ-12<br/>Утверждена постановлением Госкомстата России от 25.12.98 № 132</div>
 			<table>
-				<tr><td></td><td colspan="12" rowspan="3" class="bold_font align_bottom border_bottom"><?php echo htmlspecialchars(sprintf("%s, ИНН %s, %s, р/с %s в %s, БИК %s, корр/с %s", $oShop_Order->Shop->Shop_Company->name, $oShop_Order->Shop->Shop_Company->tin, $oShop_Order->Shop->Shop_Company->address, $oShop_Order->Shop->Shop_Company->current_account, $oShop_Order->Shop->Shop_Company->bank_name, $oShop_Order->Shop->Shop_Company->bic, $oShop_Order->Shop->Shop_Company->correspondent_account))?></td><td colspan="2"></td><td class="align_center border_all">Коды</td></tr>
+				<tr><td></td><td colspan="12" rowspan="3" class="bold_font align_bottom border_bottom"><?php echo htmlspecialchars(sprintf("%s, ИНН %s, %s, р/с %s в %s, БИК %s, корр/с %s", $oCompany->name, $oCompany->tin, $sFullCompanyAddress, $oCompany->current_account, $oCompany->bank_name, $oCompany->bic, $oCompany->correspondent_account))?></td><td colspan="2"></td><td class="align_center border_all">Коды</td></tr>
 				<tr><td></td><td colspan="2" class="align_right">Форма по ОКУД</td><td class="align_center border_all">0330212</td></tr>
-				<tr><td></td><td colspan="2" class="align_right">по ОКПО</td><td class="align_center border_all"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->okpo)?></td></tr>
+				<tr><td></td><td colspan="2" class="align_right">по ОКПО</td><td class="align_center border_all"><?php echo htmlspecialchars($oCompany->okpo)?></td></tr>
 				<tr><td></td><td class="border_bottom"></td><td colspan="11" class="small_font align_center align_top border_bottom">организация-грузоотправитель, адрес, телефон, факс, банковские реквизиты</td><td colspan="2" class="border_bottom"></td><td class="align_center border_all"></td></tr>
 				<tr><td></td><td></td><td colspan="13" class="align_center align_top"><span class="small_font">структурное подразделение</span><div class="align_right" style="float: right;">Вид деятельности по ОКДП</div></td><td class="align_center border_all"></td></tr>
 				<tr><td></td><td class="align_right small_width">Грузополучатель</td><td colspan="11" class="border_bottom"><?php echo htmlspecialchars($oShop_Order->company) . ', ' . $this->_address?></td><td colspan="2" class="align_right">по ОКПО</td><td class="align_center border_all"></td></tr>
-				<tr><td></td><td></td><td colspan="11" class="small_font align_center align_top">организация, адрес, телефон, факс, банковские</td><td colspan="2" rowspan="2" class="align_right">по ОКПО</td><td rowspan="2" class="align_center border_all"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->okpo)?></td></tr>
-				<tr><td></td><td class="align_right">Поставщик</td><td colspan= "11" class="border_bottom"><?php echo htmlspecialchars(sprintf("%s, ИНН %s, %s", $oShop_Order->Shop->Shop_Company->name, $oShop_Order->Shop->Shop_Company->tin, $oShop_Order->Shop->Shop_Company->address))?></td></tr>
+				<tr><td></td><td></td><td colspan="11" class="small_font align_center align_top">организация, адрес, телефон, факс, банковские</td><td colspan="2" rowspan="2" class="align_right">по ОКПО</td><td rowspan="2" class="align_center border_all"><?php echo htmlspecialchars($oCompany->okpo)?></td></tr>
+				<tr><td></td><td class="align_right">Поставщик</td><td colspan= "11" class="border_bottom"><?php echo htmlspecialchars(sprintf("%s, ИНН %s, %s", $oCompany->name, $oCompany->tin, $sFullCompanyAddress))?></td></tr>
 				<tr><td></td><td></td><td colspan="11" class="small_font align_center align_top">организация, адрес, телефон, факс, банковские</td><td colspan="2" rowspan="2" class="align_right border_bottom">по ОКПО</td><td rowspan="2" class="align_center border_all"></td></tr>
 				<tr><td></td><td class="align_right">Плательщик</td><td colspan="11" class="border_bottom"><?php echo htmlspecialchars($oShop_Order->company) . ', ' . $this->_address?></td></tr>
 				<tr><td></td><td></td><td colspan="11" class="small_font align_center align_top">организация, адрес, телефон, факс, банковские</td><td rowspan="2" class="border_bottom"></td><td rowspan="2" class="align_right border_all">номер</td><td rowspan="2" class="align_center border_all"></td></tr>
@@ -119,7 +140,7 @@ class Shop_Print_Form_Handler2 extends Shop_Print_Form_Handler
 				<tr><td colspan="9"></td><td class="border_left">выданной</td><td colspan="6" class="border_bottom"></td></tr>
 				<tr><td colspan="2">Отпуск груза разрешил</td><td class="border_bottom border_right"></td><td colspan="3" class="border_bottom border_right"></td><td colspan="2" class="border_bottom"></td><td class="tiny_width"></td><td class="border_left"></td><td colspan="6" class="border_bottom align_center align_top small_font">кем, кому (организация, место работы, должность, фамилия, и. о.)</td></tr>
 				<tr><td colspan="2"></td><td class="align_center align_top small_font">должность</td><td colspan="3" class="align_center align_top small_font">подпись</td><td colspan="2" class="align_center align_top small_font">расшифровка подписи</td><td></td><td class="border_left">Груз принял</td><td colspan="2" class="border_bottom"></td><td colspan="2" class="border_bottom"></td><td colspan="2" class="border_bottom"></td></tr>
-				<tr><td colspan="3" class="border_right">Главный (старший) бухгалтер</td><td colspan="3" class="border_bottom border_right"></td><td colspan="2" class="border_bottom"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->accountant_legal_name)?></td><td></td><td class="border_left"></td><td colspan="2" class="border_right align_center align_top small_font">должность</td><td colspan="2" class="border_right align_center align_top small_font">подпись</td><td colspan="2" class="border_right align_center align_top small_font">расшифровка подписи</td></tr>
+				<tr><td colspan="3" class="border_right">Главный (старший) бухгалтер</td><td colspan="3" class="border_bottom border_right"></td><td colspan="2" class="border_bottom"><?php echo htmlspecialchars($oCompany->accountant_legal_name)?></td><td></td><td class="border_left"></td><td colspan="2" class="border_right align_center align_top small_font">должность</td><td colspan="2" class="border_right align_center align_top small_font">подпись</td><td colspan="2" class="border_right align_center align_top small_font">расшифровка подписи</td></tr>
 				<tr><td colspan="3"></td><td colspan="3" class="align_center align_top small_font">подпись</td><td colspan="2" class="align_center align_top small_font">расшифровка подписи</td><td></td><td colspan="7" class="border_left"></td></tr>
 				<tr><td colspan="2">Отпуск груза произвел</td><td class="border_bottom border_right"></td><td colspan="3" class="border_bottom border_right"></td><td colspan="2" class="border_bottom"></td><td></td><td class="border_left">Груз получил</td><td colspan="2" class="border_bottom border_right"></td><td colspan="2" class="border_bottom border_right"></td><td colspan="2" class="border_bottom border_right"></td></tr>
 				<tr><td colspan="2"></td><td class="align_center align_top small_font">должность</td><td colspan="3" class="align_center align_top small_font">подпись</td><td colspan="2" class="align_center align_top small_font">расшифровка подписи</td><td></td><td class="border_left">грузополучатель</td><td colspan="2" class="border_right align_center align_top small_font">должность</td><td colspan="2" class="border_right align_center align_top small_font">подпись</td><td colspan="2" class="border_right align_center align_top small_font">расшифровка подписи</td></tr>

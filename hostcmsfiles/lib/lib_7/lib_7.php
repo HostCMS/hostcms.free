@@ -278,8 +278,8 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			$oShop_Delivery = $oShop->Shop_Deliveries->getById($shop_delivery_id);
 
 			if (!is_null($oShop_Delivery))
-			{
-				$oShop_Delivery_Handler = Shop_Delivery_Handler::factory($oShop_Delivery);
+			{							
+				$oShop_Delivery_Handler = Shop_Delivery_Handler::factory($oShop_Delivery);			
 				$oShop_Delivery_Handler->process($position);
 			}
 		}

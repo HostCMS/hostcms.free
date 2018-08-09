@@ -265,7 +265,7 @@ class Structure_Controller_Show extends Core_Controller
 
 		$aStructures = is_null($this->menu)
 			? $this->_Structure->findAll()
-			: $this->_Structure->getByStructureMenuId($this->menu);
+			: $this->_Structure->getAllByStructure_menu_id($this->menu, TRUE, is_array($this->menu) && count($this->menu) ? 'IN' : '=');
 
 		foreach ($aStructures as $oStructure)
 		{

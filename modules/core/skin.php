@@ -484,14 +484,14 @@ abstract class Core_Skin
 			$oHostcmsSubPanel->add(
 				Core::factory('Core_Html_Entity_A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Structure.edit_title')) . "'}); return false")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Structure.edit_title', $oStructure->name)) . "'}); return false")
 					->add(
 						Core::factory('Core_Html_Entity_Img')
 							->width(16)->height(16)
 							->src('/hostcmsfiles/images/structure_edit.gif')
 							->id('hostcmsEditStructure')
-							->alt(Core::_('Structure.edit_title'))
-							->title(Core::_('Structure.edit_title'))
+							->alt(Core::_('Structure.edit_title', $oStructure->name))
+							->title(Core::_('Structure.edit_title', $oStructure->name))
 					)
 			);
 
@@ -534,14 +534,14 @@ abstract class Core_Skin
 				$oHostcmsSubPanel->add(
 					Core::factory('Core_Html_Entity_A')
 						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Document.edit')) . "'}); return false")
+						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Document.edit', $oStructure->Document->name)) . "'}); return false")
 						->add(
 							Core::factory('Core_Html_Entity_Img')
 								->width(16)->height(16)
 								->src('/hostcmsfiles/images/page_edit.gif')
 								->id('hostcmsEditDocument')
-								->alt(Core::_('Document.edit'))
-								->title(Core::_('Document.edit'))
+								->alt(Core::_('Document.edit', $oStructure->Document->name))
+								->title(Core::_('Document.edit', $oStructure->Document->name))
 						)
 				);
 			}

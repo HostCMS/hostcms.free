@@ -11,7 +11,7 @@
 return array(
 	'model_name' => 'Секции макета сайта',
 	'section_show_title' => 'Секции макета "%s"',
-	'section_form_title_edit' => 'Редактирование секции макета',
+	'section_form_title_edit' => 'Редактирование секции макета "%s"',
 	'section_form_title_add' => 'Добавление секции макета',
 	'id' => 'Идентификатор',
 	'name' => 'Название',

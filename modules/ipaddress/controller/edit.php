@@ -24,7 +24,7 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->title(
 			$this->_object->id
-				? Core::_('Ipaddress.edit_title')
+				? Core::_('Ipaddress.edit_title', $this->_object->ip)
 				: Core::_('Ipaddress.add_title')
 		);
 

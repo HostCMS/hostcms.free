@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - limit($limit) количество
  *
  *
  * <code>
@@ -20,6 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 		->xsl(
  * 			Core_Entity::factory('Xsl')->getByName('МагазинИзбранное')
  * 		)
+ * 		->limit(5)
  * 		->show();
  * </code>
  *
@@ -38,7 +40,8 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 	protected $_allowedProperties = array(
 		'favoriteUrl',
 		'itemsProperties',
-		'itemsPropertiesList'
+		'itemsPropertiesList',
+		'limit'
 	);
 
 	/**
@@ -82,6 +85,8 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		$this->itemsProperties = FALSE;
 		$this->itemsPropertiesList = TRUE;
 
+		$this->limit = 10;
+
 		$this->favoriteUrl = $oShop->Structure->getPath() . 'favorite/';
 	}
 
@@ -110,6 +115,10 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('siteuser_exists')
 				->value(Core::moduleIsActive('siteuser') ? 1 : 0)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('limit')
+				->value(intval($this->limit))
 		);
 
 		// Список свойств товаров
@@ -147,21 +156,26 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
 		}
 
-		$Shop_Favorite_Controller = $this->_getFavoriteController();
-
-		$aShop_Favorites = $Shop_Favorite_Controller->getAll($oShop);
-
-		foreach ($aShop_Favorites as $oShop_Favorite)
+		if ($this->limit > 0)
 		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Favorite->shop_item_id);
-			if (!is_null($oShop_Item->id))
+			$Shop_Favorite_Controller = $this->_getFavoriteController();
+
+			$aShop_Favorites = $Shop_Favorite_Controller->getAll($oShop);
+
+			$aShop_Favorites = array_slice($aShop_Favorites, 0, $this->limit);
+
+			foreach ($aShop_Favorites as $oShop_Favorite)
 			{
-				$oShop_Favorite->showXmlProperties($this->itemsProperties);
-				$this->addEntity($oShop_Favorite->clearEntities());
-			}
-			else
-			{
-				$oShop_Favorite->delete();
+				$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Favorite->shop_item_id);
+				if (!is_null($oShop_Item->id))
+				{
+					$oShop_Favorite->showXmlProperties($this->itemsProperties);
+					$this->addEntity($oShop_Favorite->clearEntities());
+				}
+				else
+				{
+					$oShop_Favorite->delete();
+				}
 			}
 		}
 

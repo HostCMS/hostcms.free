@@ -95,7 +95,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				$title = $object->id
-					? Core::_('Informationsystem_Item.information_items_edit_form_title')
+					? Core::_('Informationsystem_Item.information_items_edit_form_title', $object->name)
 					: Core::_('Informationsystem_Item.information_items_add_form_title');
 
 				$template_id = $this->_object->Informationsystem->Structure->template_id
@@ -248,18 +248,12 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-2 no-padding-right'));
 
 					$oMainRow6->add($oSiteuserSelect);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow6->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow6, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Добавляем новое поле типа файл
@@ -597,7 +591,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->fillTab();
 
 				$title = $this->_object->id
-						? Core::_('Informationsystem_Group.information_groups_edit_form_title')
+						? Core::_('Informationsystem_Group.information_groups_edit_form_title', $this->_object->name)
 						: Core::_('Informationsystem_Group.information_groups_add_form_title');
 
 				$oMainTab
@@ -891,18 +885,12 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 no-padding-right'));
 
 					$oMainRow6->add($oSiteuserSelect);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow6->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow6, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Active

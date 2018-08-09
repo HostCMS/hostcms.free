@@ -199,7 +199,7 @@ class Skin_Default_Module_Core_Module extends Core_Module
 							)
 					)->add(
 						Core::factory('Core_Html_Entity_Div')
-							->class('characteristics ' . (version_compare(phpversion(), '5.2.2', ">=") ? 'characteristicOk' : 'characteristicFail'))
+							->class('characteristics ' . (version_compare(phpversion(), '5.3.0', ">=") ? 'characteristicOk' : 'characteristicFail'))
 							->add(
 								Core::factory('Core_Html_Entity_Span')
 									->value(Core::_('Admin.index_tech_date_php') . ' ' . phpversion())

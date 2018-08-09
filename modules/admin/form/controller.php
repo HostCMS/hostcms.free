@@ -232,7 +232,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		// String of additional parameters
 		'additionalParams',
 		// Set filter settings
-		'filterSettings',
+		//'filterSettings',
 		// Admin_View
 		'Admin_View',
 	);
@@ -463,7 +463,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->_externalReplace[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	* Get external replacement
 	* @return array
@@ -833,7 +833,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
-	//protected $_filterSettings = array();
+	/**
+	 * filter settings
+	 */
+	public $filterSettings = array();
 
 	/**
 	 * Set filter settings
@@ -977,7 +980,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add content for administration center form
+	 * Add content for Back-end form
 	 * @param string $content content
 	 * @return self
 	 */
@@ -997,7 +1000,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add message for administration center form
+	 * Add message for Back-end form
 	 * @param string $message message
 	 * @return self
 	 */
@@ -1008,7 +1011,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Clear messages for administration center form
+	 * Clear messages for Back-end form
 	 * @return self
 	 */
 	public function clearMessages()
@@ -1035,6 +1038,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			->execute();
 	}
 
+	/**
+	 * @hostcms-event Admin_Form_Controller.onBeforeShowContent
+	 * @hostcms-event Admin_Form_Controller.onAfterShowContent
+	 */
 	public function perform()
 	{
 		// ---------------------------
@@ -1076,8 +1083,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * Executes the business logic.
 	 * @hostcms-event Admin_Form_Controller.onBeforeExecute
 	 * @hostcms-event Admin_Form_Controller.onAfterExecute
-	 * @hostcms-event Admin_Form_Controller.onBeforeShowContent
-	 * @hostcms-event Admin_Form_Controller.onAfterShowContent
 	 */
 	public function execute()
 	{
@@ -1144,6 +1149,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 									throw new Core_Exception(
 										Core::_('User.error_object_owned_another_user'), array(), 0, FALSE
 									);
+								}
+
+								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
+								if (method_exists($oObject, 'checkBackendAccess') && !$oObject->checkBackendAccess($actionName, $oUser))
+								{
+									continue;
 								}
 
 								if (isset($this->_actionHandlers[$actionName]))
@@ -1264,7 +1275,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Edit-in-Place in administration center
+	 * Edit-in-Place in Back-end
 	 * @return self
 	 */
 	public function applyEditable()
@@ -1576,7 +1587,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 * @return string
 	 */
 	public function getAdminActionLoadHref($path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL)
+		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
 	{
 		is_null($additionalParams) && $additionalParams .= $this->additionalParams;
 
@@ -1585,7 +1596,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$additionalParams .= '&hostcms[checked][' . $datasetKey . '][' . $datasetValue . ']=1';
 
-		return $this->getAdminLoadHref($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection);
+		return $this->getAdminLoadHref($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection, $view);
 	}
 
 	/**

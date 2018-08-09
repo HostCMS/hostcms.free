@@ -91,9 +91,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			->show();
 
 		$oAdmin_Form_Controller->applyEditable();
-		
+
 		$oAdmin_Form_Controller->showSettings();
-		
+
 		return $this;
 	}
 
@@ -142,12 +142,16 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 	/**
 	 * Show form footer
+	 * @hostcms-event Admin_Form_Controller.onBeforeShowFooter
+	 * @hostcms-event Admin_Form_Controller.onAfterShowFooter
 	 */
 	public function _showFooter()
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-		
+
 		$sShowNavigation = $oAdmin_Form_Controller->getTotalCount() > $oAdmin_Form_Controller->limit;
+
+		Core_Event::notify('Admin_Form_Controller.onBeforeShowFooter', $oAdmin_Form_Controller);
 
 		?><div class="DTTTFooter">
 			<div class="row">
@@ -164,6 +168,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				?>
 			</div>
 		</div><?php
+
+		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller);
 
 		return $this;
 	}
@@ -188,6 +194,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		$windowId = $oAdmin_Form_Controller->getWindowId();
 
 		//Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
+		$oUser = Core_Entity::factory('User')->getCurrent();
 
 		if ($this->_showFilter)
 		{
@@ -298,7 +305,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									?>
 									<div class="form-group text-align-right">
 										<div class="col-sm-offset-2 col-sm-10">
-										
+
 											<button type="submit" class="btn btn-default" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
 
 											<div class="btn-group">
@@ -453,8 +460,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							?><th class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php echo $fieldName?></th><?php
 						}
 					}
-
-					$oUser = Core_Entity::factory('User')->getCurrent();
 
 					// Доступные действия для пользователя
 					$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
@@ -907,7 +912,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 						// Действия для строки в правом столбце
 						if ($oAdmin_Form->show_operations && $oAdmin_Form_Controller->showOperations
-							|| $allow_filter && $this->_showFilter)
+							/*|| $allow_filter && $this->_showFilter*/)
 						{
 							$sContents = '';
 
@@ -937,7 +942,14 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 								// Проверяем, привязано ли действие к определенному dataset'у.
 								if ($o_Admin_Form_Action->dataset != -1
-								&& $o_Admin_Form_Action->dataset != $datasetKey)
+									&& $o_Admin_Form_Action->dataset != $datasetKey)
+								{
+									continue;
+								}
+
+								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
+								if (method_exists($oEntity, 'checkBackendAccess')
+									&& !$oEntity->checkBackendAccess($o_Admin_Form_Action->name, $oUser))
 								{
 									continue;
 								}
@@ -1042,9 +1054,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
-		
+
 		$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
-		
+
 		// Строка с действиями
 		//if ($this->_showBottomActions)
 		//{

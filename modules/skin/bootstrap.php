@@ -88,7 +88,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
-			;
+			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js');
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
@@ -105,7 +105,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
-			;
+			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css');
 	}
 
 	/**
@@ -289,7 +289,7 @@ class Skin_Bootstrap extends Core_Skin
 										});
 									</script>
 								</li>
-								<li id="notifications-clock" class="hidden-xs">
+								<li id="notifications-clock">
 									<a href="#" title="<?php echo Core::_('Admin.events')?>" data-toggle="dropdown" class="task-area dropdown-toggle">
 										<div class="clock">
 											<ul>
@@ -616,22 +616,35 @@ class Skin_Bootstrap extends Core_Skin
 								</li>
 								<?php
 								}
+								$oUserName = ($oUser->name != '' || $oUser->surname != '') ? ($oUser->name . ' ' . $oUser->surname) : '';
 								?>
 								<li>
 									<a class="login-area dropdown-toggle" data-toggle="dropdown">
-										<div class="avatar" title="<?php echo Core::_('Admin.profile')?>">
-											<img src="<?php echo $oUser->getImageHref()?>">
+										<div class="avatar avatar-user" title="<?php echo Core::_('Admin.profile')?>">
+											<img src="<?php echo $oUser->getAvatar()?>">
 										</div>
-										<section class="hidden-xs hidden-sm hidden-md">
-											<h2><span class="profile"><span><?php echo htmlspecialchars(
-												$oUser->name != '' || $oUser->surname != ''
-													? $oUser->name . ' ' . $oUser->surname
-													: $oUser->login
-												)?></span></span></h2>
+										<section class="hidden-xs">
+											<h2>
+												<span class="profile">
+													<span>
+														<?php echo htmlspecialchars($oUserName != '' ? $oUserName : $oUser->login)?>
+													</span>
+												</span>
+											</h2>
 										</section>
 									</a>
 									<!--Login Area Dropdown-->
 									<ul class="pull-right dropdown-menu dropdown-arrow dropdown-login-area">
+										<?php
+										if ($oUserName != '')
+										{
+										?>
+										<li class="username">
+											<a><?php echo htmlspecialchars($oUserName)?></a>
+										</li>
+										<?php
+										}
+										?>
 										<!--Avatar Area-->
 										<li class="email">
 											<a>
@@ -640,7 +653,7 @@ class Skin_Bootstrap extends Core_Skin
 										</li>
 										<li>
 											<div class="avatar-area">
-												<img src="<?php echo $oUser->getImageHref()?>" class="avatar">
+												<img src="<?php echo $oUser->getAvatar()?>" class="avatar avatar-user">
 											</div>
 										</li>
 										<!--Theme Selector Area-->
@@ -672,11 +685,11 @@ class Skin_Bootstrap extends Core_Skin
 								<!--Note: notice that setting div must start right after account area list.
 								no space must be between these elements-->
 								<!-- Settings -->
-							</ul><div class="setting hidden-xs">
+							</ul><div class="setting">
 								<a id="btn-setting" title="<?php echo Core::_('Admin.settings')?>" href="#">
 									<i class="icon glyphicon glyphicon-cog"></i>
 								</a>
-							</div><div class="setting-container hidden-xs">
+							</div><div class="setting-container">
 								<label>
 									<span class="text"><?php echo Core::_('Admin.fixed')?></span>
 								</label>

@@ -253,7 +253,13 @@ foreach ($aGroupProperties as $oGroupProperty)
 
 	if ($oGroupProperty->type == 2)
 	{
-		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images') . $oGroupProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		// Description
+		$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oGroupProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		$aColors[] = "#E6E6FA";
+		$aEntities[] = 'propdesc-' . $oGroupProperty->id;
+		
+		// Small Image
+		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oGroupProperty->name) .  " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#E6E6FA";
 		$aEntities[] = 'propsmall-' . $oGroupProperty->id;
 	}
@@ -270,7 +276,13 @@ foreach ($aItemProperties as $oItemProperty)
 
 	if ($oItemProperty->type == 2)
 	{
-		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images') . $oItemProperty->name . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		// Description
+		$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oItemProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
+		$aColors[] = "#FFE4E1";
+		$aEntities[] = 'propdesc-' . $oItemProperty->id;
+		
+		// Small Image
+		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oItemProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#FFE4E1";
 		$aEntities[] = 'propsmall-' . $oItemProperty->id;
 	}

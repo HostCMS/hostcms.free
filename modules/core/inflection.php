@@ -14,6 +14,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 abstract class Core_Inflection
 {
 	/**
+	 * Array of irregular form singular => plural
+	 * @var array
+	 */
+	static public $pluralIrregular = array();
+
+	/**
+	 * Array of irregular form plural => singular, based on self::$pluralIrregular
+	 * @var array
+	 */
+	static public $singularIrregular = array();
+
+	/**
 	 * List of language drivers
 	 * @var array
 	 */
@@ -24,7 +36,7 @@ abstract class Core_Inflection
 	 * @param string $lng driver name
 	 * @return mixed
 	 */
-	static protected function _getDriver($lng = 'en')
+	static public function instance($lng = 'en')
 	{
 		if (!isset(self::$_drivers[$lng]))
 		{
@@ -33,6 +45,34 @@ abstract class Core_Inflection
 		}
 
 		return self::$_drivers[$lng];
+	}
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		self::$singularIrregular = array_flip(self::$pluralIrregular);
+	}
+
+	/**
+	 * Chech if $word is PLURAL and IRRIGUAL
+	 * @return boolean
+	 */
+	public function isPluralIrrigular($word)
+	{
+		// self::$singularIrregular consists plural => singular
+		return isset(self::$singularIrregular[$word]);
+	}
+
+	/**
+	 * Chech if $word is SINGULAR and IRRIGUAL
+	 * @return boolean
+	 */
+	public function isSingularIrrigular($word)
+	{
+		// self::$pluralIrregular consists singular => plural
+		return isset(self::$pluralIrregular[$word]);
 	}
 
 	/**
@@ -46,7 +86,7 @@ abstract class Core_Inflection
 	{
 		$aWord = explode('_', $word);
 
-		$last = self::_getDriver($lng)->__getPlural(array_pop($aWord), $count);
+		$last = self::instance($lng)->plural(array_pop($aWord), $count);
 
 		return isset($aWord[0])
 			? implode('_', $aWord) . '_' . $last
@@ -64,7 +104,7 @@ abstract class Core_Inflection
 	{
 		$aWord = explode('_', $word);
 
-		$last = self::_getDriver($lng)->__getSingular(array_pop($aWord), $count);
+		$last = self::instance($lng)->singular(array_pop($aWord), $count);
 
 		return isset($aWord[0])
 			? implode('_', $aWord) . '_' . $last
@@ -90,11 +130,11 @@ abstract class Core_Inflection
 	 * @param int $count
 	 * @return string
 	 */
-	protected function __getPlural($word, $count = NULL)
+	public function plural($singularWord, $count = NULL)
 	{
-		if (is_null($count) && isset($this->_pluralCache[$word]))
+		if (is_null($count) && isset($this->_pluralCache[$singularWord]))
 		{
-			return $this->_pluralCache[$word];
+			return $this->_pluralCache[$singularWord];
 		}
 
 		if (rand(0, self::$_maxObjects) == 0 && count($this->_pluralCache) > self::$_maxObjects)
@@ -102,8 +142,8 @@ abstract class Core_Inflection
 			$this->_pluralCache = array_slice($this->_pluralCache, floor(self::$_maxObjects / 4));
 		}
 
-		$plural = $this->_getPlural($word, $count);
-		is_null($count) && $this->_pluralCache[$word] = $plural;
+		$plural = $this->_getPlural($singularWord, $count);
+		is_null($count) && $this->_pluralCache[$singularWord] = $plural;
 
 		return $plural;
 	}
@@ -116,15 +156,15 @@ abstract class Core_Inflection
 
 	/**
 	 * Get singular form by plural
-	 * @param string $word word
+	 * @param string $pluralWord word
 	 * @param int count
 	 * @return string
 	 */
-	protected function __getSingular($word, $count = NULL)
+	public function singular($pluralWord, $count = NULL)
 	{
-		if (is_null($count) && isset($this->_singularCache[$word]))
+		if (is_null($count) && isset($this->_singularCache[$pluralWord]))
 		{
-			return $this->_singularCache[$word];
+			return $this->_singularCache[$pluralWord];
 		}
 
 		if (rand(0, self::$_maxObjects) == 0 && count($this->_singularCache) > self::$_maxObjects)
@@ -132,8 +172,8 @@ abstract class Core_Inflection
 			$this->_singularCache = array_slice($this->_singularCache, floor(self::$_maxObjects / 4));
 		}
 
-		$singular = $this->_getSingular($word, $count);
-		is_null($count) && $this->_singularCache[$word] = $singular;
+		$singular = $this->_getSingular($pluralWord, $count);
+		is_null($count) && $this->_singularCache[$pluralWord] = $singular;
 
 		return $singular;
 	}
@@ -146,6 +186,6 @@ abstract class Core_Inflection
 	 */
 	static public function num2str($float, $lng = 'en')
 	{
-		return self::_getDriver($lng)->_num2str($float);
+		return self::instance($lng)->_num2str($float);
 	}
 }

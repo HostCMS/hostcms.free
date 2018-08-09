@@ -86,6 +86,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	protected $_aExternalPropertiesSmall = array();
 
 	/**
+	 * List of descriptions of external properties
+	 * @var array
+	 */
+	protected $_aExternalPropertiesDesc = array();
+	
+	/**
 	 * List of external properties
 	 * @var array
 	 */
@@ -999,6 +1005,13 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$this->_aExternalPropertiesSmall[$aPropertySmallInfo[1]] = $sData;
 							}
 
+							if (strpos($sFieldName, "propdesc-") === 0)
+							{
+								// Описание дополнительного свойства
+								$aTmpExplode = explode('-', $sFieldName);
+								$this->_aExternalPropertiesDesc[$aTmpExplode[1]] = $sData;
+							}
+							
 							if (strpos($sFieldName, "prop-") === 0)
 							{
 								// Основной файл дополнительного свойства/Большое изображение картинки дополнительного свойства
@@ -1813,7 +1826,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									$oProperty_Value->file_small_name = '';
 								}
 
-								if (strpos(basename($sSourceFile), "CMS") === 0)
+								if (isset($this->_aExternalPropertiesDesc[$iPropertyID]))
+								{
+									$oProperty_Value->file_description = $this->_aExternalPropertiesDesc[$iPropertyID];
+								}
+								
+								clearstatcache();
+								
+								if (strpos(basename($sSourceFile), "CMS") === 0
+									&& is_file($sSourceFile)
+								)
 								{
 									// Файл временный, подлежит удалению
 									Core_File::delete($sSourceFile);
@@ -2025,6 +2047,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			// Очищаем временные массивы
 			$this->_aExternalPropertiesSmall =
 				$this->_aExternalProperties =
+				$this->_aExternalPropertiesDesc =
 				$this->_aAdditionalGroups = array();
 
 			// Список меток для текущего инфоэлемента

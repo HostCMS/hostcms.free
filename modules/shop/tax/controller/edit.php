@@ -25,7 +25,7 @@ class Shop_Tax_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab = $this->getTab('main');
 
 		$title = $this->_object->id
-			? Core::_('Shop_Tax.tax_edit_form_title')
+			? Core::_('Shop_Tax.tax_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Tax.tax_add_form_title');
 
 		$this->getField('rate')->format(

@@ -92,7 +92,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title')
+			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Delivery.type_of_delivery_add_form_title');
 
 		$this->title($title);

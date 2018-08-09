@@ -54,8 +54,12 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 						<div class="databox-text <?php echo $error ? 'databox-small' : ''?>"><?php
 							if ($error > 0)
 							{
+								$sDatetime = !is_null($aUpdates['datetime'])
+									? strftime(DATE_TIME_FORMAT, strtotime($aUpdates['datetime']))
+									: '';
+									
 								echo Core_Str::cutSentences(
-									Core::_('Update.server_error_respond_' . $error), 120
+									Core::_('Update.server_error_respond_' . $error, $sDatetime), 120
 								);
 							}
 							elseif ($iUpdateCounts == 0)

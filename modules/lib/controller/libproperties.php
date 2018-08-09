@@ -507,7 +507,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 														->name($sFieldName)
 														->id("lib_property_id_{$oLib_Property->id}")
 														->class('form-control')
-														->value($xsl_dir_id)
+														->value($tpl_dir_id)
 												)
 												->add(
 													Core::factory('Core_Html_Entity_A')

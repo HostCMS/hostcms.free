@@ -18,7 +18,7 @@ return array(
 	'shortcode_add_form_title' => 'Add Shortcode',
 	'shortcode_edit_form_title' => 'Edit Shortcode',
 	'name' => 'Name',
-	'sorting' => 'Sorting',
+	'sorting' => 'Sort',
 	'active' => 'Active',
 	'shortcode' => 'Shortcode',
 	'example' => 'Shortcode Example',
@@ -31,6 +31,6 @@ return array(
 	'edit_success' => 'Shortcode modified successfully!',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-	'id' => 'Id',
+	'id' => 'ID',
 	'error_shortcode' => 'Shortcode already exists!',
 );

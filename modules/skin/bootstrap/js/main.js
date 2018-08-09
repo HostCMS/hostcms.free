@@ -213,7 +213,7 @@ function isEmpty(str) {
 				jItemsValue, iItemsValueCount, sValue;
 
 			var reg = /check_(\d+)_(\S+)/;
-			for (var jChekedItem, i=0; i < iChekedItemsCount; i++)
+			for (var jChekedItem, i = 0; i < iChekedItemsCount; i++)
 			{
 				jChekedItem = jChekedItems.eq(i);
 
@@ -246,10 +246,10 @@ function isEmpty(str) {
 			}
 
 			// Фильтр
-			var jFiltersItems = jQuery("#"+settings.windowId+" :input[name^='admin_form_filter_']"),
+			var jFiltersItems = jQuery("#" + settings.windowId + " :input[name^='admin_form_filter_']"),
 				iFiltersItemsCount = jFiltersItems.length;
 
-			for (var jFiltersItem, i=0; i < iFiltersItemsCount; i++)
+			for (var jFiltersItem, i = 0; i < iFiltersItemsCount; i++)
 			{
 				jFiltersItem = jFiltersItems.eq(i);
 
@@ -263,7 +263,7 @@ function isEmpty(str) {
 
 			// Расширенные фильтры
 			var filterId = $('.topFilter').is(':visible')
-				? $('#filterTabs li.active').data('filter-id')
+				? $('#filterTabs .active').data('filter-id')
 				: null;
 
 			data['hostcms[filterId]'] = filterId;
@@ -294,7 +294,7 @@ function isEmpty(str) {
 			}*/
 
 			// Очистим поле для сообщений
-			jQuery("#"+settings.windowId+" #id_message").empty();
+			jQuery("#" + settings.windowId + " #id_message").empty();
 
 			$.loadingScreen('show');
 
@@ -421,7 +421,7 @@ function isEmpty(str) {
 			{
 				data['hostcms[sortingdirection]'] = settings.sortingDirection;
 			}
-			
+
 			if (settings.view != '')
 			{
 				data['hostcms[view]'] = settings.view;
@@ -764,8 +764,11 @@ function isEmpty(str) {
 		cloneFile: function(windowId)
 		{
 			var jProperies = jQuery('#' + windowId + ' #file'),
-			jNewObject = jProperies.eq(0).clone();
-			jNewObject.find("input").attr('name', 'file[]').val('');
+				jNewObject = jProperies.eq(0).clone();
+
+			jNewObject.find("input[type='file']").attr('name', 'file[]').val('');
+			jNewObject.find("input[type='text']").attr('name', 'description_file[]').val('');
+
 			jNewObject.insertAfter(jProperies.eq(-1));
 		},
 		showWindow: function(windowId, content, settings)

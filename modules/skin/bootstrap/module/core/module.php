@@ -318,7 +318,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										<span class="user-company"><?php echo phpversion() ?></span>
 									</div>
 									<?php
-									if (version_compare(phpversion(), '5.2.2', ">="))
+									if (version_compare(phpversion(), '5.3.0', ">="))
 									{
 										$divClass = ' bg-palegreen';
 										$iClass = ' fa-check';

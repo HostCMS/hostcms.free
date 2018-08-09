@@ -101,7 +101,7 @@ class Structure_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -954,6 +954,12 @@ class Structure_Model extends Core_Entity
 				'user_id' => $this->user_id
 			);
 
+			if ($this->type == 1)
+			{
+				$aBackup['structureFile'] = $this->getStructureFile();
+				$aBackup['structureConfigFile'] = $this->getStructureConfigFile();
+			}
+			
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -997,6 +1003,12 @@ class Structure_Model extends Core_Entity
 				$this->changefreq = Core_Array::get($aBackup, 'changefreq');
 				$this->priority = Core_Array::get($aBackup, 'priority');
 				$this->save();
+
+				if ($this->type == 1)
+				{
+					$this->saveStructureFile($aBackup['structureFile']);
+					$this->saveStructureConfigFile($aBackup['structureConfigFile']);
+				}
 			}
 		}
 

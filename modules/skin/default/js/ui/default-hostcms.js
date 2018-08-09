@@ -215,8 +215,8 @@
 			});
 
 			jNewObject.find("div.img_control div,div.img_control div").remove();
-			jNewObject.find("input[type='text']#description_large").attr('name', 'description_property_' + index + '[]');
-			jNewObject.find("input[type='text']#description_small").attr('name', 'description_small_property_' + index + '[]');
+			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
+			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
 
 			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
 

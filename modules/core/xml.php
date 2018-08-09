@@ -23,7 +23,7 @@ class Core_Xml
 		libxml_use_internal_errors(FALSE);
 		return self::_xml2array(simplexml_load_string($xml));
 	}
-	
+
 	/**
 	 * XML to array
 	 * @param SimpleXMLElement $oXml XML
@@ -32,7 +32,7 @@ class Core_Xml
 	static protected function _xml2array($oXml)
 	{
 		$array = array();
-		
+
 		if (is_object($oXml))
 		{
 			$array['name'] = $oXml->getName();
@@ -56,7 +56,7 @@ class Core_Xml
 
 		return $array ;
 	}
-	
+
 	/**
 	 * Array to XML
 	 * @param array $array Array
@@ -65,17 +65,26 @@ class Core_Xml
 	static public function array2xml(array $array)
 	{
 		$sReturn = '';
-		
+
 		foreach ($array as $key => $value)
 		{
-			$key = Core_Str::xml($key);
-			$sReturn .= '<' . $key . '>' . (
-				is_array($value)
-					? "\n" . self::array2xml($value)
-					: Core_Str::xml($value)
-			) . '</' . $key . ">\n";
+			if (is_object($value) && $value instanceof Core_ORM)
+			{
+				$sReturn .= $value->getXml();
+			}
+			else
+			{
+				is_numeric($key) && $key = 'node';
+
+				$key = Core_Str::xml($key);
+				$sReturn .= '<' . $key . '>' . (
+					is_array($value)
+						? "\n" . self::array2xml($value)
+						: Core_Str::xml($value)
+				) . '</' . $key . ">\n";
+			}
 		}
-		
+
 		return $sReturn;
 	}
 }
