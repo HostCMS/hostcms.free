@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 {
@@ -39,6 +39,8 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 			return NULL;
 		}
 
+		/*
+		// Сотрудники теперь не разделены по сайтам
 		$oUsers = Core_Entity::factory('User');
 		$oUsers->queryBuilder()
 			->select('users.*')
@@ -55,7 +57,7 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 			);
 
 			return NULL;
-		}
+		}*/
 
 		$this->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
 

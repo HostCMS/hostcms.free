@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -112,7 +112,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		// Массив идентификаторов платежных систем, связанных с доставкой
 		$aDelivery_Payment_Systems = array();
 
-		foreach($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
+		foreach ($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
 		{
 			$aDelivery_Payment_Systems[] = $oShop_Delivery_Payment_System->id;
 		}
@@ -120,7 +120,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		// Получаем список платежных систем магазина
 		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
 
-		foreach($aShop_Payment_Systems as $oShop_Payment_System)
+		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
 			$oShop_Payment_System_Checkbox = Admin_Form_Entity::factory('Checkbox')
 				->caption(htmlspecialchars($oShop_Payment_System->name))
@@ -240,7 +240,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oShop = $this->_object->Shop;
 
-		if(Core_Array::getRequest('type') == 1)
+		if (Core_Array::getRequest('type') == 1)
 		{
 			$this->_object->saveHandlerFile(Core_Array::getRequest('code'));
 		}
@@ -366,21 +366,27 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		}
 
 		// Получаем платежные системы, связанные с доставкой
-		$aShop_Delivery_Payment_Systems = $this->_object->Shop_Payment_Systems->findAll();
+		$aShop_Delivery_Payment_Systems = $this->_object->Shop_Delivery_Payment_Systems->findAll();
 
 		// Массив идентификаторов платежных систем, связанных с доставкой
 		$aDelivery_Payment_Systems = array();
 
-		foreach($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
+		foreach ($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
 		{
-			$aDelivery_Payment_Systems[] = $oShop_Delivery_Payment_System->id;
+			// If already exists
+			if (in_array($oShop_Delivery_Payment_System->shop_payment_system_id, $aDelivery_Payment_Systems))
+			{
+				$oShop_Delivery_Payment_System->delete();
+			}
+			$aDelivery_Payment_Systems[] = $oShop_Delivery_Payment_System->shop_payment_system_id;
 		}
 
 		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
-
-		foreach($aShop_Payment_Systems as $oShop_Payment_System)
+		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
-			$iShopPaymentSystemChecked = Core_Array::getPost('shop_payment_system_' . $oShop_Payment_System->id, 0) ? 1 : 0;
+			$iShopPaymentSystemChecked = Core_Array::getPost('shop_payment_system_' . $oShop_Payment_System->id, 0)
+				? 1
+				: 0;
 
 			// Платежная система выбрана
 			if ($iShopPaymentSystemChecked)

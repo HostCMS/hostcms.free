@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -31,8 +31,20 @@ class Site_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'robots',
 		'key',
+		'error',
+		'error404',
+		'error403',
+		'closed',
+		'safe_email',
+		'css_left',
+		'css_right',
+		'notes',
+		'uploaddir',
+		'nesting_level',
 		'html_cache_use',
 		'html_cache_with',
 		'html_cache_without',
@@ -81,8 +93,6 @@ class Site_Model extends Core_Entity
 		'structure_menu' => array(),
 		'template' => array(),
 		'template_dir' => array(),
-		'user_module' => array(),
-		'user_group' => array(),
 		'company_department_action_access' => array(),
 		'company_department_module' => array(),
 		'company_site' => array(),
@@ -292,7 +302,7 @@ class Site_Model extends Core_Entity
 			$this->Company_Department_Action_Accesses->deleteAll(FALSE);
 			$this->Company_Department_Modules->deleteAll(FALSE);
 		}
-		
+
 		$this->Site_Aliases->deleteAll(FALSE);
 
 		$this->Structures->deleteAll(FALSE);
@@ -300,10 +310,6 @@ class Site_Model extends Core_Entity
 
 		$this->Templates->deleteAll(FALSE);
 		$this->Template_Dirs->deleteAll(FALSE);
-
-		$this->User_Groups->deleteAll(FALSE);
-		
-		$this->User_Modules->deleteAll(FALSE);
 
 		// Удаление доп. св-в структуры сайта
 		$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $this->id);
@@ -538,6 +544,8 @@ class Site_Model extends Core_Entity
 		}
 		catch (Exception $e) {}
 
+		$aReplace = array();
+
 		// Advertisement
 		if (Core::moduleIsActive('advertisement'))
 		{
@@ -581,6 +589,8 @@ class Site_Model extends Core_Entity
 						$oNewAdvertisement->add($oAdvertisement_Group_List);
 					}
 				}
+
+				$aReplace["'Advertisement_Group', {$oAdvertisement_Group->id})"] = "'Advertisement_Group', " . $oNewAdvertisement_Group->id . ")";
 			}
 
 			unset($aMatchAdvertisements);
@@ -658,6 +668,8 @@ class Site_Model extends Core_Entity
 			$newObject->add($oNewDocument);
 
 			$aMatch_Documents[$oDocument->id] = $oNewDocument;
+
+			$aReplace["'Document', {$oDocument->id})"] = "'Document', " . $oNewDocument->id . ")";
 		}
 
 		unset($aMatchDocument_Statuses);
@@ -673,6 +685,8 @@ class Site_Model extends Core_Entity
 			$newObject->add($oNewStructure_Menu);
 
 			$aMatchStructure_Menus[$oStructure_Menu->id] = $oNewStructure_Menu;
+
+			$aReplace["->menu({$oStructure_Menu->id})"] = "->menu({$oNewStructure_Menu->id})";
 		}
 
 		// Structures
@@ -860,6 +874,8 @@ class Site_Model extends Core_Entity
 			{
 				$oNewPoll_Group = $oPoll_Group->copy();
 				$newObject->add($oNewPoll_Group);
+
+				$aReplace["'Poll_Group', {$oPoll_Group->id})"] = "'Poll_Group', " . $oNewPoll_Group->id . ")";
 			}
 		}
 
@@ -1093,6 +1109,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewInformationsystem);
 
 				$aMatchInformationsystems[$oInformationsystem->id] = $oNewInformationsystem;
+
+				$aReplace["'Informationsystem', {$oInformationsystem->id})"] = "'Informationsystem', " . $oNewInformationsystem->id . ")";
 			}
 
 			unset($aMatchInformationsystem_Dirs);
@@ -1141,6 +1159,8 @@ class Site_Model extends Core_Entity
 				$newObject->add($oNewShop);
 
 				$aMatchShops[$oShop->id] = $oNewShop;
+
+				$aReplace["'Shop', {$oShop->id})"] = "'Shop', " . $oNewShop->id . ")";
 			}
 
 			unset($aMatchShop_Dirs);
@@ -1362,7 +1382,7 @@ class Site_Model extends Core_Entity
 			$oNewTemplate = clone $oTemplate;
 
 			$oNewTemplate->saveTemplateCssFile($oTemplate->loadTemplateCssFile());
-			$oNewTemplate->saveTemplateFile($oTemplate->loadTemplateFile());
+			$oNewTemplate->saveTemplateFile(str_replace(array_keys($aReplace), array_values($aReplace), $oTemplate->loadTemplateFile()));
 
 			if (isset($aMatchTemplate_Dirs[$oNewTemplate->template_dir_id]))
 			{
@@ -1519,13 +1539,6 @@ class Site_Model extends Core_Entity
 		unset($aMatchTemplates);
 		unset($aMatch_Documents);
 		unset($aMatchSiteuser_Groups);
-
-		// Users
-		$aUser_Groups = $this->User_Groups->findAll(FALSE);
-		foreach ($aUser_Groups as $oUser_Group)
-		{
-			$newObject->add($oUser_Group->copy());
-		}
 
 		return $newObject;
 	}

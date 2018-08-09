@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -337,7 +337,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_applyObjectProperty();
 
-		if(
+		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('icofile', NULL))
 			// и передан файл
@@ -378,7 +378,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aReturn = array(' … ');
 
 		$aSites = Core_Entity::factory('Site')->findAll(FALSE);
-		foreach($aSites as $oSite)
+		foreach ($aSites as $oSite)
 		{
 			$aReturn[$oSite->id] = $oSite->name;
 		}

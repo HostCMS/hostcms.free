@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Model extends Core_Entity
 {
@@ -18,6 +18,49 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 * @var mixed
 	 */
 	protected $_marksDeleted = NULL;
+
+	/**
+	 * Triggered by calling isset() or empty() on inaccessible properties
+	 * @param string $property property name
+	 * @return boolean
+	 */
+	public function __isset($property)
+	{
+		return strtolower($property) == 'adminprice'
+			? TRUE
+			: parent::__isset($property);
+	}
+
+	/**
+	 * Run when writing data to inaccessible properties
+	 * @param string $property property name
+	 * @param string $value property value
+	 * @return self
+	 */
+	public function __set($property, $value)
+	{
+		if ($property == 'adminPrice')
+		{
+			$this->adminPrice($value);
+			return $this;
+		}
+
+		return parent::__set($property, $value);
+	}
+
+	/**
+	 * Utilized for reading data from inaccessible properties
+	 * @param string $property property name
+	 * @return mixed
+	 */
+	public function __get($property)
+	{
+		return strtolower($property) == 'adminprice'
+			? ($this->Shop_Item->shortcut_id
+				? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)->price
+				: $this->Shop_Item->price)
+			: parent::__get($property);
+	}
 
 	/**
 	 * Belongs to relations
@@ -53,14 +96,11 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get XML for entity and children entities
-	 * @return string
-	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetXml
+	 * Get reserved items
+	 * @return int
 	 */
-	public function getXml()
+	public function getReserved()
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
 		$oShop_Item_Reserveds = Core_Entity::factory('Shop_Item_Reserved');
 		$oShop_Item_Reserveds->queryBuilder()
 			->where('shop_item_id', '=', $this->shop_item_id)
@@ -74,6 +114,20 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		{
 			$reserved += $oShop_Item_Reserved->count;
 		}
+
+		return $reserved;
+	}
+
+	/**
+	 * Get XML for entity and children entities
+	 * @return string
+	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$reserved = $this->getReserved();
 
 		$this
 			->clearXmlTags()
@@ -124,5 +178,189 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		return isset($aShop_Warehouse_Items[0])
 			? $aShop_Warehouse_Items[0]
 			: NULL;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param object $value value
+	 * @return string
+	 * @hostcms-event shop_warehouse_item.onBeforeAdminPrice
+	 * @hostcms-event shop_warehouse_item.onAfterAdminPrice
+	 */
+	public function adminPrice($value = NULL)
+	{
+		// Get value
+		/*if (is_null($value) || is_object($value))
+		{
+			$oShopItem = $this->Shop_Item->shortcut_id
+				? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+				: $this->Shop_Item;
+
+			return $oShopItem->price;
+		}*/
+
+		// Relation before __construct does not exist!
+		if (isset($this->Shop_Item) && $this->Shop_Item->price != $value)
+		{
+			Core_Event::notify($this->_modelName . '.onBeforeAdminPrice', $this->Shop_Item);
+
+			$this->Shop_Item->price = $value;
+			$this->Shop_Item->save();
+
+			Core_Event::notify($this->_modelName . '.onAfterAdminPrice', $this->Shop_Item);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->Shop_Item->type == 3 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-purple white')
+			->style('padding-left: 1px;')
+			->value('<i class="fa fa-archive fa-fw"></i>')
+			->execute();
+	}
+
+	/**
+	 * Get item's currency
+	 * @return string
+	 */
+	public function adminCurrency()
+	{
+		$oShopItem = $this->Shop_Item->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+			: $this->Shop_Item;
+
+		return htmlspecialchars($oShopItem->Shop_Currency->name);
+	}
+
+	/**
+	 * Get item's name
+	 * @return string
+	 */
+	public function name()
+	{
+		$oShop_Item = $this->Shop_Item;
+
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+			htmlspecialchars($oShop_Item->name)
+		);
+
+		$bRightTime = ($oShop_Item->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($oShop_Item->start_datetime))
+			&& ($oShop_Item->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($oShop_Item->end_datetime));
+
+		!$bRightTime && $oCore_Html_Entity_Div->class('wrongTime');
+
+		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
+		if (!$oShop_Item->active)
+		{
+			$oCore_Html_Entity_Div->class('inactive');
+		}
+		elseif ($bRightTime)
+		{
+			$oCurrentAlias = $oShop_Item->Shop->Site->getCurrentAlias();
+
+			if ($oCurrentAlias)
+			{
+				$href = ($oShop_Item->Shop->Structure->https ? 'https://' : 'http://')
+					. $oCurrentAlias->name
+					. $oShop_Item->Shop->Structure->getPath()
+					. $oShop_Item->getPath();
+
+				$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_A')
+						->href($href)
+						->target('_blank')
+						->add(
+							Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+						)
+				);
+			}
+		}
+		elseif (!$bRightTime)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+				);
+		}
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Get item's name
+	 * @return string
+	 */
+	public function marking()
+	{
+		$oShopItem = $this->Shop_Item->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+			: $this->Shop_Item;
+
+		return htmlspecialchars($oShopItem->marking);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function adminCurrencyBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oShop_Item = $this->Shop_Item->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+			: $this->Shop_Item;
+
+		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-darkorange white')
+			->value('<i class="fa fa-exclamation fa-fw"></i>')
+			->title(Core::_('Shop_Item.shop_item_not_currency'))
+			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function img()
+	{
+		if ($this->Shop_Item->shortcut_id)
+		{
+			return '<i class="fa fa-link"></i>';
+		}
+		elseif (strlen($this->Shop_Item->image_small))
+		{
+			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->Shop_Item->getSmallFileHref()) . '" />';
+
+			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->Shop_Item->getSmallFileHref()) . '" />';
+		}
+		else
+		{
+			return '<i class="fa fa-file-text-o"></i>';
+		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->count == '0.00' && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-darkorange white')
+			->value('<i class="fa fa-exclamation"></i>')
+			->execute();
 	}
 }

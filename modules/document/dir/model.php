@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Dir_Model extends Core_Entity
 {
@@ -138,14 +138,14 @@ class Document_Dir_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aChildrenDirs = $this->Document_Dirs->findAll();
-		foreach($aChildrenDirs as $oChildrenDir)
+		foreach ($aChildrenDirs as $oChildrenDir)
 		{
 			$newDir = $oChildrenDir->copy();
 			$newObject->add($newDir);
 		}
 
 		$aDocuments = $this->Documents->findAll();
-		foreach($aDocuments as $oDocument)
+		foreach ($aDocuments as $oDocument)
 		{
 			$newDocument = $oDocument->copy();
 			$newObject->add($newDocument);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Module extends Core_Module
 {
@@ -17,13 +17,13 @@ class Document_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name
@@ -32,12 +32,11 @@ class Document_Module extends Core_Module
 	protected $_moduleName = 'document';
 
 	/**
-	 * Constructor.
+	 * Get Module's Menu
+	 * @return array
 	 */
-	public function __construct()
+	public function getMenu()
 	{
-		parent::__construct();
-
 		$this->menu = array(
 			array(
 				'sorting' => 20,
@@ -48,6 +47,8 @@ class Document_Module extends Core_Module
 				'onclick' => "$.adminLoad({path: '/admin/document/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 
 	/**
@@ -74,7 +75,7 @@ class Document_Module extends Core_Module
 		$aDocuments = $oDocuments->findAll(FALSE);
 
 		$result = array();
-		foreach($aDocuments as $oDocument)
+		foreach ($aDocuments as $oDocument)
 		{
 			$result[] = $oDocument->indexing();
 		}

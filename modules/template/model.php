@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -356,6 +356,62 @@ class Template_Model extends Core_Entity
 	 * Create directory for template
 	 * @return self
 	 */
+	protected function _createLngDir($lng)
+	{
+		$sDirPath = dirname($this->getLngPath($lng));
+
+		if (!is_dir($sDirPath))
+		{
+			try
+			{
+				Core_File::mkdir($sDirPath, CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get language path
+	 * @param string $lng
+	 * @return string
+	 */
+	public function getLngPath($lng)
+	{
+		return CMS_FOLDER . "templates/template" . intval($this->id) . "/i18n/" . $lng . ".php";
+	}
+
+	/**
+	 * Get language file content
+	 * @param string $lng
+	 * @return string|NULL
+	 */
+	public function loadLngFile($lng)
+	{
+		$path = $this->getLngPath($lng);
+
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
+	}
+
+	/**
+	 * Set language file content
+	 * @param string $lng
+	 * @param string $content content
+	 */
+	public function saveLngFile($lng, $content)
+	{
+		$this->save();
+		$this->_createLngDir($lng);
+		$content = trim($content);
+		Core_File::write($this->getLngPath($lng), $content);
+	}
+
+	/**
+	 * Create directory for template
+	 * @return self
+	 */
 	protected function _createDir()
 	{
 		$sDirPath = dirname($this->getTemplateFilePath());
@@ -462,8 +518,14 @@ class Template_Model extends Core_Entity
 	{
 		$newObject = parent::copy();
 
-		$newObject->saveTemplateCssFile($this->loadTemplateCssFile());
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
 		$newObject->saveTemplateFile($this->loadTemplateFile());
+		$newObject->saveTemplateCssFile($this->loadTemplateCssFile());
+		$newObject->saveTemplateLessFile($this->loadTemplateLessFile());
+		$newObject->saveTemplateJsFile($this->loadTemplateJsFile());
+		$newObject->saveManifestFile($this->loadManifestFile());
+		$newObject->saveLngFile($oSite->lng, $this->loadLngFile($oSite->lng));
 
 		$aTemplates = $this->Templates->findAll();
 
@@ -759,8 +821,49 @@ class Template_Model extends Core_Entity
 				{
 					?><div class="row panel-item">
 						<div class="col-xs-12">
-							<label for="<?php echo $fieldName?>"><?php echo strval($oOptionName[0])?></label>
-							<input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo $fieldName?>" value="<?php echo htmlspecialchars($lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id ?>" />
+							<label for="<?php echo htmlspecialchars($fieldName)?>"><?php echo htmlspecialchars(strval($oOptionName[0]))?></label>
+							<?php
+							switch ($fieldType)
+							{
+								case 'select':
+									?>
+									<select name="<?php echo htmlspecialchars($fieldName)?>" class="form-control" data-template="<?php echo $this->id?>">
+										<?php
+											$aSelectOptions = $oOption->xpath('select/option');
+
+											if (isset($aSelectOptions[0]))
+											{
+												foreach ($aSelectOptions as $key => $oOption)
+												{
+													$value = !is_null($oOption->attributes()->value)
+														? strval($oOption->attributes()->value)
+														: $key;
+
+													$sName = strval($oOption[0]);
+
+													$sSelected = $value == $lessFieldValue
+														? 'selected="selected"'
+														: '';
+
+													?>
+													<option value="<?php echo htmlspecialchars($value)?>" <?php echo $sSelected?>><?php echo htmlspecialchars($sName)?></option>
+													<?php
+												}
+											}
+											else
+											{
+											?>
+												<option value="">...</option>
+											<?php
+											}
+										?>
+									</select>
+									<?php
+								break;
+								default:
+									?><input type="text" class="form-control <?php echo $fieldType == 'color' ? 'colorpicker' : ''?>" name="<?php echo htmlspecialchars($fieldName)?>" value="<?php echo htmlspecialchars($lessFieldValue)?>" <?php echo $fieldType == 'color' && ($lessFieldType == 'rgb' || $lessFieldType == 'rgba') ? 'data-format="rgb"' : '' ?> <?php echo $fieldType == 'color' && $lessFieldType == 'rgba' ? 'data-rgba="true"' : '' ?> data-template="<?php echo $this->id?>" /><?php
+							}
+							?>
 						</div>
 					</div>
 					<?php
@@ -824,5 +927,40 @@ class Template_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get i18n value
+	 */
+	public function _($name)
+	{
+		$aValues = $this->_getLngFile(SITE_LNG);
+		return isset($aValues[$name]) ? $aValues[$name] : $name;
+	}
+
+	protected $_i18n = array();
+
+	/**
+	 * Include lng file
+	 * @param string $className class name
+	 * @param string $lng language name
+	 * @return array
+	 */
+	protected function _getLngFile($lng)
+	{
+		if (!isset($this->_i18n[$lng]))
+		{
+			$this->_i18n[$lng] = array();
+
+			$path = CMS_FOLDER . $this->_getDir() . DIRECTORY_SEPARATOR . 'i18n' . DIRECTORY_SEPARATOR . $lng . '.php';
+			$path = Core_File::pathCorrection($path);
+
+			if (is_file($path))
+			{
+				$this->_i18n[$lng] = require($path);
+			}
+		}
+
+		return $this->_i18n[$lng];
 	}
 }

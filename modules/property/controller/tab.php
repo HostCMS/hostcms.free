@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -315,12 +315,15 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$smallImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnSmallImage();
 							}
 
-							if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
+							$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
+							$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
+
+							/*if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
 								&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
 							{
 								$largeImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfLargeImage();
 								$smallImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfSmallImage();
-							}
+							}*/
 
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 								->style('width: 340px')
@@ -1275,9 +1278,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		if (is_array($this->_POST[$name]))
 		{
-			list(, $val) = each($this->_POST[$name]);
+			reset($this->_POST[$name]);
+			$val = current($this->_POST[$name]);
+
 			return $val;
 		}
+
 		return $this->_POST[$name];
 	}
 

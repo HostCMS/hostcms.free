@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -54,6 +54,8 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
 				->setOr()
 				->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+				->setOr()
+				->where('shop_items.id', 'LIKE', $sQuery)
 			->close()
 			->limit(15);
 
@@ -77,6 +79,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				'price_with_tax' => $aPrice['price_tax'],
 				'rate' => $aPrice['rate'],
 				'marking' => $oShop_Item->marking,
+				'currency_id' => $oShop_Currency->id,
 				'currency' => $oShop_Currency->name,
 				'count' => $oShop_Item->getRest()
 			);
@@ -194,12 +197,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Shop_Currency.show_currency_link'))
 		->icon('fa fa-eur')
 		->img('/admin/images/money_euro.gif')
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sCurrenciesFormPath = '/admin/shop/currency/index.php', NULL, NULL, '')
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sCurrenciesFormPath, NULL, NULL, '')
 		)
 	)
@@ -247,7 +248,7 @@ if ($iShopDirId)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 			);
-	} while($oShopDir = $oShopDir->getParent());
+	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

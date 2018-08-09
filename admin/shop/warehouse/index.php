@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -86,7 +86,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Добавляем крошки для групп магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$aBreadcrumbs = array();
 
@@ -113,7 +113,7 @@ if($oShopDir->id)
 				)
 			)
 		;
-	}while($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
+	}while ($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -129,8 +129,7 @@ if($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref
 			(
 				'/admin/shop/item/index.php',
@@ -139,8 +138,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0"
 			)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax
 			(
 				'/admin/shop/item/index.php',
@@ -152,7 +150,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
-if($shop_group_id)
+if ($shop_group_id)
 {
 	$oShopGroup = Core_Entity::factory('Shop_Group', $shop_group_id);
 
@@ -181,7 +179,7 @@ if($shop_group_id)
 					$sShopItemFormPath, NULL, NULL, $additionalParams
 				)
 			);
-	} while($oShopGroup = $oShopGroup->getParent());
+	} while ($oShopGroup = $oShopGroup->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -197,8 +195,7 @@ if($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref
 			(
 				$oAdmin_Form_Controller->getPath(),
@@ -207,8 +204,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 				$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"
 			)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax
 			(
 				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams
@@ -352,14 +348,16 @@ $oAdmin_Form_Dataset->addCondition(
 	)
 );
 
-$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $shop_group_id);
+$oAdmin_Form_Controller
+	->addExternalReplace('{shop_group_id}', $shop_group_id)
+	->addExternalReplace('{shop_id}', $shop_id);
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
-if(is_null(Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getDefault(FALSE)))
+if (is_null(Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getDefault(FALSE)))
 {
 	$oAdmin_Form_Controller->addMessage(Core_Message::get(Core::_('Shop_Warehouse.warehouse_default_not_exist'), 'error'));
 }

@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Response
 {
@@ -212,8 +212,8 @@ class Core_Response
 
 				if ($encoding)
 				{
-					$this->header('Content-Encoding', $encoding);
-					$this->_body = $oCompression_Controller->compress($this->_body);
+					//$this->header('Content-Encoding', $encoding);
+					$this->_body = $oCompression_Controller->compress($this->_body, $encoding);
 				}
 			}
 		}

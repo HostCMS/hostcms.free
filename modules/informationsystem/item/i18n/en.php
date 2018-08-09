@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information items',
@@ -136,4 +136,6 @@ return array(
 	'create_catalog' => 'Catalogue sections created',
 	'update_catalog' => 'Catalogue sections updated',
 	'msg_download_complete' => "Import has finished!",
+	'information_items_copy_form_title' => 'Copy item',
+	'add_value'=>'Add the default property values ​​for the items with unset values',
 );

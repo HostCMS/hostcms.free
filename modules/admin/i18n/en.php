@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'authorization_form_title' => 'Administration center',
@@ -41,6 +41,7 @@ return array(
 	'index_tech_date_gd' => 'GD version: ',
 	'index_tech_date_pcre' => 'PCRE version: ',
 	'index_tech_date_mb' => 'Multibyte String: ',
+	'index_tech_date_mb_overload' => 'MbString Overload: ',
 	'index_tech_date_json' => 'JSON: ',
 	'index_tech_date_simplexml' => 'SimpleXML:',
 	'index_tech_date_iconv' => 'Iconv:',
@@ -101,4 +102,8 @@ return array(
 	'chat' => 'Chat',
 	'profile' => 'Profile',
 	'settings' => 'Settings',
+	'notifications' => 'Notifications',
+	'events' => 'Events',
+	'bookmarks' => 'Bookmarks',
+	'sound' => 'Sound',
 );

@@ -29,18 +29,21 @@ class Shop_Delivery_Handler3 extends Shop_Delivery_Handler
 		curl_setopt($ch, 156, 5000);
 		$data = curl_exec($ch);
 		curl_close($ch);
+
 		$oResponse = json_decode($data);
+
 		if(!(is_object($oResponse) && $oResponse->rsp->stat == 'ok'))
 		{
 			throw new Exception($oResponse->rsp->stat . " ({$oResponse->rsp->err->msg})");
 		}
+
 		return $oResponse;
 	}
 
 	public function __construct()
 	{
-		//Проверка сервиса
-       $this->getData(array('method' => 'ems.test.echo'));
+		//Проверка сервиса. При отказе сервиса корзина работает с задержкой
+		//$this->getData(array('method' => 'ems.test.echo'));
 	}
 
 	public function execute()

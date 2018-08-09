@@ -177,8 +177,6 @@ class Shop_Payment_System_Handler10 extends Shop_Payment_System_Handler
 					$oShop_Order->system_information = sprintf("Товар оплачен через PayPal.\nАтрибуты:\nTransaction ID: %s\nAmount: %s %s", Core_Array::getRequest('txn_id'), Core_Array::getRequest('mc_gross'), $sCurrentCurrencyCode);
 
 					$oShop_Order->paid();
-					$this->setXSLs();
-					$this->send();
 
 					ob_start();
 					$this->changedOrder('changeStatusPaid');

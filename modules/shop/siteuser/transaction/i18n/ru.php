@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Транзакции пользователя',
@@ -27,6 +27,7 @@ return array(
 	'type' => 'Тип транзакции',
 	'type_typical' => 'Обычная',
 	'type_bonus' => 'Бонус',
+	'type_affiliate_bonus' => 'Партнерские начисления',
 	'changeActive_success' => 'Активность транзакции изменена.',
 	'edit_success' => 'Транзакция изменена',
 	'delete_success' => 'Элемент удален!',

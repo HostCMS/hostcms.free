@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -76,7 +76,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Добавляем крошки для групп магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$aBreadcrumbs = array();
 
@@ -97,7 +97,7 @@ if($oShopDir->id)
 				$oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, $additionalParams)
 			);
 	}
-	while($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
+	while ($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -111,18 +111,16 @@ if($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}")
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams)
 		)
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
-if($shop_group_id)
+if ($shop_group_id)
 {
 	$oShopGroup = Core_Entity::factory('Shop_Group', $shop_group_id);
 
@@ -146,7 +144,7 @@ if($shop_group_id)
 				$oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, $additionalParams)
 			);
 	} 
-	while($oShopGroup = $oShopGroup->getParent());
+	while ($oShopGroup = $oShopGroup->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -160,12 +158,10 @@ if($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}")
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams)
 		)
 );

@@ -163,13 +163,17 @@
 	$Structure_Controller_Show = new Structure_Controller_Show(
 		Core_Entity::factory('Site', CURRENT_SITE));
 
-	$Structure_Controller_Show->xsl(
+	$Structure_Controller_Show/*->xsl(
 		Core_Entity::factory('Xsl')->getByName('ВерхнееМеню')
-	)
-	->showShopGroups(TRUE)
-	->showInformationsystemGroupProperties(TRUE)
-	->showInformationsystemGroups(TRUE)
+	)*/
+	->tpl("ВерхнееМеню")
+	//->showInformationsystemGroupProperties(TRUE)
+	//->showInformationsystemGroups(TRUE)
+	//->showInformationsystemItems(TRUE)
+	//->showShopGroups(TRUE)
+	//->showShopItems(TRUE)
 	->menu(1)
+	->level(0)
 	->show();
 	?>
 
@@ -224,15 +228,9 @@
 			->getByName('ВтороеВерхнееМеню'))
 		->menu(2)
 		->show();
-	?>
 
-	<?php
 	Core_Page::instance()->execute();
 
-	$this->showSection('top');
-	?>
-
-	<?php
 	// Нижнее меню
 	$Structure_Controller_Show = new Structure_Controller_Show(
 		Core_Entity::factory('Site', CURRENT_SITE));

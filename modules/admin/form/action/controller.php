@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 {
@@ -125,6 +125,16 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 	public function addContent($content)
 	{
 		$this->_content .= $content;
+		return $this;
+	}
+	
+	/**
+	 * Clear content
+	 * @return self
+	 */
+	public function clearContent()
+	{
+		$this->_content = NULL;
 		return $this;
 	}
 

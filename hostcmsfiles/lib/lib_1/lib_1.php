@@ -186,6 +186,25 @@ else
 	$Informationsystem_Controller_Show->group(FALSE);
 }*/
 
+/*$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
+
+if ($oInformationsystem->id == 1)
+{
+	$Informationsystem_Controller_Show->tpl("ПоказИнформационнойСистемы");
+
+	if ($Informationsystem_Controller_Show->item)
+	{
+		$Informationsystem_Controller_Show->tpl("ПоказЭлементаИнформационнойСистемы");
+	}
+}
+else
+{
+$Informationsystem_Controller_Show
+	->xsl(
+		Core_Entity::factory('Xsl')->getByName($xslName)
+	);
+}*/
+
 $Informationsystem_Controller_Show
 	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslName)

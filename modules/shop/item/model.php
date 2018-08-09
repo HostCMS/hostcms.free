@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -60,6 +60,12 @@ class Shop_Item_Model extends Core_Entity
 	 * @var string
 	 */
 	public $absolute_price = NULL;
+
+	/**
+	 * Callback property_id
+	 * @var string
+	 */
+	public $adminRest = NULL;
 
 	/**
 	 * Triggered by calling isset() or empty() on inaccessible properties
@@ -192,10 +198,17 @@ class Shop_Item_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'price',
 		'datetime',
 		'start_datetime',
 		'end_datetime',
+		'yandex_market',
+		'yandex_market_bid',
+		'yandex_market_cid',
+		'yandex_market_sales_notes',
+		'apply_purchase_discount',
 	);
 
 	/**
@@ -338,6 +351,57 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * @var Shop_Item_Controller|NULL
+	 */
+	protected $_Shop_Item_Controller = NULL;
+
+	/**
+	 * Set $this->_Shop_Item_Controller
+	 * @return self
+	 */
+	public function setShop_Item_Controller()
+	{
+		if (is_null($this->_Shop_Item_Controller))
+		{
+			$this->_Shop_Item_Controller = new Shop_Item_Controller();
+			if (Core::moduleIsActive('siteuser'))
+			{
+				$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+				$oSiteuser && $this->_Shop_Item_Controller->siteuser($oSiteuser);
+			}
+			$this->_Shop_Item_Controller->count($this->_cartQuantity);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get Prices
+	 * @return array
+	 */
+	public function getPrices()
+	{
+		$this->setShop_Item_Controller();
+		// Prices
+		$aPrices = $this->_Shop_Item_Controller->getPrices($this);
+
+		return $aPrices;
+	}
+
+	/**
+	 * Get Bonuses
+	 * @return array
+	 */
+	public function getBonuses($aPrices)
+	{
+		$this->setShop_Item_Controller();
+		// Bonuses
+		$aBonuses = $this->_Shop_Item_Controller->getBonuses($this, $aPrices['price_discount']);
+
+		return $aBonuses;
+	}
+
+	/**
 	 * Get the quantity in the active warehouses
 	 * @return float
 	 */
@@ -353,6 +417,11 @@ class Shop_Item_Model extends Core_Entity
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
 		return $aResult['count'];
+	}
+
+	public function reservedBackend()
+	{
+		return $this->getReserved();
 	}
 
 	/**
@@ -390,7 +459,8 @@ class Shop_Item_Model extends Core_Entity
 		// Get value
 		if (is_null($value) || is_object($value))
 		{
-			return $this->getRest();
+			//return $this->getRest();
+			return $this->adminRest;
 		}
 
 		// Save value for default warehouse
@@ -400,7 +470,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oShop_Warehouse_Item = $oDefault_Warehouse->Shop_Warehouse_Items->getByShopItemId($this->id);
 
-			if(is_null($oShop_Warehouse_Item))
+			if (is_null($oShop_Warehouse_Item))
 			{
 				$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
 				$oShop_Warehouse_Item->shop_warehouse_id = $oDefault_Warehouse->id;
@@ -465,7 +535,7 @@ class Shop_Item_Model extends Core_Entity
 	}*/
 
 	/**
-	 * Show item's currency
+	 * Get item's currency
 	 * @return string
 	 */
 	public function adminCurrency()
@@ -475,6 +545,52 @@ class Shop_Item_Model extends Core_Entity
 			: $this;
 
 		return htmlspecialchars($oShopItem->Shop_Currency->name);
+	}
+
+	/**
+	 * Get item's measure
+	 * @return string
+	 */
+	public function adminMeasure()
+	{
+		$oShopItem = $this->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			: $this;
+
+		return htmlspecialchars($oShopItem->Shop_Measure->name);
+	}
+
+	/**
+	 * Get currency name
+	 * @return string
+	 */
+	public function currencyName()
+	{
+		return $this->shop_currency_id
+			? $this->Shop_Currency->name
+			: '';
+	}
+
+	/**
+	 * Get producer name
+	 * @return string
+	 */
+	public function producerName()
+	{
+		return $this->shop_producer_id
+			? $this->Shop_Producer->name
+			: '';
+	}
+
+	/**
+	 * Get seller name
+	 * @return string
+	 */
+	public function sellerName()
+	{
+		return $this->shop_seller_id
+			? $this->Shop_Seller->name
+			: '';
 	}
 
 	/**
@@ -774,7 +890,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -805,21 +921,21 @@ class Shop_Item_Model extends Core_Entity
 
 		// Получаем список цен для копируемого товара
 		$aShop_Item_Prices = $this->Shop_Item_Prices->findAll();
-		foreach($aShop_Item_Prices as $oShop_Item_Price)
+		foreach ($aShop_Item_Prices as $oShop_Item_Price)
 		{
 			$newObject->add(clone $oShop_Item_Price);
 		}
 
 		// Получаем список специальных цен для копируемого товара
 		$aShop_Specialprices = $this->Shop_Specialprices->findAll();
-		foreach($aShop_Specialprices as $oShop_Specialprice)
+		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{
 			$newObject->add(clone $oShop_Specialprice);
 		}
 
 		// Список модификаций товара
 		$aModifications = $this->Modifications->findAll();
-		foreach($aModifications as $oModification)
+		foreach ($aModifications as $oModification)
 		{
 			//$oNewModification = clone $oModification;
 
@@ -829,7 +945,7 @@ class Shop_Item_Model extends Core_Entity
 
 		// Список сопутствующих товаров копируемому товару
 		$aShop_Item_Associateds = $this->Shop_Item_Associateds->findAll();
-		foreach($aShop_Item_Associateds as $oShop_Item_Associated)
+		foreach ($aShop_Item_Associateds as $oShop_Item_Associated)
 		{
 			$newObject->add(clone $oShop_Item_Associated);
 		}
@@ -837,7 +953,7 @@ class Shop_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('tag'))
 		{
 			$aTags = $this->Tags->findAll();
-			foreach($aTags as $oTag)
+			foreach ($aTags as $oTag)
 			{
 				$newObject->add($oTag);
 			}
@@ -851,6 +967,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @param int $iShopGroupId target group id
 	 * @return Core_Entity
 	 * @hostcms-event shop_item.onBeforeMove
+	 * @hostcms-event shop_item.onAfterMove
 	 */
 	public function move($iShopGroupId)
 	{
@@ -874,6 +991,8 @@ class Shop_Item_Model extends Core_Entity
 		$this->save()->clearCache();
 
 		$iShopGroupId && $oShop_Group->incCountItems();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
 		return $this;
 	}
@@ -1125,7 +1244,7 @@ class Shop_Item_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem
@@ -1151,6 +1270,11 @@ class Shop_Item_Model extends Core_Entity
 						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 					}
 				}
+			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
@@ -1253,7 +1377,7 @@ class Shop_Item_Model extends Core_Entity
 		->Shop_Item_Associateds
 		->getByAssociatedId($this->id);
 
-		if(is_null($oShopAssociatedItem))
+		if (is_null($oShopAssociatedItem))
 		{
 			$oShopAssociatedItem = Core_Entity::factory('Shop_Item_Associated');
 			$oShopAssociatedItem->shop_item_associated_id = $this->id;
@@ -1274,7 +1398,7 @@ class Shop_Item_Model extends Core_Entity
 		->Shop_Item_Associateds
 		->getByAssociatedId($this->id);
 
-		if(!is_null($oShopAssociatedItem))
+		if (!is_null($oShopAssociatedItem))
 		{
 			$oShopAssociatedItem->delete();
 		}
@@ -1347,7 +1471,7 @@ class Shop_Item_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getItemPath());
 			$oPropertyValue->delete();
@@ -1407,7 +1531,7 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем данные о комплекте товаров
 		$this->Shop_Item_Sets->deleteAll(FALSE);
 
-		// Удаляем связи с ассоциированными товарами, обратная связь
+		// Удаляем связи с комплектом товаров, обратная связь
 		$this->Shop_Item_Set_Seconds->deleteAll(FALSE);
 
 		// Удаляем директорию товара
@@ -1775,9 +1899,11 @@ class Shop_Item_Model extends Core_Entity
 	 * @return string
 	 * @hostcms-event shop_item.onBeforeRedeclaredGetXml
 	 * @hostcms-event shop_item.onBeforeShowXmlModifications
+	 * @hostcms-event shop_item.onBeforeSelectModifications
 	 * @hostcms-event shop_item.onBeforeAddModification
 	 * @hostcms-event shop_item.onBeforeSelectAssociatedItems
 	 * @hostcms-event shop_item.onBeforeAddAssociatedEntity
+	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 */
 	public function getXml()
 	{
@@ -1836,7 +1962,14 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->_showXmlTags && Core::moduleIsActive('tag') && $this->addEntities($this->Tags->findAll());
 
-		$this->_showXmlWarehousesItems && $this->addEntities($this->Shop_Warehouse_Items->findAll());
+		if ($this->_showXmlWarehousesItems)
+		{
+			$oShop_Warehouse_Items = $this->Shop_Warehouse_Items;
+
+			Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouseItems', $this, array($oShop_Warehouse_Items));
+
+			$this->addEntities($oShop_Warehouse_Items->findAll());
+		}
 
 		// Digital item
 		if ($this->type == 1)
@@ -1862,24 +1995,32 @@ class Shop_Item_Model extends Core_Entity
 					? $oShop_Item->Shop_Item
 					: $oShop_Item;
 
-				$oTmp_Shop_Item = clone $oShop_Item->clearEntities();
-
-				// Apply forbidden tags for sets
-				foreach ($aForbiddenTags as $tagName)
+				if (!is_null($oShop_Item->id))
 				{
-					$oTmp_Shop_Item->addForbiddenTag($tagName);
-				}
+					$oTmp_Shop_Item = clone $oShop_Item->clearEntities();
 
-				$oSetEntity->addEntity(
-					$oTmp_Shop_Item
-						->id($oShop_Item->id)
-						->showXmlAssociatedItems(FALSE)
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('count')
-								->value($oShop_Item_Set->count)
-						)
-				);
+					// Apply forbidden tags for sets
+					foreach ($aForbiddenTags as $tagName)
+					{
+						$oTmp_Shop_Item->addForbiddenTag($tagName);
+					}
+
+					$oSetEntity->addEntity(
+						$oTmp_Shop_Item
+							->id($oShop_Item->id)
+							->showXmlAssociatedItems(FALSE)
+							->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('count')
+									->value($oShop_Item_Set->count)
+							)
+					);
+				}
+				else
+				{
+					// Delete broken set
+					$oShop_Item_Set->delete();
+				}
 			}
 		}
 
@@ -1891,44 +2032,43 @@ class Shop_Item_Model extends Core_Entity
 			? $this->getReserved()
 			: 0);
 
-		// Prices
-		$oShop_Item_Controller = new Shop_Item_Controller();
-		if (Core::moduleIsActive('siteuser'))
+		if (!isset($this->_forbiddenTags['getPrices']))
 		{
-			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-			$oSiteuser && $oShop_Item_Controller->siteuser($oSiteuser);
-		}
-		$oShop_Item_Controller->count($this->_cartQuantity);
-		$aPrices = $oShop_Item_Controller->getPrices($this);
+			// Prices
+			$aPrices = $this->getPrices();
 
-		// Будет совпадать с ценой вместе с налогом
-		$this->addXmlTag('price', $aPrices['price_discount']);
-		!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount']);
-		!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax']);
-		!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax']);
+			// Будет совпадать с ценой вместе с налогом
+			$this->addXmlTag('price', $aPrices['price_discount']);
+			!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount']);
+			!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax']);
+			!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax']);
 
-		count($aPrices['discounts']) && $this->addEntities($aPrices['discounts']);
+			count($aPrices['discounts']) && $this->addEntities($aPrices['discounts']);
 
-		// Валюта от магазина
-		$this->shop_currency_id && $this->addXmlTag('currency', $this->Shop->Shop_Currency->name);
+			// Валюта от магазина
+			$this->shop_currency_id && $this->addXmlTag('currency', $this->Shop->Shop_Currency->name);
 
-		// Бонусы
-		if ($this->_showXmlBonuses && Core::moduleIsActive('siteuser'))
-		{
-			$aBonuses = $oShop_Item_Controller->getBonuses($this, $aPrices['price_discount']);
-
-			if ($aBonuses['total'])
+			// Бонусы
+			if ($this->_showXmlBonuses && Core::moduleIsActive('siteuser'))
 			{
-				$this->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('shop_bonuses')
-						->addEntities($aBonuses['bonuses'])
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('total')
-								->value($aBonuses['total'])
-						)
-				);
+				// $this->setShop_Item_Controller();
+				// $aBonuses = $this->_Shop_Item_Controller->getBonuses($this, $aPrices['price_discount']);
+
+				$aBonuses = $this->getBonuses($aPrices);
+
+				if ($aBonuses['total'])
+				{
+					$this->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('shop_bonuses')
+							->addEntities($aBonuses['bonuses'])
+							->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('total')
+									->value($aBonuses['total'])
+							)
+					);
+				}
 			}
 		}
 
@@ -1937,7 +2077,7 @@ class Shop_Item_Model extends Core_Entity
 		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure);
 
 		// Modifications
-		if ($this->_showXmlModifications)
+		if ($this->_showXmlModifications && !isset($this->_forbiddenTags['modifications']))
 		{
 			$oShop_Items_Modifications = $this->Modifications;
 
@@ -1982,6 +2122,7 @@ class Shop_Item_Model extends Core_Entity
 			$dateTime = Core_Date::timestamp2sql(time());
 			$oShop_Items_Modifications
 				->queryBuilder()
+				->where('shop_items.active', '=', 1)
 				->open()
 					->where('shop_items.start_datetime', '<', $dateTime)
 					->setOr()
@@ -1994,7 +2135,9 @@ class Shop_Item_Model extends Core_Entity
 					->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
 				->close();
 
-			$aShop_Items_Modifications = $oShop_Items_Modifications->getAllByActive(1);
+			Core_Event::notify($this->_modelName . '.onBeforeSelectModifications', $this, array($oShop_Items_Modifications));
+
+			$aShop_Items_Modifications = $oShop_Items_Modifications->findAll();
 
 			if (count($aShop_Items_Modifications))
 			{
@@ -2050,7 +2193,6 @@ class Shop_Item_Model extends Core_Entity
 			Core_Event::notify($this->_modelName . '.onBeforeSelectAssociatedItems', $this, array($oShop_Item_Associateds));
 
 			$aShop_Item_Associateds = $oShop_Item_Associateds->findAll();
-
 			if (count($aShop_Item_Associateds))
 			{
 				$oAssociatedEntity = Core::factory('Core_Xml_Entity')
@@ -2167,9 +2309,9 @@ class Shop_Item_Model extends Core_Entity
 			);
 
 			$this->_addComments(0, $this);
-		}
 
-		$this->_aComments = array();
+			$this->_aComments = array();
+		}
 
 		if ($this->_showXmlProperties)
 		{
@@ -2312,6 +2454,25 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function adminCurrencyBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oShop_Item = $this->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
+			: $this;
+
+		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-darkorange white')
+			->value('<i class="fa fa-exclamation fa-fw"></i>')
+			->title(Core::_('Shop_Item.shop_item_not_currency'))
+			->execute();
 	}
 
 	/**
@@ -2562,7 +2723,7 @@ class Shop_Item_Model extends Core_Entity
 				if ($oTmp_Shop_Item->shop_currency_id)
 				{
 					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
-					
+
 					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
 				}
 				else

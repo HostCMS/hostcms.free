@@ -4,13 +4,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
  * Admin forms.
- * Типовой контроллер загрузки значений списка для <select>
+ * Типовой контроллер загрузки значений списка для select
  *
  * @package HostCMS
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_Action_Controller
 {
@@ -109,14 +109,16 @@ class Admin_Form_Action_Controller_Type_Load_Select_Options extends Admin_Form_A
 
 		foreach ($this->_conditions as $condition)
 		{
-			list($operator, $args) = each($condition);
-			call_user_func_array(array($queryBuilder, $operator), $args);
+			foreach ($condition as $operator => $args)
+			{
+				call_user_func_array(array($queryBuilder, $operator), $args);
+			}
 		}
 
 		!is_null($this->_defaultValue) && $this->_values[] = $this->_defaultValue;
 
 		$countItems = $this->_getCount();
-		
+
 		if ($countItems < Core::$mainConfig['switchSelectToAutocomplete'])
 		{
 			$this->_findObjects();

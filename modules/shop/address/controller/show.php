@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Address_Controller_Show extends Core_Controller
 {
@@ -114,7 +114,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 		}
 
 		$this->countries && $this->addEntities(
-			Core_Entity::factory('Shop_Country')->findAll(FALSE)
+			Core_Entity::factory('Shop_Country')->getAllByActive(1, FALSE)
 		);
 
 		if (!is_null($this->_Siteuser) && strlen($this->_Siteuser->country))
@@ -147,7 +147,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 					$this->addEntities(
 						$oCurrent_Shop_Country
 							->Shop_Country_Locations
-							->findAll()
+							->getAllByActive(1)
 					);
 
 					// Города
@@ -161,7 +161,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 						$oCurrent_Shop_Country_Location_City
 							->Shop_Country_Location
 							->Shop_Country_Location_Cities
-							->findAll()
+							->getAllByActive(1)
 					);
 				}
 			}

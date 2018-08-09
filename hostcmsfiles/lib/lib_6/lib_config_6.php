@@ -92,47 +92,6 @@ if (Core_Array::getRequest('compare'))
 	exit();
 }
 
-// Избранное
-/*if (Core_Array::getRequest('favorite'))
-{
-	$shop_item_id = intval(Core_Array::getRequest('favorite'));
-
-	if (Core_Entity::factory('Shop_Item', $shop_item_id)->shop_id == $oShop->id)
-	{
-		Core_Session::start();
-		Core_Session::setMaxLifeTime(86400 * 30);
-		if (isset($_SESSION['hostcmsFavorite'][$oShop->id]) && in_array($shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id]))
-		{
-			unset($_SESSION['hostcmsFavorite'][$oShop->id][
-				array_search($shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id])
-			]);
-		}
-		else
-		{
-			$_SESSION['hostcmsFavorite'][$oShop->id][] = $shop_item_id;
-		}
-	}
-
-	Core_Page::instance()->response
-		->status(200)
-		->header('Pragma', "no-cache")
-		->header('Cache-Control', "private, no-cache")
-		->header('Vary', "Accept")
-		->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
-		->header('X-Powered-By', 'HostCMS')
-		->header('Content-Disposition', 'inline; filename="files.json"');
-
-	Core_Page::instance()->response
-		->body(json_encode('OK'))
-		->header('Content-type', 'application/json; charset=utf-8');
-
-	Core_Page::instance()->response
-		->sendHeaders()
-		->showBody();
-
-	exit();
-}*/
-
 // Viewed items
 if ($Shop_Controller_Show->item && $Shop_Controller_Show->viewed)
 {
@@ -193,13 +152,13 @@ if (!is_null(Core_Array::getGet('vote')))
 	}
 
 	Core_Page::instance()->response
-			->status(200)
-			->header('Pragma', "no-cache")
-			->header('Cache-Control', "private, no-cache")
-			->header('Vary', "Accept")
-			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
-			->header('X-Powered-By', 'HostCMS')
-			->header('Content-Disposition', 'inline; filename="files.json"');
+		->status(200)
+		->header('Pragma', "no-cache")
+		->header('Cache-Control', "private, no-cache")
+		->header('Vary', 'Accept')
+		->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
+		->header('X-Powered-By', 'HostCMS')
+		->header('Content-Disposition', 'inline; filename="files.json"');
 
 	if (strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
 	{
@@ -219,103 +178,6 @@ if (!is_null(Core_Array::getGet('vote')))
 			->showBody();
 		exit();
 	}
-}
-
-// Текстовая информация для указания номера страницы, например "страница"
-$pageName = Core_Array::get(Core_Page::instance()->libParams, 'page')
-	? Core_Array::get(Core_Page::instance()->libParams, 'page')
-	: 'страница';
-
-// Разделитель в заголовке страницы
-$pageSeparator = Core_Array::get(Core_Page::instance()->libParams, 'separator')
-	? Core_Page::instance()->libParams['separator']
-	: ' / ';
-
-$aTitle = array();
-$aDescription = array();
-$aKeywords = array();
-
-if (!is_null($Shop_Controller_Show->tag) && Core::moduleIsActive('tag'))
-{
-	$oTag = Core_Entity::factory('Tag')->getByPath($Shop_Controller_Show->tag);
-	if ($oTag)
-	{
-		$aTitle[] = $oTag->seo_title != ''
-			? $oTag->seo_title
-			: Core::_('Shop.tag', $oTag->name);
-
-		$aDescription[] = $oTag->seo_description != ''
-			? $oTag->seo_description
-			: $oTag->name;
-
-		$aKeywords[] = $oTag->seo_keywords != ''
-			? $oTag->seo_keywords
-			: $oTag->name;
-	}
-}
-
-if ($Shop_Controller_Show->group)
-{
-    $oShop_Group = Core_Entity::factory('Shop_Group', $Shop_Controller_Show->group);
-
-    $bGroupTitle = $oShop_Group->seo_title != '';
-    $bGroupDescription = $oShop_Group->seo_description != '';
-    $bGroupKeywords = $oShop_Group->seo_keywords != '';
-
-    if (!$Shop_Controller_Show->item)
-    {
-        $bGroupTitle && Core_Page::instance()->title($oShop_Group->seo_title);
-        $bGroupDescription && Core_Page::instance()->description($oShop_Group->seo_description);
-        $bGroupKeywords && Core_Page::instance()->keywords($oShop_Group->seo_keywords);
-    }
-
-    do {
-        ($Shop_Controller_Show->item || !$bGroupTitle) && array_unshift($aTitle, $oShop_Group->name);
-
-        ($Shop_Controller_Show->item || !$bGroupDescription) && array_unshift($aDescription, $oShop_Group->name);
-
-        ($Shop_Controller_Show->item || !$bGroupKeywords) && array_unshift($aKeywords, $oShop_Group->name);
-
-    } while($oShop_Group = $oShop_Group->getParent());
-}
-
-if ($Shop_Controller_Show->item)
-{
-    $oShop_Item = Core_Entity::factory('Shop_Item', $Shop_Controller_Show->item);
-
-    $oShop_Item->seo_title != ''
-        ? Core_Page::instance()->title($oShop_Item->seo_title) && $aTitle = array()
-        : $aTitle[] = $oShop_Item->name;
-
-    $oShop_Item->seo_description != ''
-        ? Core_Page::instance()->description($oShop_Item->seo_description) && $aDescription = array()
-        : $aDescription[] = $oShop_Item->name;
-
-    $oShop_Item->seo_keywords != ''
-        ? Core_Page::instance()->keywords($oShop_Item->name) && $aKeywords = array()
-        : $aKeywords[] = $oShop_Item->name;
-}
-
-if ($Shop_Controller_Show->producer)
-{
-	$oShop_Producer = Core_Entity::factory('Shop_Producer', $Shop_Controller_Show->producer);
-	$aKeywords[] = $aDescription[] = $aTitle[] = $oShop_Producer->name;
-}
-
-if ($Shop_Controller_Show->page)
-{
-	array_unshift($aTitle, $pageName . ' ' . ($Shop_Controller_Show->page + 1));
-}
-
-if (count($aTitle) > 1)
-{
-	$aTitle = array_reverse($aTitle);
-	$aDescription = array_reverse($aDescription);
-	$aKeywords = array_reverse($aKeywords);
-
-	Core_Page::instance()->title(implode($pageSeparator, $aTitle));
-	Core_Page::instance()->description(implode($pageSeparator, $aDescription));
-	Core_Page::instance()->keywords(implode($pageSeparator, $aKeywords));
 }
 
 Core_Page::instance()->object = $Shop_Controller_Show;

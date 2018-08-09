@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -68,6 +68,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/clike/clike.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/php/php.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/xml/xml.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/smarty/smarty.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/selection/active-line.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/search.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/searchcursor.js')
@@ -86,11 +87,13 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
 			;
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/font-awesome.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/open-sans/open-sans.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/hostcms.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/animate.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/dataTables.bootstrap.css')
@@ -101,6 +104,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
 			;
 	}
 
@@ -128,10 +132,9 @@ class Skin_Bootstrap extends Core_Skin
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
+		/*<!-- Fonts -->
+		<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">*/
 		?>
-		<!-- Fonts -->
-		<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">
-
 		<script type="text/javascript">
 		<?php
 		$bLogged = Core_Auth::logged();
@@ -207,7 +210,7 @@ class Skin_Bootstrap extends Core_Skin
 					<!-- Navbar Barnd -->
 					<div class="navbar-header pull-left">
 						<a href="/admin/" <?php echo isset($_SESSION['valid_user'])
-							? 'onclick="'."$.adminLoad({path: '/admin/index.php'}); return false".'"'
+							? 'onclick="' . "$.adminLoad({path: '/admin/index.php'}); return false" . '"'
 							: ''?> class="navbar-brand"><?php
 							$sLogoTitle = Core_Auth::logged() ? ' v. ' . htmlspecialchars(CURRENT_VERSION) : '';
 							?><img src="/modules/skin/bootstrap/img/logo-white.png" alt="(^) HostCMS" title="HostCMS <?php echo $sLogoTitle?>" /></a>
@@ -225,8 +228,53 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						?><div class="navbar-account">
 							<ul class="account-area">
+								<li id="bookmarks">
+									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
+										<i class="icon fa fa-star-o"></i>
+										<span class="badge hidden"></span>
+									</a>
+									<div id="bookmarksListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications">
+										<div class="scroll-bookmarks">
+											<ul>
+												<li id="bookmark-0">
+													<a href="#">
+														<div class="clearfix">
+															<div class="notification-icon">
+																<i class="fa fa-info bg-themeprimary white"></i>
+															</div>
+															<div class="notification-body">
+																<span class="title margin-top-5"><?php echo Core::_('User_Bookmark.no_bookmarks')?></span>
+															</div>
+														</div>
+													</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<?php
+									$oModule = Core_Entity::factory('Module')->getByPath('user');
+									if ($oModule)
+									{
+									?>
+									<!--/Bookmark Dropdown-->
+									<script type="text/javascript">
+									$(function (){
+										$.bookmarksPrepare();
+
+										$('.navbar-account #bookmarksListBox').data({
+											moduleId: <?php echo $oModule->id?>
+										});
+
+										$.refreshBookmarksList();
+									});
+									</script>
+									<?php
+									}
+									?>
+								</li>
 								<li>
-									<a id="sound-switch" title="Sound" href="#">
+									<a id="sound-switch" title="<?php echo Core::_('Admin.sound')?>" href="#">
 										<i class="icon fa fa-<?php echo $oUser->sound ? 'volume-up' : 'volume-off'?>"></i>
 									</a>
 
@@ -241,8 +289,8 @@ class Skin_Bootstrap extends Core_Skin
 										});
 									</script>
 								</li>
-								<li id="notifications-clock">
-									<a href="#" title="" data-toggle="dropdown" class="task-area dropdown-toggle">
+								<li id="notifications-clock" class="hidden-xs">
+									<a href="#" title="<?php echo Core::_('Admin.events')?>" data-toggle="dropdown" class="task-area dropdown-toggle">
 										<div class="clock">
 											<ul>
 												<li id="hours"> </li><li id="point">:</li><li id="min"> </li>
@@ -323,7 +371,7 @@ class Skin_Bootstrap extends Core_Skin
 														'moduleId': <?php echo $oModule->id?>
 													});
 
-													$.refreshEventsList();
+													// $.refreshEventsList();
 												});
 												</script><?php
 										}
@@ -335,7 +383,7 @@ class Skin_Bootstrap extends Core_Skin
 								{
 								?>
 								<li id="notifications">
-									<a href="#" title="" data-toggle="dropdown" class="dropdown-toggle">
+									<a href="#" title="<?php echo Core::_('Admin.notifications')?>" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-bell"></i>
 										<span class="badge hidden"></span>
 									</a>
@@ -406,7 +454,7 @@ class Skin_Bootstrap extends Core_Skin
 								?>
 								</li>
 								<li>
-									<span class="account-area-site-name hidden-xs">
+									<span class="account-area-site-name hidden-xs hidden-sm hidden-md">
 										<?php echo htmlspecialchars($oCurrentSite->name)?>
 									</span>
 
@@ -574,7 +622,7 @@ class Skin_Bootstrap extends Core_Skin
 										<div class="avatar" title="<?php echo Core::_('Admin.profile')?>">
 											<img src="<?php echo $oUser->getImageHref()?>">
 										</div>
-										<section>
+										<section class="hidden-xs hidden-sm hidden-md">
 											<h2><span class="profile"><span><?php echo htmlspecialchars(
 												$oUser->name != '' || $oUser->surname != ''
 													? $oUser->name . ' ' . $oUser->surname
@@ -624,11 +672,11 @@ class Skin_Bootstrap extends Core_Skin
 								<!--Note: notice that setting div must start right after account area list.
 								no space must be between these elements-->
 								<!-- Settings -->
-							</ul><div class="setting">
+							</ul><div class="setting hidden-xs">
 								<a id="btn-setting" title="<?php echo Core::_('Admin.settings')?>" href="#">
 									<i class="icon glyphicon glyphicon-cog"></i>
 								</a>
-							</div><div class="setting-container">
+							</div><div class="setting-container hidden-xs">
 								<label>
 									<span class="text"><?php echo Core::_('Admin.fixed')?></span>
 								</label>
@@ -787,7 +835,7 @@ class Skin_Bootstrap extends Core_Skin
 				);
 
 				$subItems = array();
-				foreach($aAdminMenu['modules'] as $sModulePath)
+				foreach ($aAdminMenu['modules'] as $sModulePath)
 				{
 					if (isset($aModuleList[$sModulePath]))
 					{
@@ -814,21 +862,26 @@ class Skin_Bootstrap extends Core_Skin
 							//$oCore_Module = Core_Module::factory($oModule->path);
 							$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
-							if ($oCore_Module && is_array($oCore_Module->menu))
+							if ($oCore_Module)
 							{
-								foreach ($oCore_Module->menu as $aMenu)
+								$aMenu = $oCore_Module->getMenu();
+
+								if (is_array($aMenu))
 								{
-									$aMenu += array(
-										'sorting' => 0,
-										'block' => 0,
-										'ico' => 'fa-file-o'
-									);
-									?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-										<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>">
-											<i class="menu-icon <?php echo $aMenu['ico']?>"></i>
-											<span class="menu-text"><?php echo $aMenu['name']?></span>
-										</a>
-									</li><?php
+									foreach ($aMenu as $aTmpMenu)
+									{
+										$aTmpMenu += array(
+											'sorting' => 0,
+											'block' => 0,
+											'ico' => 'fa-file-o'
+										);
+										?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
+											<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
+												<i class="menu-icon <?php echo $aTmpMenu['ico']?>"></i>
+												<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
+											</a>
+										</li><?php
+									}
 								}
 							}
 						}
@@ -843,24 +896,29 @@ class Skin_Bootstrap extends Core_Skin
 				//$oCore_Module = Core_Module::factory($oModule->path);
 				$oCore_Module = Core_Array::get($aCore_Module, $oModule->path);
 
-				if ($oCore_Module && is_array($oCore_Module->menu))
+				if ($oCore_Module)
 				{
-					foreach ($oCore_Module->menu as $aMenu)
+					$aMenu = $oCore_Module->getMenu();
+
+					if (is_array($aMenu))
 					{
-						if (isset($aMenu['name']))
+						foreach ($aMenu as $aTmpMenu)
 						{
-							$aMenu += array(
-								'sorting' => 0,
-								'block' => 0,
-								'ico' => 'fa-file-o'
-							);
-							?><li>
-								<a href="<?php echo htmlspecialchars($aMenu['href'])?>" onclick="<?php echo htmlspecialchars($aMenu['onclick'])?>" class="menu-icon">
-									<i class="menu-icon fa <?php echo $aMenu['ico']?>"></i>
-									<span class="menu-text"><?php echo $aMenu['name']?></span>
-								</a>
-							</li>
-							<?php
+							if (isset($aTmpMenu['name']))
+							{
+								$aTmpMenu += array(
+									'sorting' => 0,
+									'block' => 0,
+									'ico' => 'fa-file-o'
+								);
+								?><li>
+									<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>" class="menu-icon">
+										<i class="menu-icon fa <?php echo $aTmpMenu['ico']?>"></i>
+										<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
+									</a>
+								</li>
+								<?php
+							}
 						}
 					}
 				}
@@ -1024,7 +1082,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2017 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2018 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>

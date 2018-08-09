@@ -157,8 +157,8 @@ class Shop_Payment_System_Handler7 extends Shop_Payment_System_Handler
 			$oShop_Siteuser_Transaction->save();
 
 			$this->_shopOrder->paid();
-			$this->setXSLs();
-			$this->send();
+			//$this->setXSLs();
+			//$this->send();
 
 			?>
 			<p>Спасибо, Ваш заказ оформлен. Подробная информация отправлена на Ваш электронный адрес.</p>

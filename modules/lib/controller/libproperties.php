@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -75,6 +75,9 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					case 2: // XSL шаблон
 						$propertyValue = Core_Entity::factory('Xsl', $propertyValue)->name;
 					break;
+					case 7: // TPL шаблон
+						$propertyValue = Core_Entity::factory('Tpl', $propertyValue)->name;
+					break;
 					case 0: // Поле ввода
 					case 3: // Список
 					case 4: // SQL-запрос
@@ -88,7 +91,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							: array();
 					break;*/
 				}
-				
+
 				$aPropertyValues[$key] = $propertyValue;
 			}
 
@@ -115,6 +118,9 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 		$oXsl_Controller_Edit = new Xsl_Controller_Edit($this->_Admin_Form_Action);
 		$aXslDirs = $oXsl_Controller_Edit->fillXslDir(0);
+
+		$oTpl_Controller_Edit = new Tpl_Controller_Edit($this->_Admin_Form_Action);
+		$aTplDirs = $oTpl_Controller_Edit->fillTplDir(0);
 
 		if (is_array($LA))
 		{
@@ -176,8 +182,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			{
 				case 0: /* Текстовое поле */
 					$oValue = Core::factory('Core_Html_Entity_Input')
-							->class('form-control')
-							->name($sFieldName);
+						->class('form-control')
+						->name($sFieldName);
 
 					foreach ($value as $valueItem)
 					{
@@ -246,67 +252,68 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					}
 				break;
 				case 2: // XSL шаблон
-					$oXsl = Core_Entity::factory('Xsl')->getByName($value);
-
-					if ($oXsl)
+					foreach ($value as $valueItem)
 					{
-						$xsl_id = $oXsl->id;
-						$xsl_dir_id = $oXsl->xsl_dir_id;
-					}
-					else
-					{
-						$xsl_id = 0;
-						$xsl_dir_id = 0;
-					}
+						$oXsl = Core_Entity::factory('Xsl')->getByName($valueItem);
 
-					$oDivInputs->add(
-						Core::factory('Core_Html_Entity_Div')
-							->class('row')
-							->add(
-								Core::factory('Core_Html_Entity_Div')
-									->class('col-xs-12 col-sm-6')
-									->add(
-										Core::factory('Core_Html_Entity_Select')
-											->name("xsl_dir_id_{$oLib_Property->id}")
-											->id("xsl_dir_id_{$oLib_Property->id}")
-											->class('form-control')
-											->options(
-												array(' … ') + $aXslDirs
-											)
-											->value($xsl_dir_id)
-											->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: 'lib_property_id_{$oLib_Property->id}', callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #lib_property_id_{$oLib_Property->id} [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #lib_property_id_{$oLib_Property->id}').val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
-									)
-							)
-							->add(
-								Core::factory('Core_Html_Entity_Script')
-									->type("text/javascript")
-									->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
-							)
-							->add(
-								Core::factory('Core_Html_Entity_Div')
-									->class('col-xs-12 col-sm-6')
-									->add(
-										Core::factory('Core_Html_Entity_Div')
-											->class('input-group')
-											->add(
-												Core::factory('Core_Html_Entity_Select')
-													->name($sFieldName)
-													->id("lib_property_id_{$oLib_Property->id}")
-													->class('form-control')
-													->value($xsl_dir_id)
-											)
-											->add(
-												Core::factory('Core_Html_Entity_A')
-													->href("/admin/xsl/index.php?xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit")
-													->target('_blank')
-													->class('input-group-addon bg-blue bordered-blue')
-													->value('<i class="fa fa-pencil"></i>')
-													//->onclick("return $.openWindow( { path: '/admin/xsl/index.php', additionalParams: 'xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit' } );")
-											)
-									)
-							)
-					);
+						if ($oXsl)
+						{
+							$xsl_id = $oXsl->id;
+							$xsl_dir_id = $oXsl->xsl_dir_id;
+						}
+						else
+						{
+							$xsl_id = 0;
+							$xsl_dir_id = 0;
+						}
 
+						$oDivInputs->add(
+							Core::factory('Core_Html_Entity_Div')
+								->class('row')
+								->add(
+									Core::factory('Core_Html_Entity_Div')
+										->class('col-xs-12 col-sm-6')
+										->add(
+											Core::factory('Core_Html_Entity_Select')
+												->name("xsl_dir_id_{$oLib_Property->id}")
+												->id("xsl_dir_id_{$oLib_Property->id}")
+												->class('form-control')
+												->options(
+													array(' … ') + $aXslDirs
+												)
+												->value($xsl_dir_id)
+												->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: 'lib_property_id_{$oLib_Property->id}', callBack: [$.loadSelectOptionsCallback, function(){var xsl_id = \$('#{$windowId} #lib_property_id_{$oLib_Property->id} [value=\'{$xsl_id}\']').get(0) ? {$xsl_id} : 0; \$('#{$windowId} #lib_property_id_{$oLib_Property->id}').val(xsl_id)}], action: 'loadXslList',additionalParams: 'xsl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
+										)
+								)
+								->add(
+									Core::factory('Core_Html_Entity_Script')
+										->type("text/javascript")
+										->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
+								)
+								->add(
+									Core::factory('Core_Html_Entity_Div')
+										->class('col-xs-12 col-sm-6')
+										->add(
+											Core::factory('Core_Html_Entity_Div')
+												->class('input-group')
+												->add(
+													Core::factory('Core_Html_Entity_Select')
+														->name($sFieldName)
+														->id("lib_property_id_{$oLib_Property->id}")
+														->class('form-control')
+														->value($xsl_dir_id)
+												)
+												->add(
+													Core::factory('Core_Html_Entity_A')
+														->href("/admin/xsl/index.php?xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit")
+														->target('_blank')
+														->class('input-group-addon bg-blue bordered-blue')
+														->value('<i class="fa fa-pencil"></i>')
+												)
+										)
+								)
+						);
+					}
 				break;
 				case 3: // Список
 					$aLib_Property_List_Values = $oLib_Property->Lib_Property_List_Values->findAll();
@@ -405,13 +412,29 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					}
 				break;
 				case 5: // Текстовое поле
-					$oDivInputs->add(
-						Core::factory('Core_Html_Entity_Textarea')
-							->name($sFieldName)
-							->id("lib_property_id_{$oLib_Property->id}")
-							->class('form-control')
-							->value($value)
-					);
+					$oValue = Core::factory('Core_Html_Entity_Textarea')
+						->class('form-control')
+						->name($sFieldName);
+
+					foreach ($value as $valueItem)
+					{
+						if ($oLib_Property->multivalue)
+						{
+							$oValue = clone $oValue;
+
+							$oDivInputs
+								->add($oDivOpen)
+								->add($oValue->value($valueItem))
+								->add($this->imgBox())
+								->add($oDivClose);
+						}
+						else
+						{
+							$oDivInputs->add(
+								$oValue->value($valueItem)
+							);
+						}
+					}
 				break;
 				case 6: // Множественные значения
 					$oDivOpen = Core::factory('Core_Html_Entity_Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
@@ -432,6 +455,70 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							->add($oValue->value($valueItem))
 							->add($this->imgBox())
 							->add($oDivClose);
+					}
+				break;
+				case 7: // TPL шаблон
+					foreach ($value as $valueItem)
+					{
+						$oTpl = Core_Entity::factory('Tpl')->getByName($valueItem);
+
+						if ($oTpl)
+						{
+							$tpl_id = $oTpl->id;
+							$tpl_dir_id = $oTpl->tpl_dir_id;
+						}
+						else
+						{
+							$tpl_id = 0;
+							$tpl_dir_id = 0;
+						}
+
+						$oDivInputs->add(
+							Core::factory('Core_Html_Entity_Div')
+								->class('row')
+								->add(
+									Core::factory('Core_Html_Entity_Div')
+										->class('col-xs-12 col-sm-6')
+										->add(
+											Core::factory('Core_Html_Entity_Select')
+												->name("tpl_dir_id_{$oLib_Property->id}")
+												->id("tpl_dir_id_{$oLib_Property->id}")
+												->class('form-control')
+												->options(
+													array(' … ') + $aTplDirs
+												)
+												->value($tpl_dir_id)
+												->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: 'lib_property_id_{$oLib_Property->id}', callBack: [$.loadSelectOptionsCallback, function(){var tpl_id = \$('#{$windowId} #lib_property_id_{$oLib_Property->id} [value=\'{$tpl_id}\']').get(0) ? {$tpl_id} : 0; \$('#{$windowId} #lib_property_id_{$oLib_Property->id}').val(tpl_id)}], action: 'loadTplList',additionalParams: 'tpl_dir_id=' + this.value + '&lib_property_id={$oLib_Property->id}',windowId: '{$windowId}'}); return false")
+										)
+								)
+								->add(
+									Core::factory('Core_Html_Entity_Script')
+										->type("text/javascript")
+										->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
+								)
+								->add(
+									Core::factory('Core_Html_Entity_Div')
+										->class('col-xs-12 col-sm-6')
+										->add(
+											Core::factory('Core_Html_Entity_Div')
+												->class('input-group')
+												->add(
+													Core::factory('Core_Html_Entity_Select')
+														->name($sFieldName)
+														->id("lib_property_id_{$oLib_Property->id}")
+														->class('form-control')
+														->value($xsl_dir_id)
+												)
+												->add(
+													Core::factory('Core_Html_Entity_A')
+														->href("/admin/tpl/index.php?tpl_dir_id={$tpl_dir_id}&hostcms[checked][1][{$tpl_id}]=1&hostcms[action]=edit")
+														->target('_blank')
+														->class('input-group-addon bg-blue bordered-blue')
+														->value('<i class="fa fa-pencil"></i>')
+												)
+										)
+								)
+						);
 					}
 				break;
 			}

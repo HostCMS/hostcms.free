@@ -34,7 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -91,6 +91,12 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * @var array
 	 */
 	protected $_union = array();
+
+	/**
+	 * UNION ORDER BY
+	 * @var array
+	 */
+	protected $_unionOrderBy = array();
 
 	/**
 	 * UNION LIMIT
@@ -389,16 +395,31 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		$this->_union[] = array('ALL', $object);
 		return $this;
 	}
-
+	
 	/**
-	 * Warning: Needs to add unionOrderBy(), unionLimit() and unionOffset
+	 * ORDER BY for UNION
 	 *
 	 * http://dev.mysql.com/doc/refman/5.5/en/union.html
 	 * @param string $column column
 	 * @param string $direction sorting direction
 	 * @param boolean $binary binary option
 	 */
-	public function unionOrderBy($column, $direction = 'ASC', $binary = FALSE) {}
+	public function unionOrderBy($column, $direction = 'ASC', $binary = FALSE)
+	{
+		$direction = strtoupper($direction);
+		if (in_array($direction, array('ASC', 'DESC', 'RAND()')))
+		{
+			$this->_unionOrderBy[] = array($column, $direction, $binary);
+		}
+		else
+		{
+			throw new Core_Exception("The direction '%direction' doesn't allow",
+				array('%direction' => $direction)
+			);
+		}
+
+		return $this;
+	}
 
 	/**
 	 * LIMIT for UNION
@@ -543,6 +564,11 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 			$aUnion[] = ')';
 
+			if (!empty($this->_unionOrderBy))
+			{
+				$aUnion[] = ' ' . $this->_buildOrderBy($this->_unionOrderBy);
+			}
+			
 			if (!is_null($this->_unionLimit))
 			{
 				$aUnion[] = ' LIMIT ' . $this->_unionLimit;
@@ -570,6 +596,15 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 	
 	/**
+	 * Get SELECT
+	 * @return array
+	 */
+	public function getSelect()
+	{
+		return $this->_select;
+	}
+	
+	/**
 	 * Clear SELECT list
 	 * @return Core_QueryBuilder_Select
 	 */
@@ -589,6 +624,16 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		return $this;
 	}
 
+	/**
+	 * Clear GROUP BY list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearGroupBy()
+	{
+		$this->_groupBy = array();
+		return $this;
+	}
+	
 	/**
 	 * Clear
 	 * @return Core_QueryBuilder_Select

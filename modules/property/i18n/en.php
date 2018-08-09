@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Properties',
@@ -76,4 +76,7 @@ return array(
 	'allowAccessChildren_success' => 'Access allowed.',
 	'denyAccessChildren_success' => 'Access denied.',
 	'multiple' => 'Allow multiple values for property',
+	'preserve_aspect_ratio' => 'Preserve aspect ratio',
+	'preserve_aspect_ratio_small' => 'Preserve aspect ratio for small images',
+	'changeMultiple_success' => 'Multiple have been changed.',
 );

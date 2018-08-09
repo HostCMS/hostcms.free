@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Controller
 {
@@ -52,7 +52,7 @@ class Wysiwyg_Filemanager_Controller_Upload_File extends Admin_Form_Action_Contr
 		{
 			if (is_array($this->file['name']))
 			{
-				foreach($this->file['name'] as $key => $fileName)
+				foreach ($this->file['name'] as $key => $fileName)
 				{
 					$this->_uploadFile($this->file['tmp_name'][$key], $fileName);
 				}

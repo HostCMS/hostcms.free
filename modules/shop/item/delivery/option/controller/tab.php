@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 {
@@ -68,7 +68,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 			->options(range(0, 24))
 			->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'));
 
-		if(count($aShop_Item_Delivery_Options))
+		if (count($aShop_Item_Delivery_Options))
 		{
 			foreach ($aShop_Item_Delivery_Options as $oShop_Item_Delivery_Option)
 			{
@@ -148,7 +148,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 		// Доставка, установленные значения
 		$aShop_Item_Delivery_Options = $this->_getShop_Item_Delivery_Options();
 
-		foreach($aShop_Item_Delivery_Options as $oShop_Item_Delivery_Option)
+		foreach ($aShop_Item_Delivery_Options as $oShop_Item_Delivery_Option)
 		{
 			$cost = Core_Array::getPost("deliveryOptionCost_{$oShop_Item_Delivery_Option->id}");
 

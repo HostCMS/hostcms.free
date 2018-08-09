@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -88,7 +88,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки по директориям магазинов
-if($oShopDir->id)
+if ($oShopDir->id)
 {
 	$oShopDirBreadcrumbs = $oShopDir;
 
@@ -104,7 +104,7 @@ if($oShopDir->id)
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 			));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -127,7 +127,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки по группам товаров
-if($oShopGroup->id)
+if ($oShopGroup->id)
 {
 	$oShopGroupBreadcrumbs = $oShopGroup;
 
@@ -143,7 +143,7 @@ if($oShopGroup->id)
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 			));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

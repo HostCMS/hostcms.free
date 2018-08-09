@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Form
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -54,7 +54,7 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aSeoDriverOptions = $aSeoDriverTokens = $aSeoDriverTokensJS = array();
 
 		$aSeo_Drivers = Core_Entity::factory('Seo_Driver')->findAll(FALSE);
-		foreach($aSeo_Drivers as $oSeo_Driver)
+		foreach ($aSeo_Drivers as $oSeo_Driver)
 		{
 			try {
 				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Driver->driver);

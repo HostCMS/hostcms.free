@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -77,6 +77,8 @@ class Comment_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'datetime'
 	);
 
@@ -294,8 +296,8 @@ class Comment_Model extends Core_Entity
 				->execute();
 
 			Core::factory('Core_Html_Entity_A')
-				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/siteuser/index.php', 'edit', NULL, 0, $this->Siteuser->id))
-				->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/siteuser/index.php', additionalParams: 'document_dir_id=' + $('#{$windowId} #document_dir_id').val() + '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
+				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/index.php', 'edit', NULL, 0, $this->Siteuser->id))
+				->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/index.php', additionalParams: '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
 				->value(htmlspecialchars($this->Siteuser->login))
 				->execute();
 

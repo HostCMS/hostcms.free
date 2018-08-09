@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ÎÎÎ "Õîñòìýéê" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ÎÎÎ "Õîñòìýéê" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_View extends Core_Servant_Properties
 {
@@ -18,7 +18,7 @@ abstract class Admin_View extends Core_Servant_Properties
 		'module',
 		'message',
 		'content',
-		'pageSelector', 
+		'pageSelector', // Óäàëèòü â âåðñèè 6.8.0
 	);
 
 	protected $_children = array();
@@ -33,14 +33,14 @@ abstract class Admin_View extends Core_Servant_Properties
 	 * Create new admin view
 	 * @return object
 	 */
-	static public function create()
+	static public function create($className = NULL)
 	{
-		$className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;
+		is_null($className)
+			&& $className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;
 
 		if (!class_exists($className))
 		{
-			throw new Core_Exception("Class '%className' does not exist",
-					array('%className' => $className));
+			throw new Core_Exception("Class '%className' does not exist", array('%className' => $className));
 		}
 
 		return new $className();

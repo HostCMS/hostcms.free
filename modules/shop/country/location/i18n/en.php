@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Locations of country',
@@ -17,6 +17,7 @@ return array(
 	'name' => "<acronym title=\"Location name\">Name</acronym>",
 	'sorting' => "Order",
 	'id' => "Id",
+	'active' => "Active",
 	'shop_country_id' => "Country id",
 	'edit_success' => "Location information updated successfully!",
 	'markDeleted_success' => "Location information deleted successfully!",
@@ -24,7 +25,8 @@ return array(
 	'apply_error' => "Error has occurred during changing information",
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-	
+	'changeActive_success' => "Information successfully changed",
+
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',
 	'name_ru'=>'In Russian',
@@ -39,5 +41,5 @@ return array(
 	'name_lt'=>'In Lithuanian',
 	'name_lv'=>'In Latvian',
 	'name_cz'=>'Czech',
-	'name_ja'=>'In Japanese',	
+	'name_ja'=>'In Japanese',
 );

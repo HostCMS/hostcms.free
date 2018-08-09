@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_List_Model extends Shop_Model
 {
@@ -225,17 +225,17 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	 * Preserve aspect ratio of large image
 	 * @return int
 	 */
-	public function preserveAspectRatioOfLargeImage()
+	/*public function preserveAspectRatioOfLargeImage()
 	{
 		return $this->preserve_aspect_ratio;
-	}
+	}*/
 
 	/**
 	 * Preserve aspect ratio of small image
 	 * @return int
 	 */
-	public function preserveAspectRatioOfSmallImage()
+	/*public function preserveAspectRatioOfSmallImage()
 	{
 		return $this->preserve_aspect_ratio_small;
-	}
+	}*/
 }

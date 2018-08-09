@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -123,5 +123,5 @@ return array(
 	'note' => 'Note',
 
 	'note-license' => 'License number <a href="/admin/site/index.php?hostcms[action]=accountInfo&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][0]=1" onclick="$.adminLoad( { path: \'/admin/site/index.php\',action: \'accountInfo\', current: \'1\', additionalParams: \'hostcms[checked][0][0]=1\' } ); return false">is not entered</a>, Content Management System works in a restricted mode.',
-	'note-bad-password' => 'User with standard login and password exists in the system, please change the password!',
+	'note-bad-password' => 'User with default login and password exists, please change the password!',
 );

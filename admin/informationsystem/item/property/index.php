@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -115,7 +115,7 @@ if ($oInformationsystem->informationsystem_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemDirPath, NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemDir = $oInformationsystemDir->getParent());
+		} while ($oInformationsystemDir = $oInformationsystemDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -164,7 +164,7 @@ if ($informationsystem_group_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemPath, NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemGroup = $oInformationsystemGroup->getParent());
+		} while ($oInformationsystemGroup = $oInformationsystemGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -214,7 +214,7 @@ if ($property_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oProperty_Dir = $oProperty_Dir->getParent());
+		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -238,7 +238,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 {
 	$oProperty_Controller_Edit = Admin_Form_Action_Controller::factory(
-		'Property_Controller_Edit', $oAdmin_Form_Action
+		'Informationsystem_Item_Property_Controller_Edit', $oAdmin_Form_Action
 	);
 
 	$oProperty_Controller_Edit
@@ -332,6 +332,11 @@ $oAdmin_Form_Dataset->addCondition(
 		array('informationsystem_item_properties.informationsystem_id', '=', $informationsystem_id)
 	)
 );
+
+$oAdmin_Form_Dataset
+->changeField('multiple', 'link', "/admin/informationsystem/item/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id . "&property_dir_id={property_dir_id}")
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_id=" . $informationsystem_id . "&informationsystem_group_id=" . $informationsystem_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

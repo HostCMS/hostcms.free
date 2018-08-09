@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Version_Model extends Core_Entity
 {
@@ -82,6 +82,13 @@ class Document_Version_Model extends Core_Entity
 		return $this;
 	}
 	
+	public function execute()
+	{
+		$this->Document->execute();
+
+		return $this;
+	}
+	
 	/**
 	 * Save document file
 	 * @param string $content content
@@ -145,7 +152,7 @@ class Document_Version_Model extends Core_Entity
 
 		$aDocument_Versions = $oDocument_Versions->findAll();
 
-		foreach($aDocument_Versions as $oDocument_Version)
+		foreach ($aDocument_Versions as $oDocument_Version)
 		{
 			$oDocument_Version->current = 0;
 			$oDocument_Version->update();

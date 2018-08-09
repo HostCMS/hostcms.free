@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Model extends Core_Entity
 {
@@ -112,21 +112,38 @@ class Shop_Price_Model extends Core_Entity
 	}
 
 	/**
-	 * Get price by guid
-	 * @param string $guid guid
-	 * @return Shop_Price_Model|NULL
+	 * Recount prices
+	 * @return self
 	 */
-	public function getByGuid($guid)
+	public function recount()
 	{
-		$this->queryBuilder()
-			//->clear()
-			->where('guid', '=', $guid)
-			->limit(1);
+		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		{
+			Core::isFunctionEnable('set_time_limit') && @set_time_limit(90000);
+			@ini_set('max_execution_time', '90000');
+		}
 
-		$aObjects = $this->findAll(FALSE);
+		$offset = 0;
+		$limit = 100;
 
-		return isset($aObjects[0])
-			? $aObjects[0]
-			: NULL;
+		do {
+			$oShop_Item_Prices = $this->Shop_Item_Prices;
+
+			$oShop_Item_Prices->queryBuilder()
+				->offset($offset)
+				->limit($limit);
+
+			$aShop_Item_Prices = $oShop_Item_Prices->findAll(FALSE);
+
+			foreach ($aShop_Item_Prices as $oShop_Item_Price)
+			{
+				$oShop_Item_Price->value = $oShop_Item_Price->Shop_Item->price / 100 * $this->percent;
+				$oShop_Item_Price->save();
+			}
+			$offset += $limit;
+		}
+		while (count($aShop_Item_Prices));
+
+		return $this;
 	}
 }

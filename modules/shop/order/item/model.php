@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -64,13 +64,15 @@ class Shop_Order_Item_Model extends Core_Entity
 	protected $_sorting = array(
 		'shop_order_items.id' => 'ASC',
 	);
-	
+
 	/**
 	 * Forbidden tags. If list of tags is empty, all tags will show.
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
 		'price',
+		'deleted',
+		'user_id',
 	);
 
 	/**
@@ -119,7 +121,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			return sprintf(
 				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
-				htmlspecialchars($this->Shop_Item->name)
+				htmlspecialchars($this->name)
 			);
 		}
 	}
@@ -140,7 +142,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Order_Item_Digitals->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -222,24 +224,27 @@ class Shop_Order_Item_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		if ($this->_showXmlItem && $this->Shop_Item->id)
+		if ($this->_showXmlItem && $this->shop_item_id)
 		{
-			$oShop_Item = $this->Shop_Item
-				->clearEntities()
-				->showXmlProperties($this->_showXmlProperties);
+			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 
-			// Parent item for modification
-			if ($this->Shop_Item->modification_id)
+			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
-				$oModification = Core_Entity::factory('Shop_Item')->find($this->Shop_Item->modification_id);
-				!is_null($oModification->id) && $oShop_Item->addEntity(
-					$oModification->showXmlProperties($this->_showXmlProperties)
-				);
-			}
-
-			$this->addEntity(
 				$oShop_Item
-			);
+					->clearEntities()
+					->showXmlProperties($this->_showXmlProperties);
+
+				// Parent item for modification
+				if ($oShop_Item->modification_id)
+				{
+					$oModification = Core_Entity::factory('Shop_Item')->find($oShop_Item->modification_id);
+					!is_null($oModification->id) && $oShop_Item->addEntity(
+						$oModification->showXmlProperties($this->_showXmlProperties)
+					);
+				}
+
+				$this->addEntity($oShop_Item);
+			}
 		}
 
 		$this->clearXmlTags()

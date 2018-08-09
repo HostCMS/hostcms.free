@@ -54,7 +54,7 @@ if ($oShopDir->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 		));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -93,7 +93,7 @@ if ($oShopGroup->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 			'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 		));
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -172,7 +172,7 @@ else
 
 			$fInputFile = fopen($sTmpFileName, 'rb');
 
-			while(!feof($fInputFile))
+			while (!feof($fInputFile))
 			{
 				$aCurrentCSVLine = fgetcsv($fInputFile, 10000, ';', '"');
 

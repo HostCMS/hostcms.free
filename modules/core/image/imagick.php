@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -136,12 +136,12 @@ class Core_Image_Imagick extends Core_Image
 			if ($ext == 'jpg' || $ext == 'jpeg')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
-				$oImagick->setImageCompressionQuality(is_null($quality)?JPG_QUALITY:intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? JPG_QUALITY : intval($quality));
 			}
 			elseif ($ext == 'png')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
-				$oImagick->setImageCompressionQuality(is_null($quality)?PNG_QUALITY:intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? PNG_QUALITY : intval($quality));
 			}
 			elseif ($ext == 'gif'){}
 			else
@@ -159,7 +159,7 @@ class Core_Image_Imagick extends Core_Image
 
 				$oImagick->sharpenImage(floatval(self::$_config['imagick']['sharpenImage']['radius']), floatval(self::$_config['imagick']['sharpenImage']['sigma']));
 			}
-			elseif(is_array(self::$_config['imagick']['adaptiveSharpenImage']))
+			elseif (is_array(self::$_config['imagick']['adaptiveSharpenImage']))
 			{
 				self::$_config['imagick']['adaptiveSharpenImage'] += array('radius' => 0, 'sigma' => 1);
 
@@ -237,7 +237,8 @@ class Core_Image_Imagick extends Core_Image
 				$sourceImage->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$sourceImage->setImageCompressionQuality(PNG_QUALITY);
 			}
-			elseif ($ext == 'gif'){}
+			elseif ($ext == 'gif')
+			{}
 			else
 			{
 				$sourceImage->clear();

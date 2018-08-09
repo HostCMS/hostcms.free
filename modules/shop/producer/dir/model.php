@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Dir_Model extends Core_Entity
 {
@@ -89,7 +89,7 @@ class Shop_Producer_Dir_Model extends Core_Entity
 				// Группа назначения является потомком текущей группы, перенос невозможен
 				return $this;
 			}
-		} while($oDestinationDir = $oDestinationDir->getParent());
+		} while ($oDestinationDir = $oDestinationDir->getParent());
 
 		$this->parent_id = $shop_producer_dir_id;
 		$this->save();

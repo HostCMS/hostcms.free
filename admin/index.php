@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once ('../bootstrap.php');
 
@@ -60,7 +60,7 @@ if (!is_null(Core_Array::getGet('skinName')))
 		throw new Core_Exception('Skin does not allow.');
 	}
 }
-elseif(isset($_SESSION['skin']))
+elseif (isset($_SESSION['skin']))
 {
 	Core::$mainConfig['skin'] = $_SESSION['skin'];
 }

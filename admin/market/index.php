@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -45,8 +45,7 @@ $oMarket_Controller
 	->page($oAdmin_Form_Controller->getCurrent());
 
 if ($oAdmin_Form_Controller->getAction() == 'sendSearchQuery'
-	&& !is_null(Core_Array::getRequest('search_query'))
-)
+	&& !is_null(Core_Array::getRequest('search_query')))
 {
 	$oMarket_Controller->search($sQuery);
 }

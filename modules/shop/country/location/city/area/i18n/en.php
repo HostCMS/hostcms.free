@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Districts of city',
@@ -26,6 +26,8 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'id' => 'Id',
+	'active'=> 'Active',
+	'changeActive_success' => "Information successfully changed",
 
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',
@@ -41,5 +43,5 @@ return array(
 	'name_lt'=>'In Lithuanian',
 	'name_lv'=>'In Latvian',
 	'name_cz'=>'Czech',
-	'name_ja'=>'In Japanese',	
+	'name_ja'=>'In Japanese',
 );

@@ -187,8 +187,6 @@ class Shop_Payment_System_Handler16 extends Shop_Payment_System_Handler
 
 					$oShop_Order->system_information = "Счет оплачен через Qiwi.\n";
 					$oShop_Order->paid();
-					$this->setXSLs();
-					$this->send();
 
 					ob_start();
 					$this->changedOrder('changeStatusPaid');
@@ -199,8 +197,6 @@ class Shop_Payment_System_Handler16 extends Shop_Payment_System_Handler
 
 					$oShop_Order->system_information = "Счет отменен клиентом.\n";
 					$oShop_Order->canceled();
-					$this->setXSLs();
-					$this->send();
 
 					ob_start();
 					$this->changedOrder('changeStatusСanceled');

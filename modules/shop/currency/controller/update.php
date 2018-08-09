@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Controller_Update extends Admin_Form_Action_Controller
 {
@@ -54,7 +54,7 @@ class Shop_Currency_Controller_Update extends Admin_Form_Action_Controller
 			$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getBydefault(1);
 
 			// валюты по умолчанию нет, нет смысла считать дальше
-			if(is_null($oDefaultCurrency))
+			if (is_null($oDefaultCurrency))
 			{
 				throw new Exception('Валюта по умолчанию не задана. Невозможно рассчитать курс');
 			}
@@ -100,7 +100,7 @@ class Shop_Currency_Controller_Update extends Admin_Form_Action_Controller
 			{
 				// ищем текущую валюту в магазине
 				$oCurrentCurrency = Core_Entity::factory('Shop_Currency')->getByCode($code);
-				if(is_null($oCurrentCurrency))
+				if (is_null($oCurrentCurrency))
 				{
 					// валюта не найдена, пропускаем итерацию
 					continue;
@@ -112,7 +112,7 @@ class Shop_Currency_Controller_Update extends Admin_Form_Action_Controller
 					$oCurrentCurrency->date($fDate);
 					$oCurrentCurrency->save();
 				}
-				elseif(isset($this->_exchangeRate[$oDefaultCurrency->code]))
+				elseif (isset($this->_exchangeRate[$oDefaultCurrency->code]))
 				{
 					$oCurrentCurrency->exchange_rate = $rate * $fRubRate;
 					$oCurrentCurrency->date($fDate);

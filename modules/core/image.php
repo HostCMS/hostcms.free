@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -69,14 +69,22 @@ abstract class Core_Image
 	 */
 	static public function exifImagetype($filename)
 	{
-		if (function_exists('exif_imagetype'))
+		// Uploaded file doesn't have extension
+		if (is_uploaded_file($filename)
+			|| Core_File::isValidExtension($filename, Core_File::$resizeExtensions)
+			|| strpos($filename, CMS_FOLDER . TMP_DIR) === 0
+			|| in_array(Core_File::getExtension($filename), array('tmp', 'dat'))
+		)
 		{
-			return @exif_imagetype($filename);
-		}
+			if (function_exists('exif_imagetype'))
+			{
+				return @exif_imagetype($filename);
+			}
 
-		if ((list($width, $height, $type, $attr) = @getimagesize($filename)) !== FALSE)
-		{
-			return $type;
+			if ((list($width, $height, $type, $attr) = @getimagesize($filename)) !== FALSE)
+			{
+				return $type;
+			}
 		}
 
 		return FALSE;

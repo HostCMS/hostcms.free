@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -108,7 +108,7 @@ class Skin_Default extends Core_Skin
 			?><link type="text/css" href="<?php echo $sPath . '?' . $timestamp?>" rel="stylesheet" /><?php
 			echo PHP_EOL;
 		}?>
-		<script type="text/javascript">if(!window.jQuery) {document.write('<scri'+'pt type="text/javascript" src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
+		<script type="text/javascript">if (!window.jQuery) {document.write('<scri'+'pt type="text/javascript" src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
 
 		<?php
 		$this->addJs("/modules/skin/bootstrap/js/lng/{$lng}/{$lng}.js");
@@ -600,27 +600,32 @@ if ($this->_mode != 'blank')
 			{
 				$oCore_Module = Core_Module::factory($oModule->path);
 
-				if ($oModule->active && $oCore_Module && is_array($oCore_Module->menu))
+				if ($oModule->active && $oCore_Module)
 				{
-					foreach ($oCore_Module->menu as $aMenu)
+					$aMenu = $oCore_Module->getMenu();
+
+					if (is_array($aMenu))
 					{
-						if (isset($aMenu['href']))
+						foreach ($aMenu as $aTmpMenu)
 						{
-							$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, 99, 0);
+							if (isset($aTmpMenu['href']))
+							{
+								$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, 99, 0);
 
-							$block = is_null($oUser_Setting) ? floor($iMenuCount % 3) : $oUser_Setting->position_x;
+								$block = is_null($oUser_Setting) ? floor($iMenuCount % 3) : $oUser_Setting->position_x;
 
-							$aMainMenu
-								[$block]
-								['sub'][] = array(
-										'position' => is_null($oUser_Setting) ? 999 : $oUser_Setting->position_y,
-										'block' => $block
-									) + $aMenu + array(
-									'sorting' => 0,
-									'moduleId' => $oModule->id,
-									'image' => $oModule->path . '.png'
-								);
-							$iMenuCount++;
+								$aMainMenu
+									[$block]
+									['sub'][] = array(
+											'position' => is_null($oUser_Setting) ? 999 : $oUser_Setting->position_y,
+											'block' => $block
+										) + $aTmpMenu + array(
+										'sorting' => 0,
+										'moduleId' => $oModule->id,
+										'image' => $oModule->path . '.png'
+									);
+								$iMenuCount++;
+							}
 						}
 					}
 				}

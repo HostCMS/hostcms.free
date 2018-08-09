@@ -7,7 +7,7 @@
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -142,7 +142,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		$aCounters = $oCounters->findAll(FALSE);
 
 		$iHitsCount = $iHostsCount = $iBotsCount = $iSessionsCount = $iNewUsersCount = 0;
-		foreach($aCounters as $oCounter)
+		foreach ($aCounters as $oCounter)
 		{
 			$index = "'" . $oCounter->date . "'";
 

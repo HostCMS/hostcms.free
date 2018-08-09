@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -134,6 +134,7 @@ return array(
 	'schedule-searchIndexItem' => 'Index shop item',
 	'schedule-searchIndexGroup' => 'Index shop group',
 	'schedule-searchUnindexItem' => 'Unindex shop item',
+	'schedule-recountShop' => 'Recount shop groups and items',	
 	'order_admin_subject' => 'New order email subject',
 	'order_user_subject' => 'New order customer\'s email subject',
 	'confirm_admin_subject' => 'Paid order email subject',
@@ -142,6 +143,34 @@ return array(
 	'cancel_user_subject' => 'Cancel order customer\'s email subject',
 	'shopRecountSet_success' => 'Sets recalculated successfully!',
 	'notification_subscribers' => 'Notification subscribers',
-	'type_subscriber' => 'Type subscriber login',	
+	'type_subscriber' => 'Type subscriber login',
 	'shop_tax_id' => 'Default tax',
+	'tab_seo_templates' => 'SEO templates',
+	'seo_group_header' => 'Group templates',
+	'seo_item_header' => 'Item templates',
+	'seo_group_title_template' => 'TITLE template',
+	'seo_group_description_template' => 'DESCRIPTION template',
+	'seo_group_keywords_template' => 'KEYWORDS template',
+	'seo_item_title_template' => 'TITLE template',
+	'seo_item_description_template' => 'DESCRIPTION template',
+	'seo_item_keywords_template' => 'KEYWORDS template',
+
+	'seo_template_shop' => 'Shop',
+	'seo_template_shop_name' => 'Shop name',
+	'seo_template_group' => 'Group',
+	'seo_template_group_name' => 'Group name',
+	'seo_template_group_description' => 'Group description',
+	'seo_template_group_path' => 'Group path',
+	'seo_template_group_page_number' => 'Page number',
+	'seo_template_group_page' => 'page',
+	'seo_template_item' => 'Item',
+	'seo_template_item_name' => 'Item name',
+	'seo_template_item_description' => 'Item description',
+	'seo_template_item_text' => 'Item text',
+	'seo_template_item_currency' => 'Item currency',
+
+	'all_groups_count' => 'Groups: %s',
+	'all_items_count' => 'Items: %s',
+
+	'create_small_image' => 'Create small image from large image',
 );

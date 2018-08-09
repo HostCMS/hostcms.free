@@ -138,14 +138,9 @@
 
 			if (count($aTmpProperties))
 			{
-				reset($aTmpProperties);
-				while(list(, list($oProperty, $propertyValue)) = each($aTmpProperties))
+				foreach ($aTmpProperties as $aTmpProperty)
 				{
-					$tableName = $oProperty->createNewValue(0)->getTableName();
-
-					$Shop_Controller_Show->shopItems()->queryBuilder()
-						->where('shop_item_properties.property_id', '=', $oProperty->id);
-
+					list($oProperty, $propertyValue) = $aTmpProperty;
 					if (!is_array($propertyValue))
 					{
 						$Shop_Controller_Show->addEntity(

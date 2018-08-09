@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Value
 {
@@ -53,7 +53,7 @@ class Property_Controller_Value
 			}
 
 			// Вариант на UNION
-			/*foreach($aSelect as $sModelName => $aTmpProperiesId)
+			/*foreach ($aSelect as $sModelName => $aTmpProperiesId)
 			{
 				$oProperty_Values = Core_Entity::factory($sModelName);
 
@@ -79,7 +79,7 @@ class Property_Controller_Value
 				$aReturn = array_merge($aReturn, $oProperty_Values->findAll());
 			}*/
 
-			foreach($aSelect as $sModelName => $aTmpProperiesId)
+			foreach ($aSelect as $sModelName => $aTmpProperiesId)
 			{
 				$oProperty_Values = Core_Entity::factory($sModelName);
 

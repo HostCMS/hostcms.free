@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -75,6 +75,7 @@ class Shop_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'shop_item_property_for_group' => array(),
 		'shop_item_delivery_option' => array(),
+		'deal' => array()
 	);
 
 	/**
@@ -131,7 +132,8 @@ class Shop_Model extends Core_Entity
 		'shop_measure' => array(),
 		'user' => array(),
 		'siteuser_group' => array(),
-		'shop_company' => array(),
+		'shop_company' => array(), // old relation
+		'company' => array('foreign_key' => 'shop_company_id'), // new relation
 		'shop_country' => array()
 	);
 
@@ -145,12 +147,65 @@ class Shop_Model extends Core_Entity
 
 	/**
 	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'size_measure',
+		'yandex_market_name',
+		'items_sorting_direction',
+		'items_sorting_field',
+		'groups_sorting_direction',
+		'groups_sorting_field',
+		'image_large_max_width',
+		'image_large_max_height',
+		'image_small_max_width',
+		'image_small_max_height',
+		'siteuser_group_id',
+		'watermark_file',
+		'watermark_default_use_large_image',
+		'watermark_default_use_small_image',
+		'watermark_default_position_x',
+		'watermark_default_position_y',
+		'create_small_image',
+		'typograph_default_items',
+		'typograph_default_groups',
+		'apply_tags_automatically',
+		'change_filename',
+		'apply_keywords_automatically',
+		'group_image_small_max_width',
+		'group_image_large_max_width',
+		'group_image_small_max_height',
+		'group_image_large_max_height',
+		'producer_image_small_max_width',
+		'producer_image_large_max_width',
+		'producer_image_small_max_height',
+		'producer_image_large_max_height',
+		'preserve_aspect_ratio',
+		'preserve_aspect_ratio_small',
+		'preserve_aspect_ratio_group',
+		'preserve_aspect_ratio_group_small',
+		'seo_group_title_template',
+		'seo_group_keywords_template',
+		'seo_group_description_template',
+		'seo_item_title_template',
+		'seo_item_keywords_template',
+		'seo_item_description_template',
+		'order_admin_subject',
+		'order_user_subject',
+		'confirm_admin_subject',
+		'confirm_user_subject',
+		'cancel_admin_subject',
+		'cancel_user_subject',
+		'shop_order_status_id',
+		'send_order_email_admin',
+		'send_order_email_user',
+		'guid',
+		'yandex_market_sales_notes_default',
 	);
-
+	
 	/**
 	 * Tree of groups
 	 * @var array
@@ -397,7 +452,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oProperty_Dir->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			//$oNewProperty_Dir = $oProperty_Dir->copy();
 			$oNewProperty_Dir = clone $oProperty_Dir;
@@ -408,7 +463,7 @@ class Shop_Model extends Core_Entity
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Item_Property_List->Property_Dirs->findAll();
 
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -421,7 +476,7 @@ class Shop_Model extends Core_Entity
 		//$oProperty->queryBuilder()->where('property_dir_id', '=', 0);
 		$aProperties = $oProperty->findAll();
 
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			//$oNewProperty = $oProperty->copy(FALSE);
 			$oNewProperty = clone $oProperty;
@@ -429,7 +484,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperties = $oNewObject_Shop_Item_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -447,7 +502,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oProperty_Dir->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			$oNewProperty_Dir = clone $oProperty_Dir;
 
@@ -463,7 +518,7 @@ class Shop_Model extends Core_Entity
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Group_Property_List->Property_Dirs->findAll();
 
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -476,7 +531,7 @@ class Shop_Model extends Core_Entity
 		//$oProperty->queryBuilder()->where('property_dir_id', '=', 0);
 		$aProperties = $oProperty->findAll();
 
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$oNewProperty = clone $oProperty;
 
@@ -489,7 +544,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperties = $oNewObject_Shop_Group_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -505,7 +560,7 @@ class Shop_Model extends Core_Entity
 		$aProperty_Dirs = $oShop_Order_Property_List->Property_Dirs->findAll();
 
 		$aMatchProperty_Dirs = array();
-		foreach($aProperty_Dirs as $oProperty_Dir)
+		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
 			$oNewProperty_Dir = clone $oProperty_Dir;
 			$oNewObject_Shop_Order_Property_List->add($oNewProperty_Dir);
@@ -513,7 +568,7 @@ class Shop_Model extends Core_Entity
 		}
 
 		$oNewProperty_Dirs = $oNewObject_Shop_Order_Property_List->Property_Dirs->findAll();
-		foreach($oNewProperty_Dirs as $oNewProperty_Dir)
+		foreach ($oNewProperty_Dirs as $oNewProperty_Dir)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty_Dir->parent_id]))
 			{
@@ -523,14 +578,14 @@ class Shop_Model extends Core_Entity
 		}
 
 		$aProperties = $oShop_Order_Property_List->Properties->findAll();
-		foreach($aProperties as $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$oNewProperty = clone $oProperty;
 			$oNewObject_Shop_Order_Property_List->add($oNewProperty);
 		}
 
 		$oNewProperties = $oNewObject_Shop_Order_Property_List->Properties->findAll();
-		foreach($oNewProperties as $oNewProperty)
+		foreach ($oNewProperties as $oNewProperty)
 		{
 			if (isset($aMatchProperty_Dirs[$oNewProperty->property_dir_id]))
 			{
@@ -541,14 +596,14 @@ class Shop_Model extends Core_Entity
 
 		// Копирование связи (!) с партнерскими программами
 		$aAffiliate_Plans = $this->Affiliate_Plans->findAll();
-		foreach($aAffiliate_Plans as $oAffiliate_Plan)
+		foreach ($aAffiliate_Plans as $oAffiliate_Plan)
 		{
 			$newObject->add($oAffiliate_Plan);
 		}
 
 		// Копирование типов и условий доставки
 		$aShop_Deliveries = $this->Shop_Deliveries->findAll();
-		foreach($aShop_Deliveries as $oShop_Delivery)
+		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
 			$newObject->add(
 				$oShop_Delivery->copy()
@@ -557,7 +612,7 @@ class Shop_Model extends Core_Entity
 
 		// Копирование бонусов
 		$aShop_Bonuses = $this->Shop_Bonuses->findAll();
-		foreach($aShop_Bonuses as $oShop_Bonus)
+		foreach ($aShop_Bonuses as $oShop_Bonus)
 		{
 			$newObject->add(
 				$oShop_Bonus->copy()
@@ -566,7 +621,7 @@ class Shop_Model extends Core_Entity
 
 		// Копирование скидок на товары
 		$aShop_Discounts = $this->Shop_Discounts->findAll();
-		foreach($aShop_Discounts as $oShop_Discount)
+		foreach ($aShop_Discounts as $oShop_Discount)
 		{
 			$newObject->add(
 				$oShop_Discount->copy()
@@ -575,42 +630,42 @@ class Shop_Model extends Core_Entity
 
 		// Копирование платежных систем
 		$aShop_Payment_Systems = $this->Shop_Payment_Systems->findAll();
-		foreach($aShop_Payment_Systems as $oShop_Payment_System)
+		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
 			$newObject->add($oShop_Payment_System->copy());
 		}
 
 		// Копирование цен
 		$aShop_Prices = $this->Shop_Prices->findAll();
-		foreach($aShop_Prices as $Shop_Price)
+		foreach ($aShop_Prices as $Shop_Price)
 		{
 			$newObject->add($Shop_Price->copy());
 		}
 
 		// Копирование производителей
 		$aShop_Producers = $this->Shop_Producers->findAll();
-		foreach($aShop_Producers as $oShop_Producer)
+		foreach ($aShop_Producers as $oShop_Producer)
 		{
 			$newObject->add($oShop_Producer->copy());
 		}
 
 		// Копирование скидок от суммы заказа
 		$aShop_Purchase_Discounts = $this->Shop_Purchase_Discounts->findAll();
-		foreach($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
 			$newObject->add($oShop_Purchase_Discount->copy());
 		}
 
 		// Копирование продавцов
 		$aShop_Sellers = $this->Shop_Sellers->findAll();
-		foreach($aShop_Sellers as $oShop_Seller)
+		foreach ($aShop_Sellers as $oShop_Seller)
 		{
 			$newObject->add($oShop_Seller->copy());
 		}
 
 		// Копирование складов
 		$aShop_Warehouses = $this->Shop_Warehouses->findAll();
-		foreach($aShop_Warehouses as $oShop_Warehouse)
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
 			$newObject->add($oShop_Warehouse->copy());
 		}
@@ -641,7 +696,7 @@ class Shop_Model extends Core_Entity
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
 
-		foreach($aShop_Groups as $aShop_Group)
+		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_groupsTree[$aShop_Group['parent_id']][] = $aShop_Group['id'];
 		}
@@ -657,7 +712,7 @@ class Shop_Model extends Core_Entity
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
 
-		foreach($aShop_Groups as $aShop_Group)
+		foreach ($aShop_Groups as $aShop_Group)
 		{
 			$this->_cacheGroups[$aShop_Group['parent_id']] = $aShop_Group['count'];
 		}
@@ -681,7 +736,7 @@ class Shop_Model extends Core_Entity
 			->groupBy('shop_group_id');
 
 		$aShop_Items = $queryBuilder->execute()->asAssoc()->result();
-		foreach($aShop_Items as $Shop_Item)
+		foreach ($aShop_Items as $Shop_Item)
 		{
 			$this->_cacheItems[$Shop_Item['shop_group_id']] = $Shop_Item['count'];
 		}
@@ -724,7 +779,7 @@ class Shop_Model extends Core_Entity
 
 			$offset += $limit;
 		}
-		while(count($aShop_Items));
+		while (count($aShop_Items));
 
 		return $this;
 	}
@@ -754,7 +809,7 @@ class Shop_Model extends Core_Entity
 
 		if (isset($this->_groupsTree[$parent_id]))
 		{
-			foreach($this->_groupsTree[$parent_id] as $groupId)
+			foreach ($this->_groupsTree[$parent_id] as $groupId)
 			{
 				$aTmp = $this->_callSubgroup($groupId);
 				$return['subgroups_total'] += $aTmp['subgroups_total'];
@@ -832,13 +887,14 @@ class Shop_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop.onBeforeRedeclaredGetXml
+	 * @hostcms-event shop.onBeforeSelectShopWarehouses
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		$this->clearXmlTags()
-			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'HTTP_HOST'))
+			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
 			->addXmlTag('captcha_id', $this->use_captcha ? Core_Captcha::getCaptchaId() : 0);
 
@@ -857,7 +913,13 @@ class Shop_Model extends Core_Entity
 		);
 
 		// Warehouses
-		$this->addEntities($this->Shop_Warehouses->findAll());
+		$oShop_Warehouses = $this->Shop_Warehouses;
+
+		Core_Event::notify($this->_modelName . '.onBeforeSelectShopWarehouses', $this, array($oShop_Warehouses));
+
+		$aShop_Warehouses = $oShop_Warehouses->findAll();
+
+		$this->addEntities($aShop_Warehouses);
 
 		$this->_showXmlTaxes && $this->addEntities(Core_Entity::factory('Shop_Tax')->findAll());
 
@@ -905,6 +967,20 @@ class Shop_Model extends Core_Entity
 		!$this->structure_id && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-darkorange badge-ico white')
 			->add(Core::factory('Core_Html_Entity_I')->class('fa fa-chain-broken'))
+			->execute();
+
+		$countShopGroups = $this->Shop_Groups->getCount();
+		$countShopGroups && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-folder-open-o"></i> ' . $countShopGroups)
+			->title(Core::_('Shop.all_groups_count', $countShopGroups))
+			->execute();
+
+		$countShopItems = $this->Shop_Items->getCount();
+		$countShopItems && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value('<i class="fa fa-file-o"></i> ' . $countShopItems)
+			->title(Core::_('Shop.all_items_count', $countShopItems))
 			->execute();
 	}
 }

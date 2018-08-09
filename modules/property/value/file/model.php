@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_File_Model extends Core_Entity
 {
@@ -57,6 +57,7 @@ class Property_Value_File_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'entity_id',
 		'file',
 		'file_small',
 	);

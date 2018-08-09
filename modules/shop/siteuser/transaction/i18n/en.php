@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'User transactions',
@@ -27,6 +27,7 @@ return array(
 	'type' => 'Transaction type',
 	'type_typical' => 'Typical',
 	'type_bonus' => 'Bonus',
+	'type_affiliate_bonus' => 'Affiliate bonus',	
 	'changeActive_success' => 'Status changed successfully!',
 	'edit_success' => 'Transaction information modified successfully.',
 	'edit_success' => 'Transaction modified successfully.',

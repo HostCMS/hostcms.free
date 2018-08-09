@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -530,7 +530,7 @@ class Core_ORM
 			{
 				$oObject->delete();
 			}
-		} while(count($aObjects) == $limit);
+		} while (count($aObjects) == $limit);
 
 		return $this;
 	}
@@ -786,7 +786,7 @@ class Core_ORM
 		if (isset(self::$_relationModelCache[$this->_modelName]))
 		{
 			$this->_relations = self::$_relationModelCache[$this->_modelName];
-			$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
+			//$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
 			return $this;
 		}
 
@@ -805,7 +805,8 @@ class Core_ORM
 				$this->_relations = self::$_relationModelCache[$this->_modelName] = $inCache;
 
 				// Clear belongs to
-				$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
+				// Forbidden! If call clearRelationModelCache() calculate needs it arrays
+				//$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
 
 				return $this;
 			}
@@ -831,7 +832,7 @@ class Core_ORM
 		}
 
 		// Clear has one
-		$this->_hasOne = array();
+		//$this->_hasOne = array();
 
 		foreach ($this->_hasMany as $modelName => $condition)
 		{
@@ -854,7 +855,7 @@ class Core_ORM
 		}
 
 		// Clear has many
-		$this->_hasMany = array();
+		//$this->_hasMany = array();
 
 		foreach ($this->_belongsTo as $modelName => $condition)
 		{
@@ -870,7 +871,7 @@ class Core_ORM
 		}
 
 		// Clear belongs to
-		$this->_belongsTo = array();
+		//$this->_belongsTo = array();
 
 		$bCache
 			&& is_null($inCache)
@@ -1049,7 +1050,7 @@ class Core_ORM
 			self::$columnCache->deleteAll('Core_ORM_ColumnCache');
 		}
 	}
-	
+
 	/**
 	 * Clear self::$_relationModelCache and Core_ORM_RelationCache
 	 */

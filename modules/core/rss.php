@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Rss
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Rss
 {
@@ -33,7 +33,8 @@ class Core_Rss
 	 */
 	public function xmlns($name, $value)
 	{
-		$this->_xmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($value) . '"';
+		//$this->_xmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($value) . '"';
+		$this->_xmlns[$name] = $value;
 		return $this;
 	}
 
@@ -86,10 +87,23 @@ class Core_Rss
 
 			$aTmp = explode(':', $name);
 
+			$sTmpValue = !is_array($aSubitem['value']) ? $aSubitem['value'] : NULL;
+			$bCDATA = isset($aSubitem['CDATA']) && $aSubitem['CDATA'];
+
 			// if isset namespace
 			$newChild = isset($aTmp[1])
-				? $object->addChild($name, !is_array($aSubitem['value']) ? $aSubitem['value'] : NULL, $aTmp[0])
-				: $object->addChild($name, !is_array($aSubitem['value']) ? $aSubitem['value'] : NULL);
+				? $object->addChild($name, $bCDATA ? NULL : $sTmpValue, isset($this->_xmlns[$aTmp[0]])
+					? $this->_xmlns[$aTmp[0]]
+					: $aTmp[0]
+				)
+				: $object->addChild($name, $bCDATA ? NULL : $sTmpValue);
+
+			if ($bCDATA)
+			{
+				$domNewChild = dom_import_simplexml($newChild);
+				$domNewChildOwner = $domNewChild->ownerDocument;
+				$domNewChild->appendChild($domNewChildOwner->createCDATASection($sTmpValue));
+			}
 
 			if (isset($aSubitem['attributes']))
 			{
@@ -135,7 +149,6 @@ class Core_Rss
 
 		$oCore_Response
 			->body($rss)
-			->compress()
 			->sendHeaders()
 			->showBody();
 	}
@@ -155,15 +168,21 @@ class Core_Rss
 	 */
 	public function get()
 	{
+		$aXmlns = array();
+		foreach ($this->_xmlns as $name => $url)
+		{
+			$aXmlns[] = 'xmlns:' . $name . '="' . htmlspecialchars($url) . '"';
+		}
+		
 		$oRss = simplexml_load_string('<?xml version="1.0" encoding="' . $this->_encoding . '"?>' .
 			'<rss version="2.0"' . (
 				count($this->_xmlns)
-					? ' ' . implode(' ', $this->_xmlns)
+					? ' ' . implode(' ', $aXmlns)
 					: ''
 				) . '>' .
 			'<channel></channel>' .
 			'</rss>');
-
+			
 		$this->_addChild($oRss->channel, $this->_entities);
 
 		// $xml = $oRss->asXML();

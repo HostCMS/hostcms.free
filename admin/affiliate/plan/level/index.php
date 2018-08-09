@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -38,12 +38,10 @@ $oAdmin_Form_Entity_Menus->add(
 		->name(Core::_('Admin_Form.add'))
 		->icon('fa fa-plus')
 		->img('/admin/images/add.gif')
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
@@ -83,12 +81,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = '&affiliate_plan_id=' . $oAffiliatePlan->id)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams)
 		)
 );
@@ -108,8 +104,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Хлебные крошки для контроллера редактирования
 	$Affiliate_Plan_Level_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

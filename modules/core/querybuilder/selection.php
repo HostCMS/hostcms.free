@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
@@ -317,23 +317,27 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		{
 			if (is_array($aCondition))
 			{
-				list($operator, $aWhere) = each($aCondition);
+				foreach ($aCondition as $operator => $aWhere)
+				{
+					// Skip first expression
+					if ($key)
+					{
+						$sql .= ' ' . $operator;
+					}
 
-				// Skip first expression
-				if ($key)
-				{
-					$sql .= ' ' . $operator;
-				}
-
-				if (count($aWhere) == 3 && !is_null($aWhere[1]))
-				{
-					list($column, $expression, $value) = $aWhere;
-					$sql .= ' ' . $this->_buildWhere($column, $expression, $value);
-				}
-				else
-				{
-					list($column) = $aWhere;
-					$sql .= ' ' . (is_object($column) ? $column->build() : $column);
+					if (!is_null($aWhere))
+					{
+						if (count($aWhere) == 3 && !is_null($aWhere[1]))
+						{
+							list($column, $expression, $value) = $aWhere;
+							$sql .= ' ' . $this->_buildWhere($column, $expression, $value);
+						}
+						else
+						{
+							list($column) = $aWhere;
+							$sql .= ' ' . (is_object($column) ? $column->build() : $column);
+						}
+					}
 				}
 			}
 		}
@@ -597,6 +601,15 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		return $this;
 	}
 
+	/**
+	 * Get WHERE
+	 * @return array
+	 */
+	public function getWhere()
+	{
+		return $this->_where;
+	}
+	
 	/**
 	 * Clear WHERE list
 	 * @return Core_QueryBuilder_Selection

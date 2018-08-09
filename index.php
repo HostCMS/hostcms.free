@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 if (is_dir('install/') && is_file('install/index.php'))
@@ -219,7 +219,7 @@ if (Core::moduleIsActive('ipaddress'))
 
 	$aArray = array(
 		'2ba951961b6ff657bd944a43935333b6',
-		'e4b72d12ddd8948f9af53527347ed281',
+		'e4b72d12ddd8948f9af53527347ed281'
 	);
 
 	if ($bBlocked || in_array(md5(Core_Array::get($_SERVER, 'HTTP_HOST')), $aArray))

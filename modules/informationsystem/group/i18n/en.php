@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information groups',
@@ -26,7 +26,7 @@ return array(
 	'exec_typograph_description' => '<acronym title="Use prepress service to description of information group">Use prepress service</acronym>',
 	'use_trailing_punctuation' => '<acronym title="Optical text alignment function moves punctuation characters beyond the typing borders">Optical alignment</acronym>',
 	'parent_id' => '<acronym title="Parent group of information group">Parent group</acronym>',
-	'sorting' => '<acronym title="Order number of information group">Order number</acronym>',
+	'sorting' => '<acronym title="Sorting order of information group">Sorting order</acronym>',
 	'path' => '<acronym title="URL item of information system for group">Path</acronym>',
 	'indexing' => '<acronym title="Checkbox to specify whether information group should be indexed">Index</acronym>',
 	'active' => '<acronym title="Activity status of information group">Active</acronym>',
@@ -65,4 +65,14 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'tab_export' => 'Export/Import',
 	'guid' => '<acronym title="Group identifier, e.g. ID00029527">GUID</acronym>',
+	'tab_seo_templates' => 'SEO templates',
+	'seo_group_header' => 'Group templates',
+	'seo_item_header' => 'Item templates',
+	'seo_group_title_template' => 'TITLE template',
+	'seo_group_description_template' => 'DESCRIPTION template',
+	'seo_group_keywords_template' => 'KEYWORDS template',
+	'seo_item_title_template' => 'TITLE template',
+	'seo_item_description_template' => 'DESCRIPTION template',
+	'seo_item_keywords_template' => 'KEYWORDS template',
+	'markDeleted' => 'Delete group',
 );

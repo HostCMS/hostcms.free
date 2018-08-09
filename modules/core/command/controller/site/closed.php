@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 {
@@ -43,7 +43,7 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$domain = Core::$url['host'];
+		$domain = htmlspecialchars(Core::$url['host']);
 
 		$title = "Сайт {$domain} отключен администратором и в данный момент недоступен!";
 

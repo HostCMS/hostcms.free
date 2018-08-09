@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -115,7 +115,7 @@ if ($oShop->shop_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams)
 				);
-		} while($oShopDir = $oShopDir->getParent());
+		} while ($oShopDir = $oShopDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -164,7 +164,7 @@ if ($shop_group_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
 				);
-		} while($oShopGroup = $oShopGroup->getParent());
+		} while ($oShopGroup = $oShopGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -214,7 +214,7 @@ if ($property_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oProperty_Dir = $oProperty_Dir->getParent());
+		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -332,6 +332,11 @@ $oAdmin_Form_Dataset->addCondition(
 		array('shop_group_properties.shop_id', '=', $shop_id)
 	)
 );
+
+$oAdmin_Form_Dataset
+->changeField('multiple', 'link', "/admin/shop/group/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={property_dir_id}")
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

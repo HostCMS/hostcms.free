@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -45,7 +45,7 @@ if ($oConstant_Dir->id)
 			->name($oConstant_Dir_Tmp->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, 'constant_dir_id='.$oConstant_Dir_Tmp->id))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, 'constant_dir_id='.$oConstant_Dir_Tmp->id));
-	} while($oConstant_Dir_Tmp = $oConstant_Dir_Tmp->getParent());
+	} while ($oConstant_Dir_Tmp = $oConstant_Dir_Tmp->getParent());
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{

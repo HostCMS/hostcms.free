@@ -11,6 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
+ * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
+ * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  *
  * Доступные свойства:
  *
@@ -35,7 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -49,11 +51,13 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'itemsPropertiesList',
 		'taxes',
 		'specialprices',
+		'associatedItems',
 		'cartUrl',
 		'amount',
 		'tax',
 		'quantity',
 		'weight',
+		'calculateCounts',
 	);
 
 	/**
@@ -67,6 +71,24 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	 * @var array
 	 */
 	protected $_aItem_Property_Dirs = array();
+
+	/**
+	 * Get _aItem_Properties set
+	 * @return array
+	 */
+	public function getItemProperties()
+	{
+		return $this->_aItem_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getItemPropertyDirs()
+	{
+		return $this->_aItem_Property_Dirs;
+	}
 
 	/**
 	 * Current Siteuser
@@ -101,7 +123,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 		);
 
-		$this->itemsProperties = $this->taxes = FALSE;
+		$this->itemsProperties = $this->taxes = $this->specialprices
+			= $this->calculateCounts = $this->associatedItems = FALSE;
+
 		$this->itemsPropertiesList = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
@@ -125,7 +149,11 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
+		$bXsl = !is_null($this->_xsl);
+
 		$oShop = $this->getEntity();
+
+		$oShop->showXmlCounts($this->calculateCounts);
 
 		// Coupon text
 		!is_null($this->couponText) && $this->addEntity(
@@ -140,6 +168,13 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->name('siteuser_exists')
 				->value(Core::moduleIsActive('siteuser') ? 1 : 0)
 		);
+
+		if (!$bXsl)
+		{
+			$this->assign('controller', $this);
+			$this->assign('aShop_Carts', array());
+			$this->assign('aShop_Purchase_Discounts', array());
+		}
 
 		// Список свойств товаров
 		if ($this->itemsPropertiesList)
@@ -168,12 +203,15 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
-				->name('shop_item_properties');
+			if ($bXsl)
+			{
+				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
+					->name('shop_item_properties');
 
-			$this->addEntity($Shop_Item_Properties);
+				$this->addEntity($Shop_Item_Properties);
 
-			$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
+				$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
+			}
 		}
 
 		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = $tax = $weight = 0;
@@ -190,24 +228,32 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			->where('end_datetime', '>=', Core_Date::timestamp2sql(time()))
 			->clearOrderBy()
 			->limit(1);
-		
+
 		// Есть скидки на N-й товар
 		$bPositionDiscount = $oShop_Purchase_Discounts->getCount() > 0;
-		
+
 		$Shop_Cart_Controller = $this->_getCartController();
-		
-		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
-		foreach ($aShop_Cart as $oShop_Cart)
+
+		$aShop_Carts = $Shop_Cart_Controller->getAll($oShop);
+		foreach ($aShop_Carts as $oShop_Cart)
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 			if (!is_null($oShop_Item->id))
 			{
-				$this->addEntity(
-					$oShop_Cart
-						->clearEntities()
-						->showXmlProperties($this->itemsProperties)
-						->showXmlSpecialprices($this->specialprices)
-				);
+				if ($bXsl)
+				{
+					$this->addEntity(
+						$oShop_Cart
+							->clearEntities()
+							->showXmlProperties($this->itemsProperties)
+							->showXmlSpecialprices($this->specialprices)
+							->showXmlAssociatedItems($this->associatedItems)
+					);
+				}
+				else
+				{
+					$this->append('aShop_Carts', $oShop_Cart);
+				}
 
 				if ($oShop_Cart->postpone == 0)
 				{
@@ -266,7 +312,15 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
 		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 		{
-			$this->addEntity($oShop_Purchase_Discount->clearEntities());
+			if ($bXsl)
+			{
+				$this->addEntity($oShop_Purchase_Discount->clearEntities());
+			}
+			else
+			{
+				$this->append('aShop_Purchase_Discounts', $oShop_Purchase_Discount);
+			}
+
 			$totalDiscount += $oShop_Purchase_Discount->getDiscountAmount();
 		}
 

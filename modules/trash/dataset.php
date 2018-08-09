@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Dataset extends Admin_Form_Dataset
 {
@@ -92,24 +92,40 @@ class Trash_Dataset extends Admin_Form_Dataset
 		//$aTables = $this->_dataBase->getTables();
 		$aTables = $this->_dataBase->query('SHOW TABLE STATUS')->asAssoc()->result();
 
+		$aDbConfig = $this->_dataBase->getConfig();
+		
+		// information about all columns in all tables
+		$aAllColumns = $this->_dataBase
+			->query('SELECT `TABLE_NAME`, `COLUMN_NAME` FROM INFORMATION_SCHEMA.COLUMNS WHERE `table_schema` = ' . $this->_dataBase->quote($aDbConfig['database']))
+			->asAssoc()
+			->result();
+		
+		$aTableColumns = array();
+		foreach ($aAllColumns as $aColumn)
+		{
+			$aTableColumns[$aColumn['TABLE_NAME']][] = $aColumn['COLUMN_NAME'];
+		}
+		
 		$queryBuilder = Core_QueryBuilder::select();
 
 		$aConfig = Core_Config::instance()->get('trash_config', array()) + array(
 			'maxExactCount' => 100000
 		);
-
+		
 		foreach ($aTables as $key => $aTableRow)
 		{
 			$name = Core_Array::get($aTableRow, 'Name');
 			$iRows = Core_Array::get($aTableRow, 'Rows');
 			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine'));
 
-			$aColumns = $this->_dataBase->getColumns($name);
+			//$aColumns = $this->_dataBase->getColumns($name);
 
 			$id = $key + 1;
 
-			// if (isset($aColumns['deleted']))
-			if (isset($aColumns['deleted']) && strpos($name, '~') !== 0)
+			//if (isset($aColumns['deleted']) && strpos($name, '~') !== 0)
+			if (isset($aTableColumns[$name]) && in_array('deleted', $aTableColumns[$name])
+				&& strpos($name, '~') !== 0
+			)
 			{
 				if ($iRows < $aConfig['maxExactCount'] || $sEngine == 'MYISAM')
 				{

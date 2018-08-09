@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -78,7 +78,7 @@ class Core_Entity extends Core_ORM
 	 *
 	 * @var array
 	 */
-	protected $_forbiddenTags = array('deleted');
+	protected $_forbiddenTags = array('deleted', 'user_id');
 
 	/**
 	 * Add tag to forbidden tags list
@@ -98,10 +98,12 @@ class Core_Entity extends Core_ORM
 	 */
 	public function addForbiddenTags(array $aTags)
 	{
-		foreach ($aTags as $tag)
+		/*foreach ($aTags as $tag)
 		{
 			$this->_forbiddenTags[$tag] = $tag;
-		}
+		}*/
+		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+
 		return $this;
 	}
 
@@ -326,6 +328,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Mark entity as deleted
 	 * @return Core_Entity
+	 * @hostcms-event modelname.onBeforeMarkDeleted
+	 * @hostcms-event modelname.onAfterMarkDeleted
 	 */
 	public function markDeleted()
 	{
@@ -354,6 +358,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Turn off deleted status
 	 * @return self
+	 * @hostcms-event modelname.onBeforeUndelete
+	 * @hostcms-event modelname.onAfterUndelete
 	 */
 	public function undelete()
 	{
@@ -544,8 +550,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
-	 * @hostcms-event Core_Entity.onBeforeGetXml
-	 * @hostcms-event Core_Entity.onAfterGetXml
+	 * @hostcms-event modelname.onBeforeGetXml
+	 * @hostcms-event modelname.onAfterGetXml
 	 */
 	public function getXml()
 	{

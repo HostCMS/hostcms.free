@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -80,6 +80,12 @@ class Shop_Group_Model extends Core_Entity
 	public $adminPrice = NULL;
 
 	/**
+	 * Backend property
+	 * @var int
+	 */
+	public $adminRest = NULL;
+
+	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -99,6 +105,22 @@ class Shop_Group_Model extends Core_Entity
 		'siteuser_group' => array(),
 		'siteuser' => array(),
 		'user' => array()
+	);
+
+	/**
+	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
+		'seo_group_title_template',
+		'seo_group_keywords_template',
+		'seo_group_description_template',
+		'seo_item_title_template',
+		'seo_item_keywords_template',
+		'seo_item_description_template'
 	);
 
 	/**
@@ -614,6 +636,29 @@ class Shop_Group_Model extends Core_Entity
 	}
 
 	/**
+	 * Get group path with separator
+	 * @return string
+	 */
+	public function groupPathWithSeparator($separator = ' → ', $offset = 0)
+	{
+		$aParentGroups = array();
+
+		$aTmpGroup = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentGroups[] = $aTmpGroup->name;
+		} while ($aTmpGroup = $aTmpGroup->getParent());
+
+		$offset > 0
+			&& $aParentGroups = array_slice($aParentGroups, $offset);
+
+		$sParents = implode($separator, array_reverse($aParentGroups));
+
+		return $sParents;
+	}
+
+	/**
 	 * Insert new object data into database
 	 * @return Core_ORM
 	 */
@@ -637,7 +682,6 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function indexing()
 	{
-		//$oSearch_Page = Core_Entity::factory('Search_Page');
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
@@ -655,7 +699,7 @@ class Shop_Group_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem
@@ -681,6 +725,11 @@ class Shop_Group_Model extends Core_Entity
 						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 					}
 				}
+			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
@@ -889,7 +938,7 @@ class Shop_Group_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->delete();
 		}
@@ -929,7 +978,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aChildrenGroups = $this->Shop_Groups->findAll();
-		foreach($aChildrenGroups as $oChildrenGroup)
+		foreach ($aChildrenGroups as $oChildrenGroup)
 		{
 			$oChild = $oChildrenGroup->copy();
 			$oChild->parent_id = $newObject->id;
@@ -937,7 +986,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aShop_Items = $this->Shop_Items->findAll();
-		foreach($aShop_Items as $oShop_Item)
+		foreach ($aShop_Items as $oShop_Item)
 		{
 			$newObject->add($oShop_Item->copy());
 			// Recount for current group
@@ -945,7 +994,7 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues();
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -1132,7 +1181,7 @@ class Shop_Group_Model extends Core_Entity
 				'seo_title' => $this->seo_title,
 				'seo_description' => $this->seo_description,
 				'seo_keywords' => $this->seo_keywords,
-				'informationsystem_id' => $this->shop_id,
+				'shop_id' => $this->shop_id,
 				'siteuser_group_id' => $this->siteuser_group_id,
 				'user_id' => $this->user_id
 			);

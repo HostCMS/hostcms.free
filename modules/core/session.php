@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session
 {
@@ -86,17 +86,16 @@ class Core_Session
 	 */
 	static public function start()
 	{
-		if (!self::$_started)
+		if (!self::isStarted())
 		{
-			$oCore_Session = new self();
-			session_set_save_handler(
-				array($oCore_Session, 'sessionOpen'),
-				array($oCore_Session, 'sessionClose'),
-				array($oCore_Session, 'sessionRead'),
-				array($oCore_Session, 'sessionWrite'),
-				array($oCore_Session, 'sessionDestroyer'),
-				array($oCore_Session, 'sessionGc')
-			);
+			// Destroy existing session started by session.auto_start
+			if (is_null(self::$_handler) && session_id())
+			{
+				session_unset();
+				session_destroy();
+			}
+
+			self::_setSessionHandler();
 
 			//$expires = self::getMaxLifeTime();
 			$expires = 31536000;
@@ -115,8 +114,6 @@ class Core_Session
 				strpos($domain, 'www.') === 0 && $domain = substr($domain, 4);
 
 				// Явное указание domain возможно только для домена второго и более уровня
-				// http://wp.netscape.com/newsref/std/cookie_spec.html
-				// http://web-notes.ru/2008/07/cookies_within_local_domains/
 				$domain = strpos($domain, '.') !== FALSE && !Core_Valid::ip($domain)
 					? '.' . $domain
 					: '';
@@ -135,6 +132,29 @@ class Core_Session
 		}
 
 		return TRUE;
+	}
+
+	static protected $_handler = NULL;
+
+	/**
+	 * Registers session handler
+	 */
+	static protected function _setSessionHandler()
+	{
+		//if (is_null(self::$_handler))
+		//{
+			self::$_handler = TRUE;
+
+			$oCore_Session = new self();
+			session_set_save_handler(
+				array($oCore_Session, 'sessionOpen'),
+				array($oCore_Session, 'sessionClose'),
+				array($oCore_Session, 'sessionRead'),
+				array($oCore_Session, 'sessionWrite'),
+				array($oCore_Session, 'sessionDestroyer'),
+				array($oCore_Session, 'sessionGc')
+			);
+		//}
 	}
 
 	/**
@@ -175,8 +195,17 @@ class Core_Session
 		//if (self::$_started)
 		//{
 			self::$_started = FALSE;
-			session_write_close();
+
+			$bStarted = function_exists('session_status')
+				? session_status() == PHP_SESSION_ACTIVE
+				: session_id() !== '';
+
+			if ($bStarted)
+			{
+				session_write_close();
+			}
 		//}
+
 		return TRUE;
 	}
 
@@ -215,9 +244,14 @@ class Core_Session
 	 */
 	protected function _error($content)
 	{
-		Core_Array::getRequest('_', FALSE)
-			? Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL))
-			: exit($content);
+		if (Core_Array::getRequest('_', FALSE))
+		{
+			Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL));
+		}
+		else
+		{
+			throw new Core_Exception($content);
+		}
 	}
 
 	/**
@@ -342,13 +376,13 @@ class Core_Session
 	{
 		self::$_maxlifetime = $maxlifetime;
 
-		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		if (!self::isStarted() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
 		{
 			ini_set('session.gc_maxlifetime', $maxlifetime);
 		}
 
 		// Для уже запущенной сесии обновляем время жизни
-		if (self::$_started)
+		if (self::isStarted())
 		{
 			$oCore_QueryBuilder = Core_QueryBuilder::update('sessions')
 				->set('maxlifetime', $maxlifetime)
@@ -385,7 +419,7 @@ class Core_Session
 	 */
 	public function sessionWrite($id, $value)
 	{
-		if ($this->_read && $this->_lock($id))
+		if ($this->_read/* && $this->_lock($id)*/)
 		{
 			$oDataBase = Core_QueryBuilder::update('sessions')
 				//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
@@ -408,6 +442,8 @@ class Core_Session
 			}
 
 			$this->_unlock($id);
+			
+			$this->_read = FALSE;
 		}
 
 		return TRUE;

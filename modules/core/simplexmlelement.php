@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_SimpleXMLElement extends SimpleXMLElement
 {
@@ -19,7 +19,7 @@ class Core_SimpleXMLElement extends SimpleXMLElement
 	 * @param string $value element value
 	 * @param string $namespace namespace
 	 */
-	public function addChild ($name, $value = null, $namespace = null)
+	public function addChild($name, $value = null, $namespace = null)
 	{
 		return parent::addChild(Core_Str::xml($name), Core_Str::xml($value), $namespace);
 	}
@@ -30,7 +30,7 @@ class Core_SimpleXMLElement extends SimpleXMLElement
 	 * @param string $value attribute value
 	 * @param string $namespace namespace
 	 */
-	public function addAttribute ($name, $value = null, $namespace = null)
+	public function addAttribute($name, $value = null, $namespace = null)
 	{
 		return parent::addAttribute(Core_Str::xml($name), Core_Str::xml($value), $namespace);
 	}

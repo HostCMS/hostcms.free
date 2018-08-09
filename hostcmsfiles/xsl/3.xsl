@@ -20,7 +20,6 @@
 		<!-- Store parent id in a variable -->
 		<xsl:variable name="group" select="group"/>
 
-
 		<xsl:choose>
 			<xsl:when test="$group = 0">
 				<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="informationsystem">
@@ -195,7 +194,7 @@
 			</a>
 		</xsl:if>
 
-	<span><xsl:text> → </xsl:text></span>
+		<span><xsl:text> → </xsl:text></span>
 
 		<a href="{url}" hostcms:id="{@id}" hostcms:field="name" hostcms:entity="informationsystem_group">
 			<xsl:value-of select="name"/>
@@ -269,7 +268,7 @@
 				</xsl:if>
 
 				<xsl:if test="count(comment)">
-		<img src="/images/comment.png" /><span><a href="{url}#comments"><xsl:value-of select="comments_count"/><xsl:text> </xsl:text><xsl:call-template name="declension"> <xsl:with-param name="number" select="comments_count"/></xsl:call-template></a></span>
+					<img src="/images/comment.png" /><span><a href="{url}#comments"><xsl:value-of select="comments_count"/><xsl:text> </xsl:text><xsl:call-template name="declension"> <xsl:with-param name="number" select="comments_count"/></xsl:call-template></a></span>
 				</xsl:if>
 			</p>
 		</xsl:if>
@@ -322,9 +321,7 @@
 			<!-- Tag Path -->
 			<xsl:variable name="tag_path">
 				<xsl:choose>
-					
 					<xsl:when test="count(/informationsystem/tag)">tag/<xsl:value-of select="/informationsystem/tag/urlencode"/>/</xsl:when>
-					
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -336,7 +333,6 @@
 					<xsl:when test="$group != 0">
 						<xsl:value-of select="/informationsystem//informationsystem_group[@id=$group]/url"/>
 					</xsl:when>
-					
 					<xsl:otherwise><xsl:value-of select="/informationsystem/url"/></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -344,9 +340,7 @@
 			<!-- Set $link variable -->
 			<xsl:variable name="number_link">
 				<xsl:choose>
-					
 					<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-					
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -376,9 +370,7 @@
 			<xsl:if test="$page != 0 and $i = $page">
 				<xsl:variable name="prev_number_link">
 					<xsl:choose>
-						
 						<xsl:when test="$page &gt; 1">page-<xsl:value-of select="$i"/>/</xsl:when>
-						
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>

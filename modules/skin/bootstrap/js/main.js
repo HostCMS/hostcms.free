@@ -131,6 +131,7 @@ function isEmpty(str) {
 				current: '',
 				sortingFieldId: '',
 				sortingDirection: '',
+				view: '',
 				post: {},
 				loadingScreen: true
 				//callBack: ''
@@ -309,7 +310,7 @@ function isEmpty(str) {
 					var pjax = window.history && window.history.pushState && window.history.replaceState /*&& !navigator.userAgent.match(/(WebApps\/.+CFNetwork)/)*/;
 
 					/*if (settings.windowId == 'id_content'){*/
-					if (pjax)
+					if (pjax && settings.windowId == 'id_content')
 					{
 						var state = {
 							windowId: settings.windowId,
@@ -419,6 +420,11 @@ function isEmpty(str) {
 			if (settings.sortingDirection != '')
 			{
 				data['hostcms[sortingdirection]'] = settings.sortingDirection;
+			}
+			
+			if (settings.view != '')
+			{
+				data['hostcms[view]'] = settings.view;
 			}
 
 			data['hostcms[window]'] = settings.windowId;

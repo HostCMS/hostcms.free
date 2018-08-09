@@ -56,13 +56,16 @@
 				</div>
 			</xsl:otherwise>
 		</xsl:choose>
-		<xsl:value-of select="prorerty_value[tag_name = 'date']/value"/>
+		
 		<p class="tags">
 			<!-- Average Grade -->
 			<xsl:if test="comments_average_grade/node() and comments_average_grade != 0">
-				<span><xsl:call-template name="show_average_grade">
+				<span>
+					<xsl:call-template name="show_average_grade">
 						<xsl:with-param name="grade" select="comments_average_grade"/>
-					<xsl:with-param name="const_grade" select="5"/></xsl:call-template></span>
+						<xsl:with-param name="const_grade" select="5"/>
+					</xsl:call-template>
+				</span>
 			</xsl:if>
 
 			<!-- Processing of the selected tag -->
@@ -113,7 +116,7 @@
 			<xsl:text> </xsl:text>
 			<xsl:call-template name="declension">
 				<xsl:with-param name="number" select="showed"/>
-		</xsl:call-template><xsl:text>. </xsl:text>
+			</xsl:call-template><xsl:text>. </xsl:text>
 		</p>
 
 

@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -62,7 +62,7 @@ if ($oInformationsystem_Dir->id)
 				'/admin/informationsystem/index.php', NULL, NULL, "informationsystem_dir_id={$oInformationsystemDirBreadcrumbs->id}"
 		));
 	}
-	while($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
+	while ($oInformationsystemDirBreadcrumbs = $oInformationsystemDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -102,7 +102,7 @@ if ($oInformationsystem_Group->id)
 			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
 		));
 	}
-	while($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
+	while ($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -531,7 +531,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		{
 			$Informationsystem_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
 
-			if ($Informationsystem_Item_Import_Csv_Controller->importAction == 0)
+			if ($Informationsystem_Item_Import_Csv_Controller->importAction == 3)
 			{
 				$Informationsystem_Item_Import_Csv_Controller->importAction = 1;
 			}
@@ -672,18 +672,18 @@ else
 				->radio(array(
 					1 => Core::_('Informationsystem_Item.import_action_items1'),
 					2 => Core::_('Informationsystem_Item.import_action_items2'),
-					0 => Core::_('Informationsystem_Item.import_action_items0')
+					3 => Core::_('Informationsystem_Item.import_action_items0')
 				))
 				->ico(array(
 					1 => 'fa-refresh',
 					2 => 'fa-ban',
-					0 => 'fa-trash',
+					3 => 'fa-trash',
 				))
 				->caption(Core::_('Informationsystem_Item.import_action_items'))
 				->name('import_action_items')
 				->divAttr(array('id' => 'import_action_items','class' => 'form-group col-xs-12'))
 				->value(1)
-				->onclick("if (this.value == 0) { res = confirm('" . Core::_('Informationsystem_Item.empty_informationsystem') . "'); if (!res) { return false; } } ")
+				->onclick("if (this.value == 3) { res = confirm('" . Core::_('Informationsystem_Item.empty_informationsystem') . "'); if (!res) { return false; } } ")
 			)
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Code')

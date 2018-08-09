@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 {
@@ -50,9 +50,13 @@ class Tag_Controller_Ajaxload extends Admin_Form_Action_Controller
 
 			foreach ($aTags as $oTag)
 			{
+				$sParents = $oTag->Tag_Dir->dirPathWithSeparator();
+
+				$postfix = strlen($sParents) ? ' [' . $sParents . ']' : '';
+
 				$aJSON[] = array(
 					'id' => $oTag->name,
-					'text' => $oTag->name,
+					'text' => $oTag->name . $postfix,
 				);
 			}
 		}

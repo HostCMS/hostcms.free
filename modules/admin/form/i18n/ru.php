@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -117,8 +117,10 @@ return array(
 	'file_description' => 'Описание файла',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	
+
 	'note' => 'Внимание',
 	'note-license' => 'Не заполнены лицензионные данные, система управления работает в ограниченном режиме, см. <a href="http://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank">инструкцию <i class="fa fa-external-link"></i></a>',
-	'note-bad-password' => 'В системе существует пользователь со стандартными логином и паролем, необходимо изменить пароль пользователя "admin".',
+	'note-bad-password' => 'В системе существует сотрудник со стандартными логином и паролем, необходимо изменить пароль сотрудника "admin".',
+	'list' => 'Список',
+	'kanban' => 'Канбан',
 );

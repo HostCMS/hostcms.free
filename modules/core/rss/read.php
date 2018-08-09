@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Rss
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Rss_Read
 {
@@ -108,11 +108,11 @@ class Core_Rss_Read
 	 */
 	public function fetchOpen($parser, $name, $attrs)
 	{
-		if (sizeof($attrs))
+		if (count($attrs))
 		{
-			while (list($k, $v) = each($attrs))
+			foreach ($attrs as $key => $value)
 			{
-				$this->_items[$this->_itemCount][mb_strtolower($name)][mb_strtolower($k)] = $v;
+				$this->_items[$this->_itemCount][mb_strtolower($name)][mb_strtolower($key)] = $value;
 			}
 		}
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Dir_Model extends Core_Entity
 {
@@ -75,13 +75,13 @@ class Shop_Dir_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		$aShop_Dirs = $this->Shop_Dirs->findAll();
-		foreach($aShop_Dirs as $oShop_Dir)
+		foreach ($aShop_Dirs as $oShop_Dir)
 		{
 			$newObject->add($oShop_Dir->copy());
 		}
 
 		$aShops = $this->Shops->findAll();
-		foreach($aShops as $oShop)
+		foreach ($aShops as $oShop)
 		{
 			$newObject->add($oShop->copy());
 		}

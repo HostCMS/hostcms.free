@@ -10,7 +10,7 @@ return array (
 		'structure' => array(
 			'ico' => 'fa fa-sitemap',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_structure'),
-			'modules' => array('structure', 'template', 'lib', 'xsl', 'shortcode'),
+			'modules' => array('structure', 'template', 'lib', 'xsl', 'tpl', 'shortcode'),
 		),
 		'services' => array(
 			'ico' => 'fa fa-cubes',
@@ -20,7 +20,7 @@ return array (
 		'crm' => array(
 			'ico' => 'fa fa-users',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
-			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'company'),
+			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'kanban', 'company'),
 		),		
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',

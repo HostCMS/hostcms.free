@@ -51,7 +51,7 @@
 
 .filter select {width: 100%}
 
-.filter input[type="text"]{ height: 15px; margin: 6px 8px 10px 0;}
+.filter input[type="text"]{ /*height: 15px;*/ margin: 6px 8px 10px 0;}
 
 .filter fieldset {
     border: 1px solid #CCCCCC;

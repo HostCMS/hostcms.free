@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -133,15 +133,15 @@ abstract class Core_QueryBuilder_Statement
 						$value = $this->_dataBase->quoteColumnName($value);
 					}
 
-					$condition = ' ON ' . $this->_dataBase->quoteColumnName($column) . ' '
-					. $expression . ' ' . $value;
+					$condition = ' ON ' . $this->_dataBase->quoteColumnName($column) . ' ' . $expression . ' ' . $value;
 
-					if(is_array($additionalConditions) && count($additionalConditions) > 0)
+					if (is_array($additionalConditions) && count($additionalConditions) > 0)
 					{
-						$first = each($additionalConditions[0]);
+						reset($additionalConditions[0]);
+						$key = key($additionalConditions[0]);
 
-						// Warning: Добавить проверку $first['key'] на перечень доступных операций (AND, OR и т.д.)
-						$condition .= ' ' . $first['key'] . ' ' . $this->_buildExpression($additionalConditions);
+						// Warning: Добавить проверку $key на перечень доступных операций (AND, OR и т.д.)
+						$condition .= ' ' . $key . ' ' . $this->_buildExpression($additionalConditions);
 					}
 				}
 			}

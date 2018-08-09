@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -33,6 +33,15 @@ class Shop_Country_Location_City_Area_Controller_Edit extends Admin_Form_Action_
 			: Core::_('Shop_Country_Location_City_Area.add_city_area_tytle');
 
 		$oMainTab = $this->getTab('main');
+
+		$oMainTab
+			->add($oMainTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainTabRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$oMainTab
+			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainTabRow1)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainTabRow2)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainTabRow2);
 
 		$this->addTabAfter($oShopCountryLanguageTab = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Shop_Country_Location_City_Area.language_tab'))

@@ -9,10 +9,27 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/**
+	 * Get Languages
+	 * @return array
+	 */
+	protected function _getLngs()
+	{
+		$aLngs = array();
+
+		$aAdmin_Languages = Core_Entity::factory('Admin_Language')->getAllByActive(1);
+		foreach ($aAdmin_Languages as $oAdmin_Language)
+		{
+			$aLngs[] = $oAdmin_Language->shortname;
+		}
+
+		return $aLngs;
+	}
+
 	/**
 	 * Set object
 	 * @param object $object object
@@ -30,8 +47,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				case 'template':
 					$object->template_id = intval(Core_Array::getGet('template_id', 0));
-					
-					!$object->template_id && 
+
+					!$object->template_id &&
 						$object->template_dir_id = intval(Core_Array::getGet('template_dir_id', 0));
 				break;
 				case 'template_dir':
@@ -81,13 +98,18 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Template.tab_4'))
 					->name('Manifest');
 
+				$oLanguageTab = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Template.tab_5'))
+					->name('Language');
+
 				$oMainTab
 					->move($this->getField('name'), $oMainRow1);
 
 				$this
 					->addTabAfter($oTemplateTab, $oMainTab)
 					->addTabAfter($oLessCssTab, $oTemplateTab)
-					->addTabAfter($oJsTab, $oLessCssTab);
+					->addTabAfter($oJsTab, $oLessCssTab)
+					->addTabAfter($oLanguageTab, $oJsTab);
 
 				if (!$this->_object->template_id)
 				{
@@ -104,7 +126,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('template_dir_id')
 						->value($this->_object->template_dir_id)
 						->caption(Core::_('Template.template_dir_id'));
-					
+
 					$oMainRow2->add($oSelect_Dirs);
 				}
 
@@ -206,16 +228,16 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oManifestTab
 						->add($oManifestRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
-					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
+					$oTextarea_Manifest = Admin_Form_Entity::factory('Textarea');
 
-					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
+					$oTmpOptions = $oTextarea_Manifest->syntaxHighlighterOptions;
 					$oTmpOptions['mode'] = 'xml';
 
 					$manifest = $this->_object->loadManifestFile();
 
 					!strlen($manifest) && $manifest = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 
-					$oTextarea_Lng
+					$oTextarea_Manifest
 						->value($manifest)
 						->rows(30)
 						->caption(Core::_('Template.manifest'))
@@ -224,7 +246,42 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->syntaxHighlighterOptions($oTmpOptions)
 						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oManifestRow1->add($oTextarea_Lng);
+					$oManifestRow1->add($oTextarea_Manifest);
+				}
+
+				$oLanguageTab
+					->add($oLanguageRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$aLngs = $this->_getLngs();
+				foreach ($aLngs as $sLng)
+				{
+					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
+
+					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
+					$oTmpOptions['mode'] = 'php';
+
+					$lng = $this->_object->loadLngFile($sLng);
+
+					!strlen($lng) && $lng = <<<EOD
+<?php
+/**
+ * Template i18n
+ */
+return array(
+	'' => '',
+);
+EOD;
+
+					$oTextarea_Lng
+						->value($lng)
+						->rows(30)
+						->caption(Core::_('Template.language', $sLng))
+						->name('lng_' . $sLng)
+						->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
+						->syntaxHighlighterOptions($oTmpOptions)
+						->divAttr(array('class' => 'form-group col-xs-12'));
+
+					$oLanguageRow1->add($oTextarea_Lng);
 				}
 			break;
 			case 'template_dir':
@@ -274,14 +331,14 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$modelName = $this->_object->getModelName();
-		
+
 		// Backup revision
 		if (Core::moduleIsActive('revision') && $this->_object->id)
 		{
 			$modelName == 'template'
 				&& $this->_object->backupRevision();
 		}
-			
+
 		parent::_applyObjectProperty();
 
 		if ($modelName == 'template')
@@ -314,6 +371,13 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$manifest = Core_Array::getPost('manifest');
 			!is_null($manifest)
 				&& $this->_object->saveManifestFile($manifest);
+
+			$aLngs = $this->_getLngs();
+			foreach ($aLngs as $sLng)
+			{
+				$content = Core_Array::getPost('lng_' . $sLng);
+				$this->_object->saveLngFile($sLng, $content);
+			}
 
 			$this->_object
 				->rebuildCompressionCss()

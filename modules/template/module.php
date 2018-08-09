@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Module extends Core_Module
 {
@@ -17,13 +17,13 @@ class Template_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name
@@ -38,17 +38,6 @@ class Template_Module extends Core_Module
 	{
 		parent::__construct();
 
-		$this->menu = array(
-			array(
-				'sorting' => 70,
-				'block' => 0,
-				'ico' => 'fa fa-th',
-				'name' => Core::_('template.menu'),
-				'href' => "/admin/template/index.php",
-				'onclick' => "$.adminLoad({path: '/admin/template/index.php'}); return false"
-			)
-		);
-
 		if (Core_Auth::logged())
 		{
 			Core_Router::add('template-section-lib.php', '/template-section-lib.php')
@@ -60,5 +49,25 @@ class Template_Module extends Core_Module
 			Core_Router::add('template-less.php', '/template-less.php')
 				->controller('Template_Less_Command_Controller');
 		}
+	}
+
+	/**
+	 * Get Module's Menu
+	 * @return array
+	 */
+	public function getMenu()
+	{
+		$this->menu = array(
+			array(
+				'sorting' => 70,
+				'block' => 0,
+				'ico' => 'fa fa-th',
+				'name' => Core::_('template.menu'),
+				'href' => "/admin/template/index.php",
+				'onclick' => "$.adminLoad({path: '/admin/template/index.php'}); return false"
+			)
+		);
+
+		return parent::getMenu();
 	}
 }

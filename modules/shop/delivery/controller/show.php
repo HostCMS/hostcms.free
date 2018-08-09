@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -26,7 +26,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		'totalAmount',
 		'couponText',
 		'postcode',
-		'volume'
+		'volume',
+		'paymentSystems'
 	);
 
 	/**
@@ -46,6 +47,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				$this->addEntity($oSiteuser->clearEntities());
 			}
 		}
+
+		$this->paymentSystems = FALSE;
 	}
 
 	/**
@@ -120,6 +123,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 					if (!is_null($oShop_Delivery_Condition))
 					{
 						$oShop_Delivery_Clone = clone $oShop_Delivery;
+
+						$this->paymentSystems && $oShop_Delivery_Clone->showXmlShopPaymentSystems($this->paymentSystems);
 
 						$this->addEntity(
 							$oShop_Delivery_Clone

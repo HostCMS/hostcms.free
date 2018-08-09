@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -46,6 +46,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'start_datetime',
 		'end_datetime',
 	);

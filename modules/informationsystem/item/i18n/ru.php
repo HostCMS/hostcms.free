@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные элементы',
@@ -139,4 +139,6 @@ return array(
 	'create_catalog' => 'Создано разделов',
 	'update_catalog' => 'Обновлено разделов',
 	'msg_download_complete' => "Импорт завершен!",
+	'information_items_copy_form_title' => 'Копировать элемент',
+	'add_value' => 'Добавить отсутствующие значения свойства по умолчанию у элементов',
 );

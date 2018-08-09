@@ -11,7 +11,7 @@ if (Core::moduleIsActive('siteuser'))
 		? Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLogin($login)
 		: NULL;
 	
-	if (!$oSiteuser)
+	if (!$oSiteuser || !$oSiteuser->active)
 	{
 		// Error 404
 		$oCore_Page->error404();

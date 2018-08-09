@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File {
 
@@ -173,7 +173,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 		//$sDivClass = 'col-xs-12 col-sm-6';
 
-		$sDivClass = $this->smallImage['show']
+		$sDivClass = $this->smallImage['show'] || $this->largeImage['show_description']
 			? 'col-xs-12 col-sm-6'
 			: 'col-xs-12';
 

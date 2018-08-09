@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -42,6 +42,14 @@ class Property_Value_Int_Model extends Core_Entity
 		'shop_item' => array('foreign_key' => 'value'),
 	);
 
+	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'entity_id'
+	);
+	
 	/**
 	 * Default sorting for models
 	 * @var array
@@ -119,10 +127,13 @@ class Property_Value_Int_Model extends Core_Entity
 				{
 					Core_Event::notify($this->_modelName . '.onBeforeAddListItem', $this, array($oList_Item));
 
-					$this
-						->addXmlTag('value', $oList_Item->value)
-						->addXmlTag('description', $oList_Item->description)
-						->addXmlTag('icon', $oList_Item->icon);
+					$this->addXmlTag('value', $oList_Item->value);
+
+					$oList_Item->description != ''
+						&& $this->addXmlTag('description', $oList_Item->description);
+						
+					$oList_Item->icon != ''
+						&& $this->addXmlTag('icon', $oList_Item->icon);
 				}
 			}
 		}

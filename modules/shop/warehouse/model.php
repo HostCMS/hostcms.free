@@ -9,10 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
+	/**
+	 * Callback property_id
+	 * @var int
+	 */
+	public $items = 1;	
+	
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -104,7 +110,7 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$aShop_Warehouses = $oShop_Warehouses->findAll();
 
-		foreach($aShop_Warehouses as $oShop_Warehouse)
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
 			$oShop_Warehouse->default = 0;
 			$oShop_Warehouse->update();
@@ -157,5 +163,26 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$queryBuilder = Core_QueryBuilder::select(array('SUM(count)', 'count'))
+			->from('shop_warehouse_items')
+			->where('shop_warehouse_items.shop_warehouse_id', '=', $this->id);
+
+		$aResult = $queryBuilder->execute()->asAssoc()->current();
+
+		$aResult['count'] && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value($aResult['count'])
+			->title(Core::_('Shop_Warehouse.shop_items_count'))
+			->execute();
 	}
 }

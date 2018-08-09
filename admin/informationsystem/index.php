@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -33,7 +33,7 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem.show_comments_link3'))
-		->icon('fa fa-tasks')
+		->icon('fa fa-newspaper-o')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Informationsystem.show_information_systems_link'))
@@ -107,7 +107,7 @@ if ($informationsystem_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oInformationsystemDir = $oInformationsystemDir->getParent());
+		} while ($oInformationsystemDir = $oInformationsystemDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 

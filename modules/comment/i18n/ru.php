@@ -6,7 +6,7 @@
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'title' => 'Комментарии',
@@ -40,4 +40,6 @@ return array(
 	'changeActive_success' => 'Активность комментария изменена',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'ban' => 'Заблокировать',
+	'ban_comment' => 'Заблокирован за комментарий: %s',
 );

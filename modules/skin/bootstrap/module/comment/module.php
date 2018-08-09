@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -29,12 +29,12 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 	 * Informationsystems exist
 	 */
 	protected $_bInformationsystems = NULL;
-	
+
 	/**
 	 * Shops exist
 	 */
 	protected $_bShops = NULL;
-	
+
 	/**
 	 * Constructor.
 	 */
@@ -44,13 +44,13 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 		$this->_bInformationsystems = Core::moduleIsActive('informationsystem')
 			&& Core_Entity::factory('Site', CURRENT_SITE)->Informationsystems->getCount();
-			
+
 		$this->_bShops = Core::moduleIsActive('shop')
 			&& Core_Entity::factory('Site', CURRENT_SITE)->Shops->getCount();
-		
+
 		$this->_bInformationsystems
 			&& $this->_adminPages[1] = array('title' => Core::_('Informationsystem.widget_title'));
-			
+
 		$this->_bShops
 			&& $this->_adminPages[2] = array('title' => Core::_('Shop.widget_title'));
 	}
@@ -71,7 +71,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 		$colClass = $this->_bInformationsystems && $this->_bShops
 			? 'col-xs-12 col-sm-6'
 			: 'col-xs-12';
-		
+
 		switch ($type)
 		{
 			case 1:
@@ -162,7 +162,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								->window('id_content');
 							$sInformationsystemCommentsHref = '/admin/informationsystem/item/comment/index.php';
 
-							foreach($aComments as $oComment)
+							foreach ($aComments as $oComment)
 							{
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sInformationsystemCommentsHref, 'edit', NULL, 0, $oComment->id);
@@ -171,6 +171,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
 
+								$sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'blockIp', NULL, 0, $oComment->id);
 								?>
 								<li class="task-item">
 									<div class="row">
@@ -212,6 +213,22 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa fa-external-link"></i> </a><?php
 														}
 													}
+
+													$bBlocked = $oComment->ip != '127.0.0.1'
+														&& Ipaddress_Controller::instance()->isBlocked($oComment->ip);
+
+													if ($bBlocked)
+													{
+													?>
+														<span class="btn btn-xs darkorange span-blocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+													<?php
+													}
+													else
+													{
+													?>
+														<a href="<?php echo $sBlockedHref?>" onclick="$.widgetRequest({path: '<?php echo $sBlockedHref?>', context: $('#informationsystemCommentsAdminPage')}); return false" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+													<?php
+													}
 													?>
 												</div>
 											</div>
@@ -242,7 +259,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 		return $this;
 	}
-	
+
 	protected function _shopContent()
 	{
 		$oUser = Core_Entity::factory('User')->getCurrent();
@@ -299,7 +316,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								->window('id_content');
 							$sShopCommentsHref = '/admin/shop/item/comment/index.php';
 
-							foreach($aComments as $oComment)
+							foreach ($aComments as $oComment)
 							{
 								$sEditHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);
 								$sEditOnClick = $oComments_Admin_Form_Controller->getAdminActionLoadAjax($sShopCommentsHref, 'edit', NULL, 0, $oComment->id);
@@ -307,6 +324,8 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								$sChangeActiveHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'changeActive', NULL, 0, $oComment->id);
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
+
+								$sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'blockIp', NULL, 0, $oComment->id);
 
 								?>
 								<li class="task-item">
@@ -349,6 +368,22 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 															?><a class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.view_comment')?>" href="<?php echo htmlspecialchars($href)?>" target="_blank"><i class="fa fa-external-link"></i></a><?php
 														}
+													}
+
+													$bBlocked = $oComment->ip != '127.0.0.1'
+														&& Ipaddress_Controller::instance()->isBlocked($oComment->ip);
+
+													if ($bBlocked)
+													{
+													?>
+														<span class="btn btn-xs darkorange span-blocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+													<?php
+													}
+													else
+													{
+													?>
+														<a href="<?php echo $sBlockedHref?>" onclick="$.widgetRequest({path: '<?php echo $sBlockedHref?>', context: $('#shopCommentsAdminPage')}); return false" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+													<?php
 													}
 													?>
 												</div>

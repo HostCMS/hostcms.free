@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_I18n
 {
@@ -133,6 +133,40 @@ class Core_I18n
 		return $this;
 	}
 
+	/**
+	 * Check if text for key exists
+	 * @param string $key module name dot key name, e.g. 'Constant.menu'
+	 * @param mixed $lng language, default NULL
+	 * @return boolean
+	 */
+	public function check($key, $lng = NULL)
+	{
+		$aKey = explode('.', $key, 2);
+
+		if (count($aKey) == 2)
+		{
+			list($className, $textName) = $aKey;
+
+			$lng = is_null($lng)
+				? $this->getLng()
+				: basename($lng);
+
+			$className = basename(strtolower($className));
+
+			if ($className == '')
+			{
+				//throw new Core_Exception(, array('%key' => $textName, '%language' => $lng));
+				return "Error! model name is empty.";
+			}
+
+			$this->loadLng($lng, $className);
+
+			return isset($this->_cache[$lng][$className][$textName]);
+		}
+		
+		return FALSE;
+	}
+	
 	/**
 	 * Get text for key
 	 *

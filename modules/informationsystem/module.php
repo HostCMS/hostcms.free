@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Module extends Core_Module
 {
@@ -17,13 +17,13 @@ class Informationsystem_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name
@@ -39,25 +39,27 @@ class Informationsystem_Module extends Core_Module
 		0 => 'searchIndexItem',
 		1 => 'searchIndexGroup',
 		2 => 'searchUnindexItem',
+		3 => 'recountInformationsystem',
 	);
 
 	/**
-	 * Constructor.
+	 * Get Module's Menu
+	 * @return array
 	 */
-	public function __construct()
+	public function getMenu()
 	{
-		parent::__construct();
-
 		$this->menu = array(
 			array(
 				'sorting' => 30,
 				'block' => 0,
-				'ico' => 'fa fa-tasks',
+				'ico' => 'fa fa-newspaper-o',
 				'name' => Core::_('Informationsystem.menu'),
 				'href' => "/admin/informationsystem/index.php",
 				'onclick' => "$.adminLoad({path: '/admin/informationsystem/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 
 	/**
@@ -167,7 +169,7 @@ class Informationsystem_Module extends Core_Module
 		$aInformationsystemGroups = $oInformationsystemGroup->findAll(FALSE);
 
 		$result = array();
-		foreach($aInformationsystemGroups as $oInformationsystemGroup)
+		foreach ($aInformationsystemGroups as $oInformationsystemGroup)
 		{
 			$result[] = $oInformationsystemGroup->indexing();
 		}
@@ -232,7 +234,7 @@ class Informationsystem_Module extends Core_Module
 		$aInformationsystemItems = $oInformationsystemItem->findAll(FALSE);
 
 		$result = array();
-		foreach($aInformationsystemItems as $oInformationsystemItem)
+		foreach ($aInformationsystemItems as $oInformationsystemItem)
 		{
 			$result[] = $oInformationsystemItem->indexing();
 		}
@@ -270,7 +272,7 @@ class Informationsystem_Module extends Core_Module
 
 						$oInformationsystem_Item->informationsystem_group_id
 							&& $oSearch_Page->addEntity($oInformationsystem_Item->Informationsystem_Group);
-							
+
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oInformationsystem_Item));
 
 						$oSearch_Page->addEntity($oInformationsystem_Item);
@@ -289,7 +291,7 @@ class Informationsystem_Module extends Core_Module
 	 */
 	public function backendSearchCallback($oSearch_Page)
 	{
-		$href = $onclick = NULL;
+		$href = $onclick = $icon = NULL;
 
 		$iAdmin_Form_Id = 12;
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
@@ -309,6 +311,7 @@ class Informationsystem_Module extends Core_Module
 						$additionalParams = "informationsystem_id={$oInformationsystem_Group->Informationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->id}";
 						$href = $oAdmin_Form_Controller->getAdminLoadHref($sPath, NULL, NULL, $additionalParams);
 						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($sPath, NULL, NULL, $additionalParams);
+						$icon = "fa fa-folder-open-o";
 					}
 				break;
 				case 2: // Информационые элементы
@@ -317,17 +320,17 @@ class Informationsystem_Module extends Core_Module
 					if (!is_null($oInformationsystem_Item->id))
 					{
 						$additionalParams = "informationsystem_id={$oInformationsystem_Item->Informationsystem->id}&informationsystem_group_id={$oInformationsystem_Item->informationsystem_group_id}";
-						
+
 						$href = $oAdmin_Form_Controller->getAdminActionLoadHref($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
-	
 						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($sPath, 'edit', NULL, 1, $oInformationsystem_Item->id, $additionalParams);
+						$icon = "fa fa-file-text-o";
 					}
 				break;
 			}
 		}
 
 		return array(
-			'icon' => 'fa-tasks',
+			'icon' => $icon,
 			'href' => $href,
 			'onclick' => $onclick
 		);
@@ -356,6 +359,10 @@ class Informationsystem_Module extends Core_Module
 				// Unindex item
 				case 2:
 					Core_Entity::factory('Informationsystem_Item', $entityId)->unindex()->clearCache();
+				break;
+				// Recount informationsystem
+				case 3:
+					Core_Entity::factory('Informationsystem', $entityId)->recount();
 				break;
 			}
 		}

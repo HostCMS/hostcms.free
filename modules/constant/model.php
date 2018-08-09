@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Constant
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Constant_Model extends Core_Entity
 {
@@ -48,7 +48,7 @@ class Constant_Model extends Core_Entity
 	 */
 	public function define()
 	{
-		if(!is_null($this->name) && !defined($this->name))
+		if (!is_null($this->name) && !defined($this->name))
 		{
 			$lowerValue = strtoupper(trim($this->value));
 

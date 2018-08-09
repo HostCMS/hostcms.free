@@ -9,10 +9,66 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 {
+	/**
+	 * Count of elements on page
+	 * @var array
+	 */
+	protected $_onPage = array (10 => 10, 20 => 20, 30 => 30, 50 => 50, 100 => 100, 500 => 500, 1000 => 1000);
+
+	/**
+	 * Is showing filter necessary
+	 * @var boolean
+	 */
+	protected $_showFilter = FALSE;
+
+	/**
+	 * Get form
+	 * @return string
+	 */
+	protected function _getForm()
+	{
+		ob_start();
+
+		$oAdmin_View = Admin_View::create($this->Admin_View);
+		$oAdmin_View
+			->children($this->_children)
+			->pageTitle($this->pageTitle)
+			->module($this->module);
+
+		ob_start();
+
+		$this
+			->showContent()
+			->showFooter();
+
+		$content = ob_get_clean();
+
+		$oAdmin_View
+			->content($content)
+			->message($this->getMessage())
+			->show();
+
+		$this->applyEditable();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Show form footer
+	 */
+	public function showFooter()
+	{
+		$this
+			->bottomActions()
+			->pageNavigation();
+
+		return $this;
+	}
+
 	/**
 	 * Show form content in administration center
 	 * @return self
@@ -26,6 +82,8 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			throw new Core_Exception('Admin form does not have fields.');
 		}
 
+		$oSortingField = $this->getSortingField();
+
 		$windowId = $this->getWindowId();
 
 		$allow_filter = FALSE;
@@ -36,7 +94,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		<tr class="admin_table_title"><?php
 
 		// Ячейку над групповыми чекбоксами показываем только при наличии действий
-		if ($this->_Admin_Form->show_operations && $this->_showOperations)
+		if ($this->_Admin_Form->show_operations && $this->showOperations)
 		{
 			?><td width="25">&nbsp;</td><?php
 		}
@@ -63,7 +121,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			$oAdmin_Form_Field->allow_sorting
-				&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+				&& $oAdmin_Form_Field->id == $oSortingField->id
 				&& $class .= ' highlight';
 
 			?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
@@ -76,9 +134,9 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					$hrefUp = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
 					$onclickUp = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, $oAdmin_Form_Field->id, 0);
 
-					if ($oAdmin_Form_Field->id == $this->_sortingFieldId)
+					if ($oAdmin_Form_Field->id == $this->sortingFieldId)
 					{
-						if ($this->_sortingDirection == 0)
+						if ($this->sortingDirection == 0)
 						{
 							?><img src="/admin/images/arrow_up.gif" alt="&uarr" /> <?php
 							?><a href="<?php echo $hrefDown?>" onclick="<?php echo $onclickDown?>"><img src="/admin/images/arrow_down_gray.gif" alt="&darr" /></a><?php
@@ -104,8 +162,8 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		// Доступные действия для пользователя
 		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-		if ($this->_Admin_Form->show_operations && $this->_showOperations
-		|| $allow_filter && $this->_showFilter)
+		if ($this->_Admin_Form->show_operations && $this->showOperations
+			|| $allow_filter && $this->_showFilter)
 		{
 				// min width action column
 				$width = 10;
@@ -120,7 +178,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		?></tr>
 		<tr class="admin_table_filter"><?php
 		// Чекбокс "Выбрать все" показываем только при наличии действий
-		if ($this->_Admin_Form->show_operations && $this->_showOperations)
+		if ($this->_Admin_Form->show_operations && $this->showOperations)
 		{
 			?><td align="center" width="25"><input type="checkbox" name="admin_forms_all_check" id="id_admin_forms_all_check" onclick="$('#<?php echo $windowId?>').highlightAllRows(this.checked)" /></td><?php
 		}
@@ -131,7 +189,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			// Перекрытие параметров для данного поля
 			foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
 			{
-				$oAdmin_Form_Field_Changed = $this->_changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field);
+				$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field);
 			}
 
 			$width = htmlspecialchars($oAdmin_Form_Field->width);
@@ -139,7 +197,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 			// Подсвечивать
 			$oAdmin_Form_Field->allow_sorting
-				&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+				&& $oAdmin_Form_Field->id == $oSortingField->id
 				&& $class .= ' highlight';
 
 			?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
@@ -270,7 +328,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		}
 
 		// Фильтр показываем если есть события или хотя бы у одного есть фильтр
-		if ($this->_Admin_Form->show_operations && $this->_showOperations
+		if ($this->_Admin_Form->show_operations && $this->showOperations
 		|| $allow_filter && $this->_showFilter)
 		{
 			$onclick = $this->getAdminLoadAjax($this->getPath());
@@ -318,7 +376,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 					?><tr id="row_<?php echo htmlspecialchars($datasetKey)?>_<?php echo htmlspecialchars($key_field_value)?>">
 						<?php
 						// Чекбокс "Для элемента" показываем только при наличии действий
-						if ($this->_Admin_Form->show_operations && $this->_showOperations)
+						if ($this->_Admin_Form->show_operations && $this->showOperations)
 						{
 							?><td align="center" width="25">
 								<input type="checkbox" id="check_<?php echo htmlspecialchars($datasetKey)?>_<?php echo htmlspecialchars($key_field_value)?>" onclick="$('#<?php echo $windowId?>').setTopCheckbox(); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $this->jQueryEscape(Core_Str::escapeJavascriptVariable($datasetKey))?>_<?php echo $this->jQueryEscape(Core_Str::escapeJavascriptVariable($key_field_value))?>').toggleHighlight()" /><?php
@@ -328,14 +386,14 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 						foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 						{
 							// Перекрытие параметров для данного поля
-							$oAdmin_Form_Field_Changed = $this->_changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+							$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
 
 
 							$width = htmlspecialchars(trim($oAdmin_Form_Field_Changed->width));
 							$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
 
 							$oAdmin_Form_Field->allow_sorting
-								&& $oAdmin_Form_Field->id == $this->_sortingAdmin_Form_Field->id
+								&& $oAdmin_Form_Field->id == $oSortingField->id
 								&& $class .= ' highlight';
 
 							?><td class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?>><?php
@@ -525,7 +583,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 										{
 											$src = $value_array[$value];
 										}
-										elseif(isset($value_array['']))
+										elseif (isset($value_array['']))
 										{
 											$src = $value_array[''];
 										}
@@ -639,7 +697,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 						// Действия для строки в правом столбце
 						if ($this->_Admin_Form->show_operations
-						&& $this->_showOperations
+						&& $this->showOperations
 						|| $allow_filter && $this->_showFilter)
 						{
 							// Определяем ширину столбца для действий.
@@ -665,16 +723,13 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 									continue;
 								}
 
-								$Admin_Word_Value = $o_Admin_Form_Action->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+								$Admin_Word_Value = $o_Admin_Form_Action
+									->Admin_Word
+									->getWordByLanguage($this->_Admin_Language->id);
 
-								if ($Admin_Word_Value && strlen($Admin_Word_Value->name) > 0)
-								{
-									$name = $Admin_Word_Value->name;
-								}
-								else
-								{
-									$name = '';
-								}
+								$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+									? htmlspecialchars($Admin_Word_Value->name)
+									: '';
 
 								$href = $this->getAdminActionLoadHref($this->getPath(), $o_Admin_Form_Action->name, NULL, $datasetKey, $key_field_value);
 
@@ -708,8 +763,8 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 	public function bottomActions()
 	{
 		// Строка с действиями
-		if ($this->_showBottomActions)
-		{
+		//if ($this->_showBottomActions)
+		//{
 			$windowId = $this->getWindowId();
 
 			// Текущий пользователь
@@ -722,7 +777,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		<tr>
 		<?php
 		// Чекбокс "Выбрать все" показываем только при наличии действий
-		if ($this->_Admin_Form->show_operations && $this->_showOperations)
+		if ($this->_Admin_Form->show_operations && $this->showOperations)
 		{
 			?><td align="center" width="25">
 				<input type="checkbox" name="admin_forms_all_check2" id="id_admin_forms_all_check2" onclick="$('#<?php echo $windowId?>').highlightAllRows(this.checked)" />
@@ -788,7 +843,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		</tr>
 		</table>
 		<?php
-		}
+		//}
 
 		return $this;
 	}
@@ -798,47 +853,47 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 	 */
 	protected function _pageSelector()
 	{
-		$sCurrentValue = $this->_limit;
+		$sCurrentValue = $this->limit;
 		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
 		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $this->_additionalParams)
+			str_replace(array('"'), array('&quot;'), $this->additionalParams)
 		);
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
 		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
-			//->name('admin_forms_on_page')
-			//->id('id_on_page')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
 			->execute();
 	}
 
+	protected $_pageNavigationDelta = 5;
+	
 	/**
 	 * Показ строки ссылок
 	 * @return self
 	 */
-	protected function _pageNavigation()
+	public function pageNavigation()
 	{
 		$total_count = $this->getTotalCount();
-		$total_page = $total_count / $this->_limit;
+		$total_page = $total_count / $this->limit;
 
 		// Округляем в большую сторону
-		if ($total_count % $this->_limit != 0)
+		if ($total_count % $this->limit != 0)
 		{
 			$total_page = intval($total_page) + 1;
 		}
 
-		$this->_current > $total_page && $this->_current = $total_page;
+		$this->current > $total_page && $this->current = $total_page;
 
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
 			->style('float: left; text-align: center; margin-top: 10px');
 
 		// Формируем скрытые ссылки навигации для перехода по Ctrl + стрелка
-		if ($this->_current < $total_page)
+		if ($this->current < $total_page)
 		{
 			// Ссылка на следующую страницу
-			$page = $this->_current + 1 ? $this->_current + 1 : 1;
+			$page = $this->current + 1 ? $this->current + 1 : 1;
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_A')
 					->onclick($this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $page))
@@ -846,10 +901,10 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			);
 		}
 
-		if ($this->_current > 1)
+		if ($this->current > 1)
 		{
 			// Ссылка на предыдущую страницу
-			$page = $this->_current - 1 ? $this->_current - 1 : 1;
+			$page = $this->current - 1 ? $this->current - 1 : 1;
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_A')
 					->onclick($this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $page))
@@ -861,18 +916,18 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		if ($total_page > 1)
 		{
 			// Определяем номер ссылки, с которой начинается строка ссылок.
-			$link_num_begin = ($this->_current - $this->_pageNavigationDelta < 1)
+			$link_num_begin = ($this->current - $this->_pageNavigationDelta < 1)
 				? 1
-				: $this->_current - $this->_pageNavigationDelta;
+				: $this->current - $this->_pageNavigationDelta;
 
 			// Определяем номер ссылки, которой заканчивается строка ссылок.
-			$link_num_end = $this->_current + $this->_pageNavigationDelta;
+			$link_num_end = $this->current + $this->_pageNavigationDelta;
 			$link_num_end > $total_page && $link_num_end = $total_page;
 
 			// Определяем число ссылок выводимых на страницу.
 			$count_link = $link_num_end - $link_num_begin + 1;
 
-			if ($this->_current == 1)
+			if ($this->current == 1)
 			{
 				$oCore_Html_Entity_Div->add(
 					Core::factory('Core_Html_Entity_Span')
@@ -914,7 +969,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$link_number = $link_num_begin + $i;
 
-				if ($link_number == $this->_current)
+				if ($link_number == $this->current)
 				{
 					// Страница является текущей
 					$oCore_Html_Entity_Div->add(
@@ -938,7 +993,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			}
 
 			// Если последняя страница является текущей
-			if ($this->_current == $total_page)
+			if ($this->current == $total_page)
 			{
 				$oCore_Html_Entity_Div->add(
 					Core::factory('Core_Html_Entity_Span')

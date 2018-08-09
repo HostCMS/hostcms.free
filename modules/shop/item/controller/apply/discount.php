@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 {
@@ -67,7 +67,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			// Получение списка скидок
 			$aDiscounts = array(" … ");
 			$aShop_Discounts = $this->Shop->Shop_Discounts->findAll(FALSE);
-			foreach($aShop_Discounts as $oShop_Discount)
+			foreach ($aShop_Discounts as $oShop_Discount)
 			{
 				$aDiscounts[$oShop_Discount->id] = $oShop_Discount->name;
 			}
@@ -81,19 +81,24 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.discount_select_caption'))
 				->controller($window_Admin_Form_Controller);
 
+			$oAdmin_Form_Entity_Select_Discount_Modifications_Checkbox = Admin_Form_Entity::factory('Checkbox')
+				->name('flag_include_modifications')
+				->caption(Core::_('Shop_Item.flag_include_modifications'));
+
 			$oAdmin_Form_Entity_Select_Discount_Checkbox = Admin_Form_Entity::factory('Checkbox')
 				->name('flag_delete_discount')
 				->caption(Core::_('Shop_Item.flag_delete_discount'));
 
 			$oCore_Html_Entity_Form
 				->add($oAdmin_Form_Entity_Select_Discount)
+				->add($oAdmin_Form_Entity_Select_Discount_Modifications_Checkbox)
 				->add($oAdmin_Form_Entity_Select_Discount_Checkbox);
 
 			if (Core::moduleIsActive('siteuser'))
 			{
 				$aBonuses = array(" … ");
 				$aShop_Bonuses = $this->Shop->Shop_Bonuses->findAll(FALSE);
-				foreach($aShop_Bonuses as $oShop_Bonus)
+				foreach ($aShop_Bonuses as $oShop_Bonus)
 				{
 					$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->name;
 				}
@@ -165,7 +170,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			Core::factory('Core_Html_Entity_Script')
 				->type("text/javascript")
 				->value("$(function() {
-				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 260, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 300, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -184,15 +189,29 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			{
 				$oShop_Discount = Core_Entity::factory('Shop_Discount', $iDiscountID);
 
-				if (!is_null(Core_Array::getPost('flag_delete_discount')))
+				$aObjects = array($oShop_Item);
+
+				if (!is_null(Core_Array::getPost('flag_include_modifications')))
 				{
-					$oShop_Item->remove($oShop_Discount);
+					$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+					foreach ($aModifications as $oModification)
+					{
+						$aObjects[] = $oModification;
+					}
 				}
-				else
+
+				foreach ($aObjects as $oShop_Item)
 				{
-					// Устанавливаем скидку товару
-					is_null($oShop_Item->Shop_Item_Discounts->getByShop_discount_id($iDiscountID))
-						&& $oShop_Item->add($oShop_Discount);
+					if (!is_null(Core_Array::getPost('flag_delete_discount')))
+					{
+						$oShop_Item->remove($oShop_Discount);
+					}
+					else
+					{
+						// Устанавливаем скидку товару
+						is_null($oShop_Item->Shop_Item_Discounts->getByShop_discount_id($iDiscountID))
+							&& $oShop_Item->add($oShop_Discount);
+					}
 				}
 			}
 

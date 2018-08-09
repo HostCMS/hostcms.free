@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -47,18 +47,19 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 
+		$oCurrent_User = Core_Entity::factory('User', 0)->getCurrent();
+		$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
+
 		switch ($type)
 		{
 			// Обновление списка уведомлений
 			case 0:
-				$oCurrent_User = Core_Entity::factory('User', 0)->getCurrent();
-
 				Core_Session::close();
 
 				$aModules = Core_Entity::factory('Module')->getAllByActive(1);
 
 				// Для каждого модуля получаем актуальные на данный момент уведомления
-				foreach($aModules as $oModule)
+				foreach ($aModules as $oModule)
 				{
 					if (method_exists($oModule->Core_Module, 'callNotifications'))
 					{
@@ -67,8 +68,6 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				}
 
 				$aJson = array();
-
-				$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
 
 				// Идентификатор последнего загруженного уведомления для пользователя
 				$iLastNotificationId = intval(Core_Array::getPost('lastNotificationId'));
@@ -117,13 +116,11 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					{
 						$aNotification = array(
 							'id' => $oNotification->id,
-							'title' => $oNotification->title,
-							'description' => $oNotification->description,
+							'title' => strval($oNotification->title), // NULL => ''
+							'description' => strval($oNotification->description), // NULL => ''
 							'datetime' => Core_Date::sql2datetime($oNotification->datetime),
 							'read' => $oNotification->read
 						);
-
-						//$oNotification_User = $oNotification->Notification_Users->getByUser_id($oCurrent_User->id);
 
 						$aNotificationDecorations = array();
 						if ($oNotification->module_id)
@@ -132,7 +129,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 							if (!is_null($oCore_Module))
 							{
-								$aNotificationDecorations = $oCore_Module->getNotifications($oNotification->type, $oNotification->entity_id);
+								$aNotificationDecorations = $oCore_Module->getNotificationDesign($oNotification->type, $oNotification->entity_id);
 
 								$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
 								$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
@@ -148,7 +145,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							$aJson['newNotifications'][] = $aNotification;
 						}
 						// Непрочитанное ранее загруженное сообщение
-						else/*if(!$oNotification->read)*/
+						else/*if (!$oNotification->read)*/
 						{
 							$aJson['unreadNotifications'][] = $aNotification;
 						}
@@ -163,16 +160,29 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				Core_Session::close();
 
 				$aNotificationsListId = Core_Array::getPost('notificationsListId');
-				$iCurrentUserId = intval(Core_Array::getPost('currentUserId'));
 
-
-				foreach ($aNotificationsListId as $iNotificationId)
+				if (!is_null($oCurrent_User) && $oCurrent_User->id == $iRequestUserId)
 				{
-					$oNotification_User = Core_Entity::factory('Notification', $iNotificationId)->Notification_Users->getByUser_id($iCurrentUserId);
+					if (is_array($aNotificationsListId) && count($aNotificationsListId))
+					{
+						Core_QueryBuilder::update('notification_users')
+							->set('read', 1)
+							->where('user_id', '=', $iRequestUserId)
+							->where('notification_id', 'IN', $aNotificationsListId)
+							->execute();
+					}
 
-					$oNotification_User
-						->read(1)
-						->save();
+					/*foreach ($aNotificationsListId as $iNotificationId)
+					{
+						$oNotification_User = Core_Entity::factory('Notification', $iNotificationId)->Notification_Users->getByUser_id($iCurrentUserId);
+
+						if (!is_null($oNotification_User))
+						{
+							$oNotification_User
+								->read(1)
+								->save();
+						}
+					}*/
 				}
 
 			break;

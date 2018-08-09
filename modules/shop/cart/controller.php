@@ -20,7 +20,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller extends Core_Servant_Properties
 {
@@ -180,7 +180,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 
-			if (!is_null($oShop_Item) && $oShop_Item->active)
+			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
 				$aTmp_Shop_Cart[] = $oShop_Cart;
 			}
@@ -215,7 +215,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 
-			if (!is_null($oShop_Item) && $oShop_Item->active)
+			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
 				// Temporary object
 				$oShop_Cart = Core_Entity::factory('Shop_Cart');

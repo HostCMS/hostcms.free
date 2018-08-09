@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Dir_Model extends Core_Entity
 {
@@ -92,7 +92,7 @@ class Tag_Dir_Model extends Core_Entity
 	}
 
 	/**
-	 * Get parent comment
+	 * Get parent dir
 	 * @return Tag_Dir_Model|NULL
 	 */
 	public function getParent()
@@ -139,10 +139,33 @@ class Tag_Dir_Model extends Core_Entity
 				// Группа назначения является потомком текущей группы, перенос невозможен
 				return $this;
 			}
-		} while($oDestinationDir = $oDestinationDir->getParent());
+		} while ($oDestinationDir = $oDestinationDir->getParent());
 
 		$this->parent_id = $tag_dir_id;
 		$this->save();
 		return $this;
+	}
+
+	/**
+	 * Get group path with separator
+	 * @return string
+	 */
+	public function dirPathWithSeparator($separator = ' → ', $offset = 0)
+	{
+		$aParentDirs = array();
+
+		$aTmpDir = $this;
+
+		// Добавляем все директории от текущей до родителя.
+		do {
+			$aParentDirs[] = $aTmpDir->name;
+		} while ($aTmpDir = $aTmpDir->getParent());
+
+		$offset > 0
+			&& $aParentDirs = array_slice($aParentDirs, $offset);
+
+		$sParents = implode($separator, array_reverse($aParentDirs));
+
+		return $sParents;
 	}
 }

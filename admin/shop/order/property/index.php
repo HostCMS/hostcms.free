@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 Core_Auth::authorization($sModule = 'shop');
@@ -56,7 +56,7 @@ if ($oShop->shop_dir_id)
 			->name($oShopDir->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"));
-	} while($oShopDir = $oShopDir->getParent());
+	} while ($oShopDir = $oShopDir->getParent());
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
@@ -78,7 +78,7 @@ if ($oShopGroup->id)
 			->name($oShopGroupTmp->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupTmp->id}"));
-	} while($oShopGroupTmp = $oShopGroupTmp->getParent());
+	} while ($oShopGroupTmp = $oShopGroupTmp->getParent());
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
@@ -105,7 +105,7 @@ if ($oPropertyDir->id)
 			->name($oShopGroupTmp->name)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"));
-	} while($oShopGroupTmp = $oShopGroupTmp->getParent());
+	} while ($oShopGroupTmp = $oShopGroupTmp->getParent());
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
@@ -174,6 +174,11 @@ $oAdmin_Form_Dataset
 	->addCondition(array('join' => array('shop_order_properties', 'shop_order_properties.property_id', '=', 'properties.id')))
 	->addCondition(array('where' =>array('shop_order_properties.shop_id', '=', $oShop->id)))
 	->addCondition(array('where' =>array('property_dir_id', '=', $oPropertyDir->id)));
+
+$oAdmin_Form_Dataset	
+	->changeField('multiple', 'link', "/admin/shop/order/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");	
+	
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 $oAdmin_Form_Controller->execute();

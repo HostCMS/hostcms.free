@@ -35,6 +35,9 @@ $step = 500;
 foreach ($aModules as $oModule)
 {
 	echo "\nModule ", $oModule->path;
+	
+	$oModule->loadModule();
+	
 	if (!is_null($oModule->Core_Module))
 	{
 		if (method_exists($oModule->Core_Module, 'indexing'))

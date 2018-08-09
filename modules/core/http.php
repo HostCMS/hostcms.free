@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -467,6 +467,16 @@ abstract class Core_Http
 	}
 
 	/**
+	 * Parse header callback
+	 * @param array $matches
+	 * @return string
+	 */
+	protected function _parseHeadersCallback($matches)
+	{
+		return strtoupper($matches[0]);
+	}
+	
+	/**
 	 * Parse header
 	 * @param string $header
 	 * @return array
@@ -482,10 +492,11 @@ abstract class Core_Http
 			{
 				$match[1] = preg_replace_callback(
 					'/(?<=^|[\x09\x20\x2D])./',
-					create_function ('$matches', 'return strtoupper($matches[0]);'), strtolower(trim($match[1]))
+					array($this, '_parseHeadersCallback'),
+					strtolower(trim($match[1]))
 				);
 
-				if( isset($aReturn[$match[1]]))
+				if ( isset($aReturn[$match[1]]))
 				{
 					if (is_array($aReturn[$match[1]]))
 					{

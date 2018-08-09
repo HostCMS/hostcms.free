@@ -6,7 +6,7 @@
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Свойства типовой динамической страницы',
@@ -30,6 +30,7 @@ return array(
 	'lib_property_type_3' => 'Список',
 	'lib_property_type_4' => 'SQL-запрос',
 	'lib_property_type_5' => 'Большое текстовое поле',
+	'lib_property_type_7' => 'TPL-шаблон',
 	'value' => 'Значение',
 	'multivalue' => 'Множественные значения',
 	'copy_from' => ' [Копия от %s]' ,

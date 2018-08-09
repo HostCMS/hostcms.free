@@ -7,7 +7,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information systems',
@@ -118,4 +118,33 @@ return array(
 	'schedule-searchIndexItem' => 'Index informationsystem item',
 	'schedule-searchIndexGroup' => 'Index informationsystem group',
 	'schedule-searchUnindexItem' => 'Unindex informationsystem item',
+	'schedule-recountShop' => 'Recount informationsystem groups and items',
+
+	'tab_seo_templates' => 'SEO templates',
+	'seo_group_header' => 'Group templates',
+	'seo_item_header' => 'Item templates',
+	'seo_group_title_template' => 'TITLE template',
+	'seo_group_description_template' => 'DESCRIPTION template',
+	'seo_group_keywords_template' => 'KEYWORDS template',
+	'seo_item_title_template' => 'TITLE template',
+	'seo_item_description_template' => 'DESCRIPTION template',
+	'seo_item_keywords_template' => 'KEYWORDS template',
+
+	'seo_template_informationsystem' => 'Informationsystem',
+	'seo_template_informationsystem_name' => 'Informationsystem name',
+	'seo_template_group' => 'Группа',
+	'seo_template_group_name' => 'Group name',
+	'seo_template_group_description' => 'Group description',
+	'seo_template_group_path' => 'Group path',
+	'seo_template_group_page_number' => 'Page number',
+	'seo_template_group_page' => 'page',
+	'seo_template_item' => 'Элемент',
+	'seo_template_item_name' => 'Item name',
+	'seo_template_item_description' => 'Item description',
+	'seo_template_item_text' => 'Item text',
+
+	'all_groups_count' => 'Groups: %s',
+	'all_items_count' => 'Items: %s',
+
+	'create_small_image' => 'Create small image from large image',
 );

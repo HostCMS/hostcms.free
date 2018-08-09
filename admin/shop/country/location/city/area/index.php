@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -74,12 +74,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/index.php', NULL, NULL, '')
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, '')
 		)
 );
@@ -88,12 +86,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/index.php', NULL, NULL, $sAdditionalParam = '&shop_country_id=' . $oShopCountry->id)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -102,12 +98,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/city/index.php', NULL, NULL, $sAdditionalParam = "&shop_location_id=" . $oShopCountryLocation->id)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -116,12 +110,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($pageTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_city_id=" . $oShopCountryLocationCity->id)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -141,8 +133,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Хлебные крошки для контроллера редактирования
 	$ShopCountryLocationCityArea_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

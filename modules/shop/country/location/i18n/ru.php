@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Области страны',
@@ -16,6 +16,7 @@ return array(
 	'location_add_form_title' => "Добавление информации об области",
 	'name' => "<acronym title=\"Название области\">Название</acronym>",
 	'sorting' => "Порядок сортировки",
+	'active' => "Активность",
 	'id' => "Идентификатор",
 	'shop_country_id' => "Идентификатор страны",
 	'edit_success' => "Область успешно добавлена!",
@@ -24,7 +25,8 @@ return array(
 	'apply_error' => "Ошибка изменения информации",
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	
+	'changeActive_success' => "Информация успешно изменена",
+
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',
 	'name_ru'=>'На русском',

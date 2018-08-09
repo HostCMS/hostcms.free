@@ -6,7 +6,7 @@
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Тemplates',
@@ -20,6 +20,7 @@ return array(
 	'tab_2' => 'CSS/LESS',
 	'tab_3' => 'Javascript',
 	'tab_4' => 'Manifest',
+	'tab_5' => 'Language',
 	'breadCrumb' => 'Template "%s"',
 	'id' => 'Id',
 	'name' => '<acronym title="Template name">Template name</acronym>',
@@ -45,4 +46,5 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'error_less_off' => 'Temlate\'s LESS has been disabled. Edit template and turn on it.',
 	'error_access_forbidden' => 'You do not have permission to edit.',
+	'language' => '%s.php',
 );

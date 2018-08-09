@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -124,9 +124,6 @@ class Core_Auth
 				Core::factory('Core_Html_Entity_Div')
 					->class('indexMessage')
 					->add(Core::factory('Core_Html_Entity_H1')->value($title))
-					/*->add(Core::factory('Core_Html_Entity_P')->value(
-						Core::_('Core.getting_key')
-					))*/
 					->execute();
 
 				$oSkin->footer();
@@ -222,7 +219,8 @@ class Core_Auth
 		// Если не используется HTTPS-доступ
 		if (defined('USE_ONLY_HTTPS_AUTHORIZATION') && USE_ONLY_HTTPS_AUTHORIZATION && !Core::httpsUses())
 		{
-			$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
+			//$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
+			$url = strtolower(Core_Array::get($_SERVER, 'SERVER_NAME')) . $_SERVER['REQUEST_URI'];
 			$url = str_replace(array("\r", "\n", "\0"), '', $url);
 			
 			header("HTTP/1.1 302 Found");

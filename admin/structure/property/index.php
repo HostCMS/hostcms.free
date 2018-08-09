@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -108,7 +108,7 @@ if ($structure_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sStructurePath, NULL, NULL, $additionalParams)
 				);
-		} while($oStructure = $oStructure->getParent());
+		} while ($oStructure = $oStructure->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -159,7 +159,7 @@ if ($property_dir_id)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				);
-		} while($oProperty_Dir = $oProperty_Dir->getParent());
+		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -277,6 +277,11 @@ $oAdmin_Form_Dataset->addCondition(
 		array('structure_properties.site_id', '=', CURRENT_SITE)
 	)
 );
+
+$oAdmin_Form_Dataset
+->changeField('multiple', 'link', "/admin/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

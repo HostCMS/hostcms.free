@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -61,6 +61,8 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'datetime',
 		'start_datetime',
 		'end_datetime'
@@ -255,7 +257,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getItemPath());
 			$oPropertyValue->delete();
@@ -386,7 +388,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -418,7 +420,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('tag'))
 		{
 			$aTags = $this->Tags->findAll();
-			foreach($aTags as $oTag)
+			foreach ($aTags as $oTag)
 			{
 				$newObject->add($oTag);
 			}
@@ -740,7 +742,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		$this->save();
 
 		$aItemShortcuts = $this->Informationsystem_Items->findAll();
-		foreach($aItemShortcuts as $oItemShortcut)
+		foreach ($aItemShortcuts as $oItemShortcut)
 		{
 			$oItemShortcut->active = 1 - $oItemShortcut->active;
 			$oItemShortcut->save();
@@ -961,7 +963,6 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function indexing()
 	{
-		//$oSearch_Page = Core_Entity::factory('Search_Page');
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
@@ -990,6 +991,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
+
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			// List
@@ -998,7 +1000,7 @@ class Informationsystem_Item_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem
@@ -1024,6 +1026,11 @@ class Informationsystem_Item_Model extends Core_Entity
 						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
 					}
 				}
+			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
@@ -1218,6 +1225,11 @@ class Informationsystem_Item_Model extends Core_Entity
 		return $this;
 	}
 
+	public function getParts()
+	{
+		return explode('<!-- pagebreak -->', $this->text);
+	}
+	
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -1256,13 +1268,24 @@ class Informationsystem_Item_Model extends Core_Entity
 		// Отображается часть текста
 		if ($this->_showXmlPart > 0 && !isset($this->_forbiddenTags['text']))
 		{
-			$aParts = explode('<!-- pagebreak -->', $this->text);
+			$aParts = $this->getParts();
 			$iPartsCount = count($aParts);
 
 			if ($iPartsCount > 1)
 			{
 				$this->_showXmlPart > $iPartsCount && $this->_showXmlPart = $iPartsCount;
 
+				if (Core::moduleIsActive('shortcode'))
+				{
+					$oShortcode_Controller = Shortcode_Controller::instance();
+					$iCountShortcodes = $oShortcode_Controller->getCount();
+					
+					if ($iCountShortcodes)
+					{
+						$aParts[$this->_showXmlPart - 1] = $oShortcode_Controller->applyShortcodes($aParts[$this->_showXmlPart - 1]);
+					}
+				}
+				
 				$this->addForbiddenTag('text')
 					->addXmlTag('parts_count', $iPartsCount)
 					->addXmlTag('text', $aParts[$this->_showXmlPart - 1]);

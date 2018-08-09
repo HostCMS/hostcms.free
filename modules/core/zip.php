@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip
 {
@@ -56,7 +56,7 @@ class Core_Zip
 						// Reopen
 						$this->_ZipArchive->close();
 						$this->_ZipArchive->open($this->_outputPath);
-						
+
 						$this->_iFiles = 0;
 					}
 				}
@@ -106,7 +106,7 @@ class Core_Zip
 
 		$this->_ZipArchive = new ZipArchive();
 		$result = $this->_ZipArchive->open($this->_outputPath, ZIPARCHIVE::CREATE);
-		
+
 		if ($result === TRUE)
 		{
 			$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));

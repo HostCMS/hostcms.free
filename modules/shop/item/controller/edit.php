@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -194,6 +194,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('pickup'), $oShopItemTabExportImport)
 					->move($this->getField('store'), $oShopItemTabExportImport)
 					->move($this->getField('adult'), $oShopItemTabExportImport)
+					->move($this->getField('cpa'), $oShopItemTabExportImport)
 					->move($this->getField('seo_title')->rows(3), $oShopItemTabSEO)
 					->move($this->getField('seo_description')->rows(3), $oShopItemTabSEO)
 					->move($this->getField('seo_keywords')->rows(3), $oShopItemTabSEO)
@@ -211,7 +212,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('delivery')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow5)
 					->move($this->getField('pickup')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow5)
 					->move($this->getField('store')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow5)
-					->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemTabExportImportRow6)
+					->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow6)
+					->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oShopItemTabExportImportRow6)
 				;
 
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
@@ -403,16 +405,92 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем модификацию
 				$oAdditionalTab->delete($this->getField('modification_id'));
 
-				$oModificationSelect = Admin_Form_Entity::factory('Select');
+				$iShopGroupId = $this->_object->modification_id
+					? $this->_object->Modification->shop_group_id
+					: $this->_object->shop_group_id;
 
-				$oModificationSelect
-					->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
-					->options($this->_fillModificationList($this->_object))
-					->name('modification_id')
-					->value($this->_object->modification_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
+				$oShop_Items = Core_Entity::factory('Shop_Item');
+				$oShop_Items->queryBuilder()
+					->where('shop_id', '=', $this->_object->shop_id)
+					->where('shop_group_id', '=', $iShopGroupId);
 
-				$oMainRow3->add($oModificationSelect);
+				$iCountModifications = $oShop_Items->getCount();
+
+				if ($iCountModifications < Core::$mainConfig['switchSelectToAutocomplete'])
+				{
+					$oModificationSelect = Admin_Form_Entity::factory('Select')
+						->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
+						->options(self::fillModificationList($this->_object))
+						->name('modification_id')
+						->value($this->_object->modification_id)
+						->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'));
+
+					$oMainRow3->add($oModificationSelect);
+				}
+				else
+				{
+					$oModificationInput = Admin_Form_Entity::factory('Input')
+						->caption(Core::_('Shop_Item.shop_item_catalog_modification_flag'))
+						->divAttr(array('class' => 'form-group col-xs-12 col-lg-3'))
+						->name('modification_name');
+
+					if ($this->_object->modification_id)
+					{
+						$oModification = Core_Entity::factory('Shop_Item', $this->_object->modification_id);
+						$oModificationInput->value($oModification->name . ' [' . $oModification->id . ']');
+					}
+
+					$oModificationInputHidden = Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+						->name('modification_id')
+						->value($this->_object->modification_id)
+						->type('hidden');
+
+					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
+					->type("text/javascript")
+					->value("
+						$('[name = modification_name]').autocomplete({
+							  source: function(request, response) {
+
+								$.ajax({
+								  url: '/admin/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
+								  dataType: 'json',
+								  data: {
+									queryString: request.term
+								  },
+								  success: function( data ) {
+									response( data );
+								  }
+								});
+							  },
+							  minLength: 1,
+							  create: function() {
+								$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+									return $('<li></li>')
+										.data('item.autocomplete', item)
+										.append($('<a>').text(item.label))
+										.appendTo(ul);
+								}
+
+								 $(this).prev('.ui-helper-hidden-accessible').remove();
+							  },
+							  select: function( event, ui ) {
+								$('[name = modification_id]').val(ui.item.id);
+							  },
+							  open: function() {
+								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+							  },
+							  close: function() {
+								$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+							  }
+						});
+					");
+
+					$oMainRow3
+						->add($oModificationInput)
+						->add($oModificationInputHidden)
+						->add($oCore_Html_Entity_Script_Modification);
+				}
 
 				if (!$object->modification_id)
 				{
@@ -466,7 +544,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Set->shop_item_set_id);
 
-					if(!is_null($oShop_Item))
+					if (!is_null($oShop_Item))
 					{
 						$oShop_Item = $oShop_Item->shortcut_id
 							? $oShop_Item->Shop_Item
@@ -562,7 +640,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio)
 					)
 					->smallImage(array('max_width' => $oShop->image_small_max_width, 'max_height' => $oShop->image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
-							$this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
+							$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 							$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small)
 					);
@@ -746,7 +824,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oPriceBlock->add($oPricesRowN = Admin_Form_Entity::factory('Div')->class('row'));
 
-					$aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
+					$oShop_Prices = $oShop->Shop_Prices;
+					$oShop_Prices->queryBuilder()
+						->clearOrderBy()
+						->orderBy('shop_prices.sorting', 'ASC');
+
+					$aShopPrices = $oShop_Prices->findAll(FALSE);
 
 					foreach ($aShopPrices as $oShopPrice)
 					{
@@ -1051,7 +1134,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Item_Associated->shop_item_associated_id);
 
-					if(!is_null($oShop_Item))
+					if (!is_null($oShop_Item))
 					{
 						$oShop_Item = $oShop_Item->shortcut_id
 							? $oShop_Item->Shop_Item
@@ -1061,7 +1144,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
 
-						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 						$associatedTable .= '
 							<tr id="' . $oShop_Item_Associated->id . '">
@@ -1195,6 +1278,51 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop_Group.tab_group_seo'))
 					->name('SEO'), $oShopGroupDescriptionTab);
 
+				$this->addTabAfter($oShopTabSeoTemplates = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Shop_Group.tab_seo_templates'))
+					->name('Seo_Templates'), $oShopGroupSeoTab);
+
+				$oShopTabSeoTemplates
+					->add($oShopGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+				$oShopGroupBlock
+					->add($oShopGroupHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Shop_Group.seo_group_header"))
+					)
+					->add($oShopGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopGroupHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showGroupButton()
+					));
+
+				$oShopItemBlock
+					->add($oShopItemHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Shop_Group.seo_item_header"))
+					)
+					->add($oShopItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopItemHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showItemButton()
+					));
+
+				// Seo templates
+				$oMainTab
+					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow1)
+					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow2)
+					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow3)
+					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow1)
+					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow2)
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow3);
+
 				$this->addTabAfter($oShopGroupImportExportTab =
 					Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Group.tab_yandex_market'))
@@ -1283,21 +1411,16 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oShop->watermark_default_use_large_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group))
 					->smallImage(array('max_width' => $oShop->group_image_small_max_width, 'max_height' => $oShop->group_image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
-						$this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
+						$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 						$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small));
 
 				// Добавляем поле картинки группы товаров
 				$oMainRow2->add($oImageField);
 
-				$this->getField("sorting")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-
-				$this->getField("indexing")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
-				$this->getField("active")
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+				$this->getField("sorting")->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+				$this->getField("indexing")->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+				$this->getField("active")->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
 					->move($this->getField("indexing"), $oMainRow4)
@@ -1618,6 +1741,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
 				{
 					$aAdditionalPrices = $this->_object->Shop->Shop_Prices->findAll();
+
 					foreach ($aAdditionalPrices as $oAdditionalPrice)
 					{
 						$oAdditionalPriceValue = $this->_object
@@ -1781,18 +1905,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}", 0);
 
 					$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-
 					if (is_null($oShopItemWarehouse))
 					{
 						$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
-
 						$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
-
 						$oShopItemWarehouse->shop_item_id = $this->_object->id;
 					}
 
 					$oShopItemWarehouse->count = $iWarehouseValue;
-
 					$oShopItemWarehouse->save();
 				}
 
@@ -2485,7 +2605,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Добавляем все директории от текущей до родителя.
 			do {
 				$aParentGroups[] = $aTmpGroup->name;
-			} while($aTmpGroup = $aTmpGroup->getParent());
+			} while ($aTmpGroup = $aTmpGroup->getParent());
 
 			$sParents = implode(' → ', array_reverse($aParentGroups));
 
@@ -2510,7 +2630,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Fill tags list
-	 * @param Informationsystem_Item_Model $oInformationsystem_Item item
+	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
 	 */
 	protected function _fillTagsList($oShop_Item)
@@ -2535,7 +2655,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
 	 */
-	protected function _fillModificationList($oShop_Item)
+	static public function fillModificationList($oShop_Item, $like = NULL)
 	{
 		$aReturnArray = array(' … ');
 
@@ -2543,7 +2663,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $oShop_Item->Modification->shop_group_id
 			: $oShop_Item->shop_group_id;
 
-		$aTmp = Core_QueryBuilder::select('id', 'name')
+		$oQB = Core_QueryBuilder::select('id', 'name')
 			->from('shop_items')
 			->where('shop_id', '=', $oShop_Item->shop_id)
 			->where('shop_group_id', '=', $iShopGroupId)
@@ -2554,8 +2674,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->where('deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('sorting')
-			->orderBy('name')
-			->execute()->asAssoc()->result();
+			->orderBy('name');
+
+		strlen($like)
+			&& $oQB->where('shop_items.name', 'LIKE', '%' . $like . '%')->limit(10);
+
+		$aTmp = $oQB->execute()->asAssoc()->result();
 
 		foreach ($aTmp as $aItem)
 		{

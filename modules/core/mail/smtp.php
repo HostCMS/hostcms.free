@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
@@ -41,37 +41,35 @@ class Core_Mail_Smtp extends Core_Mail
 		{
 			stream_set_timeout($fp, $timeout);
 
-			$server_response = $this->_serverFgets($fp);
-			if (!$this->_serverParse($server_response, "220"))
-			{
-				fclose($fp);
-				return FALSE;
-			}
-
 			// Может быть много 220-х, последний отделяется пробелом, а не минусом
 			do {
 				$server_response = $this->_serverFgets($fp);
+
+				if (!$this->_serverParse($server_response, "220"))
+				{
+					fclose($fp);
+					return FALSE;
+				}
 			}
-			while(!feof($fp)
-				&& $this->_getResponseStatus($server_response) == "220"
+			while (!feof($fp)
+				//&& $this->_getResponseStatus($server_response) == "220"
 				&& substr($server_response, 3, 1) != ' '
 			);
 
 			fputs($fp, "EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
 
-			$server_response = $this->_serverFgets($fp);
-			if (!$this->_serverParse($server_response, "250"))
-			{
-				fclose($fp);
-				return FALSE;
-			}
-
 			// Может быть много 250-х, последний отделяется пробелом, а не минусом
 			do {
 				$server_response = $this->_serverFgets($fp);
+				
+				if (!$this->_serverParse($server_response, "250"))
+				{
+					fclose($fp);
+					return FALSE;
+				}
 			}
-			while(!feof($fp)
-				&& $this->_getResponseStatus($server_response) == "250"
+			while (!feof($fp)
+				//&& $this->_getResponseStatus($server_response) == "250"
 				&& substr($server_response, 3, 1) != ' '
 			);
 

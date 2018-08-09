@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store prices',
@@ -21,8 +21,11 @@ return array(
 	'guid' => '<acronym title="Price identifier for CommerceML format, e.g. ID00006831">CommerceML price identifier</acronym>',
 	'shop_id' => 'Shop id',
 	'id' => 'Id',
+	'sorting' => 'Sorting',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-'edit_success' => "Price information added successfully!",
-'markDeleted_success' => "Price information deleted successfully!",
+	'edit_success' => "Price information added successfully!",
+	'markDeleted_success' => "Price information deleted successfully!",
+	'apply_success' => "Information successfully changed",
+	'recount_success' => "Price recount successfully!",
 );

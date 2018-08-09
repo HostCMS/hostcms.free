@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Delivery_Handler
 {
@@ -197,10 +197,14 @@ abstract class Shop_Delivery_Handler
 
 		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{
-			$oHandler = self::factory($oShop_Delivery);
-			if ($oHandler && method_exists($oHandler, $methodName))
+			// Associated with Shop_Payment_System
+			if ($oShop_Delivery->Shop_Payment_Systems->getCount())
 			{
-				$oHandler->$methodName();
+				$oHandler = self::factory($oShop_Delivery);
+				if ($oHandler && method_exists($oHandler, $methodName))
+				{
+					$oHandler->$methodName();
+				}
 			}
 		}
 	}

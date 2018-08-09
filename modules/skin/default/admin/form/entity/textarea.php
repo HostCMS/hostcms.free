@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 {
@@ -31,6 +31,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		'template_id', // ID макета для визуального редактора
 		'syntaxHighlighter',
 		'syntaxHighlighterOptions',
+		'wysiwygOptions',
 	);
 
 	/**
@@ -39,6 +40,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 	 */
 	protected $_allowedProperties = array(
 		'wysiwyg',
+		'wysiwygOptions',
 		'syntaxHighlighter',
 		'syntaxHighlighterOptions'
 	);
@@ -154,12 +156,14 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 					do{
 						$aCSS[] = "/templates/template{$oTemplate->id}/style.css?" . Core_Date::sql2timestamp($oTemplate->timestamp);
-					} while($oTemplate = $oTemplate->getParent());
+					} while ($oTemplate = $oTemplate->getParent());
 				}
 
 				$lng = Core_I18n::instance()->getLng();
 
-				$this->_init = Core_Config::instance()->get('core_wysiwyg');
+				$this->_init = is_null($this->wysiwygOptions)
+					? Core_Config::instance()->get('core_wysiwyg')
+					: $this->wysiwygOptions;
 
 				// add
 				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";
@@ -195,7 +199,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 						? $oStructure->getPath()
 						: $oStructure->url;
 
-					$tinyMCELinkListArray[] = '{title: "' . htmlspecialchars($oStructure->menu_name) . '", value: "' . htmlspecialchars($link) . '"}';
+					$tinyMCELinkListArray[] = '{title: \'' . Core_Str::escapeJavascriptVariable($oStructure->menu_name) . '\', value: \'' . Core_Str::escapeJavascriptVariable($link) . '\'}';
 				}
 
 				$tinyMCELinkList = implode(",", $tinyMCELinkListArray);

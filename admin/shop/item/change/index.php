@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -55,7 +55,7 @@ if ($oShopDir->id)
 					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 			)
 		);
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -95,7 +95,7 @@ if ($oShopGroup->id)
 					'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 			)
 		);
-	}while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -165,7 +165,7 @@ $oMainTab
 // Получение списка скидок
 $aDiscounts = array(" … ");
 $aShop_Discounts = $oShop->Shop_Discounts->findAll();
-foreach($aShop_Discounts as $oShop_Discount)
+foreach ($aShop_Discounts as $oShop_Discount)
 {
 	$aDiscounts[$oShop_Discount->id] = $oShop_Discount->name;
 }
@@ -190,7 +190,7 @@ if (Core::moduleIsActive('siteuser'))
 {
 	$aBonuses = array(" … ");
 	$aShop_Bonuses = $oShop->Shop_Bonuses->findAll();
-	foreach($aShop_Bonuses as $oShop_Bonus)
+	foreach ($aShop_Bonuses as $oShop_Bonus)
 	{
 		$aBonuses[$oShop_Bonus->id] = $oShop_Bonus->name;
 	}
@@ -246,10 +246,11 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 	if (!$oUser->read_only)
 	{
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
-		$increase_price_rate = Shop_Controller::instance()->convertFloat($increase_price_rate);
+		// Shop_Controller::instance()->convertFloat нельзя использовать, т.к. может быть ведущий минус -1.0 => .1.0
+		$increase_price_rate = str_replace(',', '.', $increase_price_rate);
 
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
-		$multiply_price_rate = Shop_Controller::instance()->convertFloat($multiply_price_rate);
+		$multiply_price_rate = str_replace(',', '.', $multiply_price_rate);
 
 		$iDiscountID = Core_Array::getPost('shop_discount_id', 0);
 		$iBonusID = Core_Array::getPost('shop_bonus_id', 0);
@@ -333,14 +334,14 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 					->limit($limit);
 
 				$aShopItems = $oShop_Items->findAll(FALSE);
-				foreach($aShopItems as $oShop_Item)
+				foreach ($aShopItems as $oShop_Item)
 				{
 					applySettings($oUser, $oShop_Item, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
 
 					if (!is_null(Core_Array::getPost('flag_include_modifications')))
 					{
 						$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
-						foreach($aShopItemModifications as $oShopItemModification)
+						foreach ($aShopItemModifications as $oShopItemModification)
 						{
 							applySettings($oUser, $oShopItemModification, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
 						}

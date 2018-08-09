@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -88,6 +88,8 @@ class Structure_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'options'
 	);
 
@@ -312,7 +314,7 @@ class Structure_Model extends Core_Entity
 		catch (Exception $e) {}
 
 		$aStructures = $this->Structures->findAll();
-		foreach($aStructures as $oStructure)
+		foreach ($aStructures as $oStructure)
 		{
 			$oStructure->delete();
 		}
@@ -560,7 +562,7 @@ class Structure_Model extends Core_Entity
 
 		count($aPropertyValues) && $newObject->createDir();
 
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oNewPropertyValue = clone $oPropertyValue;
 			$oNewPropertyValue->entity_id = $newObject->id;
@@ -665,8 +667,11 @@ class Structure_Model extends Core_Entity
 
 		$this->clearXmlTags()
 			->addXmlTag('link', $this->getPath())
-			->addXmlTag('dir', Core_Page::instance()->shopCDN . '/' . $this->getDirHref());
+			->addXmlTag('dir', Core_Page::instance()->structureCDN . '/' . $this->getDirHref());
 
+		$this->type != 3
+			&& $this->addForbiddenTag('url');
+			
 		if ($this->_showXmlProperties)
 		{
 			$this->addEntities($this->getPropertyValues());
@@ -757,7 +762,7 @@ class Structure_Model extends Core_Entity
 				if ($oPropertyValue->value != 0)
 				{
 					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ';
+					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 				}
 			}
 			// Informationsystem

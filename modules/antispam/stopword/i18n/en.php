@@ -6,7 +6,7 @@
  * @subpackage Antispam
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ÎÎÎ "Õîñòìýéê" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ÎÎÎ "Õîñòìýéê" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'title' => 'Stopwords',
@@ -20,4 +20,6 @@ return array(
 	'delete_success' => 'Stopword deleted successfully!',
 	'undelete_success' => 'Stopword restored successfully!',
 	'markDeleted_success' => 'Stopword deleted successfully.',
+	'export' => 'Export',
+	'link' => 'Stopword',
 );

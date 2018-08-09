@@ -6,7 +6,7 @@
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Parameters of sample dynamic pages',
@@ -30,6 +30,7 @@ return array(
 	'lib_property_type_3' => 'List',
 	'lib_property_type_4' => 'SQL query',
 	'lib_property_type_5' => 'Large text field',
+	'lib_property_type_7' => 'TPL template',	
 	'value' => 'Value',
 	'multivalue' => 'Multiple values',
 	'copy_from' => ' [Copy of %s]',

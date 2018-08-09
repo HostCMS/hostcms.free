@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -111,6 +111,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopTabMailSubjects = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop.tab_mail_subject'))
 					->name('Mail_Subjects');
+				$oShopTabSeoTemplates = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Shop.tab_seo_templates'))
+					->name('Seo_Templates');
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -134,13 +137,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopTabFormats
 					->add($oShopTabFormatsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabExport
 					->add($oGuidRow = Admin_Form_Entity::factory('Div')->class('row'))
@@ -156,11 +153,18 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oShopTabWatermark
-					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize5 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRowSize6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabOrders
 					->add($oShopTabOrdersRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -171,28 +175,61 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopTabMailSubjectsRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabMailSubjectsRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
+				$oShopTabSeoTemplates
+					->add($oShopGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+				$oShopGroupBlock
+					->add($oShopGroupHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Shop.seo_group_header"))
+					)
+					->add($oShopGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopGroupHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showGroupButton()
+					));
+
+				$oShopItemBlock
+					->add($oShopItemHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Shop.seo_item_header"))
+					)
+					->add($oShopItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oShopItemHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Shop_Controller::showItemButton()
+					));
+
 				$this
 					->addTabAfter($oShopTabFormats, $oMainTab)
 					->addTabAfter($oShopTabMailSubjects, $oShopTabFormats)
-					->addTabAfter($oShopTabExport, $oShopTabMailSubjects)
+					->addTabAfter($oShopTabSeoTemplates, $oShopTabMailSubjects)
+					->addTabAfter($oShopTabExport, $oShopTabSeoTemplates)
 					->addTabAfter($oShopTabWatermark, $oShopTabExport)
 					->addTabAfter($oShopTabOrders, $oShopTabWatermark);
 
 				// Перемещаем поля на их вкладки
 				$oMainTab
 					// Formats
-					->move($this->getField('image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('image_large_max_height'), $oShopTabFormats)
-					->move($this->getField('group_image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('group_image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('group_image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('group_image_large_max_height'), $oShopTabFormats)
-					->move($this->getField('producer_image_small_max_width'), $oShopTabFormats)
-					->move($this->getField('producer_image_small_max_height'), $oShopTabFormats)
-					->move($this->getField('producer_image_large_max_width'), $oShopTabFormats)
-					->move($this->getField('producer_image_large_max_height'), $oShopTabFormats)
+					->move($this->getField('image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('image_large_max_height'), $oShopTabWatermark)
+					->move($this->getField('group_image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('group_image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('group_image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('group_image_large_max_height'), $oShopTabWatermark)
+					->move($this->getField('producer_image_small_max_width'), $oShopTabWatermark)
+					->move($this->getField('producer_image_small_max_height'), $oShopTabWatermark)
+					->move($this->getField('producer_image_large_max_width'), $oShopTabWatermark)
+					->move($this->getField('producer_image_large_max_height'), $oShopTabWatermark)
 					->move($this->getField('format_date'), $oShopTabFormats)
 					->move($this->getField('format_datetime'), $oShopTabFormats)
 					->move($this->getField('typograph_default_items'), $oShopTabFormats)
@@ -202,6 +239,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('guid'), $oShopTabExport)
 					->move($this->getField('yandex_market_sales_notes_default'), $oShopTabExport)
 					->move($this->getField('adult'), $oShopTabExport)
+					->move($this->getField('cpa'), $oShopTabExport)
 					// Watermark
 					->move($this->getField('preserve_aspect_ratio'), $oShopTabWatermark)
 					->move($this->getField('preserve_aspect_ratio_small'), $oShopTabWatermark)
@@ -210,6 +248,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('watermark_default_use_large_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_use_small_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_position_x'), $oShopTabWatermark)
+					->move($this->getField('create_small_image'), $oShopTabWatermark)
 					->move($this->getField('watermark_default_position_y'), $oShopTabWatermark)
 					// Orders
 					->move($this->getField('items_sorting_field'), $oShopTabOrders)
@@ -223,6 +262,13 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('confirm_user_subject')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oShopTabMailSubjectsRow2)
 					->move($this->getField('cancel_admin_subject')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oShopTabMailSubjectsRow3)
 					->move($this->getField('cancel_user_subject')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oShopTabMailSubjectsRow3)
+					// Seo templates
+					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow1)
+					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow2)
+					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopGroupBlockRow3)
+					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow1)
+					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow2)
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oShopItemBlockRow3)
 					;
 
 				// Переопределяем стандартные поля на нужный нам вид
@@ -442,7 +488,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 					$aCompanies = $oSite->Companies->findAll();
-					foreach($aCompanies as $oCompany)
+					foreach ($aCompanies as $oCompany)
 					{
 						$oOptgroupCompany = new stdClass();
 						$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
@@ -565,40 +611,41 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('send_order_email_user'), $oMainRow10);
 				$oMainTab->move($this->getField('comment_active'), $oMainRow11);
 				$oMainTab->move($this->getField('apply_tags_automatically'), $oMainRow12);
-				$oMainTab->move($this->getField('write_off_paid_items'), $oMainRow13);
-				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow14);
+				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow13);
+				$oMainTab->move($this->getField('write_off_paid_items'), $oMainRow14);
 				$oMainTab->move($this->getField('change_filename'), $oMainRow15);
 				$oMainTab->move($this->getField('attach_digital_items'), $oMainRow16);
 				$oMainTab->move($this->getField('use_captcha'), $oMainRow17);
+				
+				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
+				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);				
 
-				$oShopTabFormats->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
-				$oShopTabFormats->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
+				$oShopTabWatermark->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
+				$oShopTabWatermark->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
+				
+				$oShopTabWatermark->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
+				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);				
 
-				$oShopTabFormats->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
-				$oShopTabFormats->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
+				$oShopTabWatermark->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
+				
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);				
 
-				$oShopTabFormats->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow3);
-				$oShopTabFormats->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow3);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
+				$oShopTabWatermark->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
 
-				$oShopTabFormats->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow4);
-				$oShopTabFormats->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow4);
+				$oShopTabFormats->move($this->getField('format_date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
+				$oShopTabFormats->move($this->getField('format_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow1);
 
-				$oShopTabFormats->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow5);
-				$oShopTabFormats->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow5);
-
-				$oShopTabFormats->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow6);
-				$oShopTabFormats->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow6);
-
-				$oShopTabFormats->move($this->getField('format_date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow7);
-				$oShopTabFormats->move($this->getField('format_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow7);
-
-				$oShopTabFormats->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow8);
-				$oShopTabFormats->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow8);
+				$oShopTabFormats->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
+				$oShopTabFormats->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabFormatsRow2);
 
 				$oShopTabExport->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')),$oGuidRow);
 				$oShopTabExport->move($this->getField('yandex_market_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
 				$oShopTabExport->move($this->getField('yandex_market_sales_notes_default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
-				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
 
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
 
@@ -646,6 +693,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oShopTabWatermark->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
 				$oShopTabWatermark->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
+
+				$oShopTabWatermark->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow6);
 
 				// Добавляем поле сортировки товара
 				$oShopTabOrdersRow1->add(Admin_Form_Entity::factory('Select')
@@ -817,7 +866,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		if(
+		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
 			// и передан файл
@@ -863,7 +912,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aCurrencyArray = array();
 
 		$aCurrencies = $oCurrency->findAll();
-		foreach($aCurrencies as $oCurrency)
+		foreach ($aCurrencies as $oCurrency)
 		{
 			$aCurrencyArray[$oCurrency->id] = $oCurrency->name;
 		}
@@ -887,7 +936,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// $aTaxArray = array();
 
 		$aShop_Taxes = $oShop_Taxes->findAll(FALSE);
-		foreach($aShop_Taxes as $oShop_Tax)
+		foreach ($aShop_Taxes as $oShop_Tax)
 		{
 			$aTaxArray[$oShop_Tax->id] = $oShop_Tax->name;
 		}
@@ -909,7 +958,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aOrderStatusArray = array(' … ');
 
 		$aOrderStatuses = $oOrderStatus->findAll();
-		foreach($aOrderStatuses as $oOrderStatus)
+		foreach ($aOrderStatuses as $oOrderStatus)
 		{
 			$aOrderStatusArray[$oOrderStatus->id] = $oOrderStatus->name;
 		}
@@ -932,7 +981,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aMeasureArray = array(' … ');
 
-		foreach($aMeasures as $oMeasure)
+		foreach ($aMeasures as $oMeasure)
 		{
 			$aMeasureArray[$oMeasure->id] = $oMeasure->name;
 		}
@@ -956,7 +1005,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryArray = array(' … ');
 
-		foreach($aCountries as $oCountry)
+		foreach ($aCountries as $oCountry)
 		{
 			$aCountryArray[$oCountry->id] = $oCountry->name;
 		}
@@ -984,7 +1033,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationArray = array(' … ');
 
-		foreach($oCountryLocations as $oCountryLocation)
+		foreach ($oCountryLocations as $oCountryLocation)
 		{
 			$aCountryLocationArray[$oCountryLocation->id] = $oCountryLocation->name;
 		}
@@ -1012,7 +1061,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationCityArray = array(' … ');
 
-		foreach($oCountryLocationCities as $oCountryLocationCity)
+		foreach ($oCountryLocationCities as $oCountryLocationCity)
 		{
 			$aCountryLocationCityArray[$oCountryLocationCity->id] = $oCountryLocationCity->name;
 		}
@@ -1040,7 +1089,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aCountryLocationCityAreaArray = array(' … ');
 
-		foreach($oCountryLocationCityAreas as $oCountryLocationCityArea)
+		foreach ($oCountryLocationCityAreas as $oCountryLocationCityArea)
 		{
 			$aCountryLocationCityAreaArray[$oCountryLocationCityArea->id] = $oCountryLocationCityArea->name;
 		}
@@ -1062,7 +1111,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aCompanies = $oCompany->findAll();
 
 		$aCompanyArray = array(' … ');
-		foreach($aCompanies as $oCompany)
+		foreach ($aCompanies as $oCompany)
 		{
 			$aCompanyArray[$oCompany->id] = $oCompany->name;
 		}
@@ -1125,37 +1174,4 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $aReturn;
 	}
-
-	/**
-	 * Fill notification subscribers list
-	 * @param Shop_Model $oShop shop
-	 * @return array
-	 */
-	/*protected function _fillNotificationSubscribersList()
-	{
-		$aReturnArray = array();
-
-		$oModule = Core::$modulesList['shop'];
-
-		$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
-		$oNotification_Subscribers->queryBuilder()
-			->where('notification_subscribers.module_id', '=', $oModule->id)
-			->where('notification_subscribers.type', '=', 0)
-			->where('notification_subscribers.entity_id', '=', $this->_object->id)
-			;
-
-		$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
-		foreach ($aNotification_Subscribers as $oNotification_Subscriber)
-		{
-			$oUser = $oNotification_Subscriber->User;
-
-			$aReturnArray[$oUser->id] = array(
-				'value' => $oUser->getFullName() . '%%%' . ($oUser->image ? $oUser->getImageFileHref() : ''),
-				'attr' => array('selected' => 'selected')
-			);
-		}
-
-		return $aReturnArray;
-	}*/
 }

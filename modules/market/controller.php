@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Market
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -895,10 +895,6 @@ class Market_Controller extends Core_Servant_Properties
 		{
 			$this->_aTmpOptions = array(Core::_('Market.select_section'));
 			$this->_getCategoryOptions(0);
-			/*foreach($this->_categories as $object)
-			{
-				$aTmp[$object->id] = $object->name;
-			}*/
 
 			$oMainTab->add(
 				Admin_Form_Entity::factory('Div')->class('row')
@@ -940,7 +936,6 @@ class Market_Controller extends Core_Servant_Properties
 				$this->controller
 					->limit($this->limit)
 					->setTotalCount($this->total)
-					//->showBottomActions(FALSE)
 					->pageNavigation();
 
 				$sFooter = '<div class="col-xs-12">' . ob_get_clean() . '</div>';

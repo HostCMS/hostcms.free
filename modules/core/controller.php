@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -51,6 +51,12 @@ class Core_Controller extends Core_Servant_Properties
 	protected $_xsl = NULL;
 
 	/**
+	 * TPL
+	 * @var Tpl_Model
+	 */
+	protected $_tpl = NULL;
+
+	/**
 	 * Constructor.
 	 * @param Core_Entity $oEntity entity
 	 */
@@ -71,7 +77,7 @@ class Core_Controller extends Core_Servant_Properties
 	 * Add a children entity
 	 *
 	 * @param Core_Entity $oChildrenEntity
-	 * @return Core_Xml_Entity
+	 * @return self
 	 */
 	public function addEntity($oChildrenEntity)
 	{
@@ -135,12 +141,31 @@ class Core_Controller extends Core_Servant_Properties
 
 	/**
 	 * Set XSL
-	 * @param Xsl_Model $oXsl XSL
+	 * @param Xsl_Model|string $xsl
 	 * @return self
 	 */
-	public function xsl(Xsl_Model $oXsl)
+	public function xsl($xsl)
 	{
+		if (is_string($xsl))
+		{
+			$oXsl = Core_Entity::factory('Xsl')->getByName($xsl);
+			if (is_null($oXsl))
+			{
+				throw new Core_Exception('Xsl %name does not exist.', array('%name' => $xsl));
+			}
+		}
+		else
+		{
+			$oXsl = $xsl;
+		}
+
+		if (!($oXsl instanceof Xsl_Model))
+		{
+			throw new Core_Exception('Wrong Xsl object "%type".', array('%type' => get_class($oXsl)));
+		}
+
 		$this->_xsl = $oXsl;
+
 		return $this;
 	}
 
@@ -167,9 +192,86 @@ class Core_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Set TPL
+	 * @param Tpl_Model|string $tpl
+	 * @return self
+	 */
+	public function tpl($tpl)
+	{
+		if (is_string($tpl))
+		{
+			$oTpl = Core_Entity::factory('Tpl')->getByName($tpl);
+			if (is_null($oTpl))
+			{
+				throw new Core_Exception('Tpl %name does not exist.', array('%name' => $tpl));
+			}
+		}
+		else
+		{
+			$oTpl = $tpl;
+		}
+
+		if (!($oTpl instanceof Tpl_Model))
+		{
+			throw new Core_Exception('Wrong Tpl object "%type".', array('%type' => get_class($oTpl)));
+		}
+
+		$this->_tpl = $oTpl;
+
+		return $this;
+	}
+
+	/**
+	 * Get TPL
+	 * @return Tpl_Model
+	 */
+	public function getTpl()
+	{
+		return $this->_tpl;
+	}
+
+	/**
+	 * Variables/objects to the TPL-template
+	 * @var array
+	 */
+	protected $_vars = array();
+
+	/**
+	 * assign variables/objects to the TPL-template
+	 * @return self
+	 */
+	public function assign($varname, $var)
+	{
+		$this->_vars[$varname] = $var;
+
+		return $this;
+	}
+
+	/**
+	 * append an element to an assigned array
+	 * @return self
+	 */
+	public function append($varname, $var)
+	{
+		$this->_vars[$varname][] = $var;
+
+		return $this;
+	}
+
+	/**
+	 * Clear vars
+	 * @return self
+	 */
+	public function clearVars()
+	{
+		$this->_vars = array();
+		return $this;
+	}
+
+	/**
 	 * Show built data
 	 * @see get()
-	 * @return Core_Controller
+	 * @return self
 	 * @hostcms-event Core_Controller.onBeforeShow
 	 * @hostcms-event Core_Controller.onAfterShow
 	 */
@@ -191,26 +293,44 @@ class Core_Controller extends Core_Servant_Properties
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShow', $this);
 
-		if (is_null($this->_xsl))
+		if (!is_null($this->_xsl))
 		{
-			throw new Core_Exception('Xsl does not exist.');
+			$sXml = $this->getXml();
+
+			$return = Xsl_Processor::instance()
+				->xml($sXml)
+				->xsl($this->_xsl)
+				->process();
+
+			Core_Event::notify(get_class($this) . '.onAfterShow', $this, array($sXml));
+
+			$this->clearEntities();
 		}
+		elseif (!is_null($this->_tpl))
+		{
+			$oTpl_Processor = Tpl_Processor::instance();
 
-		$sXml = $this->getXml();
+			$oTpl_Processor->vars($this->_vars);
+			$this->clearVars();
 
-		$return = Xsl_Processor::instance()
-			->xml($sXml)
-			->xsl($this->_xsl)
-			->process();
+			$oTpl_Processor->entities($this->_entities);
+			$this->clearEntities();
 
-		$this->clearEntities();
+			$return = $oTpl_Processor
+				->tpl($this->_tpl)
+				->process();
+
+			Core_Event::notify(get_class($this) . '.onAfterShow', $this);
+		}
+		else
+		{
+			throw new Core_Exception('Xsl or Tpl does not exist.');
+		}
 
 		/*echo "<br />Build HTML from XML and XSL '{$this->_xsl->name}'",
 			"<pre>" . htmlspecialchars(
 				Xsl_Processor::instance()->formatXml($sXml)
 			) . "</pre>";*/
-
-		Core_Event::notify(get_class($this) . '.onAfterShow', $this, array($sXml));
 
 		return $return;
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -186,29 +186,22 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 * @param int $oInformationsystem_Item item
 	 * @return array
 	 */
-	private function getItemData($oInformationsystem_Item)
+	protected function _getItemData($oInformationsystem_Item)
 	{
 		$aItemProperties = $aGroupProperties = array();
 
-		foreach ($this->_aItem_Properties as $oItem_Property)
+		foreach ($this->_aItem_Properties as $oProperty)
 		{
-			$aProperty_Values = $oItem_Property->getValues($oInformationsystem_Item->id, FALSE);
+			$aProperty_Values = $oProperty->getValues($oInformationsystem_Item->id, FALSE);
 			$iProperty_Values_Count = count($aProperty_Values);
 
-			$aItemProperties[] = sprintf('"%s"', $this->prepareString($iProperty_Values_Count > 0
-				? ($oItem_Property->type != 2
-					? ($oItem_Property->type == 3 && $aProperty_Values[0]->value != 0 && Core::moduleIsActive('list')
-						? $aProperty_Values[0]->List_Item->value
-						: ($oItem_Property->type == 8
-							? Core_Date::sql2date($aProperty_Values[0]->value)
-							: ($oItem_Property->type == 9
-								? Core_Date::sql2datetime($aProperty_Values[0]->value)
-								: $aProperty_Values[0]->value)))
-								: ($aProperty_Values[0]->file == '' ? '' : $aProperty_Values[0]->setHref($oInformationsystem_Item->getItemHref())->getLargeFileHref())
-								)
-								: ''));
+			$aItemProperties[] = sprintf('"%s"', $this->prepareString(
+				$iProperty_Values_Count > 0
+					? $this->_getPropertyValue($oProperty, $aProperty_Values[0], $oInformationsystem_Item)
+					: ''
+			));
 
-			if ($oItem_Property->type == 2)
+			if ($oProperty->type == 2)
 			{
 				$aItemProperties[] = $iProperty_Values_Count
 					? ($aProperty_Values[0]->file_small == '' ? '' : sprintf('"%s"', $aProperty_Values[0]->getSmallFileHref()))
@@ -279,6 +272,49 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		);
 	}
 
+	protected function _getPropertyValue($oProperty, $oProperty_Value, $object)
+	{
+		switch ($oProperty->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 4: // Textarea
+			case 6: // Wysiwyg
+			case 7: // Checkbox
+			case 10: // Hidden field
+			case 11: // Float
+			default:
+				$result = $oProperty_Value->value;
+			break;
+			case 2: // File
+				$result = $oProperty_Value->file == ''
+					? ''
+					: $oProperty_Value->setHref($object->getItemHref())->getLargeFileHref();
+			break;
+			case 3: // List
+				$result = $this->_getListValue($oProperty_Value->value);
+			break;
+			case 5: // Informationsystem
+				$result = $oProperty_Value->value
+					? $oProperty_Value->Informationsystem_Item->name
+					: '';
+			break;
+			case 8: // Date
+				$result = Core_Date::sql2date($oProperty_Value->value);
+			break;
+			case 9: // Datetime
+				$result = Core_Date::sql2datetime($oProperty_Value->value);
+			break;
+			case 12: // Shop
+				$result = $oProperty_Value->value
+					? $oProperty_Value->Shop_Item->name
+					: '';
+			break;
+		}
+
+		return $result;
+	}
+	
 	/**
 	 * Array of titile line
 	 * @var array
@@ -425,7 +461,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 
 				foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 				{
-					$this->_printRow($this->getItemData($oInformationsystem_Item));
+					$this->_printRow($this->_getItemData($oInformationsystem_Item));
 
 					$iPropertyFieldOffset = count($this->_aGroupBase_Properties) + count($this->_aItemBase_Properties);
 

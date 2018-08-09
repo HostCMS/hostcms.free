@@ -28,7 +28,7 @@
 		
 		<xsl:choose>
 			<xsl:when test="success/node() and success = 1">
-				<p>&labelSuccess;</p>
+				<xsl:value-of disable-output-escaping="yes" select="success_text" />
 			</xsl:when>
 			<xsl:otherwise>
 				<xsl:choose>

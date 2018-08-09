@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -84,6 +84,10 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->caption(Core::_('Informationsystem.information_systems_form_tab_4'))
 					->name('Image');
 
+				$oInformationsystemTabSeoTemplates = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Informationsystem.tab_seo_templates'))
+					->name('Seo_Templates');
+
 				$oInformationsystemTabSorting
 					->add($oSortingRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oSortingRow2 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -96,22 +100,58 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->add($oFormatsRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFormatsRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					// ->add($oFormatsRow8 = Admin_Form_Entity::factory('Div')->class('row'))
+					;
 
 				$oInformationsystemTabImage
+					->add($oImageRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))					
+					->add($oImageRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))					
 					->add($oImageRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow8 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oInformationsystemTabSeoTemplates
+					->add($oInformationsystemGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+					->add($oInformationsystemItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'));
+
+				$oInformationsystemGroupBlock
+					->add($oInformationsystemGroupHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-darkorange')
+						->value(Core::_("Informationsystem.seo_group_header"))
+					)
+					->add($oInformationsystemGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemGroupBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemGroupBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oInformationsystemGroupHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Informationsystem_Controller::showGroupButton()
+					));
+
+				$oInformationsystemItemBlock
+					->add($oInformationsystemItemHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_("Informationsystem.seo_item_header"))
+					)
+					->add($oInformationsystemItemBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemItemBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oInformationsystemItemBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oInformationsystemItemHeaderDiv
+					->add(Admin_Form_Entity::factory('Code')->html(
+						Informationsystem_Controller::showItemButton()
+					));
 
 				$this
 					->addTabAfter($oInformationsystemTabSorting, $oMainTab)
 					->addTabAfter($oInformationsystemTabFormats, $oInformationsystemTabSorting)
-					->addTabAfter($oInformationsystemTabImage, $oInformationsystemTabFormats);
+					->addTabAfter($oInformationsystemTabSeoTemplates, $oInformationsystemTabFormats)
+					->addTabAfter($oInformationsystemTabImage, $oInformationsystemTabSeoTemplates);
 
 				$oAdditionalTab->delete($this->getField('informationsystem_dir_id'));
 
@@ -293,8 +333,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_large_max_width'), $oFormatsRow2)
-					->move($this->getField('image_large_max_height'), $oFormatsRow2);
+					->move($this->getField('image_large_max_width'), $oImageRowSize1)
+					->move($this->getField('image_large_max_height'), $oImageRowSize1);
 
 				$this->getField('image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -302,8 +342,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('image_small_max_width'), $oFormatsRow3)
-					->move($this->getField('image_small_max_height'), $oFormatsRow3);
+					->move($this->getField('image_small_max_width'), $oImageRowSize2)
+					->move($this->getField('image_small_max_height'), $oImageRowSize2);
 
 				$this->getField('group_image_large_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -312,21 +352,31 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				$oMainTab
-					->move($this->getField('group_image_large_max_width'), $oFormatsRow4)
-					->move($this->getField('group_image_large_max_height'), $oFormatsRow4);
+					->move($this->getField('group_image_large_max_width'), $oImageRowSize3)
+					->move($this->getField('group_image_large_max_height'), $oImageRowSize3);
 
 				$this->getField('group_image_small_max_width')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$this->getField('group_image_small_max_height')
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 				$oMainTab
-					->move($this->getField('group_image_small_max_width'), $oFormatsRow5)
-					->move($this->getField('group_image_small_max_height'), $oFormatsRow5);
+					->move($this->getField('group_image_small_max_width'), $oImageRowSize4)
+					->move($this->getField('group_image_small_max_height'), $oImageRowSize4);
 
 				$oMainTab
-					->move($this->getField('use_captcha'), $oFormatsRow6)
-					->move($this->getField('typograph_default_items'), $oFormatsRow7)
-					->move($this->getField('typograph_default_groups'), $oFormatsRow8);
+					->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
+					->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
+					->move($this->getField('use_captcha'), $oFormatsRow7);
+
+
+				// Seo templates
+				$oMainTab
+					->move($this->getField('seo_group_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow1)
+					->move($this->getField('seo_group_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow2)
+					->move($this->getField('seo_group_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemGroupBlockRow3)
+					->move($this->getField('seo_item_title_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow1)
+					->move($this->getField('seo_item_description_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow2)
+					->move($this->getField('seo_item_keywords_template')->divAttr(array('class' => 'form-group col-xs-12')), $oInformationsystemItemBlockRow3);
 
 				// Изображение
 				$oWatermarkFileField = Admin_Form_Entity::factory('File');
@@ -361,21 +411,15 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oImageRow1->add($oWatermarkFileField);
 
 				$oMainTab
-					->move($this->getField('preserve_aspect_ratio'), $oImageRow2)
-					->move($this->getField('preserve_aspect_ratio_small'), $oImageRow3)
-					->move($this->getField('preserve_aspect_ratio_group'), $oImageRow4)
-					->move($this->getField('preserve_aspect_ratio_group_small'), $oImageRow5)
-					->move($this->getField('watermark_default_use_large_image'), $oImageRow6)
-					->move($this->getField('watermark_default_use_small_image'), $oImageRow7)
-					->move($this->getField('watermark_default_position_x'), $oImageRow8)
-					->move($this->getField('watermark_default_position_y'), $oImageRow8);
-
-				$this->getField('watermark_default_position_x')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
-				$this->getField('watermark_default_position_y')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-
+					->move($this->getField('preserve_aspect_ratio')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
+					->move($this->getField('preserve_aspect_ratio_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow2)
+					->move($this->getField('preserve_aspect_ratio_group')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
+					->move($this->getField('preserve_aspect_ratio_group_small')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow3)
+					->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
+					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
+					->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
+					->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
+					->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow6);
 			break;
 			case 'informationsystem_dir':
 			default:
@@ -460,7 +504,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	{
 		parent::_applyObjectProperty();
 
-		if(
+		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
 			// и передан файл

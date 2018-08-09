@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -71,12 +71,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/index.php', NULL, NULL, '')
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, '')
 		)
 );
@@ -85,12 +83,10 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($pageTitle)
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_country_id=" . $iShopCountryId)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -110,8 +106,7 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	// Хлебные крошки для контроллера редактирования
 	$ShopCountryLocation_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

@@ -19,6 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - onStep(3000) количество товаров, выбираемых запросом за 1 шаг, по умолчанию 500
  * - stdOut() поток вывода, может использоваться для записи результата в файл. По умолчанию Core_Out_Std
  * - sno() система налогообложения (СНО) магазина. По умолчанию OSN — общая система налогообложения (ОСН).
+ * - delay() временная задержка в микросекундах, используется на виртульных хостингах с ограничнием на ресурсы в единицу времени, по умолчанию 0. значение 10000 - 0,01 секунда.
  *
  *
  * <code>
@@ -46,7 +47,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -70,6 +71,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'mode',
 		'token',
 		'sno',
+		'delay',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -98,18 +100,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @var array
 	 */
 	protected $_aSiteuserGroups = array();
-
-	/**
-	 * List's offer tags
-	 * @var array
-	 */
-	public $aOfferTags = array(
-		'adult' => 'adult',
-		'cpa' => 'cpa',
-		'age-year' => 'age-year',
-		'age-month' => 'age-month',
-		'barcode' => 'barcode',
-	);
 
 	/**
 	 * List's vendor tags
@@ -285,6 +275,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->mode = NULL;
 		$this->token = '';
 		$this->sno = 'OSN';
+		$this->delay = 0;
 
 		Core_Session::close();
 	}
@@ -511,6 +502,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 
 			$iFrom += $this->onStep;
+			
+			// Delay execution
+			$this->delay && usleep($this->delay);
 		}
 		while ($iFrom < $maxId);
 
@@ -626,6 +620,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 			//Core_File::flush();
 			$iFrom += $this->onStep;
+			
+			// Delay execution
+			$this->delay && usleep($this->delay);
 		}
 		while ($iFrom < $maxId);
 
@@ -746,18 +743,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if (strlen($description))
 		{
 			$description = Core_Str::cutSentences(
-				html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 175
+				html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
 			);
 
 			$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
 		}
 
 		/* sales_notes */
-		$sales_notes = mb_strlen($oShop_Item->yandex_market_sales_notes) > 0
-			? $oShop_Item->yandex_market_sales_notes
-			: $oShop->yandex_market_sales_notes_default;
+		$sales_notes = $oShop_Item->yandex_market_sales_notes != ''
+			? trim($oShop_Item->yandex_market_sales_notes)
+			: trim($oShop->yandex_market_sales_notes_default);
 
-		$this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
+		$sales_notes != ''
+			&& $this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
 
 		if ($oShop_Item->manufacturer_warranty)
 		{
@@ -779,6 +777,15 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if ($oShop_Item->adult)
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
+		}
+
+		/* cpa */
+		$this->stdOut->write('<cpa>' . $oShop_Item->cpa .  '</cpa>' . "\n");
+
+		/* weight */
+		if ($oShop_Item->weight > 0)
+		{
+			$this->stdOut->write('<weight>' . $oShop_Item->weight .  '</weight>' . "\n");
 		}
 
 		/* rec */
@@ -910,9 +917,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected function _getCacheListItem($oProperty, $listItemId)
 	{
-		if (!isset($this->_cacheListItems[$oProperty->list_id][$listItemId]))
+		if (!isset($this->_cacheListItems[$listItemId]))
 		{
-			$this->_cacheListItems[$oProperty->list_id][$listItemId] = NULL;
+			$this->_cacheListItems[$listItemId] = NULL;
 
 			if ($listItemId)
 			{
@@ -921,11 +928,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				);
 
 				!is_null($oList_Item)
-					&& $this->_cacheListItems[$oProperty->list_id][$listItemId] = $oList_Item->value;
+					&& $this->_cacheListItems[$listItemId] = $oList_Item->value;
 			}
 		}
 
-		return $this->_cacheListItems[$oProperty->list_id][$listItemId];
+		return $this->_cacheListItems[$listItemId];
 	}
 
 	/**
@@ -969,7 +976,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					//$value = !is_null($oList_Item)
 					//	? $oList_Item->value
 					//	: NULL;
-					$value = $this->_getCacheListItem($oProperty, $oProperty_Value->value);
+					$value = Core::moduleIsActive('list')
+						? $this->_getCacheListItem($oProperty, $oProperty_Value->value)
+						: NULL;
 				break;
 
 				case 7: // Checkbox
@@ -1063,6 +1072,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
+		// Поле URL API https://www.site.com/shop/yandex_market/?action=
 		$action = Core_Array::getGet('action');
 
 		$path = NULL;
@@ -1079,12 +1089,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 				if ($this->token != Core_Array::get($request, 'auth-token'))
 				{
-					return $this->error404();
+					//return $this->error404();
+					throw new Core_Exception("Wrong auth-token!");
 				}
 			}
 			else
 			{
-				return $this->error404();
+				//return $this->error404();
+				throw new Core_Exception("Empty query!");
 			}
 		}
 
@@ -1310,7 +1322,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 						foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
 						{
-							$count += $oShop_Warehouse_Item->count;
+							if ($oShop_Warehouse_Item->Shop_Warehouse->active)
+							{
+								$count += $oShop_Warehouse_Item->count;
+							}
 						}
 
 						$aAnswer['cart']['items'][] = array(
@@ -1366,7 +1381,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			$oShop_Order = $this->createOrder($aResponse['order']);
 
-			if(!is_null($oShop_Order->id))
+			if (!is_null($oShop_Order->id))
 			{
 				$aAnswer['order'] = array(
 					"accepted" => TRUE,
@@ -1456,6 +1471,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		if (count($aOrderParams['items']))
 		{
+			$oSiteuser = Core::moduleIsActive('siteuser')
+				? Core_Entity::factory('Siteuser')->getCurrent()
+				: NULL;
+
 			foreach ($aOrderParams['items'] as $orderItem)
 			{
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($orderItem['offerId']);
@@ -1472,8 +1491,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					// Prices
 					$oShop_Item_Controller = new Shop_Item_Controller();
 
-					Core::moduleIsActive('siteuser') && $oSiteuser
-						&& $oShop_Item_Controller->siteuser($oSiteuser);
+					$oSiteuser && $oShop_Item_Controller->siteuser($oSiteuser);
 
 					$oShop_Item_Controller->count($orderItem['count']);
 
@@ -1554,17 +1572,40 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Headers Already Sent
+	 * @var boolean
+	 */
+	protected $_headersSent = FALSE;
+
+	/**
+	 * Send Headers
+	 * @return self
+	 */
+	public function sendHeaders()
+	{
+		if (!$this->_headersSent && !headers_sent())
+		{
+			// Stop buffering
+			ob_get_clean();
+
+			header('Content-Type: raw/data');
+			header("Cache-Control: no-cache, must-revalidate");
+			header('X-Accel-Buffering: no');
+
+			$this->_headersSent = TRUE;
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Show UML built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
 	 */
 	public function showYml()
 	{
-		// Stop buffering
-		ob_get_clean();
-		header('Content-Type: raw/data');
-		header("Cache-Control: no-cache, must-revalidate");
-		header('X-Accel-Buffering: no');
+		$this->sendHeaders();
 
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShowYml', $this);
 
@@ -1619,6 +1660,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
 		}
+
+		$this->stdOut->write('<cpa>' . $oShop->cpa . '</cpa>' . "\n");
 
 		/* Товары */
 		$this->_offers();

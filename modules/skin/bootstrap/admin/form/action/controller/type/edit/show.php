@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
@@ -22,19 +22,23 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		$children = $this->children;
 		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
-		/*$oAdmin_View = Admin_View::create();
-		$oAdmin_View
-			->children($children)
-			->pageTitle($this->title)
-			->module($Admin_Form_Controller->getModule());*/
-
 		ob_start();
-		/*?>
-		<div class="table-toolbar">
-			<?php $oAdmin_View->showFormMenus()?>
-		</div>
-		<?php*/
-		//$oAdmin_View->showChildren();
+
+		if (count($this->children))
+		{
+			?><div class="table-toolbar">
+				<?php
+				foreach ($this->children as $oAdmin_Form_Entity)
+				{
+					if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+					{
+						$oAdmin_Form_Entity->execute();
+					}
+				}
+				?>
+				<div class="clear"></div>
+			</div><?php
+		}
 
 		// Форма
 		$oAdmin_Form_Entity_Form = $this->form->controller(
@@ -99,7 +103,7 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 			$sOperaionSufix = $sOperaion == 'modal'
 				? 'Modal'
 				: '';
-			
+
 			// Кнопки
 			$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
 

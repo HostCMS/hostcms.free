@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -36,7 +36,7 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 
 			$aFileData = Core_Array::getFiles('csvfile', NULL);
 
-			if(is_null($aFileData) || intval($aFileData['size']) == 0)
+			if (is_null($aFileData) || intval($aFileData['size']) == 0)
 			{
 				$this->addMessage(
 					Core_Message::get(Core::_("Shop_Delivery_Condition.msg_import_file"), 'error')
@@ -67,13 +67,13 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 
 		$fp = fopen($sCSVFilePath, "rb");
 
-		if(!$fp)
+		if (!$fp)
 		{
 			return true;
 		}
 
 		// Цикл по строкам CSV-файла
-		while(!feof($fp))
+		while (!feof($fp))
 		{
 			$current_csv_line_array = fgetcsv($fp, 10000, ';', '"');
 
@@ -87,7 +87,7 @@ class Shop_Delivery_Condition_Controller_Import extends Admin_Form_Action_Contro
 			{
 				$oShopDeliveryCondition = Core_Entity::factory('Shop_Delivery_Condition');
 
-				foreach($current_csv_line_array as $code => $data)
+				foreach ($current_csv_line_array as $code => $data)
 				{
 					switch ($code)
 					{

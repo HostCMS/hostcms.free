@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -71,4 +71,7 @@ return array(
 	'allowAccessChildren_success' => 'Доступ разрешен.',
 	'denyAccessChildren_success' => 'Доступ запрещен.',
 	'multiple' => 'Разрешить множественные значения для свойства',
+	'preserve_aspect_ratio' => 'Сохранять пропорции изображения',
+	'preserve_aspect_ratio_small' => 'Сохранять пропорции малого изображения',
+	'changeMultiple_success' => 'Множественность свойства изменена!',
 );

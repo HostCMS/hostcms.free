@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Yandex extends Seo_Controller
 {
@@ -44,7 +44,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 		if (isset($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT']))
 		{
-			foreach($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT'] as $aTmp)
+			foreach ($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT'] as $aTmp)
 			{
 				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
@@ -67,7 +67,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 		if (isset($aTicHistory['points']))
 		{
-			foreach($aTicHistory['points'] as $aTmp)
+			foreach ($aTicHistory['points'] as $aTmp)
 			{
 				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
@@ -105,7 +105,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		{
 			if (isset($aIndexingHistory['indicators'][$sIndicator]))
 			{
-				foreach($aIndexingHistory['indicators'][$sIndicator] as $aTmp)
+				foreach ($aIndexingHistory['indicators'][$sIndicator] as $aTmp)
 				{
 					$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 					$aValues[$date][$sIndicator] = intval(Core_Array::get($aTmp, 'value'));

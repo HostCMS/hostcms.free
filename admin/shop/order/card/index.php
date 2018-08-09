@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -13,9 +13,20 @@ Core_Auth::authorization('shop');
 
 $sAdminFormAction = '/admin/shop/order/card/index.php';
 
-$oShop_Order = Core_Entity::factory('Shop_Order', Core_Array::getGet('shop_order_id', 0));
+$shop_order_id = intval(Core_Array::getGet('shop_order_id'));
+
+$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+
+if (is_null($oShop_Order))
+{
+	throw new Core_Exception('Shop_Order does not exist');
+}
+
 $oShop = $oShop_Order->Shop;
-$oCompany = $oShop->Shop_Company;
+
+$oCompany = $oShop_Order->company_id
+	? $oShop_Order->Shop_Company
+	: $oShop->Shop_Company;
 
 $aFullAddress = array(
 	trim($oShop_Order->postcode),
@@ -113,7 +124,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 		}
 
 		$oShop
-			// ->addEntity($oShop->Shop_Company->clearEntities())
+			// ->addEntity($oCompany->clearEntities())
 			->addEntity(
 				$oShop->Site->clearEntities()->showXmlAlias()
 			)
@@ -171,6 +182,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 }
 else
 {
+	
 	?>
 	<p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p>
 
@@ -181,7 +193,7 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oShop->Shop_Company->name)?>
+					<?php echo htmlspecialchars($oCompany->name)?>
 				</b>
 			</td>
 		</tr>
@@ -211,7 +223,23 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->address)?>
+					<?php
+					$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+					if (isset($aDirectory_Addresses[0]))
+					{
+						$aCompanyAddress = array(
+							$aDirectory_Addresses[0]->postcode,
+							$aDirectory_Addresses[0]->country,
+							$aDirectory_Addresses[0]->city,
+							$aDirectory_Addresses[0]->value
+						);
+
+						$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+						$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+						
+						echo htmlspecialchars($sFullCompanyAddress);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -221,17 +249,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->phone)?>
-				</b>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top">
-				<?php echo Core::_("Shop_Order.order_card_fax") . ":"?>
-			</td>
-			<td valign="top">
-				<b>
-					<?php echo htmlspecialchars($oCompany->fax)?>
+					<?php
+					$aDirectory_Phones = $oCompany->Directory_Phones->findAll();
+					if (isset($aDirectory_Phones[0]))
+					{
+						echo htmlspecialchars($aDirectory_Phones[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -241,7 +265,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->email)?>
+					<?php
+					$aDirectory_Emails = $oCompany->Directory_Emails->findAll(FALSE);
+					if (isset($aDirectory_Emails[0]))
+					{
+						echo htmlspecialchars($aDirectory_Emails[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -251,7 +281,13 @@ else
 			</td>
 			<td valign="top">
 				<b>
-					<?php echo htmlspecialchars($oCompany->site)?>
+					<?php
+					$aDirectory_Websites = $oCompany->Directory_Websites->findAll(FALSE);
+					if (isset($aDirectory_Websites[0]))
+					{
+						echo htmlspecialchars($aDirectory_Websites[0]->value);
+					}
+					?>
 				</b>
 			</td>
 		</tr>
@@ -377,7 +413,7 @@ else
 
 	$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-	if(count($aShopOrderItems))
+	if (count($aShopOrderItems))
 	{
 		foreach ($aShopOrderItems as $oShop_OrderItem)
 		{

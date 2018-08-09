@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -83,6 +83,8 @@ if (Core_Array::getPost('action') == 'export')
 						->encoding(Core_Array::getPost('import_price_encoding', "UTF-8"))
 						->parentGroup($shop_groups_parent_id)
 						->producer(Core_Array::getPost('shop_producer_id', 0))
+						->startItemDate(Core_Array::getPost('item_begin_date', ''))
+						->endItemDate(Core_Array::getPost('item_end_date', ''))
 						->execute();
 				}
 				else
@@ -107,8 +109,8 @@ if (Core_Array::getPost('action') == 'export')
 					$oShop_Item_Export_Csv_Controller
 						->exportOrders(TRUE)
 						->separator($iSeparator > 1 ? "" : $aSeparator[$iSeparator])
-						->start_order_date(Core_Array::getPost('order_begin_date', '01.01.1970'))
-						->end_order_date(Core_Array::getPost('order_end_date', '01.01.1970'))
+						->startOrderDate(Core_Array::getPost('order_begin_date', '01.01.1970'))
+						->endOrderDate(Core_Array::getPost('order_end_date', '01.01.1970'))
 						->encoding(Core_Array::getPost('import_price_encoding', "UTF-8"))
 						->execute();
 				}
@@ -220,7 +222,7 @@ if ($oShopDir->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
 		));
-	}while($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -259,7 +261,7 @@ if ($oShopGroup->id)
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
 				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
 		));
-	} while($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -280,13 +282,6 @@ Admin_Form_Entity::factory('Breadcrumb')
 	$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"
 	))
 );
-
-//ob_start();
-
-/*// Заголовок
-Admin_Form_Entity::factory('Title')
-	->name(Core::_('Shop_Item.export_shop'))
-	->execute();*/
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)
@@ -347,6 +342,19 @@ $oMainTab->add(
 			->name('order_end_date')
 			->value(Core_Date::timestamp2sql(time()))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-2 hidden-3','id'=>'order_end_date'))
+	)
+	->add(
+		Admin_Form_Entity::factory('Date')
+			->caption(Core::_('Shop_Item.start_order_date'))
+			->name('item_begin_date')
+			->value('')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3', 'id' => 'order_begin_date'))
+	)->add(
+		Admin_Form_Entity::factory('Date')
+			->caption(Core::_('Shop_Item.stop_order_date'))
+			->name('item_end_date')
+			->value('')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3','id'=>'order_end_date'))
 	));
 
 	class Shop_Item_Export_Csv_Property {

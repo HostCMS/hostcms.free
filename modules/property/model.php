@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -65,6 +65,26 @@ class Property_Model extends Core_Entity
 	);
 
 	/**
+	 * Forbidden tags. If list of tags is empty, all tags will show.
+	 * @var array
+	 */
+	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
+		'list_id',
+		'informationsystem_id',
+		'shop_id',
+		'guid',
+		'image_large_max_width',
+		'image_large_max_height',
+		'image_small_max_width',
+		'image_small_max_height',
+		'hide_small_image',
+		'preserve_aspect_ratio',
+		'preserve_aspect_ratio_small'
+	);
+
+	/**
 	 * Default sorting for models
 	 * @var array
 	 */
@@ -90,7 +110,9 @@ class Property_Model extends Core_Entity
 		'default_value' => '',
 		'hide_small_image' => 0,
 		'sorting' => 0,
-		'multiple' => 1
+		'multiple' => 1,
+		'preserve_aspect_ratio' => 1,
+		'preserve_aspect_ratio_small' => 1
 	);
 
 	/**
@@ -252,7 +274,7 @@ class Property_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		// Relations
 		$this->Structure_Property->delete();
 		$this->Informationsystem_Item_Property->delete();
@@ -345,6 +367,23 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Limit List Items in XML
+	 * @var array|Core_QueryBuilder_Select
+	 */
+	protected $_limitListItems = NULL;
+
+	/**
+	 * Limit List Items in XML
+	 * @param array|Core_QueryBuilder_Select $limitListItems
+	 * @return self
+	 */
+	public function limitListItems($limitListItems)
+	{
+		$this->_limitListItems = $limitListItems;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event property.onBeforeRedeclaredGetXml
@@ -361,14 +400,14 @@ class Property_Model extends Core_Entity
 
 		$this->clearXmlTags();
 
-		if ($this->type != 2)
+		/*if ($this->type != 2)
 		{
 			$this->addForbiddenTag('image_large_max_width')
 				->addForbiddenTag('image_large_max_height')
 				->addForbiddenTag('image_small_max_width')
 				->addForbiddenTag('image_small_max_height')
 				->addForbiddenTag('hide_small_image');
-		}
+		}*/
 
 		// List
 		if ($bIsList)
@@ -382,9 +421,15 @@ class Property_Model extends Core_Entity
 				$oList_Items = $this->List->List_Items;
 				$oList_Items->queryBuilder()
 					->where('list_items.active', '=', 1);
-				
+
+				if (!is_null($this->_limitListItems))
+				{
+					$oList_Items->queryBuilder()
+						->where('list_items.id', 'IN', $this->_limitListItems);
+				}
+
 				Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
-				
+
 				$this->List->addEntities(
 					$oList_Items->findAll()
 				);
@@ -392,5 +437,28 @@ class Property_Model extends Core_Entity
 		}
 
 		return parent::getXml();
+	}
+
+	public function typeBackend()
+	{
+		return Core::_('Property.type' . $this->type);
+	}
+
+	/**
+	 * Change multiple status
+	 * @return self
+	 * @hostcms-event property.onBeforeChangeMultiple
+	 * @hostcms-event property.onAfterChangeMultiple
+	 */
+	public function changeMultiple()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeMultiple', $this);
+
+		$this->multiple = 1 - $this->multiple;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeMultiple', $this);
+
+		return $this;
 	}
 }

@@ -72,6 +72,6 @@ AddDefaultCharset Off
 
 	RewriteCond %{REQUEST_METHOD} !POST
 	RewriteCond %{HTTP_COOKIE} !^.*PHPSESSID=.*$
-	RewriteCond %{DOCUMENT_ROOT}/cache_html/%{HTTP_HOST}%{REQUEST_URI}%{QUERY_STRING}index.html -f
-	RewriteRule ^(.*)$ /cache_html/%{HTTP_HOST}%{REQUEST_URI}%{QUERY_STRING}index.html
+	RewriteCond %{DOCUMENT_ROOT}/cache_html/%{SERVER_NAME}%{REQUEST_URI}%{QUERY_STRING}index.html -f
+	RewriteRule ^(.*)$ /cache_html/%{SERVER_NAME}%{REQUEST_URI}%{QUERY_STRING}index.html
 </IfModule>

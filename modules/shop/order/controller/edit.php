@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -262,7 +262,25 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->id('status_datetime')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
 
-		$oMainTab->move($this->getField('ip')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
+			
+		$aTmpCompanies = array(" … ");
+		$aCompanies = $object->Shop->Site->Companies->findAll();
+		foreach ($aCompanies as $oCompany)
+		{
+			$aTmpCompanies[$oCompany->id] = $oCompany->name;
+		}
+		
+		$oMainRow5->add(
+			Admin_Form_Entity::factory('Select')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+				->caption(Core::_('Shop_Order.company_id'))
+				->options($aTmpCompanies)
+				->name('company_id')
+				->value($this->_object->company_id)
+		);
+			
+		$oMainTab->move($this->getField('ip')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
 
 		$this->getField('status_datetime');
 
@@ -272,14 +290,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oAdditionalTab->delete($this->getField('shop_currency_id'));
 
-		$oAdditionalTab->delete(
-			$this->getField('shop_payment_system_id')
-		);
-
-		// Удаляем страны
-		$oAdditionalTab->delete(
-			$this->getField('shop_country_id')
-		);
+		$oAdditionalTab->delete($this->getField('shop_payment_system_id'))
+			->delete($this->getField('shop_country_id'))
+			->delete($this->getField('company_id'));
 
 		// Создаем поле стран как выпадающий список
 		$CountriesSelectField = Admin_Form_Entity::factory('Select')

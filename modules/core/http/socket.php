@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Socket extends Core_Http
 {
@@ -93,20 +93,56 @@ class Core_Http_Socket extends Core_Http
 			stream_set_timeout($fp, $this->_timeout);
 		}
 
-		$datastr = '';
+		$this->_headers = $this->_body = NULL;
+
+		$this->_body = '';
 
 		while (!feof($fp))
 		{
-			$datastr .= fgets($fp, 65536);
+			$line = fgets($fp, 65536);
+			/*if ($line === FALSE)
+			{
+				throw new Core_Exception("HostCMS: Socket closed by the server!");
+			}*/
+
+			$this->_body .= $line;
+
+			$socketStatus = stream_get_meta_data($fp);
+			if ($socketStatus['timed_out'])
+			{
+				throw new Exception("HostCMS: Timed Out, socket closed by the server!");
+			}
+
+			if (is_null($this->_headers) && strlen($this->_body) > 2048)
+			{
+				$this->_explode();
+			}
 		}
 
 		fclose($fp);
 
-		$aTmp = explode("\r\n\r\n", $datastr, 2);
-		unset ($datastr);
+		is_null($this->_headers) && $this->_explode();
 
+		/*$aTmp = explode("\r\n\r\n", $datastr, 2);
+		unset ($datastr);
 		$this->_headers = Core_Array::get($aTmp, 0);
-		$this->_body = Core_Array::get($aTmp, 1);
+		$this->_body = Core_Array::get($aTmp, 1);*/
+
+		return $this;
+	}
+
+	/**
+	 * Explode Headers and Body
+	 * @return self
+	 */
+	protected function _explode()
+	{
+		$pos = strpos($this->_body, "\r\n\r\n");
+		if ($pos !== FALSE)
+		{
+			$this->_headers = substr($this->_body, 0, $pos);
+			$this->_body = substr($this->_body, $pos + 4);
+		}
 
 		return $this;
 	}

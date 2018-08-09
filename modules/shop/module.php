@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -17,13 +17,13 @@ class Shop_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.7';
+	public $version = '6.8';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2017-12-25';
+	public $date = '2018-04-24';
 
 	/**
 	 * Module name
@@ -39,15 +39,15 @@ class Shop_Module extends Core_Module
 		0 => 'searchIndexItem',
 		1 => 'searchIndexGroup',
 		2 => 'searchUnindexItem',
+		3 => 'recountShop',
 	);
 
 	/**
-	 * Constructor.
+	 * Get Module's Menu
+	 * @return array
 	 */
-	public function __construct()
+	public function getMenu()
 	{
-		parent::__construct();
-
 		$this->menu = array(
 			array(
 				'sorting' => 40,
@@ -58,6 +58,8 @@ class Shop_Module extends Core_Module
 				'onclick' => "$.adminLoad({path: '/admin/shop/index.php'}); return false"
 			)
 		);
+
+		return parent::getMenu();
 	}
 
 	/**
@@ -191,7 +193,7 @@ class Shop_Module extends Core_Module
 		$aShopGroups = $oShopGroup->findAll(FALSE);
 
 		$result = array();
-		foreach($aShopGroups as $oShopGroup)
+		foreach ($aShopGroups as $oShopGroup)
 		{
 			$result[] = $oShopGroup->indexing();
 		}
@@ -257,7 +259,7 @@ class Shop_Module extends Core_Module
 
 		$result = array();
 
-		foreach($aShopItems as $oShopItem)
+		foreach ($aShopItems as $oShopItem)
 		{
 			$result[] = $oShopItem->indexing();
 		}
@@ -297,7 +299,7 @@ class Shop_Module extends Core_Module
 		$aShopSellers = $oShopSeller->findAll();
 
 		$result = array();
-		foreach($aShopSellers as $oShopSeller)
+		foreach ($aShopSellers as $oShopSeller)
 		{
 			$result[] = $oShopSeller->indexing();
 		}
@@ -451,17 +453,21 @@ class Shop_Module extends Core_Module
 				case 2:
 					Core_Entity::factory('Shop_Item', $entityId)->unindex()->clearCache();
 				break;
+				// Recount shop
+				case 3:
+					Core_Entity::factory('Shop', $entityId)->recount();
+				break;				
 			}
 		}
 	}
 
 	/**
-	 * Get List of Notification
+	 * Get Notification Design
 	 * @param int $type
 	 * @param int $entityId
 	 * @return array
 	 */
-	public function getNotifications($type, $entityId)
+	public function getNotificationDesign($type, $entityId)
 	{
 		// Идентификатор формы "Оформленные заказы"
 		$iAdmin_Form_Id = 75;

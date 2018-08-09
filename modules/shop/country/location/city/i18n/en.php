@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Cities',
@@ -26,6 +26,8 @@ return array(
 	'markDeleted_success' => "City/town information deleted successfully!",
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'active'=> 'Active',
+	'changeActive_success' => "Information successfully changed",
 
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',

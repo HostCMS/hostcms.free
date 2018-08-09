@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Цены магазина',
@@ -21,8 +21,11 @@ return array(
 	'guid' => '<acronym title="Идентификатор цены для формата CommerceML, например ID00006831">Идентификатор цены CommerceML</acronym>',
 	'shop_id' => 'Идентификатор магазина',
 	'id' => 'Идентификатор',
+	'sorting' => 'Порядок сортировки',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-'edit_success' => "Данные о цене успешно добавлены!",
-'markDeleted_success' => "Данные о цене успешно удалены!",
+	'edit_success' => "Данные о цене успешно добавлены!",
+	'markDeleted_success' => "Данные о цене успешно удалены!",
+	'apply_success' => "Информация успешно изменена.",
+	'recount_success' => "Цены пересчитаны успешно!",
 );

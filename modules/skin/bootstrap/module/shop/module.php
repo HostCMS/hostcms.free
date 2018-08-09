@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -75,16 +75,22 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 	{
 		$oUser = Core_Entity::factory('User', 0)->getCurrent();
 
-		$oCompany_Department_Action_Accesses = Core_Entity::factory('Company_Department_Action_Access');
-		$oCompany_Department_Action_Accesses
-			->queryBuilder()
-			->where('company_department_action_accesses.site_id', '=', CURRENT_SITE)
-			->where('company_department_action_accesses.user_id', '=', $oUser->id)
-			->where('company_department_action_accesses.admin_form_action_id', '=', 172);
+		$oAdmin_Form = Core_Entity::factory('Admin_Form', 75);
 
-		$iCount = $oCompany_Department_Action_Accesses->getCount();
+		$aAdmin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-		if ($oUser->superuser || $iCount)
+		$access = FALSE;
+
+		foreach ($aAdmin_Form_Actions as $oAdmin_Form_Action)
+		{
+			if ($oAdmin_Form_Action->name == 'edit')
+			{
+				$access = TRUE;
+				break;
+			}
+		}
+
+		if ($oUser->superuser || $access)
 		{
 			$oLast_Shop_Orders = Core_Entity::factory('Shop_Order');
 			$oLast_Shop_Orders

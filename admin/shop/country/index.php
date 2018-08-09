@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -68,7 +68,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
-if($iShopDirId)
+if ($iShopDirId)
 {
 	// Далее генерируем цепочку хлебных крошек от текущей группы к корневой
 	$oShopDir = Core_Entity::factory('Shop_Dir')->find($iShopDirId);
@@ -96,7 +96,7 @@ if($iShopDirId)
 					$sShopFormPath, NULL, NULL, $additionalParams
 				)
 			);
-	} while($oShopDir = $oShopDir->getParent());
+	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -112,12 +112,10 @@ if($iShopDirId)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href
-		(
+		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . $iShopDirId)
 		)
-		->onclick
-		(
+		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
 		)
 );
@@ -167,8 +165,7 @@ $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 	// Хлебные крошки для контроллера редактирования
 	$ShopCountry_Controller_Edit
-		->addEntity
-		(
+		->addEntity(
 			$oAdmin_Form_Entity_Breadcrumbs
 		);
 

@@ -3,7 +3,7 @@
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
 // Проверять остаток на складе при добавлении в корзину
-$bCheckStock = TRUE;
+$bCheckStock = FALSE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 
@@ -88,14 +88,12 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 			)
 			->show();
 
-		echo json_encode(
+		Core::showJson(
 			array(
 				'html' => ob_get_clean(),
 				'id' => $shop_item_id
 			)
 		);
-
-		exit();
 	}
 
 	// Список доставок
@@ -113,8 +111,9 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 
 			$aDelivery = $Shop_Cart_Controller_Onestep->showDelivery($shop_country_id, $shop_country_location_id, $shop_country_location_city_id, $shop_country_location_city_area_id, $aTotal['weight'], $aTotal['amount']);
 
-			echo json_encode(array('delivery' => $aDelivery));
-			exit();
+			Core::showJson(
+				array('delivery' => $aDelivery)
+			);
 		}
 	}
 
@@ -131,8 +130,7 @@ if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 			$aPaymentSystems = $Shop_Cart_Controller_Onestep->showPaymentSystem($oShop_Delivery_Condition->shop_delivery_id);
 		}
 
-		echo json_encode(array('payment_systems' => $aPaymentSystems));
-		exit();
+		Core::showJson(array('payment_systems' => $aPaymentSystems));
 	}
 }
 
@@ -173,7 +171,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location
 			->queryBuilder()
 			->where('shop_country_id', '=', intval(Core_Array::getGet('shop_country_id')));
-		$aObjects = $oShop_Country_Location->findAll();
+		$aObjects = $oShop_Country_Location->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_id'))
 	{
@@ -181,7 +179,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City
 			->queryBuilder()
 			->where('shop_country_location_id', '=', intval(Core_Array::getGet('shop_country_location_id')));
-		$aObjects = $oShop_Country_Location_City->findAll();
+		$aObjects = $oShop_Country_Location_City->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_city_id'))
 	{
@@ -189,7 +187,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City_Area
 			->queryBuilder()
 			->where('shop_country_location_city_id', '=', intval(Core_Array::getGet('shop_country_location_city_id')));
-		$aObjects = $oShop_Country_Location_City_Area->findAll();
+		$aObjects = $oShop_Country_Location_City_Area->getAllByActive(1);
 	}
 
 	$aArray = array('…');
@@ -199,8 +197,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$aArray['_' . $Object->id] = $Object->getName();
 	}
 
-	echo json_encode($aArray);
-	exit();
+	Core::showJson($aArray);
 }
 
 // Удаляение товара из корзины
@@ -220,6 +217,7 @@ if (Core_Array::getGet('delete'))
 // Запоминаем купон
 if (!is_null(Core_Array::getRequest('coupon_text')))
 {
+	Core_Session::start();
 	$_SESSION['hostcmsOrder']['coupon_text'] = trim(strval(Core_Array::getRequest('coupon_text')));
 }
 

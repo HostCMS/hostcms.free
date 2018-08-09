@@ -9,32 +9,39 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
+	/**
+	 * One-to-many or many-to-many relations
+	 * @var array
+	 */
+	protected $_hasMany = array(
+		'company_department_module' => array(),
+		'notification' => array(),
+		'notification_subscriber' => array()
+	);
+
 	/**
 	 * Belongs to relations
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user' => array(),
-		'company_department_module' => array(),
-		'notification' => array(),
-		'notification_subscriber' => array(),
+		'user' => array()
 	);
 
 	/**
 	 * Backend property
 	 * @var mixed
 	 */
-	public $version = NULL;
+	protected $_version = NULL;
 
 	/**
 	 * Backend property
 	 * @var mixed
 	 */
-	public $date = NULL;
+	protected $_date = NULL;
 
 	/**
 	 * Backend property
@@ -64,7 +71,54 @@ class Module_Model extends Core_Entity
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 		}
 
-		$this->_getModuleInformation();
+		//$this->_getModuleInformation();
+	}
+
+	/**
+	 * Get module name
+	 * @return string
+	 */
+	public function getModuleName()
+	{
+		return $this->_moduleName;
+	}
+
+	public function __isset($property)
+	{
+		if ($property == 'version' || $property == 'date')
+		{
+			return TRUE;
+		}
+
+		return parent::__isset($property);
+	}
+
+	public function __get($property)
+	{
+		if ($property == 'version' || $property == 'date')
+		{
+			$this->_getModuleInformation();
+
+			// protected property
+			$fieldName = '_' . $property;
+
+			return $this->$fieldName;
+		}
+
+		return parent::__get($property);
+	}
+
+	/**
+	 * Load Core_Module and call __construct
+	 */
+	public function loadModule()
+	{
+		if (is_null($this->Core_Module))
+		{
+			$this->Core_Module = Core_Module::factory($this->path);
+		}
+
+		return $this;
 	}
 
 	/**
@@ -72,15 +126,18 @@ class Module_Model extends Core_Entity
 	 */
 	protected function _getModuleInformation()
 	{
-		if (is_null($this->version) && !is_null($this->path))
+		if ($this->active && is_null($this->_version) && !is_null($this->path))
 		{
-			$this->Core_Module = Core_Module::factory($this->path);
+			$this->loadModule();
+
 			if ($this->Core_Module)
 			{
-				$this->version = $this->Core_Module->version;
-				$this->date = $this->Core_Module->date;
+				$this->_version = $this->Core_Module->version;
+				$this->_date = $this->Core_Module->date;
 			}
 		}
+
+		return $this;
 	}
 
 	/**
@@ -92,7 +149,7 @@ class Module_Model extends Core_Entity
 	public function find($primaryKey = NULL, $bCache = TRUE)
 	{
 		$return = parent::find($primaryKey, $bCache);
-		$this->_getModuleInformation();
+		//$this->_getModuleInformation();
 		return $return;
 	}
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,7 +51,7 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_applyObjectProperty();
 
-		if(!is_null(Core_Array::getPost('current')))
+		if (!is_null(Core_Array::getPost('current')))
 		{
 			$this->_object->setCurrent();
 		}

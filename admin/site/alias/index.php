@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -144,7 +144,7 @@ $oAdmin_Form_Controller->addDataset(
 );
 
 // Предупреждение
-if(is_null(Core_Entity::factory('Site', $iSiteId)->getCurrentAlias()))
+if (is_null(Core_Entity::factory('Site', $iSiteId)->getCurrentAlias()))
 {
 	$oAdmin_Form_Controller->addMessage(
 		Core_Message::get(Core::_('Site_Alias.error_current_alias'), 'error')

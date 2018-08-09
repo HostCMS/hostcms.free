@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -22,7 +22,7 @@ $oAdmin_Form_Controller
 //ob_start();
 $oShopOrder = Core_Entity::factory('Shop_Order', Core_Array::getGet('shop_order_id', 0));
 
-if(CURRENT_SITE == $oShopOrder->Shop->site_id)
+if (CURRENT_SITE == $oShopOrder->Shop->site_id)
 {
 	// HostCMS v. 5
 	if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)

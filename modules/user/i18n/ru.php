@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сотрудники',
@@ -40,7 +40,7 @@ return array(
 	'sex' => '<acronym title="Пол сотрудника">Пол</acronym>',
 	'male' => 'Мужской',
 	'female' => 'Женский',
-	'dismissed' => '<acronym title="Числится уволенным">Уволен</acronym>',
+	'dismissed' => '<acronym title="Сотрудник уволен">Уволен</acronym>',
 	'freelance' => '<acronym title="Работает вне штата компании">Внештатный</acronym>',
 	'birthday' => '<acronym title="Дата рождения">День рождения</acronym>',
 	'address' => '<acronym title="Адрес проживания">Адрес</acronym>',
@@ -87,4 +87,5 @@ return array(
 	'view_socials' => 'Социальные сети',
 	'view_messengers' => 'Мессенджеры',
 	'view_websites' => 'Сайты',
+	'error_object_owned_another_user' => 'Объект принадлежит другому пользователю, доступ запрещен.',
 );

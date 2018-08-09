@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store orders',
@@ -34,6 +34,7 @@ return array(
 	'show_order_status_link' => 'Order statuses reference',
 	'print' => "Print",
 	'order_card' => "Order card %s from %s",
+	'company_id' => 'Responsible company',
 	'status_datetime' => '<acronym title="Date/time of modifying order status">Modifying date of order status</acronym>',
 	'ip' => '<acronym title="IP-address of the customer">IP</acronym>',
 	'type_of_delivery' => "<acronym title=\"Delivery types\">Delivery types</acronym>",

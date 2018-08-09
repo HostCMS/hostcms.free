@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Xml
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Xml
 {
@@ -42,7 +42,7 @@ class Core_Xml
 			{
 				$array['attr'] = array();
 
-				foreach($oXml->attributes() as $key => $attr_name)
+				foreach ($oXml->attributes() as $key => $attr_name)
 				{
 					$array['attr'][$key] = (string)$attr_name;
 				}

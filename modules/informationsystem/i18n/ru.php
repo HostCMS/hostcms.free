@@ -7,7 +7,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные системы',
@@ -49,10 +49,10 @@ return array(
 	'format_datetime' => '<acronym title="Формат отображения даты/времени, например %d.%m.%Y %H:%M:%S">Формат даты/времени</acronym>',
 
 	// Картинки инфосистемы.
-	'image_large_max_width' => '<acronym title="Максимальная ширина большой картинки, получающейся при ее уменьшении">Максимальная ширина большой картинки</acronym>',
-	'image_large_max_height' => '<acronym title="Максимальная высота большой картинки, получающейся при ее уменьшении">Максимальная высота большой картинки</acronym>',
-	'image_small_max_width' => '<acronym title="Максимальная ширина малой картинки, получающейся при уменьшении большой">Максимальная ширина малой картинки</acronym>',
-	'image_small_max_height' => '<acronym title="Максимальная высота малой картинки, получающейся при уменьшении большой">Максимальная высота малой картинки</acronym>',
+	'image_large_max_width' => '<acronym title="Максимальная ширина большой картинки, получающейся при ее уменьшении">Максимальная ширина большой картинки элемента</acronym>',
+	'image_large_max_height' => '<acronym title="Максимальная высота большой картинки, получающейся при ее уменьшении">Максимальная высота большой картинки элемента</acronym>',
+	'image_small_max_width' => '<acronym title="Максимальная ширина малой картинки, получающейся при уменьшении большой">Максимальная ширина малой картинки элемента</acronym>',
+	'image_small_max_height' => '<acronym title="Максимальная высота малой картинки, получающейся при уменьшении большой">Максимальная высота малой картинки элемента</acronym>',
 
 	// Картинки инфосистемы для групп.
 	'group_image_large_max_width' => '<acronym title="Максимальная ширина большой картинки для группы, получающейся при ее уменьшении">Максимальная ширина большой картинки группы</acronym>',
@@ -73,13 +73,13 @@ return array(
 
 	/* водяной знак */
 	'watermark_file' => '<acronym title="Файл изображения, используемого в качестве водяного знака">Изображение для водяного знака</acronym>',
-	'watermark_default_use_large_image' => '<acronym title="Свойство, определяющее будет ли использоваться watermark по умолчанию">Использовать водяной знак по умолчанию</acronym>',
-	'watermark_default_use_small_image' => '<acronym title="Свойство, определяющее будет ли использоваться водяной знак по умолчанию для малых изображений">Использовать водяной знак по умолчанию для малых изображений</acronym>',
+	'watermark_default_use_large_image' => '<acronym title="Свойство, определяющее будет ли использоваться watermark по умолчанию">Использовать водяной знак</acronym>',
+	'watermark_default_use_small_image' => '<acronym title="Свойство, определяющее будет ли использоваться водяной знак по умолчанию для малых изображений">Использовать водяной знак для малых изображений</acronym>',
 	'watermark_default_position_x' => '<acronym title="Свойство, определяющее положение водяного знака по оси X по умолчанию, например 200 (в пикселях) или 50% (в процентах)">Позиция по оси X по умолчанию</acronym>',
 	'watermark_default_position_y' => '<acronym title="Свойство, определяющее положение водяного знака по оси Y по умолчанию, например 200 (в пикселях) или 50% (в процентах)">Позиция по оси Y по умолчанию</acronym>',
 
-	'preserve_aspect_ratio' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции изображений по умолчанию">Сохранять пропорции изображений</acronym>',
-	'preserve_aspect_ratio_small' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции малых изображений по умолчанию">Сохранять пропорции малых изображений</acronym>',
+	'preserve_aspect_ratio' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции изображений по умолчанию">Сохранять пропорции изображений элемента</acronym>',
+	'preserve_aspect_ratio_small' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции малых изображений по умолчанию">Сохранять пропорции малых изображений элемента</acronym>',
 	'preserve_aspect_ratio_group' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции изображений по умолчанию для групп">Сохранять пропорции изображений для групп</acronym>',
 	'preserve_aspect_ratio_group_small' => '<acronym title="Свойство, определяющее будут ли сохраняться пропорции малых изображений по умолчанию для групп">Сохранять пропорции малых изображений для групп</acronym>',
 	'items_on_page' => '<acronym title="Свойство, определяющее число элементов на странице">Число элементов на странице</acronym>',
@@ -107,7 +107,7 @@ return array(
 	'comment_mail_subject' => 'Добавление комментария/ответа на сайт',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
-	
+
 	'widget_title' => 'Комментарии',
 	'widget_other_comments' => 'Другие комментарии',
 	'date' => 'Дата',
@@ -115,10 +115,39 @@ return array(
 	'subject_not_found' => 'Тема отсутствует',
 	'tag' => 'Метка: %s',
 	'deleteEmptyDirs_success' => 'Пустые директории удалены!',
-	
+
 	'structureIsExist' => 'Уже существует информационная система, связанная с узлом структуры "%s"!',
-	
+
 	'schedule-searchIndexItem' => 'Индексировать информационный элемент',
 	'schedule-searchIndexGroup' => 'Индексировать группу информационных элементов',
-	'schedule-searchUnindexItem' => 'Снять информационный элемент с индексации',	
+	'schedule-searchUnindexItem' => 'Снять информационный элемент с индексации',
+	'schedule-recountInformationsystem' => 'Пересчет групп и элементов',
+
+	'tab_seo_templates' => 'Шаблоны SEO',
+	'seo_group_header' => 'Шаблоны информационных групп',
+	'seo_item_header' => 'Шаблоны информационных элементов',
+	'seo_group_title_template' => 'Шаблон title',
+	'seo_group_description_template' => 'Шаблон description',
+	'seo_group_keywords_template' => 'Шаблон keywords',
+	'seo_item_title_template' => 'Шаблон title',
+	'seo_item_description_template' => 'Шаблон description',
+	'seo_item_keywords_template' => 'Шаблон keywords',
+
+	'seo_template_informationsystem' => 'Информационная система',
+	'seo_template_informationsystem_name' => 'Название системы',
+	'seo_template_group' => 'Группа',
+	'seo_template_group_name' => 'Название группы',
+	'seo_template_group_description' => 'Описание группы',
+	'seo_template_group_path' => 'Путь группы',
+	'seo_template_group_page_number' => 'Номер страницы',
+	'seo_template_group_page' => 'страница',
+	'seo_template_item' => 'Элемент',
+	'seo_template_item_name' => 'Название элемента',
+	'seo_template_item_description' => 'Описание элемента',
+	'seo_template_item_text' => 'Текст элемента',
+
+	'all_groups_count' => 'Всего групп: %s',
+	'all_items_count' => 'Всего элементов: %s',
+
+	'create_small_image' => 'Создавать малое изображение из большого',
 );

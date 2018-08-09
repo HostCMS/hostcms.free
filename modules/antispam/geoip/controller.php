@@ -96,7 +96,7 @@ class Antispam_GeoIP_Controller
 	{
 		$fp = fopen($file, "rb");
 		if (!$fp) {
-			print "error opening $file: $php_errormsg\n";
+			print "error opening $file\n";
 			exit;
 		}
 		$s_array = fstat($fp);

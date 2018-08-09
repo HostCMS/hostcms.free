@@ -19,6 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - showInformationsystemItemProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств информационных элементов, по умолчанию FALSE
  * - showShopGroupProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп магазина, по умолчанию FALSE
  * - showShopItemProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE
+ * - showShopItemAssociated(TRUE|FALSE) выводить сопутствующие товары, по умолчанию FALSE
  * - forbiddenTags(array('name')) массив тегов узла структуры, запрещенных к передаче в генерируемый XML
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
  * - showPanel(TRUE|FALSE) показывать панель быстрого редактирования, по умолчанию TRUE
@@ -44,7 +45,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -65,6 +66,7 @@ class Structure_Controller_Show extends Core_Controller
 		'showInformationsystemItemProperties',
 		'showShopGroupProperties',
 		'showShopItemProperties',
+		'showShopItemAssociated',
 		'forbiddenTags',
 		'cache',
 		'currentStructureId',
@@ -128,7 +130,7 @@ class Structure_Controller_Show extends Core_Controller
 			->orderBy('structures.sorting')
 			->orderBy('structures.name');
 
-		$this->showProperties = $this->showInformationsystemGroups = $this->showInformationsystemItems = $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties = $this->showShopGroupProperties = $this->showShopItemProperties = FALSE;
+		$this->showProperties = $this->showInformationsystemGroups = $this->showInformationsystemItems = $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties = $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated = FALSE;
 
 		$this->showPanel = $this->cache = TRUE;
 
@@ -191,6 +193,24 @@ class Structure_Controller_Show extends Core_Controller
 	protected $_Shops = array();
 
 	/**
+	 * Get _Informationsystems set
+	 * @return array
+	 */
+	public function getInformationsystems()
+	{
+		return $this->_Informationsystems;
+	}
+
+	/**
+	 * Get _Shops set
+	 * @return array
+	 */
+	public function getShops()
+	{
+		return $this->_Shops;
+	}
+
+	/**
 	 * Check if data is cached
 	 * @return NULL|TRUE|FALSE
 	 */
@@ -230,6 +250,8 @@ class Structure_Controller_Show extends Core_Controller
 
 			$this->_aTags = array('structure_' . intval($this->parentId));
 		}
+
+		$bXsl = !is_null($this->_xsl);
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -288,7 +310,17 @@ class Structure_Controller_Show extends Core_Controller
 			$this->_selectShops();
 		}
 
-		$this->_addStructuresByParentId($this->parentId, $this);
+		// XSL
+		if ($bXsl)
+		{
+			$this->_addStructuresByParentId($this->parentId, $this);
+		}
+		// TPL
+		else
+		{
+			$this->assign('controller', $this);
+			$this->assign('aStructures', $this->_aStructures);
+		}
 
 		echo $content = $this->get();
 		$bCache && $oCore_Cache->set($cacheKey, $content, $this->_cacheName, $this->_aTags);
@@ -419,16 +451,33 @@ class Structure_Controller_Show extends Core_Controller
 	protected $_aInformationsystem_Items = array();
 
 	/**
-	 * Add all groups of information system to XML
-	 * @param object $parentObject
+	 * Get _aInformationsystem_Groups set
+	 * @return array
+	 */
+	public function getInformationsystemGroups()
+	{
+		return $this->_aInformationsystem_Groups;
+	}
+
+	/**
+	 * Get _aInformationsystem_Items set
+	 * @return array
+	 */
+	public function getInformationsystemItems()
+	{
+		return $this->_aInformationsystem_Items;
+	}
+
+	/**
+	 * Fill _aInformationsystem_Groups and _aInformationsystem_Items
 	 * @param Informationsystem_Model $oInformationsystem
+	 * @param object $parentObject
 	 * @hostcms-event Structure_Controller_Show.onBeforeFindInformationsystemGroups
 	 * @hostcms-event Structure_Controller_Show.onBeforeFindInformationsystemItems
+	 * @return self
 	 */
-	protected function _addInformationsystemGroups($parentObject, $oInformationsystem, $level = 0)
+	public function fillInformationsystem($oInformationsystem, $parentObject = NULL)
 	{
-		$this->_aInformationsystem_Groups = array();
-
 		$dateTime = Core_Date::timestamp2sql(time());
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
@@ -467,7 +516,8 @@ class Structure_Controller_Show extends Core_Controller
 
 		Core_Event::notify(get_class($this) . '.onBeforeFindInformationsystemGroups', $this, array($oInformationsystem_Groups, $parentObject, $oInformationsystem));
 
-		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
+		// findAll(FALSE) isn't necessary because Informationsystem_Group needs for getPath()
+		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
@@ -537,7 +587,22 @@ class Structure_Controller_Show extends Core_Controller
 			}
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Add all groups of information system to XML
+	 * @param object $parentObject
+	 * @param Informationsystem_Model $oInformationsystem
+	 * @return self
+	 */
+	protected function _addInformationsystemGroups($parentObject, $oInformationsystem, $level = 0)
+	{
+		$this->fillInformationsystem($oInformationsystem, $parentObject);
+
 		$this->_addInformationsystemGroupsByParentId(0, $parentObject);
+
+		return $this;
 	}
 
 	/**
@@ -627,13 +692,32 @@ class Structure_Controller_Show extends Core_Controller
 	protected $_aShop_Items = array();
 
 	/**
-	 * Add all groups of shop to XML
-	 * @param object $parentObject
+	 * Get _aShop_Groups set
+	 * @return array
+	 */
+	public function getShopGroups()
+	{
+		return $this->_aShop_Groups;
+	}
+
+	/**
+	 * Get _aShop_Items set
+	 * @return array
+	 */
+	public function getShopItems()
+	{
+		return $this->_aShop_Items;
+	}
+
+	/**
+	 * Fill Shop
 	 * @param Shop_Model $oShop shop
+	 * @param object $parentObject
+	 * @return self
 	 * @hostcms-event Structure_Controller_Show.onBeforeFindShopGroups
 	 * @hostcms-event Structure_Controller_Show.onBeforeFindShopItems
 	 */
-	protected function _addShopGroups($parentObject, $oShop, $level = 0)
+	public function fillShop($oShop, $parentObject = NULL)
 	{
 		$dateTime = Core_Date::timestamp2sql(time());
 
@@ -673,7 +757,8 @@ class Structure_Controller_Show extends Core_Controller
 
 		Core_Event::notify(get_class($this) . '.onBeforeFindShopGroups', $this, array($oShop_Groups, $parentObject, $oShop));
 
-		$aShop_Groups = $oShop_Groups->findAll(FALSE);
+		// findAll(FALSE) isn't necessary because Shop_Group needs for getPath()
+		$aShop_Groups = $oShop_Groups->findAll();
 		foreach ($aShop_Groups as $oShop_Group)
 		{
 			$this->_aShop_Groups[$oShop_Group->parent_id][] = $oShop_Group;
@@ -762,7 +847,22 @@ class Structure_Controller_Show extends Core_Controller
 			while ($iFrom < $maxId);
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Add all groups of shop to XML
+	 * @param object $parentObject
+	 * @param Shop_Model $oShop shop
+	 * @return self
+	 */
+	protected function _addShopGroups($parentObject, $oShop, $level = 0)
+	{
+		$this->fillShop($oShop, $parentObject);
+
 		$this->_addShopGroupsByParentId(0, $parentObject);
+
+		return $this;
 	}
 
 	/**
@@ -831,6 +931,8 @@ class Structure_Controller_Show extends Core_Controller
 
 				$this->showShopItemProperties && $oShop_Item->showXmlProperties($this->showShopItemProperties);
 
+				$this->showShopItemAssociated && $oShop_Item->showXmlAssociatedItems($this->showShopItemAssociated);
+
 				$this->applyForbiddenTags($oShop_Item);
 
 				$parentObject->addEntity($oShop_Item);
@@ -849,10 +951,7 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		if (!is_null($this->forbiddenTags))
 		{
-			foreach ($this->forbiddenTags as $forbiddenTag)
-			{
-				$object->addForbiddenTag($forbiddenTag);
-			}
+			$object->addForbiddenTags($this->forbiddenTags);
 		}
 
 		return $this;

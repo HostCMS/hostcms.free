@@ -9,16 +9,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_View extends Admin_View
 {
 	public function showTitle()
 	{
 		// Заголовок формы
-		strlen($this->pageTitle) && Admin_Form_Entity::factory('Title')
-			->name($this->pageTitle)
-			->execute();
+		if (strlen($this->pageTitle))
+		{
+			?><h1><?php echo htmlspecialchars($this->pageTitle)?></h1><?php
+		}
 
 		return $this;
 	}

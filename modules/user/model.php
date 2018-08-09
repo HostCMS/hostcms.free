@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -84,11 +84,14 @@ class User_Model extends Core_Entity
 		'notification_subscriber' => array(),
 		'notification' => array('through' => 'notification_user'),
 		'deal_template_step_access_user'  => array(),
+		'deal_attachment' => array(),
 		'user_note' => array(),
 		'user_setting' => array(),
 		'user_message' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
+		'deal_user' => array(),
+		'user_bookmark' => array()
 	);
 
 	/**
@@ -108,10 +111,12 @@ class User_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
-		'~email',
+		'deleted',
+		'user_id',
+		/*'~email',
 		'~icq',
 		'~site',
-		'~position'
+		'~position'*/
 	);
 
 	/**
@@ -142,6 +147,7 @@ class User_Model extends Core_Entity
 			->where('users.login', '=', $login)
 			->where('users.password', '=', Core_Hash::instance()->hash($password))
 			->where('users.active', '=', 1)
+			->where('users.dismissed', '=', 0)
 			->limit(1);
 
 		$aUsers = $this->findAll(FALSE);
@@ -223,10 +229,9 @@ class User_Model extends Core_Entity
 			}
 
 			$aCompany_Departments = $this->Company_Departments->findAll();
-
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
-				$access = $oCompany_Department/*->User_Group*/->issetModuleAccess(
+				$access = $oCompany_Department->issetModuleAccess(
 					$oModule, $oSite
 				);
 
@@ -518,6 +523,8 @@ class User_Model extends Core_Entity
 			$this->Calendar_Caldav_Users->deleteAll(FALSE);
 		}
 
+		$this->User_Bookmarks->deleteAll(FALSE);
+
 		// Удаляем директорию
 		$this->deleteDir();
 
@@ -697,19 +704,14 @@ class User_Model extends Core_Entity
 	 */
 	public function department()
 	{
-		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
-
 		$aTempDepartmentPost = array();
 
-		$i = 0;
-
-		foreach($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
+		foreach ($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
 		{
-			$aTempDepartmentPost[] = '<div ' . ( $i ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
+			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
 				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
-
-			$i++;
 		}
 
 		echo implode('', $aTempDepartmentPost);

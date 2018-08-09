@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -59,6 +59,7 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop' => array(),
+		'shop_company' => array('model' => 'Company', 'foreign_key' => 'company_id'),
 		'shop_country_location' => array(),
 		'shop_country' => array(),
 		'shop_country_location_city' => array(),
@@ -86,6 +87,8 @@ class Shop_Order_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_forbiddenTags = array(
+		'deleted',
+		'user_id',
 		'datetime',
 		'payment_datetime',
 		'status_datetime',
@@ -167,7 +170,7 @@ class Shop_Order_Model extends Core_Entity
 
 		// Удаляем значения доп. свойств
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-		foreach($aPropertyValues as $oPropertyValue)
+		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getOrderPath());
 			$oPropertyValue->delete();
@@ -248,7 +251,7 @@ class Shop_Order_Model extends Core_Entity
 		$fAmount = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$fAmount += $oShop_Order_Item->getAmount();
 		}
@@ -265,7 +268,7 @@ class Shop_Order_Model extends Core_Entity
 		$quantity = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$quantity += $oShop_Order_Item->quantity;
 		}
@@ -304,7 +307,7 @@ class Shop_Order_Model extends Core_Entity
 		$weight = 0;
 
 		$aOrderItems = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aOrderItems as $oShop_Order_Item)
+		foreach ($aOrderItems as $oShop_Order_Item)
 		{
 			$weight += $oShop_Order_Item->Shop_Item->weight * $oShop_Order_Item->quantity;
 		}
@@ -707,30 +710,17 @@ class Shop_Order_Model extends Core_Entity
 
 		if ($this->_showXmlProperties)
 		{
-			if (is_array($this->_showXmlProperties))
-			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+			$aProperty_Values = is_array($this->_showXmlProperties)
+				? Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id)
+				: $this->getPropertyValues();
 
-				foreach ($aProperty_Values as $oProperty_Value)
-				{
-					if ($oProperty_Value->Property->type == 2)
-					{
-						$oProperty_Value
-							->setHref($this->getOrderHref())
-							->setDir($this->getOrderPath());
-					}
-
-					/*isset($this->_showXmlProperties[$oProperty_Value->property_id]) && */$this->addEntity(
-						$oProperty_Value
-					);
-				}
-			}
-			else
+			foreach ($aProperty_Values as $oProperty_Value)
 			{
-				$aProperty_Values = $this->getPropertyValues();
-				// Add all values
-				$this->addEntities($aProperty_Values);
+				$this->_preparePropertyValue($oProperty_Value);
 			}
+
+			// Add all values
+			$this->addEntities($aProperty_Values);
 		}
 
 		if ($this->_showXmlCountry && $this->shop_country_id)
@@ -812,6 +802,28 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getOrderHref())
+					->setDir($this->getOrderPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
+		}
+	}
+
+	/**
 	 * Pay the order
 	 * @return self
 	 * @hostcms-event shop_order.onBeforePaid
@@ -849,7 +861,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		$oModule = Core::$modulesList['shop'];
 
-		if ($oModule)
+		if ($oModule && Core::moduleIsActive('notification'))
 		{
 			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 			$oNotification_Subscribers->queryBuilder()
@@ -858,7 +870,7 @@ class Shop_Order_Model extends Core_Entity
 				->where('notification_subscribers.entity_id', '=', $this->Shop->id);
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-			
+
 			if (count($aNotification_Subscribers))
 			{
 				$sCompany = strlen($this->company)
@@ -867,14 +879,14 @@ class Shop_Order_Model extends Core_Entity
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
-					->title(sprintf(Core::_('Shop_Order.notification_paid_order'), $this->invoice))
-					->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->sum()))
+					->title(Core::_('Shop_Order.notification_paid_order', $this->invoice))
+					->description(Core::_('Shop_Order.notification_new_order_description', $sCompany , $this->sum()))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(2) // Оплаченный заказ
 					->entity_id($this->id)
 					->save();
-				
+
 				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
 					// Связываем уведомление с сотрудником
@@ -1097,7 +1109,7 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Siteuser_Transaction->shop_currency_id = $this->shop_currency_id;
 					$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $fCurrencyCoefficient;
 					$oShop_Siteuser_Transaction->shop_order_id = $this->id;
-					$oShop_Siteuser_Transaction->type = 0;
+					$oShop_Siteuser_Transaction->type = 2;
 					$oShop_Siteuser_Transaction->description = Core::_('Shop_Bonus.bonus_transaction_name', $this->invoice);
 					$oShop_Siteuser_Transaction->save();
 				}
@@ -1124,7 +1136,7 @@ class Shop_Order_Model extends Core_Entity
 					break;
 				}
 				$level++;
-			} while($oSiteuserAffiliate->id && $level < 30);
+			} while ($oSiteuserAffiliate->id && $level < 30);
 
 			// Есть аффилиаты, приведшие пользователя
 			if (count($aSiteusers))
@@ -1310,7 +1322,7 @@ class Shop_Order_Model extends Core_Entity
 		$newObject->save();
 
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
-		foreach($aShop_Order_Items as $oShop_Order_Item)
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			$newObject->add(clone $oShop_Order_Item);
 		}
@@ -1489,6 +1501,11 @@ class Shop_Order_Model extends Core_Entity
 					: ''
 				);
 			}
+			// Wysiwyg
+			elseif ($oPropertyValue->Property->type == 6)
+			{
+				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
 			{
@@ -1543,7 +1560,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Get Popover Content
 	 * @return string
 	 */
-	protected function _orderPopover()
+	public function orderPopover()
 	{
 		ob_start();
 
@@ -1597,7 +1614,7 @@ class Shop_Order_Model extends Core_Entity
 		}
 		?>
 		<div class="row">
-			<div class="col-xs-12">
+			<div class="col-xs-12 table-responsive">
 				<table class="table table-hover">
 					<thead class="bordered-palegreen">
 						<tr>
@@ -1635,7 +1652,7 @@ class Shop_Order_Model extends Core_Entity
 
 					$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-					if(count($aShop_Order_Items))
+					if (count($aShop_Order_Items))
 					{
 						foreach ($aShop_Order_Items as $oShop_Order_Item)
 						{
@@ -1720,7 +1737,7 @@ class Shop_Order_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $onclick, 'onclick');
 
-		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->_orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
+		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
 	}
 
 	/**

@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Backend users',
@@ -82,4 +82,5 @@ return array(
 	'wallpaper' => 'Wallpaper',
 	'choosing_site' => 'Site choosing',	
 	'ua_show_user_form_events_access_title' => 'Доступ к событиям формы "%s"',	
+	'error_object_owned_another_user' => 'Object belongs to another user, access denied.',
 );

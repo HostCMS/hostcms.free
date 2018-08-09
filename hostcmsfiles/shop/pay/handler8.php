@@ -1,46 +1,129 @@
 <?php
-
 /**
  * RBK Money
+ * Личный кабинет https://dashboard.rbk.money/
  */
 class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 {
-	/* Идентификатор сайта в системе RBK Money, например 12345 */
-	private $_rbkmoney_id = '12345';
+	/**
+	 * Приватный ключ для доступа к API
+	 * Доступен в разделе "API ключ", поле "Ваш приватный ключ для доступа к API"
+	 */
+	protected $_apiKey = '%apiKey%';
 
-	/* Идентификатор валюты, в которой будет производиться платеж.
-	 Сумма к оплате будет пересчитана из валюты магазина в указанную валюту */
-	private $_rbkmoney_currency_id = 1;
+	/**
+	 * Идентификатор магазина
+	 * Доступен в разделе "Детали магазина", строка "Идентификатор"
+	 */
+	protected $_rbkShopId = '%rbkShopId%';
 
-	/* Секретные ключи для кошельков, должны совпадать с настройками сайта на www.rbkmoney.ru */
-	private $_rbkmoney_secret_key = 'hostmake';
+	/**
+	 * Публичный ключ (Webhook)
+	 * Создается в разделе "Webhooks". При создании выбираем события:
+	 *
+	 * - PaymentProcessed
+	 * - PaymentCaptured
+	 * - PaymentCancelled
+	 *
+	 * После сохранения ключ будет в поле "Публичный ключ". Нажмите "Скопировать ключ"
+	 */
+	protected $_publicKey = '%publicKey%';
 
-	/* Определяем коэффициент перерасчета цены */
-	private $_coefficient = 1;
+	/**
+	 * Идентификатор валюты, в которой будет производиться платеж.
+	 * Сумма к оплате будет пересчитана из валюты магазина в указанную валюту
+	 */
+	protected $_rbkmoney_currency_id = 1;
+
+	/**
+	 * Определяем коэффициент перерасчета цены
+	 */
+	protected $_coefficient = 1;
 
 	/**
 	 * Метод, вызываемый в коде ТДС через Shop_Payment_System_Handler::checkAfterContent($oShop);
 	 */
-	public function checkPaymentAfterContent()
+	public function checkPaymentBeforeContent()
 	{
-		if (isset($_POST['paymentStatus']) && !isset($_REQUEST['paymentType']))
+		if (isset($_SERVER['HTTP_CONTENT_SIGNATURE']))
 		{
-			// Получаем ID заказа
-			$order_id = intval(Core_Array::getPost('orderId'));
+			// Данные, которые пришли в теле сообщения
+			$content = file_get_contents('php://input');
 
-			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+			// Достаем сигнатуру из заголовка и декодируем
+			$signatureFromHeader = $this->_getSignatureFromHeader($_SERVER['HTTP_CONTENT_SIGNATURE']);
 
-			if (!is_null($oShop_Order->id))
+			// Декодируем данные
+			$decodedSignature = $this->_urlsafe_b64decode($signatureFromHeader);
+
+			if (!$this->_verificationSignature($content, $decodedSignature, $this->_publicKey))
 			{
-				// Вызов обработчика платежной системы
-				Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
-					->shopOrder($oShop_Order)
-					->paymentProcessing();
+				http_response_code(400);
+				echo json_encode(['message' => 'Webhook notification signature mismatch']);
+				exit();
+			}
+
+			// Преобразуем данные в массив
+			$aResponse = json_decode($content, TRUE);
+
+			// PaymentProcessed - платеж успешно обработан (средства захолдированы)
+			// PaymentCaptured - платеж успешно принят (захолдированные средства списаны)
+			// PaymentCancelled - платеж отменен (захолдированные средства возвращены)
+			if (isset($aResponse['eventType']) && $aResponse['eventType'] == 'PaymentProcessed'
+				&& isset($aResponse['invoice']))
+			{
+				// Получаем ID заказа
+				$order_id = intval($aResponse['invoice']['metadata']['order_id']);
+
+				$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+
+				if (!is_null($oShop_Order->id))
+				{
+					$request = json_encode(
+						array('reason' => 'capture')
+					);
+
+					try {
+						$Core_Http = Core_Http::instance('curl')
+							->clear()
+							->method('POST')
+							->timeout(30)
+							->url("https://api.rbk.money/v1/processing/invoices/{$aResponse['invoice']['id']}/payments/{$aResponse['payment']['id']}/capture")
+							->additionalHeader('X-Request-ID', uniqid())
+							->additionalHeader('Authorization', 'Bearer ' . $this->_apiKey)
+							->additionalHeader('Content-type', 'application/json; charset=utf-8')
+							->additionalHeader('Accept', 'application/json')
+							->rawData($request)
+							->execute();
+
+						$aHeaders = $Core_Http->parseHeaders();
+
+						$sStatus = Core_Array::get($aHeaders, 'status');
+
+						$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
+
+						if ($iStatusCode == 202)
+						{
+							// Вызов обработчика платежной системы
+							Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System)
+								->shopOrder($oShop_Order)
+								->paymentProcessing($aResponse);
+						}
+						else
+						{
+							$oShop_Order->system_information = "RBKMoney неверный ответ! Код: {$iStatusCode}";
+							$oShop_Order->save();
+						}
+					}
+					catch (Exception $e) {}
+				}
 			}
 		}
 	}
 
-	/* Вызывается на 4-ом шаге оформления заказа*/
+	/**
+	 * Вызывается на 4-ом шаге оформления заказа
+	 */
 	public function execute()
 	{
 		parent::execute();
@@ -63,7 +146,9 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 		return $this;
 	}
 
-	/* вычисление суммы товаров заказа */
+	/**
+	 * Вычисление суммы товаров заказа
+	 */
 	public function getSumWithCoeff()
 	{
 		return Shop_Controller::instance()->round(($this->_rbkmoney_currency_id > 0
@@ -75,112 +160,137 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 			: 0) * $this->_shopOrder->getAmount() * $this->_coefficient);
 	}
 
-	/* обработка ответа от платёжной системы */
-	public function paymentProcessing()
+	/**
+	 * Обработка ответа от платёжной системы
+	 */
+	public function paymentProcessing($aResponse)
 	{
-			$this->ProcessResult();
+		$amount = isset($aResponse['invoice']['amount'])
+			? intval($aResponse['invoice']['amount']) / 100
+			: '';
 
-			return TRUE;
+		$currency = isset($aResponse['invoice']['currency'])
+			? strval($aResponse['invoice']['currency'])
+			: '';
+
+		$id = isset($aResponse['invoice']['id'])
+			? strval($aResponse['invoice']['id'])
+			: '';
+
+		$this->shopOrderBeforeAction(clone $this->_shopOrder);
+
+		$this->_shopOrder->system_information = sprintf("Товар оплачен через RBK Money. Данные платежа - amount:{$amount}, currency:{$currency}, id:{$id}");
+
+		$this->_shopOrder->paid();
+
+		ob_start();
+		$this->changedOrder('changeStatusPaid');
+		ob_get_clean();
+
+		return TRUE;
 	}
 
-	/* оплачивает заказ */
-	function ProcessResult()
-	{
-		if(is_null($eshopId = Core_Array::getPost('eshopId'))
-			|| $eshopId != $this->_rbkmoney_id
-			|| $this->_shopOrder->paid
-			|| is_null($paymentStatus = Core_Array::getPost('paymentStatus'))
-			|| $paymentStatus != 5)
-		{
-			return FALSE;
-		}
-
-		$serviceName = Core_Array::getPost('serviceName');
-		$eshopAccount = Core_Array::getPost('eshopAccount');
-		$recipientAmount = Core_Array::getPost('recipientAmount');
-		$recipientCurrency = Core_Array::getPost('recipientCurrency');
-		$userName = Core_Array::getPost('userName');
-		$userEmail = Core_Array::getPost('userEmail');
-		$paymentData = Core_Array::getPost('paymentData');
-
-		$str_md5 = md5(sprintf("%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s",
-			$eshopId, $this->_shopOrder->id, $serviceName, $eshopAccount,
-			$recipientAmount, $recipientCurrency, $paymentStatus, $userName,
-			$userEmail, $paymentData, $this->_rbkmoney_secret_key));
-
-		if ($str_md5 == Core_Array::getPost('hash', ''))
-		{
-			$this->shopOrderBeforeAction(clone $this->_shopOrder);
-
-			$this->_shopOrder->system_information = sprintf("Товар оплачен через RBK Money.\nАтрибуты:\nНомер сайта продавца: %s\nВнутренний номер покупки продавца: %s\nСумма платежа: %s\nВалюта платежа: %s\nНомер счета в системе RBK Money: %s\nДата и время выполнения платежа: %s\nСтатус платежа: 5 - Платеж зачислен\n",
-				$eshopId, $this->_shopOrder->id, $recipientAmount,
-				$recipientCurrency, $eshopAccount, $paymentData);
-
-			$this->_shopOrder->paid();
-			$this->setXSLs();
-			$this->send();
-
-			ob_start();
-			$this->changedOrder('changeStatusPaid');
-			ob_get_clean();
-		}
-		else
-		{
-			$this->_shopOrder->system_information = 'RBKMoney хэш не совпал!';
-			$this->_shopOrder->save();
-		}
-	}
-
-	/* печатает форму отправки запроса на сайт платёжной системы */
+	/**
+	 * Печатает форму отправки запроса на сайт платёжной системы
+	 */
 	public function getNotification()
 	{
-		$sum = $this->getSumWithCoeff();
+		$oShop_Order = $this->_shopOrder;
 
-		// RBK Money needs comma separator
-		$sum = number_format($sum, 2, ',', '');
+		$sum = $this->getSumWithCoeff() * 100;
 
-		$oSite_Alias = $this->_shopOrder->Shop->Site->getCurrentAlias();
+		$aVat = array(
+			0 => '0%',
+			10 => '10%',
+			18 => '18%'
+		);
+
+		$oSite_Alias = $oShop_Order->Shop->Site->getCurrentAlias();
 		$site_alias = !is_null($oSite_Alias) ? $oSite_Alias->name : '';
 
-		$shop_path = $this->_shopOrder->Shop->Structure->getPath();
-		$handler_url = 'http://'.$site_alias.$shop_path . "cart/?order_id={$this->_shopOrder->id}";
-
-		$successUrl = $handler_url . "&payment=success";
-		$failUrl = $handler_url . "&payment=fail";
+		$shop_path = $oShop_Order->Shop->Structure->getPath();
+		$handler_url = 'http://' . $site_alias . $shop_path . "cart/?order_id={$oShop_Order->id}";
 
 		$oShop_Currency = Core_Entity::factory('Shop_Currency')->find($this->_rbkmoney_currency_id);
 
-		if(!is_null($oShop_Currency->id))
+		if (!is_null($oShop_Currency->id))
 		{
-			$serviceName = 'Оплата счета N ' . $this->_shopOrder->id;
+			$serviceName = 'Оплата счета N ' . $oShop_Order->invoice;
 
-			?>
-			<h1>Оплата через систему RBK Money</h1>
-			<p>Сумма к оплате составляет <strong><?php echo $sum?> <?php echo $oShop_Currency->name?></strong></p>
+			$aItems = $this->_getOrderItems($oShop_Order);
 
-			<p>Для оплаты нажмите кнопку "Оплатить".</p>
+			$dueDate = date('Y-m-d\TH:i:s\Z', Core_Date::sql2timestamp($oShop_Order->datetime));
 
-			<form action="https://rbkmoney.ru/acceptpurchase.aspx" name="pay" method="post">
-				<input type="hidden" name="eshopId" value="<?php echo $this->_rbkmoney_id?>">
-				<input type="hidden" name="orderId" value="<?php echo $this->_shopOrder->id?>">
-				<input type="hidden" name="serviceName" value="<?php echo $serviceName?>">
-				<input type="hidden" name="recipientAmount" value="<?php echo $sum?>">
-				<input type="hidden" name="recipientCurrency" value="<?php echo $oShop_Currency->code?>">
-				<input type="hidden" name="user_email" value="<?php echo $this->_shopOrder->email?>">
-				<input type="hidden" name="successUrl" value="<?php echo $successUrl?>">
-				<input type="hidden" name="failUrl" value="<?php echo $failUrl?>">
-				<input type="hidden" name="hash" value= "<?php echo md5(
-					$this->_rbkmoney_id . '::' .
-					$sum . '::' .
-					$oShop_Currency->code . '::' .
-					$this->_shopOrder->email . '::' .
-					$serviceName . '::' .
-					$this->_shopOrder->id . '::' .
-					'' . '::' .
-					$this->_rbkmoney_secret_key)?>">
-				<input type="submit" name="button" value="Оплатить">
-			</form>
-			<?php
+			$aData = array(
+				'shopID' => $this->_rbkShopId,
+				'dueDate' => $dueDate,
+				'amount' => $sum,
+				'currency' => $oShop_Currency->code,
+				'product' => 'Счет N ' . $oShop_Order->invoice,
+				'description' => $serviceName,
+				'metadata' => array(
+					'cms' => 'HostCMS',
+					'module' => 'shop',
+					'order_id' => $oShop_Order->id
+				)
+			);
+
+			foreach ($aItems as $aItem)
+			{
+				$aData['cart'][] = array(
+					'product' => $aItem['name'],
+					'quantity' => intval($aItem['quantity']),
+					'price' =>  $aItem['price'] * 100,
+					'taxMode' => array(
+						'type' => 'InvoiceLineTaxVAT',
+						'rate' => Core_Array::get($aVat, $aItem['tax'], 'none')
+					)
+				);
+			}
+
+			$request = json_encode($aData);
+
+			try {
+				$Core_Http = Core_Http::instance('curl')
+					->clear()
+					->method('POST')
+					->timeout(30)
+					->url("https://api.rbk.money/v1/processing/invoices")
+					->additionalHeader('X-Request-ID', uniqid())
+					->additionalHeader('Authorization', 'Bearer ' . $this->_apiKey)
+					->additionalHeader('Content-type', 'application/json; charset=utf-8')
+					->additionalHeader('Accept', 'application/json')
+					->rawData($request)
+					->execute();
+
+				$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+
+				if (isset($aAnswer['invoice']) && isset($aAnswer['invoice']['id'])
+					&& isset($aAnswer['invoiceAccessToken']) && isset($aAnswer['invoiceAccessToken']['payload'])
+				)
+				{
+					$invoice_id = strval($aAnswer['invoice']['id']);
+					$access_token = strval($aAnswer['invoiceAccessToken']['payload']);
+
+					?>
+					<form action="<?php echo $handler_url?>" method="GET">
+						<script src="https://checkout.rbk.money/checkout.js" class="rbkmoney-checkout"
+								data-invoice-id="<?php echo htmlspecialchars($invoice_id)?>"
+								data-invoice-access-token="<?php echo htmlspecialchars($access_token)?>"
+								data-payment-flow-hold="true"
+								data-hold-expiration="capture"
+								data-name="<?php echo htmlspecialchars(strval($aAnswer['invoice']['product']))?>"
+								data-email="<?php echo htmlspecialchars($oShop_Order->email)?>"
+								data-logo="https://checkout.rbk.money/images/logo.png"
+								data-label="Оплатить с карты"
+								data-description="<?php echo htmlspecialchars(strval($aAnswer['invoice']['description']))?>"
+								data-pay-button-label="Оплатить">
+						</script>
+					</form>
+					<?php
+				}
+			}
+			catch (Exception $e) {}
 		}
 		else
 		{
@@ -191,5 +301,132 @@ class Shop_Payment_System_Handler8 extends Shop_Payment_System_Handler
 	public function getInvoice()
 	{
 		return $this->getNotification();
+	}
+
+	/**
+	 * Получаем товары из заказа
+	 */
+	protected function _getOrderItems($oShop_Order)
+	{
+		$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll(FALSE);
+
+		// Расчет сумм скидок, чтобы потом вычесть из цены каждого товара
+		$discount = $amount = $quantity = 0;
+		foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
+		{
+			if ($oShop_Order_Item->price <= 0)
+			{
+				$discount -= $oShop_Order_Item->getAmount();
+				unset($aShop_Order_Items[$key]);
+			}
+			else
+			{
+				$amount += $oShop_Order_Item->getAmount();
+				$quantity += $oShop_Order_Item->quantity;
+			}
+		}
+
+		$discount = $amount != 0 && $quantity != 0
+			? round(
+				abs($discount) / $amount, 4, PHP_ROUND_HALF_DOWN
+			)
+			: 0;
+
+		$aItems = array();
+
+		// Рассчитываемая сумма с учетом скидок
+		$calcAmount = 0;
+
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
+		{
+			if ($oShop_Order_Item->quantity)
+			{
+				$price = number_format(
+					Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * (1 - $discount),
+					2, '.', ''
+				);
+
+				$calcAmount += $price * $oShop_Order_Item->quantity;
+
+				$aItems[] = array(
+					'name' => mb_substr($oShop_Order_Item->name, 0, 128),
+					'shop_item_id' => $oShop_Order_Item->shop_item_id,
+					'quantity' => $oShop_Order_Item->quantity,
+					'price' =>  $price,
+					'tax' => $oShop_Order_Item->rate
+				);
+			}
+		}
+
+		$totalAmount = $oShop_Order->getAmount();
+		if ($calcAmount != $totalAmount)
+		{
+			$delta = $totalAmount - $calcAmount;
+
+			end($aItems);
+			$lastKey = key($aItems);
+
+			$deltaPerOneItem = round($delta / $aItems[$lastKey]['quantity'], 2);
+
+			$aItems[$lastKey]['price'] += $deltaPerOneItem;
+
+			$calcAmount += $deltaPerOneItem * $aItems[$lastKey]['quantity'];
+
+			// Если опять не равны, то добавляем новый товар
+			if ($calcAmount < $totalAmount)
+			{
+				$aItems[] = array(
+					'name' => 'Округление',
+					'shop_item_id' => 0,
+					'quantity' => 1,
+					'price' => round($totalAmount - $calcAmount, 2),
+					// Ставка налога текстовая
+					'tax' => 0
+				);
+			}
+		}
+
+		return $aItems;
+	}
+
+	/**
+	 * Получаем сигнатуру из заголовка
+	 */
+	protected function _getSignatureFromHeader($contentSignature)
+	{
+		$signature = preg_replace("/alg=(\S+);\sdigest=/", '', $contentSignature);
+
+		if (empty($signature)) {
+			throw new Exception('Signature is missing');
+		}
+
+		return $signature;
+	}
+
+	/**
+	 * Декодируем сигнатуру
+	 */
+	protected function _urlsafe_b64decode($string)
+	{
+		return base64_decode(strtr($string, '-_,', '+/='));
+	}
+
+	/**
+	 * Проверяем сигнатуру
+	 */
+	protected function _verificationSignature($data, $signature, $public_key)
+	{
+		if (empty($data) || empty($signature) || empty($public_key)) {
+			return FALSE;
+		}
+
+		$public_key_id = openssl_get_publickey($public_key);
+		if (empty($public_key_id)) {
+			return FALSE;
+		}
+
+		$verify = openssl_verify($data, $signature, $public_key_id, OPENSSL_ALGO_SHA256);
+
+		return ($verify == 1);
 	}
 }

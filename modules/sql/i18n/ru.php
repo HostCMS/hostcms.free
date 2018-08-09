@@ -1,4 +1,4 @@
-<?php 
+<?php
 /**
  * SQL.
  *
@@ -6,12 +6,12 @@
  * @subpackage Sql
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'SQL-запросы',
 	'title' => 'SQL-запросы',
-	'warning' => 'Внимание! Выполнение SQL-запросов может повредить работоспособности системы. <br> 
+	'warning' => 'Внимание! Выполнение SQL-запросов может повредить работоспособности системы. <br>
 	Перед выполнением запросов рекомендуется сделать резервное копирование.',
 	'text' => '<acronym title="Текст SQL-запроса">Текст запроса</acronym>',
 	'load_file' => '<acronym title="Файл с SQL-запросами">Загрузить файл</acronym>',
@@ -24,12 +24,6 @@ return array(
 	'repair_table' => 'Исправить (только для MyISAM)',
 	'optimize_table_title' => 'Оптимизация таблиц',
 	'repair_table_title' => 'Исправление таблиц',
-	//'optimize_success' => 'Таблицы успешно оптимизированы',
-	//'repair_success' => 'Таблицы успешно исправлены',
-
-	'rows_count' => 'Найдено <b>%d</b> строк, показано <b>%d</b> строк.',
+	'rows_count' => 'Найдено <b>%d</b> строк, показано <b>%d</b> строк. Время выполнения <b>%.3f</b> с.',
 	'drop_index' => 'Дублирующий индекс %s таблицы %s был удален.',
-	
-	'delete_success' => 'Элемент удален!',
-	'undelete_success' => 'Элемент восстановлен!',
 );

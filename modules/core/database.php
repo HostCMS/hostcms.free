@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -112,7 +112,82 @@ abstract class Core_DataBase
 	 * @param mixed $selectionCondition Selection condition
 	 * @return array
 	 */
-	abstract public function getColumns($tableName, $selectionCondition = NULL);
+	public function getColumns($tableName, $selectionCondition = NULL)
+	{
+		$this->connect();
+
+		$query = "SHOW COLUMNS FROM " . $this->quoteColumnName($tableName);
+
+		if (!is_null($selectionCondition))
+		{
+			$query .= ' LIKE ' . $this->quote($selectionCondition);
+		}
+
+		$result = $this->query($query)->asAssoc()->result();
+
+		$return = array();
+		foreach ($result as $row)
+		{
+			$column = $this->getColumnType($row['Type']);
+
+			// [Field][Type][Collation][Null][Key][Default][Extra][Privileges][Comment]
+			$column['name'] = $row['Field'];
+			$column['columntype'] = $row['Type'];
+			//$column['collation'] = $row['Collation'];
+			$column['null'] = ($row['Null'] == 'YES');
+			$column['key'] = $row['Key'];
+			$column['default'] = $row['Default'];
+			$column['extra'] = $row['Extra'];
+			//$column['privileges'] = $row['Privileges'];
+			//$column['comment'] = $row['Comment'];
+
+			$return[$column['name']] = $column;
+		}
+
+		return $return;
+	}
+	
+	/**
+	 * Get list of columns in a table
+	 *
+	 * @param string $tableName Table name
+	 * @param mixed $selectionCondition Selection condition
+	 * @return array
+	 */
+	public function getFullColumns($tableName, $selectionCondition = NULL)
+	{
+		$this->connect();
+
+		$query = "SHOW FULL COLUMNS FROM " . $this->quoteColumnName($tableName);
+
+		if (!is_null($selectionCondition))
+		{
+			$query .= ' LIKE ' . $this->quote($selectionCondition);
+		}
+
+		$result = $this->query($query)->asAssoc()->result();
+
+		$return = array();
+		foreach ($result as $row)
+		{
+			$column = $this->getColumnType($row['Type']);
+
+			// [Field][Type][Collation][Null][Key][Default][Extra][Privileges][Comment]
+			$column['name'] = $row['Field'];
+			$column['columntype'] = $row['Type'];
+			$column['collation'] = $row['Collation'];
+			$column['null'] = ($row['Null'] == 'YES');
+			$column['key'] = $row['Key'];
+			$column['default'] = $row['Default'];
+			$column['extra'] = $row['Extra'];
+			$column['privileges'] = $row['Privileges'];
+			$column['comment'] = $row['Comment'];
+
+			$return[$column['name']] = $column;
+		}
+
+		return $return;
+	}
 
 	/**
 	 * Quote column name, e.g. `columnName` for 'columnName',
@@ -264,9 +339,9 @@ abstract class Core_DataBase
 	 */
 	public function highlightSql($sql)
 	{
-		foreach(self::$_colors as $key => $color)
+		foreach (self::$_colors as $key => $color)
 		{
-			foreach(self::$_words[$key] as $word)
+			foreach (self::$_words[$key] as $word)
 			{
 				//$sql = str_ireplace(" {$word} " , ' <span style="color: ' . $color . '">' . $word . '</span> ', $sql);
 				$sql = preg_replace("/(\s?)({$word})(\s)/iu", "\\1<span style=\"color: {$color}\">\\2</span>\\3", $sql);

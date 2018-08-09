@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -46,9 +46,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		$issetHaving = FALSE;
 		foreach ($this->_conditions as $condition)
 		{
-			$aCondition = each($condition);
-
-			if ($aCondition['key'] == 'having' || $aCondition['key'] == 'groupBy')
+			if (isset($condition['having']) || isset($condition['groupBy']))
 			{
 				$issetHaving = TRUE;
 				break;
@@ -235,16 +233,16 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	 */
 	public function addCondition($condition)
 	{
-		$aCondition = each($condition);
-
 		// Уточнение таблицы при поиске WHERE
-		if ($aCondition['key'] == 'where' /*|| $aCondition['key'] == 'having'*/)
+		if (isset($condition['where']))
 		{
-			if (isset($aCondition['value'][0]))
+			if (isset($condition['where'][0]))
 			{
-				if (strpos($aCondition['value'][0], '.') === FALSE)
+				if (is_string($condition['where'][0])
+					&& strpos($condition['where'][0], '.') === FALSE
+				)
 				{
-					$condition[$aCondition['key']][0] = $this->_entity->getTableName() . '.' . $condition[$aCondition['key']][0];
+					$condition['where'][0] = $this->_entity->getTableName() . '.' . $condition['where'][0];
 				}
 			}
 		}
@@ -263,8 +261,10 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		// Conditions
 		foreach ($this->_conditions as $condition)
 		{
-			list($operator, $args) = each($condition);
-			call_user_func_array(array($queryBuilder, $operator), $args);
+			foreach ($condition as $operator => $args)
+			{
+				call_user_func_array(array($queryBuilder, $operator), $args);
+			}
 		}
 
 		// Orders

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -165,11 +165,13 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 					$oShop_Items
 						->queryBuilder()
+						->clearOrderBy()
+						->orderBy('id', 'ASC')
 						->offset($offset)->limit($limit);
 
 					$aShop_Items = $oShop_Items->findAll(FALSE);
 
-					foreach($aShop_Items as $oShop_Item)
+					foreach ($aShop_Items as $oShop_Item)
 					{
 						$aProperty_Values = $this->_object->getValues($oShop_Item->id, FALSE);
 

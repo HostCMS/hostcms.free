@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -312,11 +312,14 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oFormatTab
 					->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow14 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow15 = Admin_Form_Entity::factory('Div')->class('row'));
-
-				$oAdditionalTab
+					->add($oMainRow15 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow16 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow17 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oAdditionalTab
+					->add($oMainRow18 = Admin_Form_Entity::factory('Div')->class('row'))
+					// ->add($oMainRow19 = Admin_Form_Entity::factory('Div')->class('row'))
+					;
 
 				// Formats
 				$this->getField('image_large_max_width')
@@ -331,16 +334,24 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->getField('image_small_max_height')
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
+				$this->getField('preserve_aspect_ratio')
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
+
+				$this->getField('preserve_aspect_ratio_small')
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));					
+					
 				$this->getField('hide_small_image')
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				$oMainTab
 					->move($this->getField('image_large_max_width'), $oMainRow13)
 					->move($this->getField('image_large_max_height'), $oMainRow13)
-					->move($this->getField('image_small_max_width'), $oMainRow14)
-					->move($this->getField('image_small_max_height'), $oMainRow14)
-					->move($this->getField('hide_small_image'), $oMainRow15)
-					->move($this->getField('guid'), $oMainRow16);
+					->move($this->getField('preserve_aspect_ratio'), $oMainRow14)
+					->move($this->getField('image_small_max_width'), $oMainRow15)
+					->move($this->getField('image_small_max_height'), $oMainRow15)
+					->move($this->getField('preserve_aspect_ratio_small'), $oMainRow16)
+					->move($this->getField('hide_small_image'), $oMainRow17)
+					->move($this->getField('guid'), $oMainRow18);
 
 				$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 				$oAdmin_Form_Entity_Code->html(

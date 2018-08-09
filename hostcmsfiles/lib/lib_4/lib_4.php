@@ -163,9 +163,10 @@ if ($Shop_Controller_Show->item == 0)
 				->setAnd()
 				->open();
 
-			reset($aTmpProperties);
-			while(list(, list($oProperty, $propertyValue)) = each($aTmpProperties))
+			foreach ($aTmpProperties as $aTmpProperty)
 			{
+				list($oProperty, $propertyValue) = $aTmpProperty;
+
 				$tableName = $oProperty->createNewValue(0)->getTableName();
 
 				!in_array($tableName, $aTableNames) && $aTableNames[] = $tableName;
@@ -211,7 +212,7 @@ if ($Shop_Controller_Show->item == 0)
 			$Shop_Controller_Show->shopItems()->queryBuilder()
 				->close()
 				->groupBy('shop_items.id');
-				
+
 			$havingCount > 1
 				&& $Shop_Controller_Show->shopItems()->queryBuilder()
 						->having('COUNT(shop_item_properties.id)', '=', $havingCount);
@@ -378,7 +379,7 @@ if ($Shop_Controller_Show->item == 0)
             foreach ($aProperties as $oProperty)
             {
 				$val = Core_Array::getPost("property_{$oProperty->id}");
-				
+
 				if (!is_array($val))
 				{
 					$oAddItem->addEntity(Core::factory('Core_Xml_Entity')

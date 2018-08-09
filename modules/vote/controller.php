@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Vote
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Vote_Controller
 {
@@ -94,7 +94,7 @@ class Vote_Controller
 		$aVotingStatistic = array('likes' => 0, 'dislikes' => 0, 'rate' => 0);
 
 		$aVotes = $oObject->Votes->findAll();
-		foreach($aVotes as $oVote)
+		foreach ($aVotes as $oVote)
 		{
 			$aVotingStatistic[$oVote->value < 0 ? 'dislikes' : 'likes'] += $oVote->value;
 		}

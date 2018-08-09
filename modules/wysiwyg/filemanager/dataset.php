@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 {
@@ -74,7 +74,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	public function getCount()
 	{
-		if (!count($this->_count))
+		if (!$this->_count)
 		{
 			$this->_loadFiles();
 			$this->_count = count($this->_objects);
@@ -112,12 +112,13 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 
 		foreach ($this->_conditions as $condition)
 		{
-			list($operator, $args) = each($condition);
-
-			if ($operator == 'orderBy')
+			foreach ($condition as $operator => $args)
 			{
-				$sortField = $args[0];
-				$sortDirection = strtoupper($args[1]);
+				if ($operator == 'orderBy')
+				{
+					$sortField = $args[0];
+					$sortDirection = strtoupper($args[1]);
+				}
 			}
 		}
 

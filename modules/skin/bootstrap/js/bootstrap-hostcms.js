@@ -95,7 +95,7 @@
 			// Change window id
 			data['hostcms[window]'] = jDivWin.attr('id');
 
-			console.log(data);
+			//console.log(data);
 
 			jQuery.ajax({
 				context: jDivWin,
@@ -235,8 +235,272 @@
 				},
 			});
 		},
+		bookmarksPrepare: function (){
+			setInterval($.refreshBookmarksList, 120000);
+
+			var jBookmarksListBox  = $('.navbar-account #bookmarksListBox');
+
+			jBookmarksListBox.on({
+				'click': function (event){
+					event.stopPropagation();
+				},
+				'touchstart': function (event) {
+					$(this).data({'isTouchStart': true});
+				}
+			});
+
+			// Показ списка закладок
+			$('.navbar li#bookmarks').on('shown.bs.dropdown', function (event){
+				// Устанавливаем полосу прокрутки
+				$.setBookmarksSlimScroll();
+			});
+		},
+		refreshBookmarksCallback: function(resultData)
+		{
+			 // Есть новые дела
+			if (typeof resultData['Bookmarks'] != 'undefined' && resultData['Bookmarks'].length)
+			{
+				var jEventUl = $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul');
+
+				$('li[id!="bookmark-0"]', jEventUl).remove();
+				$('li[id="bookmark-0"]', jEventUl).hide();
+
+				$.each(resultData['Bookmarks'], function(index, event) {
+					// Добавляем закладку в список
+					$.addBookmark(event, jEventUl);
+				});
+			}
+		},
+		refreshBookmarksList: function (){
+			// add ajax '_'
+			var data = jQuery.getData({}),
+				jBookmarksListBox = $('.navbar-account #bookmarksListBox');
+
+			var bLocalStorage = typeof localStorage !== 'undefined',
+				bNeedsRequest = false;
+
+			if (bLocalStorage)
+			{
+				var storage = localStorage.getItem('bookmarks'),
+					storageObj = JSON.parse(storage);
+
+				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+				{
+					storageObj = {expired_in: 0};
+				}
+
+				if (Date.now() > storageObj['expired_in'])
+				{
+					storageObj['expired_in'] = Date.now() + 120000;
+
+					bNeedsRequest = true;
+				}
+				else
+				{
+					$.refreshBookmarksCallback(storageObj);
+				}
+			}
+			else
+			{
+				bNeedsRequest = true;
+			}
+
+			if (bNeedsRequest)
+			{
+				$.ajax({
+					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jBookmarksListBox.data('moduleId') + '&type=85',
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					error: function(){},
+					success: [function(resultData){
+						if (bLocalStorage)
+						{
+							resultData['expired_in'] = storageObj['expired_in'];
+						}
+
+						try {
+							localStorage.setItem('bookmarks', JSON.stringify(resultData));
+						} catch (e) {
+							if (e == QUOTA_EXCEEDED_ERR) {
+								console.log('localStorage: QUOTA_EXCEEDED_ERR');
+							}
+						}
+					}, $.refreshBookmarksCallback]
+				});
+			}
+		},
+		setBookmarksSlimScroll: function (){
+			// Сохраняем данные .slimScrollBar
+			var jSlimScrollBar = $('#bookmarksListBox .slimScrollBar'),
+				slimScrollBarData = !jSlimScrollBar.data() ? {'isMousedown': false} : jSlimScrollBar.data(),
+				jScrollBookmarks = $('#bookmarksListBox .scroll-bookmarks');
+
+			// Удаляем slimscroll
+			if ($('#bookmarksListBox > .slimScrollDiv').length)
+			{
+				jScrollBookmarks.slimscroll({destroy: true});
+				jScrollBookmarks.attr('style', '');
+			}
+
+			// Создаем slimscroll
+			jScrollBookmarks.slimscroll({
+				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? '220px' : '55px',
+				//height: 'auto',
+				color: 'rgba(0, 0, 0, 0.3)',
+				size: '5px',
+				wheelStep: 5
+			});
+
+			//	Добавляем новому .slimScrollBar данные от удаленного
+			jSlimScrollBar
+				.data(slimScrollBarData)
+				.on({
+					'mousedown': function (){
+						$(this).data('isMousedown', true);
+					},
+
+					'mouseenter': function () {
+						$(this).css('width', '8px');
+					},
+
+					'mouseout': function () {
+						!$(this).data('isMousedown') &&	$(this).css('width', '5px');
+					}
+				});
+		},
+		addBookmark: function (oBookmark, jBox){
+			jBox.append(
+				'<li id="bookmark-' + oBookmark['id'] + '">\
+					<a href="' + (oBookmark['href'].length ? oBookmark['href'] : '#') + '" onclick="' + (oBookmark['onclick'].length ? oBookmark['onclick'] : '') + '">\
+						<div class="clearfix notification-bookmark">\
+							<div class="notification-icon">\
+								<i class="' + oBookmark['ico'] + ' bg-darkorange white"></i>\
+							</div>\
+							<div class="notification-body">\
+								<span class="title">' + oBookmark['name'] + '</span>\
+								<span class="description">' + oBookmark['href'] + '</span>\
+							</div>\
+							<div class="notification-extra">\
+								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + oBookmark['remove-title'] +'\', submit: \'' + oBookmark['remove-submit'] + '\', cancel: \'' + oBookmark['remove-cancel'] + '\', bookmark_id: ' + oBookmark['id'] + '}); event.stopPropagation(); event.preventDefault();"></i>\
+							</div>\
+						</div>\
+					</a>\
+				</li>'
+			);
+
+			// Открыт выпадающий список закладок
+			if ($('.navbar li#notification-bookmark').hasClass('open'))
+			{
+				// Если список дел был пуст, устанавливаем полосу прокрутки
+				!$('li', jBox).length && $.setBookmarksSlimScroll();
+			}
+		},
+		addUserBookmark: function(settings) {
+			bootbox.prompt({
+				title: settings.title,
+				value: settings.value,
+				className: 'add-bookmark-form',
+				buttons: {
+					confirm: {
+						label: settings.submit,
+						className: 'btn-palegreen add-bookmark-btn'
+					},
+					cancel: {
+						label: settings.cancel,
+						className: 'btn-default'
+					}
+				},
+				callback: function(name){
+					if (name)
+					{
+						$.ajax({
+							url: '/admin/user/index.php',
+							type: "POST",
+							data: {'add_bookmark': 1, 'name': name, 'path': settings.path, 'module_id': settings.module_id},
+							dataType: 'json',
+							error: function(){},
+							success: function (result) {
+								if (result.length)
+								{
+									$.removeLocalStorageItem('bookmarks');
+									$.refreshBookmarksList();
+
+									$('li#bookmarks > a').addClass('wave in');
+
+									$('a#bookmark-toggler').addClass('active');
+
+									setTimeout(function() {
+									   $('li#bookmarks > a').removeClass('wave in');
+									}, 5000);
+								}
+							}
+						});
+					}
+				}
+			});
+
+			$('.add-bookmark-form form').on('keypress', function(e) {
+				if(e.which == 13) {
+					$('.add-bookmark-btn').trigger('click');
+				}
+			});
+		},
+		removeUserBookmark: function(settings) {
+			bootbox.confirm({
+				message: settings.title,
+				className: 'delete-bookmark-form',
+				buttons: {
+					confirm: {
+						label: settings.submit,
+						className: 'btn-darkorange delete-bookmark-btn'
+					},
+					cancel: {
+						label: settings.cancel,
+						className: 'btn-default'
+					}
+				},
+				callback: function (result) {
+					if (result)
+					{
+						$.ajax({
+							url: '/admin/user/index.php',
+							type: "POST",
+							data: {'remove_bookmark': 1, 'bookmark_id': settings.bookmark_id},
+							dataType: 'json',
+							error: function(){},
+							success: function (result) {
+								if (result.length && result == 'OK')
+								{
+									// $('li#bookmark-' + settings.bookmark_id).remove();
+
+									$.removeLocalStorageItem('bookmarks');
+									$.refreshBookmarksList();
+								}
+							}
+						});
+					}
+				}
+			});
+
+			$('.delete-bookmark-form').on('keypress', function(e) {
+				if(e.which == 13) {
+					$('.delete-bookmark-btn').trigger('click');
+				}
+			});
+		},
+		removeLocalStorageItem: function(name) {
+			if (typeof localStorage !== 'undefined')
+			{
+				localStorage.removeItem(name);
+			}
+		},
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
+		},
+		insertSeoTemplate: function(el, text) {
+			if (el == undefined) { return; }
+			el.insertAtCaret(text);
 		},
 		filterToggleField: function(object)
 		{
@@ -297,26 +561,6 @@
 							saveFilterAs: true
 						}
 					});
-
-					/*$.loadingScreen('show');
-					//alert(object);
-
-					var FormNode = object.closest('form'),
-						data = { filterCaption: result, saveFilterAs: true },
-						path = FormNode.attr('action');
-
-					FormNode.ajaxSubmit({
-						data: data,
-						//context: jQuery('#'+settings.windowId),
-						url: path,
-						type: 'POST',
-						dataType: 'json',
-						cache: false,
-						success: function(data, status, jqXHR) {
-							alert(data.toSource());
-							$.loadingScreen('hide');
-						}
-					});*/
 				}
 			});
 		},
@@ -335,7 +579,6 @@
 				dataType: 'json',
 				cache: false,
 				success: function(data, status, jqXHR) {
-					//alert(data.toSource());
 					$.loadingScreen('hide');
 				}
 			});
@@ -365,6 +608,22 @@
 			$('#filter-li-' + filterId).prev().find('a').tab('show');
 			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
 
+		},
+		sortableKanban: function(path) {
+			$('.kanban-board .kanban-list').sortable({
+				items: "> li",
+				connectWith: '.kanban-board .kanban-list',
+				placeholder: 'placeholder',
+				handle: ".drag-handle",
+				// containment: '.kanban-board',
+				receive: function (event, ui) {
+					$.ajax({
+						data: { id: ui.item[0].id, target_status_id: this.id },
+						type: "POST",
+						url: path,
+					});
+				}
+			}).disableSelection();
 		},
 		/* -- CHAT -- */
 		chatGetUsersList: function(event)
@@ -766,6 +1025,73 @@
 				},
 			});
 		},
+		refreshMessagesListCallback: function(result)
+		{
+			var jMessagesList = $('.chatbar-messages .messages-list');
+
+			if (result['messages'])
+			{
+				$.each(result['messages'], function(i, object) {
+					$.addChatMessage(result['recipient-user-info'], result['user-info'], object, 1);
+				});
+
+				// ID последнего сообщения в списке
+				var lastMessage = result['messages'].length - 1;
+				jMessagesList.data('lastMessageId', result['messages'][lastMessage]['id']);
+
+				// Hide message
+				$(".chatbar-messages #messages-none").addClass("hidden");
+
+				// Последнее прочитанное сообщение находится выше области ввода сообщений, т.е. скрол находится в нижнем положении
+				if ($(".chatbar-messages .send-message").offset().top > $("li.message:not(.unread):not(.hidden):last", jMessagesList).offset().top)
+				{
+
+					$("li.message.hidden ~ li.message.unread", jMessagesList).each(function(){
+						$.showChatMessageAsRead($(this));
+					});
+
+					$.each(result['messages'], function(i, object) {
+
+						path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=83',
+						data = $.getData({});
+
+						data['message-id'] = object.id;
+
+						$.ajax({
+							url: path,
+							type: "POST",
+							data: data,
+							dataType: 'json',
+							error: function(){},
+							success: function (result) {
+								if (result['answer'][0])
+								{
+									jMessagesList.data('countNewMessages', jMessagesList.data('countNewMessages') - 1);
+									if (jMessagesList.data('countNewMessages') > 0)
+									{
+										$(".chatbar-messages #new_messages span.count_new_messages").text(jMessagesList.data("countNewMessages"));
+									}
+									else
+									{
+										$(".chatbar-messages #new_messages").addClass('hidden')
+									}
+								}
+							}
+						});
+					});
+
+
+					// Scroll
+					$.chatMessagesListScrollDown();
+				}
+				else
+				{
+					var jDivNewMessages = $(".chatbar-messages #new_messages");
+					$("span.count_new_messages", jDivNewMessages).text(jMessagesList.data("countNewMessages"));
+					jDivNewMessages.removeClass("hidden");
+				}
+			}
+		},
 		refreshMessagesList: function(recipientUserId) {
 			var refreshMessagesListIntervalId = setInterval(function () {
 
@@ -776,81 +1102,84 @@
 				data['last-message-id'] = jMessagesList.data('lastMessageId');
 				data['recipient-user-id'] = recipientUserId;
 
-				$.ajax({
-					url: path,
-					type: "POST",
-					data: data,
-					dataType: 'json',
-					abortOnRetry: 1,
-					error: function(){},
-					success: function (result) {
-						if (result['messages'])
-						{
-							$.each(result['messages'], function(i, object) {
-								$.addChatMessage(result['recipient-user-info'], result['user-info'], object, 1);
-							});
+				var bLocalStorage = typeof localStorage !== 'undefined',
+					bNeedsRequest = false;
 
-							// ID последнего сообщения в списке
-							var lastMessage = result['messages'].length - 1;
-							jMessagesList.data('lastMessageId', result['messages'][lastMessage]['id']);
+				if (bLocalStorage)
+				{
+					var storage = localStorage.getItem('chat_messages_list'),
+						storageObj = JSON.parse(storage);
 
-							// Hide message
-							$(".chatbar-messages #messages-none").addClass("hidden");
+					!storage && (storageObj = {expired_in: 0});
 
-							// Последнее прочитанное сообщение находится выше области ввода сообщений, т.е. скрол находится в нижнем положении
-							if ($(".chatbar-messages .send-message").offset().top > $("li.message:not(.unread):not(.hidden):last", jMessagesList).offset().top)
-							{
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 10000;
 
-								$("li.message.hidden ~ li.message.unread", jMessagesList).each(function(){
-									$.showChatMessageAsRead($(this));
-								});
-
-								$.each(result['messages'], function(i, object) {
-
-									path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=83',
-									data = $.getData({});
-
-									data['message-id'] = object.id;
-
-									$.ajax({
-										url: path,
-										type: "POST",
-										data: data,
-										dataType: 'json',
-										error: function(){},
-										success: function (result) {
-											if (result['answer'][0])
-											{
-												jMessagesList.data('countNewMessages', jMessagesList.data('countNewMessages') - 1);
-												if (jMessagesList.data('countNewMessages') > 0)
-												{
-													$(".chatbar-messages #new_messages span.count_new_messages").text(jMessagesList.data("countNewMessages"));
-												}
-												else
-												{
-													$(".chatbar-messages #new_messages").addClass('hidden')
-												}
-											}
-										}
-									});
-								});
-
-
-								// Scroll
-								$.chatMessagesListScrollDown();
-							}
-							else
-							{
-								var jDivNewMessages = $(".chatbar-messages #new_messages");
-								$("span.count_new_messages", jDivNewMessages).text(jMessagesList.data("countNewMessages"));
-								jDivNewMessages.removeClass("hidden");
-							}
-						}
+						bNeedsRequest = true;
 					}
-				});
-			}, 5000);
+					else
+					{
+						$.refreshMessagesListCallback(storageObj);
+					}
+				}
+				else
+				{
+					bNeedsRequest = true;
+				}
+
+				if (bNeedsRequest)
+				{
+					$.ajax({
+						url: path,
+						type: "POST",
+						data: data,
+						dataType: 'json',
+						abortOnRetry: 1,
+						error: function(){},
+						success: [function(result){
+							if (bLocalStorage)
+							{
+								result['expired_in'] = storageObj['expired_in'];
+							}
+
+							try {
+								localStorage.setItem('chat_messages_list', JSON.stringify(result));
+							} catch (e) {
+								if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage: QUOTA_EXCEEDED_ERR');
+								}
+							}
+						}, $.refreshMessagesListCallback]
+					});
+				}
+			}, 10000);
 
 			$("#chatbar").data("refreshMessagesListIntervalId", refreshMessagesListIntervalId);
+		},
+		refreshChatCallback: function(data)
+		{
+			if (data["info"])
+			{
+				Notify('<img width="24px" height="24px" src="' + data["info"].avatar + '"><span style="padding-left:10px">' + data["info"].text + '</span>', 'bottom-left', '5000', 'blueberry', 'fa-comment-o', true, !!data["info"].sound);
+
+				var user_id = data["info"]['user_id'],
+					jContact = $('#chat-user-id-' + user_id + ' .contact-info .contact-name'),
+					jBadge = $('span.badge', jContact);
+
+				jContact.addChatBadge(jBadge.length ? + jBadge.text() + 1 : 1);
+			}
+			else
+			{
+				$("#chat-link .badge").addClass("hidden").text(data["count"]);
+				$("#chat-link").removeClass("wave in");
+			}
+
+			if (data["count"] > 0)
+			{
+				$("#chat-link .badge").removeClass("hidden").text(data["count"]);
+				$("#chat-link").addClass("wave in");
+			}
 		},
 		refreshChat: function(settings) {
 			setInterval(function () {
@@ -858,38 +1187,79 @@
 				var data = $.getData({});
 					data['alert'] = 1;
 
-				$.ajax({
-					url: settings.path,
-					type: "POST",
-					data: data,
-					dataType: 'json',
-					abortOnRetry: 1,
-					error: function(){},
-					success: function (data) {
-						if (data["info"])
-						{
-							Notify('<img width="24px" height="24px" src="' + data["info"].avatar + '"><span style="padding-left:10px">' + data["info"].text + '</span>', 'bottom-left', '5000', 'blueberry', 'fa-comment-o', true, !!data["info"].sound);
+				var bLocalStorage = typeof localStorage !== 'undefined',
+					bNeedsRequest = false;
 
-							var user_id = data["info"]['user_id'],
-								jContact = $('#chat-user-id-' + user_id + ' .contact-info .contact-name'),
-								jBadge = $('span.badge', jContact);
+				if (bLocalStorage)
+				{
+					var storage = localStorage.getItem('chat'),
+						storageObj = JSON.parse(storage);
 
-							jContact.addChatBadge(jBadge.length ? +jBadge.text() + 1 : 1);
-						}
-						else
-						{
-							$("#chat-link .badge").addClass("hidden").text(data["count"]);
-							$("#chat-link").removeClass("wave in");
-						}
+					!storage && (storageObj = {expired_in: 0});
 
-						if (data["count"] > 0)
-						{
-							$("#chat-link .badge").removeClass("hidden").text(data["count"]);
-							$("#chat-link").addClass("wave in");
-						}
-					},
-				});
-			}, 5000);
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 10000;
+
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshChatCallback(storageObj);
+					}
+				}
+				else
+				{
+					bNeedsRequest = true;
+				}
+
+				if (bNeedsRequest)
+				{
+					$.ajax({
+						url: settings.path,
+						type: "POST",
+						data: data,
+						dataType: 'json',
+						abortOnRetry: 1,
+						error: function(){},
+						success: [function(data){
+							if (bLocalStorage)
+							{
+								data['expired_in'] = storageObj['expired_in'];
+							}
+
+							try {
+								localStorage.setItem('chat', JSON.stringify(data));
+							} catch (e) {
+								if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage: QUOTA_EXCEEDED_ERR');
+								}
+							}
+						}, $.refreshChatCallback]
+					});
+				}
+			}, 10000);
+		},
+		refreshUserStatusesCallback: function(result)
+		{
+			$(".online[data-user-id], .offline[data-user-id]").each(function(){
+				var $this = $(this),
+					user_id = +$this.data("userId");
+
+				if (result[user_id])
+				{
+					var status = result[user_id]['status'] == 1 ?  'online' : 'offline ' + result[user_id]['lastActivity'];
+
+					$this.attr('class', status);
+					$this.next('.status').text(status);
+
+					// Обновление количества непрочитанных для каждого пользователя
+					if (result[user_id]['count_unread'])
+					{
+						$('#chat-user-id-' + user_id + ' .contact-info .contact-name').addChatBadge(result[user_id]['count_unread']);
+					}
+				}
+			});
 		},
 		refreshUserStatuses: function() {
 			setInterval(function () {
@@ -897,34 +1267,57 @@
 					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=82',
 					data = $.getData({});
 
-				$.ajax({
-					url: path,
-					type: "POST",
-					data: data,
-					dataType: 'json',
-					abortOnRetry: 1,
-					error: function(){},
-					success: function (result) {
-						$(".online[data-user-id], .offline[data-user-id]").each(function(){
-							var $this = $(this),
-								user_id = +$this.data("userId");
+				var bLocalStorage = typeof localStorage !== 'undefined',
+					bNeedsRequest = false;
 
-							if (result[user_id])
+				if (bLocalStorage)
+				{
+					var storage = localStorage.getItem('chat_user_statuses'),
+						storageObj = JSON.parse(storage);
+
+					!storage && (storageObj = {expired_in: 0});
+
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 10000;
+
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshUserStatusesCallback(storageObj);
+					}
+				}
+				else
+				{
+					bNeedsRequest = true;
+				}
+
+				if (bNeedsRequest)
+				{
+					$.ajax({
+						url: path,
+						type: "POST",
+						data: data,
+						dataType: 'json',
+						abortOnRetry: 1,
+						error: function(){},
+						success: [function(result){
+							if (bLocalStorage)
 							{
-								var status = result[user_id]['status'] == 1 ?  'online' : 'offline ' + result[user_id]['lastActivity'];
+								result['expired_in'] = storageObj['expired_in'];
+							}
 
-								$this.attr('class', status);
-								$this.next('.status').text(status);
-
-								// Обновление количества непрочитанных для каждого пользователя
-								if (result[user_id]['count_unread'])
-								{
-									$('#chat-user-id-' + user_id + ' .contact-info .contact-name').addChatBadge(result[user_id]['count_unread']);
+							try {
+								localStorage.setItem('chat_user_statuses', JSON.stringify(result));
+							} catch (e) {
+								if (e == QUOTA_EXCEEDED_ERR) {
+									console.log('localStorage: QUOTA_EXCEEDED_ERR');
 								}
 							}
-						});
-					},
-				});
+						}, $.refreshUserStatusesCallback]
+					});
+				}
 			}, 60000);
 		},
 		chatPrepare: function() {
@@ -1408,6 +1801,22 @@
 				$.setEventsSlimScroll();
 			});
 		},
+		refreshEventsCallback: function(resultData)
+		{
+			 // Есть новые дела
+			if (typeof resultData['newEvents'] != 'undefined' && resultData['newEvents'].length)
+			{
+				var jEventUl = $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
+
+				$('li[id!="event-0"]', jEventUl).remove();
+				$('li[id="event-0"]', jEventUl).hide();
+
+				$.each(resultData['newEvents'], function( index, event ){
+					// Добавляем дело в список
+					$.addEvent(event, jEventUl);
+				});
+			}
+		},
 		refreshEventsList: function (){
 			// add ajax '_'
 			var data = jQuery.getData({}),
@@ -1415,33 +1824,59 @@
 
 			data['currentUserId'] = jNotificationsClockListBox.data('currentUserId');
 
-			$.ajax({
-				//context: textarea,
-				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsClockListBox.data('moduleId') + '&type=4',
-				type: 'POST',
-				data: data,
-				dataType: 'json',
-				success: function(resultData){
-					if (resultData['userId'] && resultData['userId'] == jNotificationsClockListBox.data('currentUserId'))
-					{
-						 // Есть новые дела
-						if (resultData['newEvents'].length)
-						{
-							var jEventUl = $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
+			var bLocalStorage = typeof localStorage !== 'undefined',
+				bNeedsRequest = false;
 
-							$('li[id!="event-0"]', jEventUl).remove();
+			if (bLocalStorage)
+			{
+				var storage = localStorage.getItem('events'),
+					storageObj = JSON.parse(storage);
 
-							// Удаление записи об отсутствии дел
-							$('li[id="event-0"]', jEventUl).hide();
-
-							$.each(resultData['newEvents'], function( index, event ){
-								// Добавляем дело в список
-								$.addEvent(event, jEventUl);
-							});
-						}
-					}
+				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+				{
+					storageObj = {expired_in: 0};
 				}
-			});
+
+				if (Date.now() > storageObj['expired_in'])
+				{
+					storageObj['expired_in'] = Date.now() + 10000;
+
+					bNeedsRequest = true;
+				}
+				else
+				{
+					$.refreshEventsCallback(storageObj);
+				}
+			}
+			else
+			{
+				bNeedsRequest = true;
+			}
+
+			if (bNeedsRequest)
+			{
+				$.ajax({
+					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsClockListBox.data('moduleId') + '&type=4',
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					error: function(){},
+					success: [function(resultData){
+						if (bLocalStorage)
+						{
+							resultData['expired_in'] = storageObj['expired_in'];
+						}
+
+						try {
+							localStorage.setItem('events', JSON.stringify(resultData));
+						} catch (e) {
+							if (e == QUOTA_EXCEEDED_ERR) {
+								console.log('localStorage: QUOTA_EXCEEDED_ERR');
+							}
+						}
+					}, $.refreshEventsCallback]
+				});
+			}
 		},
 		// Добавление полосы прокрутки для списка дел
 		setEventsSlimScroll: function (){
@@ -1459,7 +1894,7 @@
 
 			// Создаем slimscroll
 			jScrollNotificationClock.slimscroll({
-				height: $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul li[id != 0]').length ? '220px' : '55px',
+				height: $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul li[id != "notification-0"]').length ? '220px' : '55px',
 				//height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px',
@@ -1545,7 +1980,7 @@
 				// Устанавливаем видимость кнопки очистки поля поиска (фильтрации) уведомлений
 				setVisibilityInputCleaningButton(jInputSearch, jButton);
 
-				if ($('#notificationsListBox .scroll-notifications li[id != 0]').length)
+				if ($('#notificationsListBox .scroll-notifications li[id != "notification-0"]').length)
 				{
 					$('.navbar-account #notificationsListBox .footer').show();
 
@@ -1715,6 +2150,8 @@
 			var jSlimScrollBar = $('#notificationsListBox .slimScrollBar'),
 				slimScrollBarData = !jSlimScrollBar.data() ? {'isMousedown': false} : jSlimScrollBar.data();
 
+			// console.log('jSlimScrollBar = ', jSlimScrollBar);
+
 			// Удаляем slimscroll
 			if ($('#notificationsListBox > .slimScrollDiv').length)
 			{
@@ -1724,14 +2161,15 @@
 
 			// Создаем slimscroll
 			$('#notificationsListBox .scroll-notifications').slimscroll({
-				height: $('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != 0]').length ? '220px' : '55px',
+				height: $('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != "notification-0"]').length ? '220px' : '55px',
 				//height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px'
 			});
 
-			//	Добавляем новому .slimScrollBar данные от удаленного
-			jSlimScrollBar
+			// Добавляем новому .slimScrollBar данные от удаленного
+			//jSlimScrollBar
+			$('#notificationsListBox .slimScrollBar')
 				.data(slimScrollBarData)
 				.on({
 					'mousedown': function (){
@@ -1760,13 +2198,11 @@
 		},
 
 		// Добавление уведомления
-		addNotification: function (oNotification, jBox, showAlertNotification){
+		addNotification: function (oNotification, jBox, soundEnabled){
 
 			var jBox = jBox || $('.navbar-account #notificationsListBox .scroll-notifications > ul'),
-				showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,
-				soundEnabled = $('#sound-switch').data('soundEnabled') === undefined ? true : !!$('#sound-switch').data('soundEnabled');
-
-			var notificationExtra = '';
+				/*showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,*/
+				notificationExtra = '';
 
 			if (oNotification['extra'].length)
 			{
@@ -1796,10 +2232,10 @@
 						'</div>\
 					</a>\
 				</li>')
-				.find('li#' + oNotification['id'] + ' span.description').html((oNotification['description'].length ? (oNotification['description'] + '<br/>') : '') /* oNotification['datetime']*/ );
+				.find('li#notification-' + oNotification['id'] + ' span.description').html((oNotification['description'].length ? (oNotification['description'] + '<br/>') : '') /* oNotification['datetime']*/ );
 
 			// Показываем всплывающее непрочитанное уведомление
-			!parseInt(oNotification['read']) && showAlertNotification && Notify(oNotification['title'], 'bottom-left', '5000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true, soundEnabled);
+			!parseInt(oNotification['read']) && Notify(oNotification['title'], 'bottom-left', '5000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true, soundEnabled);
 
 			// Открыт выпадающий список уведомлений
 			if ($('.navbar li#notifications').hasClass('open'))
@@ -1811,9 +2247,88 @@
 				 $.readNotifications();
 			}
 		},
+		refreshNotificationsCallback: function(resultData)
+		{
+			var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+
+			// Есть уведомления для сотрудника
+			if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId'))
+			{
+				// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
+				var unreadNotifications = [];
+
+				$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').each(function (){
+					unreadNotifications.push($(this).attr('id'));
+				})
+
+				// Непрочитанные уведомления из БД
+				$.each(resultData['unreadNotifications'], function(index, notification ){
+
+					var searchIndex = -1;
+
+					if (~(searchIndex = unreadNotifications.indexOf('notification-' + notification['id'])))
+					{
+						// Удаляем из массива уведомления, оставшиеся непрочитанными
+						unreadNotifications.splice(searchIndex, 1);
+					}
+				});
+
+				// Отмечаем ранее непрочитанные уведомления как прочитанные в соответствии с данными из БД
+				$.each(unreadNotifications, function (index, value){
+					$('.navbar-account #notificationsListBox .scroll-notifications > ul li#' + value + '.unread').removeClass('unread');
+				});
+
+				 // Есть новые уведомления
+				if (resultData['newNotifications'].length)
+				{
+					// Удаление записи об отсутствии уведомлений
+					$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').hide();
+
+					if (typeof resultData['localStorage'] == 'undefined' || resultData['localStorage'] == false)
+					{
+						soundEnabled = $('#sound-switch').data('soundEnabled') === undefined
+							? true
+							: !!$('#sound-switch').data('soundEnabled');
+					}
+					else
+					{
+						soundEnabled = false;
+					}
+
+					$.each(resultData['newNotifications'], function(index, notification) {
+						// Добавляем уведомление в список
+						$.addNotification(notification, $('.navbar-account #notificationsListBox .scroll-notifications > ul'), soundEnabled);
+					});
+
+					// Обновление идентификатора последнего загруженного уведомления
+					jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][resultData['newNotifications'].length-1]['id']);
+
+					// Создаем slimscroll для нового списка, если список уведомлений открыт и при этом пуст
+					if ($('.navbar li#notifications').hasClass('open')
+						&& !$('.navbar-account #notificationsListBox .scroll-notifications > ul li').length)
+					{
+						$.setNotificationsSlimScroll();
+					}
+
+					// Показываем значек корзины - очистки списка уведомлений
+					jNotificationsListBox.find('.footer .fa-trash-o').show();
+					jNotificationsListBox.find('.footer #notification-search').show();
+					jNotificationsListBox.find('.footer .glyphicon-search').show();
+				}
+
+				var countUnreadNotifications = $('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').length;
+
+				// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
+				$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
+
+				//  Меняем значение баджа с числом непрочитанных уведомлений
+				$('.navbar li#notifications > a > span.badge')
+					.html(countUnreadNotifications)
+					.toggleClass('hidden', !countUnreadNotifications);
+			}
+		},
 		// Автоматическое обновление списка уведомлений
 		refreshNotificationsList: function() {
-
 			// add ajax '_'
 			var data = jQuery.getData({}),
 				jNotificationsListBox  = $('.navbar-account #notificationsListBox');
@@ -1821,95 +2336,60 @@
 			data['lastNotificationId'] = jNotificationsListBox.data('lastNotificationId');
 			data['currentUserId'] = jNotificationsListBox.data('currentUserId');
 
-			$.ajax({
-				//context: textarea,
-				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
-				type: 'POST',
-				data: data,
-				dataType: 'json',
-				success: function(resultData){
-					//var jNotificationsListBox = $('.navbar-account #notificationsListBox');
+			var bLocalStorage = typeof localStorage !== 'undefined',
+				bNeedsRequest = false;
 
-					if (resultData['userId'] && resultData['userId'] == jNotificationsListBox.data('currentUserId')
-					// Есть уведомления для сотрудника
-						//&& (resultData['newNotifications'].length || resultData['unreadNotifications'].length)
-					)
-					{
-						// Массив идентификаторов непрочитанных уведомлений в списке уведомлений
-						var unreadNotifications = [];
+			if (bLocalStorage)
+			{
+				var storage = localStorage.getItem('notifications'),
+					storageObj = JSON.parse(storage);
 
-						$('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').each(function (){
-							unreadNotifications.push($(this).attr('id'));
-						})
+				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+				{
+					storageObj = {expired_in: 0};
+				}
 
-						// Непрочитанные уведомления из БД
-						$.each(resultData['unreadNotifications'], function(index, notification ){
+				if (Date.now() > storageObj['expired_in'])
+				{
+					storageObj['expired_in'] = Date.now() + 10000;
+					bNeedsRequest = true;
+				}
+				else
+				{
+					storageObj['localStorage'] = true;
+					$.refreshNotificationsCallback(storageObj);
+				}
+			}
+			else
+			{
+				bNeedsRequest = true;
+			}
 
-							var searchIndex = -1;
-
-							if (~(searchIndex = unreadNotifications.indexOf(notification['id'])))
-							{
-								// Удаляем из массива уведомления, оставшиеся непрочитанными
-								unreadNotifications.splice(searchIndex, 1);
-							}
-						});
-
-						// Отмечаем ранее непрочитанные уведомления как прочитанные в соответствии с данными из БД
-						$.each(unreadNotifications, function (index, value){
-
-							$('.navbar-account #notificationsListBox .scroll-notifications > ul li#' + value + '.unread').removeClass('unread');
-						});
-
-						 // Есть новые уведомления
-						if (resultData['newNotifications'].length)
+			if (bNeedsRequest)
+			{
+				$.ajax({
+					//context: textarea,
+					url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + jNotificationsListBox.data('moduleId') + '&type=0',
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					error: function(){},
+					success: [function(resultData){
+						if (bLocalStorage)
 						{
-							// Удаление записи об отсутствии уведомлений
-							$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').hide();
-
-							$.each(resultData['newNotifications'], function( index, notification ){
-
-								// Добавляем уведомление в список
-								$.addNotification(notification, $('.navbar-account #notificationsListBox .scroll-notifications > ul'));
-							});
-
-							// Обновление идентификатора последнего загруженного уведомления
-							jNotificationsListBox.data('lastNotificationId', resultData['newNotifications'][resultData['newNotifications'].length-1]['id']);
-
-							// Создаем slimscroll для нового списка, если список уведомлений открыт и при этом пуст
-							if ($('.navbar li#notifications').hasClass('open')
-								&& !$('.navbar-account #notificationsListBox .scroll-notifications > ul li').length)
-							{
-								$.setNotificationsSlimScroll();
-							}
-
-							// Показываем значек корзины - очистки списка уведомлений
-
-							jNotificationsListBox.find('.footer .fa-trash-o').show();
-							jNotificationsListBox.find('.footer #notification-search').show();
-							jNotificationsListBox.find('.footer .glyphicon-search').show();
+							resultData['expired_in'] = storageObj['expired_in'];
 						}
 
-						var countUnreadNotifications = $('.navbar-account #notificationsListBox .scroll-notifications > ul li.unread').length;
-
-						// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
-						$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
-
-						//  Меняем значение баджа с числом непрочитанных уведомлений
-						$('.navbar li#notifications > a > span.badge')
-							.html(countUnreadNotifications)
-							.toggleClass('hidden', !countUnreadNotifications);
-
-						// Показываем значек корзины - очистки списка уведомлений.
-						/*
-
-						jNotificationsListBox.find('.footer .fa-trash-o').show();
-
-						jNotificationsListBox.find('.footer #notification-search').show();
-						jNotificationsListBox.find('.footer .glyphicon-search').show();
-						*/
-					}
-				}
-			});
+						try {
+							localStorage.setItem('notifications', JSON.stringify(resultData));
+						} catch (e) {
+							if (e == QUOTA_EXCEEDED_ERR) {
+								console.log('localStorage: QUOTA_EXCEEDED_ERR');
+							}
+						}
+					}, $.refreshNotificationsCallback]
+				});
+			}
 		},
 		// Метод устанавливает уведомления прочитанными
 		readNotifications: function (wheelDelta, delta){
@@ -1925,7 +2405,7 @@
 					var notificationBox = $(this).parent('li.unread');
 						notificationBox.removeClass('unread');
 
-					masVisibleUnreadNotifications.push(notificationBox.attr('id'));
+					masVisibleUnreadNotifications.push(notificationBox.attr('id').split('notification-')[1]);
 				}
 			});
 
@@ -1959,7 +2439,7 @@
 
 		filterNotifications: function (jInputElement){
 
-			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != 0]');
+			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != "notification-0"]');
 
 			if (jNotifications.length)
 			{
@@ -1980,8 +2460,8 @@
 		},
 
 		clearNotifications: function (){
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id!="notification-0"]').remove();
-			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id="notification-0"]').show();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != "notification-0"]').remove();
+			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id = "notification-0"]').show();
 
 			// Нет непрочитанных уведомлений
 			$('.navbar li#notifications > a').removeClass('wave in');
@@ -2033,10 +2513,10 @@
 				)
 				.on(
 					{
-						'mouseenter': function (){ // Наведение крсора мыши на полосу прокрутки дел
+						'mouseenter': function (){ // Наведение курсора мыши на полосу прокрутки дел
 							$(this).css('width', (parseInt(sSlimscrollBarWidth) + 3) + 'px')
 						},
-						'mouseleave': function (){ // Уход крсора мыши с полосы прокрутки дел
+						'mouseleave': function (){ // Уход курсора мыши с полосы прокрутки дел
 							$(this).css('width', sSlimscrollBarWidth)
 						}
 					}, '.slimScrollBar'
@@ -2113,7 +2593,7 @@
 
 											var ajaxData = $.getData({});
 
-											ajaxData['eventId'] = jEventItem.prop('id');
+											ajaxData['eventId'] = jEventItem.prop('id').split('event-')[1];
 
 											$.ajax({
 												//context: textarea,
@@ -2126,7 +2606,7 @@
 													if (resultData['eventId'])
 													{
 														// Удаляем дело из списка
-														$('#eventsAdminPage .task-item[id = ' + resultData['eventId'] + ']').remove();
+														$('#eventsAdminPage .task-item[id = "event-' + resultData['eventId'] + '"]').remove();
 
 														// Запоминаем положение полосы прокрутки в виджете дел
 														//$('#eventsAdminPage').data('slimScrollBarTop', jEventsList.scrollTop() + 'px');
@@ -2135,7 +2615,7 @@
 														$('#eventsAdminPage [data-toggle="upload"]').click();
 
 														// Нет незавершенных дел
-														!jEventsList.find('.task-item[id != 0]:not(.mark-completed)').length && jEventsList.find('.task-item[id = 0]').toggleClass('hidden');
+														!jEventsList.find('.task-item[id != "event-0"]:not(.mark-completed)').length && jEventsList.find('.task-item[id = "event-0"]').toggleClass('hidden');
 													}
 												}
 											});
@@ -2210,7 +2690,6 @@
 						});
 
 						$.ajax({
-							//context: textarea,
 							url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=3',
 							type: 'POST',
 							data: ajaxData,
@@ -2235,7 +2714,6 @@
 			ajaxData['eventStatusId'] = jEventStatus.prop('id');
 
 			$.ajax({
-				//context: textarea,
 				url: '/admin/index.php?ajaxWidgetLoad&moduleId=' + $('#eventsAdminPage').data('moduleId')  + '&type=2',
 				type: 'POST',
 				data: ajaxData,
@@ -2293,7 +2771,6 @@
 									var ajaxData = $.extend({}, $.getData({}), {'eventId': eventId, 'moduleId': moduleId});
 
 									$.ajax({
-
 										url: '/admin/calendar/index.php?eventDelete',
 										type: "POST",
 										dataType: 'json',
@@ -2500,7 +2977,7 @@
 			}
 		},
 
-		// Метод показа элементов (сотрудников) в списке select2
+		// Показ сотрудников в списке select2
 		templateResultItemResponsibleEmployees: function (data, item){
 
 			var arraySelectItemParts = data.text.split("%%%"),
@@ -2546,32 +3023,41 @@
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5 img-circle">' + resultHtml;
 			}
 
 			// Удаляем часть с названием отдела
 			arraySelectItemParts[1] && delete(arraySelectItemParts[1]);
 
-			return resultHtml; //arraySelectItemParts.join(\'\');
+			return resultHtml;
 		},
 
-		// Метод формирования выбранных элементов (сотрудников) в select2
+		// Показ выбранных сотрудников в select2
 		templateSelectionItemResponsibleEmployees: function (data, item){
 
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class"),
 				//arraySelectItemIdParts = data.id.split("_"),
-				isCreator = false;
+				isCreator = false,
 
-			// Регулярное выражение для получения id select-а, на базе которого создан данный select2
-			var regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
+				// Регулярное выражение для получения id select-а, на базе которого создан данный select2
+				regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
 				myArray = regExp.exec(data._resultId);
 
 			if (myArray)
 			{
 				// Объект select, на базе которого создан данный select2
 				var selectControlElement = $("#" + myArray[1]),
-					templateSelectionOptions = selectControlElement.data("templateSelectionOptions");
+					templateSelectionOptions = selectControlElement.data("templateSelectionOptions"),
+					selectionSingle = selectControlElement.next('.select2-container').find('.select2-selection--single');
+
+				// Если не мультиселект, добавляем контейнеру выбранного элемента класс
+				if (selectionSingle.length)
+				{
+					selectionSingle.addClass('user-container');
+				}
+
+				//console.log('selectionSingle = ', selectionSingle);
 
 				// Убираем элемент удаления (крестик) для создателя дела
 				if (templateSelectionOptions && ~templateSelectionOptions.unavailableItems.indexOf(+data.id))
@@ -2610,7 +3096,55 @@
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5 img-circle">' + resultHtml;
+			}
+
+			return resultHtml;
+		},
+
+		// Показ клиентов выпадающего списка select2
+		templateResultItemSiteusers: function (data, item){
+
+			if (!data.text)
+			{
+				return '';
+			}
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			if (data.element && $(data.element).attr("style"))
+			{
+				// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+				($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+			}
+
+			// Компания/ФИО клиента
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			if (arraySelectItemParts[1])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-right-5 img-circle">' + resultHtml;
+			}
+
+			return resultHtml;
+		},
+
+		// Формирование результатов выбора клиентов в select2
+		templateSelectionItemSiteusers: function (data, item){
+
+			var arraySelectItemParts = data.text.split("%%%"),
+				className = data.element && $(data.element).attr("class");
+
+			// Компания/ФИО клиента
+			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+
+			// Устанавливает title для элемента
+			data.title = arraySelectItemParts[0];
+
+			if (arraySelectItemParts[1])
+			{
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
@@ -2618,54 +3152,158 @@
 
 		dealsPrepare: function (){
 
+		/*
 			$("body").popover({
 				container: "body",
-				selector: "button[id ^= \'deal_template_step_\']",
+				selector: "li[id ^= \'deal_template_step_\']",
 				placement: "bottom",
 				template: "<div class=\"popover\"><div class=\"arrow\"></div><div class=\"popover-content\"></div></div>",
 				html: true,
 				trigger: "hover"
-			});
+			});*/
 
-			$("body").on("click", ".deal_template_steps .deal_step", function (){
-							
+			$("body").on("click", ".deal-steps li", function (){
 				// Идентификатор этапа сделки
-				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0;
+				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0,
+					dealTemplateStepName;
 
 				if (dealTemplateStepId)
 				{
 					// Идентификатор сделки
-					var dealTemplateSteps = $(this).parent('.deal_template_steps'),
-						dealId = dealTemplateSteps.data('deal-id');					
-					
-					if (dealTemplateSteps.data('change-by-click'))
+					var dealTemplateSteps = $(this).parent('.deal-steps'),
+						dealId = dealTemplateSteps.data('deal-id');
+
+					if (dealTemplateSteps.data('change-by-click') && $(this).children('a.available').length)
 					{
-						//$.adminLoad({path: '/admin/deal/step/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'deal_template_id=' + $(this).parents('.deal-template-step-conversion').data('deal-template-id') + '&conversion_end_step_id=' + conversionEndStepId  + '&hostcms[checked][0][' + conversionStartStepId + ']=1', windowId: 'id_content'});
-						$('#id_content #row_0_' + dealId).toggleHighlight(); 
+						$('#id_content #row_0_' + dealId).toggleHighlight();
 						$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});
 						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId, windowId: 'id_content'});
 					}
+					// При редактировании сделки
 					else
 					{
-						if ($(this).hasClass('available') || $(this).hasClass('current'))
+						if ($(this).children('a.available').length)
 						{
-							dealTemplateSteps.next('[name="deal_template_step_id"]').val(dealTemplateStepId);
-							
-							
-							dealTemplateSteps.children('.deal_step.clicked').each(function(){
-								
-								$(this).removeClass('clicked')
-							})
-							
-							$(this).hasClass('available') && $(this).addClass('clicked');							
-						}						
+							$('a.clear-next', dealTemplateSteps).each(function(){
+								$(this).removeClass('clear-next')
+							});
+
+							// Нажали на шаг уже отмеченный как "следующий",
+							// снимаем отметку для перехода
+							if ($(this).children('a').hasClass('next'))
+							{
+								//$(this).children('a').removeClass('next');
+								$(this).children('a').toggleClass('next clear-next');
+
+								dealTemplateStepId = parseInt($(this).parent('.deal-steps').data('stepId'));
+
+								dealTemplateStepName = $(this).parent('.deal-steps').find('li#deal_template_step_' + dealTemplateStepId + ' a').prop('title');
+							}
+							else
+							{
+								dealTemplateStepName = $(this).children('a').prop('title');
+
+								$('a.next', dealTemplateSteps).each(function(){
+									$(this).removeClass('next')
+								});
+
+								$(this).children('a.available') && $(this).children('a').addClass('next').removeClass('clear-next');
+							}
+
+
+							// Меняем цвет названия этапа
+							dealTemplateSteps.parent('div').next('[name="deal_template_step_id"]').val(dealTemplateStepId);
+							$('.deal-template-step-name.deal-template-step-name-inner').text(dealTemplateStepName);
+
+							$.changeDealTemplateName($(this).parent('.deal-steps').find('li#deal_template_step_' + dealTemplateStepId + ' a'));
+						}
 					}
 				}
+			})
+			.on('mouseover', '.deal-steps li a.available:not(.current):not(.next)',  function (){
+
+				$(this)
+					.parents('.deal-steps')
+					.find('li a.next')
+					.toggleClass('next clear-next');
+			})
+			.on('mouseout', '.deal-steps li a.available:not(.current):not(.next)',  function (){
+
+				$(this)
+					.removeClass('clear-next')
+					.parents('.deal-steps')
+					.find('li a.clear-next')
+					.toggleClass('next clear-next');
+
+			})
+			// Добавление дела(события) к сделке
+			.on('click', '[id = "addDealEvent"]', function (){
+
+				//console.log('!!! click addDealEvent = ', $(this).data('dealId'));
+
+				var dealId = $(this).data('dealId');
+
+				if (dealId)
+				{
+					$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&dealId=' + dealId, windowId: 'id_content'});
+				}
+			})
+			// Добавление комментария к сделке
+			.on('click', '[id = "addDealNote"]', function (){
+
+				console.log('click addDealNote dealId = ', $(this).data('dealId'));
+
+				var dealId = $(this).data('dealId');
+
+				if (dealId)
+				{
+					$.modalLoad({path: '/admin/deal/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&dealId=' + dealId, windowId: 'id_content'});
+				}
 			});
+		},
+		rgb2hex: function(rgb)
+		{
+			rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+			function hex(x) {
+				return ("0" + parseInt(x).toString(16)).slice(-2);
+			}
+			return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+		},
+		changeDealTemplateName: function (jDeal)
+		{
+			var rgbCurrent = jDeal.css("background-color"),
+				hex = $.rgb2hex(rgbCurrent);
+
+			$(".deal-template-step-name.deal-template-step-name-inner").css("color", hex);
 		}
 	});
 
 	jQuery.fn.extend({
+		insertAtCaret: function(newValue){
+		  return this.each(function(i) {
+			if (document.selection) {
+			  //For browsers like Internet Explorer
+			  this.focus();
+			  sel = document.selection.createRange();
+			  sel.text = newValue;
+			  this.focus();
+			}
+			else if (this.selectionStart || this.selectionStart == '0') {
+			  //For browsers like Firefox and Webkit based
+			  var startPos = this.selectionStart;
+			  var endPos = this.selectionEnd;
+			  var scrollTop = this.scrollTop;
+			  this.value = this.value.substring(0, startPos) + newValue + this.value.substring(endPos, this.value.length);
+			  this.focus();
+			  this.selectionStart = startPos + newValue.length;
+			  this.selectionEnd = startPos + newValue.length;
+			  this.scrollTop = scrollTop;
+			} else {
+			  this.value += newValue;
+			  this.focus();
+			}
+		  })
+		},
 		/* --- CHAT --- */
 		addChatBadge: function(count)
 		{
@@ -2684,7 +3322,7 @@
 				minimumInputLength: 1,
 				allowClear: true,
 				ajax: {
-					url: "/admin/siteuser/siteuser/index.php?siteuser",
+					url: "/admin/siteuser/index.php?siteuser",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -2750,7 +3388,7 @@
 					  open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
 					  },
-					  close: function() {
+					  close: function(event, ui) {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
 					  }
 				});
@@ -2910,6 +3548,7 @@ $(function(){
 
 			return false;
 		})
+		// Удаление перехода сделки
 		.on('click', '[id ^= "conversion_"] .close', function() {
 
 			var wrapConversion = $(this).parent('[id ^="conversion_"]'), startAndEndStepId = wrapConversion.attr('id').split('_'), conversionStartStepId = startAndEndStepId[1], conversionEndStepId = startAndEndStepId[2];
@@ -2923,6 +3562,20 @@ $(function(){
 			dropdownStepList.prev("[id ^= 'adding_conversion_to_']").show();
 			dropdownStepList.remove();
 		})
+		// Сворачивание/разворачивание списка сотрудников отдела и его дочерних отделов в "окне" установки прав на действия с типом сделок
+		.on('click', '.title_department', function() {
+
+			$(this)
+				//.toggleClass('collapsed')
+				.children('i')
+				.toggleClass('fa-caret-right fa-caret-down');
+
+			$(this)
+				.parent('.depatment_info')
+				.next('.wrap')
+				.slideToggle();
+		})
+		// Сворачивание/разворачивание списка сотрудников отдела в "окне" установки прав на действия с типом сделок
 		.on('click', '.title_users', function() {
 
 			$(this)
@@ -3022,6 +3675,8 @@ function calendarDayClick(oDate, jsEvent)
 		positionLeft = (jsEvent.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : jsEvent.pageX;
 
 		contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
+
+		$('ul.dropdown-info').data('timestamp', oDate.unix());
 
 	//
 
@@ -3356,4 +4011,4 @@ function setEventStartButtons(start, windowId)
 			$('#' + windowId + ' #eventStartButtonsGroup a.active').removeClass("active");
 		}
 	}
-}
+}

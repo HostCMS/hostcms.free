@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Module
 {
@@ -29,7 +29,28 @@ abstract class Core_Module
 	 * Module menu
 	 * @var array
 	 */
-	public $menu = array();
+	protected $menu = array();
+
+	/**
+	 * Get Module's Menu
+	 * @return array
+	 * @hostcms-event Core_Module.onBeforeGetMenu
+	 */
+	public function getMenu()
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeGetMenu', $this);
+		return $this->menu;
+	}
+
+	/**
+	 * Set Module's Menu
+	 * @return self
+	 */
+	public function setMenu(array $array)
+	{
+		$this->menu = $array;
+		return $this;
+	}
 
 	/**
 	 * Module name
@@ -102,7 +123,7 @@ abstract class Core_Module
 							2 => 'Edit'									//-- по-английски - 2=идентификатор языка
 						),
 						'sorting' => 10,								//-- сортировка для действий
-						'picture' => '',								
+						'picture' => '',
 						'icon' => 'fa fa-pencil',
 						'color' => 'palegreen',
 						'single' => 1,
@@ -200,12 +221,12 @@ abstract class Core_Module
 	}
 
 	/**
-	 * Get List of Notification
+	 * Get Notification Design
 	 * @param int $type
 	 * @param int $entityId
 	 * @return array
 	 */
-	public function getNotifications($type, $entityId)
+	public function getNotificationDesign($type, $entityId)
 	{
 		return array(
 			'icon' => array(

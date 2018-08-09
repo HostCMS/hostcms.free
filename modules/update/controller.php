@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -131,7 +131,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->execute();
 
 		return $Core_Http;
@@ -158,7 +158,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->execute();
 
 		return $Core_Http->getBody();
@@ -259,7 +259,7 @@ class Update_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->port(80)
-			->timeout(5)
+			->timeout(15)
 			->method('POST');
 
 		if (is_array($this->keys))
