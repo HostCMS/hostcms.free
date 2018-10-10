@@ -71,6 +71,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oShop = Core_Entity::factory('Shop', $entity_id);
 
@@ -89,8 +90,28 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', '=', $sQuery);
+			break;
+		}
 
 		count($aExclude) && $oShop_Groups->queryBuilder()
 			->where('shop_groups.id', 'NOT IN', $aExclude);
@@ -99,9 +120,11 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		foreach ($aShop_Groups as $oShop_Group)
 		{
+			$sParents = $oShop_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
-				'label' => $oShop_Group->name . " [" . $oShop_Group->id . "]"
+				'label' => $sParents . ' [' . $oShop_Group->id . ']'
 			);
 		}
 	}
@@ -117,6 +140,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oShop = Core_Entity::factory('Shop', $entity_id);
 
@@ -131,16 +155,38 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', '=', $sQuery);
+			break;
+		}
 
 		$aShop_Groups = $oShop_Groups->findAll();
 
 		foreach ($aShop_Groups as $oShop_Group)
 		{
+			$sParents = $oShop_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
-				'label' => $oShop_Group->name . " [" . $oShop_Group->id . "]"
+				'label' => $sParents . ' [' . $oShop_Group->id . ']'
 			);
 		}
 	}
@@ -157,7 +203,10 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	$iShopItemId = intval(Core_Array::getGet('shop_item_id'));
 	$oShop_Item = Core_Entity::factory('Shop_Item', $iShopItemId);
 
-	$aJSON = array();
+	$aJSON = array(
+		'id' => 0,
+		'label' => Core::_('Shop_Item.modifications_root') . ' [0]'
+	);
 
 	if (strlen($sQuery))
 	{
@@ -984,7 +1033,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest')))
+		array('select' => array('shop_items.*', array('shop_items.price', 'adminPrice'), array('SUM(shop_warehouse_items.count)', 'adminRest'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'related'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'modifications'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'discounts'), array(Core_QueryBuilder::expression('IF(shortcut_id, 0, 1)'), 'reviews')))
 	)
 	->addCondition(
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))

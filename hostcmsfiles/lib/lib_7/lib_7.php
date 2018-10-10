@@ -134,6 +134,8 @@ if (Core_Array::getPost('oneStepCheckout'))
 	$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = intval(Core_Array::getPost('shop_country_location_city_area_id', 0));
 	$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
 	$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(strval(Core_Array::getPost('address')));
+	$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(strval(Core_Array::getPost('house')));
+	$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(strval(Core_Array::getPost('flat')));
 	$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
 	$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(strval(Core_Array::getPost('name')));
 	$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
@@ -199,6 +201,8 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 		$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = intval(Core_Array::getPost('shop_country_location_city_area_id', 0));
 		$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
 		$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(strval(Core_Array::getPost('address')));
+		$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(strval(Core_Array::getPost('house')));
+		$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(strval(Core_Array::getPost('flat')));
 		$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
 		$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(strval(Core_Array::getPost('name')));
 		$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
@@ -219,14 +223,48 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 		foreach ($aProperties as $oProperty)
 		{
 			// Св-во может иметь несколько значений
-			$aPropertiesValue = Core_Array::getPost('property_' . $oProperty->id);
+			$aPropertiesValue = $oProperty->type != 2
+				? Core_Array::getPost('property_' . $oProperty->id)
+				: Core_Array::getFiles('property_' . $oProperty->id, array());
 
 			if (!is_null($aPropertiesValue))
 			{
-				!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
-				foreach ($aPropertiesValue as $sPropertyValue)
+				// Not file
+				if ($oProperty->type != 2)
 				{
-					$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $sPropertyValue);
+					!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
+					foreach ($aPropertiesValue as $sPropertyValue)
+					{
+						$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $sPropertyValue);
+					}
+				}
+				// Files
+				elseif (is_array($aPropertiesValue))
+				{
+					if (isset($aPropertiesValue['name']))
+					{
+						if (Core_File::isValidExtension($aPropertiesValue['name'], Core::$mainConfig['availableExtension']))
+						{
+							try
+							{
+								$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "ord");
+
+								if ($sTempFileName !== FALSE)
+								{
+									// Copy uploaded file to the temp dir
+									Core_File::copy($aPropertiesValue['tmp_name'], $sTempFileName);
+									Core_File::delete($aPropertiesValue['tmp_name']);
+
+									// Replace path
+									$aPropertiesValue['tmp_name'] = $sTempFileName;
+
+									// Save to session
+									$_SESSION['hostcmsOrder']['properties'][] = array($oProperty->id, $aPropertiesValue);
+								}
+							}
+							catch (Exception $e) {};
+						}
+					}
 				}
 			}
 		}
@@ -278,8 +316,8 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			$oShop_Delivery = $oShop->Shop_Deliveries->getById($shop_delivery_id);
 
 			if (!is_null($oShop_Delivery))
-			{							
-				$oShop_Delivery_Handler = Shop_Delivery_Handler::factory($oShop_Delivery);			
+			{
+				$oShop_Delivery_Handler = Shop_Delivery_Handler::factory($oShop_Delivery);
 				$oShop_Delivery_Handler->process($position);
 			}
 		}
@@ -315,6 +353,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 				Shop_Payment_System_Handler::factory(
 					Core_Entity::factory('Shop_Payment_System', $shop_payment_system_id)
 				)
+				//->allowOrderPropertyFiles(TRUE)
 				->orderParams($_SESSION['hostcmsOrder'])
 				->execute();
 			}

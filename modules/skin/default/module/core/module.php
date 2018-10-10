@@ -163,7 +163,6 @@ class Skin_Default_Module_Core_Module extends Core_Module
 											)
 											->add(
 												Core::factory('Core_Html_Entity_Script')
-													->type('text/javascript')
 													->value("$('#widgetEventlogOther').linkShortcut({path: '{$sEventlogHref}', shortcutImg: '/modules/skin/{$this->_skinName}/images/module/eventlog.png', shortcutTitle: '" . Core::_('Admin.index_systems_events') . "', Minimize: true, Closable: true});")
 											)
 									)
@@ -290,7 +289,6 @@ class Skin_Default_Module_Core_Module extends Core_Module
 			$oModalWindow
 				->add(
 					Core::factory('Core_Html_Entity_Script')
-						->type('text/javascript')
 						->value("$(function(){
 							$('#{$windowId}').widgetWindow({
 								position: [{$oUser_Setting->position_x}, {$oUser_Setting->position_y}],

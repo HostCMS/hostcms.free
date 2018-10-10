@@ -102,6 +102,20 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->image_large_max_height = $this->linkedObject->getLargeImageMaxHeight();
 			$object->image_small_max_width = $this->linkedObject->getSmallImageMaxWidth();
 			$object->image_small_max_height = $this->linkedObject->getSmallImageMaxHeight();
+
+			if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
+				&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
+			{
+				$object->preserve_aspect_ratio = $this->linkedObject->preserveAspectRatioOfLargeImage();
+				$object->preserve_aspect_ratio_small = $this->linkedObject->preserveAspectRatioOfSmallImage();
+			}
+
+			if (method_exists($this->linkedObject, 'layWatermarOnLargeImage')
+				&& method_exists($this->linkedObject, 'layWatermarOnSmallImage'))
+			{
+				$object->watermark_default_use_large_image = $this->linkedObject->layWatermarOnLargeImage();
+				$object->watermark_default_use_small_image = $this->linkedObject->layWatermarOnSmallImage();
+			}
 		}
 
 		return parent::setObject($object);
@@ -338,8 +352,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				$this->getField('preserve_aspect_ratio_small')
-					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));					
-					
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
+
 				$this->getField('hide_small_image')
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
@@ -350,7 +364,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('image_small_max_width'), $oMainRow15)
 					->move($this->getField('image_small_max_height'), $oMainRow15)
 					->move($this->getField('preserve_aspect_ratio_small'), $oMainRow16)
-					->move($this->getField('hide_small_image'), $oMainRow17)
+					->move($this->getField('hide_small_image'), $oMainRow16)
+					->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRow17)
+					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRow17)
 					->move($this->getField('guid'), $oMainRow18);
 
 				$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');

@@ -526,7 +526,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								->queryBuilder()
 								->where('parent_id', '=', intval($this->_oCurrentGroup->id))
 								->where('informationsystem_id', '=', intval($this->_oCurrentInformationsystem->id))
-								->where('path', 'LIKE', $sData);
+								->where('path', '=', $sData);
 
 							$oTmpObject = $oTmpObject->findAll(FALSE);
 
@@ -701,14 +701,18 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								{
 									$this->_oCurrentGroup->image_large = $sTargetFileName;
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setLargeImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										//&& $this->_oCurrentGroup->setLargeImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
 								if ($result['small_image'])
 								{
 									$this->_oCurrentGroup->image_small = "small_{$sTargetFileName}";
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setSmallImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										//&& $this->_oCurrentGroup->setSmallImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
 								if (strpos(basename($sSourceFile), "CMS") === 0)
@@ -936,7 +940,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							{
 								$oTmpObject = $this->_oCurrentInformationsystem->Informationsystem_Items;
 								$oTmpObject->queryBuilder()
-									->where('path', 'LIKE', $sData)
+									->where('path', '=', $sData)
 									->where('informationsystem_group_id', '=', $this->_oCurrentGroup->id);
 
 								$oTmpObject = $oTmpObject->findAll(FALSE);

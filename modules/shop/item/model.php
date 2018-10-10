@@ -404,6 +404,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Get the quantity in the active warehouses
 	 * @return float
+	 * @hostcms-event shop_item.onBeforeGetRest
 	 */
 	public function getRest()
 	{
@@ -414,6 +415,8 @@ class Shop_Item_Model extends Core_Entity
 			->where('shop_warehouses.active', '=', 1)
 			->where('shop_warehouses.deleted', '=', 0);
 
+		Core_Event::notify($this->_modelName . '.onBeforeGetRest', $this, array($queryBuilder));
+			
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
 		return $aResult['count'];
@@ -579,10 +582,10 @@ class Shop_Item_Model extends Core_Entity
 	public function priceWithCurrency($format = '%s %s')
 	{
 		$aPrices = $this->getPrices();
-		
+
 		return sprintf($format, $aPrices['price_discount'], $this->Shop->Shop_Currency->name);
 	}
-	
+
 	/**
 	 * Get producer name
 	 * @return string
@@ -1213,6 +1216,13 @@ class Shop_Item_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ' . $this->price . ' ' . htmlspecialchars($this->vendorcode) . ' ' . htmlspecialchars($this->marking) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1587,7 +1597,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', $path)
+			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('shop_group_id', '=', $group_id)
 			->where('shortcut_id', '=', 0)
 			->clearOrderBy()
@@ -1604,7 +1614,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function name()
+	public function nameBackend()
 	{
 		$object = $this->shortcut_id
 			? $this->Shop_Item
@@ -2478,7 +2488,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2497,7 +2507,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2513,7 +2523,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2529,7 +2539,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2549,7 +2559,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2568,7 +2578,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2701,7 +2711,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function img()
+	public function imgBackend()
 	{
 		if ($this->shortcut_id)
 		{
@@ -2824,7 +2834,7 @@ class Shop_Item_Model extends Core_Entity
 					break;
 				}
 			}
-			
+
 			if (count($aTmp))
 			{
 				return sprintf($format, $oProperty->name, implode($separator, $aTmp));

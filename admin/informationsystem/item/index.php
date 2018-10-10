@@ -70,6 +70,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
 
@@ -88,19 +89,41 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', '=', $sQuery);
+			break;
+		}
 
 		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
-			
+
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
+			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
 			);
 		}
 	}
@@ -116,6 +139,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
 
@@ -130,16 +154,38 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', '=', $sQuery);
+			break;
+		}
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
+			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
 			);
 		}
 	}

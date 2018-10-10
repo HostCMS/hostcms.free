@@ -286,9 +286,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')
-										->type("text/javascript")
-										->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
+									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
 									Core::factory('Core_Html_Entity_Div')
@@ -492,9 +490,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')
-										->type("text/javascript")
-										->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
+									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
 									Core::factory('Core_Html_Entity_Div')

@@ -129,4 +129,18 @@ return array(
 	'day5' => 'Friday',
 	'day6' => 'Saturday',
 	'day7' => 'Sunday',
+
+	'short_day1' => 'Mon',
+	'short_day2' => 'Tue',
+	'short_day3' => 'Wed',
+	'short_day4' => 'Thu',
+	'short_day5' => 'Fri',
+	'short_day6' => 'Sat',
+	'short_day7' => 'Sun',
+
+	'autocomplete_mode' => 'Mode',
+	'autocomplete_mode0' => 'Вхождение',
+	'autocomplete_mode1' => 'Вхождение с начала',
+	'autocomplete_mode2' => 'Вхождение с конца',
+	'autocomplete_mode3' => 'Точное совпадение',
 );

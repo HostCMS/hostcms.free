@@ -329,22 +329,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$largeImage['watermark_position_y'] = $this->linkedObject->getWatermarkDefaultPositionY();
 							}
 
-							if (method_exists($this->linkedObject, 'layWatermarOnLargeImage')
-								&& method_exists($this->linkedObject, 'layWatermarOnSmallImage'))
-							{
-								$largeImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnLargeImage();
-								$smallImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnSmallImage();
-							}
+							$largeImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_large_image;
+							$smallImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_small_image;
 
 							$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
 							$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
-
-							/*if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
-								&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
-							{
-								$largeImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfLargeImage();
-								$smallImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfSmallImage();
-							}*/
 
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 								->style('width: 340px')
@@ -422,8 +411,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							->divAttr(array(
 								'class' => ($oProperty->type != 2 ? 'form-group' : '') . (
 									($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
-									? ' col-sm-7 col-md-6 col-lg-5'
-									: ' col-sm-12')
+									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
+									: ' col-xs-12')
 							));
 
 						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
@@ -769,7 +758,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->type("text/javascript")
 		->value("
 			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
 				  source: function(request, response) {
@@ -1002,7 +990,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->type("text/javascript")
 		->value("
 			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
 				  source: function(request, response) {
@@ -1162,7 +1149,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 								ob_start();
 								Core::factory('Core_Html_Entity_Script')
-									->type("text/javascript")
 									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewValue->id}')")
 									->execute();
 
@@ -1257,7 +1243,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->type("text/javascript")
 								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oFileValue->id}');" .
 								// Description

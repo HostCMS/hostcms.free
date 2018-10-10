@@ -558,7 +558,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			function safe_email_callback($matches)
 			{
 				ob_start();
-				?><script type="text/javascript"><?php
+				?><script><?php
 				echo "//<![CDATA[\n";
 				?><?php
 				?>function hostcmsEmail(c){return c.replace(/[a-zA-Z]/g, function (c){return String.fromCharCode((c <= "Z" ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c-26);})}<?php
@@ -645,7 +645,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		if (defined('START_BENCHMARK') && START_BENCHMARK && Core::moduleIsActive('benchmark'))
 		{
 			ob_start();
-			?><!-- HostCMS Benchmark --><script type="text/javascript">
+			?><!-- HostCMS Benchmark --><script>
 			window.addEventListener('load', function() {
 				var waiting = performance.timing.responseStart - performance.timing.requestStart, loadPage = performance.timing.loadEventStart - performance.timing.requestStart, dnsLookup = performance.timing.domainLookupEnd - performance.timing.domainLookupStart, connectServer = performance.timing.connectEnd - performance.timing.connectStart;
 

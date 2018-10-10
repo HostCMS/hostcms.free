@@ -225,7 +225,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 				$Core_Html_Entity_Script
-					->type('text/javascript')
 					->value("$(function() { setTimeout(function(){ $('#{$windowId} #{$this->id}').tinymce({ {$sInit} }); }, 300); });")
 					->execute();
 			}
@@ -242,7 +241,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 			$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 			$Core_Html_Entity_Script
-				->type('text/javascript')
 				->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('{$this->id}'), {
 					" . implode(",\n", $aTmp) . "
 				});

@@ -66,16 +66,22 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Seller.siteuser_id'))
+				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')
 				->style('width: 100%')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 no-padding-right'));
+				->divAttr(array('class' => 'form-group col-xs-12'));
 
-			$oMainRow1->add($oSiteuserSelect);
+			$oMainRow1
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12 col-sm-3 no-padding')
+						->add($oSiteuserSelect)
+				);
 
 			// Show button
-			Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow1, $oSiteuser, $this->_Admin_Form_Controller);
+			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 		}
 
 		$oMainTab->move($this->getField('contact_person')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow2);

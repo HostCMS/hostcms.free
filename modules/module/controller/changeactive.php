@@ -21,7 +21,7 @@ class Module_Controller_Changeactive extends Admin_Form_Action_Controller
 	{
 		$this->_object->changeActive();
 
-		$this->addMessage('<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
+		$this->addMessage('<script>$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
 
 		return FALSE;
 	}

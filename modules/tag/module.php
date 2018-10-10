@@ -23,7 +23,7 @@ class Tag_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-07-11';
+	public $date = '2018-10-10';
 
 	/**
 	 * Module name

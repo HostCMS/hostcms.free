@@ -65,18 +65,13 @@ class Revision_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function user($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function userBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$oUser = $this->User;
 
-		Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-hostcms badge-square')
-			->value(
-				htmlspecialchars(
-					!is_null($oUser->id) ? $oUser->login : 'Unknown user'
-				)
-			)
-			->execute();
+		return '<span class="badge badge-hostcms badge-square">' . htmlspecialchars(
+				!is_null($oUser->id) ? $oUser->login : 'Unknown User'
+			) . '</span>';
 	}
 
 	/**

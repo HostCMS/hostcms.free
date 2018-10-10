@@ -21,7 +21,7 @@ class Site_Controller_Copy extends Admin_Form_Action_Controller_Type_Copy
 	{
 		parent::execute($operation);
 
-		$this->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
+		$this->addMessage('<script>$.loadSiteList()</script>');
 
 		return $this;
 	}

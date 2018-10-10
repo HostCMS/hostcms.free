@@ -526,7 +526,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRowNotification->add($oNotificationSubscribersSelect);
 
 					$html = '
-						<script type="text/javascript">
+						<script>
 							$(function(){
 								// Формирование элементов выпадающего списка
 								function templateResultItemSubscribers(data, item){

@@ -81,7 +81,7 @@ class Core_Session_Phpredis extends Core_Session
 
 		if (!is_null($aConfig['auth']) && !$this->_redis->auth($aConfig['auth']))
 		{
-			$this->_error('Redis authenticate the connection error. Check \'session\' section, see modules/core/config/config.php');
+			$this->_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
 		}
 
 		if (is_null($this->_prefix))

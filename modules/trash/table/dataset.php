@@ -109,7 +109,8 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 
 			$objects->queryBuilder()
 				->clear()
-				->where('deleted', '=', 1);
+				->where('deleted', '=', 1)
+				->clearOrderBy();
 
 			if ($this->_limit)
 			{

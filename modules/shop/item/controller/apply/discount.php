@@ -168,9 +168,8 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			ob_start();
 
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->value("$(function() {
-				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 300, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 300, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());

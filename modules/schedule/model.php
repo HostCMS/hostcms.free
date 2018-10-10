@@ -64,7 +64,7 @@ class Schedule_Model extends Core_Entity
 
 		if (!is_null($oModule->id))
 		{
-			echo htmlspecialchars($oModule->name);
+			return htmlspecialchars($oModule->name);
 		}
 	}
 

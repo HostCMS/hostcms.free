@@ -65,13 +65,13 @@
 	jQuery.fn.messageTopicsHostCMS = function(settings) {
 		// Настройки
 		settings = jQuery.extend({
-			timeout :					10000, // Таймаут обновлений
-			data :						'#messages_data', // блок с данными переписки для обновления
-			url :							'#url', // значение URL
-			page :						'#page', // значение total
-			message_field :		'textarea', // поле ввода сообщения
-			page_link :				'.page_link', // ссылки на страницы
-			keyToSend :				13 // Отправка сообщения
+			timeout: 10000, // Таймаут обновлений
+			data: '#messages_data', // блок с данными переписки для обновления
+			url: '#url', // значение URL
+			page: '#page', // значение total
+			message_field: 'textarea', // поле ввода сообщения
+			page_link: '.page_link', // ссылки на страницы
+			keyToSend: 13 // Отправка сообщения
 		}, settings);
 
 		var Obj = jQuery.extend({

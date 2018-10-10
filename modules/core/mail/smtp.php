@@ -13,6 +13,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Core_Mail_Smtp extends Core_Mail
 {
+	protected $_fp = NULL;
+
 	/**
 	 * Send mail
 	 * @param string $to recipient
@@ -29,114 +31,171 @@ class Core_Mail_Smtp extends Core_Mail
 		$header .= $additional_headers . $this->_separator . $this->_separator;
 
 		$header .= $message . $this->_separator;
-		$timeout = 5;
 
 		$context = stream_context_create(Core_Array::get($this->_config, 'options', array()));
 
-		$fp = /*function_exists('stream_socket_client')
-			? */stream_socket_client($this->_config['host'] . ":" . $this->_config['port'], $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context)
-			/*: fsockopen($this->_config['host'], $this->_config['port'], $errno, $errstr, $timeout)*/;
+		$this->_fp = /*function_exists('stream_socket_client')
+			? */stream_socket_client($this->_config['host'] . ":" . $this->_config['port'], $errno, $errstr, $this->_config['timeout'], STREAM_CLIENT_CONNECT, $context)
+			/*: fsockopen($this->_config['host'], $this->_config['port'], $errno, $errstr, $this->_config['timeout'])*/;
 
-		if ($fp)
+		if ($this->_fp)
 		{
-			stream_set_timeout($fp, $timeout);
+			stream_set_timeout($this->_fp, $this->_config['timeout']);
 
 			// Может быть много 220-х, последний отделяется пробелом, а не минусом
 			do {
-				$server_response = $this->_serverFgets($fp);
+				$server_response = $this->_serverFgets();
 
 				if (!$this->_serverParse($server_response, "220"))
 				{
-					fclose($fp);
+					fclose($this->_fp);
+					$this->log();
 					return FALSE;
 				}
 			}
-			while (!feof($fp)
+			while (!feof($this->_fp)
 				//&& $this->_getResponseStatus($server_response) == "220"
 				&& substr($server_response, 3, 1) != ' '
 			);
 
-			fputs($fp, "EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
+			$this->_serverFputs("EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
 
 			// Может быть много 250-х, последний отделяется пробелом, а не минусом
 			do {
-				$server_response = $this->_serverFgets($fp);
-				
+				$server_response = $this->_serverFgets();
+
 				if (!$this->_serverParse($server_response, "250"))
 				{
-					fclose($fp);
+					fclose($this->_fp);
+					$this->log();
 					return FALSE;
 				}
 			}
-			while (!feof($fp)
+			while (!feof($this->_fp)
 				//&& $this->_getResponseStatus($server_response) == "250"
 				&& substr($server_response, 3, 1) != ' '
 			);
 
-			fputs($fp, "AUTH LOGIN\r\n");
-			$server_response = $this->_serverFgets($fp); // Получен выше в цикле
-			if (!$this->_serverParse($server_response, "334"))
+			// TLS
+			if (isset($this->_config['tls']) && $this->_config['tls'])
 			{
-				fclose($fp);
-				return FALSE;
+				$this->_serverFputs("STARTTLS\r\n");
+
+				$server_response = $this->_serverFgets();
+				if (!$this->_serverParse($server_response, "220"))
+				{
+					fclose($this->_fp);
+					$this->log();
+					return FALSE;
+				}
+
+				// http://php.net/manual/ru/function.stream-socket-enable-crypto.php#119122
+				$crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+
+				if (defined('STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT'))
+				{
+					$crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+					$crypto_method |= STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
+				}
+
+				$xbCrypto = stream_socket_enable_crypto($this->_fp, TRUE, $crypto_method);
+			
+				// Resend EHLO after TLS
+				$this->_serverFputs("EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
+				
+				// Может быть много 250-х, последний отделяется пробелом, а не минусом
+				do {
+					$server_response = $this->_serverFgets();
+
+					if (!$this->_serverParse($server_response, "250"))
+					{
+						fclose($this->_fp);
+						$this->log();
+						return FALSE;
+					}
+				}
+				while (!feof($this->_fp)
+					//&& $this->_getResponseStatus($server_response) == "250"
+					&& substr($server_response, 3, 1) != ' '
+				);
 			}
 
-			fputs($fp, base64_encode($this->_config['username']) . "\r\n");
-			$server_response = $this->_serverFgets($fp);
-			if (!$this->_serverParse($server_response, "334"))
+			// AUTH
+			if (isset($this->_config['username']) && isset($this->_config['password']))
 			{
-				fclose($fp);
-				return FALSE;
-			}
+				$this->_serverFputs("AUTH LOGIN\r\n");
+				$server_response = $this->_serverFgets();
+				if (!$this->_serverParse($server_response, "334"))
+				{
+					fclose($this->_fp);
+					$this->log();
+					return FALSE;
+				}
 
-			fputs($fp, base64_encode($this->_config['password']) . "\r\n");
-			$server_response = $this->_serverFgets($fp);
-			if (!$this->_serverParse($server_response, "235"))
-			{
-				fclose($fp);
-				return FALSE;
+				$this->_serverFputs(base64_encode($this->_config['username']) . "\r\n");
+				$server_response = $this->_serverFgets();
+				if (!$this->_serverParse($server_response, "334"))
+				{
+					fclose($this->_fp);
+					$this->log();
+					return FALSE;
+				}
+
+				$this->_serverFputs(base64_encode($this->_config['password']) . "\r\n");
+				$server_response = $this->_serverFgets();
+				if (!$this->_serverParse($server_response, "235"))
+				{
+					fclose($this->_fp);
+					$this->log();
+					return FALSE;
+				}
 			}
 
 			// MAIL FROM and user name may be different
 			$smtpFrom = Core_Array::get($this->_config, 'from', $this->_config['username']);
 
-			fputs($fp, "MAIL FROM: <{$smtpFrom}>\r\n");
-			$server_response = $this->_serverFgets($fp);
-			if (!$this->_serverParse($server_response, "250")) {
-				fclose($fp);
+			$this->_serverFputs("MAIL FROM: <{$smtpFrom}>\r\n");
+			$server_response = $this->_serverFgets();
+			if (!$this->_serverParse($server_response, "250"))
+			{
+				fclose($this->_fp);
+				$this->log();
 				return FALSE;
 			}
 
 			$aRecipients = explode(',', $to);
 			foreach ($aRecipients as $sTo)
 			{
-				fputs($fp, "RCPT TO: {$sTo}\r\n");
-				$server_response = $this->_serverFgets($fp);
+				$this->_serverFputs("RCPT TO: {$sTo}\r\n");
+				$server_response = $this->_serverFgets();
 				if (!$this->_serverParse($server_response, "250"))
 				{
-					fclose($fp);
+					fclose($this->_fp);
+					$this->log();
 					return FALSE;
 				}
 			}
 
-			fputs($fp, "DATA\r\n");
-			$server_response = $this->_serverFgets($fp);
+			$this->_serverFputs("DATA\r\n");
+			$server_response = $this->_serverFgets();
 			if (!$this->_serverParse($server_response, "354"))
 			{
-				fclose($fp);
+				fclose($this->_fp);
+				$this->log();
 				return FALSE;
 			}
 
-			fputs($fp, $header."\r\n.\r\n");
-			$server_response = $this->_serverFgets($fp);
+			$this->_serverFputs($header."\r\n.\r\n");
+			$server_response = $this->_serverFgets();
 			if (!$this->_serverParse($server_response, "250"))
 			{
-				fclose($fp);
+				fclose($this->_fp);
+				$this->log();
 				return FALSE;
 			}
 
-			fputs($fp, "QUIT\r\n");
-			fclose($fp);
+			$this->_serverFputs("QUIT\r\n");
+			fclose($this->_fp);
 
 			$this->_status = TRUE;
 		}
@@ -148,14 +207,26 @@ class Core_Mail_Smtp extends Core_Mail
 		return $this;
 	}
 
+	protected function _serverFputs($str)
+	{
+		$this->_config['log']
+			&& $this->_log .= date('Y-m-d H:i:s') . " CLIENT: " . $str;
+
+		return fputs($this->_fp, $str);
+	}
+
 	/**
 	 * fgets 256 bytes
-	 * @param pointer $socket
 	 * @return mixed
 	 */
-	protected function _serverFgets($socket)
+	protected function _serverFgets()
 	{
-		return fgets($socket, 256);
+		$return = fgets($this->_fp, 256);
+
+		$this->_config['log']
+			&& $this->_log .= date('Y-m-d H:i:s') . " SERVER: " . $return;
+
+		return $return;
 	}
 
 	/**

@@ -79,4 +79,6 @@ return array(
 	'preserve_aspect_ratio' => 'Preserve aspect ratio',
 	'preserve_aspect_ratio_small' => 'Preserve aspect ratio for small images',
 	'changeMultiple_success' => 'Multiple have been changed.',
+	'watermark_default_use_large_image' => 'Use watermark by default',
+	'watermark_default_use_small_image' => 'Use watermark by default for small images',
 );

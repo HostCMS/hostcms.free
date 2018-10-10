@@ -133,109 +133,111 @@
 					</xsl:if>
 				</div>
 				<div class="field">
-					<!-- Текстовые поля -->
-					<xsl:if test="type = 0 or type = 1 or type = 2 or type = 10 or type = 11 or type = 12 or type = 13 or type = 14 or type = 15 or type = 16 or type = 17 or type = 18 or type = 19">
-						<input type="text" name="{name}" value="{value}" size="{size}">
-							<xsl:choose>
-								<!-- Поле для ввода пароля -->
-								<xsl:when test="type = 1">
-									<xsl:attribute name="type">password</xsl:attribute>
-								</xsl:when>
-								<!-- Поле загрузки файла -->
-								<xsl:when test="type = 2">
-									<xsl:attribute name="type">file</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Дата -->
-								<xsl:when test="type = 10">
-									<xsl:attribute name="type">date</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Цвет -->
-								<xsl:when test="type = 11">
-									<xsl:attribute name="type">color</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Месяц -->
-								<xsl:when test="type = 12">
-									<xsl:attribute name="type">month</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Неделя -->
-								<xsl:when test="type = 13">
-									<xsl:attribute name="type">week</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Время -->
-								<xsl:when test="type = 14">
-									<xsl:attribute name="type">time</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Дата-Время -->
-								<xsl:when test="type = 15">
-									<xsl:attribute name="type">datetime</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: E-mail -->
-								<xsl:when test="type = 16">
-									<xsl:attribute name="type">email</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Поиск -->
-								<xsl:when test="type = 17">
-									<xsl:attribute name="type">search</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: Телефон -->
-								<xsl:when test="type = 18">
-									<xsl:attribute name="type">tel</xsl:attribute>
-								</xsl:when>
-								<!-- HTML5: URL -->
-								<xsl:when test="type = 19">
-									<xsl:attribute name="type">url</xsl:attribute>
-								</xsl:when>
-								<!-- Текстовое поле -->
-								<xsl:otherwise>
-									<xsl:attribute name="type">text</xsl:attribute>
-								</xsl:otherwise>
-							</xsl:choose>
-							<xsl:if test="obligatory = 1">
-								<xsl:attribute name="class">required</xsl:attribute>
-								<xsl:attribute name="minlength">1</xsl:attribute>
-								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
-							</xsl:if>
-						</input>
-					</xsl:if>
-					
-					<!-- Радиокнопки -->
-					<xsl:if test="type = 3 or type = 9">
-						<xsl:apply-templates select="list/list_item" />
-						<label class="input_error" for="{name}" style="display: none">&labelValue;</label>
-					</xsl:if>
-					
-					<!-- Checkbox -->
-					<xsl:if test="type = 4">
-						<input type="checkbox" name="{name}">
-							<xsl:if test="checked = 1 or value = 1">
-								<xsl:attribute name="checked">checked</xsl:attribute>
-							</xsl:if>
-						</input>
-					</xsl:if>
-					
-					<!-- Textarea -->
-					<xsl:if test="type = 5">
-						<textarea name="{name}" cols="{cols}" rows="{rows}" wrap="off">
-							<xsl:if test="obligatory = 1">
-								<xsl:attribute name="class">required</xsl:attribute>
-								<xsl:attribute name="minlength">1</xsl:attribute>
-								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
-							</xsl:if>
-							<xsl:value-of select="value" />
-						</textarea>
-					</xsl:if>
-					
-					<!-- Список -->
-					<xsl:if test="type = 6">
-						<select name="{name}">
-							<xsl:if test="obligatory = 1">
-								<xsl:attribute name="class">required</xsl:attribute>
-								<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
-							</xsl:if>
-							<option value="">...</option>
+					<xsl:choose>
+						<!-- Радиокнопки -->
+						<xsl:when test="type = 3 or type = 9">
 							<xsl:apply-templates select="list/list_item" />
-						</select>
-					</xsl:if>
+							<label class="input_error" for="{name}" style="display: none">&labelValue;</label>
+						</xsl:when>
+						
+						<!-- Checkbox -->
+						<xsl:when test="type = 4">
+							<input type="checkbox" name="{name}">
+								<xsl:if test="checked = 1 or value = 1">
+									<xsl:attribute name="checked">checked</xsl:attribute>
+								</xsl:if>
+							</input>
+						</xsl:when>
+						
+						<!-- Textarea -->
+						<xsl:when test="type = 5">
+							<textarea name="{name}" cols="{cols}" rows="{rows}" wrap="off">
+								<xsl:if test="obligatory = 1">
+									<xsl:attribute name="class">required</xsl:attribute>
+									<xsl:attribute name="minlength">1</xsl:attribute>
+									<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
+								</xsl:if>
+								<xsl:value-of select="value" />
+							</textarea>
+						</xsl:when>
+						
+						<!-- Список -->
+						<xsl:when test="type = 6">
+							<select name="{name}">
+								<xsl:if test="obligatory = 1">
+									<xsl:attribute name="class">required</xsl:attribute>
+									<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
+								</xsl:if>
+								<option value="">...</option>
+								<xsl:apply-templates select="list/list_item" />
+							</select>
+						</xsl:when>
+						
+						<!-- Текстовые поля -->
+						<xsl:otherwise>
+							<input type="text" name="{name}" value="{value}" size="{size}">
+								<xsl:choose>
+									<!-- Поле для ввода пароля -->
+									<xsl:when test="type = 1">
+										<xsl:attribute name="type">password</xsl:attribute>
+									</xsl:when>
+									<!-- Поле загрузки файла -->
+									<xsl:when test="type = 2">
+										<xsl:attribute name="type">file</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Дата -->
+									<xsl:when test="type = 10">
+										<xsl:attribute name="type">date</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Цвет -->
+									<xsl:when test="type = 11">
+										<xsl:attribute name="type">color</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Месяц -->
+									<xsl:when test="type = 12">
+										<xsl:attribute name="type">month</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Неделя -->
+									<xsl:when test="type = 13">
+										<xsl:attribute name="type">week</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Время -->
+									<xsl:when test="type = 14">
+										<xsl:attribute name="type">time</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Дата-Время -->
+									<xsl:when test="type = 15">
+										<xsl:attribute name="type">datetime</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: E-mail -->
+									<xsl:when test="type = 16">
+										<xsl:attribute name="type">email</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Поиск -->
+									<xsl:when test="type = 17">
+										<xsl:attribute name="type">search</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: Телефон -->
+									<xsl:when test="type = 18">
+										<xsl:attribute name="type">tel</xsl:attribute>
+									</xsl:when>
+									<!-- HTML5: URL -->
+									<xsl:when test="type = 19">
+										<xsl:attribute name="type">url</xsl:attribute>
+									</xsl:when>
+									<!-- Текстовое поле -->
+									<xsl:otherwise>
+										<xsl:attribute name="type">text</xsl:attribute>
+									</xsl:otherwise>
+								</xsl:choose>
+								<xsl:if test="obligatory = 1">
+									<xsl:attribute name="class">required</xsl:attribute>
+									<xsl:attribute name="minlength">1</xsl:attribute>
+									<xsl:attribute name="title">&labelField; <xsl:value-of select="caption" /></xsl:attribute>
+								</xsl:if>
+							</input>
+						</xsl:otherwise>
+					</xsl:choose>
 				</div>
 			</div>
 		</xsl:if>

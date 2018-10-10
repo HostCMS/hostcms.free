@@ -39,6 +39,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 
 		$aDivAttr = array();
 
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
 		// Установим атрибуты div'a.
 		if (is_array($this->divAttr))
 		{
@@ -62,9 +64,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 			?>
 		</div>
 
-		<script type="text/javascript">
+		<script>
 		(function($) {
-			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
 		})(jQuery);
 		</script><?php
 

@@ -339,6 +339,8 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{
+			$oInformationsystem_Item->shortcut_id && $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
+
 			$attributes = array();
 
 			$this->_currentItem = array();

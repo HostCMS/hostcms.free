@@ -813,4 +813,144 @@ class Core_Str
 	{
 		return $str . mb_substr($item, 0, 1);
 	}
+	
+	/**
+	 * Decode Punycode IDN
+	 * https://www.ietf.org/rfc/rfc3492.txt
+	 *
+	 * @param string $domain
+	 * @return string
+	 */
+	static public function idnToUtf8($domain)
+	{
+		if (function_exists('idn_to_utf8'))
+		{
+			return idn_to_utf8($domain);
+		}
+
+		// Find subdomains
+		$aDomains = explode('.', $domain);
+		if (count($aDomains) > 1)
+		{
+			$sTmp = '';
+			foreach ($aDomains as $sSubdomain)
+			{
+				$sTmp .= '.' . self::idnToUtf8($sSubdomain);
+			}
+			return substr($sTmp, 1);
+		}
+
+		/* search prefix */
+		if (substr($domain, 0, 4) != 'xn--')
+		{
+			return $domain;
+		}
+		else
+		{
+			$bad_input = $domain;
+			$domain = substr($domain, 4);
+		}
+
+		$i = 0;
+		$bias = 72;
+		$initial_n = 128;
+		$output = array();
+
+		// search delimeter
+		$delimeter = strrpos($domain, '-');
+
+		if ($delimeter)
+		{
+			for ($j = 0; $j < $delimeter; $j++)
+			{
+				$c = $domain[$j];
+				$output[] = $c;
+				if ($c > 0x7F)
+				{
+					return $bad_input;
+				}
+			}
+			$delimeter++;
+		}
+		else
+		{
+			$delimeter = 0;
+		}
+
+		while ($delimeter < strlen($domain))
+		{
+			$iPrev = $i;
+			$w = 1;
+
+			for ($k = 36;; $k += 36)
+			{
+				if ($delimeter == strlen($domain))
+				{
+					return $bad_input;
+				}
+				$c = $domain[$delimeter++];
+				$c = ord($c);
+
+				$digit = ($c - 48 < 10)
+					? $c - 22
+					: ($c - 65 < 26
+						? $c - 65
+						: ($c - 97 < 26 ? $c - 97 : 36)
+					);
+					
+				if ($digit > (0x10FFFF - $i) / $w)
+				{
+					return $bad_input;
+				}
+				$i += $digit * $w;
+
+				if ($k <= $bias)
+				{
+					$t = 1;
+				}
+				elseif ($k >= $bias + 26)
+				{
+					$t = 26;
+				}
+				else
+				{
+					$t = $k - $bias;
+				}
+				
+				if ($digit < $t)
+				{
+					break;
+				}
+
+				$w *= 36 - $t;
+
+			}
+
+			$delta = $i - $iPrev;
+
+			$delta = ($iPrev == 0) ? $delta / 700 : $delta >> 1;
+
+			$count_output_plus_one = count($output) + 1;
+			$delta += intval($delta / $count_output_plus_one);
+
+			$k2 = 0;
+			while ($delta > 455)
+			{
+				$delta /= 35;
+				$k2 += 36;
+			}
+			$bias = intval($k2 + 36 * $delta / ($delta + 38));
+			
+			if ($i / $count_output_plus_one > 0x10FFFF - $initial_n)
+			{
+				return $bad_input;
+			}
+			$initial_n += intval($i / $count_output_plus_one);
+			$i %= $count_output_plus_one;
+			array_splice($output, $i, 0, html_entity_decode( '&#' . $initial_n . ';', ENT_NOQUOTES, 'UTF-8'));
+			$i++;
+		}
+
+		return implode('', $output);
+	}
 }

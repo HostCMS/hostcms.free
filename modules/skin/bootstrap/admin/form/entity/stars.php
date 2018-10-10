@@ -16,7 +16,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Stars extends Skin_Default_Admin_Form_Ent
 	public function execute()
 	{
 		$oScript = Admin_Form_Entity::factory('Script')
-			->type("text/javascript")
 			->value("$('#" . $this->id . "').rating({'step':1, 'size':'xs', 'showCaption': false, 'ratingClass':' rating-star', 'clearButtonTitle': 'Очистить'});");
 
 		$this->add($oScript);

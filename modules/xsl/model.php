@@ -129,7 +129,7 @@ class Xsl_Model extends Core_Entity
 		try
 		{
 			Core_File::delete($filename);
-			
+
 			// DTD
 			$aLngs = Xsl_Controller::getLngs();
 			foreach ($aLngs as $sLng)
@@ -185,7 +185,7 @@ class Xsl_Model extends Core_Entity
 			$content = Core_File::read($this->getXslFilePath());
 			$content = str_replace('"lang://' . $this->id . '"', '"lang://' . $newObject->id . '"', $content);
 			Core_File::write($newObject->getXslFilePath(), $content);
-			
+
 			// DTD
 			$aLngs = Xsl_Controller::getLngs();
 			foreach ($aLngs as $sLng)
@@ -193,7 +193,7 @@ class Xsl_Model extends Core_Entity
 				$sDtd = $this->loadLngDtdFile($sLng);
 				$sDtd != '' && $newObject->saveLngDtdFile($sLng, $sDtd);
 			}
-			
+
 			//Core_File::copy($this->getXslFilePath(), $newObject->getXslFilePath());
 		}
 		catch (Exception $e) {}
@@ -212,6 +212,13 @@ class Xsl_Model extends Core_Entity
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
 
 		$oSearch_Page->text = $this->name . ' ' . $this->description;
 

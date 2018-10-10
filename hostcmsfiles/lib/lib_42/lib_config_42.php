@@ -35,14 +35,14 @@ if (Core::moduleIsActive('siteuser'))
 
 		if ($Message_Controller_Show->topic)
 		{
-			$oMessage_Topic = Core_Entity::factory('Message_Topic', $Message_Controller_Show->topic);
+			$oMessage_Topic = Core_Entity::factory('Message_Topic')->getById($Message_Controller_Show->topic);
 
-			// При входе в тему пересчитываем количество
-			is_null(Core_Array::getPost('ajaxLoad'))
-				&& $oMessage_Topic->recount();
-			
-			if ($oMessage_Topic->access($oSiteuser))
+			if ($oMessage_Topic && $oMessage_Topic->access($oSiteuser))
 			{
+				// При входе в тему пересчитываем количество
+				is_null(Core_Array::getPost('ajaxLoad'))
+					&& $oMessage_Topic->recount();
+				
 				$sPageTitle = $oMessage_Topic->subject;
 			}
 			else

@@ -84,7 +84,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('action')
 			->caption(Core::_('Schedule.action'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-			->options(count($aModuleActions) ? $aModuleActions : array(' … '))
+			->options(is_array($aModuleActions) && count($aModuleActions) ? $aModuleActions : array(' … '))
 			->value($this->_object->action));
 
 		$oMainTab->move($this->getField('entity_id')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2);

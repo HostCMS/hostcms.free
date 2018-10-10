@@ -368,7 +368,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 			if ($oShop->Site->html_cache_use)
 			{
-				?><script type="text/javascript">
+				?><script>
 				var parentNode = jQuery('script').last().parent();
 				jQuery(function() {
 					jQuery.ajax({

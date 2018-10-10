@@ -83,7 +83,7 @@ class Admin_Answer extends Core_Servant_Properties
 	 */
 	protected function _afterLoad()
 	{
-		?><script type="text/javascript"><?php
+		?><script><?php
 		if (!is_null($this->title))
 		{
 			?>document.title = '<?php echo Core_Str::escapeJavascriptVariable($this->title)?>';<?php

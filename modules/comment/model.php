@@ -295,7 +295,7 @@ class Comment_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function author($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function authorBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
 		{

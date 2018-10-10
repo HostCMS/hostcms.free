@@ -23,7 +23,7 @@ class Skin_Default_Answer extends Admin_Answer
 		{
 			$windowId = $this->_getWindowId();
 
-			?><script type="text/javascript">
+			?><script>
 			$(function() {
 			<?php
 				/*if (!is_null($this->title))
@@ -100,7 +100,7 @@ class Skin_Default_Answer extends Admin_Answer
 				?><div id="<?php echo htmlspecialchars($windowId)?>" class="hostcmsWindow"><?php
 				?><div id="id_message"><?php echo $this->message?></div><?php /*echo $this->content*/?><?php
 				?></div><?php
-				?><script type="text/javascript"><?php
+				?><script><?php
 				?>$(function() {<?php
 				// Fix bug with duplicated execution Javascript
 				?>$('#<?php echo htmlspecialchars($windowId)?>').append('<?php echo str_replace('script', "scr' + 'ipt", Core_Str::escapeJavascriptVariable($this->content))?>');<?php

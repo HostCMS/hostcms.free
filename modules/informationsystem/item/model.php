@@ -26,12 +26,6 @@ class Informationsystem_Item_Model extends Core_Entity
 	public $reviews = 1;
 
 	/**
-	 * Backend property
-	 * @var mixed
-	 */
-	//public $comment_field = NULL;
-
-	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -318,7 +312,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('informationsystem_items.path', 'LIKE', $path)
+			->where('informationsystem_items.path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('informationsystem_items.informationsystem_group_id', '=', $group_id)
 			->where('informationsystem_items.shortcut_id', '=', 0)
 			->clearOrderBy()
@@ -900,7 +894,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function name()
+	public function nameBackend()
 	{
 		$object = $this->shortcut_id
 			? $this->Informationsystem_Item
@@ -967,6 +961,13 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1548,7 +1549,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -1645,7 +1646,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function img()
+	public function imgBackend()
 	{
 		if ($this->shortcut_id)
 		{

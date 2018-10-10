@@ -143,7 +143,8 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	}
 	
 	/**
-	 * Backend callback method. Get amount transactions until current
+	 * Backend callback method.
+	 * Get amount transactions until current
 	 * @return float
 	 */
 	public function adminTransactionTotalAmount()

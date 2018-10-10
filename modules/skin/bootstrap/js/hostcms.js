@@ -193,12 +193,21 @@ function InitiateSideMenu() {
 	});
 	//End Sidebar Collapse
 
-
 	//Sidebar Menu Handle
+
+	//HostCMS: Fix i.menu-expand
+	$(".sidebar-menu i.menu-expand").on('click', function (e) {
+		e.stopImmediatePropagation();
+		e.preventDefault();
+
+		$(this).closest('li').toggleClass('open');
+	});
+
 	$(".sidebar-menu").on('click', function (e) {
 		var menuLink = $(e.target).closest("a");
 		if (!menuLink || menuLink.length == 0)
 			return;
+
 		if (!menuLink.hasClass("menu-dropdown")) {
 			if (b && menuLink.get(0).parentNode.parentNode == this) {
 				var menuText = menuLink.find(".menu-text").get(0);
@@ -208,6 +217,13 @@ function InitiateSideMenu() {
 			}
 			return;
 		}
+
+		// HostCMS: Fix submenu
+		if (menuLink.is('[href]') && !$(e.target).hasClass('menu-expand'))
+		{
+			return false;
+		}
+
 		var submenu = menuLink.next().get(0);
 		if (!$(submenu).is(":visible")) {
 			var c = $(submenu.parentNode).closest("ul");

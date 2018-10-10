@@ -319,4 +319,5 @@ return array(
 	'min_quantity' => '<acronym title="Минимальное количество этого товара в заказе">Мин. кол-во</acronym>',
 	'max_quantity' => '<acronym title="Максимальное количество этого товара в заказе">Макс. кол-во</acronym>',
 	'quantity_step' => '<acronym title="Шаг выбора количества товара">Шаг</acronym>',
+	'modifications_root' => '...',
 );

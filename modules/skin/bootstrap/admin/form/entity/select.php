@@ -145,9 +145,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			}
 
 			Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('{$windowId}', '{$this->id}');")
-					->execute();
+				->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('{$windowId}', '{$this->id}');")
+				->execute();
 
 		self::$iFilterCount++;
 

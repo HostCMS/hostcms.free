@@ -11,8 +11,6 @@
 return array(
 	'model_name' => 'Сотрудники',
 	'menu' => 'Сотрудники',
-	'ua_link_users' => 'Сотрудник',
-	'ua_link_users_site' => 'Сотрудники',
 	'ua_add_user_link' => 'Добавить',
 	'ua_link_user_access' => 'Права доступа',
 	'ua_link_user_modules_access' => 'К модулям',
@@ -22,12 +20,10 @@ return array(
 	'ua_show_users_title' => 'Сотрудники',
 	'id' => 'Идентификатор',
 	'login' => "Логин",
-	'users_type_form' => 'Группа сотрудникей',
 	'password' => "Пароль",
 	'password_second' => "Подтверждение пароля",
 	'ua_add_edit_user_form_password_second_message' => "Введенные пароли не совпадают.",
 	'superuser' => "Администратор",
-	'siteusers_parent_site_id' => "Сайт",
 	'users_type_form_tab_2' => 'Личные данные',
 	'users_type_form_tab_3' => 'Расписание',
 
@@ -76,7 +72,7 @@ return array(
 	'backend-field-caption' => 'Сотрудник',
 
 	'choosing_site' => 'Выбор сайта',
-	'ua_show_user_form_events_access_title' => 'Access rights for actions "%s"',
+	'ua_show_user_form_events_access_title' => 'Доступ к действиям формы "%s"',
 
 	'root_dir' => '<acronym title="Корневая директория, выше которой сотрудник не может подниматься">Корневая директория для сотрудника</acronym>',
 
@@ -89,4 +85,5 @@ return array(
 	'view_websites' => 'Сайты',
 	'error_object_owned_another_user' => 'Объект принадлежит другому сотруднику, доступ запрещен.',
 	'break' => 'Перерыв',
+	'timesheet_title' => 'Учет рабочего времени',
 );

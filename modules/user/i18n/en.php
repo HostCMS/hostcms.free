@@ -9,26 +9,22 @@
  * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'model_name' => 'Backend users',
-	'menu' => 'Backend users',
-	'ua_link_users' => 'Backend user',
-	'ua_link_users_site' => 'Backend users',
+	'model_name' => 'Staff',
+	'menu' => 'Staff',
 	'ua_add_user_link' => 'Add',
 	'ua_link_user_access' => 'Access rights for modules',
 	// 'ua_link_user_form_access' => 'Access rights for actions',
-	'ua_add_user_form_title' => 'Add user information',
-	'ua_edit_user_form_title' => 'Edit user information',
-	'ua_show_users_title' => 'Users of group "%s"',
+	'ua_add_user_form_title' => 'Add an employee',
+	'ua_edit_user_form_title' => 'Edit an employee',
+	'ua_show_users_title' => 'Staff',
 	'id' => 'ID',
-	'login' => 'User login',
-	'users_type_form' => 'User group',
+	'login' => 'Login',
 	'password' => 'Password',
 	'password_second' => 'Password confirmation',
 	'ua_add_edit_user_form_password_second_message' => 'Passwords you specified do not match.',
 	'superuser' => 'Privileged user',
-	'siteusers_parent_site_id' => 'Website',
 	'users_type_form_tab_2' => 'Personal data',
-	'users_type_form_tab_3' => 'Worktime',	
+	'users_type_form_tab_3' => 'Worktime',
 	'name' => 'Name',
 	'patronymic' => 'Patronymic',
 	'surname' => 'Surname',
@@ -56,7 +52,7 @@ return array(
 	'chat_count_unread_message' => 'Unread messages: %s',
 	'chat_count_new_message' => 'New messages: ',
 	'new_message_from' => 'New message from %s %s',
-	'backend-field-caption' => 'Backend User',
+	'backend-field-caption' => 'Created by',
 
 	'root_dir' => '<acronym title="Root folder which restricts user access">Root folder for user</acronym>',
 
@@ -78,7 +74,8 @@ return array(
 	'description' => 'Description',
 	'wallpaper' => 'Wallpaper',
 	'choosing_site' => 'Site choosing',
-	'ua_show_user_form_events_access_title' => 'Доступ к событиям формы "%s"',
+
+	'ua_show_user_form_events_access_title' => 'Access rights for actions "%s"',
 	'error_object_owned_another_user' => 'Object belongs to another user, access denied.',
 
 	'view_sex' => 'Sex:',
@@ -88,4 +85,6 @@ return array(
 	'view_socials' => 'Socials',
 	'view_messengers' => 'Messenger',
 	'view_websites' => 'Websites',
+	'break' => 'Break',
+	'timesheet_title' => 'Timesheet',
 );

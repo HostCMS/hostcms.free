@@ -115,7 +115,6 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
 		$Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
 			->value("$('#{$windowId} #lib_id').change();")
 			->execute();
 
@@ -158,7 +157,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		// Frontend behaviour
 		if (Core_Array::getRequest('hostcmsMode') == 'blank')
 		{
-			?><script type="text/javascript">
+			?><script>
 			window.parent.hQuery.refreshSection(<?php echo $this->_object->template_section_id?>);
 			$(window.frameElement).parentsUntil('.ui-dialog').parent().find(".ui-dialog-titlebar-close").trigger('click');
 			</script><?php

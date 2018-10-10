@@ -95,6 +95,15 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 		$this->_children[] = $oAdmin_Form_Entity;
 		return $this;
 	}
+	
+	/**
+	 * Get Children
+	 * @return array
+	 */
+	public function getChildren()
+	{
+		return $this->_children;
+	}
 
 	/**
 	 * Content

@@ -95,7 +95,7 @@ class Admin_Form_Field_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

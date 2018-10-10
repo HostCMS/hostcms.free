@@ -315,6 +315,13 @@ class Lib_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = $this->name . ' ' . $this->description;
 
 		$oSearch_Page->title = $this->name;

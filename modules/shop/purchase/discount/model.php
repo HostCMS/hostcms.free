@@ -117,7 +117,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			->join('shop_purchase_discount_coupons', 'shop_purchase_discounts.id', '=', 'shop_purchase_discount_coupons.shop_purchase_discount_id')
 			->where('shop_purchase_discount_coupons.active', '=', 1)
 			->where('shop_purchase_discount_coupons.deleted', '=', 0)
-			->where('shop_purchase_discount_coupons.text', 'LIKE', $couponText)
+			->where('shop_purchase_discount_coupons.text', '=', $couponText)
 			->where('shop_purchase_discount_coupons.start_datetime', '<=', $sDatetime)
 			->where('shop_purchase_discount_coupons.end_datetime', '>=', $sDatetime)
 			->open()

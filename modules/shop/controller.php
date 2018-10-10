@@ -162,15 +162,15 @@ class Shop_Controller
 	/**
 	 * Convert price
 	 * @param mixed $price price
-	 * @param int $decimalPlaces precision
+	 * @param int $decimalDigits e.g. 2, default uses $this->_decimalDigits
 	 * @return mixed
 	 */
-	public function convertPrice($price, $decimalPlaces = 2)
+	public function convertPrice($price, $decimalDigits = NULL)
 	{
 		$price = $this->convertFloat($price);
 
-		$decimalPlaces = intval($decimalPlaces);
-		preg_match("/((\d+(\.)\d{1,{$decimalPlaces}})|\d+)/u", $price, $array_price);
+		$decimalDigits = intval(!is_null($decimalDigits) ? $decimalDigits : $this->_decimalDigits);
+		preg_match("/((\d+(\.)\d{1,{$decimalDigits}})|\d+)/u", $price, $array_price);
 		return isset($array_price[1]) ? floatval($array_price[1]) : 0;
 	}
 

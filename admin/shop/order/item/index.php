@@ -36,6 +36,36 @@ $oAdmin_Form_Controller
 	->title($sFormTitle = Core::_('Shop_Order_Item.show_order_items_title', $oShop_Order->invoice))
 	->pageTitle($sFormTitle);
 
+if (!is_null(Core_Array::getGet('autocomplete'))
+	&& !is_null(Core_Array::getGet('show_warehouse'))
+	&& !is_null(Core_Array::getGet('queryString'))
+)
+{
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$iShopId = intval(Core_Array::getGet('shop_id'));
+	$oShop = Core_Entity::factory('Shop', $iShopId);
+
+	$aJSON = array(
+		'id' => 0,
+		'label' => '[0] ...'
+	);
+
+	if (strlen($sQuery))
+	{
+		$aTmp = Shop_Order_Item_Controller_Edit::fillWarehousesList($oShop, $sQuery);
+
+		foreach ($aTmp as $key => $value)
+		{
+			$key && $aJSON[] = array(
+				'id' => $key,
+				'label' => $value
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 

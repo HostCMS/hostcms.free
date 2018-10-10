@@ -90,6 +90,21 @@ class Core_Entity extends Core_ORM
 		$this->_forbiddenTags[$tag] = $tag;
 		return $this;
 	}
+	
+	/**
+	 * Remove tag from forbidden tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeForbiddenTag($tag)
+	{
+		if (isset($this->_forbiddenTags[$tag]))
+		{
+			unset($this->_forbiddenTags[$tag]);
+		}
+			
+		return $this;
+	}
 
 	/**
 	 * Add tags to forbidden tags list
@@ -412,6 +427,12 @@ class Core_Entity extends Core_ORM
 				$primaryKey = $this->getPrimaryKey();
 			}
 
+			Core_QueryBuilder::delete('revisions')
+				->where('model', '=', $this->getModelName())
+				->where('entity_id', '=', $primaryKey)
+				->execute();
+
+			/*
 			$oRevisions = Core_Entity::factory('Revision');
 			$oRevisions->queryBuilder()
 				->where('model', '=', $this->getModelName())
@@ -421,7 +442,7 @@ class Core_Entity extends Core_ORM
 			foreach ($aRevisions as $oRevision)
 			{
 				$oRevision->delete();
-			}
+			}*/
 		}
 
 		return parent::delete($primaryKey);

@@ -206,7 +206,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 			is_null($oShopGroup->path) && $oShopGroup->path= '';
 
-			$oShopGroup->save();
+			$oShopGroup->save()->clearCache();
 
 			// Указание Картинка для группы не соответсвует формату обмена CML!
 			$PictureData = strval($oXMLGroupNode->Картинка);
@@ -1180,7 +1180,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 					// Отключение товара после определения модификация или нет
 					$oAttributes = $oXmlItem->attributes();
-					if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален')
+					if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален'
+						|| isset($oXmlItem->Статус) && strval($oXmlItem->Статус) == 'Удален')
 					{
 						$oShopItem->active = 0;
 						$oShopItem->save();
@@ -1270,7 +1271,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						is_null($oShopItem->path) && $oShopItem->path = '';
 
-						$oShopItem->save();
+						$oShopItem->save()->clearCache();
 					}
 					else
 					{
@@ -1774,7 +1775,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							}
 						}
 
-						$oShopItem->save();
+						$oShopItem->save()->clearCache();
 						$this->_aReturn['updateItemCount']++;
 
 						Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterOffersShopItem', $this, array($oShopItem, $oProposal));

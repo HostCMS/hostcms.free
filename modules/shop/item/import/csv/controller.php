@@ -623,8 +623,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 */
 	protected function _doSaveGroup(Shop_Group_Model $oShop_Group)
 	{
-		is_null($oShop_Group->path) && $oShop_Group->path = '';
+		is_null($oShop_Group->path)
+			&& $oShop_Group->path = '';
+
 		$this->_incInsertedGroups($oShop_Group->save()->id);
+
 		return $oShop_Group;
 	}
 
@@ -1108,7 +1111,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$oTmpObject
 								->queryBuilder()
 								->where('parent_id', '=', intval($this->_oCurrentGroup->id))
-								->where('path', 'LIKE', $sData);
+								->where('path', '=', $sData);
 
 							$oTmpObject = $oTmpObject->findAll(FALSE);
 
@@ -1684,7 +1687,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								{
 									$oTmpObject = $this->_oCurrentShop->Shop_Items;
 									$oTmpObject->queryBuilder()
-										->where('path', 'LIKE', $sData)
+										->where('path', '=', $sData)
 										->where('shop_group_id', '=', $this->_oCurrentGroup->id);
 
 									$oTmpObject = $oTmpObject->findAll(FALSE);
@@ -1840,7 +1843,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$this->_oCurrentShopSpecialPrice->max_quantity = $sData;
 						break;
 						case 'item_special_price_price':
-							$this->_oCurrentShopSpecialPrice->price = $sData;
+							$this->_oCurrentShopSpecialPrice->price = Shop_Controller::instance()->convertPrice($sData);
 						break;
 						case 'item_special_price_percent':
 							$this->_oCurrentShopSpecialPrice->percent = $sData;
@@ -2147,9 +2150,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				}
 			}
 
-			if ($this->searchIndexation && $this->_oCurrentGroup->id)
+			if ($this->_oCurrentGroup->id)
 			{
-				Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->index();
+				// Indexation
+				$this->searchIndexation
+					&& Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->index();
+
+				// clearCache
+				Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->clearCache();
 			}
 
 			!$this->_oCurrentItem->modification_id
@@ -2326,8 +2334,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						->where('min_quantity', '=', $this->_oCurrentShopSpecialPrice->min_quantity)
 						->where('max_quantity', '=', $this->_oCurrentShopSpecialPrice->max_quantity)
 						->where('price', '=', $this->_oCurrentShopSpecialPrice->price)
-						->where('percent', '=', $this->_oCurrentShopSpecialPrice->percent)
-					;
+						->where('percent', '=', $this->_oCurrentShopSpecialPrice->percent);
 
 					// Добавляем специальную цену, если её ещё не существовало
 					if ($oTmpObject->getCount(FALSE) == 0)
@@ -2839,9 +2846,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					$oShop_Item_Price->save();
 				}
 
-				if ($this->searchIndexation && $this->_oCurrentItem->id)
+				if ($this->_oCurrentItem->id)
 				{
-					Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)->index();
+					// Indexation
+					$this->searchIndexation
+						&& Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)->index();
+
+					// clearCache
+					Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)->clearCache();
 				}
 			} // end fields
 
@@ -2914,7 +2926,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 			$this->_aClearedPropertyValues[$oShopItem->id][] = $oProperty->guid;
 		}
-		
+
 		// File
 		if ($oProperty->type == 2)
 		{
@@ -2928,7 +2940,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					? $aPropertyValues[0]
 					: $oProperty->createNewValue($oShopItem->id);
 			}
-			
+
 			// Папка назначения
 			$sDestinationFolder = $oShopItem->getItemPath();
 
@@ -3136,7 +3148,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				}
 
 				$oProperty_Value->save();
-				
+
 				clearstatcache();
 
 				if (strpos(basename($sSourceFile), "CMS") === 0
@@ -3286,10 +3298,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$oProperty_Value->save();
 			}
 		}
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Array of cached tags
 	 */

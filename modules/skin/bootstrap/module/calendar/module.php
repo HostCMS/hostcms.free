@@ -168,7 +168,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				else
 				{
 				?><div class="col-xs-12 col-sm-6" id="calendarAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
-					<script type="text/javascript">
+					<script>
 					$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#calendarAdminPage') });
 					//$.eventsWidgetPrepare();
 					</script>
@@ -206,7 +206,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 			<div class="widget-body">
 				<div id='calendar'></div>
 			</div><!--Widget Body-->
-			<script type="text/javascript">
+			<script>
 
 				var date = new Date(),
 					d = date.getDate(),

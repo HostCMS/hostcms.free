@@ -50,26 +50,25 @@ class Template_Section_Controller_Edit extends Admin_Form_Action_Controller_Type
 			;
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->type("text/javascript")
-		->value("
-			$('.colorpicker').each(function () {
-				$(this).minicolors({
-					control: $(this).attr('data-control') || 'hue',
-					defaultValue: $(this).attr('data-defaultValue') || '',
-					inline: $(this).attr('data-inline') === 'true',
-					letterCase: $(this).attr('data-letterCase') || 'lowercase',
-					// opacity: $(this).attr('data-opacity') || 'true',
-					position: $(this).attr('data-position') || 'bottom right',
-					change: function (hex, opacity) {
-						if (!hex) return;
-						if (opacity) hex += ', ' + opacity;
-						try {
-						} catch (e) { }
-					},
-					theme: 'bootstrap'
+			->value("
+				$('.colorpicker').each(function () {
+					$(this).minicolors({
+						control: $(this).attr('data-control') || 'hue',
+						defaultValue: $(this).attr('data-defaultValue') || '',
+						inline: $(this).attr('data-inline') === 'true',
+						letterCase: $(this).attr('data-letterCase') || 'lowercase',
+						// opacity: $(this).attr('data-opacity') || 'true',
+						position: $(this).attr('data-position') || 'bottom right',
+						change: function (hex, opacity) {
+							if (!hex) return;
+							if (opacity) hex += ', ' + opacity;
+							try {
+							} catch (e) { }
+						},
+						theme: 'bootstrap'
+					});
 				});
-			});
-		");
+			");
 
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)

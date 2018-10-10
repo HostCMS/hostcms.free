@@ -171,7 +171,6 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oTextarea)
 			->add(
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1])")
 			);
 

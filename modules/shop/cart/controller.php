@@ -357,7 +357,6 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 		if (!is_null($oShop_Item->id))
 		{
-
 			$aSiteuserGroups = array(0, -1);
 			if (Core::moduleIsActive('siteuser'))
 			{

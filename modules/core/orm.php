@@ -574,7 +574,53 @@ class Core_ORM
 
 		return $aRow['count'];
 	}
+	
+	/**
+	 * Get fist entity, ordered by primary key
+	 * @param bool $bCache use cache, default TRUE
+	 * @return NULL|Core_ORM
+	 * <code>
+	 * $mObject = Core_ORM::factory('Book')->getFirst();
+	 * if (!is_null($mObject))
+	 * {
+	 * 	echo $mObject;
+	 * }
+	 * </code>
+	 */
+	public function getFirst($bCache = TRUE)
+	{
+		$this->queryBuilder()
+			->clearOrderBy()
+			->orderBy($this->_tableName . '.' . $this->_primaryKey, 'ASC')
+			->limit(1);
 
+		$aObjects = $this->findAll($bCache);
+		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	}
+
+	/**
+	 * Get last entity, ordered by primary key
+	 * @param bool $bCache use cache, default TRUE
+	 * @return NULL|Core_ORM
+	 * <code>
+	 * $mObject = Core_ORM::factory('Book')->getLast();
+	 * if (!is_null($mObject))
+	 * {
+	 * 	echo $mObject;
+	 * }
+	 * </code>
+	 */
+	public function getLast($bCache = TRUE)
+	{
+		$this->queryBuilder()
+			->clearOrderBy()
+			->orderBy($this->_tableName . '.' . $this->_primaryKey, 'DESC')
+			->limit(1);
+
+		$aObjects = $this->findAll($bCache);
+		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	}
+	
 	/**
 	 * Add related object. If main object does not save, it will save.
 	 * @param Core_ORM $model

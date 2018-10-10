@@ -32,12 +32,6 @@ class Shop_Cart_Model extends Core_Entity
 	public $postpone_flag = NULL;
 
 	/**
-	 * Column consist item's marking
-	 * @var string
-	 */
-	public $marking = NULL;
-
-	/**
 	 * Column consist item's price
 	 * @var string
 	 */
@@ -69,7 +63,7 @@ class Shop_Cart_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		if (is_null($this->Shop_Item->id))
 		{
@@ -94,7 +88,7 @@ class Shop_Cart_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function rest($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function restBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		return $this->Shop_Item->getRest();
 	}
@@ -125,13 +119,11 @@ class Shop_Cart_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function price($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function priceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$price = $this->getPrice();
 
-		$sPrice = Shop_Controller::instance()->round($price) . ' ' . $this->Shop->Shop_Currency->name;
-
-		return $sPrice;
+		return Shop_Controller::instance()->round($price) . ' ' . $this->Shop->Shop_Currency->name;
 	}
 
 	/**

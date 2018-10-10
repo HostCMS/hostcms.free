@@ -49,7 +49,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		else
 		{
 			?><div class="col-xs-12" id="counterAdminPage">
-				<script type="text/javascript">
+				<script>
 				$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#counterAdminPage') });
 				</script>
 			</div><?php
@@ -170,7 +170,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		$sSessions = implode(',', array_values($aSessions));
 		$sNewUsers = implode(',', array_values($aNewUsers));
 
-		?><script type="text/javascript">
+		?><script>
 			$(function(){
 			//$(window).bind("load", function () {
 				var titles = [<?php echo $sTitles?>],

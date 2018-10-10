@@ -440,7 +440,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				->add($oLargeWatermark_Div)
 				->add(
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(function() {
 							$('#{$windowId}_watermark_" . $this->_correctId($this->largeImage['name']) . "').HostCMSWindow({ autoOpen: false, destroyOnClose: false, title: '" . Core::_('Admin_Form.window_large_image') . "', AppendTo: '#{$windowId} form #file_large_{$iAdmin_Form_Count}', width: 360, height: 230, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				);
@@ -708,7 +707,6 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 					->add($oSmallWatermark_Div)
 					->add(
 						Core::factory('Core_Html_Entity_Script')
-							->type("text/javascript")
 							//->value("CreateWindow('{$windowId}_watermark_{$this->smallImage['name']}', '" . Core::_('Admin_Form.window_small_image') . "', '', '')")
 							->value("$(function() {
 							$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow({ autoOpen: false, destroyOnClose: false, title: '" . Core::_('Admin_Form.window_small_image') . "', AppendTo: '#{$windowId} form #file_small_{$iAdmin_Form_Count}', width: 360, height: 180, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")

@@ -1,12 +1,13 @@
 <?php
 
 /**
- * lessphp v0.5.0
+ * lessphp v0.5.1
  * http://leafo.net/lessphp
  *
  * LESS CSS compiler, adapted from http://lesscss.org
  *
  * Copyright 2013, Leaf Corcoran <leafot@gmail.com>
+ * Copyright 2016, Marcus Schwarz <github@maswaba.de>
  * Licensed under MIT or GPLv3, see LICENSE
  */
 
@@ -23,11 +24,11 @@
  * types are brought to the lowest form before being dump as strings. This
  * handles math equations, variable dereferences, and the like.
  *
- * The `parse` function of `lessc` is the entry point.
+ * The `parse` function of `Template_Less` is the entry point.
  *
  * In summary:
  *
- * The `lessc` class creates an instance of the parser, feeds it LESS code,
+ * The `Template_Less` class creates an instance of the parser, feeds it LESS code,
  * then transforms the resulting tree to a CSS tree. This class also holds the
  * evaluation context, such as all available mixins and variables at any given
  * time.
@@ -38,7 +39,7 @@
  * handling things like indentation.
  */
 class Template_Less {
-	static public $VERSION = "v0.5.0";
+	static public $VERSION = "v0.5.1";
 
 	static public $TRUE = array("keyword", "true");
 	static public $FALSE = array("keyword", "false");
@@ -51,8 +52,13 @@ class Template_Less {
 	public $mPrefix = '$'; // prefix of abstract blocks
 	public $parentSelector = '&';
 
+	static public $lengths = array( "px", "m", "cm", "mm", "in", "pt", "pc" );
+	static public $times = array( "s", "ms" );
+	static public $angles = array( "rad", "deg", "grad", "turn" );
+
+	static public $lengths_to_base = array( 1, 3779.52755906, 37.79527559, 3.77952756, 96, 1.33333333, 16  );
 	public $importDisabled = false;
-	public $importDir = '';
+	public $importDir = array();
 
 	protected $numberPrecision = null;
 
@@ -206,7 +212,7 @@ class Template_Less {
 			$this->compileNestedBlock($block, array($name));
 			break;
 		default:
-			$this->throwError("unknown block type: $block->type\n");
+            $block->parser->throwError("unknown block type: $block->type\n", $block->count);
 		}
 	}
 
@@ -294,7 +300,7 @@ class Template_Less {
 		$unique = array();
 		$comments = array();
 
-		foreach ($lines as $line) {
+		foreach($lines as $line) {
 			if (strpos($line, '/*') === 0) {
 				$comments[] = $line;
 				continue;
@@ -570,7 +576,7 @@ class Template_Less {
 			return true; // not having enough is handled above
 		} else {
 			$numMatched = $i + 1;
-			// greater than becuase default values always match
+			// greater than because default values always match
 			return $numMatched >= count($orderedArgs);
 		}
 	}
@@ -690,6 +696,7 @@ class Template_Less {
 			list(, $child) = $prop;
 			$this->compileBlock($child);
 			break;
+		case 'ruleset':
 		case 'mixin':
 			list(, $path, $args, $suffix) = $prop;
 
@@ -717,7 +724,12 @@ class Template_Less {
 			$mixins = $this->findBlocks($block, $path, $orderedArgs, $keywordArgs);
 
 			if ($mixins === null) {
-				$this->throwError("{$prop[1][0]} is undefined");
+                $block->parser->throwError("{$prop[1][0]} is undefined", $block->count);
+			}
+
+			if(strpos($prop[1][0], "$") === 0) {
+				//Use Ruleset Logic - Only last element
+				$mixins = array(array_pop($mixins));
 			}
 
 			foreach ($mixins as $mixin) {
@@ -803,7 +815,7 @@ class Template_Less {
 
 			break;
 		default:
-			$this->throwError("unknown op: {$prop[0]}\n");
+            $block->parser->throwError("unknown op: {$prop[0]}\n", $block->count);
 		}
 	}
 
@@ -885,7 +897,7 @@ class Template_Less {
 
 	protected function lib_pow($args) {
 		list($base, $exp) = $this->assertArgs($args, 2, "pow");
-		return pow($this->assertNumber($base), $this->assertNumber($exp));
+        return array( "number", pow($this->assertNumber($base), $this->assertNumber($exp)), $args[2][0][2] );
 	}
 
 	protected function lib_pi() {
@@ -894,8 +906,66 @@ class Template_Less {
 
 	protected function lib_mod($args) {
 		list($a, $b) = $this->assertArgs($args, 2, "mod");
-		return $this->assertNumber($a) % $this->assertNumber($b);
-	}
+        return array( "number", $this->assertNumber($a) % $this->assertNumber($b), $args[2][0][2] );
+ 	}
+
+	protected function lib_convert($args) {
+        list($value, $to) = $this->assertArgs($args, 2, "convert");
+
+        // If it's a keyword, grab the string version instead
+        if( is_array( $to ) && $to[0] == "keyword" )
+                $to = $to[1];
+
+ 		return $this->convert( $value, $to );
+ 	}
+
+	protected function lib_abs($num) {
+        return array( "number", abs($this->assertNumber($num)), $num[2] );
+ 	}
+
+	protected function lib_min($args) {
+        $values = $this->assertMinArgs($args, 1, "min");
+
+        $first_format = $values[0][2];
+
+        $min_index = 0;
+        $min_value = $values[0][1];
+
+        for( $a = 0; $a < sizeof( $values ); $a++ )
+        {
+            $converted = $this->convert( $values[$a], $first_format );
+
+            if( $converted[1] < $min_value )
+            {
+                $min_index = $a;
+                $min_value = $values[$a][1];
+            }
+ 		}
+
+ 		return $values[ $min_index ];
+ 	}
+
+	protected function lib_max($args) {
+        $values = $this->assertMinArgs($args, 1, "max");
+
+        $first_format = $values[0][2];
+
+        $max_index = 0;
+        $max_value = $values[0][1];
+
+        for( $a = 0; $a < sizeof( $values ); $a++ )
+        {
+            $converted = $this->convert( $values[$a], $first_format );
+
+            if( $converted[1] > $max_value )
+            {
+                $max_index = $a;
+                $max_value = $values[$a][1];
+            }
+ 		}
+
+ 		return $values[ $max_index ];
+    }
 
 	protected function lib_tan($num) {
 		return tan($this->assertNumber($num));
@@ -995,20 +1065,20 @@ class Template_Less {
 
 		$fullpath = $this->findImport($url);
 
-		if ($fullpath && ($fsize = filesize($fullpath)) !== false) {
+		if($fullpath && ($fsize = filesize($fullpath)) !== false) {
 			// IE8 can't handle data uris larger than 32KB
-			if ($fsize/1024 < 32) {
-				if (is_null($mime)) {
-					if (class_exists('finfo')) { // php 5.3+
+			if($fsize/1024 < 32) {
+				if(is_null($mime)) {
+					if(class_exists('finfo')) { // php 5.3+
 						$finfo = new finfo(FILEINFO_MIME);
 						$mime = explode('; ', $finfo->file($fullpath));
 						$mime = $mime[0];
-					} elseif (function_exists('mime_content_type')) { // PHP 5.2
+					} elseif(function_exists('mime_content_type')) { // PHP 5.2
 						$mime = mime_content_type($fullpath);
 					}
 				}
 
-				if (!is_null($mime)) // fallback if the mime type is still unknown
+				if(!is_null($mime)) // fallback if the mime type is still unknown
 					$url = sprintf('data:%s;base64,%s', $mime, base64_encode(file_get_contents($fullpath)));
 			}
 		}
@@ -1074,7 +1144,7 @@ class Template_Less {
 	}
 
 	protected function lib_round($arg) {
-		if ($arg[0] != "list") {
+		if($arg[0] != "list") {
 			$value = $this->assertNumber($arg);
 			return array("number", round($value), $arg[2]);
 		} else {
@@ -1247,7 +1317,13 @@ class Template_Less {
 	        $inputColor = ( isset($args[2][0]) ) ? $this->assertColor($args[2][0])  : $lightColor;
 	        $darkColor  = ( isset($args[2][1]) ) ? $this->assertColor($args[2][1])  : $darkColor;
 	        $lightColor = ( isset($args[2][2]) ) ? $this->assertColor($args[2][2])  : $lightColor;
-	        $threshold  = ( isset($args[2][3]) ) ? $this->assertNumber($args[2][3]) : $threshold;
+            if( isset($args[2][3]) ) {
+                if( isset($args[2][3][2]) && $args[2][3][2] == '%' ) {
+                    $args[2][3][1] /= 100;
+                    unset($args[2][3][2]);
+ 	        	}
+ 		        $threshold = $this->assertNumber($args[2][3]);
+ 	        }
 	    }
 	    else {
 	        $inputColor  = $this->assertColor($args);
@@ -1273,7 +1349,9 @@ class Template_Less {
 
 	protected function lib_luma($color) {
 	    $color = $this->coerceColor($color);
-	    return (0.2126 * $color[1] / 255) + (0.7152 * $color[2] / 255) + (0.0722 * $color[3] / 255);
+		// array(4) { [0]=> string(5) "color" [1]=> int(0) [2]=> int(0) [3]=> int(0) }
+	    // return (0.2126 * $color[0] / 255) + (0.7152 * $color[1] / 255) + (0.0722 * $color[2] / 255);
+		return (0.2126 * $color[1] / 255) + (0.7152 * $color[2] / 255) + (0.0722 * $color[3] / 255);
 	}
 
 	public function assertColor($value, $error = "expected color value") {
@@ -1305,6 +1383,21 @@ class Template_Less {
 			return $values;
 		}
 	}
+
+	public function assertMinArgs($value, $expectedMinArgs, $name="") {
+    	if ($value[0] !== "list" || $value[1] != ",") $this->throwError("expecting list");
+ 		$values = $value[2];
+ 		$numValues = count($values);
+ 		if ($expectedMinArgs > $numValues) {
+        	if ($name) {
+            	$name = $name . ": ";
+        	}
+
+ 			$this->throwError("${name}expecting at least $expectedMinArgs arguments, got $numValues");
+ 		}
+
+ 		return $values;
+}
 
 	protected function toHSL($color) {
 		if ($color[0] == 'hsl') return $color;
@@ -1580,7 +1673,7 @@ class Template_Less {
 				if (isset(self::$cssColors[$name])) {
 					$rgba = explode(',', self::$cssColors[$name]);
 
-					if (isset($rgba[3]))
+					if(isset($rgba[3]))
 						return array('color', $rgba[0], $rgba[1], $rgba[2], $rgba[3]);
 
 					return array('color', $rgba[0], $rgba[1], $rgba[2]);
@@ -1674,6 +1767,78 @@ class Template_Less {
 		}
 	}
 
+    protected function convert( $number, $to )
+    {
+        $value = $this->assertNumber( $number );
+        $from = $number[2];
+
+        // easy out
+        if( $from == $to )
+            return $number;
+
+        // check if the from value is a length
+        if( ( $from_index = array_search( $from, self::$lengths ) ) !== false ) {
+            // make sure to value is too
+            if( in_array( $to, self::$lengths ) ) {
+                // do the actual conversion
+                $to_index = array_search( $to, self::$lengths );
+                $px = $value * self::$lengths_to_base[ $from_index ];
+                $result = $px * ( 1 / self::$lengths_to_base[ $to_index ] );
+
+                $result = round( $result, 8 );
+                return array( "number", $result, $to );
+            }
+        }
+
+        // do the same check for times
+        if( in_array( $from, self::$times ) ) {
+            if( in_array( $to, self::$times ) ) {
+                // currently only ms and s are valid
+                if( $to == "ms" )
+                    $result = $value * 1000;
+                else
+                    $result = $value / 1000;
+
+                $result = round( $result, 8 );
+                return array( "number", $result, $to );
+            }
+        }
+
+        // lastly check for an angle
+        if( in_array( $from, self::$angles ) ) {
+            // convert whatever angle it is into degrees
+            if( $from == "rad" )
+                $deg = rad2deg( $value );
+
+            else if( $from == "turn" )
+                $deg = $value * 360;
+
+            else if( $from == "grad" )
+                $deg = $value / (400 / 360);
+
+            else
+                $deg = $value;
+
+            // Then convert it from degrees into desired unit
+            if( $to == "deg" )
+                $result = $deg;
+
+            if( $to == "rad" )
+                $result = deg2rad( $deg );
+
+            if( $to == "turn" )
+                $result = $value / 360;
+
+            if( $to == "grad" )
+                $result = $value * (400 / 360);
+
+            $result = round( $result, 8 );
+            return array( "number", $result, $to );
+        }
+
+        // we don't know how to convert these
+        $this->throwError( "Cannot convert {$from} to {$to}" );
+    }
 
 	// make sure a color's components don't go out of bounds
 	protected function fixColor($c) {
@@ -1834,7 +1999,10 @@ class Template_Less {
 	protected function get($name) {
 		$current = $this->env;
 
-		$isArguments = $name == $this->vPrefix . 'arguments';
+        // track scope to evaluate
+        $scope_secondary = array();
+
+        $isArguments = $name == $this->vPrefix . 'arguments';
 		while ($current) {
 			if ($isArguments && isset($current->arguments)) {
 				return array('list', ' ', $current->arguments);
@@ -1842,11 +2010,40 @@ class Template_Less {
 
 			if (isset($current->store[$name]))
 				return $current->store[$name];
-			else {
-				$current = isset($current->storeParent) ?
-					$current->storeParent : $current->parent;
-			}
+			// has secondary scope?
+			if (isset($current->storeParent))
+				$scope_secondary[] = $current->storeParent;
+
+			if (isset($current->parent))
+				$current = $current->parent;
+			else
+				$current = null;
 		}
+
+		while (count($scope_secondary)) {
+            // pop one off
+            $current = array_shift($scope_secondary);
+            while ($current) {
+                if ($isArguments && isset($current->arguments)) {
+                    return array('list', ' ', $current->arguments);
+                }
+
+                if (isset($current->store[$name])) {
+                    return $current->store[$name];
+                }
+
+                // has secondary scope?
+                if (isset($current->storeParent)) {
+                    $scope_secondary[] = $current->storeParent;
+                }
+
+                if (isset($current->parent)) {
+                    $current = $current->parent;
+                } else {
+                    $current = null;
+                }
+            }
+        }
 
 		$this->throwError("variable $name is undefined");
 	}
@@ -1887,6 +2084,7 @@ class Template_Less {
 
 		$this->env = null;
 		$this->scope = null;
+        $this->allParsedFiles = array();
 
 		$this->formatter = $this->newFormatter();
 
@@ -1928,6 +2126,43 @@ class Template_Less {
 
 		return $out;
 	}
+
+    /**
+     * Based on explicit input/output files does a full change check on cache before compiling.
+     *
+     * @param string $in
+     * @param string $out
+     * @param boolean $force
+     * @return string Compiled CSS results
+     * @throws Exception
+     */
+    public function checkedCachedCompile($in, $out, $force = false) {
+        if (!is_file($in) || !is_readable($in)) {
+            throw new Exception('Invalid or unreadable input file specified.');
+        }
+        if (is_dir($out) || !is_writable(file_exists($out) ? $out : dirname($out))) {
+            throw new Exception('Invalid or unwritable output file specified.');
+        }
+
+        $outMeta = $out . '.meta';
+        $metadata = null;
+        if (!$force && is_file($outMeta)) {
+            $metadata = unserialize(file_get_contents($outMeta));
+        }
+
+        $output = $this->cachedCompile($metadata ? $metadata : $in);
+
+        if (!$metadata || $metadata['updated'] != $output['updated']) {
+            $css = $output['compiled'];
+            unset($output['compiled']);
+            file_put_contents($out, $css);
+            file_put_contents($outMeta, serialize($output));
+        } else {
+            $css = file_get_contents($out);
+        }
+
+        return $css;
+    }
 
 	// compile only if changed input has changed or output doesn't exist
 	public function checkedCompile($in, $out) {
@@ -2017,7 +2252,7 @@ class Template_Less {
 
 		if ($str == null) {
 			if (empty($this->_parseFile)) {
-				throw new exception("nothing to parse");
+				throw new Exception("nothing to parse");
 			}
 
 			$out = $this->compileFile($this->_parseFile);
@@ -2095,7 +2330,7 @@ class Template_Less {
 		if ($this->sourceLoc >= 0) {
 			$this->sourceParser->throwError($msg, $this->sourceLoc);
 		}
-		throw new exception($msg);
+		throw new Exception($msg);
 	}
 
 	// compile file $in to file $out if $in is newer than $out
@@ -2265,7 +2500,6 @@ class Template_Less {
 		'yellowgreen' => '154,205,50'
 	);
 
-
 	/**
      * Get variables
      * @return array
@@ -2321,7 +2555,7 @@ class Template_Less {
 			break;
 			case 'function':
 				$aFunctionArgs = $this->_parsePropVariable($value[2]);
-				
+
 				switch ($value[1])
 				{
 					case 'rgb':
@@ -2329,7 +2563,7 @@ class Template_Less {
 						$value[0] = $value[1];
 					break;
 				}
-				
+
 				$return = $value[1] . '(' . $aFunctionArgs['value'] . ')';
 			break;
 			case 'number':
@@ -2464,7 +2698,7 @@ class lessc_parser {
 
 		// TODO report where the block was opened
 		if ( !property_exists($this->env, 'parent') || !is_null($this->env->parent) )
-			throw new exception('parse error: unclosed block');
+			throw new Exception('parse error: unclosed block');
 
 		return $this->env;
 	}
@@ -2557,6 +2791,16 @@ class lessc_parser {
 						$this->append(array("directive", $dirName, $dirValue));
 						return true;
 					}
+				} elseif ($this->literal(":", true)) {
+					//Ruleset Definition
+					if (($this->openString("{", $dirValue, null, array(";")) || true) &&
+							$this->literal("{"))
+					{
+						$dir = $this->pushBlock($this->fixTags(array("@".$dirName)));
+						$dir->name = $dirName;
+						if (isset($dirValue)) $dir->value = $dirValue;
+						return true;
+					}
 				}
 			}
 
@@ -2605,7 +2849,7 @@ class lessc_parser {
 		if ($this->literal('}', false)) {
 			try {
 				$block = $this->pop();
-			} catch (exception $e) {
+			} catch (Exception $e) {
 				$this->seek($s);
 				$this->throwError($e->getMessage());
 			}
@@ -2834,7 +3078,7 @@ class lessc_parser {
 		if ($this->unit($value)) return true;
 		if ($this->color($value)) return true;
 		if ($this->func($value)) return true;
-		if ($this->string($value)) return true;
+		if ($this->stringValue($value)) return true;
 
 		if ($this->keyword($word)) {
 			$value = array('keyword', $word);
@@ -2848,7 +3092,7 @@ class lessc_parser {
 		}
 
 		// unquote string (should this work on any type?
-		if ($this->literal("~") && $this->string($str)) {
+		if ($this->literal("~") && $this->stringValue($str)) {
 			$value = array("escape", $str);
 			return true;
 		} else {
@@ -2978,7 +3222,7 @@ class lessc_parser {
 				}
 			}
 
-			if (($tok == "'" || $tok == '"') && $this->string($str)) {
+			if (($tok == "'" || $tok == '"') && $this->stringValue($str)) {
 				$content[] = $str;
 				continue;
 			}
@@ -3009,7 +3253,7 @@ class lessc_parser {
 		return true;
 	}
 
-	protected function string(&$out) {
+	protected function stringValue(&$out) {
 		$s = $this->seek();
 		if ($this->literal('"', false)) {
 			$delim = '"';
@@ -3262,7 +3506,7 @@ class lessc_parser {
 					$attrParts[] = " ";
 					continue;
 				}
-				if ($this->string($str)) {
+				if ($this->stringValue($str)) {
 					// escape parent selector, (yuck)
 					foreach ($str[2] as &$chunk) {
 						$chunk = str_replace($this->lessc->parentSelector, "$&$", $chunk);
@@ -3649,14 +3893,14 @@ class lessc_parser {
 
 		// TODO this depends on $this->count
 		if ($this->peek("(.*?)(\n|$)", $m, $count)) {
-			throw new exception("$msg: failed at `$m[1]` $loc");
+			throw new Exception("$msg: failed at `$m[1]` $loc");
 		} else {
-			throw new exception("$msg: $loc");
+			throw new Exception("$msg: $loc");
 		}
 	}
 
 	protected function pushBlock($selectors=null, $type=null) {
-		$b = new stdclass;
+		$b = new stdClass();
 		$b->parent = $this->env;
 
 		$b->type = $type;
@@ -3667,6 +3911,14 @@ class lessc_parser {
 
 		$b->props = array();
 		$b->children = array();
+
+        // add a reference to the parser so
+        // we can access the parser to throw errors
+        // or retrieve the sourceName of this block.
+        $b->parser = $this;
+
+        // so we know the position of this block
+        $b->count = $this->count;
 
 		$this->env = $b;
 		return $b;
@@ -3746,6 +3998,7 @@ class lessc_parser {
 
 		return $out.$text;
 	}
+
 }
 
 class lessc_formatter_classic {
@@ -3862,3 +4115,5 @@ class lessc_formatter_lessjs extends lessc_formatter_classic {
 	public $assignSeparator = ": ";
 	public $selectorSeparator = ",";
 }
+
+

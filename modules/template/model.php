@@ -253,10 +253,13 @@ class Template_Model extends Core_Entity
 
 		Core_File::write($this->getTemplateLessFilePath(), trim($content));
 
-		// Rebuild CSS
-		$oTemplate_Less = $this->_getTemplateLess();
-		$css = $oTemplate_Less->compile($content);
-		$this->saveTemplateCssFile($css);
+		if ($this->less && strlen($content))
+		{
+			// Rebuild CSS
+			$oTemplate_Less = $this->_getTemplateLess();
+			$css = $oTemplate_Less->compile($content);
+			$this->saveTemplateCssFile($css);
+		}
 
 		return $this;
 	}
@@ -540,7 +543,7 @@ class Template_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -555,7 +558,7 @@ class Template_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -587,7 +590,7 @@ class Template_Model extends Core_Entity
 			$oCompression_Css = Core_Entity::factory('Compression_Css');
 			$oCompression_Css
 				->queryBuilder()
-				->where('path', 'LIKE', $sTemplatePath)
+				->where('path', '=', $sTemplatePath)
 				->groupBy('filename');
 
 			$aCompression_Css_With_Path = $oCompression_Css->findAll(FALSE);

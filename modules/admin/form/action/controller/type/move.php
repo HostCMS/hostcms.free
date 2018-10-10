@@ -113,9 +113,22 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 
 				$oAdmin_Form_Entity_Input = Admin_Form_Entity::factory('Input')
 					->caption($this->selectCaption)
-					->style('width: 100%')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
+					->class('form-control')
 					->name('destinationName')
 					->controller($window_Admin_Form_Controller);
+
+				$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
+					->name('inputMode')
+					->id('inputMode')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->options(array(
+						0 => Core::_('Admin_Form.autocomplete_mode0'),
+						1 => Core::_('Admin_Form.autocomplete_mode1'),
+						2 => Core::_('Admin_Form.autocomplete_mode2'),
+						3 => Core::_('Admin_Form.autocomplete_mode3')
+					))
+					->caption(Core::_('Admin_Form.autocomplete_mode'));
 
 				$oInputHidden = Admin_Form_Entity::factory('Input')
 					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
@@ -141,13 +154,11 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 				if ($entity_id)
 				{
 					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("
 						$('[name = destinationName]').autocomplete({
 							  source: function(request, response) {
-
 								$.ajax({
-								  url: '{$path}&entity_id={$entity_id}&exclude={$exclude}',
+								  url: '{$path}&entity_id={$entity_id}&exclude={$exclude}&mode=' + $('select#inputMode').val(),
 								  dataType: 'json',
 								  data: {
 									queryString: request.term
@@ -182,6 +193,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 
 					$oCore_Html_Entity_Form
 						->add($oAdmin_Form_Entity_Input)
+						->add($oAdmin_Form_Entity_Autocomplete_Select)
 						->add($oInputHidden)
 						->add($oCore_Html_Entity_Script);
 				}
@@ -230,7 +242,6 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 			ob_start();
 
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->value("$(function() {
 				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 140, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();

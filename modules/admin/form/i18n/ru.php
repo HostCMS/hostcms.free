@@ -117,7 +117,7 @@ return array(
 	'note-bad-password' => 'В системе существует сотрудник со стандартными логином и паролем, необходимо изменить пароль сотрудника "admin".',
 	'list' => 'Список',
 	'kanban' => 'Канбан',
-	
+
 	'day1' => 'Понедельник',
 	'day2' => 'Вторник',
 	'day3' => 'Среда',
@@ -125,4 +125,18 @@ return array(
 	'day5' => 'Пятница',
 	'day6' => 'Суббота',
 	'day7' => 'Воскресенье',
+
+	'short_day1' => 'Пн',
+	'short_day2' => 'Вт',
+	'short_day3' => 'Ср',
+	'short_day4' => 'Чт',
+	'short_day5' => 'Пт',
+	'short_day6' => 'Сб',
+	'short_day7' => 'Вс',
+
+	'autocomplete_mode' => 'Режим',
+	'autocomplete_mode0' => 'Вхождение',
+	'autocomplete_mode1' => 'Вхождение с начала',
+	'autocomplete_mode2' => 'Вхождение с конца',
+	'autocomplete_mode3' => 'Точное совпадение',
 );

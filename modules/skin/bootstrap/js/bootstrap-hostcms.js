@@ -32,10 +32,21 @@
 		},
 		currentMenu: function(moduleName)
 		{
-			$('#sidebar li').removeClass('active').removeClass('open');
+			$('#sidebar li').removeClass('active open');
 
-			$('#menu-'+moduleName).addClass('active')
-				.parents('li').addClass('active').addClass('open');
+			/*$('#menu-' + moduleName).addClass('active')
+				.parents('li').addClass('active open');*/
+
+			$('#menu-' + moduleName).each(function(){
+				$(this).addClass('active')
+					.parents('li').addClass('active open');
+
+				// Submenu
+				if ($(this).children('ul').length)
+				{
+					$(this).addClass('open');
+				}
+			});
 
 			$('#sidebar li[class != open] ul.submenu').hide();
 		},
@@ -609,21 +620,161 @@
 			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
 
 		},
-		sortableKanban: function(path) {
-			$('.kanban-board .kanban-list').sortable({
+		sortableKanban: function(path, container, bUpdateData = 0) {
+			$(container + ' .kanban-list').sortable({
 				items: "> li",
-				connectWith: '.kanban-board .kanban-list',
+				connectWith: container + ' .kanban-list',
 				placeholder: 'placeholder',
 				handle: ".drag-handle",
-				// containment: '.kanban-board',
 				receive: function (event, ui) {
 					$.ajax({
-						data: { id: ui.item[0].id, target_status_id: this.id },
+						data: { id: ui.item[0].id, sender_id: ui.sender[0].id, target_id: this.id, update_data: bUpdateData },
 						type: "POST",
+						dataType: 'json',
 						url: path,
+						success: function(result){
+							if (result.status == 'success' && result.update)
+							{
+								var jKanban = $('.kanban-board .kanban-board-header');
+
+								$.each(result.update, function(id, object){
+									 jKanban.find('#data-' + id + ' .kanban-deals-count').text(object.count);
+									 jKanban.find('#data-' + id + ' .kanban-deals-amount').text(object.amount);
+								});
+							}
+						}
 					});
 				}
 			}).disableSelection();
+		},
+		showKanban: function(container) {
+			var $kanban = $(container + ' > .row'),
+				$prevNav = $('.horizon-prev', container),
+				$nextNav = $('.horizon-next', container);
+
+			/* console.log('container =', container);
+			console.log('$kanban.width() = ', $kanban.width());
+			console.log('$kanban.innerWidth() = ', $kanban.innerWidth());
+			console.log('$kanban.outerWidth() = ', $kanban.outerWidth());
+			console.log('$kanban.get(0).scrollWidth = ', $kanban.get(0).scrollWidth);
+			 */
+
+
+			$.fn.horizon = function () {
+				// Set mousewheel event
+				$kanban.mousewheel(function(event, delta) {
+					this.scrollLeft += (delta * 30);
+
+					showButtons(this.scrollLeft);
+
+					event.preventDefault();
+				});
+
+				// Click and hold action on nav buttons
+				$nextNav.mousedown(function () {
+					if ($.fn.horizon.defaults.interval)
+					{
+						clearInterval($.fn.horizon.defaults.interval);
+					}
+
+					$.fn.horizon.defaults.interval = setInterval(function() { scrollRight(); }, 50);
+				}).mouseup(function() {
+					clearInterval($.fn.horizon.defaults.interval);
+				});
+
+				$prevNav.mousedown(function () {
+					if ($.fn.horizon.defaults.interval)
+					{
+						clearInterval($.fn.horizon.defaults.interval);
+					}
+
+					$.fn.horizon.defaults.interval = setInterval(function() { scrollLeft(); }, 50);
+				}).mouseup(function() {
+					clearInterval($.fn.horizon.defaults.interval);
+				});
+
+				// Keyboard buttons
+				$(window).on('keydown', function (e) {
+					if (scrolls[e.which]) {
+						scrolls[e.which]();
+						e.preventDefault();
+					}
+				});
+
+				showButtons($.fn.horizon.defaults.interval);
+			};
+
+			// Global vars
+			$.fn.horizon.defaults = {
+				delta: 0,
+				interval: 0
+			};
+
+			// Left scroll
+			var scrollLeft = function () {
+				var i2 = $.fn.horizon.defaults.delta - 1;
+				$kanban.scrollLeft($kanban.scrollLeft() + (i2 * 30));
+
+				showButtons($kanban.scrollLeft());
+			};
+
+			// Right scroll
+			var scrollRight = function () {
+				var i2 = $.fn.horizon.defaults.delta + 1;
+				$kanban.scrollLeft($kanban.scrollLeft() + (i2 * 30));
+
+				showButtons($kanban.scrollLeft());
+			};
+
+			// Left-Right buttons
+			var showButtons = function (index) {
+
+				if (index === 0) {
+					if ($.fn.horizon.defaults.interval)
+					{
+						$prevNav.hide(function (){
+							clearInterval($.fn.horizon.defaults.interval);
+						});
+					}
+					else
+					{
+						$prevNav.hide();
+					}
+
+					$nextNav.show();
+				} else if ($kanban.get(0).clientWidth >= $kanban.get(0).scrollWidth - $kanban.get(0).scrollLeft) {
+					$prevNav.show();
+
+					if ($.fn.horizon.defaults.interval)
+					{
+						//console.log('1hide');
+						$nextNav.hide(function (){
+							clearInterval($.fn.horizon.defaults.interval);
+						});
+					}
+					else
+					{
+						$nextNav.hide();
+					}
+				} else {
+					$nextNav.show();
+					$prevNav.show();
+				}
+			};
+
+			// Keyboard buttons array
+			var scrolls = {
+				'right': scrollRight,
+				'down': scrollRight,
+				'left': scrollLeft,
+				'up': scrollLeft,
+				37: scrollLeft,
+				38: scrollRight,
+				39: scrollRight,
+				40: scrollLeft
+			};
+
+			$kanban.horizon();
 		},
 		/* -- CHAT -- */
 		chatGetUsersList: function(event)
@@ -675,19 +826,23 @@
 		},
 		modalWindow: function(settings)
 		{
-			settings = jQuery.extend({
-				title: '',
-				message: '',
-				className: ''
-			}, settings);
+			var settings = jQuery.extend({
+					title: '',
+					message: '',
+					className: ''
+				}, settings),
+				dialog = bootbox.dialog({
+					message: settings.message,
+					title: settings.title,
+					className: settings.className,
+					onEscape: function() {}
+				}),
+				modalBody = dialog.find('.modal-body'),
+				content = dialog.find('.modal-body .bootbox-body div');
 
-			var dialog = bootbox.dialog({
-				message: settings.message,
-				title: settings.title,
-				className: settings.className
-			}),
-			modalBody = dialog.find('.modal-body'),
-			content = dialog.find('.modal-body .bootbox-body div');
+			//window.bootboxDialog = dialog;
+
+			settings.onHide && dialog.on('hide.bs.modal', settings.onHide);
 
 			/*windowId = content.attr('id');
 			dialog.prop('id', windowId);
@@ -1948,7 +2103,7 @@
 
 			setInterval($.refreshNotificationsList, 10000);
 
-			var jNotificationsListBox  = $('.navbar-account #notificationsListBox');
+			var jNotificationsListBox = $('.navbar-account #notificationsListBox');
 
 			jNotificationsListBox.on({
 				'click': function (event){
@@ -2227,6 +2382,7 @@
 							<div class="notification-body">\
 								<span class="title">' + oNotification['title'] + '</span>\
 								<span class="description"></span>\
+								<span class="site-name">' + (typeof oNotification['site'] !== 'undefined' && oNotification['site'] !== null ? oNotification['site'] : "") + '</span>\
 							</div>\
 							' + notificationExtra +
 						'</div>\
@@ -2323,8 +2479,30 @@
 
 				//  Меняем значение баджа с числом непрочитанных уведомлений
 				$('.navbar li#notifications > a > span.badge')
-					.html(countUnreadNotifications)
+					.html(countUnreadNotifications > 99 ? countUnreadNotifications = '∞' : countUnreadNotifications)
 					.toggleClass('hidden', !countUnreadNotifications);
+
+				// Обновление продолжительности рабочего дня
+				$('.workday-timer').html(resultData['workdayDuration']);
+
+				// Обновление кнопок управления рабочим днем
+				var aStatuses = ['ready', 'denied', 'working', 'break', 'completed', 'expired'],
+					status = $('li.workday #workdayControl').data('status');
+
+				$('li.workday #workdayControl')
+					.toggleClass(aStatuses[status] + ' ' + aStatuses[resultData['workdayStatus']])
+					.data('status', resultData['workdayStatus']);
+
+				if (resultData['workdayStatus']	== 5)
+				{
+					$('#user-info-dropdown .login-area').addClass('wave in');
+				}
+				else
+				{
+					$('#user-info-dropdown .login-area').removeClass('wave in');
+				}
+
+				$.blinkColon(resultData['workdayStatus']);
 			}
 		},
 		// Автоматическое обновление списка уведомлений
@@ -2444,7 +2622,6 @@
 		},
 
 		filterNotifications: function (jInputElement){
-
 			var jNotifications = $('#notificationsListBox .scroll-notifications li[id != "notification-0"]');
 
 			if (jNotifications.length)
@@ -2464,8 +2641,15 @@
 				}
 			}
 		},
-
 		clearNotifications: function (){
+			// Mark all current user notifications as read
+			$.ajax({
+				url: '/admin/user/index.php',
+				type: 'POST',
+				data: { 'setNotificationsRead': 1 },
+				dataType: 'json'
+			});
+
 			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id != "notification-0"]').remove();
 			$('.navbar-account #notificationsListBox .scroll-notifications > ul li[id = "notification-0"]').show();
 
@@ -2943,8 +3127,8 @@
 
 			if(oDateTimePicker)
 			{
+				jNewObject.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').datetimepicker({locale: oDateTimePicker.locale(), format: oDateTimePicker.format()});
 				jNewObject.find('script').remove();
-				jNewObject.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').datetimepicker({locale: 'ru', format: oDateTimePicker.format()});
 			}
 		},
 		cloneFormRow: function(cloningElement){
@@ -3127,7 +3311,7 @@
 
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-right-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="20px" class="margin-right-5 img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
@@ -3147,117 +3331,10 @@
 
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="30px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="20px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
-		},
-
-		dealsPrepare: function (){
-		/*
-			$("body").popover({
-				container: "body",
-				selector: "li[id ^= \'deal_template_step_\']",
-				placement: "bottom",
-				template: "<div class=\"popover\"><div class=\"arrow\"></div><div class=\"popover-content\"></div></div>",
-				html: true,
-				trigger: "hover"
-			});*/
-
-			$("body").on("click", ".deal-steps li", function (){
-				// Идентификатор этапа сделки
-				var dealTemplateStepId = parseInt($(this).attr('id').split('deal_template_step_')[1]) || 0,
-					dealTemplateStepName;
-
-				if (dealTemplateStepId)
-				{
-					// Идентификатор сделки
-					var dealTemplateSteps = $(this).parent('.deal-steps'),
-						dealId = dealTemplateSteps.data('deal-id');
-
-					if (dealTemplateSteps.data('change-by-click') && $(this).children('a.available').length)
-					{
-						$('#id_content #row_0_' + dealId).toggleHighlight();
-						/*$.adminCheckObject({objectId: 'check_0_' + dealId, windowId: 'id_content'});*/
-						$.adminLoad({path: '/admin/deal/index.php', action: 'changeStep', operation: 'changeStep', additionalParams: 'dealStepId=' + dealTemplateStepId + '&hostcms[checked][0][' + dealId + ']=1', windowId: 'id_content'});
-					}
-					// При редактировании сделки
-					else
-					{
-						if ($(this).children('a.available').length)
-						{
-							$('a.clear-next', dealTemplateSteps).each(function(){
-								$(this).removeClass('clear-next')
-							});
-
-							// Нажали на шаг уже отмеченный как "следующий",
-							// снимаем отметку для перехода
-							if ($(this).children('a').hasClass('next'))
-							{
-								//$(this).children('a').removeClass('next');
-								$(this).children('a').toggleClass('next clear-next');
-
-								dealTemplateStepId = parseInt($(this).parent('.deal-steps').data('stepId'));
-
-								dealTemplateStepName = $(this).parent('.deal-steps').find('li#deal_template_step_' + dealTemplateStepId + ' a').prop('title');
-							}
-							else
-							{
-								dealTemplateStepName = $(this).children('a').prop('title');
-
-								$('a.next', dealTemplateSteps).each(function(){
-									$(this).removeClass('next')
-								});
-
-								$(this).children('a.available') && $(this).children('a').addClass('next').removeClass('clear-next');
-							}
-
-
-							// Меняем цвет названия этапа
-							dealTemplateSteps.parent('div').next('[name="deal_template_step_id"]').val(dealTemplateStepId);
-							$('.deal-template-step-name.deal-template-step-name-inner').text(dealTemplateStepName);
-
-							$.changeDealTemplateName($(this).parent('.deal-steps').find('li#deal_template_step_' + dealTemplateStepId + ' a'));
-						}
-					}
-				}
-			})
-			.on('mouseover', '.deal-steps li a.available:not(.current):not(.next)',  function (){
-
-				$(this)
-					.parents('.deal-steps')
-					.find('li a.next')
-					.toggleClass('next clear-next');
-			})
-			.on('mouseout', '.deal-steps li a.available:not(.current):not(.next)',  function (){
-
-				$(this)
-					.removeClass('clear-next')
-					.parents('.deal-steps')
-					.find('li a.clear-next')
-					.toggleClass('next clear-next');
-
-			})
-			// Добавление дела(события) к сделке
-			.on('click', '[id = "addDealEvent"]', function (){
-
-				var dealId = $(this).data('dealId');
-
-				if (dealId)
-				{
-					$.modalLoad({path: '/admin/event/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&dealId=' + dealId, windowId: 'id_content'});
-				}
-			})
-			// Добавление комментария к сделке
-			.on('click', '[id = "addDealNote"]', function (){
-
-				var dealId = $(this).data('dealId');
-
-				if (dealId)
-				{
-					$.modalLoad({path: '/admin/deal/note/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&dealId=' + dealId, windowId: 'id_content'});
-				}
-			});
 		},
 		joinUser2DealStep: function(deal_step_id)
 		{
@@ -3346,6 +3423,82 @@
 				hex = $.rgb2hex(rgbCurrent);
 
 			$(".deal-template-step-name.deal-template-step-name-inner").css("color", hex);
+		},
+		changeUserWorkdayButtons: function(status)
+		{
+			var data = {},
+				aStatuses = ['ready', 'denied', 'working', 'break', 'completed', 'expired'],
+				currentStatusIndex = $('li.workday #workdayControl').data('status');
+
+			if (currentStatusIndex == status)
+			{
+				return;
+			}
+
+			// Начинаем рабочий день
+			if (currentStatusIndex == 0 && status == 2)
+			{
+				data = {'startUserWorkday': 1};
+			}
+			// Перерыв или Продолжаем рабочий день
+			else if ((currentStatusIndex == 2 && status == 3) || (currentStatusIndex == 3 && status == 2))
+			{
+				data = {'pauseUserWorkday': 1};
+			}
+			// Завершаем рабочий день
+			else if ((currentStatusIndex == 2 || currentStatusIndex == 5) && status == 4)
+			{
+				data = {'stopUserWorkday': 1};
+			}
+			else
+			{
+				return false;
+			}
+
+			$.ajax({
+				url: '/admin/user/index.php',
+				type: "POST",
+				data: data,
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					if (answer.result)
+					{
+						$('li.workday #workdayControl')
+							.toggleClass(aStatuses[currentStatusIndex] + ' ' + aStatuses[answer.result])
+							.data('status', answer.result);
+
+						if (answer.result != 5)
+						{
+							$('#user-info-dropdown .login-area').removeClass('wave in');
+						}
+
+						$('span.user-workday-last-date').remove();
+
+						$.blinkColon(answer.result);
+					}
+				}
+			});
+		},
+		blinkColon: function(workdayStatus)
+		{
+			var toggle = true;
+
+			// Если работаем или рабочий день кончился, но не завершен сотрудником
+			if ((workdayStatus == 2 || workdayStatus == 5) && !window.timerId)
+			{
+				window.timerId = setInterval(function() {
+					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible'});
+					toggle = !toggle;
+				}, 1000);
+			}
+
+			if ((workdayStatus != 2 && workdayStatus != 5) && window.timerId)
+			{
+				clearInterval(window.timerId);
+				window.timerId = undefined;
+				$('.workday-timer .colon').css({ visibility: 'visible'});
+			}
 		}
 	});
 
@@ -3496,7 +3649,6 @@
 $(function(){
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
-	$.dealsPrepare();
 
 	$(window).on('resize', function(event) {
 
@@ -3732,7 +3884,64 @@ $(function(){
 				}
 			},
 			'.icons_permissions i'
-		);
+		)
+		.on('click', '.workday #workdayControl > span:not(.user-workday-end-text)', function(e) {
+			e.stopPropagation();
+
+			var object = $(this),
+				buttonClassName = object.attr('class'),
+				status = 0;
+
+			if (object.hasClass('user-workday-start') || object.hasClass('user-workday-continue'))
+			{
+				status = 2;
+			}
+			else if (object.hasClass('user-workday-pause'))
+			{
+				status = 3;
+			}
+			else if (object.hasClass('user-workday-stop'))
+			{
+				if (confirm($(this).data('confirm')))
+				{
+					status = 4;
+				}
+			}
+			else if (object.hasClass('user-workday-stop-another-time'))
+			{
+				$.modalLoad({title: $(this).data('title'), path: '/admin/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+
+				return true;
+			}
+
+			/*switch(buttonClassName)
+			{
+				// Начинаем рабочий день
+				case 'user-workday-start':
+				case 'user-workday-continue':
+					status = 2;
+				break;
+				// Перерыв
+				case 'user-workday-pause':
+					status = 3;
+				break;
+				// Завершаем рабочий день
+				case 'user-workday-stop':
+					if (confirm($(this).data('confirm')))
+					{
+						status = 4;
+					}
+				break;
+				// Показ формы запроса на завершение рабочего дня с другим временем
+				case 'user-workday-stop-another-time':
+					$.modalLoad({title: $(this).data('title'), path: '/admin/user/index.php', additionalParams: 'showAnotherTimeModalForm', width: '50%', windowId: 'id_content', onHide: function(){$(".wickedpicker").remove();}});
+
+					return true;
+				break;
+			}*/
+
+			$.changeUserWorkdayButtons(status);
+		});
 });
 
 var methods = {

@@ -8,6 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
+ * - forbiddenTags(array('description')) массив тегов, запрещенных к передаче в генерируемый YML.
  * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
  * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
@@ -228,6 +229,51 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * @var Shop_Item_Controller
 	 */
 	protected $_Shop_Item_Controller = NULL;
+
+	/**
+	 * Forbidden tags. If list of tags is empty, all tags will be shown.
+	 *
+	 * @var array
+	 */
+	protected $_forbiddenTags = array();
+
+	/**
+	 * Add tag to forbidden tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function addForbiddenTag($tag)
+	{
+		$this->_forbiddenTags[$tag] = $tag;
+		return $this;
+	}
+
+	/**
+	 * Remove tag from forbidden tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeForbiddenTag($tag)
+	{
+		if (isset($this->_forbiddenTags[$tag]))
+		{
+			unset($this->_forbiddenTags[$tag]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add tags to forbidden tags list
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function addForbiddenTags(array $aTags)
+	{
+		$this->_forbiddenTags = array_merge($this->_forbiddenTags, array_combine($aTags, $aTags));
+
+		return $this;
+	}
 
 	/**
 	 * Constructor.
@@ -506,7 +552,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 
 			$iFrom += $this->onStep;
-			
+
 			// Delay execution
 			$this->delay && usleep($this->delay);
 		}
@@ -624,7 +670,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 			//Core_File::flush();
 			$iFrom += $this->onStep;
-			
+
 			// Delay execution
 			$this->delay && usleep($this->delay);
 		}
@@ -648,7 +694,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			)
 			: '';
 	}
-	
+
 	protected function _showOffer($oShop_Item)
 	{
 		$oShop = $this->getEntity();
@@ -681,7 +727,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Цена */
 		$this->stdOut->write('<price>' . $aPrices['price_discount'] . '</price>'. "\n");
 
-		if ($aPrices['discount'] > 0)
+		if ($aPrices['discount'] > 0 && !isset($this->_forbiddenTags['discount']))
 		{
 			/* Старая цена */
 			$this->stdOut->write('<oldprice>' . ($aPrices['price'] + $aPrices['tax']) . '</oldprice>'. "\n");
@@ -726,9 +772,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Delivery options */
 		if ($this->deliveryOptions)
 		{
-			$this->stdOut->write('<store>' . ($oShop_Item->store == 1 ? 'true' : 'false') . '</store>'. "\n");
-			$this->stdOut->write('<pickup>' . ($oShop_Item->pickup == 1 ? 'true' : 'false') . '</pickup>'. "\n");
-			$this->stdOut->write('<delivery>' . ($oShop_Item->delivery == 1 ? 'true' : 'false') . '</delivery>'. "\n");
+			 !isset($this->_forbiddenTags['store'])
+				&& $this->stdOut->write('<store>' . ($oShop_Item->store == 1 ? 'true' : 'false') . '</store>'. "\n");
+
+			!isset($this->_forbiddenTags['pickup'])
+				&& $this->stdOut->write('<pickup>' . ($oShop_Item->pickup == 1 ? 'true' : 'false') . '</pickup>'. "\n");
+
+			!isset($this->_forbiddenTags['delivery'])
+				&& $this->stdOut->write('<delivery>' . ($oShop_Item->delivery == 1 ? 'true' : 'false') . '</delivery>'. "\n");
 
 			$this->_deliveryOptions($oShop, $oShop_Item);
 		}
@@ -742,72 +793,78 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				$this->stdOut->write('<name>' . Core_Str::xml($oShop_Item->name) . '</name>'. "\n");
 			}
 
-			if ($oShop_Item->shop_producer_id)
+			if (!isset($this->_forbiddenTags['vendor']) && $oShop_Item->shop_producer_id)
 			{
 				$this->stdOut->write('<vendor>' . Core_Str::xml($oShop_Item->Shop_Producer->name) . '</vendor>'. "\n");
 			}
 
-			if ($oShop_Item->vendorcode != '')
+			if (!isset($this->_forbiddenTags['vendorCode']) && $oShop_Item->vendorcode != '')
 			{
 				$this->stdOut->write('<vendorCode>' . Core_Str::xml($oShop_Item->vendorcode) . '</vendorCode>'. "\n");
 			}
 		}
 
 		/* DESCRIPTION */
-		$description = !empty($oShop_Item->description)
-			? $oShop_Item->description
-			: $oShop_Item->text;
-
-		if (strlen($description))
+		if (!isset($this->_forbiddenTags['description']))
 		{
-			$description = Core_Str::cutSentences(
-				html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
-			);
+			$description = !empty($oShop_Item->description)
+				? $oShop_Item->description
+				: $oShop_Item->text;
 
-			$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+			if (strlen($description))
+			{
+				$description = Core_Str::cutSentences(
+					html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
+				);
+
+				$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+			}
 		}
 
 		/* sales_notes */
-		$sales_notes = $oShop_Item->yandex_market_sales_notes != ''
-			? trim($oShop_Item->yandex_market_sales_notes)
-			: trim($oShop->yandex_market_sales_notes_default);
+		if (!isset($this->_forbiddenTags['sales_notes']))
+		{
+			$sales_notes = $oShop_Item->yandex_market_sales_notes != ''
+				? trim($oShop_Item->yandex_market_sales_notes)
+				: trim($oShop->yandex_market_sales_notes_default);
 
-		$sales_notes != ''
-			&& $this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
+			$sales_notes != ''
+				&& $this->stdOut->write('<sales_notes>' . Core_Str::xml(html_entity_decode(strip_tags($sales_notes), ENT_COMPAT, 'UTF-8')) . '</sales_notes>'. "\n");
+		}
 
-		if ($oShop_Item->manufacturer_warranty)
+		if (!isset($this->_forbiddenTags['manufacturer_warranty']) && $oShop_Item->manufacturer_warranty)
 		{
 			$this->stdOut->write('<manufacturer_warranty>true</manufacturer_warranty>' . "\n");
 		}
 
-		if (trim($oShop_Item->country_of_origin) != '')
+		if (!isset($this->_forbiddenTags['country_of_origin']) && trim($oShop_Item->country_of_origin) != '')
 		{
 			$this->stdOut->write('<country_of_origin>' . Core_Str::xml(html_entity_decode(strip_tags($oShop_Item->country_of_origin), ENT_COMPAT, 'UTF-8')) . '</country_of_origin>'. "\n");
 		}
 
 		// Элемент предназначен для обозначения товара, который можно скачать. Если указано значение параметра true, товарное предложение показывается во всех регионах независимо от регионов доставки, указанных магазином на странице Параметры размещения.
-		if ($oShop_Item->type == 1)
+		if (!isset($this->_forbiddenTags['downloadable']) && $oShop_Item->type == 1)
 		{
 			$this->stdOut->write('<downloadable>true</downloadable>'. "\n");
 		}
 
 		/* adult */
-		if ($oShop_Item->adult)
+		if (!isset($this->_forbiddenTags['adult']) && $oShop_Item->adult)
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
 		}
 
 		/* cpa */
-		$this->stdOut->write('<cpa>' . $oShop_Item->cpa .  '</cpa>' . "\n");
+		!isset($this->_forbiddenTags['cpa']) && $this->stdOut->write('<cpa>' . $oShop_Item->cpa .  '</cpa>' . "\n");
 
 		/* weight */
-		if ($oShop_Item->weight > 0)
+		if (!isset($this->_forbiddenTags['weight']) && $oShop_Item->weight > 0)
 		{
 			$this->stdOut->write('<weight>' . $oShop_Item->weight .  '</weight>' . "\n");
 		}
 
 		/* rec */
-		if ($this->recommended)
+		if (!isset($this->_forbiddenTags['weight']) && $this->recommended)
 		{
 			$aTmp = array();
 
@@ -872,14 +929,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		if (count($aShop_Item_Delivery_Options))
 		{
-			$this->stdOut->write('<delivery-options>');
+			$this->stdOut->write('<delivery-options>' . "\n");
 
 			foreach ($aShop_Item_Delivery_Options as $oShop_Item_Delivery_Option)
 			{
 				$this->stdOut->write('<option cost="' . $oShop_Item_Delivery_Option->cost . '" days="' . $oShop_Item_Delivery_Option->day . '" order-before="' . $oShop_Item_Delivery_Option->order_before . '"/>' . "\n");
 			}
 
-			$this->stdOut->write('</delivery-options>');
+			$this->stdOut->write('</delivery-options>' . "\n");
 		}
 
 		return count($aShop_Item_Delivery_Options);

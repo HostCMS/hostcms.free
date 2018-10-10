@@ -448,7 +448,6 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					: '&';
 
 				$oLarge_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value('$(function(){
 							$("#preview_large_' . $this->largeImage['id'] . '").popover({
 								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="max-width:200px" />\',
@@ -746,7 +745,6 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							: '&';
 
 						$oSmall_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
-							->type("text/javascript")
 							->value('$(function(){
 								$("#preview_' . $this->smallImage['id'] . '").popover({
 									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="max-width:200px" />\',

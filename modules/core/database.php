@@ -810,4 +810,20 @@ abstract class Core_DataBase
 	{
 		return $this->_lastQuery;
 	}
+	
+	protected $_likeReplacements = array(
+		'%' => '\%',
+		'_' => '\_',
+		'\\' => '\\\\'
+	);
+	
+	/**
+	 * Escape value in LIKE conditions
+	 * @param string $value
+	 * @return string
+	 */
+	public function escapeLike($value)
+	{
+		return strtr($value, $this->_likeReplacements);
+	}
 }

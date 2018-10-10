@@ -783,11 +783,11 @@ class Market_Controller extends Core_Servant_Properties
 				// install() для модуля, если есть
 				$oAdminModule->setupModule();
 
-				echo '<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($oAdminModule->path) . '\'})</script>';
+				echo '<script>$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($oAdminModule->path) . '\'})</script>';
 			}
 			else
 			{
-				echo '<script type="text/javascript">$.loadSiteList()</script>';
+				echo '<script>$.loadSiteList()</script>';
 			}
 		}
 
@@ -950,8 +950,14 @@ class Market_Controller extends Core_Servant_Properties
 		}
 		else
 		{
+			$aReturn = Update_Controller::instance()->parseUpdates();
+
+			$sDatetime = !is_null($aReturn['datetime'])
+			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
+			: '';
+
 			throw new Core_Exception(
-				Core::_('Update.server_error_respond_' . $this->error), array(), 0, FALSE
+				Core::_('Update.server_error_respond_' . $this->error, $sDatetime), array(), 0, FALSE
 			);
 		}
 
@@ -962,7 +968,7 @@ class Market_Controller extends Core_Servant_Properties
 			->action($this->controller->getPath())
 			->add($oMainTab)
 			->add(Admin_Form_Entity::factory('Code')
-				->html('<script type="text/javascript">
+				->html('<script>
 				function changeCategory(object)
 				{
 					if (object && object.tagName == "SELECT")

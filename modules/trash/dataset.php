@@ -114,61 +114,65 @@ class Trash_Dataset extends Admin_Form_Dataset
 		
 		foreach ($aTables as $key => $aTableRow)
 		{
-			$name = Core_Array::get($aTableRow, 'Name');
-			$iRows = Core_Array::get($aTableRow, 'Rows');
 			$sEngine = strtoupper(Core_Array::get($aTableRow, 'Engine'));
-
-			//$aColumns = $this->_dataBase->getColumns($name);
-
-			$id = $key + 1;
-
-			//if (isset($aColumns['deleted']) && strpos($name, '~') !== 0)
-			if (isset($aTableColumns[$name]) && in_array('deleted', $aTableColumns[$name])
-				&& strpos($name, '~') !== 0
-			)
+			$sComment = Core_Array::get($aTableRow, 'Comment');
+			
+			if ($sEngine != '' && $sComment != 'VIEW')
 			{
-				if ($iRows < $aConfig['maxExactCount'] || $sEngine == 'MYISAM')
+				$name = Core_Array::get($aTableRow, 'Name');
+				$iRows = Core_Array::get($aTableRow, 'Rows');
+				
+				//$aColumns = $this->_dataBase->getColumns($name);
+				$id = $key + 1;
+
+				//if (isset($aColumns['deleted']) && strpos($name, '~') !== 0)
+				if (isset($aTableColumns[$name]) && in_array('deleted', $aTableColumns[$name])
+					&& strpos($name, '~') !== 0
+				)
 				{
-					$row = $queryBuilder
-						->clear()
-						->select(array('COUNT(*)', 'count'))
-						->from($name)
-						->where('deleted', '=', 1)
-						->execute()
-						->asAssoc()
-						->current();
+					if ($iRows < $aConfig['maxExactCount'] || $sEngine == 'MYISAM')
+					{
+						$row = $queryBuilder
+							->clear()
+							->select(array('COUNT(*)', 'count'))
+							->from($name)
+							->where('deleted', '=', 1)
+							->execute()
+							->asAssoc()
+							->current();
 
-					$count = $row['count'];
-				}
-				else
-				{
-					$count = '???';
-				}
-
-				if ($count)
-				{
-					$oTrash_Entity = $this->_objects[$id] = $this->_newObject();
-
-					$oTrash_Entity->setTableColums(array(
-						'id' => array(),
-						'table_name' => array(),
-						'name' => array(),
-						'count' => array(),
-					));
-
-					$singular = Core_Inflection::getSingular($name);
-
-					$oTrash_Entity->id = $id;
-					$oTrash_Entity->table_name = $name;
-
-					try {
-						$oTrash_Entity->name = Core::_($singular . '.model_name');
+						$count = $row['count'];
 					}
-					catch (Exception $e) {
-						$oTrash_Entity->name = 'Unknown';
+					else
+					{
+						$count = '???';
 					}
 
-					$oTrash_Entity->count = $count;
+					if ($count)
+					{
+						$oTrash_Entity = $this->_objects[$id] = $this->_newObject();
+
+						$oTrash_Entity->setTableColums(array(
+							'id' => array(),
+							'table_name' => array(),
+							'name' => array(),
+							'count' => array(),
+						));
+
+						$singular = Core_Inflection::getSingular($name);
+
+						$oTrash_Entity->id = $id;
+						$oTrash_Entity->table_name = $name;
+
+						try {
+							$oTrash_Entity->name = Core::_($singular . '.model_name');
+						}
+						catch (Exception $e) {
+							$oTrash_Entity->name = 'Unknown';
+						}
+
+						$oTrash_Entity->count = $count;
+					}
 				}
 			}
 		}

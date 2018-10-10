@@ -428,7 +428,7 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime($sPath)
 				: NULL;
 
-			$sReturn .= '<script type="text/javascript"' . ($aJs[1] ? ' async="async"' : '') . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$sReturn .= '<script' . ($aJs[1] ? ' async="async"' : '') . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 
 		return $sReturn;
@@ -461,7 +461,7 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime(CMS_FOLDER . $sPath)
 				: NULL;
 
-			$sReturn .= '<script type="text/javascript"' . $sAsync . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$sReturn .= '<script' . $sAsync . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 		catch (Exception $e)
 		{

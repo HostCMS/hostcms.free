@@ -132,7 +132,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 							if (strlen($this->_object->address))
 							{
 							?>
-								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo $this->_object->address?></div>
+								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo htmlspecialchars($this->_object->address)?></div>
 							<?php
 							}
 							?>

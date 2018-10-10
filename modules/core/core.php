@@ -823,9 +823,6 @@ class Core
 			header('Content-type: text/plain; charset=utf-8');
 		}
 
-		// utf-8: http://www.iana.org/assignments/character-sets
-		//header('Content-Type: text/javascript; charset=utf-8');
-
 		// bug in Chrome
 		//header("Content-Length: " . strlen($content));
 		echo json_encode($content);

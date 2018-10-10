@@ -433,7 +433,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', $path)
+			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('parent_id', '=', $parent_id)
 			->limit(1)
 			->clearOrderBy();
@@ -831,7 +831,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$link = $oAdmin_Form_Field->link;
 		$onclick = $oAdmin_Form_Field->onclick;
@@ -900,6 +900,13 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;

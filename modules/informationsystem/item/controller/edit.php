@@ -37,6 +37,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->addSkipColumn('image_small_width')
 					->addSkipColumn('image_small_height');
 
+				if ($object->shortcut_id != 0)
+				{
+					$object = $object->Informationsystem_Item;
+				}
+					
 				if (!$object->id)
 				{
 					$object->informationsystem_id = $informationsystem_id;
@@ -162,7 +167,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$oMainRow3->add($oAdditionalGroupsSelect);
 
 				$html2 = '
-					<script type="text/javascript">
+					<script>
 						$(function(){
 							$(".shortcut-group-tags").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
@@ -244,16 +249,22 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-2 no-padding-right'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow6->add($oSiteuserSelect);
+					$oMainRow6
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
 					// Show button
-					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow6, $oSiteuser, $this->_Admin_Form_Controller);
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Добавляем новое поле типа файл
@@ -534,7 +545,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oMainRow5->add($oAdditionalGroupsSelect);
 
 					$html = '
-						<script type="text/javascript">
+						<script>
 							$(function(){
 								$(".informationsystem-item-tags").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
@@ -881,16 +892,22 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 no-padding-right'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow6->add($oSiteuserSelect);
+					$oMainRow6
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
 					// Show button
-					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow6, $oSiteuser, $this->_Admin_Form_Controller);
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Active
@@ -971,7 +988,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				->type('hidden');
 
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
 			->value("
 				$('[name = informationsystem_group_name]').autocomplete({
 					  source: function(request, response) {

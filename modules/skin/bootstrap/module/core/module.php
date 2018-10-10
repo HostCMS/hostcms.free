@@ -77,7 +77,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				else
 				{
 					?><div class="col-xs-12" id="notesAdminPage">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#notesAdminPage') });
 						</script>
 					</div><?php
@@ -92,7 +92,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				else
 				{
 					?><div class="col-xs-12 col-sm-8" id="coreEventsAdminPage">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#coreEventsAdminPage') });
 						</script>
 					</div><?php
@@ -111,7 +111,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				else
 				{
 					?><div class="systems-characteristics col-xs-12 col-sm-4 col-md-4 col-lg-4" id="characteristicsAdminPage">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#characteristicsAdminPage') });
 						</script>
 					</div><?php
@@ -610,7 +610,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 										</div>
 									</div>
 								</div>
-								<script type="text/javascript">
+								<script>
 								<?php
 								foreach ($aUser_Notes as $oUser_Note)
 								{
@@ -793,7 +793,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 					</div>
 				</div>
 
-				<script type="text/javascript">
+				<script>
 				var dialog = bootbox.dialog({
 					message: $("#note-license").html(),
 					title: '<?php echo Core::_('Site.menu2_sub_caption')?>',
@@ -802,15 +802,6 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 				</script>
 				<?php
 			}
-
-			/*?><!-- Core License -->
-			<div class="col-xs-12">
-				<div class="well bordered-left bordered-themesecondary">
-					<i class="fa fa-star yellow margin-right-5"></i>
-					<strong><?php echo Core::_('Admin_Form.note')?>: </strong><?php echo Core::_('Admin_Form.note-license')?>
-				</div>
-			</div>
-			<?php*/
 		}
 
 		// Check password

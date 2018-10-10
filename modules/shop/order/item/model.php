@@ -107,7 +107,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		if (is_null($this->Shop_Item->id))
 		{

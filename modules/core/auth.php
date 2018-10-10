@@ -14,10 +14,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Core_Auth
 {
 	/**
-	 * Authorization
-	 * @param string $moduleName name of the module
+	 * Check Blocked Ip. Break if IP blocked
 	 */
-	static public function authorization($moduleName)
+	static public function checkBackendBlockedIp()
 	{
 		// Check IP addresses
 		$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
@@ -50,6 +49,15 @@ class Core_Auth
 				exit();
 			}
 		}
+	}
+	
+	/**
+	 * Authorization
+	 * @param string $moduleName name of the module
+	 */
+	static public function authorization($moduleName)
+	{
+		self::checkBackendBlockedIp();
 
 		self::systemInit();
 

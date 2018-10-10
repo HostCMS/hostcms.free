@@ -122,7 +122,7 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -291,6 +291,8 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function sum()
 	{
+		//$language = Core_i18n::instance()->getLng();
+
 		return sprintf(
 			"%s %s",
 			Shop_Controller::instance()->round($this->getAmount()),
@@ -302,7 +304,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function weight()
+	public function weightBackend()
 	{
 		$weight = 0;
 
@@ -890,11 +892,8 @@ class Shop_Order_Model extends Core_Entity
 				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
 					// Связываем уведомление с сотрудником
-					$oNotification_User = Core_Entity::factory('Notification_User');
-					$oNotification_User
-						->notification_id($oNotification->id)
-						->user_id($oNotification_Subscriber->user_id)
-						->save();
+					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
+						->add($oNotification);
 				}
 			}
 		}
@@ -1280,12 +1279,10 @@ class Shop_Order_Model extends Core_Entity
 			->Properties
 			->findAll();
 
-		//$aReturn = array();
 		$aProperiesId = array();
 		foreach ($aProperties as $oProperty)
 		{
 			$aProperiesId[] = $oProperty->id;
-			//$aReturn = array_merge($aReturn, $this->_getPropertyValue($oProperty, $bCache));
 		}
 
 		$aReturn = Property_Controller_Value::getPropertiesValues($aProperiesId, $this->id);
@@ -1397,7 +1394,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->postcode,
 			$this->shop_country->name,
 			$this->shop_country_location_city->name,
-			$this->address
+			$this->address,
+			$this->house,
+			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
 		$sFullAddress = implode(', ', $aAddress);
@@ -1527,7 +1526,7 @@ class Shop_Order_Model extends Core_Entity
 		$oOrderItemsXml = $oOrderXml->addChild('Товары');
 
 		$aDiscount_Shop_Order_Items = array();
-		
+
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
@@ -1571,7 +1570,7 @@ class Shop_Order_Model extends Core_Entity
 		if (count($aDiscount_Shop_Order_Items))
 		{
 			$oDiscountXml = $oOrderXml->addChild('Скидки');
-			
+
 			foreach ($aDiscount_Shop_Order_Items as $oShop_Order_Item)
 			{
 				$oCurrentItemXml = $oDiscountXml->addChild('Скидка');
@@ -1597,7 +1596,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->postcode,
 			$this->Shop_Country->name,
 			$this->Shop_Country_Location_City->name,
-			$this->address
+			$this->address,
+			$this->house,
+			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
 		$sFullAddress = implode(', ', $aAddress);
@@ -1776,7 +1777,7 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

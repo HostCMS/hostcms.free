@@ -74,4 +74,6 @@ return array(
 	'preserve_aspect_ratio' => 'Сохранять пропорции изображения',
 	'preserve_aspect_ratio_small' => 'Сохранять пропорции малого изображения',
 	'changeMultiple_success' => 'Множественность свойства изменена!',
+	'watermark_default_use_large_image' => 'Использовать водяной знак',
+	'watermark_default_use_small_image' => 'Использовать водяной знак для малых изображений',
 );

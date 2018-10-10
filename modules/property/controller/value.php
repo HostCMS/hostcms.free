@@ -28,6 +28,23 @@ class Property_Controller_Value
 		return new $propertyValueName();
 	}
 
+	static protected $_cacheGetProperty = array();
+	
+	/**
+	 * Get Property by ID
+	 * @param int $iPropertyId
+	 * @return object|NULL
+	 */
+	static protected function _getProperty($iPropertyId)
+	{
+		if (!isset(self::$_cacheGetProperty[$iPropertyId]))
+		{
+			self::$_cacheGetProperty[$iPropertyId] = Core_Entity::factory('Property')->getById($iPropertyId);
+		}
+		
+		return self::$_cacheGetProperty[$iPropertyId];
+	}
+	
 	/**
 	 * Получение значений свойств $aProperiesId объекта $entityId
 	 * @param array $aProperiesId properties ID
@@ -44,8 +61,8 @@ class Property_Controller_Value
 			$aSelect = array();
 			foreach ($aProperiesId as $iPropertyId)
 			{
-				$oProperty = Core_Entity::factory('Property')->find($iPropertyId);
-				if (!is_null($oProperty->id))
+				$oProperty = self::_getProperty($iPropertyId);
+				if (!is_null($oProperty))
 				{
 					$aPropertyValue = self::factory($oProperty->type);
 					$aSelect[$aPropertyValue->getModelName()][] = $iPropertyId;

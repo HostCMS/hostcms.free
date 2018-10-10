@@ -59,7 +59,7 @@ class Site_Controller_Markdeleted extends Admin_Form_Action_Controller
 			return NULL;
 		}*/
 
-		$this->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
+		$this->addMessage('<script>$.loadSiteList()</script>');
 
 		$this->_object->markDeleted();
 

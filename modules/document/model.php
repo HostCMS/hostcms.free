@@ -67,7 +67,7 @@ class Document_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function adminTemplate()
+	public function adminTemplateBackend()
 	{
 		return htmlspecialchars($this->Template->name);
 	}
@@ -132,6 +132,13 @@ class Document_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->datetime = $this->datetime;
@@ -153,7 +160,7 @@ class Document_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

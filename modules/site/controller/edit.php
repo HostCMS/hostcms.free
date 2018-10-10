@@ -364,7 +364,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		$this->addMessage('<script type="text/javascript">$.loadSiteList()</script>');
+		$this->addMessage('<script>$.loadSiteList()</script>');
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

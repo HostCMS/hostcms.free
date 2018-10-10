@@ -72,7 +72,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		is_null($this->_formId)
 			&& $this->_formId = 'formEdit' . rand(0, 99999);
-		
+
 		// Set default title
 		$oAdmin_Word = $this->_Admin_Form_Action->Admin_Word->getWordByLanguage(
 			Core_Entity::factory('Admin_Language')->getCurrent()->id
@@ -665,9 +665,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				if (is_null($prevPrimaryKeyValue))
 				{
 					$windowId = $this->_Admin_Form_Controller->getWindowId();
-					?><script type="text/javascript"><?php
-					?>$.appendInput('<?php echo $windowId?>', '<?php echo $this->_formId?>', '<?php echo $primaryKeyName?>', '<?php echo $this->_object->$primaryKeyName?>');<?php
-					/*?>$.appendInput('<?php echo $windowId?>', '<?php echo $this->_formId?>', 'hostcms[checked][<?php echo $this->_datasetId?>][<?php echo $this->_object->$primaryKeyName?>]', '1');<?php*/
+					?><script><?php
+					?>$.appendInput('<?php echo $windowId?>', '<?php echo $primaryKeyName?>', '<?php echo $this->_object->$primaryKeyName?>');<?php
 					?></script><?php
 				}
 
@@ -707,13 +706,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_applyObjectProperty();
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
 			case 'markDeleted':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
@@ -826,7 +825,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$sAdmin_View = !is_null($this->_Admin_Form_Controller)
 			? $this->_Admin_Form_Controller->Admin_View
 			: NULL;
-		
+
 		$oAdmin_View = Admin_View::create($sAdmin_View);
 		$oAdmin_View
 			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)

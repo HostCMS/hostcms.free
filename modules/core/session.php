@@ -172,7 +172,8 @@ abstract class Core_Session
 				session_write_close();
 			}
 			
-			self::$_handler = NULL;
+			// cause session_destroy(): Trying to destroy uninitialized session
+			//self::$_handler = NULL;
 		//}
 
 		return TRUE;

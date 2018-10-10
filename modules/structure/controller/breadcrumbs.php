@@ -41,6 +41,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'showInformationsystem',
 		'showShop',
 		'showForum',
+		'showMessage',
 		'cache',
 		'informationsystem_item_id',
 		'informationsystem_group_id',
@@ -49,6 +50,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'forum_category_id',
 		'forum_topic_id',
 		'forbiddenTags',
+		'message_topic_id',
 	);
 
 	/**
@@ -80,7 +82,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		$this->current = Core_Page::instance()->structure->id;
 
-		$this->showInformationsystem = $this->showShop = $this->showForum = TRUE;
+		$this->showInformationsystem = $this->showShop = $this->showForum = $this->showMessage = TRUE;
 
 		$this->cache = TRUE;
 	}
@@ -159,6 +161,11 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 				{
 					$this->shop_group_id = Core_Page::instance()->object->group;
 				}
+			}
+
+			if ($this->showMessage && Core_Page::instance()->object instanceof Message_Controller_Show)
+			{
+				$this->message_topic_id = Core_Page::instance()->object->topic;
 			}
 
 			if ($this->showForum && Core_Page::instance()->object instanceof Forum_Controller_Show)
@@ -332,6 +339,35 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 					$this->addBreadcrumbs($aShop_Groups);
 
 					Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($aShop_Groups));
+				}
+			}
+
+			if ($this->showMessage && Core_Page::instance()->object instanceof Message_Controller_Show)
+			{
+				if ($this->message_topic_id)
+				{
+					$oMessage_Topic = Core_Entity::factory('Message_Topic', $this->message_topic_id);
+
+					Core_Event::notify(get_class($this) . '.onBeforeAddMessageTopic', $this, array($oMessage_Topic));
+
+					$sPath = Core_Page::instance()->structure->getPath() . $oMessage_Topic->id . '/';
+
+					$oMessage_Topic
+						->clearEntities()
+						->addForbiddenTag('url')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('link')
+								->value($sPath)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('show')
+								->value(1)
+						);
+
+					$this->addBreadcrumb($oMessage_Topic);
+
+					Core_Event::notify(get_class($this) . '.onAfterAddMessageTopic', $this, array($oMessage_Topic));
 				}
 			}
 

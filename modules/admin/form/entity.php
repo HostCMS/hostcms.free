@@ -240,11 +240,14 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 					}
 				}
 			}
-			?><script type="text/javascript"><?php
-			?>fieldType['<?php echo $this->id?>'] = {<?php echo implode(",\n", $array_field)?>};<?php
+			
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+			
+			?><script><?php
+			?>fieldType['<?php echo $windowId?>']['<?php echo $this->id?>'] = {<?php echo implode(",\n", $array_field)?>};<?php
 			if (count($message_field) > 0)
 			{
-				?>fieldMessage['<?php echo $this->id?>'] = {<?php echo implode(",\n", $message_field)?>};<?php
+				?>fieldMessage['<?php echo $windowId?>']['<?php echo $this->id?>'] = {<?php echo implode(",\n", $message_field)?>};<?php
 			}
 			?></script><?php
 		}

@@ -319,4 +319,5 @@ return array(
 	'min_quantity' => '<acronym title="Minimum order quantity">Min qty</acronym>',
 	'max_quantity' => '<acronym title="Maximum order quantity">Max qty</acronym>',
 	'quantity_step' => '<acronym title="Quantity step">Step</acronym>',
+	'modifications_root' => '...',
 );

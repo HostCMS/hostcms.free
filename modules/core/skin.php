@@ -187,7 +187,7 @@ abstract class Core_Skin
 		{
 			$name = Core::$mainConfig['skin'];
 		}
-			
+
 		if (!is_string($name))
 		{
 			throw new Core_Exception('Wrong argument type (expected String)');
@@ -385,18 +385,19 @@ abstract class Core_Skin
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/js/toastr/toastr.css?<?php echo $iTimestamp?>" /><?php
 		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/fontawesome/css/font-awesome.min.css?<?php echo $iTimestamp?>" /><?php
 		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
-		?><script src="/modules/skin/default/frontend/jquery-ui.min.js" type="text/javascript"></script><?php
-		?><script src="/admin/wysiwyg/jquery.tinymce.min.js" type="text/javascript"></script><?php
-		?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js" type="text/javascript"></script><?php
-		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js" type="text/javascript"></script><?php
-		?><script src="/modules/skin/bootstrap/js/toastr/toastr.js" type="text/javascript"></script><?php
-		?><script type="text/javascript">var hQuery = $.noConflict(true);</script><?php
-		?><script src="/modules/skin/default/frontend/frontend.js" type="text/javascript"></script>
+		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
+		?><script src="/admin/wysiwyg/jquery.tinymce.min.js"></script><?php
+		?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js"></script><?php
+		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js"></script><?php
+		?><script src="/modules/skin/bootstrap/js/toastr/toastr.js"></script><?php
+		?><script>var hQuery = $.noConflict(true);</script><?php
+		?><script src="/modules/skin/default/frontend/frontend.js"></script>
 
 		<?php
 		$oTemplate = Core_Page::instance()->template;
 		$aTemplates = array();
 		$bLess = FALSE;
+
 		do {
 			$aTemplates[] = $oTemplate;
 
@@ -423,7 +424,7 @@ abstract class Core_Skin
 				</div>
 			</div>
 
-			<script type="text/javascript">
+			<script>
 			hQuery('.bootstrap-iso .colorpicker').each(function () {
 				hQuery(this).minicolors({
 					control: $(this).attr('data-control') || 'hue',
@@ -659,13 +660,13 @@ abstract class Core_Skin
 				Core::factory('Core_Html_Entity_Li')
 					->liValue(Core::_('Core.time_sql_execution', $oCore_Registry->get('Core_DataBase.queryTime', 0)))
 			);
-			
+
 		$fXslExecution = $oCore_Registry->get('Xsl_Processor.process', 0);
 		$fXslExecution && $oDebugWindowUl->add(
 			Core::factory('Core_Html_Entity_Li')
 				->liValue(Core::_('Core.time_xml_execution', $fXslExecution))
 		);
-			
+
 		$fTplExecution = $oCore_Registry->get('Tpl_Processor.process', 0);
 		$fTplExecution && $oDebugWindowUl->add(
 			Core::factory('Core_Html_Entity_Li')
@@ -926,7 +927,6 @@ abstract class Core_Skin
 		$oHostcmsTopPanel
 			->add(
 				Core::factory('Core_Html_Entity_Script')
-					->type('text/javascript')
 					->value(
 						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '";' . PHP_EOL .
 						'(function($){' . PHP_EOL .

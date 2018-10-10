@@ -859,7 +859,7 @@ class Shop_Model extends Core_Entity
 	 * Backend callback method
 	 * @return float
 	 */
-	public function adminTransactionAmount()
+	public function adminTransactionAmountBackend()
 	{
 		$siteuser_id = intval(Core_Array::getGet('siteuser_id'));
 
@@ -957,7 +957,7 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

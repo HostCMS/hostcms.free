@@ -36,7 +36,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/main.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/ru.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.time.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.categories.js')
@@ -128,14 +128,13 @@ class Skin_Bootstrap extends Core_Skin
 		foreach ($this->_js as $sPath)
 		{
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
 		/*<!-- Fonts -->
 		<link href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">*/
 		?>
-		<script type="text/javascript">
+		<script>
 		<?php
 		$bLogged = Core_Auth::logged();
 		if ($bLogged)
@@ -150,7 +149,7 @@ class Skin_Bootstrap extends Core_Skin
 		?>
 		</script>
 
-		<script type="text/javascript" src="/admin/wysiwyg/jquery.tinymce.min.js"></script>
+		<script src="/admin/wysiwyg/jquery.tinymce.min.js"></script>
 		<?php
 		if ($this->_mode != 'install')
 		{
@@ -258,7 +257,7 @@ class Skin_Bootstrap extends Core_Skin
 									{
 									?>
 									<!--/Bookmark Dropdown-->
-									<script type="text/javascript">
+									<script>
 									$(function (){
 										$.bookmarksPrepare();
 
@@ -281,7 +280,7 @@ class Skin_Bootstrap extends Core_Skin
 									<?php
 									$oModule = Core_Entity::factory('Module')->getByPath('user');
 									?>
-									<script type="text/javascript">
+									<script>
 										$(function(){
 											$("#sound-switch")
 												.data('soundEnabled', <?php echo $oUser->sound ? 'true' : 'false'?>)
@@ -297,7 +296,7 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</div>
 									</a>
-									<script type="text/javascript">
+									<script>
 									$(function(){
 										$.refreshClock();
 									});
@@ -355,7 +354,7 @@ class Skin_Bootstrap extends Core_Skin
 										$oModule = Core_Entity::factory('Module')->getByPath('event');
 										if ($oModule)
 										{
-											?><script type="text/javascript">
+											?><script>
 												$(function(){
 													$.eventsPrepare();
 
@@ -365,13 +364,9 @@ class Skin_Bootstrap extends Core_Skin
 													};
 
 													$('.navbar-account #notificationsClockListBox').data({
-														// Идентификатор последнего загруженного дела
-														// 'lastEventId': 0,
 														'currentUserId': <?php echo $oUser->id?>,
 														'moduleId': <?php echo $oModule->id?>
 													});
-
-													// $.refreshEventsList();
 												});
 												</script><?php
 										}
@@ -420,7 +415,7 @@ class Skin_Bootstrap extends Core_Skin
 									{
 									?>
 									<!--/Notification Dropdown-->
-									<script type="text/javascript">
+									<script>
 									$(function (){
 										$.notificationsPrepare();
 										$('.navbar-account #notificationsListBox').data({
@@ -465,7 +460,7 @@ class Skin_Bootstrap extends Core_Skin
 									<!--Tasks Dropdown-->
 									<div id="sitesListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications"></div>
 
-									<script type="text/javascript">
+									<script>
 										var sitesListBox = document.getElementById('sitesListBox');
 										sitesListBox.onclick = function(event){
 											event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
@@ -517,7 +512,7 @@ class Skin_Bootstrap extends Core_Skin
 											</ul>
 										</div>
 									</div>
-									<script type="text/javascript">
+									<script>
 										var languagesListBox = document.getElementById('languagesListBox');
 										languagesListBox.onclick = function(event){
 											event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
@@ -598,7 +593,7 @@ class Skin_Bootstrap extends Core_Skin
 											<i class="fa fa-spinner fa-pulse fa-3x chatbar-message-spinner hidden"></i>
 										</div>
 									</div>
-									<script type="text/javascript">
+									<script>
 										$(function(){
 											// Chat
 											$('.page-container').append($('#chatbar'));
@@ -618,7 +613,7 @@ class Skin_Bootstrap extends Core_Skin
 								}
 								$oUserName = ($oUser->name != '' || $oUser->surname != '') ? ($oUser->name . ' ' . $oUser->surname) : '';
 								?>
-								<li>
+								<li id="user-info-dropdown">
 									<a class="login-area dropdown-toggle" data-toggle="dropdown">
 										<div class="avatar avatar-user" title="<?php echo Core::_('Admin.profile')?>">
 											<img src="<?php echo $oUser->getAvatar()?>">
@@ -636,32 +631,62 @@ class Skin_Bootstrap extends Core_Skin
 									<!--Login Area Dropdown-->
 									<ul class="pull-right dropdown-menu dropdown-arrow dropdown-login-area">
 										<?php
-										if ($oUserName != '')
+										if (strlen($oUserName))
 										{
-										?>
-										<li class="username">
-											<a><?php echo htmlspecialchars($oUserName)?></a>
-										</li>
-										<?php
+											?><li class="username">
+												<a><?php echo htmlspecialchars($oUserName)?></a>
+											</li><?php
 										}
+
+										$currentDay = Core_Date::timestamp2sqldate(time());
+
+										$duration = $oUser->getWorkdayDuration($currentDay);
+
+										$workdayStatus = $oUser->getStatusWorkday($currentDay);
+
+										$aWorkdayStatuses = array('ready', 'denied', 'working', 'break', 'completed', 'expired');
+
+										$statusClassName = Core_Array::get($aWorkdayStatuses, $workdayStatus, 0);
 										?>
-										<!--Avatar Area-->
-										<li class="email">
-											<a>
-												<i class="fa fa-<?php echo $oUser->superuser ? 'graduation-cap' : 'user'?>"></i> <?php echo htmlspecialchars($_SESSION['valid_user'])?>
-											</a>
+										<li class="workday">
+											<div id="workdayControl" class="<?php echo $statusClassName?> pull-left">
+												<span class="user-workday-start palegreen"><i class="fa fa-play"></i><span><?php echo Core::_('User_Workday.start_day')?></span></span>
+												<span class="user-workday-pause warning"><i class="fa fa-pause"></i></span>
+												<span class="user-workday-continue workday-green"><i class="fa fa-eject fa-rotate-90"></i><span><?php echo Core::_('User_Workday.continue_day')?></span></span>
+												<span class="user-workday-stop darkorange" data-confirm="<?php echo Core::_('User_Workday.stop_day_confirm')?>"><i class="fa fa-stop"></i><span><?php echo Core::_('User_Workday.stop_day')?></span><?php
+												if ($workdayStatus == 1)
+												{
+													$oLastUserWorkday = $oUser->User_Workdays->getLast(FALSE);
+
+													if (!is_null($oLastUserWorkday) && $oLastUserWorkday->date != date('Y-m-d'))
+													{
+														?><span class="user-workday-last-date"> <?php echo date('d.m', Core_Date::sql2timestamp($oLastUserWorkday->date))?></span><?php
+													}
+												}
+												?></span>
+												<span class="user-workday-end-text gray"><?php echo Core::_('User_Workday.stop_day_message')?></span>
+												<span class="user-workday-stop-another-time" data-title="<?php echo Core::_('User_Workday.another_time_modal_title')?>"><?php echo Core::_('User_Workday.another_time')?></span>
+											</div>
+											<div class="workdayTimer pull-right">
+												<i class="fa fa fa-clock-o"></i><span class="workday-timer"><?php echo $duration?></span>
+											</div>
 										</li>
+										<!--Avatar Area-->
 										<li>
 											<div class="avatar-area">
 												<img src="<?php echo $oUser->getAvatar()?>" class="avatar avatar-user">
 											</div>
 										</li>
+										<li class="email">
+											<a>
+												<i class="fa fa-<?php echo $oUser->superuser ? 'graduation-cap' : 'user'?>"></i> <?php echo htmlspecialchars($oUser->login)?>
+											</a>
+										</li>
 										<!--Theme Selector Area-->
 										<li class="theme-area">
-											<ul class="colorpicker" id="skin-changer">
+											<ul id="skin-changer" class="wallpaper-picker">
 												<?php
 												$aUser_Wallpapers = Core_Entity::factory('User_Wallpaper')->findAll(FALSE);
-
 												foreach ($aUser_Wallpapers as $oUser_Wallpaper)
 												{
 												?>
@@ -679,6 +704,20 @@ class Skin_Bootstrap extends Core_Skin
 											<a href="/admin/logout.php" onmousedown="$(window).off('beforeunload')"><?php echo Core::_('Admin.exit')?></a>
 										</li>
 									</ul>
+
+									<script>
+									$(function(){
+										$('li.workday #workdayControl').data('status', <?php echo $workdayStatus?>);
+
+										$('#user-info-dropdown .dropdown-menu li:not(.workday)').on({
+											'click': function(e){
+												e.stopPropagation();
+											}
+										});
+
+										$.blinkColon(<?php echo $workdayStatus?>);
+									});
+									</script>
 									<!--/Login Area Dropdown-->
 								</li>
 								<!-- /Account Area -->
@@ -739,7 +778,7 @@ class Skin_Bootstrap extends Core_Skin
 			{
 				$oSearchModule = Core_Entity::factory('Module')->getByPath('search');
 				?>
-				<script type="text/javascript">
+				<script>
 				$(function(){
 					// Search
 					$('[class = searchinput]').autocomplete({
@@ -888,12 +927,47 @@ class Skin_Bootstrap extends Core_Skin
 											'block' => 0,
 											'ico' => 'fa-file-o'
 										);
+
+										$bSubmenu = isset($aTmpMenu['submenu']) && count($aTmpMenu['submenu']);
 										?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-											<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
-												<i class="menu-icon <?php echo $aTmpMenu['ico']?>"></i>
-												<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
+											<!-- удалить class="menu-dropdown" -->
+											<a <?php if ($bSubmenu) { echo 'class="menu-dropdown" '; }?>href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
+												<i class="menu-icon <?php echo htmlspecialchars($aTmpMenu['ico'])?>"></i>
+												<span class="menu-text"><?php echo htmlspecialchars($aTmpMenu['name'])?></span>
+
+												<?php if ($bSubmenu) {?>
+													<i class="menu-expand"></i>
+												<?php } ?>
 											</a>
-										</li><?php
+
+											<?php if ($bSubmenu) {?>
+											<ul class="submenu">
+												<?php
+												foreach ($aTmpMenu['submenu'] as $aSubmenu)
+												{
+													$aSubmenu += array(
+														'name' => NULL,
+														'href' => NULL,
+														'onclick' => NULL,
+														'ico' => 'fa-file-o'
+													);
+													?>
+													<li id="menu-<?php echo $oCore_Module->getModuleName()?>">
+														<a href="<?php echo htmlspecialchars($aSubmenu['href'])?>" onclick="<?php echo htmlspecialchars($aSubmenu['onclick'])?>">
+															<i class="menu-icon <?php echo htmlspecialchars($aSubmenu['ico'])?>"></i>
+															<span class="menu-text"><?php echo htmlspecialchars($aSubmenu['name'])?></span>
+														</a>
+													</li>
+												<?php
+												}
+												?>
+											</ul>
+											<?php
+											}
+											?>
+										</li>
+
+										<?php
 									}
 								}
 							}
@@ -920,8 +994,9 @@ class Skin_Bootstrap extends Core_Skin
 							if (isset($aTmpMenu['name']))
 							{
 								$aTmpMenu += array(
-									'sorting' => 0,
-									'block' => 0,
+									'name' => NULL,
+									'href' => NULL,
+									'onclick' => NULL,
 									'ico' => 'fa-file-o'
 								);
 								?><li>
@@ -1066,7 +1141,7 @@ class Skin_Bootstrap extends Core_Skin
 		</div>
 		</div>
 
-		<script type="text/javascript">$("#authorization input[name='login']").focus();</script>
+		<script>$("#authorization input[name='login']").focus();</script>
 		<?php
 		}
 

@@ -325,7 +325,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow3->add($oAdditionalGroupsSelect);
 
 				$html2 = '
-					<script type="text/javascript">
+					<script>
 						$(function(){
 							$(".shortcut-group-tags").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
@@ -447,7 +447,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->type('hidden');
 
 					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("
 						$('[name = modification_name]').autocomplete({
 							  source: function(request, response) {
@@ -600,7 +599,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$('.add-set-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
 						$('.set-item-table > tbody').append(
 							$('<tr><td>' + ui.item.label + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
@@ -731,16 +729,22 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-2 no-padding-right'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow10->add($oSiteuserSelect);
+					$oMainRow10
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
 					// Show button
-					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow10, $oSiteuser, $this->_Admin_Form_Controller);
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Удаляем продавцов
@@ -1075,7 +1079,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow9->add($oAdditionalGroupsSelect);
 
 					$html = '
-						<script type="text/javascript">
+						<script>
 							$(function(){
 								$(".shop-item-tags").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
@@ -1178,19 +1182,18 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
-				->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
-					$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
-						.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
-						.insertAfter($('.associated-item-table'));
+					->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+						$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
+							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+							.insertAfter($('.associated-item-table'));
 
-					$('.associated-item-table > tbody').append(
-						$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						$('.associated-item-table > tbody').append(
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						);
+
+						ui.item.value = '';
+					  } );"
 					);
-
-					ui.item.value = '';
-				  } );"
-				);
 
 				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
 
@@ -1463,16 +1466,22 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Group.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 no-padding-right'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow5->add($oSiteuserSelect);
+					$oMainRow5
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
 					// Show button
-					Siteuser_Controller_Edit::addSiteuserSelect2($oMainRow5, $oSiteuser, $this->_Admin_Form_Controller);
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
@@ -1872,7 +1881,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->type("text/javascript")
 								->value("$(\"#{$windowId} input[name='specMinQuantity_\\[\\]']\").eq(0).prop('name', 'specMinQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specMaxQuantity_\\[\\]']\").eq(0).prop('name', 'specMaxQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specPrice_\\[\\]']\").eq(0).prop('name', 'specPrice_{$oShop_Specialprice->id}');
@@ -2411,44 +2419,43 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->type('hidden');
 
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
-			->value("
-				$('[name = shop_group_name]').autocomplete({
-					  source: function(request, response) {
+				->value("
+					$('[name = shop_group_name]').autocomplete({
+						  source: function(request, response) {
 
-						$.ajax({
-						  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
-						  dataType: 'json',
-						  data: {
-							queryString: request.term
+							$.ajax({
+							  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+							  dataType: 'json',
+							  data: {
+								queryString: request.term
+							  },
+							  success: function( data ) {
+								response( data );
+							  }
+							});
 						  },
-						  success: function( data ) {
-							response( data );
-						  }
-						});
-					  },
-					  minLength: 1,
-					  create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
-							return $('<li></li>')
-								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
-								.appendTo(ul);
-						}
+						  minLength: 1,
+						  create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+								return $('<li></li>')
+									.data('item.autocomplete', item)
+									.append($('<a>').text(item.label))
+									.appendTo(ul);
+							}
 
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					  },
-					  select: function( event, ui ) {
-						$('[name = {$fieldName}]').val(ui.item.id);
-					  },
-					  open: function() {
-						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					  },
-					  close: function() {
-						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					  }
-				});
-			");
+							 $(this).prev('.ui-helper-hidden-accessible').remove();
+						  },
+						  select: function( event, ui ) {
+							$('[name = {$fieldName}]').val(ui.item.id);
+						  },
+						  open: function() {
+							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+						  },
+						  close: function() {
+							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+						  }
+					});
+				");
 
 			$return = array($oShopGroupInput, $oShopGroupInputHidden, $oCore_Html_Entity_Script);
 		}

@@ -79,6 +79,12 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */}
 	th.filter-action-7{width: 220px}
 }
 
+@media only screen and (min-width: 930px){
+	.navbar .navbar-inner .navbar-header .navbar-account .account-area>li>a.login-area.wave.in:after {
+		left: 15px;
+	}
+}
+
 @media only screen and (max-width: 929px){
 	.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area section {
 		display: none;
@@ -122,6 +128,9 @@ body {padding-right: 0 !important; /*Fix bug with bootbox modal window */}
 	}
 }
 
+.navbar .navbar-inner .navbar-header .navbar-account .account-area .login-area+.dropdown-menu {
+	min-width: 200px;
+}
 
 .black {
 	color: #000 !important;
@@ -302,7 +311,8 @@ form.adminForm .popover .form-horizontal .checkbox-inline{
 
 span.profile > span {
 	display: inline-block;
-	width: 103px;
+	/*width: 103px;*/
+	width: 119px;
 	white-space: nowrap;
 	overflow: hidden !important;
 	text-overflow: ellipsis;
@@ -2138,7 +2148,11 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 /* TinyMCE */
 .mce-tinymce { border: 1px solid #e5e5e5 !important }
 .mce-panel { background-color: #f5f4f4 !important }
+
+/* Bug with bg, ticket 270451*/
 .mce-btn { background: none !important }
+.mce-btn.mce-active { background: #555 !important }
+
 .mce-primary { background-color: #2d8ac7 !important }
 .mce-fullscreen { z-index: 999 !important; }
 
@@ -2280,6 +2294,8 @@ table.table.table-popular-queries tr td:last-child {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
+#notificationsListBox  .notification-body .site-name { font-size: 9px; color: #999; }
 
 #notificationsListBox  .notification-body:hover .description, #notificationsListBox  .notification-body:hover .title, #notificationsClockListBox  .notification-body:hover .description, #notificationsClockListBox  .notification-body:hover .title, #bookmarksListBox  .notification-body:hover .description, #bookmarksListBox  .notification-body:hover .title {
 	white-space: normal;
@@ -2792,14 +2808,14 @@ a.fc-day-number
 .company .dd-handle::first-line { font-size: 16px; color: #333 }
 
 /* .ticket-item .control-buttons a, .department-head  .control-buttons a {*/
- .department .control-buttons a {
+/*.department .control-buttons a {
 	border-radius: 50%;
     border-style: solid;
 	border-width: 1px;
     height: 1.8em;
     width: 1.8em;
 	margin-right: 5px
-}
+}*/
 
 .table table.person-details tr td{
 	/*padding: 0px;*/
@@ -2981,7 +2997,7 @@ li.select2-selection__choice .user-post, li.select2-selection__choice .company-d
 .department-users .widget-buttons.widget-button-chevron { padding: 0; line-height: 30px; }
 
 .department .control-buttons-wrapper {
-	float: right;
+	display: inline-block;
 	height: 25px;
 	margin-right: 10px;
 	overflow: hidden;
@@ -2989,7 +3005,10 @@ li.select2-selection__choice .user-post, li.select2-selection__choice .company-d
 	top: 13px;
 	width: 120px;
 	text-align: center;
+	font-size: 13px;
 }
+.company .dd-item > button { top: 12px; }
+
 .department .control-buttons-wrapper .control-buttons {
 	top: 0;
     position: absolute;
@@ -3026,7 +3045,8 @@ li.select2-selection__choice .user-post, li.select2-selection__choice .company-d
 .department-users .widget-header { text-align: unset; }
 .department-users .widget-buttons { padding: 0; }
 
-.head-star { color: #d0c38a }
+.head-star { color: #d0c38a; font-size: 85% !important; }
+.user-post-name { font-size: 85% !important; color: #999; }
 
 .department-users .tickets-container .tickets-list .ticket-item .ticket-user .user-avatar
 {
@@ -3106,6 +3126,7 @@ a.fc-day-number { color: #999 !important; }
 [data-action="showListDealTemplateSteps"]
 {
 	cursor: pointer;
+	margin-top: 4px;
 }
 
 .deal-template-step-conversion [data-action="showListDealTemplateSteps"] .fa
@@ -3119,6 +3140,8 @@ a.fc-day-number { color: #999 !important; }
 }
 
 .deal-template-step-conversion .dropdown-step-list .close i { font-size: 10px; }
+
+
 
 .label.deal-template-step .close
 {
@@ -3135,6 +3158,7 @@ a.fc-day-number { color: #999 !important; }
 .dropdown-step-list
 {
 	display: inline-block;
+	margin-top: -3px;
 }
 
 .dropdown-step-list .close
@@ -3276,9 +3300,9 @@ a.fc-day-number { color: #999 !important; }
 }
 .contracrot .user-image {
 	margin-right: 10px;
-	flex: 1;
 	margin-top: 2px;
 }
+.contracrot .user-image.flex { flex: 1; }
 .contracrot .contracrot-ico
 {
 	background-clip: padding-box;
@@ -3465,10 +3489,13 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 }
 
 .kanban-board > .row { overflow-x: auto; white-space: nowrap; overflow-y: hidden;}
+.kanban-board > .row > div:first-child { padding-left: 0 !important; }
 .kanban-board > .row > .col-sm-3 { display: inline-block; float: none; }
 .kanban-board { width: 100%; position: relative; }
+.kanban-board .kanban-board-header { padding-bottom: 5px; }
+.kanban-board .kanban-board-header div { font-weight: 300; }
 .kanban-board h5 { margin-top: 0; font-weight: 400 !important; color: #999 }
-.kanban-board .well { margin-bottom: 10px; padding: 15px; position: relative; }
+.kanban-board .well { margin-bottom: 10px; padding: 15px; position: relative; border-radius: 0; padding: 7px; }
 .kanban-board .well:hover .edit-entity { display: block; transition-delay: 0.8s; -webkit-transition-delay: 0.8s; }
 .kanban-board .well .edit-entity {
 	position: absolute;
@@ -3500,6 +3527,14 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 .kanban-board .horizon-next { right: 20px; }
 .kanban-board:hover .horizon-prev { display: block; }
 .kanban-board:hover .horizon-next { display: block; }
+
+.kanban-board .well .well-avatar.deal-kanban-avatar img:last-child { margin-left: 0; }
+.well-avatar.deal-client {
+    margin-left: 10px;
+    display: inline-block;
+}
+.deal-client-name.user-name { display: inline-block; font-size: 10px; }
+.well-avatar.deal-client img { width: 20px !important; height: 20px !important; }
 
 .view-selector input[type=radio] { position: absolute; visibility: hidden; display: none; }
 .view-selector label { color: #333; display: inline-block; cursor: pointer; font-weight: 300; padding: 5px 20px; }
@@ -3786,8 +3821,8 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 
 .deal-template-step-bar { display: inline-block; }
 .deal-template-step-name-inner { position: absolute; top: 0; display: inline-block; }
-.deal-amount > div:first-child { display: inline-block; width: 70%; }
-.deal-amount > div:last-child { display: inline-block; width: 30%; }
+.deal-amount > div:first-child { display: inline-block; width: 65%; }
+.deal-amount > div:last-child { display: inline-block; width: 35%; }
 
 .deal-comment
 {
@@ -3990,7 +4025,142 @@ table.deals-aggregate-user-info tbody td:nth-child(2)  { text-align: left; }
 table.deals-aggregate-user-info .deals-aggregate-user-department { text-align: left !important; font-size: 14px; font-weight: 600; }
 
 .agregate-user-tab .tab-content { padding: 0 !important; margin-top: 10px; border-top: 0; }
-ul#agregate-user-info li a { border-radius: 0; }
+ul#agregate-user-info li a[data-toggle="tab"] { border-radius: 0; }
 
 .avatar-user img { border-radius: 50%; }
 .avatar.avatar-user { border-left: 0 !important; }
+
+.databox .databox-left.databox-deal { background-color: #fff !important; }
+
+.siteuser-link a.show-user-info:hover { text-decoration: none !important; }
+
+.fill-form-text .field-name { font-weight: 300; color: #999; }
+.fill-form-text span:nth-child(2n):not(:last-child)::after { content: ";" }
+
+.dropdown-login-area .workdayTimer { color: #b6b6b6; text-align: center; font-size: 12px; margin-top: 13px; }
+.dropdown-login-area li.workday { min-height: 47px !important; position: relative; }
+.dropdown-login-area li.workday #workdayControl { margin-top: 10px; }
+.dropdown-login-area li.workday #workdayControl i { font-size: 11px; /*color: #5fc63b;*/ }
+.dropdown-login-area li.workday #workdayControl span:hover { cursor: pointer; }
+.dropdown-login-area li.workday #workdayControl span { font-size: 11px; /*color: #5fc63b;*/ text-transform: uppercase; }
+.dropdown-login-area li.email a { color: #b6b6b6 !important; }
+
+.workday-green { color: #5fc63b !important; }
+
+/* Ready */
+.dropdown-login-area li.workday #workdayControl.ready .user-workday-start { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.ready .user-workday-pause, .dropdown-login-area li.workday #workdayControl.ready .user-workday-continue, .dropdown-login-area li.workday #workdayControl.ready .user-workday-stop, .dropdown-login-area li.workday #workdayControl.ready .user-workday-end-text, .dropdown-login-area li.workday #workdayControl.ready .user-workday-stop-another-time { display: none }
+
+/* Denied */
+/*.dropdown-login-area li.workday #workdayControl.denied .user-workday-end-text { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.denied .user-workday-start, .dropdown-login-area li.workday #workdayControl.denied .user-workday-pause, .dropdown-login-area li.workday #workdayControl.denied .user-workday-continue, .dropdown-login-area li.workday #workdayControl.denied .user-workday-stop { display: none }*/
+
+.dropdown-login-area li.workday #workdayControl.denied .user-workday-stop, .dropdown-login-area li.workday #workdayControl.denied .user-workday-stop-another-time { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.denied .user-workday-start, .dropdown-login-area li.workday #workdayControl.denied .user-workday-pause, .dropdown-login-area li.workday #workdayControl.denied .user-workday-continue, .dropdown-login-area li.workday #workdayControl.denied .user-workday-end-text { display: none }
+
+/* Working */
+.dropdown-login-area li.workday #workdayControl.working .user-workday-pause, .dropdown-login-area li.workday #workdayControl.working .user-workday-stop { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.working .user-workday-start, .dropdown-login-area li.workday #workdayControl.working .user-workday-continue,  .dropdown-login-area li.workday #workdayControl.working .user-workday-end-text { display: none }
+
+/* Break */
+.dropdown-login-area li.workday #workdayControl.break .user-workday-continue { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.break .user-workday-start, .dropdown-login-area li.workday #workdayControl.break .user-workday-pause, .dropdown-login-area li.workday #workdayControl.break .user-workday-stop, .dropdown-login-area li.workday #workdayControl.break .user-workday-end-text, .dropdown-login-area li.workday #workdayControl.break .user-workday-stop-another-time { display: none }
+
+/* Completed */
+.dropdown-login-area li.workday #workdayControl.completed .user-workday-end-text { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.completed .user-workday-start, .dropdown-login-area li.workday #workdayControl.completed .user-workday-pause, .dropdown-login-area li.workday #workdayControl.completed .user-workday-continue, .dropdown-login-area li.workday #workdayControl.completed .user-workday-stop, .dropdown-login-area li.workday #workdayControl.completed .user-workday-stop-another-time { display: none }
+
+/* Expired */
+.dropdown-login-area li.workday #workdayControl.expired .user-workday-stop { display: inline-block }
+.dropdown-login-area li.workday #workdayControl.expired .user-workday-start, .dropdown-login-area li.workday #workdayControl.expired .user-workday-pause, .dropdown-login-area li.workday #workdayControl.expired .user-workday-continue, .dropdown-login-area li.workday #workdayControl.expired .user-workday-end-text { display: none }
+
+.workday-timer .colon { visibility: visible; }
+
+.dropdown-login-area li.workday #workdayControl .user-workday-stop-another-time { text-transform: none; color: #d0d0d0; position: absolute; left: 38px; top: 25px; }
+.dropdown-login-area li.workday #workdayControl .user-workday-stop-another-time:hover { /*text-decoration: underline;*/ color: #999 }
+.dropdown-login-area li.workday #workdayControl.expired .user-workday-stop-another-time, .dropdown-login-area li.workday #workdayControl.denied .user-workday-stop-another-time { left: 22px; }
+
+.dropdown-login-area li.workday #workdayControl.denied .user-workday-stop:hover, .dropdown-login-area li.workday #workdayControl.denied .user-workday-stop span:hover, .dropdown-login-area li.workday #workdayControl.denied .user-workday-stop i:hover { cursor: default; }
+
+.another-time-answer { display: inline-block; position: relative; text-align: center; }
+.another-time-answer i { vertical-align: middle; }
+.another-time-answer span { display: inline-block; vertical-align: middle; margin-left: 10px; font-size: 20px; color: #999; }
+
+.border-top-none { border-top: 0 !important; }
+
+table.deals-aggregate-user-info thead .month-day { font-size: 14px; font-weight: bold; }
+table.deals-aggregate-user-info tbody .posts.small { color: #999; }
+
+th.timesheet-holiday { border-bottom: 2px solid #fb6e52 !important;}
+
+td.timesheet-holiday { background-color: #ffdad3; }
+td .timesheet-workday-period { white-space: nowrap; }
+
+.show-another-time-form.form-horizontal .control-label { text-align: left !important; }
+.show-another-time-form.form-bordered .border-bottom { border-bottom: 1px solid #e5e5e5 !important; padding-bottom: 15px !important; }
+
+.wickedpicker { z-index: 2000 !important; }
+
+table.deals-aggregate-user-info thead tr:last-child th { text-align: center; }
+
+table.deals-aggregate-user-info tr a, table.deals-aggregate-user-info td a, table.company-structure .user-name a { color: #262626; }
+
+table.company-structure tbody tr:first-child td { border-top: 0; }
+table.company-structure tbody tr td { padding: 10px; }
+
+.table-scrollable.border-transparent { border: 1px solid transparent; }
+.table-scrollable table.table.company-structure { background-color: #ffffff4d; }
+
+.department .control-buttons-wrapper.department-top-actions { top: 8px; }
+.department .control-buttons-wrapper.department-top-actions a { margin-right: 5px; }
+.department .control-buttons-wrapper.department-top-actions a:hover { text-decoration: none; }
+
+.fieldcheck-error { font-size: 11px; color: #999; }
+
+/* #agregate-user-info .nav-item a.btn { padding: 6px 12px; margin-left: 5px; } */
+
+.dropdown-menu > li > a.add-absence-button i.fa { min-width: 0; }
+
+.wallpaper-picker
+{
+	padding: 10px 4px;
+	width: 100%;
+}
+.wallpaper-picker li {
+	display: inline-block;
+	/* padding: 6px !important; */
+	height: 30px !important;
+	width: 30px !important;
+	margin: 5px !important;
+}
+.wallpaper-picker li:hover { cursor: pointer; background-color: #fff !important; }
+.wallpaper-picker li img {
+    width: 30px;
+    height: 30px;
+}
+.wallpaper-picker > li > .colorpick-btn {
+	display: block;
+	width: 23px;
+	height: 23px;
+	margin: 0;
+	padding: 0;
+	border-radius: 0;
+	background-clip: padding-box;
+	position: relative;
+	transition: all ease .1s;
+}
+.wallpaper-picker li > .colorpick-btn:hover { text-decoration: none; opacity: .8; transform: scale(1.08); }
+
+#agregate-user-info li a[data-toggle="tab"] {
+	color: #999;
+}
+#agregate-user-info li.active a[data-toggle="tab"] {
+	color: #555;
+	background-color: #e7e7e7;
+}
+
+.show-add-absence-form .contracrot {
+	display: inline-flex;
+	right: 15px;
+	position: absolute;
+}

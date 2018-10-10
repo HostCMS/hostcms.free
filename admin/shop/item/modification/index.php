@@ -18,6 +18,12 @@ $sFormAction = '/admin/shop/item/modification/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oShopItemParent = Core_Entity::factory('Shop_Item', intval(Core_Array::getRequest('shop_item_id', 0)));
+
+if ($oShopItemParent->shortcut_id)
+{
+	$oShopItemParent = $oShopItemParent->Shop_Item;
+}
+
 $oShop = $oShopItemParent->Shop;
 $oShopGroup = $oShopItemParent->Shop_Group;
 $oShopDir = $oShop->Shop_Dir;

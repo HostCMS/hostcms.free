@@ -60,7 +60,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 				else
 				{
 					?><div id="shopOrdersAdminPage">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopOrdersAdminPage') });
 						</script>
 					</div><?php

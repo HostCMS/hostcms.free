@@ -93,7 +93,9 @@ class User_Model extends Core_Entity
 		'deal_step_user' => array(),
 		'user_bookmark' => array(),
 		'restapi_token' => array(),
-		'user_worktime' => array()
+		'user_worktime' => array(),
+		'user_workday' => array(),
+		'user_absence' => array('foreign_key' => 'employee_id', 'model' => 'user_absence'),
 	);
 
 	/**
@@ -550,27 +552,14 @@ class User_Model extends Core_Entity
 
 		$this->User_Bookmarks->deleteAll(FALSE);
 		$this->User_Worktimes->deleteAll(FALSE);
+		$this->User_Workdays->deleteAll(FALSE);
+		$this->User_Absences->deleteAll(FALSE);
 
 		// Удаляем директорию
 		$this->deleteDir();
 
 		return parent::delete($primaryKey);
 	}
-
-	/**
-	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
-	 */
-	/*public function login($oAdmin_Form_Field, $oAdmin_Form_Controller)
-	{
-		$sStatus = $this->isOnline()
-			? 'online'
-			: 'offline';
-
-		return "{$this->login}&nbsp;<div class=\"{$sStatus}\"></div>";
-	}*/
 
 	/**
 	 * Change user status
@@ -707,7 +696,7 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 */
@@ -726,14 +715,14 @@ class User_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function department()
+	public function departmentBackend()
 	{
 		$aTempDepartmentPost = array();
 
 		$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->findAll();
 		foreach ($aCompany_Department_Post_Users as $key => $oCompany_Department_Post_User)
 		{
-			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="darkgray">'
+			$aTempDepartmentPost[] = '<div ' . ( $key ? ' class="margin-top-5"' : '' ) . '>' . htmlspecialchars($oCompany_Department_Post_User->Company_Department->name) . '<br /><span class="user-post-name">'
 				. htmlspecialchars($oCompany_Department_Post_User->Company_Post->name) . '</span>'
 				. ($oCompany_Department_Post_User->head ? ' <i class="fa fa-star head-star" title="' . Core::_('User.head_title') . '"></i>' : '') . '</div>';
 		}
@@ -759,5 +748,288 @@ class User_Model extends Core_Entity
 		return $this->sex
 			? '<i class="fa fa-venus pink"></i>'
 			: '<i class="fa fa-mars sky"></i>';
+	}
+
+	public function getWorkdayDuration($date)
+	{
+		$sDate = '00<span class="colon">:</span>00';
+
+		$oUser_Workday = $this->User_Workdays->getByDate($date);
+
+		if (!is_null($oUser_Workday) && $oUser_Workday->begin != '00:00:00')
+		{
+			$beginTimestamp = Core_Date::sql2timestamp($date . ' ' . $oUser_Workday->begin);
+
+			$time = $oUser_Workday->end != '00:00:00'
+				? Core_Date::sql2timestamp($date . ' ' . $oUser_Workday->end)
+				: time();
+
+			$durationInSeconds = $time - $beginTimestamp;
+
+			$aUser_Workday_Breaks = $oUser_Workday->User_Workday_Breaks->findAll(FALSE);
+
+			$sumBreakTimeInSeconds = 0;
+
+			foreach ($aUser_Workday_Breaks as $oUser_Workday_Break)
+			{
+				$endBreak = $oUser_Workday_Break->end != '00:00:00'
+					? Core_Date::sql2timestamp($date . ' ' . $oUser_Workday_Break->end)
+					: time();
+
+				$beginBreakTimestamp = Core_Date::sql2timestamp($date . ' ' . $oUser_Workday_Break->begin);
+
+				$sumBreakTimeInSeconds += $endBreak - $beginBreakTimestamp;
+			}
+
+			$durationInMinutes = ($durationInSeconds - $sumBreakTimeInSeconds) / 60;
+
+			$sDate = sprintf('%02d<span class="colon">:</span>%02d', floor($durationInMinutes / 60), $durationInMinutes % 60);
+		}
+
+		return $sDate;
+	}
+
+	public function isUserWorkdayAvailable($date)
+	{
+		$aUser_Workdays = $this->User_Workdays->getAllByDate($date);
+
+		if (count($aUser_Workdays) == 0)
+		{
+			return TRUE;
+		}
+		elseif (count($aUser_Workdays) == 1 && $aUser_Workdays[0]->end != '00:00:00')
+		{
+			// Работает ли сотрудник в ночную смену
+			$dayNumber = date('w', Core_Date::sql2timestamp($date));
+
+			$oUser_Worktime = $this->User_Worktimes->getByDay($dayNumber);
+
+			// Есть режим работы на этот день
+			if (!is_null($oUser_Worktime))
+			{
+				$iFrom = Core_Date::sql2timestamp($date . ' ' . $oUser_Worktime->from);
+				$iTo = Core_Date::sql2timestamp($date . ' ' . $oUser_Worktime->to);
+				// Работает в ночную и остался час до начала смены, то можно ее открывать
+				if ($iFrom > $iTo && ($iFrom - 3600) <= time())
+				{
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Получение статуса рабочего дня:
+	 * 0 - рабочий день не начат и доступен для начала
+	 * 1 - рабочий день не начат и не доступен для начала
+	 * 2 - рабочий день начат, сотрудник работает
+	 * 3 - рабочий день начат, у сотрудника перерыв
+	 * 4 - рабочий день завершен
+	 * 5 - рабочий день окончен, но не завершен сотрудником
+	 * @param string $sDate дата в формате "YYYY-mm-dd" или пустая строка
+	 * @return int
+	 */
+	public function getStatusWorkday($sDate = '')
+	{
+		// Если дата не задана или задана некорректно, берем текущую дату
+		if ($sDate == '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $sDate))
+		{
+			$sDate = Core_Date::timestamp2sqldate(time());
+		}
+
+		if ($this->isUserWorkdayAvailable($sDate))
+		{
+			// Проверяем завершенность последнего рабочего дня
+			$oLastUserWorkday = $this->User_Workdays->getLast(FALSE);
+
+			if ($oLastUserWorkday->end == '00:00:00')
+			{
+				$iWorkdayStatus = 1;
+			}
+			else
+			{
+				// Сотрудник может начать рабочий день
+				$iWorkdayStatus = 0;
+			}
+		}
+		// Рабочий день уже начат
+		elseif(!is_null($oUser_Workday = $this->User_Workdays->getByDate($sDate, FALSE)))
+		{
+			// Рабочий день завершен
+			if($oUser_Workday->end != '00:00:00')
+			{
+				$iWorkdayStatus = 4;
+			}
+			// Рабочий день не завершен
+			else
+			{
+				$oUser_Workday_Break = $oUser_Workday->User_Workday_Breaks->getLast(FALSE);
+
+				// Сотрудник на перерыве
+				if (!is_null($oUser_Workday_Break) && $oUser_Workday_Break->end == '00:00:00')
+				{
+					$iWorkdayStatus = 3;
+				}
+				// Сотрудник работает
+				else
+				{
+					$iWorkdayStatus = 2;
+				}
+
+				// Рабочий день окончен, но не завершен сотрудником
+				$dayNumber = date('w', Core_Date::sql2timestamp($sDate));
+				$oUser_Worktime = $this->User_Worktimes->getByDay($dayNumber);
+
+				if (!is_null($oUser_Worktime) && $oUser_Worktime->from != '00:00:00' && $oUser_Worktime->to != '00:00:00')
+				{
+					$iDayEnd = Core_Date::sql2timestamp($sDate . ' ' . $oUser_Worktime->to);
+
+					if ($iDayEnd <= time())
+					{
+						$iWorkdayStatus = 5;
+					}
+				}
+			}
+		}
+		else
+		{
+			$iWorkdayStatus = 1;
+		}
+
+		return $iWorkdayStatus;
+	}
+
+	/**
+	 * Является ли текущий сотрудник начальником отдела
+	 * @param $oDepartment отдел
+	 * @return boolean
+	 */
+	public function isHeadOfDepartment($oDepartment)
+	{
+		$aDepartmentHeads = $oDepartment->getHeads();
+
+		foreach ($aDepartmentHeads as $oDepartmentHead)
+		{
+			if ($oDepartmentHead->id == $this->id)
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Get Departments which headed by current user
+	 * @param mixed $oCompany Company, default NULL
+	 * @return array
+	 */
+	public function getDepartmentsHeadedBy($oCompany = NULL)
+	{
+		// Отделы, в которых текущий пользователь глава
+		$oCompany_Department_Post_Users = $this->Company_Department_Post_Users;
+		$oCompany_Department_Post_Users
+			->queryBuilder()
+			->where('company_department_post_users.head', '=', 1);
+
+		!is_null($oCompany) && $oCompany_Department_Post_Users
+			->queryBuilder()
+			->where('company_department_post_users.company_id', '=', $oCompany->id);
+			
+		$aCompany_Department_Post_Users = $oCompany_Department_Post_Users->findAll();
+		
+		$aHeadOfDepartments = array();
+		foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+		{
+			$aHeadOfDepartments[] = $oCompany_Department_Post_User->Company_Department;
+		}
+		
+		return $aHeadOfDepartments;
+	}
+
+	/**
+	 * Get All Departments which headed by current user or user is head of parent department
+	 *
+	 * @return array
+	 */
+	public function getAllDepartmentsHeadedBy()
+	{
+		$aReturn = $aCompany_Departments = $this->getDepartmentsHeadedBy();
+		foreach ($aCompany_Departments as $oCompany_Department)
+		{
+			$aReturn = array_merge($aReturn, $oCompany_Department->getChildren());
+		}
+		
+		return $aReturn;
+	}
+	
+	/**
+	 * Является ли текущий сотрудник начальником для определенного сотрудника в заданой компании
+	 * @param $oCompany компания
+	 * @param $oEmployee сотрудник, подчинененность которого необходимо проверить
+	 * @return boolean
+	 */
+	public function isHeadOfEmployeeInCompany(Company_Model $oCompany, User_Model $oEmployee)
+	{
+		// Отделы, в которых текущий пользователь непосредственно глава
+		$aCompany_Departments = $this->getDepartmentsHeadedBy();
+
+		if (count($aCompany_Departments))
+		{
+			// Если идет проверка для самого себя и пользователь является главой отдела, который находится в самом верху
+			if ($oEmployee->id == $this->id)
+			{
+				foreach ($aCompany_Departments as $oCompany_Department)
+				{
+					if ($oCompany_Department->parent_id == 0)
+					{
+						return TRUE;
+					}
+				}
+			}
+			
+			$aHeadOfDepartmentsIDs = array();
+			foreach ($aCompany_Departments as $oCompany_Department)
+			{
+				$aHeadOfDepartmentsIDs[] = $oCompany_Department->id;
+			}
+
+			$aCompany_Departments = $oEmployee->Company_Departments->findAll();
+			foreach ($aCompany_Departments as $oCompany_Department)
+			{
+				do {
+					// ID департамента, в котором работает $oEmployee входит в перечень, в которой $this глава
+					if (in_array($oCompany_Department->id, $aHeadOfDepartmentsIDs))
+					{
+						return TRUE;
+					}
+				} while($oCompany_Department = $oCompany_Department->getParent());
+			}
+
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Является ли текущий сотрудник начальником для определенного сотрудника хотя бы в одной компании
+	 * @param $oCompany компания
+	 * @param $oUser сотрудник, подчинененность которого необходимо проверить
+	 * @return boolean
+	 */
+	public function isHeadOfEmployee($oUser)
+	{
+		$aCompanies = Core_Entity::factory('Company')->findAll();
+
+		foreach ($aCompanies as $oCompany)
+		{
+			if ($this->isHeadOfEmployeeInCompany($oCompany, $oUser))
+			{
+				return TRUE;
+			}
+		}
+		return FALSE;
 	}
 }
