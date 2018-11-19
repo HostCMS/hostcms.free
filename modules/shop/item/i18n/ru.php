@@ -125,6 +125,7 @@ return array(
 	'show_discount_link' => "Скидки на товары",
 	'order_discount_show_title' => 'Скидки от суммы заказа',
 	'coupon_group_link' => 'Купоны на скидку',
+	'disountcard_link' => 'Дисконтные карты',
 	'bonus_link' => 'Бонусы',
 	'affiliate_menu_title' => 'Партнерские программы',
 	'add_item_shortcut_shop_groups_id' => "<acronym title=\"Группа, в которой размещается ярлык товара\">Родительская группа</acronym>",
@@ -320,4 +321,6 @@ return array(
 	'max_quantity' => '<acronym title="Максимальное количество этого товара в заказе">Макс. кол-во</acronym>',
 	'quantity_step' => '<acronym title="Шаг выбора количества товара">Шаг</acronym>',
 	'modifications_root' => '...',
+	'items_catalog_barcodes' => 'Штрихкоды',
+	'type_barcode' => 'Введите штрихкод',
 );

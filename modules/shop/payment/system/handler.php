@@ -414,7 +414,25 @@ abstract class Shop_Payment_System_Handler
 		//}
 
 		// Номер заказа
-		!$bInvoice && $this->_shopOrder->invoice($this->_shopOrder->id);
+		if (!$bInvoice)
+		{
+			if (strlen($oShop->invoice_template))
+			{
+				$oCore_Templater = new Core_Templater();
+				$invoice = $oCore_Templater
+					->addObject('shop', $oShop)
+					->addObject('this', $this->_shopOrder)
+					->addFunction('ordersToday', array($this, 'ordersToday'))
+					->setTemplate($oShop->invoice_template)
+					->execute();
+			}
+			else
+			{
+				$invoice = $this->_shopOrder->id;
+			}
+
+			$this->_shopOrder->invoice = $invoice;
+		}
 
 		// Номер акта
 		!$bAcceptance_report && $this->_shopOrder->acceptance_report($this->_shopOrder->id);
@@ -425,6 +443,22 @@ abstract class Shop_Payment_System_Handler
 		$this->_shopOrder->save();
 
 		return $this;
+	}
+
+	/**
+	 * Количество заказов за сегодня
+	 */
+	public function ordersToday()
+	{
+		$oShop_Order = $this->getShopOrder();
+		$date = date('Y-m-d');
+
+		$oShop_Orders = $oShop_Order->Shop->Shop_Orders;
+		$oShop_Orders->queryBuilder()
+			->where('datetime', '>', "{$date} 00:00:00")
+			->where('datetime', '<', "{$date} 23:59:59");
+
+		return $oShop_Orders->getCount(FALSE);
 	}
 
 	/**
@@ -698,6 +732,25 @@ abstract class Shop_Payment_System_Handler
 	{
 		$oShop = $this->_Shop_Payment_System_Model->Shop;
 
+		// Дисконтная карта
+		$bApplyMaxDiscount = FALSE;
+		$fDiscountcard = 0;
+		if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
+		{
+			$oSiteuser = $this->_shopOrder->Siteuser;
+
+			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
+			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+			{
+				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
+
+				$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
+
+				// Сумма скидки по дисконтной карте
+				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
+			}
+		}
+
 		// Скидки от суммы заказа
 		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
 		$oShop_Purchase_Discount_Controller
@@ -726,35 +779,85 @@ abstract class Shop_Payment_System_Handler
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
 
-		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+		// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
+		if ($bApplyMaxDiscount)
 		{
-			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-			$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
-			$oShop_Order_Item->quantity = 1;
-			$oShop_Order_Item->type = 0;
+			$totalPurchaseDiscount = 0;
 
-			$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
-
-			// Скидка больше суммы заказа
-			$discountAmount > $amount && $discountAmount = $amount;
-
-			$oShop_Order_Item->price = -1 * $discountAmount;
-
-			if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 			{
-				$oShop_Purchase_Discount_Coupon = Core_Entity::factory('shop_purchase_discount_coupon')->find(
-					$shop_purchase_discount_coupon_id
-				);
-
-				// Списываем купон
-				if (!is_null($oShop_Purchase_Discount_Coupon->id) && $oShop_Purchase_Discount_Coupon->count != -1 && $oShop_Purchase_Discount_Coupon->count != 0)
-				{
-					$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
-					$oShop_Purchase_Discount_Coupon->save();
-				}
+				$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
 			}
 
-			$this->_shopOrder->add($oShop_Order_Item);
+			$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
+		}
+		else
+		{
+			$bApplyShopPurchaseDiscounts = TRUE;
+		}
+
+		// Если решили применять скидку от суммы заказа
+		$fAppliedDiscountsAmount = 0;
+		if ($bApplyShopPurchaseDiscounts)
+		{
+			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+			{
+				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
+				$oShop_Order_Item->quantity = 1;
+				$oShop_Order_Item->type = 0;
+
+				$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
+
+				// Скидка больше суммы заказа
+				$discountAmount > $amount && $discountAmount = $amount;
+
+				$oShop_Order_Item->price = -1 * $discountAmount;
+
+				// Inc total discount amount
+				$fAppliedDiscountsAmount += $discountAmount;
+
+				if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+				{
+					$oShop_Purchase_Discount_Coupon = Core_Entity::factory('shop_purchase_discount_coupon')->find(
+						$shop_purchase_discount_coupon_id
+					);
+
+					// Списываем купон
+					if (!is_null($oShop_Purchase_Discount_Coupon->id)
+						&& $oShop_Purchase_Discount_Coupon->count != -1
+						&& $oShop_Purchase_Discount_Coupon->count != 0
+					)
+					{
+						$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
+						$oShop_Purchase_Discount_Coupon->save();
+					}
+				}
+
+				$this->_shopOrder->add($oShop_Order_Item);
+			}
+		}
+
+		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
+		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
+		{
+			if ($fDiscountcard)
+			{
+				$fAmountForCard = $amount - $fAppliedDiscountsAmount;
+
+				if ($fAmountForCard > 0)
+				{
+					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+					$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
+					$oShop_Order_Item->quantity = 1;
+					$oShop_Order_Item->type = 0;
+					$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
+						$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
+					);
+
+					$this->_shopOrder->add($oShop_Order_Item);
+				}
+			}
 		}
 
 		return $this;

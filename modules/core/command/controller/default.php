@@ -642,21 +642,13 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		}
 
 		// Benchmark
-		if (defined('START_BENCHMARK') && START_BENCHMARK && Core::moduleIsActive('benchmark'))
+		if (defined('BENCHMARK_ENABLE') && BENCHMARK_ENABLE
+			&& defined('BENCHMARK_ADD_COUNTER') && BENCHMARK_ADD_COUNTER
+			&& Core::moduleIsActive('benchmark')
+		)
 		{
 			ob_start();
-			?><!-- HostCMS Benchmark --><script>
-			window.addEventListener('load', function() {
-				var waiting = performance.timing.responseStart - performance.timing.requestStart, loadPage = performance.timing.loadEventStart - performance.timing.requestStart, dnsLookup = performance.timing.domainLookupEnd - performance.timing.domainLookupStart, connectServer = performance.timing.connectEnd - performance.timing.connectStart;
-
-				xmlhttprequest = new XMLHttpRequest();
-				xmlhttprequest.open('POST','/hostcms-benchmark.php',true);
-				xmlhttprequest.setRequestHeader('Content-type','application/x-www-form-urlencoded');
-				xmlhttprequest.send('structure_id=<?php echo CURRENT_STRUCTURE_ID?>&waiting_time='+waiting+'&load_page_time='+loadPage+'&dns_lookup='+dnsLookup+'&connect_server='+connectServer);
-			});
-			</script>
-			<?php
-
+			Benchmark_Controller::show();
 			$oCore_Response->body(ob_get_clean());
 		}
 

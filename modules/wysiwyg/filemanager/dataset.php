@@ -27,9 +27,9 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 
 	/**
 	 * File type
-	 * @var string
+	 * @var array
 	 */
-	protected $_type = NULL;
+	protected $_aTypes = NULL;
 
 	/**
 	 * Name of the model
@@ -43,7 +43,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	public function __construct($type)
 	{
-		$this->_type = $type;
+		$this->_aTypes = is_array($type) ? $type : array($type);
 		$this->_path = rtrim(CMS_FOLDER, DIRECTORY_SEPARATOR);
 	}
 
@@ -76,7 +76,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	{
 		if (!$this->_count)
 		{
-			$this->_loadFiles();
+			/*is_null($this->_objects) && */$this->_loadFiles();
 			$this->_count = count($this->_objects);
 		}
 
@@ -87,15 +87,17 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 * Dataset objects list
 	 * @var array|NULL
 	 */
-	protected $_objects = array();
+	protected $_objects = NULL;
 
 	/**
 	 * Load objects
 	 * @return array
 	 */
 	public function load()
-	{
-		return array_slice($this->_objects, $this->_offset, $this->_limit);
+	{ 
+		return is_array($this->_objects)
+			? array_slice($this->_objects, $this->_offset, $this->_limit)
+			: array();
 	}
 
 	/**
@@ -123,7 +125,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		}
 
 		// Директория существует
-		if (is_dir($this->_path) && !is_link($this->_path))
+		if (is_dir($this->_path) /*&& !is_link($this->_path)*/)
 		{
 			if ($dh = opendir($this->_path))
 			{
@@ -134,9 +136,10 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 					$filePath = $this->_path . DIRECTORY_SEPARATOR . $file;
 					if ($file != '.' && $file != '..' && file_exists($filePath))
 					{
-						if (filetype($filePath) == $this->_type)
+						$filetype = @filetype($filePath);
+
+						if (in_array($filetype, $this->_aTypes))
 						{
-							$isDir = filetype($filePath) == 'dir';
 							$stat = stat($filePath);
 
 							$Wysiwyg_Filemanager_File = $this->_newObject();
@@ -145,10 +148,13 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 							//$Wysiwyg_Filemanager_File->name = mb_convert_encoding($file, 'UTF-8');
 							$Wysiwyg_Filemanager_File->name = @iconv(mb_detect_encoding($file, mb_detect_order(), TRUE), "UTF-8", $file);
 							$Wysiwyg_Filemanager_File->datetime = Core_Date::timestamp2sql($stat[9]);
-							$Wysiwyg_Filemanager_File->type = $this->_type;
-							$Wysiwyg_Filemanager_File->size = $isDir
+							$Wysiwyg_Filemanager_File->type = $filetype;
+							$Wysiwyg_Filemanager_File->size = $filetype == 'dir'
 								? '<DIR>'
-								: number_format($stat['size'], 0, '.', ' ');
+								: ($filetype == 'link'
+									? '<LINK>'
+									: number_format($stat['size'], 0, '.', ' ')
+								);
 							$Wysiwyg_Filemanager_File->mode = Core_File::getFilePerms($filePath, TRUE);
 							$Wysiwyg_Filemanager_File->hash = sha1($Wysiwyg_Filemanager_File->name);
 
@@ -195,15 +201,18 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	public function getObject($primaryKey)
 	{
-		!count($this->_objects) && $this->_loadFiles();
-
-		if (isset($this->_objects[$primaryKey]))
-		{
-			return $this->_objects[$primaryKey];
-		}
-		elseif ($primaryKey == 0)
+		if ($primaryKey === 0)
 		{
 			return $this->_newObject();
+		}
+		else
+		{
+			is_null($this->_objects) && $this->_loadFiles();
+			
+			if (isset($this->_objects[$primaryKey]))
+			{
+				return $this->_objects[$primaryKey];
+			}
 		}
 
 		return NULL;

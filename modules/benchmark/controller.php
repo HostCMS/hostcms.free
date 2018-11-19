@@ -310,7 +310,7 @@ class Benchmark_Controller
 
 		$startTime = Core::getmicrotime();
 
-		@mail($oSite->admin_email, 'Performance test', self::$aConfig['sample_text']);
+		@mail($oSite->getFirstEmail(), 'Performance test', self::$aConfig['sample_text']);
 
 		return abs(round(Core::getmicrotime() - $startTime, 4));
 	}
@@ -357,5 +357,25 @@ class Benchmark_Controller
 			->result();
 
 		return $aResult;
+	}
+	
+	/**
+	 * Show Benchmark JS-code
+	 */
+	static public function show()
+	{
+		if (defined('BENCHMARK_ENABLE') && BENCHMARK_ENABLE)
+		{
+?><!-- HostCMS Benchmark --><script>
+window.addEventListener('load', function() {
+	var waiting = performance.timing.responseStart - performance.timing.requestStart, loadPage = performance.timing.loadEventStart - performance.timing.requestStart, dnsLookup = performance.timing.domainLookupEnd - performance.timing.domainLookupStart, connectServer = performance.timing.connectEnd - performance.timing.connectStart;
+
+	xmlhttprequest = new XMLHttpRequest();
+	xmlhttprequest.open('POST','/hostcms-benchmark.php',true);
+	xmlhttprequest.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	xmlhttprequest.send('structure_id=<?php echo CURRENT_STRUCTURE_ID?>&waiting_time='+waiting+'&load_page_time='+loadPage+'&dns_lookup='+dnsLookup+'&connect_server='+connectServer);
+});
+</script><?php
+		}
 	}
 }

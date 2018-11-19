@@ -158,10 +158,10 @@ class Core_Session_Phpredis extends Core_Session
 	 */
 	public function sessionWrite($id, $value)
 	{
-		$key = $this->_getKey($id);
-
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
+			$key = $this->_getKey($id);
+			
 			$this->_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
 
 			$this->_unlock($id);
@@ -179,12 +179,14 @@ class Core_Session_Phpredis extends Core_Session
 	 */
 	public function sessionDestroyer($id)
 	{
-		$key = $this->_getKey($id);
-
-		if ($this->_lock($id))
+		if ($this->_read || $this->_lock($id))
 		{
+			$key = $this->_getKey($id);
+
 			$this->_redis->del($key);
 
+			$this->_unlock($id);
+			
 			// для предотвращения автоматической повторной регистрации сеанса
 			$_SESSION = array();
 

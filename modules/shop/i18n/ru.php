@@ -174,4 +174,9 @@ return array(
 	'all_items_count' => 'Всего товаров: %s',
 
 	'create_small_image' => 'Создавать малое изображение из большого',
+	
+	'issue_discountcard' => 'Выдавать дисконтную карту при заказе',
+	'discountcard_template' => 'Шаблон номера карты',
+	'invoice_template' => 'Шаблон номера заказа',
+	'all_shops' => 'Все магазины',
 );

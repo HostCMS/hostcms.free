@@ -268,7 +268,7 @@ class User_Model extends Core_Entity
 			return TRUE;
 		}
 
-		$aTableColumns = $oObject->getTableColums();
+		$aTableColumns = $oObject->getTableColumns();
 
 		// Объект имеет поле user_id
 		if (isset($aTableColumns['user_id']))
@@ -844,7 +844,7 @@ class User_Model extends Core_Entity
 			// Проверяем завершенность последнего рабочего дня
 			$oLastUserWorkday = $this->User_Workdays->getLast(FALSE);
 
-			if ($oLastUserWorkday->end == '00:00:00')
+			if (!is_null($oLastUserWorkday) && $oLastUserWorkday->end == '00:00:00')
 			{
 				$iWorkdayStatus = 1;
 			}

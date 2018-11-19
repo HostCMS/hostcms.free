@@ -515,6 +515,14 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			: '';
 	}
 
+	/**
+	 * Get value of Property_Value
+	 * @param Property_Model $oProperty
+	 * @param mixed $oProperty_Value
+	 * @param mixed $object
+	 * @return string
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onGetPropertyValueDefault
+	 */
 	protected function _getPropertyValue($oProperty, $oProperty_Value, $object)
 	{
 		switch ($oProperty->type)
@@ -553,6 +561,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 					? $oProperty_Value->Shop_Item->name
 					: '';
 			break;
+			default:
+				Core_Event::notify(get_class($this) . '.onGetPropertyValueDefault', $this, array($oProperty, $oProperty_Value, $object));
+				$result = Core_Event::getLastReturn();
 		}
 
 		return $result;
@@ -749,6 +760,13 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 					foreach ($aShopItems as $oShopItem)
 					{
+						// Set GUID
+						if ($oShopItem->guid == '')
+						{
+							$oShopItem->guid = Core_Guid::get();
+							$oShopItem->save();
+						}
+						
 						$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
 
 						// Кэш всех значений свойств товара

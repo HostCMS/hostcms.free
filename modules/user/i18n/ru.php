@@ -86,4 +86,5 @@ return array(
 	'error_object_owned_another_user' => 'Объект принадлежит другому сотруднику, доступ запрещен.',
 	'break' => 'Перерыв',
 	'timesheet_title' => 'Учет рабочего времени',
+	'select_user' => 'Укажите сотрудника',
 );

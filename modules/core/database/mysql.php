@@ -200,13 +200,9 @@ class Core_DataBase_Mysql extends Core_DataBase
 
 		$columnType = strtolower($columnType);
 
-		$type = NULL;
-		$fixed = NULL;
-		$binary = NULL;
-		$unsigned = (strpos($columnType, 'unsigned') !== FALSE);
-		$zerofill = (strpos($columnType, 'zerofill') !== FALSE);
-		$min = NULL;
-		$max = NULL;
+		$type = $fixed = $binary = $min = $max = NULL;
+		$unsigned = strpos($columnType, 'unsigned') !== FALSE;
+		$zerofill = strpos($columnType, 'zerofill') !== FALSE;
 
 		list($switchType, $max_length) = $this->getColumnTypeAndLength($columnType);
 

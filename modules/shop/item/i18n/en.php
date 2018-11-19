@@ -320,4 +320,5 @@ return array(
 	'max_quantity' => '<acronym title="Maximum order quantity">Max qty</acronym>',
 	'quantity_step' => '<acronym title="Quantity step">Step</acronym>',
 	'modifications_root' => '...',
+	'disountcard_link' => 'Discount cards',
 );

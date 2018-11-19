@@ -16,6 +16,10 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 
 	// местоположение магазина (отправки), почтовый индекс, Ростов-на-Дону
 	private $_from = '344000';
+	
+	protected $_insurance = TRUE;  // Страхование   TRUE/FALSE 
+	
+	protected $_iBase = 'Partial'; // База для расчета страховки (только при оценке товарного вложения больше 0!) Partial / Full
 
 	// Список тарифов
 	private $_tariffList = array(
@@ -65,6 +69,12 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 			$aParams['st'] = 'site';
 			$aParams['ml'] = 'email';
 			$aParams['person'] = 'person';
+			
+			if($this->_insurance)
+			{
+				$aParams['v'] = $this->_amount;
+				$aParams['ib'] = $this->_iBase;
+			}
 		}
 		else
 		{
@@ -101,7 +111,7 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 	public function execute()
 	{
 		$fOrderWeight = $this->_weight * $this->_coefficient;
-
+		
 		if($fOrderWeight == 0 || $fOrderWeight > $this->_maxWeight)
 		{
 			$errorDescription = ($fOrderWeight == 0 ? "Вес равен нулю" : "Вес превышает максимально допустимые 100 кг.");
@@ -128,7 +138,7 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 					)
 					{
 						$oCurrentDeliveryType = new StdClass();
-						$oCurrentDeliveryType->price = floatval($oDeliveryType->Тариф);
+						$oCurrentDeliveryType->price = floatval($oDeliveryType->Доставка);
 						$oCurrentDeliveryType->description = strval($oDeliveryType->Название);
 						$aRetObjs[] = $oCurrentDeliveryType;
 					}
@@ -152,7 +162,7 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 					)
 					{
 						$oCurrentDeliveryType = new StdClass();
-						$oCurrentDeliveryType->price = floatval($oDeliveryType->Тариф);
+						$oCurrentDeliveryType->price = floatval($oDeliveryType->Доставка);
 						$oCurrentDeliveryType->description = strval($oDeliveryType->Название);
 						$aRetObjs[] = $oCurrentDeliveryType;
 					}

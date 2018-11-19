@@ -21,6 +21,7 @@ else
 }
 
 $Shop_Controller_Show
+	//->warehouseMode('in-stock')
 	->limit($limit)
 	->parseUrl();
 

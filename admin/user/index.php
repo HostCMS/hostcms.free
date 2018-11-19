@@ -75,7 +75,7 @@ if (Core_Auth::logged())
 					$oUser_Workday_Break->begin = date('H:i' . ':00', time());
 					$oUser_Workday_Break->save();
 				}
-				
+
 				$aJSON['result'] = $oUser->getStatusWorkday($currentDay);
 			}
 			else
@@ -100,7 +100,7 @@ if (Core_Auth::logged())
 						$oUser_Workday->save();
 
 						$oUser_Workday_Break = $oUser_Workday->User_Workday_Breaks->getLast();
-						
+
 						if (!is_null($oUser_Workday_Break) && $oUser_Workday_Break->end == '00:00:00')
 						{
 							$oUser_Workday_Break->end = date('H:i' . ':00', time());
@@ -158,7 +158,7 @@ if (Core_Auth::logged())
 			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
 
 			$aCompany_Departments = $oUser->getDepartmentsHeadedBy($oCompany);
-				
+
 			$aChildren = array();
 
 			foreach ($aCompany_Departments as $oCompany_Department)
@@ -219,7 +219,7 @@ if (Core_Auth::logged())
 		if ($absence_id)
 		{
 			$oUser_Absence = Core_Entity::factory('User_Absence')->find($absence_id);
-			
+
 			if (!is_null($oUser_Absence->id))
 			{
 				$start_date = Core_Date::sql2date($oUser_Absence->start);
@@ -861,6 +861,7 @@ if (Core_Auth::logged())
 		Core::showJson('OK');
 	}
 
+	// Bookmarks
 	if (!is_null(Core_Array::getPost('add_bookmark')) && Core_Array::getPost('name'))
 	{
 		$oUser = Core_Entity::factory('User')->getCurrent();
@@ -899,6 +900,7 @@ if (Core_Auth::logged())
 		Core::showJson($message);
 	}
 
+	// NavSideBar
 	if (!is_null(Core_Array::getPost('loadNavSidebarMenu')))
 	{
 		ob_start();
@@ -916,6 +918,7 @@ if (Core_Auth::logged())
 		exit();
 	}
 
+	// Avatar
 	if (!is_null(Core_Array::getGet('loadUserAvatar')))
 	{
 		$id = intval(Core_Array::getGet('loadUserAvatar'));

@@ -203,4 +203,9 @@ return array(
 	'minute_nominative' => 'минуту',
 	'minute_genitive_singular' => 'минуты',
 	'minute_genitive_plural' => 'минут',
+	
+	'day' => 'День',
+	'month' => 'Месяц',
+	'year' => 'Год',
+	'random' => 'Случайный',
 );

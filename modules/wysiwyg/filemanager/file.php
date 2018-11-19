@@ -133,9 +133,10 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	{
 		$filePath = $this->_getFullPath();
 
-		$this->type == 'file'
-			? Core_File::delete($filePath)
-			: Core_File::deleteDir($filePath);
+		$this->type == 'dir'
+			? Core_File::deleteDir($filePath)
+			// file or link
+			: Core_File::delete($filePath);
 
 		return $this;
 	}
@@ -180,7 +181,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 * Get table columns
 	 * @return array
 	 */
-	public function getTableColums()
+	public function getTableColumns()
 	{
 		return array_flip(
 			array('hash', 'name', 'type', 'datetime', 'size', 'mode', 'user_id')
@@ -208,6 +209,22 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 		}
 	}
 
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->type == 'link')
+		{
+			Core::factory('Core_Html_Entity_I')
+				->class('fa fa-link fa-small')
+				->execute();
+		}
+	}
+	
 	/**
 	 * Get file image
 	 */

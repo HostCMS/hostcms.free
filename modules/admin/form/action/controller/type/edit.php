@@ -396,7 +396,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$this->_loadKeys();
 
 		// Получение списка полей объекта
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		// Список закладок
 		// Основная закладка
@@ -568,7 +568,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					{
 						$oAdmin_Form_Entity_For_Column
 							->caption(Core::_('User.backend-field-caption'))
-							->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 
 						if ($this->_object->user_id && Core::moduleIsActive('user'))
 						{
@@ -739,7 +739,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onBeforeApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		// Show on the additional tab, but not change!
 		$this->skipColumns = $this->skipColumns + array('user_id' => 'user_id');
@@ -780,6 +780,19 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						{
 							// Checkbox
 							$value = is_null($value) ? 0 : $value;
+						}
+					break;
+					case 'decimal':
+						if ($value != 0 && isset($columnArray['max_length']))
+						{
+							$aMaxLength = explode(',', $columnArray['max_length']);
+							if (count($aMaxLength) == 2)
+							{
+								$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
+								
+								$value > $maxValue && $value = $maxValue;
+								$value < -$maxValue && $value = -$maxValue;
+							}
 						}
 					break;
 					default:

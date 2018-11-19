@@ -573,7 +573,7 @@ class Core
 		// Максимальный размер в одном из измерений при преобразовании загруженных изображений (большое изображение)
 		define('MAX_SIZE_LOAD_IMAGE_BIG', $oSite->max_size_load_image_big);
 		// Адрес эл. почты администратора
-		define('EMAIL_TO', $oSite->admin_email);
+		define('EMAIL_TO', $oSite->getFirstEmail());
 
 		// Права доступа к директории
 		define('CHMOD', octdec($oSite->chmod)); // octdec - преобразование 8-ричного в 10-тичное

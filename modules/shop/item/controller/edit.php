@@ -1002,7 +1002,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
 							: $oWarehouseItem->count;
 
-						$rowClass = !$this->_object->id || $countItems > 0
+						$rowClass = !$this->_object->id || $countItems != 0
 							? 'row'
 							: 'row hidden';
 
@@ -1067,16 +1067,16 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Tags
 				if (Core::moduleIsActive('tag'))
 				{
-					$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
+					$oAdditionalTagsSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.items_catalog_tags'))
 						->options($this->_fillTagsList($this->_object))
 						->name('tags[]')
 						->class('shop-item-tags')
 						->style('width: 100%')
 						->multiple('multiple')
-						->divAttr(array('class' => 'form-group col-xs-12'));
+						->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
-					$oMainRow9->add($oAdditionalGroupsSelect);
+					$oMainRow9->add($oAdditionalTagsSelect);
 
 					$html = '
 						<script>
@@ -1111,6 +1111,57 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
+
+				$barcodeClass = Core::moduleIsActive('tag')
+					? 'col-xs-12 col-md-6'
+					: 'col-xs-12';
+
+				$oAdditionalBarcodesSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Item.items_catalog_barcodes'))
+					->options($this->_fillBarcodesList($this->_object))
+					->name('barcodes[]')
+					->class('shop-item-barcodes')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group ' . $barcodeClass));
+
+				$oMainRow9->add($oAdditionalBarcodesSelect);
+
+				$html = '
+					<script>
+						$(function(){
+							$(".shop-item-barcodes").select2({
+								language: "' . Core_i18n::instance()->getLng() . '",
+								minimumInputLength: 1,
+								placeholder: "' . Core::_('Shop_Item.type_barcode') . '",
+								tags: true,
+								allowClear: true,
+								multiple: true,
+								ajax: {
+									url: "/admin/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
+									dataType: "json",
+									type: "GET",
+									processResults: function (data) {
+										var aResults = [];
+										$.each(data, function (index, item) {
+											var jInputName = $("#' . $windowId . ' input[name=\'name\']");
+											!jInputName.val() && jInputName.val(item.name).focus();
+
+											aResults.push({
+												"id": item.id,
+												"text": item.text
+											});
+										});
+										return {
+											results: aResults
+										};
+									}
+								},
+							});
+						})</script>
+					';
+
+				$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 
 				$aShop_Item_Associateds = $this->_object->Shop_Item_Associateds->findAll(FALSE);
 
@@ -1964,6 +2015,31 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 				}
 
+				// Barcodes
+				$aBarcodes = Core_Array::getPost('barcodes', array());
+				!is_array($aBarcodes) && $aBarcodes = array();
+
+				$aTmp = array();
+
+				$aShop_Item_Barcodes = $this->_object->Shop_Item_Barcodes->findAll(FALSE);
+				foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+				{
+					!in_array($oShop_Item_Barcode->value, $aBarcodes)
+						? $oShop_Item_Barcode->markDeleted()
+						: $aTmp[] = $oShop_Item_Barcode->value;
+				}
+
+				$aNewBarcodes = array_diff($aBarcodes, $aTmp);
+				foreach ($aNewBarcodes as $value)
+				{
+					$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
+					$oShop_Item_Barcode
+						->value($value)
+						->shop_item_id($this->_object->id)
+						->setType()
+						->save();
+				}
+
 				// Пересчет комплекта
 				Core_Array::getPost('apply_recount_set') && $this->_object->recountSet();
 			break;
@@ -2644,6 +2720,28 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$aReturnArray[$oTag->name] = array(
 				'value' => $oTag->name,
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturnArray;
+	}
+
+	/**
+	 * Fill barcodes list
+	 * @param Shop_Item_Model $oShop_Item item
+	 * @return array
+	 */
+	protected function _fillBarcodesList($oShop_Item)
+	{
+		$aReturnArray = array();
+
+		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$aReturnArray[$oShop_Item_Barcode->value] = array(
+				'value' => $oShop_Item_Barcode->value,
 				'attr' => array('selected' => 'selected')
 			);
 		}

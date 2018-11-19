@@ -48,16 +48,34 @@ class Core_Zip
 
 				if (is_file($filePath))
 				{
-					$this->_ZipArchive->addFile($filePath, $localPath);
-					$this->_iFiles++;
-
-					if ($this->_iFiles == 2048)
+					if (is_readable($filePath))
 					{
-						// Reopen
-						$this->_ZipArchive->close();
-						$this->_ZipArchive->open($this->_outputPath);
+						$this->_ZipArchive->addFile($filePath, $localPath);
+						$this->_iFiles++;
 
-						$this->_iFiles = 0;
+						if ($this->_iFiles == 2048)
+						{
+							// Reopen
+							if ($this->_ZipArchive->close())
+							{
+								$result = $this->_ZipArchive->open($this->_outputPath);
+								
+								if ($result !== TRUE)
+								{
+									throw new Core_Exception('ZipArchive re-open error, code: %code', array('%code' => $result));
+								}
+								
+								$this->_iFiles = 0;
+							}
+							else
+							{
+								throw new Core_Exception('ZipArchive close error');
+							}
+						}
+					}
+					else
+					{
+						throw new Core_Exception('ZipArchive error read file %file', array('%file' => $filePath));
 					}
 				}
 				elseif (is_dir($filePath))
@@ -110,6 +128,7 @@ class Core_Zip
 		if ($result === TRUE)
 		{
 			$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));
+			//$this->_ZipArchive->addFromString("README.txt", "test file");
 			$this->_ZipArchive->close();
 		}
 		else

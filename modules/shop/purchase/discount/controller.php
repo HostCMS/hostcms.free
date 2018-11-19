@@ -76,7 +76,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 	 * @hostcms-event Shop_Purchase_Discount_Controller.onBeforeGetDiscounts
 	 * @hostcms-event Shop_Purchase_Discount_Controller.onAfterGetDiscounts
 	 */
-	function getDiscounts()
+	public function getDiscounts()
 	{
 		$amount = floatval($this->amount);
 		$quantity = floatval($this->quantity);

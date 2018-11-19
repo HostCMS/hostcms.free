@@ -48,7 +48,7 @@ return array(
 	'number_of_queries' => "Number of queries: <strong>%d</strong>.",
 	'compression' => 'Compression: <strong>%s</strong>.',
 	'cache' => 'Cache: <strong>%s</strong>.',
-	
+
 	'cache_insert_time' => 'inserts into cache time: <strong>%.3f</strong> sec',
 	'cache_read_time' => 'reads from cache time: <strong>%.3f</strong> sec',
 
@@ -144,12 +144,12 @@ return array(
 	'redaction3'=>'Small business',
 	'redaction5'=>'Business',
 	'redaction7'=>'Corporation',
-	
+
 	'byte' => 'Byte',
 	'kbyte' => 'KB',
 	'mbyte' => 'MB',
 	'gbyte' => 'GB',
-	
+
 	'timePeriodSeconds' => '%ssec later',
 	'timePeriodMinutes' => '%smin later',
 	'timePeriodHours' => '%shours later',
@@ -158,7 +158,7 @@ return array(
 	'timePeriodMonths' => '%smon later',
 	'timePeriodYears' => '%syears later',
 	'timePeriodYearMonths' => '%sy %smon later',
-	
+
 	'now' => 'Now',
 	'ago' => '%1$s %2$s ago',
 	'today' => 'Today at %s',
@@ -199,4 +199,9 @@ return array(
 	'minute_nominative' => 'minute',
 	'minute_genitive_singular' => 'minutes',
 	'minute_genitive_plural' => 'minutes',
+
+	'day' => 'Day',
+	'month' => 'Month',
+	'year' => 'Year',
+	'random' => 'Random',
 );

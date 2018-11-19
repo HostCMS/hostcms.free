@@ -2907,6 +2907,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 * @param Shop_Item_Model $oShopItem item
 	 * @param Property_Model $oProperty
 	 * @param string $sPropertyValue property value
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAddItemPropertyValueDefault
 	 */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sPropertyValue)
 	{
@@ -3224,10 +3225,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				case 8:
 					if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
 					{
-					 $sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
+						$changedValue = Core_Date::datetime2sql($sPropertyValue);
 					}
-
-					$oProperty_Value->setValue($sPropertyValue);
+					else
+					{
+						$changedValue = $sPropertyValue;
+					}
 				break;
 				case 9:
 					if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue))
@@ -3262,8 +3265,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 				break;
 				default:
-					$changedValue = $sPropertyValue;
-				break;
+					Core_Event::notify(get_class($this) . '.onAddItemPropertyValueDefault', $this, array($oShopItem, $oProperty, $sPropertyValue));
+					
+					$changedValue = is_null(Core_Event::getLastReturn())
+						? $sPropertyValue
+						: Core_Event::getLastReturn();
 			}
 
 			//$oProperty_Value->save();
@@ -3288,11 +3294,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						? $aPropertyValues[0]
 						: $oProperty->createNewValue($oShopItem->id);
 				}
-
-				/*if ($oProperty->type == 7)
-				{
-					mb_strtoupper($value) == 'ДА' ? $value = 1 : $value = intval($value);
-				}*/
 
 				$oProperty_Value->setValue($changedValue);
 				$oProperty_Value->save();

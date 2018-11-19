@@ -150,7 +150,7 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	protected function _setLimits()
 	{
 		// Load model columns BEFORE FOUND_ROWS()
-		Core_Entity::factory('Comment')->getTableColums();
+		Core_Entity::factory('Comment')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
 		Core_Entity::factory('User', 0)->getCurrent();

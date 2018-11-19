@@ -214,7 +214,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 				$aItemProperties[] = $iProperty_Values_Count
 					? sprintf('"%s"', $aProperty_Values[0]->file_description)
 					: '';
-					
+
 				$aItemProperties[] = $iProperty_Values_Count
 					? ($aProperty_Values[0]->file_small == '' ? '' : sprintf('"%s"', $aProperty_Values[0]->getSmallFileHref()))
 					: '';
@@ -296,6 +296,14 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			: '';
 	}
 
+	/**
+	 * Get value of Property_Value
+	 * @param Property_Model $oProperty
+	 * @param mixed $oProperty_Value
+	 * @param mixed $object
+	 * @return string
+	 * @hostcms-event Informationsystem_Item_Export_Csv_Controller.onGetPropertyValueDefault
+	 */
 	protected function _getPropertyValue($oProperty, $oProperty_Value, $object)
 	{
 		switch ($oProperty->type)
@@ -334,6 +342,9 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 					? $oProperty_Value->Shop_Item->name
 					: '';
 			break;
+			default:
+				Core_Event::notify(get_class($this) . '.onGetPropertyValueDefault', $this, array($oProperty, $oProperty_Value, $object));
+				$result = Core_Event::getLastReturn();
 		}
 
 		return $result;
@@ -465,7 +476,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 						$aTmpArray[] = $iProperty_Values_Count
 							? sprintf('"%s"', $aProperty_Values[0]->file_description)
 							: '';
-							
+
 						$aTmpArray[] = $iProperty_Values_Count
 							? ($aProperty_Values[0]->file_small == ''
 								? ''
@@ -486,11 +497,22 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			$limit = 100;
 
 			do {
-				$oInformationsystem_Items->queryBuilder()->offset($offset)->limit($limit);
+				$oInformationsystem_Items
+					->queryBuilder()
+					->offset($offset)
+					->limit($limit);
+
 				$aInformationsystem_Items = $oInformationsystem_Items->findAll(FALSE);
 
 				foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 				{
+					// Set GUID
+					if ($oInformationsystem_Item->guid == '')
+					{
+						$oInformationsystem_Item->guid = Core_Guid::get();
+						$oInformationsystem_Item->save();
+					}
+
 					$this->_printRow($this->_getItemData($oInformationsystem_Item));
 
 					$iPropertyFieldOffset = count($this->_aGroupBase_Properties) + count($this->_aItemBase_Properties);
@@ -509,21 +531,15 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 						{
 							foreach ($aProperty_Values as $oProperty_Value)
 							{
-								$aCurrentPropertyLine[$iPropertyFieldOffset] = sprintf('"%s"', $this->prepareString(($oItem_Property->type != 2
-									? ($oItem_Property->type == 3 && $oProperty_Value->value != 0 && Core::moduleIsActive('list')
-										? $oProperty_Value->List_Item->value
-										: ($oItem_Property->type == 8
-											? Core_Date::sql2date($oProperty_Value->value)
-											: ($oItem_Property->type == 9
-												? Core_Date::sql2datetime($oProperty_Value->value)
-												: $oProperty_Value->value)))
-												: ($oProperty_Value->file == '' ? '' : $oProperty_Value->setHref($oInformationsystem_Item->getItemHref())->getLargeFileHref())
-												)));
+								$aCurrentPropertyLine[$iPropertyFieldOffset] = sprintf('"%s"', $this->prepareString(
+										$this->_getPropertyValue($oItem_Property, $oProperty_Value, $oInformationsystem_Item)
+									)
+								);
 
 								if ($oItem_Property->type == 2)
 								{
 									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
-									
+
 									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oInformationsystem_Item->getItemHref())->getSmallFileHref()));
 								}
 
@@ -536,11 +552,11 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 							// File
 							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 							$iPropertyFieldOffset++;
-							
+
 							// Description
 							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 							$iPropertyFieldOffset++;
-							
+
 							// Small File
 							$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 							$iPropertyFieldOffset++;

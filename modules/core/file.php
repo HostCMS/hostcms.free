@@ -174,7 +174,7 @@ class Core_File
 	 */
 	static public function delete($fileName)
 	{
-		if (is_file($fileName))
+		if (is_file($fileName) || is_link($fileName))
 		{
 			if (!unlink($fileName))
 			{

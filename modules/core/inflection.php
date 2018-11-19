@@ -48,14 +48,6 @@ abstract class Core_Inflection
 	}
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct()
-	{
-		self::$singularIrregular = array_flip(self::$pluralIrregular);
-	}
-
-	/**
 	 * Chech if $word is PLURAL and IRRIGUAL
 	 * @return boolean
 	 */

@@ -125,11 +125,15 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Prepare backend item's edit form
 	 *
 	 * @return self
+	 * @hostcms-event Property_Controller_Edit.onBeforePrepareForm
+	 * @hostcms-event Property_Controller_Edit.onAfterPrepareForm
 	 */
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
 
+		Core_Event::notify('Property_Controller_Edit.onBeforePrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+		
 		$bNewProperty = !$this->_object->id;
 
 		$modelName = $this->_object->getModelName();
@@ -413,6 +417,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->title($title);
 
+		Core_Event::notify('Property_Controller_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+		
 		return $this;
 	}
 

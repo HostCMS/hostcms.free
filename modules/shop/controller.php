@@ -170,7 +170,7 @@ class Shop_Controller
 		$price = $this->convertFloat($price);
 
 		$decimalDigits = intval(!is_null($decimalDigits) ? $decimalDigits : $this->_decimalDigits);
-		preg_match("/((\d+(\.)\d{1,{$decimalDigits}})|\d+)/u", $price, $array_price);
+		preg_match("/((\d+(\.)\d{0,{$decimalDigits}})|\d+)/u", $price, $array_price);
 		return isset($array_price[1]) ? floatval($array_price[1]) : 0;
 	}
 

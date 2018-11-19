@@ -92,6 +92,8 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 		if ($oUser->superuser || $access)
 		{
+			$iShopId = Core_Array::getGet('shop_id');
+
 			$oLast_Shop_Orders = Core_Entity::factory('Shop_Order');
 			$oLast_Shop_Orders
 				->queryBuilder()
@@ -102,9 +104,13 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 				->orderBy('datetime', 'DESC')
 				->limit(9);
 
+			$iShopId && $oLast_Shop_Orders
+				->queryBuilder()
+				->where('shops.id', '=', $iShopId);
+
 			$aLast_Shop_Orders = $oLast_Shop_Orders->findAll(FALSE);
 
-			if (count($aLast_Shop_Orders))
+			if (count($aLast_Shop_Orders) || $iShopId)
 			{
 			?><div class="col-xs-12 no-padding">
 				<div class="col-xs-12 col-md-9">
@@ -144,6 +150,10 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->limit($limit)
 								->clearOrderBy()
 								->orderBy('id', 'ASC');
+
+							$iShopId && $oShop_Orders
+								->queryBuilder()
+								->where('shops.id', '=', $iShopId);
 
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
 
@@ -188,6 +198,10 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->clearOrderBy()
 								->orderBy('id', 'ASC');
 
+							$iShopId && $oShop_Orders
+								->queryBuilder()
+								->where('shops.id', '=', $iShopId);
+
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
 
 							foreach ($aShop_Orders as $oShop_Order)
@@ -218,6 +232,43 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							<div class="box-header">
 								<div class="deadline">
 									<?php echo Core::_('Shop.sales_statistics')?>
+									<?php
+									$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+									$aShops = $oSite->Shops->findAll(FALSE);
+
+									if (count($aShops))
+									{
+										Core_Session::start();
+
+										?>
+										<select class="input-xs widget-select-shop" name="select_shop">
+											<option value="0"><?php echo Core::_('Shop.all_shops')?></option>
+
+											<?php
+											foreach ($aShops as $oShop)
+											{
+												$selected = $oShop->id == $iShopId
+													? 'selected="selected"'
+													: '';
+
+												?><option value="<?php echo $oShop->id?>" <?php echo $selected?>><?php echo htmlspecialchars($oShop->name)?></option><?php
+											}
+											?>
+										</select>
+
+										<script>
+										$(function() {
+											$('select.widget-select-shop').change(function(){
+												// console.log($(this).val());
+
+												$.widgetLoad({ path: '<?php echo $this->_path?>&shop_id=' + $(this).val(), context: $('#shopOrdersAdminPage') });
+											});
+										});
+										</script>
+									<?php
+									}
+									?>
 								</div>
 							</div>
 
@@ -345,6 +396,10 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->clearOrderBy()
 								->orderBy('sum', 'DESC');
 
+							$iShopId && $oMost_Ordered_Shop_Items
+								->queryBuilder()
+								->where('shops.id', '=', $iShopId);
+
 							$aMost_Ordered_Shop_Items = $oMost_Ordered_Shop_Items->findAll(FALSE);
 
 							$oBrand_Shop_Items = Core_Entity::factory('Shop_Order_Item');
@@ -364,6 +419,10 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->groupBy('shop_items.shop_producer_id')
 								->clearOrderBy()
 								->orderBy('sum', 'DESC');
+
+							$iShopId && $oBrand_Shop_Items
+								->queryBuilder()
+								->where('shops.id', '=', $iShopId);
 
 							$aBrand_Shop_Items = $oBrand_Shop_Items->findAll(FALSE);
 

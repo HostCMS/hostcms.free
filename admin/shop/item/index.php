@@ -32,6 +32,44 @@ $oAdmin_Form_Controller
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
 
+if (!is_null(Core_Array::getGet('loadBarcodesList')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('term'))));
+
+	if (strlen($sQuery))
+	{
+		$Core_Http = Core_Http::instance('curl')
+			->clear()
+			// ->url('http://barcode.hostcms.ru/api/')
+			->url('http://barcode/api/')
+			->method('POST')
+			->port(80)
+			->additionalHeader('Barrequest', 'ubggjgfnfv')
+			->data('barcode', $sQuery)
+			->execute();
+
+		// var_dump($Core_Http->getHeaders());
+
+		$aResponse = json_decode($Core_Http->getBody(), TRUE);
+
+		if (count($aResponse))
+		{
+			foreach ($aResponse as $aBarcode)
+			{
+				$aJSON[] = array(
+					'id' => $aBarcode['barcode'],
+					'text' => $aBarcode['barcode'],
+					'name' => $aBarcode['name'],
+				);
+			}
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('term')))
 {
 	$aJSON = array();
@@ -648,6 +686,18 @@ $oMenu->add(
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/purchase/discount/coupon/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.disountcard_link'))
+				->icon('fa fa-credit-card-alt')
+				->img('/admin/images/money.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/index.php', NULL, NULL, $additionalParams)
 				)
 		)
 )->add(

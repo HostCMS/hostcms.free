@@ -126,7 +126,15 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 			?><div class="input-group"><?php
 		}
 
-		?><textarea <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></textarea><?php
+		$this->_init = is_null($this->wysiwygOptions)
+			? Core_Config::instance()->get('core_wysiwyg')
+			: $this->wysiwygOptions;
+
+		$tagName = isset($this->_init['inline'])
+			? 'div'
+			: 'textarea';
+
+		?><<?php echo $tagName?> <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></<?php echo $tagName?>><?php
 
 		$this->_format();
 
@@ -160,10 +168,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				}
 
 				$lng = Core_I18n::instance()->getLng();
-
-				$this->_init = is_null($this->wysiwygOptions)
-					? Core_Config::instance()->get('core_wysiwyg')
-					: $this->wysiwygOptions;
 
 				// add
 				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";

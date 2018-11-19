@@ -5,7 +5,7 @@ return array (
 		'content' => array(
 			'ico' => 'fa fa-newspaper-o',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_content'),
-			'modules' => array('informationsystem', 'shop', 'document', 'tag', 'revision'),
+			'modules' => array('informationsystem', 'shop', 'document', 'tag', 'printlayout', 'revision'),
 		),
 		'structure' => array(
 			'ico' => 'fa fa-sitemap',

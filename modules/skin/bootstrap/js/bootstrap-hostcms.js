@@ -620,7 +620,7 @@
 			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
 
 		},
-		sortableKanban: function(path, container, bUpdateData = 0) {
+		sortableKanban: function(path, container, bUpdateData) {
 			$(container + ' .kanban-list').sortable({
 				items: "> li",
 				connectWith: container + ' .kanban-list',
@@ -1476,6 +1476,9 @@
 			}, 60000);
 		},
 		chatPrepare: function() {
+
+			$('#chatbar').resizable({ handles:"w" });
+
 			// Обновление статусов
 			$.refreshUserStatuses();
 
@@ -3213,7 +3216,7 @@
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
 			}
 
 			// Удаляем часть с названием отдела
@@ -3259,31 +3262,37 @@
 			}
 
 			// Компания, отдел, ФИО сотрудника
-			// arraySelectItemParts[0] = \'<span class="\' + className + \'">\' + (className == "user-name" && isCreator ? \'<i class="fa fa-flag"></i> \' : "") + arraySelectItemParts[0] + \'</span>\';
 			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
 
 			// Формируем title элемента
 			data.title = arraySelectItemParts[0];
 
-			if (arraySelectItemParts[1])
+			if (arraySelectItemParts[1] || arraySelectItemParts[2])
 			{
-				resultHtml += '<span class="company-department">' + arraySelectItemParts[1] + '</span>';
-				data.title += " - " + arraySelectItemParts[1];
+				resultHtml += '<br />';
+				if (arraySelectItemParts[1])
+				{
+					resultHtml += '<span class="company-department">' + arraySelectItemParts[1] + '</span>';
+					data.title += " - " + arraySelectItemParts[1];
+				}
+
+				// Список должностей через запятую
+				if (arraySelectItemParts[2])
+				{
+					var departmentPosts = arraySelectItemParts[2].split('###').join(', ');
+
+					resultHtml += (arraySelectItemParts[1] ? ' → ' : '') + '<span class="user-post">' + departmentPosts  + '</span>';
+					data.title += " - " + departmentPosts;
+				}
 			}
 
-			// Список должностей через запятую
-			if (arraySelectItemParts[2])
-			{
-				var departmentPosts = arraySelectItemParts[2].split('###').join(', ');
-
-				resultHtml += '<span class="user-post">' + departmentPosts  + '</span>';
-				data.title += " - " + departmentPosts;
-			}
+			// Компания, отдел, ФИО сотрудника
+			resultHtml =  '<div class="user-info">' + resultHtml + '</div>';
 
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="pull-left margin-top-5 margin-right-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
@@ -3540,6 +3549,70 @@
 			});
 		},
 		/* --- /CHAT --- */
+		
+		selectPersonCompany: function(settings)
+		{
+			settings = $.extend({
+				
+				ajax: {
+					url: "/admin/siteuser/index.php?loadEventSiteusers",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				},
+				allowClear: true,
+				templateResult: $.templateResultItemSiteusers,
+				escapeMarkup: function(m) { return m; },
+				templateSelection: $.templateSelectionItemSiteusers,				
+				width: "100%"
+				
+			}, settings);
+
+			return this.each(function(){
+				jQuery(this).select2(settings);
+			});
+		},
+		
+		selectUser: function(settings)
+		{
+			settings = $.extend({
+				
+				ajax: {
+					url: "/admin/user/index.php?loadUsers",
+					dataType: "json",
+					type: "GET",
+					processResults: function (data) {
+						var aResults = [];
+						$.each(data, function (index, item) {
+							aResults.push({
+								"id": item.id,
+								"text": item.text
+							});
+						});
+						return {
+							results: aResults
+						};
+					}
+				}
+				
+			}, settings);
+
+			return this.each(function(){
+				jQuery(this).select2(settings);
+			});
+		},
+		
 		selectSiteuser: function(settings)
 		{
 			settings = $.extend({

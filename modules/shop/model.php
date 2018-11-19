@@ -75,7 +75,9 @@ class Shop_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'shop_item_property_for_group' => array(),
 		'shop_item_delivery_option' => array(),
-		'deal' => array()
+		'deal' => array(),
+		'shop_discountcard' => array(),
+		'shop_discountcard_level' => array(),
 	);
 
 	/**
@@ -116,6 +118,8 @@ class Shop_Model extends Core_Entity
 		'producer_image_large_max_width' => 800,
 		'producer_image_small_max_height' => 100,
 		'producer_image_large_max_height' => 800,
+		'discountcard_template' => '{this.id}',
+		'invoice_template' => '{this.invoice}'
 	);
 
 	/**
@@ -205,7 +209,7 @@ class Shop_Model extends Core_Entity
 		'guid',
 		'yandex_market_sales_notes_default',
 	);
-	
+
 	/**
 	 * Tree of groups
 	 * @var array
@@ -336,6 +340,8 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Warehouses->deleteAll(FALSE);
 		$this->Shop_Item_Property_For_Groups->deleteAll(FALSE);
 		$this->Shop_Item_Delivery_Options->deleteAll(FALSE);
+		$this->Shop_Discountcards->deleteAll(FALSE);
+		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
 
 		// Shop dir
 		Core_File::deleteDir($this->getPath());

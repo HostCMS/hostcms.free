@@ -176,6 +176,20 @@ class Core_Inflection_En extends Core_Inflection
 	);
 
 	/**
+	 * Array of irregular form plural => singular
+	 * @var array
+	 */
+	static public $singularIrregular = array();
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		self::$singularIrregular = array_flip(self::$pluralIrregular);
+	}
+
+	/**
 	 * Rules for convert singular to plural form
 	 * @var array
 	 */
@@ -240,6 +254,8 @@ class Core_Inflection_En extends Core_Inflection
 	 */
 	protected function _getSingular($word, $count = NULL)
 	{
+//print_r(self::$singularIrregular);
+//die();
 		// Irregular words
 		if (isset(self::$singularIrregular[$word]))
 		{
@@ -258,7 +274,7 @@ class Core_Inflection_En extends Core_Inflection
 
 		return $word;
 	}
-	
+
 	/**
 	 * Number to str
 	 * @param float $float

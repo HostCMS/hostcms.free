@@ -408,6 +408,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * @param Shop_Item_Model $oShopItem item
 	 * @param Property_Model $oProperty
 	 * @param string $sValue property value
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAddItemPropertyValueDefault
 	 */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sValue)
 	{
@@ -501,7 +502,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				}
 			break;
 			default:
-				$changedValue = nl2br($value);
+				Core_Event::notify(get_class($this) . '.onAddItemPropertyValueDefault', $this, array($oShopItem, $oProperty, $value));
+					
+				$changedValue = is_null(Core_Event::getLastReturn())
+					? nl2br($value)
+					: Core_Event::getLastReturn();
 			break;
 		}
 

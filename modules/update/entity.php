@@ -82,7 +82,7 @@ class Update_Entity extends Core_Entity
 	 * Get table colums
 	 * @return array
 	 */
-	public function getTableColums()
+	public function getTableColumns()
 	{
 		return $this->_tableColums;
 	}

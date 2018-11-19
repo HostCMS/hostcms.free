@@ -848,11 +848,57 @@ class Shop_Order_Model extends Core_Entity
 
 			// Уведомление о событии оплаты заказа
 			$this->_createNotification();
+
+			// Дисконтная карта
+			$this->_paidShopDiscountcard();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterPaid', $this);
 
 		return $this->save();
+	}
+
+	protected function _paidShopDiscountcard()
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = $this->Siteuser;
+			$oShop = $this->Shop;
+
+			$mode = $this->paid == 0 ? -1 : 1;
+
+			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getFirst();
+
+			if (is_null($oShop_Discountcard))
+			{
+				if ($oShop->issue_discountcard)
+				{
+					$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
+					$oShop_Discountcard->shop_id = $oShop->id;
+					$oShop_Discountcard->siteuser_id = $oSiteuser->id;
+					$oShop_Discountcard->setSiteuserAmount();
+					$oShop_Discountcard->save(); // create ID
+
+					// Uses number template
+					$oShop_Discountcard->number = $oShop_Discountcard->generate();
+				}
+				else
+				{
+					return $this;
+				}
+			}
+
+			// При вызове в paid() в данный момент модель не сохранена и заказ не числится оплаченным,
+			// поэтому после создания карты ее сумма не включает текущий заказ
+			$oShop_Discountcard->amount += $this->getAmount() * $mode;
+
+			$oShop_Discountcard->save();
+
+			// update level
+			$oShop_Discountcard->checkLevel();
+		}
+
+		return $this;
 	}
 
 	/**
@@ -921,6 +967,9 @@ class Shop_Order_Model extends Core_Entity
 
 			// Удалить зарезервированные товары
 			$this->deleteReservedItems();
+
+			// Дисконтная карта
+			$this->_paidShopDiscountcard();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);

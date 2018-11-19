@@ -144,6 +144,7 @@ class Shop_Item_Model extends Core_Entity
 		'vote' => array('through' => 'vote_shop_item'),
 		'shop_item_delivery_option' => array(),
 		'shop_favorite' => array(),
+		'shop_item_barcode' => array(),
 	);
 
 	/**
@@ -416,7 +417,7 @@ class Shop_Item_Model extends Core_Entity
 			->where('shop_warehouses.deleted', '=', 0);
 
 		Core_Event::notify($this->_modelName . '.onBeforeGetRest', $this, array($queryBuilder));
-			
+
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
 		return $aResult['count'];

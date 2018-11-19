@@ -84,7 +84,7 @@ class Skin_Bootstrap extends Core_Skin
 			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/ru.js')
 			// Уже подключается выше из datetime
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
@@ -930,7 +930,6 @@ class Skin_Bootstrap extends Core_Skin
 
 										$bSubmenu = isset($aTmpMenu['submenu']) && count($aTmpMenu['submenu']);
 										?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
-											<!-- удалить class="menu-dropdown" -->
 											<a <?php if ($bSubmenu) { echo 'class="menu-dropdown" '; }?>href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>">
 												<i class="menu-icon <?php echo htmlspecialchars($aTmpMenu['ico'])?>"></i>
 												<span class="menu-text"><?php echo htmlspecialchars($aTmpMenu['name'])?></span>
@@ -939,10 +938,10 @@ class Skin_Bootstrap extends Core_Skin
 													<i class="menu-expand"></i>
 												<?php } ?>
 											</a>
-
-											<?php if ($bSubmenu) {?>
-											<ul class="submenu">
-												<?php
+											<?php if ($bSubmenu)
+											{
+												?><ul class="submenu"><?php
+												
 												foreach ($aTmpMenu['submenu'] as $aSubmenu)
 												{
 													$aSubmenu += array(
@@ -951,18 +950,14 @@ class Skin_Bootstrap extends Core_Skin
 														'onclick' => NULL,
 														'ico' => 'fa-file-o'
 													);
-													?>
-													<li id="menu-<?php echo $oCore_Module->getModuleName()?>">
+													?><li id="menu-<?php echo $oCore_Module->getModuleName()?>">
 														<a href="<?php echo htmlspecialchars($aSubmenu['href'])?>" onclick="<?php echo htmlspecialchars($aSubmenu['onclick'])?>">
 															<i class="menu-icon <?php echo htmlspecialchars($aSubmenu['ico'])?>"></i>
 															<span class="menu-text"><?php echo htmlspecialchars($aSubmenu['name'])?></span>
 														</a>
-													</li>
-												<?php
+													</li><?php
 												}
-												?>
-											</ul>
-											<?php
+												?></ul><?php
 											}
 											?>
 										</li>

@@ -653,7 +653,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 										case 1: // Текст.
 											if (!is_null($value))
 											{
-												?><span id="<?php echo $element_name?>"<?php echo 	$oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
+												?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
 												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
 											}
 										break;
@@ -691,7 +691,40 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2datetime($value);
-												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat);
+												
+												if ($oAdmin_Form_Field_Changed->editable)
+												{
+													$sCurrentLng = Core_I18n::instance()->getLng();
+													
+													?><div class="row">
+														<div class="date col-xs-12">
+															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
+														</div>
+													</div>
+													<script type="text/javascript">
+													(function($) {
+														var el = $('#<?php echo $windowId?> #<?php echo $element_name?>');
+														el.datetimepicker({
+															locale: '<?php echo $sCurrentLng?>',
+															format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>',
+															useCurrent: false
+														})
+														.on('dp.change', function(){
+															$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>');
+														})
+														.on('click', function(){
+															$(this).trigger('focus')
+														});
+														el.closest('td').css('overflow','visible');
+													})(jQuery);
+													</script><?php
+												}
+												else
+												{
+													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
+												}
+												
+												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
 										break;
 										case 6: // Дата.
@@ -700,7 +733,41 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2date($value);
-												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat);
+												
+												if ($oAdmin_Form_Field_Changed->editable)
+												{
+													$sCurrentLng = Core_I18n::instance()->getLng();
+													
+													?><div class="row">
+														<div class="date col-xs-12">
+															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
+														</div>
+													</div>
+													<script type="text/javascript">
+													(function($) {
+														var el = $('#<?php echo $windowId?> #<?php echo $element_name?>');
+														el.datetimepicker({
+															locale: '<?php echo $sCurrentLng?>',
+															format: '<?php echo Core::$mainConfig['datePickerFormat']?>',
+															useCurrent: false
+														})
+														.on('dp.change', function(){
+															$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>');
+														})
+														.on('click', function(){
+															$(this).trigger('focus')
+														});
+														el.closest('td').css('overflow','visible');
+													})(jQuery);
+													</script><?php
+												}
+												else
+												{
+													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
+												}
+												
+												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
+												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
 										break;
 										case 7: // Картинка-ссылка.

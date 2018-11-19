@@ -148,17 +148,20 @@ foreach ($aProperties as $oProperty)
 		}
 
 		$oAdmin_Form_Entity_Form->add(
-			Admin_Form_Entity::factory('Checkbox')
-				->name("property_{$oProperty->id}")
-				->caption(Core::_('Shop_Item.create_modification_property_enable', $oProperty->name, $oProperty->id))
-		)
-		->add(
-			Admin_Form_Entity::factory('Select')
-				->options($aValues)
-				->multiple("multiple")
-				->name("property{$oProperty->id}list[]")
-				->style('width:300px;')
-				->filter(FALSE)
+			Admin_Form_Entity::factory('Div')->class('row')
+				->add(
+					Admin_Form_Entity::factory('Checkbox')
+						->name("property_{$oProperty->id}")
+						->caption(Core::_('Shop_Item.create_modification_property_enable', $oProperty->name, $oProperty->id))
+				)
+				->add(
+					Admin_Form_Entity::factory('Select')
+						->options($aValues)
+						->multiple("multiple")
+						->name("property{$oProperty->id}list[]")
+						->style('width:300px;')
+						->filter(FALSE)
+				)
 		);
 	}
 }

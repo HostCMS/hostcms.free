@@ -42,6 +42,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'showShop',
 		'showForum',
 		'showMessage',
+		'showHelpdesk',
 		'cache',
 		'informationsystem_item_id',
 		'informationsystem_group_id',
@@ -51,6 +52,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'forum_topic_id',
 		'forbiddenTags',
 		'message_topic_id',
+		'helpdesk_ticket_id',
 	);
 
 	/**
@@ -82,7 +84,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		$this->current = Core_Page::instance()->structure->id;
 
-		$this->showInformationsystem = $this->showShop = $this->showForum = $this->showMessage = TRUE;
+		$this->showInformationsystem = $this->showShop = $this->showForum = $this->showMessage = $this->showHelpdesk = TRUE;
 
 		$this->cache = TRUE;
 	}
@@ -166,6 +168,14 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			if ($this->showMessage && Core_Page::instance()->object instanceof Message_Controller_Show)
 			{
 				$this->message_topic_id = Core_Page::instance()->object->topic;
+			}
+
+			if ($this->showHelpdesk && Core_Page::instance()->object instanceof Helpdesk_Controller_Show)
+			{
+				if (Core_Page::instance()->object->ticket)
+				{
+					$this->helpdesk_ticket_id = Core_Page::instance()->object->ticket;
+				}
 			}
 
 			if ($this->showForum && Core_Page::instance()->object instanceof Forum_Controller_Show)
@@ -368,6 +378,39 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 					$this->addBreadcrumb($oMessage_Topic);
 
 					Core_Event::notify(get_class($this) . '.onAfterAddMessageTopic', $this, array($oMessage_Topic));
+				}
+			}
+
+			if ($this->showHelpdesk && Core_Page::instance()->object instanceof Helpdesk_Controller_Show)
+			{
+				if ($this->helpdesk_ticket_id)
+				{
+					$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket', $this->helpdesk_ticket_id);
+
+					Core_Event::notify(get_class($this) . '.onBeforeAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
+
+					$sPath = Core_Page::instance()->structure->getPath() . 'ticket-' . $oHelpdesk_Ticket->id . '/';
+
+					$oHelpdesk_Ticket
+						->clearEntities()
+						->addForbiddenTag('url')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('link')
+								->value($sPath)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('name')
+								->value($oHelpdesk_Ticket->number)
+						)->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('show')
+								->value(1)
+						);
+
+					$this->addBreadcrumb($oHelpdesk_Ticket);
+
+					Core_Event::notify(get_class($this) . '.onAfterAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
 				}
 			}
 

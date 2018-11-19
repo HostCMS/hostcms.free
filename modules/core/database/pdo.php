@@ -164,13 +164,9 @@ class Core_DataBase_Pdo extends Core_DataBase
 	{
 		$columnType = strtolower($columnType);
 
-		$type = NULL;
-		$fixed = NULL;
-		$binary = NULL;
-		$unsigned = (strpos($columnType, 'unsigned') !== FALSE);
-		$zerofill = (strpos($columnType, 'zerofill') !== FALSE);
-		$min = NULL;
-		$max = NULL;
+		$type = $fixed = $binary = $min = $max = NULL;
+		$unsigned = strpos($columnType, 'unsigned') !== FALSE;
+		$zerofill = strpos($columnType, 'zerofill') !== FALSE;
 
 		list($switchType, $max_length) = $this->getColumnTypeAndLength($columnType);
 
@@ -215,6 +211,12 @@ class Core_DataBase_Pdo extends Core_DataBase
 				$max = 65535;
 				break;
 
+			case 'tinyint unsigned':
+				$type = 'int';
+				$min = 0;
+				$max = 255;
+				break;
+				
 			case 'mediumint':
 				$type = 'int';
 				$min = -8388608;

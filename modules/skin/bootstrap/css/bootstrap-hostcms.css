@@ -944,7 +944,7 @@ tr.admin_table_filter.disabled select {
 .table tbody tr td a:not(.btn) .fa:not(.btn-sm), .fa-active {
 	color: #333;
 }
-.table tbody tr td a .fa-external-link {
+.table tbody tr td a .fa-external-link, .table tbody tr td .fa-small {
 	font-size: 75%
 }
 .fa-inactive {
@@ -1012,12 +1012,15 @@ td.importantField a {
 
 .tickets-container .tickets-list .ticket-item .ticket-user .user-name{
 	display: inline-block;
-	white-space: normal;
+	white-space: unset;
 }
-
 .tickets-container .tickets-list .ticket-item .ticket-user{
-	/* white-space: normal; */
+	white-space: normal;
 	overflow: unset;
+}
+/* Siteuser Mode */
+.tickets-container .tickets-list .ticket-item .ticket-siteuser {
+	white-space: nowrap;
 }
 
 .tickets-container .tickets-list .ticket-item .ticket-type i{
@@ -1207,7 +1210,6 @@ input[type=checkbox]~span.text, input[type=radio]~span.text {z-index: 12}
 */
 
 /* tinymce */
-
 .row .mceEditor td:first-child{
 	width: auto;
 }
@@ -2109,15 +2111,6 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 #dropzone:hover .dz-message { color: #70BAFD !important; }
 #dropzone .dz-preview .dz-image { border-radius: 10px !important; }
 
-.select2-container--default .select2-selection--multiple .select2-selection__rendered {
-	padding: 3px 5px 3px 10px;
-}
-
-.select2-container--default .select2-results__option--highlighted[aria-selected] {
-    background-color: #2dc3e8;
-    color: white;
-}
-
 .tickets-container .tickets-list .ticket-item .ticket-type .type.user-login {
     display: block;
     float: right;
@@ -2151,7 +2144,7 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 
 /* Bug with bg, ticket 270451*/
 .mce-btn { background: none !important }
-.mce-btn.mce-active { background: #555 !important }
+.mce-btn-small.mce-active { background: #555 !important }
 
 .mce-primary { background-color: #2d8ac7 !important }
 .mce-fullscreen { z-index: 999 !important; }
@@ -2538,46 +2531,6 @@ table.table.table-popular-queries tr td:last-child {
 	z-index: 10;
 }
 
-/*.select2-container .select2-selection--single.user-container*/
-.select2-container .select2-selection--single
-{
-	height: auto;
-	/* padding-bottom: 6px;  Убрано 19.01.18 */
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered
-{
-	/*margin-top: 6px !important; Убрано 19.01.18*/
-}
-
-.select2-container--default .select2-selection--multiple .select2-selection__choice
- {
-	background-color: #F3F3F3 /*#E7F5FE*/ !important;
-	color: #333 /*#11A0F8*/ !important;
-	border-color: #eee /*#c2e8ff*/ !important;
-	font-weight: 600 !important;
-	font-size: 11px !important;
-	margin-top: 6px !important;
-}
-
-/* .select2-container--default .select2-selection__rendered */
-
-.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-	color: #777 /*#11a0f8*/ !important;
-	float: right;
-	font-size: 11px;
-	margin-left: 5px;
-	margin-right: 0;
-}
-.select2-container--default .select2-selection--multiple .select2-selection__choice.event-author {
-	background-color: #d9edf7 !important;
-	color: #31708f !important;
-	border-color: #C8E6F7 !important;
-
-	/*background-color: #f1faed !important;
-	color: #6aa74a !important;
-	border-color: #c2e7ae !important;*/
-}
 
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-body .description i { margin:0 }
 /* .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-notifications li .notification-time { */
@@ -2912,7 +2865,81 @@ td.user-avatar img
     width: 30px;
 }
 
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+	padding: 3px 5px 3px 10px;
+}
 
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #2dc3e8;
+    color: white;
+}
+
+/*.select2-container .select2-selection--single.user-container*/
+.select2-container .select2-selection--single
+{
+	/*height: auto; Убрано 26.10.18*/
+	/* padding-bottom: 6px;  Убрано 19.01.18 */
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered
+{
+	/*margin-top: 6px !important; Убрано 19.01.18*/
+}
+
+.select2-selection--single .user-info,
+.select2-selection__choice .user-info
+{
+	float: left;
+}
+
+.select2-selection--single.user-container .user-info
+{
+	font-size: 10px;
+	margin-top: 2px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	width: calc(100% - 40px);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice
+ {
+	background-color: #F3F3F3 /*#E7F5FE*/ !important;
+	color: #333 /*#11A0F8*/ !important;
+	border-color: #eee /*#c2e8ff*/ !important;
+	margin-top: 6px !important;
+	/*font-weight: 600 !important;*/
+	font-size: 11px !important;
+}
+
+.select2-selection--single.user-container .user-name
+{
+	font-weight: 600 !important;
+	font-size: 11px !important;
+}
+
+li.select2-selection__choice .company-department,,
+.select2-selection--single.user-container .company-department {
+	font-weight: 300 !important;
+}
+
+/* .select2-container--default .select2-selection__rendered */
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+	color: #777 /*#11a0f8*/ !important;
+	float: right;
+	font-size: 11px;
+	margin-left: 5px;
+	margin-right: 0;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice.event-author {
+	background-color: #d9edf7 !important;
+	color: #31708f !important;
+	border-color: #C8E6F7 !important;
+
+	/*background-color: #f1faed !important;
+	color: #6aa74a !important;
+	border-color: #c2e7ae !important;*/
+}
 
 .select2-container--default .select2-selection--single.user-container .select2-selection__rendered
 {
@@ -2923,17 +2950,41 @@ td.user-avatar img
 	line-height: 34px;
 }
 
-li.select2-results__option .user-name, li.select2-selection__choice.user-name{
+li.select2-results__option .user-name {
 	font-weight: 600;
 }
-li.select2-results__option .user-post, .select2-selection--single.user-container .user-post { font-weight: 300; }
+
+li.select2-selection__choice .user-name {
+	float: left;
+	font-weight: 600;
+}
+
 li.select2-results__option .user-post,
+.select2-selection--single.user-container .user-post,
+li.select2-selection__choice .user-post {
+	font-weight: 300
+}
+
+[role="tree"] li.select2-results__option .user-post,
 /*li.select2-selection__choice .user-post, li.select2-selection__choice .company-department*/
-.select2-selection__rendered .user-post, .select2-selection__rendered .company-department
+[role="tree"] .select2-selection__rendered .user-post,
+[role="tree"] .select2-selection__rendered .company-department
 {
-	/* font-weight: 300; */
+	font-weight: 300;
 	display: block;
 }
+
+
+[role="tree"] li.select2-results__option .user-image,
+li.select2-selection__choice .user-image{
+	margin: 3px 5px 0 0;
+}
+
+.select2-selection--single.user-container .user-image{
+	margin: 1px 5px 0 0;
+}
+
+
 
 .select2-selection__rendered .select2-selection__placeholder
 {
@@ -2945,12 +2996,10 @@ li.select2-results__option.company-department{
 	margin-left: 15px;
 }
 
-li.select2-selection__choice .user-post {
-	font-weight: 300;
-}
-
-li.select2-selection__choice .user-post, li.select2-selection__choice .company-department,
-.select2-selection--single.user-container .user-post, .select2-selection--single.user-container  .company-department
+li.select2-selection__choice .user-post,
+li.select2-selection__choice .company-department,
+.select2-selection--single.user-container .user-post,
+.select2-selection--single.user-container .company-department
 {
 	font-size: 10px;
 	overflow: hidden;
@@ -3404,7 +3453,7 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 .bg-19 { background-color: #ffea00 !important; }
 .bg-20 { background-color: #ef9a9a !important; }
 
-.select2-container { font-size: 12px !important; }
+.select2-container { font-size: 11px !important; }
 
 .btn-pink, .btn-pink:focus {
     background-color: #e75b8d !important;
@@ -3864,6 +3913,49 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 #deal-notes div.dataTables_paginate, .timeline-board div.dataTables_paginate { float: none; }
 #deal-notes .pagination, .timeline-board .pagination { padding-top: 0; }
 
+#deal-notes .comment-text:before {
+    position: absolute;
+    display: block;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    content: '';
+    top: 10px;
+    left: -14px;
+    border-width: 7px;
+    border-right-width: 7px;
+    border-right-color: inherit;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+}
+
+#deal-notes .comment-text:after {
+    position: absolute;
+    display: block;
+    width: 0px;
+    height: 0px;
+    border-style: solid;
+    content: '';
+    top: 12px;
+    left: -10px;
+    border-width: 5px;
+    border-right-width: 5px;
+    border-right-color: #fff;
+    border-top-color: transparent;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+}
+
+#deal-notes .comment .comment-text {
+	position: relative;
+}
+
+#deal-notes .comment .comment-header{
+	margin-top: 10px;
+	text-align: right;
+}
+
 #deal-events .deal-event-actions {
 	position: absolute;
 	right: 10px;
@@ -3879,6 +3971,37 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 }
 #deal-events .deal-event-actions span i { font-size: 11px; }
 #deal-events .deal-event-actions span:hover { cursor: pointer; }
+
+#deal-events .admin-table
+{
+	border-left: 0px;
+	border-right: 0px
+}
+
+#deal-events .user-info {
+
+	display: flex;
+    margin-bottom: 5px;
+}
+
+#deal-events .user-info .user-image {
+    margin-right: 10px;
+    margin-top: 2px;
+}
+
+#deal-events .user-info .user-image img {
+    background-clip: padding-box;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+}
+
+#deal-events .user-info .user-name {
+	color: #999;
+	font-size: 11px;
+    margin: auto 0;
+}
+
 
 .timeline > li > .timeline-panel .timeline-body { padding-bottom: 10px; }
 .timeline > li > .timeline-panel .timeline-body > p { display: inline-block; }
@@ -4163,4 +4286,30 @@ table.company-structure tbody tr td { padding: 10px; }
 	display: inline-flex;
 	right: 15px;
 	position: absolute;
+}
+
+.template-number-input-button {
+	margin-top: 27px;
+}
+
+.deal-note-board .comment-avatar {
+	border-radius: 50% !important;
+	margin-top: 5px !important;
+}
+
+.widget-select-shop { padding: 0 3px; margin-left: 10px; }
+
+.deal-siteuser .input-group
+{
+	display: block;	
+}
+.deal-siteuser .input-group .select2.select2-container
+{
+	float: left;
+	width: calc(100% - 37px) !important;
+}
+
+.deal-siteuser .input-group .select2-selection
+{
+	border-right: none;
 }

@@ -173,6 +173,14 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 		$oQueryBuilderSelect->where('shop_orders.paid', '=', 1);
 	}
 
+	if (Core::moduleIsActive('siteuser'))
+	{
+		if (!is_null($iSiteuserId = Core_Array::getPost('siteuser_id')) && $iSiteuserId > 0)
+		{
+			$oQueryBuilderSelect->where('shop_orders.siteuser_id', '=', $iSiteuserId);
+		}
+	}
+
 	$iOrderStatusID = Core_Array::getPost('shop_order_status_id', 0);
 	if ($iOrderStatusID != 0)
 	{
@@ -554,46 +562,23 @@ else
 			});</script>")
 	)*/)
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Checkbox')
-			->name('sales_order_show_list_items')
-			->caption(Core::_('Shop_Item.form_sales_order_show_list_items'))
-			->value(1)
-			->divAttr(array('class' => 'form-group col-xs-12'))
-	))
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Admin_Form_Entity::factory('Date')
 			->caption(Core::_('Shop_Item.form_sales_order_begin_date'))
 			->name('sales_order_begin_date')
 			->value(Core_Date::timestamp2sql(strtotime("-2 months")))
-			->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 	)->add(
 		Admin_Form_Entity::factory('Date')
 			->caption(Core::_('Shop_Item.form_sales_order_end_date'))
 			->name('sales_order_end_date')
 			->value(Core_Date::timestamp2sql(time()))
-			->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-3'))
-	))
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+	))->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Admin_Form_Entity::factory('Checkbox')
-			->name('sales_order_show_only_paid_items')
-			->caption(Core::_('Shop_Item.form_sales_order_show_paid_items'))
+			->name('sales_order_show_list_items')
+			->caption(Core::_('Shop_Item.form_sales_order_show_list_items'))
 			->value(1)
 			->divAttr(array('class' => 'form-group col-xs-12'))
-	));
-
-	$aSellers = array(' … ');
-	$aShop_Sellers = $oShop->Shop_Sellers->findAll();
-	foreach ($aShop_Sellers as $oShop_Seller)
-	{
-		$aSellers[$oShop_Seller->id] = $oShop_Seller->name;
-	}
-
-	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Select')
-			->options($aSellers)
-			->caption(Core::_('Shop_Item.form_sales_order_sallers'))
-			->name('shop_seller_id')
-			->divAttr(array('class' => 'form-group col-lg-6 col-md-6 col-sm-6'))
 	));
 
 	$aPaySystems = array(' … ');
@@ -603,14 +588,6 @@ else
 		$aPaySystems[$oShop_Payment_System->id] = $oShop_Payment_System->name;
 	}
 
-	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Select')
-			->options($aPaySystems)
-			->caption(Core::_('Shop_Item.form_sales_order_sop'))
-			->name('shop_system_of_pay_id')
-			->divAttr(array('class' => 'form-group col-lg-6 col-md-6 col-sm-6'))
-	));
-
 	$aOrderStatuses = array(' … ');
 	$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
 	foreach ($aShop_Order_Statuses as $oShop_Order_Status)
@@ -618,29 +595,72 @@ else
 		$aOrderStatuses[$oShop_Order_Status->id] = $oShop_Order_Status->name;
 	}
 
-	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
+	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
+		->add(
+		Admin_Form_Entity::factory('Checkbox')
+			->name('sales_order_show_only_paid_items')
+			->caption(Core::_('Shop_Item.form_sales_order_show_paid_items'))
+			->value(1)
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+	))
+	->add(Admin_Form_Entity::factory('Div')->class('row')
+		->add(
+			Admin_Form_Entity::factory('Select')
+				->options($aPaySystems)
+				->caption(Core::_('Shop_Item.form_sales_order_sop'))
+				->name('shop_system_of_pay_id')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+		)
+		->add(
+			Admin_Form_Entity::factory('Select')
+				->options($aOrderStatuses)
+				->caption(Core::_('Shop_Item.form_sales_order_status'))
+				->name('shop_order_status_id')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+		)
+	);
+
+	$oMainTab->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+	if (Core::moduleIsActive('siteuser'))
+	{
+		$oSiteuser = Core_Entity::factory('Siteuser');
+
+		$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+			->caption(Core::_('Shop_Order.siteuser_id'))
+			->id('object_siteuser_id')
+			->options(array(0))
+			->name('siteuser_id')
+			->class('siteuser-tag')
+			->style('width: 100%')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+
+		$oMainRow1->add($oSiteuserSelect);
+
+		// Show button
+		Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $oAdmin_Form_Controller);
+	}
+
+	$aSellers = array(' … ');
+	$aShop_Sellers = $oShop->Shop_Sellers->findAll();
+	foreach ($aShop_Sellers as $oShop_Seller)
+	{
+		$aSellers[$oShop_Seller->id] = $oShop_Seller->name;
+	}
+
+	$oMainRow1->add(
 		Admin_Form_Entity::factory('Select')
-			->options($aOrderStatuses)
-			->caption(Core::_('Shop_Item.form_sales_order_status'))
-			->name('shop_order_status_id')
-			->divAttr(array('class' => 'form-group col-lg-6 col-md-6 col-sm-6'))
-	)->add(
+			->options($aSellers)
+			->caption(Core::_('Shop_Item.form_sales_order_sallers'))
+			->name('shop_seller_id')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+	);
+
+	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_id')->value(Core_Array::getGet('shop_id'))
 	)->add(
 		Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_group_id')->value(Core_Array::getGet('shop_group_id'))
 	));
-
-	/*$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Input')
-			->type('hidden')
-			->name('shop_id')
-			->value(Core_Array::getGet('shop_id'))
-	)->add(
-		Admin_Form_Entity::factory('Input')
-			->type('hidden')
-			->name('shop_group_id')
-			->value(Core_Array::getGet('shop_group_id'))
-	));*/
 
 	$oAdmin_Form_Entity_Form->add($oMainTab);
 

@@ -20,6 +20,12 @@ class Core_Meta
 	protected $_objects = array();
 
 	/**
+	 * Array of functions [name] => callable
+	 * @var array
+	 */
+	protected $_functions = array();
+
+	/**
 	 * Predefined functions
 	 * @var array
 	 */
@@ -43,6 +49,18 @@ class Core_Meta
 	}
 
 	/**
+	 * Add function
+	 * @param string $name
+	 * @param callable $callable
+	 * @return self
+	 */
+	public function addFunction($name, $callable)
+	{
+		$this->_functions[$name] = $callable;
+		return $this;
+	}
+
+	/**
 	 * Apply template, e.g. {group.name}, {toLower group.name}, {toLower group.groupPathWithSeparator " / " 1}
 	 *
 	 * @param string $str
@@ -50,7 +68,7 @@ class Core_Meta
 	 */
 	public function apply($str)
 	{
-		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)\.([^\}\s]+)(?:\s+([^\}]+))*\}/';
+		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))?(?:\s+([^\}]+))*\}/';
 
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
@@ -140,10 +158,23 @@ class Core_Meta
 				return $matches[0];
 			}
 		}
+		elseif (isset($this->_functions[$matches[2]]))
+		{
+			return call_user_func($this->_functions[$matches[2]]);
+		}
 		else
 		{
-			// skip replacing
-			return $matches[0];
+			preg_match_all('/\s*([a-zA-Z]*)\s*\(([^\)]*)\)/', $matches[2], $matchesAttr);
+
+			if (isset($matchesAttr[1][0]) && is_callable($matchesAttr[1][0]))
+			{
+				return call_user_func_array($matchesAttr[1][0], strlen($matchesAttr[2][0]) ? explode(',', $matchesAttr[2][0]) : NULL);
+			}
+			else
+			{
+				// skip replacing
+				return $matches[0];
+			}
 		}
 	}
 }

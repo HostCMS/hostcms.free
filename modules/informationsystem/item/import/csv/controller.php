@@ -90,7 +90,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * @var array
 	 */
 	protected $_aExternalPropertiesDesc = array();
-	
+
 	/**
 	 * List of external properties
 	 * @var array
@@ -1015,7 +1015,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$aTmpExplode = explode('-', $sFieldName);
 								$this->_aExternalPropertiesDesc[$aTmpExplode[1]] = $sData;
 							}
-							
+
 							if (strpos($sFieldName, "prop-") === 0)
 							{
 								// Основной файл дополнительного свойства/Большое изображение картинки дополнительного свойства
@@ -1206,7 +1206,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-											
+
 											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
 									break;
@@ -1239,7 +1239,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-											
+
 											$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 										}
 									break;
@@ -1834,9 +1834,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								{
 									$oProperty_Value->file_description = $this->_aExternalPropertiesDesc[$iPropertyID];
 								}
-								
+
 								clearstatcache();
-								
+
 								if (strpos(basename($sSourceFile), "CMS") === 0
 									&& is_file($sSourceFile)
 								)
@@ -1882,14 +1882,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-								
+
 								$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 							}
 						break;
 						case 8:
 							if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
 							{
-							 $sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
+								$sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
 							}
 
 							$oProperty_Value->setValue($sPropertyValue);
@@ -1915,11 +1915,18 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-								
+
 								$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 							}
 						break;
 						default:
+							Core_Event::notify(get_class($this) . '.onPreparePropertyValueDefault', $this, array($this->_oCurrentItem, $oProperty, $sPropertyValue));
+
+							if (!is_null(Core_Event::getLastReturn()))
+							{
+								$sPropertyValue = Core_Event::getLastReturn();
+							}
+
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 					}

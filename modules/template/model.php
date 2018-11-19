@@ -936,7 +936,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function _($name)
 	{
-		$aValues = $this->_getLngFile(SITE_LNG);
+		$aValues = $this->_getLngFile(Core::getLng());
 		return isset($aValues[$name]) ? $aValues[$name] : $name;
 	}
 

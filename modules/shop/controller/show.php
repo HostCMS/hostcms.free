@@ -399,6 +399,46 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Apply warehouse's conditions
+	 *
+	 * @param Shop_Item_Model $oShop_Items
+	 * @return self
+	 */
+	protected function _applyWarehouseConditions(Shop_Item_Model $oShop_Items)
+	{
+		switch ($this->warehouseMode)
+		{
+			case 'in-stock':
+				$oShop_Items
+					->queryBuilder()
+					->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+					->having('SUM(shop_warehouse_items.count)', '>', 0)
+					->groupBy('shop_items.id');
+			break;
+			case 'in-stock-modification':
+				$oShop_Items
+					->queryBuilder()
+					// Модификации и остатки на складах модификаций
+					->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', 'shop_items.id')
+					->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
+					// Остатки на складах основного отвара
+					->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
+					// Есть остатки на основном складе
+					->havingOpen()
+					->having('SUM(shop_warehouse_items.count)', '>', 0)
+					// Или
+					->setOr()
+					// Есть остатки на складах у модификаций
+					->having('SUM(modifications_shop_warehouse_items.count)', '>', 0)
+					->havingClose()
+					->groupBy('shop_items.id');
+			break;
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Apply item's conditions
 	 *
 	 * @param Shop_Item_Model $oShop_Items
@@ -727,7 +767,7 @@ class Shop_Controller_Show extends Core_Controller
 	protected function _setLimits()
 	{
 		// Load model columns BEFORE FOUND_ROWS()
-		Core_Entity::factory('Shop_Item')->getTableColums();
+		Core_Entity::factory('Shop_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
 		Core_Entity::factory('User', 0)->getCurrent();
@@ -858,34 +898,8 @@ class Shop_Controller_Show extends Core_Controller
 
 			!$this->item && $this->_setLimits();
 
-			switch ($this->warehouseMode)
-			{
-				case 'in-stock':
-					$this->_Shop_Items
-						->queryBuilder()
-						->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
-						->having('SUM(shop_warehouse_items.count)', '>', 0)
-						->groupBy('shop_items.id');
-				break;
-				case 'in-stock-modification':
-					$this->_Shop_Items
-						->queryBuilder()
-						// Модификации и остатки на складах модификаций
-						->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', 'shop_items.id')
-						->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
-						// Остатки на складах основного отвара
-						->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id')
-						// Есть остатки на основном складе
-						->havingOpen()
-						->having('SUM(shop_warehouse_items.count)', '>', 0)
-						// Или
-						->setOr()
-						// Есть остатки на складах у модификаций
-						->having('SUM(modifications_shop_warehouse_items.count)', '>', 0)
-						->havingClose()
-						->groupBy('shop_items.id');
-				break;
-			}
+			// Apply $this->warehouseMode
+			$this->_applyWarehouseConditions($this->_Shop_Items);
 
 			$aShop_Items = $this->_Shop_Items->findAll();
 
@@ -1522,6 +1536,7 @@ class Shop_Controller_Show extends Core_Controller
 					}
 
 					$this->_applyItemConditions($oShop_Items);
+					$this->_applyWarehouseConditions($oShop_Items);
 
 					//$this->forbidSelectModifications();
 					$oShop_Items->queryBuilder()->where('shop_items.modification_id', '=', 0);
@@ -1881,11 +1896,13 @@ class Shop_Controller_Show extends Core_Controller
 
 			foreach ($this->_aShop_Groups[$parent_id] as $oShop_Group)
 			{
+				// $bIsArrayGroupsProperties && $oShop_Group->showXmlProperties(FALSE);
+				
 				// Properties for shop's group entity
 				if ($this->groupsProperties
 					&& (!$bIsArrayPropertiesForGroups || in_array($oShop_Group->id, $this->propertiesForGroups)))
 				{
-					$aProperty_Values = $oShop_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
+					/*$aProperty_Values = $oShop_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
 
 					foreach ($aProperty_Values as $oProperty_Value)
 					{
@@ -1895,20 +1912,11 @@ class Shop_Controller_Show extends Core_Controller
 
 						if ($dAdd)
 						{
-							$type = $oProperty_Value->Property->type;
-
-							if ($type == 8)
-							{
-								$oProperty_Value->dateFormat($oShop->format_date);
-							}
-							elseif ($type == 9)
-							{
-								$oProperty_Value->dateTimeFormat($oShop->format_datetime);
-							}
-
 							$oShop_Group->addEntity($oProperty_Value);
 						}
-					}
+					}*/
+					
+					$oShop_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
 				{
@@ -1942,6 +1950,8 @@ class Shop_Controller_Show extends Core_Controller
 
 		if (isset($this->_aItem_Properties[$parent_id]))
 		{
+			$oShop = $this->getEntity();
+			
 			foreach ($this->_aItem_Properties[$parent_id] as $oProperty)
 			{
 				if ($this->itemsPropertiesListJustAvailable
@@ -1950,31 +1960,42 @@ class Shop_Controller_Show extends Core_Controller
 					// 0 - Hide; 1 - Input; 2,3,4 - Select
 					&& $oProperty->Shop_Item_Property->filter > 1)
 				{
-					$shop_group_id = intval($this->group);
+					//$shop_group_id = intval($this->group);
 
 					$oCore_QueryBuilder_Select = Core_QueryBuilder::select('property_value_ints.value')
 						->from('property_value_ints')
 						->join('shop_items', 'shop_items.id', '=', 'property_value_ints.entity_id')
 						->open()
+						->where('shop_items.shop_id', '=', $oShop->id)
 						->where('shop_items.active', '=', 1)
-						->where('shop_items.modification_id', '=', 0)
-						->where('shop_items.shop_group_id', '=', $shop_group_id);
+						->where('shop_items.modification_id', '=', 0);
+						//->where('shop_items.shop_group_id', '=', $shop_group_id);
 
+					$this->group !== FALSE
+						&& $oCore_QueryBuilder_Select->where('shop_items.shop_group_id', '=', $this->group);
+						
+					$this->producer
+						&& $oCore_QueryBuilder_Select->where('shop_items.shop_producer_id', '=', $this->producer);
+						
 					// Стандартные ограничения для товаров
 					$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select);
 
 					// Вывод модификаций на одном уровне в списке товаров
 					if ($this->modificationsList)
 					{
-						$oShop = $this->getEntity();
-
 						$oCore_QueryBuilder_Select_Modifications = Core_QueryBuilder::select('shop_items.id')
 							->from('shop_items')
 							->where('shop_items.shop_id', '=', $oShop->id)
 							->where('shop_items.deleted', '=', 0)
-							->where('shop_items.active', '=', 1)
-							->where('shop_items.shop_group_id', '=', $shop_group_id);
+							->where('shop_items.active', '=', 1);
+							//->where('shop_items.shop_group_id', '=', $shop_group_id);
+							
+						$this->group !== FALSE
+							&& $oCore_QueryBuilder_Select_Modifications->where('shop_items.shop_group_id', '=', $this->group);
 
+						$this->producer
+							&& $oCore_QueryBuilder_Select_Modifications->where('shop_items.shop_producer_id', '=', $this->producer);
+							
 						// Стандартные ограничения для товаров
 						$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
 
@@ -1982,6 +2003,7 @@ class Shop_Controller_Show extends Core_Controller
 
 						$oCore_QueryBuilder_Select
 							->setOr()
+							->where('shop_items.shop_id', '=', $oShop->id)
 							->where('shop_items.shop_group_id', '=', 0)
 							->where('shop_items.deleted', '=', 0)
 							->where('shop_items.active', '=', 1)
@@ -1995,11 +2017,18 @@ class Shop_Controller_Show extends Core_Controller
 								->where('shop_items.shop_id', '=', $oShop->id)
 								->where('shop_items.deleted', '=', 0)
 								->where('shop_items.active', '=', 1)
-								->where('shop_items.shop_group_id', '=', $shop_group_id)
+								//->where('shop_items.shop_group_id', '=', $shop_group_id)
 								->where('shop_items.shortcut_id', '>', 0);
 
+							$this->group !== FALSE
+								&& $oCore_QueryBuilder_Select_Shortcuts_For_Modifications->where('shop_items.shop_group_id', '=', $this->group);
+								
+							$this->producer
+								&& $oCore_QueryBuilder_Select_Shortcuts_For_Modifications->where('shop_items.shop_producer_id', '=', $this->producer);
+								
 							$oCore_QueryBuilder_Select
 								->setOr()
+								->where('shop_items.shop_id', '=', $oShop->id)
 								->where('shop_items.shop_group_id', '=', 0)
 								->where('shop_items.modification_id', 'IN', $oCore_QueryBuilder_Select_Shortcuts_For_Modifications);
 						}
@@ -2011,9 +2040,13 @@ class Shop_Controller_Show extends Core_Controller
 							->from('shop_items')
 							->where('shop_items.deleted', '=', 0)
 							->where('shop_items.active', '=', 1)
-							->where('shop_items.shop_group_id', '=', $shop_group_id)
+							->where('shop_items.shop_id', '=', $oShop->id)
+							//->where('shop_items.shop_group_id', '=', $shop_group_id)
 							->where('shop_items.shortcut_id', '>', 0);
 
+						$this->group !== FALSE
+							&& $oCore_QueryBuilder_Select_Shortcuts->where('shop_items.shop_group_id', '=', $this->group);
+							
 						// Стандартные ограничения для товаров
 						$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
 
@@ -2197,7 +2230,7 @@ class Shop_Controller_Show extends Core_Controller
 		else
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item', $this->item);
-			
+
 			// Edit
 			$sPath = '/admin/shop/item/index.php';
 			$sAdditional = "hostcms[action]=edit&shop_id={$oShop->id}&shop_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";

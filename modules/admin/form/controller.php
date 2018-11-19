@@ -1337,7 +1337,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$subject = str_replace($replace_key, $replace_value, $subject);
 		}
 
-		$aColumns = $oEntity->getTableColums();
+		$aColumns = $oEntity->getTableColumns();
 		foreach ($aColumns as $columnName => $columnArray)
 		{
 			$subject = str_replace(
@@ -1890,6 +1890,143 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</select>
 		<?php
 	}
+	
+	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$placeholder = Core::_('Siteuser.select_siteuser');			
+			$language = Core_i18n::instance()->getLng();
+			
+			$aTmpValue = explode('_', $value);
+			
+			$sOptions = '';	
+			
+			if (count($aTmpValue) == 2 && ($aTmpValue[0] == 'company' || $aTmpValue[0] == 'person'))
+			{
+				$iCounterpartyId = intval($aTmpValue[1]);
+								
+				$oSelectedSiteuser = $aTmpValue[0] == 'company' 
+					? Core_Entity::factory('Siteuser_Company', $iCounterpartyId)->Siteuser
+					: Core_Entity::factory('Siteuser_Person', $iCounterpartyId)->Siteuser;
+					
+								
+				if (!is_null($oSelectedSiteuser->id))
+				{
+					$aSiteuserCompanies = $oSelectedSiteuser->Siteuser_Companies->findAll();
+					
+					foreach ($aSiteuserCompanies as $oSiteuserCompany)
+					{
+						$sOptionValue = 'company_' . $oSiteuserCompany->id;
+						
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserCompany->getAvatar() . '</option>';
+						
+						/* $oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
+							'value' => htmlspecialchars($oSiteuserCompany->name) . '%%%' . $oSiteuserCompany->getAvatar(),
+							'attr' => array('class' => 'siteuser-company')
+						);
+ */					}
+
+					$aSiteuserPersons = $oSelectedSiteuser->Siteuser_People->findAll();
+					foreach ($aSiteuserPersons as $oSiteuserPerson)
+					{
+						$sOptionValue = 'person_' . $oSiteuserPerson->id;
+						
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserPerson->getAvatar() . '</option>';
+						
+						/* $oOptgroupSiteuser->children['person_' . $oSiteuserPerson->id] = array(
+							'value' => htmlspecialchars($oSiteuserPerson->getFullName()) . '%%%' . $oSiteuserPerson->getAvatar(),
+							'attr' => array('class' => 'siteuser-person')
+						); */
+					}
+					
+					$sOptions = '<optgroup label="' . $oSelectedSiteuser->login . '" class="siteuser">' . $sOptions . '</optgroup>';
+				}				
+			}	
+				
+			?>
+			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
+				<?php echo $sOptions?>
+			</select>
+
+			<script>
+				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
+
+				//$(".select2-container").css('width', '100%');
+			</script>
+			<?php
+		}
+		else
+		{
+			?>—<?php
+		}
+	}
+
+	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$iUserId = intval($value);
+
+		$placeholder = Core::_('User.select_user');
+		$language = Core_i18n::instance()->getLng();
+		//$oUser = Core_Entity::factory('Siteuser')->getById($iUserId);
+
+		///////////////////
+
+		$oOptgroupCompany = new stdClass();
+		$oOptgroupCompany->attributes = array('label' => '');
+
+		$aSelectResponsibleUsers = array('-1' => '');
+		//$aSelectResponsibleUsers[] = $oOptgroupCompany;
+
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$aCompanies = $oSite->Companies->findAll();
+		foreach ($aCompanies as $oCompany)
+		{
+			//$aTmpCompanies[] = $oCompany->id;
+
+			$oOptgroupCompany = new stdClass();
+			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
+			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
+
+			$aSelectResponsibleUsers[] = $oOptgroupCompany;
+		}
+
+		Core::factory('Core_Html_Entity_Select')
+			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
+			->options($aSelectResponsibleUsers)
+			->name($filterPrefix . $oAdmin_Form_Field->id)
+			->value($iUserId)
+			->execute();
+		?>
+		<script>
+
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').select2({
+				placeholder: '<?php echo $placeholder?>',
+				allowClear: true,
+				//multiple: true,
+				templateResult: $.templateResultItemResponsibleEmployees,
+				escapeMarkup: function(m) { return m; },
+				templateSelection: $.templateSelectionItemResponsibleEmployees,
+				language: '<?php echo $language?>',
+				width: "100%"
+			}).val('<?php echo $iUserId?>').trigger('change.select2');
+
+		$(".select2-container").css('width', '100%');
+
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
+			.on('select2:unselect', function (){
+				
+				$(this)
+					.next('.select2-container')
+					.find('.select2-selection--single')
+					.removeClass('user-container');
+			});
+
+		</script>
+		<?php
+
+	}
 
 	protected function _filterCallbackSiteuser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
@@ -2171,25 +2308,41 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 									if ($dateFrom != '')
 									{
-										$dateFrom = trim(
+										$sDateFrom = trim(
 											$oAdmin_Form_Field_Changed->type == 5
 												? Core_Date::datetime2sql($dateFrom)
 												: date('Y-m-d 00:00:00', Core_Date::date2timestamp($dateFrom))
 											);
 
 										// Если не задана конечная дата, то ищем только за дату form (см. counter)
-										$sCondition = is_null($dateTo) ? '=' : '>=';
+										//$sCondition = is_null($dateTo) ? '=' : '>=';
+										if (is_null($dateTo))
+										{
+											if ($oAdmin_Form_Field_Changed->type == 5 && strpos($dateFrom, ' ') === FALSE)
+											{
+												$sCondition = 'BETWEEN';
+												$sDateFrom = array($sDateFrom, date('Y-m-d 23:59:59', Core_Date::date2timestamp($dateFrom)));
+											}
+											else
+											{
+												$sCondition = '=';
+											}
+										}
+										else
+										{
+											$sCondition = '>=';
+										}
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field_Changed->name, $sCondition, $dateFrom)
+												array($oAdmin_Form_Field_Changed->name, $sCondition, $sDateFrom)
 											)
 										);
 									}
 
 									if ($dateTo != '')
 									{
-										$dateTo = trim(
+										$sDateTo = trim(
 											$oAdmin_Form_Field_Changed->type == 5
 												// Преобразуем из d.m.Y H:i:s в SQL формат
 												? Core_Date::datetime2sql($dateTo)
@@ -2199,7 +2352,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field_Changed->name, '<=', $dateTo)
+												array($oAdmin_Form_Field_Changed->name, '<=', $sDateTo)
 											)
 										);
 									}

@@ -150,7 +150,7 @@ class Antispam_Controller extends Core_Servant_Properties
 		$aAntispam_Stopwords = $this->getAntispamStopword();
 		foreach ($aAntispam_Stopwords as $oAntispam_Stopword)
 		{
-			if (strpos($this->text, $oAntispam_Stopword->value) !== FALSE)
+			if ($oAntispam_Stopword->value != '' && strpos($this->text, $oAntispam_Stopword->value) !== FALSE)
 			{
 				if ($this->log)
 				{

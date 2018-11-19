@@ -107,6 +107,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	 * Get options list
 	 * @param array $LA
 	 * @return self
+	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
 	 */
 	public function getOptionsList(array $LA)
 	{
@@ -517,6 +518,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						);
 					}
 				break;
+				default:
+					Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivInputs, $value)); 
 			}
 
 			$oDivRow->execute();

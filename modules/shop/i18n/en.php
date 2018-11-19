@@ -174,4 +174,9 @@ return array(
 	'all_items_count' => 'Items: %s',
 
 	'create_small_image' => 'Create small image from large image',
+
+	'issue_discountcard' => 'Issue discount card by order',
+	'discountcard_template' => 'Discount card number template',
+	'invoice_template' => 'Order invoice number template',
+	'all_shops' => 'All shops',
 );

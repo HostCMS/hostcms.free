@@ -64,8 +64,8 @@ class Property_Controller_Value
 				$oProperty = self::_getProperty($iPropertyId);
 				if (!is_null($oProperty))
 				{
-					$aPropertyValue = self::factory($oProperty->type);
-					$aSelect[$aPropertyValue->getModelName()][] = $iPropertyId;
+					$oPropertyValue = self::factory($oProperty->type);
+					$aSelect[$oPropertyValue->getModelName()][] = $iPropertyId;
 				}
 			}
 

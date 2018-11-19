@@ -196,20 +196,7 @@ class Shop_Group_Model extends Core_Entity
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
 		{
-			switch ($oProperty_Value->Property->type)
-			{
-				case 2:
-					$oProperty_Value
-						->setHref($this->getGroupHref())
-						->setDir($this->getGroupPath());
-				break;
-				case 8:
-					$oProperty_Value->dateFormat($this->Shop->format_date);
-				break;
-				case 9:
-					$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
-				break;
-			}
+			$this->_preparePropertyValue($oProperty_Value);
 		}
 
 		$bCache && $this->_propertyValues[$iMd5] = $aReturn;
@@ -1114,16 +1101,9 @@ class Shop_Group_Model extends Core_Entity
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
-					if ($oProperty_Value->Property->type == 2)
-					{
-						$oProperty_Value
-							->setHref($this->getGroupHref())
-							->setDir($this->getGroupPath());
-					}
+					$this->_preparePropertyValue($oProperty_Value);
 
-					/*isset($this->_showXmlProperties[$oProperty_Value->property_id]) && */$this->addEntity(
-						$oProperty_Value
-					);
+					$this->addEntity($oProperty_Value);
 				}
 			}
 			else
@@ -1137,6 +1117,28 @@ class Shop_Group_Model extends Core_Entity
 		return parent::getXml();
 	}
 
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getGroupHref())
+					->setDir($this->getGroupPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
+		}
+	}
+	
 	/**
 	 * Clear tagged cache
 	 * @return self

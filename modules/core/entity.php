@@ -315,12 +315,12 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
-	 * Get table columns
+	 * Get table columns. Fix wrong method name
 	 * @return array
 	 */
 	public function getTableColums()
 	{
-		return $this->_loadColumns()->_tableColumns;
+		return $this->getTableColumns();
 	}
 
 	/**
@@ -605,12 +605,12 @@ class Core_Entity extends Core_ORM
 
 		foreach ($this->_modelColumns as $field_name => $field_value)
 		{
-			// Разрешенные теги
+			// Allowed Tags
 			if ($field_name != $this->_primaryKey
 				&& ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
 			)
 			{
-				// Запрещенные теги
+				// Forbidden Tags
 				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
 				{
 					if ($bShortcodeTags && $iCountShortcodes && isset($this->_shortcodeTags[$field_name]))
@@ -634,6 +634,20 @@ class Core_Entity extends Core_ORM
 			$xml .= $oChildrenEntity->getXml();
 		}
 
+		// data-values, e.g. dataMyValue
+		foreach ($this->_dataValues as $field_name => $field_value)
+		{
+			// Allowed Tags
+			if ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
+			{
+				// Forbidden Tags
+				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
+				{
+					$xml .= "<{$field_name}>" . Core_Str::xml($field_value) . "</{$field_name}>\n";
+				}
+			}
+		}
+		
 		$xml .= "</" . $this->_tagName . ">\n";
 
 		$this->_clearEntitiesAfterGetXml && $this->clearEntities();

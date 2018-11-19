@@ -156,20 +156,7 @@ class Informationsystem_Group_Model extends Core_Entity
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
 		{
-			switch ($oProperty_Value->Property->type)
-			{
-				case 2:
-					$oProperty_Value
-						->setHref($this->getGroupHref())
-						->setDir($this->getGroupPath());
-				break;
-				case 8:
-					$oProperty_Value->dateFormat($this->Informationsystem->format_date);
-				break;
-				case 9:
-					$oProperty_Value->dateTimeFormat($this->Informationsystem->format_datetime);
-				break;
-			}
+			$this->_preparePropertyValue($oProperty_Value);
 		}
 
 		$bCache && $this->_propertyValues[$iMd5] = $aReturn;
@@ -284,6 +271,28 @@ class Informationsystem_Group_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getGroupHref())
+					->setDir($this->getGroupPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Informationsystem->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Informationsystem->format_datetime);
+			break;
+		}
+	}
+	
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
@@ -1032,11 +1041,12 @@ class Informationsystem_Group_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+				
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
-					/*isset($this->_showXmlProperties[$oProperty_Value->property_id]) && */$this->addEntity(
-						$oProperty_Value
-					);
+					$this->_preparePropertyValue($oProperty_Value);
+					
+					$this->addEntity($oProperty_Value);
 				}
 			}
 			else

@@ -293,12 +293,12 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'uploadFile')
 	$oAdmin_Form_Controller->addAction($oWysiwyg_Filemanager_Controller_Upload_File);
 }
 
-$path = CMS_FOLDER . $cdir;
+$path = CMS_FOLDER . ltrim($cdir, DIRECTORY_SEPARATOR);
 
 // Источник данных "Директории"
-$oAdmin_Form_Dataset = new Wysiwyg_Filemanager_Dataset('dir');
-$oAdmin_Form_Dataset->setPath($path);
+$oAdmin_Form_Dataset = new Wysiwyg_Filemanager_Dataset(array('dir', 'link'));
 $oAdmin_Form_Dataset
+	->setPath($path)
 	->addExternalField('name')
 	->addExternalField('datetime');
 // Добавляем источник данных контроллеру формы
@@ -309,8 +309,7 @@ $oAdmin_Form_Controller->addDataset(
 $oAdmin_Form_Dataset = new Wysiwyg_Filemanager_Dataset('file');
 $oAdmin_Form_Dataset
 	->changeField('name', 'type', 1)
-	->setPath($path);
-$oAdmin_Form_Dataset
+	->setPath($path)
 	->addExternalField('name')
 	->addExternalField('datetime');
 // Добавляем источник данных контроллеру формы

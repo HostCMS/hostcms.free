@@ -447,7 +447,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected function _setLimits()
 	{
 		// Load model columns BEFORE FOUND_ROWS()
-		Core_Entity::factory('Informationsystem_Item')->getTableColums();
+		Core_Entity::factory('Informationsystem_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
 		Core_Entity::factory('User', 0)->getCurrent();
@@ -1281,7 +1281,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				if ($this->groupsProperties
 					&& (!$bIsArrayPropertiesForGroups || in_array($oInformationsystem_Group->id, $this->propertiesForGroups)))
 				{
-					$aProperty_Values = $oInformationsystem_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
+					/*$aProperty_Values = $oInformationsystem_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
 
 					foreach ($aProperty_Values as $oProperty_Value)
 					{
@@ -1304,7 +1304,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 							$oInformationsystem_Group->addEntity($oProperty_Value);
 						}
-					}
+					}*/
+					
+					$oInformationsystem_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
 				{
