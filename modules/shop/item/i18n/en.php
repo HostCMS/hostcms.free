@@ -321,4 +321,6 @@ return array(
 	'quantity_step' => '<acronym title="Quantity step">Step</acronym>',
 	'modifications_root' => '...',
 	'disountcard_link' => 'Discount cards',
+	'items_catalog_barcodes' => 'Barcodes',
+	'type_barcode' => 'Input barcode',	
 );

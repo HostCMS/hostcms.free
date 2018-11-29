@@ -1258,6 +1258,13 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
+		// Barcodes
+		$aShop_Item_Barcodes = $this->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$oSearch_Page->text .= htmlspecialchars($oShop_Item_Barcode->value) . ' ';
+		}
+
 		$aPropertyValues = $this->getPropertyValues(FALSE);
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
@@ -1557,6 +1564,9 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем связи с комплектом товаров, обратная связь
 		$this->Shop_Item_Set_Seconds->deleteAll(FALSE);
 
+		// Удаляем штрихкоды
+		$this->Shop_Item_Barcodes->deleteAll(FALSE);
+
 		// Удаляем директорию товара
 		$this->deleteDir();
 
@@ -1625,6 +1635,17 @@ class Shop_Item_Model extends Core_Entity
 			htmlspecialchars($object->name)
 		);
 
+		// Barcodes
+		$aShop_Item_Barcodes = $this->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-sm darkgray bordered-1 bordered-gray')
+					->value($oShop_Item_Barcode->value)
+			);
+		}
+
 		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
 			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
 
@@ -1646,8 +1667,7 @@ class Shop_Item_Model extends Core_Entity
 					. $object->Shop->Structure->getPath()
 					. $object->getPath();
 
-				$oCore_Html_Entity_Div
-				->add(
+				$oCore_Html_Entity_Div->add(
 					Core::factory('Core_Html_Entity_A')
 						->href($href)
 						->target('_blank')
@@ -1682,6 +1702,23 @@ class Shop_Item_Model extends Core_Entity
 	public function showXmlBonuses($showXmlBonuses = TRUE)
 	{
 		$this->_showXmlBonuses = $showXmlBonuses;
+		return $this;
+	}
+
+	/**
+	 * Show barcodes in XML
+	 * @var boolean
+	 */
+	protected $_showXmlBarcodes = FALSE;
+
+	/**
+	 * Add barcodes XML to item
+	 * @param boolean $showXmlBarcodes mode
+	 * @return self
+	 */
+	public function showXmlBarcodes($showXmlBarcodes = TRUE)
+	{
+		$this->_showXmlBarcodes = $showXmlBarcodes;
 		return $this;
 	}
 
@@ -2002,8 +2039,7 @@ class Shop_Item_Model extends Core_Entity
 		// Sets
 		elseif ($this->type == 3)
 		{
-			$oSetEntity = Core::factory('Core_Xml_Entity')
-				->name('set');
+			$oSetEntity = Core::factory('Core_Xml_Entity')->name('set');
 
 			$this->addEntity($oSetEntity);
 
@@ -2031,6 +2067,7 @@ class Shop_Item_Model extends Core_Entity
 					$oSetEntity->addEntity(
 						$oTmp_Shop_Item
 							->id($oShop_Item->id)
+							->showXmlModifications(FALSE)
 							->showXmlAssociatedItems(FALSE)
 							->addEntity(
 								Core::factory('Core_Xml_Entity')
@@ -2098,6 +2135,9 @@ class Shop_Item_Model extends Core_Entity
 		$this->shop_seller_id && !isset($this->_forbiddenTags['shop_seller']) && $this->addEntity($this->Shop_Seller);
 		$this->shop_producer_id && !isset($this->_forbiddenTags['shop_producer']) && $this->addEntity($this->Shop_Producer);
 		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure);
+
+		// Barcodes
+		$this->_showXmlBarcodes && $this->addEntities($this->Shop_Item_Barcodes->findAll());
 
 		// Modifications
 		if ($this->_showXmlModifications && !isset($this->_forbiddenTags['modifications']))
@@ -2733,6 +2773,8 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Recount set
 	 * @return self
+	 * @hostcms-event shop_item.onRecountSetItem
+	 * @hostcms-event shop_item.onAfterRecountSet
 	 */
 	public function recountSet()
 	{
@@ -2743,6 +2785,8 @@ class Shop_Item_Model extends Core_Entity
 			$Shop_Item_Controller = new Shop_Item_Controller();
 
 			$amount = 0;
+
+			//$aAvailableRest = array();
 
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
@@ -2762,10 +2806,21 @@ class Shop_Item_Model extends Core_Entity
 				{
 					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name));
 				}
+
+				// Check warehouses rest
+				// Товары могут быть с разных складов, автоматически пересчитывать остатки нельзя.
+				/*if ($oShop_Item_Set->count > 0)
+				{
+					$aAvailableRest[] = floor($oTmp_Shop_Item->getRest() / $oShop_Item_Set->count);
+				}*/
+
+				Core_Event::notify($this->_modelName . '.onRecountSetItem', $this, array($oShop_Item_Set));
 			}
 
 			$this->price = $amount;
 			$this->save();
+
+			Core_Event::notify($this->_modelName . '.onAfterRecountSet', $this);
 		}
 		else
 		{

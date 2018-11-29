@@ -493,9 +493,10 @@ $Shop_Controller_Show
 	// Режим вывода групп
 	//->groupsMode('none')
 	// Выводить доп. св-ва групп
-//	->groupsProperties(TRUE)
+	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
 	//->filterShortcuts(TRUE)
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
+	// ->barcodes(TRUE)
 	->show();

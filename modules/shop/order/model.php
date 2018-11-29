@@ -1514,12 +1514,12 @@ class Shop_Order_Model extends Core_Entity
 		// Способ доставки
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Способ доставки');
-		$oOrderProperty->addChild('Значение', $this->shop_delivery->name);
+		$oOrderProperty->addChild('Значение', $this->Shop_Delivery->name);
 
 		// Метод оплаты
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Метод оплаты');
-		$oOrderProperty->addChild('Значение', $this->shop_payment_system->name);
+		$oOrderProperty->addChild('Значение', $this->Shop_Payment_System->name);
 
 		// Адрес доставки
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
@@ -1586,7 +1586,7 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Order_Item->Shop_Item->modification_id
 						? sprintf('%s#%s', $oShop_Order_Item->Shop_Item->Modification->guid, $oShop_Order_Item->Shop_Item->guid)
 						: ($oShop_Order_Item->type == 1
-							? 'ORDER_DELIVERY'
+							? $this->Shop_Delivery->guid //'ORDER_DELIVERY'
 							: $oShop_Order_Item->Shop_Item->guid
 						)
 				);

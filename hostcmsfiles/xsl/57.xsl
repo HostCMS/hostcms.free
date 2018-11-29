@@ -71,6 +71,7 @@
 					<input name="recount" value="&labelRecount;" type="submit" class="button" />
 
 					<!-- Пользователь авторизован или модуль пользователей сайта отсутствует -->
+					<!-- Чтобы дать возможность заказывать неавторизованным пользователям, удалите в условии 'and (siteuser_id > 0 or siteuser_exists = 0)' -->
 					<xsl:if test="count(shop_cart[postpone = 0]) and (siteuser_id > 0 or siteuser_exists = 0)">
 						<input name="step" value="1" type="hidden" />
 						<input value="&labelCheckout;" type="submit" class="button"/>

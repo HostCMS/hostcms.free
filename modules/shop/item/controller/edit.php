@@ -81,9 +81,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oAdditionalTab
 					->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
-				// $oMainTab
-					// ->move($this->getField("apply_purchase_discount"), $oAdditionalRow1);
-
 				$this->getField('image_small_height')
 					->divAttr(array('style' => 'display: none'));
 				$this->getField('image_small_width')
@@ -106,9 +103,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopItemTabAssociated = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Item.tab_associated'))
 					->name('Associateds');
-				/*$oShopItemTabSpecialPrices = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Shop_Item.tab_special_prices'))
-					->name('SpecialPrices');*/
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -120,6 +114,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
+
+				$this->getField('name')->class('input-lg form-control');
 
 				$oShopItemTabDescription
 					->add($oShopItemTabDescriptionRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -151,17 +147,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopItemTabSEORow3 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-				/*$oShopItemTabAssociated
-					->add($oShopItemTabAssociatedRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-				;*/
-
 				// Добавляем вкладки
 				$this
 					->addTabAfter($oShopItemTabDescription, $oMainTab)
 					->addTabAfter($oShopItemTabExportImport, $oShopItemTabDescription)
 					->addTabAfter($oShopItemTabSEO, $oShopItemTabExportImport)
 					->addTabAfter($oShopItemTabAssociated, $oShopItemTabSEO)
-					// ->addTabAfter($oShopItemTabSpecialPrices, $oShopItemTabSEO)
 				;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
@@ -551,7 +542,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$currencyName = $oShop_Item->Shop_Currency->name;
 
-						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteSetItem', NULL, 1, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
+						$iDatasetKey = $this->_object->modification_id == 0 ? 1 : 0;
+
+						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteSetItem', NULL, $iDatasetKey, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
 
 						$externalLink = '';
 
@@ -1144,12 +1137,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									processResults: function (data) {
 										var aResults = [];
 										$.each(data, function (index, item) {
-											var jInputName = $("#' . $windowId . ' input[name=\'name\']");
-											!jInputName.val() && jInputName.val(item.name).focus();
-
 											aResults.push({
 												"id": item.id,
-												"text": item.text
+												"text": item.text,
+												"name": item.name
 											});
 										});
 										return {
@@ -1157,6 +1148,17 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 										};
 									}
 								},
+							});
+
+							$(".shop-item-barcodes").on("select2:select", function (e) {
+								var data = e.params.data,
+									jInputName = $("#' . $windowId . ' input[name=\'name\']");
+
+								!jInputName.val() && jInputName
+									.val(data.name)
+									.focus()
+									.fadeOut(500)
+									.fadeIn(500);
 							});
 						})</script>
 					';
@@ -1193,7 +1195,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
 
-						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+						$iDatasetKey = $this->_object->modification_id == 0 ? 1 : 0;
+
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $iDatasetKey, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 						$associatedTable .= '
 							<tr id="' . $oShop_Item_Associated->id . '">

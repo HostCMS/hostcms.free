@@ -268,8 +268,10 @@ return array(
 	'item_cards_print_parent_group' => "<acronym title=\"Вы можете генерировать ценники для товаров из указанного каталога, включая все подкаталоги\">Родительская группа для генерации ценников</acronym>",
 	'item_cards_print_fio' => "ФИО ответственного лица",
 	'item_cards_print_date' => "Дата",
-	'item_cards_print_height' => "Высота, мм.",
+	// 'item_cards_print_height' => "Высота, мм.",
 	'item_cards_print_width' => "Ширина, мм.",
+	'item_cards_print_horizontal' => "По горизонтали",
+	'item_cards_print_vertical' => "По вертикали",
 	'item_cards_print_font' => "Размер шрифта",
 	'item_cards_desription' => "Наименование",
 	'item_cards_price' => "Цена",
@@ -323,4 +325,5 @@ return array(
 	'modifications_root' => '...',
 	'items_catalog_barcodes' => 'Штрихкоды',
 	'type_barcode' => 'Введите штрихкод',
+	'placeholderSearch' => 'Поиск',
 );

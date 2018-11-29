@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
  * - item(123) идентификатор показываемого товара
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
- * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE. Ограничения на список свойств в виде массива влияет и на выборку значений свойств товара.
  * - itemsPropertiesListJustAvailable(TRUE|FALSE) выводить только доступные значения у свойства, по умолчанию FALSE
  * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehouseMode('all'|'in-stock'|'in-stock-modification') режим вывода товаров:
@@ -38,6 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - siteuser(TRUE|FALSE) показывать данные о пользователе сайта, связанного с выбранным товаром, по умолчанию TRUE
  * - siteuserProperties(TRUE|FALSE) выводить значения дополнительных свойств пользователей сайта, по умолчанию FALSE
  * - bonuses(TRUE|FALSE) выводить бонусы для товаров, по умолчанию TRUE
+ * - barcodes(TRUE|FALSE) выводить штрихкоды для товаров, по умолчанию FALSE
  * - comparing(TRUE|FALSE) выводить сравниваемые товары, по умолчанию TRUE
  * - comparingLimit(10) максимальное количество выводимых сравниваемых товаров, по умолчанию 10
  * - favorite(TRUE|FALSE) выводить избранные товары, по умолчанию TRUE
@@ -118,6 +119,7 @@ class Shop_Controller_Show extends Core_Controller
 		'siteuser',
 		'siteuserProperties',
 		'bonuses',
+		'barcodes',
 		'comparing',
 		'comparingLimit',
 		'favorite',
@@ -281,7 +283,8 @@ class Shop_Controller_Show extends Core_Controller
 		$this->groupsProperties = $this->itemsProperties = $this->propertiesForGroups
 			= $this->comments = $this->tags = $this->calculateCounts = $this->siteuserProperties
 			= $this->warehousesItems = $this->taxes = $this->cart = $this->modifications
-			= $this->modificationsList = $this->filterShortcuts = $this->itemsPropertiesListJustAvailable = FALSE;
+			= $this->modificationsList = $this->filterShortcuts = $this->itemsPropertiesListJustAvailable
+			= $this->barcodes = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->groupsPropertiesList
 			= $this->bonuses = $this->comparing = $this->favorite = $this->viewed
@@ -691,10 +694,11 @@ class Shop_Controller_Show extends Core_Controller
 				{
 					$this->applyItemsForbiddenTags($oShop_Item);
 
-					$oShop_Item->showXmlProperties($this->itemsProperties);
-					$oShop_Item->showXmlComments($this->comments);
-					$oShop_Item->showXmlBonuses($this->bonuses);
-					$oShop_Item->showXmlSpecialprices($this->specialprices);
+					$oShop_Item
+						->showXmlProperties($this->itemsProperties)
+						->showXmlComments($this->comments)
+						->showXmlBonuses($this->bonuses)
+						->showXmlSpecialprices($this->specialprices);
 
 					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oShop_Item));
 
@@ -1077,6 +1081,7 @@ class Shop_Controller_Show extends Core_Controller
 							->commentsActivity($this->commentsActivity);
 
 						$oShop_Item->showXmlBonuses($this->bonuses);
+						$oShop_Item->showXmlBarcodes($this->barcodes);
 						$oShop_Item->showXmlWarehousesItems($this->warehousesItems);
 						$oShop_Item->showXmlAssociatedItems($this->associatedItems);
 						$oShop_Item->showXmlModifications($this->modifications);
@@ -1897,7 +1902,7 @@ class Shop_Controller_Show extends Core_Controller
 			foreach ($this->_aShop_Groups[$parent_id] as $oShop_Group)
 			{
 				// $bIsArrayGroupsProperties && $oShop_Group->showXmlProperties(FALSE);
-				
+
 				// Properties for shop's group entity
 				if ($this->groupsProperties
 					&& (!$bIsArrayPropertiesForGroups || in_array($oShop_Group->id, $this->propertiesForGroups)))
@@ -1915,7 +1920,7 @@ class Shop_Controller_Show extends Core_Controller
 							$oShop_Group->addEntity($oProperty_Value);
 						}
 					}*/
-					
+
 					$oShop_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
@@ -1951,7 +1956,7 @@ class Shop_Controller_Show extends Core_Controller
 		if (isset($this->_aItem_Properties[$parent_id]))
 		{
 			$oShop = $this->getEntity();
-			
+
 			foreach ($this->_aItem_Properties[$parent_id] as $oProperty)
 			{
 				if ($this->itemsPropertiesListJustAvailable
@@ -1973,10 +1978,10 @@ class Shop_Controller_Show extends Core_Controller
 
 					$this->group !== FALSE
 						&& $oCore_QueryBuilder_Select->where('shop_items.shop_group_id', '=', $this->group);
-						
+
 					$this->producer
 						&& $oCore_QueryBuilder_Select->where('shop_items.shop_producer_id', '=', $this->producer);
-						
+
 					// Стандартные ограничения для товаров
 					$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select);
 
@@ -1989,13 +1994,13 @@ class Shop_Controller_Show extends Core_Controller
 							->where('shop_items.deleted', '=', 0)
 							->where('shop_items.active', '=', 1);
 							//->where('shop_items.shop_group_id', '=', $shop_group_id);
-							
+
 						$this->group !== FALSE
 							&& $oCore_QueryBuilder_Select_Modifications->where('shop_items.shop_group_id', '=', $this->group);
 
 						$this->producer
 							&& $oCore_QueryBuilder_Select_Modifications->where('shop_items.shop_producer_id', '=', $this->producer);
-							
+
 						// Стандартные ограничения для товаров
 						$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Modifications);
 
@@ -2022,10 +2027,10 @@ class Shop_Controller_Show extends Core_Controller
 
 							$this->group !== FALSE
 								&& $oCore_QueryBuilder_Select_Shortcuts_For_Modifications->where('shop_items.shop_group_id', '=', $this->group);
-								
+
 							$this->producer
 								&& $oCore_QueryBuilder_Select_Shortcuts_For_Modifications->where('shop_items.shop_producer_id', '=', $this->producer);
-								
+
 							$oCore_QueryBuilder_Select
 								->setOr()
 								->where('shop_items.shop_id', '=', $oShop->id)
@@ -2046,7 +2051,7 @@ class Shop_Controller_Show extends Core_Controller
 
 						$this->group !== FALSE
 							&& $oCore_QueryBuilder_Select_Shortcuts->where('shop_items.shop_group_id', '=', $this->group);
-							
+
 						// Стандартные ограничения для товаров
 						$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
 

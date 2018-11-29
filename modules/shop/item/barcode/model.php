@@ -20,6 +20,12 @@ class Shop_Item_Barcode_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'shop_item' => array(),
 	);
+	
+	/**
+	 * Column consist item's name
+	 * @var string
+	 */
+	protected $_nameColumn = 'value';	
 
 	/**
 	 * Set barcode type

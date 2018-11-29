@@ -1877,6 +1877,30 @@
 				}
 			});
 		},
+		loadWallpaper: function(wallpaper_id) {
+			$.ajax({
+				url: '/admin/user/index.php',
+				type: "POST",
+				data: {'loadWallpaper':1, 'wallpaper_id':wallpaper_id},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					if (answer.id)
+					{
+						var jWallpapersList = $('ul.wallpaper-picker');
+						jWallpapersList.append(
+							'<li>\
+								<span class="colorpick-btn">\
+									<img onclick="$.changeWallpaper(this)" data-id="' + answer.id + '" data-original-path="' + answer.original_path + '" src="' + answer.src + '" />\
+								</span>\
+							</li>'
+						);
+
+						$('#user-info-dropdown .login-area').effect('pulsate', {times: 3}, 3000);
+					}
+				}
+			});
+		},
 		changeWallpaper: function(img) {
 			var wallpaper_id =  $(img).data('id'),
 				original = $(img).data('original-path');
@@ -3549,11 +3573,11 @@
 			});
 		},
 		/* --- /CHAT --- */
-		
+
 		selectPersonCompany: function(settings)
 		{
 			settings = $.extend({
-				
+
 				ajax: {
 					url: "/admin/siteuser/index.php?loadEventSiteusers",
 					dataType: "json",
@@ -3574,45 +3598,31 @@
 				allowClear: true,
 				templateResult: $.templateResultItemSiteusers,
 				escapeMarkup: function(m) { return m; },
-				templateSelection: $.templateSelectionItemSiteusers,				
+				templateSelection: $.templateSelectionItemSiteusers,
 				width: "100%"
-				
+
 			}, settings);
 
 			return this.each(function(){
 				jQuery(this).select2(settings);
 			});
 		},
-		
+
 		selectUser: function(settings)
 		{
 			settings = $.extend({
-				
-				ajax: {
-					url: "/admin/user/index.php?loadUsers",
-					dataType: "json",
-					type: "GET",
-					processResults: function (data) {
-						var aResults = [];
-						$.each(data, function (index, item) {
-							aResults.push({
-								"id": item.id,
-								"text": item.text
-							});
-						});
-						return {
-							results: aResults
-						};
-					}
-				}
-				
+				allowClear: true,
+				templateResult: $.templateResultItemResponsibleEmployees,
+				escapeMarkup: function(m) { return m; },
+				templateSelection: $.templateSelectionItemResponsibleEmployees,
+				width: "100%"
 			}, settings);
 
 			return this.each(function(){
 				jQuery(this).select2(settings);
 			});
 		},
-		
+
 		selectSiteuser: function(settings)
 		{
 			settings = $.extend({

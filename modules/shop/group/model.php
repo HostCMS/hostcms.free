@@ -769,7 +769,7 @@ class Shop_Group_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$link = $oAdmin_Form_Field->link;
 		$onclick = $oAdmin_Form_Field->onclick;

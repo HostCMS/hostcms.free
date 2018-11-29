@@ -918,6 +918,25 @@ if (Core_Auth::logged())
 		exit();
 	}
 
+	if (!is_null(Core_Array::getPost('loadWallpaper')) && !is_null(Core_Array::getPost('wallpaper_id')))
+	{
+		$aJSON = array();
+
+		$wallpaper_id = intval(Core_Array::getPost('wallpaper_id'));
+		$oUser_Wallpaper = Core_Entity::factory('User_Wallpaper')->getById($wallpaper_id);
+
+		if (!is_null($oUser_Wallpaper))
+		{
+			$aJSON = array(
+				'id' => $oUser_Wallpaper->id,
+				'original_path' => htmlspecialchars($oUser_Wallpaper->getLargeImageFileHref()),
+				'src' => htmlspecialchars($oUser_Wallpaper->getSmallImageFileHref()),
+			);
+		}
+
+		Core::showJson($aJSON);
+	}
+
 	// Avatar
 	if (!is_null(Core_Array::getGet('loadUserAvatar')))
 	{

@@ -223,7 +223,14 @@ a, a:hover, a:focus {
 	padding-bottom: 5px;
 }
 .admin-table select {width: 100%}
-div.form-group .caption{display:block;margin:0 0 3px;padding:0}
+div.form-group .caption {
+	display:block;
+	margin:0 0 3px;
+	overflow: hidden;
+	padding:0;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
 div.form-group acronym { text-decoration: none; /*border-bottom: 1px dashed #D0D0D0;*/ cursor: help }
 
 .radio-inline, .checkbox-inline {padding-left: 2px}
@@ -2564,7 +2571,7 @@ table.table.table-popular-queries tr td:last-child {
 .dropdown-menu .fa, [data-toggle="dropdown"] .fa {
     margin-right: 4px;
 }
-.btn-group [data-toggle="dropdown"] .fa , .btn-group ul.dropdown-menu > li > a i.fa {
+.btn-group [data-toggle="dropdown"] .fa /*, .btn-group ul.dropdown-menu > li > a i.fa */{
 	color: inherit !important;
 }
 
@@ -4301,7 +4308,7 @@ table.company-structure tbody tr td { padding: 10px; }
 
 .deal-siteuser .input-group
 {
-	display: block;	
+	display: block;
 }
 .deal-siteuser .input-group .select2.select2-container
 {
@@ -4313,3 +4320,6 @@ table.company-structure tbody tr td { padding: 10px; }
 {
 	border-right: none;
 }
+
+.search-field { position: relative; }
+.search-field i { position: absolute; right: 25px; top: 10px; cursor: pointer; }

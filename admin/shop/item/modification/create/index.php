@@ -140,12 +140,7 @@ foreach ($aProperties as $oProperty)
 	{
 		$aNamePattern[] = sprintf("%s {P%s}", $oProperty->name, $oProperty->id);
 
-		$aListItems = $oProperty->List->List_Items->getAllByActive(1);
-		$aValues = array();
-		foreach ($aListItems as $oListItem)
-		{
-			$aValues[$oListItem->id] = array('value' => $oListItem->value, 'attr' => array('selected' => 'selected'));
-		}
+		$aValues = $oProperty->List->getListItemsTree();
 
 		$oAdmin_Form_Entity_Form->add(
 			Admin_Form_Entity::factory('Div')->class('row')
@@ -276,92 +271,11 @@ $oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShop_i
 if (!is_null($oShop_Warehouse_Item))
 {
 	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
-			->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('count')->value($oShop_Warehouse_Item->count))
+		->add(
+			Core::factory('Core_Html_Entity_Input')->type('hidden')->name('count')->value($oShop_Warehouse_Item->count)
+		)
 	);
 }
-
-/*$oAdmin_Form_Entity_Form->add(
-	Admin_Form_Entity::factory('Input')
-		->name("price")
-		->divAttr(array('style' => 'width: 75px; display: inline-block; padding-right:20px;'))
-		->caption(Core::_('Shop_Item.create_modification_price'))
-		->value($oShopItemParent->price)
-)->add(
-	Admin_Form_Entity::factory('Select')
-		->name('currency')
-		->divAttr(array('style' => 'width: 75px; display: inline-block;'))
-		->caption(' ')
-		->options($aCurrencies)
-		->value($oShopItemParent->shop_currency_id)
-)->add(
-	Admin_Form_Entity::factory('Select')
-		->name('measure')
-		->divAttr(array('style' => 'width: 75px;'))
-		->options($aMeasures)
-		->value($oShopItemParent->shop_measure_id)
-)->add(
-	Admin_Form_Entity::factory('Input')
-		->name('marking')
-		->caption(Core::_('Shop_Item.create_modification_mark'))
-		->value(sprintf("%s-{N}", $oShopItemParent->marking))
-)->add(
-	Admin_Form_Entity::factory('Input')
-		->name('name')
-		->caption(Core::_('Shop_Item.create_modification_name', $oShopItemParent->name, $oShopItemParent->name))
-		->value(sprintf("%s %s", $oShopItemParent->name, implode(', ', $aNamePattern)))
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_main_properties')
-		->caption(Core::_('Shop_Item.create_modification_copy_main_properties'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_seo')
-		->caption(Core::_('Shop_Item.create_modification_copy_seo'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_export_import')
-		->caption(Core::_('Shop_Item.create_modification_copy_export_import'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_prices_to_item')
-		->caption(Core::_('Shop_Item.create_modification_copy_prices_to_item'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_specials_prices_to_item')
-		->caption(Core::_('Shop_Item.create_modification_copy_specials_prices_to_item'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_tying_products')
-		->caption(Core::_('Shop_Item.create_modification_copy_tying_products'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_external_property')
-		->caption(Core::_('Shop_Item.create_modification_copy_external_property'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Checkbox')
-		->name('copy_tags')
-		->caption(Core::_('Shop_Item.create_modification_copy_tags'))
-		->value(0)
-)->add(
-	Admin_Form_Entity::factory('Input')
-		->type('hidden')
-		->name('shop_item_id')
-		->value($oShopItemParent->id)
-)->add(
-	Admin_Form_Entity::factory('Button')
-	 ->name('create_modifications')
-		->type('submit')
-		->value(Core::_('Shop_Item.create_modification'))
-		->class('applyButton')
-		->onclick($oAdmin_Form_Controller->getAdminSendForm('generateModifications', NULL, 'hostcms[checked][0][0]=1&shop_item_id=' . $oShopItemParent->id))
-);*/
 
 $oAdmin_Form_Entity_Form->add($oMainTab);
 
@@ -375,16 +289,6 @@ $oAdmin_Form_Entity_Form->add(
 );
 
 $oAdmin_Form_Entity_Form->execute();
-
-/*$oAdmin_Answer = Core_Skin::instance()->answer();
-
-$oAdmin_Answer
-->ajax(Core_Array::getRequest('_', FALSE))
-->content(
-	iconv("UTF-8", "UTF-8//IGNORE//TRANSLIT", ob_get_clean())
-)
-->title($sFormTitle)
-->execute();*/
 
 $content = ob_get_clean();
 

@@ -208,6 +208,13 @@ class Core_Entity extends Core_ORM
 	protected $_marksDeleted = 'deleted';
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+	
+	/**
 	 * Get column name for marks deleted
 	 */
 	public function getMarksDeleted()
@@ -420,7 +427,7 @@ class Core_Entity extends Core_ORM
 		Core_ObjectWatcher::instance()->delete($this);
 
 		// Delete Revisions
-		if (Core::moduleIsActive('revision'))
+		if ($this->_hasRevisions && Core::moduleIsActive('revision'))
 		{
 			if (is_null($primaryKey))
 			{

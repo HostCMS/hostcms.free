@@ -592,6 +592,12 @@ abstract class Shop_Payment_System_Handler
 			$this->_applyBonuses();
 		}
 
+		// Удаление купона из сессии
+		if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+		{
+			unset($_SESSION['hostcmsOrder']['coupon_text']);
+		}
+		
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
 
 		return $this;
@@ -928,8 +934,12 @@ abstract class Shop_Payment_System_Handler
 			$oShop_Order_Item->type = 1;
 			$this->_shopOrder->add($oShop_Order_Item);
 		}
+		else
+		{
+			$oShop_Order_Item = NULL;
+		}
 
-		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddDelivery', $this);
+		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddDelivery', $this, array($oShop_Order_Item));
 
 		return $this;
 	}

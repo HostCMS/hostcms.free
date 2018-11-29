@@ -153,7 +153,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				?><h5 class="row-title before-pink"><i class="fa <?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
 			}
 			?>
-			<div id="id_message"><?php echo $this->message?></div>
+			<div id="id_message"><?php /*echo $this->message*/?></div>
 			<div class="widget">
 				<div class="widget-body">
 					<?php $this->showChildren()?>

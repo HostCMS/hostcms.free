@@ -234,10 +234,8 @@ if (!$iModificationId)
 		->addCondition(array('select' => array('shop_groups.*', /*array('shop_groups.id', 'key'),*/ array(Core_QueryBuilder::expression("''"), 'count'))))
 		->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 		->addCondition(array('where' => array('parent_id', '=', intval($oShopGroupAssociated->id))))
-	;
-
-	$oAdmin_Form_Dataset
-		->changeField('name', 'type', 4)
+		->changeField('name', 'class', 'semi-bold')
+		//->changeField('name', 'type', 4)
 		->changeField('name', 'link',
 			'/admin/shop/item/associated/index.php?shop_id={shop_id}&shop_group_id={id}&shop_item_id=' . $oShopItem->id)
 		->changeField('name', 'onclick',

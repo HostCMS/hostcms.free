@@ -42,4 +42,5 @@ return array(
 	'courier' => 'Курьерская доставка',
 	'days_from' => 'Дней доставки от',
 	'days_to' => 'до',
+	'guid' => 'GUID',
 );

@@ -784,6 +784,17 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			$this->_deliveryOptions($oShop, $oShop_Item);
 		}
 
+		// barcode
+		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			// EAN-8 and EAN-13 only
+			if ($oShop_Item_Barcode->type == 1 || $oShop_Item_Barcode->type == 2)
+			{
+				$this->stdOut->write('<barcode>' . Core_Str::xml($oShop_Item_Barcode->value) . '</barcode>'. "\n");
+			}
+		}
+
 		// (name, vendor?, vendorCode?)
 		if (strlen($oShop_Item->name) > 0)
 		{

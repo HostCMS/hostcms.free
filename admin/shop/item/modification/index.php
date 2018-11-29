@@ -296,6 +296,34 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteSmallImage')
 	$oAdmin_Form_Controller->addAction($oDeleteSmallImageController);
 }
 
+// Удаление сопутствующих товаров с вкладки
+$oAdminFormActionDeleteAssociated = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteAssociated');
+
+if ($oAdminFormActionDeleteAssociated && $oAdmin_Form_Controller->getAction() == 'deleteAssociated')
+{
+	$Shop_Item_Associated_Controller_Delete = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Associated_Controller_Delete', $oAdminFormActionDeleteAssociated
+	);
+
+	$oAdmin_Form_Controller->addAction($Shop_Item_Associated_Controller_Delete);
+}
+
+// Удаление товаров из комплекта
+$oAdminFormActionDeleteSet = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteSetItem');
+
+if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'deleteSetItem')
+{
+	$Shop_Item_Set_Controller_Delete = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Set_Controller_Delete', $oAdminFormActionDeleteSet
+	);
+
+	$oAdmin_Form_Controller->addAction($Shop_Item_Set_Controller_Delete);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Item')

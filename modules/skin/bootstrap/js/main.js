@@ -176,7 +176,7 @@ function isEmpty(str) {
 						width: '80%',
 					}, settings);
 
-					$.modalWindow(settings);					
+					$.modalWindow(settings);
 
 					/*modalDiv.HostCMSWindow({
 						//autoOpen: true,
@@ -634,6 +634,8 @@ function isEmpty(str) {
 		{
 			jQuery("#" + windowId + " .admin_table_filter input").val('');
 			jQuery("#" + windowId + " .admin_table_filter select").prop('selectedIndex', 0);
+
+			jQuery("#" + windowId + " .search-field input[name = globalSearch]").val('');
 		},
 		deleteNewProperty: function(object)
 		{

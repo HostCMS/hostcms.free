@@ -42,4 +42,5 @@ return array(
 	'courier' => 'Courier',
 	'days_from' => 'Delivery days from',
 	'days_to' => 'to',
+	'guid' => 'GUID',	
 );

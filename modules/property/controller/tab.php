@@ -213,28 +213,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	 * @var array
 	 */
 	protected $_cacheListOptions = array();
-
-	protected $_aListItemsTree = array();
-
-	protected function _fillListItems($iListItemParentId = 0, $iLevel = 0)
-	{
-		$iListItemParentId = intval($iListItemParentId);
-		$iLevel = intval($iLevel);
-
-		$aReturn = array();
-
-		if (isset($this->_aListItemsTree[$iListItemParentId]))
-		{
-			foreach ($this->_aListItemsTree[$iListItemParentId] as $oList_Item)
-			{
-				$aReturn[$oList_Item->id] = str_repeat('  ', $iLevel) . $oList_Item->value;
-				$aReturn += $this->_fillListItems($oList_Item->id, $iLevel + 1);
-			}
-		}
-
-		return $aReturn;
-	}
-
+	
 	/**
 	 * Add external properties container to $parentObject
 	 * @param int $parent_id ID of parent directory of properties
@@ -348,22 +327,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							{
 								if (!isset($this->_cacheListOptions[$oProperty->list_id]))
 								{
-									$oList_Items = $oProperty->List->List_Items;
-									$oList_Items->queryBuilder()
-										->where('list_items.active', '=', 1);
-
-									$this->_aListItemsTree = array();
-
-									$aList_Items = $oList_Items->findAll(FALSE);
-									foreach ($aList_Items as $oList_Item)
-									{
-										$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item;
-									}
-
 									$this->_cacheListOptions[$oProperty->list_id] = array(' … ');
-									$this->_cacheListOptions[$oProperty->list_id] += $this->_fillListItems(0);
-
-									$this->_aListItemsTree = array();
+									$this->_cacheListOptions[$oProperty->list_id] += $oProperty->List->getListItemsTree();
 								}
 
 								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')

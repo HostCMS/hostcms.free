@@ -260,7 +260,9 @@ class Core_Session_Phpredis extends Core_Session
 
 		while (!connection_aborted())
 		{
+			// Redis 2.6.12+
 			if ($this->_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
+			//if ($this->_redis->setNx($this->_lockKey, $this->_lockToken))
 			{
 				return TRUE;
 			}

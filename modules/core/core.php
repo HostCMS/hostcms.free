@@ -109,6 +109,19 @@ class Core
 
 		self::$log = Core_Log::instance();
 
+		try
+		{
+			Core_DataBase::instance()->connect();
+		}
+		catch (Exception $e)
+		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+
+			echo $e->getMessage();
+			die();
+		}
+
 		// Constants init
 		$oConstants = Core_Entity::factory('Constant');
 		$oConstants->queryBuilder()->where('active', '=', 1);
@@ -117,7 +130,7 @@ class Core
 		{
 			$oConstant->define();
 		}
-
+		
 		!defined('TMP_DIR') && define('TMP_DIR', 'hostcmsfiles/tmp/');
 		!defined('DEFAULT_LNG') && define('DEFAULT_LNG', 'ru');
 		!defined('BACKUP_DIR') && define('BACKUP_DIR', CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR);
@@ -375,12 +388,23 @@ class Core
 	 */
 	static public function getClassPath($class)
 	{
+		// $class = basename($class);
+		$aNamespaces = explode('\\', $class);
+		$aNamespaces = array_map('basename', $aNamespaces);
+		
+		$class = array_pop($aNamespaces);
+		
 		$aClassName = explode('_', strtolower($class));
 
 		$sFileName = array_pop($aClassName);
 
+		// Path from Namespace
+		$path = empty($aNamespaces)
+			? ''
+			: implode(DIRECTORY_SEPARATOR, $aNamespaces);
+		
 		// If class name doesn't have '_'
-		$path = empty($aClassName)
+		$path .= empty($aClassName) && empty($aNamespaces)
 			? $sFileName . DIRECTORY_SEPARATOR
 			: implode(DIRECTORY_SEPARATOR, $aClassName) . DIRECTORY_SEPARATOR;
 
@@ -420,8 +444,6 @@ class Core
 	 */
 	static public function _autoload($class)
 	{
-		$class = basename($class);
-
 		if (isset(self::$_autoloadCache[$class]))
 		{
 			return self::$_autoloadCache[$class];

@@ -1890,37 +1890,37 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</select>
 		<?php
 	}
-	
+
 	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		if (Core::moduleIsActive('siteuser'))
 		{
-			$placeholder = Core::_('Siteuser.select_siteuser');			
+			$placeholder = Core::_('Siteuser.select_siteuser');
 			$language = Core_i18n::instance()->getLng();
-			
+
 			$aTmpValue = explode('_', $value);
-			
-			$sOptions = '';	
-			
+
+			$sOptions = '';
+
 			if (count($aTmpValue) == 2 && ($aTmpValue[0] == 'company' || $aTmpValue[0] == 'person'))
 			{
 				$iCounterpartyId = intval($aTmpValue[1]);
-								
-				$oSelectedSiteuser = $aTmpValue[0] == 'company' 
+
+				$oSelectedSiteuser = $aTmpValue[0] == 'company'
 					? Core_Entity::factory('Siteuser_Company', $iCounterpartyId)->Siteuser
 					: Core_Entity::factory('Siteuser_Person', $iCounterpartyId)->Siteuser;
-					
-								
+
+
 				if (!is_null($oSelectedSiteuser->id))
 				{
 					$aSiteuserCompanies = $oSelectedSiteuser->Siteuser_Companies->findAll();
-					
+
 					foreach ($aSiteuserCompanies as $oSiteuserCompany)
 					{
 						$sOptionValue = 'company_' . $oSiteuserCompany->id;
-						
+
 						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserCompany->getAvatar() . '</option>';
-						
+
 						/* $oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
 							'value' => htmlspecialchars($oSiteuserCompany->name) . '%%%' . $oSiteuserCompany->getAvatar(),
 							'attr' => array('class' => 'siteuser-company')
@@ -1931,19 +1931,19 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					foreach ($aSiteuserPersons as $oSiteuserPerson)
 					{
 						$sOptionValue = 'person_' . $oSiteuserPerson->id;
-						
+
 						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserPerson->getAvatar() . '</option>';
-						
+
 						/* $oOptgroupSiteuser->children['person_' . $oSiteuserPerson->id] = array(
 							'value' => htmlspecialchars($oSiteuserPerson->getFullName()) . '%%%' . $oSiteuserPerson->getAvatar(),
 							'attr' => array('class' => 'siteuser-person')
 						); */
 					}
-					
+
 					$sOptions = '<optgroup label="' . $oSelectedSiteuser->login . '" class="siteuser">' . $sOptions . '</optgroup>';
-				}				
-			}	
-				
+				}
+			}
+
 			?>
 			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
 				<?php echo $sOptions?>
@@ -1951,8 +1951,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 			<script>
 				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
-
-				//$(".select2-container").css('width', '100%');
 			</script>
 			<?php
 		}
@@ -2001,22 +1999,17 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?>
 		<script>
 
-		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').select2({
-				placeholder: '<?php echo $placeholder?>',
-				allowClear: true,
-				//multiple: true,
-				templateResult: $.templateResultItemResponsibleEmployees,
-				escapeMarkup: function(m) { return m; },
-				templateSelection: $.templateSelectionItemResponsibleEmployees,
+		
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
 				language: '<?php echo $language?>',
-				width: "100%"
+				placeholder: '<?php echo $placeholder?>'				
 			}).val('<?php echo $iUserId?>').trigger('change.select2');
 
-		$(".select2-container").css('width', '100%');
+		//$(".select2-container").css('width', '100%');
 
 		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
 			.on('select2:unselect', function (){
-				
+
 				$(this)
 					.next('.select2-container')
 					.find('.select2-selection--single')

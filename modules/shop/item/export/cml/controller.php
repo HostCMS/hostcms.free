@@ -224,6 +224,13 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 
 		$xmlItem = $parentNode->addChild('Товар');
 		$xmlItem->addChild('Ид', $sMod . $oShop_Item->guid);
+
+		$oShop_Item_Barcode = $oShop_Item->Shop_Item_Barcodes->getFirst(FALSE);
+		if (!is_null($oShop_Item_Barcode))
+		{
+			$xmlItem->addChild('Штрихкод', $oShop_Item_Barcode->value);
+		}
+
 		$xmlItem->addChild('Артикул', $oShop_Item->marking);
 		$xmlItem->addChild('Наименование', $oShop_Item->name);
 		$xmlItem->addChild('Описание', $oShop_Item->description);
@@ -270,23 +277,23 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		if ($oShop_Item->shop_tax_id)
 		{
 			$xmlTaxes = $xmlItem->addChild('СтавкиНалогов');
-			
+
 			$xmlTax = $xmlTaxes->addChild('СтавкаНалога');
 			$xmlTax->addChild('Наименование', $oShop_Item->Shop_Tax->name);
 			$xmlTax->addChild('Ставка', $oShop_Item->Shop_Tax->rate);
 		}
-		
+
 		// ЗначенияРеквизитов
 		if ($oShop_Item->weight)
 		{
 			$xmlProp = $xmlItem->addChild('ЗначенияРеквизитов');
-			
+
 			// Вес
 			$xmlWeight = $xmlProp->addChild('ЗначениеРеквизита');
 			$xmlWeight->addChild('Наименование', 'Вес');
 			$xmlWeight->addChild('Значение', $oShop_Item->weight);
 		}
-		
+
 		return $this;
 	}
 
@@ -392,14 +399,21 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 
 		$sShop_Measure_Name = $oShop_Item->Shop_Measure->name;
 
-		$proposal = $parentNode->addChild('Предложение');
-		$proposal->addChild('Ид', $sMod . $oShop_Item->guid);
-		$proposal->addChild('Артикул', $oShop_Item->marking);
-		$proposal->addChild('Наименование', $oShop_Item->name);
-		$proposal->addChild('БазоваяЕдиница', $sShop_Measure_Name)
+		$xmlItem = $parentNode->addChild('Предложение');
+		$xmlItem->addChild('Ид', $sMod . $oShop_Item->guid);
+
+		$oShop_Item_Barcode = $oShop_Item->Shop_Item_Barcodes->getFirst(FALSE);
+		if (!is_null($oShop_Item_Barcode))
+		{
+			$xmlItem->addChild('Штрихкод', $oShop_Item_Barcode->value);
+		}
+
+		$xmlItem->addChild('Артикул', $oShop_Item->marking);
+		$xmlItem->addChild('Наименование', $oShop_Item->name);
+		$xmlItem->addChild('БазоваяЕдиница', $sShop_Measure_Name)
 				->addAttribute('НаименованиеПолное', $oShop_Item->Shop_Measure->description);
 
-		$prices = $proposal->addChild('Цены');
+		$prices = $xmlItem->addChild('Цены');
 
 		$price = $prices->addChild('Цена');
 
@@ -431,7 +445,7 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 			}
 		}
 
-		$proposal->addChild('Количество', $oShop_Item->getRest());
+		$xmlItem->addChild('Количество', $oShop_Item->getRest());
 
 		return $this;
 	}

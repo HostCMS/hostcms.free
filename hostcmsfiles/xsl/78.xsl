@@ -5,14 +5,14 @@
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<!-- КвитанцияПД4 -->
-	
+
 	<xsl:template match="/">
 		<xsl:apply-templates select="shop"/>
 	</xsl:template>
-	
-	
+
+
 	<xsl:template match="shop">
 		<html xmlns="http://www.w3.org/1999/xhtml">
 			<head>
@@ -25,7 +25,7 @@
 					* html hr {margin:-7px 0; display: block; padding: 0; border: 0; /* для IE6 */}
 					*+html hr {margin:-7px 0; display: block; padding: 0; border: 0; /* для IE7 */}
 					hr { border: 0\9 /* для IE8 */ }
-					
+
 					.main_div
 					{
 					margin-left: 0.5em;
@@ -48,10 +48,10 @@
 			</body>
 		</html>
 	</xsl:template>
-	
+
 	<xsl:template name="pd4">
 		<xsl:param name="type"/>
-		
+
 		<table cellspacing="0" cellpadding="5" border="1" width="680" bordercolor="#000000" rules="all">
 			<tr valign="top">
 				<td width="190" height="275">
@@ -203,13 +203,15 @@
 								<!-- Address -->
 								<font size="1">
 									<xsl:if test="/shop/shop_order/postcode != ''"><xsl:value-of select="/shop/shop_order/postcode"/>,	</xsl:if>
-									
+
 									<xsl:if test="/shop/shop_order/shop_country/name != ''"><xsl:value-of select="/shop/shop_order/shop_country/name"/></xsl:if>
-									
+
 									<xsl:if test="/shop/shop_order/shop_country/shop_country_location/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/name"/></xsl:if>
 									<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/name"/></xsl:if>
 									<xsl:if test="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name != ''">, <xsl:value-of select="/shop/shop_order/shop_country/shop_country_location/shop_country_location_city/shop_country_location_city_area/name"/>&#xA0;район</xsl:if>
 									<xsl:if test="/shop/shop_order/address != ''">, <xsl:value-of select="/shop/shop_order/address"/></xsl:if>
+									<xsl:if test="/shop/shop_order/house != ''">, <xsl:value-of select="/shop/shop_order/house"/></xsl:if>
+									<xsl:if test="/shop/shop_order/flat != ''">, <xsl:value-of select="/shop/shop_order/flat"/></xsl:if>
 								</font>
 							</td>
 						</tr>
@@ -218,19 +220,19 @@
 							<td height="1"><hr noshade="noshade" size="1" color="#000000"/></td>
 						</tr>
 					</table>
-					
+
 					<table rules="none" border="0" cellspacing="0" cellpadding="0" width="100%">
 						<tr>
 							<td width="70" align="left">
 						<font size="1"><bobr><xsl:text>Сумма платежа</xsl:text></bobr></font>
 							</td>
-							
+
 							<td width="45">
 								<!-- Сумма в рублях -->
 								<font size="2"><xsl:value-of select="floor(/shop/shop_order/total_amount)"/></font>
 							</td>
 					<td width="20"><font size="1"><xsl:text> руб. </xsl:text></font></td>
-							
+
 							<td width="20" align="center">
 								<!-- Сумма в копейках -->
 								<font size="2"><xsl:value-of select="floor((/shop/shop_order/total_amount - floor(/shop/shop_order/total_amount)) * 100)"/></font>
@@ -242,7 +244,7 @@
 							</td>
 						<td width="45"><xsl:text> </xsl:text></td>
 					<td width="20"><font size="1"><xsl:text> руб. </xsl:text></font></td>
-							
+
 						<td width="20" align="center" class="bottom_border"><xsl:text> </xsl:text></td>
 						<td width="20"><font size="1">&#xA0;коп.</font></td>
 						</tr>
@@ -301,7 +303,7 @@
 							<td></td>
 						</tr>
 					</table>
-					
+
 					<font size="1">С условиями приема указанной в платежном документе
 						суммы, в т.ч. с суммой взимаемой платы за услуги банка,
 					ознакомлен и согласен.</font>
@@ -320,7 +322,7 @@
 				</td>
 			</tr>
 		</table>
-		
+
 	</xsl:template>
-	
+
 </xsl:stylesheet>

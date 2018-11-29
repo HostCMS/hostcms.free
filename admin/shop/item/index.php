@@ -40,31 +40,32 @@ if (!is_null(Core_Array::getGet('loadBarcodesList')) && !is_null(Core_Array::get
 
 	if (strlen($sQuery))
 	{
-		$Core_Http = Core_Http::instance('curl')
-			->clear()
-			// ->url('http://barcode.hostcms.ru/api/')
-			->url('http://barcode/api/')
-			->method('POST')
-			->port(80)
-			->additionalHeader('Barrequest', 'ubggjgfnfv')
-			->data('barcode', $sQuery)
-			->execute();
+		try {
+			$Core_Http = Core_Http::instance('curl')
+				->clear()
+				->url('http://barcode.hostcms.ru/api/')
+				->method('POST')
+				->port(80)
+				->timeout(5)
+				->additionalHeader('Barrequest', 'ubggjgfnfv')
+				->data('barcode', $sQuery)
+				->execute();
 
-		// var_dump($Core_Http->getHeaders());
+			$aResponse = json_decode($Core_Http->getBody(), TRUE);
 
-		$aResponse = json_decode($Core_Http->getBody(), TRUE);
-
-		if (count($aResponse))
-		{
-			foreach ($aResponse as $aBarcode)
+			if (count($aResponse))
 			{
-				$aJSON[] = array(
-					'id' => $aBarcode['barcode'],
-					'text' => $aBarcode['barcode'],
-					'name' => $aBarcode['name'],
-				);
+				foreach ($aResponse as $aBarcode)
+				{
+					$aJSON[] = array(
+						'id' => $aBarcode['barcode'],
+						'text' => $aBarcode['barcode'],
+						'name' => $aBarcode['name'],
+					);
+				}
 			}
 		}
+		catch (Exception $e) {}
 	}
 
 	Core::showJson($aJSON);
@@ -715,6 +716,24 @@ $oMenu->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oMenu);
 
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="/admin/shop/item/index.php" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Shop_Item.placeholderSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '">
+						<i class="fa fa-search no-margin" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '"></i>
+
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '" />
+					</form>
+				</div>
+			</div>
+		')
+);
+
 // Хлебные крошки
 $oBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -873,6 +892,26 @@ if ($oAdminFormActionLoadShopItemList && $oAdmin_Form_Controller->getAction() ==
 
 	$oAdmin_Form_Controller->addAction($oShop_Controller_Load_Select_Options);
 }
+
+// Действие "Поиск"
+/*$oAdminFormActionSearch = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('searchItem');
+
+if ($oAdminFormActionSearch && $oAdmin_Form_Controller->getAction() == 'searchItem')
+{
+	$oControllerSearch = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Search', $oAdminFormActionSearch
+	);
+
+	$sSearchQuery = trim(strval(Core_Array::getRequest('search')));
+
+	$oControllerSearch
+		->query($sSearchQuery);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerSearch);
+}*/
 
 // Действие "Применить"
 $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
@@ -1058,23 +1097,32 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Group'));
-$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 $oAdmin_Form_Dataset
+	->changeField('name', 'class', 'semi-bold')
 	->addCondition(
 		array(
 				'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
 			)
 		)
 	)
-	->addCondition(array('where' => array('parent_id', '=', $oShopGroup->id)))
 	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 	->changeField('related', 'type', 1)
 	->changeField('modifications', 'type', 1)
 	->changeField('discounts', 'type', 1)
 	->changeField('type', 'type', 1)
 	->changeField('reviews', 'type', 1)
-	->changeField('adminPrice', 'type', 1)
-	;
+	->changeField('adminPrice', 'type', 1);
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('shop_groups.parent_id', '=', $oShopGroup->id)));
+}
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
@@ -1088,11 +1136,33 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
-	->addCondition(array('where' => array('shop_group_id', '=', $oShopGroup->id)))
-	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
-	->addCondition(array('where' => array('modification_id', '=', 0)))
+	->addCondition(array('where' => array('shop_items.shop_id', '=', $oShop->id)))
 	->addCondition(array('groupBy' => array('shop_items.id')))
 ;
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(
+			array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
+		)
+		->addCondition(array('open' => array()))
+		// Название
+		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		// Артикул
+		->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		// Штрихкод
+		->addCondition(array('where' => array('shop_item_barcodes.value', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('shop_items.shop_group_id', '=', $oShopGroup->id)))
+		->addCondition(array('where' => array('shop_items.modification_id', '=', 0)));
+}
 
 $oShop_Producers = $oShop->Shop_Producers;
 $oShop_Producers->queryBuilder()

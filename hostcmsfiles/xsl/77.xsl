@@ -148,6 +148,14 @@
 			</xsl:if>
 			<xsl:if test="address != ''">
 				<xsl:value-of select="address" />
+				<xsl:text>, </xsl:text>
+			</xsl:if>
+			<xsl:if test="house != ''">
+				<xsl:value-of select="house" />
+				<xsl:text>, </xsl:text>
+			</xsl:if>
+			<xsl:if test="flat != ''">
+				<xsl:value-of select="flat" />
 			</xsl:if>
 			
 			<br />

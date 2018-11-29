@@ -267,9 +267,9 @@ class Core_ORM
 
 	/**
 	 * Core_DataBase object
-	 * @var Core_DataBase
+	 * @var array
 	 */
-	protected $_dataBase = NULL;
+	protected $_database = array();
 
 	/**
 	 * Select query builder
@@ -364,7 +364,12 @@ class Core_ORM
 
 		if (!is_null($primaryKey))
 		{
-			Core_QueryBuilder::delete($this->_tableName)
+			$oQuery_Builder = Core_QueryBuilder::delete($this->_tableName);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oQuery_Builder
 				->where($this->_primaryKey, '=', $primaryKey)
 				->execute();
 		}
@@ -574,7 +579,7 @@ class Core_ORM
 
 		return $aRow['count'];
 	}
-	
+
 	/**
 	 * Get fist entity, ordered by primary key
 	 * @param bool $bCache use cache, default TRUE
@@ -620,7 +625,7 @@ class Core_ORM
 		$aObjects = $this->findAll($bCache);
 		return isset($aObjects[0]) ? $aObjects[0] : NULL;
 	}
-	
+
 	/**
 	 * Add related object. If main object does not save, it will save.
 	 * @param Core_ORM $model
@@ -780,7 +785,7 @@ class Core_ORM
 
 					$throughModel = $throughModel->find();
 
-					if (!is_null($throughModel))
+					if (!is_null($throughModel->id))
 					{
 						$throughModel->delete();
 					}
@@ -978,6 +983,20 @@ class Core_ORM
 	}
 
 	/**
+	 * Get Database
+	 * @return Core_DataBase
+	 */
+	protected function getDatabase()
+	{
+		if (!isset($this->_database[self::$_databaseDriver]))
+		{
+			$this->_database[self::$_databaseDriver] = Core_DataBase::instance(self::$_databaseDriver);
+		}
+		
+		return $this->_database[self::$_databaseDriver];
+	}
+	
+	/**
 	 * Model initialization
 	 * @return Core_ORM
 	 */
@@ -985,10 +1004,10 @@ class Core_ORM
 	{
 		if (!$this->_init)
 		{
-			if (is_null($this->_dataBase))
+			/*if (is_null($this->_database))
 			{
-				$this->_dataBase = Core_DataBase::instance(self::$_databaseDriver);
-			}
+				$this->_database = Core_DataBase::instance(self::$_databaseDriver);
+			}*/
 
 			// is_null() into getModelName()
 			$this->_modelName = $this->getModelName();
@@ -1095,6 +1114,9 @@ class Core_ORM
 		if (is_null($this->_queryBuilder))
 		{
 			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*');
+			
+			self::$_databaseDriver != 'default'
+				&& $this->_queryBuilder->setDataBase($this->getDatabase());
 		}
 
 		return $this->_queryBuilder;
@@ -1187,7 +1209,7 @@ class Core_ORM
 
 				self::$_columnCache[$this->_modelName] = $this->_tableColumns = is_array($inCache)
 					? $inCache
-					: $this->_dataBase->getColumns($this->_tableName);
+					: $this->getDatabase()->getColumns($this->_tableName);
 
 				$bCache
 					&& is_null($inCache)
@@ -1198,7 +1220,7 @@ class Core_ORM
 
 			/*$this->_tableColumns = isset(self::$_columnCache[$this->_modelName])
 				? self::$_columnCache[$this->_modelName]
-				: self::$_columnCache[$this->_modelName] = $this->_dataBase->getColumns($this->_tableName);*/
+				: self::$_columnCache[$this->_modelName] = $this->getDatabase()->getColumns($this->_tableName);*/
 		}
 
 		return $this;
@@ -1755,8 +1777,12 @@ class Core_ORM
 				!is_null($getPrimaryKeyValue) && $data[$this->_primaryKey] = $getPrimaryKeyValue;
 			}
 
-			$oInsert = Core_QueryBuilder::insert($this->_tableName, $data)
-				->execute();
+			$oQuery_Builder = Core_QueryBuilder::insert($this->_tableName, $data);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oInsert = $oQuery_Builder->execute();
 
 			// Set primary key
 			$this->setValues(
@@ -1793,7 +1819,12 @@ class Core_ORM
 
 			$data = $this->_getChangedData();
 
-			$oUpdate = Core_QueryBuilder::update($this->_tableName)
+			$oQuery_Builder = Core_QueryBuilder::update($this->_tableName);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oUpdate = $oQuery_Builder
 				->columns($data)
 				->where($this->_primaryKey, '=', $this->getPrimaryKey())
 				->execute();
