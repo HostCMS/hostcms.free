@@ -107,6 +107,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	 * Get options list
 	 * @param array $LA
 	 * @return self
+	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
 	 */
 	public function getOptionsList(array $LA)
 	{
@@ -286,9 +287,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')
-										->type("text/javascript")
-										->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
+									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
 									Core::factory('Core_Html_Entity_Div')
@@ -492,9 +491,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')
-										->type("text/javascript")
-										->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
+									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
 									Core::factory('Core_Html_Entity_Div')
@@ -507,7 +504,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 														->name($sFieldName)
 														->id("lib_property_id_{$oLib_Property->id}")
 														->class('form-control')
-														->value($xsl_dir_id)
+														->value($tpl_dir_id)
 												)
 												->add(
 													Core::factory('Core_Html_Entity_A')
@@ -521,6 +518,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						);
 					}
 				break;
+				default:
+					Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivInputs, $value)); 
 			}
 
 			$oDivRow->execute();

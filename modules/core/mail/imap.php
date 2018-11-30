@@ -105,17 +105,25 @@ class Core_Mail_Imap extends Core_Servant_Properties
 		$aServer = explode(':', $this->server);
 
 		$this->server = $aServer[0];
-		is_null($this->port) && isset($aServer[1]) && $this->port = intval($aServer[1]);
+
+		// Check valid host
+		if (!Core_Valid::host($this->server))
+		{
+			$this->_aErrors = array('Wrong server name!');
+			return $this;
+		}
+
+		is_null($this->port) && isset($aServer[1]) && $this->port = $aServer[1];
 
 		switch ($this->type)
 		{
 			case 'imap':
 				is_null($this->port) && $this->port = $this->ssl ? 993 : 143;
-				$this->_protocol = '/imap';
+				$protocol = '/imap';
 			break;
 			case 'pop3':
 				is_null($this->port) && $this->port = $this->ssl ? 995 : 110;
-				$this->_protocol = '/pop3';
+				$protocol = '/pop3';
 			break;
 			default:
 				throw new Core_Exception("Wrong type '%type', 'imap' and 'pop3' are possible.",
@@ -123,13 +131,13 @@ class Core_Mail_Imap extends Core_Servant_Properties
 				);
 		}
 
-		// Безопасное соединение TSL/SSL
-		$this->ssl && $this->_protocol .= '/ssl';
+		// Use TSL/SSL
+		$this->ssl && $protocol .= '/ssl';
 
-		$this->_protocol .= '/novalidate-cert/notls';
+		$protocol .= '/novalidate-cert/notls';
 
 		// Формируем имя ящика
-		$mailbox = '{' . $this->server . ':' . $this->port . $this->_protocol . '}INBOX';
+		$mailbox = '{' . $this->server . ':' . intval($this->port) . $protocol . '}INBOX';
 
 		$aParam = $this->ssl
 			? array('DISABLE_AUTHENTICATOR' => 'GSSAPI') // PLAIN
@@ -197,7 +205,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			foreach ($aImap_fetchheader as $key => $value)
 			{
 				$aValue = explode(':', $value);
-				
+
 				isset($aValue[1])
 					&& $fetchheader[strtolower(trim(strval($aValue[0])))] = strtolower(trim(strval($aValue[1])));
 			}
@@ -416,7 +424,7 @@ class Core_Mail_Imap extends Core_Servant_Properties
 			[7] = "other"
 			*/
 			$partType = Core_Array::get($aStructurePart, 'type', 0);
-			
+
 			// multipart
 			if ($partType == 1)
 			{

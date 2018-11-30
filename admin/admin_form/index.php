@@ -53,20 +53,7 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($sLanguagePath, '', NULL, 0, 0)
-		)		
-		/*->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.show_form_menu_admin_forms_top2_sub_add'))
-				->img('/admin/images/languages.gif')
-				->icon('fa fa-list')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sLanguagePath, '', NULL, 0, 0)
-
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sLanguagePath, '', NULL, 0, 0)
-				)
-		)*/
+		)
 );
 
 // Добавляем все меню контроллеру

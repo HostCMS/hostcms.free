@@ -259,9 +259,10 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 		$iParentGroup = Core_Array::getPost('shop_groups_parent_id');
 
 		$bSpecialPrices = !is_null(Core_Array::getPost('flag_include_spec_prices'));
+		$bIncludeModifications = !is_null(Core_Array::getPost('flag_include_modifications'));
 
 		// Если только увеличение цены в N раз и не указаны скидки или бонусы
-		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID)
+		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID && !($bIncludeModifications && $iParentGroup))
 		{
 			// Items
 			$oCore_QueryBuilder_Update = Core_QueryBuilder::update('shop_items')
@@ -270,7 +271,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				->where('shop_items.deleted', '=', 0);
 
 			// Учитывать модификации не установлено
-			is_null(Core_Array::getPost('flag_include_modifications'))
+			!$bIncludeModifications
 				&& $oCore_QueryBuilder_Update->where('shop_items.modification_id', '=', 0);
 
 			$oUser->only_access_my_own
@@ -294,7 +295,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 					->where('shop_items.deleted', '=', 0);
 
 				// Учитывать модификации не установлено
-				is_null(Core_Array::getPost('flag_include_modifications'))
+				!$bIncludeModifications
 					&& $oCore_QueryBuilder_Update->where('shop_items.modification_id', '=', 0);
 
 				$oUser->only_access_my_own
@@ -338,7 +339,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				{
 					applySettings($oUser, $oShop_Item, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
 
-					if (!is_null(Core_Array::getPost('flag_include_modifications')))
+					if ($bIncludeModifications)
 					{
 						$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
 						foreach ($aShopItemModifications as $oShopItemModification)

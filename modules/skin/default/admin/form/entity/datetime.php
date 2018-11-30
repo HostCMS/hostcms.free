@@ -60,7 +60,7 @@ class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 
 		?><input <?php echo implode(' ', $aAttr) ?>/>
 
-		<script type="text/javascript">
+		<script>
 		(function($) {
 			$("#<?php echo $this->id?>")
 				.datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});

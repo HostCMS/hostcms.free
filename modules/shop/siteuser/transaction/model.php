@@ -82,7 +82,7 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -143,7 +143,8 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	}
 	
 	/**
-	 * Backend callback method. Get amount transactions until current
+	 * Backend callback method.
+	 * Get amount transactions until current
 	 * @return float
 	 */
 	public function adminTransactionTotalAmount()

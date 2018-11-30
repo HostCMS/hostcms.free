@@ -123,16 +123,16 @@ class User_Controller_View extends Admin_Form_Action_Controller
 				<div class="profile-container">
 					<div class="profile-header row">
 						<div class="col-lg-2 col-md-4 col-sm-12 text-center">
-							<img class="header-avatar" src="<?php echo $this->_object->getImageHref()?>" alt="">
+							<img class="header-avatar" src="<?php echo $this->_object->getAvatar()?>" alt="">
 						</div>
 						<div class="col-lg-5 col-md-8 col-sm-12 profile-info">
-							<div class="header-fullname"><?php echo $this->_object->getFullName()?></div>
+							<div class="header-fullname"><?php echo htmlspecialchars($this->_object->getFullName())?></div>
 							<div class="header-information"><?php echo $this->_object->description?></div>
 							<?php
 							if (strlen($this->_object->address))
 							{
 							?>
-								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo $this->_object->address?></div>
+								<div class="header-information"><i class="glyphicon glyphicon-map-marker margin-right-5 red"></i><?php echo htmlspecialchars($this->_object->address)?></div>
 							<?php
 							}
 							?>

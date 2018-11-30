@@ -69,8 +69,8 @@ class Template_Section_Lib_Model extends Core_Entity{
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
 		try {
-			//$bUserAccess = $this->Template_Section->Template->checkUserAccess();
-			$bUserAccess = Core::checkPanel() && Core_Auth::logged();
+			$bUserAccess = $this->Template_Section->Template->checkUserAccess();
+			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
 
 			$bCreateDiv = $this->style != '' || $this->class != '' || $bUserAccess;
 			if ($bCreateDiv)

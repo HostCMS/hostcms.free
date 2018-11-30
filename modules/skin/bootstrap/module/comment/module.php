@@ -82,7 +82,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 				else
 				{
 					?><div class="<?php echo $colClass?>" id="informationsystemCommentsAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#informationsystemCommentsAdminPage') });
 						</script>
 					</div><?php
@@ -96,7 +96,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 				else
 				{
 					?><div class="<?php echo $colClass?>" id="shopCommentsAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
-						<script type="text/javascript">
+						<script>
 						$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage') });
 						</script>
 					</div><?php
@@ -215,6 +215,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													}
 
 													$bBlocked = $oComment->ip != '127.0.0.1'
+														&& Core::moduleIsActive('ipaddress')
 														&& Ipaddress_Controller::instance()->isBlocked($oComment->ip);
 
 													if ($bBlocked)
@@ -371,6 +372,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													}
 
 													$bBlocked = $oComment->ip != '127.0.0.1'
+														&& Core::moduleIsActive('ipaddress')
 														&& Ipaddress_Controller::instance()->isBlocked($oComment->ip);
 
 													if ($bBlocked)

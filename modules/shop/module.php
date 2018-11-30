@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-04-24';
+	public $date = '2018-11-29';
 
 	/**
 	 * Module name
@@ -456,7 +456,7 @@ class Shop_Module extends Core_Module
 				// Recount shop
 				case 3:
 					Core_Entity::factory('Shop', $entityId)->recount();
-				break;				
+				break;
 			}
 		}
 	}
@@ -517,7 +517,8 @@ class Shop_Module extends Core_Module
 			'extra' => array(
 				'icons' => array(),
 				'description' => NULL
-			)
+			),
+			'site' => htmlspecialchars($oShop->Site->name) . ' [' . $oShop->Site->id . ']'
 		);
 	}
 }

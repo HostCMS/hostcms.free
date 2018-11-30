@@ -75,7 +75,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
 
 		$title = $this->_object->id
-			? Core::_('User_Wallpaper.edit_title')
+			? Core::_('User_Wallpaper.edit_title', $this->_object->name)
 			: Core::_('User_Wallpaper.add_title');
 
 		$this->title($title);
@@ -142,6 +142,8 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					$this->_object->image_small = $sSmallImageName;
 					$this->_object->save();
 				}
+
+				$this->addMessage('<script>$.loadWallpaper(' . $this->_object->id . ')</script>');
 			}
 			else
 			{
@@ -153,5 +155,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 				);
 			}
 		}
+		
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
 }

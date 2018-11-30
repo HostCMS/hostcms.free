@@ -468,7 +468,10 @@ abstract class Core_DataBase
 				throw new Core_Exception('Database configuration doesn\'t defined');
 			}
 
-			$driver = self::_getDriverName($aConfig[$name]['driver']);
+			$driver = isset($aConfig[$name]['class'])
+				? $aConfig[$name]['class']
+				: self::_getDriverName($aConfig[$name]['driver']);
+
 			self::$instance[$name] = new $driver($aConfig[$name]);
 		}
 
@@ -806,5 +809,21 @@ abstract class Core_DataBase
 	public function getLastQuery()
 	{
 		return $this->_lastQuery;
+	}
+	
+	protected $_likeReplacements = array(
+		'%' => '\%',
+		'_' => '\_',
+		'\\' => '\\\\'
+	);
+	
+	/**
+	 * Escape value in LIKE conditions
+	 * @param string $value
+	 * @return string
+	 */
+	public function escapeLike($value)
+	{
+		return strtr($value, $this->_likeReplacements);
 	}
 }

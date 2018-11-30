@@ -44,7 +44,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 
@@ -70,6 +70,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
 
@@ -88,19 +89,41 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', '=', $sQuery);
+			break;
+		}
 
 		count($aExclude) && $oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.id', 'NOT IN', $aExclude);
-			
+
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
+			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
 			);
 		}
 	}
@@ -116,6 +139,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 {
 	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
+	$mode = intval(Core_Array::getGet('mode'));
 
 	$oInformationsystem = Core_Entity::factory('Informationsystem', $entity_id);
 
@@ -130,16 +154,38 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
-			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-			->limit(10);
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		switch ($mode)
+		{
+			// Вхождение
+			case 0:
+			default:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%');
+			break;
+			// Вхождение с начала
+			case 1:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', $sQuery . '%');
+			break;
+			// Вхождение с конца
+			case 2:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery);
+			break;
+			// Точное вхождение
+			case 3:
+				$oInformationsystem_Groups->queryBuilder()->where('informationsystem_groups.name', '=', $sQuery);
+			break;
+		}
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
+			$sParents = $oInformationsystem_Group->groupPathWithSeparator();
+
 			$aJSON[] = array(
 				'id' => $oInformationsystem_Group->id,
-				'label' => $oInformationsystem_Group->name . " [" . $oInformationsystem_Group->id . "]"
+				'label' => $sParents . ' [' . $oInformationsystem_Group->id . ']'
 			);
 		}
 	}
@@ -165,7 +211,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Items->queryBuilder()
 				->where('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)
 				->where('informationsystem_items.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Items = $oInformationsystem_Items->findAll(FALSE);
 
@@ -182,7 +228,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
 				->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
-				->limit(10);
+				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 
@@ -324,6 +370,24 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="/admin/informationsystem/item/index.php" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Informationsystem_Item.placeholderSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '">
+						<i class="fa fa-search no-margin" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParamsItemProperties) . '"></i>
+
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParamsItemProperties) . '" />
+					</form>
+				</div>
+			</div>
+		')
+);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -618,10 +682,19 @@ $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('*', array(Core_QueryBuilder::expression("''"), 'datetime'))
 	)
 )->addCondition(
-	array('where' => array('parent_id', '=', $iInformationsystemGroupId))
-)->addCondition(
 	array('where' => array('informationsystem_id', '=', $iInformationsystemId))
 );
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('informationsystem_groups.parent_id', '=', $iInformationsystemGroupId)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -640,11 +713,11 @@ $oAdmin_Form_Dataset
 	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}',action: 'changeIndexation', windowId: '{windowId}'}); return false")
 	->changeField('adminComment', 'type', 10)
 	// Ограничение источника 1 по родительской группе
-	->addCondition(
+	/*->addCondition(
 		array('where' =>
 			array('informationsystem_group_id', '=', $iInformationsystemGroupId)
 		)
-	)
+	)*/
 	->addCondition(
 		array('where' =>
 			array('informationsystem_id', '=', $iInformationsystemId)
@@ -654,8 +727,17 @@ $oAdmin_Form_Dataset
 	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
 	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 
-// Change field type
-$oAdmin_Form_Dataset->changeField('img', 'type', 10);
+	// Change field type
+	$oAdmin_Form_Dataset->changeField('img', 'type', 10);
+
+	if (strlen($sGlobalSearch))
+	{
+		$oAdmin_Form_Dataset->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+	}
+	else
+	{
+		$oAdmin_Form_Dataset->addCondition(array('where' => array('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)));
+	}
 
 	// Добавляем источник данных контроллеру формы
 	$oAdmin_Form_Controller->addDataset(

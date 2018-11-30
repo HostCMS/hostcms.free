@@ -757,4 +757,200 @@ class Core_Str
 
 		return '#' . implode('', $rgb);
 	}
+
+	/**
+	 * Возвращает строку согласно падежам
+	 * @param int $number number
+	 * @param string $nominative Nominative case
+	 * @param $genitive_singular Genitive singular case
+	 * @param $genitive_plural Genitive plural case
+	 * @return string
+	 */
+	static public function declensionNumber($number = 0, $nominative, $genitive_singular, $genitive_plural)
+	{
+		$last_digit = $number % 10;
+		$last_two_digits = $number % 100;
+
+		if ($last_digit == 1 && $last_two_digits != 11)
+		{
+			return $nominative;
+		}
+		elseif (($last_digit == 2 && $last_two_digits != 12) || ($last_digit == 3 && $last_two_digits != 13) || ($last_digit == 4 && $last_two_digits != 14))
+		{
+			return $genitive_singular;
+		}
+		else
+		{
+			return $genitive_plural;
+		}
+	}
+
+	/**
+	 * Remove emoji (UTF8 4 Byte characters)
+	 * @param string $str source string
+	 * @return string
+	 */
+	static public function removeEmoji($str)
+	{
+		return preg_replace('/[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F1E0}-\x{1F1FF}]/u', '', $str);
+	}
+
+	static public function getInitials($fullName, $length = 2)
+	{
+		$fullName = mb_strtoupper(trim($fullName));
+		$aFullName = explode(' ', $fullName);
+
+		$initials = array_reduce(str_replace(array('*', '"'), '', $aFullName), array('Core_Str', '_getInitialsReduce'));
+
+		$initials = mb_strlen($initials) < $length
+			? mb_substr($fullName, 0, $length)
+			: mb_substr($initials, 0, $length);
+
+		return $initials;
+	}
+
+	static protected function _getInitialsReduce($str, $item)
+	{
+		return $str . mb_substr($item, 0, 1);
+	}
+	
+	/**
+	 * Decode Punycode IDN
+	 * https://www.ietf.org/rfc/rfc3492.txt
+	 *
+	 * @param string $domain
+	 * @return string
+	 */
+	static public function idnToUtf8($domain)
+	{
+		if (function_exists('idn_to_utf8'))
+		{
+			return idn_to_utf8($domain);
+		}
+
+		// Find subdomains
+		$aDomains = explode('.', $domain);
+		if (count($aDomains) > 1)
+		{
+			$sTmp = '';
+			foreach ($aDomains as $sSubdomain)
+			{
+				$sTmp .= '.' . self::idnToUtf8($sSubdomain);
+			}
+			return substr($sTmp, 1);
+		}
+
+		/* search prefix */
+		if (substr($domain, 0, 4) != 'xn--')
+		{
+			return $domain;
+		}
+		else
+		{
+			$bad_input = $domain;
+			$domain = substr($domain, 4);
+		}
+
+		$i = 0;
+		$bias = 72;
+		$initial_n = 128;
+		$output = array();
+
+		// search delimeter
+		$delimeter = strrpos($domain, '-');
+
+		if ($delimeter)
+		{
+			for ($j = 0; $j < $delimeter; $j++)
+			{
+				$c = $domain[$j];
+				$output[] = $c;
+				if ($c > 0x7F)
+				{
+					return $bad_input;
+				}
+			}
+			$delimeter++;
+		}
+		else
+		{
+			$delimeter = 0;
+		}
+
+		while ($delimeter < strlen($domain))
+		{
+			$iPrev = $i;
+			$w = 1;
+
+			for ($k = 36;; $k += 36)
+			{
+				if ($delimeter == strlen($domain))
+				{
+					return $bad_input;
+				}
+				$c = $domain[$delimeter++];
+				$c = ord($c);
+
+				$digit = ($c - 48 < 10)
+					? $c - 22
+					: ($c - 65 < 26
+						? $c - 65
+						: ($c - 97 < 26 ? $c - 97 : 36)
+					);
+					
+				if ($digit > (0x10FFFF - $i) / $w)
+				{
+					return $bad_input;
+				}
+				$i += $digit * $w;
+
+				if ($k <= $bias)
+				{
+					$t = 1;
+				}
+				elseif ($k >= $bias + 26)
+				{
+					$t = 26;
+				}
+				else
+				{
+					$t = $k - $bias;
+				}
+				
+				if ($digit < $t)
+				{
+					break;
+				}
+
+				$w *= 36 - $t;
+
+			}
+
+			$delta = $i - $iPrev;
+
+			$delta = ($iPrev == 0) ? $delta / 700 : $delta >> 1;
+
+			$count_output_plus_one = count($output) + 1;
+			$delta += intval($delta / $count_output_plus_one);
+
+			$k2 = 0;
+			while ($delta > 455)
+			{
+				$delta /= 35;
+				$k2 += 36;
+			}
+			$bias = intval($k2 + 36 * $delta / ($delta + 38));
+			
+			if ($i / $count_output_plus_one > 0x10FFFF - $initial_n)
+			{
+				return $bad_input;
+			}
+			$initial_n += intval($i / $count_output_plus_one);
+			$i %= $count_output_plus_one;
+			array_splice($output, $i, 0, html_entity_decode( '&#' . $initial_n . ';', ENT_NOQUOTES, 'UTF-8'));
+			$i++;
+		}
+
+		return implode('', $output);
+	}
 }

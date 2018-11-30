@@ -61,7 +61,6 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 		{
 			// Удаляем дочерние узлы
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->value("$('#{$windowId} #{$sDivId}').remove()")
 				->execute();
 		}

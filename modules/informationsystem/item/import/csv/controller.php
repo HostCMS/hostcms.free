@@ -86,6 +86,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	protected $_aExternalPropertiesSmall = array();
 
 	/**
+	 * List of descriptions of external properties
+	 * @var array
+	 */
+	protected $_aExternalPropertiesDesc = array();
+
+	/**
 	 * List of external properties
 	 * @var array
 	 */
@@ -520,7 +526,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								->queryBuilder()
 								->where('parent_id', '=', intval($this->_oCurrentGroup->id))
 								->where('informationsystem_id', '=', intval($this->_oCurrentInformationsystem->id))
-								->where('path', 'LIKE', $sData);
+								->where('path', '=', $sData);
 
 							$oTmpObject = $oTmpObject->findAll(FALSE);
 
@@ -695,14 +701,18 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								{
 									$this->_oCurrentGroup->image_large = $sTargetFileName;
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setLargeImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										//&& $this->_oCurrentGroup->setLargeImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
 								if ($result['small_image'])
 								{
 									$this->_oCurrentGroup->image_small = "small_{$sTargetFileName}";
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setSmallImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										//&& $this->_oCurrentGroup->setSmallImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
 
 								if (strpos(basename($sSourceFile), "CMS") === 0)
@@ -930,7 +940,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							{
 								$oTmpObject = $this->_oCurrentInformationsystem->Informationsystem_Items;
 								$oTmpObject->queryBuilder()
-									->where('path', 'LIKE', $sData)
+									->where('path', '=', $sData)
 									->where('informationsystem_group_id', '=', $this->_oCurrentGroup->id);
 
 								$oTmpObject = $oTmpObject->findAll(FALSE);
@@ -997,6 +1007,13 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$aPropertySmallInfo = explode("-", $sFieldName);
 
 								$this->_aExternalPropertiesSmall[$aPropertySmallInfo[1]] = $sData;
+							}
+
+							if (strpos($sFieldName, "propdesc-") === 0)
+							{
+								// Описание дополнительного свойства
+								$aTmpExplode = explode('-', $sFieldName);
+								$this->_aExternalPropertiesDesc[$aTmpExplode[1]] = $sData;
 							}
 
 							if (strpos($sFieldName, "prop-") === 0)
@@ -1189,7 +1206,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-											
+
 											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
 									break;
@@ -1222,7 +1239,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										elseif (is_numeric($sPropertyValue))
 										{
 											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-											
+
 											$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 										}
 									break;
@@ -1813,7 +1830,16 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									$oProperty_Value->file_small_name = '';
 								}
 
-								if (strpos(basename($sSourceFile), "CMS") === 0)
+								if (isset($this->_aExternalPropertiesDesc[$iPropertyID]))
+								{
+									$oProperty_Value->file_description = $this->_aExternalPropertiesDesc[$iPropertyID];
+								}
+
+								clearstatcache();
+
+								if (strpos(basename($sSourceFile), "CMS") === 0
+									&& is_file($sSourceFile)
+								)
 								{
 									// Файл временный, подлежит удалению
 									Core_File::delete($sSourceFile);
@@ -1856,14 +1882,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
-								
+
 								$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 							}
 						break;
 						case 8:
 							if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
 							{
-							 $sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
+								$sPropertyValue = Core_Date::datetime2sql($sPropertyValue);
 							}
 
 							$oProperty_Value->setValue($sPropertyValue);
@@ -1889,11 +1915,18 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							elseif (is_numeric($sPropertyValue))
 							{
 								$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
-								
+
 								$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 							}
 						break;
 						default:
+							Core_Event::notify(get_class($this) . '.onPreparePropertyValueDefault', $this, array($this->_oCurrentItem, $oProperty, $sPropertyValue));
+
+							if (!is_null(Core_Event::getLastReturn()))
+							{
+								$sPropertyValue = Core_Event::getLastReturn();
+							}
+
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 					}
@@ -2025,6 +2058,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			// Очищаем временные массивы
 			$this->_aExternalPropertiesSmall =
 				$this->_aExternalProperties =
+				$this->_aExternalPropertiesDesc =
 				$this->_aAdditionalGroups = array();
 
 			// Список меток для текущего инфоэлемента

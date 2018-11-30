@@ -315,7 +315,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 					if ($oShop_Price)
 					{
 						// Смотрим, определена ли такая цена для данного товара
-						$oShop_Item_Price =$oShop_Item->Shop_Item_Prices->getByPriceId($oShop_Price->id);
+						$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByPriceId($oShop_Price->id);
 
 						if ($oShop_Item_Price)
 						{

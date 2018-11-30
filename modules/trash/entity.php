@@ -18,19 +18,19 @@ class Trash_Entity extends Core_Entity
 	 * @var int
 	 */
 	public $id = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
 	public $table_name = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
 	public $name = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var int
@@ -82,7 +82,7 @@ class Trash_Entity extends Core_Entity
 	 * Get table columns
 	 * @return array
 	 */
-	public function getTableColums()
+	public function getTableColumns()
 	{
 		return $this->_tableColums;
 	}
@@ -113,6 +113,36 @@ class Trash_Entity extends Core_Entity
 
 			$totalCount -= $limit;
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Turn off deleted status
+	 * @return self
+	 */
+	public function undelete()
+	{
+		$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
+
+		$totalCount = $Trash_Table_Dataset->getCount();
+		$limit = 100;
+
+		while ($totalCount > 0)
+		{
+			$aTrash_Table_Items = $Trash_Table_Dataset
+				->limit($limit)
+				->clear()
+				->getObjects();
+
+			foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+			{
+				$oTrash_Table_Item->undelete();
+			}
+
+			$totalCount -= $limit;
+		}
+
 		return $this;
 	}
 }

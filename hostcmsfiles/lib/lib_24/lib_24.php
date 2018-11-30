@@ -481,23 +481,33 @@ if (!is_null(Core_Array::getPost('apply')))
 										}
 									}
 
-									// Отправка письма
-									$oSite_Alias = $oSiteuser->Site->getCurrentAlias();
-									$Siteuser_Controller_Show
-										->setEntity($oSiteuser)
-										->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'))
-										->subject(
-											Core::_('Siteuser.confirm_subject', !is_null($oSite_Alias) ? $oSite_Alias->alias_name_without_mask : '')
-										)
-										->sendConfirmationMail(Core_Entity::factory('Xsl')->getByName($xsl_letter));
+									if (!$bQuickRegistration)
+									{
+										// Отправка письма
+										$oSite_Alias = $oSiteuser->Site->getCurrentAlias();
+										$Siteuser_Controller_Show
+											->setEntity($oSiteuser)
+											->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'))
+											->subject(
+												Core::_('Siteuser.confirm_subject', !is_null($oSite_Alias) ? $oSite_Alias->alias_name_without_mask : '')
+											)
+											->sendConfirmationMail(Core_Entity::factory('Xsl')->getByName($xsl_letter));
 
-									?>
-									<h1>Спасибо за регистрацию</h1>
-									<p>Для продолжения работы необходимо подтвердить регистрацию Ваших данных.
-									В Ваш адрес отправлено письмо, содержащее ссылку для подтверждения регистрации.</p>
-									<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдете на страницу <a href="../">авторизации пользователя</a>.</p>
-									<script type="text/javascript">setTimeout(function(){ location = '../' }, 3000);</script>
-									<?php
+										?>
+										<h1>Спасибо за регистрацию</h1>
+										<p>Для продолжения работы необходимо подтвердить регистрацию Ваших данных.
+										В Ваш адрес отправлено письмо, содержащее ссылку для подтверждения регистрации.</p>
+										<p>Если Ваш браузер поддерживает автоматическое перенаправление через 3 секунды Вы перейдете на страницу <a href="../">авторизации пользователя</a>.</p>
+										<script type="text/javascript">setTimeout(function(){ location = '../' }, 3000);</script>
+										<?php
+									}
+									else
+									{
+										?>
+										<h1>Спасибо за регистрацию!</h1>
+										<script type="text/javascript">setTimeout(function(){ location = '../' }, 500);</script>
+										<?php
+									}									
 
 									return;
 								}

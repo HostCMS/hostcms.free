@@ -89,7 +89,9 @@ abstract class Shop_Print_Form_Handler
 			$this->_Shop_Order->Shop_Country_Location->name,
 			$this->_Shop_Order->Shop_Country_Location_City->name,
 			$this->_Shop_Order->Shop_Country_Location_City_Area->name,
-			trim($this->_Shop_Order->address)
+			trim($this->_Shop_Order->address),
+			trim($this->_Shop_Order->house),
+			trim($this->_Shop_Order->flat)
 		);
 
 		$aFullAddress = array_filter($aFullAddress);

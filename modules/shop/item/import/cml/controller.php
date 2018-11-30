@@ -5,12 +5,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Online shop.
  * 2.0.8 - http://v8.1c.ru/edi/edi_stnd/90/CML208.XSD
+ * 2.1.0 - http://v8.1c.ru/edi/edi_stnd/90/CML210.XSD
  *
  * Доступные методы:
  *
  * - importGroups(TRUE|FALSE) импортировать группы товаров, по умолчанию TRUE
  * - createShopItems(TRUE|FALSE) создавать новые товары, по умолчанию TRUE
- * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
+ * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'barcode', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
  * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
  * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание. По умолчанию МалоеОписание
@@ -181,7 +182,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		foreach ($this->xpath($oXMLNode, 'Группа') as $oXMLGroupNode)
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopGroup', $this, array($oXMLGroupNode));
-			
+
 			$oShopGroup = Core_Entity::factory('Shop', $this->iShopId)
 				->Shop_Groups
 				->getByGuid(strval($oXMLGroupNode->Ид), FALSE);
@@ -206,7 +207,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 			is_null($oShopGroup->path) && $oShopGroup->path= '';
 
-			$oShopGroup->save();
+			$oShopGroup->save()->clearCache();
 
 			// Указание Картинка для группы не соответсвует формату обмена CML!
 			$PictureData = strval($oXMLGroupNode->Картинка);
@@ -317,10 +318,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				$this->_importGroups($oSubGroup, $oShopGroup->id);
 			}
-			
+
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopGroup', $this, array($oXMLGroupNode));
 		}
-		
+
 		return $this;
 	}
 
@@ -408,6 +409,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * @param Shop_Item_Model $oShopItem item
 	 * @param Property_Model $oProperty
 	 * @param string $sValue property value
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAddItemPropertyValueDefault
 	 */
 	protected function _addItemPropertyValue(Shop_Item_Model $oShopItem, Property_Model $oProperty, $sValue)
 	{
@@ -501,7 +503,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				}
 			break;
 			default:
-				$changedValue = nl2br($value);
+				Core_Event::notify(get_class($this) . '.onAddItemPropertyValueDefault', $this, array($oShopItem, $oProperty, $value));
+
+				$changedValue = is_null(Core_Event::getLastReturn())
+					? nl2br($value)
+					: Core_Event::getLastReturn();
 			break;
 		}
 
@@ -1129,7 +1135,28 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$sGUIDmod = $sTmp[1];
 					}
 
+					// Товар может быть идентифицирован произвольным (например GUID или внутрисистемным) идентификатором, Штрихкодом, Артикулом. Контрагент может использовать любой удобный с его точки зрения  идентификатор - на выбор
+
+					// Search by GUID
 					$oShopItem = $oShop->Shop_Items->getByGuid($sGUID, FALSE);
+
+					// Search by Barcode
+					if (is_null($oShopItem) && strval($oXmlItem->Штрихкод))
+					{
+						$oTmpItemsByBarcode = $oShop->Shop_Items;
+						$oTmpItemsByBarcode->queryBuilder()
+							->select('shop_items.*')
+							->join('shop_item_barcodes', 'shop_item_barcodes.shop_item_id', '=', 'shop_items.id')
+							->where('shop_item_barcodes.value', '=', strval($oXmlItem->Штрихкод));
+
+						$oShopItem = $oTmpItemsByBarcode->getFirst(FALSE);
+					}
+
+					// Search by Marking
+					if (is_null($oShopItem) && strval($oXmlItem->Артикул))
+					{
+						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oXmlItem->Артикул));
+					}
 
 					$sItemName = strval($oXmlItem->Наименование);
 
@@ -1180,22 +1207,33 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 					// Отключение товара после определения модификация или нет
 					$oAttributes = $oXmlItem->attributes();
-					if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален')
+					if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален'
+						|| isset($oXmlItem->Статус) && strval($oXmlItem->Статус) == 'Удален')
 					{
 						$oShopItem->active = 0;
 						$oShopItem->save();
 						continue;
 					}
 
+					$this->_checkUpdateField('name') && $oShopItem->name = $sItemName;
+
+					// Barcode
+					if ($this->_checkUpdateField('barcode') && strval($oXmlItem->Штрихкод))
+					{
+						$oShop_Item_Barcode = $oShopItem->Shop_Item_Barcodes->getByvalue(strval($oXmlItem->Штрихкод), FALSE);
+
+						if (is_null($oShop_Item_Barcode))
+						{
+							$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
+							$oShop_Item_Barcode->value = strval($oXmlItem->Штрихкод);
+							$oShop_Item_Barcode->setType();
+							$oShopItem->add($oShop_Item_Barcode);
+						}
+					}
+
+					// Marking
 					$this->_checkUpdateField('marking') && strval($oXmlItem->Артикул) != ''
 						&& $oShopItem->marking = strval($oXmlItem->Артикул);
-						/*? strval($oXmlItem->Артикул)
-						: (strlen(strval($oXmlItem->Штрихкод))
-							? strval($oXmlItem->Штрихкод)
-							: ''
-						);*/
-
-					$this->_checkUpdateField('name') && $oShopItem->name = $sItemName;
 
 					// БазоваяЕдиница
 					$this->_importBaseMeasure($oXmlItem, $oShopItem);
@@ -1270,7 +1308,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						is_null($oShopItem->path) && $oShopItem->path = '';
 
-						$oShopItem->save();
+						$oShopItem->save()->clearCache();
 					}
 					else
 					{
@@ -1508,10 +1546,28 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$sGUIDmod = $aItemGUID[1];
 					}
 
+					// Товар может быть идентифицирован произвольным (например GUID или внутрисистемным) идентификатором, Штрихкодом, Артикулом. Контрагент может использовать любой удобный с его точки зрения  идентификатор - на выбор
+
 					// Основной товар (не модификация)
-					$oShopItem = $oShop
-						->Shop_Items
-						->getByGuid($sItemGUID, FALSE);
+					$oShopItem = $oShop->Shop_Items->getByGuid($sItemGUID, FALSE);
+
+					// Search by Barcode
+					if (is_null($oShopItem) && strval($oProposal->Штрихкод))
+					{
+						$oTmpItemsByBarcode = $oShop->Shop_Items;
+						$oTmpItemsByBarcode->queryBuilder()
+							->select('shop_items.*')
+							->join('shop_item_barcodes', 'shop_item_barcodes.shop_item_id', '=', 'shop_items.id')
+							->where('shop_item_barcodes.value', '=', strval($oProposal->Штрихкод));
+
+						$oShopItem = $oTmpItemsByBarcode->getFirst(FALSE);
+					}
+
+					// Search by Marking
+					if (is_null($oShopItem) && strval($oProposal->Артикул))
+					{
+						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oProposal->Артикул));
+					}
 
 					if (!is_null($oShopItem))
 					{
@@ -1537,7 +1593,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							// Для модификации обновляется название и артикул
 							$this->_checkUpdateField('marking') && strval($oProposal->Артикул) != ''
 								&& $oShopItem->marking = strval($oProposal->Артикул);
-							
+
 							$this->_checkUpdateField('name') && $oShopItem->name = strval($oProposal->Наименование);
 						}
 
@@ -1774,7 +1830,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							}
 						}
 
-						$oShopItem->save();
+						$oShopItem->save()->clearCache();
 						$this->_aReturn['updateItemCount']++;
 
 						Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterOffersShopItem', $this, array($oShopItem, $oProposal));
@@ -2021,12 +2077,12 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					$sTagName = Core_Str::transliteration($oProperty->name);
-					
+
 					// Уже может быть свойство с таким же tag_name внтури одного магазина,
 					// например, разные справочники с одинаковым названием, но разными значениями
 					$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
 					$iCount = $linkedObject->Properties->getCountBytag_name($sTagName, FALSE);
-					
+
 					// Добавляем к названию тега "-{количество+1}"
 					if ($iCount)
 					{
@@ -2044,9 +2100,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oProperty->image_small_max_height = $oShop->image_small_max_height;
 
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeCreateProperty', $this, array($oProperty, $oItemProperty));
-					
+
 					$oShop_Item_Property_List->add($oProperty);
-					
+
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterCreateProperty', $this, array($oProperty, $oItemProperty));
 				}
 

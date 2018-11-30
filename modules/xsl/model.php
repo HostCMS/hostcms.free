@@ -53,7 +53,7 @@ class Xsl_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -129,6 +129,18 @@ class Xsl_Model extends Core_Entity
 		try
 		{
 			Core_File::delete($filename);
+
+			// DTD
+			$aLngs = Xsl_Controller::getLngs();
+			foreach ($aLngs as $sLng)
+			{
+				$sDtdPath = $this->getLngDtdPath($sLng);
+
+				if (is_file($sDtdPath))
+				{
+					Core_File::delete($sDtdPath);
+				}
+			}
 		} catch (Exception $e) {}
 
 		return parent::delete($primaryKey);
@@ -169,7 +181,20 @@ class Xsl_Model extends Core_Entity
 
 		try
 		{
-			Core_File::copy($this->getXslFilePath(), $newObject->getXslFilePath());
+			// XSL
+			$content = Core_File::read($this->getXslFilePath());
+			$content = str_replace('"lang://' . $this->id . '"', '"lang://' . $newObject->id . '"', $content);
+			Core_File::write($newObject->getXslFilePath(), $content);
+
+			// DTD
+			$aLngs = Xsl_Controller::getLngs();
+			foreach ($aLngs as $sLng)
+			{
+				$sDtd = $this->loadLngDtdFile($sLng);
+				$sDtd != '' && $newObject->saveLngDtdFile($sLng, $sDtd);
+			}
+
+			//Core_File::copy($this->getXslFilePath(), $newObject->getXslFilePath());
 		}
 		catch (Exception $e) {}
 
@@ -187,6 +212,13 @@ class Xsl_Model extends Core_Entity
 		$oSearch_Page = new stdClass();
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
 
 		$oSearch_Page->text = $this->name . ' ' . $this->description;
 

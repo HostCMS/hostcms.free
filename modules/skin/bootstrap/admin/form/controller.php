@@ -290,12 +290,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	{
 		if (count($this->viewList) > 1)
 		{
-			/* <div class="btn-group btn-group-justified">
-				<a href="#" class="btn btn-default">Left</a>
-				<a href="#" class="btn btn-default">Middle</a>
-				<a href="#" class="btn btn-default">Right</a>
-			</div> */
-
 			?><div class="btn-group btn-view-selector pull-left"><?php
 			foreach ($this->viewList as $viewName => $className)
 			{
@@ -305,7 +299,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			}
 			?></div><?php
 
-			if (1==0)
+			/*if (1==0)
 			{
 			?><div class="view-selector pull-left"><?php
 			foreach ($this->viewList as $viewName => $className)
@@ -314,10 +308,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 				?><input type="radio" onclick="<?php echo $onclick?>" id="<?php echo htmlspecialchars($viewName)?>" data-view="<?php echo htmlspecialchars($viewName)?>" name="selector" <?php if ($viewName == $this->view) { echo 'checked="checked"'; }?> /><label for="<?php echo htmlspecialchars($viewName)?>"><?php echo Core::_('Admin_Form.' . $viewName)?></label><?php
 			}
-
-			/*	?><input type="radio" id="kanban" data-view="1" name="selector"><label for="kanban"><?php echo Core::_('Admin_Form.kanban')?></label>*/
 			?></div><?php
-			}
+			}*/
 		}
 
 		return $this;

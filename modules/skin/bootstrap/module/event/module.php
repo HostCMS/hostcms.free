@@ -175,7 +175,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 				{
 
 				?><div class="col-xs-12 col-sm-6" id="eventsAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
-					<script type="text/javascript">
+					<script>
 					$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#eventsAdminPage') });
 					$.eventsWidgetPrepare();
 					</script>
@@ -338,7 +338,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					</div>
 				</div>
 			</div><!--Widget Body-->
-			<script type="text/javascript">
+			<script>
 				$('#eventsAdminPage .tasks-list')
 					.slimscroll({
 						//height: '500px',

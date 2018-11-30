@@ -117,6 +117,12 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->addTabAfter($oPersonalDataTab, $oMainTab);
 
+		$oWorktimeTab = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('User.users_type_form_tab_3'))
+			->name('tab_worktime');
+
+		$this->addTabAfter($oWorktimeTab, $oPersonalDataTab);
+
 		// Email'ы сотрудника
 		$oPersonalDataEmailsRow = Directory_Controller_Tab::instance('email')
 			->title(Core::_('Directory_Email.emails'))
@@ -235,8 +241,148 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oPersonalDataRow3->add($oImageField);
 
+		// Расписание
+		for ($day = 1; $day <= 7; $day++)
+		{
+			$oWorktimeTab
+				->add($oWorktimeRow = Admin_Form_Entity::factory('Div')->class('row'));
+
+			// День недели
+			$oDayDiv = Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-md-2 margin-top-10')
+				->value(Core::_('Admin_Form.day' . $day));
+
+			$oUser_Worktime = $this->_object->User_Worktimes->getByDay($day);
+
+			$from = !is_null($oUser_Worktime)
+				? $oUser_Worktime->from
+				: '00 : 00';
+
+			// Начало рабочего дня
+			$oDayStart = Admin_Form_Entity::factory('Input')
+				->id("timepicker_{$day}_start")
+				->name("day_{$day}_from")
+				->value($from)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			$to = !is_null($oUser_Worktime)
+				? $oUser_Worktime->to
+				: '00 : 00';
+
+			// Конец рабочего дня
+			$oDayEnd = Admin_Form_Entity::factory('Input')
+				->id("timepicker_{$day}_end")
+				->name("day_{$day}_to")
+				->value($to)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			// Перерыв
+			$oDayBreakDiv = Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-md-2 margin-top-10')
+				->value(Core::_('User.break'));
+
+			// Начало перерыва
+			$break_from = !is_null($oUser_Worktime)
+				? $oUser_Worktime->break_from
+				: '00 : 00';
+
+			$oDayBreakStart = Admin_Form_Entity::factory('Input')
+				->id("timepicker_break_{$day}_start")
+				->name("day_break_{$day}_from")
+				->value($break_from)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			// Конец перерыва
+			$break_to = !is_null($oUser_Worktime)
+				? $oUser_Worktime->break_to
+				: '00 : 00';
+
+			$oDayBreakEnd = Admin_Form_Entity::factory('Input')
+				->id("timepicker_break_{$day}_end")
+				->name("day_break_{$day}_to")
+				->value($break_to)
+				->divAttr(array('class' => 'form-group col-xs-6 col-md-2'));
+
+			$html = "<script>
+				$(function(){
+					$('#timepicker_{$day}_start').wickedpicker({
+						now: '{$from}',
+						twentyFour: true,  //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+						hoverState: 'hover-state', //The hover state class to use, for custom CSS
+						title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+						showSeconds: false, //Whether or not to show seconds,
+						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+						secondsInterval: 1, //Change interval for seconds, defaults to 1,
+						minutesInterval: 1, //Change interval for minutes, defaults to 1
+						clearable: false //Make the picker's input clearable (has clickable 'x')
+					});
+
+					$('#timepicker_{$day}_end').wickedpicker({
+						now: '{$to}',
+						twentyFour: true,  //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+						hoverState: 'hover-state', //The hover state class to use, for custom CSS
+						title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+						showSeconds: false, //Whether or not to show seconds,
+						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+						secondsInterval: 1, //Change interval for seconds, defaults to 1,
+						minutesInterval: 1, //Change interval for minutes, defaults to 1
+						clearable: false //Make the picker's input clearable (has clickable 'x')
+					});
+
+					$('#timepicker_break_{$day}_start').wickedpicker({
+						now: '{$break_from}',
+						twentyFour: true,  //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+						hoverState: 'hover-state', //The hover state class to use, for custom CSS
+						title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+						showSeconds: false, //Whether or not to show seconds,
+						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+						secondsInterval: 1, //Change interval for seconds, defaults to 1,
+						minutesInterval: 1, //Change interval for minutes, defaults to 1
+						clearable: false //Make the picker's input clearable (has clickable 'x')
+					});
+
+					$('#timepicker_break_{$day}_end').wickedpicker({
+						now: '{$break_to}',
+						twentyFour: true,  //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+						hoverState: 'hover-state', //The hover state class to use, for custom CSS
+						title: '" . Core::_('User_Worktime.time') . "', //The Wickedpicker's title,
+						showSeconds: false, //Whether or not to show seconds,
+						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+						secondsInterval: 1, //Change interval for seconds, defaults to 1,
+						minutesInterval: 1, //Change interval for minutes, defaults to 1
+						clearable: false //Make the picker's input clearable (has clickable 'x')
+					});
+				})
+			</script>";
+
+			$oWorktimeRow
+				->add($oDayDiv)
+				->add($oDayStart)
+				->add($oDayEnd)
+				->add($oDayBreakDiv)
+				->add($oDayBreakStart)
+				->add($oDayBreakEnd)
+				->add(Admin_Form_Entity::factory('Code')->html($html));
+		}
+
+		$name = strlen($this->_object->getFullName())
+			? $this->_object->getFullName()
+			: $this->_object->login;
+
 		$title = $this->_object->id
-			? Core::_('User.ua_edit_user_form_title')
+			? Core::_('User.ua_edit_user_form_title', htmlspecialchars($name))
 			: Core::_('User.ua_add_user_form_title');
 
 		$this->title($title);
@@ -347,7 +493,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$sEmail = trim(Core_Array::getPost("email#{$oUser_Directory_Email->id}"));
 
-			//if (!is_null(Core_Array::getPost("email_type#{$oUser_Directory_Email->id}")))
 			if (!empty($sEmail))
 			{
 				$oDirectory_Email = $oUser_Directory_Email->Directory_Email;
@@ -361,7 +506,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем пустую строку с полями
 				ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='email_type#{$oUser_Directory_Email->id}']\").closest('.row').find('.btn-delete111').get(0));")
 					->execute();
 
@@ -371,10 +515,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// Электронные адреса, новые значения
-		$aEmails = Core_Array::getPost('email');
-		$aEmail_Types = Core_Array::getPost('email_type');
+		$aEmails = Core_Array::getPost('email', array());
+		$aEmail_Types = Core_Array::getPost('email_type', array());
 
-		if (count($aEmails))
+		if (is_array($aEmails) && count($aEmails))
 		{
 			$i = 0;
 			foreach ($aEmails as $key => $sEmail)
@@ -388,16 +532,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->value($sEmail)
 						->save();
 
-					/*$oUser_Directory_Email = Core_Entity::factory('Directory_Email_User')
-						->directory_email_id($oDirectory_Email->id);*/
-
 					$this->_object->add($oDirectory_Email);
-
-					//$this->_object->add($oDirectory_Email);
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} select[name='email_type\\[\\]']\").eq({$i}).prop('name', 'email_type#{$oDirectory_Email->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='email\\[\\]']\").eq({$i}).prop('name', 'email#{$oDirectory_Email->id}');")
 						->execute();
@@ -430,7 +568,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем пустую строку с полями
 				ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='phone_type#{$oUser_Directory_Phone->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
@@ -440,10 +577,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// Телефоны, новые значения
-		$aPhones = Core_Array::getPost('phone');
-		$aPhone_Types = Core_Array::getPost('phone_type');
+		$aPhones = Core_Array::getPost('phone', array());
+		$aPhone_Types = Core_Array::getPost('phone_type', array());
 
-		if (count($aPhones))
+		if (is_array($aPhones) && count($aPhones))
 		{
 			$i = 0;
 			foreach ($aPhones as $key => $sPhone)
@@ -461,7 +598,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} select[name='phone_type\\[\\]']\").eq({$i}).prop('name', 'phone_type#{$oDirectory_Phone->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='phone\\[\\]']\").eq({$i}).prop('name', 'phone#{$oDirectory_Phone->id}');
 						")
@@ -482,7 +618,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$sSocial_Address = trim(Core_Array::getPost("social_address#{$oUser_Directory_Social->id}"));
 
-			//if (!is_null(Core_Array::getPost("social_address#{$oUser_Directory_Social->id}")))
 			if (!empty($sSocial_Address))
 			{
 				$aUrl = parse_url($sSocial_Address);
@@ -490,12 +625,11 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Если не был указан протокол, или
 				// указанный протокол некорректен для url
 				!array_key_exists('scheme', $aUrl)
-					&& $sSocial_Address = /*'http://' .*/ $sSocial_Address;
+					&& $sSocial_Address = $sSocial_Address;
 
 				$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
 				$oDirectory_Social
 					->directory_social_type_id(intval(Core_Array::getPost("social#{$oUser_Directory_Social->id}", 0)))
-					//->directory_social_id(intval(Core_Array::getPost("social#{$oUser_Directory_Social->id}", 0)))
 					->value($sSocial_Address)
 					->save();
 			}
@@ -504,7 +638,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем пустую строку с полями
 				ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='social#{$oUser_Directory_Social->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
@@ -514,10 +647,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// Социальные сети, новые значения
-		$aSocial_Addresses = Core_Array::getPost('social_address');
-		$aSocials = Core_Array::getPost('social');
+		$aSocial_Addresses = Core_Array::getPost('social_address', array());
+		$aSocials = Core_Array::getPost('social', array());
 
-		if (count($aSocial_Addresses))
+		if (is_array($aSocial_Addresses) && count($aSocial_Addresses))
 		{
 			$i = 0;
 			foreach ($aSocial_Addresses as $key => $sSocial_Address)
@@ -531,7 +664,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Если не был указан протокол, или
 					// указанный протокол некорректен для url
 					!array_key_exists('scheme', $aUrl)
-						&& $sSocial_Address = /*'http://' .*/ $sSocial_Address;
+						&& $sSocial_Address = $sSocial_Address;
 
 					$oDirectory_Social = Core_Entity::factory('Directory_Social')
 						->directory_social_type_id(intval(Core_Array::get($aSocials, $key)))
@@ -542,7 +675,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} select[name='social\\[\\]']\").eq({$i}).prop('name', 'social#{$oDirectory_Social->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='social_address\\[\\]']\").eq({$i}).prop('name', 'social_address#{$oDirectory_Social->id}');
 						")
@@ -563,7 +695,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		foreach ($aUser_Directory_Messengers as $oUser_Directory_Messenger)
 		{
 			$sMessenger_Address = trim(Core_Array::getPost("messenger_username#{$oUser_Directory_Messenger->id}"));
-			//if (!is_null(Core_Array::getPost("messenger_username#{$oUser_Directory_Messenger->id}")))
+
 			if (!empty($sMessenger_Address))
 			{
 				$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
@@ -580,7 +712,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем пустую строку с полями
 				ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='messenger#{$oUser_Directory_Messenger->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
@@ -590,10 +721,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// Мессенджеры, новые значения
-		$aMessenger_Addresses = Core_Array::getPost('messenger_username');
-		$aMessengers = Core_Array::getPost('messenger');
+		$aMessenger_Addresses = Core_Array::getPost('messenger_username', array());
+		$aMessengers = Core_Array::getPost('messenger', array());
 
-		if (count($aMessenger_Addresses))
+		if (is_array($aMessenger_Addresses) && count($aMessenger_Addresses))
 		{
 			$i = 0;
 			foreach ($aMessenger_Addresses as $key => $sMessenger_Address)
@@ -611,7 +742,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} select[name='messenger\\[\\]']\").eq({$i}).prop('name', 'messenger#{$oDirectory_Messenger->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='messenger_username\\[\\]']\").eq({$i}).prop('name', 'messenger_username#{$oDirectory_Messenger->id}');
 						")
@@ -634,11 +764,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$sWebsite_Address = trim(Core_Array::getPost("website_address#{$oUser_Directory_Website->id}"));
 
-			//if (!is_null(Core_Array::getPost("website_address#{$oUser_Directory_Website->id}")))
 			if (!empty($sWebsite_Address))
 			{
-				//$oDirectory_Website->description = Core_Array::getPost("website_name#{$oUser_Directory_Website->id}");
-
 				$aUrl = parse_url($sWebsite_Address);
 
 				// Если не был указан протокол, или
@@ -656,7 +783,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаляем пустую строку с полями
 				ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$.deleteFormRow($(\"#{$windowId} input[name='website_address#{$oUser_Directory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 
@@ -666,10 +792,10 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		// Сайты, новые значения
-		$aWebsite_Addresses = Core_Array::getPost('website_address');
-		$aWebsite_Names = Core_Array::getPost('website_description');
+		$aWebsite_Addresses = Core_Array::getPost('website_address', array());
+		$aWebsite_Names = Core_Array::getPost('website_description', array());
 
-		if (count($aWebsite_Addresses))
+		if (is_array($aWebsite_Addresses) && count($aWebsite_Addresses))
 		{
 			$i = 0;
 
@@ -694,11 +820,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oUser_Directory_Website = $oDirectory_Website->User_Directory_Websites->getByUser_Id($this->_object->id);
 
-					//$this->_object->add($oDirectory_Email);
-
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} input[name='website_address\\[\\]']\").eq({$i}).prop('name', 'website_address#{$oUser_Directory_Website->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='website_description\\[\\]']\").eq({$i}).prop('name', 'website_description#{$oUser_Directory_Website->id}');
 
@@ -711,6 +834,45 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$i++;
 				}
+			}
+		}
+
+		// Расписание
+		for ($day = 1; $day <= 7; $day++)
+		{
+			$from = Core_Array::getPost("day_{$day}_from");
+			$to = Core_Array::getPost("day_{$day}_to");
+
+			$from = str_replace(' ', '', $from);
+			$to = str_replace(' ', '', $to);
+
+			// Перерыв
+			$break_from = Core_Array::getPost("day_break_{$day}_from");
+			$break_to = Core_Array::getPost("day_break_{$day}_to");
+
+			$break_from = str_replace(' ', '', $break_from);
+			$break_to = str_replace(' ', '', $break_to);
+
+			$oUser_Worktime = $this->_object->User_Worktimes->getByDay($day);
+
+			if ($from != '00:00' && $to != '00:00')
+			{
+				if (is_null($oUser_Worktime))
+				{
+					$oUser_Worktime = Core_Entity::factory('User_Worktime');
+					$oUser_Worktime->user_id = $this->_object->id;
+					$oUser_Worktime->day = $day;
+				}
+
+				$oUser_Worktime->from = $from . ':00';
+				$oUser_Worktime->to = $to . ':00';
+				$oUser_Worktime->break_from = $break_from . ':00';
+				$oUser_Worktime->break_to = $break_to . ':00';
+				$oUser_Worktime->save();
+			}
+			elseif (!is_null($oUser_Worktime))
+			{
+				$oUser_Worktime->delete();
 			}
 		}
 

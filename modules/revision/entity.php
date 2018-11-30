@@ -82,7 +82,7 @@ class Revision_Entity extends Core_Entity
 	 * Get table columns
 	 * @return array
 	 */
-	public function getTableColums()
+	public function getTableColumns()
 	{
 		return $this->_tableColums;
 	}

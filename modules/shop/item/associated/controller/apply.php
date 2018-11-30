@@ -29,7 +29,7 @@ class Shop_Item_Associated_Controller_Apply extends Admin_Form_Action_Controller
 	public function execute($operation = NULL)
 	{
 		// Получение списка полей объекта
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		$aAdmin_Form_Fields = $this->_Admin_Form_Action->Admin_Form->Admin_Form_Fields->findAll();
 

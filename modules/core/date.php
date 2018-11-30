@@ -86,7 +86,7 @@ class Core_Date
 			self::datetime2timestamp($sDate)
 		);
 	}
-	
+
 	/**
 	 * Преобразовывает дату из формата даты в SQL
 	 *
@@ -123,7 +123,7 @@ class Core_Date
 	{
 		return date(self::$_sqlFormat, $timestamp);
 	}
-	
+
 	/**
 	 * Преобразовывает дату из временной метки в формат даты SQL
 	 *
@@ -186,7 +186,7 @@ class Core_Date
 		// Дни
 		elseif ($time >= 60 * 60 * 24 && $time < 60 * 60 * 24 * 365)
 		{
-			$sLastMessageTime = floor($time / 60 / 60/ 24) . ' д.';
+			$sLastMessageTime = floor($time / 60 / 60 / 24) . ' д.';
 		}
 		// Годы
 		else
@@ -195,5 +195,95 @@ class Core_Date
 		}
 
 		return $sLastMessageTime;
+	}
+
+	/**
+	 * Преобразовывает дату из временной метки в текстовый формат
+	 *
+	 * @param string $timestamp
+	 * @return string
+	 */
+	static public function timestamp2string($timestamp)
+	{
+		list($year, $month, $day) = array_values(date_parse(Core_Date::timestamp2sql($timestamp)));
+
+		$aMonth = array(
+			1 => Core::_('Core.month1'),
+			2 => Core::_('Core.month2'),
+			3 => Core::_('Core.month3'),
+			4 => Core::_('Core.month4'),
+			5 => Core::_('Core.month5'),
+			6 => Core::_('Core.month6'),
+			7 => Core::_('Core.month7'),
+			8 => Core::_('Core.month8'),
+			9 => Core::_('Core.month9'),
+			10 => Core::_('Core.month10'),
+			11 => Core::_('Core.month11'),
+			12 => Core::_('Core.month12')
+		);
+
+		$estimate_time = time() - $timestamp;
+
+		$time = date('H:i', $timestamp);
+
+		$sReturn = '';
+
+		// Прошло дней
+		//$estimate_days = floor($estimate_time / 86400);
+		$dateZ = date('z', $timestamp);
+		$currentZ = date('z');
+		
+		$dateY = date('Y', $timestamp);
+		$currentY = date('Y');
+		
+		// Прошло часов
+		$estimate_hours = floor($estimate_time / 3600);
+		
+		if ($estimate_hours < 3)
+		{
+			// Прошло минут
+			$estimate_minutes = floor($estimate_time / 60);
+
+			if ($estimate_minutes == 0)
+			{
+				$sReturn = Core::_('Core.now');
+			}
+			else
+			{
+				$hour_prefix = $estimate_hours > 0
+					? $estimate_hours . ' ' . Core_Str::declensionNumber($estimate_hours, Core::_('Core.hour_nominative'), Core::_('Core.hour_genitive_singular'), Core::_('Core.hour_genitive_plural')) . ' '
+					: '';
+
+				$minutes_ago = $estimate_minutes - 60 * $estimate_hours;
+
+				$minute_prefix = $minutes_ago > 0
+					? $minutes_ago . ' ' . Core_Str::declensionNumber($minutes_ago, Core::_('Core.minute_nominative'), Core::_('Core.minute_genitive_singular'), Core::_('Core.minute_genitive_plural'))
+					: '';
+
+				$sReturn = Core::_('Core.ago', $hour_prefix, $minute_prefix);
+			}
+		}
+		elseif ($dateY == $currentY && $dateZ == $currentZ)
+		{
+			$sReturn = Core::_('Core.today', $time);
+		}
+		elseif ($dateY == $currentY && $dateZ == $currentZ - 1)
+		{
+			$sReturn = Core::_('Core.yesterday', $time);
+		}
+		elseif ($dateY == $currentY && $dateZ == $currentZ + 1)
+		{
+			$sReturn = Core::_('Core.tomorrow', $time);
+		}
+		elseif ($dateY == $currentY)
+		{
+			$sReturn = Core::_('Core.estimate_date', $day, $aMonth[$month], $time);
+		}
+		else
+		{
+			$sReturn = Core::_('Core.estimate_date_year', $day, $aMonth[$month], $year, $time);
+		}
+
+		return $sReturn;
 	}
 }

@@ -55,7 +55,7 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 
 				foreach (libxml_get_errors() as $error)
 				{
-					// Buf with libxml 2.9.2 + edit-in-place = error with same IDs
+					// Bug with libxml 2.9.2 + edit-in-place = error with same IDs
 					if ($error->code != 513)
 					{
 						echo "Libxml error {$error->code}: <strong>{$error->message}</strong>, Line: {$error->line}\n";
@@ -67,9 +67,10 @@ class Xsl_Processor_Xslt extends Xsl_Processor
 
 				if ($newdom)
 				{
-					$newdom->formatOutput = Core_Array::get(
-						Core::$config->get('xsl_config'), 'formatOutput', TRUE
-					);
+					$newdom->formatOutput = !is_null($this->_formatOutput)
+						? $this->_formatOutput
+						: Core_Array::get(Core::$config->get('xsl_config'), 'formatOutput', TRUE);
+
 					$content = $newdom->saveXML();
 
 					$return = $this->_deleteXmlHeader($content);

@@ -17,19 +17,20 @@ $sAdminFormAction = '/admin/benchmark/url/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-if (!is_null($constantValue = Core_Array::getPost('constantValue', NULL))
+if (!is_null($constantName = Core_Array::getPost('constantName', NULL))
+	&& !is_null($constantValue = Core_Array::getPost('constantValue', NULL))
 	&& isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 	&& $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest')
 {
-	$oConstant = Core_Entity::factory('Constant')->getByName('START_BENCHMARK');
+	$oConstant = Core_Entity::factory('Constant')->getByName($constantName);
 	if (is_null($oConstant))
 	{
 		$oConstant = Core_Entity::factory('Constant');
-		$oConstant->name = 'START_BENCHMARK';
+		$oConstant->name = $constantName;
 	}
 
 	$oConstant->active = 1;
-	$oConstant->value = $constantValue;
+	$oConstant->value = intval($constantValue) ? 'true' : 'false';
 	$oConstant->save();
 	die();
 }
@@ -93,14 +94,10 @@ if ($iStructureId)
 		->addCondition(
 			array('join' => array('structures', 'benchmark_urls.structure_id', '=', 'structures.id'))
 		)->addCondition(
-			array(
-				'where' => array('structures.id', '=', intval($iStructureId)),
-			)
+			array('where' => array('benchmark_urls.structure_id', '=', intval($iStructureId)))
 		)
 		->addCondition(
-			array(
-				'where' => array('benchmark_urls.datetime', '>', date('Y-m-d 00:00:00', strtotime("-1 month")))
-			)
+			array('where' => array('benchmark_urls.datetime', '>', date('Y-m-d 00:00:00', strtotime("-1 month"))))
 		)
 		->changeField('name', 'type', 1);
 }
@@ -109,21 +106,17 @@ else
 	$oAdmin_Form_Dataset->addCondition(
 		array(
 		'select' => array('structures.name', 'benchmark_urls.*',
-				array('ROUND(SUM(waiting_time) / COUNT(*) / 1000, 3)', 'waiting_time_avr'),
-				array('ROUND(SUM(load_page_time) / COUNT(*) / 1000, 3)', 'load_page_time_avr'),
-				array('ROUND(SUM(dns_lookup) / COUNT(*)/ 1000, 3)', 'dns_lookup_avr'),
-				array('ROUND(SUM(connect_server) / COUNT(*) / 1000, 3)', 'connect_server_avr')
+				array(Core_QueryBuilder::expression('ROUND(SUM(`waiting_time`) / COUNT(*) / 1000, 3)'), 'waiting_time_avr'),
+				array(Core_QueryBuilder::expression('ROUND(SUM(`load_page_time`) / COUNT(*) / 1000, 3)'), 'load_page_time_avr'),
+				array(Core_QueryBuilder::expression('ROUND(SUM(`dns_lookup`) / COUNT(*)/ 1000, 3)'), 'dns_lookup_avr'),
+				array(Core_QueryBuilder::expression('ROUND(SUM(`connect_server`) / COUNT(*) / 1000, 3)'), 'connect_server_avr')
 			)
 		)
 	)
 	->addCondition(
-		array(
-			'join' => array('structures', 'benchmark_urls.structure_id', '=', 'structures.id')
-		)
+		array('join' => array('structures', 'benchmark_urls.structure_id', '=', 'structures.id'))
 	)->addCondition(
-		array(
-			'where' => array('benchmark_urls.datetime', '>', date('Y-m-d 00:00:00', strtotime("-1 month")))
-		)
+		array('where' => array('benchmark_urls.datetime', '>', date('Y-m-d 00:00:00', strtotime("-1 month"))))
 	)->addCondition(
 		array('groupBy' => array('structure_id'))
 	)
@@ -132,36 +125,64 @@ else
 
 	ob_start();
 
-	$sChecked = defined('START_BENCHMARK') && START_BENCHMARK
+	$sCheckedStart = defined('BENCHMARK_ENABLE') && BENCHMARK_ENABLE
+		? 'checked="checked"'
+		: '';
+
+	$sCheckedAddCounter = defined('BENCHMARK_ADD_COUNTER') && BENCHMARK_ADD_COUNTER
 		? 'checked="checked"'
 		: '';
 
 	?>
 	<script>
-	function changeConstant(val)
+	function changeConstant(name, value)
 	{
+		console.log(name);
+		console.log(value);
+
 		$.ajax({
 			type: "POST",
 			url: "/admin/benchmark/url/index.php",
-			data: { constantValue: +val }
-		})
+			data: {constantName: name, constantValue: +value}
+		});
 	}
 	</script>
+
 	<div class="row">
-		<div class="col-xs-5">
-			<span class="text sky" style="font-size: 12pt;"><?php echo Core::_('Benchmark.start_monitoring') ?></span>
-		</div>
-		<div class="col-xs-4">
-			<label>
-				<input class="checkbox-slider toggle colored-success" <?php echo $sChecked?> type="checkbox" onchange="changeConstant(this.checked)">
-				<span class="text"></span>
-			</label>
+		<div class="col-xs-12">
+			<div class="well">
+				<div class="row">
+					<div class="col-xs-6 col-sm-3 col-md-2">
+						<label>
+							<input class="checkbox-slider toggle colored-success" <?php echo $sCheckedStart?> type="checkbox" onchange="changeConstant('BENCHMARK_ENABLE', this.checked)">
+							<span class="text"></span>
+						</label>
+					</div>
+					<div class="col-xs-6 col-sm-9 col-md-10">
+						<span class="text sky" style="font-size: 12pt;"><?php echo Core::_('Benchmark.start_monitoring')?></span>
+					</div>
+					
+				</div>
+
+				<div class="row margin-top-10">
+					<div class="col-xs-6 col-sm-3 col-md-2">
+						<label>
+							<input class="checkbox-slider toggle colored-success" <?php echo $sCheckedAddCounter?> type="checkbox" onchange="changeConstant('BENCHMARK_ADD_COUNTER', this.checked)">
+							<span class="text"></span>
+						</label>
+					</div>
+					<div class="col-xs-6 col-sm-9 col-md-10">
+						<span class="text sky" style="font-size: 12pt;"><?php echo Core::_('Benchmark.add_counter')?></span>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
+
 	<?php
-$oAdmin_Form_Controller->addEntity(
-	Admin_Form_Entity::factory('Code')
-		->html(ob_get_clean())
+	$oAdmin_Form_Controller->addEntity(
+		Admin_Form_Entity::factory('Code')
+			->html(ob_get_clean())
 	);
 }
 
@@ -181,27 +202,40 @@ while ($iTmpTimestamp < $endTime)
 }
 
 $oBenchmark_Url = Core_Entity::factory('Benchmark_Url');
+
+if ($iStructureId)
+{
+	$oBenchmark_Url
+		->queryBuilder()
+		->select(
+			array(Core_QueryBuilder::expression('ROUND(`waiting_time` / 1000, 3)'), 'waiting_time_avr'),
+			array(Core_QueryBuilder::expression('ROUND(`load_page_time` / 1000, 3)'), 'load_page_time_avr'),
+			array(Core_QueryBuilder::expression('ROUND(`dns_lookup` / 1000, 3)'), 'dns_lookup_avr'),
+			array(Core_QueryBuilder::expression('ROUND(`connect_server` / 1000, 3)'), 'connect_server_avr')
+		)
+		->where('benchmark_urls.structure_id', '=', $iStructureId);
+}
+else
+{
+	$oBenchmark_Url
+		->queryBuilder()
+		->select(
+			array(Core_QueryBuilder::expression('ROUND(SUM(`waiting_time`) / COUNT(*) / 1000, 3)'), 'waiting_time_avr'),
+			array(Core_QueryBuilder::expression('ROUND(SUM(`load_page_time`) / COUNT(*) / 1000, 3)'), 'load_page_time_avr'),
+			array(Core_QueryBuilder::expression('ROUND(SUM(`dns_lookup`) / COUNT(*) / 1000, 3)'), 'dns_lookup_avr'),
+			array(Core_QueryBuilder::expression('ROUND(SUM(`connect_server`) / COUNT(*) / 1000, 3)'), 'connect_server_avr')
+		)
+		->join('structures', 'benchmark_urls.structure_id', '=', 'structures.id')
+		->where('structures.site_id', '=', CURRENT_SITE);
+}
+
 $oBenchmark_Url
 	->queryBuilder()
-	->select(
-		array('SUM(waiting_time) / COUNT(*) / 1000', 'waiting_time_avr'),
-		array('SUM(load_page_time) / COUNT(*) / 1000', 'load_page_time_avr'),
-		array('SUM(dns_lookup) / COUNT(*) / 1000', 'dns_lookup_avr'),
-		array('SUM(connect_server) / COUNT(*) / 1000', 'connect_server_avr')
-	)
-	->join('structures', 'benchmark_urls.structure_id', '=', 'structures.id')
-	->where('structures.site_id', '=', CURRENT_SITE)
-	//->where('benchmark_urls.datetime', '>=', Core_Date::timestamp2sql(strtotime("-1 month")))
 	->where('benchmark_urls.datetime', '>', date('Y-m-d 00:00:00', $iOneMonthAgo))
 	->groupBy('DATE(benchmark_urls.datetime)')
 	->clearOrderBy();
 
-$iStructureId && $oBenchmark_Url
-	->queryBuilder()
-	->where('structures.id', '=', $iStructureId);
-
 $aBenchmark_Urls = $oBenchmark_Url->findAll(FALSE);
-
 foreach ($aBenchmark_Urls as $oBenchmark_Url)
 {
 	$aTmp[strtotime(date('Y-m-d 00:00:00', Core_Date::sql2timestamp($oBenchmark_Url->datetime)))] = $oBenchmark_Url;

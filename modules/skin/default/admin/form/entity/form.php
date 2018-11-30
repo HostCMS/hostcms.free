@@ -42,15 +42,15 @@ class Skin_Default_Admin_Form_Entity_Form extends Admin_Form_Entity
 
 		// Warning: fieldType, fieldMessage, fieldsStatus (ниже !) переделать на JS-класс + заполнение в модели input-а
 		?><div id="box0">
-		<script type="text/javascript">
-		var fieldType = new Array(), fieldMessage = new Array(), fieldsStatus = new Array();
+		<script>
+		fieldType['<?php echo $windowId?>'] = [], fieldMessage['<?php echo $windowId?>'] = [], fieldsStatus['<?php echo $windowId?>'] = [];
 		</script>
 		<form <?php echo implode(' ', $aAttr) ?>><?php
 		
 		$this->executeChildren();
 		
 		?></form>
-		<script type="text/javascript">
+		<script>
 		$(function() {
 		var jForm = $("#<?php echo $windowId?> #<?php echo htmlspecialchars($this->id)?>");
 		if (jForm.length > 0)

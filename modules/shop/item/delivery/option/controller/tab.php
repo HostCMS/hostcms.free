@@ -192,7 +192,6 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
-						->type("text/javascript")
 						->value("$(\"#{$windowId} input[name='deliveryOptionDay_\\[\\]']\").eq(0).prop('name', 'deliveryOptionDay_{$oShop_Item_Delivery_Option->id}');
 						$(\"#{$windowId} input[name='deliveryOptionOrderBefore_\\[\\]']\").eq(0).prop('name', 'deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}');
 						$(\"#{$windowId} input[name='deliveryOptionCost_\\[\\]']\").eq(0).prop('name', 'deliveryOptionCost_{$oShop_Item_Delivery_Option->id}');

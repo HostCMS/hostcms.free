@@ -101,6 +101,23 @@ abstract class Xsl_Processor
 	}
 
 	/**
+	 * formatOutput
+	 * @return NULL|TRUE|FALSE
+	 */
+	protected $_formatOutput = NULL;
+
+	/**
+	 * Set formatOutput
+	 * @param NULL|TRUE|FALSE $formatOutput
+	 * @return self
+	 */
+	public function formatOutput($formatOutput)
+	{
+		$this->_formatOutput = $formatOutput;
+		return $this;
+	}
+
+	/**
 	 * Clear XSL
 	 * @return self
 	 */
@@ -154,7 +171,7 @@ abstract class Xsl_Processor
 			{
 				stream_wrapper_register('lang', 'Xsl_Stream_Lang');
 			}
-			
+
 			if (!in_array('import', stream_get_wrappers()))
 			{
 				stream_wrapper_register('import', 'Xsl_Stream_Import');

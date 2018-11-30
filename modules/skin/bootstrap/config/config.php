@@ -5,7 +5,7 @@ return array (
 		'content' => array(
 			'ico' => 'fa fa-newspaper-o',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_content'),
-			'modules' => array('informationsystem', 'shop', 'document', 'tag', 'revision'),
+			'modules' => array('informationsystem', 'shop', 'document', 'tag', 'printlayout', 'revision'),
 		),
 		'structure' => array(
 			'ico' => 'fa fa-sitemap',
@@ -45,7 +45,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'notification', 'benchmark', 'admin_form', 'module', 'constant', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'notification', 'benchmark', 'admin_form', 'module', 'constant', 'restapi', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

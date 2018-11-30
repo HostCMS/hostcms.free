@@ -16,7 +16,7 @@ return array(
 	'add_title' => 'Add driver',
 	'name' => 'Name',
 	'driver' => 'Driver',
-	'id' => 'Id',
+	'id' => 'ID',
 	'edit_success' => "Product information added successfully!",
 	'apply_success' => "Information has been successfully changed",
 	'delete_success' => 'Item deleted successfully!',

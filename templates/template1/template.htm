@@ -163,17 +163,17 @@
 	$Structure_Controller_Show = new Structure_Controller_Show(
 		Core_Entity::factory('Site', CURRENT_SITE));
 
-	$Structure_Controller_Show/*->xsl(
+	$Structure_Controller_Show->xsl(
 		Core_Entity::factory('Xsl')->getByName('ВерхнееМеню')
-	)*/
-	->tpl("ВерхнееМеню")
-	//->showInformationsystemGroupProperties(TRUE)
+	)
+	//->tpl("ВерхнееМеню")
+	->showShopGroupProperties(array(8014))
 	//->showInformationsystemGroups(TRUE)
 	//->showInformationsystemItems(TRUE)
-	//->showShopGroups(TRUE)
+	->showShopGroups(TRUE)
 	//->showShopItems(TRUE)
 	->menu(1)
-	->level(0)
+	//->level(0)
 	->show();
 	?>
 

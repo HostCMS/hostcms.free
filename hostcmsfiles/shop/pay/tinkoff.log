@@ -1,0 +1,2 @@
+[Tue Nov 20 09:58:12 2018] {"OrderId":"152","Amount":13496900,"DATA":{"Email":"","Connection_type":"hostcms"},"Receipt":{"Email":"","Taxation":"osn","Items":[{"Name":"Electrolux ESF 46010","Price":14207216,"Quantity":"1.00","Amount":13496900,"Tax":"none"}]}}
+[Tue Nov 20 09:58:12 2018] {"Success":false,"ErrorCode":"9999","Message":"Неверные параметры.","Details":"Email или Phone обязательны при передаче чека"}

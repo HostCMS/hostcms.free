@@ -148,7 +148,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$oMainRow11->add($oShopItemCountCheckBox);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Warehouse.form_warehouses_edit')
+			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name)
 			: Core::_('Shop_Warehouse.form_warehouses_add');
 
 		$this->title($title);

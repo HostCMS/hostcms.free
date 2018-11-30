@@ -23,7 +23,7 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::setObject($object);
 
 		$title = $this->_object->id
-			? Core::_('Module.modules_edit_form_title')
+			? Core::_('Module.modules_edit_form_title', $this->_object->name)
 			: Core::_('Module.modules_add_form_title');
 
 		$oMainTab = $this->getTab('main');
@@ -87,7 +87,7 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->_object->setupModule();
 			
-			$this->addMessage('<script type="text/javascript">$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
+			$this->addMessage('<script>$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
 		}
 
 		$this->_object->saveConfigFile(Core_Array::getPost('parameters'));

@@ -73,7 +73,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6')), $oMainRow1);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Discount.item_discount_edit_form_title')
+			? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Discount.item_discount_add_form_title');
 
 		$this->title($title);

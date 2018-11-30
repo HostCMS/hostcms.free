@@ -34,7 +34,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 * Form's ID
 	 * @var string
 	 */
-	protected $_formId = 'formEdit';
+	protected $_formId = NULL;
 
 	/**
 	 * Stores POST, which can change the controller
@@ -69,6 +69,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	public function __construct(Admin_Form_Action_Model $oAdmin_Form_Action)
 	{
 		parent::__construct($oAdmin_Form_Action);
+
+		is_null($this->_formId)
+			&& $this->_formId = 'formEdit' . rand(0, 99999);
 
 		// Set default title
 		$oAdmin_Word = $this->_Admin_Form_Action->Admin_Word->getWordByLanguage(
@@ -393,7 +396,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$this->_loadKeys();
 
 		// Получение списка полей объекта
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		// Список закладок
 		// Основная закладка
@@ -565,7 +568,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					{
 						$oAdmin_Form_Entity_For_Column
 							->caption(Core::_('User.backend-field-caption'))
-							->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 
 						if ($this->_object->user_id && Core::moduleIsActive('user'))
 						{
@@ -662,9 +665,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				if (is_null($prevPrimaryKeyValue))
 				{
 					$windowId = $this->_Admin_Form_Controller->getWindowId();
-					?><script type="text/javascript"><?php
-					?>$.appendInput('<?php echo $windowId?>', '<?php echo $this->_formId?>', '<?php echo $primaryKeyName?>', '<?php echo $this->_object->$primaryKeyName?>');<?php
-					/*?>$.appendInput('<?php echo $windowId?>', '<?php echo $this->_formId?>', 'hostcms[checked][<?php echo $this->_datasetId?>][<?php echo $this->_object->$primaryKeyName?>]', '1');<?php*/
+					?><script><?php
+					?>$.appendInput('<?php echo $windowId?>', '<?php echo $primaryKeyName?>', '<?php echo $this->_object->$primaryKeyName?>');<?php
 					?></script><?php
 				}
 
@@ -704,13 +706,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_applyObjectProperty();
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
 			case 'markDeleted':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script type="text/javascript">$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
 
 				$this->_return = TRUE;
 			break;
@@ -737,7 +739,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onBeforeApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		// Show on the additional tab, but not change!
 		$this->skipColumns = $this->skipColumns + array('user_id' => 'user_id');
@@ -778,6 +780,19 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						{
 							// Checkbox
 							$value = is_null($value) ? 0 : $value;
+						}
+					break;
+					case 'decimal':
+						if ($value != 0 && isset($columnArray['max_length']))
+						{
+							$aMaxLength = explode(',', $columnArray['max_length']);
+							if (count($aMaxLength) == 2)
+							{
+								$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
+								
+								$value > $maxValue && $value = $maxValue;
+								$value < -$maxValue && $value = -$maxValue;
+							}
 						}
 					break;
 					default:
@@ -823,7 +838,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		$sAdmin_View = !is_null($this->_Admin_Form_Controller)
 			? $this->_Admin_Form_Controller->Admin_View
 			: NULL;
-		
+
 		$oAdmin_View = Admin_View::create($sAdmin_View);
 		$oAdmin_View
 			->children($oAdmin_Form_Action_Controller_Type_Edit_Show->children)

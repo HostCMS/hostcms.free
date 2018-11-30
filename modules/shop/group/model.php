@@ -149,7 +149,7 @@ class Shop_Group_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -196,20 +196,7 @@ class Shop_Group_Model extends Core_Entity
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
 		{
-			switch ($oProperty_Value->Property->type)
-			{
-				case 2:
-					$oProperty_Value
-						->setHref($this->getGroupHref())
-						->setDir($this->getGroupPath());
-				break;
-				case 8:
-					$oProperty_Value->dateFormat($this->Shop->format_date);
-				break;
-				case 9:
-					$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
-				break;
-			}
+			$this->_preparePropertyValue($oProperty_Value);
 		}
 
 		$bCache && $this->_propertyValues[$iMd5] = $aReturn;
@@ -265,7 +252,7 @@ class Shop_Group_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', $path)
+			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('parent_id', '=', $parent_id)
 			->clearOrderBy()
 			->limit(1);
@@ -686,6 +673,13 @@ class Shop_Group_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -775,7 +769,7 @@ class Shop_Group_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function name($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$link = $oAdmin_Form_Field->link;
 		$onclick = $oAdmin_Form_Field->onclick;
@@ -1107,16 +1101,9 @@ class Shop_Group_Model extends Core_Entity
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
-					if ($oProperty_Value->Property->type == 2)
-					{
-						$oProperty_Value
-							->setHref($this->getGroupHref())
-							->setDir($this->getGroupPath());
-					}
+					$this->_preparePropertyValue($oProperty_Value);
 
-					/*isset($this->_showXmlProperties[$oProperty_Value->property_id]) && */$this->addEntity(
-						$oProperty_Value
-					);
+					$this->addEntity($oProperty_Value);
 				}
 			}
 			else
@@ -1130,6 +1117,28 @@ class Shop_Group_Model extends Core_Entity
 		return parent::getXml();
 	}
 
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getGroupHref())
+					->setDir($this->getGroupPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Shop->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Shop->format_datetime);
+			break;
+		}
+	}
+	
 	/**
 	 * Clear tagged cache
 	 * @return self
@@ -1221,5 +1230,75 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+	
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param int $property_id Property ID
+	 * @return string
+	 */
+	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
+	{
+		$oProperty = Core_Entity::factory('Property', $property_id);
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+
+		if (count($aProperty_Values))
+		{
+			$aTmp = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+					case 11: // Float
+						$aTmp[] = $oProperty_Value->value;
+					break;
+					case 8: // Date
+						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 9: // Datetime
+						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 3: // List
+						$oList_Item = $oProperty->List->List_Items->getById(
+							$oProperty_Value->value, FALSE
+						);
+
+						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+					break;
+					case 7: // Checkbox
+					break;
+					case 5: // Informationsystem
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Informationsystem_Item->name;
+						}
+					break;
+					case 12: // Shop
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Shop_Item->name;
+						}
+					break;
+					case 2: // File
+					case 10: // Hidden field
+					default:
+					break;
+				}
+			}
+			
+			if (count($aTmp))
+			{
+				return sprintf($format, $oProperty->name, implode($separator, $aTmp));
+			}
+		}
+
+		return NULL;
 	}
 }

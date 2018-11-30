@@ -82,7 +82,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->title(
 					$this->_object->id
-						? Core::_('Constant_Dir.edit')
+						? Core::_('Constant_Dir.edit', $this->_object->name)
 						: Core::_('Constant_Dir.add')
 					);
 

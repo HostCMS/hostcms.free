@@ -20,9 +20,9 @@ return array(
 	'add_title' => 'Add property',
 	'edit_title' => 'Edit property',
 
-	'name' => '<acronym title="Name of product property">Name</acronym>',
-	'description' => '<acronym title="Property description">Description</acronym>',
-	'type' => '<acronym title="Type of product property">Type</acronym>',
+	'name' => 'Name',
+	'description' => 'Description',
+	'type' => 'Type',
 
 	'type0' => 'Integer',
 	'type1' => 'String',
@@ -42,19 +42,19 @@ return array(
 	'informationsystem_id' => '<acronym title="Information system sets as a property">Information system</acronym>',
 	'shop_id' => '<acronym title="Online store sets as a property">Online store</acronym>',
 
-	'sorting' => '<acronym title="Sorting order">Sorting order</acronym>',
-	'default_value' => '<acronym title="Default value of product property">Value</acronym>',
+	'sorting' => 'Sort',
+	'default_value' => 'Value',
 	'tag_name' => '<acronym title="Name of XML tag containing property value">Name of XML tag</acronym>',
 
-	'image_large_max_width' => '<acronym title="Maximum width of large image">Maximum width of large image</acronym>',
-	'image_large_max_height' => '<acronym title="Maximum height of large image">Maximum height of large image</acronym>',
+	'image_large_max_width' => 'Maximum width of large image',
+	'image_large_max_height' => 'Maximum height of large image',
 
-	'image_small_max_width' => '<acronym title="Maximum width of small image">Maximum width of small image</acronym>',
-	'image_small_max_height' => '<acronym title="Maximum height of small image">Maximum height of small image</acronym>',
+	'image_small_max_width' => 'Maximum width of small image',
+	'image_small_max_height' => 'Maximum height of small image',
 
 	'hide_small_image' => 'Hide small image field',
 	'guid' => '<acronym title="Unique identifier in GUID format">GUID</acronym>',
-	'id' => 'Id',
+	'id' => 'ID',
 
 	'edit_success' => 'Additional property added successfully.',
 	'markDeleted_success' => 'Additional property deleted successfully!',
@@ -79,4 +79,6 @@ return array(
 	'preserve_aspect_ratio' => 'Preserve aspect ratio',
 	'preserve_aspect_ratio_small' => 'Preserve aspect ratio for small images',
 	'changeMultiple_success' => 'Multiple have been changed.',
+	'watermark_default_use_large_image' => 'Use watermark by default',
+	'watermark_default_use_small_image' => 'Use watermark by default for small images',
 );

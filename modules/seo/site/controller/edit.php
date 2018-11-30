@@ -78,7 +78,7 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oSelect_Drivers)
 			->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<script type="text/javascript">var seoTokens = {' . implode(", ", $aSeoDriverTokensJS) . '}</script>')
+					->html('<script>var seoTokens = {' . implode(", ", $aSeoDriverTokensJS) . '}</script>')
 			);
 
 		$sTokenUrl = $this->_object->seo_driver_id

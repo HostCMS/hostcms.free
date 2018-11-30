@@ -43,6 +43,8 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 );
 
+$sSiteuserGroupPath = '/admin/siteuser/siteuser/index.php';
+
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
@@ -57,7 +59,16 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	->onclick(
 		$oAdmin_Form_Controller->getAdminLoadAjax($sSiteuserFormPath, NULL, NULL, '')
 	)
-);
+)	->add(
+		Admin_Form_Entity::factory('Breadcrumb')
+			->name(Core::_('Siteuser_Group.title'))
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref($sSiteuserGroupPath, NULL, NULL, '')
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax($sSiteuserGroupPath, NULL, NULL, '')
+			)
+	);
 
 // Добавляем крошку на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(

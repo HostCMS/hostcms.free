@@ -35,6 +35,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		// Главная вкладка
 		$oMainTab = $this->getTab('main');
+		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -45,6 +46,11 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
+		
+		$oAdditionalTab->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+		
+		$oMainTab
+			->move($this->getField('guid'), $oAdditionalRow1);
 
 		// Магазин, которому принадлежит данный тип доставки
 		$oShop = $this->_object->Shop;
@@ -92,7 +98,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title')
+			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Delivery.type_of_delivery_add_form_title');
 
 		$this->title($title);
@@ -171,7 +177,6 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oTextarea)
 			->add(
 				Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1])")
 			);
 
@@ -373,8 +378,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		foreach ($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
 		{
-			// If already exists
-			if (in_array($oShop_Delivery_Payment_System->shop_payment_system_id, $aDelivery_Payment_Systems))
+			// Fix relation with deleted Shop_Payment_System
+			if (!in_array($oShop_Delivery_Payment_System->shop_payment_system_id, $aDelivery_Payment_Systems))
 			{
 				$oShop_Delivery_Payment_System->delete();
 			}
@@ -384,12 +389,10 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
-			$iShopPaymentSystemChecked = Core_Array::getPost('shop_payment_system_' . $oShop_Payment_System->id, 0)
-				? 1
-				: 0;
+			$bShopPaymentSystemChecked = Core_Array::getPost('shop_payment_system_' . $oShop_Payment_System->id);
 
 			// Платежная система выбрана
-			if ($iShopPaymentSystemChecked)
+			if ($bShopPaymentSystemChecked)
 			{
 				// Платежная система не связана с доставкой. Добавляем платежную систему доставке
 				if (!in_array($oShop_Payment_System->id, $aDelivery_Payment_Systems))

@@ -473,12 +473,19 @@ foreach ($aShop_Producers as $oShop_Producer)
 	);
 }
 
+// В корне выводим из всех групп
+ if ($Shop_Controller_Show->group == 0)
+{
+	 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
+}
+
 $Shop_Controller_Show
 	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslName)
 	)
 	// Выводить свойства товаров
 	->itemsProperties(TRUE)
+	// ->groupsProperties(array(7428,8014))
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром
@@ -489,8 +496,7 @@ $Shop_Controller_Show
 	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
 	//->filterShortcuts(TRUE)
-	// Учет остатка товаров на складе
-	//->warehouseMode('in-stock')
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
+	// ->barcodes(TRUE)
 	->show();

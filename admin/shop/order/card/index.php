@@ -34,7 +34,9 @@ $aFullAddress = array(
 	$oShop_Order->Shop_Country_Location->name,
 	$oShop_Order->Shop_Country_Location_City->name,
 	$oShop_Order->Shop_Country_Location_City_Area->name,
-	trim($oShop_Order->address)
+	trim($oShop_Order->address),
+	trim($oShop_Order->house),
+	trim($oShop_Order->flat)
 );
 
 $aFullAddress = array_filter($aFullAddress);
@@ -166,12 +168,6 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 				->process();
 
 		echo $return;
-
-		// Top panel
-		if (Core::checkPanel())
-		{
-			Core_Skin::instance()->frontend();
-		}
 	}
 	else
 	{
@@ -182,7 +178,7 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 }
 else
 {
-	
+
 	?>
 	<p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p>
 
@@ -236,7 +232,7 @@ else
 
 						$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
 						$sFullCompanyAddress = implode(', ', $aCompanyAddress);
-						
+
 						echo htmlspecialchars($sFullCompanyAddress);
 					}
 					?>

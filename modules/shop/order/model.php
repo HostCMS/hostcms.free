@@ -102,7 +102,7 @@ class Shop_Order_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -122,7 +122,7 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -291,6 +291,8 @@ class Shop_Order_Model extends Core_Entity
 	 */
 	public function sum()
 	{
+		//$language = Core_i18n::instance()->getLng();
+
 		return sprintf(
 			"%s %s",
 			Shop_Controller::instance()->round($this->getAmount()),
@@ -302,7 +304,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function weight()
+	public function weightBackend()
 	{
 		$weight = 0;
 
@@ -846,11 +848,57 @@ class Shop_Order_Model extends Core_Entity
 
 			// Уведомление о событии оплаты заказа
 			$this->_createNotification();
+
+			// Дисконтная карта
+			$this->_paidShopDiscountcard();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterPaid', $this);
 
 		return $this->save();
+	}
+
+	protected function _paidShopDiscountcard()
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = $this->Siteuser;
+			$oShop = $this->Shop;
+
+			$mode = $this->paid == 0 ? -1 : 1;
+
+			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getFirst();
+
+			if (is_null($oShop_Discountcard))
+			{
+				if ($oShop->issue_discountcard)
+				{
+					$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
+					$oShop_Discountcard->shop_id = $oShop->id;
+					$oShop_Discountcard->siteuser_id = $oSiteuser->id;
+					$oShop_Discountcard->setSiteuserAmount();
+					$oShop_Discountcard->save(); // create ID
+
+					// Uses number template
+					$oShop_Discountcard->number = $oShop_Discountcard->generate();
+				}
+				else
+				{
+					return $this;
+				}
+			}
+
+			// При вызове в paid() в данный момент модель не сохранена и заказ не числится оплаченным,
+			// поэтому после создания карты ее сумма не включает текущий заказ
+			$oShop_Discountcard->amount += $this->getAmount() * $mode;
+
+			$oShop_Discountcard->save();
+
+			// update level
+			$oShop_Discountcard->checkLevel();
+		}
+
+		return $this;
 	}
 
 	/**
@@ -890,11 +938,8 @@ class Shop_Order_Model extends Core_Entity
 				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
 					// Связываем уведомление с сотрудником
-					$oNotification_User = Core_Entity::factory('Notification_User');
-					$oNotification_User
-						->notification_id($oNotification->id)
-						->user_id($oNotification_Subscriber->user_id)
-						->save();
+					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
+						->add($oNotification);
 				}
 			}
 		}
@@ -922,6 +967,9 @@ class Shop_Order_Model extends Core_Entity
 
 			// Удалить зарезервированные товары
 			$this->deleteReservedItems();
+
+			// Дисконтная карта
+			$this->_paidShopDiscountcard();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);
@@ -1280,12 +1328,10 @@ class Shop_Order_Model extends Core_Entity
 			->Properties
 			->findAll();
 
-		//$aReturn = array();
 		$aProperiesId = array();
 		foreach ($aProperties as $oProperty)
 		{
 			$aProperiesId[] = $oProperty->id;
-			//$aReturn = array_merge($aReturn, $this->_getPropertyValue($oProperty, $bCache));
 		}
 
 		$aReturn = Property_Controller_Value::getPropertiesValues($aProperiesId, $this->id);
@@ -1333,6 +1379,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Add order CommerceML
 	 * @param Core_SimpleXMLElement $oXml
+	 * @hostcms-event shop_order.onBeforeGetCmlUserName
 	 */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
@@ -1357,13 +1404,20 @@ class Shop_Order_Model extends Core_Entity
 
 		$bCompany = strlen(trim($this->company)) > 0;
 
-		$aTmpArray = array();
-		$this->surname != '' && $aTmpArray[] = $this->surname;
-		$this->name != '' && $aTmpArray[] = $this->name;
-		$this->patronymic != '' && $aTmpArray[] = $this->patronymic;
-		!count($aTmpArray) && $aTmpArray[] = $this->email;
+		Core_Event::notify($this->_modelName . '.onBeforeGetCmlUserName', $this);
 
-		$sUserFullName = implode(' ', $aTmpArray);
+		$sUserFullName = Core_Event::getLastReturn();
+
+		if (!strlen($sUserFullName))
+		{
+			$aTmpArray = array();
+			$this->surname != '' && $aTmpArray[] = $this->surname;
+			$this->name != '' && $aTmpArray[] = $this->name;
+			$this->patronymic != '' && $aTmpArray[] = $this->patronymic;
+			!count($aTmpArray) && $aTmpArray[] = $this->email;
+
+			$sUserFullName = implode(' ', $aTmpArray);
+		}
 
 		// При отсутствии модуля "Пользователи сайта" ИД пользователя рассчитывается как crc32()
 		$sContractorId = $this->siteuser_id
@@ -1389,7 +1443,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->postcode,
 			$this->shop_country->name,
 			$this->shop_country_location_city->name,
-			$this->address
+			$this->address,
+			$this->house,
+			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
 		$sFullAddress = implode(', ', $aAddress);
@@ -1458,12 +1514,12 @@ class Shop_Order_Model extends Core_Entity
 		// Способ доставки
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Способ доставки');
-		$oOrderProperty->addChild('Значение', $this->shop_delivery->name);
+		$oOrderProperty->addChild('Значение', $this->Shop_Delivery->name);
 
 		// Метод оплаты
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Метод оплаты');
-		$oOrderProperty->addChild('Значение', $this->shop_payment_system->name);
+		$oOrderProperty->addChild('Значение', $this->Shop_Payment_System->name);
 
 		// Адрес доставки
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
@@ -1518,38 +1574,59 @@ class Shop_Order_Model extends Core_Entity
 
 		$oOrderItemsXml = $oOrderXml->addChild('Товары');
 
-		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		$aDiscount_Shop_Order_Items = array();
 
+		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
-			$oCurrentItemXml = $oOrderItemsXml->addChild('Товар');
-			$oCurrentItemXml->addChild('Ид',
-				$oShop_Order_Item->Shop_Item->modification_id
-					? sprintf('%s#%s', $oShop_Order_Item->Shop_Item->Modification->guid, $oShop_Order_Item->Shop_Item->guid)
-					: ($oShop_Order_Item->type == 1
-						? 'ORDER_DELIVERY'
-						: $oShop_Order_Item->Shop_Item->guid
-					)
-			);
-			$oCurrentItemXml->addChild('Артикул', $oShop_Order_Item->marking);
-			$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
+			if ($oShop_Order_Item->getPrice() >= 0)
+			{
+				$oCurrentItemXml = $oOrderItemsXml->addChild('Товар');
+				$oCurrentItemXml->addChild('Ид',
+					$oShop_Order_Item->Shop_Item->modification_id
+						? sprintf('%s#%s', $oShop_Order_Item->Shop_Item->Modification->guid, $oShop_Order_Item->Shop_Item->guid)
+						: ($oShop_Order_Item->type == 1
+							? $this->Shop_Delivery->guid //'ORDER_DELIVERY'
+							: $oShop_Order_Item->Shop_Item->guid
+						)
+				);
+				$oCurrentItemXml->addChild('Артикул', $oShop_Order_Item->marking);
+				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
 
-			$oShop_Measure = $oShop_Order_Item->Shop_Item->Shop_Measure;
-			$oXmlMeasure = $oCurrentItemXml->addChild('БазоваяЕдиница', $oShop_Measure->name);
-			$oShop_Measure->okei && $oXmlMeasure->addAttribute('Код', $oShop_Measure->okei);
-			strlen($oShop_Measure->description) && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
+				$oShop_Measure = $oShop_Order_Item->Shop_Item->Shop_Measure;
+				$oXmlMeasure = $oCurrentItemXml->addChild('БазоваяЕдиница', $oShop_Measure->name);
+				$oShop_Measure->okei && $oXmlMeasure->addAttribute('Код', $oShop_Measure->okei);
+				strlen($oShop_Measure->description) && $oXmlMeasure->addAttribute('НаименованиеПолное', $oShop_Measure->description);
 
-			$oCurrentItemXml->addChild('ЦенаЗаЕдиницу', $oShop_Order_Item->getPrice());
-			$oCurrentItemXml->addChild('Количество', $oShop_Order_Item->quantity);
-			$oCurrentItemXml->addChild('Сумма', $oShop_Order_Item->getAmount());
+				$oCurrentItemXml->addChild('ЦенаЗаЕдиницу', $oShop_Order_Item->getPrice());
+				$oCurrentItemXml->addChild('Количество', $oShop_Order_Item->quantity);
+				$oCurrentItemXml->addChild('Сумма', $oShop_Order_Item->getAmount());
 
-			$oProperty = $oCurrentItemXml->addChild('ЗначенияРеквизитов');
-			$oValue = $oProperty->addChild('ЗначениеРеквизита');
-			$oValue->addChild('Наименование', 'ВидНоменклатуры');
-			$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
-			$oValue = $oProperty->addChild('ЗначениеРеквизита');
-			$oValue->addChild('Наименование', 'ТипНоменклатуры');
-			$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+				$oProperty = $oCurrentItemXml->addChild('ЗначенияРеквизитов');
+				$oValue = $oProperty->addChild('ЗначениеРеквизита');
+				$oValue->addChild('Наименование', 'ВидНоменклатуры');
+				$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+				$oValue = $oProperty->addChild('ЗначениеРеквизита');
+				$oValue->addChild('Наименование', 'ТипНоменклатуры');
+				$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+			}
+			else
+			{
+				$aDiscount_Shop_Order_Items[] = $oShop_Order_Item;
+			}
+		}
+
+		if (count($aDiscount_Shop_Order_Items))
+		{
+			$oDiscountXml = $oOrderXml->addChild('Скидки');
+
+			foreach ($aDiscount_Shop_Order_Items as $oShop_Order_Item)
+			{
+				$oCurrentItemXml = $oDiscountXml->addChild('Скидка');
+				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
+				$oCurrentItemXml->addChild('Сумма', -1 * $oShop_Order_Item->getPrice() * $oShop_Order_Item->quantity);
+				$oCurrentItemXml->addChild('УчтеноВСумме', 'true');
+			}
 		}
 
 		return $this;
@@ -1568,7 +1645,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->postcode,
 			$this->Shop_Country->name,
 			$this->Shop_Country_Location_City->name,
-			$this->address
+			$this->address,
+			$this->house,
+			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
 		$sFullAddress = implode(', ', $aAddress);
@@ -1610,6 +1689,12 @@ class Shop_Order_Model extends Core_Entity
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+			</div><?php
+		}
+		if (strlen($this->description))
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_description')?>:</b> <?php echo htmlspecialchars($this->description)?>
 			</div><?php
 		}
 		?>
@@ -1741,7 +1826,7 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

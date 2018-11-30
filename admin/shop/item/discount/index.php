@@ -19,13 +19,17 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
 
-$oShopItemParent = Core_Entity::factory('Shop_Item', intval(Core_Array::getGet('shop_item_id', 0)));
-$oShop = $oShopItemParent->Shop;
-//$oShopGroup = $oShopItemParent->Shop_Group;
+if ($oShopItem->shortcut_id)
+{
+	$oShopItem = $oShopItem->Shop_Item;
+}
+
 $oShopGroup = $oShopItem->modification_id ? $oShopItem->Modification->Shop_Group  : $oShopItem->Shop_Group;
+
+$oShop = $oShopItem->Shop;
 $oShopDir = $oShop->Shop_Dir;
 
-$sFormTitle = Core::_('Shop_Discount.show_item_discount_title', $oShopItemParent->name);
+$sFormTitle = Core::_('Shop_Discount.show_item_discount_title', $oShopItem->name);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -177,8 +181,8 @@ if ($oShopItem->modification_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($sFormTitle)
-		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItemParent->id}"))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"))
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
@@ -253,9 +257,7 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('join' => array('shop_item_discounts', 'shop_discounts.id', '=', 'shop_item_discounts.shop_discount_id'))
 	)
-	->addCondition(array('where' => array('shop_item_discounts.shop_item_id', '=', $oShopItemParent->id)))
-	/*->changeField('active', 'link', '/admin/shop/item/discount/index.php?hostcms[action]=changeStatus&hostcms[checked][{dataset_key}][{id}]=1&shop_item_id=' . $oShopItemParent->id)
-	->changeField('active', 'onclick', "$.adminLoad({path: '/admin/shop/item/discount/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_item_id={$oShopItemParent->id}', action: 'changeStatus', windowId: '{windowId}'}); return false")*/;
+	->addCondition(array('where' => array('shop_item_discounts.shop_item_id', '=', $oShopItem->id)));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
@@ -271,9 +273,7 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('join' => array('shop_item_bonuses', 'shop_bonuses.id', '=', 'shop_item_bonuses.shop_bonus_id'))
 	)
-	->addCondition(array('where' => array('shop_item_bonuses.shop_item_id', '=', $oShopItemParent->id)))
-	/*->changeField('active', 'link', '/admin/shop/item/discount/index.php?hostcms[action]=changeStatus&hostcms[checked][{dataset_key}][{id}]=1&shop_item_id=' . $oShopItemParent->id)
-	->changeField('active', 'onclick', "$.adminLoad({path: '/admin/shop/item/discount/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_item_id={$oShopItemParent->id}', action: 'changeStatus', windowId: '{windowId}'}); return false")*/;
+	->addCondition(array('where' => array('shop_item_bonuses.shop_item_id', '=', $oShopItem->id)));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

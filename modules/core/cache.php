@@ -31,6 +31,12 @@ abstract class Core_Cache
 	protected $_format = 'i*';
 
 	/**
+	 * Cleaning Cache Tags Frequency
+	 * @var int
+	 */
+	protected $_cleaningFrequency = 5000;
+	
+	/**
 	 * Typical cache parameters
 	 */
 	static public $aCaches = array(
@@ -236,7 +242,7 @@ abstract class Core_Cache
 	 * @param array $tags array of tags
 	 * @return self
 	 */
-	protected function _saveTags($cacheName, $actualKey, array $tags)
+	protected function _saveTags($cacheName, $actualKey, array $tags, $expire)
 	{
 		if ($this->_config['caches'][$cacheName]['tags'])
 		{
@@ -249,7 +255,18 @@ abstract class Core_Cache
 				$oCache_Tag->cache = Core::crc32($cacheName);
 				$oCache_Tag->hashcrc32 = Core::crc32($actualKey);
 				$oCache_Tag->hash = $actualKey;
+				$oCache_Tag->expire = Core_Date::timestamp2sql($expire);
 				$oCache_Tag->save();
+			}
+			
+			if (rand(0, $this->_cleaningFrequency) == 0)
+			{
+				$iLimit = intval($this->_cleaningFrequency);
+				
+				$cleaningDate = Core_Date::timestamp2sql(time());
+				
+				Core_DataBase::instance()->setQueryType(3)
+					->query("DELETE LOW_PRIORITY QUICK FROM `cache_tags` WHERE `expire` < '{$cleaningDate}' LIMIT {$iLimit}");
 			}
 		}
 

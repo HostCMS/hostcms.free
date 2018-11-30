@@ -27,7 +27,6 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 		
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
-
 		$oAdditionalTab->delete($this->getField('shop_purchase_discount_id'));
 
 		$aOptions = $this->_fillShopPurchaseDiscounts(Core_Array::getGet('shop_id', 0));
@@ -37,18 +36,31 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 			throw new Core_Exception(Core::_('Shop_Purchase_Discount_Coupon.not_enough_discounts'), array(), 0, FALSE);
 		}
 		
+		$oMainTab
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+		
 		$oCouponSelect = Admin_Form_Entity::factory('Select')
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
 			->caption(Core::_('Shop_Purchase_Discount_Coupon.shop_purchase_discount_id'))
 			->options(
 				count($aOptions) ? $aOptions : array(' … ')
 			)
 			->name('shop_purchase_discount_id')
 			->value($this->_object->shop_purchase_discount_id);
-
-		$oMainTab->addAfter($oCouponSelect, $this->getField('name'));
-
+		
+		$oMainTab->move($this->getField('text')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow1);
+		$oMainRow1->add($oCouponSelect);
+		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-md-4 margin-top-21')), $oMainRow1);
+			
+		$oMainTab
+			->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
+			->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
+			->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
+			;
+			
 		$title = $this->_object->id
-			? Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_edit')
+			? Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_edit', $this->_object->name)
 			: Core::_('Shop_Purchase_Discount_Coupon.coupon_form_table_title_add');
 
 		$this->title($title);

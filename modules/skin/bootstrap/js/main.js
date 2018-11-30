@@ -26,14 +26,13 @@ function isEmpty(str) {
 	});
 
 	$.extend({
-		appendInput: function(windowId, ObjectId, InputName, InputValue)
+		appendInput: function(windowId, InputName, InputValue)
 		{
-			var windowId = $.getWindowId(windowId), obj = $('#'+windowId+' #'+ObjectId);
+			var windowId = $.getWindowId(windowId), obj = $('#' + windowId + ' .adminForm');
 
-			if (obj.length == 1
-			&& obj.find("input[name='"+InputName+"']").length === 0)
+			if (obj.length && obj.eq(0).find("input[name='" + InputName + "']").length === 0)
 			{
-				$('#'+windowId+' #'+ObjectId).append(
+				obj.append(
 					$('<input>')
 					.attr('type', 'hidden')
 					.attr('name', InputName)
@@ -42,7 +41,7 @@ function isEmpty(str) {
 		},
 		toogleInputsActive: function(windowId, status)
 		{
-			$("#"+$.getWindowId(windowId)+" #ControlElements input").attr('disabled', !status);
+			$("#" + $.getWindowId(windowId) + " #ControlElements input").attr('disabled', !status);
 		},
 		getWindowId: function(WindowId)
 		{
@@ -213,7 +212,7 @@ function isEmpty(str) {
 				jItemsValue, iItemsValueCount, sValue;
 
 			var reg = /check_(\d+)_(\S+)/;
-			for (var jChekedItem, i=0; i < iChekedItemsCount; i++)
+			for (var jChekedItem, i = 0; i < iChekedItemsCount; i++)
 			{
 				jChekedItem = jChekedItems.eq(i);
 
@@ -246,10 +245,10 @@ function isEmpty(str) {
 			}
 
 			// Фильтр
-			var jFiltersItems = jQuery("#"+settings.windowId+" :input[name^='admin_form_filter_']"),
+			var jFiltersItems = jQuery("#" + settings.windowId + " :input[name^='admin_form_filter_']"),
 				iFiltersItemsCount = jFiltersItems.length;
 
-			for (var jFiltersItem, i=0; i < iFiltersItemsCount; i++)
+			for (var jFiltersItem, i = 0; i < iFiltersItemsCount; i++)
 			{
 				jFiltersItem = jFiltersItems.eq(i);
 
@@ -263,7 +262,7 @@ function isEmpty(str) {
 
 			// Расширенные фильтры
 			var filterId = $('.topFilter').is(':visible')
-				? $('#filterTabs li.active').data('filter-id')
+				? $('#filterTabs .active').data('filter-id')
 				: null;
 
 			data['hostcms[filterId]'] = filterId;
@@ -294,7 +293,7 @@ function isEmpty(str) {
 			}*/
 
 			// Очистим поле для сообщений
-			jQuery("#"+settings.windowId+" #id_message").empty();
+			jQuery("#" + settings.windowId + " #id_message").empty();
 
 			$.loadingScreen('show');
 
@@ -421,7 +420,7 @@ function isEmpty(str) {
 			{
 				data['hostcms[sortingdirection]'] = settings.sortingDirection;
 			}
-			
+
 			if (settings.view != '')
 			{
 				data['hostcms[view]'] = settings.view;
@@ -635,6 +634,8 @@ function isEmpty(str) {
 		{
 			jQuery("#" + windowId + " .admin_table_filter input").val('');
 			jQuery("#" + windowId + " .admin_table_filter select").prop('selectedIndex', 0);
+
+			jQuery("#" + windowId + " .search-field input[name = globalSearch]").val('');
 		},
 		deleteNewProperty: function(object)
 		{
@@ -764,8 +765,11 @@ function isEmpty(str) {
 		cloneFile: function(windowId)
 		{
 			var jProperies = jQuery('#' + windowId + ' #file'),
-			jNewObject = jProperies.eq(0).clone();
-			jNewObject.find("input").attr('name', 'file[]').val('');
+				jNewObject = jProperies.eq(0).clone();
+
+			jNewObject.find("input[type='file']").attr('name', 'file[]').val('');
+			jNewObject.find("input[type='text']").attr('name', 'description_file[]').val('');
+
 			jNewObject.insertAfter(jProperies.eq(-1));
 		},
 		showWindow: function(windowId, content, settings)
@@ -1104,60 +1108,64 @@ function radiogroupOnChange(windowId, value, values)
 	$("#"+windowId+" .shown-"+value).show();
 }
 
+// Empty arrays
+var fieldType = [], fieldMessage = [], fieldsStatus = [];
+
 // -- Проверка ячеек
 function FieldCheck(WindowId, field)
 {
-	if (typeof fieldType == 'undefined')
+	var WindowId = $.getWindowId(WindowId);
+
+	if (typeof fieldType[WindowId] == 'undefined')
 	{
 		return false;
 	}
 
-	var WindowId = $.getWindowId(WindowId),
-		value = $(field).val(),
+	var value = $(field).val(),
 		FiledId = $(field).attr('id'),
 		message = '';
 
-	if (typeof fieldType[field.id] != 'undefined')
+	if (typeof fieldType[WindowId][field.id] != 'undefined')
 	{
 		// Проверка на минимальную длину
-		if (fieldType[FiledId]['minlen'] && value.length < fieldType[FiledId]['minlen'])
+		if (fieldType[WindowId][FiledId]['minlen'] && value.length < fieldType[WindowId][FiledId]['minlen'])
 		{
-			var decl = declension(fieldType[FiledId]['minlen'], i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']);
+			var decl = declension(fieldType[WindowId][FiledId]['minlen'], i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']);
 
 			// Есть пользовательское сообщение
-			if (fieldMessage[FiledId] && fieldMessage[FiledId]['minlen'])
+			if (fieldMessage[WindowId][FiledId] && fieldMessage[WindowId][FiledId]['minlen'])
 			{
-				message += fieldMessage[FiledId]['minlen'];
+				message += fieldMessage[WindowId][FiledId]['minlen'];
 			}
 			else // Стандартное сообщение
 			{
-				message += i18n['Minimum'] + ' ' + fieldType[FiledId]['minlen'] + ' ' + decl + '. ' + i18n['current_length'] + ' ' + value.length + '. ';
+				message += i18n['Minimum'] + ' ' + fieldType[WindowId][FiledId]['minlen'] + ' ' + decl + '. ' + i18n['current_length'] + ' ' + value.length + '. ';
 			}
 		}
 
 		// Проверка на максимальную длину
-		if (fieldType[FiledId]['maxlen'] && value.length > fieldType[FiledId]['maxlen'])
+		if (fieldType[WindowId][FiledId]['maxlen'] && value.length > fieldType[WindowId][FiledId]['maxlen'])
 		{
-			var decl = declension(fieldType[FiledId]['maxlen'], i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']);
+			var decl = declension(fieldType[WindowId][FiledId]['maxlen'], i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']);
 
 			// Есть пользовательское сообщение
-			if (fieldMessage[FiledId] && fieldMessage[FiledId]['maxlen'])
+			if (fieldMessage[WindowId][FiledId] && fieldMessage[WindowId][FiledId]['maxlen'])
 			{
-				message += fieldMessage[FiledId]['maxlen'];
+				message += fieldMessage[WindowId][FiledId]['maxlen'];
 			}
 			else // Стандартное сообщение
 			{
-				message += i18n['Maximum'] + ' ' + fieldType[FiledId]['maxlen'] + ' ' + decl + '. ' + i18n['current_length'] + ' ' + value.length + '. ';
+				message += i18n['Maximum'] + ' ' + fieldType[WindowId][FiledId]['maxlen'] + ' ' + decl + '. ' + i18n['current_length'] + ' ' + value.length + '. ';
 			}
 		}
 
 		// Проверка на регулярное выражение
-		if (value.length > 0 && fieldType[FiledId]['reg'] && !value.match(fieldType[FiledId]['reg']))
+		if (value.length > 0 && fieldType[WindowId][FiledId]['reg'] && !value.match(fieldType[WindowId][FiledId]['reg']))
 		{
 			// Есть пользовательское сообщение
-			if (fieldMessage[FiledId] && fieldMessage[FiledId]['reg'])
+			if (fieldMessage[WindowId][FiledId] && fieldMessage[WindowId][FiledId]['reg'])
 			{
-				message += fieldMessage[FiledId]['reg'];
+				message += fieldMessage[WindowId][FiledId]['reg'];
 			}
 			else // Стандартное сообщение
 			{
@@ -1166,19 +1174,19 @@ function FieldCheck(WindowId, field)
 		}
 
 		// Проверка на соответствие значений 2-х полей
-		if (fieldType[FiledId]['fieldEquality'])
+		if (fieldType[WindowId][FiledId]['fieldEquality'])
 		{
 			// Пытаемся получить значение поля, которому должны соответствовать
-			var jFiled2 = $("#"+WindowId+" #"+fieldType[FiledId]['fieldEquality']);
+			var jFiled2 = $("#"+WindowId+" #"+fieldType[WindowId][FiledId]['fieldEquality']);
 
 			if (jFiled2.length > 0
 			// Сравниваем значение полей
 			&& value != jFiled2.val())
 			{
 				// Есть пользовательское сообщение
-				if (fieldMessage[FiledId] && fieldMessage[FiledId]['fieldEquality'])
+				if (fieldMessage[WindowId][FiledId] && fieldMessage[WindowId][FiledId]['fieldEquality'])
 				{
-					message += fieldMessage[FiledId]['fieldEquality'];
+					message += fieldMessage[WindowId][FiledId]['fieldEquality'];
 				}
 				else // Стандартное сообщение
 				{
@@ -1196,17 +1204,17 @@ function FieldCheckShowError(WindowId, FiledId, message)
 	var WindowId = $.getWindowId(WindowId);
 
 	// Insert message into the message div
-	$("#" + WindowId + " #"+FiledId + '_error').html(message);
+	$("#" + WindowId + " #" + FiledId + '_error').html(message);
 
 	// Плучаем элемент формы, над которым ведется работа
-	var ElementField =	$("#" + WindowId + " #"+FiledId);
+	var ElementField =	$("#" + WindowId + " #" + FiledId);
 
 	if (ElementField.length > 0)
 	{
 		// Устанавливаем флаг несоответствия
-		fieldsStatus[FiledId] = (message.length > 0);
+		fieldsStatus[WindowId][FiledId] = (message.length > 0);
 
-		if (fieldsStatus[FiledId])
+		if (fieldsStatus[WindowId][FiledId])
 		{
 			ElementField
 				.css('border-style', 'solid')
@@ -1231,10 +1239,10 @@ function FieldCheckShowError(WindowId, FiledId, message)
 	// Отображать контрольные элементы
 	var ControlElementsStatus = true;
 
-	for (ItemIndex in fieldsStatus)
+	for (ItemIndex in fieldsStatus[WindowId])
 	{
 		// если есть хоть одно несоответствие - выключаем управляющие элементы
-		if (fieldsStatus[ItemIndex])
+		if (fieldsStatus[WindowId][ItemIndex])
 		{
 			ControlElementsStatus = false;
 			break;
@@ -1248,7 +1256,7 @@ function FieldCheckShowError(WindowId, FiledId, message)
 function CheckAllField(windowId, formId)
 {
 	var windowId = $.getWindowId(windowId);
-	$("#"+windowId+" #"+formId+" :input").each(function(){
+	$("#" + windowId + " #" + formId + " :input").each(function(){
 		FieldCheck(windowId, this);
 	});
 }

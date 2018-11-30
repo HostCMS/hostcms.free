@@ -69,6 +69,104 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
+	protected function _filterCallbackInput($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$value = htmlspecialchars($value);
+		?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 97%" class="form-control input-sm" /><?php
+	}
+	
+	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
+			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+			<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
+			<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
+		</select><?php
+	}
+
+	/**
+	 * Datetime-filed (from-to)
+	 */
+	protected function _filterCallbackDatetime($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		?><input name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="17" class="form-control input-sm calendar_field" type="text" />
+		<div><input name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="17" class="form-control input-sm calendar_field" type="text" /></div>
+		<script>
+		(function($) {
+			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
+			$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
+		})(jQuery);
+		</script><?php
+	}
+	
+	/**
+	 * Date-filed (from-to)
+	 */
+	protected function _filterCallbackDate($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm calendar_field" />
+		<div><input type="text" name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="8" class="form-control input-sm calendar_field" /></div>
+		<script>
+		(function($) {
+			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
+			$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
+		})(jQuery);
+		</script>
+		<?php
+	}
+	
+	/**
+	 * Date-filed (single-mode)
+	 */
+	protected function _filterCallbackDateSingle($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm calendar_field" />
+		<script>
+		(function($) {
+			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
+		})(jQuery);
+		</script>
+		<?php
+	}
+	
+	/**
+	 * Select-filed
+	 */
+	protected function _filterCallbackSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" style="width: 97%">
+		<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+		<?php
+		$str_array = explode("\n", $oAdmin_Form_Field->list);
+		$value_array = array();
+
+		foreach ($str_array as $str_value)
+		{
+			// Каждую строку разделяем по равно
+			$str_explode = explode('=', $str_value);
+
+			if ($str_explode[0] != 0 && count($str_explode) > 1)
+			{
+				// сохраняем в массив варинаты значений и ссылки для них
+				$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
+
+				?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
+			}
+		}
+		?>
+		</select>
+		<?php
+	}
+	
 	/**
 	 * Show form content in administration center
 	 * @return self
@@ -205,6 +303,39 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			{
 				$value = trim(Core_Array::get($this->request, "admin_form_filter_{$oAdmin_Form_Field->id}"));
 
+				switch ($oAdmin_Form_Field->type)
+				{
+					case 1: // Строка
+					case 2: // Поле ввода
+					case 4: // Ссылка
+					case 10: // Функция обратного вызова
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackInput'));
+					break;
+
+					case 3: // Checkbox
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckbox'));
+					break;
+
+					case 5: // Дата-время
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackDatetime'));
+					break;
+
+					case 6: // Дата
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackDate'));
+					break;
+					case 7: // Картинка-ссылка
+						if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
+						{
+							break;
+						}
+					case 8: // Выпадающий список
+						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackSelect'));
+					break;
+					default:
+						?><div style="color: #CEC3A3; text-align: center">—</div><?php
+					break;
+				}
+				
 				// Функция обратного вызова для фильтра
 				if (isset($this->_filters[$oAdmin_Form_Field->name]))
 				{
@@ -216,7 +347,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 						case 10: // Функция обратного вызова
 						case 3: // Checkbox.
 						case 8: // Выпадающий список
-							echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field);
+							echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field, NULL, NULL);
 						break;
 
 						case 5: // Дата-время.
@@ -224,97 +355,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 							$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
 							$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
 
-							echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field);
-						break;
-					}
-				}
-				else
-				{
-					$style = /*!empty($width)
-						? "width: {$width};"
-						: */"width: 97%;";
-
-					switch ($oAdmin_Form_Field->type)
-					{
-						case 1: // Строка
-						case 2: // Поле ввода
-						case 4: // Ссылка
-						case 10: // Функция обратного вызова
-							$value = htmlspecialchars($value);
-							?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
-						break;
-
-						case 3: // Checkbox.
-							?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
-								<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-								<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
-								<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
-							</select><?php
-						break;
-
-						case 5: // Дата-время.
-							$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-							$date_from = htmlspecialchars($date_from);
-
-							$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-							$date_to = htmlspecialchars($date_to);
-
-							?><input name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="17" class="form-control input-sm calendar_field" type="text" />
-							<div><input name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="17" class="form-control input-sm calendar_field" type="text" /></div>
-							<script type="text/javascript">
-							(function($) {
-								$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
-								$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
-							})(jQuery);
-							</script><?php
-						break;
-
-						case 6: // Дата.
-							$date_from = Core_Array::get($this->request, "admin_form_filter_from_{$oAdmin_Form_Field->id}", NULL);
-							$date_from = htmlspecialchars($date_from);
-
-							$date_to = Core_Array::get($this->request, "admin_form_filter_to_{$oAdmin_Form_Field->id}", NULL);
-							$date_to = htmlspecialchars($date_to);
-
-							?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm calendar_field" />
-							<div><input type="text" name="admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" size="8" class="form-control input-sm calendar_field" /></div>
-							<script type="text/javascript">
-							(function($) {
-								$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
-								$("#id_admin_form_filter_to_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
-							})(jQuery);
-							</script>
-							<?php
-						break;
-
-						case 8: // Выпадающий список.
-
-						?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
-						<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-						<?php
-						$str_array = explode("\n", $oAdmin_Form_Field_Changed->list);
-						$value_array = array();
-
-						foreach ($str_array as $str_value)
-						{
-							// Каждую строку разделяем по равно
-							$str_explode = explode('=', $str_value);
-
-							if ($str_explode[0] != 0 && count($str_explode) > 1)
-							{
-								// сохраняем в массив варинаты значений и ссылки для них
-								$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-								?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
-							}
-						}
-						?>
-						</select>
-						<?php
-						break;
-
-						default:
-						?><div style="color: #CEC3A3; text-align: center">—</div><?php
+							echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field, NULL, NULL);
 						break;
 					}
 				}
@@ -328,8 +369,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		}
 
 		// Фильтр показываем если есть события или хотя бы у одного есть фильтр
-		if ($this->_Admin_Form->show_operations && $this->showOperations
-		|| $allow_filter && $this->_showFilter)
+		if ($this->_Admin_Form->show_operations && $this->showOperations || $allow_filter && $this->_showFilter)
 		{
 			$onclick = $this->getAdminLoadAjax($this->getPath());
 			?><td><?php

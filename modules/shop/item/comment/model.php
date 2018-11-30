@@ -29,7 +29,7 @@ class Shop_Item_Comment_Model extends Comment_Model
 	 * Backend callback method
 	 * @return string
 	 */
-	public function view()
+	public function viewBackend()
 	{
 		ob_start();
 

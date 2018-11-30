@@ -18,6 +18,12 @@ $sFormAction = '/admin/shop/item/associated/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
+
+if ($oShopItem->shortcut_id)
+{
+	$oShopItem = $oShopItem->Shop_Item;
+}
+
 $oShop = $oShopItem->Shop;
 $oShopGroup = $oShopItem->modification_id ? $oShopItem->Modification->Shop_Group  : $oShopItem->Shop_Group;
 $oShopDir = $oShop->Shop_Dir;
@@ -228,10 +234,8 @@ if (!$iModificationId)
 		->addCondition(array('select' => array('shop_groups.*', /*array('shop_groups.id', 'key'),*/ array(Core_QueryBuilder::expression("''"), 'count'))))
 		->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 		->addCondition(array('where' => array('parent_id', '=', intval($oShopGroupAssociated->id))))
-	;
-
-	$oAdmin_Form_Dataset
-		->changeField('name', 'type', 4)
+		->changeField('name', 'class', 'semi-bold')
+		//->changeField('name', 'type', 4)
 		->changeField('name', 'link',
 			'/admin/shop/item/associated/index.php?shop_id={shop_id}&shop_group_id={id}&shop_item_id=' . $oShopItem->id)
 		->changeField('name', 'onclick',

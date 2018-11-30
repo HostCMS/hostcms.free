@@ -47,7 +47,7 @@ abstract class Admin_View extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add message for administration center form
+	 * Add message for Back-end form
 	 * @param string $message message
 	 * @return self
 	 */

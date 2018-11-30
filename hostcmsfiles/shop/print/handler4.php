@@ -12,10 +12,47 @@ class Shop_Print_Form_Handler4 extends Shop_Print_Form_Handler
 
 		$oShop_Order = $this->_Shop_Order;
 		$oShop = $this->_Shop_Order->Shop;
-		$oShop_Company = $oShop_Order->Shop->Shop_Company;
 		$sShopCurrency = $oShop_Order->Shop_Currency->code ? $oShop_Order->Shop_Currency->code : '';
 
 		$sPageTitle = "Invoice # " . htmlspecialchars($oShop_Order->acceptance_report);
+
+		$oCompany = $oShop_Order->company_id
+			? $oShop_Order->Shop_Company
+			: $oShop->Shop_Company;
+
+		$sFullCompanyAddress = $sCompanyPhone = $sCompanyEmail = $sCompanySite = '';
+
+		$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+		if (isset($aDirectory_Addresses[0]))
+		{
+			$aCompanyAddress = array(
+				$aDirectory_Addresses[0]->postcode,
+				$aDirectory_Addresses[0]->country,
+				$aDirectory_Addresses[0]->city,
+				$aDirectory_Addresses[0]->value
+			);
+
+			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+		}
+
+		$aDirectory_Phones = $oCompany->Directory_Phones->findAll();
+		if (isset($aDirectory_Phones[0]))
+		{
+			$sCompanyPhone = $aDirectory_Phones[0]->value;
+		}
+
+		$aDirectory_Emails = $oCompany->Directory_Emails->findAll();
+		if (isset($aDirectory_Emails[0]))
+		{
+			$sCompanyEmail = $aDirectory_Emails[0]->value;
+		}
+
+		$aDirectory_Websites = $oCompany->Directory_Websites->findAll();
+		if (isset($aDirectory_Websites[0]))
+		{
+			$sCompanySite = $aDirectory_Websites[0]->value;
+		}
 		?>
 
 		<!doctype html>
@@ -142,8 +179,8 @@ class Shop_Print_Form_Handler4 extends Shop_Print_Form_Handler
 					<!-- Company details -->
 					<div class="col-xs-12 col-md-6">
 						<div class="company">
-							<div class="company-name"><?php echo htmlspecialchars($oShop_Company->name)?></div>
-							<div class="company-contacts"><?php echo htmlspecialchars($oShop_Company->address)?><br/><?php echo htmlspecialchars($oShop_Company->phone)?><br/><?php echo htmlspecialchars($oShop_Company->site)?><br/><?php echo htmlspecialchars($oShop_Company->email)?></div>
+							<div class="company-name"><?php echo htmlspecialchars($oCompany->name)?></div>
+							<div class="company-contacts"><?php echo htmlspecialchars($sFullCompanyAddress)?><br/><?php echo htmlspecialchars($sCompanyPhone)?><br/><?php echo htmlspecialchars($sCompanySite)?><br/><?php echo htmlspecialchars($sCompanyEmail)?></div>
 						</div>
 					</div>
 				</div>
@@ -194,9 +231,9 @@ class Shop_Print_Form_Handler4 extends Shop_Print_Form_Handler
 								<tbody>
 								<?php
 								$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
-																	
+
 								$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll();
-								
+
 								if(count($aShopOrderItems))
 								{
 									foreach ($aShopOrderItems as $key => $oShopOrderItem)
@@ -244,13 +281,13 @@ class Shop_Print_Form_Handler4 extends Shop_Print_Form_Handler
 									Please make payment to the following account
 								</div>
 								<div class="col-xs-12">
-									Bank: <?php echo htmlspecialchars($oShop_Company->bank_name)?>
+									Bank: <?php echo htmlspecialchars($oCompany->bank_name)?>
 								</div>
 								<div class="col-xs-12">
-									IBAN: <?php echo htmlspecialchars($oShop_Company->current_account)?>
+									IBAN: <?php echo htmlspecialchars($oCompany->current_account)?>
 								</div>
 								<div class="col-xs-12">
-									Swift Code: <?php echo htmlspecialchars($oShop_Company->bic)?>
+									Swift Code: <?php echo htmlspecialchars($oCompany->bic)?>
 								</div>
 							</div>
 						</div>

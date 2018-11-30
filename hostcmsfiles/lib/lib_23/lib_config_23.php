@@ -228,7 +228,7 @@ if (Core::moduleIsActive('siteuser'))
 				$oSiteuser->setCurrent();
 
 				$oauth_location = Core_Array::get($_SESSION, 'oauth_location');
-				!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));
+				!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));			
 			}
 		}
 		else

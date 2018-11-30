@@ -192,7 +192,6 @@ class Skin_Default_Module_Siteuser_Module extends Siteuser_Module
 							)
 							->add(
 								Core::factory('Core_Html_Entity_Script')
-									->type('text/javascript')
 									->value("$('#widgetSiteuserOther').linkShortcut({path: '{$sSiteuserHref}', shortcutImg: '{$shortcutImg}', shortcutTitle: '{$shortcutTitle}', Minimize: true, Closable: true});")
 							)
 					)
@@ -218,7 +217,6 @@ class Skin_Default_Module_Siteuser_Module extends Siteuser_Module
 				$oModalWindow
 					->add(
 						Core::factory('Core_Html_Entity_Script')
-							->type('text/javascript')
 							->value("$(function(){
 								$('#{$windowId}').widgetWindow({
 									position: [{$oUser_Setting->position_x}, {$oUser_Setting->position_y}],

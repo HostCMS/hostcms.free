@@ -90,6 +90,21 @@ class Core_Entity extends Core_ORM
 		$this->_forbiddenTags[$tag] = $tag;
 		return $this;
 	}
+	
+	/**
+	 * Remove tag from forbidden tags list
+	 * @param string $tag tag
+	 * @return self
+	 */
+	public function removeForbiddenTag($tag)
+	{
+		if (isset($this->_forbiddenTags[$tag]))
+		{
+			unset($this->_forbiddenTags[$tag]);
+		}
+			
+		return $this;
+	}
 
 	/**
 	 * Add tags to forbidden tags list
@@ -192,6 +207,13 @@ class Core_Entity extends Core_ORM
 	 */
 	protected $_marksDeleted = 'deleted';
 
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+	
 	/**
 	 * Get column name for marks deleted
 	 */
@@ -300,12 +322,12 @@ class Core_Entity extends Core_ORM
 	}
 
 	/**
-	 * Get table columns
+	 * Get table columns. Fix wrong method name
 	 * @return array
 	 */
 	public function getTableColums()
 	{
-		return $this->_loadColumns()->_tableColumns;
+		return $this->getTableColumns();
 	}
 
 	/**
@@ -405,13 +427,19 @@ class Core_Entity extends Core_ORM
 		Core_ObjectWatcher::instance()->delete($this);
 
 		// Delete Revisions
-		if (Core::moduleIsActive('revision'))
+		if ($this->_hasRevisions && Core::moduleIsActive('revision'))
 		{
 			if (is_null($primaryKey))
 			{
 				$primaryKey = $this->getPrimaryKey();
 			}
 
+			Core_QueryBuilder::delete('revisions')
+				->where('model', '=', $this->getModelName())
+				->where('entity_id', '=', $primaryKey)
+				->execute();
+
+			/*
 			$oRevisions = Core_Entity::factory('Revision');
 			$oRevisions->queryBuilder()
 				->where('model', '=', $this->getModelName())
@@ -421,7 +449,7 @@ class Core_Entity extends Core_ORM
 			foreach ($aRevisions as $oRevision)
 			{
 				$oRevision->delete();
-			}
+			}*/
 		}
 
 		return parent::delete($primaryKey);
@@ -584,12 +612,12 @@ class Core_Entity extends Core_ORM
 
 		foreach ($this->_modelColumns as $field_name => $field_value)
 		{
-			// Разрешенные теги
+			// Allowed Tags
 			if ($field_name != $this->_primaryKey
 				&& ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
 			)
 			{
-				// Запрещенные теги
+				// Forbidden Tags
 				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
 				{
 					if ($bShortcodeTags && $iCountShortcodes && isset($this->_shortcodeTags[$field_name]))
@@ -613,6 +641,20 @@ class Core_Entity extends Core_ORM
 			$xml .= $oChildrenEntity->getXml();
 		}
 
+		// data-values, e.g. dataMyValue
+		foreach ($this->_dataValues as $field_name => $field_value)
+		{
+			// Allowed Tags
+			if ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
+			{
+				// Forbidden Tags
+				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
+				{
+					$xml .= "<{$field_name}>" . Core_Str::xml($field_value) . "</{$field_name}>\n";
+				}
+			}
+		}
+		
 		$xml .= "</" . $this->_tagName . ">\n";
 
 		$this->_clearEntitiesAfterGetXml && $this->clearEntities();

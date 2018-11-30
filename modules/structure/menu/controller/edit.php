@@ -24,7 +24,7 @@ class Structure_Menu_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$title = is_null($this->_object->id)
 			? Core::_('Structure_Menu.add_title')
-			: Core::_('Structure_Menu.edit_title');
+			: Core::_('Structure_Menu.edit_title', $this->_object->name);
 
 		$this->title($title);
 

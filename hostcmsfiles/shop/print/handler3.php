@@ -11,9 +11,36 @@ class Shop_Print_Form_Handler3 extends Shop_Print_Form_Handler
 		parent::execute();
 
 		$oShop_Order = $this->_Shop_Order;
+		$oShop = $oShop_Order->Shop;
 
 		$sPageTitle = sprintf("Акт № %s от %s", $oShop_Order->acceptance_report, Core_Date::sql2date($oShop_Order->acceptance_report_datetime)) . " г.";
 		$sShopCurrency = $oShop_Order->Shop_Currency->name ? ', ' . $oShop_Order->Shop_Currency->name : '';
+
+		$oCompany = $oShop_Order->company_id
+			? $oShop_Order->Shop_Company
+			: $oShop->Shop_Company;
+
+		$sFullCompanyAddress = $sCompanyPhone = '';
+
+		$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+		if (isset($aDirectory_Addresses[0]))
+		{
+			$aCompanyAddress = array(
+				$aDirectory_Addresses[0]->postcode,
+				$aDirectory_Addresses[0]->country,
+				$aDirectory_Addresses[0]->city,
+				$aDirectory_Addresses[0]->value
+			);
+
+			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+		}
+
+		$aDirectory_Phones = $oCompany->Directory_Phones->findAll();
+		if (isset($aDirectory_Phones[0]))
+		{
+			$sCompanyPhone = $aDirectory_Phones[0]->value;
+		}
 		?>
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 		<html xmlns="http://www.w3.org/1999/xhtml">
@@ -39,13 +66,14 @@ class Shop_Print_Form_Handler3 extends Shop_Print_Form_Handler
 					table{border-collapse: collapse;}
 					table.first{margin: 0 0 2em;}
 					table.second{margin: 2em 0 0;}
-					table.first td{border: 1px solid black; white-space: nowrap;}
+					table.first th, table.first td{border: 1px solid black;}
+					table.first th{ white-space: nowrap; font-size: 90% }
 					table.first td.border_none{border: none;}
 				</style>
 			</head>
 			<body class="font_sans_serif base_font">
-				<p class="font_weight_bold text_underline disable_indentation"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->name)?></p>
-				<p class="font_weight_bold disable_indentation"><?php echo "Адрес: " . htmlspecialchars($oShop_Order->Shop->Shop_Company->address) . ", тел.: " . htmlspecialchars($oShop_Order->Shop->Shop_Company->phone)?></p>
+				<p class="font_weight_bold text_underline disable_indentation"><?php echo htmlspecialchars($oCompany->name)?></p>
+				<p class="font_weight_bold disable_indentation"><?php echo "Адрес: " . htmlspecialchars($sFullCompanyAddress) . ", тел.: " . htmlspecialchars($sCompanyPhone)?></p>
 				<h1 class="text_align_center center big_font"><?php echo htmlspecialchars($sPageTitle)?></h1>
 				<p>
 				Заказчик: <?php echo htmlspecialchars($oShop_Order->company)?>
@@ -59,24 +87,24 @@ class Shop_Print_Form_Handler3 extends Shop_Print_Form_Handler
 				</p>
 				<table cellspacing="0" cellpadding="3" border="0" width="100%" class="first">
 				<tr>
-					<td class="width_small text_align_center">
+					<th class="width_small text_align_center">
 						№
-					</td>
-					<td class="text_align_center">
+					</th>
+					<th class="text_align_center">
 						Наименование работы (услуги)
-					</td>
-					<td class="width_small text_align_center">
+					</th>
+					<th class="width_small text_align_center">
 						Ед. изм.
-					</td>
-					<td class="width_small text_align_center">
+					</th>
+					<th class="width_small text_align_center">
 						Количество
-					</td>
-					<td class="width_small text_align_center">
+					</th>
+					<th class="width_small text_align_center">
 						Цена<?php echo htmlspecialchars($sShopCurrency)?>
-					</td>
-					<td class="width_normal text_align_center">
+					</th>
+					<th class="width_normal text_align_center">
 						Сумма<?php echo htmlspecialchars($sShopCurrency)?>
-					</td>
+					</th>
 				</tr>
 				<?php
 				$i = 1;

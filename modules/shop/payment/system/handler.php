@@ -140,6 +140,23 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
+	 * Allow upload files for order's property
+	 * @var boolean
+	 */
+	protected $_allowOrderPropertyFiles = FALSE;
+
+	/**
+	 * Allow upload files for order's property
+	 * @param boolean $allowOrderPropertyFiles
+	 * @return self
+	 */
+	public function allowOrderPropertyFiles($allowOrderPropertyFiles)
+	{
+		$this->_allowOrderPropertyFiles = $allowOrderPropertyFiles;
+		return $this;
+	}
+
+	/**
 	 * Executes the business logic.
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeExecute
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterExecute
@@ -245,16 +262,18 @@ abstract class Shop_Payment_System_Handler
 		$this->_shopOrder->shop_country_location_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_id', 0));
 		$this->_shopOrder->shop_country_location_city_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_city_id', 0));
 		$this->_shopOrder->shop_country_location_city_area_id = intval(Core_Array::get($this->_orderParams, 'shop_country_location_city_area_id', 0));
-		$this->_shopOrder->postcode = strval(Core_Array::get($this->_orderParams, 'postcode', ''));
-		$this->_shopOrder->address = strval(Core_Array::get($this->_orderParams, 'address', ''));
-		$this->_shopOrder->surname = strval(Core_Array::get($this->_orderParams, 'surname', ''));
-		$this->_shopOrder->name = strval(Core_Array::get($this->_orderParams, 'name', ''));
-		$this->_shopOrder->patronymic = strval(Core_Array::get($this->_orderParams, 'patronymic', ''));
-		$this->_shopOrder->company = strval(Core_Array::get($this->_orderParams, 'company', ''));
-		$this->_shopOrder->phone = strval(Core_Array::get($this->_orderParams, 'phone', ''));
-		$this->_shopOrder->fax = strval(Core_Array::get($this->_orderParams, 'fax', ''));
-		$this->_shopOrder->email = strval(Core_Array::get($this->_orderParams, 'email', ''));
-		$this->_shopOrder->description = strval(Core_Array::get($this->_orderParams, 'description', ''));
+		$this->_shopOrder->postcode = trim(strval(Core_Array::get($this->_orderParams, 'postcode', '')));
+		$this->_shopOrder->address = trim(strval(Core_Array::get($this->_orderParams, 'address', '')));
+		$this->_shopOrder->house = trim(strval(Core_Array::get($this->_orderParams, 'house', '')));
+		$this->_shopOrder->flat = trim(strval(Core_Array::get($this->_orderParams, 'flat', '')));
+		$this->_shopOrder->surname = trim(strval(Core_Array::get($this->_orderParams, 'surname', '')));
+		$this->_shopOrder->name = trim(strval(Core_Array::get($this->_orderParams, 'name', '')));
+		$this->_shopOrder->patronymic = trim(strval(Core_Array::get($this->_orderParams, 'patronymic', '')));
+		$this->_shopOrder->company = trim(strval(Core_Array::get($this->_orderParams, 'company', '')));
+		$this->_shopOrder->phone = trim(strval(Core_Array::get($this->_orderParams, 'phone', '')));
+		$this->_shopOrder->fax = trim(strval(Core_Array::get($this->_orderParams, 'fax', '')));
+		$this->_shopOrder->email = trim(strval(Core_Array::get($this->_orderParams, 'email', '')));
+		$this->_shopOrder->description = trim(strval(Core_Array::get($this->_orderParams, 'description', '')));
 
 		$shop_delivery_condition_id = intval(Core_Array::get($this->_orderParams, 'shop_delivery_condition_id', 0));
 		$this->_shopOrder->shop_delivery_condition_id = $shop_delivery_condition_id;
@@ -266,8 +285,8 @@ abstract class Shop_Payment_System_Handler
 		$this->_shopOrder->shop_payment_system_id = intval(Core_Array::get($this->_orderParams, 'shop_payment_system_id', 0));
 		$this->_shopOrder->shop_currency_id = intval($oShop->shop_currency_id);
 		$this->_shopOrder->shop_order_status_id = intval($oShop->shop_order_status_id);
-		$this->_shopOrder->tin = strval(Core_Array::get($this->_orderParams, 'tin', ''));
-		$this->_shopOrder->kpp = strval(Core_Array::get($this->_orderParams, 'kpp', ''));
+		$this->_shopOrder->tin = trim(strval(Core_Array::get($this->_orderParams, 'tin', '')));
+		$this->_shopOrder->kpp = trim(strval(Core_Array::get($this->_orderParams, 'kpp', '')));
 
 		if (Core::moduleIsActive('siteuser'))
 		{
@@ -276,8 +295,12 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		// UTM, Openstat or From
-		$oSource_Controller = new Source_Controller();
-		$this->_shopOrder->source_id = $oSource_Controller->getId();
+		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		if (is_null($oUser))
+		{
+			$oSource_Controller = new Source_Controller();
+			$this->_shopOrder->source_id = $oSource_Controller->getId();
+		}
 
 		// Номер заказа
 		$bInvoice = strlen($this->_orderParams['invoice']) > 0;
@@ -341,7 +364,35 @@ abstract class Shop_Payment_System_Handler
 							$oProperty_Value->save();
 						break;
 						case 2: // File
+							if ($this->_allowOrderPropertyFiles || 1)
+							{
+								$aFileData = $value;
 
+								$oShop_Order_Property_List = Core_Entity::factory('Shop_Order_Property_List', $oShop->id);
+
+								// New values of property
+								if (is_array($aFileData) && isset($aFileData['name']))
+								{
+									if (Core_File::isValidExtension($aFileData['name'], Core::$mainConfig['availableExtension']))
+									{
+										$oProperty_Value->file_name = Core_Str::stripTags($aFileData['name']);
+										$oProperty_Value->save();
+
+										$oShop_Order_Property_List->createPropertyDir($this->_shopOrder);
+
+										try
+										{
+											$oProperty_Value->file = $oShop_Order_Property_List->getLargeFileName($this->_shopOrder, $oProperty_Value, $aFileData['name']);
+
+											// not moveUploadedFile(), see lib_7.php
+											Core_File::upload($aFileData['tmp_name'], $oShop_Order_Property_List->getDirPath($this->_shopOrder) . $oProperty_Value->file);
+
+											$oProperty_Value->save();
+										}
+										catch (Exception $e) {};
+									}
+								}
+							}
 						break;
 						case 7: // Checkbox
 							$oProperty_Value->value(is_null($value) ? 0 : 1);
@@ -363,7 +414,25 @@ abstract class Shop_Payment_System_Handler
 		//}
 
 		// Номер заказа
-		!$bInvoice && $this->_shopOrder->invoice($this->_shopOrder->id);
+		if (!$bInvoice)
+		{
+			if (strlen($oShop->invoice_template))
+			{
+				$oCore_Templater = new Core_Templater();
+				$invoice = $oCore_Templater
+					->addObject('shop', $oShop)
+					->addObject('this', $this->_shopOrder)
+					->addFunction('ordersToday', array($this, 'ordersToday'))
+					->setTemplate($oShop->invoice_template)
+					->execute();
+			}
+			else
+			{
+				$invoice = $this->_shopOrder->id;
+			}
+
+			$this->_shopOrder->invoice = $invoice;
+		}
 
 		// Номер акта
 		!$bAcceptance_report && $this->_shopOrder->acceptance_report($this->_shopOrder->id);
@@ -374,6 +443,22 @@ abstract class Shop_Payment_System_Handler
 		$this->_shopOrder->save();
 
 		return $this;
+	}
+
+	/**
+	 * Количество заказов за сегодня
+	 */
+	public function ordersToday()
+	{
+		$oShop_Order = $this->getShopOrder();
+		$date = date('Y-m-d');
+
+		$oShop_Orders = $oShop_Order->Shop->Shop_Orders;
+		$oShop_Orders->queryBuilder()
+			->where('datetime', '>', "{$date} 00:00:00")
+			->where('datetime', '<', "{$date} 23:59:59");
+
+		return $oShop_Orders->getCount(FALSE);
 	}
 
 	/**
@@ -507,6 +592,12 @@ abstract class Shop_Payment_System_Handler
 			$this->_applyBonuses();
 		}
 
+		// Удаление купона из сессии
+		if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+		{
+			unset($_SESSION['hostcmsOrder']['coupon_text']);
+		}
+		
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
 
 		return $this;
@@ -548,11 +639,8 @@ abstract class Shop_Payment_System_Handler
 				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
 					// Связываем уведомление с сотрудником
-					$oNotification_User = Core_Entity::factory('Notification_User');
-					$oNotification_User
-						->notification_id($oNotification->id)
-						->user_id($oNotification_Subscriber->user_id)
-						->save();
+					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
+						->add($oNotification);
 				}
 			}
 		}
@@ -650,6 +738,25 @@ abstract class Shop_Payment_System_Handler
 	{
 		$oShop = $this->_Shop_Payment_System_Model->Shop;
 
+		// Дисконтная карта
+		$bApplyMaxDiscount = FALSE;
+		$fDiscountcard = 0;
+		if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
+		{
+			$oSiteuser = $this->_shopOrder->Siteuser;
+
+			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
+			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+			{
+				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
+
+				$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
+
+				// Сумма скидки по дисконтной карте
+				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
+			}
+		}
+
 		// Скидки от суммы заказа
 		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
 		$oShop_Purchase_Discount_Controller
@@ -678,35 +785,85 @@ abstract class Shop_Payment_System_Handler
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
 
-		foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+		// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
+		if ($bApplyMaxDiscount)
 		{
-			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-			$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
-			$oShop_Order_Item->quantity = 1;
-			$oShop_Order_Item->type = 0;
+			$totalPurchaseDiscount = 0;
 
-			$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
-
-			// Скидка больше суммы заказа
-			$discountAmount > $amount && $discountAmount = $amount;
-
-			$oShop_Order_Item->price = -1 * $discountAmount;
-
-			if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 			{
-				$oShop_Purchase_Discount_Coupon = Core_Entity::factory('shop_purchase_discount_coupon')->find(
-					$shop_purchase_discount_coupon_id
-				);
-
-				// Списываем купон
-				if (!is_null($oShop_Purchase_Discount_Coupon->id) && $oShop_Purchase_Discount_Coupon->count != -1 && $oShop_Purchase_Discount_Coupon->count != 0)
-				{
-					$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
-					$oShop_Purchase_Discount_Coupon->save();
-				}
+				$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
 			}
 
-			$this->_shopOrder->add($oShop_Order_Item);
+			$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
+		}
+		else
+		{
+			$bApplyShopPurchaseDiscounts = TRUE;
+		}
+
+		// Если решили применять скидку от суммы заказа
+		$fAppliedDiscountsAmount = 0;
+		if ($bApplyShopPurchaseDiscounts)
+		{
+			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+			{
+				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
+				$oShop_Order_Item->quantity = 1;
+				$oShop_Order_Item->type = 0;
+
+				$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
+
+				// Скидка больше суммы заказа
+				$discountAmount > $amount && $discountAmount = $amount;
+
+				$oShop_Order_Item->price = -1 * $discountAmount;
+
+				// Inc total discount amount
+				$fAppliedDiscountsAmount += $discountAmount;
+
+				if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+				{
+					$oShop_Purchase_Discount_Coupon = Core_Entity::factory('shop_purchase_discount_coupon')->find(
+						$shop_purchase_discount_coupon_id
+					);
+
+					// Списываем купон
+					if (!is_null($oShop_Purchase_Discount_Coupon->id)
+						&& $oShop_Purchase_Discount_Coupon->count != -1
+						&& $oShop_Purchase_Discount_Coupon->count != 0
+					)
+					{
+						$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
+						$oShop_Purchase_Discount_Coupon->save();
+					}
+				}
+
+				$this->_shopOrder->add($oShop_Order_Item);
+			}
+		}
+
+		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
+		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
+		{
+			if ($fDiscountcard)
+			{
+				$fAmountForCard = $amount - $fAppliedDiscountsAmount;
+
+				if ($fAmountForCard > 0)
+				{
+					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+					$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
+					$oShop_Order_Item->quantity = 1;
+					$oShop_Order_Item->type = 0;
+					$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
+						$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
+					);
+
+					$this->_shopOrder->add($oShop_Order_Item);
+				}
+			}
 		}
 
 		return $this;
@@ -777,8 +934,12 @@ abstract class Shop_Payment_System_Handler
 			$oShop_Order_Item->type = 1;
 			$this->_shopOrder->add($oShop_Order_Item);
 		}
+		else
+		{
+			$oShop_Order_Item = NULL;
+		}
 
-		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddDelivery', $this);
+		Core_Event::notify('Shop_Payment_System_Handler.onAfterAddDelivery', $this, array($oShop_Order_Item));
 
 		return $this;
 	}
@@ -857,6 +1018,14 @@ abstract class Shop_Payment_System_Handler
 		foreach ($aProperties as $oProperty)
 		{
 			$this->_aProperties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+
+			$oShop_Order_Property = $oProperty->Shop_Order_Property;
+			$oProperty->addEntity(
+				Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Order_Property->prefix)
+			)
+			->addEntity(
+				Core::factory('Core_Xml_Entity')->name('display')->value($oShop_Order_Property->display)
+			);
 		}
 
 		$this->_aProperty_Dirs = array();
@@ -1210,8 +1379,8 @@ abstract class Shop_Payment_System_Handler
 			: sprintf($oShop->order_admin_subject, $oShopOrder->invoice, $oShop->name, $date_str);
 
 		$senderName = !is_null($this->_senderName)
-				? $this->_senderName
-				: $oShop->name;
+			? $this->_senderName
+			: $oShop->name;
 
 		$oCore_Mail
 			->from($from)
@@ -1223,8 +1392,25 @@ abstract class Shop_Payment_System_Handler
 			->header('X-HostCMS-Reason', 'Order')
 			->header('Precedence', 'bulk');
 
-		$aEmails = array_map('trim', $this->getAdminEmails());
+		// Attach order property files
+		$aProperty_Values = $oShopOrder->getPropertyValues(FALSE);
+		foreach ($aProperty_Values as $oProperty_Value)
+		{
+			if ($oProperty_Value->Property->type == 2)
+			{
+				$sPath = $oProperty_Value->getLargeFilePath();
 
+				if (is_file($sPath))
+				{
+					$oCore_Mail->attach(array(
+						'filepath' => $sPath,
+						'filename' => $oProperty_Value->file_name
+					));
+				}
+			}
+		}
+
+		$aEmails = array_map('trim', $this->getAdminEmails());
 		foreach ($aEmails as $key => $sEmail)
 		{
 			// Delay 0.350s for second mail and others

@@ -14,47 +14,40 @@ return array(
 	'show_information_groups_link1' => 'Добавить',
 	'show_information_groups_link4' => 'Дополнительные свойства',
 	'information_groups_add_form_title' => 'Добавление информационной группы',
-	'information_groups_edit_form_title' => 'Редактирование информационной группы',
+	'information_groups_edit_form_title' => 'Редактирование информационной группы "%s"',
 	'tab_1' => 'Описание',
 	'tab_2' => 'SEO',
 	'tab_3' => 'Дополнительные свойства',
 
 	'id' => 'Идентификатор',
 	'informationsystem_id' => 'Идентификатор информационной системы',
-	'name' => '<acronym title="Название информационной группы">Название информационной группы</acronym>',
-	'description' => '<acronym title="Описание информационной группы">Описание информационной группы</acronym>',
-	'exec_typograph_description' => '<acronym title="Типографировать описание информационной группы">Типографировать</acronym>',
+	'name' => 'Название информационной группы',
+	'description' => 'Описание информационной группы',
+	'exec_typograph_description' => 'Типографировать',
 	'use_trailing_punctuation' => '<acronym title="Оптическое выравнивание текста перемещает символы пунктуации за границу набора">Оптическое выравнивание</acronym>',
 
-	'parent_id' => '<acronym title="Родительская группа информационной группы">Родительская группа</acronym>',
-	'sorting' => '<acronym title="Порядок сортировки информационной группы">Порядок сортировки</acronym>',
-	'path' => '<acronym title="Элемент URL информационной системы для группы">Путь</acronym>',
-	'indexing' => '<acronym title="Флаг, указывающий индексировать информационную группу или нет">Индексировать</acronym>',
+	'parent_id' => 'Родительская группа',
+	'sorting' => 'Порядок сортировки',
+	'path' => 'Путь',
+	'indexing' => 'Индексировать',
 
-	'active' => '<acronym title="Статус активности информационной группы">Активна</acronym>',
-	'siteuser_id' => '<acronym title="Идентификатор пользователя сайта, которому принадлежит информационная группа">
-	Пользователь сайта</acronym>',
+	'active' => 'Активна',
+	'siteuser_id' => 'Клиент',
 
-	'siteuser_group_id' => '<acronym title="Группа, имеющая права доступа к информационной группе">Группа доступа</acronym>',
+	'siteuser_group_id' => 'Группа доступа',
 	'information_parent' => 'Как у родителя',
 
 
-	'image_large' => '<acronym title="Изображение для информационной группы">Изображение</acronym>',
-	'image_small' => '<acronym title="Малое изображение для информационной группы">Малое изображение</acronym>',
+	'image_large' => 'Изображение',
+	'image_small' => 'Малое изображение',
 
-	'seo_title' => '<acronym title="Значение мета-тега title для информационной группы">Заголовок (Title)</acronym>',
-	'seo_description' => '<acronym title="Значение мета-тега description для информационной группы">Описание (Description)</acronym>',
-	'seo_keywords' => '<acronym title="Значение мета-тега keywords для информационной группы">Ключевые слова (Keywords)</acronym>',
+	'seo_title' => 'Заголовок (Title)',
+	'seo_description' => 'Описание (Description)',
+	'seo_keywords' => 'Ключевые слова (Keywords)',
 
 	'edit_success' => 'Информационная группа успешно добавлена.',
-	//'edit_information_groups_success' => "Информационная группа успешно сохранена!",
-
 	'edit_error' => 'Информационная группа не добавлена!',
-	//'edit_information_groups_error' => "Ошибка! Информационная группа не изменена!",
-
 	'markDeleted_success' => 'Информационная группа успешно удалена.',
-	//'delete_information_groups_success' => "Информационные группы успешно удалены!",
-
 	'markDeleted_error' => 'Информационная группа не удалена!',
 
 	'error_URL_information_group' => 'В группе уже существует информационная подгруппа с таким URL!',

@@ -71,7 +71,7 @@ class Template_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -253,10 +253,13 @@ class Template_Model extends Core_Entity
 
 		Core_File::write($this->getTemplateLessFilePath(), trim($content));
 
-		// Rebuild CSS
-		$oTemplate_Less = $this->_getTemplateLess();
-		$css = $oTemplate_Less->compile($content);
-		$this->saveTemplateCssFile($css);
+		if ($this->less && strlen($content))
+		{
+			// Rebuild CSS
+			$oTemplate_Less = $this->_getTemplateLess();
+			$css = $oTemplate_Less->compile($content);
+			$this->saveTemplateCssFile($css);
+		}
 
 		return $this;
 	}
@@ -534,14 +537,13 @@ class Template_Model extends Core_Entity
 			$subTemplate = $oTemplate->copy();
 			$subTemplate->template_id = $newObject->id;
 			$subTemplate->save();
-			//$newObject->add();
 		}
 
 		return $newObject;
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -556,7 +558,7 @@ class Template_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -588,7 +590,7 @@ class Template_Model extends Core_Entity
 			$oCompression_Css = Core_Entity::factory('Compression_Css');
 			$oCompression_Css
 				->queryBuilder()
-				->where('path', 'LIKE', $sTemplatePath)
+				->where('path', '=', $sTemplatePath)
 				->groupBy('filename');
 
 			$aCompression_Css_With_Path = $oCompression_Css->findAll(FALSE);
@@ -656,8 +658,8 @@ class Template_Model extends Core_Entity
 
 		if (!is_null($oTemplate_Section))
 		{
-			//$bUserAccess = $this->checkUserAccess();
-			$bUserAccess = Core::checkPanel() && Core_Auth::logged();
+			$bUserAccess = $this->checkUserAccess();
+			// $bUserAccess = Core::checkPanel() && Core_Auth::logged();
 
 			if ($bUserAccess)
 			{
@@ -934,7 +936,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function _($name)
 	{
-		$aValues = $this->_getLngFile(SITE_LNG);
+		$aValues = $this->_getLngFile(Core::getLng());
 		return isset($aValues[$name]) ? $aValues[$name] : $name;
 	}
 

@@ -116,6 +116,12 @@ class Core_ORM
 	protected $_changedColumns = array();
 
 	/**
+	 * data-values, e.g. dataMyValue
+	 * @var array
+	 */
+	protected $_dataValues = array();
+
+	/**
 	 * List of all relations are created by _relations() based on _hasOne, _hasMany and _belongsTo
 	 * array('field_name' =>
 			array(
@@ -261,9 +267,9 @@ class Core_ORM
 
 	/**
 	 * Core_DataBase object
-	 * @var Core_DataBase
+	 * @var array
 	 */
-	protected $_dataBase = NULL;
+	protected $_database = array();
 
 	/**
 	 * Select query builder
@@ -358,7 +364,12 @@ class Core_ORM
 
 		if (!is_null($primaryKey))
 		{
-			Core_QueryBuilder::delete($this->_tableName)
+			$oQuery_Builder = Core_QueryBuilder::delete($this->_tableName);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oQuery_Builder
 				->where($this->_primaryKey, '=', $primaryKey)
 				->execute();
 		}
@@ -369,18 +380,28 @@ class Core_ORM
 	}
 
 	/**
+	 * Get Model CallsName
+	 * @param $modelName Model name
+	 * @return string
+	 */
+	static public function getClassName($modelName)
+	{
+		return ucfirst($modelName) . '_Model';
+	}
+
+	/**
 	 * Create and return an object of model
 	 * @param $modelName Model name
 	 * @param $primaryKey Primary key
 	 */
 	static public function factory($modelName, $primaryKey = NULL)
 	{
-		$modelName = ucfirst($modelName) . '_Model';
+		$modelName = self::getClassName($modelName);
 
 		if (!class_exists($modelName))
 		{
 			throw new Core_Exception("Model '%modelName' does not exist",
-					array('%modelName' => $modelName));
+				array('%modelName' => $modelName));
 		}
 
 		return new $modelName($primaryKey);
@@ -560,6 +581,52 @@ class Core_ORM
 	}
 
 	/**
+	 * Get fist entity, ordered by primary key
+	 * @param bool $bCache use cache, default TRUE
+	 * @return NULL|Core_ORM
+	 * <code>
+	 * $mObject = Core_ORM::factory('Book')->getFirst();
+	 * if (!is_null($mObject))
+	 * {
+	 * 	echo $mObject;
+	 * }
+	 * </code>
+	 */
+	public function getFirst($bCache = TRUE)
+	{
+		$this->queryBuilder()
+			->clearOrderBy()
+			->orderBy($this->_tableName . '.' . $this->_primaryKey, 'ASC')
+			->limit(1);
+
+		$aObjects = $this->findAll($bCache);
+		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	}
+
+	/**
+	 * Get last entity, ordered by primary key
+	 * @param bool $bCache use cache, default TRUE
+	 * @return NULL|Core_ORM
+	 * <code>
+	 * $mObject = Core_ORM::factory('Book')->getLast();
+	 * if (!is_null($mObject))
+	 * {
+	 * 	echo $mObject;
+	 * }
+	 * </code>
+	 */
+	public function getLast($bCache = TRUE)
+	{
+		$this->queryBuilder()
+			->clearOrderBy()
+			->orderBy($this->_tableName . '.' . $this->_primaryKey, 'DESC')
+			->limit(1);
+
+		$aObjects = $this->findAll($bCache);
+		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	}
+
+	/**
 	 * Add related object. If main object does not save, it will save.
 	 * @param Core_ORM $model
 	 * @param string $relation
@@ -718,7 +785,7 @@ class Core_ORM
 
 					$throughModel = $throughModel->find();
 
-					if (!is_null($throughModel))
+					if (!is_null($throughModel->id))
 					{
 						$throughModel->delete();
 					}
@@ -916,6 +983,20 @@ class Core_ORM
 	}
 
 	/**
+	 * Get Database
+	 * @return Core_DataBase
+	 */
+	protected function getDatabase()
+	{
+		if (!isset($this->_database[self::$_databaseDriver]))
+		{
+			$this->_database[self::$_databaseDriver] = Core_DataBase::instance(self::$_databaseDriver);
+		}
+		
+		return $this->_database[self::$_databaseDriver];
+	}
+	
+	/**
 	 * Model initialization
 	 * @return Core_ORM
 	 */
@@ -923,10 +1004,10 @@ class Core_ORM
 	{
 		if (!$this->_init)
 		{
-			if (is_null($this->_dataBase))
+			/*if (is_null($this->_database))
 			{
-				$this->_dataBase = Core_DataBase::instance(self::$_databaseDriver);
-			}
+				$this->_database = Core_DataBase::instance(self::$_databaseDriver);
+			}*/
 
 			// is_null() into getModelName()
 			$this->_modelName = $this->getModelName();
@@ -1033,6 +1114,9 @@ class Core_ORM
 		if (is_null($this->_queryBuilder))
 		{
 			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*');
+			
+			self::$_databaseDriver != 'default'
+				&& $this->_queryBuilder->setDataBase($this->getDatabase());
 		}
 
 		return $this->_queryBuilder;
@@ -1089,6 +1173,17 @@ class Core_ORM
 	}
 
 	/**
+	 * Get tableColumns
+	 * @return array
+	 */
+	public function getTableColumns()
+	{
+		$this->_loadColumns();
+
+		return $this->_tableColumns;
+	}
+
+	/**
 	 * Load columns list for model
 	 * @return Core_ORM
 	 */
@@ -1114,7 +1209,7 @@ class Core_ORM
 
 				self::$_columnCache[$this->_modelName] = $this->_tableColumns = is_array($inCache)
 					? $inCache
-					: $this->_dataBase->getColumns($this->_tableName);
+					: $this->getDatabase()->getColumns($this->_tableName);
 
 				$bCache
 					&& is_null($inCache)
@@ -1125,7 +1220,7 @@ class Core_ORM
 
 			/*$this->_tableColumns = isset(self::$_columnCache[$this->_modelName])
 				? self::$_columnCache[$this->_modelName]
-				: self::$_columnCache[$this->_modelName] = $this->_dataBase->getColumns($this->_tableName);*/
+				: self::$_columnCache[$this->_modelName] = $this->getDatabase()->getColumns($this->_tableName);*/
 		}
 
 		return $this;
@@ -1348,6 +1443,12 @@ class Core_ORM
 			return $this->_modelColumns[$lowerProperty];
 		}
 
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
+		{
+			return Core_Array::get($this->_dataValues, $property);
+		}
+
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this))
 		{
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
@@ -1363,7 +1464,8 @@ class Core_ORM
 	 */
 	public function isCallable($methodName)
 	{
-		return method_exists($this, $methodName) || Core_Event::getCount($this->_modelName . '.onCall' . $methodName);
+		return method_exists($this, $methodName)
+			|| Core_Event::getCount($this->_modelName . '.onCall' . $methodName);
 	}
 
 	/**
@@ -1392,6 +1494,12 @@ class Core_ORM
 		}
 
 		if (Core_Event::getCount($this->_modelName . '.onCall' . $property))
+		{
+			return TRUE;
+		}
+
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
 		{
 			return TRUE;
 		}
@@ -1439,6 +1547,13 @@ class Core_ORM
 			return $this;
 		}
 
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
+		{
+			$this->_dataValues[$property] = $value;
+			return $this;
+		}
+
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $property, $this, array($value)))
 		{
 			throw new Core_Exception("The property '%property' does not exist in the model '%model'",
@@ -1462,6 +1577,13 @@ class Core_ORM
 		if (isset($this->_tableColumns[$name]) && array_key_exists(0, $arguments))
 		{
 			return $this->__set($name, $arguments[0]);
+		}
+
+		// data-property, e.g. dataMyValue
+		if (strpos($name, 'data') === 0 && $name != 'data')
+		{
+			$this->_dataValues[$name] = $arguments[0];
+			return $this;
 		}
 
 		if (!Core_Event::notify($this->_modelName . '.onCall' . $name, $this, $arguments))
@@ -1655,8 +1777,12 @@ class Core_ORM
 				!is_null($getPrimaryKeyValue) && $data[$this->_primaryKey] = $getPrimaryKeyValue;
 			}
 
-			$oInsert = Core_QueryBuilder::insert($this->_tableName, $data)
-				->execute();
+			$oQuery_Builder = Core_QueryBuilder::insert($this->_tableName, $data);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oInsert = $oQuery_Builder->execute();
 
 			// Set primary key
 			$this->setValues(
@@ -1693,7 +1819,12 @@ class Core_ORM
 
 			$data = $this->_getChangedData();
 
-			$oUpdate = Core_QueryBuilder::update($this->_tableName)
+			$oQuery_Builder = Core_QueryBuilder::update($this->_tableName);
+			
+			self::$_databaseDriver != 'default'
+				&& $oQuery_Builder->setDataBase($this->getDatabase());
+			
+			$oUpdate = $oQuery_Builder
 				->columns($data)
 				->where($this->_primaryKey, '=', $this->getPrimaryKey())
 				->execute();
@@ -1750,7 +1881,20 @@ class Core_ORM
 	 */
 	public function setRelations(array $relations)
 	{
-		$this->_relations = $relations;
+		$this->_relations
+			= self::$_relationModelCache[$this->_modelName]
+			= $relations;
+
+		// Relation cache
+		$bCache = Core::moduleIsActive('cache');
+
+		if ($bCache)
+		{
+			$cacheName = 'Core_ORM_RelationCache';
+
+			self::$relationCache->set($this->_modelName, $this->_relations, $cacheName);
+		}
+
 		return $this;
 	}
 

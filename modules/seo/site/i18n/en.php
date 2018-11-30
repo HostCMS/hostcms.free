@@ -16,7 +16,7 @@ return array(
 	'add_title' => 'Add seo site',
 	'seo_driver_id' => 'Driver',
 	'token' => 'Token',
-	'id' => 'Id',
+	'id' => 'ID',
 	'last_update' => 'Last update',
 	'active' => 'Active',
 	'site_id' => 'Site id',

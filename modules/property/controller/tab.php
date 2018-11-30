@@ -213,7 +213,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	 * @var array
 	 */
 	protected $_cacheListOptions = array();
-
+	
 	/**
 	 * Add external properties container to $parentObject
 	 * @param int $parent_id ID of parent directory of properties
@@ -308,22 +308,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$largeImage['watermark_position_y'] = $this->linkedObject->getWatermarkDefaultPositionY();
 							}
 
-							if (method_exists($this->linkedObject, 'layWatermarOnLargeImage')
-								&& method_exists($this->linkedObject, 'layWatermarOnSmallImage'))
-							{
-								$largeImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnLargeImage();
-								$smallImage['place_watermark_checkbox_checked'] = $this->linkedObject->layWatermarOnSmallImage();
-							}
+							$largeImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_large_image;
+							$smallImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_small_image;
 
 							$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
 							$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
-
-							/*if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
-								&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
-							{
-								$largeImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfLargeImage();
-								$smallImage['preserve_aspect_ratio_checkbox_checked'] = $this->linkedObject->preserveAspectRatioOfSmallImage();
-							}*/
 
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 								->style('width: 340px')
@@ -339,20 +328,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								if (!isset($this->_cacheListOptions[$oProperty->list_id]))
 								{
 									$this->_cacheListOptions[$oProperty->list_id] = array(' … ');
-
-									$aListItems = $oProperty->List->List_Items->getAllByActive(1, FALSE);
-									foreach ($aListItems as $oListItem)
-									{
-										$this->_cacheListOptions[$oProperty->list_id][$oListItem->id] = $oListItem->value;
-									}
+									$this->_cacheListOptions[$oProperty->list_id] += $oProperty->List->getListItemsTree();
 								}
 
 								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
 									->options($this->_cacheListOptions[$oProperty->list_id]);
 
 								Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyListValues', $this, array($oProperty, $oAdmin_Form_Entity));
-
-								//unset($aOptions);
 							}
 						break;
 
@@ -385,7 +367,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 					if ($oAdmin_Form_Entity)
 					{
-						$oAdmin_Form_Entity->name("property_{$oProperty->id}[]")
+						$oAdmin_Form_Entity
+							->name("property_{$oProperty->id}[]")
 							->caption(htmlspecialchars($oProperty->name))
 							->value(
 								$this->_correctPrintValue($oProperty, $oProperty->default_value)
@@ -393,8 +376,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							->divAttr(array(
 								'class' => ($oProperty->type != 2 ? 'form-group' : '') . (
 									($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
-									? ' col-sm-7 col-md-6 col-lg-5'
-									: ' col-sm-12')
+									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
+									: ' col-xs-12')
 							));
 
 						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
@@ -740,7 +723,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->type("text/javascript")
 		->value("
 			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
 				  source: function(request, response) {
@@ -973,7 +955,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->type("text/javascript")
 		->value("
 			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
 				  source: function(request, response) {
@@ -1121,21 +1102,23 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					{
 						foreach ($aNewValue as $newValue)
 						{
-							$oNewValue = $oProperty->createNewValue($this->_object->id);
+							if ($newValue !== '')
+							{
+								$oNewValue = $oProperty->createNewValue($this->_object->id);
 
-							$newValue = $this->_correctValue($oProperty, $newValue);
+								$newValue = $this->_correctValue($oProperty, $newValue);
 
-							$oNewValue
-								->setValue($newValue)
-								->save();
+								$oNewValue
+									->setValue($newValue)
+									->save();
 
-							ob_start();
-							Core::factory('Core_Html_Entity_Script')
-								->type("text/javascript")
-								->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewValue->id}')")
-								->execute();
+								ob_start();
+								Core::factory('Core_Html_Entity_Script')
+									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewValue->id}')")
+									->execute();
 
-							$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+							}
 						}
 					}
 
@@ -1225,7 +1208,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->type("text/javascript")
 								->value("$(\"#{$windowId} div[id^='file_large'] input[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oFileValue->id}');" .
 								"$(\"#{$windowId} div[id^='file_small'] input[name='small_property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'small_property_{$oProperty->id}_{$oFileValue->id}');" .
 								// Description
@@ -1278,8 +1260,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		if (is_array($this->_POST[$name]))
 		{
-			reset($this->_POST[$name]);
-			$val = current($this->_POST[$name]);
+			//reset($this->_POST[$name]);
+			//$val = current($this->_POST[$name]);
+			$val = array_shift($this->_POST[$name]);
 
 			return $val;
 		}
@@ -1455,10 +1438,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$param['create_small_image_from_large'] = $create_small_image_from_large;
 
 			// Значение максимальной ширины большого изображения
-			$param['large_image_max_width'] = $this->_getEachPost("large_max_width_{$sPropertyName}", 0);
+			$param['large_image_max_width'] = $this->_getEachPost("large_max_width_{$sPropertyName}");
 
 			// Значение максимальной высоты большого изображения
-			$param['large_image_max_height'] = $this->_getEachPost("large_max_height_{$sPropertyName}", 0);
+			$param['large_image_max_height'] = $this->_getEachPost("large_max_height_{$sPropertyName}");
 
 			// Значение максимальной ширины малого изображения;
 			$param['small_image_max_width'] = $this->_getEachPost("small_max_width_small_{$sPropertyName}");
@@ -1577,6 +1560,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				$value = $value == '0000-00-00 00:00:00'
 					? ''
 					: Core_Date::datetime2sql($value);
+			break;
+			case 6: // Wysiwyg
+				// Nothing to do
 			break;
 			default:
 				$value = htmlspecialchars($value);

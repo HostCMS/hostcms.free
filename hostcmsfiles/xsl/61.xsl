@@ -16,7 +16,7 @@
 		<li><span>&labelOrderConfirmation;</span></li>
 		</ul>
 		
-		<form method="POST">
+		<form method="post" enctype="multipart/form-data">
 			<h1>&labelAddress;</h1>
 			
 			<div class="comment shop_address">
@@ -107,7 +107,7 @@
 				
 				<!-- Дополнительные свойства заказа -->
 				<xsl:if test="count(shop_order_properties//property[display != 0 and (type != 2 )])">
-					<xsl:apply-templates select="shop_order_properties//property[display != 0 and (type != 2 )]" mode="propertyList"/>
+					<xsl:apply-templates select="shop_order_properties//property[display != 0]" mode="propertyList"/>
 				</xsl:if>
 				
 				<div class="row">
@@ -147,6 +147,10 @@
 			</div>
 			<div class="field">
 				<xsl:choose>
+					<!-- Отображаем файл -->
+					<xsl:when test="type = 2">
+						<input type="file" size="30" name="property_{@id}" class="width2"></input>
+					</xsl:when>
 					<!-- Отображаем поле ввода -->
 					<xsl:when test="display = 1">
 						<input type="text" size="30" name="property_{@id}" class="width2">
@@ -207,6 +211,7 @@
 							</xsl:choose>
 						</textarea>
 					</xsl:when>
+					
 				</xsl:choose>
 			</div>
 		</div>

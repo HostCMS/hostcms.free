@@ -178,10 +178,40 @@ if ($oAdminFormActionExport && $oAdmin_Form_Controller->getAction() == 'exportIt
 	$Shop_Warehouse_Item_Export_Controller->execute();
 }
 
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Warehouse_Item')
 );
+
+$oShop_Producers = $oShop->Shop_Producers;
+$oShop_Producers->queryBuilder()
+	->distinct()
+	->select('shop_producers.*')
+	->join('shop_items', 'shop_producers.id', '=', 'shop_items.shop_producer_id')
+	// ->where('shop_producers.active', '=', 1)
+	->where('shop_items.modification_id', '=', 0)
+	->where('shop_items.shortcut_id', '=', 0)
+	//->groupBy('shop_producers.id')
+	->clearOrderBy()
+	->orderBy('shop_producers.sorting', 'ASC')
+	->orderBy('shop_producers.name', 'ASC');
+
+$aShop_Producers = $oShop_Producers->findAll(FALSE);
+
+if (count($aShop_Producers))
+{
+	$options = '';
+
+	foreach ($aShop_Producers as $oShop_Producer)
+	{
+		$options .= $oShop_Producer->id . "=" . $oShop_Producer->name . "\n";
+	}
+
+	$oAdmin_Form_Dataset
+		->changeField('shop_items.shop_producer_id', 'list', $options)
+		->addExternalField('shop_producer_id');
+}
 
 $oAdmin_Form_Dataset
 	->addCondition(

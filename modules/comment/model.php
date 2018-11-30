@@ -69,7 +69,8 @@ class Comment_Model extends Core_Entity
 		'text' => '',
 		'siteuser_id' => 0,
 		'parent_id' => 0,
-		'grade' => 0
+		'grade' => 0,
+		'active' => 1
 	);
 
 	/**
@@ -141,7 +142,7 @@ class Comment_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 
@@ -262,6 +263,16 @@ class Comment_Model extends Core_Entity
 				);
 		}
 
+		if ($this->grade)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_Span')
+						->class('small green')
+						->value(str_repeat('★', $this->grade) . str_repeat('☆', 5 - $this->grade))
+				);
+		}
+
 		$oCore_Html_Entity_Div->execute();
 
 		return ob_get_clean();
@@ -284,7 +295,7 @@ class Comment_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function author($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function authorBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
 		{

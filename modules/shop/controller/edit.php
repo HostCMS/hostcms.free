@@ -72,7 +72,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'shop_dir':
 				$title = $object->id
-					? Core::_('Shop_Dir.edit_title')
+					? Core::_('Shop_Dir.edit_title', $object->name)
 					: Core::_('Shop_Dir.add_title');
 
 				$oAdditionalTab->delete($this->getField('parent_id'));
@@ -93,7 +93,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			case 'shop':
 				$title = $object->id
-					? Core::_('Shop.edit_title')
+					? Core::_('Shop.edit_title', $object->name)
 					: Core::_('Shop.add_title');
 
 				$oShopTabFormats = Admin_Form_Entity::factory('Tab')
@@ -123,6 +123,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRowInvoice = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRowDiscountcard = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowNotification = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -481,6 +483,13 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow7->add($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')));
 
+				Core_Templater::decorateInput($this->getField('invoice_template'));
+				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);
+
+				$oMainTab->move($this->getField('issue_discountcard'), $oMainRowDiscountcard);
+				Core_Templater::decorateInput($this->getField('discountcard_template'));
+				$oMainTab->move($this->getField('discountcard_template'), $oMainRowDiscountcard);
+
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
 				{
@@ -526,79 +535,16 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRowNotification->add($oNotificationSubscribersSelect);
 
 					$html = '
-						<script type="text/javascript">
+						<script>
 							$(function(){
-								// Формирование элементов выпадающего списка
-								function templateResultItemSubscribers(data, item){
-
-									var arraySelectItemParts = data.text.split("%%%"),
-										className = data.element && $(data.element).attr("class");
-
-									if (data.element && $(data.element).attr("style"))
-									{
-										// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
-										($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
-									}
-
-									// Компания, отдел, ФИО сотрудника
-									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
-
-									if (arraySelectItemParts[2])
-									{
-										// Список должностей через запятую
-										resultHtml += \'<span class="user-post">\' + arraySelectItemParts[2].split(\'###\').join(\', \')  + \'</span>\';
-									}
-
-									if (arraySelectItemParts[3])
-									{
-										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-right-5">\' + resultHtml;
-									}
-
-									return resultHtml;
-								}
-
-								// Формирование результатов выбора
-								function templateSelectionItemSubscribers(data, item){
-
-									var arraySelectItemParts = data.text.split("%%%"),
-										className = data.element && $(data.element).attr("class");
-
-									// Компания, отдел, ФИО сотрудника
-									var resultHtml = \'<span class="\' + className + \'">\' + arraySelectItemParts[0] + \'</span>\';
-
-									// Устанавливает title для элемента
-									data.title = arraySelectItemParts[0];
-
-									if (arraySelectItemParts[1])
-									{
-										resultHtml += \'<span class="company-department">\' + arraySelectItemParts[1] + \'</span>\';
-										data.title += " - " + arraySelectItemParts[1];
-									}
-
-									// Список должностей через запятую
-									if (arraySelectItemParts[2])
-									{
-										var departmentPosts = arraySelectItemParts[2].split(\'###\').join(\', \');
-
-										resultHtml += \'<span class="user-post">\' + departmentPosts  + \'</span>\';
-										data.title += " - " + departmentPosts;
-									}
-
-									if (arraySelectItemParts[3])
-									{
-										resultHtml = \'<img src="\' + arraySelectItemParts[3] + \'" height="30px" class="pull-left margin-top-5 margin-right-5">\' + resultHtml;
-									}
-
-									return resultHtml;
-								}
-
 								$(".shop-notification-subscribers").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
 									placeholder: "' . Core::_('Shop.type_subscriber') . '",
 									allowClear: true,
-									templateResult: templateResultItemSubscribers,
+									templateResult: $.templateResultItemResponsibleEmployees,
 									escapeMarkup: function(m) { return m; },
-									templateSelection: templateSelectionItemSubscribers
+									templateSelection: $.templateSelectionItemResponsibleEmployees,
+									width: "100%"
 								});
 							})</script>
 						';
@@ -616,21 +562,21 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('change_filename'), $oMainRow15);
 				$oMainTab->move($this->getField('attach_digital_items'), $oMainRow16);
 				$oMainTab->move($this->getField('use_captcha'), $oMainRow17);
-				
+
 				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
-				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);				
+				$oShopTabWatermark->move($this->getField('image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
 
 				$oShopTabWatermark->move($this->getField('image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
 				$oShopTabWatermark->move($this->getField('image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize2);
-				
+
 				$oShopTabWatermark->move($this->getField('group_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
-				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);				
+				$oShopTabWatermark->move($this->getField('group_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize3);
 
 				$oShopTabWatermark->move($this->getField('group_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
 				$oShopTabWatermark->move($this->getField('group_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize4);
-				
+
 				$oShopTabWatermark->move($this->getField('producer_image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
-				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);				
+				$oShopTabWatermark->move($this->getField('producer_image_large_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize5);
 
 				$oShopTabWatermark->move($this->getField('producer_image_small_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);
 				$oShopTabWatermark->move($this->getField('producer_image_small_max_height')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize6);

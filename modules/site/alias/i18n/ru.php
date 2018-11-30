@@ -38,7 +38,7 @@ return array(
 	'site_parameters' => 'Параметры',
 	'site_link_site_name' => 'Сайт "%s"',
 	'site_link_sites' => 'Сайты',
-	'site_edit_domen_form_title' => 'Редактирование информации о домене',
+	'site_edit_domen_form_title' => 'Редактирование информации о домене "%s"',
 	'site_add_domen_form_title' => 'Добавление информации о домене',
 	'site_add_domen_success' => 'Информация о домене успешно добавлена!',
 	'site_add_domen_error' => 'Информация о домене не добавлена!',

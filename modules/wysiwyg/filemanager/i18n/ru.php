@@ -13,10 +13,10 @@ return array(
 	'delete_error' => 'Ошибка удаления файла/директории!',
 
 	'fm_form_file_button' => 'Загрузить',
-	'fm_form_dir' => '<acronym title="Название директории">Создать папку</acronym>',
+	'fm_form_dir' => 'Создать папку',
 	'fm_form_dir_button' => 'Создать',
 
-	'fm_form_file' => '<acronym title="Загрузить файл на сервер">Загрузить файл</acronym>',
+	'fm_form_file' => 'Загрузить файл',
 
 	'dir_does_not_exist' => 'Директория %s не существует!',
 
@@ -28,7 +28,7 @@ return array(
 	'createDirectory_success' => 'Директория создана!',
 
 	'edit_file' => 'Редактирование файла "%s"',
-	'edit_file_text' => '<acronym title="Текст файла">Текст файла</acronym>',
+	'edit_file_text' => 'Текст файла',
 	'fm_error_open_file' => 'Ошибка! Невозможно открыть файл "%s".',
 	'fm_error_write_file' => 'Ошибка! Невозможно записать в файл "%s".',
 	'edit_success' => 'Файл успешно отредактирован!',

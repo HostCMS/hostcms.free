@@ -232,7 +232,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		// String of additional parameters
 		'additionalParams',
 		// Set filter settings
-		'filterSettings',
+		//'filterSettings',
 		// Admin_View
 		'Admin_View',
 	);
@@ -440,6 +440,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	/**
+	 * Get Children
+	 * @return array
+	 */
 	public function getChildren()
 	{
 		return $this->_children;
@@ -463,7 +467,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->_externalReplace[$key] = $value;
 		return $this;
 	}
-	
+
 	/**
 	* Get external replacement
 	* @return array
@@ -833,7 +837,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
-	//protected $_filterSettings = array();
+	/**
+	 * filter settings
+	 */
+	public $filterSettings = array();
 
 	/**
 	 * Set filter settings
@@ -977,7 +984,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add content for administration center form
+	 * Add content for Back-end form
 	 * @param string $content content
 	 * @return self
 	 */
@@ -997,7 +1004,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Add message for administration center form
+	 * Add message for Back-end form
 	 * @param string $message message
 	 * @return self
 	 */
@@ -1008,7 +1015,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Clear messages for administration center form
+	 * Clear messages for Back-end form
 	 * @return self
 	 */
 	public function clearMessages()
@@ -1035,6 +1042,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			->execute();
 	}
 
+	/**
+	 * @hostcms-event Admin_Form_Controller.onBeforeShowContent
+	 * @hostcms-event Admin_Form_Controller.onAfterShowContent
+	 */
 	public function perform()
 	{
 		// ---------------------------
@@ -1076,8 +1087,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * Executes the business logic.
 	 * @hostcms-event Admin_Form_Controller.onBeforeExecute
 	 * @hostcms-event Admin_Form_Controller.onAfterExecute
-	 * @hostcms-event Admin_Form_Controller.onBeforeShowContent
-	 * @hostcms-event Admin_Form_Controller.onAfterShowContent
 	 */
 	public function execute()
 	{
@@ -1144,6 +1153,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 									throw new Core_Exception(
 										Core::_('User.error_object_owned_another_user'), array(), 0, FALSE
 									);
+								}
+
+								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
+								if (method_exists($oObject, 'checkBackendAccess') && !$oObject->checkBackendAccess($actionName, $oUser))
+								{
+									continue;
 								}
 
 								if (isset($this->_actionHandlers[$actionName]))
@@ -1264,7 +1279,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Edit-in-Place in administration center
+	 * Edit-in-Place in Back-end
 	 * @return self
 	 */
 	public function applyEditable()
@@ -1292,7 +1307,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		if ($bEditable)
 		{
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->value("(function($){
 					$('#{$windowId} table .editable').editable({windowId: '{$windowId}', path: '{$path}'});
 				})(jQuery);")
@@ -1300,7 +1314,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		}
 
 		Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
 			->value("(function($){
 				$('#{$windowId} table .admin_table_filter :input').on('keydown', $.filterKeyDown);
 			})(jQuery);")
@@ -1324,7 +1337,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$subject = str_replace($replace_key, $replace_value, $subject);
 		}
 
-		$aColumns = $oEntity->getTableColums();
+		$aColumns = $oEntity->getTableColumns();
 		foreach ($aColumns as $columnName => $columnArray)
 		{
 			$subject = str_replace(
@@ -1552,7 +1565,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aTmp[] = "view:'" . Core_Str::escapeJavascriptVariable($this->view) . "'";
 		$aTmp[] = "windowId:'" . Core_Str::escapeJavascriptVariable($this->windowId) . "'";
 
-		?><script type="text/javascript">//<![CDATA[
+		?><script>//<![CDATA[
 var _windowSettings={<?php echo implode(',', $aTmp)?>}
 //]]></script>
 		<?php
@@ -1576,7 +1589,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 * @return string
 	 */
 	public function getAdminActionLoadHref($path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL)
+		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
 	{
 		is_null($additionalParams) && $additionalParams .= $this->additionalParams;
 
@@ -1585,7 +1598,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$additionalParams .= '&hostcms[checked][' . $datasetKey . '][' . $datasetValue . ']=1';
 
-		return $this->getAdminLoadHref($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection);
+		return $this->getAdminLoadHref($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection, $view);
 	}
 
 	/**
@@ -1695,15 +1708,19 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			str_replace(array('"'), array('&quot;'), $additionalParams)
 		);
 		// Выбранные элементы для действия
-		foreach ($this->checked as $datasetKey => $checkedItems)
-		{
-			foreach ($checkedItems as $checkedItemId => $v1)
-			{
-				$datasetKey = intval($datasetKey);
-				$checkedItemId = htmlspecialchars($checkedItemId);
 
-				$additionalParams .= empty($additionalParams) ? '' : '&';
-				$additionalParams .= 'hostcms[checked][' . $datasetKey . '][' . $checkedItemId . ']=1';
+		if (is_array($this->checked))
+		{
+			foreach ($this->checked as $datasetKey => $checkedItems)
+			{
+				foreach ($checkedItems as $checkedItemId => $v1)
+				{
+					$datasetKey = intval($datasetKey);
+					$checkedItemId = htmlspecialchars($checkedItemId);
+
+					$additionalParams .= empty($additionalParams) ? '' : '&';
+					$additionalParams .= 'hostcms[checked][' . $datasetKey . '][' . $checkedItemId . ']=1';
+				}
 			}
 		}
 		$aData[] = "additionalParams: '{$additionalParams}'";
@@ -1754,6 +1771,287 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		return $fieldName;
 	}
 
+	protected function _filterCallbackInput($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$value = htmlspecialchars($value);
+		?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 100%" class="form-control input-sm" /><?php
+	}
+
+	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
+			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+			<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
+			<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
+		</select><?php
+	}
+
+	protected function _filterCallbackDatetime($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4';
+
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
+		?><div class="row">
+			<div class="date <?php echo $divClass?>">
+				<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
+			</div>
+			<div class="date <?php echo $divClass?>">
+				<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
+			</div>
+		</div>
+		<script>
+		(function($) {
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+		})(jQuery);
+		</script><?php
+	}
+
+	/**
+	 * Date-filed (from-to)
+	 */
+	protected function _filterCallbackDate($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
+
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
+		?><div class="row">
+			<div class="date <?php echo $divClass?>">
+				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+			</div>
+			<div class="date <?php echo $divClass?>">
+				<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
+			</div>
+		</div>
+		<script>
+		(function($) {
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+		})(jQuery);
+		</script>
+		<?php
+	}
+
+	/**
+	 * Date-filed (single-mode)
+	 */
+	protected function _filterCallbackDateSingle($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$date_from = htmlspecialchars($date_from);
+		$date_to = htmlspecialchars($date_to);
+
+		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
+
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
+		?><div class="row">
+			<div class="date <?php echo $divClass?>">
+				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+			</div>
+		</div>
+		<script>
+		(function($) {
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+		})(jQuery);
+		</script>
+		<?php
+	}
+
+	protected function _filterCallbackSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" style="width: 100%">
+			<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
+			<?php
+			$str_array = explode("\n", $oAdmin_Form_Field->list);
+			$value_array = array();
+
+			foreach ($str_array as $str_value)
+			{
+				// Каждую строку разделяем по равно
+				$str_explode = explode('=', $str_value);
+
+				if (count($str_explode) > 1 /*&& $str_explode[0] != 0*/ && $str_explode[1] != '…')
+				{
+					// сохраняем в массив варинаты значений и ссылки для них
+					$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
+
+					?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
+				}
+			}
+		?>
+		</select>
+		<?php
+	}
+
+	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$aTmpValue = explode('_', $value);
+
+			$sOptions = '';
+
+			if (count($aTmpValue) == 2 && ($aTmpValue[0] == 'company' || $aTmpValue[0] == 'person'))
+			{
+				$iCounterpartyId = intval($aTmpValue[1]);
+
+				$oSelectedSiteuser = $aTmpValue[0] == 'company'
+					? Core_Entity::factory('Siteuser_Company', $iCounterpartyId)->Siteuser
+					: Core_Entity::factory('Siteuser_Person', $iCounterpartyId)->Siteuser;
+
+
+				if (!is_null($oSelectedSiteuser->id))
+				{
+					$aSiteuserCompanies = $oSelectedSiteuser->Siteuser_Companies->findAll();
+
+					foreach ($aSiteuserCompanies as $oSiteuserCompany)
+					{
+						$sOptionValue = 'company_' . $oSiteuserCompany->id;
+
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserCompany->getAvatar() . '</option>';
+
+						/* $oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
+							'value' => htmlspecialchars($oSiteuserCompany->name) . '%%%' . $oSiteuserCompany->getAvatar(),
+							'attr' => array('class' => 'siteuser-company')
+						);
+ */					}
+
+					$aSiteuserPersons = $oSelectedSiteuser->Siteuser_People->findAll();
+					foreach ($aSiteuserPersons as $oSiteuserPerson)
+					{
+						$sOptionValue = 'person_' . $oSiteuserPerson->id;
+
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserPerson->getAvatar() . '</option>';
+
+						/* $oOptgroupSiteuser->children['person_' . $oSiteuserPerson->id] = array(
+							'value' => htmlspecialchars($oSiteuserPerson->getFullName()) . '%%%' . $oSiteuserPerson->getAvatar(),
+							'attr' => array('class' => 'siteuser-person')
+						); */
+					}
+
+					$sOptions = '<optgroup label="' . $oSelectedSiteuser->login . '" class="siteuser">' . $sOptions . '</optgroup>';
+				}
+			}
+
+			?>
+			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
+				<?php echo $sOptions?>
+			</select>
+
+			<script>
+				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
+			</script>
+			<?php
+		}
+		else
+		{
+			?>—<?php
+		}
+	}
+
+	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$iUserId = intval($value);
+
+		$placeholder = Core::_('User.select_user');
+		$language = Core_i18n::instance()->getLng();
+		//$oUser = Core_Entity::factory('Siteuser')->getById($iUserId);
+
+		///////////////////
+
+		$oOptgroupCompany = new stdClass();
+		$oOptgroupCompany->attributes = array('label' => '');
+
+		$aSelectResponsibleUsers = array('-1' => '');
+		//$aSelectResponsibleUsers[] = $oOptgroupCompany;
+
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$aCompanies = $oSite->Companies->findAll();
+		foreach ($aCompanies as $oCompany)
+		{
+			//$aTmpCompanies[] = $oCompany->id;
+
+			$oOptgroupCompany = new stdClass();
+			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
+			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
+
+			$aSelectResponsibleUsers[] = $oOptgroupCompany;
+		}
+
+		Core::factory('Core_Html_Entity_Select')
+			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
+			->options($aSelectResponsibleUsers)
+			->name($filterPrefix . $oAdmin_Form_Field->id)
+			->value($iUserId)
+			->execute();
+		?>
+		<script>
+
+		
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
+				language: '<?php echo $language?>',
+				placeholder: '<?php echo $placeholder?>'				
+			}).val('<?php echo $iUserId?>').trigger('change.select2');
+
+		//$(".select2-container").css('width', '100%');
+
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
+			.on('select2:unselect', function (){
+
+				$(this)
+					.next('.select2-container')
+					.find('.select2-selection--single')
+					.removeClass('user-container');
+			});
+
+		</script>
+		<?php
+
+	}
+
+	protected function _filterCallbackSiteuser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$siteuser_id = intval($value);
+
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$oSiteuser = Core_Entity::factory('Siteuser')->getById($siteuser_id);
+			$option = !is_null($oSiteuser)
+				? '<option value=' . $oSiteuser->id . ' selected="selected">' . $oSiteuser->login . ' [' . $oSiteuser->id . ']</option>'
+				: '<option></option>';
+			?>
+			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
+				<?php echo $option?>
+			</select>
+
+			<script>
+				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
+
+				$(".select2-container").css('width', '100%');
+			</script>
+			<?php
+		}
+		else
+		{
+			?>—<?php
+		}
+	}
+
 	/**
 	 * Отображает поле фильтра (верхнего или основного)
 	 */
@@ -1787,7 +2085,39 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				: '';
 		}
 
-		// Функция обратного вызова для фильтра
+		switch ($oAdmin_Form_Field->type)
+		{
+			case 1: // Строка
+			case 2: // Поле ввода
+			case 4: // Ссылка
+			case 10: // Функция обратного вызова
+				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackInput'));
+			break;
+
+			case 3: // Checkbox
+				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackCheckbox'));
+			break;
+
+			case 5: // Дата-время
+				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackDatetime'));
+			break;
+
+			case 6: // Дата
+				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackDate'));
+			break;
+			case 7: // Картинка-ссылка
+				if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
+				{
+					break;
+				}
+			case 8: // Выпадающий список
+				$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackSelect'));
+			break;
+			default:
+				?><div style="color: #CEC3A3; text-align: center">—</div><?php
+			break;
+		}
+
 		if (isset($this->_filters[$oAdmin_Form_Field->name]))
 		{
 			switch ($oAdmin_Form_Field->type)
@@ -1798,7 +2128,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				case 10: // Функция обратного вызова
 				case 3: // Checkbox.
 				case 8: // Выпадающий список
-					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field, $filterPrefix);
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field, $filterPrefix, $tabName);
 				break;
 
 				case 5: // Дата-время.
@@ -1806,115 +2136,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
 					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
 
-					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field, $filterPrefix);
-				break;
-			}
-		}
-		else
-		{
-			$style = /*!empty($width)
-				? "width: {$width};"
-				: */"width: 100%;";
-
-			switch ($oAdmin_Form_Field->type)
-			{
-				case 1: // Строка
-				case 2: // Поле ввода
-				case 4: // Ссылка
-				case 10: // Функция обратного вызова
-					$value = htmlspecialchars($value);
-					?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="<?php echo $style?>" class="form-control input-sm" /><?php
-				break;
-
-				case 3: // Checkbox
-					?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
-						<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-						<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
-						<option value="2" <?php echo $value == 2 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_not_selected'))?></option>
-					</select><?php
-				break;
-
-				case 5: // Дата-время
-					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
-					$date_from = htmlspecialchars($date_from);
-
-					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
-					$date_to = htmlspecialchars($date_to);
-
-					$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4';
-
-					?><div class="row">
-						<div class="date <?php echo $divClass?>">
-							<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
-						</div>
-						<div class="date <?php echo $divClass?>">
-							<input name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" type="text"/>
-						</div>
-					</div>
-					<script type="text/javascript">
-					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
-					})(jQuery);
-					</script><?php
-				break;
-
-				case 6: // Дата
-					$date_from = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field->id}", NULL);
-					$date_from = htmlspecialchars($date_from);
-
-					$date_to = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field->id}", NULL);
-					$date_to = htmlspecialchars($date_to);
-
-					$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
-
-					?><div class="row">
-						<div class="date <?php echo $divClass?>">
-							<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
-						</div>
-						<div class="date <?php echo $divClass?>">
-							<input type="text" name="<?php echo $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_to?>" class="form-control input-sm" />
-						</div>
-					</div>
-					<script type="text/javascript">
-					(function($) {
-						$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
-						$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
-					})(jQuery);
-					</script>
-					<?php
-				break;
-				case 7: // Картинка-ссылка
-					if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
-					{
-						break;
-					}
-				case 8: // Выпадающий список
-					?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" style="<?php echo $style?>">
-					<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-					<?php
-					$str_array = explode("\n", $oAdmin_Form_Field->list);
-					$value_array = array();
-
-					foreach ($str_array as $str_value)
-					{
-						// Каждую строку разделяем по равно
-						$str_explode = explode('=', $str_value);
-
-						if (count($str_explode) > 1 /*&& $str_explode[0] != 0*/ && $str_explode[1] != '…')
-						{
-							// сохраняем в массив варинаты значений и ссылки для них
-							$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-							?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
-						}
-					}
-					?>
-					</select>
-					<?php
-				break;
-				default:
-					?><div style="color: #CEC3A3; text-align: center">—</div><?php
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName);
 				break;
 			}
 		}
@@ -1987,13 +2209,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 						// Top Filter
 						: 'topFilter_';
 
-					$sFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}", NULL);
+					$mFilterValue = Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field_Changed->id}", NULL);
 
 					// Функция обратного вызова для значения в фильтре
 					if (isset($this->_filterCallbacks[$oAdmin_Form_Field_Changed->name]))
 					{
-						$sFilterValue = call_user_func(
-							$this->_filterCallbacks[$oAdmin_Form_Field_Changed->name], $sFilterValue, $oAdmin_Form_Field_Changed, $filterPrefix
+						$mFilterValue = call_user_func(
+							$this->_filterCallbacks[$oAdmin_Form_Field_Changed->name], $mFilterValue, $oAdmin_Form_Field_Changed, $filterPrefix
 						);
 					}
 
@@ -2018,26 +2240,26 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 								case 2: // Поле ввода
 								case 4: // Ссылка
 								case 10: // Вычислимое поле
-									if (is_null($sFilterValue) || $sFilterValue == '' || mb_strlen($sFilterValue) > 255)
+									if (is_null($mFilterValue) || $mFilterValue == '' || mb_strlen($mFilterValue) > 255)
 									{
 										break;
 									}
 
-									$sFilterValue = str_replace(array('*', '?'), array('%', '_'), trim($sFilterValue));
+									$mFilterValue = str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($mFilterValue)));
 
 									$oAdmin_Form_Dataset->addCondition(
-										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $sFilterValue))
+										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $mFilterValue))
 									);
 								break;
 
 								case 3: // Checkbox.
 								{
-									if (!$sFilterValue)
+									if (!$mFilterValue)
 									{
 										break;
 									}
 
-									if ($sFilterValue != 1)
+									if ($mFilterValue != 1)
 									{
 										$openName = $oAdmin_Form_Field_Changed->filter_type == 0
 											? 'open'
@@ -2071,36 +2293,59 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 								case 5: // Дата-время.
 								case 6: // Дата.
 
-									// Дата от.
-									$date = trim(Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field_Changed->id}"));
+									// Дата от
+									$dateFrom = Core_Array::get($this->request, "{$filterPrefix}from_{$oAdmin_Form_Field_Changed->id}");
 
-									if (!empty($date))
+									// Дата до
+									$dateTo = Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field_Changed->id}");
+
+									if ($dateFrom != '')
 									{
-										$date = $oAdmin_Form_Field_Changed->type == 5
-											? Core_Date::datetime2sql($date)
-											: date('Y-m-d 00:00:00', Core_Date::date2timestamp($date));
+										$sDateFrom = trim(
+											$oAdmin_Form_Field_Changed->type == 5
+												? Core_Date::datetime2sql($dateFrom)
+												: date('Y-m-d 00:00:00', Core_Date::date2timestamp($dateFrom))
+											);
+
+										// Если не задана конечная дата, то ищем только за дату form (см. counter)
+										//$sCondition = is_null($dateTo) ? '=' : '>=';
+										if (is_null($dateTo))
+										{
+											if ($oAdmin_Form_Field_Changed->type == 5 && strpos($dateFrom, ' ') === FALSE)
+											{
+												$sCondition = 'BETWEEN';
+												$sDateFrom = array($sDateFrom, date('Y-m-d 23:59:59', Core_Date::date2timestamp($dateFrom)));
+											}
+											else
+											{
+												$sCondition = '=';
+											}
+										}
+										else
+										{
+											$sCondition = '>=';
+										}
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field_Changed->name, '>=', $date)
+												array($oAdmin_Form_Field_Changed->name, $sCondition, $sDateFrom)
 											)
 										);
 									}
 
-									// Дата до.
-									$date = trim(Core_Array::get($this->request, "{$filterPrefix}to_{$oAdmin_Form_Field_Changed->id}"));
-
-									if (!empty($date))
+									if ($dateTo != '')
 									{
-										$date = $oAdmin_Form_Field_Changed->type == 5
-											// Преобразуем из d.m.Y H:i:s в SQL формат
-											? Core_Date::datetime2sql($date)
-											// Преобразуем из d.m.Y в SQL формат
-											: date('Y-m-d 23:59:59', Core_Date::date2timestamp($date));
+										$sDateTo = trim(
+											$oAdmin_Form_Field_Changed->type == 5
+												// Преобразуем из d.m.Y H:i:s в SQL формат
+												? Core_Date::datetime2sql($dateTo)
+												// Преобразуем из d.m.Y в SQL формат
+												: date('Y-m-d 23:59:59', Core_Date::date2timestamp($dateTo))
+											);
 
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field_Changed->name, '<=', $date)
+												array($oAdmin_Form_Field_Changed->name, '<=', $sDateTo)
 											)
 										);
 									}
@@ -2112,16 +2357,16 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 									}
 								case 8: // Список
 								{
-									if (is_null($sFilterValue))
+									if (is_null($mFilterValue))
 									{
 										break;
 									}
 
-									if ($sFilterValue != '' && $sFilterValue != 'HOST_CMS_ALL')
+									if ($mFilterValue != '' && $mFilterValue != 'HOST_CMS_ALL')
 									{
 										$oAdmin_Form_Dataset->addCondition(
 											array($sFilterType =>
-												array($oAdmin_Form_Field_Changed->name, 'LIKE', $sFilterValue)
+												array($oAdmin_Form_Field_Changed->name, is_array($mFilterValue) ? 'IN' : '=', $mFilterValue)
 											)
 										);
 									}

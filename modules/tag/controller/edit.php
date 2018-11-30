@@ -60,8 +60,8 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'tag':
 				$title = $this->_object->id
-					? Core::_('Tag.form_edit_add_title_add')
-					: Core::_('Tag.form_edit_add_title_edit');
+					? Core::_('Tag.form_edit_add_title_edit', $this->_object->name)
+					: Core::_('Tag.form_edit_add_title_add');
 
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete($this->getField('tag_dir_id'));
@@ -115,7 +115,7 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'tag_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Tag_Dir.form_edit_add_tags_group_title_edit')
+					? Core::_('Tag_Dir.form_edit_add_tags_group_title_edit', $this->_object->name)
 					: Core::_('Tag_Dir.form_edit_add_tags_group_title_add');
 
 				// Удаляем стандартный <input>

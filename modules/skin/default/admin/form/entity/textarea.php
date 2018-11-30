@@ -126,7 +126,15 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 			?><div class="input-group"><?php
 		}
 
-		?><textarea <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></textarea><?php
+		$this->_init = is_null($this->wysiwygOptions)
+			? Core_Config::instance()->get('core_wysiwyg')
+			: $this->wysiwygOptions;
+
+		$tagName = isset($this->_init['inline'])
+			? 'div'
+			: 'textarea';
+
+		?><<?php echo $tagName?> <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></<?php echo $tagName?>><?php
 
 		$this->_format();
 
@@ -161,10 +169,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				$lng = Core_I18n::instance()->getLng();
 
-				$this->_init = is_null($this->wysiwygOptions)
-					? Core_Config::instance()->get('core_wysiwyg')
-					: $this->wysiwygOptions;
-
 				// add
 				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";
 				$this->_init['language'] = '"' . $lng . '"';
@@ -174,7 +178,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				!isset($this->_init['height'])
 					&& $this->_init['height'] = '"' . ($this->rows * 30) . '"';
 
-				//$this->_init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
+				// $this->_init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
 
 				$userCss = trim(Core_Array::get($this->_init, 'content_css', ''), '\'"');
 
@@ -225,7 +229,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 				$Core_Html_Entity_Script
-					->type('text/javascript')
 					->value("$(function() { setTimeout(function(){ $('#{$windowId} #{$this->id}').tinymce({ {$sInit} }); }, 300); });")
 					->execute();
 			}
@@ -242,7 +245,6 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 			$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 			$Core_Html_Entity_Script
-				->type('text/javascript')
 				->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('{$this->id}'), {
 					" . implode(",\n", $aTmp) . "
 				});

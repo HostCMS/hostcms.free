@@ -134,4 +134,35 @@ abstract class Core_Image
 	{
 		return Core_Image::instance()->resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality, $preserveAspectRatio);
 	}
+	
+	static public function avatar($initials, $bgColor = '#f44336', $width = 130, $height = 130)
+	{
+		// Create image
+		$font = CMS_FOLDER . 'modules/skin/default/fonts/roboto-regular.ttf';
+		$fontSize = 40;
+
+		$image = imagecreatetruecolor($width, $height);
+
+		$transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+		imagefill($image, 0, 0, $transparent);
+		imagesavealpha($image, TRUE); // save alphablending setting (important);
+
+		list($r, $g, $b) = sscanf($bgColor, "#%02x%02x%02x");
+
+		// Draw the circle
+		imagefilledellipse($image, $width / 2, $height / 2, $width, $height, imagecolorallocate($image, $r, $g, $b));
+
+		$bbox = imagettfbbox($fontSize, 0, $font, $initials);
+
+		// Text
+		$textColor = imagecolorallocate($image, 255, 255, 255);
+		imagettftext($image, $fontSize, 0, ($width - $bbox[4]) / 2, ($height - $bbox[5]) / 2, $textColor, $font, $initials);
+
+		// Output the image.
+		header("Content-type: image/png");
+		imagepng($image);
+		imagedestroy($image);
+		
+		exit();
+	}
 }

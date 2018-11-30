@@ -102,6 +102,20 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->image_large_max_height = $this->linkedObject->getLargeImageMaxHeight();
 			$object->image_small_max_width = $this->linkedObject->getSmallImageMaxWidth();
 			$object->image_small_max_height = $this->linkedObject->getSmallImageMaxHeight();
+
+			if (method_exists($this->linkedObject, 'preserveAspectRatioOfLargeImage')
+				&& method_exists($this->linkedObject, 'preserveAspectRatioOfSmallImage'))
+			{
+				$object->preserve_aspect_ratio = $this->linkedObject->preserveAspectRatioOfLargeImage();
+				$object->preserve_aspect_ratio_small = $this->linkedObject->preserveAspectRatioOfSmallImage();
+			}
+
+			if (method_exists($this->linkedObject, 'layWatermarOnLargeImage')
+				&& method_exists($this->linkedObject, 'layWatermarOnSmallImage'))
+			{
+				$object->watermark_default_use_large_image = $this->linkedObject->layWatermarOnLargeImage();
+				$object->watermark_default_use_small_image = $this->linkedObject->layWatermarOnSmallImage();
+			}
 		}
 
 		return parent::setObject($object);
@@ -111,11 +125,15 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Prepare backend item's edit form
 	 *
 	 * @return self
+	 * @hostcms-event Property_Controller_Edit.onBeforePrepareForm
+	 * @hostcms-event Property_Controller_Edit.onAfterPrepareForm
 	 */
 	protected function _prepareForm()
 	{
 		parent::_prepareForm();
 
+		Core_Event::notify('Property_Controller_Edit.onBeforePrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+		
 		$bNewProperty = !$this->_object->id;
 
 		$modelName = $this->_object->getModelName();
@@ -151,7 +169,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$title = $this->_object->id
-					? Core::_('Property.edit_title')
+					? Core::_('Property.edit_title', $this->_object->name)
 					: Core::_('Property.add_title');
 
 				!$this->_object->id && $this->_object->property_dir_id = Core_Array::getGet('property_dir_id');
@@ -338,8 +356,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				$this->getField('preserve_aspect_ratio_small')
-					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));					
-					
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
+
 				$this->getField('hide_small_image')
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
@@ -350,7 +368,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('image_small_max_width'), $oMainRow15)
 					->move($this->getField('image_small_max_height'), $oMainRow15)
 					->move($this->getField('preserve_aspect_ratio_small'), $oMainRow16)
-					->move($this->getField('hide_small_image'), $oMainRow17)
+					->move($this->getField('hide_small_image'), $oMainRow16)
+					->move($this->getField('watermark_default_use_large_image')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRow17)
+					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRow17)
 					->move($this->getField('guid'), $oMainRow18);
 
 				$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
@@ -363,7 +383,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'property_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Property_Dir.edit_title')
+					? Core::_('Property_Dir.edit_title', $this->_object->name)
 					: Core::_('Property_Dir.add_title');
 
 				// Значения директории для добавляемого объекта
@@ -397,6 +417,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->title($title);
 
+		Core_Event::notify('Property_Controller_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
+		
 		return $this;
 	}
 

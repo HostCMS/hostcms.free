@@ -224,6 +224,37 @@ class Core_Response
 	}
 
 	/**
+	 * Send HTTP response code
+	 * @param int $status Status code
+	 *
+	 */
+	static public function sendHttpStatusCode($status)
+	{
+		if (isset(self::$_httpStatusCode[$status]))
+		{
+			$sHttpStatusCode = self::$_httpStatusCode[$status];
+
+			$SERVER_PROTOCOL = Core_Array::get($_SERVER, 'SERVER_PROTOCOL');
+
+			if (substr(php_sapi_name(), 0, 3) == 'cgi')
+			{
+				header("Status: {$status} {$sHttpStatusCode}", TRUE);
+			}
+			elseif ($SERVER_PROTOCOL == 'HTTP/1.0')
+			{
+				header("HTTP/1.0 {$status} {$sHttpStatusCode}", TRUE, $status);
+			}
+			else
+			{
+				header("HTTP/1.1 {$status} {$sHttpStatusCode}", TRUE, $status);
+			}
+			/*Core_Array::get($_SERVER, 'SERVER_PROTOCOL') == 'HTTP/1.1' && function_exists('apache_lookup_uri')
+				? header("HTTP/1.1 {$this->_status} {$sHttpStatusCode}")
+				: header("Status: {$this->_status} {$sHttpStatusCode}");*/
+		}
+	}
+
+	/**
 	 * Send response headers
 	 *
 	 * <code>
@@ -237,28 +268,7 @@ class Core_Response
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeSendHeaders', $this);
 
-		if (isset(self::$_httpStatusCode[$this->_status]))
-		{
-			$sHttpStatusCode = self::$_httpStatusCode[$this->_status];
-
-			$SERVER_PROTOCOL = Core_Array::get($_SERVER, 'SERVER_PROTOCOL');
-
-			if (substr(php_sapi_name(), 0, 3) == 'cgi')
-			{
-				header("Status: {$this->_status} {$sHttpStatusCode}", TRUE);
-			}
-			elseif ($SERVER_PROTOCOL == 'HTTP/1.0')
-			{
-				header("HTTP/1.0 {$this->_status} {$sHttpStatusCode}", TRUE, $this->_status);
-			}
-			else
-			{
-				header("HTTP/1.1 {$this->_status} {$sHttpStatusCode}", TRUE, $this->_status);
-			}
-			/*Core_Array::get($_SERVER, 'SERVER_PROTOCOL') == 'HTTP/1.1' && function_exists('apache_lookup_uri')
-				? header("HTTP/1.1 {$this->_status} {$sHttpStatusCode}")
-				: header("Status: {$this->_status} {$sHttpStatusCode}");*/
-		}
+		self::sendHttpStatusCode($this->_status);
 
 		foreach ($this->_headers as $value)
 		{

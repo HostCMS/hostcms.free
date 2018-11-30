@@ -81,7 +81,7 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oMainRow5->add($Admin_Form_Entity_Textarea);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Print_Form.edit_form_title')
+			? Core::_('Shop_Print_Form.edit_form_title', $this->_object->name)
 			: Core::_('Shop_Print_Form.add_form_title');
 
 		$this->title($title);

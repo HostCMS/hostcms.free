@@ -36,7 +36,7 @@ class Site_Alias_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -250,7 +250,7 @@ class Site_Alias_Model extends Core_Entity
 			->clear()
 			->select('site_aliases.*')
 			->join('sites', 'sites.id', '=', 'site_aliases.site_id')
-			->where('site_aliases.name', 'LIKE', $aliasName)
+			->where('site_aliases.name', 'LIKE', Core_DataBase::instance()->escapeLike($aliasName))
 			->where('sites.deleted', '=', 0)
 			->limit(1);
 
@@ -296,7 +296,7 @@ class Site_Alias_Model extends Core_Entity
 	}
 	
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string

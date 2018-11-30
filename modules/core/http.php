@@ -371,7 +371,8 @@ abstract class Core_Http
 			switch ($aHeaders['content-encoding'])
 			{
 				case 'gzip':
-					return gzinflate(substr($this->_body, 10));
+					$content = substr($this->_body, 10);
+					return $content != '' ? gzinflate($content) : '';
 				break;
 				default:
 					throw new Core_Exception('Core_Http unsupported compression method "%name"', array('%name' =>

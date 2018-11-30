@@ -106,6 +106,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 	 * @return self
 	 * @hostcms-event Shop_Cart_Controller.onBeforeMoveTemporaryCart
 	 * @hostcms-event Shop_Cart_Controller.onAfterMoveTemporaryCart
+	 * @hostcms-event Shop_Cart_Controller.onAfterMoveTemporaryCartItem
 	 */
 	public function moveTemporaryCart(Shop_Model $oShop)
 	{
@@ -127,6 +128,8 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 						->shop_warehouse_id($oShop_Cart->shop_warehouse_id)
 						->siteuser_id($this->siteuser_id)
 						->add();
+
+					Core_Event::notify(get_class($this) . '.onAfterMoveTemporaryCartItem', $this, array($oShop_Cart));
 				}
 				$this->clearSessionCart();
 			}
@@ -372,6 +375,29 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 			// Проверяем право пользователя добавить этот товар в корзину
 			if (in_array($oShop_Item->getSiteuserGroupId(), $aSiteuserGroups))
 			{
+				// 1. Check STEP. DECIMAL, > 0, NOT $oShop_Item->quantity_step
+				if ($oShop_Item->quantity_step > 0)
+				{
+					$iStep = $this->quantity / $oShop_Item->quantity_step;
+
+					if (!is_int($iStep))
+					{
+						$this->quantity = ceil($iStep) * $oShop_Item->quantity_step;
+					}
+				}
+
+				// 2. Check MIN quantity
+				if ($this->quantity < $oShop_Item->min_quantity)
+				{
+					$this->quantity = $oShop_Item->min_quantity;
+				}
+
+				// 3. Check MAX quantity (DECIMAL, $oShop_Item->max_quantity > 0, NOT $oShop_Item->max_quantity)
+				if ($oShop_Item->max_quantity > 0 && $this->quantity > $oShop_Item->max_quantity)
+				{
+					$this->quantity = $oShop_Item->max_quantity;
+				}
+
 				// Нужно получить реальное количество товара, если товар электронный
 				if ($oShop_Item->type == 1)
 				{
@@ -383,7 +409,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 						$this->quantity = $iShop_Item_Digitals;
 					}
 				}
-					
+
 				// Если делимый товар
 				if ($oShop_Item->type == 2)
 				{

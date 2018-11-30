@@ -65,7 +65,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -117,7 +117,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			->join('shop_purchase_discount_coupons', 'shop_purchase_discounts.id', '=', 'shop_purchase_discount_coupons.shop_purchase_discount_id')
 			->where('shop_purchase_discount_coupons.active', '=', 1)
 			->where('shop_purchase_discount_coupons.deleted', '=', 0)
-			->where('shop_purchase_discount_coupons.text', 'LIKE', $couponText)
+			->where('shop_purchase_discount_coupons.text', '=', $couponText)
 			->where('shop_purchase_discount_coupons.start_datetime', '<=', $sDatetime)
 			->where('shop_purchase_discount_coupons.end_datetime', '>=', $sDatetime)
 			->open()

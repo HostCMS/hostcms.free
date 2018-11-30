@@ -23,8 +23,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 
 		// Warning: fieldType, fieldMessage, fieldsStatus (ниже !) переделать на JS-класс + заполнение в модели input-а
 		?><div id="box0">
-		<script type="text/javascript">
-		var fieldType = new Array(), fieldMessage = new Array(), fieldsStatus = new Array();
+		<script>
+		fieldType['<?php echo $windowId?>'] = [], fieldMessage['<?php echo $windowId?>'] = [], fieldsStatus['<?php echo $windowId?>'] = [];
 		</script>
 		<form <?php echo implode(' ', $aAttr) ?>><?php
 
@@ -34,7 +34,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 		<?php
 		if (!is_null($this->id))
 		{
-		?><script type="text/javascript">$(function() { CheckAllField('<?php echo $windowId?>', "<?php echo htmlspecialchars($this->id)?>"); });</script><?php
+		?><script>$(function() { CheckAllField('<?php echo $windowId?>', "<?php echo htmlspecialchars($this->id)?>"); });</script><?php
 		}
 		?>
 		</div><?php

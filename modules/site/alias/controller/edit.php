@@ -29,8 +29,8 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::setObject($object);
 
 		$this->title($this->_object->id
-			? Core::_('Site.site_edit_site_form_title')
-			: Core::_('Site.site_add_site_form_title'));
+			? Core::_('Site_Alias.site_edit_domen_form_title', $this->_object->name)
+			: Core::_('Site_Alias.site_add_domen_form_title'));
 
 		if (!$this->_object->id)
 		{

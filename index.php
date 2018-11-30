@@ -40,6 +40,7 @@ Core_Router::add('sitemap.xml', '/sitemap.xml')
 	->controller('Core_Command_Controller_Sitemap');
 	
 $oDefault_Router_Route = Core_Router::add('default', '()');
+$oDefault_Router_Route->controller('Core_Command_Controller_Default');
 
 // Контроллер совместимости с HostCMS 5
 if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)

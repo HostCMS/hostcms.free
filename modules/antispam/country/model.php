@@ -55,7 +55,7 @@ class Antispam_Country_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function country_flag()
+	public function country_flagBackend()
 	{
 		$oAdmin_Language = Core_Entity::factory('Admin_Language')->getByShortname(Core_Array::getSession('current_lng'));
 

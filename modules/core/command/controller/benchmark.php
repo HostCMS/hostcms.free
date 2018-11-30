@@ -29,7 +29,7 @@ class Core_Command_Controller_Benchmark extends Core_Command_Controller
 		
 		$result = 'Error';
 
-		if (defined('START_BENCHMARK') && START_BENCHMARK && Core::moduleIsActive('benchmark'))
+		if (defined('BENCHMARK_ENABLE') && BENCHMARK_ENABLE && Core::moduleIsActive('benchmark'))
 		{
 			Core_Entity::factory('Benchmark_Url')
 				->structure_id(intval(Core_Array::getPost('structure_id', 0)))

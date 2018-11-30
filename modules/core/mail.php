@@ -16,8 +16,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 	->header('Precedence', 'bulk')
  * 	->attach(array(
  * 		'filepath' => $include_file,
- * 		'filename' => $file,
- * 		))
+ * 		'filename' => $file
+ * 	))
  * 	->send();
  * </code>
  *
@@ -54,6 +54,25 @@ abstract class Core_Mail
 		return __CLASS__ . '_' . ucfirst($driver);
 	}
 
+	protected $_log = NULL;
+	
+	/**
+	 * Log error
+	 * @return boolean
+	 */
+	public function log()
+	{
+		if (!is_null($this->_log))
+		{
+			Core_Log::instance()->clear()
+				->notify(FALSE) // avoid recursion
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('SMTP LOG: "%s"', $this->_log));
+		}
+
+		return TRUE;
+	}
+	
 	/**
 	 * Register an existing instance as a singleton.
 	 * @param string $name
@@ -84,6 +103,11 @@ abstract class Core_Mail
 				defined('CURRENT_SITE') && isset($aConfigDriver[CURRENT_SITE])
 					? $aConfigDriver[CURRENT_SITE]
 					: $aConfigDriver
+			) + array(
+				'host' => NULL,
+				'port' => 25,
+				'log' => TRUE,
+				'timeout' => 5
 			)
 		);
 	}
@@ -104,7 +128,7 @@ abstract class Core_Mail
 		$this->_headers = $this->_files = array();
 
 		$this->_to = $this->_from = $this->_subject = $this->_message
-			= $this->_senderName = $this->_recipientName = NULL;
+			= $this->_senderName = $this->_recipientName = $this->_log = NULL;
 
 		$this->_multipartRelated = FALSE;
 
@@ -388,7 +412,8 @@ abstract class Core_Mail
 		Core_Event::notify('Core_Mail.onBeforeSend', $this);
 
 		$sFrom = !is_null($this->_senderName)
-			? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?= <{$this->_from}>"
+			// NO SPACES BETWEEN name and <email>
+			? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?=<{$this->_from}>"
 			: $this->_from;
 
 		$this
@@ -396,10 +421,11 @@ abstract class Core_Mail
 			->header('X-Mailer', 'HostCMS');
 
 		$sTo = !is_null($this->_recipientName)
-			? '=?UTF-8?B?' . base64_encode($this->_recipientName) . "?= <{$this->_to}>"
+			// NO SPACES BETWEEN name and <email>
+			? '=?UTF-8?B?' . base64_encode($this->_recipientName) . "?=<{$this->_to}>"
 			: (strlen($this->_to)
-					? "<{$this->_to}>"
-					: ''
+				? "<{$this->_to}>"
+				: ''
 			);
 
 		if (!isset($this->_headers['Reply-To']))

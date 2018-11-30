@@ -32,7 +32,7 @@ class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 		//$aDefaultDivAttr = array('class' => 'item_div');
 		//$this->divAttr = Core_Array::union($this->divAttr, $aDefaultDivAttr);
 
-		$aDivAttr = array();
+		/*$aDivAttr = array();
 
 		// Установим атрибуты div'a.
 		if (is_array($this->divAttr))
@@ -43,7 +43,7 @@ class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 			}
 		}
 
-		/*?><div <?php echo implode(' ', $aDivAttr)?>><?php*/
+		?><div <?php echo implode(' ', $aDivAttr)?>><?php*/
 		?><div <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?><?php
 
 		$this->executeChildren();

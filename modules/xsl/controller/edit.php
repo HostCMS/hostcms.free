@@ -14,30 +14,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
 	/**
-	 * Get Languages
-	 * @return array
-	 */
-	protected function _getLngs()
-	{
-		$aConfig = Core_Config::instance()->get('xsl_config', array()) + array(
-			'lngs' => array()
-		);
-
-		$aLngs = $aConfig['lngs'];
-
-		$aRows = Site_Controller::instance()->getLngList();
-		foreach ($aRows as $aRow)
-		{
-			if (!in_array($aRow['lng'], $aLngs))
-			{
-				$aLngs[] = $aRow['lng'];
-			}
-		}
-
-		return $aLngs;
-	}
-
-	/**
 	 * Set object
 	 * @param object $object object
 	 * @return self
@@ -61,7 +37,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			case 'xsl':
 				$title = $this->_object->id
-					? Core::_('Xsl.edit_title')
+					? Core::_('Xsl.edit_title', $this->_object->name)
 					: Core::_('Xsl.add_title');
 
 				if (!$this->_object->id)
@@ -147,7 +123,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('description'), $oMainRow6);
 
 				// DTD для всех языков
-				$aLngs = $this->_getLngs();
+				$aLngs = Xsl_Controller::getLngs();
 
 				foreach ($aLngs as $sLng)
 				{
@@ -183,7 +159,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'xsl_dir':
 			default:
 				$title = $this->_object->id
-					? Core::_('Xsl_Dir.edit_title')
+					? Core::_('Xsl_Dir.edit_title', $this->_object->name)
 					: Core::_('Xsl_Dir.add_title');
 
 				// Значения директории для добавляемого объекта
@@ -283,7 +259,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->_object->saveXslFile($xsl_value);
 
 				// DTD для всех языков
-				$aLngs = $this->_getLngs();
+				$aLngs = Xsl_Controller::getLngs();
 
 				foreach ($aLngs as $sLng)
 				{

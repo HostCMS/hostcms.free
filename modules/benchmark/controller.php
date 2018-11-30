@@ -26,6 +26,12 @@ class Benchmark_Controller
 	protected $_database = NULL;
 
 	/**
+	 * Table name
+	 * @var string
+	 */
+	protected $_table_name = NULL;
+
+	/**
 	 * Temporary directory
 	 * @var int
 	 */
@@ -61,6 +67,8 @@ class Benchmark_Controller
 		$this->_database = Core_Database::instance();
 
 		$this->_temporary_directory = CMS_FOLDER . TMP_DIR;
+
+		$this->_table_name = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
 	}
 
 	public static function getConfig()
@@ -89,9 +97,7 @@ class Benchmark_Controller
 	 */
 	public function clearTable()
 	{
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
-		$this->_database->query("TRUNCATE TABLE {$sTableName}");
+		$this->_database->query("TRUNCATE TABLE {$this->_table_name}");
 
 		return $this;
 	}
@@ -102,14 +108,12 @@ class Benchmark_Controller
 	 */
 	public function createTable()
 	{
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
-		$this->_database->query("DROP TABLE IF EXISTS {$sTableName}");
+		$this->_database->query("DROP TABLE IF EXISTS {$this->_table_name}");
 
 		$aConfig = $this->_database->getConfig();
 
 		$this->_database->query(
-			"CREATE TABLE IF NOT EXISTS {$sTableName} (
+			"CREATE TABLE IF NOT EXISTS {$this->_table_name} (
 			`id` int(11) NOT NULL auto_increment,
 			`value` varchar(255) NOT NULL,
 			PRIMARY KEY (`id`)
@@ -124,9 +128,7 @@ class Benchmark_Controller
 	 */
 	public function dropTable()
 	{
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
-		$this->_database->query("DROP TABLE IF EXISTS {$sTableName}");
+		$this->_database->query("DROP TABLE IF EXISTS {$this->_table_name}");
 
 		return $this;
 	}
@@ -139,13 +141,11 @@ class Benchmark_Controller
 	{
 		$this->clearTable();
 
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
 		$startTime = Core::getmicrotime();
 
 		for ($i = 0; $i < self::$aConfig['database_write_query_count']; $i++)
 		{
-			$this->_database->query("INSERT INTO {$sTableName} (`value`) VALUES ({$i})");
+			$this->_database->query("INSERT INTO {$this->_table_name} (`value`) VALUES ({$i})");
 		}
 
 		$fQueryTime = Core::getmicrotime() - $startTime;
@@ -161,14 +161,12 @@ class Benchmark_Controller
 	 */
 	public function readTable()
 	{
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
 		$startTime = Core::getmicrotime();
 
 		for ($i = 0; $i < self::$aConfig['database_read_query_count']; $i++)
 		{
 			$iID = rand(1, self::$aConfig['database_read_query_count']);
-			$this->_database->query("SELECT * FROM {$sTableName} WHERE `id` = {$iID}");
+			$this->_database->query("SELECT * FROM {$this->_table_name} WHERE `id` = {$iID}");
 		}
 
 		$fQueryTime = Core::getmicrotime() - $startTime;
@@ -184,14 +182,12 @@ class Benchmark_Controller
 	 */
 	public function changeTable()
 	{
-		$sTableName = $this->_database->quoteColumnName(self::$aConfig['database_table_name']);
-
 		$startTime = Core::getmicrotime();
 
 		for ($i = 0; $i < self::$aConfig['database_change_query_count']; $i++)
 		{
 			$iID = rand(1, self::$aConfig['database_change_query_count']);
-			$this->_database->query("UPDATE {$sTableName} SET `value` = `value` * {$iID} WHERE `id`={$iID}");
+			$this->_database->query("UPDATE {$this->_table_name} SET `value` = `value` * {$iID} WHERE `id` = {$iID}");
 		}
 
 		$fQueryTime = Core::getmicrotime() - $startTime;
@@ -286,17 +282,22 @@ class Benchmark_Controller
 	 */
 	public function networkDownloadTest()
 	{
-		$startTime = Core::getmicrotime();
+		if (ini_get('allow_url_fopen'))
+		{
+			$startTime = Core::getmicrotime();
+			
+			$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path']);
 
-		$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path']);
+			$fQueryTime = Core::getmicrotime() - $startTime;
 
-		$fQueryTime = Core::getmicrotime() - $startTime;
+			$iFileLen = strlen($sFileContent);
 
-		$iFileLen = strlen($sFileContent);
-
-		return $fQueryTime > 0
-			? abs(round((($iFileLen * 8) / 1024 / 1024) / $fQueryTime, 2))
-			: 0;
+			return $fQueryTime > 0
+				? abs(round((($iFileLen * 8) / 1024 / 1024) / $fQueryTime, 2))
+				: 0;
+		}
+		
+		return FALSE;
 	}
 
 	/*
@@ -309,7 +310,7 @@ class Benchmark_Controller
 
 		$startTime = Core::getmicrotime();
 
-		@mail($oSite->admin_email, 'Performance test', self::$aConfig['sample_text']);
+		@mail($oSite->getFirstEmail(), 'Performance test', self::$aConfig['sample_text']);
 
 		return abs(round(Core::getmicrotime() - $startTime, 4));
 	}
@@ -356,5 +357,25 @@ class Benchmark_Controller
 			->result();
 
 		return $aResult;
+	}
+	
+	/**
+	 * Show Benchmark JS-code
+	 */
+	static public function show()
+	{
+		if (defined('BENCHMARK_ENABLE') && BENCHMARK_ENABLE)
+		{
+?><!-- HostCMS Benchmark --><script>
+window.addEventListener('load', function() {
+	var waiting = performance.timing.responseStart - performance.timing.requestStart, loadPage = performance.timing.loadEventStart - performance.timing.requestStart, dnsLookup = performance.timing.domainLookupEnd - performance.timing.domainLookupStart, connectServer = performance.timing.connectEnd - performance.timing.connectStart;
+
+	xmlhttprequest = new XMLHttpRequest();
+	xmlhttprequest.open('POST','/hostcms-benchmark.php',true);
+	xmlhttprequest.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+	xmlhttprequest.send('structure_id=<?php echo CURRENT_STRUCTURE_ID?>&waiting_time='+waiting+'&load_page_time='+loadPage+'&dns_lookup='+dnsLookup+'&connect_server='+connectServer);
+});
+</script><?php
+		}
 	}
 }

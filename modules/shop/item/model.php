@@ -144,6 +144,7 @@ class Shop_Item_Model extends Core_Entity
 		'vote' => array('through' => 'vote_shop_item'),
 		'shop_item_delivery_option' => array(),
 		'shop_favorite' => array(),
+		'shop_item_barcode' => array(),
 	);
 
 	/**
@@ -228,7 +229,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -404,6 +405,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Get the quantity in the active warehouses
 	 * @return float
+	 * @hostcms-event shop_item.onBeforeGetRest
 	 */
 	public function getRest()
 	{
@@ -413,6 +415,8 @@ class Shop_Item_Model extends Core_Entity
 			->where('shop_warehouse_items.shop_item_id', '=', !$this->shortcut_id ? $this->id : $this->shortcut_id)
 			->where('shop_warehouses.active', '=', 1)
 			->where('shop_warehouses.deleted', '=', 0);
+
+		Core_Event::notify($this->_modelName . '.onBeforeGetRest', $this, array($queryBuilder));
 
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
@@ -569,6 +573,18 @@ class Shop_Item_Model extends Core_Entity
 		return $this->shop_currency_id
 			? $this->Shop_Currency->name
 			: '';
+	}
+
+	/**
+	 * Get price with currency for SEO-templates
+	 * @param string $format
+	 * @return string
+	 */
+	public function priceWithCurrency($format = '%s %s')
+	{
+		$aPrices = $this->getPrices();
+
+		return sprintf($format, $aPrices['price_discount'], $this->Shop->Shop_Currency->name);
 	}
 
 	/**
@@ -1201,6 +1217,13 @@ class Shop_Item_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ' . $this->price . ' ' . htmlspecialchars($this->vendorcode) . ' ' . htmlspecialchars($this->marking) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1219,7 +1242,7 @@ class Shop_Item_Model extends Core_Entity
 		// комментарии к товару
 		if (Core::moduleIsActive('comment'))
 		{
-			$aComments = $this->Comments->findAll(FALSE);
+			$aComments = $this->Comments->getAllByActive(1, FALSE);
 			foreach ($aComments as $oComment)
 			{
 				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
@@ -1233,6 +1256,13 @@ class Shop_Item_Model extends Core_Entity
 			{
 				$oSearch_Page->text .= htmlspecialchars($oTag->name) . ' ';
 			}
+		}
+
+		// Barcodes
+		$aShop_Item_Barcodes = $this->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$oSearch_Page->text .= htmlspecialchars($oShop_Item_Barcode->value) . ' ';
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
@@ -1534,6 +1564,9 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем связи с комплектом товаров, обратная связь
 		$this->Shop_Item_Set_Seconds->deleteAll(FALSE);
 
+		// Удаляем штрихкоды
+		$this->Shop_Item_Barcodes->deleteAll(FALSE);
+
 		// Удаляем директорию товара
 		$this->deleteDir();
 
@@ -1575,7 +1608,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', $path)
+			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('shop_group_id', '=', $group_id)
 			->where('shortcut_id', '=', 0)
 			->clearOrderBy()
@@ -1592,7 +1625,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function name()
+	public function nameBackend()
 	{
 		$object = $this->shortcut_id
 			? $this->Shop_Item
@@ -1601,6 +1634,17 @@ class Shop_Item_Model extends Core_Entity
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
 			htmlspecialchars($object->name)
 		);
+
+		// Barcodes
+		$aShop_Item_Barcodes = $this->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-sm darkgray bordered-1 bordered-gray')
+					->value($oShop_Item_Barcode->value)
+			);
+		}
 
 		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
 			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
@@ -1623,8 +1667,7 @@ class Shop_Item_Model extends Core_Entity
 					. $object->Shop->Structure->getPath()
 					. $object->getPath();
 
-				$oCore_Html_Entity_Div
-				->add(
+				$oCore_Html_Entity_Div->add(
 					Core::factory('Core_Html_Entity_A')
 						->href($href)
 						->target('_blank')
@@ -1659,6 +1702,23 @@ class Shop_Item_Model extends Core_Entity
 	public function showXmlBonuses($showXmlBonuses = TRUE)
 	{
 		$this->_showXmlBonuses = $showXmlBonuses;
+		return $this;
+	}
+
+	/**
+	 * Show barcodes in XML
+	 * @var boolean
+	 */
+	protected $_showXmlBarcodes = FALSE;
+
+	/**
+	 * Add barcodes XML to item
+	 * @param boolean $showXmlBarcodes mode
+	 * @return self
+	 */
+	public function showXmlBarcodes($showXmlBarcodes = TRUE)
+	{
+		$this->_showXmlBarcodes = $showXmlBarcodes;
 		return $this;
 	}
 
@@ -1979,8 +2039,7 @@ class Shop_Item_Model extends Core_Entity
 		// Sets
 		elseif ($this->type == 3)
 		{
-			$oSetEntity = Core::factory('Core_Xml_Entity')
-				->name('set');
+			$oSetEntity = Core::factory('Core_Xml_Entity')->name('set');
 
 			$this->addEntity($oSetEntity);
 
@@ -2008,6 +2067,7 @@ class Shop_Item_Model extends Core_Entity
 					$oSetEntity->addEntity(
 						$oTmp_Shop_Item
 							->id($oShop_Item->id)
+							->showXmlModifications(FALSE)
 							->showXmlAssociatedItems(FALSE)
 							->addEntity(
 								Core::factory('Core_Xml_Entity')
@@ -2075,6 +2135,9 @@ class Shop_Item_Model extends Core_Entity
 		$this->shop_seller_id && !isset($this->_forbiddenTags['shop_seller']) && $this->addEntity($this->Shop_Seller);
 		$this->shop_producer_id && !isset($this->_forbiddenTags['shop_producer']) && $this->addEntity($this->Shop_Producer);
 		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure);
+
+		// Barcodes
+		$this->_showXmlBarcodes && $this->addEntities($this->Shop_Item_Barcodes->findAll());
 
 		// Modifications
 		if ($this->_showXmlModifications && !isset($this->_forbiddenTags['modifications']))
@@ -2443,9 +2506,18 @@ class Shop_Item_Model extends Core_Entity
 				$oSiteAlias = $oSite->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					$url = $oSiteAlias->name
-						. $this->Shop->Structure->getPath()
-						. $this->getPath();
+					if ($this->shop_group_id)
+					{
+						$url = $oSiteAlias->name
+							. $this->Shop->Structure->getPath()
+							. $this->Shop_Group->getPath();
+					}
+					else
+					{
+						$url = $oSiteAlias->name
+							. $this->Shop->Structure->getPath()
+							. $this->getPath();
+					}
 
 					$oCache_Static = Core_Cache::instance('static');
 					$oCache_Static->delete($url);
@@ -2457,7 +2529,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2470,13 +2542,13 @@ class Shop_Item_Model extends Core_Entity
 
 		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-ico badge-darkorange white')
-			->value('<i class="fa fa-exclamation fa-fw"></i>')
+			->value('<i class="fa fa-exclamation"></i>')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2492,7 +2564,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2508,7 +2580,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2528,7 +2600,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2547,7 +2619,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -2680,7 +2752,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function img()
+	public function imgBackend()
 	{
 		if ($this->shortcut_id)
 		{
@@ -2701,6 +2773,8 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Recount set
 	 * @return self
+	 * @hostcms-event shop_item.onRecountSetItem
+	 * @hostcms-event shop_item.onAfterRecountSet
 	 */
 	public function recountSet()
 	{
@@ -2711,6 +2785,8 @@ class Shop_Item_Model extends Core_Entity
 			$Shop_Item_Controller = new Shop_Item_Controller();
 
 			$amount = 0;
+
+			//$aAvailableRest = array();
 
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
@@ -2730,10 +2806,21 @@ class Shop_Item_Model extends Core_Entity
 				{
 					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name));
 				}
+
+				// Check warehouses rest
+				// Товары могут быть с разных складов, автоматически пересчитывать остатки нельзя.
+				/*if ($oShop_Item_Set->count > 0)
+				{
+					$aAvailableRest[] = floor($oTmp_Shop_Item->getRest() / $oShop_Item_Set->count);
+				}*/
+
+				Core_Event::notify($this->_modelName . '.onRecountSetItem', $this, array($oShop_Item_Set));
 			}
 
 			$this->price = $amount;
 			$this->save();
+
+			Core_Event::notify($this->_modelName . '.onAfterRecountSet', $this);
 		}
 		else
 		{
@@ -2741,5 +2828,75 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param int $property_id Property ID
+	 * @return string
+	 */
+	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
+	{
+		$oProperty = Core_Entity::factory('Property', $property_id);
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+
+		if (count($aProperty_Values))
+		{
+			$aTmp = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+					case 11: // Float
+						$aTmp[] = $oProperty_Value->value;
+					break;
+					case 8: // Date
+						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 9: // Datetime
+						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 3: // List
+						$oList_Item = $oProperty->List->List_Items->getById(
+							$oProperty_Value->value, FALSE
+						);
+
+						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+					break;
+					case 7: // Checkbox
+					break;
+					case 5: // Informationsystem
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Informationsystem_Item->name;
+						}
+					break;
+					case 12: // Shop
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Shop_Item->name;
+						}
+					break;
+					case 2: // File
+					case 10: // Hidden field
+					default:
+					break;
+				}
+			}
+
+			if (count($aTmp))
+			{
+				return sprintf($format, $oProperty->name, implode($separator, $aTmp));
+			}
+		}
+
+		return NULL;
 	}
 }

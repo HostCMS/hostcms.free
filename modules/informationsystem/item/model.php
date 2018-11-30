@@ -26,12 +26,6 @@ class Informationsystem_Item_Model extends Core_Entity
 	public $reviews = 1;
 
 	/**
-	 * Backend property
-	 * @var mixed
-	 */
-	//public $comment_field = NULL;
-
-	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -112,7 +106,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -318,7 +312,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('informationsystem_items.path', 'LIKE', $path)
+			->where('informationsystem_items.path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('informationsystem_items.informationsystem_group_id', '=', $group_id)
 			->where('informationsystem_items.shortcut_id', '=', 0)
 			->clearOrderBy()
@@ -885,7 +879,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		if ($this->siteuser_group_id == -1)
 		{
 			$result = $this->informationsystem_group_id
-				? $this->InformationSystem_Group->getSiteuserGroupId()
+				? $this->Informationsystem_Group->getSiteuserGroupId()
 				: $this->InformationSystem->siteuser_group_id;
 		}
 		else
@@ -900,7 +894,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function name()
+	public function nameBackend()
 	{
 		$object = $this->shortcut_id
 			? $this->Informationsystem_Item
@@ -967,6 +961,13 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -974,7 +975,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		// комментарии к информационному элементу
 		if (Core::moduleIsActive('comment'))
 		{
-			$aComments = $this->Comments->findAll();
+			$aComments = $this->Comments->getAllByActive(1, FALSE);
 			foreach ($aComments as $oComment)
 			{
 				$oSearch_Page->text .= htmlspecialchars($oComment->author) . ' ' . $oComment->text . ' ';
@@ -983,7 +984,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		if (Core::moduleIsActive('tag'))
 		{
-			$aTags = $this->Tags->findAll();
+			$aTags = $this->Tags->findAll(FALSE);
 			foreach ($aTags as $oTag)
 			{
 				$oSearch_Page->text .= htmlspecialchars($oTag->name) . ' ';
@@ -991,7 +992,6 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
-
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
 			// List
@@ -1229,7 +1229,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		return explode('<!-- pagebreak -->', $this->text);
 	}
-	
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -1279,13 +1279,13 @@ class Informationsystem_Item_Model extends Core_Entity
 				{
 					$oShortcode_Controller = Shortcode_Controller::instance();
 					$iCountShortcodes = $oShortcode_Controller->getCount();
-					
+
 					if ($iCountShortcodes)
 					{
 						$aParts[$this->_showXmlPart - 1] = $oShortcode_Controller->applyShortcodes($aParts[$this->_showXmlPart - 1]);
 					}
 				}
-				
+
 				$this->addForbiddenTag('text')
 					->addXmlTag('parts_count', $iPartsCount)
 					->addXmlTag('text', $aParts[$this->_showXmlPart - 1]);
@@ -1526,9 +1526,18 @@ class Informationsystem_Item_Model extends Core_Entity
 				$oSiteAlias = $oSite->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					$url = $oSiteAlias->name
-						. $this->Informationsystem->Structure->getPath()
-						. $this->getPath();
+					if ($this->informationsystem_group_id)
+					{
+						$url = $oSiteAlias->name
+							. $this->Informationsystem->Structure->getPath()
+							. $this->Informationsystem_Group->getPath();
+					}
+					else
+					{
+						$url = $oSiteAlias->name
+							. $this->Informationsystem->Structure->getPath()
+							. $this->getPath();
+					}
 
 					$oCache_Static = Core_Cache::instance('static');
 					$oCache_Static->delete($url);
@@ -1540,7 +1549,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -1637,7 +1646,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function img()
+	public function imgBackend()
 	{
 		if ($this->shortcut_id)
 		{
@@ -1653,5 +1662,75 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			return '<i class="fa fa-file-text-o"></i>';
 		}
+	}
+
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param int $property_id Property ID
+	 * @return string
+	 */
+	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
+	{
+		$oProperty = Core_Entity::factory('Property', $property_id);
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+
+		if (count($aProperty_Values))
+		{
+			$aTmp = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+					case 11: // Float
+						$aTmp[] = $oProperty_Value->value;
+					break;
+					case 8: // Date
+						$aTmp[] = strftime($this->Informationsystem->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 9: // Datetime
+						$aTmp[] = strftime($this->Informationsystem->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 3: // List
+						$oList_Item = $oProperty->List->List_Items->getById(
+							$oProperty_Value->value, FALSE
+						);
+
+						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+					break;
+					case 7: // Checkbox
+					break;
+					case 5: // Informationsystem
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Informationsystem_Item->name;
+						}
+					break;
+					case 12: // Shop
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Shop_Item->name;
+						}
+					break;
+					case 2: // File
+					case 10: // Hidden field
+					default:
+					break;
+				}
+			}
+
+			if (count($aTmp))
+			{
+				return sprintf($format, $oProperty->name, implode($separator, $aTmp));
+			}
+		}
+
+		return NULL;
 	}
 }

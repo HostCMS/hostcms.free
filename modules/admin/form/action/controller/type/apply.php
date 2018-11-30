@@ -33,7 +33,7 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 	public function execute($operation = NULL)
 	{
 		// Получение списка полей объекта
-		$aColumns = $this->_object->getTableColums();
+		$aColumns = $this->_object->getTableColumns();
 
 		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($this->_object));
 
@@ -53,10 +53,31 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 
 				if (property_exists($this->_object, $columnName) || isset($this->_object->$columnName))
 				{
+					$aTableColumns = $this->_object->getTableColumns();
+					
+					/*if (isset($aTableColumns[$columnName]))
+					{
+						print_r($aTableColumns[$columnName]);
+					}*/
+					
+					switch ($oAdmin_Form_Field->type)
+					{
+						case 5: // Datetime
+							$value = $value != ''
+								? Core_Date::datetime2sql($value)
+								: '0000-00-00 00:00:00';
+						break;
+						case 6: // Date
+							$value = $value != ''
+								? Core_Date::date2sql($value)
+								: '0000-00-00';
+						break;
+					}
+					
 					$this->_object->$columnName = $value;
 					$bChanged = TRUE;
 					
-					// Backend Callback Method. 6.7.9
+					// Backend Callback Method, HostCMS 6.7.9+
 					if ($oAdmin_Form_Field->type == 10 && method_exists($this->_object, $columnName))
 					{
 						$this->_object->$columnName($value);

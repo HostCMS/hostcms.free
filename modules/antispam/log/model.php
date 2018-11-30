@@ -55,7 +55,7 @@ class Antispam_Log_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 		}
@@ -65,7 +65,7 @@ class Antispam_Log_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function country_flag()
+	public function country_flagBackend()
 	{
 		$oAdmin_Language = Core_Entity::factory('Admin_Language')->getByShortname(Core_Array::getSession('current_lng'));
 

@@ -45,7 +45,7 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$this->title(
 			$this->_object->id
-				? Core::_('Comment.edit_title')
+				? Core::_('Comment.edit_title', $this->_object->subject)
 				: Core::_('Comment.add_title')
 			);
 
@@ -81,22 +81,22 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Order.siteuser_id'))
+				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')
 				->style('width: 100%')
-				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+				->divAttr(array('class' => 'form-group col-xs-12'));
 
-			$oMainRow2->add($oSiteuserSelect);
+			$oMainRow2
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12 col-sm-3 no-padding')
+						->add($oSiteuserSelect)
+				);
 
-			$placeholder = Core::_('Siteuser.select_siteuser');
-			$language = Core_i18n::instance()->getLng();
-
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
-			->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-			$oMainRow2->add($oCore_Html_Entity_Script);
+			// Show button
+			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 		}
 
 		$oMainTab->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
@@ -131,7 +131,7 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_applyObjectProperty();
 
 		// Informationsystem_Item_Comment_Controller_Edit + Shop_Item_Comment_Controller_Edit Clears Cache
-		
+
 		return $this;
 	}
 }

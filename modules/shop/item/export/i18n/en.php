@@ -18,8 +18,10 @@ return array(
 	'category_meta_keywords' => 'Group Keywords',
 	'category_description' => 'Group Description',
 	'category_path' => 'Group Path',
+	'category_large_image' => 'Group Large Image',
+	'category_small_image' => 'Group Small Image',
 	'category_sorting' => 'Group Sorting',
-	
+
 	'item_cml_id' => 'CML ID',
 	'item_id' => 'Item ID',
 	'item_marking' => 'Marking',

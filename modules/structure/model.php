@@ -101,7 +101,7 @@ class Structure_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -356,7 +356,7 @@ class Structure_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -393,7 +393,7 @@ class Structure_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function path()
+	public function pathBackend()
 	{
 		$sPath = $this->getPath();
 
@@ -409,7 +409,7 @@ class Structure_Model extends Core_Entity
 
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_A')
-					->href("http://" . $oSite_Alias->name . $sPath)
+					->href(($this->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
 					->target("_blank")
 					->value(htmlspecialchars(urldecode($sPath)))
 			);
@@ -478,11 +478,12 @@ class Structure_Model extends Core_Entity
 			->queryBuilder()
 			//->clear()
 			->where('active', '=', 1)
-			->where('path', 'LIKE', $path)
+			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('parent_id', '=', $parent_id)
 			->limit(1);
 
 		$aStructure = $this->findAll();
+
 		return count($aStructure) == 1 ? $aStructure[0] : NULL;
 	}
 
@@ -671,7 +672,7 @@ class Structure_Model extends Core_Entity
 
 		$this->type != 3
 			&& $this->addForbiddenTag('url');
-			
+
 		if ($this->_showXmlProperties)
 		{
 			$this->addEntities($this->getPropertyValues());
@@ -713,6 +714,13 @@ class Structure_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
+		$eventResult = Core_Event::getLastReturn();
+		
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+		
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' .
 			$this->id . ' ' .
 			htmlspecialchars($this->seo_title) . ' ' .
@@ -954,6 +962,12 @@ class Structure_Model extends Core_Entity
 				'user_id' => $this->user_id
 			);
 
+			if ($this->type == 1)
+			{
+				$aBackup['structureFile'] = $this->getStructureFile();
+				$aBackup['structureConfigFile'] = $this->getStructureConfigFile();
+			}
+
 			Revision_Controller::backup($this, $aBackup);
 		}
 
@@ -997,6 +1011,12 @@ class Structure_Model extends Core_Entity
 				$this->changefreq = Core_Array::get($aBackup, 'changefreq');
 				$this->priority = Core_Array::get($aBackup, 'priority');
 				$this->save();
+
+				if ($this->type == 1)
+				{
+					$this->saveStructureFile($aBackup['structureFile']);
+					$this->saveStructureConfigFile($aBackup['structureConfigFile']);
+				}
 			}
 		}
 

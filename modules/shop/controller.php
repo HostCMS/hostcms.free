@@ -162,15 +162,15 @@ class Shop_Controller
 	/**
 	 * Convert price
 	 * @param mixed $price price
-	 * @param int $decimalPlaces precision
+	 * @param int $decimalDigits e.g. 2, default uses $this->_decimalDigits
 	 * @return mixed
 	 */
-	public function convertPrice($price, $decimalPlaces = 2)
+	public function convertPrice($price, $decimalDigits = NULL)
 	{
 		$price = $this->convertFloat($price);
 
-		$decimalPlaces = intval($decimalPlaces);
-		preg_match("/((\d+(\.)\d{1,{$decimalPlaces}})|\d+)/u", $price, $array_price);
+		$decimalDigits = intval(!is_null($decimalDigits) ? $decimalDigits : $this->_decimalDigits);
+		preg_match("/((\d+(\.)\d{0,{$decimalDigits}})|\d+)/u", $price, $array_price);
 		return isset($array_price[1]) ? floatval($array_price[1]) : 0;
 	}
 
@@ -259,6 +259,9 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
@@ -301,6 +304,9 @@ class Shop_Controller
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.description\}\')">' . Core::_("Shop.seo_template_group_description") . '</a>
 					</li>
 					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{group.groupPathWithSeparator \x22 → \x22 1\}\')">' . Core::_("Shop.seo_template_group_path") . '</a>
 					</li>
 					<li>
@@ -318,6 +324,12 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.text\}\')">' . Core::_("Shop.seo_template_item_text") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.propertyValue ID\}\')">' . Core::_("Shop.seo_template_property_value") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.priceWithCurrency\}\')">' . Core::_("Shop.seo_template_item_price_with_currency") . '</a>
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{item.currencyName\}\')">' . Core::_("Shop.seo_template_item_currency") . '</a>

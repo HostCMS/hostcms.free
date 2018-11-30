@@ -63,7 +63,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6')), $oMainRow1);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Bonus.edit_title')
+			? Core::_('Shop_Bonus.edit_title', $this->_object->name)
 			: Core::_('Shop_Bonus.add_title');
 
 		$this->title($title);

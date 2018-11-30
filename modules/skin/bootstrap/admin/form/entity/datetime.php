@@ -48,6 +48,8 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 			}
 		}
 
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 
 		?><span class="caption"><?php echo $this->caption?></span><?php
@@ -62,9 +64,9 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 			?>
 		</div>
 
-		<script type="text/javascript">
+		<script>
 		(function($) {
-			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: 'ru', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
 		})(jQuery);
 		</script><?php
 

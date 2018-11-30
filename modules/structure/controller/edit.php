@@ -381,7 +381,6 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
 		$Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
 			->value("$('#{$windowId} #lib_id').change();")
 			->execute();
 
@@ -491,7 +490,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->fillTab();
 
 		$this->title($this->_object->id
-			? Core::_('Structure.edit_title')
+			? Core::_('Structure.edit_title', $this->_object->name)
 			: Core::_('Structure.add_title')
 		);
 

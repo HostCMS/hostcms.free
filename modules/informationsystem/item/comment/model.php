@@ -28,7 +28,7 @@ class Informationsystem_Item_Comment_Model extends Comment_Model
 	/**
 	 * Callback function
 	 */
-	public function view()
+	public function viewBackend()
 	{
 		ob_start();
 

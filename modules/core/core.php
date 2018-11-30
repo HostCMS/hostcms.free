@@ -109,6 +109,19 @@ class Core
 
 		self::$log = Core_Log::instance();
 
+		try
+		{
+			Core_DataBase::instance()->connect();
+		}
+		catch (Exception $e)
+		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+
+			echo $e->getMessage();
+			die();
+		}
+
 		// Constants init
 		$oConstants = Core_Entity::factory('Constant');
 		$oConstants->queryBuilder()->where('active', '=', 1);
@@ -117,7 +130,7 @@ class Core
 		{
 			$oConstant->define();
 		}
-
+		
 		!defined('TMP_DIR') && define('TMP_DIR', 'hostcmsfiles/tmp/');
 		!defined('DEFAULT_LNG') && define('DEFAULT_LNG', 'ru');
 		!defined('BACKUP_DIR') && define('BACKUP_DIR', CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR);
@@ -162,6 +175,11 @@ class Core
 			'translate' => TRUE,
 			'chat' => TRUE,
 			'switchSelectToAutocomplete' => 100,
+			'autocompleteItems' => 10,
+			'session' => array(
+				'driver' => 'database',
+				'class' => 'Core_Session_Database',
+			),
 			'backendSessionLifetime' => 14400
 		);
 	}
@@ -370,12 +388,23 @@ class Core
 	 */
 	static public function getClassPath($class)
 	{
+		// $class = basename($class);
+		$aNamespaces = explode('\\', $class);
+		$aNamespaces = array_map('basename', $aNamespaces);
+		
+		$class = array_pop($aNamespaces);
+		
 		$aClassName = explode('_', strtolower($class));
 
 		$sFileName = array_pop($aClassName);
 
+		// Path from Namespace
+		$path = empty($aNamespaces)
+			? ''
+			: implode(DIRECTORY_SEPARATOR, $aNamespaces);
+		
 		// If class name doesn't have '_'
-		$path = empty($aClassName)
+		$path .= empty($aClassName) && empty($aNamespaces)
 			? $sFileName . DIRECTORY_SEPARATOR
 			: implode(DIRECTORY_SEPARATOR, $aClassName) . DIRECTORY_SEPARATOR;
 
@@ -415,8 +444,6 @@ class Core
 	 */
 	static public function _autoload($class)
 	{
-		$class = basename($class);
-
 		if (isset(self::$_autoloadCache[$class]))
 		{
 			return self::$_autoloadCache[$class];
@@ -545,7 +572,7 @@ class Core
 		if (!defined('ALLOW_SET_LOCALE') || ALLOW_SET_LOCALE)
 		{
 			setlocale(LC_ALL, SITE_LOCAL);
-			setlocale(LC_NUMERIC, 'POSIX');
+			setlocale(LC_NUMERIC, 'C'); // POSIX depends on OS settings
 		}
 
 		// Временная зона сайта
@@ -568,7 +595,7 @@ class Core
 		// Максимальный размер в одном из измерений при преобразовании загруженных изображений (большое изображение)
 		define('MAX_SIZE_LOAD_IMAGE_BIG', $oSite->max_size_load_image_big);
 		// Адрес эл. почты администратора
-		define('EMAIL_TO', $oSite->admin_email);
+		define('EMAIL_TO', $oSite->getFirstEmail());
 
 		// Права доступа к директории
 		define('CHMOD', octdec($oSite->chmod)); // octdec - преобразование 8-ричного в 10-тичное
@@ -687,7 +714,10 @@ class Core
 
 		if (strlen($aDomain[0]))
 		{
-			$sUrl = 'http://' . $aDomain[0];
+			$scheme = /*(Core_Array::get($_SERVER, 'HTTPS') == 'on' || Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO') == 'https')*/
+				self::httpsUses() ? 'https' : 'http';
+			
+			$sUrl = $scheme . '://' . $aDomain[0];
 			if (!empty($_SERVER['HTTP_X_ORIGINAL_URL']))
 			{
 				$sUrl .= $_SERVER['HTTP_X_ORIGINAL_URL'];
@@ -814,9 +844,6 @@ class Core
 			header('X-Content-Type-Options: nosniff');
 			header('Content-type: text/plain; charset=utf-8');
 		}
-
-		// utf-8: http://www.iana.org/assignments/character-sets
-		//header('Content-Type: text/javascript; charset=utf-8');
 
 		// bug in Chrome
 		//header("Content-Length: " . strlen($content));

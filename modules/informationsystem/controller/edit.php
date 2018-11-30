@@ -69,7 +69,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			case 'informationsystem':
 
 				$title = $object->id
-					? Core::_('Informationsystem.edit_title')
+					? Core::_('Informationsystem.edit_title', $object->name)
 					: Core::_('Informationsystem.add_title');
 
 				$oInformationsystemTabSorting = Admin_Form_Entity::factory('Tab')
@@ -425,7 +425,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			default:
 
 				$title = $this->_object->id
-					? Core::_('Informationsystem_Dir.information_systems_dir_edit_form_title')
+					? Core::_('Informationsystem_Dir.information_systems_dir_edit_form_title', $this->_object->name)
 					: Core::_('Informationsystem_Dir.information_systems_dir_add_form_title');
 
 				// Удаляем стандартный <input>

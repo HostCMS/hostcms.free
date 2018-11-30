@@ -123,7 +123,7 @@ class Property_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -384,6 +384,12 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * _aListItemsTree
+	 * @var array
+	 */
+	protected $_aListItemsTree = array();
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event property.onBeforeRedeclaredGetXml
@@ -430,13 +436,35 @@ class Property_Model extends Core_Entity
 
 				Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
 
-				$this->List->addEntities(
-					$oList_Items->findAll()
-				);
+				$aList_Items = $oList_Items->findAll(FALSE);
+
+				foreach ($aList_Items as $oList_Item)
+				{
+					$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item;
+				}
+
+				$this->_addListItems(0, $this->List);
+				
+				$this->_aListItemsTree = array();
 			}
 		}
 
 		return parent::getXml();
+	}
+
+	protected function _addListItems($parentId, $oObject)
+	{
+		if (isset($this->_aListItemsTree[$parentId]))
+		{
+			foreach ($this->_aListItemsTree[$parentId] as $oList_Item)
+			{
+				$oObject->addEntity($oList_Item->clearEntities());
+
+				$this->_addListItems($oList_Item->id, $oList_Item);
+			}
+		}
+
+		return $this;
 	}
 
 	public function typeBackend()

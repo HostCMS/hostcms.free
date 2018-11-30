@@ -47,8 +47,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-		;
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->addTab($oMainTab);
 
@@ -163,7 +162,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				{
 					$oObject = Core_Entity::factory('Shop_Discount', $shop_discount_id);
 					is_null($oShop_Item->Shop_Item_Discounts->getByDiscountId($oObject->id))
-						&& $oShop_Item->add($oObject);
+						&& $oShop_Item->add($oObject)->clearCache();
 				}
 			break;
 			case 'shop_bonus':
@@ -173,7 +172,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				{
 					$oObject = Core_Entity::factory('Shop_Bonus', $shop_bonus_id);
 					is_null($oShop_Item->Shop_Item_Bonuses->getByBonusId($oObject->id))
-						&& $oShop_Item->add($oObject);
+						&& $oShop_Item->add($oObject)->clearCache();
 				}
 			break;
 		}
@@ -190,13 +189,13 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				foreach ($aModifications as $oModification)
 				{
 					is_null($oModification->Shop_Item_Discounts->getByDiscountId($oObject->id))
-						&& $oModification->add($oObject);
+						&& $oModification->add($oObject)->clearCache();
 				}
 			break;
 			case 2:
 				foreach ($aModifications as $oModification)
 				{
-					$oModification->remove($oObject);
+					$oModification->remove($oObject)->clearCache();
 				}
 			break;
 		}

@@ -209,7 +209,6 @@ ol.search li a {
   text-align: center;
   font-weight: bold;
 }
-.top_menu li:last-child { background-image: none; }
 .top_menu a:hover,
 .top_menu a {
   color: #FFF;

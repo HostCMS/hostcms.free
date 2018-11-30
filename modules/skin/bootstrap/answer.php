@@ -26,7 +26,7 @@ class Skin_Bootstrap_Answer extends Admin_Answer
 		?><div id="id_content"><?php echo $this->content?></div><?php
 
 		// При смене статуса в новом окне сообщения задваиваются
-		/*<script type="text/javascript">$('#id_message').append('<?php echo Core_Str::escapeJavascriptVariable($this->message)?>');</script>*/
+		/*<script>$('#id_message').append('<?php echo Core_Str::escapeJavascriptVariable($this->message)?>');</script>*/
 
 		$this
 			->_afterLoad()
@@ -42,7 +42,7 @@ class Skin_Bootstrap_Answer extends Admin_Answer
 	protected function _afterLoad()
 	{
 		parent::_afterLoad();
-		?><script type="text/javascript">$.currentMenu('<?php echo Core_Str::escapeJavascriptVariable($this->module)?>');</script><?php
+		?><script>$.currentMenu('<?php echo Core_Str::escapeJavascriptVariable($this->module)?>');</script><?php
 
 		return $this;
 	}

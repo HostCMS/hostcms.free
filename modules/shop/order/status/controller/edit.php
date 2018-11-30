@@ -36,7 +36,7 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRow3);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Order_Status.order_status_edit_form_title')
+			? Core::_('Shop_Order_Status.order_status_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Order_Status.order_status_add_form_title');
 
 		$this->title($title);

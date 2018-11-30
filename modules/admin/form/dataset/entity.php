@@ -198,7 +198,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			}
 
 			// Load columns
-			$this->_entity->getTableColums();
+			$this->_entity->getTableColumns();
 
 			$this->_objects = $this->_entity->findAll(FALSE);
 

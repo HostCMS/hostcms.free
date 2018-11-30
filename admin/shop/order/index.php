@@ -404,9 +404,7 @@ $oAdmin_Form_Controller->addDataset
 );
 
 $oAdmin_Form_Dataset->addCondition(
-	array(
-		'where' => array('shop_id', '=', $oShop->id)
-	)
+	array('where' => array('shop_id', '=', $oShop->id))
 );
 
 // Список значений для фильтра и поля
@@ -425,5 +423,7 @@ $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)
 	->addExternalReplace('{shop_dir_id}', $oShopDir->id);
 
+$oAdmin_Form_Controller->addFilter('siteuser_id', array($oAdmin_Form_Controller, '_filterCallbackSiteuser'));
+	
 // Показ формы
 $oAdmin_Form_Controller->execute();

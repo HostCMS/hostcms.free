@@ -60,7 +60,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
@@ -166,7 +166,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	}
 
 	/**
-	 * Backend callback method
+	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -183,6 +183,22 @@ class Shop_Warehouse_Model extends Core_Entity
 			->class('badge badge-hostcms badge-square')
 			->value($aResult['count'])
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
+			->execute();
+	}
+	
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function itemsBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Warehouse_Items->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square')
+			->value($count)
+			->title($count)
 			->execute();
 	}
 }

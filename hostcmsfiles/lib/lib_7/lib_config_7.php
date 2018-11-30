@@ -12,6 +12,9 @@ Shop_Delivery_Handler::checkBeforeContent($oShop);
 // Добавление товара в корзину
 if (Core_Array::getRequest('add'))
 {
+	// Core_Session::start();
+	// Core_Session::setMaxLifeTime(86400, TRUE);
+
 	// Запрещаем индексацию страницы корзины
 	Core_Page::instance()->response
 		->header('X-Robots-Tag', 'none');

@@ -11,8 +11,29 @@ class Shop_Print_Form_Handler1 extends Shop_Print_Form_Handler
 		parent::execute();
 
 		$oShop_Order = $this->_Shop_Order;
+		$oShop = $oShop_Order->Shop;
 
 		$sPageTitle = sprintf("Счет-фактура %s от %s г.", $oShop_Order->vat_invoice, Core_Date::sql2date($oShop_Order->vat_invoice_datetime));
+
+		$oCompany = $oShop_Order->company_id
+			? $oShop_Order->Shop_Company
+			: $oShop->Shop_Company;
+
+		$sFullCompanyAddress = '';
+
+		$aDirectory_Addresses = $oCompany->Directory_Addresses->findAll();
+		if (isset($aDirectory_Addresses[0]))
+		{
+			$aCompanyAddress = array(
+				$aDirectory_Addresses[0]->postcode,
+				$aDirectory_Addresses[0]->country,
+				$aDirectory_Addresses[0]->city,
+				$aDirectory_Addresses[0]->value
+			);
+
+			$aCompanyAddress = array_filter($aCompanyAddress, 'strlen');
+			$sFullCompanyAddress = implode(', ', $aCompanyAddress);
+		}
 		?>
 
 		<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -50,9 +71,9 @@ class Shop_Print_Form_Handler1 extends Shop_Print_Form_Handler
 			<div class="text_align_right small_font">Приложение №1<br/>к Правилам ведения журналов учета полученных и выставленных счетов-фактур,<br/>книг покупок и книг продаж при расчетах по налогу на добавленную стоимость,<br/>утвержденным постановлением Правительства Российской Федерации от 2 декабря 2000 г. N 914<br/>(в редакции постановлений Правительства Российской Федерации от 15 марта 2001 г. N 189,<br/>от 27 июля 2002 г. N 575, от 16 февраля 2004 г. N 84, от 11 мая 2006 г. N 283)</div>
 			<div class="big_font bold_font"><?php echo $sPageTitle?></div>
 			<div>
-			Продавец: <?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->name)?>
-			<br/>Адрес: <?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->address)?>
-			<br/>ИНН/КПП продавца <?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->tin . '/' . $oShop_Order->Shop->Shop_Company->kpp)?>
+			Продавец: <?php echo htmlspecialchars($oCompany->name)?>
+			<br/>Адрес: <?php echo htmlspecialchars($sFullCompanyAddress)?>
+			<br/>ИНН/КПП продавца <?php echo htmlspecialchars($oCompany->tin . '/' . $oCompany->kpp)?>
 			<br/>Грузоотправитель и его адрес: ----
 			<br/>Грузополучатель и его адрес: ----
 			<br/>К платежно-расчетному документу № ____________ от ____________
@@ -128,11 +149,11 @@ class Shop_Print_Form_Handler1 extends Shop_Print_Form_Handler
 				<tr>
 					<td class="text_align_bottom width_normal text_nowrap">Руководитель организации</td>
 					<td class="border_bottom width_normal"></td>
-					<td class="border_bottom width_big text_align_center text_align_bottom"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->legal_name)?></td>
+					<td class="border_bottom width_big text_align_center text_align_bottom"><?php echo htmlspecialchars($oCompany->legal_name)?></td>
 					<td class="width_small"></td>
 					<td class="text_align_bottom width_normal text_nowrap">Главный бухгалтер</td>
 					<td class="width_normal border_bottom"></td>
-					<td class="width_big border_bottom text_align_center text_align_bottom"><?php echo htmlspecialchars($oShop_Order->Shop->Shop_Company->accountant_legal_name)?></td>
+					<td class="width_big border_bottom text_align_center text_align_bottom"><?php echo htmlspecialchars($oCompany->accountant_legal_name)?></td>
 				</tr>
 				<tr>
 					<td class="text_align_bottom width_normal text_nowrap">Индивидуальный предприниматель</td>

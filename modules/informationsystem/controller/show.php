@@ -447,7 +447,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	protected function _setLimits()
 	{
 		// Load model columns BEFORE FOUND_ROWS()
-		Core_Entity::factory('Informationsystem_Item')->getTableColums();
+		Core_Entity::factory('Informationsystem_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
 		Core_Entity::factory('User', 0)->getCurrent();
@@ -1281,7 +1281,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				if ($this->groupsProperties
 					&& (!$bIsArrayPropertiesForGroups || in_array($oInformationsystem_Group->id, $this->propertiesForGroups)))
 				{
-					$aProperty_Values = $oInformationsystem_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
+					/*$aProperty_Values = $oInformationsystem_Group->getPropertyValues(TRUE, $bIsArrayGroupsProperties ? $this->groupsProperties : array());
 
 					foreach ($aProperty_Values as $oProperty_Value)
 					{
@@ -1304,7 +1304,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 							$oInformationsystem_Group->addEntity($oProperty_Value);
 						}
-					}
+					}*/
+					
+					$oInformationsystem_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
 				{
@@ -1431,7 +1433,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$sPath = '/admin/informationsystem/item/index.php';
 				$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
-				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title');
+				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name);
 
 				$oXslSubPanel->add(
 					Core::factory('Core_Html_Entity_A')
@@ -1502,10 +1504,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 		}
 		else
 		{
+			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
+			
 			// Edit
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";
-			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title');
+			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

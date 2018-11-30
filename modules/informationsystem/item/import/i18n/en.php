@@ -43,6 +43,5 @@ return array(
 	'item_additional_group' => "Shortcute's GUID",
 	'item_guid' => "GUID identifier",
 	'group_active' => "Group activity",
-
 	'siteuser_id' => "Siteuser ID",
 );

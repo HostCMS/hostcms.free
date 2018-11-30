@@ -49,7 +49,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		else
 		{
 			?><div class="col-xs-12" id="counterAdminPage">
-				<script type="text/javascript">
+				<script>
 				$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#counterAdminPage') });
 				</script>
 			</div><?php
@@ -82,7 +82,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 							<a href="#website_traffic" data-toggle="tab"><?php echo Core::_('Counter.website_traffic')?></a>
 						</li>
 						<li class="">
-							<a href="#search_bots" data-toggle="tab"><?php echo Core::_('Counter.search_bots')?></a>
+							<a href="#search_bots" data-toggle="tab"><?php echo Core::_('Counter.crawlers')?></a>
 						</li>
 					</ul>
 
@@ -170,7 +170,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		$sSessions = implode(',', array_values($aSessions));
 		$sNewUsers = implode(',', array_values($aNewUsers));
 
-		?><script type="text/javascript">
+		?><script>
 			$(function(){
 			//$(window).bind("load", function () {
 				var titles = [<?php echo $sTitles?>],

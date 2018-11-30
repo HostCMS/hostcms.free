@@ -49,7 +49,7 @@ class Skin_Bootstrap_Module_Market_Module extends Market_Module
 		else
 		{
 			?><div class="col-xs-12" id="marketAdminPage">
-				<script type="text/javascript">
+				<script>
 				$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#marketAdminPage') });
 				</script>
 			</div><?php

@@ -104,6 +104,10 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 				$oShopItem->width = $oShopItemParent->width;
 				$oShopItem->height = $oShopItemParent->height;
 				$oShopItem->weight = $oShopItemParent->weight;
+				$oShopItem->type = $oShopItemParent->type;
+				$oShopItem->min_quantity = $oShopItemParent->min_quantity;
+				$oShopItem->max_quantity = $oShopItemParent->max_quantity;
+				$oShopItem->quantity_step = $oShopItemParent->quantity_step;
 
 				try
 				{

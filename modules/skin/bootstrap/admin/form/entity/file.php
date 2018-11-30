@@ -205,13 +205,17 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			// Картинка с контролем большого изображения
 			if ($this->largeImage['path'] != '')
 			{
+				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE
+					? '?'
+					: '&';
+
 				//$oLargeControl_Div->add(
 				$oLarge_Input_Group_Div->add(
 					Core::factory('Core_Html_Entity_A')
 						//->id('control_' . 'large_' . $this->largeImage['id'])
 						->id('preview_large_' . $this->largeImage['id'])
 						->class('input-group-addon control-item')
-						->href($this->largeImage['path']. '?rnd=' . rand())
+						->href($this->largeImage['path'] . $prefixRand . 'rnd=' . rand())
 						->target('_blank')
 						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
 					)
@@ -339,7 +343,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						->add(
 							Core::factory('Core_Html_Entity_Label')
 								->class('checkbox-inline')
-								->value(Core::_('Admin_Form.information_items_add_form_image_watermark_is_use'))
+								->value(Core::_('Admin_Form.place_watermark'))
 								->add($Core_Html_Entity_Checkbox)
 								->add(
 									Core::factory('Core_Html_Entity_Span')
@@ -439,11 +443,14 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			if (Core_File::isValidExtension($this->largeImage['path'], array('jpg', 'jpeg', 'gif', 'png')))
 			{
+				$prefixRand = strpos($this->largeImage['path'], '?') === FALSE
+					? '?'
+					: '&';
+
 				$oLarge_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value('$(function(){
 							$("#preview_large_' . $this->largeImage['id'] . '").popover({
-								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . '?rnd=' . rand() .'" style="max-width:200px" />\',
+								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="max-width:200px" />\',
 								html: true,
 								placement: \'top\',
 								container: $(\'#file_large_' . $iAdmin_Form_Count . '\'),
@@ -468,9 +475,8 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						->add(
 							Core::factory('Core_Html_Entity_Input')
 								->type('text')
-								->id('description_large')
 								->name("description_{$this->largeImage['name']}")
-								->class('form-control')
+								->class('form-control description-large')
 								->value($this->largeImage['description'])
 						)
 			);
@@ -508,12 +514,16 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				// Картинка с контролем малого изображения
 				if ($this->smallImage['path'] != '')
 				{
+					$prefixRand = strpos($this->smallImage['path'], '?') === FALSE
+						? '?'
+						: '&';
+
 					//$oSmallControl_Div->add(
 					$oSmall_Input_Group_Div->add(
 						Core::factory('Core_Html_Entity_A')
 							->id('preview_' . $this->smallImage['id'])
 							->class('input-group-addon control-item')
-							->href($this->smallImage['path'] . '?rnd=' . rand())
+							->href($this->smallImage['path'] . $prefixRand . 'rnd=' . rand())
 							->target('_blank')
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
 						)
@@ -676,7 +686,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 								->add(
 									Core::factory('Core_Html_Entity_Label')
 										->class('checkbox-inline')
-										->value(Core::_('Admin_Form.information_items_add_form_image_watermark_is_use'))
+										->value(Core::_('Admin_Form.place_watermark'))
 										->add($Core_Html_Entity_Checkbox)
 										->add(
 											Core::factory('Core_Html_Entity_Span')
@@ -704,9 +714,8 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 								->add(
 									Core::factory('Core_Html_Entity_Input')
 										->type('text')
-										->id('description_small')
 										->name("description_{$this->smallImage['name']}")
-										->class('form-control')
+										->class('form-control description-small')
 										->value($this->smallImage['description'])
 								)
 							);
@@ -731,11 +740,14 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				{
 					if (Core_File::isValidExtension($this->smallImage['path'], array('jpg', 'jpeg', 'gif', 'png')))
 					{
+						$prefixRand = strpos($this->smallImage['path'], '?') === FALSE
+							? '?'
+							: '&';
+
 						$oSmall_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
-							->type("text/javascript")
 							->value('$(function(){
 								$("#preview_' . $this->smallImage['id'] . '").popover({
-									content: \'<img src="' . $this->smallImage['path'] . '?rnd=' . rand() . '" style="max-width:200px" />\',
+									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="max-width:200px" />\',
 									html: true,
 									placement: \'top\',
 									container: $(\'#file_small_' . $iAdmin_Form_Count . '\'),

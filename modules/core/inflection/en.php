@@ -17,7 +17,7 @@ class Core_Inflection_En extends Core_Inflection
 	 * Array of irregular form singular => plural
 	 * @var array
 	 */
-	static public $pluralIrregular = array (
+	static public $pluralIrregular = array(
 		'bus' => 'busses',
 		'child' => 'children',
 		'calf' => 'calves',
@@ -176,7 +176,7 @@ class Core_Inflection_En extends Core_Inflection
 	);
 
 	/**
-	 * Array of irregular form plural => singular, based on self::$pluralIrregular
+	 * Array of irregular form plural => singular
 	 * @var array
 	 */
 	static public $singularIrregular = array();
@@ -254,6 +254,8 @@ class Core_Inflection_En extends Core_Inflection
 	 */
 	protected function _getSingular($word, $count = NULL)
 	{
+//print_r(self::$singularIrregular);
+//die();
 		// Irregular words
 		if (isset(self::$singularIrregular[$word]))
 		{
@@ -272,7 +274,7 @@ class Core_Inflection_En extends Core_Inflection
 
 		return $word;
 	}
-	
+
 	/**
 	 * Number to str
 	 * @param float $float

@@ -27,8 +27,9 @@
 							</xsl:call-template>
 
 							<!-- Скидки -->
-							<xsl:if test="count(shop_purchase_discount)">
+							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node()">
 								<xsl:apply-templates select="shop_purchase_discount"/>
+								<xsl:apply-templates select="shop_discountcard"/>
 								<tr class="total">
 									<td>&labelTotal;</td>
 									<td></td>
@@ -70,6 +71,7 @@
 					<input name="recount" value="&labelRecount;" type="submit" class="button" />
 
 					<!-- Пользователь авторизован или модуль пользователей сайта отсутствует -->
+					<!-- Чтобы дать возможность заказывать неавторизованным пользователям, удалите в условии 'and (siteuser_id > 0 or siteuser_exists = 0)' -->
 					<xsl:if test="count(shop_cart[postpone = 0]) and (siteuser_id > 0 or siteuser_exists = 0)">
 						<input name="step" value="1" type="hidden" />
 						<input value="&labelCheckout;" type="submit" class="button"/>
@@ -131,7 +133,7 @@
 				<xsl:if test="shop_item/type = 3">
 					<xsl:for-each select="shop_item/set/shop_item">
 						<div>
-							<span><xsl:text> — </xsl:text></span>
+						<span><xsl:text> — </xsl:text></span>
 							<a href="{url}">
 								<xsl:value-of disable-output-escaping="yes" select="name"/>
 							</a>
@@ -178,6 +180,25 @@
 		<tr>
 			<td>
 				<xsl:value-of select="name"/>
+			</td>
+			<td></td>
+			<td></td>
+			<td>
+				<!-- Amount -->
+				<xsl:value-of select="format-number(discount_amount * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes"/>
+			</td>
+			<xsl:if test="count(/shop/shop_warehouse)">
+				<td></td>
+			</xsl:if>
+			<td></td>
+			<td></td>
+		</tr>
+	</xsl:template>
+
+	<xsl:template match="shop_discountcard">
+		<tr>
+			<td>
+				Дисконтная карта <xsl:value-of select="number"/>
 			</td>
 			<td></td>
 			<td></td>

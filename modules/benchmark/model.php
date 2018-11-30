@@ -89,7 +89,7 @@ class Benchmark_Model extends Core_Entity
 	{
 		parent::__construct($id);
 
-		if (is_null($id))
+		if (is_null($id) && !$this->loaded())
 		{
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 		}
@@ -130,15 +130,15 @@ class Benchmark_Model extends Core_Entity
 
 	public function getBenchmark()
 	{
-		return ceil((
-			$this->getCoefficient($this->mysql_write, $this->etalon_mysql_write) +
-			$this->getCoefficient($this->mysql_read, $this->etalon_mysql_read) +
-			$this->getCoefficient($this->mysql_update, $this->etalon_mysql_update) +
-			$this->getCoefficient($this->filesystem, $this->etalon_filesystem) +
-			$this->getCoefficient($this->cpu_math, $this->etalon_cpu_math) +
-			$this->getCoefficient($this->cpu_string, $this->etalon_cpu_string) +
-			$this->getCoefficient($this->network, $this->etalon_network) +
-			$this->getMailCoefficient())
-			/ 8);
+		return ceil(
+			$this->getCoefficient($this->mysql_write, $this->etalon_mysql_write) * 0.2 +
+			$this->getCoefficient($this->mysql_read, $this->etalon_mysql_read) * 0.2 +
+			$this->getCoefficient($this->mysql_update, $this->etalon_mysql_update) * 0.2 +
+			$this->getCoefficient($this->filesystem, $this->etalon_filesystem) * 0.1 +
+			$this->getCoefficient($this->cpu_math, $this->etalon_cpu_math) * 0.1 +
+			$this->getCoefficient($this->cpu_string, $this->etalon_cpu_string) * 0.1 +
+			$this->getCoefficient($this->network, $this->etalon_network) * 0.05 +
+			$this->getMailCoefficient() * 0.05
+		);
 	}
 }

@@ -21,6 +21,7 @@ else
 }
 
 $Shop_Controller_Show
+	//->warehouseMode('in-stock')
 	->limit($limit)
 	->parseUrl();
 
@@ -95,6 +96,9 @@ if (Core_Array::getRequest('compare'))
 // Viewed items
 if ($Shop_Controller_Show->item && $Shop_Controller_Show->viewed)
 {
+	// Core_Session::start();
+	// Core_Session::setMaxLifeTime(28800, TRUE);
+	
 	$Shop_Controller_Show->addIntoViewed();
 }
 

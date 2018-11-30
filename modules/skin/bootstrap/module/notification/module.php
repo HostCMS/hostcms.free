@@ -68,9 +68,11 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				}
 
 				$aJson = array();
-
+				
 				// Идентификатор последнего загруженного уведомления для пользователя
 				$iLastNotificationId = intval(Core_Array::getPost('lastNotificationId'));
+
+				//$iLocalStorage = intval(Core_Array::getPost('localStorage'));
 
 				if (!is_null($oCurrent_User) && $oCurrent_User->id == $iRequestUserId)
 				{
@@ -136,6 +138,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 								$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
 								$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
 								$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');
+								$aNotification['site'] = Core_Array::get($aNotificationDecorations, 'site');
 							}
 						}
 
@@ -149,7 +152,16 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 						{
 							$aJson['unreadNotifications'][] = $aNotification;
 						}
+
 					}
+
+					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;
+
+					// Данные о продолжительности рабочего дня
+
+					$aJson['workdayDuration'] = $oCurrent_User->getWorkdayDuration(Core_Date::timestamp2sqldate(time()));
+					$aJson['workdayStatus'] = $oCurrent_User->getStatusWorkday(Core_Date::timestamp2sqldate(time()));
+
 				}
 
 				Core::showJson($aJson);

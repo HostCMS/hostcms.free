@@ -70,7 +70,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: 0;
 
 				$title = $this->_object->id
-					? Core::_('Shop_Item.items_catalog_edit_form_title')
+					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name)
 					: Core::_('Shop_Item.items_catalog_add_form_title');
 
 				$oMainTab = $this->getTab('main');
@@ -80,9 +80,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdditionalTab
 					->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-
-				// $oMainTab
-					// ->move($this->getField("apply_purchase_discount"), $oAdditionalRow1);
 
 				$this->getField('image_small_height')
 					->divAttr(array('style' => 'display: none'));
@@ -106,9 +103,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopItemTabAssociated = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Item.tab_associated'))
 					->name('Associateds');
-				/*$oShopItemTabSpecialPrices = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Shop_Item.tab_special_prices'))
-					->name('SpecialPrices');*/
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -120,6 +114,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
+
+				$this->getField('name')->class('input-lg form-control');
 
 				$oShopItemTabDescription
 					->add($oShopItemTabDescriptionRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -151,17 +147,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopItemTabSEORow3 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-				/*$oShopItemTabAssociated
-					->add($oShopItemTabAssociatedRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-				;*/
-
 				// Добавляем вкладки
 				$this
 					->addTabAfter($oShopItemTabDescription, $oMainTab)
 					->addTabAfter($oShopItemTabExportImport, $oShopItemTabDescription)
 					->addTabAfter($oShopItemTabSEO, $oShopItemTabExportImport)
 					->addTabAfter($oShopItemTabAssociated, $oShopItemTabSEO)
-					// ->addTabAfter($oShopItemTabSpecialPrices, $oShopItemTabSEO)
 				;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
@@ -325,7 +316,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow3->add($oAdditionalGroupsSelect);
 
 				$html2 = '
-					<script type="text/javascript">
+					<script>
 						$(function(){
 							$(".shortcut-group-tags").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
@@ -447,7 +438,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->type('hidden');
 
 					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("
 						$('[name = modification_name]').autocomplete({
 							  source: function(request, response) {
@@ -552,7 +542,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$currencyName = $oShop_Item->Shop_Currency->name;
 
-						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteSetItem', NULL, 1, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
+						$iDatasetKey = $this->_object->modification_id == 0 ? 1 : 0;
+
+						$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteSetItem', NULL, $iDatasetKey, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
 
 						$externalLink = '';
 
@@ -600,7 +592,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
 					->value("$('.add-set-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
 						$('.set-item-table > tbody').append(
 							$('<tr><td>' + ui.item.label + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
@@ -731,22 +722,22 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow10->add($oSiteuserSelect);
+					$oMainRow10
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow10->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				// Удаляем продавцов
@@ -1004,7 +995,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
 							: $oWarehouseItem->count;
 
-						$rowClass = !$this->_object->id || $countItems > 0
+						$rowClass = !$this->_object->id || $countItems != 0
 							? 'row'
 							: 'row hidden';
 
@@ -1069,19 +1060,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Tags
 				if (Core::moduleIsActive('tag'))
 				{
-					$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
+					$oAdditionalTagsSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.items_catalog_tags'))
 						->options($this->_fillTagsList($this->_object))
 						->name('tags[]')
 						->class('shop-item-tags')
 						->style('width: 100%')
 						->multiple('multiple')
-						->divAttr(array('class' => 'form-group col-xs-12'));
+						->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
-					$oMainRow9->add($oAdditionalGroupsSelect);
+					$oMainRow9->add($oAdditionalTagsSelect);
 
 					$html = '
-						<script type="text/javascript">
+						<script>
 							$(function(){
 								$(".shop-item-tags").select2({
 									language: "' . Core_i18n::instance()->getLng() . '",
@@ -1114,6 +1105,66 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
 
+				$barcodeClass = Core::moduleIsActive('tag')
+					? 'col-xs-12 col-md-6'
+					: 'col-xs-12';
+
+				$oAdditionalBarcodesSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Item.items_catalog_barcodes'))
+					->options($this->_fillBarcodesList($this->_object))
+					->name('barcodes[]')
+					->class('shop-item-barcodes')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group ' . $barcodeClass));
+
+				$oMainRow9->add($oAdditionalBarcodesSelect);
+
+				$html = '
+					<script>
+						$(function(){
+							$(".shop-item-barcodes").select2({
+								language: "' . Core_i18n::instance()->getLng() . '",
+								minimumInputLength: 1,
+								placeholder: "' . Core::_('Shop_Item.type_barcode') . '",
+								tags: true,
+								allowClear: true,
+								multiple: true,
+								ajax: {
+									url: "/admin/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
+									dataType: "json",
+									type: "GET",
+									processResults: function (data) {
+										var aResults = [];
+										$.each(data, function (index, item) {
+											aResults.push({
+												"id": item.id,
+												"text": item.text,
+												"name": item.name
+											});
+										});
+										return {
+											results: aResults
+										};
+									}
+								},
+							});
+
+							$(".shop-item-barcodes").on("select2:select", function (e) {
+								var data = e.params.data,
+									jInputName = $("#' . $windowId . ' input[name=\'name\']");
+
+								!jInputName.val() && jInputName
+									.val(data.name)
+									.focus()
+									.fadeOut(500)
+									.fadeIn(500);
+							});
+						})</script>
+					';
+
+				$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
+
 				$aShop_Item_Associateds = $this->_object->Shop_Item_Associateds->findAll(FALSE);
 
 				$associatedTable = '
@@ -1144,7 +1195,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
 
-						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, 1, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
+						$iDatasetKey = $this->_object->modification_id == 0 ? 1 : 0;
+
+						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $iDatasetKey, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 						$associatedTable .= '
 							<tr id="' . $oShop_Item_Associated->id . '">
@@ -1184,19 +1237,18 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
-				->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
-					$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
-						.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
-						.insertAfter($('.associated-item-table'));
+					->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+						$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
+							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
+							.insertAfter($('.associated-item-table'));
 
-					$('.associated-item-table > tbody').append(
-						$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						$('.associated-item-table > tbody').append(
+							$('<tr><td>' + ui.item.label + '</td><td>' + ui.item.marking + '</td><td>' + ui.item.count + '</td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+						);
+
+						ui.item.value = '';
+					  } );"
 					);
-
-					ui.item.value = '';
-				  } );"
-				);
 
 				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
 
@@ -1231,6 +1283,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->value(Core::_('Shop.size_measure_'.$oShop->size_measure))
 					);
 				$oMainTab->move($this->getField('height'), $oMainRow11);
+
+				$oMainTab
+					->move($this->getField('min_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					->move($this->getField('max_quantity')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					->move($this->getField('quantity_step')->divAttr(array('class' => 'form-group col-lg-2 col-md-2 col-sm-2 col-xs-4')), $oMainRow11)
+					;
 
 				$oMainTab->add(
 					Admin_Form_Entity::factory('Code')
@@ -1463,22 +1521,22 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Group.siteuser_id'))
+						->id('object_siteuser_id')
 						->options($options)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
+						->divAttr(array('class' => 'form-group col-xs-12'));
 
-					$oMainRow5->add($oSiteuserSelect);
+					$oMainRow5
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->add($oSiteuserSelect)
+						);
 
-					$placeholder = Core::_('Siteuser.select_siteuser');
-					$language = Core_i18n::instance()->getLng();
-
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->type("text/javascript")
-					->value("$('.siteuser-tag').selectSiteuser({language: '{$language}', placeholder: '{$placeholder}'})");
-
-					$oMainRow5->add($oCore_Html_Entity_Script);
+					// Show button
+					Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 				}
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
@@ -1557,7 +1615,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Выводим заголовок формы
 				$title = $this->_object->id
-					? Core::_("Shop_Group.groups_edit_form_title")
+					? Core::_("Shop_Group.groups_edit_form_title", $this->_object->name)
 					: Core::_("Shop_Group.groups_add_form_title");
 
 			break;
@@ -1878,7 +1936,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->type("text/javascript")
 								->value("$(\"#{$windowId} input[name='specMinQuantity_\\[\\]']\").eq(0).prop('name', 'specMinQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specMaxQuantity_\\[\\]']\").eq(0).prop('name', 'specMaxQuantity_{$oShop_Specialprice->id}');
 								$(\"#{$windowId} input[name='specPrice_\\[\\]']\").eq(0).prop('name', 'specPrice_{$oShop_Specialprice->id}');
@@ -1960,6 +2017,31 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oShop_ItemShortcut->save()->clearCache();
 					}
+				}
+
+				// Barcodes
+				$aBarcodes = Core_Array::getPost('barcodes', array());
+				!is_array($aBarcodes) && $aBarcodes = array();
+
+				$aTmp = array();
+
+				$aShop_Item_Barcodes = $this->_object->Shop_Item_Barcodes->findAll(FALSE);
+				foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+				{
+					!in_array($oShop_Item_Barcode->value, $aBarcodes)
+						? $oShop_Item_Barcode->markDeleted()
+						: $aTmp[] = $oShop_Item_Barcode->value;
+				}
+
+				$aNewBarcodes = array_diff($aBarcodes, $aTmp);
+				foreach ($aNewBarcodes as $value)
+				{
+					$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
+					$oShop_Item_Barcode
+						->value($value)
+						->shop_item_id($this->_object->id)
+						->setType()
+						->save();
 				}
 
 				// Пересчет комплекта
@@ -2417,44 +2499,43 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->type('hidden');
 
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->type("text/javascript")
-			->value("
-				$('[name = shop_group_name]').autocomplete({
-					  source: function(request, response) {
+				->value("
+					$('[name = shop_group_name]').autocomplete({
+						  source: function(request, response) {
 
-						$.ajax({
-						  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
-						  dataType: 'json',
-						  data: {
-							queryString: request.term
+							$.ajax({
+							  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+							  dataType: 'json',
+							  data: {
+								queryString: request.term
+							  },
+							  success: function( data ) {
+								response( data );
+							  }
+							});
 						  },
-						  success: function( data ) {
-							response( data );
-						  }
-						});
-					  },
-					  minLength: 1,
-					  create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
-							return $('<li></li>')
-								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
-								.appendTo(ul);
-						}
+						  minLength: 1,
+						  create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+								return $('<li></li>')
+									.data('item.autocomplete', item)
+									.append($('<a>').text(item.label))
+									.appendTo(ul);
+							}
 
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					  },
-					  select: function( event, ui ) {
-						$('[name = {$fieldName}]').val(ui.item.id);
-					  },
-					  open: function() {
-						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					  },
-					  close: function() {
-						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					  }
-				});
-			");
+							 $(this).prev('.ui-helper-hidden-accessible').remove();
+						  },
+						  select: function( event, ui ) {
+							$('[name = {$fieldName}]').val(ui.item.id);
+						  },
+						  open: function() {
+							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+						  },
+						  close: function() {
+							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+						  }
+					});
+				");
 
 			$return = array($oShopGroupInput, $oShopGroupInputHidden, $oCore_Html_Entity_Script);
 		}
@@ -2643,6 +2724,28 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$aReturnArray[$oTag->name] = array(
 				'value' => $oTag->name,
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturnArray;
+	}
+
+	/**
+	 * Fill barcodes list
+	 * @param Shop_Item_Model $oShop_Item item
+	 * @return array
+	 */
+	protected function _fillBarcodesList($oShop_Item)
+	{
+		$aReturnArray = array();
+
+		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			$aReturnArray[$oShop_Item_Barcode->value] = array(
+				'value' => $oShop_Item_Barcode->value,
 				'attr' => array('selected' => 'selected')
 			);
 		}

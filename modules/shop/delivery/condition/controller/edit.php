@@ -68,7 +68,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 				$oShop = $object->shop_delivery->Shop;
 
 				$this->getField('name')->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
-				
+
 				// Удаляем типы доставок
 				$oAdditionalTab->delete($this->getField('shop_delivery_id'));
 
@@ -94,7 +94,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 				$oPriceField = $this->getField('price')
 					->divAttr(array('class' => 'form-group col-xs-8 col-sm-2'));
 				$oMainTab->move($oPriceField, $oMainRow4);
-				
+
 				// Удаляем валюты
 				$oAdditionalTab->delete($this->getField('shop_currency_id'));
 
@@ -110,10 +110,10 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 						->caption("&nbsp;")
 						->value($this->_object->shop_currency_id)
 				);
-				
+
 				// Удаляем налоги
 				$oAdditionalTab->delete($this->getField('shop_tax_id'));
-				
+
 				// Создаем поле налогов как выпадающий список
 				$oTaxSelect = Admin_Form_Entity::factory('Select');
 
@@ -130,7 +130,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 					->value($this->_object->shop_tax_id);
 
 				$oMainRow4->add($oTaxSelect);
-				
+
 				// Переносим поля на другую вкладку
 				$oMainTab
 					->move($oMinWeightField = $this->getField('min_weight'), $oConditionsTab)
@@ -250,7 +250,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 
 				// Заголовок формы
 				$title = $this->_object->id
-					? Core::_('Shop_Delivery_Condition.cond_of_delivery_edit_form_title')
+					? Core::_('Shop_Delivery_Condition.cond_of_delivery_edit_form_title', $this->_object->name)
 					: Core::_('Shop_Delivery_Condition.cond_of_delivery_add_form_title');
 
 				$this->title($title);
@@ -263,6 +263,13 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 				}
 
 				parent::setObject($object);
+
+				// Заголовок формы
+				$title = $this->_object->id
+					? Core::_('Shop_Delivery_Condition_Dir.edit_form_title', $this->_object->name)
+					: Core::_('Shop_Delivery_Condition_Dir.add_form_title');
+
+				$this->title($title);
 
 				$oMainTab = $this->getTab('main');
 				$oAdditionalTab = $this->getTab('additional');

@@ -10,19 +10,19 @@
  * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'authorization_form_title' => 'Administration center',
+	'authorization_form_title' => 'Back-end',
 	'authorization_form_login' => 'User',
 	'authorization_form_password' => 'Password',
 	'authorization_form_ip' => 'Attach session to IP address',
 	'authorization_form_button' => 'Enter',
 	'themes' => 'Themes',
-	'authorization_error_valid_user' => 'Error! Invalid login and password!<br />Your IP-address is <b>%s</b>, administrator informed of this event.',
+	'authorization_error_valid_user' => 'Error! Invalid login and password!<br />Your IP is <b>%s</b>, administrator informed of this event.',
 	'authorization_error_access_temporarily_unavailable' => 'Access temporarily unavailable. Please try again in %s seconds',
-	'authorization_title' => 'HostCMS administration center',
-	'authorization_notice' => '<p>* In order to enter administration center, your browser should support Cookies.</p>',
-	'authorization_notice2' => '<p>** Attachment of session to IP address decreases the risk of an authorized access to administration center.</p>',
+	'authorization_title' => 'HostCMS Back-end',
+	'authorization_notice' => '<p>* In order to enter back-end, your browser should support Cookies.</p>',
+	'authorization_notice2' => '<p>** Attachment of session to IP address decreases the risk of an authorized access to back-end.</p>',
 
-	'index_title' => "Administration center of %s v. %s",
+	'index_title' => "Back-end of %s v. %s",
 
 	'index_systems_events' => 'Events log',
 	'index_systems_characteristics' => 'System characteristics',
@@ -55,8 +55,8 @@ return array(
 	'index_memory_unit' => ' Mb.',
 	'index_memory_not_limit' => 'Not identified',
 	'index_safe_mode' => 'Safe mode: ',
-	'index_register_globals' => 'Global variables: ',
-	'index_magic_quotes' => 'Magic quotes: ',
+	'index_register_globals' => 'Global Variables: ',
+	'index_magic_quotes' => 'Magic Quotes: ',
 	'index_on' => 'Enable',
 	'index_off' => 'Disable',
 

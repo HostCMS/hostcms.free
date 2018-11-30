@@ -160,10 +160,11 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	/**
 	 * Получение свойств товара, доступных группе $shop_group_id
 	 * @param int $shop_group_id идентификатор группы
-	 * @param array $property_ids массив идентификаторов дополнительных свойств, доступных для выборки
+	 * @param array $property_ids массив идентификаторов дополнительных свойств, доступных для выборки, по умолчанию NULL
+	 * @param boolean $bCache кэшировать результаты, по умочланию TRUE
 	 * @return array
 	 */
-	public function getPropertiesForGroup($shop_group_id, $property_ids = NULL)
+	public function getPropertiesForGroup($shop_group_id, $property_ids = NULL, $bCache = TRUE)
 	{
 		$oProperties = $this->Properties;
 		if ($shop_group_id !== FALSE)
@@ -182,7 +183,7 @@ class Shop_Item_Property_List_Model extends Shop_Model
 				->where('properties.id', 'IN', $property_ids);
 		}
 
-		return $oProperties->findAll();
+		return $oProperties->findAll($bCache);
 	}
 
 	/**

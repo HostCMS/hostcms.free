@@ -29,8 +29,8 @@ class Shortcode_List
 		
 		ob_start();
 		?>
-		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-		<script type="text/javascript">
+		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
+		<script>
 			ymaps.ready(init);
 		
 			function init() {
@@ -77,7 +77,7 @@ class Shortcode_List
 		ob_start();
 		?>
 		<script async defer src="https://maps.googleapis.com/maps/api/js?key=<?php echo htmlspecialchars($args['key'])?>&callback=initMap"></script>
-		<script type="text/javascript">
+		<script>
 			function initMap() {
 				var myLatlng = new google.maps.LatLng(<?php echo htmlspecialchars($args['latlng'])?>);
 				var mapOptions = {

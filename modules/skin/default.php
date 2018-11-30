@@ -108,7 +108,7 @@ class Skin_Default extends Core_Skin
 			?><link type="text/css" href="<?php echo $sPath . '?' . $timestamp?>" rel="stylesheet" /><?php
 			echo PHP_EOL;
 		}?>
-		<script type="text/javascript">if (!window.jQuery) {document.write('<scri'+'pt type="text/javascript" src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
+		<script>if (!window.jQuery) {document.write('<scri'+'pt src="/modules/skin/default/js/jquery/jquery.js"></scr'+'ipt>');}</script>
 
 		<?php
 		$this->addJs("/modules/skin/bootstrap/js/lng/{$lng}/{$lng}.js");
@@ -116,13 +116,12 @@ class Skin_Default extends Core_Skin
 		foreach ($aJs as $sPath)
 		{
 			Core::factory('Core_Html_Entity_Script')
-				->type("text/javascript")
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
 		?>
 
-		<script type="text/javascript"><?php
+		<script><?php
 		if (Core_Auth::logged())
 		{
 			?>var HostCMSFileManager = new HostCMSFileManager();<?php
@@ -155,7 +154,7 @@ class Skin_Default extends Core_Skin
 				.mouseup(function(){$('#hostCmsLogo').animate({top: 0})});
 		});
 		</script>
-		<script type="text/javascript" src="/admin/wysiwyg/jquery.tinymce.js"></script>
+		<script src="/admin/wysiwyg/jquery.tinymce.js"></script>
 		<?php
 
 		return $this;
@@ -219,7 +218,7 @@ if ($this->_mode != 'blank')
 		</div>
 	</div>
 
-	<script type="text/javascript">
+	<script>
 	(function($){
 		$.UpdateTaskbar();
 
@@ -272,7 +271,7 @@ if ($this->_mode != 'blank')
 					->execute();
 			}
 		?></div>
-		<script type="text/javascript">
+		<script>
 		(function($){
 			$('#theme').on('click', function(){
 				var object = $('#themeSelector'), position = $(this).find('span').offset();
@@ -689,7 +688,6 @@ if ($this->_mode != 'blank')
 
 			$sJs .= '})(jQuery);';
 			Core::factory('Core_Html_Entity_Script')
-				->type('text/javascript')
 				->value($sJs)
 				->execute();
 
@@ -820,7 +818,7 @@ if ($this->_mode != 'blank')
 
 		</div>
 
-		<script type="text/javascript">
+		<script>
 		$(function() {
 			$("#sortable0,#sortable1,#sortable2,#sortable3,#sortable4").sortable({
 				cursor: 'move',

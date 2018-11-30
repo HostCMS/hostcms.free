@@ -197,6 +197,7 @@ class Update_Controller extends Core_Servant_Properties
 		$return = array(
 			'error' => 0,
 			'expiration_of_support' => FALSE,
+			'datetime' => NULL,
 			'entities' => array(),
 		);
 
@@ -228,6 +229,7 @@ class Update_Controller extends Core_Servant_Properties
 
 				$return['error'] = (int)$oXml->error;
 				$return['expiration_of_support'] = (string)$oXml->expiration_of_support;
+				$return['datetime'] = (string)$oXml->datetime;
 			}
 		}
 		else
