@@ -181,7 +181,7 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 
 	if (is_file($sFullFileName)
 		// Размер меньше блока или прошло 5 минут с даты последнего изменения
-		&& (filesize($sFullFileName) < $iFileLimit || (filemtime($sFullFileName) + 60*5) < time())
+		&& (filesize($sFullFileName) < $iFileLimit * 0.95 || (filemtime($sFullFileName) + 60*5) < time())
 	)
 	{
 		$bDebug && Core_Log::instance()->clear()

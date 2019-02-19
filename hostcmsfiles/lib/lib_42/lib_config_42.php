@@ -24,7 +24,7 @@ if (Core::moduleIsActive('siteuser'))
 			$oMessage = Core_Entity::factory('Message');
 
 			$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
-			$oMessage->text = nl2br(trim(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags)));
+			$oMessage->text = nl2br(trim(Core_Str::stripTags(Core_Str::removeEmoji(Core_Array::getPost('text')), $allowable_tags)));
 
 			empty($oMessage->text) && $aErrors[] = Core::factory('Core_Xml_Entity')
 				->name('error')->value('Отсутствует текст сообщения!');

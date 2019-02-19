@@ -83,14 +83,17 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 				$oShopFilterSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.property_filter'))
 					->options(
-						array(0 => Core::_('Shop_Item.properties_show_kind_none'),
-						1 => Core::_('Shop_Item.properties_show_kind_text'),
-						2 => Core::_('Shop_Item.properties_show_kind_list'),
-						3 => Core::_('Shop_Item.properties_show_kind_radio'),
-						4 => Core::_('Shop_Item.properties_show_kind_checkbox'),
-						5 => Core::_('Shop_Item.properties_show_kind_checkbox_one'),
-						6 => Core::_('Shop_Item.properties_show_kind_from_to'),
-						7 => Core::_('Shop_Item.properties_show_kind_listbox'))
+						array(
+							0 => Core::_('Shop_Item.properties_show_kind_none'),
+							1 => Core::_('Shop_Item.properties_show_kind_text'),
+							2 => Core::_('Shop_Item.properties_show_kind_list'),
+							3 => Core::_('Shop_Item.properties_show_kind_radio'),
+							4 => Core::_('Shop_Item.properties_show_kind_checkbox'),
+							7 => Core::_('Shop_Item.properties_show_kind_listbox'),
+							5 => Core::_('Shop_Item.properties_show_kind_checkbox_one'),
+							6 => Core::_('Shop_Item.properties_show_kind_from_to')
+							// 8 => 
+						)
 					)
 					->name('filter')
 					->value($this->_object->Shop_Item_Property->filter)

@@ -91,34 +91,54 @@ class Core_Inflection_Ru extends Core_Inflection
 
 			switch ($lastChar)
 			{
-				case 'й':
-					$singular = 'я';
-					$plural = 'ев';
-				break;
 				case 'а':
 					$singular = 'ы';
 					$plural = '';
 				break;
-				case 'я':
-					$singular = 'и';
-					$plural = 'й';
-				break;
-				case 'о':
+				case 'б':
+				case 'в':
+				case 'г':
+				case 'д':
+				case 'з':
+				case 'к':
+				case 'л':
+				case 'м':
+				case 'н':
+				case 'п':
+				case 'р':
+				case 'с':
+				case 'т':
+				case 'ф':
+				case 'х':
 					$singular = 'а';
-					$plural = '';
+					$plural = 'ов';
 				break;
 				case 'е':
 					$singular = 'я';
 					$plural = 'й';
 				break;
+				case 'ж':
+				case 'ч':
+				case 'щ':
+				case 'ш':
+					$singular = 'а';
+					$plural = 'ей';
+				break;
+				case 'й':
+					$singular = 'я';
+					$plural = 'ев';
+				break;
+				case 'о':
+					$singular = 'а';
+					$plural = '';
+				break;
 				case 'ь':
 					$singular = 'я';
 					$plural = 'ей';
 				break;
-				case 'с':
-				case 'д':
-					$singular = 'а';
-					$plural = 'ов';
+				case 'я':
+					$singular = 'и';
+					$plural = 'й';
 				break;
 				default:
 					$singular = '';
@@ -148,8 +168,16 @@ class Core_Inflection_Ru extends Core_Inflection
 	 * Number to str
 	 * @param float $float
 	 */
-	protected function _num2str($float)
+	public function numberInWords($float, $aUnits = NULL)
 	{
+		is_null($aUnits) && $aUnits = array( // Units
+			array('копейка', 'копейки', 'копеек', 1),
+			array('рубль', 'рубля', 'рублей', 0),
+			array('тысяча', 'тысячи', 'тысяч', 1),
+			array('миллион', 'миллиона', 'миллионов', 0),
+			array('миллиард', 'милиарда', 'миллиардов', 0),
+		);
+
 		$float = floatval($float);
 
 		$ten = array(
@@ -173,14 +201,6 @@ class Core_Inflection_Ru extends Core_Inflection
 		$tens = array('', '', 'двадцать','тридцать','сорок','пятьдесят','шестьдесят','семьдесят' ,'восемьдесят','девяносто');
 		$hundreds = array('', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот');
 
-		$AUnits = array(
-			array('копейка' ,'копейки' ,'копеек', 1),
-			array('рубль'   ,'рубля'   ,'рублей', 0),
-			array('тысяча'  ,'тысячи'  ,'тысяч' , 1),
-			array('миллион' ,'миллиона','миллионов', 0),
-			array('миллиард','милиарда','миллиардов', 0),
-		);
-
 		// 3 => 000000000003.00
 		list($iInteger, $fractional) = explode('.', sprintf("%015.2f", $float));
 
@@ -196,9 +216,9 @@ class Core_Inflection_Ru extends Core_Inflection
 					continue;
 				}
 
-				$uk = count($AUnits) - $uk - 1;
+				$uk = count($aUnits) - $uk - 1;
 
-				$gender = $AUnits[$uk][3];
+				$gender = $aUnits[$uk][3];
 				list($iHundreds, $iTens, $i3) = array_map('intval', str_split($value, 1));
 //var_dump($i3);
 				$out[] = $hundreds[$iHundreds];
@@ -207,7 +227,7 @@ class Core_Inflection_Ru extends Core_Inflection
 					? $tens[$iTens] . ' ' . $ten[$gender][$i3] # 20-99
 					: ($iTens > 0 ? $a20[$i3] : $ten[$gender][$i3]); # 10-19 | 1-9
 
-				$uk > 1 && $out[] = $this->_morph($value, $AUnits[$uk]);
+				$uk > 1 && $out[] = $this->_morph($value, $aUnits[$uk]);
 			}
 		}
 		else
@@ -215,8 +235,8 @@ class Core_Inflection_Ru extends Core_Inflection
 			$out[] = $ten[0][0];
 		}
 
-		$out[] = $this->_morph(intval($iInteger), $AUnits[1]);
-		$out[] = $fractional . ' ' . $this->_morph(intval($fractional), $AUnits[0]);
+		$out[] = $this->_morph(intval($iInteger), $aUnits[1]);
+		$out[] = $fractional . ' ' . $this->_morph(intval($fractional), $aUnits[0]);
 
 		return trim(preg_replace('/ {2,}/', ' ', implode(' ',$out)));
 	}

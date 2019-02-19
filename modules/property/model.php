@@ -275,6 +275,77 @@ class Property_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
+		// Values
+		$this->Property_Value_Ints->deleteAll(FALSE);
+		$this->Property_Value_Floats->deleteAll(FALSE);
+		$this->Property_Value_Strings->deleteAll(FALSE);
+		$this->Property_Value_Texts->deleteAll(FALSE);
+		$this->Property_Value_Datetimes->deleteAll(FALSE);
+
+		$nodeName = $methodName = NULL;
+
+		if (Core::moduleIsActive('structure') && !is_null($this->Structure_Property->id))
+		{
+			$nodeName = 'Structure';
+			$methodName = 'getDirPath';
+		}
+		elseif (Core::moduleIsActive('siteuser') && !is_null($this->Siteuser_Property->id))
+		{
+			$nodeName = 'Siteuser';
+			$methodName = 'getDirPath';
+		}
+		elseif (Core::moduleIsActive('informationsystem') && !is_null($this->Informationsystem_Item_Property->id))
+		{
+			$nodeName = 'Informationsystem_Item';
+			$methodName = 'getItemPath';
+		}
+		elseif (Core::moduleIsActive('informationsystem') && !is_null($this->Informationsystem_Group_Property->id))
+		{
+			$nodeName = 'Informationsystem_Group';
+			$methodName = 'getGroupPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Item_Property->id))
+		{
+			$nodeName = 'Shop_Item';
+			$methodName = 'getItemPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Group_Property->id))
+		{
+			$nodeName = 'Shop_Group';
+			$methodName = 'getGroupPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Order_Property->id))
+		{
+			$nodeName = 'Shop_Order';
+			$methodName = 'getOrderPath';
+		}
+
+		if (!is_null($nodeName))
+		{
+			do {
+				$oProperty_Value_Files = $this->Property_Value_Files;
+				$oProperty_Value_Files
+					->queryBuilder()
+					->limit(500);
+
+				$aProperty_Value_Files = $oProperty_Value_Files->findAll(FALSE);
+
+				foreach ($aProperty_Value_Files as $oProperty_Value_File)
+				{
+					$oProperty_Value_File
+						->setDir(
+							Core_Entity::factory($nodeName, $oProperty_Value_File->entity_id)->$methodName()
+						)
+						->delete();
+				}
+			} while (count($aProperty_Value_Files));
+		}
+		// Delte just from database
+		else
+		{
+			$this->Property_Value_Files->deleteAll(FALSE);
+		}
+
 		// Relations
 		$this->Structure_Property->delete();
 		$this->Informationsystem_Item_Property->delete();
@@ -283,13 +354,6 @@ class Property_Model extends Core_Entity
 		$this->Shop_Group_Property->delete();
 		$this->Shop_Order_Property->delete();
 		Core::moduleIsActive('siteuser') && $this->Siteuser_Property->delete();
-
-		$this->Property_Value_Ints->deleteAll(FALSE);
-		$this->Property_Value_Floats->deleteAll(FALSE);
-		$this->Property_Value_Strings->deleteAll(FALSE);
-		$this->Property_Value_Texts->deleteAll(FALSE);
-		$this->Property_Value_Datetimes->deleteAll(FALSE);
-		$this->Property_Value_Files->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -444,7 +508,7 @@ class Property_Model extends Core_Entity
 				}
 
 				$this->_addListItems(0, $this->List);
-				
+
 				$this->_aListItemsTree = array();
 			}
 		}

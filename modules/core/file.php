@@ -17,7 +17,7 @@ class Core_File
 	 * File types with resize support
 	 * @var array
 	 */
-	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG');
+	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP');
 
 	/**
 	 * Moves an uploaded file to a new location

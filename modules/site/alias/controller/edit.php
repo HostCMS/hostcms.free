@@ -49,6 +49,9 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		isset($this->_formValues['name'])
+			&& $this->_formValues['name'] = str_replace(array('http://', 'https://', '*.'), '*.', trim($this->_formValues['name'], " \t\n\r\0\x0B/"));
+		
 		parent::_applyObjectProperty();
 
 		if (!is_null(Core_Array::getPost('current')))

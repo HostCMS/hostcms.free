@@ -39,6 +39,14 @@ class Shop_Price_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'percent' => 0
 	);
+	
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'shop_prices.id' => 'ASC',
+	);	
 
 	/**
 	 * Constructor.

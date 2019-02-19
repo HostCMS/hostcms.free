@@ -704,9 +704,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			? ' bid="' . Core_Str::xml($oShop_Item->yandex_market_bid) . '"'
 			: '';
 
-		$tag_cbid = $oShop_Item->yandex_market_cid
+		/*$tag_cbid = $oShop_Item->yandex_market_cid
 			? ' cbid="' . Core_Str::xml($oShop_Item->yandex_market_cid) . '"'
-			: '';
+			: '';*/
 
 		$available = !$this->checkAvailable || $oShop_Item->getRest() > 0 ? 'true' : 'false';
 
@@ -714,7 +714,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			? ' type="' . Core_Str::xml($this->type) . '"'
 			: '';
 
-		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . $tag_cbid . $sType . " available=\"{$available}\">\n");
+		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . " available=\"{$available}\">\n");
 
 		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
 
@@ -863,6 +863,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if (!isset($this->_forbiddenTags['adult']) && $oShop_Item->adult)
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
+		}
+
+		/* dimensions */
+		if (!isset($this->_forbiddenTags['dimensions'])
+			&& $oShop_Item->length != 0
+			&& $oShop_Item->width != 0
+			&& $oShop_Item->height != 0
+		)
+		{
+			$sDimensions = Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 1)
+				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 1)
+				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 1);
+			$this->stdOut->write('<dimensions>' . $sDimensions . '</dimensions>'. "\n");
 		}
 
 		/* cpa */

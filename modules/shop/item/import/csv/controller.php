@@ -537,7 +537,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			Core::_('Shop_Exchange.order_item_type')
 		);
 
-		$aGroupProperties = Core_Entity::factory('Shop_Group_Property_List', $oShop->id)->Properties->findAll();
+		$aGroupProperties = Core_Entity::factory('Shop_Group_Property_List', $oShop->id)->Properties->findAll(FALSE);
 		foreach ($aGroupProperties as $oGroupProperty)
 		{
 			$oPropertyDir = $oGroupProperty->Property_Dir;
@@ -562,7 +562,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			}
 		}
 
-		$aItemProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties->findAll();
+		$aItemProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties->findAll(FALSE);
 		foreach ($aItemProperties as $oItemProperty)
 		{
 			$oPropertyDir = $oItemProperty->Property_Dir;
@@ -586,23 +586,26 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$this->aEntities[] = 'propsmall-' . $oItemProperty->id;
 			}
 		}
+		unset($aItemProperties);
 
-		$aShopPrices = $oShop->Shop_Prices->findAll();
+		$aShopPrices = $oShop->Shop_Prices->findAll(FALSE);
 		foreach ($aShopPrices as $oShopPrice)
 		{
 			$this->aCaptions[] = $oShopPrice->name;
 			$this->aColors[] = "#B0BEC5";
 			$this->aEntities[] = 'price-' . $oShopPrice->id;
 		}
+		unset($aShopPrices);
 
 		// Выводим склады
-		$aShopWarehouses = $oShop->Shop_Warehouses->findAll();
-		foreach ($aShopWarehouses as $oShopWarehouse)
+		$aShop_Warehouses = $oShop->Shop_Warehouses->findAll(FALSE);
+		foreach ($aShop_Warehouses as $oShopWarehouse)
 		{
 			$this->aCaptions[] = Core::_('Shop_Item.warehouse_import_field', $oShopWarehouse->name);
 			$this->aColors[] = "#F48FB1";
 			$this->aEntities[] = 'warehouse-' . $oShopWarehouse->id;
 		}
+		unset($aShop_Warehouses);
 
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterConstruct', $this);
 	}
@@ -636,7 +639,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->clear()
 			->url($sSourceFile)
-			->timeout(5)
+			->timeout(10)
 			->addOption(CURLOPT_FOLLOWLOCATION, TRUE)
 			->execute();
 
@@ -690,7 +693,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				->execute();
 		}
 
-		$fInputFile = fopen($this->file, 'rb');
+		$fInputFile = fopen(CMS_FOLDER . TMP_DIR . $this->file, 'rb');
 
 		if ($fInputFile === FALSE)
 		{

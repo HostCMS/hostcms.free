@@ -76,7 +76,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->rows(15)
 					->caption(Core::_('Document.text'))
 					->name('text')
-					->wysiwyg(TRUE)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->divAttr(array('class' => 'form-group col-xs-12'))
 					->template_id($this->_object->template_id);
 

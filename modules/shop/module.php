@@ -521,4 +521,29 @@ class Shop_Module extends Core_Module
 			'site' => htmlspecialchars($oShop->Site->name) . ' [' . $oShop->Site->id . ']'
 		);
 	}
+	
+	/**
+	 * Get Module's Printlayouts
+	 * @return array
+	 */
+	public function getPrintlayouts()
+	{
+		return array(
+			array(
+				'dir' => 'Заказы',
+				'items' => array(
+					0 => array('name' => 'Бланк заказа')
+				)
+			),
+			array(
+				'dir' => 'Склад',
+				'items' => array(
+					1 => array('name' => Core::_('Shop_Warehouse_Incoming.title')),
+					2 => array('name' => Core::_('Shop_Warehouse_Writeoff.title')),
+					3 => array('name' => Core::_('Shop_Warehouse_Inventory.title')),
+					4 => array('name' => Core::_('Shop_Warehouse_Regrade.title')),
+				)
+			)
+		);
+	}
 }

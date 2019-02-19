@@ -89,4 +89,5 @@ return array(
 
 	'lng' => 'Язык сайта',
 	'lng_default' => 'ru',
+	'error_email' => '<acronym title="Технический e-mail (ошибки и т.д.)">Технический e-mail</acronym>',
 );

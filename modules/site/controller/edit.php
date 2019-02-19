@@ -180,9 +180,11 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('max_size_load_image_big'), $oMainRow3);
 
 		/* $oMainRow4 */
-		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$oMainTab->move($this->getField('admin_email'), $oMainRow4);
-		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('error_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$oMainTab->move($this->getField('error_email'), $oMainRow4);
+		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */

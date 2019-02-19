@@ -32,6 +32,13 @@ class Document_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+	
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -233,7 +240,12 @@ class Document_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
 		$checkPanel = Core::checkPanel();
-		if ($checkPanel)
+		if ($checkPanel
+			&& ($oUser = Core_Entity::factory('User')->getCurrent())
+			&& ($oSite = Core_Entity::factory('Site', CURRENT_SITE))
+			&& $oUser->checkModuleAccess(array('document'), $oSite)
+			&& $oUser->checkObjectAccess($this)
+		)
 		{
 			?><div hostcms:id="<?php echo intval($this->id)?>" hostcms:field="editInPlace" hostcms:entity="document" hostcms:type="wysiwyg"><?php
 		}

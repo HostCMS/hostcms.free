@@ -339,7 +339,7 @@
 							<!-- Аватар с правой стороны -->
 							<td align="right">
 								<xsl:text> </xsl:text>
-								
+
 								<!-- Действия с открытым форумом -->
 								<xsl:if test="$moderator = 1 or not(../forum_topic/closed = 1 or ../forum_category/closed = 1)">
 									<!-- Для модераторов -->
@@ -459,7 +459,7 @@
 					<!-- Средства сообщения с автором сообщения -->
 					<xsl:if test="siteuser/node()">
 					<a href="/users/info/{siteuser/login}/">&labelProfile;</a><xsl:text> | </xsl:text>
-					&labelCountMessages; <xsl:value-of select="siteuser/property_value[tag_name = 'count_message']/value"/><xsl:text> | </xsl:text>
+					&labelCountMessages; <xsl:value-of select="siteuser/messages_count"/><xsl:text> | </xsl:text>
 					</xsl:if>
 					&labelDate; <xsl:value-of select="datetime"/>
 					<!-- Для модераторов -->
@@ -525,9 +525,9 @@
 					<!-- Set $link variable -->
 					<xsl:variable name="number_link">
 						<xsl:choose>
-							
+
 							<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-							
+
 							<xsl:otherwise></xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>

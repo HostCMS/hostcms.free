@@ -142,5 +142,4 @@ return array(
 	'msg_download_complete' => "Импорт завершен!",
 	'information_items_copy_form_title' => 'Копировать элемент',
 	'add_value' => 'Добавить отсутствующие значения свойства по умолчанию у элементов',
-	'placeholderSearch' => 'Поиск',
 );

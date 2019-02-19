@@ -99,6 +99,13 @@ class Informationsystem_Item_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+	
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -114,6 +121,24 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
+	}
+
+	/**
+	 * Inc items'count in group during creating item
+	 * @var boolean
+	 */
+	protected $_incCountByCreate = TRUE;
+
+	/**
+	 * Inc items'count in group during creating item
+	 * @param boolean $value
+	 * @return self
+	 */
+	public function incCountByCreate($value = TRUE)
+	{
+		$this->_incCountByCreate = $value;
+
+		return $this;
 	}
 
 	/**
@@ -962,12 +987,12 @@ class Informationsystem_Item_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1492,7 +1517,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$return = parent::create();
 
-		if (!is_null($this->Informationsystem_Group->id))
+		if ($this->_incCountByCreate && !is_null($this->Informationsystem_Group->id))
 		{
 			// Увеличение количества элементов в группе
 			$this->Informationsystem_Group->incCountItems();

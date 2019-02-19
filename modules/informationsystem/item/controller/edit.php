@@ -428,8 +428,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oDescriptionRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('description')
-					->wysiwyg(TRUE)
 					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				$oMainTab->move($this->getField('description'), $oDescriptionRow1);
@@ -461,8 +461,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				// Text
 				$this->getField('text')
-					->wysiwyg(TRUE)
 					->rows(15)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				$oMainTab->move($this->getField('text'), $oDescriptionRow3);
@@ -714,7 +714,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$this->getField('description')
 					->rows(15)
-					->wysiwyg(TRUE)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				if (Core::moduleIsActive('typograph'))
@@ -902,7 +902,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oMainRow6
 						->add(
 							Admin_Form_Entity::factory('Div')
-								->class('form-group col-xs-12 col-sm-3 no-padding')
+								->class('form-group col-xs-12 col-sm-4 no-padding')
 								->add($oSiteuserSelect)
 						);
 
@@ -912,9 +912,9 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				// Active
 				$this->getField('active')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
 				$this->getField('indexing')
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'));
 
 				$oMainTab->move($this->getField('active'), $oMainRow7);
 				$oMainTab->move($this->getField('indexing'), $oMainRow7);

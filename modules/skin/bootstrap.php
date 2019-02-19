@@ -941,7 +941,7 @@ class Skin_Bootstrap extends Core_Skin
 											<?php if ($bSubmenu)
 											{
 												?><ul class="submenu"><?php
-												
+
 												foreach ($aTmpMenu['submenu'] as $aSubmenu)
 												{
 													$aSubmenu += array(
@@ -1035,6 +1035,7 @@ class Skin_Bootstrap extends Core_Skin
 <title><?php echo $this->_title?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="referrer" content="no-referrer" />
 <link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
 <link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
 <link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
@@ -1136,7 +1137,18 @@ class Skin_Bootstrap extends Core_Skin
 		</div>
 		</div>
 
-		<script>$("#authorization input[name='login']").focus();</script>
+		<script>
+			$("#authorization input[name='login']").focus();
+
+			// Check Google chrome data saver mode
+			if ('connection' in navigator)
+			{
+				if (navigator.connection.saveData)
+				{
+					$("input[name='ip']").prop('checked', false);
+				}
+			}
+		</script>
 		<?php
 		}
 
@@ -1165,7 +1177,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2018 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2019 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>

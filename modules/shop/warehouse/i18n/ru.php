@@ -42,4 +42,8 @@ return array(
 	'website' => 'Сайт',
 	'working_time' => 'Часы работы',
 	'shop_items_count' => 'Общее количество товаров на складе',
+	'inventory' => 'Инвентаризация',
+	'incoming' => 'Оприходование',
+	'writeoff' => 'Списание',
+	'regrade' => 'Пересортица',
 );

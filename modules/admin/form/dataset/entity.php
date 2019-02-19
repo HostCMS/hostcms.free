@@ -26,6 +26,12 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	protected $_count = NULL;
 
 	/**
+	 * Restrict access to entities
+	 * @var FALSE|int
+	 */
+	protected $_restrictAccess = FALSE;
+
+	/**
 	 * Constructor.
 	 * @param Core_Entity $oCore_Entity entity
 	 * @hostcms-event Admin_Form_Dataset_Entity.onAfterConstruct
@@ -33,6 +39,13 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	public function __construct(Core_Entity $oCore_Entity)
 	{
 		$this->_entity = $oCore_Entity;
+
+		$oUser = Core_Entity::factory('User')->getCurrent();
+
+		if (!is_null($oUser) && $oUser->superuser != 1 && $oUser->only_access_my_own != 0)
+		{
+			$this->_restrictAccess = $oUser->id;
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this);
 	}
@@ -73,6 +86,17 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		return $row['count'];
 	}
 
+	/*protected function _applyRestrictAccess($queryBuilder)
+	{
+		// Restrict access
+		if ($this->_restrictAccess && isset($this->_entity->user_id))
+		{
+			$queryBuilder->where($this->_entity->getTableName() . '.user_id', '=', $this->_restrictAccess);
+		}
+
+		return $this;
+	}*/
+
 	/**
 	 * Get total count by COUNT(*)
 	 * @return int
@@ -87,6 +111,8 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			->limit(1)
 			->offset(0)
 			->asAssoc();
+
+		//$this->_applyRestrictAccess($queryBuilder);
 
 		$Core_DataBase = $queryBuilder->execute();
 
@@ -130,6 +156,8 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 					->limit(1)
 					->offset(0)
 					->asAssoc();
+
+				//$this->_applyRestrictAccess($queryBuilder);
 
 				$queryBuilder->execute();
 
@@ -213,14 +241,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			// Расчет количества
 			if (is_null($this->_count))
 			{
-				if ($issetHaving)
-				{
-					$this->_count = $this->_getFoundRows();
-				}
-				else
-				{
-					$this->_count = $this->_getTotalCountByCount();
-				}
+				$this->_count = $issetHaving
+					? $this->_getFoundRows()
+					: $this->_getTotalCountByCount();
 			}
 		}
 		return $this->_objects;
@@ -294,7 +317,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		//$this->_setConditions();
 
 		$newObject = clone $this->_entity;
-		return $newObject->find($primaryKey, FALSE);
+
+		// Needs to use object watcher
+		return $newObject->find($primaryKey/*, FALSE*/);
 		//return $this->_entity->find($primaryKey, FALSE);
 	}
 }

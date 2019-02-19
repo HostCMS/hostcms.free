@@ -1487,7 +1487,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			$sPath = '/admin/informationsystem/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_dir_id={$oInformationsystem->informationsystem_dir_id}&hostcms[checked][1][{$oInformationsystem->id}]=1";
-			$sTitle = Core::_('Informationsystem.edit_title');
+			$sTitle = Core::_('Informationsystem.edit_title', $oInformationsystem->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

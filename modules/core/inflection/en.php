@@ -254,8 +254,6 @@ class Core_Inflection_En extends Core_Inflection
 	 */
 	protected function _getSingular($word, $count = NULL)
 	{
-//print_r(self::$singularIrregular);
-//die();
 		// Irregular words
 		if (isset(self::$singularIrregular[$word]))
 		{
@@ -279,8 +277,8 @@ class Core_Inflection_En extends Core_Inflection
 	 * Number to str
 	 * @param float $float
 	 */
-	protected function _num2str($float)
+	protected function numberInWords($float)
 	{
-		return '_num2str is undefined';
+		return 'numberInWords is undefined';
 	}
 }

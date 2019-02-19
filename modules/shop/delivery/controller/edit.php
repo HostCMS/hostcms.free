@@ -370,23 +370,33 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			$this->_object->save();
 		}
 
-		// Получаем платежные системы, связанные с доставкой
-		$aShop_Delivery_Payment_Systems = $this->_object->Shop_Delivery_Payment_Systems->findAll();
-
+		// Все платежные
+		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
+		
+		$aTmp = array();
+		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
+		{
+			$aTmp[] = $oShop_Payment_System->id;
+		}
+		
 		// Массив идентификаторов платежных систем, связанных с доставкой
 		$aDelivery_Payment_Systems = array();
 
+		// Получаем платежные системы, связанные с доставкой
+		$aShop_Delivery_Payment_Systems = $this->_object->Shop_Delivery_Payment_Systems->findAll();
 		foreach ($aShop_Delivery_Payment_Systems as $oShop_Delivery_Payment_System)
 		{
 			// Fix relation with deleted Shop_Payment_System
-			if (!in_array($oShop_Delivery_Payment_System->shop_payment_system_id, $aDelivery_Payment_Systems))
+			if (!in_array($oShop_Delivery_Payment_System->shop_payment_system_id, $aTmp))
 			{
 				$oShop_Delivery_Payment_System->delete();
 			}
-			$aDelivery_Payment_Systems[] = $oShop_Delivery_Payment_System->shop_payment_system_id;
+			else
+			{
+				$aDelivery_Payment_Systems[] = $oShop_Delivery_Payment_System->shop_payment_system_id;
+			}
 		}
 
-		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
 			$bShopPaymentSystemChecked = Core_Array::getPost('shop_payment_system_' . $oShop_Payment_System->id);

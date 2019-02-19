@@ -736,7 +736,7 @@ abstract class Core_DataBase
 			case 'numeric unsigned':
 			case 'decimal':
 			case 'decimal unsigned':
-				$type = 'float';
+				$type = 'decimal';
 				$fixed = TRUE;
 			break;
 			case 'bit':

@@ -234,9 +234,14 @@ class Shop_Controller
 		$html = '
 			<script>
 				var lastFocusedGroup;
-				$("textarea[name^=\'seo_group_\']").focus(function() {
-				  lastFocusedGroup = $(document.activeElement);
-				});
+
+				$(function() {
+
+					$("textarea[name^=\'seo_group_\']").on("focus", function() {
+
+						lastFocusedGroup = $(document.activeElement);
+					});
+				})
 			</script>
 			<div class="btn-group pull-right">
 				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>
@@ -279,9 +284,14 @@ class Shop_Controller
 		$html = '
 			<script>
 				var lastFocusedItem;
-				$("textarea[name^=\'seo_item_\']").focus(function() {
-				  lastFocusedItem = $(document.activeElement);
-				});
+
+				$(function(){
+
+					$("textarea[name^=\'seo_item_\']").on("focus", function() {
+
+						lastFocusedItem = $(document.activeElement);
+					});
+				})
 			</script>
 			<div class="btn-group pull-right">
 				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>

@@ -220,8 +220,8 @@ class Core_Log
 				$this->_login, $this->_site, $page, $user_ip, 'HostCMS', 'www.hostcms.ru'
 			);
 
-			$email = defined('EMAIL_TO')
-				? EMAIL_TO
+			$email = defined('ERROR_EMAIL')
+				? ERROR_EMAIL
 				: SUPERUSER_EMAIL;
 
 			$subject = "HostCMS - {$sHttpHost}: " . trim(strip_tags(mb_substr($message, 0, 150)));

@@ -29,7 +29,8 @@ abstract class Seo_Controller{
 	 * @var Site_Model
 	 */
 	protected $_oSeo_Site = NULL;
-	/**
+
+	/**
 	 * The singleton instances.
 	 * @var mixed
 	 */

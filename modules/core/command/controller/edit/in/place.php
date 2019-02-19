@@ -26,7 +26,9 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 		Core_Page::instance()
 			->response($oCore_Response);
 		
-		$result = 'Error';
+		$aResult = array(
+			'status' => 'Error',
+		);
 
 		if (Core::checkPanel())
 		{
@@ -43,17 +45,27 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 				{
 					$oUser = Core_Entity::factory('User')->getCurrent();
 
-					if ($oUser && $oUser->checkObjectAccess($oEntity))
+					// Get Module Name
+					list($moduleName) = explode('_', $modelName);
+					
+					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+					
+					if ($oUser
+						&& $oUser->checkModuleAccess(array($moduleName), $oSite)
+						&& $oUser->checkObjectAccess($oEntity)
+					)
 					{
 						if (!is_null(Core_Array::getPost('loadValue')))
 						{
 							if (isset($oEntity->$fieldName))
 							{
-								$result = $oEntity->$fieldName;
+								$aResult['value'] = $oEntity->$fieldName;
+								$aResult['status'] = 'OK';
 							}
 							elseif (method_exists($oEntity, $fieldName))
 							{
-								$result = $oEntity->$fieldName();
+								$aResult['value'] = $oEntity->$fieldName();
+								$aResult['status'] = 'OK';
 							}
 						}
 						else
@@ -72,12 +84,12 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 								{
 									$oEntity->$fieldName = $value;
 									$oEntity->save();
-									$result = 'OK';
+									$aResult['status'] = 'OK';
 								}
 								elseif (method_exists($oEntity, $fieldName))
 								{
 									$oEntity->$fieldName($value);
-									$result = 'OK';
+									$aResult['status'] = 'OK';
 								}
 							}
 						}
@@ -93,7 +105,7 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 			->header('Vary', 'Accept')
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS')
-			->body(json_encode($result));
+			->body(json_encode($aResult));
 
 		if (strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
 		{

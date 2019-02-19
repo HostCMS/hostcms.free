@@ -17,8 +17,8 @@ class Shop_Warehouse_Model extends Core_Entity
 	 * Callback property_id
 	 * @var int
 	 */
-	public $items = 1;	
-	
+	public $items = 1;
+
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -28,6 +28,10 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_item' => array(),
 		'shop_item_reserved' => array(),
 		'shop_cart' => array(),
+		'shop_warehouse_entry' => array(),
+		'shop_warehouse_inventory' => array(),
+		'shop_warehouse_incoming' => array(),
+		'shop_warehouse_writeoff' => array(),
 	);
 
 	/**
@@ -40,7 +44,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_country_location' => array(),
 		'shop_country_location_city' => array(),
 		'shop_country_location_city_area' => array(),
-		'user' => array()
+		'user' => array(),
 	);
 
 	/**
@@ -159,8 +163,14 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Warehouse_Items->deleteAll(FALSE);
+
 		// Удаляем связи с зарезервированными, прямая связь
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
+
+		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
+		$this->Shop_Warehouse_Inventories->deleteAll(FALSE);
+		$this->Shop_Warehouse_Incomings->deleteAll(FALSE);
+		$this->Shop_Warehouse_Writeoffs->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -185,7 +195,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
 			->execute();
 	}
-	
+
 	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -200,5 +210,80 @@ class Shop_Warehouse_Model extends Core_Entity
 			->value($count)
 			->title($count)
 			->execute();
+	}
+
+	/**
+	 * Get rest
+	 * @param $shop_item_id shop item id
+	 * @param $dateTo date
+	 * @return float
+	 */
+	public function getRest($shop_item_id, $dateTo = NULL)
+	{
+		$count = 0;
+
+		$oShop_Warehouse_Entries = $this->Shop_Warehouse_Entries;
+		$oShop_Warehouse_Entries->queryBuilder()
+			->where('shop_warehouse_entries.shop_item_id', '=', $shop_item_id);
+
+		if (!is_null($dateTo))
+		{
+			$oShop_Warehouse_Entries->queryBuilder()
+				->where('shop_warehouse_entries.datetime', '<=', $dateTo);
+		}
+
+		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll();
+
+		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+		{
+			$type = $oShop_Warehouse_Entry->getDocumentType();
+
+			if (!is_null($type))
+			{
+				switch ($type)
+				{
+					// Инвентаризация. Сброс к значению при инвентаризации.
+					case 0:
+						$count = $oShop_Warehouse_Entry->value;
+					break;
+					// Приход
+					case 1:
+						$count += $oShop_Warehouse_Entry->value;
+					break;
+					// Списание
+					case 2:
+						$count -= $oShop_Warehouse_Entry->value;
+					break;
+					// Пересортица
+					case 3:
+						// У списываемого товара value будет отрицательным
+						$count += $oShop_Warehouse_Entry->value;
+					break;
+				}
+			}
+		}
+
+		return floatval($count);
+	}
+
+	/**
+	 * Set rest
+	 * @param $shop_item_id shop item id
+	 * @param $value value
+	 * @return self
+	 */
+	public function setRest($shop_item_id, $value)
+	{
+		$oShop_Warehouse_Item = $this->Shop_Warehouse_Items->getByShop_item_id($shop_item_id);
+
+		if (is_null($oShop_Warehouse_Item))
+		{
+			$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
+			$oShop_Warehouse_Item->shop_warehouse_id = $this->id;
+			$oShop_Warehouse_Item->shop_item_id = $shop_item_id;
+		}
+
+		$oShop_Warehouse_Item->count = $value;
+		$oShop_Warehouse_Item->save();
 	}
 }

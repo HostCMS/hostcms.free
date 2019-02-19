@@ -509,9 +509,26 @@
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
 		},
+		editWarehouses: function(object) {
+			$.each( $(".shop-item-warehouses-list .row"), function (index, item) {
+				$(this).find('input[name ^= warehouse_]').prop('disabled', false);
+				$(this).find('select[name ^= warehouse_shop_price_id_]').removeClass('hidden');
+			});
+			$(object).addClass('hidden');
+		},
+		toggleShopPrice: function(shop_price_id) {
+			$('.toggle-shop-price-' + shop_price_id).toggleClass('hidden');
+
+			$.each($(".shop-item-table tbody tr"), function (index, item) {
+				var button = $(this).find('a.delete-associated-item'),
+					parentTd = button.parents('td');
+
+				parentTd.detach().appendTo($(this));
+			});
+		},
 		insertSeoTemplate: function(el, text) {
-			if (el == undefined) { return; }
-			el.insertAtCaret(text);
+
+			el && el.insertAtCaret(text);
 		},
 		filterToggleField: function(object)
 		{
@@ -651,14 +668,6 @@
 			var $kanban = $(container + ' > .row'),
 				$prevNav = $('.horizon-prev', container),
 				$nextNav = $('.horizon-next', container);
-
-			/* console.log('container =', container);
-			console.log('$kanban.width() = ', $kanban.width());
-			console.log('$kanban.innerWidth() = ', $kanban.innerWidth());
-			console.log('$kanban.outerWidth() = ', $kanban.outerWidth());
-			console.log('$kanban.get(0).scrollWidth = ', $kanban.get(0).scrollWidth);
-			 */
-
 
 			$.fn.horizon = function () {
 				// Set mousewheel event
@@ -2504,7 +2513,7 @@
 				// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
 				$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
 
-				//  Меняем значение баджа с числом непрочитанных уведомлений
+				// Меняем значение баджа с числом непрочитанных уведомлений
 				$('.navbar li#notifications > a > span.badge')
 					.html(countUnreadNotifications > 99 ? countUnreadNotifications = '∞' : countUnreadNotifications)
 					.toggleClass('hidden', !countUnreadNotifications);
@@ -3532,6 +3541,335 @@
 				window.timerId = undefined;
 				$('.workday-timer .colon').css({ visibility: 'visible'});
 			}
+		},
+		setWarehouseCounts: function(shop_warehouse_id)
+		{
+			var aItems = [];
+
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				aItems.push($(this).data('item-id'));
+			});
+
+			$.ajax({
+				url: '/admin/shop/warehouse/inventory/index.php',
+				type: "POST",
+				data: {'load_warehouse_counts': 1, 'shop_warehouse_id': shop_warehouse_id, 'items': aItems},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+						var id = $(this).data('item-id');
+
+						if (answer[id])
+						{
+							$(this).find('td:first-child').text(index + 1);
+							$(this).find('.fact-warehouse-count').text(answer[id]['count']);
+							$(this).find('.fact-warehouse-sum').text(answer[id]['sum']);
+
+							var jInput = $(this).find('.set-item-count');
+
+							jInput.change();
+							$.changeWarehouseCounts(jInput, 0);
+						}
+					});
+				}
+			});
+		},
+		changeWarehouseCounts: function(jInput, type)
+		{
+			jInput.change(function() {
+				// Replace ',' on '.'
+				var replace = $(this).val().replace(',', '.');
+				$(this).val(replace);
+
+				if ($(this).val() < 0)
+				{
+					$(this).val(0);
+				}
+
+				var parentTr = $(this).parents('tr'),
+					quantity = $.isNumeric($(this).val()) && $(this).val() > 0
+						? parseFloat($(this).val())
+						: 0,
+					price = $.isNumeric(parentTr.find('.price').text())
+						? parseFloat(parentTr.find('.price').text())
+						: 0,
+					sum = $.mathRound((quantity * price), 2);
+
+				switch (type)
+				{
+					// Инвентаризация
+					case 0:
+						var factCount = $.isNumeric(parentTr.find('.fact-warehouse-count').text())
+							? parseFloat(parentTr.find('.fact-warehouse-count').text())
+							: 0,
+						diffCount = $.mathRound((quantity - factCount), 3),
+						diffCountTd = parentTr.find('.diff-warehouse-count'),
+						factSum = $.isNumeric(parentTr.find('.fact-warehouse-sum').text())
+							? parseFloat(parentTr.find('.fact-warehouse-sum').text())
+							: 0,
+						invSumSpan = parentTr.find('.warehouse-inv-sum'),
+						diffSumSpan = parentTr.find('.diff-warehouse-sum');
+
+					diffCountTd
+						.removeClass('palegreen')
+						.removeClass('darkorange');
+
+					if (diffCount > 0)
+					{
+						diffCount = '+' + diffCount;
+						diffCountTd.addClass('palegreen');
+					}
+					else if (diffCount == 0)
+					{
+						diffCountTd
+							.removeClass('palegreen')
+							.removeClass('darkorange');
+					}
+					else
+					{
+						diffCountTd.addClass('darkorange');
+					}
+
+					// Отклонение на складе
+					diffCountTd.text(diffCount);
+
+					// Сумма учтенных
+					invSumSpan.text(sum);
+
+					var invSum = $.isNumeric(invSumSpan.text())
+						? parseFloat(invSumSpan.text())
+						: 0,
+						diffSum = $.mathRound((sum - factSum), 2),
+						parentDiffTd = diffSumSpan.parents('td');
+
+					parentDiffTd
+						.removeClass('palegreen')
+						.removeClass('darkorange');
+
+					if (diffSum > 0)
+					{
+						diffSum = '+' + diffSum;
+						parentDiffTd.addClass('palegreen');
+					}
+					else if (diffSum == 0)
+					{
+						parentDiffTd
+							.removeClass('palegreen')
+							.removeClass('darkorange');
+					}
+					else
+					{
+						parentDiffTd.addClass('darkorange');
+					}
+
+					// Отклонение в сумме
+					diffSumSpan.text(diffSum);
+					break;
+					// Оприходование
+					case 1:
+					case 2:
+						parentTr.find('.fact-warehouse-sum').text(sum);
+						parentTr.find('.hidden-shop-price').val(price);
+					break;
+				}
+			});
+		},
+		prepareShopPrices: function()
+		{
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+
+				$(this).find('td:first-child').text(index + 1);
+				var jInput = $(this).find('.set-item-new-price');
+
+				jInput.change();
+				$.changeShopPrices(jInput);
+			});
+		},
+		changeShopPrices: function(jInput) {
+			jInput.change(function() {
+				// Replace ',' on '.'
+				var replace = $(this).val().replace(',', '.');
+				$(this).val(replace);
+
+				if ($(this).val() < 0)
+				{
+					$(this).val(0);
+				}
+
+				var parentTr = $(this).parents('tr'),
+					newPrice = $.isNumeric($(this).val()) && $(this).val() > 0
+						? parseFloat($(this).val())
+						: 0,
+					shop_price_id = $(this).data('shop-price-id')
+					oldPrice = $.isNumeric(parentTr.find('.old-price-' + shop_price_id).text()) && parentTr.find('.old-price-' + shop_price_id).text() > 0
+						? parseFloat(parentTr.find('.old-price-' + shop_price_id).text())
+						: 0,
+					percent = 0,
+					diffPersentSpan = parentTr.find('.percent-diff-' + shop_price_id),
+					diffPercentValue = (newPrice * 100) / oldPrice;
+
+					diffPersentSpan
+						.removeClass('palegreen')
+						.removeClass('darkorange');
+
+					if(diffPercentValue > 100)
+					{
+						percent = '+' + $.mathRound((diffPercentValue - 100), 2);
+
+						diffPersentSpan.addClass('darkorange');
+					}
+					else
+					{
+						percent = '-' + $.mathRound((100 - diffPercentValue), 2);
+
+						diffPersentSpan.addClass('palegreen');
+					}
+
+					Number.isFinite(diffPercentValue) && newPrice && diffPersentSpan.text(percent + '%');
+			});
+		},
+		recalcPrice: function()
+		{
+			// $.loadingScreen('show');
+
+			var jSelect = $('select.select-price'),
+				shop_price_id = jSelect.val(),
+				aItems = [];
+
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				var id = $(this).data('item-id').toString();
+
+				if (id.includes(','))
+				{
+					var aIds = $(this).data('item-id').split(',');
+					$.each(aIds, function(i, shop_item_id) {
+						aItems.push(shop_item_id);
+					});
+				}
+				else
+				{
+					aItems.push(id);
+				}
+			});
+
+			$.ajax({
+				url: '/admin/shop/warehouse/index.php',
+				type: "POST",
+				data: {'load_prices': 1, 'shop_price_id': shop_price_id, 'items': aItems},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+						var container = $(this),
+							id = container.data('item-id').toString();
+
+						if (id.includes(','))
+						{
+							var aIds = $(this).data('item-id').split(',');
+							$.each(aIds, function(i, shop_item_id) {
+								if (answer[shop_item_id])
+								{
+									var price = answer[shop_item_id]['price'],
+										type = !i ? 'writeoff' : 'incoming';
+
+									// container.find('.price-' + shop_item_id).text(price);
+									container.find('.' + type + '-price').text(price);
+
+									container.find('input[name = writeoff_price_' + shop_item_id + ']').val(price);
+									container.find('input[name = incoming_price_' + shop_item_id + ']').val(price);
+								}
+							});
+						}
+						else
+						{
+							if (answer[id])
+							{
+								container.find('.price').text(answer[id]['price']);
+
+								var jInput = container.find('.set-item-count');
+
+								jInput.change();
+								$.changeWarehouseCounts(jInput, 1);
+							}
+						}
+					});
+				}
+			});
+
+			// $.loadingScreen('hide');
+		},
+		addRegradeItem: function(shop_id)
+		{
+			$('.shop-item-table').append(
+				'<tr id="" data-item-id="">\
+					<td class="index"></td>\
+					<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" /><input type="hidden" name="writeoff_item[]" value="" /></td>\
+					<td><span class="writeoff-measure"></span></td>\
+					<td><span class="writeoff-price"></span></td>\
+					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" /><input type="hidden" name="incoming_item[]" value="" /></td>\
+					<td><span class="incoming-measure"></span></td>\
+					<td><span class="incoming-price"></span></td>\
+					<td><input class="set-item-count form-control" name="shop_item_quantity[]" value="0.00"/></td>\
+					<td><a class="delete-associated-item" onclick="$(this).parents(\'tr\').remove()"><i class="fa fa-times-circle darkorange"></i></a></td>\
+				</tr>'
+			);
+
+			var aItemIds = ['',''];
+
+			$('.writeoff-item-autocomplete, .incoming-item-autocomplete').autocompleteShopItem(shop_id, 0, function(event, ui) {
+				var type = $(this).data('type'),
+					parentTr = $(this).parents('tr');
+
+				parentTr.find('.' + type + '-measure').text(ui.item.measure);
+				parentTr.find('.' + type + '-price').text(ui.item.price_with_tax);
+
+				$(this).next('input').val(ui.item.id);
+
+				parentTr.find('.' + type + '-item-autocomplete').attr('id', ui.item.id);
+
+				aItemIds = $.getIds(aItemIds, $(this));
+				parentTr.attr('data-item-id', aItemIds.slice(-2).join(','));
+			});
+
+			// recount index
+			$('.shop-item-table > tbody tr:last-child td.index').text($('.shop-item-table > tbody tr').length);
+		},
+		getIds: function(aItemIds, object)
+		{
+			var type = object.data('type'),
+				id = object.attr('id'),
+				index = type == 'writeoff' ? 2 : 1;
+
+			aItemIds[aItemIds.length - index] = id;
+
+			return aItemIds;
+		},
+		focusAutocomplete: function(object)
+		{
+			$(object).keydown(function(event){
+				if(event.keyCode == 13){
+					event.preventDefault();
+					$('.add-shop-item').focus();
+					return false;
+				}
+			});
+		},
+		mathRound: function(value, number)
+		{
+			switch (number)
+			{
+				case 2:
+				default:
+					coeff = 100;
+				break;
+				case 3:
+					coeff = 1000;
+				break;
+			}
+
+			// return parseFloat(value).toFixed(number);
+			return Math.round(value * coeff) / coeff;
 		}
 	});
 

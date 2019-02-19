@@ -130,7 +130,7 @@ class Core
 		{
 			$oConstant->define();
 		}
-		
+
 		!defined('TMP_DIR') && define('TMP_DIR', 'hostcmsfiles/tmp/');
 		!defined('DEFAULT_LNG') && define('DEFAULT_LNG', 'ru');
 		!defined('BACKUP_DIR') && define('BACKUP_DIR', CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR);
@@ -169,7 +169,7 @@ class Core
 			'dateTimeFormat' => 'd.m.Y H:i:s',
 			'datePickerFormat' => 'DD.MM.YYYY',
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
-			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'PDF', 'ZIP'),
+			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP', 'PDF', 'ZIP', 'DOC', 'DOCX',  'XLS', 'XLSX'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/Los_Angeles',
 			'translate' => TRUE,
@@ -233,7 +233,7 @@ class Core
 		foreach ($aModules as $oModule)
 		{
 			self::$modulesList[$oModule->path] = $oModule;
-			
+
 			// Call module's __construct()
 			$oModule->active && $oModule->loadModule();
 		}
@@ -391,9 +391,9 @@ class Core
 		// $class = basename($class);
 		$aNamespaces = explode('\\', $class);
 		$aNamespaces = array_map('basename', $aNamespaces);
-		
+
 		$class = array_pop($aNamespaces);
-		
+
 		$aClassName = explode('_', strtolower($class));
 
 		$sFileName = array_pop($aClassName);
@@ -402,7 +402,7 @@ class Core
 		$path = empty($aNamespaces)
 			? ''
 			: implode(DIRECTORY_SEPARATOR, $aNamespaces);
-		
+
 		// If class name doesn't have '_'
 		$path .= empty($aClassName) && empty($aNamespaces)
 			? $sFileName . DIRECTORY_SEPARATOR
@@ -597,6 +597,9 @@ class Core
 		// Адрес эл. почты администратора
 		define('EMAIL_TO', $oSite->getFirstEmail());
 
+		// Технический адрес эл. почты
+		define('ERROR_EMAIL', $oSite->getErrorEmail());
+
 		// Права доступа к директории
 		define('CHMOD', octdec($oSite->chmod)); // octdec - преобразование 8-ричного в 10-тичное
 
@@ -716,7 +719,7 @@ class Core
 		{
 			$scheme = /*(Core_Array::get($_SERVER, 'HTTPS') == 'on' || Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO') == 'https')*/
 				self::httpsUses() ? 'https' : 'http';
-			
+
 			$sUrl = $scheme . '://' . $aDomain[0];
 			if (!empty($_SERVER['HTTP_X_ORIGINAL_URL']))
 			{

@@ -87,4 +87,6 @@ return array(
 	'break' => 'Перерыв',
 	'timesheet_title' => 'Учет рабочего времени',
 	'select_user' => 'Укажите сотрудника',
+	'user_active' => 'Онлайн %s',
+	'user_last_activity' => 'Последняя активность %s',
 );

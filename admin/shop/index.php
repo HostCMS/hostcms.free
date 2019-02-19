@@ -40,6 +40,14 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
+		$aAllPricesIDs = array();
+
+		$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
+		foreach ($aShop_Prices as $oShop_Price)
+		{
+			$aAllPricesIDs[] = $oShop_Price->id;
+		}
+
 		// Указание валюты не обязательно
 		$shop_currency_id = Core_Array::getGet('shop_currency_id');
 		$oShop_Currency = is_numeric($shop_currency_id) && $shop_currency_id > 0
@@ -72,6 +80,22 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
 
+			$measureName = $oShop_Item->shop_measure_id
+				? htmlspecialchars($oShop_Item->Shop_Measure->name)
+				: '';
+
+			$aPrices = array(0 => $oShop_Item->price);
+			foreach ($aAllPricesIDs as $shop_price_id)
+			{
+				$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
+
+				$price = !is_null($oShop_Item_Price)
+					? $oShop_Item_Price->value
+					: $oShop_Item->price;
+
+				$aPrices[$shop_price_id] = htmlspecialchars($price);
+			}
+
 			$aJSON[] = array(
 				'id' => $oShop_Item->id,
 				'label' => $oShop_Item->name,
@@ -81,7 +105,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				'marking' => $oShop_Item->marking,
 				'currency_id' => $oShop_Currency->id,
 				'currency' => $oShop_Currency->name,
-				'count' => $oShop_Item->getRest()
+				'measure' => $measureName,
+				'count' => $oShop_Item->getRest(),
+				'aPrices' => $aPrices
 			);
 		}
 	}

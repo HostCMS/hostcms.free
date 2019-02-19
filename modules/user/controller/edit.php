@@ -24,13 +24,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addSkipColumn('sound')
 			->addSkipColumn('last_activity')
 			->addSkipColumn('image')
-			->addSkipColumn('user_group_id')
-
-			->addSkipColumn('~email')
-			->addSkipColumn('~icq')
-			->addSkipColumn('~site')
-			->addSkipColumn('~position')
-			;
+			->addSkipColumn('user_group_id');
 
 		return parent::setObject($object);
 	}
@@ -54,13 +48,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'));
-
-		/*$oMainTab
-			->delete($this->getField('email'))
-			->delete($this->getField('position'))
-			->delete($this->getField('icq'))
-			->delete($this->getField('site'))
-			;*/
 
 		$oMainTab->move($this->getField('login'), $oMainRow1);
 
@@ -432,6 +419,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		parent::_applyObjectProperty();
 
+		$bSave = isset($_POST['hostcms']['operation']) && in_array($_POST['hostcms']['operation'], array('save', 'saveModal'));
+		
 		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('image', NULL))
@@ -491,25 +480,25 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aUser_Directory_Emails = $this->_object->User_Directory_Emails->findAll();
 		foreach ($aUser_Directory_Emails as $oUser_Directory_Email)
 		{
-			$sEmail = trim(Core_Array::getPost("email#{$oUser_Directory_Email->id}"));
+			$oDirectory_Email = $oUser_Directory_Email->Directory_Email;
+			$sEmail = trim(Core_Array::getPost("email#{$oDirectory_Email->id}"));
 
-			if (!empty($sEmail))
+			if (!empty($sEmail) || $bSave)
 			{
-				$oDirectory_Email = $oUser_Directory_Email->Directory_Email;
 				$oDirectory_Email
-					->directory_email_type_id(intval(Core_Array::getPost("email_type#{$oUser_Directory_Email->id}", 0)))
+					->directory_email_type_id(intval(Core_Array::getPost("email_type#{$oDirectory_Email->id}", 0)))
 					->value($sEmail)
 					->save();
 			}
 			else
 			{
 				// Удаляем пустую строку с полями
-				ob_start();
+				/*ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->value("$.deleteFormRow($(\"#{$windowId} select[name='email_type#{$oUser_Directory_Email->id}']\").closest('.row').find('.btn-delete111').get(0));")
+					->value("$.deleteFormRow($(\"#{$windowId} select[name='email_type#{$oDirectory_Email->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 
-				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
 				$oUser_Directory_Email->Directory_Email->delete();
 			}
 		}
@@ -553,24 +542,25 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aUser_Directory_Phones = $this->_object->User_Directory_Phones->findAll();
 		foreach ($aUser_Directory_Phones as $oUser_Directory_Phone)
 		{
-			$sPhone = trim(Core_Array::getPost("phone#{$oUser_Directory_Phone->id}"));
+			$oDirectory_Phone = $oUser_Directory_Phone->Directory_Phone;
+			$sPhone = trim(Core_Array::getPost("phone#{$oDirectory_Phone->id}"));
 
-			if (!empty($sPhone))
+			if (!empty($sPhone) || $bSave)
 			{
-				$oDirectory_Phone = $oUser_Directory_Phone->Directory_Phone;
+				
 				$oDirectory_Phone
-					->directory_phone_type_id(intval(Core_Array::getPost("phone_type#{$oUser_Directory_Phone->id}", 0)))
+					->directory_phone_type_id(intval(Core_Array::getPost("phone_type#{$oDirectory_Phone->id}", 0)))
 					->value($sPhone)
 					->save();
 			}
 			else
 			{
 				// Удаляем пустую строку с полями
-				ob_start();
+				/*ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->value("$.deleteFormRow($(\"#{$windowId} select[name='phone_type#{$oUser_Directory_Phone->id}']\").closest('.row').find('.btn-delete').get(0));")
+					->value("$.deleteFormRow($(\"#{$windowId} select[name='phone_type#{$oDirectory_Phone->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
-				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
 
 				$oUser_Directory_Phone->Directory_Phone->delete();
 			}
@@ -616,9 +606,11 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aUser_Directory_Socials = $this->_object->User_Directory_Socials->findAll();
 		foreach ($aUser_Directory_Socials as $oUser_Directory_Social)
 		{
-			$sSocial_Address = trim(Core_Array::getPost("social_address#{$oUser_Directory_Social->id}"));
+			$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
+			
+			$sSocial_Address = trim(Core_Array::getPost("social_address#{$oDirectory_Social->id}"));
 
-			if (!empty($sSocial_Address))
+			if (!empty($sSocial_Address) || $bSave)
 			{
 				$aUrl = parse_url($sSocial_Address);
 
@@ -627,20 +619,19 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				!array_key_exists('scheme', $aUrl)
 					&& $sSocial_Address = $sSocial_Address;
 
-				$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
 				$oDirectory_Social
-					->directory_social_type_id(intval(Core_Array::getPost("social#{$oUser_Directory_Social->id}", 0)))
+					->directory_social_type_id(intval(Core_Array::getPost("social#{$oDirectory_Social->id}", 0)))
 					->value($sSocial_Address)
 					->save();
 			}
 			else
 			{
 				// Удаляем пустую строку с полями
-				ob_start();
+				/*ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->value("$.deleteFormRow($(\"#{$windowId} select[name='social#{$oUser_Directory_Social->id}']\").closest('.row').find('.btn-delete').get(0));")
+					->value("$.deleteFormRow($(\"#{$windowId} select[name='social#{$oDirectory_Social->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
-				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
 
 				$oUser_Directory_Social->delete();
 			}
@@ -689,32 +680,29 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		///////////////
 		// Мессенджеры, установленные значения
 		$aUser_Directory_Messengers = $this->_object->User_Directory_Messengers->findAll();
 		foreach ($aUser_Directory_Messengers as $oUser_Directory_Messenger)
 		{
-			$sMessenger_Address = trim(Core_Array::getPost("messenger_username#{$oUser_Directory_Messenger->id}"));
+			$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
+			
+			$sMessenger_Address = trim(Core_Array::getPost("messenger_username#{$oDirectory_Messenger->id}"));
 
-			if (!empty($sMessenger_Address))
+			if (!empty($sMessenger_Address) || $bSave)
 			{
-				$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
-
-				var_dump(intval(Core_Array::getPost("messenger#{$oDirectory_Messenger->id}")));
-
 				$oDirectory_Messenger
-					->directory_messenger_type_id(intval(Core_Array::getPost("messenger#{$oUser_Directory_Messenger->id}", 0)))
+					->directory_messenger_type_id(intval(Core_Array::getPost("messenger#{$oDirectory_Messenger->id}", 0)))
 					->value($sMessenger_Address)
 					->save();
 			}
 			else
 			{
 				// Удаляем пустую строку с полями
-				ob_start();
+				/*ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->value("$.deleteFormRow($(\"#{$windowId} select[name='messenger#{$oUser_Directory_Messenger->id}']\").closest('.row').find('.btn-delete').get(0));")
+					->value("$.deleteFormRow($(\"#{$windowId} select[name='messenger#{$oDirectory_Messenger->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
-				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
 
 				$oUser_Directory_Messenger->delete();
 			}
@@ -762,9 +750,9 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oDirectory_Website = $oUser_Directory_Website->Directory_Website;
 
-			$sWebsite_Address = trim(Core_Array::getPost("website_address#{$oUser_Directory_Website->id}"));
+			$sWebsite_Address = trim(Core_Array::getPost("website_address#{$oDirectory_Website->id}"));
 
-			if (!empty($sWebsite_Address))
+			if (!empty($sWebsite_Address) || $bSave)
 			{
 				$aUrl = parse_url($sWebsite_Address);
 
@@ -774,19 +762,19 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					&& $sWebsite_Address = 'http://' . $sWebsite_Address;
 
 				$oDirectory_Website
-					->description(strval(Core_Array::getPost("website_description#{$oUser_Directory_Website->id}")))
+					->description(strval(Core_Array::getPost("website_description#{$oDirectory_Website->id}")))
 					->value($sWebsite_Address)
 					->save();
 			}
 			else
 			{
 				// Удаляем пустую строку с полями
-				ob_start();
+				/*ob_start();
 				Core::factory('Core_Html_Entity_Script')
-					->value("$.deleteFormRow($(\"#{$windowId} input[name='website_address#{$oUser_Directory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
+					->value("$.deleteFormRow($(\"#{$windowId} input[name='website_address#{$oDirectory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
-
-				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
+				
 				$oDirectory_Website->delete();
 			}
 		}

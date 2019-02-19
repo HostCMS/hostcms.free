@@ -149,9 +149,45 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 {
 	if (!$oUserCurrent->read_only)
 	{
-		$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
+		$sFileName = $sTmpPath = NULL;
+		
+		// Uploaded File
+		if (isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0)
+		{
+			$sFileName = $_FILES['csv_file']['tmp_name'];
+		}
+		// External file
+		else
+		{
+			$altFile = Core_Array::getPost('alternative_file_pointer');
+			
+			if (strpos($altFile, 'http://') === 0 || strpos($altFile, 'https://') === 0)
+			{
+				$Core_Http = Core_Http::instance('curl')
+					->url($altFile)
+					->port(80)
+					->timeout(20)
+					->execute();
+
+				$aHeaders = $Core_Http->parseHeaders();
+				if ($Core_Http->parseHttpStatusCode($aHeaders['status']) != 200)
+				{
+					Core_Message::show('Wrong status: ' . htmlspecialchars($aHeaders['status']), "error");
+				}
+
+				$sFileName = $sTmpPath = tempnam(CMS_FOLDER . TMP_DIR, 'CSV');
+
+				Core_File::write($sTmpPath, $Core_Http->getBody());
+			}
+			else
+			{
+				$sFileName = CMS_FOLDER . $altFile;
+			}
+		}
+		
+		/*$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
 			? $_FILES['csv_file']['tmp_name']
-			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');
+			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');*/
 
 		if (is_file($sFileName) && is_readable($sFileName))
 		{
@@ -160,12 +196,19 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 				Core_Event::notify('Shop_Item_Import.oBeforeImportCSV', NULL, array($sFileName));
 
 				// Обработка CSV-файла
-				$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.csv';
+				$sTmpFileName = 'import_' . date('U') . '.csv';
+				$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . $sTmpFileName;
 
 				try {
-					Core_File::upload($sFileName, $sTmpFileName);
+					Core_File::upload($sFileName, $sTmpFileFullpath);
 
-					if ($fInputFile = fopen($sTmpFileName, 'rb'))
+					// Delete uploaded by cURL file
+					if (!is_null($sTmpPath) && is_file($sTmpPath))
+					{
+						Core_File::delete($sTmpPath);
+					}
+
+					if ($fInputFile = fopen($sTmpFileFullpath, 'rb'))
 					{
 						$sSeparator = Core_Array::getPost('import_price_separator');
 
@@ -217,11 +260,23 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						{
 							$iValuesCount = count($oShop_Item_Import_Csv_Controller->aCaptions);
 
-							$pos = 0;
+							// Генерируем массив для выпадающего списка с цветными элементами
+							$aOptions = array();
+							for ($j = 0; $j < $iValuesCount; $j++)
+							{
+								$aOptions[$oShop_Item_Import_Csv_Controller->aEntities[$j]] = array(
+									'value' => $oShop_Item_Import_Csv_Controller->aCaptions[$j],
+									'attr' => array('style' => 'background-color: ' . (
+										!empty($oShop_Item_Import_Csv_Controller->aColors[$j])
+											? $oShop_Item_Import_Csv_Controller->aColors[$j]
+											: '#000')
+									)
+								);
+							}
 
 							$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 
-							for($i = 0; $i < $iFieldCount; $i++)
+							for ($i = 0; $i < $iFieldCount; $i++)
 							{
 								$oCurrentRow = Admin_Form_Entity::factory('Div')->class('row');
 
@@ -230,14 +285,12 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 										//->caption('')
 										->value($aCsvLine[$i])
 										->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-										);
-
-								$aOptions = array();
+									);
 
 								$isset_selected = FALSE;
 
 								// Генерируем выпадающий список с цветными элементами
-								for($j = 0; $j < $iValuesCount; $j++)
+								for ($j = 0; $j < $iValuesCount; $j++)
 								{
 									$aCsvLine[$i] = trim($aCsvLine[$i]);
 
@@ -246,13 +299,13 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									if (!$isset_selected
 									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($sCaption)
 									|| (strlen($sCaption) > 0
-									&& strlen($aCsvLine[$i]) > 0
-									&&
-									(strpos($aCsvLine[$i], $sCaption) !== FALSE
-									|| strpos($sCaption, $aCsvLine[$i]) !== FALSE)
-									// Чтобы не было срабатывания "Город" -> "Городской телефон"
-									// Если есть целиком подходящее поле
-									&& !array_search($aCsvLine[$i], $oShop_Item_Import_Csv_Controller->aCaptions))
+										&& strlen($aCsvLine[$i]) > 0
+										&&
+										(strpos($aCsvLine[$i], $sCaption) !== FALSE
+										|| strpos($sCaption, $aCsvLine[$i]) !== FALSE)
+										// Чтобы не было срабатывания "Город" -> "Городской телефон"
+										// Если есть целиком подходящее поле
+										&& !array_search($aCsvLine[$i], $oShop_Item_Import_Csv_Controller->aCaptions))
 									))
 									{
 										$selected = $oShop_Item_Import_Csv_Controller->aEntities[$j];
@@ -264,26 +317,15 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									{
 										$selected = -1;
 									}
-
-									$aOptions[$oShop_Item_Import_Csv_Controller->aEntities[$j]] = array(
-										'value' => $sCaption,
-										'attr' => array('style' => 'background-color: ' . (
-											!empty($oShop_Item_Import_Csv_Controller->aColors[$pos])
-												? $oShop_Item_Import_Csv_Controller->aColors[$j]
-												: '#000')
-										)
-									);
-
-									$pos++;
 								}
 
-								$pos = 0;
-
-								$oCurrentRow->add(Admin_Form_Entity::factory('Select')
-									->name("field{$i}")
-									->options($aOptions)
-									->value($selected)
-									->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')));
+								$oCurrentRow->add(
+									Admin_Form_Entity::factory('Select')
+										->name("field{$i}")
+										->options($aOptions)
+										->value($selected)
+										->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+								);
 
 								$oMainTab->add($oCurrentRow);
 							}
@@ -323,28 +365,29 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 				$sOnClick = $oAdmin_Form_Controller->getAdminSendForm('start_import');
 			}
+			// CML
 			else
 			{
 				Core_Event::notify('Shop_Item_Import.oBeforeImportCML', NULL, array($sFileName));
 
 				// Обработка CommerceML-файла
-				$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.cml';
+				$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.cml';
 
 				try {
-					Core_File::upload($sFileName, $sTmpFileName);
+					Core_File::upload($sFileName, $sTmpFileFullpath);
 
 					Core_Session::start();
 
 					// Reset importPosition
 					$_SESSION['importPosition'] = 0;
 
-					$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sTmpFileName);
+					$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sTmpFileFullpath);
 					$oShop_Item_Import_Cml_Controller->timeout = 0;
 					$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
 					$oShop_Item_Import_Cml_Controller->iShopGroupId = $shop_groups_parent_id;
 					$oShop_Item_Import_Cml_Controller->sPicturesPath = Core_Array::getPost('import_price_load_files_path');
 					$oShop_Item_Import_Cml_Controller->importAction = Core_Array::getPost('import_price_action_items');
-					
+
 					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
 						? SHOP_DEFAULT_CML_CURRENCY_NAME
 						: 'Розничная';
@@ -352,15 +395,15 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
 					Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
-					echo Core::_('Shop_Item.count_insert_item') . ' &#151; <b>' . $aReturn['insertItemCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.count_update_item') . ' &#151; <b>' . $aReturn['updateItemCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.create_catalog') . ' &#151; <b>' . $aReturn['insertDirCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.update_catalog') . ' &#151; <b>' . $aReturn['updateDirCount'] . '</b><br/>';
+					echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $aReturn['insertItemCount'] . '</b><br/>';
+					echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $aReturn['updateItemCount'] . '</b><br/>';
+					echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $aReturn['insertDirCount'] . '</b><br/>';
+					echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $aReturn['updateDirCount'] . '</b><br/>';
 				} catch (Exception $exc) {
 					Core_Message::show($exc->getMessage(), "error");
 				}
 
-				Core_File::delete($sTmpFileName);
+				Core_File::delete($sTmpFileFullpath);
 
 				$sOnClick = "";
 			}
@@ -407,10 +450,10 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			$iNextSeekPosition = 0;
 
-			$sCsvFilename = Core_Array::getPost('csv_filename');
+			$sTmpFileName = basename(Core_Array::getPost('csv_filename'));
 
 			$Shop_Item_Import_Csv_Controller
-				->file($sCsvFilename)
+				->file($sTmpFileName)
 				->encoding(Core_Array::getPost('locale', 'UTF-8'))
 				->csv_fields($aConformity)
 				->time(Core_Array::getPost('import_price_max_time'))
@@ -425,7 +468,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			if (Core_Array::getPost('firstlineheader', 0))
 			{
-				$fInputFile = fopen($Shop_Item_Import_Csv_Controller->file, 'rb');
+				$fInputFile = fopen(CMS_FOLDER . TMP_DIR . $Shop_Item_Import_Csv_Controller->file, 'rb');
 				@fgetcsv($fInputFile, 0, $Shop_Item_Import_Csv_Controller->separator, $Shop_Item_Import_Csv_Controller->limiter);
 				$iNextSeekPosition = ftell($fInputFile);
 				fclose($fInputFile);
@@ -456,6 +499,12 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			$sRedirectAction = "";
 			Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 			showStat($Shop_Item_Import_Csv_Controller);
+
+			$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . $Shop_Item_Import_Csv_Controller->file;
+			if (is_file($sTmpFileFullpath))
+			{
+				Core_File::delete($sTmpFileFullpath);
+			}
 		}
 
 		$oAdmin_Form_Entity_Form->add(
@@ -656,10 +705,10 @@ else
 
 function showStat($Shop_Item_Import_Csv_Controller)
 {
-	echo Core::_('Shop_Item.count_insert_item') . ' &#151; <b>' . $Shop_Item_Import_Csv_Controller->getInsertedItemsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.count_update_item') . ' &#151; <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedItemsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.create_catalog') . ' &#151; <b>' . $Shop_Item_Import_Csv_Controller->getInsertedGroupsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.update_catalog') . ' &#151; <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedGroupsCount() . '</b><br/>';
+	echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getInsertedItemsCount() . '</b><br/>';
+	echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedItemsCount() . '</b><br/>';
+	echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getInsertedGroupsCount() . '</b><br/>';
+	echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedGroupsCount() . '</b><br/>';
 }
 
 if ($sOnClick)
@@ -679,12 +728,16 @@ if ($sOnClick)
 }
 
 $oAdmin_Form_Entity_Form->execute();
+$oAdmin_Form_Entity_Form->clear();
+
 $content = ob_get_clean();
 
 ob_start();
 $oAdmin_View
 	->content($content)
 	->show();
+
+unset($content);
 
 Core_Skin::instance()
 	->answer()

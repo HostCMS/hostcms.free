@@ -94,6 +94,13 @@ class Structure_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -715,12 +722,12 @@ class Structure_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' .
 			$this->id . ' ' .
 			htmlspecialchars($this->seo_title) . ' ' .

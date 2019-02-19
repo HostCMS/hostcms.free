@@ -275,7 +275,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->getField('description')
 					->divAttr(array('class' => 'form-group col-xs-12'))
-					->wysiwyg(TRUE);
+					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				$oMainTab->move($this->getField('description'), $oMainRow6);
 

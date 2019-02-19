@@ -293,13 +293,33 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 											);
 										}
 
-										$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
+										$iAdmin_Form_Id = 220;
+										$sAdminFormAction = '/admin/event/index.php';
 
-										$oCore_Html_Entity_Dropdownlist
-											->value($oEvent->event_status_id)
-											->options($aMasEventStatuses)
-											->onchange('$.eventsWidgetChangeStatus(this)')
-											->execute();
+										$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
+										$oAdmin_Form_Action = $oAdmin_Form
+											->Admin_Form_Actions
+											->getByName('changeStatus');
+
+										if ($oAdmin_Form_Action)
+										{
+											$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+											$oAdmin_Form_Controller
+												->path($sAdminFormAction)
+												->window('id_content')
+												->checked(array(0 => array(0)));
+
+											$path = $oAdmin_Form_Controller->getPath();
+
+											$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
+
+											$oCore_Html_Entity_Dropdownlist
+												->value($oEvent->event_status_id)
+												->options($aMasEventStatuses)
+												// ->onchange('$.eventsWidgetChangeStatus(this)')
+												->onchange("$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$oEvent->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+												->execute();
+										}
 										?>
 									</div>
 									<div class="task-time"><i class="fa fa-clock-o"></i> <?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($oEvent->datetime)) ?></div>
@@ -309,7 +329,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 											? '<i class="fa fa-clock-o event-title-deadline"></i>'
 											: '';
 										?>
-										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1142"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
+										<span class="task-title editable" id="apply_check_0_<?php echo $oEvent->id ?>_fv_1226"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name);?></span>
 										<?php
 											$isCreator = is_null($oEvent_User) ? 0 : $oEvent_User->creator;
 											// Текущий пользователь - не создатель дела
@@ -339,13 +359,16 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 				</div>
 			</div><!--Widget Body-->
 			<script>
-				$('#eventsAdminPage .tasks-list')
+				var obj = $('#eventsAdminPage .tasks-list')
 					.slimscroll({
 						//height: '500px',
 						height: 'auto',
 						color: 'rgba(0,0,0,0.3)',
-						size: '5px'
+						size: '5px',
+						wheelStep: 5
 					});
+
+				//$('#eventsAdminPage .tasks-list').on('slimscroll', function(){console.log('$(this).children().length = ' + ($(this).children().length - 1), '$(this)[0].scrollHeight = ' + $(this)[0].scrollHeight, '$(this).outerHeight() = ' + $(this).outerHeight())});
 
 				var slimScrollBarTop = $('#eventsAdminPage').data('slimScrollBarTop');
 

@@ -104,21 +104,6 @@ class Core_Event
 		{
 			foreach (self::$_attached[$eventName] as $observer)
 			{
-				/*if (!isset($GLOBALS['a']))
-				{
-					$GLOBALS['a'] = 1;
-					
-					//$debug = var_export($eventName, true);
-					
-					Core_Log::instance()
-						->clear()
-						->status(Core_Log::$MESSAGE)
-						->notify(FALSE)
-						->write($eventName);
-						
-					unset($GLOBALS['a']);
-				}*/
-				
 				self::$_lastReturn = call_user_func($observer, $object, $args);
 				if (self::$_lastReturn === FALSE)
 				{

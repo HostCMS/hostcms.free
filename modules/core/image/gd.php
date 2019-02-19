@@ -48,9 +48,69 @@ class Core_Image_Gd extends Core_Image
 		$sourceY = $picsize['height'];
 
 		/* Если размеры исходного файла больше максимальных, тогда масштабируем*/
-		if (($sourceX > $maxWidth || $sourceY > $maxHeight)
-		/*&& $maxWidth != 0 && $maxHeight != 0*/)
+		if (($sourceX > $maxWidth || $sourceY > $maxHeight) /*&& $maxWidth != 0 && $maxHeight != 0*/)
 		{
+			//$ext = Core_File::getExtension($targetFile);
+			$iImagetype = Core_Image::instance()->exifImagetype($sourceFile);
+
+			if ($iImagetype == IMAGETYPE_JPEG)
+			{
+				$sourceResource = imagecreatefromjpeg($sourceFile);
+			}
+			elseif ($iImagetype == IMAGETYPE_PNG)
+			{
+				$sourceResource = imagecreatefrompng($sourceFile);
+			}
+			elseif ($iImagetype == IMAGETYPE_GIF)
+			{
+				$sourceResource = imagecreatefromgif($sourceFile);
+			}
+			elseif(defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+			{
+				$sourceResource = imagecreatefromwebp($sourceFile);
+			}
+			else
+			{
+				return FALSE;
+			}
+
+			if ($sourceResource)
+			{
+				// Image Rotate
+				if ($iImagetype == IMAGETYPE_JPEG && function_exists('exif_read_data'))
+				{
+					$aEXIF = @exif_read_data($sourceFile, 'IFD0');
+
+					if (isset($aEXIF['Orientation']))
+					{
+						switch ($aEXIF['Orientation'])
+						{
+							case 3: // Поворот на 180 градусов
+								$sourceResource = imagerotate($sourceResource, 180, 0);
+							break;
+							case 6: // Поворот вправо на 90 градусов
+								$sourceResource = imagerotate($sourceResource, -90, 0);
+
+								$tmp = $sourceX;
+								$sourceX = $sourceY;
+								$sourceY = $tmp;
+							break;
+							case 8: // Поворот влево на 90 градусов
+								$sourceResource = imagerotate($sourceResource, 90, 0);
+
+								$tmp = $sourceX;
+								$sourceX = $sourceY;
+								$sourceY = $tmp;
+							break;
+						}
+					}
+				}
+			}
+			else
+			{
+				return FALSE;
+			}
+
 			if ($preserveAspectRatio)
 			{
 				$destX = $sourceX;
@@ -142,65 +202,29 @@ class Core_Image_Gd extends Core_Image
 				$targetResourceStep2 = imagecreatetruecolor($destX_step2, $destY_step2);
 			}
 
-			//$ext = Core_File::getExtension($targetFile);
-			$iImagetype = Core_Image::instance()->exifImagetype($sourceFile);
-
 			if ($iImagetype == IMAGETYPE_JPEG)
 			{
 				$quality = is_null($quality)
 					? JPG_QUALITY
 					: intval($quality);
 
-				$sourceResource = imagecreatefromjpeg($sourceFile);
+				// Изменяем размер оригинальной картинки и копируем в созданую картинку
+				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
 
-				if ($sourceResource)
+				if ($preserveAspectRatio)
 				{
-					// Image Rotate
-					if (function_exists('exif_read_data'))
-					{
-						$aEXIF = @exif_read_data($sourceFile, 'IFD0');
-
-						if (isset($aEXIF['Orientation']))
-						{
-							switch ($aEXIF['Orientation'])
-							{
-								case 3: // Поворот на 180 градусов
-									$sourceResource = imagerotate($sourceResource, 180, 0);
-								break;
-								case 6: // Поворот вправо на 90 градусов
-									$sourceResource = imagerotate($sourceResource, -90, 0);
-									$tmp = $destX;
-									$destX = $destY;
-									$destY = $tmp;
-								break;
-								case 8: // Поворот влево на 90 градусов
-									$sourceResource = imagerotate($sourceResource, 90, 0);
-									$tmp = $destX;
-									$destX = $destY;
-									$destY = $tmp;
-								break;
-							}
-						}
-					}
-
-					// Изменяем размер оригинальной картинки и копируем в созданую картинку
-					imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
-
-					if ($preserveAspectRatio)
-					{
-						imagejpeg($targetResourceStep1, $targetFile, $quality);
-					}
-					else
-					{
-						imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
-
-						imagejpeg($targetResourceStep2, $targetFile, $quality);
-						imagedestroy($targetResourceStep2);
-					}
-					@chmod($targetFile, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
+					imagejpeg($targetResourceStep1, $targetFile, $quality);
 				}
+				else
+				{
+					imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+
+					imagejpeg($targetResourceStep2, $targetFile, $quality);
+					imagedestroy($targetResourceStep2);
+				}
+				@chmod($targetFile, CHMOD_FILE);
+
+				imagedestroy($sourceResource);
 			}
 			elseif ($iImagetype == IMAGETYPE_PNG)
 			{
@@ -208,67 +232,81 @@ class Core_Image_Gd extends Core_Image
 					? PNG_QUALITY
 					: intval($quality);
 
-				$sourceResource = imagecreatefrompng($sourceFile);
+				imagealphablending($targetResourceStep1, FALSE);
+				imagesavealpha($targetResourceStep1, TRUE);
 
-				if ($sourceResource)
+				//$transparent = imagecolorallocatealpha($targetResourceStep1, 255, 255, 255, 127);
+				//imagefilledrectangle($targetResourceStep1, 0, 0, $destX, $destY, $transparent);
+
+				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
+
+				if ($preserveAspectRatio)
 				{
-					imagealphablending($targetResourceStep1, FALSE);
-					imagesavealpha($targetResourceStep1, TRUE);
-
-					//$transparent = imagecolorallocatealpha($targetResourceStep1, 255, 255, 255, 127);
-					//imagefilledrectangle($targetResourceStep1, 0, 0, $destX, $destY, $transparent);
-
-					imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
-
-					if ($preserveAspectRatio)
-					{
-						imagepng($targetResourceStep1, $targetFile, $quality);
-					}
-					else
-					{
-						imagealphablending($targetResourceStep2, FALSE);
-						imagesavealpha($targetResourceStep2, TRUE);
-
-						//imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
-						imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
-
-						imagepng($targetResourceStep2, $targetFile, $quality);
-						imagedestroy($targetResourceStep2);
-					}
-					@chmod($targetFile, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
+					imagepng($targetResourceStep1, $targetFile, $quality);
 				}
+				else
+				{
+					imagealphablending($targetResourceStep2, FALSE);
+					imagesavealpha($targetResourceStep2, TRUE);
+
+					//imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
+
+					imagepng($targetResourceStep2, $targetFile, $quality);
+					imagedestroy($targetResourceStep2);
+				}
+				@chmod($targetFile, CHMOD_FILE);
+
+				imagedestroy($sourceResource);
 			}
 			elseif ($iImagetype == IMAGETYPE_GIF)
 			{
-				$sourceResource = imagecreatefromgif ($sourceFile);
+				self::setTransparency($targetResourceStep1, $sourceResource);
 
-				if ($sourceResource)
+				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
+				//imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
+
+				if ($preserveAspectRatio)
 				{
-					self::setTransparency($targetResourceStep1, $sourceResource);
-
-					imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
-					//imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
-
-					if ($preserveAspectRatio)
-					{
-						imagegif ($targetResourceStep1, $targetFile);
-					}
-					else
-					{
-						//imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
-						imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
-
-						imagegif ($targetResourceStep2, $targetFile);
-						imagedestroy($targetResourceStep2);
-					}
-					@chmod($targetFile, CHMOD_FILE);
-
-					imagedestroy($sourceResource);
+					imagegif ($targetResourceStep1, $targetFile);
 				}
+				else
+				{
+					//imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
+
+					imagegif ($targetResourceStep2, $targetFile);
+					imagedestroy($targetResourceStep2);
+				}
+				@chmod($targetFile, CHMOD_FILE);
+
+				imagedestroy($sourceResource);
 			}
-			else
+			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
+			{
+				$quality = is_null($quality)
+					? 80
+					: intval($quality);
+
+				// Изменяем размер оригинальной картинки и копируем в созданую картинку
+				imagecopyresampled($targetResourceStep1, $sourceResource, 0, 0, 0, 0, $destX, $destY, $sourceX, $sourceY);
+
+				if ($preserveAspectRatio)
+				{
+					imagewebp($targetResourceStep1, $targetFile, $quality);
+				}
+				else
+				{
+					imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
+
+					imagewebp($targetResourceStep2, $targetFile, $quality);
+					imagedestroy($targetResourceStep2);
+				}
+				@chmod($targetFile, CHMOD_FILE);
+
+				imagedestroy($sourceResource);
+			}
+			/*else
 			{
 				imagedestroy($targetResourceStep1);
 
@@ -278,7 +316,7 @@ class Core_Image_Gd extends Core_Image
 				}
 
 				return FALSE;
-			}
+			}*/
 
 			imagedestroy($targetResourceStep1);
 		}

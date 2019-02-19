@@ -554,6 +554,27 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 
 			$oDocumentsTabRow5->add($oAdmin_Form_Entity_Div_Print_Form_Buttons);
+
+			// Печать
+			$moduleName = $this->_Admin_Form_Controller->module->getModuleName();
+
+			$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
+
+			if (!is_null($oModule))
+			{
+				$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
+				$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
+
+				$printlayoutsButton = Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 0, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+
+				$oDocumentsTabRow5
+					->add(Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12 col-sm-3')
+						->add(
+							Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+						)
+				);
+			}
 		}
 
 		$oAdditionalTab->delete(

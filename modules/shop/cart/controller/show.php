@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
@@ -49,6 +50,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'couponText',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'warehousesItems',
 		'taxes',
 		'specialprices',
 		'associatedItems',
@@ -126,7 +128,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$this->itemsProperties = $this->taxes = $this->specialprices
 			= $this->calculateCounts = $this->associatedItems = FALSE;
 
-		$this->itemsPropertiesList = TRUE;
+		$this->itemsPropertiesList = $this->warehousesItems = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
 	}
@@ -246,6 +248,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					$this->addEntity(
 						$oShop_Cart
 							->clearEntities()
+							->showXmlWarehousesItems($this->warehousesItems)
 							->showXmlProperties($this->itemsProperties)
 							->showXmlSpecialprices($this->specialprices)
 							->showXmlAssociatedItems($this->associatedItems)

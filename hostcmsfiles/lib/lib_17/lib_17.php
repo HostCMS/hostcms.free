@@ -124,8 +124,8 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 		&& ($oForum_Category = $oForum_Topic->Forum_Category)
 		&& ($oForum_Category->id == $Forum_Controller_Show->category)))
 	{
-		$topic_subject = Core_Str::stripTags(strval(Core_Array::getPost('topic_subject')));
-		$topic_text = strval(Core_Array::getPost('topic_text'));
+		$topic_subject = Core_Str::removeEmoji(Core_Str::stripTags(strval(Core_Array::getPost('topic_subject'))));
+		$topic_text = Core_Str::removeEmoji(strval(Core_Array::getPost('topic_text')));
 
 		$status = 0;
 
@@ -292,18 +292,19 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 					{
 						$oForum_Category->add($oForum_Topic);
 
-						if (!is_null($oSiteuser))
-						{
-							$aPropertyValues = $Forum_Controller_Show->getCountMessageProperty();
-							$aPropertyValues->value = $aPropertyValues->value + 1;
-							$aPropertyValues->save();
-						}
-
 						$oForum_Topic_Post = Core_Entity::factory('Forum_Topic_Post');
 						$oForum_Topic_Post->siteuser_id = !is_null($oSiteuser) ? $oSiteuser->id : 0;
 						$oForum_Topic_Post->subject = $topic_subject;
 						$oForum_Topic_Post->text = $topic_text;
 						$oForum_Topic->add($oForum_Topic_Post);
+
+						// Пересчитываем количество сообщений
+						if (!is_null($oSiteuser))
+						{
+							$oForum_Siteuser_Count = $Forum_Controller_Show->getCountMessageProperty();
+							$oForum_Siteuser_Count->count = $oForum_Siteuser_Count->count + 1;
+							$oForum_Siteuser_Count->save();
+						}
 
 						// Подписываем создателя темы
 						if ($oSiteuser && Core_Array::getPost('subscribe'))
@@ -561,6 +562,14 @@ elseif ($Forum_Controller_Show->topic)
 				?><script type="text/javascript">setTimeout(function(){ location = '<?php echo $path?>' }, 0);</script><?php
 			}
 
+			// Пересчитываем количество сообщений
+			if (!is_null($oSiteuser))
+			{
+				$oForum_Siteuser_Count = $Forum_Controller_Show->getCountMessageProperty();
+				$oForum_Siteuser_Count->count = $oForum_Siteuser_Count->count - 1;
+				$oForum_Siteuser_Count->save();
+			}
+
 			return;
 		}
 	}
@@ -592,8 +601,8 @@ elseif ($Forum_Controller_Show->topic)
 		&& ($oForum_Topic->id == $Forum_Controller_Show->topic))
 	)
 	{
-		$post_title = strval(Core_Array::getPost('post_title'));
-		$post_text = strval(Core_Array::getPost('post_text'));
+		$post_title = Core_Str::removeEmoji(strval(Core_Array::getPost('post_title')));
+		$post_text = Core_Str::removeEmoji(strval(Core_Array::getPost('post_text')));
 
 		$status = 0;
 
@@ -674,18 +683,19 @@ elseif ($Forum_Controller_Show->topic)
 				// Добавление сообщения
 				if (!$Forum_Controller_Show->editPost)
 				{
-					if (!is_null($oSiteuser))
-					{
-						$aPropertyValues = $Forum_Controller_Show->getCountMessageProperty();
-						$aPropertyValues->value = $aPropertyValues->value + 1;
-						$aPropertyValues->save();
-					}
-
 					$oForum_Topic_Post = Core_Entity::factory('Forum_Topic_Post');
 					$oForum_Topic_Post->siteuser_id = !is_null($oSiteuser) ? $oSiteuser->id : 0;
 					$oForum_Topic_Post->subject = $post_title;
 					$oForum_Topic_Post->text = $post_text;
 					$oForum_Topic->add($oForum_Topic_Post);
+
+					// Пересчитываем количество сообщений
+					if (!is_null($oSiteuser))
+					{
+						$oForum_Siteuser_Count = $Forum_Controller_Show->getCountMessageProperty();
+						$oForum_Siteuser_Count->count = $oForum_Siteuser_Count->count + 1;
+						$oForum_Siteuser_Count->save();
+					}
 
 					$oForum_Topic->clearEntities();
 					$oForum_Category

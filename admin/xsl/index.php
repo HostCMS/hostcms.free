@@ -26,6 +26,9 @@ $oAdmin_Form_Controller
 	->title(Core::_('Xsl.menu'))
 	->pageTitle(Core::_('Xsl.menu'));
 
+// Строка навигации
+$xsl_dir_id = intval(Core_Array::getGet('xsl_dir_id', 0));
+	
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -68,11 +71,30 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+$additionalParams = 'xsl_dir_id=' . $xsl_dir_id;
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-
-// Строка навигации
-$xsl_dir_id = intval(Core_Array::getGet('xsl_dir_id', 0));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -176,14 +198,17 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Xsl_Dir')
 );
 
-// Ограничение источника 0 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('parent_id', '=', $xsl_dir_id)
-	)
-);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('xsl_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('xsl_dirs.parent_id', '=', $xsl_dir_id)));
+}
 
-// Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
@@ -193,12 +218,18 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Xsl')
 );
 
-// Ограничение источника 1 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('xsl_dir_id', '=', $xsl_dir_id)
-	)
-)->changeField('name', 'type', 1);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('xsls.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('xsls.xsl_dir_id', '=', $xsl_dir_id)));
+}
+
+$oAdmin_Form_Dataset->changeField('name', 'type', 1);
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

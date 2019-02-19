@@ -216,28 +216,29 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	
 	/**
 	 * Add external properties container to $parentObject
-	 * @param int $parent_id ID of parent directory of properties
+	 * @param int $property_dir_id ID of parent directory of properties
 	 * @param object $parentObject
 	 * @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
 	 * @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
 	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
 	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
 	 * @hostcms-event Property_Controller_Tab.onSetPropertyType
+	 * @hostcms-event Property_Controller_Tab.onBeforeAddSection
 	 */
-	protected function _setPropertyDirs($parent_id = 0, $parentObject)
+	protected function _setPropertyDirs($property_dir_id = 0, $parentObject)
 	{
 		$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Section')
-			->caption($parent_id == 0
+			->caption($property_dir_id == 0
 				? Core::_('Property_Dir.main_section')
-				: htmlspecialchars(Core_Entity::factory('Property_Dir', $parent_id)->name)
+				: htmlspecialchars(Core_Entity::factory('Property_Dir', $property_dir_id)->name)
 			)
-			->id('accordion_' . $parent_id);
+			->id('accordion_' . $property_dir_id);
 
 		// Properties
 		$oProperties = $this->_getProperties();
 		$oProperties
 			->queryBuilder()
-			->where('property_dir_id', '=', $parent_id);
+			->where('property_dir_id', '=', $property_dir_id);
 
 		$aProperties = $oProperties->findAll();
 		foreach ($aProperties as $oProperty)
@@ -344,7 +345,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						case 6: // Wysiwyg
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
-								->wysiwyg(TRUE)
+								->wysiwyg(Core::moduleIsActive('wysiwyg'))
 								->template_id($this->template_id);
 						break;
 
@@ -468,7 +469,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
 									->id("property_{$oProperty->id}_{$oProperty_Value->id}");
 
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
+								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
 								$oAdmin_Form_Entity_Section->add(
 									Admin_Form_Entity::factory('Div')
@@ -513,6 +514,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
+							
 							$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
 						}
 						else
@@ -536,6 +539,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
 									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
+								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+									
 								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
 							}
 						}
@@ -567,6 +572,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Section, $oProperty));
+							
 							$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
 						}
 						else
@@ -587,6 +594,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$oNewAdmin_Form_Entity_Shop_Items_Input
 									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
 									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+									
+								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
 								$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
 							}
@@ -608,14 +617,16 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$oProperty_Dirs
 			->queryBuilder()
-			->where('parent_id', '=', $parent_id);
+			->where('parent_id', '=', $property_dir_id);
 
 		$aProperty_Dirs = $oProperty_Dirs->findAll();
 		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
-			$this->_setPropertyDirs($oProperty_Dir->id, $parent_id == 0 ? $this->_tab : $oAdmin_Form_Entity_Section);
+			$this->_setPropertyDirs($oProperty_Dir->id, $property_dir_id == 0 ? $this->_tab : $oAdmin_Form_Entity_Section);
 		}
 
+		Core_Event::notify('Property_Controller_Tab.onBeforeAddSection', $this, array($oAdmin_Form_Entity_Section, $property_dir_id));
+		
 		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
 	}
 

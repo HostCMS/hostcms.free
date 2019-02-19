@@ -70,7 +70,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	/**
 	 * Set result type as an object with className
 	 * @param mixed $className Object class name
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function asObject($className = NULL)
 	{
@@ -80,7 +80,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Set result type as an array
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function asAssoc()
 	{
@@ -90,7 +90,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Set operator as a default operator
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function setDefaultOperator()
 	{
@@ -101,7 +101,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Set operator as AND
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function setAnd()
 	{
@@ -111,7 +111,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Set operator as OR
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function setOr()
 	{
@@ -121,7 +121,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Open bracket in WHERE
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function open()
 	{
@@ -137,7 +137,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Close bracket in WHERE
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function close()
 	{
@@ -162,7 +162,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	protected function _join($type, $table, $column = NULL, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -192,7 +192,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function join($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -212,7 +212,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function leftJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -233,7 +233,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $expression expression
 	 * @param string $value value
 	 * @param string $additionalConditions additional conditions
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function rightJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
@@ -249,7 +249,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * $Core_QueryBuilder_Select->crossJoin('join1');
 	 * </code>
 	 * @param string $table table name
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function crossJoin($table)
 	{
@@ -263,7 +263,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * $Core_QueryBuilder_Select->naturalJoin('join1');
 	 * </code>
 	 * @param string $table table name
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function naturalJoin($table)
 	{
@@ -289,7 +289,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $column column
 	 * @param string $expression expression
 	 * @param string $value value
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function where($column, $expression = NULL, $value = NULL)
 	{
@@ -480,7 +480,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @param string $column column
 	 * @param string $direction sorting direction
 	 * @param boolean $binary binary option
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function orderBy($column, $direction = 'ASC', $binary = FALSE)
 	{
@@ -551,7 +551,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * </code>
 	 * @param int $arg1 offset
 	 * @param int $arg2 limit
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function limit($arg1, $arg2 = NULL)
 	{
@@ -574,7 +574,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * $Core_QueryBuilder_Select->offset(10);
 	 * </code>
 	 * @param int $offset offset
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function offset($offset)
 	{
@@ -593,7 +593,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 	/**
 	 * Clear ORDER BY
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function clearOrderBy()
 	{
@@ -609,25 +609,44 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	{
 		return $this->_where;
 	}
-	
+
 	/**
 	 * Clear WHERE list
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function clearWhere()
 	{
 		$this->_where = array();
 		return $this;
 	}
-	
+
+	/**
+	 * Get JOIN
+	 * @return array
+	 */
+	public function getJoin()
+	{
+		return $this->_join;
+	}
+
+	/**
+	 * Clear JOIN
+	 * @return self
+	 */
+	public function clearJoin()
+	{
+		$this->_join = array();
+		return $this;
+	}
+
 	/**
 	 * Clear
 	 *
-	 * @return Core_QueryBuilder_Selection
+	 * @return self
 	 */
 	public function clear()
 	{
-		$this->_where = $this->_orderBy = array();
+		$this->_where = $this->_orderBy = $this->_join = array();
 		$this->_operator = '';
 
 		$this->_defaultOperator = 'AND';

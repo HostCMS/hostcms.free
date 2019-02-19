@@ -237,7 +237,12 @@ class Shop_Payment_System_Model extends Core_Entity
 
 		try
 		{
-			Core_File::copy($this->getPaymentSystemFilePath(), $newObject->getPaymentSystemFilePath());
+			if (is_file($this->getPaymentSystemFilePath()))
+			{
+				$content = str_replace("Shop_Payment_System_Handler" . $this->id, "Shop_Payment_System_Handler" . $newObject->id, $this->loadPaymentSystemFile());
+
+				$newObject->savePaymentSystemFile($content);
+			}
 		} catch (Exception $e) {}
 
 		return $newObject;

@@ -27,6 +27,7 @@ return array(
 	'source_id' => "<acronym title=\"URL tag ID (UTM, OpenStat, etc.)\">URL tags ID</acronym>",
 	'order_currency' => "Currency",
 	'paid' => 'Paid',
+	'not_paid' => 'Not paid',
 	'canceled' => 'Cancelled',
 	'order_items_link' => "Pruducts",
 	'payment_datetime' => "Payment date",

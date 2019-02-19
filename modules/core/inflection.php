@@ -86,6 +86,18 @@ abstract class Core_Inflection
 	}
 
 	/**
+	 * Get plural form of word
+	 * @param string $word word
+	 * @param int $count
+	 * @param string $lng driver
+	 * @return string
+	 */
+	/*static public function numberInWords($number, $aUnits = NULL)
+	{
+		return self::instance($lng)->numberInWords($number, $aUnits);
+	}*/
+	
+	/**
 	 * Get singular form of word
 	 * @param string $word word
 	 * @param int $count
@@ -178,6 +190,6 @@ abstract class Core_Inflection
 	 */
 	static public function num2str($float, $lng = 'en')
 	{
-		return self::instance($lng)->_num2str($float);
+		return self::instance($lng)->numberInWords($float);
 	}
 }

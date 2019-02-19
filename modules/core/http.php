@@ -5,6 +5,47 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Abstract HTTP
  *
+ * Доступные методы:
+ *
+ * - clear() очистить предыдущие данные
+ * - instance($name = 'default') получить Core_Http указанного типа, например, curl или socket
+ * - config($array) перезаписать конфигурационные данные, загруженные из файла
+ * - getConfig() получить массив с конфигурационными данными
+ * - additionalHeader($name, $value) установить дополнительный заголовок $name со значением $value
+ * - addOption($name, $value) установить дополнительную опцию $name со значением $value, используется, например, для задания опций cUrl
+ * - method('GET') метод HTTP запроса, по умолчанию GET
+ * - timeout(10) таймаут соединения, по умолчанию 10
+ * - port(80) порт соединения, по умолчанию 80
+ * - contentType('application/x-www-form-urlencoded') Content-type запроса, по умолчанию 'application/x-www-form-urlencoded'
+ * - rawData($data) все данные, передаваемые в HTTP POST-запросе (передача массива закодирует данные в виде multipart/form-data)
+ * - userAgent($userAgent) установить пользовательский агент, по умолчанию 'Mozilla/5.0 (compatible; HostCMS/6.x; +https://www.hostcms.ru)'
+ * - url($url) адрес загружаемого ресурса
+ * - referer($referer) содержимое заголовка Referer, если NULL, то будет установлен в "{схема}://{запрошенный домен}"
+ * - data($key, $value) добавить POST-данные
+ * - execute() отправить запрос
+ * 
+ * - getHeaders() получить заголовки ответа
+ * - parseHeaders() получить заголовки в виде массива
+ * - parseHttpStatusCode('HTTP/1.1 200 OK') получить код ответа по переданному статусу
+ * - getBody() получить ответ
+ * - getDecompressedBody() получить распакованный ответ
+ * - getErrno() получить номер ошибки
+ * - getError() получить текст ошибки
+ *
+ * <code>
+ * $Core_Http = Core_Http::instance()
+ * 	->clear()
+ * 	->url('https://www.site.com')
+ * 	->additionalHeader('Content-Type', 'text/html')
+ * 	->execute();
+ *
+ * $aHeaders = $Core_Http->parseHeaders();
+ * print_r($aHeaders);
+ *
+ * $sBody = $Core_Http->getDecompressedBody();
+ * echo htmlspecialchars($sBody);
+ * </code>
+ *
  * @package HostCMS
  * @subpackage Core\Http
  * @version 6.x
@@ -150,7 +191,7 @@ abstract class Core_Http
 	protected function _init()
 	{
 		$this
-			->userAgent('Mozilla/5.0 (compatible; HostCMS/6.x; +http://www.hostcms.ru)')
+			->userAgent('Mozilla/5.0 (compatible; HostCMS/6.x; +https://www.hostcms.ru)')
 			->method('GET')
 			->timeout(10)
 			->port(80)

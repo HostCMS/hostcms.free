@@ -128,7 +128,7 @@ class Informationsystem_Model extends Core_Entity
 		'seo_item_keywords_template',
 		'seo_item_description_template'
 	);
-	
+
 	/**
 	 * List of Shortcodes tags
 	 * @var array
@@ -504,6 +504,8 @@ class Informationsystem_Model extends Core_Entity
 	/**
 	 * Recount items and subgroups
 	 * @return Informationsystem_Model
+	 * @hostcms-event informationsystem.onBeforeRecount
+	 * @hostcms-event informationsystem.onAfterRecount
 	 */
 	public function recount()
 	{
@@ -514,6 +516,8 @@ class Informationsystem_Model extends Core_Entity
 			@set_time_limit(90000);
 			ini_set('max_execution_time', '90000');
 		}
+
+		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
 
 		$this->_groupsTree = array();
 		$queryBuilder = Core_QueryBuilder::select('id', 'parent_id')
@@ -577,6 +581,8 @@ class Informationsystem_Model extends Core_Entity
 		Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `informationsystem_groups` ENABLE KEYS");
 
 		$this->_groupsTree = $this->_cacheGroups = $this->_cacheItems = array();
+
+		Core_Event::notify($this->_modelName . '.onAfterRecount', $this);
 
 		return $this;
 	}

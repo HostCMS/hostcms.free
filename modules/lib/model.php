@@ -44,6 +44,13 @@ class Lib_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+	
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */

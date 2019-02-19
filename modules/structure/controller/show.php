@@ -209,7 +209,29 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		return $this->_Shops;
 	}
+	
+	/**
+	 * Set _Shops set
+	 * @param array $array
+	 * @return self
+	 */
+	public function setShops(array $array)
+	{
+		$this->_Shops = $array;
+		return $this;
+	}
 
+	/**
+	 * Set _Informationsystems set
+	 * @param array $array
+	 * @return self
+	 */
+	public function setInformationsystems(array $array)
+	{
+		$this->_Informationsystems = $array;
+		return $this;
+	}
+	
 	/**
 	 * Check if data is cached
 	 * @return NULL|TRUE|FALSE
@@ -335,6 +357,7 @@ class Structure_Controller_Show extends Core_Controller
 	/**
 	 * Select informationsystems
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onAfterSelectInformationsystems
 	 */
 	protected function _selectInformationsystems()
 	{
@@ -346,12 +369,15 @@ class Structure_Controller_Show extends Core_Controller
 			$oInformationsystem->structure_id && $this->_Informationsystems[$oInformationsystem->structure_id] = $oInformationsystem;
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterSelectInformationsystems', $this, array($this->_Informationsystems));
+		
 		return $this;
 	}
 
 	/**
 	 * Select shops
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onAfterSelectShops
 	 */
 	protected function _selectShops()
 	{
@@ -363,6 +389,8 @@ class Structure_Controller_Show extends Core_Controller
 			$oShop->structure_id && $this->_Shops[$oShop->structure_id] = $oShop;
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterSelectShops', $this, array($this->_Shops));
+		
 		return $this;
 	}
 

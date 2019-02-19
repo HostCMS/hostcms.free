@@ -179,7 +179,7 @@ class Shop_Payment_System_Handler5 extends Shop_Payment_System_Handler
     /*
      * Оплачивает заказ
      */
-    function ProcessResult()
+    public function ProcessResult()
     {
         if ($this->checkSign($_POST))
         {

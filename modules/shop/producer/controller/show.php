@@ -8,6 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - dirsList(TRUE|FALSE) показывать группы производителей, по умолчанию FALSE
+ * - group($id) идентификатор группы товаров, для которой необходимо выводить список производителей
  * - producer($id) идентификатор производителя
  * - offset($offset) смещение, по умолчанию 0
  * - limit($limit) количество
@@ -39,6 +40,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	 */
 	protected $_allowedProperties = array(
 		'producer',
+		'group',
 		'offset',
 		'limit',
 		'page',
@@ -67,6 +69,12 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	protected $_Shop_Producer_Dirs = NULL;
 
 	/**
+	 * Array of siteuser's groups allowed for current siteuser
+	 * @var array
+	 */
+	protected $_aSiteuserGroups = array();
+
+	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
 	 */
@@ -85,10 +93,37 @@ class Shop_Producer_Controller_Show extends Core_Controller
 		$this->dirsList = FALSE;
 
 		$this->producer = NULL;
-		$this->offset = 0;
-		$this->page = 0;
+		$this->offset = $this->page = 0;
+
+		$this->_aSiteuserGroups = $this->_getSiteuserGroups();
 
 		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . 'producers/({path})(page-{page}/)';
+	}
+
+	/**
+	 * Get array of siteuser groups for current siteuser. Exists group 0 (all) and -1 (parent)
+	 * @return array
+	 */
+	protected function _getSiteuserGroups()
+	{
+		$aSiteuserGroups = array(0, -1);
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+
+			if ($oSiteuser)
+			{
+				$this->addCacheSignature('siteuser_id=' . $oSiteuser->id);
+
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				foreach ($aSiteuser_Groups as $oSiteuser_Group)
+				{
+					$aSiteuserGroups[] = $oSiteuser_Group->id;
+				}
+			}
+		}
+
+		return $aSiteuserGroups;
 	}
 
 	/**
@@ -178,11 +213,36 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			$this->_Shop_Producers
 				->queryBuilder()
 				->sqlCalcFoundRows()
-				//->where('shop_producers.active', '=', 1)
+				->where('shop_producers.active', '=', 1)
 				->offset(intval($this->offset))
 				->limit(intval($this->limit));
 
-			$aShop_Producers = $this->_Shop_Producers->getAllByActive(1);
+			if ($this->group)
+			{
+				$dateTime = Core_Date::timestamp2sql(time());
+
+				$this->_Shop_Producers
+					->queryBuilder()
+					->select('shop_producers.*')
+					->distinct()
+					->join('shop_items', 'shop_items.shop_producer_id', '=', 'shop_producers.id')
+					->where('shop_items.shop_group_id', '=', $this->group)
+					->open()
+						->where('shop_items.start_datetime', '<', $dateTime)
+						->setOr()
+						->where('shop_items.start_datetime', '=', '0000-00-00 00:00:00')
+					->close()
+					->setAnd()
+					->open()
+						->where('shop_items.end_datetime', '>', $dateTime)
+						->setOr()
+						->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
+					->close()
+					->where('shop_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+					->where('shop_items.deleted', '=', 0);
+			}
+
+			$aShop_Producers = $this->_Shop_Producers->findAll();
 
 			if (!$this->producer)
 			{

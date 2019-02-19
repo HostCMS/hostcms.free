@@ -11,7 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Shortcode_Module extends Core_Module{	/**
+class Shortcode_Module extends Core_Module{
+	/**
 	 * Module version
 	 * @var string
 	 */
@@ -21,7 +22,9 @@ class Shortcode_Module extends Core_Module{	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-11-29';
+	public $date = '2018-11-29';
+
+
 	/**
 	 * Module name
 	 * @var string

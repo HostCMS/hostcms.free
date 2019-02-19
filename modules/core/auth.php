@@ -169,9 +169,9 @@ class Core_Auth
 
 			$oSite = Core_Entity::factory('Site', $_SESSION['current_site_id']);
 
-			$allow_access = $oUser->checkModuleAccess($aModuleNames, $oSite);
+			$bModuleAccess = $oUser->checkModuleAccess($aModuleNames, $oSite);
 
-			if (!$allow_access)
+			if (!$bModuleAccess)
 			{
 				$sModuleName = implode(', ', $aModuleNames);
 				$sMessage = Core::_('Core.error_log_access_was_denied', $sModuleName);

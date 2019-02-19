@@ -682,6 +682,8 @@ class Shop_Model extends Core_Entity
 	/**
 	 * Recount items and subgroups
 	 * @return self
+	 * @hostcms-event shop.onBeforeRecount
+	 * @hostcms-event shop.onAfterRecount
 	 */
 	public function recount()
 	{
@@ -693,6 +695,8 @@ class Shop_Model extends Core_Entity
 			@ini_set('max_execution_time', '90000');
 		}
 
+		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
+		
 		$this->_groupsTree = array();
 		$queryBuilder = Core_QueryBuilder::select('id', 'parent_id')
 			->from('shop_groups')
@@ -757,15 +761,21 @@ class Shop_Model extends Core_Entity
 
 		$this->_groupsTree = $this->_cacheGroups = $this->_cacheItems = array();
 
+		Core_Event::notify($this->_modelName . '.onAfterRecount', $this);
+		
 		return $this;
 	}
-
+	
 	/**
 	 * Recount sets
 	 * @return self
+	 * @hostcms-event shop.onBeforeRecountSets
+	 * @hostcms-event shop.onAfterRecountSets
 	 */
 	public function recountSets()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeRecountSets', $this);
+		
 		$limit = 100;
 		$offset = 0;
 
@@ -787,6 +797,8 @@ class Shop_Model extends Core_Entity
 		}
 		while (count($aShop_Items));
 
+		Core_Event::notify($this->_modelName . '.onAfterRecountSets', $this);
+		
 		return $this;
 	}
 

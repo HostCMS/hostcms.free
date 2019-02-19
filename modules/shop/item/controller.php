@@ -352,7 +352,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 
 		$price = $this->getPrice($oShop_Item);
 
-		// Цены в зависимости от количества самого товара в корзине (а не все корзины)
+		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
 		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll();
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{

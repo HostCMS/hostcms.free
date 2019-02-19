@@ -60,7 +60,7 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		;
 
 		$this->getField('text')
-			->wysiwyg(TRUE)
+			->wysiwyg(Core::moduleIsActive('wysiwyg'))
 			->rows(10)
 			->divAttr(array('class' => 'form-group col-xs-12'));
 
@@ -91,7 +91,7 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow2
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12 col-sm-3 no-padding')
+						->class('form-group col-xs-12 col-sm-4 no-padding')
 						->add($oSiteuserSelect)
 				);
 

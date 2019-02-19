@@ -14,13 +14,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Shop_Company_Model extends Company_Model
 {
 	/**
-	 * Model name, e.g. 'book' for 'Book_Model'
+	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'shop_company';
 
 	/**
-	 * Table name, e.g. 'books' for 'Book_Model'
+	 * Table name
 	 * @var mixed
 	 */
 	protected $_tableName = 'companies';

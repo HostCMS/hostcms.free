@@ -237,7 +237,7 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 		{
 			$sql .= ' OFFSET ' . $this->_offset;
 		}*/
-
+		
 		return $sql;
 	}
 

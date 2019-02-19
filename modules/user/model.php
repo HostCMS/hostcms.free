@@ -702,11 +702,19 @@ class User_Model extends Core_Entity
 	 */
 	public function loginBadge()
 	{
-		$sStatus = $this->isOnline()
+		$isOnline = $this->isOnline();
+		
+		$sStatus = $isOnline
 			? 'online'
 			: 'offline';
 
-		echo "&nbsp;<span class=\"{$sStatus}\"></span>";
+		$lng = $isOnline ? 'user_active' : 'user_last_activity';
+		
+		$sStatusTitle = !is_null($this->last_activity)
+			? Core::_('User.' . $lng, Core_Date::sql2datetime($this->last_activity))
+			: '';
+
+		echo '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>';
 	}
 
 	/**

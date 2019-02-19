@@ -97,6 +97,11 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 			<?php
 			if (Core_Auth::logged())
 			{
+				if (is_null($this->module))
+				{
+					throw new Core_Exception('You use OLD module. Update index.php to set ->module(Core_Module::factory($sModule))');
+				}
+
 				$moduleName = $this->module->getModuleName();
 				$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
 
@@ -105,10 +110,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$sPagePath = strval(Core_Array::get($_SERVER,'REQUEST_URI'));
 
 				$oUser = Core_Entity::factory('User')->getCurrent();
-				$oUser_Bookmark = isset($oUser->User_Bookmarks)
-					// Удалить isset в 6.8.1
-					? $oUser->User_Bookmarks->getByPath($sPagePath)
-					: NULL;
+				$oUser_Bookmark = $oUser->User_Bookmarks->getByPath($sPagePath);
 				$class = !is_null($oUser_Bookmark) ? 'active' : '';
 
 				?><div class="header-buttons">

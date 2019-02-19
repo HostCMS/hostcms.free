@@ -32,7 +32,7 @@ if (Core::moduleIsActive('siteuser'))
 				// Удаление объявления
 				if (isset($Shop_Controller_Show->patternParams['delete']))
 				{
-					$oShop_Item->delete();
+					$oShop_Item->markDeleted();
 					$Shop_Controller_Show->item = NULL;
 				}
 			}

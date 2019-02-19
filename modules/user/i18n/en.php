@@ -87,6 +87,7 @@ return array(
 	'view_websites' => 'Websites',
 	'break' => 'Break',
 	'timesheet_title' => 'Timesheet',
-	
 	'select_user' => 'Select user',	
+	'user_active' => 'Online %s',
+	'user_last_activity' => 'Last activity %s',
 );

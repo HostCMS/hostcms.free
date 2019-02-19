@@ -365,10 +365,10 @@ class Core_ORM
 		if (!is_null($primaryKey))
 		{
 			$oQuery_Builder = Core_QueryBuilder::delete($this->_tableName);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oQuery_Builder
 				->where($this->_primaryKey, '=', $primaryKey)
 				->execute();
@@ -992,10 +992,10 @@ class Core_ORM
 		{
 			$this->_database[self::$_databaseDriver] = Core_DataBase::instance(self::$_databaseDriver);
 		}
-		
+
 		return $this->_database[self::$_databaseDriver];
 	}
-	
+
 	/**
 	 * Model initialization
 	 * @return Core_ORM
@@ -1114,7 +1114,7 @@ class Core_ORM
 		if (is_null($this->_queryBuilder))
 		{
 			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*');
-			
+
 			self::$_databaseDriver != 'default'
 				&& $this->_queryBuilder->setDataBase($this->getDatabase());
 		}
@@ -1639,6 +1639,13 @@ class Core_ORM
 						$value = ($value < $aField['min']) ? $aField['min'] : $aField['max'];
 					}
 				break;
+				case 'decimal':
+					// Convert "," to "."
+					$value = str_replace(',', '.', $value);
+
+					// Remove everything except numbers and dot
+					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+				break;
 				case 'float':
 					// Convert "," to "."
 					$value = str_replace(',', '.', $value);
@@ -1769,25 +1776,32 @@ class Core_ORM
 
 			$data = $this->_getChangedData();
 
+			$bPKexists = array_key_exists($this->_primaryKey, $data);
+
 			// Set PK
-			if (!array_key_exists($this->_primaryKey, $data))
+			if (!$bPKexists)
 			{
 				$getPrimaryKeyValue = $this->getPrimaryKey();
 
-				!is_null($getPrimaryKeyValue) && $data[$this->_primaryKey] = $getPrimaryKeyValue;
+				$bPKexists = !is_null($getPrimaryKeyValue);
+
+				$bPKexists && $data[$this->_primaryKey] = $getPrimaryKeyValue;
 			}
 
 			$oQuery_Builder = Core_QueryBuilder::insert($this->_tableName, $data);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oInsert = $oQuery_Builder->execute();
 
-			// Set primary key
-			$this->setValues(
-				array($this->_primaryKey => $oInsert->getInsertId())
-			);
+			if (!$bPKexists)
+			{
+				// Set primary key
+				$this->setValues(
+					array($this->_primaryKey => $oInsert->getInsertId())
+				);
+			}
 
 			$this->_saved = TRUE;
 
@@ -1820,10 +1834,10 @@ class Core_ORM
 			$data = $this->_getChangedData();
 
 			$oQuery_Builder = Core_QueryBuilder::update($this->_tableName);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oUpdate = $oQuery_Builder
 				->columns($data)
 				->where($this->_primaryKey, '=', $this->getPrimaryKey())

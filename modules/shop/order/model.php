@@ -860,14 +860,13 @@ class Shop_Order_Model extends Core_Entity
 
 	protected function _paidShopDiscountcard()
 	{
-		if (Core::moduleIsActive('siteuser'))
+		if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
 		{
-			$oSiteuser = $this->Siteuser;
 			$oShop = $this->Shop;
 
 			$mode = $this->paid == 0 ? -1 : 1;
 
-			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getFirst();
+			$oShop_Discountcard = $this->Siteuser->Shop_Discountcards->getFirst();
 
 			if (is_null($oShop_Discountcard))
 			{
@@ -875,7 +874,7 @@ class Shop_Order_Model extends Core_Entity
 				{
 					$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
 					$oShop_Discountcard->shop_id = $oShop->id;
-					$oShop_Discountcard->siteuser_id = $oSiteuser->id;
+					$oShop_Discountcard->siteuser_id = $this->siteuser_id;
 					$oShop_Discountcard->setSiteuserAmount();
 					$oShop_Discountcard->save(); // create ID
 
@@ -921,9 +920,11 @@ class Shop_Order_Model extends Core_Entity
 
 			if (count($aNotification_Subscribers))
 			{
-				$sCompany = strlen($this->company)
+				/*$sCompany = strlen($this->company)
 					? $this->company
-					: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
+					: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);*/
+
+				$sCompany = $this->getCustomerName();
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
@@ -1380,6 +1381,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Add order CommerceML
 	 * @param Core_SimpleXMLElement $oXml
 	 * @hostcms-event shop_order.onBeforeGetCmlUserName
+	 * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
 	 */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
@@ -1439,7 +1441,7 @@ class Shop_Order_Model extends Core_Entity
 		$oContractor->addChild('Наименование', $sContractorName);
 		$oContractor->addChild('Роль', 'Покупатель');
 
-		$aAddress = array(
+		/*$aAddress = array(
 			$this->postcode,
 			$this->shop_country->name,
 			$this->shop_country_location_city->name,
@@ -1448,7 +1450,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
-		$sFullAddress = implode(', ', $aAddress);
+		$sFullAddress = implode(', ', $aAddress);*/
+
+		$sFullAddress = $this->getFullAddress();
 
 		if ($bCompany)
 		{
@@ -1576,7 +1580,11 @@ class Shop_Order_Model extends Core_Entity
 
 		$aDiscount_Shop_Order_Items = array();
 
-		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		$oShop_Order_Items = $this->Shop_Order_Items;
+
+		Core_Event::notify($this->_modelName . '.onAddCmlSelectShopOrderItems', $this, array($oShop_Order_Items, $oXml));
+
+		$aShop_Order_Items = $oShop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			if ($oShop_Order_Item->getPrice() >= 0)
@@ -1636,12 +1644,22 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Get Popover Content
 	 * @return string
+	 * @hostcms-event shop_order.onBeforeOrderPopover
 	 */
 	public function orderPopover()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeOrderPopover', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		ob_start();
 
-		$aAddress = array(
+		/*$aAddress = array(
 			$this->postcode,
 			$this->Shop_Country->name,
 			$this->Shop_Country_Location_City->name,
@@ -1650,7 +1668,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
-		$sFullAddress = implode(', ', $aAddress);
+		$sFullAddress = implode(', ', $aAddress);*/
+
+		$sFullAddress = $this->getFullAddress();
 
 		if (strlen($this->company))
 		{
@@ -1689,6 +1709,12 @@ class Shop_Order_Model extends Core_Entity
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+			</div><?php
+		}
+		if ($this->shop_order_status_id)
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_order_status')?>:</b> <?php echo htmlspecialchars($this->Shop_Order_Status->name)?>
 			</div><?php
 		}
 		if (strlen($this->description))
@@ -1805,9 +1831,7 @@ class Shop_Order_Model extends Core_Entity
 		</div>
 
 		<?php
-		$sOrderContent = ob_get_clean();
-
-		return $sOrderContent;
+		return ob_get_clean();
 	}
 
 	public function order_items($oAdmin_Form_Field, $oAdmin_Form_Controller)
@@ -1866,5 +1890,37 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	public function date()
+	{
+		return Core_Date::sql2date($this->datetime);
+	}
+
+	public function getFullAddress()
+	{
+		$aAddress = array(
+			$this->postcode,
+			$this->Shop_Country->name,
+			$this->Shop_Country_Location->name,
+			$this->Shop_Country_Location_City->name,
+			$this->Shop_Country_Location_City_Area->name,
+			$this->address,
+			$this->house,
+			$this->flat
+		);
+
+		$aAddress = array_map('trim', $aAddress);
+		$aAddress = array_filter($aAddress, 'strlen');
+		$sFullAddress = implode(', ', $aAddress);
+
+		return $sFullAddress;
+	}
+
+	public function getCustomerName()
+	{
+		return strlen(trim($this->company))
+			? $this->company
+			: implode(' ', array_filter(array_map('trim', array($this->surname, $this->name, $this->patronymic)), 'strlen'));
 	}
 }

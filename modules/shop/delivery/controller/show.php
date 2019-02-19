@@ -31,6 +31,12 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 	);
 
 	/**
+	 * Shop_Deliveries object
+	 * @var Shop_Delivery_Model
+	 */
+	protected $_Shop_Deliveries = NULL;
+
+	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
 	 */
@@ -49,6 +55,34 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		}
 
 		$this->paymentSystems = FALSE;
+
+		$this->_setShopDeliveries();
+	}
+
+	/**
+	 * Prepare Shop_Deliveries for showing
+	 * @return self
+	 */
+	protected function _setShopDeliveries()
+	{
+		$oShop = $this->getEntity();
+
+		$this->_Shop_Deliveries = $oShop->Shop_Deliveries;
+
+		$this->_Shop_Deliveries
+			->queryBuilder()
+			->where('shop_deliveries.active', '=', 1);
+
+		return $this;
+	}
+
+	/**
+	 * Get Shop_Deliveries
+	 * @return Shop_Delivery_Model
+	 */
+	public function shopDeliveries()
+	{
+		return $this->_Shop_Deliveries;
 	}
 
 	/**
@@ -73,7 +107,7 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		);
 
 		// Выбираем все типы доставки для данного магазина
-		$aShop_Deliveries = $oShop->Shop_Deliveries->getAllByActive(1);
+		$aShop_Deliveries = $this->_Shop_Deliveries->findAll();
 
 		foreach ($aShop_Deliveries as $oShop_Delivery)
 		{

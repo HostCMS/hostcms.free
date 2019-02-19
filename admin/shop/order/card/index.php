@@ -28,7 +28,7 @@ $oCompany = $oShop_Order->company_id
 	? $oShop_Order->Shop_Company
 	: $oShop->Shop_Company;
 
-$aFullAddress = array(
+/*$aFullAddress = array(
 	trim($oShop_Order->postcode),
 	$oShop_Order->Shop_Country->name,
 	$oShop_Order->Shop_Country_Location->name,
@@ -40,7 +40,9 @@ $aFullAddress = array(
 );
 
 $aFullAddress = array_filter($aFullAddress);
-$sFullAddress = implode(', ', $aFullAddress);
+$sFullAddress = implode(', ', $aFullAddress);*/
+
+$sFullAddress = $oShop_Order->getFullAddress();
 
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>

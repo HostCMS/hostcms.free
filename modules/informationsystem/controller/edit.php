@@ -169,7 +169,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				);
 
 				$this->getField('description')
-					->wysiwyg(TRUE)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id
 						: 0);

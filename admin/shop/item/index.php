@@ -75,7 +75,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 {
 	$aJSON = array();
 
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('term'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
@@ -108,7 +108,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
 	$mode = intval(Core_Array::getGet('mode'));
 
@@ -177,7 +177,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
 	$mode = intval(Core_Array::getGet('mode'));
 
@@ -265,7 +265,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
@@ -723,16 +723,18 @@ $oAdmin_Form_Controller->addEntity(
 		->html('
 			<div class="row search-field margin-bottom-20">
 				<div class="col-xs-12">
-					<form action="/admin/shop/item/index.php" method="GET">
-						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Shop_Item.placeholderSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '">
-						<i class="fa fa-search no-margin" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '"></i>
-
-						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '" />
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
 					</form>
 				</div>
 			</div>
 		')
 );
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Хлебные крошки
 $oBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -892,26 +894,6 @@ if ($oAdminFormActionLoadShopItemList && $oAdmin_Form_Controller->getAction() ==
 
 	$oAdmin_Form_Controller->addAction($oShop_Controller_Load_Select_Options);
 }
-
-// Действие "Поиск"
-/*$oAdminFormActionSearch = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('searchItem');
-
-if ($oAdminFormActionSearch && $oAdmin_Form_Controller->getAction() == 'searchItem')
-{
-	$oControllerSearch = Admin_Form_Action_Controller::factory(
-		'Shop_Item_Controller_Search', $oAdminFormActionSearch
-	);
-
-	$sSearchQuery = trim(strval(Core_Array::getRequest('search')));
-
-	$oControllerSearch
-		->query($sSearchQuery);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oControllerSearch);
-}*/
 
 // Действие "Применить"
 $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
@@ -1099,11 +1081,9 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Group'));
 $oAdmin_Form_Dataset
 	->changeField('name', 'class', 'semi-bold')
-	->addCondition(
-		array(
-				'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
-			)
-		)
+	->addCondition(array(
+			'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
+		))
 	)
 	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 	->changeField('related', 'type', 1)
@@ -1116,7 +1096,17 @@ $oAdmin_Form_Dataset
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
@@ -1137,8 +1127,7 @@ $oAdmin_Form_Dataset
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
 	->addCondition(array('where' => array('shop_items.shop_id', '=', $oShop->id)))
-	->addCondition(array('groupBy' => array('shop_items.id')))
-;
+	->addCondition(array('groupBy' => array('shop_items.id')));
 
 if (strlen($sGlobalSearch))
 {
@@ -1147,14 +1136,19 @@ if (strlen($sGlobalSearch))
 			array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
 		)
 		->addCondition(array('open' => array()))
-		// Название
 		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
-		// Артикул
+		->addCondition(array('where' => array('shop_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
-		// Штрихкод
 		->addCondition(array('where' => array('shop_item_barcodes.value', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
@@ -1202,8 +1196,7 @@ if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 // Change field type
 $oAdmin_Form_Dataset
 	->changeField('img', 'type', 10)
-	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
-	;
+	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

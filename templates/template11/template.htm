@@ -241,7 +241,7 @@
 							);
 
 							//Если модификация, то в неё добавляем родителя
-							if($oShop_Item->modification_id > 0)
+							if ($oShop_Item->modification_id > 0)
 							{
 								$oShop_Parent_Item = Core_Entity::factory('Shop_Item', $oShop_Item->modification_id);
 								!is_null($oShop_Parent_Item->id) && $oShop_Item->addEntity(

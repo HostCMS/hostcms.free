@@ -325,5 +325,8 @@ return array(
 	'modifications_root' => '...',
 	'items_catalog_barcodes' => 'Штрихкоды',
 	'type_barcode' => 'Введите штрихкод',
-	'placeholderSearch' => 'Поиск',
+	'shop_warehouse_incoming' => 'Оприходование при добавлении нового товара',
+	'shop_warehouse_inventory' => 'Инвентаризация при редактировании товара',
+	'edit_all_warehouses' => 'Редактировать',
+	'shop_price_setting' => 'Установка цены',
 );

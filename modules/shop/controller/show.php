@@ -37,6 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  * - siteuser(TRUE|FALSE) показывать данные о пользователе сайта, связанного с выбранным товаром, по умолчанию TRUE
  * - siteuserProperties(TRUE|FALSE) выводить значения дополнительных свойств пользователей сайта, по умолчанию FALSE
+ * - sets(TRUE|FALSE) показывать состав комплектов товаров, по умолчанию TRUE
  * - bonuses(TRUE|FALSE) выводить бонусы для товаров, по умолчанию TRUE
  * - barcodes(TRUE|FALSE) выводить штрихкоды для товаров, по умолчанию FALSE
  * - comparing(TRUE|FALSE) выводить сравниваемые товары, по умолчанию TRUE
@@ -118,6 +119,7 @@ class Shop_Controller_Show extends Core_Controller
 		'calculateCounts',
 		'siteuser',
 		'siteuserProperties',
+		'sets',
 		'bonuses',
 		'barcodes',
 		'comparing',
@@ -287,7 +289,7 @@ class Shop_Controller_Show extends Core_Controller
 			= $this->barcodes = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->groupsPropertiesList
-			= $this->bonuses = $this->comparing = $this->favorite = $this->viewed
+			= $this->bonuses = $this->sets = $this->comparing = $this->favorite = $this->viewed
 			= $this->votes = $this->showPanel = $this->calculateTotal = TRUE;
 
 		$this->viewedLimit = $this->comparingLimit = $this->favoriteLimit = 10;
@@ -570,6 +572,7 @@ class Shop_Controller_Show extends Core_Controller
 				if (!is_null($oShop_Item->id))
 				{
 					$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
+					!$this->sets && $oShop_Item->showXmlSets($this->sets);
 					$oCompareEntity->addEntity($oShop_Item->clearEntities());
 				}
 			}
@@ -631,6 +634,7 @@ class Shop_Controller_Show extends Core_Controller
 
 					$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
 					$this->bonuses && $oShop_Item->showXmlBonuses($this->bonuses);
+					!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
 					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oShop_Item));
 
@@ -700,6 +704,8 @@ class Shop_Controller_Show extends Core_Controller
 						->showXmlBonuses($this->bonuses)
 						->showXmlSpecialprices($this->specialprices);
 
+					!$this->sets && $oShop_Item->showXmlSets($this->sets);
+						
 					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oShop_Item));
 
 					$oViewedEntity->addEntity($oShop_Item);
@@ -871,8 +877,12 @@ class Shop_Controller_Show extends Core_Controller
 						$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 						if (!is_null($oShop_Item->id) && $oShop_Item->active)
 						{
+							$this->applyItemsForbiddenTags($oShop_Item->clearEntities());
+
 							$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
-							$oCartEntity->addEntity($oShop_Item->clearEntities());
+							!$this->sets && $oShop_Item->showXmlSets($this->sets);
+
+							$oCartEntity->addEntity($oShop_Item);
 						}
 					}
 				}
@@ -1090,6 +1100,7 @@ class Shop_Controller_Show extends Core_Controller
 						$oShop_Item->showXmlVotes($this->votes);
 
 						$oShop_Item->showXmlProperties($mShowPropertyIDs);
+						!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
 						// Siteuser
 						$oShop_Item->showXmlSiteuser($this->siteuser)
@@ -1107,6 +1118,7 @@ class Shop_Controller_Show extends Core_Controller
 								->showXmlModifications($this->modifications)
 								->showXmlSpecialprices($this->specialprices)
 								->showXmlVotes($this->votes)
+								->showXmlSets($this->sets)
 						);
 					}
 				}
@@ -2217,7 +2229,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$sPath = '/admin/shop/index.php';
 			$sAdditional = "hostcms[action]=edit&shop_dir_id={$oShop->shop_dir_id}&hostcms[checked][1][{$oShop->id}]=1";
-			$sTitle = Core::_('Shop.edit_title');
+			$sTitle = Core::_('Shop.edit_title', $oShop->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

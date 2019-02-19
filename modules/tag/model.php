@@ -114,38 +114,39 @@ class Tag_Model extends Core_Entity
 	{
 		if (!is_null($this->id) && is_null($this->_site_count))
 		{
+			// IS
 			$queryBuilder = Core_QueryBuilder::select(
 				array('COUNT(*)', 'count'))
 				->from('tags')
-				->leftJoin('tag_shop_items', 'tags.id', '=', 'tag_shop_items.tag_id'/*,
-					array(
-						array('AND' => array('tag_shop_items.tag_id', '=', $this->id))
-					)*/
-				)
-				->leftJoin('tag_informationsystem_items', 'tags.id', '=', 'tag_informationsystem_items.tag_id'/*,
-					array(
-						array('AND' => array('tag_informationsystem_items.tag_id', '=', $this->id))
-					)*/)
-				->open()
+				->leftJoin('tag_informationsystem_items', 'tags.id', '=', 'tag_informationsystem_items.tag_id')
 				->where('tag_informationsystem_items.tag_id', '=', $this->id)
-				->setOr()
-				->where('tag_shop_items.tag_id', '=', $this->id)
-				->close()
-				//->where('tags.id', '=', $this->id)
 				->where('tags.deleted', '=', 0);
 
 			$row = $queryBuilder->execute()->asAssoc()->current();
 			$this->_all_count = $row['count'];
 
 			$queryBuilder
-				->open()
-				->where('tag_informationsystem_items.site_id', '=', CURRENT_SITE)
-				->setOr()
-				->where('tag_shop_items.site_id', '=', CURRENT_SITE)
-				->close();
+				->where('tag_informationsystem_items.site_id', '=', CURRENT_SITE);
 
 			$row = $queryBuilder->execute()->asAssoc()->current();
 			$this->_site_count = $row['count'];
+
+			// Shop
+			$queryBuilder = Core_QueryBuilder::select(
+				array('COUNT(*)', 'count'))
+				->from('tags')
+				->leftJoin('tag_shop_items', 'tags.id', '=', 'tag_shop_items.tag_id')
+				->where('tag_shop_items.tag_id', '=', $this->id)
+				->where('tags.deleted', '=', 0);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_all_count += $row['count'];
+
+			$queryBuilder
+				->where('tag_shop_items.site_id', '=', CURRENT_SITE);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_site_count += $row['count'];
 		}
 	}
 

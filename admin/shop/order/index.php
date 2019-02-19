@@ -28,6 +28,8 @@ $oShop = Core_Entity::factory('Shop')->find($shop_id);
 // Текущая группа магазинов
 $oShopDir = Core_Entity::factory('Shop_Dir', $oShop->shop_dir_id);
 
+$printlayout_id = intval(Core_Array::getGet('printlayout_id', 0));
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
@@ -392,6 +394,24 @@ if ($oAction && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
 	$oAdmin_Form_Controller->addAction($oDeletePropertyValueController);
 }
 
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('print');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
+{
+	$Shop_Order_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Order_Controller_Print
+		->title(Core::_('Shop_Order.orders'))
+		->printlayout($printlayout_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Order')
@@ -424,6 +444,6 @@ $oAdmin_Form_Controller
 	->addExternalReplace('{shop_dir_id}', $oShopDir->id);
 
 $oAdmin_Form_Controller->addFilter('siteuser_id', array($oAdmin_Form_Controller, '_filterCallbackSiteuser'));
-	
+
 // Показ формы
 $oAdmin_Form_Controller->execute();

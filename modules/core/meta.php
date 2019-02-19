@@ -68,7 +68,8 @@ class Core_Meta
 	 */
 	public function apply($str)
 	{
-		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))?(?:\s+([^\}]+))*\}/';
+		//$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))?(?:\s+([^\}]+))*\}/';
+		$pattern = '/\{([:A-Za-z0-9_-]*\s)?([^\}\.]+)(?:\.([^\}\s]+))*(?:\s+([^\}]+))*\}/';
 
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
@@ -105,57 +106,69 @@ class Core_Meta
 		if (isset($this->_objects[$matches[2]]))
 		{
 			$object = $this->_objects[$matches[2]];
-			$fieldName = $matches[3];
 
-			if (isset($object->$fieldName))
+			if (isset($matches[3]))
 			{
-				$return = strip_tags($object->$fieldName);
+				$fieldNames = $matches[3];
 
-				return is_null($functionName)
-					? $return
-					: call_user_func($functionName, $return);
-					//: $functionName($return);
-			}
-			elseif (method_exists($object, $fieldName))
-			{
-				$attr = array();
+				// shop.company.name => object = shop, fieldName = company.name
+				$aTmpExplode = explode('.', $fieldNames);
 
-				if (isset($matches[4]) && $matches[4] != '')
+				foreach ($aTmpExplode as $fieldName)
 				{
-					preg_match_all('/\s*(?:(?:"([^"]*)")|(?:\'([^\']*)\')|([^"\'\s]+))/', $matches[4], $matchesAttr);
-
-					if (isset($matchesAttr[0]))
+					if (isset($object->$fieldName))
 					{
-						foreach ($matchesAttr[0] as $key => $attrName)
-						{
-							$value = $matchesAttr[1][$key] != ''
-								? $matchesAttr[1][$key]
-								: (
-									$matchesAttr[2][$key] != ''
-										? $matchesAttr[2][$key]
-										: $matchesAttr[3][$key]
-								);
-
-							($value === 'true' || $value === 'TRUE') && $value = TRUE;
-							($value === 'false' || $value === 'FALSE') && $value = FALSE;
-							($value === 'null' || $value === 'NULL') && $value = NULL;
-
-							$attr[] = $value;
-						}
+						$return = $object->$fieldName;
 					}
+					elseif (method_exists($object, $fieldName))
+					{
+						$attr = array();
+
+						if (isset($matches[4]) && $matches[4] != '')
+						{
+							preg_match_all('/\s*(?:(?:"([^"]*)")|(?:\'([^\']*)\')|([^"\'\s]+))/', $matches[4], $matchesAttr);
+
+							if (isset($matchesAttr[0]))
+							{
+								foreach ($matchesAttr[0] as $key => $attrName)
+								{
+									$value = $matchesAttr[1][$key] != ''
+										? $matchesAttr[1][$key]
+										: (
+											$matchesAttr[2][$key] != ''
+												? $matchesAttr[2][$key]
+												: $matchesAttr[3][$key]
+										);
+
+									($value === 'true' || $value === 'TRUE') && $value = TRUE;
+									($value === 'false' || $value === 'FALSE') && $value = FALSE;
+									($value === 'null' || $value === 'NULL') && $value = NULL;
+
+									$attr[] = $value;
+								}
+							}
+						}
+
+						$return = call_user_func_array(array($object, $fieldName), $attr);
+					}
+					else
+					{
+						// skip replacing
+						$return = $matches[0];
+					}
+
+					// shop.company.name => first iteration $object is shop, second iteration $object is company
+					$object = $return;
 				}
 
-				$return = strip_tags(call_user_func_array(array($object, $fieldName), $attr));
-
 				return is_null($functionName)
-					? $return
-					: call_user_func($functionName, $return);
+					? strip_tags($return)
+					: call_user_func($functionName, strip_tags($return));
 					//: $functionName($return);
 			}
 			else
 			{
-				// skip replacing
-				return $matches[0];
+				return $object;
 			}
 		}
 		elseif (isset($this->_functions[$matches[2]]))

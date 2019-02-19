@@ -28,6 +28,7 @@ return array(
 	'cond_of_delivery_add_form_price_order' => "Сумма заказа",
 	'order_currency' => "Валюта",
 	'paid' => 'Оплачен',
+	'not_paid' => 'Не оплачен',
 	'canceled' => 'Отменен',
 	'order_items_link' => "Товары",
 	'payment_datetime' => "Дата оплаты",

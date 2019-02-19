@@ -106,4 +106,5 @@ return array(
 	'events' => 'Дела',
 	'bookmarks' => 'Закладки',
 	'sound' => 'Звук',
+	'placeholderGlobalSearch' => 'Поиск',
 );

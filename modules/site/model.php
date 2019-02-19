@@ -1572,6 +1572,16 @@ class Site_Model extends Core_Entity
 	}
 
 	/**
+	 * Get first error email
+	 * @return string
+	 */
+	public function getErrorEmail()
+	{
+		$aEmails = array_map('trim', explode(',', $this->error_email));
+		return $aEmails[0];
+	}
+
+	/**
 	 * Get site keys as array
 	 * @return array
 	 */

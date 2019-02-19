@@ -212,7 +212,7 @@ class Core_Entity extends Core_ORM
 	 *
 	 * @param boolean
 	 */
-	protected $_hasRevisions = TRUE;
+	protected $_hasRevisions = FALSE;
 	
 	/**
 	 * Get column name for marks deleted

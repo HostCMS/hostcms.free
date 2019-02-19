@@ -100,6 +100,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 				->straightJoin()
 				->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
 				->where('shops.site_id', '=', CURRENT_SITE)
+				->where('shops.deleted', '=', 0)
 				->clearOrderBy()
 				->orderBy('datetime', 'DESC')
 				->limit(9);
@@ -144,6 +145,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->straightJoin()
 								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
 								->where('shops.site_id', '=', CURRENT_SITE)
+								->where('shops.deleted', '=', 0)
 								->where('shop_orders.datetime', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
 								//->where('shop_orders.datetime', '<=', $sEndTimestamp)
 								->offset($offset)
@@ -191,6 +193,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->queryBuilder()
 								->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
 								->where('shops.site_id', '=', CURRENT_SITE)
+								->where('shops.deleted', '=', 0)
 								->where('shop_orders.payment_datetime', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
 								->where('shop_orders.paid', '=', 1)
 								->offset($offset)
@@ -233,9 +236,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								<div class="deadline">
 									<?php echo Core::_('Shop.sales_statistics')?>
 									<?php
-									$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-									$aShops = $oSite->Shops->findAll(FALSE);
+									$aShops = Core_Entity::factory('Site', CURRENT_SITE)->Shops->findAll(FALSE);
 
 									if (count($aShops))
 									{
@@ -671,7 +672,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 									</div>
 									<div class="col-xs-5 item-right">
 										<div class="item-price">
-											<span class="price"><?php echo $oShop_Order->getAmount()?></span> <span class="currency"><?php echo htmlspecialchars($oShop_Order->Shop_Currency->name)?></span>
+											<span class="price"><?php echo $oShop_Order->sum()?></span>
 										</div>
 									</div>
 								</div>

@@ -224,6 +224,23 @@ class Shop_Cart_Model extends Core_Entity
 	}
 
 	/**
+	 * Show items count data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlWarehousesItems = TRUE;
+
+	/**
+	 * Add warehouse information to XML
+	 * @param boolean $showXmlWarehousesItems show status
+	 * @return self
+	 */
+	public function showXmlWarehousesItems($showXmlWarehousesItems = TRUE)
+	{
+		$this->_showXmlWarehousesItems = $showXmlWarehousesItems;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetXml
@@ -235,11 +252,11 @@ class Shop_Cart_Model extends Core_Entity
 
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
-			->showXmlWarehousesItems(TRUE)
 			->showXmlBonuses(TRUE)
 			->showXmlProperties($this->_showXmlProperties)
 			->showXmlSpecialprices($this->_showXmlSpecialprices)
 			->showXmlAssociatedItems($this->_showXmlAssociatedItems)
+			->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 			->cartQuantity($this->quantity);
 
 		// Parent item for modification

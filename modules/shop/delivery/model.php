@@ -25,6 +25,7 @@ class Shop_Delivery_Model extends Core_Entity
 	 */
 	protected $_hasMany = array(
 		'shop_delivery_condition' => array(),
+		'shop_delivery_condition_dir' => array(),
 		'shop_delivery_payment_system' => array(),
 		'shop_payment_system' => array('through' => 'shop_delivery_payment_system')
 	);
@@ -185,14 +186,32 @@ class Shop_Delivery_Model extends Core_Entity
 		{
 			if (is_file($this->getHandlerFilePath()))
 			{
-				$sReplace = str_replace("Shop_Delivery_Handler" . $this->id, "Shop_Delivery_Handler" . $newObject->id, $this->loadHandlerFile());
+				$content = str_replace("Shop_Delivery_Handler" . $this->id, "Shop_Delivery_Handler" . $newObject->id, $this->loadHandlerFile());
 
-				$this->saveHandlerFile($sReplace);
-
-				Core_File::copy($this->getHandlerFilePath(), $newObject->getHandlerFilePath());
+				$newObject->saveHandlerFile($content);
 			}
 		}
 		catch (Exception $e) {}
+
+		$aTmpConditionDirs = array();
+		$aShop_Delivery_Conditions_Dirs = $this->Shop_Delivery_Condition_Dirs->findAll();
+		foreach ($aShop_Delivery_Conditions_Dirs as $oShop_Delivery_Conditions_Dir)
+		{
+			$oNew_Shop_Delivery_Conditions_Dir = clone $oShop_Delivery_Conditions_Dir;
+			$newObject->add($oNew_Shop_Delivery_Conditions_Dir);
+
+			$aTmpConditionDirs[$oShop_Delivery_Conditions_Dir->id] = $oNew_Shop_Delivery_Conditions_Dir;
+		}
+
+		$aNew_Shop_Delivery_Conditions_Dirs = $newObject->Shop_Delivery_Condition_Dirs->findAll();
+		foreach ($aNew_Shop_Delivery_Conditions_Dirs as $oNew_Shop_Delivery_Conditions_Dir)
+		{
+			if (isset($aTmpConditionDirs[$oNew_Shop_Delivery_Conditions_Dir->parent_id]))
+			{
+				$oNew_Shop_Delivery_Conditions_Dir->parent_id = $aTmpConditionDirs[$oNew_Shop_Delivery_Conditions_Dir->parent_id]->id;
+				$oNew_Shop_Delivery_Conditions_Dir->save();
+			}
+		}
 
 		do {
 			$oShop_Delivery_Conditions = $this->Shop_Delivery_Conditions;
@@ -202,6 +221,12 @@ class Shop_Delivery_Model extends Core_Entity
 			foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
 			{
 				$oNew_Shop_Delivery_Condition = $oShop_Delivery_Condition->copy();
+
+				if (isset($aTmpConditionDirs[$oNew_Shop_Delivery_Condition->shop_delivery_condition_dir_id]))
+				{
+					$oNew_Shop_Delivery_Condition->shop_delivery_condition_dir_id = $aTmpConditionDirs[$oNew_Shop_Delivery_Condition->shop_delivery_condition_dir_id]->id;
+				}
+
 				$newObject->add($oNew_Shop_Delivery_Condition);
 			}
 

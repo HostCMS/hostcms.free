@@ -28,4 +28,5 @@ return array(
 	'markDeleted_success' => "Данные о цене успешно удалены!",
 	'apply_success' => "Информация успешно изменена.",
 	'recount_success' => "Цены пересчитаны успешно!",
+	'set_prices' => "Установка цен",
 );

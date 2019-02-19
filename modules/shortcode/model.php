@@ -51,6 +51,13 @@ class Shortcode_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+
+	/**
 	 * Change item status
 	 * @return self
 	 * @hostcms-event shortcode.onBeforeChangeActive
@@ -117,12 +124,12 @@ class Shortcode_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		if (Core::moduleIsActive('revision'))
 		{
 			Revision_Controller::delete($this->getModelName(), $this->id);
-		}		
-		
+		}
+
 		// Rebuild shortcodes list
 		Shortcode_Controller::instance()->rebuild();
 

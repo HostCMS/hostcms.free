@@ -14,6 +14,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 abstract class Shop_Payment_System_Handler
 {
 	/**
+	 * Allow pay by bonuses, 1 - 100%, 0.5 - 50%, 0 - forbid pay by bonuses
+	 * @var int
+	 */
+	protected $_bonusMultiplier = 1;
+	
+	/**
 	 * Create instance of payment system
 	 * @param Shop_Payment_System_Model $oShop_Payment_System_Model payment system
 	 * @return mixed
@@ -28,6 +34,7 @@ abstract class Shop_Payment_System_Handler
 		{
 			return new $name($oShop_Payment_System_Model);
 		}
+		
 		return NULL;
 	}
 
@@ -587,6 +594,7 @@ abstract class Shop_Payment_System_Handler
 			&& isset($this->_orderParams['partial_payment_by_personal_account'])
 			&& $this->_orderParams['partial_payment_by_personal_account']
 			&& $this->_shopOrder->Siteuser->id
+			&& $this->_bonusMultiplier > 0 && $this->_bonusMultiplier <= 1
 		)
 		{
 			$this->_applyBonuses();
@@ -672,9 +680,9 @@ abstract class Shop_Payment_System_Handler
 			// Сумма заказа в валюте магазина
 			$fOrderAmount = $this->_shopOrder->getAmount() * $fCurrencyCoefficient;
 
-			// Сумма заказа меньше или равна средствам
-			$fBonusesAmount = $fSiteuserAmount > $fOrderAmount
-				? $fOrderAmount
+			// Сумма заказа меньше или равна средствам (с учетом $this->_bonusMultiplier)
+			$fBonusesAmount = $fSiteuserAmount > $fOrderAmount * $this->_bonusMultiplier
+				? $fOrderAmount * $this->_bonusMultiplier
 				: $fSiteuserAmount;
 
 			// Проведение транзакции по списанию предоплаты бонусами

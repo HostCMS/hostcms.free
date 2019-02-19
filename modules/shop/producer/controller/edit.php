@@ -46,7 +46,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 				$this->getField('description')
 					->rows(15)
-					->wysiwyg(TRUE);
+					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				$oMainTab = $this->getTab('main');
 

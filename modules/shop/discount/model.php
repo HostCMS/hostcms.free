@@ -113,7 +113,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Item_Discounts->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -145,6 +145,37 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			: $this->addXmlTag('amount', $this->value);
 
 		return parent::getXml();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+			htmlspecialchars($this->name)
+		);
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		!$bRightTime && $oCore_Html_Entity_Div->class('wrongTime');
+
+		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
+		if (!$this->active)
+		{
+			$oCore_Html_Entity_Div->class('inactive');
+		}
+		elseif (!$bRightTime)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+				);
+		}
+
+		$oCore_Html_Entity_Div->execute();
 	}
 
 	/**
