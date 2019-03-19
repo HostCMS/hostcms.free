@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
@@ -70,6 +70,11 @@ class Shop_Price_Setting_Model extends Core_Entity
 		return ob_get_clean();
 	}
 
+	public function date()
+	{
+		return Core_Date::sql2date($this->datetime);
+	}
+
 	/**
 	 * Backend callback method
 	 * @return string
@@ -79,6 +84,17 @@ class Shop_Price_Setting_Model extends Core_Entity
 		return $this->posted
 			? '<i class="fa fa-check-circle-o green">'
 			: '<i class="fa fa-times-circle-o red">';
+	}
+
+	/**
+	 * Mark entity as deleted
+	 * @return Core_Entity
+	 */
+	public function markDeleted()
+	{
+		$this->unpost();
+
+		return parent::markDeleted();
 	}
 
 	/**
@@ -100,6 +116,104 @@ class Shop_Price_Setting_Model extends Core_Entity
 
 		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
 
+		$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
+		foreach ($aShop_Price_Entries as $oShop_Price_Entry)
+		{
+			$oShop_Price_Entry->delete();
+		}
+
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Add entries
+	 * @return self
+	 */
+	public function post()
+	{
+		if (!$this->posted)
+		{
+echo "post";
+			$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
+
+			$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
+			$aTmp = array();
+
+			foreach ($aShop_Price_Entries as $oShop_Price_Entry)
+			{
+				$aTmp[$oShop_Price_Entry->shop_price_id][$oShop_Price_Entry->shop_item_id] = $oShop_Price_Entry;
+			}
+
+			unset($aShop_Price_Entries);
+
+			$aShop_Price_Setting_Items = $this->Shop_Price_Setting_Items->findAll(FALSE);
+			foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
+			{
+				if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
+				{
+					$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
+				}
+				else
+				{
+					$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
+					$oShop_Price_Entry->setDocument($this->id, 0);
+					$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
+				}
+
+				$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
+				$oShop_Price_Entry->datetime = $this->datetime;
+				$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
+				$oShop_Price_Entry->save();
+
+				// Update price
+				$Shop_Price_Entry_Controller->setPrice(
+					$oShop_Price_Setting_Item->shop_price_id,
+					$oShop_Price_Setting_Item->shop_item_id,
+					$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
+				);
+			}
+
+			$this->posted = 1;
+			$this->save();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete entries
+	 * @return self
+	 */
+	public function unpost()
+	{
+		if ($this->posted)
+		{
+			$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
+
+			$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
+			foreach ($aShop_Price_Entries as $oShop_Price_Entry)
+			{
+				$oldPrice = $Shop_Price_Entry_Controller->getPrice($oShop_Price_Entry->shop_price_id, $oShop_Price_Entry->shop_item_id, $this->datetime);
+
+				if (!is_null($oldPrice))
+				{
+					// Update price
+					$Shop_Price_Entry_Controller->setPrice(
+						$oShop_Price_Entry->shop_price_id,
+						$oShop_Price_Entry->shop_item_id,
+						$oldPrice
+					);
+				}
+
+				$oShop_Price_Entry->delete();
+			}
+
+			$this->posted = 0;
+			$this->save();
+		}
+
+		return $this;
 	}
 }

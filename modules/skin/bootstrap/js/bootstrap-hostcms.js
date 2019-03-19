@@ -246,6 +246,25 @@
 				},
 			});
 		},
+		changePrintButton: function(object) {
+			var print_price_id = $(object).val();
+
+			$.each($('.print-price ul.dropdown-menu li:has(a) > a'), function (i, el) {
+				var onclick = $(this).attr('onclick'),
+					matches = onclick.match(/(\&\w+\S+\&)/),
+					split = matches[0].split('&'),
+					text = onclick.replace(split[1], 'shop_price_id=' + print_price_id);
+
+				$(this).attr('onclick', text);
+			});
+		},
+		escapeHtml: function(str) {
+			// This does not escape quotes
+			escaped = new Option(str).innerHTML;
+
+			// Replace quotes
+			return escaped.replace(/"/g, '&quot;');
+		},
 		bookmarksPrepare: function (){
 			setInterval($.refreshBookmarksList, 120000);
 
@@ -356,8 +375,8 @@
 
 			// Создаем slimscroll
 			jScrollBookmarks.slimscroll({
-				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? '220px' : '55px',
-				//height: 'auto',
+				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? ($(window).height() * 0.7) : '55px',
+				// height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px',
 				wheelStep: 5
@@ -513,11 +532,14 @@
 			$.each( $(".shop-item-warehouses-list .row"), function (index, item) {
 				$(this).find('input[name ^= warehouse_]').prop('disabled', false);
 				$(this).find('select[name ^= warehouse_shop_price_id_]').removeClass('hidden');
+				$(this).find('select[name ^= warehouse_shop_price_id_]').parents('div').prev().removeClass('hidden');
 			});
 			$(object).addClass('hidden');
 		},
 		toggleShopPrice: function(shop_price_id) {
-			$('.toggle-shop-price-' + shop_price_id).toggleClass('hidden');
+			$('.toggle-shop-price-' + shop_price_id)
+				.toggleClass('hidden')
+				.find('input').prop('disabled', function(i, v) { return !v; });
 
 			$.each($(".shop-item-table tbody tr"), function (index, item) {
 				var button = $(this).find('a.delete-associated-item'),
@@ -526,8 +548,50 @@
 				parentTd.detach().appendTo($(this));
 			});
 		},
-		insertSeoTemplate: function(el, text) {
+		toggleCoupon: function(object) {
+			var jInput = $('input[name=coupon_text]'),
+				length = jInput.val().length;
 
+			jInput.parents('.form-group').toggleClass('hidden');
+
+			length === 0 && $.generateCoupon(jInput);
+		},
+		generateCoupon: function(jInput) {
+			$.ajax({
+				url: '/admin/shop/discount/index.php',
+				type: 'POST',
+				data: {'generate-coupon': 1},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					jInput
+						.val(answer.coupon)
+						.focus();
+				}
+			});
+		},
+		showEmails: function(data)
+		{
+			$.ajax({
+				url: '/admin/printlayout/index.php',
+				type: 'POST',
+				data: {'showEmails': 1, 'representative': data.id},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					if (answer)
+					{
+						$(".email-select").empty().trigger("change");
+
+						$.each(answer, function(id, object){
+							var newOption = new Option(object.email + ' [' + object.type + ']', object.email, true, true);
+							$(".email-select").append(newOption).trigger('change');
+						});
+					}
+				}
+			});
+		},
+		insertSeoTemplate: function(el, text) {
 			el && el.insertAtCaret(text);
 		},
 		filterToggleField: function(object)
@@ -3672,6 +3736,9 @@
 						parentTr.find('.fact-warehouse-sum').text(sum);
 						parentTr.find('.hidden-shop-price').val(price);
 					break;
+					case 5:
+						parentTr.find('.fact-warehouse-sum').text(sum);
+					break;
 				}
 			});
 		},
@@ -3724,6 +3791,14 @@
 						percent = '-' + $.mathRound((100 - diffPercentValue), 2);
 
 						diffPersentSpan.addClass('palegreen');
+					}
+
+					if (percent == '-0')
+					{
+						percent = 0;
+						diffPersentSpan
+							.removeClass('darkorange')
+							.removeClass('palegreen');
 					}
 
 					Number.isFinite(diffPercentValue) && newPrice && diffPersentSpan.text(percent + '%');
@@ -3799,15 +3874,15 @@
 
 			// $.loadingScreen('hide');
 		},
-		addRegradeItem: function(shop_id)
+		addRegradeItem: function(shop_id, placeholder)
 		{
 			$('.shop-item-table').append(
 				'<tr id="" data-item-id="">\
 					<td class="index"></td>\
-					<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" /><input type="hidden" name="writeoff_item[]" value="" /></td>\
+					<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" placeholder="' + placeholder + '" /><input type="hidden" name="writeoff_item[]" value="" /></td>\
 					<td><span class="writeoff-measure"></span></td>\
 					<td><span class="writeoff-price"></span></td>\
-					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" /><input type="hidden" name="incoming_item[]" value="" /></td>\
+					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" placeholder="' + placeholder + '"/><input type="hidden" name="incoming_item[]" value="" /></td>\
 					<td><span class="incoming-measure"></span></td>\
 					<td><span class="incoming-price"></span></td>\
 					<td><input class="set-item-count form-control" name="shop_item_quantity[]" value="0.00"/></td>\
@@ -3915,9 +3990,8 @@
 		selectPersonCompany: function(settings)
 		{
 			settings = $.extend({
-
 				ajax: {
-					url: "/admin/siteuser/index.php?loadEventSiteusers",
+					url: "/admin/siteuser/index.php?loadEventSiteusers=1",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -3937,7 +4011,8 @@
 				templateResult: $.templateResultItemSiteusers,
 				escapeMarkup: function(m) { return m; },
 				templateSelection: $.templateSelectionItemSiteusers,
-				width: "100%"
+				width: "100%",
+				dropdownParent: $(this).closest('.modal')
 
 			}, settings);
 
@@ -3945,7 +4020,6 @@
 				jQuery(this).select2(settings);
 			});
 		},
-
 		selectUser: function(settings)
 		{
 			settings = $.extend({

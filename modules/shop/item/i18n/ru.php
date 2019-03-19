@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -110,7 +110,7 @@ return array(
 	'export_shop' => "Экспорт товаров",
 	'shops_link_orders' => "Заказы",
 	'shops_add_form_link_orders' => "Оформленные заказы",
-	'show_delivery_on' => "Доставка",
+	'show_delivery_on' => "Доставки",
 	'show_type_of_delivery_link' => "Типы доставки",
 	'show_sds_link' => "Справочники",
 	'show_prices_title' => "Цены",
@@ -326,7 +326,8 @@ return array(
 	'items_catalog_barcodes' => 'Штрихкоды',
 	'type_barcode' => 'Введите штрихкод',
 	'shop_warehouse_incoming' => 'Оприходование при добавлении нового товара',
-	'shop_warehouse_inventory' => 'Инвентаризация при редактировании товара',
+	'shop_warehouse_inventory' => 'Инвентаризация при редактировании товара "%s"',
 	'edit_all_warehouses' => 'Редактировать',
-	'shop_price_setting' => 'Установка цены',
+	'shop_price_setting' => 'Установка цены товара "%s"',
+	'warehouse_in_price' => 'Отразить в цене',
 );

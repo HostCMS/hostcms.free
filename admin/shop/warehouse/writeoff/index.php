@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -216,6 +216,24 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Writeoff_Controller_Print);
 }
 
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('sendMail');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
+{
+	$Shop_Warehouse_Writeoff_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Warehouse_Writeoff_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Warehouse_Writeoff_Controller_Print
+		->printlayout($printlayout_id)
+		->send(TRUE);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Writeoff_Controller_Print);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Warehouse_Writeoff')
@@ -224,6 +242,20 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
+);
+
+$oAdmin_Form_Dataset->addCondition(
+	array('select' => array('shop_warehouse_writeoffs.*'))
+)
+->addCondition(
+	array(
+		'leftJoin' => array('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_writeoffs.shop_warehouse_id')
+	)
+)
+->addCondition(
+	array(
+		'where' => array('shop_warehouses.shop_id', '=', $shop_id)
+	)
 );
 
 $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));

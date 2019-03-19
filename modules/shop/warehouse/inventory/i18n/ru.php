@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Инвентаризация',
@@ -14,8 +14,8 @@ return array(
 	'number' => 'Номер',
 	'datetime' => 'Дата создания',
 	'posted' => 'Проведено',
-	'user_id' => 'Ответственный',	
-	'description' => 'Описание',	
+	'user_id' => 'Ответственный',
+	'description' => 'Описание',
 	'id' => 'Идентификатор',
 	'shop_warehouse_id' => 'Склад',
 	'form_edit' => 'Редактирование инвентаризации "%s"',
@@ -34,4 +34,7 @@ return array(
 	'position' => '№',
 	'sum' => 'Сумма',
 	'currency' => 'Вал.',
+	'delete_dialog' => "Вы уверены, что хотите удалить?",
+	'add_item_placeholder' => "Введите название товара",
+	'apply_item' => "Инвентаризация из списка товаров",
 );

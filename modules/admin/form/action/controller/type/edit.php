@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -575,8 +575,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							$oUser = $this->_object->User;
 
 							$oUserLink = Admin_Form_Entity::factory('Link');
-							$oUserLink
-								// ->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
+							$oUserLink								
 								->divAttr(array('class' => 'input-group-addon user-link'))
 								->a
 									->class('btn btn-labeled btn-sky')

@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -351,35 +351,35 @@ else
 					->add(Admin_Form_Entity::factory('Select')
 						->name("parent_group")
 						->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+						->divAttr(array('class' => 'form-group col-xs-12'))
 						->caption(Core::_('Shop_Item.item_cards_print_parent_group'))
 						->value($oShopGroup->id)
 					)
 				)
 				->add(Admin_Form_Entity::factory('Div')->class('row')
 					->add(Admin_Form_Entity::factory('Input')
-						->name('fio')
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+						->name('fio')						
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 						->caption(Core::_('Shop_Item.item_cards_print_fio'))
 						->value($oShop->Shop_Company->accountant_legal_name)
 					)
 					->add(Admin_Form_Entity::factory('Date')
 						->name('date')
-						->caption(Core::_('Shop_Item.item_cards_print_date'))
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+						->caption(Core::_('Shop_Item.item_cards_print_date'))						
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 						->value(date('d.m.Y'))
 					)
 				)
 				->add(Admin_Form_Entity::factory('Div')->class('row')
 					->add(Admin_Form_Entity::factory('Input')
-						->name('font')
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+						->name('font')						
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 						->caption(Core::_('Shop_Item.item_cards_print_font'))
 						->value(10)
 					)
 					->add(Admin_Form_Entity::factory('Input')
-						->name('width')
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+						->name('width')						
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 						->caption(Core::_('Shop_Item.item_cards_print_width'))
 						->value(50)
 					)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -37,25 +37,37 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))->class('input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('input-lg'), $oMainRow1);
 
 		// Печать
+		$printlayoutsButton = '
+			<div class="btn-group">
+				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-palegreen">
+		';
+
 		$moduleName = $oAdmin_Form_Controller->module->getModuleName();
 
 		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
 
 		if (!is_null($oModule))
 		{
-			$printlayoutsButton = Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 3, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
-
-			$oMainRow1
-				->add(Admin_Form_Entity::factory('Div')
-					->class('form-group col-xs-12 col-sm-3 margin-top-21 margin-left-50')
-					->add(
-						Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
-					)
-			);
+			$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 3, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 		}
+
+		$printlayoutsButton .= '
+				</ul>
+			</div>
+		';
+
+		$oMainRow1
+			->add(Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center')
+				->add(
+					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+				)
+		);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
@@ -102,7 +114,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			->options($aSelectResponsibleUsers)
 			->name('user_id')
 			->value($this->_object->user_id)
-			->caption(Core::_('Deal.user_id'))
+			->caption(Core::_('Shop_Warehouse_Inventory.user_id'))
 			->divAttr(array('class' => ''));
 
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
@@ -202,7 +214,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 						<td><span class="fact-warehouse-sum"></span></td>
 						<td><span class="warehouse-inv-sum"></span></td>
 						<td><span class="diff-warehouse-sum"></span></td>
-						<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 					</tr>
 				';
 			}
@@ -217,6 +229,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			Admin_Form_Entity::factory('Input')
 				->divAttr(array('class' => 'form-group col-xs-12'))
 				->class('add-shop-item form-control')
+				->placeholder(Core::_('Shop_Warehouse_Inventory.add_item_placeholder'))
 				->name('set_item_name')
 		);
 
@@ -231,7 +244,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			->value("$('.add-shop-item').autocompleteShopItem('{$oShop->id}', 0, function(event, ui) {
 				$('.shop-item-table > tbody').append(
-					$('<tr data-item-id=\"' + ui.item.id + '\"><td></td><td>' + ui.item.label + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.measure + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + ui.item.currency + '</td><td><span class=\"fact-warehouse-count\"></span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"fact-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+					$('<tr data-item-id=\"' + ui.item.id + '\"><td></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"fact-warehouse-count\"></span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"fact-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 				);
 				ui.item.value = '';
 				$.setWarehouseCounts($('select.select-warehouse').val());
@@ -270,7 +283,15 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 	{
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
 
+		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
+
 		parent::_applyObjectProperty();
+
+		if ($this->_object->number == '')
+		{
+			$this->_object->number = $this->_object->id;
+			$this->_object->save();
+		}
 
 		// Существующие товары
 		$aShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items->findAll(FALSE);
@@ -282,10 +303,6 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			{
 				$oShop_Warehouse_Inventory_Item->count = $quantity;
 				$oShop_Warehouse_Inventory_Item->save();
-			}
-			else
-			{
-				$oShop_Warehouse_Inventory_Item->delete();
 			}
 		}
 
@@ -308,58 +325,11 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			}
 		}
 
-		$oShop_Warehouse = $this->_object->Shop_Warehouse;
+		Core_Array::getPost('posted')
+			? $this->_object->post()
+			: $this->_object->unpost();
 
-		$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->_object->id, 0);
-
-		// Не было проведено, проводим документ
-		if ($this->_object->posted)
-		{
-			$aTmp = array();
-
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$aTmp[$oShop_Warehouse_Entry->shop_item_id] = $oShop_Warehouse_Entry;
-			}
-
-			unset($aShop_Warehouse_Entries);
-
-			$aShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items->findAll(FALSE);
-			foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
-			{
-				if (isset($aTmp[$oShop_Warehouse_Inventory_Item->shop_item_id]))
-				{
-					$oShop_Warehouse_Entry = $aTmp[$oShop_Warehouse_Inventory_Item->shop_item_id];
-				}
-				else
-				{
-					$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry->setDocument($this->_object->id, 0);
-					$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Inventory_Item->shop_item_id;
-				}
-
-				$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
-				$oShop_Warehouse_Entry->datetime = $this->_object->datetime;
-				$oShop_Warehouse_Entry->value = $oShop_Warehouse_Inventory_Item->count;
-				$oShop_Warehouse_Entry->save();
-
-				// Recount
-				$oShop_Warehouse->setRest($oShop_Warehouse_Inventory_Item->shop_item_id, $oShop_Warehouse->getRest($oShop_Warehouse_Inventory_Item->shop_item_id));
-			}
-		}
-		else
-		{
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
-				$oShop_Warehouse_Entry->delete();
-
-				// Recount
-				$oShop_Warehouse->setRest($shop_item_id, $oShop_Warehouse->getRest($shop_item_id));
-			}
-		}
-
-		if ($iOldWarehouse != $oShop_Warehouse->id)
+		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
 		{
 			$aOld_Shop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse', $iOldWarehouse)->Shop_Warehouse_Entries->getByDocument($this->_object->id, 0);
 

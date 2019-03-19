@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_Ru extends Core_Inflection
 {
@@ -181,9 +181,14 @@ class Core_Inflection_Ru extends Core_Inflection
 		$float = floatval($float);
 
 		$ten = array(
-			0 => array('ноль', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'),
-			1 => array('ноль', 'одна', 'две', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять')
+			0 => array('', 'один', 'два', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять'),
+			1 => array('', 'одна', 'две', 'три', 'четыре', 'пять', 'шесть', 'семь', 'восемь', 'девять')
 		);
+
+		if ($float > 0 && $float < 1)
+		{
+			$ten[0][0] = $ten[1][0] = 'ноль';
+		}
 
 		$a20 = array(
 			'десять',
@@ -198,7 +203,7 @@ class Core_Inflection_Ru extends Core_Inflection
 			'девятнадцать'
 		);
 
-		$tens = array('', '', 'двадцать','тридцать','сорок','пятьдесят','шестьдесят','семьдесят' ,'восемьдесят','девяносто');
+		$tens = array('', '', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто');
 		$hundreds = array('', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот');
 
 		// 3 => 000000000003.00
@@ -220,7 +225,7 @@ class Core_Inflection_Ru extends Core_Inflection
 
 				$gender = $aUnits[$uk][3];
 				list($iHundreds, $iTens, $i3) = array_map('intval', str_split($value, 1));
-//var_dump($i3);
+
 				$out[] = $hundreds[$iHundreds];
 
 				$out[] = $iTens > 1

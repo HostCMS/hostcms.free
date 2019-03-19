@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -527,118 +527,6 @@ $oMenu->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_delivery_on'))
-		->icon('fa fa-truck')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_sds_link'))
-		->icon('fa fa-book')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_prices_title'))
-				->icon('fa fa-usd')
-				->img('/admin/images/prices.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.system_of_pays'))
-				->icon('fa fa-credit-card')
-				->img('/admin/images/payment.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.print_forms'))
-				->icon('fa fa-print')
-				->img('/admin/images/payment.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_producers_link'))
-				->icon('fa fa-building-o')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_sellers_link'))
-				->icon('fa fa-trademark')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.main_menu_warehouses_list'))
-				->icon('fa fa-balance-scale')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_reports_title'))
-		->icon('fa fa-book')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_sales_order_link'))
-				->icon('fa fa-book')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_brands_order_link'))
-				->icon('fa fa-book')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.shop_menu_title'))
 		->icon('fa fa-money')
 		->add(
@@ -703,13 +591,127 @@ $oMenu->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.affiliate_menu_title'))
-		->icon('fa fa-group')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+		->name(Core::_('Shop_Item.show_sds_link'))
+		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_prices_title'))
+				->icon('fa fa-usd')
+				->img('/admin/images/prices.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+				)
 		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.main_menu_warehouses_list'))
+				->icon('fa fa-balance-scale')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.system_of_pays'))
+				->icon('fa fa-credit-card')
+				->img('/admin/images/payment.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_delivery_on'))
+				->icon('fa fa-truck')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.affiliate_menu_title'))
+				->icon('fa fa-group')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.print_forms'))
+				->icon('fa fa-print')
+				->img('/admin/images/payment.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_producers_link'))
+				->icon('fa fa-building-o')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_sellers_link'))
+				->icon('fa fa-trademark')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.show_reports_title'))
+		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_sales_order_link'))
+				->icon('fa fa-book')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_brands_order_link'))
+				->icon('fa fa-book')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
+				)
 		)
 );
 
@@ -903,7 +905,7 @@ $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'apply')
 {
 	$oApplyController = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Apply', $oAction
+		'Shop_Item_Controller_Apply', $oAction
 	);
 
 	$oAdmin_Form_Controller->addAction($oApplyController);

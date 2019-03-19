@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -38,25 +38,37 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))->class('input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('input-lg'), $oMainRow1);
 
 		// Печать
+		$printlayoutsButton = '
+			<div class="btn-group">
+				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-palegreen">
+		';
+
 		$moduleName = $oAdmin_Form_Controller->module->getModuleName();
 
 		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
 
 		if (!is_null($oModule))
 		{
-			$printlayoutsButton = Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
-
-			$oMainRow1
-				->add(Admin_Form_Entity::factory('Div')
-					->class('form-group col-xs-12 col-sm-3 margin-top-21 margin-left-50')
-					->add(
-						Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
-					)
-			);
+			$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
 		}
+
+		$printlayoutsButton .= '
+				</ul>
+			</div>
+		';
+
+		$oMainRow1
+			->add(Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center')
+				->add(
+					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+				)
+		);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
@@ -221,7 +233,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 						<td>' . htmlspecialchars($incomingMeasureName) . '</td>
 						<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
 						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
-						<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
+						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 					</tr>
 				';
 			}
@@ -232,12 +244,14 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			</table>
 		';
 
+		$placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');
+
 		$oAddItemLink = Admin_Form_Entity::factory('Link');
 				$oAddItemLink
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->a
 						->class('btn btn-palegreen')
-						->onclick("$.addRegradeItem({$oShop->id})")
+						->onclick("$.addRegradeItem({$oShop->id}, '{$placeholder}')")
 						->value(Core::_('Shop_Warehouse_Regrade.add_item'));
 				$oAddItemLink
 					->icon
@@ -264,13 +278,21 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 	/**
 	 * Processing of the form. Apply object fields.
-	 * @hostcms-event Shop_Warehouse_Writeoff_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 * @hostcms-event Shop_Warehouse_Regrade_Controller_Edit.onAfterRedeclaredApplyObjectProperty
 	 */
 	protected function _applyObjectProperty()
 	{
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
 
+		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
+
 		parent::_applyObjectProperty();
+
+		if ($this->_object->number == '')
+		{
+			$this->_object->number = $this->_object->id;
+			$this->_object->save();
+		}
 
 		// Существующие товары
 		$aShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items->findAll(FALSE);
@@ -300,10 +322,6 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					$oShop_Warehouse_Regrade_Item->writeoff_price = $writeoff_price;
 					$oShop_Warehouse_Regrade_Item->incoming_price = $incoming_price;
 					$oShop_Warehouse_Regrade_Item->save();
-				}
-				else
-				{
-					$oShop_Warehouse_Regrade_Item->delete();
 				}
 			}
 		}
@@ -351,82 +369,11 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
-		$oShop_Warehouse = $this->_object->Shop_Warehouse;
+		Core_Array::getPost('posted')
+			? $this->_object->post()
+			: $this->_object->unpost();
 
-		$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->_object->id, 3);
-
-		// Не было проведено, проводим документ
-		if ($this->_object->posted)
-		{
-			$aTmp = array();
-
-			$aTmpPair = array();
-
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$aTmpPair[] = $oShop_Warehouse_Entry;
-
-				if (count($aTmpPair) == 2)
-				{
-					$oTmpWriteoff = $aTmpPair[0];
-					$oTmpIncoming = $aTmpPair[1];
-					$aTmp[$oTmpWriteoff->id . ',' . $oTmpIncoming->id] = $aTmpPair;
-
-					$aTmpPair = array();
-				}
-			}
-
-			unset($aShop_Warehouse_Entries);
-
-			$aShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items->findAll(FALSE);
-			foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
-			{
-				$key = $oShop_Warehouse_Regrade_Item->writeoff_shop_item_id . ',' . $oShop_Warehouse_Regrade_Item->incoming_shop_item_id;
-
-				if (isset($aTmp[$key]))
-				{
-					$oShop_Warehouse_Entry_Writeoff = $aTmp[$key][0];
-					$oShop_Warehouse_Entry_Incoming = $aTmp[$key][1];
-				}
-				else
-				{
-					$oShop_Warehouse_Entry_Writeoff = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry_Writeoff->setDocument($this->_object->id, 3);
-					$oShop_Warehouse_Entry_Writeoff->shop_item_id = $oShop_Warehouse_Regrade_Item->writeoff_shop_item_id;
-
-					$oShop_Warehouse_Entry_Incoming = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry_Incoming->setDocument($this->_object->id, 3);
-					$oShop_Warehouse_Entry_Incoming->shop_item_id = $oShop_Warehouse_Regrade_Item->incoming_shop_item_id;
-				}
-
-				$oShop_Warehouse_Entry_Writeoff->shop_warehouse_id = $oShop_Warehouse->id;
-				$oShop_Warehouse_Entry_Writeoff->datetime = $this->_object->datetime;
-				$oShop_Warehouse_Entry_Writeoff->value = -1 * $oShop_Warehouse_Regrade_Item->count;
-				$oShop_Warehouse_Entry_Writeoff->save();
-
-				$oShop_Warehouse_Entry_Incoming->shop_warehouse_id = $oShop_Warehouse->id;
-				$oShop_Warehouse_Entry_Incoming->datetime = $this->_object->datetime;
-				$oShop_Warehouse_Entry_Incoming->value = $oShop_Warehouse_Regrade_Item->count;
-				$oShop_Warehouse_Entry_Incoming->save();
-
-				$oShop_Warehouse->setRest($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id, $oShop_Warehouse->getRest($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id));
-
-				$oShop_Warehouse->setRest($oShop_Warehouse_Regrade_Item->incoming_shop_item_id, $oShop_Warehouse->getRest($oShop_Warehouse_Regrade_Item->incoming_shop_item_id));
-			}
-		}
-		else
-		{
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
-				$oShop_Warehouse_Entry->delete();
-
-				// Recount
-				$oShop_Warehouse->setRest($shop_item_id, $oShop_Warehouse->getRest($shop_item_id));
-			}
-		}
-
-		if ($iOldWarehouse != $oShop_Warehouse->id)
+		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
 		{
 			$aOld_Shop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse', $iOldWarehouse)->Shop_Warehouse_Entries->getByDocument($this->_object->id, 3);
 

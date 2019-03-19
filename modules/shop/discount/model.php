@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -173,6 +173,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				->add(
 					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
 				);
+		}
+
+		if ($this->coupon && strlen($this->coupon_text))
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-sky label-sm')
+					->value(htmlspecialchars($this->coupon_text))
+			);
 		}
 
 		$oCore_Html_Entity_Div->execute();

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -18,6 +18,8 @@ $sAdminFormAction = '/admin/shop/price/setting/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $sFormTitle = Core::_('Shop_Price_Setting.title');
+
+$printlayout_id = intval(Core_Array::getGet('printlayout_id', 0));
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -291,6 +293,42 @@ if ($oAdminFormActionDeleteShopItem && $oAdmin_Form_Controller->getAction() == '
 	);
 
 	$oAdmin_Form_Controller->addAction($Shop_Price_Setting_Item_Controller_Delete);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('print');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
+{
+	$Shop_Price_Setting_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Price_Setting_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Price_Setting_Controller_Print
+		->title(Core::_('Shop_Price_Setting.title'))
+		->printlayout($printlayout_id);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Price_Setting_Controller_Print);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('sendMail');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
+{
+	$Shop_Price_Setting_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Price_Setting_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Price_Setting_Controller_Print
+		->printlayout($printlayout_id)
+		->send(TRUE);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Price_Setting_Controller_Print);
 }
 
 // Источник данных 0

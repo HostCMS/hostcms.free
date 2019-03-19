@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -1671,7 +1671,16 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// цена товара
 						case 'item_price':
-							$this->_oCurrentItem->price = Shop_Controller::instance()->convertPrice($sData);
+							$oShop_Price_Setting = $this->_getPrices();
+
+							$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+							$oShop_Price_Setting_Item->shop_price_id = 0;
+							$oShop_Price_Setting_Item->shop_item_id = $this->_oCurrentItem->id;
+							$oShop_Price_Setting_Item->old_price = $this->_oCurrentItem->price;
+							$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice($sData);
+							$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+							// $this->_oCurrentItem->price = Shop_Controller::instance()->convertPrice($sData);
 						break;
 						// активность товара
 						case 'item_active':
@@ -2313,7 +2322,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					// Если склада не существует, связь не добавляется
 					if (!is_null($oShop_Warehouse->id))
 					{
-						$oShop_Warehouse_Item = $oShop_Warehouse
+						$oShop_Warehouse_Inventory = $this->_getInventory($oShop_Warehouse->id);
+
+						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+						$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_oCurrentItem->id;
+						$oShop_Warehouse_Inventory_Item->count = Shop_Controller::instance()->convertPrice($iWarehouseCount);
+						$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+						/*$oShop_Warehouse_Item = $oShop_Warehouse
 							->Shop_Warehouse_Items
 							->getByShopItemId($this->_oCurrentItem->id, FALSE);
 
@@ -2324,7 +2340,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$oShop_Warehouse_Item->shop_item_id = $this->_oCurrentItem->id;
 						}
 						$oShop_Warehouse_Item->count = Shop_Controller::instance()->convertPrice($iWarehouseCount);
-						$oShop_Warehouse_Item->save();
+						$oShop_Warehouse_Item->save();*/
 					}
 				}
 
@@ -2834,11 +2850,15 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 				foreach ($this->_aExternalPrices as $iPriceID => $sPriceValue)
 				{
-					$oShop_Item_Price = Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)
-						->Shop_Item_Prices
-						->getByPriceId($iPriceID);
+					$oShop_Price_Setting = $this->_getPrices();
 
-					if (is_null($oShop_Item_Price))
+					$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+					$oShop_Price_Setting_Item->shop_price_id = $iPriceID;
+					$oShop_Price_Setting_Item->shop_item_id = $this->_oCurrentItem->id;
+
+					$oShop_Item_Price = $this->_oCurrentItem->Shop_Item_Prices->getByPriceId($iPriceID, FALSE);
+
+					/*if (is_null($oShop_Item_Price))
 					{
 						$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
 						$oShop_Item_Price->shop_item_id = $this->_oCurrentItem->id;
@@ -2846,17 +2866,25 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 
 					$oShop_Item_Price->value($sPriceValue);
-					$oShop_Item_Price->save();
+					$oShop_Item_Price->save();*/
+
+					$old_price = !is_null($oShop_Item_Price)
+						? $oShop_Item_Price->value
+						: $this->_oCurrentItem->price;
+
+					$oShop_Price_Setting_Item->old_price = $old_price;
+					$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice($sPriceValue);
+					$oShop_Price_Setting->add($oShop_Price_Setting_Item);
 				}
 
 				if ($this->_oCurrentItem->id)
 				{
 					// Indexation
 					$this->searchIndexation
-						&& Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)->index();
+						&& $this->_oCurrentItem->index();
 
 					// clearCache
-					Core_Entity::factory('Shop_Item', $this->_oCurrentItem->id)->clearCache();
+					$this->_oCurrentItem->clearCache();
 				}
 			} // end fields
 
@@ -3225,6 +3253,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						$changedValue = NULL;
 					}
 				break;
+				case 7: // Checkbox
+					$changedValue = $sPropertyValue == 1 || strtolower($sPropertyValue) === 'true'
+						? 1
+						: 0;
+				break;
 				case 8:
 					if (!preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue))
 					{
@@ -3269,7 +3302,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				break;
 				default:
 					Core_Event::notify(get_class($this) . '.onAddItemPropertyValueDefault', $this, array($oShopItem, $oProperty, $sPropertyValue));
-					
+
 					$changedValue = is_null(Core_Event::getLastReturn())
 						? $sPropertyValue
 						: Core_Event::getLastReturn();
@@ -3712,4 +3745,61 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'order_item_rate',
 		'order_item_type'
 	);
+
+	protected $_aShop_Warehouse_Inventory_Ids = array();
+
+	protected function _getInventory($shop_warehouse_id)
+	{
+		if (!isset($this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]))
+		{
+			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
+			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
+			$oShop_Warehouse_Inventory->description = Core::_('Shop_Exchange.shop_warehouse_inventory');
+			$oShop_Warehouse_Inventory->number = '';
+			$oShop_Warehouse_Inventory->save();
+
+			$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
+			$oShop_Warehouse_Inventory->save();
+
+			$this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id] = $oShop_Warehouse_Inventory->id;
+		}
+
+		return Core_Entity::factory('Shop_Warehouse_Inventory', $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]);
+	}
+
+	protected $_oShop_Price_Setting_Id = NULL;
+
+	protected function _getPrices()
+	{
+		if (is_null($this->_oShop_Price_Setting_Id))
+		{
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
+			$oShop_Price_Setting->shop_id = $this->_oCurrentShop->id;
+			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->description = Core::_('Shop_Exchange.shop_price_setting');
+			$oShop_Price_Setting->save();
+
+			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
+			$oShop_Price_Setting->save();
+
+			$this->_oShop_Price_Setting_Id = $oShop_Price_Setting->id;
+		}
+
+		return Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+	}
+
+	public function postAll()
+	{
+		foreach ($this->_aShop_Warehouse_Inventory_Ids as $shop_warehouse_id => $shop_warehouse_inventory_id)
+		{
+			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory', $shop_warehouse_inventory_id);
+			$oShop_Warehouse_Inventory->post();
+		}
+
+		if (!is_null($this->_oShop_Price_Setting_Id))
+		{
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+			$oShop_Price_Setting->post();
+		}
+	}
 }

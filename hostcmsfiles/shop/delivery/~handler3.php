@@ -22,6 +22,7 @@ class Shop_Delivery_Handler3 extends Shop_Delivery_Handler
 
 	private function getData($aParams)
 	{
+		// https://otpravka-api.pochta.ru/api/rest/?
 		$url = "http://emspost.ru/api/rest/?" . http_build_query($aParams);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -32,9 +33,12 @@ class Shop_Delivery_Handler3 extends Shop_Delivery_Handler
 
 		$oResponse = json_decode($data);
 
-		if(!(is_object($oResponse) && $oResponse->rsp->stat == 'ok'))
+		if(!is_object($oResponse) || $oResponse->rsp->stat != 'ok')
 		{
-			throw new Exception($oResponse->rsp->stat . " ({$oResponse->rsp->err->msg})");
+			throw new Exception(is_object($oResponse) && isset($oResponse->rsp->stat)
+				? $oResponse->rsp->stat . " ({$oResponse->rsp->err->msg})"
+				: 'Wrong emspost.ru answer'
+			);
 		}
 
 		return $oResponse;

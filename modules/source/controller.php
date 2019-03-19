@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Source
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Source_Controller extends Core_Servant_Properties
 {
@@ -73,9 +73,8 @@ class Source_Controller extends Core_Servant_Properties
 			{
 				$cookieName = 'hostcms_source_' . $propertyName;
 
-				isset($_COOKIE[$cookieName]) && $oSource->$propertyName = $_COOKIE[$cookieName];
+				isset($_COOKIE[$cookieName]) && $oSource->$propertyName = Core_Str::removeEmoji($_COOKIE[$cookieName]);
 			}
-
 			$oSource->save();
 
 			return $oSource->id;

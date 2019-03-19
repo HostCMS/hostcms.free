@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -84,7 +84,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				? htmlspecialchars($oShop_Item->Shop_Measure->name)
 				: '';
 
-			$aPrices = array(0 => $oShop_Item->price);
+			$aPrices = array();
+			$aPrices[] = array('id' => 0, 'price' => $oShop_Item->price);
+
 			foreach ($aAllPricesIDs as $shop_price_id)
 			{
 				$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
@@ -93,7 +95,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					? $oShop_Item_Price->value
 					: $oShop_Item->price;
 
-				$aPrices[$shop_price_id] = htmlspecialchars($price);
+				$aPrices[] = array('id' => $shop_price_id, 'price' => $price);
 			}
 
 			$aJSON[] = array(

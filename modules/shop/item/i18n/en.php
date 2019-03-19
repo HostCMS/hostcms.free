@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products',
@@ -266,7 +266,7 @@ return array(
 	'item_cards_print_parent_group' => "Parent group",
 	'item_cards_print_fio' => "Full name of the responsible person",
 	'item_cards_print_date' => "Date",
-	'item_cards_print_height' => "Height, mm.",
+	// 'item_cards_print_height' => "Height, mm.",
 	'item_cards_print_width' => "Width, mm.",
 	'item_cards_print_font' => "Font size",
 	'item_cards_desription' => "Description",
@@ -322,5 +322,12 @@ return array(
 	'modifications_root' => '...',
 	'disountcard_link' => 'Discount cards',
 	'items_catalog_barcodes' => 'Barcodes',
-	'type_barcode' => 'Input barcode',	
+	'type_barcode' => 'Input barcode',
+	'item_cards_print_horizontal' => "Horizontal",
+	'item_cards_print_vertical' => "Vertical",
+	'shop_warehouse_incoming' => 'Incoming by add item',
+	'shop_warehouse_inventory' => 'Inventory by edit item "%s"',
+	'edit_all_warehouses' => 'Edit',
+	'shop_price_setting' => 'Set price by edit item "%s"',
+	'warehouse_in_price' => 'In price',
 );

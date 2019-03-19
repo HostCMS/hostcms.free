@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -102,6 +102,10 @@ class Shop_Item_Model extends Core_Entity
 		'shop_warehouse_incoming_item' => array(),
 		'shop_warehouse_inventory_item' => array(),
 		'shop_warehouse_writeoff_item' => array(),
+		'shop_warehouse_regrade_incoming_item' => array('model' => 'Shop_Warehouse_Regrade_Item', 'foreign_key' => 'incoming_shop_item_id'),
+		'shop_warehouse_regrade_writeoff_item' => array('model' => 'Shop_Warehouse_Regrade_Item', 'foreign_key' => 'writeoff_shop_item_id'),
+		'shop_price_entry' => array(),
+		'shop_price_setting_item' => array(),
 	);
 
 	/**
@@ -184,7 +188,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @param boolean
 	 */
 	protected $_hasRevisions = TRUE;
-	
+
 	/**
 	 * Inc items'count in group during creating item
 	 * @var boolean
@@ -1596,10 +1600,15 @@ class Shop_Item_Model extends Core_Entity
 		// Удаляем штрихкоды
 		$this->Shop_Item_Barcodes->deleteAll(FALSE);
 
-		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
 		$this->Shop_Warehouse_Incoming_Items->deleteAll(FALSE);
 		$this->Shop_Warehouse_Inventory_Items->deleteAll(FALSE);
 		$this->Shop_Warehouse_Writeoff_Items->deleteAll(FALSE);
+		$this->Shop_Warehouse_Regrade_Incoming_Items->deleteAll(FALSE);
+		$this->Shop_Warehouse_Regrade_Writeoff_Items->deleteAll(FALSE);
+		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
+
+		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
+		$this->Shop_Price_Entries->deleteAll(FALSE);
 
 		// Удаляем директорию товара
 		$this->deleteDir();
@@ -1945,7 +1954,7 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Show properties in XML
-	 * @var boolean
+	 * @var mixed
 	 */
 	protected $_showXmlProperties = FALSE;
 
@@ -2123,6 +2132,7 @@ class Shop_Item_Model extends Core_Entity
 								->id($oShop_Item->id)
 								->showXmlModifications(FALSE)
 								->showXmlAssociatedItems(FALSE)
+								->showXmlSpecialprices($this->_showXmlSpecialprices)
 								->addEntity(
 									Core::factory('Core_Xml_Entity')
 										->name('count')
@@ -2597,9 +2607,8 @@ class Shop_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-darkorange white')
-			->value('<i class="fa fa-exclamation"></i>')
+		$oShop_Item->shop_currency_id == 0 && Core::factory('Core_Html_Entity_I')
+			->class('fa fa-exclamation-triangle darkorange')
 			->title(Core::_('Shop_Item.shop_item_not_currency'))
 			->execute();
 	}

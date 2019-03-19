@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -115,7 +115,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 		$this->getField('show')
-			->divAttr(array('class' => 'form-group col-sm-4 col-md-4 col-lg-4 checkbox-margin-top'));
+			->divAttr(array('class' => 'form-group col-sm-4 col-md-4 col-lg-4 margin-top-21'));
 
 		$oAdditionalTab
 			->delete($this->getField('parent_id'))
@@ -634,7 +634,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				if ($bExclude != $oStructure->id)
 				{
-					$aReturn[$oStructure->id] = str_repeat('  ', $iLevel) . $oStructure->name;
+					$aReturn[$oStructure->id] = str_repeat('  ', $iLevel) . $oStructure->name . ' [' . $oStructure->path . ']';
 					$aReturn += $this->fillStructureList($iSiteId, $oStructure->id, $bExclude, $iLevel + 1);
 				}
 			}

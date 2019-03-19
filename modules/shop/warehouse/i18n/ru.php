@@ -6,12 +6,12 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Склады',
 	'main_menu_warehouses_list' => "Склады",
-	'main_menu_warehouses_add_caption' => "Склад",
+	'warehouse' => "Склад",
 	'form_warehouses_add' => "Добавление склада",
 	'form_warehouses_edit' => 'Редактирование склада "%s"',
 	'main_menu_warehouses_add' => "Добавить",
@@ -46,4 +46,5 @@ return array(
 	'incoming' => 'Оприходование',
 	'writeoff' => 'Списание',
 	'regrade' => 'Пересортица',
+	'movement' => 'Перемещение',
 );

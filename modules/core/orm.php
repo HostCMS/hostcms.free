@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -846,6 +846,7 @@ class Core_ORM
 	/**
 	 * Calculate model's relation if data does not exist in self::$_relationModelCache.
 	 * @return self
+	 * @hostcms-event modelname.onAfterLoadModelCache
 	 * @hostcms-event modelname.onAfterRelations
 	 */
 	protected function _relations()
@@ -854,6 +855,9 @@ class Core_ORM
 		{
 			$this->_relations = self::$_relationModelCache[$this->_modelName];
 			//$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
+			
+			Core_Event::notify($this->_modelName . '.onAfterLoadModelCache', $this);
+			
 			return $this;
 		}
 
@@ -1137,14 +1141,25 @@ class Core_ORM
 
 	/**
 	 * Clear self::$_relationModelCache and Core_ORM_RelationCache
+	 * @param mixed $modelName default NULL
 	 */
-	static public function clearRelationModelCache()
+	static public function clearRelationModelCache($modelName = NULL)
 	{
-		self::$_relationModelCache = array();
-
-		if (Core::moduleIsActive('cache'))
+		if (!is_null($modelName))
 		{
-			self::$relationCache->deleteAll('Core_ORM_RelationCache');
+			if (isset(self::$_relationModelCache[$modelName]))
+			{
+				unset(self::$_relationModelCache[$modelName]);
+			}
+		}
+		else
+		{
+			self::$_relationModelCache = array();
+
+			if (Core::moduleIsActive('cache'))
+			{
+				self::$relationCache->deleteAll('Core_ORM_RelationCache');
+			}
 		}
 	}
 

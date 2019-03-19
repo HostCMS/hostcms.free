@@ -9,13 +9,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_Print
 {
-	protected function _print()
+	protected function _prepare()
 	{
 		$oPrintlayout = Core_Entity::factory('Printlayout')->getById($this->printlayout);
+
+		$this->_oPrintlayout_Controller = new Printlayout_Controller($oPrintlayout);
 
 		if (!is_null($oPrintlayout))
 		{
@@ -40,25 +42,13 @@ class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_P
 						'company' => $oShop_Warehouse_Inventory->Shop_Warehouse->Shop->Shop_Company,
 						'shop_warehouse' => $oShop_Warehouse_Inventory->Shop_Warehouse,
 						'shop' => $oShop_Warehouse_Inventory->Shop_Warehouse->Shop,
-
+						'user' => $oShop_Warehouse_Inventory->User,
 						'total_count' => 0,
 						'Items' => array(),
-
-						/*'{number}' => $oShop_Warehouse_Inventory->number,
-						'{date}' => Core_Date::sql2date($oShop_Warehouse_Inventory->datetime),
-						'{datetime}' => Core_Date::sql2datetime($oShop_Warehouse_Inventory->datetime),
-						'{company_name}' => $oShop_Warehouse_Inventory->Shop_Warehouse->Shop->Shop_Company->name,
-						'{warehouse_name}' => $oShop_Warehouse_Inventory->Shop_Warehouse->name,
-						'{shop_name}' => $oShop_Warehouse_Inventory->Shop_Warehouse->Shop->name,
-						'{total_count}' => 0,
-						'{total_sum}' => 0,
-						'{inv_total_sum}' => 0,
-						'{total_sum_in_words}' => '',
-						'{Items}' => array(),*/
 					);
 
 					$position = 1;
-					$inv_total_sum = $total_sum = 0;
+					$inv_amount_total = $amount_total = 0;
 
 					$aShop_Warehouse_Inventory_Items = $oShop_Warehouse_Inventory->Shop_Warehouse_Inventory_Items->findAll();
 
@@ -72,7 +62,7 @@ class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_P
 
 						$oShop_Warehouse_Items = Core_Entity::factory('Shop_Warehouse_Item');
 						$oShop_Warehouse_Items->queryBuilder()
-							->where('shop_warehouse_items.shop_warehouse_id', '=', $oShop_Warehouse_Inventory->Shop_Warehouse->id)
+							->where('shop_warehouse_items.shop_warehouse_id', '=', $oShop_Warehouse_Inventory->shop_warehouse_id)
 							->where('shop_warehouse_items.shop_item_id', '=', $oShop_Item->id)
 							->limit(1);
 
@@ -83,48 +73,46 @@ class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_P
 							$factWarehouseCount = $aShop_Warehouse_Items[0]->count;
 						}
 
-						$factWarehouseSum = $factWarehouseCount * $oShop_Item->price;
+						$factWarehouseSum = Shop_Controller::instance()->round($factWarehouseCount * $oShop_Item->price);
 
 						$aReplace['Items'][] = array(
 							'position' => $position++,
 							'name' => htmlspecialchars($oShop_Item->name),
 							'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
 							'price' => $oShop_Item->price,
-							'inv_quantity' => $oShop_Warehouse_Inventory_Item->count,
-							'inv_amount' => $inv_amount,
 							'quantity' => $factWarehouseCount,
-							'amount' => $factWarehouseSum
+							'amount' => $factWarehouseSum,
+							'inv_quantity' => $oShop_Warehouse_Inventory_Item->count,
+							'inv_amount' => $inv_amount
 						);
 
-						$inv_total_sum += $inv_amount;
-						$total_sum += $factWarehouseSum;
+						$inv_amount_total += $inv_amount;
+						$amount_total += $factWarehouseSum;
 
 						$aReplace['total_count']++;
 					}
 
+					$aReplace['amount'] = Shop_Controller::instance()->round($amount_total);
+					$aReplace['inv_amount'] = Shop_Controller::instance()->round($inv_amount_total);
 
-					$inv_total_sum = Shop_Controller::instance()->round($inv_total_sum);
-					$total_sum = Shop_Controller::instance()->round($total_sum);
+					$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
+					$aReplace['inv_amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['inv_amount']));
 
-					$aReplace['inv_total_sum'] = $inv_total_sum;
-					$aReplace['total_sum'] = $total_sum;
-					$aReplace['total_sum_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($inv_total_sum));
-
-					$Printlayout_Controller = new Printlayout_Controller($oPrintlayout);
-					$Printlayout_Controller
+					$this->_oPrintlayout_Controller
 						->replace($aReplace)
 						->driver($oPrintlayout_Driver)
-						->entity($oShop_Warehouse_Inventory)
-						->execute()
-						->download()
-						//->print()
-						;
-
-					exit();
+						->entity($oShop_Warehouse_Inventory);
 				}
 			}
 		}
 
 		return $this;
+	}
+
+	protected function _print()
+	{
+		$this->_oPrintlayout_Controller->execute()->download();
+
+		exit();
 	}
 }

@@ -86,7 +86,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Show extends Core_Controller
 {
@@ -314,6 +314,8 @@ class Shop_Controller_Show extends Core_Controller
 			$hostcmsFavorite = Core_Array::get(Core_Array::getSession('hostcmsFavorite', array()), $oShop->id, array());
 			count($hostcmsFavorite) && $this->addCacheSignature('hostcmsFavorite=' . implode(',', $hostcmsFavorite));
 		}
+		
+		 isset($_SESSION['hostcmsOrder']['coupon_text']) && $this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
 	}
 
 	/**
@@ -630,15 +632,20 @@ class Shop_Controller_Show extends Core_Controller
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 				if (!is_null($oShop_Item->id))
 				{
-					$this->applyItemsForbiddenTags($oShop_Item);
+					$oFavorite_Shop_Item = clone $oShop_Item;
+					$oFavorite_Shop_Item
+						->id($oShop_Item->id)
+						->showXmlProperties($this->itemsProperties)
+						->showXmlBonuses($this->bonuses)
+						->showXmlSpecialprices($this->specialprices);
 
-					$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
-					$this->bonuses && $oShop_Item->showXmlBonuses($this->bonuses);
-					!$this->sets && $oShop_Item->showXmlSets($this->sets);
+					!$this->sets && $oFavorite_Shop_Item->showXmlSets($this->sets);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oShop_Item));
+					$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
 
-					$oFavouriteEntity->addEntity($oShop_Item);
+					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
+
+					$oFavouriteEntity->addEntity($oFavorite_Shop_Item);
 				}
 			}
 		}
@@ -696,19 +703,21 @@ class Shop_Controller_Show extends Core_Controller
 
 				if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
 				{
-					$this->applyItemsForbiddenTags($oShop_Item);
-
-					$oShop_Item
+					$oViewed_Shop_Item = clone $oShop_Item;
+					$oViewed_Shop_Item
+						->id($oShop_Item->id)
 						->showXmlProperties($this->itemsProperties)
 						->showXmlComments($this->comments)
 						->showXmlBonuses($this->bonuses)
 						->showXmlSpecialprices($this->specialprices);
 
-					!$this->sets && $oShop_Item->showXmlSets($this->sets);
-						
-					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oShop_Item));
+					$this->applyItemsForbiddenTags($oViewed_Shop_Item);
 
-					$oViewedEntity->addEntity($oShop_Item);
+					!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
+						
+					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
+
+					$oViewedEntity->addEntity($oViewed_Shop_Item);
 				}
 			}
 		}

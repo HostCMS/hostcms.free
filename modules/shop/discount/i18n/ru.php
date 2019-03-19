@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки',
@@ -35,4 +35,8 @@ return array(
 	'changeStatus_success' => "Информация успешно изменена",
 	'item_discount_name' => "Название скидки",
 	'description' => "Описание скидки",
+	'url' => "Ссылка на описание скидки",
+	'coupon' => "Применять с купоном",
+	'coupon_text' => '<acronym title="Если указан купон, то скидка доступна только после ввода купона">Купон</acronym>',
+	'public' => "Выгружать в Маркет",
 );

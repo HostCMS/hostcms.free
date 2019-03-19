@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Status_Model extends Core_Entity
 {
@@ -59,5 +59,15 @@ class Shop_Order_Status_Model extends Core_Entity
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#eee' ) . '"></i> '
+				. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1379">' . htmlspecialchars($this->name) . '</span>';
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -703,13 +703,13 @@ class User_Model extends Core_Entity
 	public function loginBadge()
 	{
 		$isOnline = $this->isOnline();
-		
+
 		$sStatus = $isOnline
 			? 'online'
 			: 'offline';
 
 		$lng = $isOnline ? 'user_active' : 'user_last_activity';
-		
+
 		$sStatusTitle = !is_null($this->last_activity)
 			? Core::_('User.' . $lng, Core_Date::sql2datetime($this->last_activity))
 			: '';
@@ -945,15 +945,15 @@ class User_Model extends Core_Entity
 		!is_null($oCompany) && $oCompany_Department_Post_Users
 			->queryBuilder()
 			->where('company_department_post_users.company_id', '=', $oCompany->id);
-			
+
 		$aCompany_Department_Post_Users = $oCompany_Department_Post_Users->findAll();
-		
+
 		$aHeadOfDepartments = array();
 		foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 		{
 			$aHeadOfDepartments[] = $oCompany_Department_Post_User->Company_Department;
 		}
-		
+
 		return $aHeadOfDepartments;
 	}
 
@@ -969,10 +969,10 @@ class User_Model extends Core_Entity
 		{
 			$aReturn = array_merge($aReturn, $oCompany_Department->getChildren());
 		}
-		
+
 		return $aReturn;
 	}
-	
+
 	/**
 	 * Является ли текущий сотрудник начальником для определенного сотрудника в заданой компании
 	 * @param $oCompany компания
@@ -997,7 +997,7 @@ class User_Model extends Core_Entity
 					}
 				}
 			}
-			
+
 			$aHeadOfDepartmentsIDs = array();
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
@@ -1039,5 +1039,13 @@ class User_Model extends Core_Entity
 			}
 		}
 		return FALSE;
+	}
+
+	public function getEmail()
+	{
+		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
+		return isset($aDirectory_Emails[0])
+			? $aDirectory_Emails[0]->value
+			: NULL;
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -71,7 +71,7 @@ abstract class Core_Image
 	{
 		// Uploaded file doesn't have extension
 		if (is_uploaded_file($filename)
-			|| Core_File::isValidExtension($filename, Core_File::$resizeExtensions)
+			|| Core_File::isValidExtension($filename, Core_File::getResizeExtensions())
 			|| strpos($filename, CMS_FOLDER . TMP_DIR) === 0
 			|| in_array(Core_File::getExtension($filename), array('tmp', 'dat'))
 		)

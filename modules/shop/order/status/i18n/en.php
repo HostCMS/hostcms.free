@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Order statuses',
@@ -26,4 +26,5 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'sorting' => 'Sort',
 	'apply_success' => 'Status information modified successfully!',
+	'color' => 'Color',
 );

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -410,6 +410,39 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'print')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('sendMail');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
+{
+	$Shop_Order_Controller_Print = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Controller_Print', $oAdmin_Form_Action
+	);
+
+	$Shop_Order_Controller_Print
+		->printlayout($printlayout_id)
+		->send(TRUE);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
+}
+
+// Действие "Изменить статус"
+$oAdminFormActionChangeStatus = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('changeStatus');
+
+if ($oAdminFormActionChangeStatus && $oAdmin_Form_Controller->getAction() == 'changeStatus')
+{
+	$oShopOrderControllerStatus = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Controller_Status', $oAdminFormActionChangeStatus
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShopOrderControllerStatus);
 }
 
 // Источник данных 0

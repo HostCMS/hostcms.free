@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Datetime_Model extends Core_Entity
 {
@@ -52,7 +52,7 @@ class Property_Value_Datetime_Model extends Core_Entity
 	 * Date format.
 	 * @var string
 	 */
-	protected $_dateFormat = '%m.%Y.%d';
+	protected $_dateFormat = '%d.%m.%Y';
 
 	/**
 	 * Set date format

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -506,6 +506,8 @@ class Informationsystem_Model extends Core_Entity
 	 * @return Informationsystem_Model
 	 * @hostcms-event informationsystem.onBeforeRecount
 	 * @hostcms-event informationsystem.onAfterRecount
+	 * @hostcms-event informationsystem.onBeforeSelectCountGroupsInRecount
+	 * @hostcms-event informationsystem.onBeforeSelectCountItemsInRecount
 	 */
 	public function recount()
 	{
@@ -541,6 +543,8 @@ class Informationsystem_Model extends Core_Entity
 			->where('informationsystem_groups.deleted', '=', 0)
 			->groupBy('parent_id');
 
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountGroupsInRecount', $this, array($queryBuilder));
+
 		$aInformationsystem_Groups = $queryBuilder->execute()->asAssoc()->result();
 		foreach ($aInformationsystem_Groups as $aInformationsystem_Group)
 		{
@@ -565,6 +569,8 @@ class Informationsystem_Model extends Core_Entity
 			->where('informationsystem_items.deleted', '=', 0)
 			->groupBy('informationsystem_group_id');
 
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountItemsInRecount', $this, array($queryBuilder));
+
 		$aInformationsystem_Items = $queryBuilder->execute()->asAssoc()->result();
 
 		foreach ($aInformationsystem_Items as $Informationsystem_Item)
@@ -585,15 +591,6 @@ class Informationsystem_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterRecount', $this);
 
 		return $this;
-	}
-
-	/**
-	 * Delete empty groups in UPLOAD path for informationsystem
-	 */
-	public function deleteEmptyDirs()
-	{
-		Core_File::deleteEmptyDirs($this->getPath());
-		return FALSE;
 	}
 
 	/**
@@ -643,6 +640,15 @@ class Informationsystem_Model extends Core_Entity
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Delete empty groups in UPLOAD path for informationsystem
+	 */
+	public function deleteEmptyDirs()
+	{
+		Core_File::deleteEmptyDirs($this->getPath());
+		return FALSE;
 	}
 
 	/**
@@ -718,5 +724,14 @@ class Informationsystem_Model extends Core_Entity
 			->value('<i class="fa fa-file-o"></i> ' . $countInformationsystemItems)
 			->title(Core::_('Informationsystem.all_items_count', $countInformationsystemItems))
 			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function pathBackend()
+	{
+		$this->structure_id && $this->Structure->pathBackend();
 	}
 }

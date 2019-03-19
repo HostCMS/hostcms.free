@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -26,6 +26,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		}
 
 		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
+		$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 
 		parent::setObject($object);
 
@@ -45,8 +46,52 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))->class('input-lg'), $oMainRow1)
-			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('input-lg'), $oMainRow1);
+
+		// Печать
+		$printlayoutsButton = '
+			<div class="btn-group">
+				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+				<ul class="dropdown-menu dropdown-palegreen">
+		';
+
+		$moduleName = $oAdmin_Form_Controller->module->getModuleName();
+
+		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
+
+		if (!is_null($oModule))
+		{
+			$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 10, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_price_id=0&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+		}
+
+		$printlayoutsButton .= '
+				</ul>
+			</div>
+		';
+
+		$oMainRow1
+			->add(Admin_Form_Entity::factory('Div')
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-price')
+				->add(
+					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+				)
+		);
+
+		$oShop_Warehouse_Select = Admin_Form_Entity::factory('Select')
+			->caption(Core::_('Shop_Price_Setting.print_price_id'))
+			->divAttr(
+				array('class' => 'form-group col-xs-12 col-sm-3')
+			)
+			->options(self::fillPricesList($oShop))
+			->class('form-control select-warehouse')
+			->name('print_price_id')
+			->onchange('$.changePrintButton(this)')
+			->value(0);
+
+		$oMainRow1->add($oShop_Warehouse_Select);
+
+		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 		$aColors = array(
 			'danger',
@@ -103,7 +148,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow3);
 
-		$aExistPriceIDs = array();
+		$aExistPriceIDs = $this->_object->id ? array() : array(0);
 		$aPrices = array();
 
 		$aShop_Price_Setting_Items = $this->_object->Shop_Price_Setting_Items->findAll(FALSE);
@@ -132,8 +177,8 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					->onclick("$.toggleShopPrice(0)")
 		);
 
-		in_array(0, $aExistPriceIDs) && $oShop_Price_Checkbox->checked('checked');	
-		
+		in_array(0, $aExistPriceIDs) && $oShop_Price_Checkbox->checked('checked');
+
 		$aAllPricesIDs = array(0);
 
 		$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
@@ -164,8 +209,8 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$hiddenPrice0 = !in_array(0, $aExistPriceIDs)
 			? 'hidden'
-			: '';	
-			
+			: '';
+
 		$itemTable = '
 		<div class="table-scrollable">
 			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
@@ -192,7 +237,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				<th colspan="3" class="border-bottom-' . $color . ' toggle-shop-price-' . $oShop_Price->id . ' ' . $hidden . '" scope="col">' . htmlspecialchars($oShop_Price->name) . '</th>
 			';
 		}
-	
+
 		$itemTable .= '
 						<th rowspan="2" scope="col">  </th>
 					</tr>
@@ -232,7 +277,10 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					? $oShop_Item->Shop_Item
 					: $oShop_Item;
 
-				$currencyName = $oShop_Item->Shop_Currency->name;
+				$currencyName = strlen($oShop_Item->Shop_Currency->name)
+					? htmlspecialchars($oShop_Item->Shop_Currency->name)
+					: '<i class="fa fa-exclamation-triangle darkorange" title="' . Core::_('Shop_Item.shop_item_not_currency') . '"></i>';
+
 				$measureName = $oShop_Item->Shop_Measure->name;
 
 				$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_price_setting_id={$this->_object->id}&shop_item_id={$shop_item_id}");
@@ -255,7 +303,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 							<td class="index">' . $i . '</td>
 							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
 							<td>' . htmlspecialchars($measureName) . '</td>
-							<td>' . htmlspecialchars($currencyName) . '</td>
+							<td>' . $currencyName . '</td>
 				';
 
 				foreach ($aAllPricesIDs as $shop_price_id)
@@ -289,16 +337,16 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 					}
 
 					$itemTable .= '
-							<td width="80" class="toggle-shop-price-' . $shop_price_id . ' old-price-' . $shop_price_id . ' ' . $hidden . '">' . htmlspecialchars($old_price) . '</td>
-							<td width="80" class="toggle-shop-price-' . $shop_price_id . ' ' . $hidden . '"><span class="percent-diff-' . $shop_price_id . '"></span></td>
-							<td width="80" class="toggle-shop-price-' . $shop_price_id . ' ' . $hidden . '"><input data-shop-price-id="' . $shop_price_id . '" class="set-item-new-price form-control" name="' . $name . '" value="' . htmlspecialchars($new_price) . '" /></td>
+						<td width="80" class="toggle-shop-price-' . $shop_price_id . ' old-price-' . $shop_price_id . ' ' . $hidden . '">' . htmlspecialchars($old_price) . '</td>
+						<td width="80" class="toggle-shop-price-' . $shop_price_id . ' ' . $hidden . '"><span class="percent-diff-' . $shop_price_id . '"></span></td>
+						<td width="80" class="toggle-shop-price-' . $shop_price_id . ' ' . $hidden . '"><input data-shop-price-id="' . $shop_price_id . '" class="set-item-new-price form-control" name="' . $name . '" value="' . htmlspecialchars($new_price) . '" ' . ($hidden == 'hidden' ? 'disabled' : '') . ' /></td>
 					';
 				}
 
 				$itemTable .= '
-							<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
-						</tr>
-					';
+						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Price_Setting.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+					</tr>
+				';
 			}
 
 			$i++;
@@ -314,6 +362,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			Admin_Form_Entity::factory('Input')
 				->divAttr(array('class' => 'form-group col-xs-12'))
 				->class('add-shop-item form-control')
+				->placeholder(Core::_('Shop_Price_Setting.add_item_placeholder'))
 				->name('set_item_name')
 		);
 
@@ -328,7 +377,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			->value("$('.add-shop-item').autocompleteShopItem('{$oShop->id}', 0, function(event, ui) {
 				$('.shop-item-table > tbody').append(
-					$('<tr id=\"shop-item-' + ui.item.id + '\" data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + ui.item.label + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.measure + '</td><td>' + ui.item.currency + '</td></tr>')
+					$('<tr id=\"shop-item-' + ui.item.id + '\" data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td>' + ui.item.currency + '</td></tr>')
 				);
 
 				var aExistItems = [];
@@ -338,12 +387,18 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 				if ($.isArray(ui.item.aPrices))
 				{
-					$.each(ui.item.aPrices, function (shop_price_id, old_price) {
-						var hidden = $.inArray(shop_price_id, aExistItems) == -1
-							? 'hidden'
-							: '';
+					$.each(ui.item.aPrices, function (index, aArray) {
 
-						$('.shop-item-table > tbody tr:last-child').append($('<td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' old-price-' + shop_price_id + ' ' + hidden + '\">' + old_price + '</td><td class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><span class=\"percent-diff-' + shop_price_id + '\"></span></td><td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><input data-shop-price-id=\"' + shop_price_id + '\" class=\"set-item-new-price form-control\" name=\"shop_item_new_price[' + ui.item.id + '][' + shop_price_id + ']\" value=\"\" /></td>'));
+						var shop_price_id = parseInt(aArray.id),
+							old_price = aArray.price,
+							hidden = $.inArray(shop_price_id, aExistItems) == -1
+								? 'hidden'
+								: '',
+							disabled = $.inArray(shop_price_id, aExistItems) == -1
+								? 'disabled'
+								: '';
+
+						$('.shop-item-table > tbody tr:last-child').append($('<td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' old-price-' + shop_price_id + ' ' + hidden + '\">' + old_price + '</td><td class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><span class=\"percent-diff-' + shop_price_id + '\"></span></td><td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><input data-shop-price-id=\"' + shop_price_id + '\" class=\"set-item-new-price form-control\" name=\"shop_item_new_price[' + ui.item.id + '][' + shop_price_id + ']\" value=\"\" ' + disabled + ' /></td>'));
 					});
 				}
 
@@ -377,7 +432,21 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	 */
 	protected function _applyObjectProperty()
 	{
+		$this->addSkipColumn('posted');
+
+		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
+
 		parent::_applyObjectProperty();
+
+		if ($this->_object->number == '')
+		{
+			$this->_object->number = $this->_object->id;
+			$this->_object->save();
+		}
+
+		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
+		$bNeedsRePost = FALSE;
 
 		// Существующие товары
 		$aShop_Price_Setting_Items = $this->_object->Shop_Price_Setting_Items->findAll(FALSE);
@@ -385,28 +454,33 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		{
 			$price = Core_Array::getPost('shop_item_new_price_' . $oShop_Price_Setting_Item->id);
 
-			if ($price !== '')
+			// Может быть в случае, если при импорте добавлили один товар дважды
+			if (is_null($price))
 			{
-				$oShop_Item = $oShop_Price_Setting_Item->Shop_Item;
+				$oShop_Price_Setting_Item->delete();
+				
+				$bNeedsRePost = TRUE;
+			}
+			elseif ($price !== '')
+			{
+				$oShop_Price_Setting_Item->new_price != $price && $bNeedsRePost = TRUE;
+				
+				$old_price = $Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id, $this->_object->datetime);
 
-				$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($oShop_Price_Setting_Item->shop_price_id);
-
-				$old_price = !is_null($oShop_Item_Price)
-					? $oShop_Item_Price->value
-					: $oShop_Item->price;
+				is_null($old_price)
+					&& $old_price = $oShop_Price_Setting_Item->Shop_Item->price;
 
 				$oShop_Price_Setting_Item->old_price = $old_price;
 				$oShop_Price_Setting_Item->new_price = $price;
 				$oShop_Price_Setting_Item->save();
 			}
-			else
-			{
-				$oShop_Price_Setting_Item->delete();
-			}
 		}
 
 		// Новые товары
 		$aAddShopItems = Core_Array::getPost('shop_item_new_price', array());
+		
+		count($aAddShopItems) && $bNeedsRePost = TRUE;
+		
 		foreach ($aAddShopItems as $shop_item_id => $aTmpPrices)
 		{
 			$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
@@ -421,11 +495,14 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				{
 					if ($value != '')
 					{
-						$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($oShop_Price_Setting_Item->shop_price_id);
+						$oShop_Item_Price = $shop_price_id
+							? $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id)
+							: NULL;
 
-						$old_price = !is_null($oShop_Item_Price)
-							? $oShop_Item_Price->value
-							: $oShop_Item->price;
+						$old_price = $Shop_Price_Entry_Controller->getPrice($shop_price_id, $oShop_Item->id, $this->_object->datetime);
+
+						is_null($old_price)
+							&& $old_price = $oShop_Item->price;
 
 						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
 						$oShop_Price_Setting_Item
@@ -440,58 +517,51 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			}
 		}
 
-		$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->_object->id, 0);
-
-		// Не было проведено, проводим документ
-		if ($this->_object->posted)
+		// Проводим документ
+		/*Core_Array::getPost('posted')
+			? $this->_object->post()
+			: $this->_object->unpost();*/
+			
+		/*if (Core_Array::getPost('posted') && !$this->posted)
 		{
-			$aTmp = array();
-
-			foreach ($aShop_Price_Entries as $oShop_Price_Entry)
-			{
-				$aTmp[$oShop_Price_Entry->shop_price_id][$oShop_Price_Entry->shop_item_id] = $oShop_Price_Entry;
-			}
-
-			unset($aShop_Price_Entries);
-
-			$aShop_Price_Setting_Items = $this->_object->Shop_Price_Setting_Items->findAll(FALSE);
-			foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
-			{
-				if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
-				{
-					$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
-				}
-				else
-				{
-					$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
-					$oShop_Price_Entry->setDocument($this->_object->id, 0);
-					$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
-				}
-
-				$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
-				$oShop_Price_Entry->datetime = $this->_object->datetime;
-				$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
-				$oShop_Price_Entry->save();
-
-				// Update price
-				$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
-				$Shop_Price_Entry_Controller->setPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id, $Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id));
-			}
+			$this->_object->post();
 		}
-		else
+		elseif (!Core_Array::getPost('posted') && $this->posted)
 		{
-			foreach ($aShop_Price_Entries as $oShop_Price_Entry)
-			{
-				$oShop_Price_Entry->delete();
-
-				// Update price
-				$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
-				$Shop_Price_Entry_Controller->setPrice($oShop_Price_Entry->shop_price_id, $oShop_Price_Entry->shop_item_id, $Shop_Price_Entry_Controller->getPrice($oShop_Price_Entry->shop_price_id, $oShop_Price_Entry->shop_item_id));
-			}
+			$this->_object->unpost();
 		}
+		elseif ($bNeedsRePost)
+		{
+			$this->_object->unpost();
+			$this->_object->post();
+		}*/
+		
+		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
+		Core_Array::getPost('posted') && $this->_object->post();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
+	}
+
+	/**
+	 * Fill prices list
+	 * @return array
+	 */
+	public function fillPricesList(Shop_Model $oShop)
+	{
+		$aReturn = array(Core::_('Shop_Warehouse_Incoming.basic'));
+
+		// if (Core::moduleIsActive('siteuser'))
+		// {
+			$aShop_Prices = $oShop->Shop_Prices->findAll();
+
+			foreach ($aShop_Prices as $oShop_Price)
+			{
+				$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
+			}
+		// }
+
+		return $aReturn;
 	}
 }

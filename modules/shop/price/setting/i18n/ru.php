@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Установка цен',
@@ -35,4 +35,8 @@ return array(
 	'apply_success' => "Информация успешно изменена.",
 	'user_id' => "Ответственный",
 	'posted' => "Проведен",
+	'delete_dialog' => "Вы уверены, что хотите удалить?",
+	'add_item_placeholder' => "Введите название товара",
+	'print_price_id' => "Цена (для печати)",
+	'apply_item' => "Установка цены из списка товаров",
 );

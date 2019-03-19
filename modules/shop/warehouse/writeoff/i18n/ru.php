@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Списание товаров',
@@ -38,4 +38,6 @@ return array(
 	'shop_price_id' => 'Цена',
 	'recalc_price' => 'Заполнить',
 	'reason' => 'Причина',
+	'delete_dialog' => "Вы уверены, что хотите удалить?",
+	'add_item_placeholder' => "Введите название товара",
 );

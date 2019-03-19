@@ -9,13 +9,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Print
 {
-	protected function _print()
+	protected function _prepare()
 	{
 		$oPrintlayout = Core_Entity::factory('Printlayout')->getById($this->printlayout);
+
+		$this->_oPrintlayout_Controller = new Printlayout_Controller($oPrintlayout);
 
 		if (!is_null($oPrintlayout))
 		{
@@ -40,7 +42,7 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 						'company' => $oShop_Warehouse_Regrade->Shop_Warehouse->Shop->Shop_Company,
 						'shop_warehouse' => $oShop_Warehouse_Regrade->Shop_Warehouse,
 						'shop' => $oShop_Warehouse_Regrade->Shop_Warehouse->Shop,
-
+						'user' => $oShop_Warehouse_Regrade->User,
 						'total_count' => 0,
 						'Items' => array(),
 					);
@@ -68,10 +70,10 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 								'position' => $position++,
 								'writeoff_name' => htmlspecialchars($oShop_Item_Writeoff->name),
 								'writeoff_measure' => htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name),
-								'writeoff_price' => $oShop_Item_Writeoff->price,
+								'writeoff_price' => $oShop_Warehouse_Regrade_Item->writeoff_price,
 								'incoming_name' => htmlspecialchars($oShop_Item_Incoming->name),
 								'incoming_measure' => htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name),
-								'incoming_price' => $oShop_Item_Incoming->price,
+								'incoming_price' => $oShop_Warehouse_Regrade_Item->incoming_price,
 								'count' => $oShop_Warehouse_Regrade_Item->count
 							);
 
@@ -79,21 +81,21 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 						}
 					}
 
-					$Printlayout_Controller = new Printlayout_Controller($oPrintlayout);
-					$Printlayout_Controller
+					$this->_oPrintlayout_Controller
 						->replace($aReplace)
 						->driver($oPrintlayout_Driver)
-						->entity($oShop_Warehouse_Regrade)
-						->execute()
-						->download()
-						//->print()
-						;
-
-					exit();
+						->entity($oShop_Warehouse_Regrade);
 				}
 			}
 		}
 
 		return $this;
+	}
+
+	protected function _print()
+	{
+		$this->_oPrintlayout_Controller->execute()->download();
+
+		exit();
 	}
 }

@@ -9,13 +9,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Print
 {
-	protected function _print()
+	protected function _prepare()
 	{
 		$oPrintlayout = Core_Entity::factory('Printlayout')->getById($this->printlayout);
+
+		$this->_oPrintlayout_Controller = new Printlayout_Controller($oPrintlayout);
 
 		if (!is_null($oPrintlayout))
 		{
@@ -40,7 +42,7 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 						'company' => $oShop_Warehouse_Writeoff->Shop_Warehouse->Shop->Shop_Company,
 						'shop_warehouse' => $oShop_Warehouse_Writeoff->Shop_Warehouse,
 						'shop' => $oShop_Warehouse_Writeoff->Shop_Warehouse->Shop,
-
+						'user' => $oShop_Warehouse_Writeoff->User,
 						'type' => Core::_('Shop_Warehouse_Writeoff.title'),
 						'reason' => $oShop_Warehouse_Writeoff->reason,
 						'total_count' => 0,
@@ -48,7 +50,7 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 					);
 
 					$position = 1;
-					$total_sum = 0;
+					$total_amount = 0;
 
 					$aShop_Warehouse_Writeoff_Items = $oShop_Warehouse_Writeoff->Shop_Warehouse_Writeoff_Items->findAll();
 
@@ -56,7 +58,7 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 					{
 						$oShop_Item = $oShop_Warehouse_Writeoff_Item->Shop_Item;
 
-						$amount = $oShop_Warehouse_Writeoff_Item->count * $oShop_Warehouse_Writeoff_Item->price;
+						$amount = Shop_Controller::instance()->round($oShop_Warehouse_Writeoff_Item->count * $oShop_Warehouse_Writeoff_Item->price);
 
 						$aReplace['Items'][] = array(
 							'position' => $position++,
@@ -69,29 +71,28 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 
 						$aReplace['total_count']++;
 
-						$total_sum += $amount;
+						$total_amount += $amount;
 					}
 
-					$total_sum = Shop_Controller::instance()->round($total_sum);
+					$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
+					$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
 
-					$aReplace['total_sum'] = $total_sum;
-					$aReplace['total_sum_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($total_sum));
-
-					$Printlayout_Controller = new Printlayout_Controller($oPrintlayout);
-					$Printlayout_Controller
+					$this->_oPrintlayout_Controller = new Printlayout_Controller($oPrintlayout);
+					$this->_oPrintlayout_Controller
 						->replace($aReplace)
 						->driver($oPrintlayout_Driver)
-						->entity($oShop_Warehouse_Writeoff)
-						->execute()
-						->download()
-						//->print()
-						;
-
-					exit();
+						->entity($oShop_Warehouse_Writeoff);
 				}
 			}
 		}
 
 		return $this;
+	}
+
+	protected function _print()
+	{
+		$this->_oPrintlayout_Controller->execute()->download();
+
+		exit();
 	}
 }

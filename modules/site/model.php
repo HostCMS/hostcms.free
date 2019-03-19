@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -982,11 +982,20 @@ class Site_Model extends Core_Entity
 				}
 			}
 
-			// Получаем список пользователей сайта
-			$aSiteusers = $this->Siteusers->findAll(FALSE);
+			$aMatchIdentityProviders = array();
+			$aSiteuser_Identity_Providers = $this->Siteuser_Identity_Providers->findAll(FALSE);
+			foreach ($aSiteuser_Identity_Providers as $oSiteuser_Identity_Provider)
+			{
+				$oNewProvider = $oSiteuser_Identity_Provider->copy();
+				$aMatchIdentityProviders[$oSiteuser_Identity_Provider->id] = $oNewProvider;
+
+				$newObject->add($oNewProvider);
+			}
 
 			$aMatchSiteusers = array();
-
+			
+			// Получаем список пользователей сайта
+			$aSiteusers = $this->Siteusers->findAll(FALSE);
 			foreach ($aSiteusers as $oSiteuser)
 			{
 				$oNewSiteuser = $oSiteuser->copy();
@@ -1000,9 +1009,13 @@ class Site_Model extends Core_Entity
 				$aSiteuser_Identities = $oSiteuser->Siteuser_Identities->findAll(FALSE);
 				foreach ($aSiteuser_Identities as $oSiteuser_Identity)
 				{
-					$oNewSiteuser_Identity = $oSiteuser_Identity->copy();
-					$oNewSiteuser_Identity->siteuser_id = $oNewSiteuser->id;
-					$oNewSiteuser_Identity->save();
+					if (isset($aMatchIdentityProviders[$oSiteuser_Identity->siteuser_identity_provider_id]))
+					{
+						$oNewSiteuser_Identity = $oSiteuser_Identity->copy();
+						$oNewSiteuser_Identity->siteuser_id = $oNewSiteuser->id;
+						$oNewSiteuser_Identity->siteuser_identity_provider_id = $aMatchIdentityProviders[$oSiteuser_Identity->siteuser_identity_provider_id];
+						$oNewSiteuser_Identity->save();
+					}
 				}
 
 				foreach ($aProperty_Values as $oProperty_Value)
@@ -1039,13 +1052,6 @@ class Site_Model extends Core_Entity
 						$oNewSiteuser_Group_List->siteuser_id = $oNewSiteuser->id;
 						$oNewSiteuser_Group_List->save();
 					}
-				}
-
-				$aSiteuser_Identity_Providers = $this->Siteuser_Identity_Providers->findAll(FALSE);
-
-				foreach ($aSiteuser_Identity_Providers as $oSiteuser_Identity_Provider)
-				{
-					$newObject->add($oSiteuser_Identity_Provider->copy());
 				}
 			}
 

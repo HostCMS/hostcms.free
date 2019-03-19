@@ -113,7 +113,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			: array('value' => $aOptions[$itemIndex]);
 
 		$aItemInfo += array(
-			'icon' => 'fa fa-circle',
+			'icon' => 'fa fa-circle fa-dropdownlist',
 			'color' => '#aebec4',
 			'value' => NULL
 		);

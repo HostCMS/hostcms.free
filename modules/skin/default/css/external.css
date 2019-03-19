@@ -1281,10 +1281,6 @@ fieldset[disabled] .btn-maroon.active {
 	margin-bottom: 7px;
 }
 
-.checkbox-margin-top{
-	margin-top: 20px;
-}
-
 [class *="col-lg-"] select, [class *="col-lg-"] input:not([type="checkbox"]){
 	width: 100%;
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Model extends Core_Entity
 {
@@ -20,6 +20,8 @@ class Shop_Price_Model extends Core_Entity
 	protected $_hasMany = array(
 		'shop_item' => array('through' => 'shop_item_price'),
 		'shop_item_price' => array(),
+		'shop_price_entry' => array(),
+		'shop_price_setting_item' => array(),
 	);
 
 	/**
@@ -39,14 +41,14 @@ class Shop_Price_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'percent' => 0
 	);
-	
+
 	/**
 	 * Default sorting for models
 	 * @var array
 	 */
 	protected $_sorting = array(
 		'shop_prices.id' => 'ASC',
-	);	
+	);
 
 	/**
 	 * Constructor.
@@ -115,6 +117,9 @@ class Shop_Price_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		$this->Shop_Item_Prices->deleteAll(FALSE);
+
+		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
+		$this->Shop_Price_Entries->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}

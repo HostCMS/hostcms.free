@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'!download' => '-- Не загружать --',
@@ -114,5 +114,7 @@ return array(
 	'order_item_quantity' => "Количество товара заказа",
 	'order_item_price' => "Цена товара заказа",
 	'order_item_rate' => "Налог на товар заказа",
-	'order_item_type' => "Тип товара"
+	'order_item_type' => "Тип товара",
+	'shop_warehouse_inventory' => "Инвентаризация при импорте товара",
+	'shop_price_setting' => "Установка цены при импорте товара",
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Model extends Core_Entity
 {
@@ -81,11 +81,22 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		return ob_get_clean();
 	}
-	
+
 	public function date()
 	{
 		return Core_Date::sql2date($this->datetime);
-	}	
+	}
+
+	/**
+	 * Mark entity as deleted
+	 * @return Core_Entity
+	 */
+	public function markDeleted()
+	{
+		$this->unpost();
+
+		return parent::markDeleted();
+	}
 
 	/**
 	 * Delete object from database
@@ -106,6 +117,88 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Inventory_Items->deleteAll(FALSE);
 
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 0);
+		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+		{
+			$oShop_Warehouse_Entry->delete();
+		}
+
 		return parent::delete($primaryKey);
+	}
+
+	public function post()
+	{
+		if (!$this->posted)
+		{
+			$oShop_Warehouse = $this->Shop_Warehouse;
+
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 0);
+
+			$aTmp = array();
+
+			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			{
+				$aTmp[$oShop_Warehouse_Entry->shop_item_id] = $oShop_Warehouse_Entry;
+			}
+
+			unset($aShop_Warehouse_Entries);
+
+			$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll(FALSE);
+			foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
+			{
+				if (isset($aTmp[$oShop_Warehouse_Inventory_Item->shop_item_id]))
+				{
+					$oShop_Warehouse_Entry = $aTmp[$oShop_Warehouse_Inventory_Item->shop_item_id];
+				}
+				else
+				{
+					$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
+					$oShop_Warehouse_Entry->setDocument($this->id, 0);
+					$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Inventory_Item->shop_item_id;
+				}
+
+				$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
+				$oShop_Warehouse_Entry->datetime = $this->datetime;
+				$oShop_Warehouse_Entry->value = $oShop_Warehouse_Inventory_Item->count;
+				$oShop_Warehouse_Entry->save();
+
+				$rest = $oShop_Warehouse->getRest($oShop_Warehouse_Inventory_Item->shop_item_id);
+
+				if (!is_null($rest))
+				{
+					// Recount
+					$oShop_Warehouse->setRest($oShop_Warehouse_Inventory_Item->shop_item_id, $rest);
+				}
+			}
+
+			$this->posted = 1;
+			$this->save();
+		}
+
+		return $this;
+	}
+
+	public function unpost()
+	{
+		if ($this->posted)
+		{
+			$oShop_Warehouse = $this->Shop_Warehouse;
+
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 0);
+
+			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			{
+				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+				$oShop_Warehouse_Entry->delete();
+
+				// Recount
+				$oShop_Warehouse->setRest($shop_item_id, $oShop_Warehouse->getRest($shop_item_id));
+			}
+
+			$this->posted = 0;
+			$this->save();
+		}
+
+		return $this;
 	}
 }

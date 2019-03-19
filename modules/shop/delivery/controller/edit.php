@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -197,8 +197,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainRow1->add($oSelect_Method);
 		
-		$oMainTab->move($this->getField('days_from')->divAttr(array('class' => 'form-group col-xs-12 col-md-2')), $oMainRow1);
-		$oMainTab->move($this->getField('days_to')->divAttr(array('class' => 'form-group col-xs-12 col-md-2')), $oMainRow1);		
+		$oMainTab->move($this->getField('days_from')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2')), $oMainRow1);
+		$oMainTab->move($this->getField('days_to')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2')), $oMainRow1);		
 
 		return $this;
 	}

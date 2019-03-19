@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2018-11-29';
+	public $date = '2019-03-12';
 
 	/**
 	 * Module name
@@ -521,7 +521,7 @@ class Shop_Module extends Core_Module
 			'site' => htmlspecialchars($oShop->Site->name) . ' [' . $oShop->Site->id . ']'
 		);
 	}
-	
+
 	/**
 	 * Get Module's Printlayouts
 	 * @return array
@@ -530,18 +530,25 @@ class Shop_Module extends Core_Module
 	{
 		return array(
 			array(
-				'dir' => 'Заказы',
+				'dir' => Core::_('Shop_Order.orders'),
 				'items' => array(
-					0 => array('name' => 'Бланк заказа')
+					0 => array('name' => Core::_('Shop_Order.shops_link_order'))
 				)
 			),
 			array(
-				'dir' => 'Склад',
+				'dir' => Core::_('Shop_Warehouse.warehouse'),
 				'items' => array(
 					1 => array('name' => Core::_('Shop_Warehouse_Incoming.title')),
 					2 => array('name' => Core::_('Shop_Warehouse_Writeoff.title')),
 					3 => array('name' => Core::_('Shop_Warehouse_Inventory.title')),
 					4 => array('name' => Core::_('Shop_Warehouse_Regrade.title')),
+					5 => array('name' => Core::_('Shop_Warehouse_Movement.title')),
+				)
+			),
+			array(
+				'dir' => Core::_('Shop_Price.show_prices_title'),
+				'items' => array(
+					10 => array('name' => Core::_('Shop_Price_Setting.title')),
 				)
 			)
 		);

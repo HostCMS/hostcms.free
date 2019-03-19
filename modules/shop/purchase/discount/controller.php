@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 {
@@ -22,7 +22,8 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 		'quantity', // количество товаров в заказе
 		'couponText', // текст купона, если есть
 		'siteuserId', // Идентификатор пользователя сайта, нужен для расчета накопительных скидок
-		'prices' // массив цен товаров, используется при расчете скидки на N-й товар
+		'prices', // массив цен товаров, используется при расчете скидки на N-й товар
+		'dateTime'
 	);
 
 	/**
@@ -37,11 +38,11 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 	 */
 	public function __construct(Shop_Model $oShop)
 	{
-		$this->_shop = $oShop;
-
 		parent::__construct();
-
+		
+		$this->_shop = $oShop;
 		$this->prices = array();
+		$this->dateTime = Core_Date::timestamp2sql(time());
 	}
 
 	/**
@@ -90,6 +91,9 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 			return $this->_aReturn;
 		}
 
+		$aPrices = $this->prices;
+		rsort($aPrices);
+
 		// Идентификатор скидки по купону
 		$shop_purchase_discount_id = 0;
 
@@ -105,8 +109,8 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 		$oShop_Purchase_Discounts->queryBuilder()
 			->where('active', '=', 1)
 			//->where('coupon', '=', 0)
-			->where('start_datetime', '<=', Core_Date::timestamp2sql(time()))
-			->where('end_datetime', '>=', Core_Date::timestamp2sql(time()));
+			->where('start_datetime', '<=', $this->dateTime)
+			->where('end_datetime', '>=', $this->dateTime);
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll();
 
@@ -168,9 +172,9 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 				if ($oShop_Purchase_Discount->position)
 				{
 					// В заказе товаров достаточно для применения скидки на N-й
-					if (count($this->prices) >= $oShop_Purchase_Discount->position)
+					if (count($this->prices) >= $oShop_Purchase_Discount->position && isset($aPrices[$oShop_Purchase_Discount->position - 1]))
 					{
-						$fTmpAmount = min($this->prices);
+						$fTmpAmount = $aPrices[$oShop_Purchase_Discount->position - 1];
 					}
 					else
 					{

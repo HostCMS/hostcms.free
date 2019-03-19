@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store orders',
@@ -142,4 +142,6 @@ return array(
 	'notification_new_order' => 'New order №%s',
 	'notification_paid_order' => 'Paid order №%s',
 	'notification_new_order_description' => '%1$s on %2$s',
+	'coupon' => 'Coupon',
+	'notStatus' => 'Not status',	
 );

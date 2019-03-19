@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -32,6 +32,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_inventory' => array(),
 		'shop_warehouse_incoming' => array(),
 		'shop_warehouse_writeoff' => array(),
+		'shop_warehouse_regrade' => array(),
 	);
 
 	/**
@@ -171,6 +172,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Warehouse_Inventories->deleteAll(FALSE);
 		$this->Shop_Warehouse_Incomings->deleteAll(FALSE);
 		$this->Shop_Warehouse_Writeoffs->deleteAll(FALSE);
+		$this->Shop_Warehouse_Regrades->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -220,7 +222,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	 */
 	public function getRest($shop_item_id, $dateTo = NULL)
 	{
-		$count = 0;
+		$count = NULL;
 
 		$oShop_Warehouse_Entries = $this->Shop_Warehouse_Entries;
 		$oShop_Warehouse_Entries->queryBuilder()
@@ -229,7 +231,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		if (!is_null($dateTo))
 		{
 			$oShop_Warehouse_Entries->queryBuilder()
-				->where('shop_warehouse_entries.datetime', '<=', $dateTo);
+				->where('shop_warehouse_entries.datetime', '<', $dateTo);
 		}
 
 		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll();
@@ -263,7 +265,9 @@ class Shop_Warehouse_Model extends Core_Entity
 			}
 		}
 
-		return floatval($count);
+		return is_null($count)
+			? $count
+			: number_format($count, 2, '.', '');
 	}
 
 	/**

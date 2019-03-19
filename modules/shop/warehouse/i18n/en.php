@@ -6,12 +6,12 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Warehouses',
 	'main_menu_warehouses_list' => "Warehouses",
-	'main_menu_warehouses_add_caption' => "Warehouse",
+	'warehouse' => "Warehouse",
 	'form_warehouses_add' => "Add warehouse",
 	'form_warehouses_edit' => "Edit warehouse",
 	'main_menu_warehouses_add' => "Add warehouse",
@@ -42,4 +42,8 @@ return array(
 	'website' => 'Website',
 	'working_time' => 'Working time',
 	'shop_items_count' => 'Total Items',
+	'inventory' => 'Inventory',
+	'incoming' => 'Incoming',
+	'writeoff' => 'Writeoff',
+	'regrade' => 'Regrade',
 );

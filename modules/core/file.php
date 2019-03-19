@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_File
 {
@@ -17,7 +17,19 @@ class Core_File
 	 * File types with resize support
 	 * @var array
 	 */
-	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP');
+	static public $resizeExtensions = array('JPG', 'JPEG', 'GIF', 'PNG');
+
+	static public function getResizeExtensions()
+	{
+		$aReturn = self::$resizeExtensions;
+		
+		if (PHP_VERSION_ID >= 70100)
+		{
+			$aReturn[] = 'WEBP';
+		}
+		
+		return $aReturn;
+	}
 
 	/**
 	 * Moves an uploaded file to a new location
@@ -827,7 +839,7 @@ class Core_File
 			: TRUE;
 
 		// Проверка на доступность разрешения для уменьшения
-		if (!self::isValidExtension($large_image_target, self::$resizeExtensions)
+		if (!self::isValidExtension($large_image_target, self::getResizeExtensions())
 			|| $small_image_source != '')
 		{
 			$create_small_image_from_large = FALSE;
@@ -897,7 +909,8 @@ class Core_File
 				self::upload($large_image_source, $large_image_target);
 
 				// Уменьшаем большую картинку до максимального размера.
-				if (self::isValidExtension($large_image_target, self::$resizeExtensions) && !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, NULL, $large_image_preserve_aspect_ratio))
+				if (self::isValidExtension($large_image_target, self::getResizeExtensions())
+					&& !Core_Image::instance()->resizeImage($large_image_target, $large_image_max_width, $large_image_max_height, $large_image_target, NULL, $large_image_preserve_aspect_ratio))
 				{
 					throw new Core_Exception(Core::_('Core.error_resize'));
 				}
@@ -924,7 +937,7 @@ class Core_File
 							$source_file_path = $small_image_source;
 						}
 
-						if (self::isValidExtension($small_image_target, self::$resizeExtensions))
+						if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 						{
 							// Делаем уменьшенный файл.
 							if (!Core_Image::instance()->resizeImage($source_file_path, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio))
@@ -1020,7 +1033,7 @@ class Core_File
 				// Если не передан флаг ватермарка для маленькой картинки - то копируем ее до наложения ватермарка
 				if (!$small_image_watermark || $watermark_file_path == '')
 				{
-					if (self::isValidExtension($small_image_target, self::$resizeExtensions))
+					if (self::isValidExtension($small_image_target, self::getResizeExtensions()))
 					{
 						if (!Core_Image::instance()->resizeImage($small_image_target, $small_image_max_width, $small_image_max_height, $small_image_target, NULL, $small_image_preserve_aspect_ratio))
 						{

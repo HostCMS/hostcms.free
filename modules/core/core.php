@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core
 {
@@ -601,10 +601,10 @@ class Core
 		define('ERROR_EMAIL', $oSite->getErrorEmail());
 
 		// Права доступа к директории
-		define('CHMOD', octdec($oSite->chmod)); // octdec - преобразование 8-ричного в 10-тичное
+		define('CHMOD', octdec($oSite->chmod));
 
 		// Права доступа к файлу
-		define('CHMOD_FILE', octdec($oSite->files_chmod)); // octdec - преобразование 8-ричного в 10-тичное
+		define('CHMOD_FILE', octdec($oSite->files_chmod));
 
 		// Формат вывода даты
 		define('DATE_FORMAT', $oSite->date_format);

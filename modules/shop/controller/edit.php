@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -486,9 +486,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Core_Templater::decorateInput($this->getField('invoice_template'));
 				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);
 
-				$oMainTab->move($this->getField('issue_discountcard'), $oMainRowDiscountcard);
 				Core_Templater::decorateInput($this->getField('discountcard_template'));
-				$oMainTab->move($this->getField('discountcard_template'), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 margin-top-25')), $oMainRowDiscountcard);
 
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))

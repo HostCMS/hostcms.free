@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -41,18 +41,43 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Currency.update_currency'))
-		->icon('fa fa-refresh')
-		->img('/admin/images/money_euro_add.gif')
-		->href(
-			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'update', NULL, 0, 0)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'update', NULL, 0, 0)
-		)
 );
+
+$oCurrenciesMenu = Admin_Form_Entity::factory('Menu')
+	->name(Core::_('Shop_Currency.update_currency'))
+	->icon('fa fa-refresh');
+
+$aConfig = Core_Config::instance()->get('shop_currency_config')
+	+ array(
+		'cbrf' => array(
+			'driver' => 'cbrf',
+			'name' => 'ЦБ РФ'
+		),
+		'floatrates' => array(
+			'driver' => 'floatrates',
+			'name' => 'Exchange Rates for USD'
+		)
+	);
+
+foreach ($aConfig as $key => $aCurrencyConfig)
+{
+	if (isset($aCurrencyConfig['name']))
+	{
+		$oCurrenciesMenu->add(
+			Admin_Form_Entity::factory('Menu')
+				->name($aCurrencyConfig['name'])
+				->icon('fa fa-shopping-cart')
+				->href( 
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'update', $key, 0, 0)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'update', $key, 0, 0)
+				)
+		);
+	}
+}
+
+$oAdmin_Form_Entity_Menus->add($oCurrenciesMenu);
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -393,12 +393,17 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						: 'Розничная';
 					$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = $fRoznPrice_name;
 					$aReturn = $oShop_Item_Import_Cml_Controller->import();
+					
+					// Post all
+					$oShop_Item_Import_Cml_Controller->postAll();
 
 					Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 					echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $aReturn['insertItemCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $aReturn['updateItemCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $aReturn['insertDirCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $aReturn['updateDirCount'] . '</b><br/>';
+					
+					
 				} catch (Exception $exc) {
 					Core_Message::show($exc->getMessage(), "error");
 				}
@@ -479,6 +484,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 		ob_start();
 
+		// CSV - next step
 		if (($iNextSeekPosition = $Shop_Item_Import_Csv_Controller->import()) !== FALSE)
 		{
 			$Shop_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
@@ -494,8 +500,12 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 
 			showStat($Shop_Item_Import_Csv_Controller);
 		}
+		// CSV - complete
 		else
 		{
+			// Post all
+			$Shop_Item_Import_Csv_Controller->postAll();
+			
 			$sRedirectAction = "";
 			Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 			showStat($Shop_Item_Import_Csv_Controller);
@@ -627,13 +637,14 @@ else
 					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
 					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
 				))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 hidden-1'))
 				->caption(Core::_('Shop_Item.price_list_encoding'))
 			)
 			->add(Admin_Form_Entity::factory('Select')
 			->name("shop_groups_parent_id")
 			->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->filter(TRUE)
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-10'))
 			->caption(Core::_('Shop_Item.import_price_list_parent_group'))
 			->value($oShopGroup->id)))
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Input')
