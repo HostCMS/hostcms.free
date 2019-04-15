@@ -37,4 +37,6 @@ return array(
 	'currency' => 'Вал.',
 	'delete_dialog' => "Вы уверены, что хотите удалить?",
 	'add_item_placeholder' => "Введите название товара",
+	'post_success' => 'Документ проведен успешно!',
+	'unpost_success' => 'Документ распроведен успешно!',	
 );

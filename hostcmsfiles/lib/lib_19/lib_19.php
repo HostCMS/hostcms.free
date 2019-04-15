@@ -64,6 +64,7 @@ if (!is_null(Core_Array::getPost('anonymousmaillist')))
 								->name('message')->value('Пользователь успешно зарегистрирован и подписан на почтовые рассылки. Вам необходимо подтвердить регистрацию.')
 						);
 
+						// Помещаем пользователя в группу по умолчанию
 						$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
 						!is_null($oSiteuser_Group) && $oSiteuser_Group->add($oSiteuser);
 					}

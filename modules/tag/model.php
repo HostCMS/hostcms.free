@@ -173,23 +173,23 @@ class Tag_Model extends Core_Entity
 	 */
 	protected function _checkDuplicate()
 	{
-		$oTagDublicate = Core_Entity::factory('Tag')->getByName($this->name);
+		$oTagDuplicate = Core_Entity::factory('Tag')->getByName($this->name);
 
 		// Дубликат по имени найден
-		if (!is_null($oTagDublicate) && $oTagDublicate->id != $this->id)
+		if (!is_null($oTagDuplicate) && $oTagDuplicate->id != $this->id)
 		{
-			$this->id = $oTagDublicate->id;
+			$this->id = $oTagDuplicate->id;
 		}
 		// Дубликат по имени не найден
 		else
 		{
 			// Проверяем наличие дубликата по пути
-			$oTagDublicate = Core_Entity::factory('Tag')->getByPath($this->path);
+			$oTagDuplicate = Core_Entity::factory('Tag')->getByPath($this->path);
 
 			// Дубликат по пути найден
-			if (!is_null($oTagDublicate) && $oTagDublicate->id != $this->id)
+			if (!is_null($oTagDuplicate) && $oTagDuplicate->id != $this->id)
 			{
-				$this->id = $oTagDublicate->id;
+				$this->id = $oTagDuplicate->id;
 			}
 		}
 
@@ -280,7 +280,7 @@ class Tag_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Tag_Informationsystem_Items->deleteAll(FALSE);
 		$this->Tag_Shop_Items->deleteAll(FALSE);
 

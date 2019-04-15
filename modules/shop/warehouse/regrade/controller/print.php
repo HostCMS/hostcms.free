@@ -70,9 +70,11 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 								'position' => $position++,
 								'writeoff_name' => htmlspecialchars($oShop_Item_Writeoff->name),
 								'writeoff_measure' => htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name),
+								'writeoff_currency' => htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name),
 								'writeoff_price' => $oShop_Warehouse_Regrade_Item->writeoff_price,
 								'incoming_name' => htmlspecialchars($oShop_Item_Incoming->name),
 								'incoming_measure' => htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name),
+								'incoming_currency' => htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name),
 								'incoming_price' => $oShop_Warehouse_Regrade_Item->incoming_price,
 								'count' => $oShop_Warehouse_Regrade_Item->count
 							);
@@ -94,7 +96,7 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 
 	protected function _print()
 	{
-		$this->_oPrintlayout_Controller->execute()->download();
+		$this->_oPrintlayout_Controller->execute()->downloadFile();
 
 		exit();
 	}

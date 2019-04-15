@@ -139,7 +139,7 @@ $oAdmin_Form_Entity_Menus->add(
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Warehouse.movement'))
-		->icon('fa fa-refresh')
+		->icon('fa fa-arrows-h')
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 		)

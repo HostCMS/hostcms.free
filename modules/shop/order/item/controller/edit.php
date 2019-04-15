@@ -37,7 +37,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oShop_Order = Core_Entity::factory('Shop_Order', intval(Core_Array::getGet('shop_order_id')));
+		$oShop_Order = $this->_object->Shop_Order;
 		$oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id')));
 
 		$oMainTab->move($this->getField('quantity')->divAttr(array('class' => 'form-group col-sm-3 col-xs-12')), $oMainRow1);
@@ -167,7 +167,8 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oMainTab->move($this->getField('shop_item_id')->id('itemId')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("$('#itemInput').autocompleteShopItem('{$oShop->id}', '{$oShop->shop_currency_id}', function(event, ui) {
+			// &shop_order_id= может использоваться в хуках, когда цена товара зависит от опций заказа (страна, город и т.д.)
+			->value("$('#itemInput').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
 				$('#itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
 				$('#itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
 				$('#itemRate').val(typeof ui.item.rate !== 'undefined' ? ui.item.rate : 0);

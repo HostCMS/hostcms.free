@@ -1660,6 +1660,8 @@ class Core_ORM
 
 					// Remove everything except numbers and dot
 					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+					
+					$value == '' && $value = 0;
 				break;
 				case 'float':
 					// Convert "," to "."

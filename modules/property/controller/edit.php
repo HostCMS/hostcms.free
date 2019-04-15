@@ -458,6 +458,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$bNewProperty = is_null($this->_object->id);
 
+print_r($_POST);
+
 		parent::_applyObjectProperty();
 
 		$modelName = $this->_object->getModelName();

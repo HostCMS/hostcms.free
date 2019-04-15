@@ -49,6 +49,7 @@ class Shop_Price_Setting_Model extends Core_Entity
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
+			$this->_preloadValues['posted'] = 1;
 		}
 	}
 
@@ -122,6 +123,11 @@ class Shop_Price_Setting_Model extends Core_Entity
 			$oShop_Price_Entry->delete();
 		}
 
+		if (Core::moduleIsActive('revision'))
+		{
+			Revision_Controller::delete($this->getModelName(), $this->id);
+		}
+
 		return parent::delete($primaryKey);
 	}
 
@@ -133,7 +139,6 @@ class Shop_Price_Setting_Model extends Core_Entity
 	{
 		if (!$this->posted)
 		{
-echo "post";
 			$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
 
 			$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
@@ -212,6 +217,104 @@ echo "post";
 
 			$this->posted = 0;
 			$this->save();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 10);
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'shop_id' => $this->shop_id,
+				'number' => $this->number,
+				'description' => $this->description,
+				'datetime' => $this->datetime,
+				'posted' => $this->posted,
+				'user_id' => $this->user_id,
+				'items' => array()
+			);
+
+			$aShop_Price_Setting_Items = $this->Shop_Price_Setting_Items->findAll(FALSE);
+
+			foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
+			{
+				$aBackup['items'][] = array(
+					'shop_price_id' => $oShop_Price_Setting_Item->shop_price_id,
+					'shop_item_id' => $oShop_Price_Setting_Item->shop_item_id,
+					'old_price' => $oShop_Price_Setting_Item->old_price,
+					'new_price' => $oShop_Price_Setting_Item->new_price,
+				);
+			}
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->unpost();
+
+				$this->shop_id = Core_Array::get($aBackup, 'shop_id');
+				$this->number = Core_Array::get($aBackup, 'number');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->datetime = Core_Array::get($aBackup, 'datetime');
+				$this->posted = 0;
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+
+				$aAllItems = Core_Array::get($aBackup, 'items');
+
+				if (count($aAllItems))
+				{
+					// Удаляем все товары
+					$this->Shop_Price_Setting_Items->deleteAll(FALSE);
+
+					// Создаем новые
+					foreach ($aAllItems as $aShop_Price_Setting_Items)
+					{
+						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+						$oShop_Price_Setting_Item->shop_price_setting_id = $this->id;
+						$oShop_Price_Setting_Item->shop_price_id = Core_Array::get($aShop_Price_Setting_Items, 'shop_price_id');
+						$oShop_Price_Setting_Item->shop_item_id = Core_Array::get($aShop_Price_Setting_Items, 'shop_item_id');
+						$oShop_Price_Setting_Item->old_price = Core_Array::get($aShop_Price_Setting_Items, 'old_price');
+						$oShop_Price_Setting_Item->new_price = Core_Array::get($aShop_Price_Setting_Items, 'new_price');
+						$oShop_Price_Setting_Item->save();
+					}
+				}
+
+				$this->save();
+
+				Core_Array::get($aBackup, 'posted') && $this->post();
+			}
 		}
 
 		return $this;

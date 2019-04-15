@@ -1457,6 +1457,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Прерываем этап импорта
 					if ($this->timeout && (Core::getmicrotime() - $timeout + 2 > $this->timeout))
 					{
+						Core_Session::start();
 						$_SESSION['importPosition'] = $importPosition;
 
 						$this->_aReturn['status'] = 'progress';
@@ -2090,6 +2091,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		// Пересчет количества товаров в группах
 		$oShop->recount();
 
+		// Post all
+		$this->postAll();
+
 		Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImport', $this);
 
 		return $this->_aReturn;
@@ -2664,6 +2668,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
 			$oShop_Warehouse_Inventory->description = Core::_('Shop_Exchange.shop_warehouse_inventory');
 			$oShop_Warehouse_Inventory->number = '';
+			$oShop_Warehouse_Inventory->posted = 0;
 			$oShop_Warehouse_Inventory->save();
 
 			$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
@@ -2684,6 +2689,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $this->iShopId;
 			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
 			$oShop_Price_Setting->description = Core::_('Shop_Exchange.shop_price_setting');
 			$oShop_Price_Setting->save();
 

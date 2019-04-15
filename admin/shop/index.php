@@ -40,6 +40,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
+		$shop_warehouse_id = Core_Array::getGet('shop_warehouse_id');
+		$datetime = Core_Array::getGet('datetime');
+
 		$aAllPricesIDs = array();
 
 		$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
@@ -98,6 +101,35 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				$aPrices[] = array('id' => $shop_price_id, 'price' => $price);
 			}
 
+			$aWarehouses = array();
+
+			//$rest = $oShop_Item->getRest();
+			$rest = 0;
+
+			/*$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->findAll(FALSE);
+			foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
+			{
+				$rest += $oShop_Warehouse_Item->count;
+				
+				$aWarehouses[] = array(
+					'id' => $oShop_Warehouse_Item->shop_warehouse_id,
+					'count' => $oShop_Warehouse_Item->count
+				);
+			}*/
+			$aShop_Warehouses = $oShop_Item->Shop->Shop_Warehouses->findAll(FALSE);
+			foreach ($aShop_Warehouses as $oShop_Warehouse)
+			{
+				$count = $oShop_Warehouse->getRest($oShop_Item->id, $datetime);
+				is_null($count) && $count = 0;
+				
+				$rest += $count;
+				
+				$aWarehouses[] = array(
+					'id' => $oShop_Warehouse->id,
+					'count' => $count
+				);
+			}
+
 			$aJSON[] = array(
 				'id' => $oShop_Item->id,
 				'label' => $oShop_Item->name,
@@ -108,8 +140,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				'currency_id' => $oShop_Currency->id,
 				'currency' => $oShop_Currency->name,
 				'measure' => $measureName,
-				'count' => $oShop_Item->getRest(),
-				'aPrices' => $aPrices
+				'count' => $rest,
+				'aPrices' => $aPrices,
+				'aWarehouses' => $aWarehouses
 			);
 		}
 	}

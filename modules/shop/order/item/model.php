@@ -252,10 +252,10 @@ class Shop_Order_Item_Model extends Core_Entity
 			->addXmlTag('tax', $this->getTax());
 
 		// Заказ оплачен и товар электронный
-		if ($this->Shop_Order->paid == 1 && $this->Shop_Item->type == 1)
+		if ($this->Shop_Order->paid == 1 /*&& $this->Shop_Item->type == 1*/)
 		{
 			// Digital items
-			$aShop_Order_Item_Digitals = $this->Shop_Order_Item_Digitals->findAll();
+			$aShop_Order_Item_Digitals = $this->Shop_Order_Item_Digitals->findAll(FALSE);
 			foreach ($aShop_Order_Item_Digitals as $oShop_Order_Item_Digital)
 			{
 				$this->addEntity(
@@ -265,5 +265,67 @@ class Shop_Order_Item_Model extends Core_Entity
 		}
 
 		return parent::getXml();
+	}
+
+	public function addDigitalItems(Shop_Item_Model $oShop_Item)
+	{
+		if ($oShop_Item->type == 1)
+		{
+			// Получаем все файлы электронного товара
+			$aShop_Item_Digitals = $oShop_Item->Shop_Item_Digitals->getBySorting();
+
+			if (count($aShop_Item_Digitals))
+			{
+				// Указываем, какой именно электронный товар добавляем в заказ
+				// $this->shop_item_digital_id = $aShop_Item_Digitals[0]->id;
+
+				$countGoodsNeed = $this->quantity;
+
+				foreach ($aShop_Item_Digitals as $oShop_Item_Digital)
+				{
+					if ($oShop_Item_Digital->count == -1 || $oShop_Item_Digital->count > 0)
+					{
+						if ($oShop_Item_Digital->count == -1)
+						{
+							$iCount = $countGoodsNeed;
+						}
+						// Списывам файлы, если их количество не равно -1
+						else
+						{
+							$iCount = $oShop_Item_Digital->count < $countGoodsNeed
+								? $oShop_Item_Digital->count
+								: $countGoodsNeed;
+						}
+
+						for ($i = 0; $i < $iCount; $i++)
+						{
+							$oShop_Order_Item_Digital = Core_Entity::factory('Shop_Order_Item_Digital');
+							$oShop_Order_Item_Digital->shop_item_digital_id = $oShop_Item_Digital->id;
+							$this->add($oShop_Order_Item_Digital);
+
+							$countGoodsNeed--;
+						}
+
+						$mode = $this->Shop_Order->paid == 0 ? -1 : 1;
+
+						// Списываем электронный товар, если он ограничен
+						if ($oShop_Item_Digital->count != -1)
+						{
+							$oShop_Item_Digital->count -= $iCount * $mode;
+							$oShop_Item_Digital->save();
+						}
+
+						if ($countGoodsNeed == 0)
+						{
+							break;
+						}
+					}
+				}
+			}
+
+			$this->save();
+		}
+
+		return $this;
 	}
 }

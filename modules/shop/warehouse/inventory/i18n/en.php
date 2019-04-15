@@ -25,7 +25,7 @@ return array(
 	'markDeleted_success' => "Inventory information deleted successfully!",
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
-	'shop_item_header' => 'Товары',
+	'shop_item_header' => 'Goods',
 	'name' => 'Name',
 	'marking' => 'Marking',
 	'quantity' => 'Quantity',
@@ -37,4 +37,9 @@ return array(
 	'delete_dialog' => "Are you sure you want to delete?",
 	'add_item_placeholder' => "Enter item name",
 	'apply_item' => "Inventory from items list",
+	'calc' => "Calc",
+	'fact' => "Fact",
+	'diff' => "Diff",
+	'post_success' => 'Document posted successfully!',
+	'unpost_success' => 'Document unposted successfully!',	
 );

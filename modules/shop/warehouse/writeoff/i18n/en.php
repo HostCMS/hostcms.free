@@ -39,5 +39,7 @@ return array(
 	'recalc_price' => 'Fill',
 	'reason' => 'Reason',
 	'delete_dialog' => "Are you sure you want to delete?",
-	'add_item_placeholder' => "Enter item name",	
+	'add_item_placeholder' => "Enter item name",
+	'post_success' => 'Document posted successfully!',
+	'unpost_success' => 'Document unposted successfully!',
 );

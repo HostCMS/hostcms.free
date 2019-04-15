@@ -78,7 +78,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oCoupon = Admin_Form_Entity::factory('Checkbox')
 			->name('coupon')
-			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-3'))
+			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-5'))
 			->caption(Core::_('Shop_Discount.coupon'))
 			->value($this->_object->coupon)
 			->onclick("$.toggleCoupon(this)");

@@ -39,4 +39,6 @@ return array(
 	'add_item_placeholder' => "Enter item name",
 	'print_price_id' => "Price (for print)",
 	'apply_item' => "Set price from items list",
+	'post_success' => 'Document posted successfully!',
+	'unpost_success' => 'Document unposted successfully!',
 );

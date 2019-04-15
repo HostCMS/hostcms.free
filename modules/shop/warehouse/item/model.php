@@ -189,16 +189,6 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	public function adminPrice($value = NULL)
 	{
-		// Get value
-		/*if (is_null($value) || is_object($value))
-		{
-			$oShopItem = $this->Shop_Item->shortcut_id
-				? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
-				: $this->Shop_Item;
-
-			return $oShopItem->price;
-		}*/
-
 		// Relation before __construct does not exist!
 		if (isset($this->Shop_Item) && $this->Shop_Item->price != $value)
 		{
@@ -234,11 +224,24 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	public function adminCurrency()
 	{
-		$oShopItem = $this->Shop_Item->shortcut_id
+		$oShop_Item = $this->Shop_Item->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShopItem->Shop_Currency->name);
+		return htmlspecialchars($oShop_Item->Shop_Currency->name);
+	}
+
+	/**
+	 * Get item's measure
+	 * @return string
+	 */
+	public function adminMeasure()
+	{
+		$oShop_Item = $this->Shop_Item->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+			: $this->Shop_Item;
+
+		return htmlspecialchars($oShop_Item->Shop_Measure->name);
 	}
 
 	/**
@@ -356,11 +359,29 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	/*public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$this->count == '0.00' && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value('<i class="fa fa-exclamation"></i>')
+			->execute();
+	}*/
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function countBackend()
+	{
+		$class = $this->count > 0
+			? 'green'
+			: 'darkorange';
+
+		$this->count == 0 && $class = '';
+
+		Core::factory('Core_Html_Entity_Span')
+			->class($class)
+			->value($this->count)
 			->execute();
 	}
 }

@@ -149,12 +149,15 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if ($this->file != '' && is_file($path))
+		if ($this->file != '')
 		{
-			try
+			if (is_file($path))
 			{
-				Core_File::delete($path);
-			} catch (Exception $e) {}
+				try
+				{
+					Core_File::delete($path);
+				} catch (Exception $e) {}
+			}
 
 			$this->file = '';
 			$this->file_name = '';
@@ -190,12 +193,15 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if ($this->file_small != '' && is_file($path))
+		if ($this->file_small != '')
 		{
-			try
+			if (is_file($path))
 			{
-				Core_File::delete($path);
-			} catch (Exception $e) {}
+				try
+				{
+					Core_File::delete($path);
+				} catch (Exception $e) {}
+			}
 
 			$this->file_small = '';
 			$this->file_small_name = '';

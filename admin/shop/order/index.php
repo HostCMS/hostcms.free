@@ -469,6 +469,7 @@ foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 }
 
 $oAdmin_Form_Dataset
+	->changeField('shop_order_status_id', 'type', 8)
 	->changeField('shop_order_status_id', 'list', trim($sList))
 	->changeField('paid', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 

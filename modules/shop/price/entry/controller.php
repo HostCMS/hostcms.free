@@ -27,7 +27,9 @@ class Shop_Price_Entry_Controller extends Core_Servant_Properties
 		$oShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry');
 		$oShop_Price_Entries->queryBuilder()
 			->where('shop_price_entries.shop_price_id', '=', $shop_price_id)
-			->where('shop_price_entries.shop_item_id', '=', $shop_item_id);
+			->where('shop_price_entries.shop_item_id', '=', $shop_item_id)
+			->clearOrderBy()
+			->orderBy('shop_price_entries.datetime', 'ASC');
 
 		if (!is_null($dateTo))
 		{

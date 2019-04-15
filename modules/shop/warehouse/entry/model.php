@@ -5,6 +5,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Shop_Warehouse_Entry_Model
  *
+ * Типы документов:
+ * - 0 - Инвентаризация
+ * - 1 - Приход
+ * - 2 - Списание
+ * - 3 - Пересортица
+ * - 4 - Перемещение
+ * - 5 - Заказ
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 6.x
@@ -48,10 +56,15 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 		}
 	}
 
+	/*
+	 * Get uniq document ID
+	 * @param $document_id document ID
+	 * @param $type document type
+	 * @return int
+	 */
 	protected function _getDocumentId($document_id, $type)
 	{
-		$offset = $document_id << 4;
-		return $offset | $type;
+		return ($document_id << 8) | $type;
 	}
 
 	/*
@@ -94,8 +107,7 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 
 		if ($this->document_id)
 		{
-			$offset = $this->document_id >> 4;
-			$return = $this->document_id % $offset;
+			$return = Core_Bit::extractBits($this->document_id, 8, 1);
 		}
 
 		return $return;

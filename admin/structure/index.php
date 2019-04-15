@@ -360,6 +360,8 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('structures.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('structures.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('structures.path', 'LIKE', '%' . $sGlobalSearch . '%')))

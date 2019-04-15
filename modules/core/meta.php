@@ -190,4 +190,14 @@ class Core_Meta
 			}
 		}
 	}
+
+	/**
+	 * Clear meta
+	 * @return self
+	 */
+	public function clear()
+	{
+		$this->_objects = $this->_functions = array();
+		return $this;
+	}
 }

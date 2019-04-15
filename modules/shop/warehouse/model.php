@@ -33,6 +33,8 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_incoming' => array(),
 		'shop_warehouse_writeoff' => array(),
 		'shop_warehouse_regrade' => array(),
+		'shop_warehouse_movement_source' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'source_shop_warehouse_id'),
+		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id'),
 	);
 
 	/**
@@ -174,6 +176,9 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Warehouse_Writeoffs->deleteAll(FALSE);
 		$this->Shop_Warehouse_Regrades->deleteAll(FALSE);
 
+		$this->Shop_Warehouse_Movement_Sources->deleteAll(FALSE);
+		$this->Shop_Warehouse_Movement_Destinations->deleteAll(FALSE);
+
 		return parent::delete($primaryKey);
 	}
 
@@ -226,7 +231,9 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$oShop_Warehouse_Entries = $this->Shop_Warehouse_Entries;
 		$oShop_Warehouse_Entries->queryBuilder()
-			->where('shop_warehouse_entries.shop_item_id', '=', $shop_item_id);
+			->where('shop_warehouse_entries.shop_item_id', '=', $shop_item_id)
+			->clearOrderBy()
+			->orderBy('shop_warehouse_entries.datetime', 'ASC');
 
 		if (!is_null($dateTo))
 		{
@@ -234,8 +241,7 @@ class Shop_Warehouse_Model extends Core_Entity
 				->where('shop_warehouse_entries.datetime', '<', $dateTo);
 		}
 
-		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll();
-
+		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll(FALSE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$type = $oShop_Warehouse_Entry->getDocumentType();
@@ -248,17 +254,12 @@ class Shop_Warehouse_Model extends Core_Entity
 					case 0:
 						$count = $oShop_Warehouse_Entry->value;
 					break;
-					// Приход
-					case 1:
-						$count += $oShop_Warehouse_Entry->value;
-					break;
-					// Списание
-					case 2:
-						$count -= $oShop_Warehouse_Entry->value;
-					break;
-					// Пересортица
-					case 3:
-						// У списываемого товара value будет отрицательным
+					case 1: // Приход
+					case 2: // Списание
+					case 3: // Пересортица, у списываемого товара value будет отрицательным
+					case 4: // Перемещение
+					case 5: // Заказ
+					default:
 						$count += $oShop_Warehouse_Entry->value;
 					break;
 				}

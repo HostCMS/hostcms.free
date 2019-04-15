@@ -188,6 +188,39 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Get options for select
+	 * @return array
+	 */
+	public function getOptions()
+	{
+		$aReturn = array(" … ");
+
+		$name = $this->name;
+		$attr = array();
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		if (!$this->active || !$bRightTime)
+		{
+			$attr = array('class' => 'gray');
+		}
+
+		if ($this->coupon)
+		{
+			$name .= ' [' . htmlspecialchars($this->coupon_text) . ']';
+			$attr = array('class' => 'sky');
+		}
+
+		$aReturn = array(
+			'value' => htmlspecialchars($name),
+			'attr' => $attr
+		);
+
+		return $aReturn;
+	}
+
+	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller

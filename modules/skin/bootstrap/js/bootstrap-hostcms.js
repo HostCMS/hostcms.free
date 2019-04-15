@@ -258,6 +258,16 @@
 				$(this).attr('onclick', text);
 			});
 		},
+		showPrintButton: function(window_id, id) {
+			$('#' + window_id + ' .print-button').removeClass('hidden');
+
+			$.each($('#' + window_id + ' .print-button ul.dropdown-menu li:has(a) > a'), function (i, el) {
+				var onclick = $(this).attr('onclick'),
+					text = onclick.replace('[]', '[' + id + ']');
+
+				$(this).attr('onclick', text);
+			});
+		},
 		escapeHtml: function(str) {
 			// This does not escape quotes
 			escaped = new Option(str).innerHTML;
@@ -530,7 +540,8 @@
 		},
 		editWarehouses: function(object) {
 			$.each( $(".shop-item-warehouses-list .row"), function (index, item) {
-				$(this).find('input[name ^= warehouse_]').prop('disabled', false);
+				$(this).removeClass('hidden');
+				$(this).find('input[name ^= warehouse_]').prop('disabled', false).focus();
 				$(this).find('select[name ^= warehouse_shop_price_id_]').removeClass('hidden');
 				$(this).find('select[name ^= warehouse_shop_price_id_]').parents('div').prev().removeClass('hidden');
 			});
@@ -3594,7 +3605,7 @@
 			if ((workdayStatus == 2 || workdayStatus == 5) && !window.timerId)
 			{
 				window.timerId = setInterval(function() {
-					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible'});
+					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible' });
 					toggle = !toggle;
 				}, 1000);
 			}
@@ -3603,10 +3614,10 @@
 			{
 				clearInterval(window.timerId);
 				window.timerId = undefined;
-				$('.workday-timer .colon').css({ visibility: 'visible'});
+				$('.workday-timer .colon').css({ visibility: 'visible' });
 			}
 		},
-		setWarehouseCounts: function(shop_warehouse_id)
+		updateWarehouseCounts: function(shop_warehouse_id)
 		{
 			var aItems = [];
 
@@ -3617,7 +3628,7 @@
 			$.ajax({
 				url: '/admin/shop/warehouse/inventory/index.php',
 				type: "POST",
-				data: {'load_warehouse_counts': 1, 'shop_warehouse_id': shop_warehouse_id, 'items': aItems},
+				data: {'update_warehouse_counts': 1, 'shop_warehouse_id': shop_warehouse_id, 'items': aItems, 'datetime': $('input[name=datetime]').val()},
 				dataType: 'json',
 				error: function(){},
 				success: function (answer) {
@@ -3626,9 +3637,7 @@
 
 						if (answer[id])
 						{
-							$(this).find('td:first-child').text(index + 1);
-							$(this).find('.fact-warehouse-count').text(answer[id]['count']);
-							$(this).find('.fact-warehouse-sum').text(answer[id]['sum']);
+							$(this).find('.calc-warehouse-count').text(answer[id]['count']);
 
 							var jInput = $(this).find('.set-item-count');
 
@@ -3658,86 +3667,89 @@
 					price = $.isNumeric(parentTr.find('.price').text())
 						? parseFloat(parentTr.find('.price').text())
 						: 0,
-					sum = $.mathRound((quantity * price), 2);
+					sum = $.mathRound(quantity * price, 2);
 
 				switch (type)
 				{
 					// Инвентаризация
 					case 0:
-						var factCount = $.isNumeric(parentTr.find('.fact-warehouse-count').text())
-							? parseFloat(parentTr.find('.fact-warehouse-count').text())
+						var calcCount = $.isNumeric(parentTr.find('.calc-warehouse-count').text())
+							? parseFloat(parentTr.find('.calc-warehouse-count').text())
 							: 0,
-						diffCount = $.mathRound((quantity - factCount), 3),
-						diffCountTd = parentTr.find('.diff-warehouse-count'),
-						factSum = $.isNumeric(parentTr.find('.fact-warehouse-sum').text())
-							? parseFloat(parentTr.find('.fact-warehouse-sum').text())
+						diffCount = $.mathRound((quantity - calcCount), 3),
+						diffCountTd = parentTr.find('.diff-warehouse-count');
+
+						parentTr.find('.calc-warehouse-sum').text(price * calcCount);
+
+						var calcSum = $.isNumeric(parentTr.find('.calc-warehouse-sum').text())
+							? parseFloat(parentTr.find('.calc-warehouse-sum').text())
 							: 0,
 						invSumSpan = parentTr.find('.warehouse-inv-sum'),
 						diffSumSpan = parentTr.find('.diff-warehouse-sum');
 
-					diffCountTd
-						.removeClass('palegreen')
-						.removeClass('darkorange');
-
-					if (diffCount > 0)
-					{
-						diffCount = '+' + diffCount;
-						diffCountTd.addClass('palegreen');
-					}
-					else if (diffCount == 0)
-					{
 						diffCountTd
 							.removeClass('palegreen')
 							.removeClass('darkorange');
-					}
-					else
-					{
-						diffCountTd.addClass('darkorange');
-					}
 
-					// Отклонение на складе
-					diffCountTd.text(diffCount);
+						if (diffCount > 0)
+						{
+							diffCount = '+' + diffCount;
+							diffCountTd.addClass('palegreen');
+						}
+						else if (diffCount == 0)
+						{
+							diffCountTd
+								.removeClass('palegreen')
+								.removeClass('darkorange');
+						}
+						else
+						{
+							diffCountTd.addClass('darkorange');
+						}
 
-					// Сумма учтенных
-					invSumSpan.text(sum);
+						// Отклонение на складе
+						diffCountTd.text(diffCount);
 
-					var invSum = $.isNumeric(invSumSpan.text())
-						? parseFloat(invSumSpan.text())
-						: 0,
-						diffSum = $.mathRound((sum - factSum), 2),
-						parentDiffTd = diffSumSpan.parents('td');
+						// Сумма учтенных
+						invSumSpan.text(sum);
 
-					parentDiffTd
-						.removeClass('palegreen')
-						.removeClass('darkorange');
+						var invSum = $.isNumeric(invSumSpan.text())
+							? parseFloat(invSumSpan.text())
+							: 0,
+							diffSum = $.mathRound((sum - calcSum), 2),
+							parentDiffTd = diffSumSpan.parents('td');
 
-					if (diffSum > 0)
-					{
-						diffSum = '+' + diffSum;
-						parentDiffTd.addClass('palegreen');
-					}
-					else if (diffSum == 0)
-					{
 						parentDiffTd
 							.removeClass('palegreen')
 							.removeClass('darkorange');
-					}
-					else
-					{
-						parentDiffTd.addClass('darkorange');
-					}
 
-					// Отклонение в сумме
-					diffSumSpan.text(diffSum);
+						if (diffSum > 0)
+						{
+							diffSum = '+' + diffSum;
+							parentDiffTd.addClass('palegreen');
+						}
+						else if (diffSum == 0)
+						{
+							parentDiffTd
+								.removeClass('palegreen')
+								.removeClass('darkorange');
+						}
+						else
+						{
+							parentDiffTd.addClass('darkorange');
+						}
+
+						// Отклонение в сумме
+						diffSumSpan.text(diffSum);
 					break;
 					// Оприходование
 					case 1:
 					case 2:
-						parentTr.find('.fact-warehouse-sum').text(sum);
+						parentTr.find('.calc-warehouse-sum').text(sum);
 						parentTr.find('.hidden-shop-price').val(price);
 					break;
 					case 5:
-						parentTr.find('.fact-warehouse-sum').text(sum);
+						parentTr.find('.calc-warehouse-sum').text(sum);
 					break;
 				}
 			});
@@ -3885,14 +3897,14 @@
 					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" placeholder="' + placeholder + '"/><input type="hidden" name="incoming_item[]" value="" /></td>\
 					<td><span class="incoming-measure"></span></td>\
 					<td><span class="incoming-price"></span></td>\
-					<td><input class="set-item-count form-control" name="shop_item_quantity[]" value="0.00"/></td>\
+					<td width="80"><input class="set-item-count form-control" name="shop_item_quantity[]" value=""/></td>\
 					<td><a class="delete-associated-item" onclick="$(this).parents(\'tr\').remove()"><i class="fa fa-times-circle darkorange"></i></a></td>\
 				</tr>'
 			);
 
 			var aItemIds = ['',''];
 
-			$('.writeoff-item-autocomplete, .incoming-item-autocomplete').autocompleteShopItem(shop_id, 0, function(event, ui) {
+			$('.writeoff-item-autocomplete, .incoming-item-autocomplete').autocompleteShopItem({ 'shop_id': shop_id, 'shop_currency_id': 0}, function(event, ui) {
 				var type = $(this).data('type'),
 					parentTr = $(this).parents('tr');
 
@@ -4063,13 +4075,13 @@
 				jQuery(this).select2(settings);
 			});
 		},
-		autocompleteShopItem: function(shop_id, shop_currency_id, selectOption)
+		autocompleteShopItem: function(options, selectOption)
 		{
 			return this.each(function(){
 				 jQuery(this).autocomplete({
 					  source: function(request, response) {
 						$.ajax({
-						  url: '/admin/shop/index.php?autocomplete&shop_id=' + shop_id + '&shop_currency_id=' + shop_currency_id,
+						  url: '/admin/shop/index.php?autocomplete&' + $.param(options),
 						  dataType: 'json',
 						  data: {
 							queryString: request.term

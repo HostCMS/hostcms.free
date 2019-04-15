@@ -64,6 +64,7 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 							'position' => $position++,
 							'name' => htmlspecialchars($oShop_Item->name),
 							'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
+							'currency' => htmlspecialchars($oShop_Item->Shop_Currency->name),
 							'price' => $oShop_Warehouse_Writeoff_Item->price,
 							'quantity' => $oShop_Warehouse_Writeoff_Item->count,
 							'amount' => $amount
@@ -91,7 +92,7 @@ class Shop_Warehouse_Writeoff_Controller_Print extends Printlayout_Controller_Pr
 
 	protected function _print()
 	{
-		$this->_oPrintlayout_Controller->execute()->download();
+		$this->_oPrintlayout_Controller->execute()->downloadFile();
 
 		exit();
 	}

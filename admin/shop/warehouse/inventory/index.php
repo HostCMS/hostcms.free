@@ -40,7 +40,38 @@ $oAdmin_Form_Controller
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
 
-if (!is_null(Core_Array::getPost('load_warehouse_counts')) && Core_Array::getPost('shop_warehouse_id'))
+if (!is_null(Core_Array::getPost('update_warehouse_counts')) && Core_Array::getPost('shop_warehouse_id'))
+{
+	$aJSON = array();
+
+	$shop_warehouse_id = intval(Core_Array::getPost('shop_warehouse_id'));
+	$datetime = Core_Date::datetime2sql(Core_Array::getPost('datetime'));
+	$aItems = Core_Array::getPost('items');
+
+	foreach ($aItems as $shop_item_id)
+	{
+		$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
+		$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getById($shop_warehouse_id);
+
+		if (!is_null($oShop_Item) && !is_null($oShop_Warehouse))
+		{
+			$oShop_Item = $oShop_Item->shortcut_id
+				? $oShop_Item->Shop_Item
+				: $oShop_Item;
+
+			$rest = $oShop_Warehouse->getRest($oShop_Item->id, $datetime);
+			is_null($rest) && $rest = 0;
+
+			$aJSON[$oShop_Item->id] = array(
+				'count' => $rest
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+/*if (!is_null(Core_Array::getPost('load_warehouse_counts')) && Core_Array::getPost('shop_warehouse_id'))
 {
 	$aJSON = array();
 
@@ -82,7 +113,7 @@ if (!is_null(Core_Array::getPost('load_warehouse_counts')) && Core_Array::getPos
 	}
 
 	Core::showJson($aJSON);
-}
+}*/
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -276,6 +307,20 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Inventory_Controller_Print);
+}
+
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('post');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'post')
+{
+	$Admin_Form_Action_Controller_Type_Post = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Post', $oAdmin_Form_Action
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Post);
 }
 
 // Источник данных 0

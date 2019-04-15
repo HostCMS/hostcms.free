@@ -41,7 +41,7 @@ return array(
 	'phone' => 'Телефон',
 	'website' => 'Сайт',
 	'working_time' => 'Часы работы',
-	'shop_items_count' => 'Общее количество товаров на складе',
+	'shop_items_count' => 'Общее количество товаров на складе (ед.)',
 	'inventory' => 'Инвентаризация',
 	'incoming' => 'Оприходование',
 	'writeoff' => 'Списание',

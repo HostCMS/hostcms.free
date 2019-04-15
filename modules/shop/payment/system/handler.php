@@ -584,6 +584,11 @@ abstract class Shop_Payment_System_Handler
 		if ($amount > 0)
 		{
 			// Add a discount to the purchase
+			if (!is_null($this->_orderParams['coupon_text']))
+			{
+				$this->_shopOrder->coupon = $this->_orderParams['coupon_text'];
+			}
+
 			$this->_addPurchaseDiscount($amountPurchaseDiscount, $quantityPurchaseDiscount, $aDiscountPrices);
 		}
 
@@ -993,6 +998,11 @@ abstract class Shop_Payment_System_Handler
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeProcessXml', $this);
 
 		$sXml = $this->_prepareXml()->getXml();
+
+ob_start();
+print_r($sXml);
+echo "\n\n";
+file_put_contents(CMS_FOLDER . 'xml_order.txt', ob_get_clean(), FILE_APPEND);
 
 		//echo "<pre>" . htmlspecialchars($sXml) . "</pre>";
 		$return = Xsl_Processor::instance()

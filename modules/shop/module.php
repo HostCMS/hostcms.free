@@ -550,6 +550,12 @@ class Shop_Module extends Core_Module
 				'items' => array(
 					10 => array('name' => Core::_('Shop_Price_Setting.title')),
 				)
+			),
+			array(
+				'dir' => Core::_('Shop_Item.model_name'),
+				'items' => array(
+					15 => array('name' => Core::_('Shop_Item.item_cards')),
+				)
 			)
 		);
 	}

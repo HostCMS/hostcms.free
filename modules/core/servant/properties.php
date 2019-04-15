@@ -61,6 +61,17 @@ class Core_Servant_Properties
 	}
 
 	/**
+	 * Set unlimitedProperties
+	 * @param boolean $value default TRUR
+	 * @return self
+	 */
+	public function setUnlimitedProperties($value = TRUE)
+	{
+		$this->_unlimitedProperties = $value;
+		return $this;
+	}
+
+	/**
 	 * Add additional allowed property
 	 * @param string $property property name
 	 * @return self
@@ -99,14 +110,6 @@ class Core_Servant_Properties
 	 */
 	public function set($property, $value)
 	{
-		/*if (array_key_exists($property, $this->_propertiesValues))
-		{
-			$this->_propertiesValues[$property] = $value;
-			return $this;
-		}
-
-		throw new Core_Exception("The property '%property' does not exist in the entity",
-			array('%property' => $property));*/
 		return $this->__set($property, $value);
 	}
 
@@ -162,6 +165,13 @@ class Core_Servant_Properties
 	 */
 	public function __call($name, $arguments)
 	{
+		// Add new property for 'unlimitedProperties' mode
+		if ($this->_unlimitedProperties && !isset($this->_allowedProperties[$name]))
+		{
+			$this->_allowedProperties[$name] = $name;
+			$this->_propertiesValues[$name] = NULL;
+		}
+
 		if (array_key_exists($name, $this->_propertiesValues))
 		{
 			if (array_key_exists(0, $arguments))

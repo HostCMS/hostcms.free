@@ -690,6 +690,8 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('informationsystem_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
@@ -735,6 +737,8 @@ if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))

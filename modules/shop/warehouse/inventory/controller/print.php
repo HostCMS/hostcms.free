@@ -52,42 +52,37 @@ class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_P
 
 					$aShop_Warehouse_Inventory_Items = $oShop_Warehouse_Inventory->Shop_Warehouse_Inventory_Items->findAll();
 
+					$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
 					foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
 					{
 						$oShop_Item = $oShop_Warehouse_Inventory_Item->Shop_Item;
 
-						$inv_amount = $oShop_Warehouse_Inventory_Item->count * $oShop_Item->price;
+						$rest = $oShop_Warehouse_Inventory->Shop_Warehouse->getRest($oShop_Item->id, $oShop_Warehouse_Inventory->datetime);
+						is_null($rest) && $rest = 0;
 
-						$factWarehouseCount = $factWarehouseSum = '0.00';
+						$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $oShop_Warehouse_Inventory->datetime);
 
-						$oShop_Warehouse_Items = Core_Entity::factory('Shop_Warehouse_Item');
-						$oShop_Warehouse_Items->queryBuilder()
-							->where('shop_warehouse_items.shop_warehouse_id', '=', $oShop_Warehouse_Inventory->shop_warehouse_id)
-							->where('shop_warehouse_items.shop_item_id', '=', $oShop_Item->id)
-							->limit(1);
+						is_null($old_price)
+							&& $old_price = $oShop_Item->price;
 
-						$aShop_Warehouse_Items = $oShop_Warehouse_Items->findAll();
+						$fact_amount = Shop_Controller::instance()->round($rest * $old_price);
 
-						if (isset($aShop_Warehouse_Items[0]))
-						{
-							$factWarehouseCount = $aShop_Warehouse_Items[0]->count;
-						}
-
-						$factWarehouseSum = Shop_Controller::instance()->round($factWarehouseCount * $oShop_Item->price);
+						$inv_amount = Shop_Controller::instance()->round($oShop_Warehouse_Inventory_Item->count * $old_price);
 
 						$aReplace['Items'][] = array(
 							'position' => $position++,
 							'name' => htmlspecialchars($oShop_Item->name),
 							'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-							'price' => $oShop_Item->price,
-							'quantity' => $factWarehouseCount,
-							'amount' => $factWarehouseSum,
+							'price' => $old_price,
+							'quantity' => $rest,
+							'amount' => $fact_amount,
 							'inv_quantity' => $oShop_Warehouse_Inventory_Item->count,
 							'inv_amount' => $inv_amount
 						);
 
 						$inv_amount_total += $inv_amount;
-						$amount_total += $factWarehouseSum;
+						$amount_total += $rest;
 
 						$aReplace['total_count']++;
 					}
@@ -111,7 +106,7 @@ class Shop_Warehouse_Inventory_Controller_Print extends Printlayout_Controller_P
 
 	protected function _print()
 	{
-		$this->_oPrintlayout_Controller->execute()->download();
+		$this->_oPrintlayout_Controller->execute()->downloadFile();
 
 		exit();
 	}

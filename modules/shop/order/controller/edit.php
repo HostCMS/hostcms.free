@@ -137,8 +137,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('patronymic')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oContactsTabRow4);
 		$oMainTab->move($this->getField('company')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oContactsTabRow4);
 
-		$oMainTab->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4')), $oContactsTabRow5);
-		$oMainTab->move($this->getField('fax')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4')), $oContactsTabRow5);
+		$oMainTab->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oContactsTabRow5);
+		$oMainTab->move($this->getField('fax')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oContactsTabRow5);
 		$oMainTab->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oContactsTabRow5);
 
 		$oMainTab->move($this->getField('tin')->divAttr(array('class' => 'form-group col-xs-6')), $oContactsTabRow6);
@@ -182,27 +182,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 		}
 
-		/*$oMainRow2
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->name('sum')
-					->id('sum')
-					->value($this->_object->getAmount())
-					->readonly('readonly')
-					->caption(Core::_("Shop_Order.cond_of_delivery_add_form_price_order"))
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Select')
-					->caption(Core::_('Shop_Order.order_currency'))
-					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
-					->options(
-						$Shop_Controller_Edit->fillCurrencies()
-					)
-					->name('shop_currency_id')
-					->value($this->_object->shop_currency_id)
-			);*/
-
 		$oDiv_Amount = Admin_Form_Entity::factory('Div')
 			->class('form-group col-xs-12 col-sm-6 col-md-3 deal-amount')
 			->add(Admin_Form_Entity::factory('Input')
@@ -235,24 +214,27 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$sShopOrderItemsPath = '/admin/shop/order/item/index.php';
 		$sAdditionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_dir_id={$shop_dir_id}&shop_order_id={$shop_order_id}";
 
-		$oItemsLink = Admin_Form_Entity::factory('Link');
-		$oItemsLink
-			->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-12 col-sm-3'))
-			->a
-				->class('btn btn-labeled btn-success')
-				->href($this->_Admin_Form_Controller->getAdminLoadHref(
-						$sShopOrderItemsPath, NULL, NULL, $sAdditionalParams
+		if ($objectId)
+		{
+			$oItemsLink = Admin_Form_Entity::factory('Link');
+			$oItemsLink
+				->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-12 col-sm-3'))
+				->a
+					->class('btn btn-labeled btn-success')
+					->href($this->_Admin_Form_Controller->getAdminLoadHref(
+							$sShopOrderItemsPath, NULL, NULL, $sAdditionalParams
+						)
 					)
-				)
-				->onclick($this->_Admin_Form_Controller->getAdminLoadAjax(
-						$sShopOrderItemsPath, NULL, NULL, $sAdditionalParams
-					))
-				->value(Core::_('Shop_Order.order_items_link'));
-		$oItemsLink
-			->icon
-				->class('btn-label fa fa-list');
+					->onclick($this->_Admin_Form_Controller->getAdminLoadAjax(
+							$sShopOrderItemsPath, NULL, NULL, $sAdditionalParams
+						))
+					->value(Core::_('Shop_Order.order_items_link'));
+			$oItemsLink
+				->icon
+					->class('btn-label fa fa-list');
 
-		$oMainRow2->add($oItemsLink);
+			$oMainRow2->add($oItemsLink);
+		}
 
 		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
@@ -261,14 +243,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('Shop_Order.send_mail'))
 			->value(0)
 			->name('send_mail')
-			->divAttr(array('class' => 'form-group col-xs-12 col-md-3 margin-top-21'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21'));
 
 		$oMainRow2->add($oSendMailField);
 
-		$oMainTab->move($this->getField('paid')->divAttr(
+		$oMainTab->move($this->getField('paid')->class('form-control colored-success')->divAttr(
 				array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')
 			), $oMainRow3);
-		$oMainTab->move($this->getField('canceled')->divAttr(
+		$oMainTab->move($this->getField('canceled')->class('form-control colored-danger times')->divAttr(
 				array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')
 			), $oMainRow3);
 
@@ -493,7 +475,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oDocumentsTabRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-3')
+				// ->class('form-group col-xs-12 col-sm-3')
+				->class('padding-left-15 padding-bottom-15')
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printButton)
 				)
@@ -539,14 +522,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oAdmin_Form_Entity_Input = Admin_Form_Entity::factory('Input')
 			->name('acceptance_report')
-			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6'))
+			->divAttr(array('class' => 'form-group col-md-3 col-xs-6'))
 			->caption(Core::_('Shop_Order.document_number'))
 			//->class('form-control input-group-input')
 			->value($this->_object->acceptance_report);
 
 		$oAdmin_Form_Entity_Datetime = Admin_Form_Entity::factory('Datetime')
 			->name('acceptance_report_datetime')
-			->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-6 col-xs-6'))
+			->divAttr(array('class' => 'form-group col-lg-3 col-md-4 col-xs-6'))
 			->caption(Core::_('Shop_Order.document_datetime'))
 			->value($this->_object->acceptance_report_datetime);
 
@@ -560,14 +543,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oAdmin_Form_Entity_Input = Admin_Form_Entity::factory('Input');
 		$oAdmin_Form_Entity_Input
 			->name('vat_invoice')
-			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6'))
+			->divAttr(array('class' => 'form-group col-md-3 col-xs-6'))
 			->caption(Core::_('Shop_Order.vat_number'))
 			//->class('form-control input-group-input')
 			->value($this->_object->vat_invoice);
 
 		$oAdmin_Form_Entity_Vat_Datetime = Admin_Form_Entity::factory('Datetime')
 			->name('vat_invoice_datetime')
-			->divAttr(array('class' => 'form-group col-lg-4 col-md-4 col-sm-6 col-xs-6'))
+			->divAttr(array('class' => 'form-group col-lg-3 col-md-4 col-xs-6'))
 			->caption(Core::_('Shop_Order.vat_datetime'))
 			->value($this->_object->vat_invoice_datetime);
 

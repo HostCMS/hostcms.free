@@ -163,11 +163,11 @@ $oMainTab
 	);
 
 // Получение списка скидок
-$aDiscounts = array(" … ");
-$aShop_Discounts = $oShop->Shop_Discounts->findAll();
+$aDiscounts = array();
+$aShop_Discounts = $oShop->Shop_Discounts->findAll(FALSE);
 foreach ($aShop_Discounts as $oShop_Discount)
 {
-	$aDiscounts[$oShop_Discount->id] = $oShop_Discount->name;
+	$aDiscounts[$oShop_Discount->id] = $oShop_Discount->getOptions();
 }
 
 $oMainTab
@@ -273,6 +273,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 			do {
 				$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 				$oShop_Price_Setting->shop_id = $oShop->id;
+				$oShop_Price_Setting->number = '';
+				$oShop_Price_Setting->posted = 0;
 				$oShop_Price_Setting->description = Core::_('Shop_Item.change_prices_for_shop_group');
 				$oShop_Price_Setting->datetime = Core_Date::timestamp2sql(time());
 				$oShop_Price_Setting->save();
@@ -365,6 +367,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $oShop->id;
+			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
 			$oShop_Price_Setting->description = Core::_('Shop_Item.change_prices_for_shop_group');
 			$oShop_Price_Setting->datetime = Core_Date::timestamp2sql(time());
 			$oShop_Price_Setting->save();
@@ -400,6 +404,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				$offset += $limit;
 			}
 			while (count($aShop_Items));
+
+			$oShop_Price_Setting->post();
 		}
 
 		Core_Message::show(Core::_('Shop_Item.accepted_prices'));

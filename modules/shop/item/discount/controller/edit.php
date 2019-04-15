@@ -113,12 +113,10 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	 */
 	protected function _fillDiscounts($iShopId)
 	{
-		$aReturn = array(" … ");
-
 		$aShop_Discounts = Core_Entity::factory('Shop', $iShopId)->Shop_Discounts->findAll(FALSE);
 		foreach ($aShop_Discounts as $oShop_Discount)
 		{
-			$aReturn[$oShop_Discount->id] = $oShop_Discount->name;
+			$aReturn[$oShop_Discount->id] = $oShop_Discount->getOptions();
 		}
 
 		return $aReturn;

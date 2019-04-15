@@ -56,8 +56,7 @@ class Shop_Price_Entry_Model extends Core_Entity
 	 */
 	protected function _getDocumentId($document_id, $type)
 	{
-		$offset = $document_id << 4;
-		return $offset | $type;
+		return ($document_id << 8) | $type;
 	}
 
 	/*
@@ -94,8 +93,7 @@ class Shop_Price_Entry_Model extends Core_Entity
 
 		if ($this->document_id)
 		{
-			$offset = $this->document_id >> 4;
-			$return = $this->document_id % $offset;
+			$return = Core_Bit::extractBits($this->document_id, 8, 1);
 		}
 
 		return $return;

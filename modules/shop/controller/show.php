@@ -2198,25 +2198,28 @@ class Shop_Controller_Show extends Core_Controller
 								->title($sTitle)
 						)
 				);
+			}
 
-				// Folder
-				$sPath = '/admin/shop/item/index.php';
-				$sAdditional = "shop_id={$oShop->id}&shop_group_id={$this->group}";
-				$sTitle = Core::_('Shop_Group.links_groups');
+			// Folder
+			$sPath = '/admin/shop/item/index.php';
+			$sAdditional = "shop_id={$oShop->id}&shop_group_id={$this->group}";
+			$sTitle = Core::_('Shop_Group.links_groups');
 
-				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
-						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
-						->add(
-							Core::factory('Core_Html_Entity_Img')
-								->width(16)->height(16)
-								->src('/admin/images/folder.gif')
-								->alt($sTitle)
-								->title($sTitle)
-						)
-				);
+			$oXslSubPanel->add(
+				Core::factory('Core_Html_Entity_A')
+					->href("{$sPath}?{$sAdditional}")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->add(
+						Core::factory('Core_Html_Entity_Img')
+							->width(16)->height(16)
+							->src('/admin/images/folder.gif')
+							->alt($sTitle)
+							->title($sTitle)
+					)
+			);
 
+			if ($this->group)
+			{
 				// Delete
 				$sPath = '/admin/shop/item/index.php';
 				$sAdditional = "hostcms[action]=markDeleted&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";

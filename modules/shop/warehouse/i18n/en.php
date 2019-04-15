@@ -41,9 +41,10 @@ return array(
 	'phone' => 'Phone',
 	'website' => 'Website',
 	'working_time' => 'Working time',
-	'shop_items_count' => 'Total Items',
+	'shop_items_count' => 'Total Items (pc.)',
 	'inventory' => 'Inventory',
 	'incoming' => 'Incoming',
 	'writeoff' => 'Writeoff',
 	'regrade' => 'Regrade',
+	'movement' => 'Movement',	
 );

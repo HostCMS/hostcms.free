@@ -37,6 +37,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $shopId;
 			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
 			$oShop_Price_Setting->description = Core::_('Shop_Price_Setting.apply_item');
 			$oShop_Price_Setting->datetime = Core_Date::timestamp2sql(time());
 			$oShop_Price_Setting->save();
@@ -62,6 +63,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
 			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
 			$oShop_Warehouse_Inventory->number = '';
+			$oShop_Warehouse_Inventory->posted = 0;
 			$oShop_Warehouse_Inventory->description = Core::_('Shop_Warehouse_Inventory.apply_item');
 			$oShop_Warehouse_Inventory->datetime = Core_Date::timestamp2sql(time());
 			$oShop_Warehouse_Inventory->save();
@@ -100,9 +102,9 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 				{
 					$sInputName = 'apply_check_1_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
 
-					$value = floatval(Core_Array::getPost($sInputName));
+					$value = Core_Array::getPost($sInputName);
 
-					if ($this->_object->price != $value)
+					if (!is_null($value) && $this->_object->price != $value)
 					{
 						$oShop_Price_Setting = $this->_getShopPriceSetting($this->_object->shop_id);
 
@@ -119,23 +121,26 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 				{
 					$sInputName = 'apply_check_1_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
 
-					$value = floatval(Core_Array::getPost($sInputName));
+					$value = Core_Array::getPost($sInputName);
 
-					$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getDefault();
-
-					if (!is_null($oShop_Warehouse))
+					if (!is_null($value))
 					{
-						$fRest = $oShop_Warehouse->getRest($this->_object->id);
+						$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getDefault();
 
-						if ($fRest != $value)
+						if (!is_null($oShop_Warehouse))
 						{
-							$oShop_Warehouse_Inventory = $this->_getShopWarehouseInventory($oShop_Warehouse->id);
+							$fRest = $oShop_Warehouse->getRest($this->_object->id);
 
-							$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-							$oShop_Warehouse_Inventory_Item->shop_warehouse_inventory_id = $oShop_Warehouse_Inventory->id;
-							$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
-							$oShop_Warehouse_Inventory_Item->count = $value;
-							$oShop_Warehouse_Inventory_Item->save();
+							if ($fRest != $value)
+							{
+								$oShop_Warehouse_Inventory = $this->_getShopWarehouseInventory($oShop_Warehouse->id);
+
+								$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+								$oShop_Warehouse_Inventory_Item->shop_warehouse_inventory_id = $oShop_Warehouse_Inventory->id;
+								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
+								$oShop_Warehouse_Inventory_Item->count = $value;
+								$oShop_Warehouse_Inventory_Item->save();
+							}
 						}
 					}
 				}
@@ -151,7 +156,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 			$this->_itemsCount++;
 
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
-
+			
 			if ($this->_itemsCount == count($aChecked[1]))
 			{
 				// Проводки, если есть

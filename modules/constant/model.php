@@ -70,28 +70,6 @@ class Constant_Model extends Core_Entity
 	}
 
 	/**
-	 * Get constant by name
-	 * @param string $name name
-	 * @return Constant|NULL
-	 */
-	public function getByName($name)
-	{
-		$this->queryBuilder()
-			->clear()
-			->where('name', '=', $name)
-			->limit(1);
-
-		$result = $this->findAll();
-
-		if (!empty($result))
-		{
-			return $result[0];
-		}
-
-		return NULL;
-	}
-
-	/**
 	 * Change constant status
 	 * return self
 	 */

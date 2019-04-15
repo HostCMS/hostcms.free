@@ -204,4 +204,29 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
+
+	/**
+	 * Fill warehouses list
+	 * @param Shop_Model $oShop shop object
+	 * @return array
+	 */
+	static public function fillWarehousesList(Shop_Model $oShop)
+	{
+		// $aReturn = array(' … ');
+		$aReturn = array();
+
+		$oShop_Warehouses = $oShop->Shop_Warehouses;
+		$oShop_Warehouses->queryBuilder()
+			->clearOrderBy()
+			->orderBy('shop_warehouses.sorting')
+			->orderBy('shop_warehouses.id');
+
+		$aShop_Warehouses = $oShop_Warehouses->findAll(FALSE);
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
+		{
+			$aReturn[$oShop_Warehouse->id] = $oShop_Warehouse->name . ' [' . $oShop_Warehouse->id . ']';
+		}
+
+		return $aReturn;
+	}
 }

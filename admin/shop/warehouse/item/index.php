@@ -153,7 +153,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams))
 );
 
-$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+/*$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('apply');
 
@@ -165,7 +165,7 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 
 	// Добавляем контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Apply);
-}
+}*/
 
 // Действие экспорта
 $oAdminFormActionExport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)

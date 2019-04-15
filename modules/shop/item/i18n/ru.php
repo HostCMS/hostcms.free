@@ -330,4 +330,5 @@ return array(
 	'edit_all_warehouses' => 'Редактировать',
 	'shop_price_setting' => 'Установка цены товара "%s"',
 	'warehouse_in_price' => 'Отразить в цене',
+	'item_cards_printlayout' => 'Шаблон документа для ценников',
 );

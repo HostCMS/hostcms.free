@@ -423,12 +423,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							? htmlspecialchars($Admin_Word_Value->name)
 							: '&mdash;';
 
-						// Change to Font Awesome
-						if (strlen($oAdmin_Form_Field_Changed->ico))
-						{
-							$fieldName = '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
-						}
-
 						$oAdmin_Form_Field_Changed->allow_sorting
 							&& is_object($oSortingField)
 							&& $oAdmin_Form_Field->id == $oSortingField->id
@@ -460,7 +454,16 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$sSortingOnClick = $onclickUp;
 							}
 						}
-						?><th class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php echo $fieldName?></th><?php
+						?><th title="<?php echo $fieldName?>" class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php
+							if (strlen($oAdmin_Form_Field_Changed->ico))
+							{
+								echo '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
+							}
+							else
+							{
+								echo $fieldName;
+							}
+						?></th><?php
 					}
 				}
 

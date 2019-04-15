@@ -68,4 +68,16 @@ class Core_Bit
 
 		return $bit;
 	}
+
+	/**
+	 * Extract bits from a given position.
+	 * @param int $int число
+	 * @param int $count количество бит
+	 * @param int $position позиция бита
+	 * @return int
+	 */
+	static public function extractBits($int, $count, $position)
+	{
+		return (((1 << $count) - 1) & ($int >> ($position - 1)));
+	}
 }

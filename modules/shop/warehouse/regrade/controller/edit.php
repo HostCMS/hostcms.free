@@ -38,7 +38,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control input-lg'), $oMainRow1);
 
 		// Печать
 		$printlayoutsButton = '
@@ -64,7 +64,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center')
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -81,7 +81,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			->divAttr(
 				array('class' => 'form-group col-xs-12 col-sm-3')
 			)
-			->options(self::fillWarehousesList($oShop))
+			->options(Shop_Warehouse_Controller_Edit::fillWarehousesList($oShop))
 			->class('form-control select-warehouse')
 			->name('shop_warehouse_id')
 			->value($this->_object->id
@@ -167,10 +167,24 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainRow3->add($oRecalcPriceLink);
 
+		$placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');
+
+		$oAddItemLink = Admin_Form_Entity::factory('Link');
+		$oAddItemLink
+			->divAttr(array('class' => 'add-regrade-item-link'))
+			->a
+				->class('btn btn-xs btn-azure')
+				->onclick("$.addRegradeItem({$oShop->id}, '{$placeholder}')")
+				->value(Core::_('Shop_Warehouse_Regrade.add_item'));
+		$oAddItemLink
+			->icon
+				->class('fa fa-plus');
+
 		$oShopItemBlock
 			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
 				->class('header bordered-palegreen')
 				->value(Core::_('Shop_Warehouse_Regrade.shop_item_header'))
+				->add($oAddItemLink)
 			)
 			->add($oShopItemRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -244,9 +258,9 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			</table>
 		';
 
-		$placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');
+		// $placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');
 
-		$oAddItemLink = Admin_Form_Entity::factory('Link');
+		/*$oAddItemLink = Admin_Form_Entity::factory('Link');
 				$oAddItemLink
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->a
@@ -257,7 +271,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					->icon
 						->class('fa fa-plus');
 
-		$oShopItemRow2->add($oAddItemLink);
+		$oShopItemRow2->add($oAddItemLink);*/
 
 		$oShopItemRow2
 			->add(Admin_Form_Entity::factory('Div')
@@ -282,17 +296,36 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _applyObjectProperty()
 	{
+		$modelName = $this->_object->getModelName();
+
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$modelName == 'shop_warehouse_regrade'
+				&& $this->_object->backupRevision();
+		}
+
+		$this->addSkipColumn('posted');
+
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
 
 		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
 
 		parent::_applyObjectProperty();
 
+		if ($this->_object->id)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+			$this->addMessage("<script>$.showPrintButton('{$windowId}', {$this->_object->id})</script>");
+		}
+
 		if ($this->_object->number == '')
 		{
 			$this->_object->number = $this->_object->id;
 			$this->_object->save();
 		}
+
+		$bNeedsRePost = FALSE;
 
 		// Существующие товары
 		$aShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items->findAll(FALSE);
@@ -311,23 +344,24 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					? $oShop_Item_Incoming->Shop_Item
 					: $oShop_Item_Incoming;
 
-				$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id);
+				$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id, 0);
 
-				if ($quantity > 0)
-				{
-					$writeoff_price = $oShop_Item_Writeoff->loadPrice($this->_object->shop_price_id);
-					$incoming_price = $oShop_Item_Incoming->loadPrice($this->_object->shop_price_id);
+				$oShop_Warehouse_Regrade_Item->count != $quantity && $bNeedsRePost = TRUE;
 
-					$oShop_Warehouse_Regrade_Item->count = $quantity;
-					$oShop_Warehouse_Regrade_Item->writeoff_price = $writeoff_price;
-					$oShop_Warehouse_Regrade_Item->incoming_price = $incoming_price;
-					$oShop_Warehouse_Regrade_Item->save();
-				}
+				$writeoff_price = $oShop_Item_Writeoff->loadPrice($this->_object->shop_price_id);
+				$incoming_price = $oShop_Item_Incoming->loadPrice($this->_object->shop_price_id);
+
+				$oShop_Warehouse_Regrade_Item->count = $quantity;
+				$oShop_Warehouse_Regrade_Item->writeoff_price = $writeoff_price;
+				$oShop_Warehouse_Regrade_Item->incoming_price = $incoming_price;
+				$oShop_Warehouse_Regrade_Item->save();
 			}
 		}
 
 		$aWriteoffItems = Core_Array::getPost('writeoff_item', array());
 		$aIncomingItems = Core_Array::getPost('incoming_item', array());
+
+		count($aWriteoffItems) && $bNeedsRePost = TRUE;
 
 		// Новые товары
 		foreach ($aWriteoffItems as $key => $writeoff_shop_item_id)
@@ -354,14 +388,16 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					$writeoff_price = $oShop_Item_Writeoff->loadPrice($this->_object->shop_price_id);
 					$incoming_price = $oShop_Item_Incoming->loadPrice($this->_object->shop_price_id);
 
+					$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
+						? $_POST['shop_item_quantity'][$key]
+						: 0;
+
 					$oShop_Warehouse_Regrade_Item = Core_Entity::factory('Shop_Warehouse_Regrade_Item');
 					$oShop_Warehouse_Regrade_Item
 						->shop_warehouse_regrade_id($this->_object->id)
 						->writeoff_shop_item_id($writeoff_shop_item_id)
 						->incoming_shop_item_id($incoming_shop_item_id)
-						->count(
-							isset($_POST['shop_item_quantity'][$key]) ? $_POST['shop_item_quantity'][$key] : 1
-						)
+						->count($count)
 						->writeoff_price($writeoff_price)
 						->incoming_price($incoming_price)
 						->save();
@@ -369,9 +405,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
-		Core_Array::getPost('posted')
-			? $this->_object->post()
-			: $this->_object->unpost();
+		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
+		Core_Array::getPost('posted') && $this->_object->post();
 
 		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
 		{
@@ -384,24 +419,6 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
-	}
-
-	/**
-	 * Fill warehouses list
-	 * @return array
-	 */
-	public function fillWarehousesList(Shop_Model $oShop)
-	{
-		$aReturn = array(' … ');
-
-		$aShop_Warehouses = $oShop->Shop_Warehouses->findAll();
-
-		foreach ($aShop_Warehouses as $oShop_Warehouse)
-		{
-			$aReturn[$oShop_Warehouse->id] = $oShop_Warehouse->name . ' [' . $oShop_Warehouse->id . ']';
-		}
-
-		return $aReturn;
 	}
 
 	/**

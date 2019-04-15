@@ -174,20 +174,19 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($modelName)
 		{
 			case 'tag':
-
-			if (!$id)
-			{
-				foreach ($aTags as $tag_name)
+				if (!$id)
 				{
-					$tag_name = trim($tag_name);
+					foreach ($aTags as $tag_name)
+					{
+						$tag_name = trim($tag_name);
 
-					$oNewTag = clone $this->_object;
+						$oNewTag = clone $this->_object;
 
-					$oNewTag->name = $tag_name;
-					$oNewTag->path = '';
-					$oNewTag->save();
+						$oNewTag->name = $tag_name;
+						$oNewTag->path = '';
+						$oNewTag->save();
+					}
 				}
-			}
 			break;
 		}
 

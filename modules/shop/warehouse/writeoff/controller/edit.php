@@ -38,7 +38,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control input-lg'), $oMainRow1);
 
 		// Печать
 		$printlayoutsButton = '
@@ -64,7 +64,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center')
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -83,7 +83,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			->divAttr(
 				array('class' => 'form-group col-xs-12 col-sm-3')
 			)
-			->options(self::fillWarehousesList($oShop))
+			->options(Shop_Warehouse_Controller_Edit::fillWarehousesList($oShop))
 			->class('form-control select-warehouse')
 			->name('shop_warehouse_id')
 			->value($this->_object->id
@@ -237,10 +237,10 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 						<td class="index">' . $index . '</td>
 						<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
 						<td>' . htmlspecialchars($measureName) . '</td>
-						<td><span class="price">' . htmlspecialchars($oShop_Warehouse_Writeoff_Item->price) . '</span><input type="hidden" class="hidden-shop-price" name="shop_item_price_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . htmlspecialchars($oShop_Warehouse_Writeoff_Item->price) . '" /></td>
+						<td><span class="price">' . htmlspecialchars($oShop_Warehouse_Writeoff_Item->price) . '</span></td>
 						<td>' . htmlspecialchars($currencyName) . '</td>
 						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . $oShop_Warehouse_Writeoff_Item->count . '" /></td>
-						<td><span class="fact-warehouse-sum">' . $sum . '</span></td>
+						<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
 						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 					</tr>
 				';
@@ -275,19 +275,25 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 		);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("$('.add-shop-item').autocompleteShopItem('{$oShop->id}', 0, function(event, ui) {
+			->value("$('.add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
 				$('.index_value').val((parseInt($('.index_value').val()) + 1));
 
 				$('.shop-item-table > tbody').append(
-					$('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('.index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"0.00\"/></td><td><span class=\"fact-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+					$('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('.index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 				);
 				ui.item.value = '';
 				$.changeWarehouseCounts($('.set-item-count'), 2);
+				$('.set-item-count').change();
 				$('.shop-item-table tr:last-child').find('.set-item-count').focus();
 				$.focusAutocomplete($('.set-item-count'));
 			  });
 
-			  $.changeWarehouseCounts($('.set-item-count'), 2);
+				$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+					var jInput = $(this).find('.set-item-count');
+
+					$.changeWarehouseCounts(jInput, 2);
+					jInput.change();
+				});
 
 			  $.focusAutocomplete($('.set-item-count'));
 			  ");
@@ -309,17 +315,36 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 	 */
 	protected function _applyObjectProperty()
 	{
+		$modelName = $this->_object->getModelName();
+
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$modelName == 'shop_warehouse_writeoff'
+				&& $this->_object->backupRevision();
+		}
+
+		$this->addSkipColumn('posted');
+
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);
 
 		$this->_object->user_id = intval(Core_Array::getPost('user_id'));
 
 		parent::_applyObjectProperty();
 
+		if ($this->_object->id)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+			$this->addMessage("<script>$.showPrintButton('{$windowId}', {$this->_object->id})</script>");
+		}
+
 		if ($this->_object->number == '')
 		{
 			$this->_object->number = $this->_object->id;
 			$this->_object->save();
 		}
+
+		$bNeedsRePost = FALSE;
 
 		// Существующие товары
 		$aShop_Warehouse_Writeoff_Items = $this->_object->Shop_Warehouse_Writeoff_Items->findAll(FALSE);
@@ -333,27 +358,29 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					? $oShop_Item->Shop_Item
 					: $oShop_Item;
 
-				$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id);
+				$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id, 0);
 
-				if ($quantity > 0)
-				{
-					$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
+				$oShop_Warehouse_Writeoff_Item->count != $quantity && $bNeedsRePost = TRUE;
 
-					$oShop_Warehouse_Writeoff_Item->count = $quantity;
-					$oShop_Warehouse_Writeoff_Item->price = $price;
-					$oShop_Warehouse_Writeoff_Item->save();
-				}
+				$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
+
+				$oShop_Warehouse_Writeoff_Item->count = $quantity;
+				$oShop_Warehouse_Writeoff_Item->price = $price;
+				$oShop_Warehouse_Writeoff_Item->save();
 			}
 		}
 
 		// Новые товары
 		$aAddShopItems = Core_Array::getPost('shop_item_id', array());
+
+		count($aAddShopItems) && $bNeedsRePost = TRUE;
+
 		foreach ($aAddShopItems as $key => $shop_item_id)
 		{
-			$iCount = $this->_object->Shop_Warehouse_Writeoff_Items->getCountByshop_item_id($shop_item_id);
+			// $iCount = $this->_object->Shop_Warehouse_Writeoff_Items->getCountByshop_item_id($shop_item_id);
 
-			if (!$iCount)
-			{
+			// if (!$iCount)
+			// {
 				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
 
 				if (!is_null($oShop_Item))
@@ -364,25 +391,23 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 					$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
 
+					$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
+						? $_POST['shop_item_quantity'][$key]
+						: 0;
+
 					$oShop_Warehouse_Writeoff_Item = Core_Entity::factory('Shop_Warehouse_Writeoff_Item');
 					$oShop_Warehouse_Writeoff_Item
 						->shop_warehouse_writeoff_id($this->_object->id)
-						->shop_item_id($shop_item_id)
-						->count(
-							isset($_POST['shop_item_quantity'][$key]) ? $_POST['shop_item_quantity'][$key] : 1
-						)
-						->price(
-							// isset($_POST['shop_item_price'][$key]) ? $_POST['shop_item_price'][$key] : 0
-							$price
-						)
+						->shop_item_id($oShop_Item->id)
+						->count($count)
+						->price($price)
 						->save();
 				}
-			}
+			// }
 		}
 
-		Core_Array::getPost('posted')
-			? $this->_object->post()
-			: $this->_object->unpost();
+		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
+		Core_Array::getPost('posted') && $this->_object->post();
 
 		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
 		{
@@ -398,24 +423,6 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 	}
 
 	/**
-	 * Fill warehouses list
-	 * @return array
-	 */
-	public function fillWarehousesList(Shop_Model $oShop)
-	{
-		$aReturn = array(' … ');
-
-		$aShop_Warehouses = $oShop->Shop_Warehouses->findAll();
-
-		foreach ($aShop_Warehouses as $oShop_Warehouse)
-		{
-			$aReturn[$oShop_Warehouse->id] = $oShop_Warehouse->name . ' [' . $oShop_Warehouse->id . ']';
-		}
-
-		return $aReturn;
-	}
-
-	/**
 	 * Fill prices list
 	 * @return array
 	 */
@@ -423,15 +430,12 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 	{
 		$aReturn = array(Core::_('Shop_Warehouse_Incoming.basic'));
 
-		// if (Core::moduleIsActive('siteuser'))
-		// {
-			$aShop_Prices = $oShop->Shop_Prices->findAll();
+		$aShop_Prices = $oShop->Shop_Prices->findAll();
 
-			foreach ($aShop_Prices as $oShop_Price)
-			{
-				$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
-			}
-		// }
+		foreach ($aShop_Prices as $oShop_Price)
+		{
+			$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
+		}
 
 		return $aReturn;
 	}

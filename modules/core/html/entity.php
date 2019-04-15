@@ -310,13 +310,18 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 	/**
 	 * Get entity's children
-	 * @return int
+	 * @return array
 	 */
 	public function getChildren()
 	{
 		return $this->_children;
 	}
 
+	/**
+	 * Delete child by key
+	 * @param int $key
+	 * @return self
+	 */
 	public function deleteChild($key)
 	{
 		if (isset($this->_children[$key]))

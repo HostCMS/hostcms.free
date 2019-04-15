@@ -150,7 +150,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 	if (!$oUserCurrent->read_only)
 	{
 		$sFileName = $sTmpPath = NULL;
-		
+
 		// Uploaded File
 		if (isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0)
 		{
@@ -160,7 +160,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 		else
 		{
 			$altFile = Core_Array::getPost('alternative_file_pointer');
-			
+
 			if (strpos($altFile, 'http://') === 0 || strpos($altFile, 'https://') === 0)
 			{
 				$Core_Http = Core_Http::instance('curl')
@@ -184,7 +184,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 				$sFileName = CMS_FOLDER . $altFile;
 			}
 		}
-		
+
 		/*$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
 			? $_FILES['csv_file']['tmp_name']
 			: CMS_FOLDER . Core_Array::getPost('alternative_file_pointer');*/
@@ -393,17 +393,14 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						: 'Розничная';
 					$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = $fRoznPrice_name;
 					$aReturn = $oShop_Item_Import_Cml_Controller->import();
-					
-					// Post all
-					$oShop_Item_Import_Cml_Controller->postAll();
 
 					Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 					echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $aReturn['insertItemCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $aReturn['updateItemCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $aReturn['insertDirCount'] . '</b><br/>';
 					echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $aReturn['updateDirCount'] . '</b><br/>';
-					
-					
+
+
 				} catch (Exception $exc) {
 					Core_Message::show($exc->getMessage(), "error");
 				}
@@ -505,7 +502,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		{
 			// Post all
 			$Shop_Item_Import_Csv_Controller->postAll();
-			
+
 			$sRedirectAction = "";
 			Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 			showStat($Shop_Item_Import_Csv_Controller);

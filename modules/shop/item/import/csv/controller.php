@@ -1671,15 +1671,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// цена товара
 						case 'item_price':
-							$oShop_Price_Setting = $this->_getPrices();
-
-							$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-							$oShop_Price_Setting_Item->shop_price_id = 0;
-							$oShop_Price_Setting_Item->shop_item_id = $this->_oCurrentItem->id;
-							$oShop_Price_Setting_Item->old_price = $this->_oCurrentItem->price;
-							$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice($sData);
-							$oShop_Price_Setting->add($oShop_Price_Setting_Item);
-
+							$this->_aExternalPrices[0] = Shop_Controller::instance()->convertPrice($sData);
 							// $this->_oCurrentItem->price = Shop_Controller::instance()->convertPrice($sData);
 						break;
 						// активность товара
@@ -2856,7 +2848,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					$oShop_Price_Setting_Item->shop_price_id = $iPriceID;
 					$oShop_Price_Setting_Item->shop_item_id = $this->_oCurrentItem->id;
 
-					$oShop_Item_Price = $this->_oCurrentItem->Shop_Item_Prices->getByPriceId($iPriceID, FALSE);
+					$oShop_Item_Price = $iPriceID
+						? $this->_oCurrentItem->Shop_Item_Prices->getByPriceId($iPriceID, FALSE)
+						: NULL;
 
 					/*if (is_null($oShop_Item_Price))
 					{
@@ -3756,6 +3750,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
 			$oShop_Warehouse_Inventory->description = Core::_('Shop_Exchange.shop_warehouse_inventory');
 			$oShop_Warehouse_Inventory->number = '';
+			$oShop_Warehouse_Inventory->posted = 0;
 			$oShop_Warehouse_Inventory->save();
 
 			$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
@@ -3776,6 +3771,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $this->_oCurrentShop->id;
 			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
 			$oShop_Price_Setting->description = Core::_('Shop_Exchange.shop_price_setting');
 			$oShop_Price_Setting->save();
 

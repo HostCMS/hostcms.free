@@ -27,7 +27,7 @@ $oAdmin_Form_Controller
 	->pageTitle(Core::_('Lib.menu_list'));
 
 $lib_dir_id = intval(Core_Array::getGet('lib_dir_id', 0));
-	
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -199,14 +199,18 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('lib_dirs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
 	$oAdmin_Form_Dataset
 		->addCondition(array('where' => array('lib_dirs.parent_id', '=', $lib_dir_id)));
 }
-	
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
@@ -220,7 +224,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('libs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {

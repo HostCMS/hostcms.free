@@ -1,7 +1,7 @@
 <?php
 @ini_set('display_errors', 1);
 error_reporting(E_ALL);
-@set_time_limit(90000);
+//@set_time_limit(90000);
 
 // Временная директория
 $currentMonth = date('n');
@@ -17,6 +17,9 @@ $iFileLimit = 1000000;
 
 // Логировать обмен
 $bDebug = TRUE;
+
+// Время на шаг, секунд
+$iTimeout = 25;
 
 // bugfix
 usleep(10);
@@ -224,15 +227,22 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		//$oShop_Item_Import_Cml_Controller->updateFields = array('marking', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id');
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
+		$oShop_Item_Import_Cml_Controller->timeout = $iTimeout;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
 		if ($aReturn['status'] == 'success')
 		{
 			$bDebug && Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write('1С, type=catalog, mode=import, file=' . $sFileName . ', import success, DELETE FILE');
+				->write('1С, status: ' . $aReturn['status'] . ', timeout: ' . $oShop_Item_Import_Cml_Controller->timeout . ', type=catalog, mode=import, file=' . $sFileName . ', DELETE FILE');
 
 			Core_File::delete($sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName));
+		}
+		else
+		{
+			$bDebug && Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('1С, status: ' . $aReturn['status'] . ', timeout: ' . $oShop_Item_Import_Cml_Controller->timeout . ', type=catalog, mode=import, file=' . $sFileName . ', CONTINUE ...');
 		}
 
 		echo "{$BOM}" . $aReturn['status'];

@@ -347,15 +347,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$oInformationsystem_Items
 			->queryBuilder()
 			->open()
-			->where('informationsystem_items.start_datetime', '<', $dateTime)
-			->setOr()
-			->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
+				->where('informationsystem_items.start_datetime', '<', $dateTime)
+				->setOr()
+				->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
 			->close()
 			->setAnd()
 			->open()
-			->where('informationsystem_items.end_datetime', '>', $dateTime)
-			->setOr()
-			->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
+				->where('informationsystem_items.end_datetime', '>', $dateTime)
+				->setOr()
+				->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
 			->close()
 			->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups);
 
@@ -1305,7 +1305,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 							$oInformationsystem_Group->addEntity($oProperty_Value);
 						}
 					}*/
-					
+
 					$oInformationsystem_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
@@ -1447,25 +1447,28 @@ class Informationsystem_Controller_Show extends Core_Controller
 								->title($sTitle)
 						)
 				);
+			}
 
-				// Folder
-				$sPath = '/admin/informationsystem/item/index.php';
-				$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
-				$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
+			// Folder
+			$sPath = '/admin/informationsystem/item/index.php';
+			$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
+			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
-				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
-						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
-						->add(
-							Core::factory('Core_Html_Entity_Img')
-								->width(16)->height(16)
-								->src('/admin/images/folder.gif')
-								->alt($sTitle)
-								->title($sTitle)
-						)
-				);
+			$oXslSubPanel->add(
+				Core::factory('Core_Html_Entity_A')
+					->href("{$sPath}?{$sAdditional}")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->add(
+						Core::factory('Core_Html_Entity_Img')
+							->width(16)->height(16)
+							->src('/admin/images/folder.gif')
+							->alt($sTitle)
+							->title($sTitle)
+					)
+			);
 
+			if ($this->group)
+			{
 				// Delete
 				$sPath = '/admin/informationsystem/item/index.php';
 				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
@@ -1505,7 +1508,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		else
 		{
 			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
-			
+
 			// Edit
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";

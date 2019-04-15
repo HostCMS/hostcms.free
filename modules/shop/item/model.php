@@ -537,11 +537,11 @@ class Shop_Item_Model extends Core_Entity
 		// Get value
 		if (is_null($value) || is_object($value))
 		{
-			$oShopItem = $this->shortcut_id
+			$oShop_Item = $this->shortcut_id
 				? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 				: $this;
 
-			return $oShopItem->price;
+			return $oShop_Item->price;
 		}
 
 		if ($this->price != $value)
@@ -559,29 +559,16 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Show item's currency
-	 * @return string
-	 */
-	/*public function suffixAdminPrice()
-	{
-		$oShopItem = $this->shortcut_id
-			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
-			: $this;
-
-		echo ' ' . $oShopItem->Shop_Currency->name;
-	}*/
-
-	/**
 	 * Get item's currency
 	 * @return string
 	 */
 	public function adminCurrency()
 	{
-		$oShopItem = $this->shortcut_id
+		$oShop_Item = $this->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		return htmlspecialchars($oShopItem->Shop_Currency->name);
+		return htmlspecialchars($oShop_Item->Shop_Currency->name);
 	}
 
 	/**
@@ -590,11 +577,11 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function adminMeasure()
 	{
-		$oShopItem = $this->shortcut_id
+		$oShop_Item = $this->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		return htmlspecialchars($oShopItem->Shop_Measure->name);
+		return htmlspecialchars($oShop_Item->Shop_Measure->name);
 	}
 
 	/**

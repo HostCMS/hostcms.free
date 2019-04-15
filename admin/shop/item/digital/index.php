@@ -62,25 +62,18 @@ $additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}";
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item_Digital.shop_eitems_menu_title'))
-		->icon('fa fa-file-text-o')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item_Digital.eitems_show_add_new_link'))
-				->icon('fa fa-plus')
-				->img('/admin/images/money_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
-				)
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref(
+				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
+			)
 		)
-	)
-;
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax(
+				$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
+			)
+		)
+);
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);

@@ -234,6 +234,20 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 	$oAdmin_Form_Controller->addAction($Shop_Warehouse_Regrade_Controller_Print);
 }
 
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('post');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'post')
+{
+	$Admin_Form_Action_Controller_Type_Post = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Post', $oAdmin_Form_Action
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Post);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Warehouse_Regrade')

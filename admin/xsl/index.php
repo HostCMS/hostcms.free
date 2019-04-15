@@ -28,7 +28,7 @@ $oAdmin_Form_Controller
 
 // Строка навигации
 $xsl_dir_id = intval(Core_Array::getGet('xsl_dir_id', 0));
-	
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -201,7 +201,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('xsl_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('xsl_dirs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('xsl_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
@@ -221,7 +225,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('xsls.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('xsls.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('xsls.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {

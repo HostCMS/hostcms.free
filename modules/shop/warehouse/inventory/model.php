@@ -48,8 +48,8 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		{
 			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
 			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
-
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
+			$this->_preloadValues['posted'] = 1;
 		}
 	}
 
@@ -123,6 +123,11 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 			$oShop_Warehouse_Entry->delete();
 		}
 
+		if (Core::moduleIsActive('revision'))
+		{
+			Revision_Controller::delete($this->getModelName(), $this->id);
+		}
+
 		return parent::delete($primaryKey);
 	}
 
@@ -191,12 +196,111 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
 				$oShop_Warehouse_Entry->delete();
 
-				// Recount
-				$oShop_Warehouse->setRest($shop_item_id, $oShop_Warehouse->getRest($shop_item_id));
+				$rest = $oShop_Warehouse->getRest($shop_item_id);
+
+				if (!is_null($rest))
+				{
+					// Recount
+					$oShop_Warehouse->setRest($shop_item_id, $rest);
+				}
 			}
 
 			$this->posted = 0;
 			$this->save();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 3);
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'shop_warehouse_id' => $this->shop_warehouse_id,
+				'number' => $this->number,
+				'description' => $this->description,
+				'datetime' => $this->datetime,
+				'posted' => $this->posted,
+				'user_id' => $this->user_id,
+				'items' => array()
+			);
+
+			$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll(FALSE);
+
+			foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
+			{
+				$aBackup['items'][] = array(
+					'shop_item_id' => $oShop_Warehouse_Inventory_Item->shop_item_id,
+					'count' => $oShop_Warehouse_Inventory_Item->count,
+				);
+			}
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->unpost();
+
+				$this->shop_warehouse_id = Core_Array::get($aBackup, 'shop_warehouse_id');
+				$this->number = Core_Array::get($aBackup, 'number');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->datetime = Core_Array::get($aBackup, 'datetime');
+				$this->posted = 0;
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+
+				$aAllItems = Core_Array::get($aBackup, 'items');
+
+				if (count($aAllItems))
+				{
+					// Удаляем все товары
+					$this->Shop_Warehouse_Inventory_Items->deleteAll(FALSE);
+
+					// Создаем новые
+					foreach ($aAllItems as $aShop_Warehouse_Inventory_Items)
+					{
+						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+						$oShop_Warehouse_Inventory_Item->shop_warehouse_inventory_id = $this->id;
+						$oShop_Warehouse_Inventory_Item->shop_item_id = Core_Array::get($aShop_Warehouse_Inventory_Items, 'shop_item_id');
+						$oShop_Warehouse_Inventory_Item->count = Core_Array::get($aShop_Warehouse_Inventory_Items, 'count');
+						$oShop_Warehouse_Inventory_Item->save();
+					}
+				}
+
+				$this->save();
+
+				Core_Array::get($aBackup, 'posted') && $this->post();
+			}
 		}
 
 		return $this;
