@@ -171,7 +171,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$oShop = $this->getEntity();
 
@@ -187,7 +187,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 		$this->dirsList && $this->addDirs();
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aShop_Producers', array());
@@ -258,7 +258,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 
 			foreach ($aShop_Producers as $oShop_Producer)
 			{
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$this->addEntity(
 						$oShop_Producer->clearEntities()

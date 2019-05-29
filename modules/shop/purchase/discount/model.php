@@ -177,7 +177,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Purchase_Discount_Coupons->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -192,12 +192,37 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		$this->clearXmlTags()
-			->addXmlTag('discount_amount', $this->_discountAmount);
+		$this->_prepareData();
 
 		return parent::getXml();
 	}
-	
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_purchase_discount.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->clearXmlTags()
+			->addXmlTag('discount_amount', $this->_discountAmount);
+
+		return $this;
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -210,7 +235,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			? $this->value . '%'
 			: $this->value . htmlspecialchars($this->shop_currency_id ? ' ' . $this->Shop_Currency->name : '');
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string
@@ -240,8 +265,8 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->execute();
-	}	
-	
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -254,7 +279,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			? '—'
 			: $this->min_amount;
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field

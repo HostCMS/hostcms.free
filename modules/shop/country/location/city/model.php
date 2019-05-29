@@ -112,10 +112,35 @@ class Shop_Country_Location_City_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_country_location_city.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('name', $this->getName());
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

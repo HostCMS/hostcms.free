@@ -41,7 +41,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				{
 					$object = $object->Informationsystem_Item;
 				}
-					
+
 				if (!$object->id)
 				{
 					$object->informationsystem_id = $informationsystem_id;

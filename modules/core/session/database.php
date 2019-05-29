@@ -35,7 +35,7 @@ class Core_Session_Database extends Core_Session
 	 * GET_LOCK timeout (sec)
 	 * @var int
 	 */
-	protected $_getLockTimeout = 1;
+	protected $_getLockTimeout = 5;
 
 	/**
 	 * Next step delay (microseconds)

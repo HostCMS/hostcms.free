@@ -1119,7 +1119,7 @@ class Shop_Item_Model extends Core_Entity
 		$oShop_ItemShortcut->shortcut_id = $object->id;
 		$oShop_ItemShortcut->datetime = $object->datetime;
 		$oShop_ItemShortcut->name = ''/*$object->name*/;
-		$oShop_ItemShortcut->type = $object->type;
+		$oShop_ItemShortcut->type = 0; //$object->type;
 		$oShop_ItemShortcut->path = '';
 		$oShop_ItemShortcut->indexing = 0;
 
@@ -2005,6 +2005,32 @@ class Shop_Item_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_item.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_item.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
 	 * @hostcms-event shop_item.onBeforeShowXmlModifications
 	 * @hostcms-event shop_item.onBeforeSelectModifications
 	 * @hostcms-event shop_item.onBeforeAddModification
@@ -2012,11 +2038,10 @@ class Shop_Item_Model extends Core_Entity
 	 * @hostcms-event shop_item.onBeforeAddAssociatedEntity
 	 * @hostcms-event shop_item.onBeforeSelectShopWarehouseItems
 	 * @hostcms-event shop_item.onAfterAddSetEntity
+	 * @return self
 	 */
-	public function getXml()
+	protected function _prepareData()
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
-
 		$oShop = $this->Shop;
 
 		$this->clearXmlTags();
@@ -2476,7 +2501,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -2857,7 +2882,7 @@ class Shop_Item_Model extends Core_Entity
 				}
 				else
 				{
-					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->name));
+					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->id, $oTmp_Shop_Item->name));
 				}
 
 				// Check warehouses rest
@@ -2877,7 +2902,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 		else
 		{
-			throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $this->name));
+			throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $this->id, $this->name));
 		}
 
 		return $this;

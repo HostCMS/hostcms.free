@@ -150,11 +150,6 @@ abstract class Core_Cache
 
 			$driver = $aConfig[$name]['driver'];
 			self::$instance[$name] = new $driver($aConfig[$name]);
-
-			/*if (!self::$instance[$name]->available())
-			{
-
-			}*/
 		}
 
 		return self::$instance[$name];

@@ -1,4 +1,8 @@
 <?php
+
+// Запрещаем индексацию страницы
+Core_Page::instance()->response->header('X-Robots-Tag', 'none');
+
 $id = Core_Array::getGet('id');
 if (Core::moduleIsActive('advertisement') && $id)
 {

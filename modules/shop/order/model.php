@@ -702,6 +702,31 @@ class Shop_Order_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_order.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this
 			->clearXmlTags()
 			->addXmlTag('amount', $this->getAmount())
@@ -817,7 +842,7 @@ class Shop_Order_Model extends Core_Entity
 				->value(Shop_Controller::instance()->round($total_tax))
 		);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -987,6 +1012,9 @@ class Shop_Order_Model extends Core_Entity
 			// Удалить зарезервированные товары
 			$this->deleteReservedItems();
 
+			// Удалить электронные товары
+			$this->_deleteDigitalItems();
+
 			// Дисконтная карта
 			$this->_paidShopDiscountcard();
 		}
@@ -994,6 +1022,39 @@ class Shop_Order_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);
 
 		return $this->save();
+	}
+
+	/**
+	 * Delete digital items
+	 * @return self
+	 */
+	protected function _deleteDigitalItems()
+	{
+		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
+		{
+			$oShop_Item = $oShop_Order_Item->Shop_Item;
+
+			if ($oShop_Item->type == 1)
+			{
+				$aShop_Order_Item_Digitals = $oShop_Order_Item->Shop_Order_Item_Digitals->findAll(FALSE);
+
+				foreach ($aShop_Order_Item_Digitals as $oShop_Order_Item_Digital)
+				{
+					$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;
+
+					if ($oShop_Item_Digital->id)
+					{
+						$oShop_Item_Digital->count += $oShop_Order_Item->quantity;
+						$oShop_Item_Digital->save();
+
+						$oShop_Order_Item_Digital->delete();
+					}
+				}
+			}
+		}
+
+		return $this;
 	}
 
 	/**
@@ -1412,7 +1473,24 @@ class Shop_Order_Model extends Core_Entity
 		$newObject = parent::copy();
 		$newObject->guid = Core_Guid::get();
 		$newObject->save();
-		$newObject->invoice = $newObject->id;
+
+		$oShop = $newObject->Shop;
+
+		if (strlen($oShop->invoice_template))
+		{
+			$oCore_Templater = new Core_Templater();
+			$newObject->invoice = $oCore_Templater
+				->addObject('shop', $oShop)
+				->addObject('this', $newObject)
+				->addFunction('ordersToday', array($newObject, 'ordersToday'))
+				->setTemplate($oShop->invoice_template)
+				->execute();
+		}
+		else
+		{
+			$newObject->invoice = $newObject->id;
+		}
+
 		$newObject->save();
 
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
@@ -2157,13 +2235,17 @@ class Shop_Order_Model extends Core_Entity
 
 		$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
 
+		$additionalParams = Core_Str::escapeJavascriptVariable(
+			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+		);
+
 		$oDiv = Core::factory('Core_Html_Entity_Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist
 					->value($this->shop_order_status_id)
 					->options($aMasShopOrderStatuses)
-					->onchange("$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->id}]=0&shopOrderStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 				)
 			->execute();
 
@@ -2195,5 +2277,66 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	public function getPrintlayoutReplaces()
+	{
+		$oCompany = $this->company_id
+			? $this->Shop_Company
+			: $this->Shop->Shop_Company;
+
+		$aReplace = array(
+			// Core_Meta
+			'this' => $this,
+			'shop_order' => $this,
+			'company' => $oCompany,
+			'shop' => $this->Shop,
+			'total_count' => 0,
+			'Items' => array(),
+		);
+
+		$position = 1;
+
+		$total_amount = $total_quantity = $total_tax = 0;
+
+		$aShop_Order_Items = $this->Shop_Order_Items->findAll();
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
+		{
+			$oShop_Item = $oShop_Order_Item->Shop_Item;
+
+			$amount = Shop_Controller::instance()->round($oShop_Order_Item->quantity * $oShop_Order_Item->price);
+
+			$tax = Shop_Controller::instance()->round($amount * $oShop_Order_Item->rate / 100);
+
+			$aReplace['Items'][] = array(
+				'position' => $position++,
+				'item' => $oShop_Item,
+				'id' => $oShop_Item->id,
+				'name' => htmlspecialchars($oShop_Order_Item->name),
+				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
+				'okei' => htmlspecialchars($oShop_Item->Shop_Measure->okei),
+				'price' => $oShop_Order_Item->price,
+				'quantity' => $oShop_Order_Item->quantity,
+				'rate' => $oShop_Order_Item->rate,
+				'rate%' => $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '',
+				'tax' => $tax,
+				'amount' => $amount,
+				'amount_tax_included' => Shop_Controller::instance()->round($amount + $tax)
+			);
+
+			$total_quantity += $oShop_Order_Item->quantity;
+			$total_tax += $tax;
+			$total_amount += $amount;
+
+			$aReplace['total_count']++;
+		}
+
+		$aReplace['quantity'] = $total_quantity;
+		$aReplace['tax'] = Shop_Controller::instance()->round($total_tax);
+		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
+		$aReplace['amount_tax_included'] = Shop_Controller::instance()->round($this->getAmount());
+		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount_tax_included']));
+
+		return $aReplace;
 	}
 }

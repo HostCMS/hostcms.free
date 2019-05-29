@@ -209,7 +209,7 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		return $this->_Shops;
 	}
-	
+
 	/**
 	 * Set _Shops set
 	 * @param array $array
@@ -231,7 +231,7 @@ class Structure_Controller_Show extends Core_Controller
 		$this->_Informationsystems = $array;
 		return $this;
 	}
-	
+
 	/**
 	 * Check if data is cached
 	 * @return NULL|TRUE|FALSE
@@ -273,7 +273,7 @@ class Structure_Controller_Show extends Core_Controller
 			$this->_aTags = array('structure_' . intval($this->parentId));
 		}
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -333,7 +333,7 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		// XSL
-		if ($bXsl)
+		if (!$bTpl)
 		{
 			$this->_addStructuresByParentId($this->parentId, $this);
 		}
@@ -370,7 +370,7 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterSelectInformationsystems', $this, array($this->_Informationsystems));
-		
+
 		return $this;
 	}
 
@@ -390,7 +390,7 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterSelectShops', $this, array($this->_Shops));
-		
+
 		return $this;
 	}
 

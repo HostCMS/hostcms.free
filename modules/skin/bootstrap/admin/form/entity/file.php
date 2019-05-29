@@ -11,8 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File {
-
+class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File 
+{
 	/**
 	 * Execute business logic
 	 */
@@ -31,6 +31,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 			// big_image_path - адрес большого загруженного изображения
 			'path' => '',
+			'originalName' => NULL,
 
 			// show_big_image_params - параметр, определяющий отображать ли настройки большого изображения
 			'show_params' => TRUE,
@@ -93,6 +94,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 			// small_image_path - адрес малого загруженного изображения
 			'path' => '',
+			'originalName' => NULL,
 
 			// show_small_image_params - параметр, определяющий отображать ли настройки малого изображения
 			'show_params' => TRUE,
@@ -190,12 +192,28 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					->class('input-group')
 					->add(
 						Core::factory('Core_Html_Entity_Input')
-							->class('form-control')
+							->class('form-control' . ($this->largeImage['path'] != '' ? ' hidden' : ''))
 							->name($this->largeImage['name'])
 							->id($this->largeImage['id'])
 							->type('file')
 					)
 			);
+
+		if ($this->largeImage['path'] != '')
+		{
+			$prefixRand = strpos($this->largeImage['path'], '?') === FALSE
+				? '?'
+				: '&';
+
+			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename($this->largeImage['path']);
+
+			$oLarge_Input_Group_Div->add(
+				Admin_Form_Entity::factory('Code')
+					->html('<div id="file_preview_large_' . $this->largeImage['id'] . '" class="file-caption" style="display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; width: calc(100% - 15px)"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+						. htmlspecialchars($originalName . $originalName . $originalName)
+						. '</a></div>')
+			);
+		}
 
 		$oLarge_Main_Block_Core_Html_Entity_Div
 			->add($oLarge_Input_Div);
@@ -209,15 +227,12 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					? '?'
 					: '&';
 
-				//$oLargeControl_Div->add(
 				$oLarge_Input_Group_Div->add(
 					Core::factory('Core_Html_Entity_A')
-						//->id('control_' . 'large_' . $this->largeImage['id'])
 						->id('preview_large_' . $this->largeImage['id'])
-						->class('input-group-addon control-item')
-						->href($this->largeImage['path'] . $prefixRand . 'rnd=' . rand())
-						->target('_blank')
-						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
+						->class('input-group-addon control-item ')
+						->onclick('$("#' . $windowId . ' input#' . $this->largeImage['id'] . ', #' . $windowId . ' div#file_preview_large_' . $this->largeImage['id'] . '").toggleClass(\'hidden\'); $("#' . $windowId . ' a#preview_large_' . $this->largeImage['id'] . ' > i").toggleClass(\'fa-pencil fa-image\')')
+						->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-pencil"></i>'))
 					)
 					->add(
 						Core::factory('Core_Html_Entity_A')
@@ -449,7 +464,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 				$oLarge_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
 					->value('$(function(){
-							$("#preview_large_' . $this->largeImage['id'] . '").popover({
+							$("#' . $windowId . ' #file_preview_large_' . $this->largeImage['id'] . '").popover({
 								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="max-width:200px" />\',
 								html: true,
 								placement: \'top\',
@@ -474,6 +489,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						)
 						->add(
 							Core::factory('Core_Html_Entity_Input')
+								// ->placeholder(Core::_('Admin_Form.file_description'))
 								->type('text')
 								->name("description_{$this->largeImage['name']}")
 								->class('form-control description-large')
@@ -499,12 +515,28 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					->class('input-group')
 					->add(
 						Core::factory('Core_Html_Entity_Input')
-							->class('form-control')
+							->class('form-control' . ($this->smallImage['path'] != '' ? ' hidden' : ''))
 							->name($this->smallImage['name'])
 							->id($this->smallImage['id'])
 							->type('file')
 					)
 				);
+
+			if ($this->smallImage['path'] != '')
+			{
+				$prefixRand = strpos($this->smallImage['path'], '?') === FALSE
+					? '?'
+					: '&';
+
+				$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
+
+				$oSmall_Input_Group_Div->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<div id="file_preview_' . $this->smallImage['id'] . '" class="file-caption"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->smallImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+							. htmlspecialchars($originalName)
+							. '</a></div>')
+				);
+			}
 
 			$oLarge_Main_Block_Core_Html_Entity_Div
 				->add($oSmall_Input_Div);
@@ -518,14 +550,12 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						? '?'
 						: '&';
 
-					//$oSmallControl_Div->add(
 					$oSmall_Input_Group_Div->add(
 						Core::factory('Core_Html_Entity_A')
 							->id('preview_' . $this->smallImage['id'])
 							->class('input-group-addon control-item')
-							->href($this->smallImage['path'] . $prefixRand . 'rnd=' . rand())
-							->target('_blank')
-							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
+							->onclick('$("#' . $windowId . ' input#' . $this->smallImage['id'] . ', #' . $windowId . ' div#file_preview_' . $this->smallImage['id'] . '").toggleClass(\'hidden\'); $("#' . $windowId . ' a#preview_' . $this->smallImage['id'] . ' > i").toggleClass(\'fa-pencil fa-image\')')
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-pencil"></i>'))
 						)
 						->add(
 							Core::factory('Core_Html_Entity_A')
@@ -746,7 +776,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 						$oSmall_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
 							->value('$(function(){
-								$("#preview_' . $this->smallImage['id'] . '").popover({
+								$("#' . $windowId . ' #file_preview_' . $this->smallImage['id'] . '").popover({
 									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="max-width:200px" />\',
 									html: true,
 									placement: \'top\',
@@ -771,5 +801,48 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						->style('clear: both')
 				)
 			->execute();
+	}
+
+	protected function _getIcon($originalName)
+	{
+		$ext = Core_File::getExtension($originalName);
+
+		switch ($ext)
+		{
+			case 'jpg':
+			case 'jpeg':
+			case 'png':
+			case 'gif':
+			case 'bmp':
+			case 'webp':
+				$class = 'fa fa-file-image-o image-color';
+			break;
+			case 'pdf':
+				$class = 'fa fa-file-pdf-o pdf-color';
+			break;
+			case 'xls':
+			case 'xlsx':
+			case 'csv':
+				$class = 'fa fa-file-excel-o excel-color';
+			break;
+			case 'doc':
+			case 'docx':
+				$class = 'fa fa-file-word-o word-color';
+			break;
+			case 'txt':
+			case 'rtf':
+				$class = 'fa fa-file-text-o text-color';
+			break;
+			case 'zip':
+			case 'gz':
+			case 'rar':
+			case 'tar':
+				$class = 'fa fa-file-archive-o archive-color';
+			break;
+			default:
+				$class = 'fa fa-file-o default-color';
+		}
+
+		return $class;
 	}
 }

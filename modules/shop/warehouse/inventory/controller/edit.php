@@ -37,7 +37,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'))->class('form-control input-lg'), $oMainRow1);
 
 		// Печать
 		$printlayoutsButton = '
@@ -63,7 +63,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
+				->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -127,16 +127,12 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		$oMainRow2
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->add(
-						Admin_Form_Entity::factory('Div')
-							->class('hidden-sm hidden-md hidden-lg padding-top-40')
-					)
 					->add($oSelectResponsibleUsers)
-					->class('form-group col-xs-12 col-sm-4')
+					->class('form-group col-xs-12 col-sm-5 col-lg-4')
 			)
 			->add($oScriptResponsibleUsers);
 
-		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow2);
+		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21')), $oMainRow2);
 
 		$oShopItemBlock
 			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
@@ -147,28 +143,29 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$itemTable = '
-			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
-				<thead>
-					<tr>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.position') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.name') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.measure') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.price') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.currency') . '</th>
-						<th colspan="3" class="border-bottom-success" scope="col">' . Core::_('Shop_Warehouse_Inventory.quantity') . '</th>
-						<th colspan="3" scope="col">' . Core::_('Shop_Warehouse_Inventory.sum') . '</th>
-						<th rowspan="2" scope="col">  </th>
-					</tr>
-					<tr>
-						<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
-						<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
-						<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
-						<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
-						<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
-						<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
-					</tr>
-				</thead>
-				<tbody>
+			<div class="table-scrollable">
+				<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+					<thead>
+						<tr>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.position') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.name') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.measure') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.price') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.currency') . '</th>
+							<th colspan="3" class="border-bottom-success" scope="col">' . Core::_('Shop_Warehouse_Inventory.quantity') . '</th>
+							<th colspan="3" scope="col">' . Core::_('Shop_Warehouse_Inventory.sum') . '</th>
+							<th rowspan="2" scope="col">  </th>
+						</tr>
+						<tr>
+							<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
+							<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
+							<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
+							<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
+							<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
+							<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
+						</tr>
+					</thead>
+					<tbody>
 		';
 
 		$aShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items->findAll(FALSE);
@@ -253,8 +250,9 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		}
 
 		$itemTable .= '
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		';
 
 		$oShopItemRow2->add(
@@ -312,8 +310,6 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 				$('select.select-warehouse').change(function() {
 					$.updateWarehouseCounts($(this).val());
-
-
 				});
 			");
 

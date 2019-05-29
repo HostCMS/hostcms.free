@@ -93,6 +93,7 @@ class Core_Http_Curl extends Core_Http
 		//curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
 
 		curl_setopt($curl, CURLOPT_TIMEOUT, $this->_timeout);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->_timeout);
 		curl_setopt($curl, CURLOPT_USERAGENT, $this->_userAgent);
 		curl_setopt($curl, CURLOPT_REFERER, $this->_referer);
 

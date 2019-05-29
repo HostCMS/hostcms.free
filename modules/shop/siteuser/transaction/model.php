@@ -132,6 +132,31 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_siteuser_transaction.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('date', strftime($this->Shop->format_date, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
@@ -139,7 +164,7 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 		$this->shop_currency_id && $this->addEntity($this->Shop_Currency);
 		$this->shop_order_id && $this->addEntity($this->Shop_Order);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

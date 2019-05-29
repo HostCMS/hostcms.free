@@ -125,7 +125,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 					if (!is_null($value))
 					{
-						$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getDefault();
+						$oShop_Warehouse = $this->_object->Shop->Shop_Warehouses->getDefault();
 
 						if (!is_null($oShop_Warehouse))
 						{

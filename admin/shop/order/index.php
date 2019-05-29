@@ -430,21 +430,6 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
 }
 
-// Действие "Изменить статус"
-$oAdminFormActionChangeStatus = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('changeStatus');
-
-if ($oAdminFormActionChangeStatus && $oAdmin_Form_Controller->getAction() == 'changeStatus')
-{
-	$oShopOrderControllerStatus = Admin_Form_Action_Controller::factory(
-		'Shop_Order_Controller_Status', $oAdminFormActionChangeStatus
-	);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oShopOrderControllerStatus);
-}
-
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Order')

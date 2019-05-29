@@ -196,6 +196,14 @@ function isEmpty(str) {
 			return false;
 		},
 		adminLoad: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminLoad', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
 			settings = jQuery.requestSettings(settings);
 
 			var path = settings.path,
@@ -330,6 +338,9 @@ function isEmpty(str) {
 
 						window.history.pushState(state, document.title, path);
 					}
+
+					// Call own event
+					$("#" + settings.windowId).trigger('adminLoadSuccess');
 					//}
 				}]
 			});
@@ -337,6 +348,14 @@ function isEmpty(str) {
 			return false;
 		},
 		adminSendForm: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminSendForm', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
 			settings = jQuery.requestSettings(settings);
 
 			settings = jQuery.extend({
@@ -454,6 +473,14 @@ function isEmpty(str) {
 		},
 		ajaxCallback: function(data, status, jqXHR)
 		{
+			var triggerReturn = $('body').triggerHandler('beforeAjaxCallback', [data]);
+
+			if (triggerReturn == 'break')
+			{
+				$.loadingScreen('hide');
+				return false;
+			}
+
 			$.loadingScreen('hide');
 			if (data == null)
 			{
@@ -615,7 +642,17 @@ function isEmpty(str) {
 				jQuery(this).empty();
 				for (var key in data)
 				{
-					jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+					if (typeof data[key] == 'object')
+					{
+						jQuery(this)
+							.append(jQuery('<option>')
+							.attr('value', data[key].value)
+							.text(data[key].name));
+					}
+					else
+					{
+						jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+					}
 				}
 			}
 		},

@@ -415,7 +415,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 			$oUser = Core_Entity::factory('User')->getCurrent();
 
-			!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
+			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
+			//!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
 
 			$this->addTab($oAdmin_Form_Tab_EntityAdditional);
 		//}
@@ -568,14 +569,15 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					{
 						$oAdmin_Form_Entity_For_Column
 							->caption(Core::_('User.backend-field-caption'))
-							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
+							->disabled('disabled');
 
 						if ($this->_object->user_id && Core::moduleIsActive('user'))
 						{
 							$oUser = $this->_object->User;
 
 							$oUserLink = Admin_Form_Entity::factory('Link');
-							$oUserLink								
+							$oUserLink
 								->divAttr(array('class' => 'input-group-addon user-link'))
 								->a
 									->class('btn btn-labeled btn-sky')
@@ -595,7 +597,59 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->addField($oAdmin_Form_Entity_For_Column);
 			}
 		}
+		?>
+		<script>
+			formLocked = false;
 
+			function lockForm(e) {
+				console.log(e);
+				if (!formLocked)
+				{
+					$('body').on('beforeAdminLoad beforeAjaxCallback', function(e) {
+						if (!confirm('<?php echo Core::_('Admin_Form.lock_message')?>'))
+						{
+							return 'break';
+						}
+
+						formLocked = false;
+
+						unbindEvents();
+					});
+
+					$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
+
+					formLocked = true;
+				}
+			}
+
+			function unbindEvents()
+			{
+				$('body')
+					.unbind('beforeAdminLoad')
+					.unbind('beforeAjaxCallback');
+
+				$('h5.row-title > i.edit-lock').remove();
+			}
+
+			$(document).ready(function() {
+				// Указываем таймаут для узлов структуры (подгрузка xsl)
+				setTimeout(function() {
+					$('body').on('afterTinyMceInit', function(event, editor) {
+						editor.on('change', lockForm);
+					});
+
+					$('#id_content form[id ^= "formEdit"]').on('keyup change paste', ':input', lockForm);
+					$('#id_content form[id ^= "formEdit"] input.hasDatetimepicker').parent().on('dp.change', lockForm);
+
+					$('div#ControlElements input').on('click', function(){
+						formLocked = false;
+
+						unbindEvents();
+					});
+				}, 5000);
+			});
+		</script>
+		<?php
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 
 		return $this;
@@ -788,7 +842,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							if (count($aMaxLength) == 2)
 							{
 								$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
-								
+
 								$value > $maxValue && $value = $maxValue;
 								$value < -$maxValue && $value = -$maxValue;
 							}

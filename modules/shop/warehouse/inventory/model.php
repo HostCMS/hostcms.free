@@ -305,4 +305,81 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		return $this;
 	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Warehouse_Inventory_Items->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-info badge-square')
+			->value($count)
+			->execute();
+	}
+
+	public function getPrintlayoutReplaces()
+	{
+		$aReplace = array(
+			// Core_Meta
+			'this' => $this,
+			'company' => $this->Shop_Warehouse->Shop->Shop_Company,
+			'shop_warehouse' => $this->Shop_Warehouse,
+			'shop' => $this->Shop_Warehouse->Shop,
+			'user' => $this->User,
+			'total_count' => 0,
+			'Items' => array(),
+		);
+
+		$position = 1;
+		$inv_amount_total = $amount_total = 0;
+
+		$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll();
+
+		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
+		foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
+		{
+			$oShop_Item = $oShop_Warehouse_Inventory_Item->Shop_Item;
+
+			$rest = $this->Shop_Warehouse->getRest($oShop_Item->id, $this->datetime);
+			is_null($rest) && $rest = 0;
+
+			$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+
+			is_null($old_price)
+				&& $old_price = $oShop_Item->price;
+
+			$fact_amount = Shop_Controller::instance()->round($rest * $old_price);
+
+			$inv_amount = Shop_Controller::instance()->round($oShop_Warehouse_Inventory_Item->count * $old_price);
+
+			$aReplace['Items'][] = array(
+				'position' => $position++,
+				'name' => htmlspecialchars($oShop_Item->name),
+				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
+				'price' => $old_price,
+				'quantity' => $rest,
+				'amount' => $fact_amount,
+				'inv_quantity' => $oShop_Warehouse_Inventory_Item->count,
+				'inv_amount' => $inv_amount
+			);
+
+			$inv_amount_total += $inv_amount;
+			$amount_total += $rest;
+
+			$aReplace['total_count']++;
+		}
+
+		$aReplace['amount'] = Shop_Controller::instance()->round($amount_total);
+		$aReplace['inv_amount'] = Shop_Controller::instance()->round($inv_amount_total);
+
+		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
+		$aReplace['inv_amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['inv_amount']));
+
+		return $aReplace;
+	}
 }

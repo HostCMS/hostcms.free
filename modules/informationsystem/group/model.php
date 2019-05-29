@@ -86,7 +86,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 * @param boolean
 	 */
 	protected $_hasRevisions = TRUE;
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -349,8 +349,9 @@ class Informationsystem_Group_Model extends Core_Entity
 	public function copy()
 	{
 		$newObject = parent::copy();
-
-		$this->_changeCopiedName && $newObject->path(Core_Guid::get())->save();
+		$newObject->guid = Core_Guid::get();
+		$this->_changeCopiedName && $newObject->path(Core_Guid::get());
+		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
 		if (is_file($this->getLargeFilePath()))
@@ -1036,6 +1037,31 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event informationsystem_group.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags();
 
 		!isset($this->_forbiddenTags['url'])
@@ -1065,7 +1091,7 @@ class Informationsystem_Group_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

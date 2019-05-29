@@ -475,7 +475,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->showPanel && Core::checkPanel() && $this->_showPanel();
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->item && $this->_incShowed();
 
@@ -575,7 +575,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Informationsystem_Group_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_group_properties');
@@ -634,7 +634,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_item_properties');
@@ -647,7 +647,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aInformationsystem_Items', array());
@@ -676,7 +676,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$oInformationsystem_Item->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					// Ярлык может ссылаться на отключенный элемент
 					$desiredActivity = strtolower($this->itemsActivity) == 'active'
@@ -1212,8 +1212,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
-		$bXsl = !is_null($this->_xsl);
-		if ($bXsl)
+		$bTpl = $this->_mode == 'tpl';
+
+		if (!$bTpl)
 		{
 			$this->_addGroupsByParentId(0, $this);
 		}
@@ -1251,8 +1252,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			} while ($oInformationsystem_Group = $oInformationsystem_Group->getParent());
 		}
 
-		$bXsl = !is_null($this->_xsl);
-		if ($bXsl)
+		$bTpl = $this->_mode == 'tpl';
+
+		if (!$bTpl)
 		{
 			$this->_addGroupsByParentId(0, $this);
 		}

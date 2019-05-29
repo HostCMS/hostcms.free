@@ -2041,6 +2041,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$oShop_Warehouse_Incoming->shop_warehouse_id = $oShopWarehouse->id;
 							$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
 							$oShop_Warehouse_Incoming->number = '';
+							$oShop_Warehouse_Incoming->posted = 0;
 							$oShop_Warehouse_Incoming->shop_price_id = $iWarehouseShopPriceId;
 							$oShop_Warehouse_Incoming->save();
 

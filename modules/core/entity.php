@@ -41,6 +41,15 @@ class Core_Entity extends Core_ORM
 		$this->_tagName = strval($tagName);
 		return $this;
 	}
+	
+	/**
+	 * Get tag name
+	 * @return string
+	 */
+	public function getXmlTagName()
+	{
+		return $this->_tagName;
+	}
 
 	/**
 	 * Allowed tags. If list of tags is empty, all tags will show.
@@ -90,7 +99,7 @@ class Core_Entity extends Core_ORM
 		$this->_forbiddenTags[$tag] = $tag;
 		return $this;
 	}
-	
+
 	/**
 	 * Remove tag from forbidden tags list
 	 * @param string $tag tag
@@ -102,7 +111,7 @@ class Core_Entity extends Core_ORM
 		{
 			unset($this->_forbiddenTags[$tag]);
 		}
-			
+
 		return $this;
 	}
 
@@ -213,7 +222,7 @@ class Core_Entity extends Core_ORM
 	 * @param boolean
 	 */
 	protected $_hasRevisions = FALSE;
-	
+
 	/**
 	 * Get column name for marks deleted
 	 */
@@ -587,15 +596,12 @@ class Core_Entity extends Core_ORM
 
 		Core_Event::notify($this->_modelName . '.onBeforeGetXml', $this);
 
-		//$object_values = $this->_modelColumns;
-
 		$xml = "<" . $this->_tagName;
 
 		// Primary key as tag property
 		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
 		{
 			$xml .= " {$this->_primaryKey}=\"" . Core_Str::xml($this->_modelColumns[$this->_primaryKey]) . "\"";
-			//unset($object_values[$this->_primaryKey]);
 		}
 
 		$xml .= ">\n";
@@ -636,9 +642,9 @@ class Core_Entity extends Core_ORM
 		}
 
 		// Children entities
-		foreach ($this->_childrenEntities as $oChildrenEntity)
+		foreach ($this->_childrenEntities as $oChildEntity)
 		{
-			$xml .= $oChildrenEntity->getXml();
+			$xml .= $oChildEntity->getXml();
 		}
 
 		// data-values, e.g. dataMyValue
@@ -654,7 +660,7 @@ class Core_Entity extends Core_ORM
 				}
 			}
 		}
-		
+
 		$xml .= "</" . $this->_tagName . ">\n";
 
 		$this->_clearEntitiesAfterGetXml && $this->clearEntities();
@@ -662,6 +668,106 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterGetXml', $this);
 
 		return $xml;
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event modelname.onBeforeGetXml
+	 * @hostcms-event modelname.onAfterGetXml
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		$this->_load();
+
+		Core_Event::notify($this->_modelName . '.onBeforeGetArray', $this);
+
+		$oRetrun = new stdClass();
+
+		// Primary key as tag property
+		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
+		{
+			$properttName = $attributePrefix . $this->_primaryKey;
+			$oRetrun->$properttName = $this->_modelColumns[$this->_primaryKey];
+		}
+
+		$bAllowedTagsIsEmpty = count($this->_allowedTags) == 0;
+		$bForbiddenTagsIsEmpty = count($this->_forbiddenTags) == 0;
+		$bShortcodeTags = Core::moduleIsActive('shortcode') && count($this->_shortcodeTags) > 0;
+
+		if ($bShortcodeTags)
+		{
+			$oShortcode_Controller = Shortcode_Controller::instance();
+			$iCountShortcodes = $oShortcode_Controller->getCount();
+		}
+
+		foreach ($this->_modelColumns as $field_name => $field_value)
+		{
+			// Allowed Tags
+			if ($field_name != $this->_primaryKey
+				&& ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
+			)
+			{
+				// Forbidden Tags
+				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
+				{
+					if ($bShortcodeTags && $iCountShortcodes && isset($this->_shortcodeTags[$field_name]))
+					{
+						$field_value = $oShortcode_Controller->applyShortcodes($field_value);
+					}
+					$oRetrun->$field_name = $field_value;
+				}
+			}
+		}
+
+		// External tags
+		foreach ($this->_xmlTags as $aTag)
+		{
+			$sTmp = $aTag[0];
+			$oRetrun->$sTmp = $aTag[1];
+		}
+
+		// Children entities
+		foreach ($this->_childrenEntities as $oChildEntity)
+		{
+			$childName = $oChildEntity instanceof Core_ORM
+				? $oChildEntity->getModelName()
+				: $oChildEntity->name;
+
+			$childArray = $oChildEntity->getStdObject($attributePrefix);
+
+			if (!isset($oRetrun->$childName))
+			{
+				$oRetrun->$childName = $childArray;
+			}
+			else
+			{
+				// Convert to array
+				!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
+
+				$oRetrun->$childName[] = $childArray;
+			}
+		}
+
+		// data-values, e.g. dataMyValue
+		foreach ($this->_dataValues as $field_name => $field_value)
+		{
+			// Allowed Tags
+			if ($bAllowedTagsIsEmpty || isset($this->_allowedTags[$field_name]))
+			{
+				// Forbidden Tags
+				if ($bForbiddenTagsIsEmpty || !isset($this->_forbiddenTags[$field_name]))
+				{
+					$oRetrun->$field_name = $field_value;
+				}
+			}
+		}
+
+		$this->_clearEntitiesAfterGetXml && $this->clearEntities();
+
+		Core_Event::notify($this->_modelName . '.onAfterGetArray', $this);
+
+		return $oRetrun;
 	}
 
 	/**

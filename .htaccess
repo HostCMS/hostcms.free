@@ -11,8 +11,13 @@ Options +FollowSymlinks
 AddDefaultCharset Off
 
 <Files .htaccess>
-	Order Allow,Deny
-	Deny from all
+	<IfModule !mod_authz_core.c>
+		Order deny,allow
+		Deny from all
+	</IfModule>
+	<IfModule mod_authz_core.c>
+		Require all denied
+	</IfModule>
 </Files>
 
 <IfModule mod_php5.c>

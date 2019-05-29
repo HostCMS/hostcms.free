@@ -623,6 +623,15 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							$fieldName = $oAdmin_Form_Controller->getFieldName($oAdmin_Form_Field_Changed->name);
 
+							// Badges
+							$badgesMethodName = $fieldName . 'Badge';
+							$bBadge = $oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName);
+
+							if ($bBadge)
+							{
+								?><div style="position: relative"><?php
+							}
+
 							try
 							{
 								if ($oAdmin_Form_Field_Changed->type != 10
@@ -694,11 +703,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2datetime($value);
-												
+
 												if ($oAdmin_Form_Field_Changed->editable)
 												{
 													$sCurrentLng = Core_I18n::instance()->getLng();
-													
+
 													?><div class="row">
 														<div class="date col-xs-12">
 															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
@@ -726,7 +735,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												{
 													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
 												}
-												
+
 												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
 										break;
@@ -736,11 +745,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2date($value);
-												
+
 												if ($oAdmin_Form_Field_Changed->editable)
 												{
 													$sCurrentLng = Core_I18n::instance()->getLng();
-													
+
 													?><div class="row">
 														<div class="date col-xs-12">
 															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
@@ -768,7 +777,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												{
 													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
 												}
-												
+
 												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
 												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
@@ -953,7 +962,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								else
 								{
 									$aTmpFieldName = explode('.', $oAdmin_Form_Field_Changed->name);
-									
+
 									$backendName = (isset($aTmpFieldName[1]) ? $aTmpFieldName[1] : $aTmpFieldName[0]) . 'Backend';
 									if ($oAdmin_Form_Controller->isCallable($oEntity, $backendName))
 									{
@@ -975,11 +984,13 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							}
 
 							// Badges
-							$badgesMethodName = $fieldName . 'Badge';
-							if ($oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName))
+							//$badgesMethodName = $fieldName . 'Badge';
+							//if ($oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName))
+							if ($bBadge)
 							{
 								// Выполним функцию обратного вызова
 								$oEntity->$badgesMethodName($oAdmin_Form_Field, $oAdmin_Form_Controller);
+								?></div><?php
 							}
 							?></td><?php
 						}

@@ -65,6 +65,16 @@ class Core_Xml_Entity extends Core_Servant_Properties
 	}
 
 	/**
+	 * Clear enities
+	 * @return self
+	 */
+	public function clearEntities()
+	{
+		$this->_childrenEntities = array();
+		return $this;
+	}
+
+	/**
 	 * Attributes
 	 * @var array
 	 */
@@ -104,9 +114,9 @@ class Core_Xml_Entity extends Core_Servant_Properties
 		{
 			$xml .= "\n";
 
-			foreach ($this->_childrenEntities as $oChildrenEntity)
+			foreach ($this->_childrenEntities as $oChildEntity)
 			{
-				$xml .= $oChildrenEntity->getXml();
+				$xml .= $oChildEntity->getXml();
 			}
 		}
 
@@ -118,5 +128,56 @@ class Core_Xml_Entity extends Core_Servant_Properties
 		$xml .= "</" . $this->name . ">\n";
 
 		return $xml;
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		$oRetrun = new stdClass();
+
+		foreach ($this->_attributes as $attributeName => $attributeValue)
+		{
+			$properttName = $attributePrefix . $attributeName;
+			$oRetrun->$properttName = $attributeValue;
+		}
+
+		// Children entities
+		if (!empty($this->_childrenEntities))
+		{
+			foreach ($this->_childrenEntities as $oChildEntity)
+			{
+				//$xml .= $oChildEntity->getXml();
+				$childName = $oChildEntity instanceof Core_ORM
+					? $oChildEntity->getModelName()
+					: $oChildEntity->name;
+
+				$childArray = $oChildEntity->getStdObject($attributePrefix);
+
+				if (!isset($oRetrun->$childName))
+				{
+					$oRetrun->$childName = $childArray;
+				}
+				else
+				{
+					// Convert to array
+					!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
+
+					// array_push($oRetrun->$childName, $childArray);
+					$oRetrun->{$childName}[] = $childArray;
+				}
+			}
+		}
+
+		if (!is_null($this->value))
+		{
+			count(get_object_vars($oRetrun))
+				? $oRetrun->value = $this->value
+				: $oRetrun = $this->value;
+		}
+
+		return $oRetrun;
 	}
 }

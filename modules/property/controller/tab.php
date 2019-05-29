@@ -420,6 +420,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 											$oNewAdmin_Form_Entity->largeImage(
 												Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
 													'path' => $sDirHref . rawurlencode($oProperty_Value->file),
+													'originalName' => $oProperty_Value->file_name,
 													'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "large_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id)
 												))
 											);
@@ -436,6 +437,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 											$oNewAdmin_Form_Entity->smallImage(
 												Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
 													'path' => $sDirHref . rawurlencode($oProperty_Value->file_small),
+													'originalName' => $oProperty_Value->file_small_name,
 													'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "small_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id),
 													'create_small_image_from_large_checked' => FALSE,
 												))

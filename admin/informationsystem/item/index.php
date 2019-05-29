@@ -20,7 +20,13 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 $iInformationsystemId = intval(Core_Array::getGet('informationsystem_id'));
 $iInformationsystemGroupId = intval(Core_Array::getGet('informationsystem_group_id', 0));
 
+$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $iInformationsystemGroupId);
+
 $oInformationsystem = Core_Entity::factory('Informationsystem')->find($iInformationsystemId);
+
+$sFormTitle = $oInformationsystem_Group->id
+	? $oInformationsystem_Group->name
+	: Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -28,8 +34,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name))
-	->pageTitle(Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('term')))
 {
@@ -370,6 +376,16 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+if ($iInformationsystemGroupId)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $iInformationsystemGroupId);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $iInformationsystemGroupId);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 

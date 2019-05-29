@@ -175,8 +175,8 @@ class Core_Log
 				: '-';
 		}
 
-		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST', 'unknow');
-		$page = 'http://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI');
+		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST', 'unknown');
+		$page = Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI');
 		$user_ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 
 		$fname = $this->getLogName(date('Y-m-d'));

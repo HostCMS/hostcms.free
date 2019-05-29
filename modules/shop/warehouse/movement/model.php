@@ -339,4 +339,73 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 		return $this;
 	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Warehouse_Movement_Items->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-success badge-square')
+			->value($count)
+			->execute();
+	}
+
+	public function getPrintlayoutReplaces()
+	{
+		$aReplace = array(
+			// Core_Meta
+			'this' => $this,
+			'company' => $this->Source_Shop_Warehouse->Shop->Shop_Company,
+			'shop_warehouse' => $this->Source_Shop_Warehouse,
+			'destination_shop_warehouse' => $this->Destination_Shop_Warehouse,
+			'shop' => $this->Source_Shop_Warehouse->Shop,
+			'user' => $this->User,
+			'type' => Core::_('Shop_Warehouse_Movement.title'),
+			'total_count' => 0,
+			'Items' => array(),
+		);
+
+		$position = 1;
+		$total_amount = 0;
+
+		$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll();
+
+		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+
+		foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
+		{
+			$oShop_Item = $oShop_Warehouse_Movement_Item->Shop_Item;
+
+			$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+
+			is_null($old_price)
+				&& $old_price = $oShop_Item->price;
+
+			$amount = Shop_Controller::instance()->round($oShop_Warehouse_Movement_Item->count * $old_price);
+
+			$aReplace['Items'][] = array(
+				'position' => $position++,
+				'name' => htmlspecialchars($oShop_Item->name),
+				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
+				'currency' => htmlspecialchars($oShop_Item->Shop_Currency->name),
+				'price' => $old_price,
+				'quantity' => $oShop_Warehouse_Movement_Item->count,
+				'amount' => $amount
+			);
+
+			$aReplace['total_count']++;
+
+			$total_amount += $amount;
+		}
+
+		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
+		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
+
+		return $aReplace;
+	}
 }

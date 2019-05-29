@@ -128,6 +128,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_discount.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$oShop = $this->Shop;
 
 		$this->clearXmlTags();
@@ -144,7 +169,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			? $this->addXmlTag('percent', $this->value)
 			: $this->addXmlTag('amount', $this->value);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

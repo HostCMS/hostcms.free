@@ -51,7 +51,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		// Печать
 		$printlayoutsButton = '
 			<div class="btn-group">
-				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+				<a class="btn btn-success" href="javascript:void(0);"><!--<i class="btn-label fa fa-print"></i>-->' . Core::_('Printlayout.print') . '</a>
 				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
 				<ul class="dropdown-menu dropdown-palegreen">
 		';
@@ -72,7 +72,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-price print-button' . (!$this->_object->id ? ' hidden' : ''))
+				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-price print-button no-padding' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -137,16 +137,12 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$oMainRow3
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->add(
-						Admin_Form_Entity::factory('Div')
-							->class('hidden-sm hidden-md hidden-lg padding-top-40')
-					)
 					->add($oSelectResponsibleUsers)
-					->class('form-group col-xs-12 col-sm-4')
+					->class('form-group col-xs-12 col-sm-7 col-md-6 col-lg-5')
 			)
 			->add($oScriptResponsibleUsers);
 
-		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow3);
+		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow3);
 
 		$aExistPriceIDs = $this->_object->id ? array() : array(0);
 		$aPrices = array();
@@ -212,15 +208,15 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			: '';
 
 		$itemTable = '
-		<div class="table-scrollable">
-			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
-				<thead>
-					<tr>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.position') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.name') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.measure') . '</th>
-						<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.currency') . '</th>
-						<th colspan="3" class="border-bottom-success toggle-shop-price-0 ' . $hiddenPrice0 . '" scope="col">' . Core::_('Shop_Price_Setting.basic') . '</th>
+			<div class="table-scrollable">
+				<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+					<thead>
+						<tr>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.position') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.name') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.measure') . '</th>
+							<th rowspan="2" scope="col">' . Core::_('Shop_Price_Setting.currency') . '</th>
+							<th colspan="3" class="border-bottom-success toggle-shop-price-0 ' . $hiddenPrice0 . '" scope="col">' . Core::_('Shop_Price_Setting.basic') . '</th>
 		';
 
 		foreach ($aShop_Prices as $key => $oShop_Price)

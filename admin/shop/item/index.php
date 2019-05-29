@@ -21,7 +21,9 @@ $oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 $oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 $oShopDir = $oShop->Shop_Dir;
 
-$sFormTitle = $oShop->name;
+$sFormTitle = $oShopGroup->id
+	? $oShopGroup->name
+	: $oShop->name;
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -717,6 +719,16 @@ $oMenu->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oMenu);
+
+if ($oShopGroup->id)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oShopGroup->id);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oShopGroup->id);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 

@@ -460,14 +460,41 @@ class Property_Model extends Core_Entity
 	 */
 	public function getXml()
 	{
-		$bIsList = $this->type == 3 && $this->list_id != 0 && Core::moduleIsActive('list');
-
 		$this->setConfig(
 			Core_Config::instance()->get('property_config', array()) + array('add_list_items' => TRUE)
 		);
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		$this->setConfig(
+			Core_Config::instance()->get('property_config', array()) + array('add_list_items' => TRUE)
+		);
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags();
 
 		/*if ($this->type != 2)
@@ -478,6 +505,8 @@ class Property_Model extends Core_Entity
 				->addForbiddenTag('image_small_max_height')
 				->addForbiddenTag('hide_small_image');
 		}*/
+
+		$bIsList = $this->type == 3 && $this->list_id != 0 && Core::moduleIsActive('list');
 
 		// List
 		if ($bIsList)
@@ -513,7 +542,7 @@ class Property_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	protected function _addListItems($parentId, $oObject)
@@ -534,6 +563,11 @@ class Property_Model extends Core_Entity
 	public function typeBackend()
 	{
 		return Core::_('Property.type' . $this->type);
+	}
+
+	public function descriptionBackend()
+	{
+		return Core_Str::cut(strip_tags($this->description), 100);
 	}
 
 	/**

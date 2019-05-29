@@ -4024,8 +4024,7 @@
 				escapeMarkup: function(m) { return m; },
 				templateSelection: $.templateSelectionItemSiteusers,
 				width: "100%",
-				dropdownParent: $(this).closest('.modal')
-
+				dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
 			}, settings);
 
 			return this.each(function(){
@@ -4156,6 +4155,11 @@
 $(function(){
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
+
+/* 	$(window).on("popstate", function() {
+
+			console.log("popstate");
+	}); */
 
 	$(window).on('resize', function(event) {
 
@@ -4450,6 +4454,48 @@ $(function(){
 			$.changeUserWorkdayButtons(status);
 		});
 });
+
+
+// Lazy image load
+document.addEventListener("DOMContentLoaded", function() {
+	var lazyloadThrottleTimeout;
+
+	function lazyload()
+	{
+		if(lazyloadThrottleTimeout)
+		{
+			clearTimeout(lazyloadThrottleTimeout);
+		}
+
+		lazyloadThrottleTimeout = setTimeout(function() {
+			var scrollTop = window.pageYOffset,
+				lazyloadImages = document.querySelectorAll("img.lazy");
+
+			lazyloadImages.forEach(function(img) {
+				if(img.offsetTop < (window.innerHeight + scrollTop))
+				{
+				  img.src = img.dataset.src;
+				  img.classList.remove('lazy');
+				}
+			});
+
+			/*if(lazyloadImages.length == 0)
+			{
+			  document.removeEventListener("scroll", lazyload);
+			  window.removeEventListener("resize", lazyload);
+			  window.removeEventListener("orientationChange", lazyload);
+			}*/
+		}, 100);
+	}
+
+	document.addEventListener("scroll", lazyload);
+	window.addEventListener("resize", lazyload);
+	window.addEventListener("orientationChange", lazyload);
+
+	$('#id_content').on('adminLoadSuccess', lazyload);
+
+	lazyload();
+}, false);
 
 var methods = {
 	show: function() {

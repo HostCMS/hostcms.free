@@ -58,6 +58,14 @@ class Shop_Cart_Model extends Core_Entity
 	);
 
 	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'shop_carts.id' => 'ASC',
+	);
+
+	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -244,12 +252,37 @@ class Shop_Cart_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetXml
-	 * @hostcms-event shop_cart.onBeforeAddShopItem
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_cart.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 * @hostcms-event shop_cart.onBeforeAddShopItem
+	 */
+	protected function _prepareData()
+	{
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
 			->showXmlBonuses(TRUE)
@@ -273,6 +306,6 @@ class Shop_Cart_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addEntity($oShop_Item);
 
-		return parent::getXml();
+		return $this;
 	}
 }

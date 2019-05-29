@@ -296,6 +296,31 @@ class Tag_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event tag.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('urlencode', rawurlencode($this->path));
 
@@ -304,7 +329,7 @@ class Tag_Model extends Core_Entity
 			$this->addXmlTag('count', $this->count);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

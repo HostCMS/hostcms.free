@@ -227,53 +227,39 @@ class Comment_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
-
 		// Subject
-		trim($this->subject) != '' && $oCore_Html_Entity_Div
-			->add(
-				Core::factory('Core_Html_Entity_Strong')
-					->value(htmlspecialchars($this->subject))
-			);
+		trim($this->subject) != '' && Core::factory('Core_Html_Entity_Strong')
+			->value(htmlspecialchars($this->subject))
+			->execute();
 
-		$oCore_Html_Entity_Div
-			->add(
-				Core::factory('Core_Html_Entity_A')
-					->href($link)
-					->onclick($onclick)
-					->value(htmlspecialchars($this->getShortText()))
-			);
+		Core::factory('Core_Html_Entity_A')
+			->href($link)
+			->onclick($onclick)
+			->value(htmlspecialchars($this->getShortText()))
+			->execute();
 
 		$subCommentCount = $this->Comments->getCount();
 
-		$subCommentCount && $oCore_Html_Entity_Div
-			->add(
-				Core::factory('Core_Html_Entity_Span')
-					->class('count')
-					->value(htmlspecialchars($subCommentCount))
-			);
+		$subCommentCount && Core::factory('Core_Html_Entity_Span')
+			->class('count')
+			->value(htmlspecialchars($subCommentCount))
+			->execute();
 
 		if (strlen($this->ip))
 		{
-			$oCore_Html_Entity_Div
-				->add(
-					Core::factory('Core_Html_Entity_Span')
-						->class('small darkgray')
-						->value(htmlspecialchars($this->ip))
-				);
+			Core::factory('Core_Html_Entity_Span')
+				->class('small darkgray')
+				->value(htmlspecialchars($this->ip))
+				->execute();
 		}
 
 		if ($this->grade)
 		{
-			$oCore_Html_Entity_Div
-				->add(
-					Core::factory('Core_Html_Entity_Span')
-						->class('small green')
-						->value(str_repeat('★', $this->grade) . str_repeat('☆', 5 - $this->grade))
-				);
+			Core::factory('Core_Html_Entity_Span')
+				->class('small green')
+				->value(str_repeat('★', $this->grade) . str_repeat('☆', 5 - $this->grade))
+				->execute();
 		}
-
-		$oCore_Html_Entity_Div->execute();
 
 		return ob_get_clean();
 	}
@@ -360,6 +346,31 @@ class Comment_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event comment.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('date', strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
@@ -391,6 +402,6 @@ class Comment_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 }

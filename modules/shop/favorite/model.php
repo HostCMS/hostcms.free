@@ -74,6 +74,31 @@ class Shop_Favorite_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_favorite.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
 			->showXmlWarehousesItems(TRUE)
@@ -91,6 +116,6 @@ class Shop_Favorite_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addEntity($oShop_Item);
 
-		return parent::getXml();
+		return $this;
 	}
 }

@@ -134,7 +134,7 @@ abstract class Core_Image
 	{
 		return Core_Image::instance()->resizeImage($sourceFile, $maxWidth, $maxHeight, $targetFile, $quality, $preserveAspectRatio);
 	}
-	
+
 	static public function avatar($initials, $bgColor = '#f44336', $width = 130, $height = 130)
 	{
 		// Create image
@@ -159,10 +159,26 @@ abstract class Core_Image
 		imagettftext($image, $fontSize, 0, ($width - $bbox[4]) / 2, ($height - $bbox[5]) / 2, $textColor, $font, $initials);
 
 		// Output the image.
+		header('Pragma: public');
+		header('Cache-Control: public, max-age=86400');
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 86400) . ' GMT');
+
+		$etag = sha1($initials . ' ' . $bgColor . ' ' . $width . ' ' . $height . ' ');
+
+		if (
+			isset($_SERVER['HTTP_IF_NONE_MATCH']) &&
+			trim($_SERVER['HTTP_IF_NONE_MATCH'], '"') === $etag
+		) {
+			header("HTTP/1.1 304 Not Modified");
+			exit;
+		}
+
 		header("Content-type: image/png");
+		header('ETag: "' . $etag . '"');
+
 		imagepng($image);
 		imagedestroy($image);
-		
+
 		exit();
 	}
 }

@@ -38,7 +38,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'))->class('form-control input-lg'), $oMainRow1);
 
 		// Печать
 		$printlayoutsButton = '
@@ -64,7 +64,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-2 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
+				->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -126,16 +126,16 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		$oMainRow2
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->add(
+					/* ->add(
 						Admin_Form_Entity::factory('Div')
 							->class('hidden-sm hidden-md hidden-lg padding-top-40')
-					)
+					) */
 					->add($oSelectResponsibleUsers)
-					->class('form-group col-xs-12 col-sm-4')
+					->class('form-group col-xs-12 col-sm-5 col-lg-4')
 			)
 			->add($oScriptResponsibleUsers);
 
-		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow2);
+		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21')), $oMainRow2);
 
 		$oMainTab->delete($this->getField('shop_price_id'));
 
@@ -190,25 +190,26 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$itemTable = '
-			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info shop-warehouse-regrade-table">
-				<thead>
-					<tr>
-						<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.position') . '</th>
-						<th scope="col" colspan="3" class="regrade-bottom-writeoff">' . Core::_('Shop_Warehouse_Regrade.writeoff_item') . '</th>
-						<th scope="col" colspan="3" class="regrade-bottom-incoming">' . Core::_('Shop_Warehouse_Regrade.incoming_item') . '</th>
-						<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.quantity') . '</th>
-						<th scope="col" rowspan="2">  </th>
-					</tr>
-					<tr>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
-					</tr>
-				</thead>
-				<tbody>
+			<div class="table-scrollable">
+				<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info shop-warehouse-regrade-table">
+					<thead>
+						<tr>
+							<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.position') . '</th>
+							<th scope="col" colspan="3" class="regrade-bottom-writeoff">' . Core::_('Shop_Warehouse_Regrade.writeoff_item') . '</th>
+							<th scope="col" colspan="3" class="regrade-bottom-incoming">' . Core::_('Shop_Warehouse_Regrade.incoming_item') . '</th>
+							<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.quantity') . '</th>
+							<th scope="col" rowspan="2">  </th>
+						</tr>
+						<tr>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
+						</tr>
+					</thead>
+					<tbody>
 		';
 
 		$index = 0;
@@ -254,8 +255,9 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		}
 
 		$itemTable .= '
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		';
 
 		// $placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');

@@ -18,4 +18,5 @@ $Siteuser_Controller_Show->xsl(
 	)
 )
 ->showFriends(TRUE)
+// ->showForumCounts(TRUE)
 ->show();

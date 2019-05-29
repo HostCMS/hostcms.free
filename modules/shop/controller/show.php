@@ -812,9 +812,9 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$this->showPanel && Core::checkPanel() && $this->_showPanel();
+		$this->showPanel && Core::checkPanel() && in_array($this->_mode, array('xsl', 'tpl')) && $this->_showPanel();
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->item && $this->_incShowed();
 
@@ -900,7 +900,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aShop_Items', array());
@@ -972,7 +972,7 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Group_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_group_properties');
@@ -1053,7 +1053,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				$oShop_Item->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					// Ярлык может ссылаться на отключенный товар
 					$desiredActivity = strtolower($this->itemsActivity) == 'active'
@@ -1165,7 +1165,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		//if ($this->itemsProperties)
 		//{
@@ -1189,7 +1189,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$oProperty->addEntity(
 						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Item_Property->prefix)
@@ -1221,7 +1221,7 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_item_properties');

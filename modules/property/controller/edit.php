@@ -133,7 +133,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_prepareForm();
 
 		Core_Event::notify('Property_Controller_Edit.onBeforePrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
-		
+
 		$bNewProperty = !$this->_object->id;
 
 		$modelName = $this->_object->getModelName();
@@ -418,7 +418,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->title($title);
 
 		Core_Event::notify('Property_Controller_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
-		
+
 		return $this;
 	}
 
@@ -457,8 +457,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$bNewProperty = is_null($this->_object->id);
-
-print_r($_POST);
 
 		parent::_applyObjectProperty();
 

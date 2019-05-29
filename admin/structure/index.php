@@ -41,14 +41,20 @@ if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('docu
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
+$oParentStructure = Core_Entity::factory('Structure', Core_Array::getGet('parent_id', 0));
+
+$sFormTitle = $oParentStructure->id
+	? $oParentStructure->name
+	: Core::_('Structure.title');
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Structure.title'))
-	->pageTitle(Core::_('Structure.title'));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -103,6 +109,16 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+if ($oParentStructure->id)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oParentStructure->id);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oParentStructure->id);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 

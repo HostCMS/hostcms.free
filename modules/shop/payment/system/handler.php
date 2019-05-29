@@ -999,11 +999,6 @@ abstract class Shop_Payment_System_Handler
 
 		$sXml = $this->_prepareXml()->getXml();
 
-ob_start();
-print_r($sXml);
-echo "\n\n";
-file_put_contents(CMS_FOLDER . 'xml_order.txt', ob_get_clean(), FILE_APPEND);
-
 		//echo "<pre>" . htmlspecialchars($sXml) . "</pre>";
 		$return = Xsl_Processor::instance()
 			->xml($sXml)
@@ -1498,6 +1493,7 @@ file_put_contents(CMS_FOLDER . 'xml_order.txt', ob_get_clean(), FILE_APPEND);
 	public function changedOrder($mode)
 	{
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeChangedOrder', $this, array($mode));
+
 		if (in_array($mode, $this->_notificationModes))
 		{
 			if ($this->getShopOrderBeforeAction()->paid != $this->getShopOrder()->paid

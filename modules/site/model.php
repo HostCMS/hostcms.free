@@ -145,7 +145,7 @@ class Site_Model extends Core_Entity
 		'error' => 'E_ALL',
 		'error404' => 0,
 		'error403' => 0,
-		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
+		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /showbanner\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
 		'closed' => 0,
 		'safe_email' => 1,
 		'html_cache_use' => 0,
@@ -993,7 +993,7 @@ class Site_Model extends Core_Entity
 			}
 
 			$aMatchSiteusers = array();
-			
+
 			// Получаем список пользователей сайта
 			$aSiteusers = $this->Siteusers->findAll(FALSE);
 			foreach ($aSiteusers as $oSiteuser)
@@ -1640,6 +1640,31 @@ class Site_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event site.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		if ($this->_showXmlAlias)
 		{
 			$oSite_Alias = $this->getCurrentAlias();
@@ -1660,7 +1685,7 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

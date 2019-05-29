@@ -342,4 +342,71 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 
 		return $this;
 	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Warehouse_Regrade_Items->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-maroon badge-square')
+			->value($count)
+			->execute();
+	}
+
+	public function getPrintlayoutReplaces()
+	{
+		$aReplace = array(
+			// Core_Meta
+			'this' => $this,
+			'company' => $this->Shop_Warehouse->Shop->Shop_Company,
+			'shop_warehouse' => $this->Shop_Warehouse,
+			'shop' => $this->Shop_Warehouse->Shop,
+			'user' => $this->User,
+			'total_count' => 0,
+			'Items' => array(),
+		);
+
+		$position = 1;
+
+		$aShop_Warehouse_Regrade_Items = $this->Shop_Warehouse_Regrade_Items->findAll();
+
+		foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
+		{
+			$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id);
+			$oShop_Item_Incoming = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->incoming_shop_item_id);
+
+			if (!is_null($oShop_Item_Writeoff) && !is_null($oShop_Item_Incoming))
+			{
+				$oShop_Item_Writeoff = $oShop_Item_Writeoff->shortcut_id
+					? $oShop_Item_Writeoff->Shop_Item
+					: $oShop_Item_Writeoff;
+
+				$oShop_Item_Incoming = $oShop_Item_Incoming->shortcut_id
+					? $oShop_Item_Incoming->Shop_Item
+					: $oShop_Item_Incoming;
+
+				$aReplace['Items'][] = array(
+					'position' => $position++,
+					'writeoff_name' => htmlspecialchars($oShop_Item_Writeoff->name),
+					'writeoff_measure' => htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name),
+					'writeoff_currency' => htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name),
+					'writeoff_price' => $oShop_Warehouse_Regrade_Item->writeoff_price,
+					'incoming_name' => htmlspecialchars($oShop_Item_Incoming->name),
+					'incoming_measure' => htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name),
+					'incoming_currency' => htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name),
+					'incoming_price' => $oShop_Warehouse_Regrade_Item->incoming_price,
+					'count' => $oShop_Warehouse_Regrade_Item->count
+				);
+
+				$aReplace['total_count']++;
+			}
+		}
+
+		return $aReplace;
+	}
 }

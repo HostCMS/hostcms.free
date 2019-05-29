@@ -151,7 +151,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$oShop = $this->getEntity();
 
@@ -171,7 +171,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value(Core::moduleIsActive('siteuser') ? 1 : 0)
 		);
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aShop_Carts', array());
@@ -206,7 +206,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_item_properties');
@@ -243,7 +243,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 			if (!is_null($oShop_Item->id))
 			{
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$this->addEntity(
 						$oShop_Cart
@@ -321,7 +321,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
 			}
 		}
-		
+
 		// Скидки от суммы заказа
 		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
 		$oShop_Purchase_Discount_Controller
@@ -332,7 +332,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			->prices($aDiscountPrices);
 
 		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
-		
+
 		// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
 		if ($bApplyMaxDiscount)
 		{
@@ -349,15 +349,15 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		{
 			$bApplyShopPurchaseDiscounts = TRUE;
 		}
-		
+
 		$fAppliedDiscountsAmount = 0;
-		
+
 		// Если решили применять скидку от суммы заказа
 		if ($bApplyShopPurchaseDiscounts)
 		{
 			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 			{
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$this->addEntity($oShop_Purchase_Discount->clearEntities());
 				}
@@ -387,8 +387,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					$oShop_Discountcard->discountAmount(
 						Shop_Controller::instance()->round($fAmountForCard * ($oShop_Discountcard_Level->discount / 100))
 					);
-					
-					if ($bXsl)
+
+					if (!$bTpl)
 					{
 						$this->addEntity($oShop_Discountcard->clearEntities());
 					}
@@ -396,7 +396,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					{
 						$this->append('aShop_Discountcards', $oShop_Discountcard);
 					}
-					
+
 					$fAppliedDiscountsAmount += $oShop_Discountcard->getDiscountAmount();
 				}
 			}
@@ -404,7 +404,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		// Скидка больше суммы заказа
 		$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
-		
+
 		$this->amount = $amount - $fAppliedDiscountsAmount;
 		$this->tax = $tax;
 		$this->quantity = $quantity;
@@ -415,6 +415,10 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('total_amount')
 				->value($this->amount)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_discount')
+				->value($fAppliedDiscountsAmount)
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_tax')

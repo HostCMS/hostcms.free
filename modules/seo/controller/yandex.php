@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2017 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Yandex extends Seo_Controller
 {
@@ -18,6 +18,12 @@ class Seo_Controller_Yandex extends Seo_Controller
 	 * @var int
 	 */
 	protected $_user_id = NULL;
+
+	/**
+	 * Yandex.Webmaster API url
+	 * @var string
+	 */
+	protected $_baseUrl = 'https://api.webmaster.yandex.net/v4/';
 
 	/**
 	 * Execute
@@ -44,7 +50,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 		if (isset($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT']))
 		{
-			foreach ($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT'] as $aTmp)
+			foreach($aExternalLinksHistory['indicators']['LINKS_TOTAL_COUNT'] as $aTmp)
 			{
 				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
@@ -62,12 +68,12 @@ class Seo_Controller_Yandex extends Seo_Controller
 			}
 		}
 
-		// Get tic
-		$aTicHistory = $this->getTicHistory($host_id);
+		// Get sqi
+		$aSqiHistory = $this->getSqiHistory($host_id);
 
-		if (isset($aTicHistory['points']))
+		if (isset($aSqiHistory['points']))
 		{
-			foreach ($aTicHistory['points'] as $aTmp)
+			foreach($aSqiHistory['points'] as $aTmp)
 			{
 				$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 
@@ -105,7 +111,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		{
 			if (isset($aIndexingHistory['indicators'][$sIndicator]))
 			{
-				foreach ($aIndexingHistory['indicators'][$sIndicator] as $aTmp)
+				foreach($aIndexingHistory['indicators'][$sIndicator] as $aTmp)
 				{
 					$date = Core_Date::timestamp2sqldate(strtotime(Core_Array::get($aTmp, 'date')));
 					$aValues[$date][$sIndicator] = intval(Core_Array::get($aTmp, 'value'));
@@ -155,7 +161,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			$Core_Http = Core_Http::instance('curl')
 				->clear()
 				->method('GET')
-				->url("https://api.webmaster.yandex.net/v3/user/")
+				->url($this->_baseUrl . 'user/')
 				->additionalHeader("Authorization", "OAuth {$this->_token}")
 				->additionalHeader("Accept", "application/json")
 				->execute();
@@ -192,8 +198,9 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
+			->additionalHeader("Content-type", "application/json")
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
@@ -279,10 +286,10 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('POST')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
-			->additionalHeader("Content-Type", "application/json")
+			->additionalHeader("Content-type", "application/json")
 			->rawData($sData)
 			->execute();
 
@@ -309,7 +316,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('DELETE')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
@@ -337,7 +344,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
@@ -365,12 +372,14 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/summary/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/summary/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
 		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+
+		var_dump($aAnswer);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -393,7 +402,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/verification/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/verification/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
@@ -420,7 +429,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			$Core_Http = Core_Http::instance('curl')
 				->clear()
 				->method('POST')
-				->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/verification/?verification_type=HTML_FILE")
+				->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/verification/?verification_type=HTML_FILE")
 				->additionalHeader("Authorization", "OAuth {$this->_token}")
 				->additionalHeader("Accept", "application/json")
 				->execute();
@@ -449,7 +458,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/links/external/samples/?offset={$offset}&limit={$limit}")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/links/external/samples/?offset={$offset}&limit={$limit}")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
@@ -475,7 +484,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		// Get user id
 		$this->getUserId();
 
-		$sUrl = "https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/search-queries/popular/?order_by={$order_by}&query_indicator=TOTAL_SHOWS&query_indicator=TOTAL_CLICKS&query_indicator=AVG_CLICK_POSITION&query_indicator=AVG_SHOW_POSITION";
+		$sUrl = $this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/search-queries/popular/?order_by={$order_by}&query_indicator=TOTAL_SHOWS&query_indicator=TOTAL_CLICKS&query_indicator=AVG_CLICK_POSITION&query_indicator=AVG_SHOW_POSITION";
 
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
@@ -508,7 +517,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		// Get user id
 		$this->getUserId();
 
-		$sUrl = "https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/indexing-history/";
+		$sUrl = $this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/indexing/history/";
 
 		$i = 0;
 
@@ -540,11 +549,11 @@ class Seo_Controller_Yandex extends Seo_Controller
 	}
 
 	/**
-	 * Get site tic history for last 6 month
+	 * Get site sqi history for last year
 	 * @param int $host_id Yandex.Webmaster site id
 	 * @return array
 	 */
-	public function getTicHistory($host_id)
+	public function getSqiHistory($host_id)
 	{
 		// Get user id
 		$this->getUserId();
@@ -552,7 +561,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/tic-history/")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/sqi-history/")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();
@@ -580,7 +589,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 		$Core_Http = Core_Http::instance('curl')
 			->clear()
 			->method('GET')
-			->url("https://api.webmaster.yandex.net/v3/user/{$this->_user_id}/hosts/{$host_id}/links/external/history/?indicator=LINKS_TOTAL_COUNT")
+			->url($this->_baseUrl . "user/{$this->_user_id}/hosts/{$host_id}/links/external/history/?indicator=LINKS_TOTAL_COUNT")
 			->additionalHeader("Authorization", "OAuth {$this->_token}")
 			->additionalHeader("Accept", "application/json")
 			->execute();

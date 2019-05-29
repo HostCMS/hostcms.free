@@ -223,7 +223,7 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 			// Копировать количество на складе
 			if (!is_null(Core_Array::getPost('copy_warehouse_count')))
 			{
-				$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getDefault();
+				$oShop_Warehouse = $oShop->Shop_Warehouses->getDefault();
 				if (!is_null($oShop_Warehouse))
 				{
 					$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');

@@ -39,7 +39,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainTab
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
-			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->class('form-control input-lg'), $oMainRow1);
+			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'))->class('form-control input-lg'), $oMainRow1);
 
 		$oAdditionalTab->delete($this->getField('source_shop_warehouse_id'));
 
@@ -113,16 +113,16 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 		$oMainRow2
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->add(
+					/* ->add(
 						Admin_Form_Entity::factory('Div')
 							->class('hidden-sm hidden-md hidden-lg padding-top-40')
-					)
+					) */
 					->add($oSelectResponsibleUsers)
-					->class('form-group col-xs-12 col-sm-4')
+					->class('form-group col-xs-12 col-sm-5 col-lg-6')
 			)
 			->add($oScriptResponsibleUsers);
 
-		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oMainRow2);
+		$oMainTab->move($this->getField('posted')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2 margin-top-21')), $oMainRow2);
 
 		// Печать
 		$printlayoutsButton = '
@@ -148,7 +148,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
+				->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
 				->add(
 					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
 				)
@@ -165,20 +165,21 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$itemTable = '
-			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
-				<thead>
-					<tr>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.position') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.name') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.measure') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.price') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.currency') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.quantity') . '</th>
-						<th scope="col">' . Core::_('Shop_Warehouse_Incoming.sum') . '</th>
-						<th scope="col">  </th>
-					</tr>
-				</thead>
-				<tbody>
+			<div class="table-scrollable">
+				<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+					<thead>
+						<tr>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.position') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.name') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.measure') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.price') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.currency') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.quantity') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.sum') . '</th>
+							<th scope="col">  </th>
+						</tr>
+					</thead>
+					<tbody>
 		';
 
 		$index = 0;
@@ -240,8 +241,9 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 		}
 
 		$itemTable .= '
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		';
 
 		$oShopItemRow2->add(
@@ -287,7 +289,7 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 					jInput.change();
 				});
 
-			  $.focusAutocomplete($('.set-item-count'));
+				$.focusAutocomplete($('.set-item-count'));
 			  ");
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);

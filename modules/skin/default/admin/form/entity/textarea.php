@@ -174,6 +174,8 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$this->_init['language'] = '"' . $lng . '"';
 				$this->_init['language_url'] = '"/admin/wysiwyg/langs/' . $lng . '.js"';
 				$this->_init['elements'] = '"' . $this->id . '"';
+				
+				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]);}';
 
 				!isset($this->_init['height'])
 					&& $this->_init['height'] = '"' . ($this->rows * 30) . 'px"';

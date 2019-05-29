@@ -66,7 +66,7 @@ class Shop_Price_Setting_Model extends Core_Entity
 		// Ответственный по сделке
 		$oUser = $this->User;
 
-		echo '<div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="' . $oUser->getAvatar() .'" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div></div>';
+		echo '<div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="' . $oUser->getAvatar() .'" /></div><div class="user-name"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div></div>';
 
 		return ob_get_clean();
 	}
@@ -229,6 +229,21 @@ class Shop_Price_Setting_Model extends Core_Entity
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 10);
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function count_itemsBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$count = $this->Shop_Price_Setting_Items->getCount();
+		$count && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-info badge-square')
+			->value($count)
+			->execute();
 	}
 
 	/**

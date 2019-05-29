@@ -33,33 +33,33 @@ class Core_File
 
 	/**
 	 * Moves an uploaded file to a new location
-	 * @param string $fileName Path to the source file.
+	 * @param string $source Path to the source file.
 	 * @param string $destination The destination path.
 	 * @param int $chmod The mode parameter consists of three octal number components specifying access, e.g. 0644
 	 */
-	static public function moveUploadedFile($fileName, $destination, $chmod = CHMOD_FILE)
+	static public function moveUploadedFile($source, $destination, $chmod = CHMOD_FILE)
 	{
-		if (is_uploaded_file($fileName))
+		if (is_uploaded_file($source))
 		{
 			$destination = str_replace(array("\r", "\n", "\0"), '', $destination);
 
 			// Create destination dir
 			self::mkdir(dirname($destination), CHMOD, TRUE);
 			
-			if (move_uploaded_file($fileName, $destination))
+			if (move_uploaded_file($source, $destination))
 			{
 				chmod($destination, $chmod);
 			}
 			else
 			{
-				throw new Core_Exception("Move uploaded file '%fileName' error.",
-					array('%fileName' => Core_Exception::cutRootPath($fileName)));
+				throw new Core_Exception("Move uploaded file '%source' error.",
+					array('%source' => Core_Exception::cutRootPath($source)));
 			}
 		}
 		else
 		{
-			throw new Core_Exception("The file '%fileName' is not uploaded file.",
-				array('%fileName' => Core_Exception::cutRootPath($fileName)));
+			throw new Core_Exception("The file '%source' is not uploaded file.",
+				array('%source' => Core_Exception::cutRootPath($source)));
 		}
 	}
 

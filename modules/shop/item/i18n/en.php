@@ -141,7 +141,7 @@ return array(
 	'import_price_list_file_type2' => "CommerceML",
 	'export_file_type' => "Select file type",
 	'import_price_list_file' => "Choose file to upload",
-	'alternative_file_pointer_form_import' => "<acronym title=\"Set file path on server, e.g., tmp/myfile.csv\">or set file path on server</acronym>",
+	'alternative_file_pointer_form_import' => "<acronym title=\"Set file path on server, e.g., tmp/myfile.csv or URL\">or set file path on server</acronym>",
 	'import_price_list_name_field_f' => "<acronym title=\"Checkbox to determine whether the first line contains field names\">First line contains field names</acronym>",
 	'import_price_list_separator1' => "Comma",
 	'import_price_list_separator2' => "Semicolon",
@@ -308,7 +308,7 @@ return array(
 	'associated_item_price' => 'Price',
 	'set_item_header' => 'Product Set',
 	'apply_recount_set' => 'Recount Set',
-	'shop_item_set_not_currency' => 'There is no currency for "%s"',
+	'shop_item_set_not_currency' => 'There is no currency for item #%d "%s"',
 	'import_price_list_delay' => 'Delay (sec.)',
 	'create_modification_copy_warehouse_count' => 'Copy the same warehouse rest',
 	'markDeleted' => "Delete item",
@@ -330,4 +330,5 @@ return array(
 	'edit_all_warehouses' => 'Edit',
 	'shop_price_setting' => 'Set price by edit item "%s"',
 	'warehouse_in_price' => 'In price',
+	'item_cards_printlayout' => 'Item card printlayout',	
 );

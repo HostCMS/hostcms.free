@@ -36,55 +36,8 @@ class Shop_Warehouse_Regrade_Controller_Print extends Printlayout_Controller_Pri
 
 				if (!is_null($oShop_Warehouse_Regrade))
 				{
-					$aReplace = array(
-						// Core_Meta
-						'this' => $oShop_Warehouse_Regrade,
-						'company' => $oShop_Warehouse_Regrade->Shop_Warehouse->Shop->Shop_Company,
-						'shop_warehouse' => $oShop_Warehouse_Regrade->Shop_Warehouse,
-						'shop' => $oShop_Warehouse_Regrade->Shop_Warehouse->Shop,
-						'user' => $oShop_Warehouse_Regrade->User,
-						'total_count' => 0,
-						'Items' => array(),
-					);
-
-					$position = 1;
-
-					$aShop_Warehouse_Regrade_Items = $oShop_Warehouse_Regrade->Shop_Warehouse_Regrade_Items->findAll();
-
-					foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
-					{
-						$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id);
-						$oShop_Item_Incoming = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->incoming_shop_item_id);
-
-						if (!is_null($oShop_Item_Writeoff) && !is_null($oShop_Item_Incoming))
-						{
-							$oShop_Item_Writeoff = $oShop_Item_Writeoff->shortcut_id
-								? $oShop_Item_Writeoff->Shop_Item
-								: $oShop_Item_Writeoff;
-
-							$oShop_Item_Incoming = $oShop_Item_Incoming->shortcut_id
-								? $oShop_Item_Incoming->Shop_Item
-								: $oShop_Item_Incoming;
-
-							$aReplace['Items'][] = array(
-								'position' => $position++,
-								'writeoff_name' => htmlspecialchars($oShop_Item_Writeoff->name),
-								'writeoff_measure' => htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name),
-								'writeoff_currency' => htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name),
-								'writeoff_price' => $oShop_Warehouse_Regrade_Item->writeoff_price,
-								'incoming_name' => htmlspecialchars($oShop_Item_Incoming->name),
-								'incoming_measure' => htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name),
-								'incoming_currency' => htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name),
-								'incoming_price' => $oShop_Warehouse_Regrade_Item->incoming_price,
-								'count' => $oShop_Warehouse_Regrade_Item->count
-							);
-
-							$aReplace['total_count']++;
-						}
-					}
-
 					$this->_oPrintlayout_Controller
-						->replace($aReplace)
+						->replace($oShop_Warehouse_Regrade->getPrintlayoutReplaces())
 						->driver($oPrintlayout_Driver)
 						->entity($oShop_Warehouse_Regrade);
 				}

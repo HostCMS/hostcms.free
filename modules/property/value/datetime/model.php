@@ -81,7 +81,7 @@ class Property_Value_Datetime_Model extends Core_Entity
 		$this->_dateTimeFormat = $dateTimeFormat;
 		return $this;
 	}
-	
+
 	/**
 	 * Set value
 	 * @param string $value value
@@ -108,6 +108,31 @@ class Property_Value_Datetime_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property_value_datetime.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
 			->addXmlTag('tag_name', $this->Property->tag_name);
@@ -122,7 +147,7 @@ class Property_Value_Datetime_Model extends Core_Entity
 
 		$this->addXmlTag('value', $value);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

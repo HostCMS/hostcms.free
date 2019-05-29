@@ -134,7 +134,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->move($this->getField('longitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow9)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
 			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow10)
-			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow10);
+			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21')), $oMainRow10);
 
 		// Флаг установки количества товара на складе
 		$oShopItemCountCheckBox = Admin_Form_Entity::factory('Checkbox');
@@ -145,7 +145,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->caption(Core::_("Shop_Warehouse.warehouse_default_count"))
 			->name("warehouse_default_count");
 
-		$oMainRow11->add($oShopItemCountCheckBox);
+		$oMainRow11->add($oShopItemCountCheckBox);							
 
 		$title = $this->_object->id
 			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name)

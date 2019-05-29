@@ -525,7 +525,7 @@ class Informationsystem_Model extends Core_Entity
 		$queryBuilder = Core_QueryBuilder::select('id', 'parent_id')
 			->from('informationsystem_groups')
 			->where('informationsystem_groups.informationsystem_id', '=', $information_system_id)
-			->where('informationsystem_groups.active', '=', 1)
+			//->where('informationsystem_groups.active', '=', 1) // Пресчитываем для всех групп, включая отключенные
 			->where('informationsystem_groups.deleted', '=', 0);
 
 		$aInformationsystem_Groups = $queryBuilder->execute()->asAssoc()->result();
@@ -660,6 +660,31 @@ class Informationsystem_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event informationsystem.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
@@ -695,7 +720,7 @@ class Informationsystem_Model extends Core_Entity
 				->addXmlTag('subgroups_total_count', $array['subgroups_total_count']);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

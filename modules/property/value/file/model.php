@@ -226,6 +226,31 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property_value_file.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		if (!is_null($this->_href))
@@ -300,7 +325,7 @@ class Property_Value_File_Model extends Core_Entity
 			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
 			->addXmlTag('tag_name', $this->Property->tag_name);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

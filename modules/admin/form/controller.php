@@ -2003,10 +2003,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?>
 		<script>
 
-		
+
 		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
 				language: '<?php echo $language?>',
-				placeholder: '<?php echo $placeholder?>'				
+				placeholder: '<?php echo $placeholder?>'
 			}).val('<?php echo $iUserId?>').trigger('change.select2');
 
 		//$(".select2-container").css('width', '100%');

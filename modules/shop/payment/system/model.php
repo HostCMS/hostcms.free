@@ -257,8 +257,33 @@ class Shop_Payment_System_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
+		$this->_prepareData();
 
 		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_payment_system.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
+
+		return $this;
 	}
 }

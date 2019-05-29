@@ -36,49 +36,8 @@ class Shop_Warehouse_Incoming_Controller_Print extends Printlayout_Controller_Pr
 
 				if (!is_null($oShop_Warehouse_Incoming))
 				{
-					$aReplace = array(
-						// Core_Meta
-						'this' => $oShop_Warehouse_Incoming,
-						'company' => $oShop_Warehouse_Incoming->Shop_Warehouse->Shop->Shop_Company,
-						'shop_warehouse' => $oShop_Warehouse_Incoming->Shop_Warehouse,
-						'shop' => $oShop_Warehouse_Incoming->Shop_Warehouse->Shop,
-						'user' => $oShop_Warehouse_Incoming->User,
-						'type' => Core::_('Shop_Warehouse_Incoming.title'),
-						'total_count' => 0,
-						'Items' => array(),
-					);
-
-					$position = 1;
-					$total_amount = 0;
-
-					$aShop_Warehouse_Incoming_Items = $oShop_Warehouse_Incoming->Shop_Warehouse_Incoming_Items->findAll();
-
-					foreach ($aShop_Warehouse_Incoming_Items as $oShop_Warehouse_Incoming_Item)
-					{
-						$oShop_Item = $oShop_Warehouse_Incoming_Item->Shop_Item;
-
-						$amount = Shop_Controller::instance()->round($oShop_Warehouse_Incoming_Item->count * $oShop_Warehouse_Incoming_Item->price);
-
-						$aReplace['Items'][] = array(
-							'position' => $position++,
-							'name' => htmlspecialchars($oShop_Item->name),
-							'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-							'currency' => htmlspecialchars($oShop_Item->Shop_Currency->name),
-							'price' => $oShop_Warehouse_Incoming_Item->price,
-							'quantity' => $oShop_Warehouse_Incoming_Item->count,
-							'amount' => $amount
-						);
-
-						$aReplace['total_count']++;
-
-						$total_amount += $amount;
-					}
-
-					$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
-					$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
-
 					$this->_oPrintlayout_Controller
-						->replace($aReplace)
+						->replace($oShop_Warehouse_Incoming->getPrintlayoutReplaces())
 						->driver($oPrintlayout_Driver)
 						->entity($oShop_Warehouse_Incoming);
 				}

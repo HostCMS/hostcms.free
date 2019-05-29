@@ -114,7 +114,7 @@ class Core_Auth
 
 				$oCore_Response
 					->status(401)
-					->header('Pragma', "no-cashe")
+					->header('Pragma', 'no-cashe')
 					->header('WWW-authenticate', "basic realm='HostCMS'")
 					->header('Content-Type', "text/html; charset=UTF-8")
 					->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
