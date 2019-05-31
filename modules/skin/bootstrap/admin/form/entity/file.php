@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File 
+class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
 	/**
 	 * Execute business logic
@@ -209,9 +209,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 			$oLarge_Input_Group_Div->add(
 				Admin_Form_Entity::factory('Code')
-					->html('<div id="file_preview_large_' . $this->largeImage['id'] . '" class="file-caption" style="display:block; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; width: calc(100% - 15px)"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
-						. htmlspecialchars($originalName . $originalName . $originalName)
-						. '</a></div>')
+					->html('<div class="file-caption-wrapper"><div id="file_preview_large_' . $this->largeImage['id'] . '" class="file-caption"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+						. htmlspecialchars($originalName)
+						. '</a></div></div>')
 			);
 		}
 
@@ -532,9 +532,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 				$oSmall_Input_Group_Div->add(
 					Admin_Form_Entity::factory('Code')
-						->html('<div id="file_preview_' . $this->smallImage['id'] . '" class="file-caption"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->smallImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
+						->html('<div class="file-caption-wrapper"><div id="file_preview_' . $this->smallImage['id'] . '" class="file-caption"><i class="' . $this->_getIcon($originalName) . ' margin-right-5"></i><a target="_blank" href="' . htmlspecialchars($this->smallImage['path']) . $prefixRand . 'rnd=' . rand() .'">'
 							. htmlspecialchars($originalName)
-							. '</a></div>')
+							. '</a></div></div>')
 				);
 			}
 

@@ -37,7 +37,7 @@ class Document_Model extends Core_Entity
 	 * @param boolean
 	 */
 	protected $_hasRevisions = TRUE;
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -140,12 +140,12 @@ class Document_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->datetime = $this->datetime;
@@ -194,6 +194,19 @@ class Document_Model extends Core_Entity
 
 			Admin_Form_Entity::factory('Code')
 				->html('<a id="document_' . $this->id . '" type="button" class="structure_list_link" data-toggle="popover" data-placement="right" data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" data-container="#document_' . $this->id . '" title="' . Core::_('Document.structures') . '"><i class="fa fa-link gray"></i></a>
+				')
+				->execute();
+
+			Admin_Form_Entity::factory('Code')
+				->html('
+					<script>
+						$("#document_' . $this->id . '.structure_list_link").on(\'click\', function(){
+							if ($(this).has(\'.popover\').length == 0)
+							{
+								$(this).parents(\'td\').find(\'div:first-child\').css(\'position\', \'inherit\');
+							}
+						});
+					</script>
 				')
 				->execute();
 		}

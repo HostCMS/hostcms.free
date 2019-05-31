@@ -745,7 +745,7 @@ class Core_Entity extends Core_ORM
 				// Convert to array
 				!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
 
-				$oRetrun->$childName[] = $childArray;
+				$oRetrun->{$childName}[] = $childArray;
 			}
 		}
 

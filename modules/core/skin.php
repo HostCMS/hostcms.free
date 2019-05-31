@@ -401,7 +401,7 @@ abstract class Core_Skin
 		do {
 			$aTemplates[] = $oTemplate;
 
-			$oTemplate->less && $bLess = TRUE;
+			$oTemplate->type == 1 && $bLess = TRUE;
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);

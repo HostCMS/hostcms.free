@@ -44,10 +44,9 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-		;
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$this->getField('description')->wysiwyg(Core::moduleIsActive('wysiwyg'));
+		$this->getField('description')->rows(7)->wysiwyg(Core::moduleIsActive('wysiwyg'));
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
 		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);

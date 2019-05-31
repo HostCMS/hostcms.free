@@ -80,6 +80,7 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$this->getField('description')
+					->rows(7)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				if (!$this->_object->id)

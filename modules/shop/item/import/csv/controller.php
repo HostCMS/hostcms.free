@@ -1012,7 +1012,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 
 						//=======================================//
-
 						// Идентификатор группы товаров
 						case 'group_id':
 							if (intval($sData))
@@ -1947,7 +1946,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 			if ($this->_oCurrentGroup->id)
 			{
-				
 				// Indexation
 				$this->searchIndexation
 					&& Core_Entity::factory('Shop_Group', $this->_oCurrentGroup->id)->index();
@@ -2073,7 +2071,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 			if ($this->_oCurrentItem->seo_keywords == '' && count($aTagsName))
 			{
-				$this->_oCurrentItem->seo_keywords = implode(", ", $aTagsName);
+				$this->_oCurrentItem->seo_keywords = implode(', ', $aTagsName);
 				$this->_oCurrentItem->save();
 			}
 

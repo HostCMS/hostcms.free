@@ -1002,9 +1002,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
 							: $oWarehouseItem->count;
 
-						$rowClass = !$this->_object->id || $countItems != 0
-							? 'row'
-							: 'row hidden';
+						// на складе 0 или идет добавление товара - строку скрываем!
+						$rowClass = $countItems == 0 || !$this->_object->id
+							? 'row hidden'
+							: 'row';
 
 						$oWarehouseBlock
 							->add($oWarehouseCurrentRow = Admin_Form_Entity::factory('Div')->class($rowClass));

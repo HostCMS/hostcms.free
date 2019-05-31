@@ -332,6 +332,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Переопределяем тип поля описания на WYSIWYG
 				$this->getField('description')
+					->rows(7)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id

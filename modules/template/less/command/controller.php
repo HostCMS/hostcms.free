@@ -32,7 +32,8 @@ class Template_Less_Command_Controller extends Core_Command_Controller
 			{
 				$oTemplate = Core_Entity::factory('Template', $iTemplateId);
 
-				if ($oTemplate->less)
+				// If LESS
+				if ($oTemplate->type == 1)
 				{
 					if ($oTemplate->checkUserAccess())
 					{

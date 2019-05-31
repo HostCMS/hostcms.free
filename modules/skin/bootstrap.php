@@ -88,7 +88,9 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js');
+			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
+			;
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
@@ -105,7 +107,9 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css');
+			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
+			;
 	}
 
 	/**

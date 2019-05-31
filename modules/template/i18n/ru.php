@@ -17,7 +17,7 @@ return array(
 	'title_add' => 'Добавление макета',
 	'title_edit' => 'Редактирование макета "%s"',
 	'tab_1' => 'Макет',
-	'tab_2' => 'CSS/LESS',
+	'tab_2' => 'CSS/LESS/SCSS',
 	'tab_3' => 'Javascript',
 	'tab_4' => 'Манифест',
 	'tab_5' => 'Язык',
@@ -29,7 +29,7 @@ return array(
 	'site_id' => 'Идентификатор сайта',
 	'template_id' => 'Родительский макет',
 	'template' => '<acronym title="Код макета">Макет</acronym>',
-	'css' => '<acronym title="Описание стилей">CSS/LESS</acronym>',
+	'css' => '<acronym title="Описание стилей">CSS/LESS/SCSS</acronym>',
 	'less' => '<acronym title="Используется LESS">LESS</acronym>',
 	'js' => '<acronym title="Код js-скриптов">Javascript</acronym>',
 	'manifest' => '<acronym title="Код манифеста для LESS">Манифест</acronym>',
@@ -46,4 +46,5 @@ return array(
 	'error_less_off' => 'LESS выключен для данного макета. Отредактируйте макет и включите его.',
 	'error_access_forbidden' => 'Доступ к редактированию макета запрещен.',
 	'language' => '%s.php',
+	'type' => 'Тип',
 );

@@ -597,59 +597,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->addField($oAdmin_Form_Entity_For_Column);
 			}
 		}
-		?>
-		<script>
-			formLocked = false;
 
-			function lockForm(e) {
-				console.log(e);
-				if (!formLocked)
-				{
-					$('body').on('beforeAdminLoad beforeAjaxCallback', function(e) {
-						if (!confirm('<?php echo Core::_('Admin_Form.lock_message')?>'))
-						{
-							return 'break';
-						}
-
-						formLocked = false;
-
-						unbindEvents();
-					});
-
-					$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
-
-					formLocked = true;
-				}
-			}
-
-			function unbindEvents()
-			{
-				$('body')
-					.unbind('beforeAdminLoad')
-					.unbind('beforeAjaxCallback');
-
-				$('h5.row-title > i.edit-lock').remove();
-			}
-
-			$(document).ready(function() {
-				// Указываем таймаут для узлов структуры (подгрузка xsl)
-				setTimeout(function() {
-					$('body').on('afterTinyMceInit', function(event, editor) {
-						editor.on('change', lockForm);
-					});
-
-					$('#id_content form[id ^= "formEdit"]').on('keyup change paste', ':input', lockForm);
-					$('#id_content form[id ^= "formEdit"] input.hasDatetimepicker').parent().on('dp.change', lockForm);
-
-					$('div#ControlElements input').on('click', function(){
-						formLocked = false;
-
-						unbindEvents();
-					});
-				}, 5000);
-			});
-		</script>
-		<?php
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 
 		return $this;

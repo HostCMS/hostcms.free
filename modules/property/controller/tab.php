@@ -345,6 +345,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						case 6: // Wysiwyg
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
+								->rows(7)
 								->wysiwyg(Core::moduleIsActive('wysiwyg'))
 								->template_id($this->template_id);
 						break;

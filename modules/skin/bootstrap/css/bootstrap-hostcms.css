@@ -566,8 +566,16 @@ body.body-authorization .hostcms-notice {
 	}
 }
 
-#ControlElements {margin-top: 15px}
-#ControlElements input {margin-right: 10px}
+#ControlElements {margin-top: 15px; text-align: center; padding: 10px 5px; }
+#ControlElements input { margin-right: 10px }
+
+.sticky-actions {
+	position: sticky;
+	bottom: 1px;
+	background-color: #f9f9f9;
+	z-index: 999;
+}
+
 /*.table thead tr th.highlight,
 .table thead tr td.highlight,
 */
@@ -2008,8 +2016,8 @@ td.td-badge	{ background-clip: padding-box; position: relative; padding-top: 12p
 }
 td.td-badge .badge-ico {
 	position: absolute;
-	/*left: 1px;
-	top: 4px;*/
+	/* left: 1px; */
+	/* top: 4px; */
 	left: -5px;
 	top: -10px;
 	width: 16px;
@@ -3959,13 +3967,17 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 #deal-notes div.dataTables_paginate, .timeline-board div.dataTables_paginate { float: none; }
 #deal-notes .pagination, .timeline-board .pagination { padding-top: 0; }
 
+.deal-note-board .comment .comment-text-right .deal-note-actions span:first-child i { color: #7cba00; }
+.deal-note-board .comment .comment-text-right .deal-note-actions span:last-child i { color: #f01818; }
+
 #deal-notes .comment-text, #deal-notes .comment-text-right { display: inline-block; }
 
 .deal-note-board .input-group-btn i { margin-right: 0; }
 
 #deal-notes .comment-text-right {
 	color: #ccc;
-	font-size: 10px;
+	font-size: 11px;
+	font-weight: 600;
 }
 
 /*#deal-notes .comment-text:before {
@@ -4416,21 +4428,25 @@ option.inactive { color: #aaa }
 i.edit-lock { margin-left: 5px; font-size: 14px !important; color: #ff3f00cc }
 i.h5-edit-icon { margin-left: 5px; font-size: 14px !important; }
 
+.file-caption-wrapper {
+	display: table;
+	table-layout: fixed;
+	width: 80%;
+	white-space: nowrap;
+}
 .file-caption {
 	background-color: #f8f8f8;
-	padding: 8px;
+	padding: 7px;
 	border-radius: 2px;
-	/* border: 1px solid #eeefef; */
 	color: #333;
 	font-weight: 600;
-	display: inline-block;
 	box-shadow: 1px 1px 1px 1px rgba(238,239,239,1);
 	cursor: pointer;
+	height: 34px;
 
-	/*overflow: hidden;
-	white-space: nowrap;
+	display: table-cell;
+	overflow: hidden;
 	text-overflow: ellipsis;
-	width: 300px;*/
 }
 
 .file-caption a {
@@ -4519,3 +4535,5 @@ ul.nav.nav-tabs > li .badge {
 	min-width: 14px;
 	font-size: 10px !important;
 }
+
+.slider-container { margin-top: 15px; }
