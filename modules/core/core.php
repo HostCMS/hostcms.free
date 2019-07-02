@@ -502,12 +502,17 @@ class Core
 	/**
 	 * Returns a string produced according to the formatting string $key.
 	 * @param string $key source string
+	 * @param boolean $convertSpecialCharacters Convert special characters, default TRUE
 	 *
 	 * <code>
+	 * // with convert special characters
 	 * echo Core::_('constant.name', 'value1', 'value2');
+	 * // without convert special characters
+	 * echo Core::_('constant.name', 'value1', 'value2', FALSE);
 	 * // Same code
 	 * // echo sprintf(Core::_('constant.name'), 'value1', 'value2');
 	 * </code>
+	 * @return string
 	 * @see Core_I18n::get()
 	 */
 	static public function _($key)
@@ -521,9 +526,14 @@ class Core
 			$value = Core_I18n::instance()->get($key);
 			array_unshift($args, $value);
 
-			foreach ($args as $argKey => $argValue)
+			$convertSpecialCharacters = is_bool(end($args)) ? array_pop($args) : TRUE;
+
+			if ($convertSpecialCharacters)
 			{
-				$argKey > 0 && $args[$argKey] = htmlspecialchars($argValue);
+				foreach ($args as $argKey => $argValue)
+				{
+					$argKey > 0 && $args[$argKey] = htmlspecialchars($argValue);
+				}
 			}
 
 			return call_user_func_array('sprintf', $args);

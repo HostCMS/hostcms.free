@@ -5,18 +5,18 @@
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-
+	
 	<!-- Хлебные крошки -->
-
+	
 	<xsl:template match="/site">
 		<xsl:if test="count(*[@id]) &gt; 0">
 			<a href="/">&labelMainPage;</a>
 			<xsl:apply-templates select="*[@id]" />
 		</xsl:if>
 	</xsl:template>
-
+	
 	<xsl:template match="*">
-
+		
 		<!-- Set $link variable -->
 		<xsl:variable name="link">
 			<xsl:choose>
@@ -30,9 +30,9 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-
-		<span><xsl:text> → </xsl:text></span>
-
+		
+	<span><xsl:text> → </xsl:text></span>
+		
 		<!-- Показывать ссылку? -->
 		<xsl:choose>
 			<xsl:when test="(show = 1 or active/node() and active = 1) and count(*[@id][link/node() or url/node()]) &gt; 0">
@@ -44,8 +44,8 @@
 				<xsl:value-of select="name"/>
 			</xsl:otherwise>
 		</xsl:choose>
-
+		
 		<xsl:apply-templates select="*[@id][link/node() or url/node()]" />
-
+		
 	</xsl:template>
 </xsl:stylesheet>

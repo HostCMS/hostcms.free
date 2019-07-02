@@ -623,7 +623,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
 
 				$oImageField
-					->divAttr(array('class' => 'form-group col-xs-12'))
 					->name("image")
 					->id("image")
 					->largeImage(array('max_width' => $oShop->image_large_max_width, 'max_height' => $oShop->image_large_max_height, 'path' => $oLargeFilePath, 'show_params' => TRUE, 'watermark_position_x' => $oShop->watermark_default_position_x, 'watermark_position_y' => $oShop->watermark_default_position_y, 'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image, 'delete_onclick' =>
@@ -988,7 +987,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oHeaderDiv
 						->add(Admin_Form_Entity::factory('A')
 							->value(Core::_("Shop_Item.edit_all_warehouses"))
-							->class('pull-right margin-right-10 gray')
+							->class('pull-right margin-right-10 darkgray')
 							->onclick('$.editWarehouses(this)')
 						);
 

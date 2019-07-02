@@ -60,9 +60,9 @@ class Admin_Form_Action_Controller_Type_Delete_File extends Admin_Form_Action_Co
 		foreach ($this->divId as $sDivId)
 		{
 			// Удаляем дочерние узлы
+			// $('#{$windowId} div#file_{$sDivId}').toggleClass('hidden');
 			Core::factory('Core_Html_Entity_Script')
 				->value("$('#{$windowId} div#file_{$sDivId}').prev('input').toggleClass('hidden');
-				$('#{$windowId} div#file_{$sDivId}').toggleClass('hidden');
 				$('#{$windowId} #{$sDivId}').remove();")
 				->execute();
 		}

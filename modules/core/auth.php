@@ -50,7 +50,7 @@ class Core_Auth
 			}
 		}
 	}
-	
+
 	/**
 	 * Authorization
 	 * @param string $moduleName name of the module
@@ -230,14 +230,21 @@ class Core_Auth
 			//$url = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . $_SERVER['REQUEST_URI'];
 			$url = strtolower(Core_Array::get($_SERVER, 'SERVER_NAME')) . $_SERVER['REQUEST_URI'];
 			$url = str_replace(array("\r", "\n", "\0"), '', $url);
-			
+
 			header("HTTP/1.1 302 Found");
 			header("Location: https://{$url}");
 
 			exit();
 		}
 
-		header("Content-type: text/html; charset=UTF-8");
+		header('Content-type: text/html; charset=UTF-8');
+		header('Cache-Control: no-cache, must-revalidate, max-age=0');
+		header('Pragma: no-cache');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+		header('X-Frame-Options: SAMEORIGIN');
+		header('X-Content-Type-Options: nosniff');
+		header('X-XSS-Protection: 1; mode=block');
+		header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'");
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
@@ -297,14 +304,31 @@ class Core_Auth
 	 */
 	static public function logged()
 	{
-		return isset($_SESSION['valid_user']) && strlen($_SESSION['valid_user']) > 0
+		if (isset($_SESSION['valid_user']) && strlen($_SESSION['valid_user']) > 0
 			&& isset($_SESSION['date_user']) && strlen($_SESSION['date_user']) > 0
 			&& isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
-			&& isset($_SESSION['is_superuser'])
-			&& (
-				// Привязки к IP не было или IP совпадают
-				!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1')
-			);
+			&& isset($_SESSION['is_superuser']))
+		{
+			// Привязки к IP не было или IP совпадают
+			if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1'))
+			{
+				// Пользователь существует
+				if (Core_Entity::factory('User')->getCurrent())
+				{
+					return TRUE;
+				}
+				else
+				{
+					Core_Auth::logout();
+				}
+			}
+			else
+			{
+				Core_Auth::logout();
+			}
+		}
+
+		return FALSE;
 	}
 
 	/**

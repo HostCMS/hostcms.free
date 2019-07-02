@@ -91,9 +91,9 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 		}
 		if (!is_null($this->name))
 		{
-		?>
+			?>
 			<input type="hidden" name="<?php echo $this->name?>" value="<?php echo htmlspecialchars($indexValueItem)?>">
-		<?php
+			<?php
 		}
 		?>
 		</div>

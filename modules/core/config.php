@@ -148,16 +148,32 @@ class Core_Config
 			$aTmp = array();
 			foreach ($value as $tmpKey => $tmpValue)
 			{
-				$aTmp[] = $sTabs . "'" . str_replace("'", "\'", $tmpKey) . "' => " . $this->_toString($tmpValue, $level + 1);
+				$aTmp[] = $sTabs . $this->_escape($tmpKey) . " => " . $this->_toString($tmpValue, $level + 1);
 			}
 
 			return "array(\n" . implode(",\n", $aTmp) . "\n" . str_repeat("\t", $level - 1) . ")";
 		}
 		else
 		{
-			return is_string($value)
-				? "'" . str_replace("'", "\'", $value) . "'"
-				: $value;
+			return $this->_escape($value);
 		}
+	}
+	
+	protected function _escape($value)
+	{
+		if (is_string($value))
+		{
+			return "'" . str_replace("'", "\'", $value) . "'";
+		}
+		elseif (is_null($value))
+		{
+			return 'NULL';
+		}
+		elseif (is_bool($value))
+		{
+			return $value === TRUE ? 'TRUE' : 'FALSE';
+		}
+		
+		return "''";
 	}
 }

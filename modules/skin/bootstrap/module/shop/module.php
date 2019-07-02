@@ -115,6 +115,18 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 			{
 			?><div class="col-xs-12 no-padding">
 				<div class="col-xs-12 col-md-9">
+					<script>
+					var aScripts = [
+						'jquery.flot.js',
+						'jquery.flot.time.min.js',
+						'jquery.flot.categories.min.js',
+						'jquery.flot.tooltip.min.js',
+						'jquery.flot.crosshair.min.js',
+						'jquery.flot.resize.js',
+						'jquery.flot.selection.min.js',
+						'jquery.flot.pie.min.js'
+					];
+					</script>
 					<?php
 					$iBeginTimestamp = strtotime('-1 month');
 
@@ -261,8 +273,6 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 										<script>
 										$(function() {
 											$('select.widget-select-shop').change(function(){
-												// console.log($(this).val());
-
 												$.widgetLoad({ path: '<?php echo $this->_path?>&shop_id=' + $(this).val(), context: $('#shopOrdersAdminPage') });
 											});
 										});
@@ -443,69 +453,72 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 											<script>
 											$(function() {
-												/* Most ordered items */
-												var mostOrderedDiagramData = [];
+												$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+													/* Most ordered items */
+													var mostOrderedDiagramData = [];
 
-												<?php
-												$i = 0;
-												foreach ($aMost_Ordered_Shop_Items as $key => $oShop_Order_Item)
-												{
-													?>
-													mostOrderedDiagramData.push(
-														{
+													<?php
+													$i = 0;
+													foreach ($aMost_Ordered_Shop_Items as $key => $oShop_Order_Item)
+													{
+														?>
+														mostOrderedDiagramData.push({
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->name, $aConfig['cutNames'])))?>',
 															data:[<?php echo $oShop_Order_Item->sum?>],
 															color: '#<?php echo $iCountColors
 																? $aColors[$key % $iCountColors]
 																: 'E75B8D'?>'
-														}
-													);
-													<?php
-													$i++;
-												}
-												?>
-												var placeholderMostOrderedDiagram = $("#<?php echo $sWindowId?> #mostOrdered");
+														});
+														<?php
+														$i++;
+													}
+													?>
 
-												$.plot(placeholderMostOrderedDiagram, mostOrderedDiagramData, {
-													series: {
-														pie: {
-															show: true,
-															radius: 1,
-															innerRadius: 0.5,
+													// all scripts loaded
+													setTimeout(function() {
+														var placeholderMostOrderedDiagram = $("#<?php echo $sWindowId?> #mostOrdered");
 
-															label: {
+														$.plot(placeholderMostOrderedDiagram, mostOrderedDiagramData, {
+															series: {
+																pie: {
 																	show: true,
-																	radius: 0,
-																	formatter: function(label, series) {
-																					return "<div style='font-size:8pt;'>" + label + "</div>";
+																	radius: 1,
+																	innerRadius: 0.5,
+
+																	label: {
+																			show: true,
+																			radius: 0,
+																			formatter: function(label, series) {
+																				return "<div style='font-size:8pt;'>" + label + "</div>";
+																			}
 																	}
+																}
+															},
+															legend: {
+																labelFormatter: function (label, series) {
+																	return label + ", " + series.data[0][1];
+																}
+															},
+															grid: {
+																hoverable: true,
 															}
-														}
-													},
-													legend: {
-														labelFormatter: function (label, series) {
-															return label + ", " + series.data[0][1];
-														}
-													}
-													,
-													grid: {
-														hoverable: true,
-													}
 
+														});
+
+														placeholderMostOrderedDiagram.bind("plothover", function (event, pos, obj) {
+															if (!obj) {
+																return;
+															}
+
+															$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();
+															$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
+														});
+
+														placeholderMostOrderedDiagram.resize(function(){$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();});
+
+														$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();
+													}, 200);
 												});
-
-												placeholderMostOrderedDiagram.bind("plothover", function (event, pos, obj) {
-													if (!obj) {
-														return;
-													}
-
-													$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();
-													$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
-												});
-
-												placeholderMostOrderedDiagram.resize(function(){$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();});
-
-												$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();
 											});
 											</script>
 										</div>
@@ -523,70 +536,75 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 											<script>
 											$(function() {
-												/* Brands shop items */
-												var brandsDiagramData = [];
+												$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+													/* Brands shop items */
+													var brandsDiagramData = [];
 
-												<?php
-												$i = 0;
-												foreach ($aBrand_Shop_Items as $key => $oShop_Order_Item)
-												{
-													?>
-													brandsDiagramData.push(
-														{
-															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
-															data:[<?php echo $oShop_Order_Item->sum?>],
-															color: '#<?php echo $iCountColors
-																? $aColors[$key % $iCountColors]
-																: 'E75B8D'?>'
-														}
-													);
 													<?php
-													$i++;
-												}
-												?>
-												var placeholderBrandsDiagram = $("#<?php echo $sWindowId?> #countBrands");
-
-												$.plot(placeholderBrandsDiagram, brandsDiagramData, {
-													series: {
-														pie: {
-															show: true,
-															radius: 1,
-															innerRadius: 0.5,
-
-															label: {
-																	show: true,
-																	radius: 0,
-																	formatter: function(label, series) {
-																		return "<div style='font-size:8pt;'>" + label + "</div>";
-																	}
+													$i = 0;
+													foreach ($aBrand_Shop_Items as $key => $oShop_Order_Item)
+													{
+														?>
+														brandsDiagramData.push(
+															{
+																label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
+																data:[<?php echo $oShop_Order_Item->sum?>],
+																color: '#<?php echo $iCountColors
+																	? $aColors[$key % $iCountColors]
+																	: 'E75B8D'?>'
 															}
-														}
-													},
-
-													legend: {
-														labelFormatter: function (label, series) {
-															return label + ", " + series.data[0][1];
-														}
+														);
+														<?php
+														$i++;
 													}
-													,
-													grid: {
-														hoverable: true,
-													}
+													?>
+													// all scripts loaded
+													setTimeout(function() {
+														var placeholderBrandsDiagram = $("#<?php echo $sWindowId?> #countBrands");
 
+														$.plot(placeholderBrandsDiagram, brandsDiagramData, {
+															series: {
+																pie: {
+																	show: true,
+																	radius: 1,
+																	innerRadius: 0.5,
+
+																	label: {
+																			show: true,
+																			radius: 0,
+																			formatter: function(label, series) {
+																				return "<div style='font-size:8pt;'>" + label + "</div>";
+																			}
+																	}
+																}
+															},
+
+															legend: {
+																labelFormatter: function (label, series) {
+																	return label + ", " + series.data[0][1];
+																}
+															}
+															,
+															grid: {
+																hoverable: true,
+															}
+
+														});
+
+														placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
+															if (!obj) {
+																return;
+															}
+
+															$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();
+															$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
+														});
+
+														placeholderBrandsDiagram.resize(function(){$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();});
+
+														$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();
+													}, 200);
 												});
-
-												placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
-													if (!obj) {
-														return;
-													}
-
-													$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();
-													$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
-												});
-
-												placeholderBrandsDiagram.resize(function(){$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();});
-
-												$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();
 											});
 											</script>
 										</div>
@@ -609,28 +627,33 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 					<script>
 					$(function() {
-						setTimeout(function() {
+						var aScripts = [
+							'jquery.sparkline.js'
+						];
 
-							var sparklinelines = $('[data-sparkline=line]');
-							$.each(sparklinelines, function () {
-								$(this).sparkline('html', {
-									type: 'line',
-									disableHiddenCheck: true,
-									height: $(this).data('height'),
-									width: $(this).data('width'),
-									fillColor: getcolor($(this).data('fillcolor')),
-									lineColor: getcolor($(this).data('linecolor')),
-									spotRadius: $(this).data('spotradius'),
-									lineWidth: $(this).data('linewidth'),
-									spotColor: getcolor($(this).data('spotcolor')),
-									minSpotColor: getcolor($(this).data('minspotcolor')),
-									maxSpotColor: getcolor($(this).data('maxspotcolor')),
-									highlightSpotColor: getcolor($(this).data('highlightspotcolor')),
-									highlightLineColor: getcolor($(this).data('highlightlinecolor'))
+						$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
+							setTimeout(function() {
+								var sparklinelines = $('[data-sparkline=line]');
+								$.each(sparklinelines, function () {
+									$(this).sparkline('html', {
+										type: 'line',
+										disableHiddenCheck: true,
+										height: $(this).data('height'),
+										width: $(this).data('width'),
+										fillColor: getcolor($(this).data('fillcolor')),
+										lineColor: getcolor($(this).data('linecolor')),
+										spotRadius: $(this).data('spotradius'),
+										lineWidth: $(this).data('linewidth'),
+										spotColor: getcolor($(this).data('spotcolor')),
+										minSpotColor: getcolor($(this).data('minspotcolor')),
+										maxSpotColor: getcolor($(this).data('maxspotcolor')),
+										highlightSpotColor: getcolor($(this).data('highlightspotcolor')),
+										highlightLineColor: getcolor($(this).data('highlightlinecolor'))
+									});
 								});
-							});
 
-						}, 500);
+							}, 300);
+						});
 					});
 					</script>
 				</div>

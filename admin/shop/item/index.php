@@ -1176,6 +1176,7 @@ else
 		->addCondition(array('where' => array('shop_items.modification_id', '=', 0)));
 }
 
+// Producers
 $oShop_Producers = $oShop->Shop_Producers;
 $oShop_Producers->queryBuilder()
 	->distinct()
@@ -1202,6 +1203,35 @@ if (count($aShop_Producers))
 
 	$oAdmin_Form_Dataset
 		->changeField('shop_producer_id', 'list', $options);
+}
+
+// Sellers
+$oShop_Sellers = $oShop->Shop_Sellers;
+$oShop_Sellers->queryBuilder()
+	->distinct()
+	->select('shop_sellers.*')
+	->join('shop_items', 'shop_sellers.id', '=', 'shop_items.shop_seller_id')
+	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+	->where('shop_items.modification_id', '=', 0)
+	->where('shop_items.shortcut_id', '=', 0)
+	//->groupBy('shop_sellers.id')
+	->clearOrderBy()
+	->orderBy('shop_sellers.sorting', 'ASC')
+	->orderBy('shop_sellers.name', 'ASC');
+
+$aShop_Sellers = $oShop_Sellers->findAll(FALSE);
+
+if (count($aShop_Sellers))
+{
+	$options = '';
+
+	foreach ($aShop_Sellers as $oShop_Seller)
+	{
+		$options .= $oShop_Seller->id . "=" . $oShop_Seller->name . "\n";
+	}
+
+	$oAdmin_Form_Dataset
+		->changeField('shop_seller_id', 'list', $options);
 }
 
 // Change field type

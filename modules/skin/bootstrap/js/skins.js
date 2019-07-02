@@ -1,8 +1,4 @@
-﻿/*Note: if you want to draw charts and sparkline with Theme Colors you must place skins.js in your page before beyond.js*/
-/*Do not use JQuery if you intend to use this file in Head element*/
-
-
-//Handle Skins
+﻿//Handle Skins
 if (readCookie("current-skin")) {
     var a = document.createElement('link');
     a.href = readCookie("current-skin");

@@ -55,9 +55,11 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 			return $oCore_Response;
 		}
+		
+		$sLastChar = substr($this->_uri, -1);
 
 		// Путь заканчивается на слэш
-		if (substr($this->_uri, -1) == '/'
+		if ($sLastChar == '/'
 		// или передаются данные методом GET
 		// || isset(Core::$url['query']) // style.css?1341303578 doesn't work
 		// или запрет на 302 редирект к последнему слэшу
@@ -77,6 +79,33 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		}
 		else
 		{
+			// Shortlink
+			if ($sLastChar != '/' && Core::moduleIsActive('shortlink'))
+			{
+				$oShortlinks = Core_Entity::factory('Shortlink');
+				$oShortlinks->queryBuilder()
+					->where('active', '=', 1)
+					->where('shortlink', '=', ltrim($this->_uri, '/'))
+					->limit(1);
+					
+				$aShortlinks = $oShortlinks->findAll(FALSE);
+
+				if (isset($aShortlinks[0]))
+				{
+					$sQuery = "UPDATE `shortlinks` SET `hits` = `hits` + 1 WHERE `id` = " . intval($aShortlinks[0]->id);
+
+					Core_DataBase::instance()
+						->setQueryType(2)
+						->query($sQuery);
+					
+					$oCore_Response
+						->status($aShortlinks[0]->type)
+						->header('Location', $aShortlinks[0]->source);
+
+					return $oCore_Response;
+				}
+			}
+			
 			// Если после последнего слэша указывается имя файла с расширением в два или более символов
 			if (!defined('NOT_EXISTS_FILE_404_ERROR') || NOT_EXISTS_FILE_404_ERROR)
 			{
@@ -113,8 +142,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		// Отдача статичного кэша в случае, если правила mod_rewrite не сработали
 		// из-за %{HTTP_COOKIE} !^.*PHPSESSID=.*$
-		$bCheckCache = Core::moduleIsActive('cache') && $oSite->html_cache_use == 1;
-		if ($bCheckCache)
+		$bUseStaticCache = Core::moduleIsActive('cache') && $oSite->html_cache_use == 1;
+		if ($bUseStaticCache)
 		{
 			$Core_Cache = Core_Cache::instance('static');
 
@@ -131,6 +160,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					return $oCore_Response;
 				}
 			}
+			
+			define('STATIC_CACHE', TRUE);
 		}
 
 		if (((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & 1176341605))
@@ -606,7 +637,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		!$bIsUtf8 && $sContent = $this->_iconv($oSite->coding, $sContent);
 
-		if ($bCheckCache && $oCore_Response->getStatus() == 200)
+		if ($bUseStaticCache && $oCore_Response->getStatus() == 200)
 		{
 			// Проверяем, нужно ли очищать кэш
 			if ($oSite->html_cache_clear_probability > 0 && rand(0, $oSite->html_cache_clear_probability) == 0)

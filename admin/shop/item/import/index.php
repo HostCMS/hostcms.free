@@ -284,7 +284,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 									->add(Admin_Form_Entity::factory('Span')
 										//->caption('')
 										->value($aCsvLine[$i])
-										->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+										->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 									);
 
 								$isset_selected = FALSE;
@@ -324,7 +324,9 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 										->name("field{$i}")
 										->options($aOptions)
 										->value($selected)
-										->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+										->filter(TRUE)
+										->caseSensitive(FALSE)
+										->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
 								);
 
 								$oMainTab->add($oCurrentRow);

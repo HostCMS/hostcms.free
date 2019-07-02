@@ -156,7 +156,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->name('document_status_id')
 					->value($this->_object->document_status_id)
 					->caption(Core::_('Document.document_status_id'))
-					->divAttr(array('class' => 'form-group col-sm-12 col-md-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				$oMainRow5->add($oSelect_Statuses);
 

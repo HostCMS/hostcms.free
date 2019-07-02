@@ -190,7 +190,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	public function moveTabBefore(Skin_Default_Admin_Form_Entity_Tab $oAdmin_Form_Entity_Tab, Skin_Default_Admin_Form_Entity_Tab $oAdmin_Form_Entity_Tab_Before)
 	{
 		$this->deleteTab($oAdmin_Form_Entity_Tab);
-		$oTabTo->addTabBefore($oAdmin_Form_Entity_Tab, $oAdmin_Form_Entity_Tab_Before);
+		$this->addTabBefore($oAdmin_Form_Entity_Tab, $oAdmin_Form_Entity_Tab_Before);
 		return $this;
 	}
 

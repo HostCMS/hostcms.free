@@ -58,8 +58,12 @@ class Site_Model extends Core_Entity
 	protected $_hasMany = array(
 		'affiliate_plan' => array(),
 		'advertisement' => array(),
-		'advertisement_group' => array(),
+		'advertisement_group' => array(),		
 		'cloud' => array(),
+		'company_department_action_access' => array(),
+		'company_department_module' => array(),
+		'company_site' => array(),
+		'company' => array('through' => 'company_site'),
 		'counter' => array(),
 		'counter_browser' => array(),
 		'counter_device' => array(),
@@ -101,11 +105,7 @@ class Site_Model extends Core_Entity
 		'structure_property_dir' => array(),
 		'structure_menu' => array(),
 		'template' => array(),
-		'template_dir' => array(),
-		'company_department_action_access' => array(),
-		'company_department_module' => array(),
-		'company_site' => array(),
-		'company' => array('through' => 'company_site')
+		'template_dir' => array(),		
 	);
 
 	/**

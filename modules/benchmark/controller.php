@@ -285,7 +285,7 @@ class Benchmark_Controller
 		if (ini_get('allow_url_fopen'))
 		{
 			$startTime = Core::getmicrotime();
-			
+
 			$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path']);
 
 			$fQueryTime = Core::getmicrotime() - $startTime;
@@ -296,7 +296,7 @@ class Benchmark_Controller
 				? abs(round((($iFileLen * 8) / 1024 / 1024) / $fQueryTime, 2))
 				: 0;
 		}
-		
+
 		return FALSE;
 	}
 
@@ -346,6 +346,20 @@ class Benchmark_Controller
 	}
 
 	/**
+	 * Get DataBase Storage Engines
+	 * @return array
+	 */
+	static public function getStorageCharsets()
+	{
+		$aResult = Core_DataBase::instance()->setQueryType(9)
+			->query("SHOW CHARSET")
+			->asAssoc()
+			->result();
+
+		return $aResult;
+	}
+
+	/**
 	 * Get list of tables
 	 * @return array
 	 */
@@ -358,7 +372,7 @@ class Benchmark_Controller
 
 		return $aResult;
 	}
-	
+
 	/**
 	 * Show Benchmark JS-code
 	 */

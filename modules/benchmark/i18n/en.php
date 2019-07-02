@@ -51,7 +51,7 @@ return array(
 	'changeStorageEnginesTitle' => 'Setting the Storage Engine',
 	'engine' => 'Engine',
 	'count' => 'Count',
-	'chooseStorageEnginesMsg' => 'Select the storage engine for tables. Do not forget to backup your database!',
+	'changeMsg' => 'Do not forget to backup your database!',
 	'convert' => 'Convert',
 	'convertedMsg' => 'Changed Storage Engines: %s.',
 	'add_counter' => 'Insert benchmark code into template',

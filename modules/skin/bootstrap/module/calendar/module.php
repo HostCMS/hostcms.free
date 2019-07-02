@@ -170,7 +170,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				?><div class="col-xs-12 col-sm-6" id="calendarAdminPage" data-hostcmsurl="<?php echo htmlspecialchars($this->_path)?>">
 					<script>
 					$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#calendarAdminPage') });
-					//$.eventsWidgetPrepare();
 					</script>
 				</div>
 				<?php
@@ -207,88 +206,63 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				<div id='calendar'></div>
 			</div><!--Widget Body-->
 			<script>
+				var aScripts = [
+					//'moment.min.js', // see bootstrap.php => datetime/moment.js
+					'fullcalendar.min.js',
+					'locale-all.js'
+				];
 
-				var date = new Date(),
-					d = date.getDate(),
-					m = date.getMonth(),
-					y = date.getFullYear();
+				$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/fullcalendar/').done(function() {
+					// all scripts loaded
+					var date = new Date(),
+						d = date.getDate(),
+						m = date.getMonth(),
+						y = date.getFullYear();
 
-				 $('#calendar').fullCalendar({
-					locale: '<?php echo Core_i18n::instance()->getLng()?>',
-					timezone: 'local',
-					//height: 'auto',
-					height: 'parent',
-					//aspectRatio: 1.05,
+					 $('#calendar').fullCalendar({
+						locale: '<?php echo Core_i18n::instance()->getLng()?>',
+						timezone: 'local',
+						//height: 'auto',
+						height: 'parent',
+						//aspectRatio: 1.05,
 
-					scrollTime: "08:00:00",
-					/*
-					businessHours: {
-						// days of week. an array of zero-based day of week integers (0=Sunday)
-						//dow: [ 1, 2, 3, 4 ], // Monday - Thursday
+						scrollTime: "08:00:00",
+						/*
+						businessHours: {
+							// days of week. an array of zero-based day of week integers (0=Sunday)
+							//dow: [ 1, 2, 3, 4 ], // Monday - Thursday
 
-						start: '08:00', // a start time (10am in this example)
-						end: '20:00', // an end time (6pm in this example)
-					},
-					*/
-					header: {
-						left: 'prev,next today',
-						center: 'title',
-						right: 'month,agendaWeek,agendaDay'
-					},
-					defaultView: 'agendaDay',
-					//defaultView: 'month',
-
-					timeFormat: 'H:mm',
-
-					navLinks: true,
-
-					// Интервал (шаг) изменения времени при перетаскивании события
-					snapDuration: '00:01:00',
-					editable: true,
-					droppable: true, // this allows things to be dropped onto the calendar
-
-					dayClick: calendarDayClick,
-
-					eventClick: calendarEventClick,
-
-					events: calendarEvents,
-
-					eventRender: calendarEventRender,
-
-					eventDragStart: calendarEventDragStart,
-
-					eventResizeStart: calendarEventResizeStart,
-
-					// Изменение продолжительности
-					eventResize: calendarEventResize,
-
-					// Изменеие даты начала
-					eventDrop: calendarEventDrop,
-
-					// Удаление события из DOM
-					eventDestroy: calendarEventDestroy,
-
-					defaultDate: date
+							start: '08:00', // a start time (10am in this example)
+							end: '20:00', // an end time (6pm in this example)
+						},
+						*/
+						header: {
+							left: 'prev,next today',
+							center: 'title',
+							right: 'month,agendaWeek,agendaDay'
+						},
+						defaultView: 'agendaDay', //'month',
+						timeFormat: 'H:mm',
+						navLinks: true,
+						// Интервал (шаг) изменения времени при перетаскивании события
+						snapDuration: '00:01:00',
+						editable: true,
+						droppable: true, // this allows things to be dropped onto the calendar
+						dayClick: calendarDayClick,
+						eventClick: calendarEventClick,
+						events: calendarEvents,
+						eventRender: calendarEventRender,
+						eventDragStart: calendarEventDragStart,
+						eventResizeStart: calendarEventResizeStart,
+						// Изменение продолжительности
+						eventResize: calendarEventResize,
+						// Изменеие даты начала
+						eventDrop: calendarEventDrop,
+						// Удаление события из DOM
+						eventDestroy: calendarEventDestroy,
+						defaultDate: date
+					});
 				});
-
-				//$.calendarPrepare();
-
-				/*
-				$('#eventsAdminPage .tasks-list').slimscroll({
-					//height: '500px',
-					height: 'auto',
-					color: 'rgba(0,0,0,0.3)',
-					size: '5px',
-				});
-				<?
-				$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
-				?>
-				$('#eventsAdminPage').data({'moduleId': <?php echo $oModule->id?>});
-
-				(function($){
-					$('#eventsAdminPage .editable').editable({windowId: '#eventsAdminPage', path: '/admin/event/index.php'});
-				})(jQuery);*/
-
 			</script>
 		</div><!--Widget -->
 		<?php

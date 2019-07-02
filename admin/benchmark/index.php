@@ -441,7 +441,20 @@ if (count($aBenchmarks))
 <h5 class="row-title before-info"><i class="fa fa-database info"></i> <?php echo Core::_('Benchmark.database')?></h5>
 
 <?php
+// Доступные хранилища
 $aAllowedEngines = array('InnoDB', 'MyISAM', 'Aria', 'Xtradb');
+
+// Доступные collations
+$aTmp = Core_DataBase::instance()->setQueryType(9)
+	->query("SHOW COLLATION")
+	->asAssoc()
+	->result();
+
+$aCharsetByCollation = array();
+foreach ($aTmp as $aRow)
+{
+	$aCharsetByCollation[$aRow['Collation']] = $aRow['Charset'];
+}
 
 // Конвертирование таблиц
 if ($oAdmin_Form_Controller->getAction() == 'convertTables')
@@ -451,19 +464,22 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 	if (in_array($sEngine, $aAllowedEngines))
 	{
 		$sNewStorageEngine = strtolower($sEngine);
-		$aResult = Benchmark_Controller::getTables();
+
+		$oCore_DataBase = Core_DataBase::instance();
 
 		$aChanged = array();
-		foreach ($aResult as $aRow)
+
+		$aTables = Benchmark_Controller::getTables();
+		foreach ($aTables as $aRow)
 		{
 			if (Core_Array::get($aRow, 'Comment') != 'VIEW'
 				&& strlen($aRow['Engine'])
 				&& strtolower($aRow['Engine']) != $sNewStorageEngine)
 			{
 				try {
-					Core_DataBase::instance()
+					$oCore_DataBase
 						->setQueryType(5)
-						->query("ALTER TABLE `" . $aRow['Name'] . "` ENGINE={$sEngine}");
+						->query("ALTER TABLE " . $oCore_DataBase->quoteColumnName($aRow['Name']) . " ENGINE={$sEngine}");
 
 					$aChanged[] = $aRow['Name'];
 				}
@@ -482,6 +498,134 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 		}
 	}
 }
+
+// Изменение кодировки
+if ($oAdmin_Form_Controller->getAction() == 'convertCharsets')
+{
+	$sCharset = Core_Array::getPost('charset');
+
+	$sNewCharset = strtolower($sCharset);
+
+	$oCore_DataBase = Core_DataBase::instance();
+
+	$aChanged = array();
+
+	$aTables = Benchmark_Controller::getTables();
+	foreach ($aTables as $aTable)
+	{
+		if (Core_Array::get($aTable, 'Comment') != 'VIEW'
+			&& isset($aCharsetByCollation[$aTable['Collation']]))
+		{
+			// Tables
+			if (strtolower($aCharsetByCollation[$aTable['Collation']]) != $sNewCharset)
+			{
+				$aCollation = explode('_', $aTable['Collation'], 2);
+				$sNewCollation = $sNewCharset . '_' . $aCollation[1];
+
+				try {
+					$oCore_DataBase
+						->setQueryType(5)
+						->query("ALTER TABLE " . $oCore_DataBase->quoteColumnName($aTable['Name']) . " COLLATE {$sNewCollation}");
+
+					$aChanged[$aTable['Name']] = $aTable['Name'];
+				}
+				catch(Core_Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+				}
+			}
+
+			// Columns
+			$aColumns = $oCore_DataBase->setQueryType(9)
+				->query("SHOW FULL COLUMNS FROM " . $oCore_DataBase->quoteColumnName($aTable['Name']))
+				->asAssoc()
+				->result();
+
+			$aModify = array();
+			foreach ($aColumns as $aColumn)
+			{
+				if (!is_null($aColumn['Collation']))
+				{
+					if (strtolower($aCharsetByCollation[$aColumn['Collation']]) != $sNewCharset)
+					{
+						$aColumnCollation = explode('_', $aColumn['Collation'], 2);
+						$sNewColumCollation = $sNewCharset . '_' . $aColumnCollation[1];
+
+						$sDefault = strtoupper($aColumn['Null']) == 'YES'
+							? 'NULL'
+							: 'NOT NULL';
+
+						if (!is_null($aColumn['Default']))
+						{
+							$sDefault .= ' DEFAULT ' . $oCore_DataBase->quote($aColumn['Default']);
+						}
+
+						$aModify[] = 'MODIFY ' . $oCore_DataBase->quoteColumnName($aColumn['Field']) . " {$aColumn['Type']} CHARACTER SET {$sNewCharset} COLLATE {$sNewColumCollation} {$sDefault}";
+					}
+				}
+			}
+
+			if (count($aModify))
+			{
+				try {
+					$oCore_DataBase
+						->setQueryType(5)
+						->query('ALTER TABLE ' . $oCore_DataBase->quoteColumnName($aTable['Name']) . ' ' . implode(', ', $aModify));
+					
+					// У таблицы могло и не быть изменения, а полям меняли
+					$aChanged[$aTable['Name']] = $aTable['Name'];
+				}
+				catch(Core_Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+				}
+			}
+
+			$aConfig = Core_Config::instance()->get('core_database');
+			$aConfig['default']['charset'] = $sNewCharset;
+			Core_Config::instance()->set('core_database', $aConfig);
+		}
+	}
+
+	if (count($aChanged))
+	{
+		?>
+		<div class="alert alert-info"><?php echo Core::_('Benchmark.convertedMsg', implode(', ', $aChanged))?></div>
+		<?php
+	}
+}
+
+// Reload new table's statuses
+$aTables = Benchmark_Controller::getTables();
+
+$aTableEngines = $aTableCharsets = array();
+
+foreach ($aTables as $aRow)
+{
+	// Engine
+	if (Core_Array::get($aRow, 'Comment') != 'VIEW')
+	{
+		if (strlen($aRow['Engine']))
+		{
+			isset($aTableEngines[$aRow['Engine']])
+				? $aTableEngines[$aRow['Engine']]++
+				: $aTableEngines[$aRow['Engine']] = 1;
+		}
+
+		// Charset
+		if (strlen($aRow['Collation']))
+		{
+			$sCharset = Core_Array::get($aCharsetByCollation, $aRow['Collation'], '-');
+
+			isset($aTableCharsets[$sCharset])
+				? $aTableCharsets[$sCharset]++
+				: $aTableCharsets[$sCharset] = 1;
+		}
+	}
+}
+
+asort($aTableEngines);
+asort($aTableCharsets);
 ?>
 <div class="row">
 	<div class="col-xs-12 col-md-6">
@@ -494,22 +638,6 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 					<div class="databox-cell cell-7 text-center  padding-5">
 						<div id="dashboard-pie-chart-sources" class="chart"></div>
 						<?php
-						$aResult = Benchmark_Controller::getTables();
-
-						$aTableEngines = array();
-
-						foreach ($aResult as $aRow)
-						{
-							if (Core_Array::get($aRow, 'Comment') != 'VIEW' && strlen($aRow['Engine']))
-							{
-								isset($aTableEngines[$aRow['Engine']])
-									? $aTableEngines[$aRow['Engine']]++
-									: $aTableEngines[$aRow['Engine']] = 1;
-							}
-						}
-
-						asort($aTableEngines);
-
 						$aColors = array('#e75b8d', '#a0d468', '#ffce55', '#5db2ff', '#fb6e52');
 
 						$aData = array();
@@ -527,27 +655,40 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 						?>
 						<script>
 						$(function(){
-							var data = [<?php echo implode(",\n", $aData)?>];
-							var placeholder = $("#dashboard-pie-chart-sources");
-							placeholder.unbind();
+							var aScripts = [
+								'jquery.flot.js',
+								'jquery.flot.time.min.js',
+								'jquery.flot.categories.min.js',
+								'jquery.flot.tooltip.min.js',
+								'jquery.flot.crosshair.min.js',
+								'jquery.flot.selection.min.js',
+								'jquery.flot.pie.min.js',
+								'jquery.flot.resize.js'
+							];
 
-							$.plot(placeholder, data, {
-								series: {
-									pie: {
-										innerRadius: 0.45,
-										show: true,
-										stroke: {
-											width: 4
+							$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+
+								var data = [<?php echo implode(",\n", $aData)?>];
+								var placeholder = $("#dashboard-pie-chart-sources");
+								placeholder.unbind();
+
+								$.plot(placeholder, data, {
+									series: {
+										pie: {
+											innerRadius: 0.45,
+											show: true,
+											stroke: {
+												width: 4
+											}
 										}
+									},
+									legend: {
+										show: false
 									}
-								},
-								legend: {
-									show: false
-								}
+								});
 							});
 						});
 						</script>
-
 					</div>
 					<div class="databox-cell cell-5 text-center no-padding-left">
 						<div class="databox-row row-2 bordered-bottom bordered-ivory padding-10">
@@ -613,7 +754,7 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 								->name('engine')
 								->execute();
 							?>
-							<p class="help-block"><?php echo Core::_('Benchmark.chooseStorageEnginesMsg')?></p>
+							<p class="help-block"><?php echo Core::_('Benchmark.changeMsg')?></p>
 						</div>
 					</div>
 					<div class="form-group">
@@ -626,6 +767,155 @@ if ($oAdmin_Form_Controller->getAction() == 'convertTables')
 								->class('btn btn-default')
 								->onclick(
 									$oAdmin_Form_Controller->getAdminSendForm('convertTables')
+								)
+								->execute();
+							?>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-xs-12 col-md-6">
+		<div class="databox databox-xxlg databox-vertical databox-shadowed bg-white radius-bordered padding-5">
+			<div class="databox-top bg-white bordered-bottom-1 bordered-platinum text-align-left padding-10">
+				<div class="databox-text darkgray"><?php echo Core::_('Benchmark.tableCharsets')?></div>
+			</div>
+			<div class="databox-bottom">
+				<div class="databox-row row-12">
+					<div class="databox-cell cell-7 text-center  padding-5">
+						<div id="dashboard-pie-chart-charsets" class="chart"></div>
+						<?php
+						$aColors = array('#fb6e52', '#6f85bf', '#53a93f', '#11a9cc', '#981b48');
+
+						$aData = array();
+						$i = 0;
+						foreach ($aTableCharsets as $sCharsetName => $iCount)
+						{
+							$aData[] = "{
+								label: \"" . htmlspecialchars($sCharsetName) . "\",
+								data: [[1, {$iCount}]],
+								color: '" . $aColors[$i % count($aColors)] . "'
+							}";
+							$i++;
+						}
+
+						?>
+						<script>
+						$(function(){
+							var aScripts = [
+								'jquery.flot.js',
+								'jquery.flot.time.min.js',
+								'jquery.flot.categories.min.js',
+								'jquery.flot.tooltip.min.js',
+								'jquery.flot.crosshair.min.js',
+								'jquery.flot.selection.min.js',
+								'jquery.flot.pie.min.js',
+								'jquery.flot.resize.js'
+							];
+
+							$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+
+								var data = [<?php echo implode(",\n", $aData)?>];
+								var placeholder = $("#dashboard-pie-chart-charsets");
+								placeholder.unbind();
+
+								$.plot(placeholder, data, {
+									series: {
+										pie: {
+											innerRadius: 0.45,
+											show: true,
+											stroke: {
+												width: 4
+											}
+										}
+									},
+									legend: {
+										show: false
+									}
+								});
+							});
+						});
+						</script>
+					</div>
+					<div class="databox-cell cell-5 text-center no-padding-left">
+						<div class="databox-row row-2 bordered-bottom bordered-ivory padding-10">
+							<span class="databox-text sonic-silver pull-left no-margin"><?php echo Core::_('Benchmark.engine')?></span>
+							<span class="databox-text sonic-silver pull-right no-margin"><?php echo Core::_('Benchmark.count')?></span>
+						</div>
+						<?php
+						$i = 0;
+						$aBadges = array('badge-orange', 'badge-blueberry', 'badge-success', 'badge-sky', 'badge-maroon');
+						foreach ($aTableCharsets as $sCharsetName => $iCount)
+						{
+							?><div class="databox-row row-2 bordered-bottom bordered-ivory padding-10">
+								<span class="badge <?php echo $aBadges[$i % count($aBadges)]?> badge-empty pull-left margin-5"></span>
+								<span class="databox-text darkgray pull-left no-margin hidden-xs"><?php echo htmlspecialchars($sCharsetName)?></span>
+								<span class="databox-text darkgray pull-right no-margin uppercase"><?php echo $iCount?></span>
+							</div><?php
+							$i++;
+						}
+						?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-12 col-md-6">
+		<div class="well well-lg">
+			<?php
+			$aResult = Benchmark_Controller::getStorageCharsets();
+
+			$aAvailabledCharsets = array();
+
+			foreach ($aResult as $aRow)
+			{
+				if (strpos($aRow['Charset'], 'utf8') === 0)
+				{
+					$aAvailabledCharsets[] = $aRow['Charset'];
+				}
+			}
+
+			if (count($aTableCharsets) > 1)
+			{
+				Core_Message::show(Core::_('Benchmark.severalCharsetsMsg'), 'error');
+			}
+			?>
+			<div id="horizontal-form">
+				<form class="form-horizontal" role="form" action="/admin/benchmark/index.php" method="post">
+					<div class="form-title">
+						<?php echo Core::_('Benchmark.changeStorageCharsetTitle')?>
+					</div>
+					<div class="form-group">
+						<label for="inputEmail3" class="col-sm-2 control-label no-padding-right">
+							<?php echo Core::_('Benchmark.engine')?>
+						</label>
+						<div class="col-sm-10">
+							<?php
+							Core::factory('Core_Html_Entity_Select')
+								->options(
+									array_combine($aAvailabledCharsets, $aAvailabledCharsets)
+								)
+								->class('form-control')
+								->value('utf8')
+								->name('charset')
+								->execute();
+							?>
+							<p class="help-block"><?php echo Core::_('Benchmark.changeMsg')?></p>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<?php
+							Admin_Form_Entity::factory('Button')
+								->name('process')
+								->type('submit')
+								->value(Core::_('Benchmark.convert'))
+								->class('btn btn-default')
+								->onclick(
+									$oAdmin_Form_Controller->getAdminSendForm('convertCharsets')
 								)
 								->execute();
 							?>

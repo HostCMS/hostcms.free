@@ -238,7 +238,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						Core::factory('Core_Html_Entity_A')
 							->id('delete_large_' . $this->largeImage['id'])
 							->class('input-group-addon control-item')
-							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
+							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->largeImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_large_" . $this->largeImage['id'] . "').addClass('hidden'); {$this->largeImage['delete_onclick']} } else {return false;}")
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
 					);
 			}
@@ -561,7 +561,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							Core::factory('Core_Html_Entity_A')
 								->id('delete_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
-								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
+								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->smallImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_" . $this->smallImage['id'] . "').addClass('hidden'); {$this->smallImage['delete_onclick']} } else {return false;}")
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
 						);
 				}

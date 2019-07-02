@@ -939,7 +939,7 @@ div.hostcmsAdminButton {float: none; display: inline; padding: 3px; }
 }
 
 /* fix bug IE button padding */
-.hostcms6 #ControlElements input
+.hostcms6 .formButtons input
 {
 	margin: 10px 0;
 }

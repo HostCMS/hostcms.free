@@ -679,6 +679,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportItemProperty
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.oBeforeCaseDefault
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeAssociated
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterImportItem
 	 */
 	public function import()
 	{
@@ -2670,6 +2671,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					// clearCache
 					$this->_oCurrentItem->clearCache();
 				}
+				
+				Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterImportItem', $this, array($this->_oCurrentShop, $this->_oCurrentItem, $aCsvLine));
 			} // end fields
 
 			$iCounter++;

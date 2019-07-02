@@ -79,7 +79,15 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 			}
 		}
 
-		$this->shopOrder->addPurchaseDiscount($amount, $quantity, $aDiscountPrices);
+		$this->shopOrder->addPurchaseDiscount(
+			array(
+				'amount' => $amount,
+				'quantity' => $quantity,
+				'prices' => $aDiscountPrices,
+				'applyDiscounts' => TRUE,
+				'applyDiscountCards' => TRUE
+			)
+		);
 
 		return $this;
 	}

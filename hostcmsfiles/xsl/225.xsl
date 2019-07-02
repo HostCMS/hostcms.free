@@ -48,11 +48,11 @@
 					</div>
 					<div class="row">
 						<div class="caption">&labelSubject;</div>
-						<div class="field"><input type="text" name="subject" size="72" style="width: 455px;" /></div>
+						<div class="field"><input type="text" name="subject" value="{/siteuser/subject}" size="72" style="width: 455px;" /></div>
 					</div>
 					<div class="row">
 						<div class="caption">&labelMessage;</div>
-						<div class="field"><textarea name="text" rows="7" cols="54" style="width: 455px;" ></textarea></div>
+						<div class="field"><textarea name="text" rows="7" cols="54" style="width: 455px;" ><xsl:value-of select="/siteuser/text" /></textarea></div>
 					</div>
 					<div class="row">
 						<div class="caption"></div>
@@ -93,11 +93,11 @@
 
 					<!-- Links before current -->
 					<xsl:variable name="pre_count_page"><xsl:choose>
-						<xsl:when test="page  - (floor($real_visible_pages div 2)) &lt; 0">
+						<xsl:when test="page - (floor($real_visible_pages div 2)) &lt; 0">
 							<xsl:value-of select="page"/>
 						</xsl:when>
-						<xsl:when test="($count_pages  - page - 1) &lt; floor($real_visible_pages div 2)">
-							<xsl:value-of select="$real_visible_pages - ($count_pages  - page - 1) - 1"/>
+						<xsl:when test="($count_pages - page - 1) &lt; floor($real_visible_pages div 2)">
+							<xsl:value-of select="$real_visible_pages - ($count_pages - page - 1) - 1"/>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:choose>
@@ -116,7 +116,7 @@
 						<xsl:when test="0 &gt; page - (floor($real_visible_pages div 2) - 1)">
 							<xsl:value-of select="$real_visible_pages - page - 1"/>
 						</xsl:when>
-						<xsl:when test="($count_pages  - page - 1) &lt; floor($real_visible_pages div 2)">
+						<xsl:when test="($count_pages - page - 1) &lt; floor($real_visible_pages div 2)">
 							<xsl:value-of select="$real_visible_pages - $pre_count_page - 1"/>
 						</xsl:when>
 						<xsl:otherwise>
@@ -307,9 +307,9 @@
 			<!-- Set $link variable -->
 			<xsl:variable name="number_link">
 				<xsl:choose>
-					
+
 					<xsl:when test="$i != 0">page-<xsl:value-of select="$i + 1"/>/</xsl:when>
-					
+
 					<xsl:otherwise></xsl:otherwise>
 				</xsl:choose>
 			</xsl:variable>
@@ -340,9 +340,9 @@
 			<xsl:if test="$page != 0 and $i = $page">
 				<xsl:variable name="prev_number_link">
 					<xsl:choose>
-						
+
 						<xsl:when test="$page &gt; 1">page-<xsl:value-of select="$i"/>/</xsl:when>
-						
+
 						<xsl:otherwise></xsl:otherwise>
 					</xsl:choose>
 				</xsl:variable>

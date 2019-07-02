@@ -36,8 +36,8 @@ class Antispam_Country_Model extends Core_Entity
 	/**
 	 * Change allow
 	 * @return self
-	 * @hostcms-event shortcode.onBeforeChangeActive
-	 * @hostcms-event shortcode.onAfterChangeActive
+	 * @hostcms-event antispam_country.onBeforeChangeActive
+	 * @hostcms-event antispam_country.onAfterChangeActive
 	 */
 	public function changeAllow()
 	{

@@ -76,7 +76,7 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow1
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12 col-sm-3 no-padding')
+						->class('form-group col-xs-12 col-sm-4 no-padding')
 						->add($oSiteuserSelect)
 				);
 

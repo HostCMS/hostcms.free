@@ -37,30 +37,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/' . $lng . '.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.time.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.categories.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.tooltip.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.crosshair.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.resize.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.selection.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.pie.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/easypiechart/jquery.easypiechart.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/easypiechart/easypiechart-init.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/sparkline/jquery.sparkline.js')
-
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/nestable/jquery.nestable.min.js')
-
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/raphael-2.0.2.min.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris-init.js')
-
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/css/css.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/htmlmixed/htmlmixed.js')
@@ -80,16 +60,9 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
-			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.js')
-			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/ru.js')
-			// Уже подключается выше из datetime
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
 			;
 
 		$this
@@ -105,10 +78,9 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
+			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
 			;
 	}
 
@@ -153,7 +125,7 @@ class Skin_Bootstrap extends Core_Skin
 		?>
 		</script>
 
-		<script src="/admin/wysiwyg/jquery.tinymce.min.js"></script>
+		<script src="/admin/wysiwyg/jquery.tinymce.min.js?<?php echo $timestamp?>"></script>
 		<?php
 		if ($this->_mode != 'install')
 		{

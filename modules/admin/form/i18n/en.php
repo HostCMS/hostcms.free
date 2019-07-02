@@ -143,6 +143,4 @@ return array(
 	'autocomplete_mode1' => 'Вхождение с начала',
 	'autocomplete_mode2' => 'Вхождение с конца',
 	'autocomplete_mode3' => 'Точное совпадение',
-
-	'lock_message' => 'Form changed! Are you sure you want to leave page without saving?',
 );

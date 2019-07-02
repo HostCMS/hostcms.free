@@ -31,7 +31,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Section extends Skin_Default_Admin_Form_E
 					</h4>
 				</div>
 				<div id="collapse<?php echo $this->id?>" class="panel-collapse collapse in">
-					<div class="panel-body border-red">
+					<div class="panel-body">
 						<?php $this->executeChildren()?>
 					</div>
 				</div>

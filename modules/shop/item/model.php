@@ -2594,8 +2594,8 @@ class Shop_Item_Model extends Core_Entity
 					else
 					{
 						$url = $oSiteAlias->name
-							. $this->Shop->Structure->getPath()
-							. $this->getPath();
+							. $this->Shop->Structure->getPath();
+							//. $this->getPath();
 					}
 
 					$oCache_Static = Core_Cache::instance('static');

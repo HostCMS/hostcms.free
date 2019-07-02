@@ -90,7 +90,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 						<div id="website_traffic" class="tab-pane animated fadeInUp active">
 							<div class="row">
 								<div class="col-xs-12">
-									<div id="website-traffic-chart" class="chart chart-lg"></div>
+									<div id="website-traffic-chart" class="chart chart-lg" style="width:100%"></div>
 								</div>
 							</div>
 							<div class="row">
@@ -271,70 +271,86 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 					}
 				};
 
-				var placeholderWebsiteTraffic = $("#website-traffic-chart"),
-					placeholderSearchBots = $("#search-bots-chart");
+				var aScripts = [
+					'jquery.flot.js',
+					'jquery.flot.time.min.js',
+					'jquery.flot.categories.min.js',
+					'jquery.flot.tooltip.min.js',
+					'jquery.flot.crosshair.min.js',
+					'jquery.flot.selection.min.js',
+					'jquery.flot.pie.min.js',
+					'jquery.flot.resize.js'
+				];
 
-				placeholderWebsiteTraffic.bind("plotselected", function (event, ranges) {
-					//var zoom = $("#zoom").is(":checked");
-					//if (zoom) {
-						plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, $.extend(true, {}, options, {
-							xaxis: {
-								min: ranges.xaxis.from,
-								max: ranges.xaxis.to
-							}
-						}));
-					//}
-				});
+				$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+					// all scripts loaded
+					var placeholderWebsiteTraffic = $("#website-traffic-chart"),
+						placeholderSearchBots = $("#search-bots-chart");
 
-				placeholderSearchBots.bind("plotselected", function (event, ranges) {
-					//var zoom = $("#zoom").is(":checked");
-					//if (zoom) {
-						plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, $.extend(true, {}, options, {
-							xaxis: {
-								min: ranges.xaxis.from,
-								max: ranges.xaxis.to
-							}
-						}));
-					//}
-				});
+					placeholderWebsiteTraffic.bind("plotselected", function (event, ranges) {
+						//var zoom = $("#zoom").is(":checked");
+						//if (zoom) {
+							plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, $.extend(true, {}, options, {
+								xaxis: {
+									min: ranges.xaxis.from,
+									max: ranges.xaxis.to
+								}
+							}));
+						//}
+					});
 
-				/*
-				$("#zoom").on('change', function(){
-					$this = $(this);
+					placeholderSearchBots.bind("plotselected", function (event, ranges) {
+						//var zoom = $("#zoom").is(":checked");
+						//if (zoom) {
+							plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, $.extend(true, {}, options, {
+								xaxis: {
+									min: ranges.xaxis.from,
+									max: ranges.xaxis.to
+								}
+							}));
+						//}
+					});
 
-					if (!$this.prop('checked'))
-					{
-						$('#setOriginalZoom').hide();
-						plot = $.plot(placeholder, data, options);
-					}
-					else
-					{
-						$('#setOriginalZoom').show();
-					}
-				});
-				*/
+					/*
+					$("#zoom").on('change', function(){
+						$this = $(this);
 
-				$('#website_traffic #setOriginalZoom').on('click', function(){
-					plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, options);
-				});
+						if (!$this.prop('checked'))
+						{
+							$('#setOriginalZoom').hide();
+							plot = $.plot(placeholder, data, options);
+						}
+						else
+						{
+							$('#setOriginalZoom').show();
+						}
+					});
+					*/
 
-				$('#search_bots #setOriginalZoom').on('click', function(){
-					plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, options);
-				});
+					$('#website_traffic #setOriginalZoom').on('click', function(){
+						plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, options);
+					});
 
-				/*placeholderWebsiteTraffic.bind("plotunselected", function (event) {
-					// Do Some Work
-				});*/
+					$('#search_bots #setOriginalZoom').on('click', function(){
+						plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, options);
+					});
 
-				var plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, options),
-					plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, options);
+					/*placeholderWebsiteTraffic.bind("plotunselected", function (event) {
+						// Do Some Work
+					});*/
 
-				$("#website_traffic #clearSelection").click(function () {
-					plotWebsiteTraffic.clearSelection();
-				});
+					setTimeout(function() {
+						var plotWebsiteTraffic = $.plot(placeholderWebsiteTraffic, dataWebsiteTraffic, options),
+							plotSearchBots = $.plot(placeholderSearchBots, dataSearchBots, options);
 
-				$("#search_bots #clearSelection").click(function () {
-					plotSearchBots.clearSelection();
+						$("#website_traffic #clearSelection").click(function () {
+							plotWebsiteTraffic.clearSelection();
+						});
+
+						$("#search_bots #clearSelection").click(function () {
+							plotSearchBots.clearSelection();
+						});
+					}, 200);
 				});
 			});
 		</script>

@@ -118,8 +118,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					{
 						$aNotification = array(
 							'id' => $oNotification->id,
-							'title' => strval($oNotification->title), // NULL => ''
-							'description' => strval($oNotification->description), // NULL => ''
+							'title' => htmlspecialchars(strval($oNotification->title)), // NULL => ''
+							'description' => htmlspecialchars(strval($oNotification->description)), // NULL => ''
 							'datetime' => Core_Date::sql2datetime($oNotification->datetime),
 							'read' => $oNotification->read
 						);

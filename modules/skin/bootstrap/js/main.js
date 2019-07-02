@@ -41,7 +41,7 @@ function isEmpty(str) {
 		},
 		toogleInputsActive: function(windowId, status)
 		{
-			$("#" + $.getWindowId(windowId) + " #ControlElements input").attr('disabled', !status);
+			$("#" + $.getWindowId(windowId) + " .formButtons input").attr('disabled', !status);
 		},
 		getWindowId: function(WindowId)
 		{
@@ -1256,7 +1256,7 @@ function FieldCheckShowError(WindowId, FiledId, message)
 			ElementField
 				.css('border-style', 'solid')
 				.css('border-width', '1px')
-				.css('border-color', '#DB1905')
+				.css('border-color', '#ff1861')
 				.css('background-image', "url('/admin/images/bullet_red.gif')")
 				.css('background-position', 'center right')
 				.css('background-repeat', 'no-repeat');

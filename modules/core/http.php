@@ -554,9 +554,11 @@ abstract class Core_Http
 					$aReturn[$match[1]] = trim($match[2]);
 				}
 			}
-			elseif (!isset($aReturn['status']))
+			// get last status
+			//elseif (!isset($aReturn['status']))
+			elseif (strpos($field, 'HTTP') === 0)
 			{
-				$aReturn['status'] = trim($field);
+				$aReturn['statuses'][] = $aReturn['status'] = trim($field);
 			}
 		}
 		return $aReturn;

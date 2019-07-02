@@ -130,6 +130,40 @@ abstract class Shop_Payment_System_Handler
 		$this->_round = $round;
 		return $this;
 	}
+	
+	/**
+	 * Round prices
+	 * @var boolean
+	 */
+	protected $_applyDiscounts = TRUE;
+
+	/**
+	 * Apply Discounts
+	 * @param boolean $applyDiscounts
+	 * @return self
+	 */
+	public function applyDiscounts($applyDiscounts)
+	{
+		$this->_applyDiscounts = $applyDiscounts;
+		return $this;
+	}
+
+	/**
+	 * Apply Discount Cards
+	 * @var boolean
+	 */
+	protected $_applyDiscountCards = TRUE;
+
+	/**
+	 * Apply Discount Cards
+	 * @param boolean $applyDiscountCards
+	 * @return self
+	 */
+	public function applyDiscountCards($applyDiscountCards)
+	{
+		$this->_applyDiscountCards = $applyDiscountCards;
+		return $this;
+	}
 
 	/**
 	 * Payment system
@@ -632,6 +666,8 @@ abstract class Shop_Payment_System_Handler
 
 		if ($oModule && Core::moduleIsActive('notification'))
 		{
+			$aUserIDs = array();
+
 			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 			$oNotification_Subscribers->queryBuilder()
 				->where('notification_subscribers.module_id', '=', $oModule->id)
@@ -640,27 +676,40 @@ abstract class Shop_Payment_System_Handler
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
 
-			if (count($aNotification_Subscribers))
+			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 			{
-				$sCompany = strlen($this->_shopOrder->company)
-					? $this->_shopOrder->company
-					: trim($this->_shopOrder->surname . ' ' . $this->_shopOrder->name . ' ' . $this->_shopOrder->patronymic);
+				$aUserIDs[] = $oNotification_Subscriber->user_id;
+			}
+
+			// Ответственные сотрудники
+			if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
+			{
+				$aSiteuser_Users = $this->_shopOrder->Siteuser->Siteuser_Users->findAll(FALSE);
+				foreach ($aSiteuser_Users as $oSiteuser_User)
+				{
+					!in_array($oSiteuser_User->user_id, $aUserIDs)
+						&& $aUserIDs[] = $oSiteuser_User->user_id;
+				}
+			}
+
+			if (count($aUserIDs))
+			{
+				$sCompany = $this->_shopOrder->getCustomerName();
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
-					->title(sprintf(Core::_('Shop_Order.notification_new_order'), $this->_shopOrder->invoice))
-					->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->_shopOrder->sum()))
+					->title(Core::_('Shop_Order.notification_new_order', strip_tags($this->_shopOrder->invoice), FALSE))
+					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->_shopOrder->sum(), FALSE))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(1) // Новый заказ
 					->entity_id($this->_shopOrder->id)
 					->save();
 
-				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+				foreach ($aUserIDs as $user_id)
 				{
 					// Связываем уведомление с сотрудником
-					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
-						->add($oNotification);
+					Core_Entity::factory('User', $user_id)->add($oNotification);
 				}
 			}
 		}
@@ -756,7 +805,15 @@ abstract class Shop_Payment_System_Handler
 	 */
 	protected function _addPurchaseDiscount($amount, $quantity, $aDiscountPrices = array())
 	{
-		$this->_shopOrder->addPurchaseDiscount($amount, $quantity, $aDiscountPrices);
+		$this->_shopOrder->addPurchaseDiscount(
+			array(
+				'amount' => $amount,
+				'quantity' => $quantity,
+				'prices' => $aDiscountPrices,
+				'applyDiscounts' => $this->_applyDiscounts,
+				'applyDiscountCards' => $this->_applyDiscountCards
+			)
+		);
 
 		return $this;
 	}

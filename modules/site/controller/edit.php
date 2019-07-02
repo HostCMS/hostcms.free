@@ -267,9 +267,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_404 = Admin_Form_Entity::factory('Select');
 		$oSelect_404
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('error404')
 			->value($this->_object->error404)
 			->caption(Core::_('Site.error404'))
@@ -279,9 +277,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_403 = Admin_Form_Entity::factory('Select');
 		$oSelect_403
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('error403')
 			->value($this->_object->error403)
 			->caption(Core::_('Site.error403'))
@@ -290,9 +286,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_503 = Admin_Form_Entity::factory('Select');
 		$oSelect_503
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('closed')
 			->value($this->_object->closed)
 			->caption(Core::_('Site.closed'))

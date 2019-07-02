@@ -108,13 +108,15 @@
 
 			//console.log(data);
 
+			mainFormLocker.saveStatus().unlock();
+
 			jQuery.ajax({
 				context: jDivWin,
 				url: cmsrequest,
 				data: data,
 				dataType: 'json',
 				type: 'POST',
-				success: jQuery.ajaxCallback
+				success: [jQuery.ajaxCallback, function() { mainFormLocker.restoreStatus() }]
 			});
 
 			return jDivWin;
@@ -321,23 +323,29 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('bookmarks'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('bookmarks'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0};
+					}
 
-				if (Date.now() > storageObj['expired_in'])
-				{
-					storageObj['expired_in'] = Date.now() + 120000;
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 120000;
 
-					bNeedsRequest = true;
-				}
-				else
-				{
-					$.refreshBookmarksCallback(storageObj);
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshBookmarksCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -1346,20 +1354,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat_messages_list'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat_messages_list'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshMessagesListCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshMessagesListCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -1431,20 +1445,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshChatCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshChatCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -1511,20 +1531,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat_user_statuses'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat_user_statuses'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshUserStatusesCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshUserStatusesCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -2095,23 +2121,29 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('events'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('events'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0};
+					}
 
-				if (Date.now() > storageObj['expired_in'])
-				{
-					storageObj['expired_in'] = Date.now() + 10000;
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 10000;
 
-					bNeedsRequest = true;
-				}
-				else
-				{
-					$.refreshEventsCallback(storageObj);
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshEventsCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -2630,24 +2662,30 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('notifications'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('notifications'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0, lastNotificationId: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0, lastNotificationId: 0};
+					}
 
-				// При окрытии новой вкладки (!lastNotificationId) загружаем данные из БД, а не из хранилища
-				if (Date.now() > storageObj['expired_in'] || !lastNotificationId)
-				{
-					//storageObj['expired_in'] = Date.now() + 10000;
-					bNeedsRequest = true;
-				}
-				else if(lastNotificationId < storageObj['lastNotificationId'])
-				{
-					storageObj['localStorage'] = true;
-					$.refreshNotificationsCallback(storageObj);
+					// При окрытии новой вкладки (!lastNotificationId) загружаем данные из БД, а не из хранилища
+					if (Date.now() > storageObj['expired_in'] || !lastNotificationId)
+					{
+						//storageObj['expired_in'] = Date.now() + 10000;
+						bNeedsRequest = true;
+					}
+					else if(lastNotificationId < storageObj['lastNotificationId'])
+					{
+						storageObj['localStorage'] = true;
+						$.refreshNotificationsCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -3233,6 +3271,10 @@
 			jNewObject.find("div.img_control div,div.img_control div").remove();
 			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
 			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
+
+			jNewObject.find(".file-caption-wrapper")
+				.addClass('hidden')
+				.prev().removeClass('hidden');
 
 			var oDateTimePicker = jProperies.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
 
@@ -4034,6 +4076,7 @@
 		selectUser: function(settings)
 		{
 			settings = $.extend({
+				minimumInputLength: 1,
 				allowClear: true,
 				templateResult: $.templateResultItemResponsibleEmployees,
 				escapeMarkup: function(m) { return m; },
@@ -4221,16 +4264,13 @@ $(function(){
 
 	$('body')
 		.on('shown.bs.dropdown', '.admin-table td div', function (){
-
 			var td = $(this).closest('td').css('overflow', 'visible');
 		})
 		.on('hidden.bs.dropdown', '.admin-table td div', function (){
-
 			var td = $(this).closest('td').css('overflow', 'hidden');
 		})
 		// Выбор элемента dropdownlist
 		.on('click', '.form-element.dropdown-menu li', function (){
-
 			var li = $(this),
 				dropdownMenu = li.parent('.dropdown-menu'),
 				containerCurrentChoice = dropdownMenu.prev('[data-toggle="dropdown"]');
@@ -4453,8 +4493,25 @@ $(function(){
 
 			$.changeUserWorkdayButtons(status);
 		});
-});
 
+	// Sticky actions
+	$(document).on("scroll", function () {
+		// to bottom
+		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+			$('.formButtons').removeClass('sticky-actions');
+		}
+
+		// to top
+		if ($(window).scrollTop() + $(window).height() < $(document).height()) {
+			$('.formButtons').addClass('sticky-actions');
+		}
+	});
+
+	// For TinyMCE init
+	$('body').on('afterTinyMceInit', function(event, editor) {
+		editor.on('change', function() { mainFormLocker.lock() });
+	});
+});
 
 // Lazy image load
 document.addEventListener("DOMContentLoaded", function() {
@@ -4485,7 +4542,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			  window.removeEventListener("resize", lazyload);
 			  window.removeEventListener("orientationChange", lazyload);
 			}*/
-		}, 100);
+		}, 200);
 	}
 
 	document.addEventListener("scroll", lazyload);
@@ -4517,13 +4574,9 @@ function calendarDayClick(oDate, jsEvent)
 		contextMenuWidth = contextMenu.outerWidth(),
 		positionLeft = (jsEvent.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : jsEvent.pageX;
 
-		contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
+	contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
 
-		$('ul.dropdown-info').data('timestamp', oDate.unix());
-
-	//
-
-
+	$('ul.dropdown-info').data('timestamp', oDate.unix());
 	/*
 	 $("body").on("contextmenu", "table tr", function(e) {
 		$contextMenu.css({
@@ -4670,7 +4723,6 @@ function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
 
 function calendarEventDrop( event, delta, revertFunc, jsEvent, ui, view )
 {
-
 	$.loadingScreen('show');
 
 	var eventIdParts = event.id.split('_'),
@@ -4852,4 +4904,132 @@ function setEventStartButtons(start, windowId)
 			$('#' + windowId + ' #eventStartButtonsGroup a.active').removeClass("active");
 		}
 	}
-}
+}
+
+function formLocker()
+{
+	this._locked = false;
+	this._previousLocked = false;
+	this._delay = false;
+
+	this.lock = function(event) {
+		if (!this._delay)
+		{
+			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
+			aKeycodes = [13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
+
+			if (!this._locked && $.inArray(keycode, aKeycodes) == -1)
+			{
+				$('body').on('beforeAdminLoad beforeAjaxCallback', $.proxy(this._confirm, this));
+
+				$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
+
+				this._locked = true;
+			}
+		}
+
+		return this;
+	}
+
+	this._confirm = function() {
+		if (!confirm(i18n['lock_message']))
+		{
+			return 'break';
+		}
+		this.unlock();
+	}
+
+	this.unlock = function() {
+		this._locked = false;
+
+		$('body')
+			.unbind('beforeAdminLoad')
+			.unbind('beforeAjaxCallback');
+
+		$('h5.row-title > i.edit-lock').remove();
+
+		if (!this._delay)
+		{
+			this._delay = true;
+			setTimeout($.proxy(this._resetDelay, this), 3000);
+		}
+
+		return this;
+	}
+
+	this._resetDelay = function() {
+		this._delay = false;
+
+		return this;
+	}
+
+	this.saveStatus = function() {
+		this._previousLocked = this._locked;
+		return this;
+	}
+
+	this.restoreStatus = function() {
+		this._previousLocked ? this.lock() : this.unlock();
+		this._previousLocked = false;
+		return this;
+	}
+}
+mainFormLocker = new formLocker();
+
+// -------------
+var loadedMultiContent = [];
+$.getMultiContent = function(arr, path) {
+	function loadSctriptContent(url) {
+		return $.ajax({
+		  url: url,
+		  dataType: "text",
+		  success: function (data, textStatus, jqxhr) {
+			  //console.log(url);
+			loadedMultiContent.push(url);
+		  }
+		});
+	}
+
+    var _arr = $.map(arr, function(url) {
+		url = (path || '') + url;
+		if ($.inArray(url, loadedMultiContent) == -1)
+		{
+			//loadedMultiContent.push(url);
+			if (url.indexOf('.css') != -1)
+			{
+				$('<link>', {rel: 'stylesheet', href: url}).appendTo('head');
+			}
+			else
+			{
+				return loadSctriptContent(url);
+			}
+		}
+
+		// Already loaded, delete item from the array
+		return null;
+    });
+
+    /*_arr.push($.Deferred(function(deferred) {
+        $(deferred.resolve);
+    }));*/
+
+    return $.when.apply($, _arr).done(function() {
+		if (arguments.length)
+		{
+			// when() with multiple deferred, 'arguments' is aggregate state of all the deferreds
+			if (Array.isArray(arguments[0]))
+			{
+				for (var i=0; i < arguments.length; i++) {
+					//contentType = arguments[i][2].getResponseHeader('Content-Type');
+					//if (contentType.indexOf('javascript') != -1)
+					//console.log(arguments[i]);
+					$.globalEval(arguments[i][0]);
+				}
+			}
+			else
+			{
+				$.globalEval(arguments[0]);
+			}
+		}
+	});
+}

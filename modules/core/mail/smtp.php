@@ -185,7 +185,7 @@ class Core_Mail_Smtp extends Core_Mail
 				return FALSE;
 			}
 
-			$this->_serverFputs($header."\r\n.\r\n");
+			$this->_serverFputs($header . "\r\n.\r\n");
 			$server_response = $this->_serverFgets();
 			if (!$this->_serverParse($server_response, "250"))
 			{

@@ -1787,6 +1787,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 										// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
 
+										// Set ->shop_currency_id
 										$oShopItem->add($oShop_Currency);
 
 										if (!is_null($this->_oTaxForBasePrice))

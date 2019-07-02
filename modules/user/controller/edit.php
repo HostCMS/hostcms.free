@@ -378,25 +378,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	}
 
 	/**
-	 * Fill user groups list
-	 * @return array
-	 */
-	protected function _fillUserGroup()
-	{
-		$oSite = Core_Entity::factory('site', CURRENT_SITE);
-
-		$aUserGroups = $oSite->User_Groups->findAll();
-
-		$aReturnUserGroups = array();
-		foreach ($aUserGroups as $oUserGroup)
-		{
-			$aReturnUserGroups[$oUserGroup->id] = $oUserGroup->name;
-		}
-
-		return $aReturnUserGroups;
-	}
-
-	/**
 	 * Processing of the form. Apply object fields.
 	 * @return self
 	 * @hostcms-event User_Controller_Edit.onAfterRedeclaredApplyObjectProperty
@@ -420,7 +401,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_applyObjectProperty();
 
 		$bSave = isset($_POST['hostcms']['operation']) && in_array($_POST['hostcms']['operation'], array('save', 'saveModal'));
-		
+
 		if (
 			// Поле файла существует
 			!is_null($aFileData = Core_Array::getFiles('image', NULL))
@@ -547,7 +528,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			if (!empty($sPhone) || $bSave)
 			{
-				
+
 				$oDirectory_Phone
 					->directory_phone_type_id(intval(Core_Array::getPost("phone_type#{$oDirectory_Phone->id}", 0)))
 					->value($sPhone)
@@ -607,7 +588,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		foreach ($aUser_Directory_Socials as $oUser_Directory_Social)
 		{
 			$oDirectory_Social = $oUser_Directory_Social->Directory_Social;
-			
+
 			$sSocial_Address = trim(Core_Array::getPost("social_address#{$oDirectory_Social->id}"));
 
 			if (!empty($sSocial_Address) || $bSave)
@@ -685,7 +666,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		foreach ($aUser_Directory_Messengers as $oUser_Directory_Messenger)
 		{
 			$oDirectory_Messenger = $oUser_Directory_Messenger->Directory_Messenger;
-			
+
 			$sMessenger_Address = trim(Core_Array::getPost("messenger_username#{$oDirectory_Messenger->id}"));
 
 			if (!empty($sMessenger_Address) || $bSave)
@@ -774,7 +755,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value("$.deleteFormRow($(\"#{$windowId} input[name='website_address#{$oDirectory_Website->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$this->_Admin_Form_Controller->addMessage(ob_get_clean());*/
-				
+
 				$oDirectory_Website->delete();
 			}
 		}

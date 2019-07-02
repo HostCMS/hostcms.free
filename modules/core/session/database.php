@@ -227,6 +227,9 @@ class Core_Session_Database extends Core_Session
 		}
 		else
 		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+			
 			throw new Core_Exception($content);
 		}
 	}
@@ -274,7 +277,7 @@ class Core_Session_Database extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait!');
+				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
 			}
 
 			usleep($this->_nextStepDelay);

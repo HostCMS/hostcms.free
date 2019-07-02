@@ -232,7 +232,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				? Core::_('Property_Dir.main_section')
 				: htmlspecialchars(Core_Entity::factory('Property_Dir', $property_dir_id)->name)
 			)
-			->id('accordion_' . $property_dir_id);
+			->id('accordion_' . $property_dir_id)
+			->class('property_dir');
 
 		// Properties
 		$oProperties = $this->_getProperties();
@@ -345,14 +346,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						case 6: // Wysiwyg
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
-								->rows(7)
+								->rows(8)
 								->wysiwyg(Core::moduleIsActive('wysiwyg'))
 								->template_id($this->template_id);
 						break;
 
 						case 7: // Checkbox
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
-
 							count($aProperty_Values) && $oAdmin_Form_Entity->postingUnchecked(TRUE);
 						break;
 
@@ -376,10 +376,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$this->_correctPrintValue($oProperty, $oProperty->default_value)
 							)
 							->divAttr(array(
-								'class' => ($oProperty->type != 2 ? 'form-group' : '') . (
-									($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
-									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
-									: ' col-xs-12')
+								'class' => ($oProperty->type != 2 ? 'form-group' : '')
+									. (
+										($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
+										? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
+										: ' col-xs-12'
+									)
+									. ($oProperty->type == 7 ? ' margin-top-21' : '')
 							));
 
 						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
@@ -391,9 +394,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								Admin_Form_Entity::factory('Div')
 									->class('row')
 									->id("property_{$oProperty->id}")
-									/*->divAttr(array(
-										'id' => "property_{$oProperty->id}",
-									))*/
 									->add($oAdmin_Form_Entity)
 							);
 
@@ -478,9 +478,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									Admin_Form_Entity::factory('Div')
 										->class('row')
 										->id("property_{$oProperty->id}")
-										/*->divAttr(array(
-											'id' => "property_{$oProperty->id}",
-										))*/
 										->add($oNewAdmin_Form_Entity)
 								);
 

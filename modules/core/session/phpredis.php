@@ -89,7 +89,7 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$this->_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
 		}
-		
+
 		if (is_null($this->_prefix))
 		{
 			$this->_prefix = Core::crc32(CMS_FOLDER);
@@ -169,7 +169,7 @@ class Core_Session_Phpredis extends Core_Session
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
 			$key = $this->_getKey($id);
-			
+
 			$this->_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
 
 			$this->_unlock($id);
@@ -194,7 +194,7 @@ class Core_Session_Phpredis extends Core_Session
 			$this->_redis->del($key);
 
 			$this->_unlock($id);
-			
+
 			// для предотвращения автоматической повторной регистрации сеанса
 			$_SESSION = array();
 
@@ -251,6 +251,9 @@ class Core_Session_Phpredis extends Core_Session
 		}
 		else
 		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+
 			throw new Core_Exception($content);
 		}
 	}
@@ -280,7 +283,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait!');
+				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
 			}
 
 			usleep($this->_nextStepDelay);

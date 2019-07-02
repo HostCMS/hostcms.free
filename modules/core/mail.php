@@ -67,7 +67,7 @@ abstract class Core_Mail
 			Core_Log::instance()->clear()
 				->notify(FALSE) // avoid recursion
 				->status(Core_Log::$MESSAGE)
-				->write(sprintf('SMTP LOG: "%s"', $this->_log));
+				->write(sprintf('MAIL LOG: "%s"', $this->_log));
 		}
 
 		return TRUE;
@@ -106,7 +106,7 @@ abstract class Core_Mail
 			) + array(
 				'host' => NULL,
 				'port' => 25,
-				'log' => TRUE,
+				'log' => FALSE,
 				'timeout' => 5
 			)
 		);

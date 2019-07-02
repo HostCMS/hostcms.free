@@ -184,6 +184,7 @@ class Core_Http_Curl extends Core_Http
 
 		$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
 		$this->_headers = substr($datastr, 0, $iHeaderSize);
+
 		$this->_body = substr($datastr, $iHeaderSize);
 
 		// Close PHP cURL handle
@@ -191,7 +192,7 @@ class Core_Http_Curl extends Core_Http
 
 		//$aTmp = explode("\r\n\r\n", $datastr, 2);
 
-		unset ($datastr);
+		unset($datastr);
 
 		/*$this->_headers = Core_Array::get($aTmp, 0);
 		$this->_body = Core_Array::get($aTmp, 1);*/

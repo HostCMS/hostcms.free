@@ -146,7 +146,7 @@ abstract class Core_DataBase
 
 		return $return;
 	}
-	
+
 	/**
 	 * Get list of columns in a table
 	 *
@@ -405,7 +405,7 @@ abstract class Core_DataBase
 	}
 
 	/**
-	 * Get current config array
+	 * Get current config array (without username and password)
 	 * @return array
 	 */
 	public function getConfig()
@@ -810,13 +810,13 @@ abstract class Core_DataBase
 	{
 		return $this->_lastQuery;
 	}
-	
+
 	protected $_likeReplacements = array(
 		'%' => '\%',
 		'_' => '\_',
 		'\\' => '\\\\'
 	);
-	
+
 	/**
 	 * Escape value in LIKE conditions
 	 * @param string $value

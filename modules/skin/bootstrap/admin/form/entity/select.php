@@ -38,7 +38,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 				<?php
 					if ($this->caseSensitive)
 					{
-						?><div class="col-xs-5 col-lg-6"><?php
+						?><div class="col-xs-12 col-sm-6"><?php
 					}
 					else
 					{
@@ -117,7 +117,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 		$iFilterCount = self::$iFilterCount;
 
 		Admin_Form_Entity::factory('Div')
-			->class(($this->caseSensitive ? 'col-lg-3 col-md-3 col-sm-3 col-xs-4' : 'col-lg-4 col-md-4 col-sm-4 col-xs-5 no-padding-left') . ' no-padding-left')
+			->class($this->caseSensitive ? 'col-xs-7 col-sm-3 col-md-4' : 'col-xs-5 col-sm-4 col-md-4 col-lg-4 no-padding-left')
 			->add(
 				Admin_Form_Entity::factory('Div')
 					->class('input-group' . (strlen($this->caption) ? ' margin-top-21' : ''))
@@ -134,7 +134,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			if ($this->caseSensitive)
 			{
 				Admin_Form_Entity::factory('Div')
-					->class('col-xs-3 col-sm-4 col-lg-3 no-padding-left' . (strlen($this->caption) ? ' margin-top-21' : ''))
+					->class('col-xs-5 col-sm-3 col-md-2 no-padding-left' . (strlen($this->caption) ? ' margin-top-21' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<label class="checkbox-inline">' .

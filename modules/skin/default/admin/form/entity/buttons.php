@@ -18,7 +18,7 @@ class Skin_Default_Admin_Form_Entity_Buttons extends Admin_Form_Entity
 	 */
 	public function execute()
 	{
-		?><div id="ControlElements"><?php
+		?><div class="formButtons sticky-actions"><?php
 		$this->executeChildren();
 		?></div><?php
 	}

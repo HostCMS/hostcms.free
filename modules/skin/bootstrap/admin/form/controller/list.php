@@ -167,7 +167,26 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				}
 				?>
 			</div>
-		</div><?php
+		</div>
+		<script>
+			$(function (){
+				// Sticky actions
+				$('.DTTTFooter').addClass('sticky-actions');
+
+				$(document).on("scroll", function () {
+					// to bottom
+					if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+						$('.DTTTFooter').removeClass('sticky-actions');
+					}
+
+					// to top
+					if ($(window).scrollTop() + $(window).height() < $(document).height()) {
+						$('.DTTTFooter').addClass('sticky-actions');
+					}
+				});
+			});
+		</script>
+		<?php
 
 		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller);
 

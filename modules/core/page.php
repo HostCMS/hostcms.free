@@ -434,7 +434,7 @@ class Core_Page extends Core_Servant_Properties
 		return $sReturn;
 	}
 
-	/** 
+	/**
 	 * Get JS mode
 	 * @param $mode
 	 * @return string
@@ -453,7 +453,7 @@ class Core_Page extends Core_Servant_Properties
 			default:
 				$return = '';
 		}
-		
+
 		return $return;
 	}
 
@@ -549,6 +549,45 @@ class Core_Page extends Core_Servant_Properties
 	}
 
 	/**
+	 * Prepare Core_Page by Structure
+	 * @param Structure_Model $oStructure
+	 * @return self
+	 */
+	public function prepareByStructure(Structure_Model $oStructure)
+	{
+		if ($oStructure->type == 0)
+		{
+			$this->template($oStructure->Document->Template);
+		}
+		// Если динамическая страница или типовая дин. страница
+		elseif ($oStructure->type == 1 || $oStructure->type == 2)
+		{
+			$this->template($oStructure->Template);
+		}
+
+		if ($oStructure->type == 2)
+		{
+			$this->libParams
+				= $oStructure->Lib->getDat($oStructure->id);
+
+			$LibConfig = $oStructure->Lib->getLibConfigFilePath();
+
+			if (is_file($LibConfig) && is_readable($LibConfig))
+			{
+				include $LibConfig;
+			}
+		}
+
+		$this
+			->structure($oStructure)
+			->addChild($oStructure->getRelatedObjectByType());
+
+		$oStructure->setCorePageSeo($this);
+
+		return $this;
+	}
+
+	/**
 	 * Show 403 error
 	 * @return self
 	 */
@@ -568,18 +607,7 @@ class Core_Page extends Core_Servant_Properties
 				throw new Core_Exception('Structure 403 not found');
 			}
 
-			if ($oStructure->type == 0)
-			{
-				$this->template($oStructure->Document->Template);
-			}
-			// Если динамическая страница или типовая дин. страница
-			elseif ($oStructure->type == 1 || $oStructure->type == 2)
-			{
-				$this->template($oStructure->Template);
-			}
-
-			$this->addChild($oStructure->getRelatedObjectByType());
-			$oStructure->setCorePageSeo($this);
+			$this->prepareByStructure($oStructure);
 		}
 		else
 		{
@@ -613,34 +641,7 @@ class Core_Page extends Core_Servant_Properties
 				throw new Core_Exception('Structure 404 not found');
 			}
 
-			if ($oStructure->type == 0)
-			{
-				$this->template($oStructure->Document->Template);
-			}
-			// Если динамическая страница или типовая дин. страница
-			elseif ($oStructure->type == 1 || $oStructure->type == 2)
-			{
-				$this->template($oStructure->Template);
-			}
-
-			if ($oStructure->type == 2)
-			{
-				$this->libParams
-					= $oStructure->Lib->getDat($oStructure->id);
-
-				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
-
-				if (is_file($LibConfig) && is_readable($LibConfig))
-				{
-					include $LibConfig;
-				}
-			}
-
-			$this
-				->structure($oStructure)
-				->addChild($oStructure->getRelatedObjectByType());
-
-			$oStructure->setCorePageSeo($this);
+			$this->prepareByStructure($oStructure);
 
 			// Если уже идет генерация страницы, то добавленный потомок не будет вызван
 			$this->buildingPage && $this->execute();

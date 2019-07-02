@@ -39,7 +39,7 @@ class Core_Rss_Read
 		'pubdate' => '',
 		'yandex:full-text' => ''
 	);
-	
+
 	/**
 	 * Пустой массив с полями канала
 	 *
@@ -55,7 +55,7 @@ class Core_Rss_Read
 			'url' => ''
 		)
 	);
-	
+
 	/**
 	 * XML parser
 	 */
@@ -66,7 +66,7 @@ class Core_Rss_Read
 	 * @var string
 	 */
 	protected $_tag = NULL;
-	
+
 	/**
 	 * RSS
 	 * @var string
@@ -98,7 +98,7 @@ class Core_Rss_Read
 	{
 		$this->_chanel = self::$_defaultChanel;
 	}
-	
+
 	/**
 	 * Callback function for xml parser
 	 * @param string $parser reference to the XML parser to set up character data handler function
@@ -126,7 +126,7 @@ class Core_Rss_Read
 		}
 
 		$this->_tag .= '^' . $name;
-		
+
 		return $this;
 	}
 
@@ -148,7 +148,7 @@ class Core_Rss_Read
 		}
 
 		$this->_tag = mb_substr($this->_tag, 0, mb_strrpos($this->_tag, '^'));
-		
+
 		return $this;
 	}
 
@@ -211,7 +211,7 @@ class Core_Rss_Read
 				$this->_chanel['image']['url'] .= $data;
 			}
 		}
-		
+
 		return $this;
 	}
 
@@ -228,7 +228,7 @@ class Core_Rss_Read
 	}
 
 	/**
-	 * Load URL 
+	 * Load URL
 	 * @param string $url URL
 	 * @return self
 	 */
@@ -237,10 +237,22 @@ class Core_Rss_Read
 		$url = trim($url);
 
 		$Core_Http = Core_Http::instance()
+			->clear()
 			->url($url)
 			->execute();
 
 		$this->_data = $Core_Http->getBody();
+
+		$aHeaders = $Core_Http->parseHeaders();
+
+		$sStatus = Core_Array::get($aHeaders, 'status');
+		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
+
+		if ($iStatusCode != 200)
+		{
+			throw new Core_Exception("HTTP %code ERROR: %body.\nSource URL: %url",
+				array('%code' => $iStatusCode, '%body' => strip_tags($this->_data), '%url' => $url));
+		}
 
 		return $this;
 	}

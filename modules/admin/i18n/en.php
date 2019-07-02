@@ -18,11 +18,11 @@ return array(
 	'themes' => 'Themes',
 	'authorization_error_valid_user' => 'Error! Invalid login and password!<br />Your IP is <b>%s</b>, administrator informed of this event.',
 	'authorization_error_access_temporarily_unavailable' => 'Access temporarily unavailable. Please try again in %s seconds',
-	'authorization_title' => 'HostCMS Back End',
+	'authorization_title' => 'HostCMS Backend',
 	'authorization_notice' => '<p>* In order to enter back-end, your browser should support Cookies.</p>',
 	'authorization_notice2' => '<p>** Attachment of session to IP address decreases the risk of an authorized access to back-end.</p>',
 
-	'index_title' => "Back-end of %s v. %s",
+	'index_title' => "%s Backend v. %s",
 
 	'index_systems_events' => 'Events log',
 	'index_systems_characteristics' => 'System characteristics',

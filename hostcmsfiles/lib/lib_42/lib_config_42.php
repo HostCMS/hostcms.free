@@ -6,8 +6,6 @@ if (Core::moduleIsActive('siteuser'))
 
 	if (!is_null($oSiteuser))
 	{
-		$oSite = $oSiteuser->Site;
-
 		$Message_Controller_Show = new Message_Controller_Show($oSiteuser);
 
 		$Message_Controller_Show
@@ -19,84 +17,56 @@ if (Core::moduleIsActive('siteuser'))
 
 		$aErrors = array();
 
-		if (Core_Array::getPost('text'))
+		// Создание топика
+		if (!$Message_Controller_Show->topic && !is_null(Core_Array::getPost('login')))
 		{
-			$oMessage = Core_Entity::factory('Message');
+			$login = Core_Array::getPost('login');
+			$subject = Core_Array::getPost('subject');
+			$text = Core_Array::getPost('text');
+			$result = $Message_Controller_Show->createTopic($login, $subject, $text);
 
-			$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
-			$oMessage->text = nl2br(trim(Core_Str::stripTags(Core_Str::removeEmoji(Core_Array::getPost('text')), $allowable_tags)));
-
-			empty($oMessage->text) && $aErrors[] = Core::factory('Core_Xml_Entity')
-				->name('error')->value('Отсутствует текст сообщения!');
-
-			//$oMessage->datetime = Core_Date::timestamp2sql(time());
-			$oMessage->siteuser_id = $oSiteuser->id;
-		}
-
-		if ($Message_Controller_Show->topic)
-		{
-			$oMessage_Topic = Core_Entity::factory('Message_Topic')->getById($Message_Controller_Show->topic);
-
-			if ($oMessage_Topic && $oMessage_Topic->access($oSiteuser))
+			if ($result == 'wrong-login')
 			{
-				// При входе в тему пересчитываем количество
-				is_null(Core_Array::getPost('ajaxLoad'))
-					&& $oMessage_Topic->recount();
-				
-				$sPageTitle = $oMessage_Topic->subject;
-			}
-			else
-			{
-				$sPageTitle = 'Пользователь не имеет доступа к переписке!';
-
 				$aErrors[] = Core::factory('Core_Xml_Entity')
-					->name('error')->value($sPageTitle);
-			}
+					->name('error')->value('Пользователя с таким логином не существует!');
 
-			Core_Page::instance()->title($sPageTitle);
-			Core_Page::instance()->description($sPageTitle);
-			Core_Page::instance()->keywords($sPageTitle);
+				$Message_Controller_Show->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('login')
+						->value($login)
+					)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('subject')
+						->value($subject)
+					)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('text')
+						->value($text)
+					);
+			}
 		}
-
-		if (isset($oMessage))
+		elseif (Core_Array::getPost('text'))
 		{
-			if (!isset($oMessage_Topic))
+			$text = Core_Array::getPost('text');
+			$result = $Message_Controller_Show->addMessage($text);
+
+			if ($result == 'empty-text')
 			{
-				$oMessage_Topic = Core_Entity::factory('Message_Topic');
-				$oMessage_Topic->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
-
-				empty($oMessage_Topic->subject) && $oMessage_Topic->subject = Core::_('Message_Topic.no_subject');
-
-				$oMessage_Topic->sender_siteuser_id = $oSiteuser->id;
-
-				$oSiteuserRecipient = $oSite->Siteusers->getByLogin(trim(Core_Array::getPost('login')));
-
-				if (!is_null($oSiteuserRecipient))
-				{
-					$oMessage_Topic->recipient_siteuser_id = $oSiteuserRecipient->id;
-				}
-				else
-				{
-					$aErrors[] = Core::factory('Core_Xml_Entity')
-						->name('error')->value('Пользователя с таким логином не существует!');
-				}
+				$aErrors[] = Core::factory('Core_Xml_Entity')
+					->name('error')->value('Отсутствует текст сообщения!');
 			}
-
-			if (!count($aErrors))
+			elseif ($result == 'wrong-topic')
 			{
-				// При добавлении сообщения увеличиваем количество непрочитанных
-				$oMessage_Topic->sender_siteuser_id == $oSiteuser->id
-					? $oMessage_Topic->count_recipient_unread += 1
-					: $oMessage_Topic->count_sender_unread += 1;
-					
-				$oMessage_Topic->add($oMessage);
+				$aErrors[] = Core::factory('Core_Xml_Entity')
+					->name('error')->value('Не выбрана переписка!');
 			}
 		}
 
 		$Message_Controller_Show->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('errors')
-				->addEntities($aErrors));
+				->addEntities($aErrors)
+			);
 
 		if (!is_null(Core_Array::getPost('ajaxLoad')))
 		{
@@ -104,18 +74,13 @@ if (Core::moduleIsActive('siteuser'))
 				? Core_Array::get(Core_Page::instance()->libParams, 'messagesListXsl')
 				: Core_Array::get(Core_Page::instance()->libParams, 'xsl');
 
-			$aArray = array();
-
 			ob_start();
 
 			$Message_Controller_Show
 				->xsl(Core_Entity::factory('Xsl')->getByName($xslName))
 				->show();
 
-			$aArray['content'] = ob_get_clean();
-
-			echo json_encode($aArray);
-			exit();
+			Core::showJson(array('content' => ob_get_clean()));
 		}
 
 		Core_Page::instance()->object = $Message_Controller_Show;
