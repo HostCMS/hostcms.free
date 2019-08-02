@@ -80,7 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -117,7 +117,7 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Add child to an hierarchy
 	 * @param object $object object
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function addChild($object)
 	{
@@ -133,7 +133,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Delete first child
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function deleteChild()
 	{
@@ -218,7 +218,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Clear $css list
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function clearCss()
 	{
@@ -229,7 +229,7 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Link $css to the beginning of list
 	 * @param string $css path
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function prependCss($css)
 	{
@@ -240,7 +240,7 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Link $css onto the end of array
 	 * @param string $css path
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function css($css)
 	{
@@ -330,7 +330,7 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Show block of linked css and clear added CSS list
 	 * @param boolean $bExternal add as link
-	 * @return Core_Page
+	 * @return self
 	 * @hostcms-event Core_Page.onBeforeShowCss
 	 */
 	public function showCss($bExternal = TRUE)
@@ -349,7 +349,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Clear $js list
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function clearJs()
 	{
@@ -360,39 +360,39 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Link $js to the beginning of list
 	 * @param string $js path
-	 * @param boolean $async Run asynchronously, default FALSE
-	 * @return Core_Page
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @return self
 	 */
-	public function prependJs($js, $async = FALSE)
+	public function prependJs($js, $mode = FALSE)
 	{
-		array_unshift($this->js, array($js, $async));
+		array_unshift($this->js, array($js, $mode));
 		return $this;
 	}
 
 	/**
 	 * Link js
 	 * @param string $js path
-	 * @param boolean $async Run asynchronously, default FALSE
-	 * @return Core_Page
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @return self
 	 */
-	public function js($js, $async = FALSE)
+	public function js($js, $mode = FALSE)
 	{
-		$this->js[] = array($js, $async);
+		$this->js[] = array($js, $mode);
 		return $this;
 	}
 
 	/**
 	 * Get block of linked JS and clear added JS list
-	 * @param boolean $async Run asynchronously, default FALSE
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
 	 * @return string
 	 * @hostcms-event Core_Page.onBeforeGetJs
 	 */
-	public function getJs($async = FALSE)
+	public function getJs($mode = FALSE)
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeGetJs', $this);
 
 		$return = $this->compress && Core::moduleIsActive('compression')
-			? $this->_getJsCompressed($async)
+			? $this->_getJsCompressed($mode)
 			: $this->_getJs();
 
 		$this->js = array();
@@ -402,15 +402,15 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show block of linked JS and clear added JS list
-	 * @param boolean $async Run asynchronously, default FALSE
-	 * @return Core_Page
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @return self
 	 * @hostcms-event Core_Page.onBeforeShowJs
 	 */
-	public function showJs($async = FALSE)
+	public function showJs($mode = FALSE)
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShowJs', $this);
 
-		echo $this->getJs($async);
+		echo $this->getJs($mode);
 		return $this;
 	}
 
@@ -428,18 +428,41 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime($sPath)
 				: NULL;
 
-			$sReturn .= '<script' . ($aJs[1] ? ' async="async"' : '') . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$sReturn .= '<script' . $this->_getMode($aJs[1]) . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 
 		return $sReturn;
 	}
 
 	/**
-	 * Get block of linked compressed js
-	 * @param boolean $async Run asynchronously, default FALSE
+	 * Get JS mode
+	 * @param $mode
 	 * @return string
 	 */
-	protected function _getJsCompressed($async = FALSE)
+	protected function _getMode($mode)
+	{
+		switch ($mode)
+		{
+			case TRUE:
+			case 'async':
+				$return = ' async="async"';
+			break;
+			case 'defer':
+				$return = ' defer="defer"';
+			break;
+			default:
+				$return = '';
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Get block of linked compressed js
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
+	 * @return string
+	 */
+	protected function _getJsCompressed($mode = FALSE)
 	{
 		try
 		{
@@ -453,15 +476,13 @@ class Core_Page extends Core_Servant_Properties
 				$oCompression_Controller->addJs($aJs[0]);
 			}
 
-			$sAsync = $async ? ' async="async"' : '';
-
 			$sPath = $oCompression_Controller->getPath();
 
 			$timestamp = $this->fileTimestamp && is_file(CMS_FOLDER . $sPath)
 				? filemtime(CMS_FOLDER . $sPath)
 				: NULL;
 
-			$sReturn .= '<script' . $sAsync . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$sReturn .= '<script' . $this->_getMode($mode) . ' src="' . $this->jsCDN . $sPath . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 		catch (Exception $e)
 		{
@@ -473,7 +494,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show page title
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function showTitle()
 	{
@@ -483,7 +504,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show page description
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function showDescription()
 	{
@@ -493,7 +514,7 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Show page keywords
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function showKeywords()
 	{
@@ -504,7 +525,7 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Add templates
 	 * @param Template_Model $oTemplate Template
-	 * @return Core_Page
+	 * @return self
 	 */
 	public function addTemplates(Template_Model $oTemplate)
 	{
@@ -523,6 +544,45 @@ class Core_Page extends Core_Servant_Properties
 		$this->css = array_merge($this->css, array_reverse($aCss));
 
 		$this->js = array_merge($this->js, array_reverse($aJs));
+
+		return $this;
+	}
+
+	/**
+	 * Prepare Core_Page by Structure
+	 * @param Structure_Model $oStructure
+	 * @return self
+	 */
+	public function prepareByStructure(Structure_Model $oStructure)
+	{
+		if ($oStructure->type == 0)
+		{
+			$this->template($oStructure->Document->Template);
+		}
+		// Если динамическая страница или типовая дин. страница
+		elseif ($oStructure->type == 1 || $oStructure->type == 2)
+		{
+			$this->template($oStructure->Template);
+		}
+
+		if ($oStructure->type == 2)
+		{
+			$this->libParams
+				= $oStructure->Lib->getDat($oStructure->id);
+
+			$LibConfig = $oStructure->Lib->getLibConfigFilePath();
+
+			if (is_file($LibConfig) && is_readable($LibConfig))
+			{
+				include $LibConfig;
+			}
+		}
+
+		$this
+			->structure($oStructure)
+			->addChild($oStructure->getRelatedObjectByType());
+
+		$oStructure->setCorePageSeo($this);
 
 		return $this;
 	}
@@ -547,18 +607,7 @@ class Core_Page extends Core_Servant_Properties
 				throw new Core_Exception('Structure 403 not found');
 			}
 
-			if ($oStructure->type == 0)
-			{
-				$this->template($oStructure->Document->Template);
-			}
-			// Если динамическая страница или типовая дин. страница
-			elseif ($oStructure->type == 1 || $oStructure->type == 2)
-			{
-				$this->template($oStructure->Template);
-			}
-
-			$this->addChild($oStructure->getRelatedObjectByType());
-			$oStructure->setCorePageSeo($this);
+			$this->prepareByStructure($oStructure);
 		}
 		else
 		{
@@ -592,34 +641,7 @@ class Core_Page extends Core_Servant_Properties
 				throw new Core_Exception('Structure 404 not found');
 			}
 
-			if ($oStructure->type == 0)
-			{
-				$this->template($oStructure->Document->Template);
-			}
-			// Если динамическая страница или типовая дин. страница
-			elseif ($oStructure->type == 1 || $oStructure->type == 2)
-			{
-				$this->template($oStructure->Template);
-			}
-
-			if ($oStructure->type == 2)
-			{
-				$this->libParams
-					= $oStructure->Lib->getDat($oStructure->id);
-
-				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
-
-				if (is_file($LibConfig) && is_readable($LibConfig))
-				{
-					include $LibConfig;
-				}
-			}
-
-			$this
-				->structure($oStructure)
-				->addChild($oStructure->getRelatedObjectByType());
-
-			$oStructure->setCorePageSeo($this);
+			$this->prepareByStructure($oStructure);
 
 			// Если уже идет генерация страницы, то добавленный потомок не будет вызван
 			$this->buildingPage && $this->execute();

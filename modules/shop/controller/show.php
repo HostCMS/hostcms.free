@@ -37,6 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
  * - siteuser(TRUE|FALSE) показывать данные о пользователе сайта, связанного с выбранным товаром, по умолчанию TRUE
  * - siteuserProperties(TRUE|FALSE) выводить значения дополнительных свойств пользователей сайта, по умолчанию FALSE
+ * - sets(TRUE|FALSE) показывать состав комплектов товаров, по умолчанию TRUE
  * - bonuses(TRUE|FALSE) выводить бонусы для товаров, по умолчанию TRUE
  * - barcodes(TRUE|FALSE) выводить штрихкоды для товаров, по умолчанию FALSE
  * - comparing(TRUE|FALSE) выводить сравниваемые товары, по умолчанию TRUE
@@ -85,7 +86,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Show extends Core_Controller
 {
@@ -118,6 +119,7 @@ class Shop_Controller_Show extends Core_Controller
 		'calculateCounts',
 		'siteuser',
 		'siteuserProperties',
+		'sets',
 		'bonuses',
 		'barcodes',
 		'comparing',
@@ -287,7 +289,7 @@ class Shop_Controller_Show extends Core_Controller
 			= $this->barcodes = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->groupsPropertiesList
-			= $this->bonuses = $this->comparing = $this->favorite = $this->viewed
+			= $this->bonuses = $this->sets = $this->comparing = $this->favorite = $this->viewed
 			= $this->votes = $this->showPanel = $this->calculateTotal = TRUE;
 
 		$this->viewedLimit = $this->comparingLimit = $this->favoriteLimit = 10;
@@ -312,6 +314,8 @@ class Shop_Controller_Show extends Core_Controller
 			$hostcmsFavorite = Core_Array::get(Core_Array::getSession('hostcmsFavorite', array()), $oShop->id, array());
 			count($hostcmsFavorite) && $this->addCacheSignature('hostcmsFavorite=' . implode(',', $hostcmsFavorite));
 		}
+		
+		 isset($_SESSION['hostcmsOrder']['coupon_text']) && $this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
 	}
 
 	/**
@@ -570,6 +574,7 @@ class Shop_Controller_Show extends Core_Controller
 				if (!is_null($oShop_Item->id))
 				{
 					$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
+					!$this->sets && $oShop_Item->showXmlSets($this->sets);
 					$oCompareEntity->addEntity($oShop_Item->clearEntities());
 				}
 			}
@@ -627,14 +632,20 @@ class Shop_Controller_Show extends Core_Controller
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 				if (!is_null($oShop_Item->id))
 				{
-					$this->applyItemsForbiddenTags($oShop_Item);
+					$oFavorite_Shop_Item = clone $oShop_Item;
+					$oFavorite_Shop_Item
+						->id($oShop_Item->id)
+						->showXmlProperties($this->itemsProperties)
+						->showXmlBonuses($this->bonuses)
+						->showXmlSpecialprices($this->specialprices);
 
-					$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
-					$this->bonuses && $oShop_Item->showXmlBonuses($this->bonuses);
+					!$this->sets && $oFavorite_Shop_Item->showXmlSets($this->sets);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oShop_Item));
+					$this->applyItemsForbiddenTags($oFavorite_Shop_Item);
 
-					$oFavouriteEntity->addEntity($oShop_Item);
+					Core_Event::notify(get_class($this) . '.onBeforeAddFavoriteEntity', $this, array($oFavorite_Shop_Item));
+
+					$oFavouriteEntity->addEntity($oFavorite_Shop_Item);
 				}
 			}
 		}
@@ -692,17 +703,21 @@ class Shop_Controller_Show extends Core_Controller
 
 				if (!is_null($oShop_Item->id) /*&& $oShop_Item->id != $this->item*/ && $oShop_Item->active)
 				{
-					$this->applyItemsForbiddenTags($oShop_Item);
-
-					$oShop_Item
+					$oViewed_Shop_Item = clone $oShop_Item;
+					$oViewed_Shop_Item
+						->id($oShop_Item->id)
 						->showXmlProperties($this->itemsProperties)
 						->showXmlComments($this->comments)
 						->showXmlBonuses($this->bonuses)
 						->showXmlSpecialprices($this->specialprices);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oShop_Item));
+					$this->applyItemsForbiddenTags($oViewed_Shop_Item);
 
-					$oViewedEntity->addEntity($oShop_Item);
+					!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
+						
+					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
+
+					$oViewedEntity->addEntity($oViewed_Shop_Item);
 				}
 			}
 		}
@@ -797,9 +812,9 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$this->showPanel && Core::checkPanel() && $this->_showPanel();
+		$this->showPanel && Core::checkPanel() && in_array($this->_mode, array('xsl', 'tpl')) && $this->_showPanel();
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->item && $this->_incShowed();
 
@@ -871,8 +886,12 @@ class Shop_Controller_Show extends Core_Controller
 						$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 						if (!is_null($oShop_Item->id) && $oShop_Item->active)
 						{
+							$this->applyItemsForbiddenTags($oShop_Item->clearEntities());
+
 							$this->itemsProperties && $oShop_Item->showXmlProperties($this->itemsProperties);
-							$oCartEntity->addEntity($oShop_Item->clearEntities());
+							!$this->sets && $oShop_Item->showXmlSets($this->sets);
+
+							$oCartEntity->addEntity($oShop_Item);
 						}
 					}
 				}
@@ -881,7 +900,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aShop_Items', array());
@@ -953,7 +972,7 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Group_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_group_properties');
@@ -1034,7 +1053,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				$oShop_Item->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					// Ярлык может ссылаться на отключенный товар
 					$desiredActivity = strtolower($this->itemsActivity) == 'active'
@@ -1090,6 +1109,7 @@ class Shop_Controller_Show extends Core_Controller
 						$oShop_Item->showXmlVotes($this->votes);
 
 						$oShop_Item->showXmlProperties($mShowPropertyIDs);
+						!$this->sets && $oShop_Item->showXmlSets($this->sets);
 
 						// Siteuser
 						$oShop_Item->showXmlSiteuser($this->siteuser)
@@ -1107,6 +1127,7 @@ class Shop_Controller_Show extends Core_Controller
 								->showXmlModifications($this->modifications)
 								->showXmlSpecialprices($this->specialprices)
 								->showXmlVotes($this->votes)
+								->showXmlSets($this->sets)
 						);
 					}
 				}
@@ -1144,7 +1165,7 @@ class Shop_Controller_Show extends Core_Controller
 
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		//if ($this->itemsProperties)
 		//{
@@ -1168,7 +1189,7 @@ class Shop_Controller_Show extends Core_Controller
 
 				$this->_aItem_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$oProperty->addEntity(
 						Core::factory('Core_Xml_Entity')->name('prefix')->value($oShop_Item_Property->prefix)
@@ -1200,7 +1221,7 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_item_properties');
@@ -2177,25 +2198,28 @@ class Shop_Controller_Show extends Core_Controller
 								->title($sTitle)
 						)
 				);
+			}
 
-				// Folder
-				$sPath = '/admin/shop/item/index.php';
-				$sAdditional = "shop_id={$oShop->id}&shop_group_id={$this->group}";
-				$sTitle = Core::_('Shop_Group.links_groups');
+			// Folder
+			$sPath = '/admin/shop/item/index.php';
+			$sAdditional = "shop_id={$oShop->id}&shop_group_id={$this->group}";
+			$sTitle = Core::_('Shop_Group.links_groups');
 
-				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
-						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
-						->add(
-							Core::factory('Core_Html_Entity_Img')
-								->width(16)->height(16)
-								->src('/admin/images/folder.gif')
-								->alt($sTitle)
-								->title($sTitle)
-						)
-				);
+			$oXslSubPanel->add(
+				Core::factory('Core_Html_Entity_A')
+					->href("{$sPath}?{$sAdditional}")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->add(
+						Core::factory('Core_Html_Entity_Img')
+							->width(16)->height(16)
+							->src('/admin/images/folder.gif')
+							->alt($sTitle)
+							->title($sTitle)
+					)
+			);
 
+			if ($this->group)
+			{
 				// Delete
 				$sPath = '/admin/shop/item/index.php';
 				$sAdditional = "hostcms[action]=markDeleted&shop_id={$oShop->id}&shop_group_id={$oShop_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
@@ -2217,7 +2241,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			$sPath = '/admin/shop/index.php';
 			$sAdditional = "hostcms[action]=edit&shop_dir_id={$oShop->shop_dir_id}&hostcms[checked][1][{$oShop->id}]=1";
-			$sTitle = Core::_('Shop.edit_title');
+			$sTitle = Core::_('Shop.edit_title', $oShop->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')

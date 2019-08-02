@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -25,6 +25,8 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Lib.menu_list'))
 	->pageTitle(Core::_('Lib.menu_list'));
+
+$lib_dir_id = intval(Core_Array::getGet('lib_dir_id', 0));
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -67,10 +69,29 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
-// Строка навигации
-$lib_dir_id = intval(Core_Array::getGet('lib_dir_id', 0));
+$additionalParams = 'lib_dir_id=' . $lib_dir_id;
 
-// Элементы строки навигации
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+
+// Строка навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -175,12 +196,20 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib_Dir')
 );
 
-// Ограничение источника 0 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('parent_id', '=', $lib_dir_id)
-	)
-);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('lib_dirs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('lib_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('lib_dirs.parent_id', '=', $lib_dir_id)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -192,12 +221,23 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib')
 );
 
-// Ограничение источника 1 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('lib_dir_id', '=', $lib_dir_id)
-	)
-)->changeField('name', 'type', 1);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('libs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('libs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('libs.lib_dir_id', '=', $lib_dir_id)));
+}
+
+$oAdmin_Form_Dataset
+	->changeField('name', 'type', 1);
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

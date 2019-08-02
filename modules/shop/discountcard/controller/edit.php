@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -74,7 +74,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			$oMainRow2
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12 col-sm-3 no-padding')
+						->class('form-group col-xs-12 col-sm-6 col-lg-3 no-padding')
 						->add($oSiteuserSelect)
 				);
 
@@ -87,7 +87,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$oMainRow2->add(
 			Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Discountcard.shop_discountcard_level_id'))
-				->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-3'))
 				->options($this->fillLevels($this->_object->Shop))
 				->name('shop_discountcard_level_id')
 				->value($this->_object->shop_discountcard_level_id)
@@ -112,7 +112,7 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
 		$bSiteuser = $this->_object->siteuser_id == 0;
-		
+
 		parent::_applyObjectProperty();
 
 		$bSiteuser && $this->_object->setSiteuserAmount()->save();

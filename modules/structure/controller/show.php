@@ -45,7 +45,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -211,6 +211,28 @@ class Structure_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Set _Shops set
+	 * @param array $array
+	 * @return self
+	 */
+	public function setShops(array $array)
+	{
+		$this->_Shops = $array;
+		return $this;
+	}
+
+	/**
+	 * Set _Informationsystems set
+	 * @param array $array
+	 * @return self
+	 */
+	public function setInformationsystems(array $array)
+	{
+		$this->_Informationsystems = $array;
+		return $this;
+	}
+
+	/**
 	 * Check if data is cached
 	 * @return NULL|TRUE|FALSE
 	 */
@@ -251,7 +273,7 @@ class Structure_Controller_Show extends Core_Controller
 			$this->_aTags = array('structure_' . intval($this->parentId));
 		}
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
@@ -311,7 +333,7 @@ class Structure_Controller_Show extends Core_Controller
 		}
 
 		// XSL
-		if ($bXsl)
+		if (!$bTpl)
 		{
 			$this->_addStructuresByParentId($this->parentId, $this);
 		}
@@ -335,6 +357,7 @@ class Structure_Controller_Show extends Core_Controller
 	/**
 	 * Select informationsystems
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onAfterSelectInformationsystems
 	 */
 	protected function _selectInformationsystems()
 	{
@@ -346,12 +369,15 @@ class Structure_Controller_Show extends Core_Controller
 			$oInformationsystem->structure_id && $this->_Informationsystems[$oInformationsystem->structure_id] = $oInformationsystem;
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterSelectInformationsystems', $this, array($this->_Informationsystems));
+
 		return $this;
 	}
 
 	/**
 	 * Select shops
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onAfterSelectShops
 	 */
 	protected function _selectShops()
 	{
@@ -362,6 +388,8 @@ class Structure_Controller_Show extends Core_Controller
 		{
 			$oShop->structure_id && $this->_Shops[$oShop->structure_id] = $oShop;
 		}
+
+		Core_Event::notify(get_class($this) . '.onAfterSelectShops', $this, array($this->_Shops));
 
 		return $this;
 	}

@@ -32,7 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 {
@@ -237,7 +237,7 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 		{
 			$sql .= ' OFFSET ' . $this->_offset;
 		}*/
-
+		
 		return $sql;
 	}
 

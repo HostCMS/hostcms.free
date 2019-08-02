@@ -7,5 +7,6 @@ var i18n =
 "some_letter2": "letters",
 "current_length": "Current length is",
 "wrong_value_format": "Wrong value format.",
-"different_fields_value": "The fields value are different"
+"different_fields_value": "The fields value are different",
+"lock_message": "Form changed! Are you sure you want to leave page without saving?"
 };

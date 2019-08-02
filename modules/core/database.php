@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -146,7 +146,7 @@ abstract class Core_DataBase
 
 		return $return;
 	}
-	
+
 	/**
 	 * Get list of columns in a table
 	 *
@@ -405,7 +405,7 @@ abstract class Core_DataBase
 	}
 
 	/**
-	 * Get current config array
+	 * Get current config array (without username and password)
 	 * @return array
 	 */
 	public function getConfig()
@@ -736,7 +736,7 @@ abstract class Core_DataBase
 			case 'numeric unsigned':
 			case 'decimal':
 			case 'decimal unsigned':
-				$type = 'float';
+				$type = 'decimal';
 				$fixed = TRUE;
 			break;
 			case 'bit':
@@ -810,13 +810,13 @@ abstract class Core_DataBase
 	{
 		return $this->_lastQuery;
 	}
-	
+
 	protected $_likeReplacements = array(
 		'%' => '\%',
 		'_' => '\_',
 		'\\' => '\\\\'
 	);
-	
+
 	/**
 	 * Escape value in LIKE conditions
 	 * @param string $value

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -80,7 +80,8 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$this->getField('description')
-					->wysiwyg(TRUE);
+					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				if (!$this->_object->id)
 				{
@@ -174,20 +175,19 @@ class Tag_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		switch ($modelName)
 		{
 			case 'tag':
-
-			if (!$id)
-			{
-				foreach ($aTags as $tag_name)
+				if (!$id)
 				{
-					$tag_name = trim($tag_name);
+					foreach ($aTags as $tag_name)
+					{
+						$tag_name = trim($tag_name);
 
-					$oNewTag = clone $this->_object;
+						$oNewTag = clone $this->_object;
 
-					$oNewTag->name = $tag_name;
-					$oNewTag->path = '';
-					$oNewTag->save();
+						$oNewTag->name = $tag_name;
+						$oNewTag->path = '';
+						$oNewTag->save();
+					}
 				}
-			}
 			break;
 		}
 

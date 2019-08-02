@@ -9,10 +9,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
  * - calculateCounts(TRUE|FALSE) вычислять общее количество товаров и групп в корневой группе, по умолчанию FALSE
+ * - applyDiscounts(TRUE|FALSE) применять скидки от суммы заказа, по умолчанию TRUE
+ * - applyDiscountCards(TRUE|FALSE) применять дисконтные карты, по умолчанию TRUE
  *
  * Доступные свойства:
  *
@@ -37,7 +40,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -49,6 +52,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'couponText',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'warehousesItems',
 		'taxes',
 		'specialprices',
 		'associatedItems',
@@ -58,6 +62,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'quantity',
 		'weight',
 		'calculateCounts',
+		'applyDiscounts',
+		'applyDiscountCards',
 	);
 
 	/**
@@ -126,7 +132,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		$this->itemsProperties = $this->taxes = $this->specialprices
 			= $this->calculateCounts = $this->associatedItems = FALSE;
 
-		$this->itemsPropertiesList = TRUE;
+		$this->itemsPropertiesList = $this->warehousesItems
+			= $this->applyDiscounts = $this->applyDiscountCards = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
 	}
@@ -149,7 +156,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$oShop = $this->getEntity();
 
@@ -169,7 +176,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->value(Core::moduleIsActive('siteuser') ? 1 : 0)
 		);
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aShop_Carts', array());
@@ -204,7 +211,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Shop_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('shop_item_properties');
@@ -241,11 +248,12 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
 			if (!is_null($oShop_Item->id))
 			{
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					$this->addEntity(
 						$oShop_Cart
 							->clearEntities()
+							->showXmlWarehousesItems($this->warehousesItems)
 							->showXmlProperties($this->itemsProperties)
 							->showXmlSpecialprices($this->specialprices)
 							->showXmlAssociatedItems($this->associatedItems)
@@ -300,10 +308,13 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
+		$this->taxes && $oShop->showXmlTaxes(TRUE);
+
 		// Дисконтная карта
 		$bApplyMaxDiscount = FALSE;
 		$fDiscountcard = 0;
-		if (Core::moduleIsActive('siteuser') && $this->_oSiteuser)
+
+		if ($this->applyDiscountCards && Core::moduleIsActive('siteuser') && $this->_oSiteuser)
 		{
 			$oSiteuser = $this->_oSiteuser;
 
@@ -318,60 +329,62 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
 			}
 		}
-		
-		// Скидки от суммы заказа
-		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
-		$oShop_Purchase_Discount_Controller
-			->amount($amountPurchaseDiscount)
-			->quantity($quantityPurchaseDiscount)
-			->couponText($this->couponText)
-			->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
-			->prices($aDiscountPrices);
 
-		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
-		
-		// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
-		if ($bApplyMaxDiscount)
-		{
-			$totalPurchaseDiscount = 0;
-
-			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-			{
-				$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
-			}
-
-			$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
-		}
-		else
-		{
-			$bApplyShopPurchaseDiscounts = TRUE;
-		}
-		
 		$fAppliedDiscountsAmount = 0;
-		
-		// Если решили применять скидку от суммы заказа
-		if ($bApplyShopPurchaseDiscounts)
+		$bApplyShopPurchaseDiscounts = FALSE;
+
+		if ($this->applyDiscounts)
 		{
-			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+			// Скидки от суммы заказа
+			$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
+			$oShop_Purchase_Discount_Controller
+				->amount($amountPurchaseDiscount)
+				->quantity($quantityPurchaseDiscount)
+				->couponText($this->couponText)
+				->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
+				->prices($aDiscountPrices);
+
+			$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
+
+			// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
+			if ($bApplyMaxDiscount)
 			{
-				if ($bXsl)
+				$totalPurchaseDiscount = 0;
+
+				foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
 				{
-					$this->addEntity($oShop_Purchase_Discount->clearEntities());
-				}
-				else
-				{
-					$this->append('aShop_Purchase_Discounts', $oShop_Purchase_Discount);
+					$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
 				}
 
-				$fAppliedDiscountsAmount += $oShop_Purchase_Discount->getDiscountAmount();
+				$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
 			}
+			else
+			{
+				$bApplyShopPurchaseDiscounts = TRUE;
+			}
+
+			// Если решили применять скидку от суммы заказа
+			if ($bApplyShopPurchaseDiscounts)
+			{
+				foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+				{
+					if (!$bTpl)
+					{
+						$this->addEntity($oShop_Purchase_Discount->clearEntities());
+					}
+					else
+					{
+						$this->append('aShop_Purchase_Discounts', $oShop_Purchase_Discount);
+					}
+
+					$fAppliedDiscountsAmount += $oShop_Purchase_Discount->getDiscountAmount();
+				}
+			}
+
+			// Скидка больше суммы заказа
+			$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
 		}
-
-		$this->taxes && $oShop->showXmlTaxes(TRUE);
-
-		// Скидка больше суммы заказа
-		$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
-
+		
 		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
 		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
 		{
@@ -384,8 +397,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					$oShop_Discountcard->discountAmount(
 						Shop_Controller::instance()->round($fAmountForCard * ($oShop_Discountcard_Level->discount / 100))
 					);
-					
-					if ($bXsl)
+
+					if (!$bTpl)
 					{
 						$this->addEntity($oShop_Discountcard->clearEntities());
 					}
@@ -393,7 +406,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					{
 						$this->append('aShop_Discountcards', $oShop_Discountcard);
 					}
-					
+
 					$fAppliedDiscountsAmount += $oShop_Discountcard->getDiscountAmount();
 				}
 			}
@@ -401,7 +414,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		// Скидка больше суммы заказа
 		$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
-		
+
 		$this->amount = $amount - $fAppliedDiscountsAmount;
 		$this->tax = $tax;
 		$this->quantity = $quantity;
@@ -412,6 +425,10 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('total_amount')
 				->value($this->amount)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_discount')
+				->value($fAppliedDiscountsAmount)
 		)->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('total_tax')

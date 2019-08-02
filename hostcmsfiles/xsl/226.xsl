@@ -8,7 +8,7 @@
 
 	<!-- ЛентаЛичныхСообщений -->
 	<xsl:template match="/">
-		<SCRIPT type="text/javascript">
+		<script>
 			<xsl:comment>
 				<xsl:text disable-output-escaping="yes">
 					<![CDATA[
@@ -18,7 +18,7 @@
 					]]>
 				</xsl:text>
 			</xsl:comment>
-		</SCRIPT>
+		</script>
 
 		<div id="siteuser_messages">
 			<xsl:apply-templates select="siteuser"/>

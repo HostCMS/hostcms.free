@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -133,7 +133,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_prepareForm();
 
 		Core_Event::notify('Property_Controller_Edit.onBeforePrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
-		
+
 		$bNewProperty = !$this->_object->id;
 
 		$modelName = $this->_object->getModelName();
@@ -275,7 +275,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this->getField('description')
 					->divAttr(array('class' => 'form-group col-xs-12'))
-					->wysiwyg(TRUE);
+					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'));
 
 				$oMainTab->move($this->getField('description'), $oMainRow6);
 
@@ -418,7 +419,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->title($title);
 
 		Core_Event::notify('Property_Controller_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
-		
+
 		return $this;
 	}
 

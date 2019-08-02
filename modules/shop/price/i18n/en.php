@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store prices',
@@ -28,4 +28,5 @@ return array(
 	'markDeleted_success' => "Price information deleted successfully!",
 	'apply_success' => "Information successfully changed",
 	'recount_success' => "Price recount successfully!",
+	'set_prices' => "Set prices",
 );

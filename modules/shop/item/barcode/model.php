@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Barcode_Model extends Core_Entity
 {
@@ -20,12 +20,12 @@ class Shop_Item_Barcode_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'shop_item' => array(),
 	);
-	
+
 	/**
 	 * Column consist item's name
 	 * @var string
 	 */
-	protected $_nameColumn = 'value';	
+	protected $_nameColumn = 'value';
 
 	/**
 	 * Set barcode type
@@ -156,9 +156,9 @@ class Shop_Item_Barcode_Model extends Core_Entity
 	{
 		$calculation = 0;
 
-		for ($i = 0; $i < (strlen($value) - 1); $i++)
+		for ($i = 0; $i < strlen($value) - 1; $i++)
 		{
-			$calculation += $i % 2 ? $value{$i} * 1 : $value{$i} * 3;
+			$calculation += $i % 2 ? $value{$i} * 3 : $value{$i};
 		}
 
 		return substr(10 - substr($calculation, -1), -1) == substr($value, -1);
@@ -229,20 +229,4 @@ class Shop_Item_Barcode_Model extends Core_Entity
 
 		return array_search($calculation % 43, $aDigitsReference);
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

@@ -6,7 +6,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -149,6 +149,7 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 		))
 		->where('shop_orders.shop_id', '=', $oShop->id)
 		->where('shop_orders.canceled', '=', 0)
+		->where('shop_orders.deleted', '=', 0)
 		->where('shop_orders.datetime', '>=', $sDateFrom)
 		->where('shop_orders.datetime', '<=', $sDateTo)
 		->groupBy('date_title')
@@ -441,7 +442,6 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 						}
 
 					},
-
 					{
 						color: themesecondary,
 						label: '<?php echo Core::_('Shop_Item.form_sales_order_count_items')?>',
@@ -481,7 +481,7 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 							show: true
 						},
 						yaxis: 2
-					},
+					}
 				];
 
 				var options = {
@@ -523,8 +523,23 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 						}
 					}
 				};
-				var placeholder = $("#shopOrdersReportDiagram");
-				var plot = $.plot(placeholder, shopOrdersReportDiagramData, options);
+				
+				var aScripts = [
+					'jquery.flot.js',
+					'jquery.flot.time.min.js',
+					'jquery.flot.categories.min.js',
+					'jquery.flot.tooltip.min.js',
+					'jquery.flot.crosshair.min.js',
+					'jquery.flot.resize.js',
+					'jquery.flot.selection.min.js',
+					'jquery.flot.pie.min.js'
+				];
+
+				$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+					// all scripts loaded
+					var placeholder = $("#shopOrdersReportDiagram");
+					var plot = $.plot(placeholder, shopOrdersReportDiagramData, options);
+				});
 			});
 		</script>
 		<?php
@@ -609,14 +624,14 @@ else
 				->options($aPaySystems)
 				->caption(Core::_('Shop_Item.form_sales_order_sop'))
 				->name('shop_system_of_pay_id')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 		)
 		->add(
 			Admin_Form_Entity::factory('Select')
 				->options($aOrderStatuses)
 				->caption(Core::_('Shop_Item.form_sales_order_status'))
 				->name('shop_order_status_id')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 		)
 	);
 
@@ -633,7 +648,7 @@ else
 			->name('siteuser_id')
 			->class('siteuser-tag')
 			->style('width: 100%')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 		$oMainRow1->add($oSiteuserSelect);
 
@@ -653,7 +668,7 @@ else
 			->options($aSellers)
 			->caption(Core::_('Shop_Item.form_sales_order_sallers'))
 			->name('shop_seller_id')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 	);
 
 	$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')->add(

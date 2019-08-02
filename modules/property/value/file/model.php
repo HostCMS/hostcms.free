@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_File_Model extends Core_Entity
 {
@@ -149,12 +149,15 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$path = $this->getLargeFilePath();
 
-		if ($this->file != '' && is_file($path))
+		if ($this->file != '')
 		{
-			try
+			if (is_file($path))
 			{
-				Core_File::delete($path);
-			} catch (Exception $e) {}
+				try
+				{
+					Core_File::delete($path);
+				} catch (Exception $e) {}
+			}
 
 			$this->file = '';
 			$this->file_name = '';
@@ -190,12 +193,15 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$path = $this->getSmallFilePath();
 
-		if ($this->file_small != '' && is_file($path))
+		if ($this->file_small != '')
 		{
-			try
+			if (is_file($path))
 			{
-				Core_File::delete($path);
-			} catch (Exception $e) {}
+				try
+				{
+					Core_File::delete($path);
+				} catch (Exception $e) {}
+			}
 
 			$this->file_small = '';
 			$this->file_small_name = '';
@@ -220,6 +226,31 @@ class Property_Value_File_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property_value_file.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
 		if (!is_null($this->_href))
@@ -294,7 +325,7 @@ class Property_Value_File_Model extends Core_Entity
 			->addXmlTag('property_dir_id', $this->Property->property_dir_id)
 			->addXmlTag('tag_name', $this->Property->tag_name);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

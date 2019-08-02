@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -92,6 +92,13 @@ class Structure_Model extends Core_Entity
 		'user_id',
 		'options'
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.
@@ -666,6 +673,31 @@ class Structure_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event structure.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('link', $this->getPath())
 			->addXmlTag('dir', Core_Page::instance()->structureCDN . '/' . $this->getDirHref());
@@ -678,7 +710,7 @@ class Structure_Model extends Core_Entity
 			$this->addEntities($this->getPropertyValues());
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -715,12 +747,12 @@ class Structure_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' .
 			$this->id . ' ' .
 			htmlspecialchars($this->seo_title) . ' ' .

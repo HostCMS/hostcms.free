@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,11 +20,9 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	 */
 	public function setObject($object)
 	{
-		$oShopItem = Core_Entity::factory('Shop', Core_Array::getGet('shop_item_id', 0));
-
 		if (!$object->id)
 		{
-			$object->shop_item_id = $oShopItem->id;
+			$object->shop_item_id = intval(Core_Array::getGet('shop_item_id', 0));
 		}
 
 		$this->addSkipColumn('filename');
@@ -32,6 +30,16 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
+		$oAdditionalTab = $this->getTab('additional');
+
+		$oMainTab
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$oMainTab
+			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
+			->move($this->getField('value')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 		$oImageField = Admin_Form_Entity::factory('File');
 
@@ -49,22 +57,24 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oImageField
-			->style("width: 400px;")
 			->name("image")
 			->id("image")
+			->divAttr(array('class' => 'form-group col-xs-12 col-xs-4'))
 			->largeImage(array(
-					'path' => $sFilePath,
-					'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteFile', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item_Digital.filename')
-				))
+				'path' => $sFilePath,
+				'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteFile', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item_Digital.filename')
+			))
 			->smallImage(array('show' => FALSE));
 
-		$oMainTab->addAfter($oImageField, $this->getField('value'));
+		$oMainRow3->add($oImageField);
 
-		$this->getField('count')->style("width: 110px");
+		$oMainTab->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-xs-2')), $oMainRow3);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Item.eitems_edit_title')
-			: Core::_('Shop_Item.eitems_add_title');
+			? Core::_('Shop_Item_Digital.eitems_edit_title', $this->_object->name)
+			: Core::_('Shop_Item_Digital.eitems_add_title');
+
+		$this->title($title);
 
 		return $this;
 	}

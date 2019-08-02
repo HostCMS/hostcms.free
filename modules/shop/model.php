@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -78,6 +78,7 @@ class Shop_Model extends Core_Entity
 		'deal' => array(),
 		'shop_discountcard' => array(),
 		'shop_discountcard_level' => array(),
+		'shop_price_setting' => array(),
 	);
 
 	/**
@@ -342,6 +343,7 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Item_Delivery_Options->deleteAll(FALSE);
 		$this->Shop_Discountcards->deleteAll(FALSE);
 		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
+		$this->Shop_Price_Settings->deleteAll(FALSE);
 
 		// Shop dir
 		Core_File::deleteDir($this->getPath());
@@ -682,6 +684,10 @@ class Shop_Model extends Core_Entity
 	/**
 	 * Recount items and subgroups
 	 * @return self
+	 * @hostcms-event shop.onBeforeRecount
+	 * @hostcms-event shop.onAfterRecount
+	 * @hostcms-event shop.onBeforeSelectCountGroupsInRecount
+	 * @hostcms-event shop.onBeforeSelectCountItemsInRecount
 	 */
 	public function recount()
 	{
@@ -693,11 +699,13 @@ class Shop_Model extends Core_Entity
 			@ini_set('max_execution_time', '90000');
 		}
 
+		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
+
 		$this->_groupsTree = array();
 		$queryBuilder = Core_QueryBuilder::select('id', 'parent_id')
 			->from('shop_groups')
 			->where('shop_groups.shop_id', '=', $shop_id)
-			->where('shop_groups.active', '=', 1)
+			//->where('shop_groups.active', '=', 1) // Пресчитываем для всех групп, включая отключенные
 			->where('shop_groups.deleted', '=', 0);
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
@@ -715,6 +723,8 @@ class Shop_Model extends Core_Entity
 			->where('shop_groups.active', '=', 1)
 			->where('shop_groups.deleted', '=', 0)
 			->groupBy('parent_id');
+
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountGroupsInRecount', $this, array($queryBuilder));
 
 		$aShop_Groups = $queryBuilder->execute()->asAssoc()->result();
 
@@ -741,6 +751,8 @@ class Shop_Model extends Core_Entity
 			->where('shop_items.deleted', '=', 0)
 			->groupBy('shop_group_id');
 
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountItemsInRecount', $this, array($queryBuilder));
+
 		$aShop_Items = $queryBuilder->execute()->asAssoc()->result();
 		foreach ($aShop_Items as $Shop_Item)
 		{
@@ -757,46 +769,9 @@ class Shop_Model extends Core_Entity
 
 		$this->_groupsTree = $this->_cacheGroups = $this->_cacheItems = array();
 
-		return $this;
-	}
-
-	/**
-	 * Recount sets
-	 * @return self
-	 */
-	public function recountSets()
-	{
-		$limit = 100;
-		$offset = 0;
-
-		do {
-			$oShop_Items = $this->Shop_Items;
-			$oShop_Items->queryBuilder()
-				->where('shop_items.type', '=', 3)
-				->limit($limit)
-				->offset($offset);
-
-			$aShop_Items = $oShop_Items->findAll(FALSE);
-
-			foreach ($aShop_Items as $oShop_Item)
-			{
-				$oShop_Item->recountSet();
-			}
-
-			$offset += $limit;
-		}
-		while (count($aShop_Items));
+		Core_Event::notify($this->_modelName . '.onAfterRecount', $this);
 
 		return $this;
-	}
-
-	/**
-	 * Delete empty groups in UPLOAD path for shop
-	 */
-	public function deleteEmptyDirs()
-	{
-		Core_File::deleteEmptyDirs($this->getPath());
-		return FALSE;
 	}
 
 	/**
@@ -849,6 +824,52 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
+	 * Recount sets
+	 * @return self
+	 * @hostcms-event shop.onBeforeRecountSets
+	 * @hostcms-event shop.onAfterRecountSets
+	 */
+	public function recountSets()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRecountSets', $this);
+
+		$limit = 100;
+		$offset = 0;
+
+		do {
+			$oShop_Items = $this->Shop_Items;
+			$oShop_Items->queryBuilder()
+				->where('shop_items.shortcut_id', '=', 0)
+				->where('shop_items.type', '=', 3)
+				->limit($limit)
+				->offset($offset);
+
+			$aShop_Items = $oShop_Items->findAll(FALSE);
+
+			foreach ($aShop_Items as $oShop_Item)
+			{
+				$oShop_Item->recountSet();
+			}
+
+			$offset += $limit;
+		}
+		while (count($aShop_Items));
+
+		Core_Event::notify($this->_modelName . '.onAfterRecountSets', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Delete empty groups in UPLOAD path for shop
+	 */
+	public function deleteEmptyDirs()
+	{
+		Core_File::deleteEmptyDirs($this->getPath());
+		return FALSE;
+	}
+
+	/**
 	 * Get first shop's admin email
 	 * @return string
 	 */
@@ -893,12 +914,37 @@ class Shop_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop.onBeforeRedeclaredGetXml
-	 * @hostcms-event shop.onBeforeSelectShopWarehouses
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 * @hostcms-event shop.onBeforeSelectShopWarehouses
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
@@ -959,7 +1005,7 @@ class Shop_Model extends Core_Entity
 				->addXmlTag('subgroups_total_count', $array['subgroups_total_count']);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -988,5 +1034,14 @@ class Shop_Model extends Core_Entity
 			->value('<i class="fa fa-file-o"></i> ' . $countShopItems)
 			->title(Core::_('Shop.all_items_count', $countShopItems))
 			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function pathBackend()
+	{
+		$this->structure_id && $this->Structure->pathBackend();
 	}
 }

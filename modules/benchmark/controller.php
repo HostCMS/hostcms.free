@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Controller
 {
@@ -285,7 +285,7 @@ class Benchmark_Controller
 		if (ini_get('allow_url_fopen'))
 		{
 			$startTime = Core::getmicrotime();
-			
+
 			$sFileContent = file_get_contents(self::$aConfig['benchmark_file_path']);
 
 			$fQueryTime = Core::getmicrotime() - $startTime;
@@ -296,7 +296,7 @@ class Benchmark_Controller
 				? abs(round((($iFileLen * 8) / 1024 / 1024) / $fQueryTime, 2))
 				: 0;
 		}
-		
+
 		return FALSE;
 	}
 
@@ -310,7 +310,7 @@ class Benchmark_Controller
 
 		$startTime = Core::getmicrotime();
 
-		@mail($oSite->getFirstEmail(), 'Performance test', self::$aConfig['sample_text']);
+		@mail($oSite->getErrorEmail(), 'Performance test', self::$aConfig['sample_text']);
 
 		return abs(round(Core::getmicrotime() - $startTime, 4));
 	}
@@ -346,6 +346,20 @@ class Benchmark_Controller
 	}
 
 	/**
+	 * Get DataBase Storage Engines
+	 * @return array
+	 */
+	static public function getStorageCharsets()
+	{
+		$aResult = Core_DataBase::instance()->setQueryType(9)
+			->query("SHOW CHARSET")
+			->asAssoc()
+			->result();
+
+		return $aResult;
+	}
+
+	/**
 	 * Get list of tables
 	 * @return array
 	 */
@@ -358,7 +372,7 @@ class Benchmark_Controller
 
 		return $aResult;
 	}
-	
+
 	/**
 	 * Show Benchmark JS-code
 	 */

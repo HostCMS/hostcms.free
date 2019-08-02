@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -40,49 +40,177 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
-		// Указание валюты не обязательно
-		$shop_currency_id = Core_Array::getGet('shop_currency_id');
-		$oShop_Currency = is_numeric($shop_currency_id) && $shop_currency_id > 0
-			? Core_Entity::factory('Shop_Currency', intval($shop_currency_id))
-			: $oShop->Shop_Currency;
+		$shop_warehouse_id = Core_Array::getGet('shop_warehouse_id');
+		$datetime = Core_Array::getGet('datetime');
 
-		$oShop_Controller = Shop_Controller::instance();
+		$aTypes = Core_Array::getGet('types', array('items'));
 
-		$oShop_Items = $oShop->Shop_Items;
-		$oShop_Items->queryBuilder()
-			->open()
-				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
-				->setOr()
-				->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
-				->setOr()
-				->where('shop_items.id', 'LIKE', $sQuery)
-			->close()
-			->limit(15);
-
-		$aShop_Items = $oShop_Items->findAll(FALSE);
-		foreach ($aShop_Items as $oShop_Item)
+		// Товары
+		if (in_array('items', $aTypes))
 		{
-			$oShop_Item_Controller = new Shop_Item_Controller();
-			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
-				? $oShop_Controller->getCurrencyCoefficientInShopCurrency(
-					$oShop_Item->Shop_Currency,
-					$oShop_Currency
-				)
-				: 0;
+			$aAllPricesIDs = array();
 
-			$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
+			$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
+			foreach ($aShop_Prices as $oShop_Price)
+			{
+				$aAllPricesIDs[] = $oShop_Price->id;
+			}
 
-			$aJSON[] = array(
-				'id' => $oShop_Item->id,
-				'label' => $oShop_Item->name,
-				'price' => $aPrice['price_tax'] - $aPrice['tax'],
-				'price_with_tax' => $aPrice['price_tax'],
-				'rate' => $aPrice['rate'],
-				'marking' => $oShop_Item->marking,
-				'currency_id' => $oShop_Currency->id,
-				'currency' => $oShop_Currency->name,
-				'count' => $oShop_Item->getRest()
-			);
+			// Указание валюты не обязательно
+			$shop_currency_id = Core_Array::getGet('shop_currency_id');
+			$oShop_Currency = is_numeric($shop_currency_id) && $shop_currency_id > 0
+				? Core_Entity::factory('Shop_Currency', intval($shop_currency_id))
+				: $oShop->Shop_Currency;
+
+			$oShop_Controller = Shop_Controller::instance();
+
+			$oShop_Items = $oShop->Shop_Items;
+			$oShop_Items->queryBuilder()
+				->open()
+					->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+					->setOr()
+					->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+					->setOr()
+					->where('shop_items.id', 'LIKE', $sQuery)
+				->close()
+				->limit(15);
+
+			$aShop_Items = $oShop_Items->findAll(FALSE);
+			foreach ($aShop_Items as $oShop_Item)
+			{
+				$oShop_Item_Controller = new Shop_Item_Controller();
+				$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
+					? $oShop_Controller->getCurrencyCoefficientInShopCurrency(
+						$oShop_Item->Shop_Currency,
+						$oShop_Currency
+					)
+					: 0;
+
+				$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
+
+				$measureName = $oShop_Item->shop_measure_id
+					? htmlspecialchars($oShop_Item->Shop_Measure->name)
+					: '';
+
+				$aPrices = array();
+				$aPrices[] = array('id' => 0, 'price' => $oShop_Item->price);
+
+				foreach ($aAllPricesIDs as $shop_price_id)
+				{
+					$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
+
+					$price = !is_null($oShop_Item_Price)
+						? $oShop_Item_Price->value
+						: $oShop_Item->price;
+
+					$aPrices[] = array('id' => $shop_price_id, 'price' => $price);
+				}
+
+				$aWarehouses = array();
+
+				//$rest = $oShop_Item->getRest();
+				$rest = 0;
+
+				/*$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->findAll(FALSE);
+				foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
+				{
+					$rest += $oShop_Warehouse_Item->count;
+
+					$aWarehouses[] = array(
+						'id' => $oShop_Warehouse_Item->shop_warehouse_id,
+						'count' => $oShop_Warehouse_Item->count
+					);
+				}*/
+				$aShop_Warehouses = $oShop_Item->Shop->Shop_Warehouses->findAll(FALSE);
+				foreach ($aShop_Warehouses as $oShop_Warehouse)
+				{
+					$count = $oShop_Warehouse->getRest($oShop_Item->id, $datetime);
+					is_null($count) && $count = 0;
+
+					$rest += $count;
+
+					$aWarehouses[] = array(
+						'id' => $oShop_Warehouse->id,
+						'count' => $count
+					);
+				}
+
+				$aJSON[] = array(
+					'type' => 'item',
+					'id' => $oShop_Item->id,
+					'label' => $oShop_Item->name,
+					'price' => $aPrice['price_tax'] - $aPrice['tax'],
+					'price_with_tax' => $aPrice['price_tax'],
+					'rate' => $aPrice['rate'],
+					'marking' => $oShop_Item->marking,
+					'currency_id' => $oShop_Currency->id,
+					'currency' => $oShop_Currency->name,
+					'measure' => $measureName,
+					'count' => $rest,
+					'aPrices' => $aPrices,
+					'aWarehouses' => $aWarehouses
+				);
+			}
+		}
+
+		// Доставки
+		if (in_array('deliveries', $aTypes))
+		{
+			$oShop_Deliveries = $oShop->Shop_Deliveries;
+			$oShop_Deliveries->queryBuilder()
+				->where('shop_deliveries.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_deliveries.active', '=', 1)
+				->limit(15);
+
+			$aShop_Deliveries = $oShop_Deliveries->findAll(FALSE);
+
+			foreach ($aShop_Deliveries as $oShop_Delivery)
+			{
+				$aJSON[] = array(
+					'type' => 'delivery',
+					'id' => $oShop_Delivery->id,
+					'label' => $oShop_Delivery->name,
+					'price' => '',
+					'price_with_tax' => '',
+					'rate' => 0,
+					'marking' => '',
+					'currency' => '',
+				);
+			}
+		}
+
+		// Скидки
+		if (in_array('discounts', $aTypes))
+		{
+			$datetime = Core_Date::timestamp2sql(time());
+
+			$oShop_Purchase_Discounts = $oShop->Shop_Purchase_Discounts;
+
+			$oShop_Purchase_Discounts->queryBuilder()
+				->where('shop_purchase_discounts.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_purchase_discounts.active', '=', 1)
+				->where('shop_purchase_discounts.start_datetime', '<=', $datetime)
+				->where('shop_purchase_discounts.end_datetime', '>=', $datetime)
+				->limit(15);
+
+			$aShop_Purchase_Discounts = $oShop_Purchase_Discounts->findAll(FALSE);
+
+			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+			{
+				$aJSON[] = array(
+					'type' => 'discount',
+					'id' => $oShop_Purchase_Discount->id,
+					'label' => $oShop_Purchase_Discount->name,
+					'price' => '',
+					'price_with_tax' => '',
+					'rate' => 0,
+					'marking' => '',
+					'currency' => '',
+					'discount_type' => $oShop_Purchase_Discount->type,
+					'discount_value' => $oShop_Purchase_Discount->value,
+					'discount_position' => $oShop_Purchase_Discount->position,
+				);
+			}
 		}
 	}
 

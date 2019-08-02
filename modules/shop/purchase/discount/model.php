@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -177,7 +177,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Purchase_Discount_Coupons->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -192,12 +192,37 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		$this->clearXmlTags()
-			->addXmlTag('discount_amount', $this->_discountAmount);
+		$this->_prepareData();
 
 		return parent::getXml();
 	}
-	
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_purchase_discount.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->clearXmlTags()
+			->addXmlTag('discount_amount', $this->_discountAmount);
+
+		return $this;
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -210,7 +235,38 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			? $this->value . '%'
 			: $this->value . htmlspecialchars($this->shop_currency_id ? ' ' . $this->Shop_Currency->name : '');
 	}
-	
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+			htmlspecialchars($this->name)
+		);
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		!$bRightTime && $oCore_Html_Entity_Div->class('wrongTime');
+
+		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
+		if (!$this->active)
+		{
+			$oCore_Html_Entity_Div->class('inactive');
+		}
+		elseif (!$bRightTime)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+				);
+		}
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -223,7 +279,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			? '—'
 			: $this->min_amount;
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field

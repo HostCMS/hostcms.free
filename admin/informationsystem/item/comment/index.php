@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -342,9 +342,8 @@ $bItem = !is_null($oInformationsystem_Item->id);
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('comments.*'))
-)
-->addCondition(
+	array('select' => array('comments.*', array(Core_QueryBuilder::expression('CONCAT_WS(\' \', `comments`.`subject`, `comments`.`text`)'), 'fulltext')))
+)->addCondition(
 	array('join' => array('comment_informationsystem_items', 'comments.id', '=', 'comment_informationsystem_items.comment_id'))
 );
 

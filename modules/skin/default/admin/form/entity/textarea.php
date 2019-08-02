@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 {
@@ -175,8 +175,10 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$this->_init['language_url'] = '"/admin/wysiwyg/langs/' . $lng . '.js"';
 				$this->_init['elements'] = '"' . $this->id . '"';
 
+				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]);}';
+
 				!isset($this->_init['height'])
-					&& $this->_init['height'] = '"' . ($this->rows * 30) . '"';
+					&& $this->_init['height'] = '"' . ($this->rows * 30) . 'px"';
 
 				// $this->_init['theme'] = '$(window).width() < 700 ? "inlite" : "modern"';
 

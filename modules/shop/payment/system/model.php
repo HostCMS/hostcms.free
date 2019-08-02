@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
@@ -237,7 +237,12 @@ class Shop_Payment_System_Model extends Core_Entity
 
 		try
 		{
-			Core_File::copy($this->getPaymentSystemFilePath(), $newObject->getPaymentSystemFilePath());
+			if (is_file($this->getPaymentSystemFilePath()))
+			{
+				$content = str_replace("Shop_Payment_System_Handler" . $this->id, "Shop_Payment_System_Handler" . $newObject->id, $this->loadPaymentSystemFile());
+
+				$newObject->savePaymentSystemFile($content);
+			}
 		} catch (Exception $e) {}
 
 		return $newObject;
@@ -252,8 +257,33 @@ class Shop_Payment_System_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
-		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
+		$this->_prepareData();
 
 		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_payment_system.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getHref());
+
+		return $this;
 	}
 }

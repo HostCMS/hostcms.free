@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -74,12 +74,21 @@ $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Order_Item.links_items_add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Order_Item.recount_discounts'))
+		->icon('fa fa-refresh')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'recountDiscount', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'recountDiscount', NULL, 0, 0)
 		)
 );
 
@@ -298,6 +307,21 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+$oAdminFormActionRecount = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('recountDiscount');
+
+if ($oAdminFormActionRecount && $oAdmin_Form_Controller->getAction() == 'recountDiscount')
+{
+	$Shop_Order_Item_Controller_Recount = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Item_Controller_Recount', $oAdminFormActionRecount
+	);
+
+	$Shop_Order_Item_Controller_Recount->shopOrder($oShop_Order);
+
+	$oAdmin_Form_Controller->addAction($Shop_Order_Item_Controller_Recount);
 }
 
 // Источник данных

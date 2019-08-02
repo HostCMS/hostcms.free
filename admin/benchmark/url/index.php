@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -161,7 +161,7 @@ else
 					<div class="col-xs-6 col-sm-9 col-md-10">
 						<span class="text sky" style="font-size: 12pt;"><?php echo Core::_('Benchmark.start_monitoring')?></span>
 					</div>
-					
+
 				</div>
 
 				<div class="row margin-top-10">
@@ -370,7 +370,6 @@ $(function(){
 		load_page_values_per_hour = [<?php echo implode(',', $aLoadPageValuesPerHour)?>],
 		dns_values_per_hour = [<?php echo implode(',', $aDnsValuesPerHour)?>],
 		server_values_per_hour = [<?php echo implode(',', $aServerValuesPerHour)?>];
-
 
 	for(var i = 0; i < load_dom_values_per_day.length; i++) {
 		valueTitlesLoadDomPerDay.push([new Date(titles_per_day[i]), load_dom_values_per_day[i]]);
@@ -590,8 +589,6 @@ $(function(){
 			bars:  {show: true},
 			points: {show: true}
 		},*/
-
-
 		legend: {
 			noColumns: 4,
 			backgroundOpacity: 0.65
@@ -637,56 +634,67 @@ $(function(){
 		}
 	};
 
+	var aScripts = [
+		'jquery.flot.js',
+		'jquery.flot.time.min.js',
+		'jquery.flot.categories.min.js',
+		'jquery.flot.tooltip.min.js',
+		'jquery.flot.crosshair.min.js',
+		'jquery.flot.resize.js',
+		'jquery.flot.selection.min.js',
+		'jquery.flot.pie.min.js'
+	];
 
-	var placeholderPerDay = $("#benchmark-month-chart"),
+	$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+		// all scripts loaded
+
+		var placeholderPerDay = $("#benchmark-month-chart"),
 		placeholderPerHour = $("#benchmark-day-chart");
 
-	placeholderPerDay.bind("plotselected", function (event, ranges) {
-
+		placeholderPerDay.bind("plotselected", function (event, ranges) {
 			plotPerDay = $.plot(placeholderPerDay, dataPerDay, $.extend(true, {}, optionsForDayGraph, {
 				xaxis: {
 					min: ranges.xaxis.from,
 					max: ranges.xaxis.to
 				}
 			}));
-	});
+		});
 
-	placeholderPerHour.bind("plotselected", function (event, ranges) {
-
+		placeholderPerHour.bind("plotselected", function (event, ranges) {
 			plotPerHour = $.plot(placeholderPerHour, dataPerHour, $.extend(true, {}, optionsForHourGraph, {
 				xaxis: {
 					min: ranges.xaxis.from,
 					max: ranges.xaxis.to
 				}
 			}));
-		//}
+		});
+
+		$('#benchmark_month #setOriginalZoom').on('click', function(){
+			plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph);
+		});
+
+		$('#benchmark_day #setOriginalZoom').on('click', function(){
+			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
+		});
+
+		var plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph),
+			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
+
+
+		$("#benchmark_month #clearSelection").click(function () {
+			plotPerDay.clearSelection();
+		});
+
+		$("#benchmark_day #clearSelection").click(function () {
+			plotPerHour.clearSelection();
+		});
+
+		// Вызываем однократно обработчик нажатия кнопки, для правильной отрисовки графика
+		$('.page-content').one('shown.bs.tab', 'a[data-toggle="tab"]', function(e){
+			$('#<?php echo $sWindowId ?> ' + $(e.target).attr('href') + ' #setOriginalZoom').click();
+		});
 	});
-
-	$('#benchmark_month #setOriginalZoom').on('click', function(){
-		plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph);
-	});
-
-	$('#benchmark_day #setOriginalZoom').on('click', function(){
-		plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
-	});
-
-	var plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph),
-		plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
-
-
-	$("#benchmark_month #clearSelection").click(function () {
-		plotPerDay.clearSelection();
-	});
-
-	$("#benchmark_day #clearSelection").click(function () {
-		plotPerHour.clearSelection();
-	});
-
-	// Вызываем однократно обработчик нажатия кнопки, для правильной отрисовки графика
-	$('.page-content').one('shown.bs.tab', 'a[data-toggle="tab"]', function(e){
-		$('#<?php echo $sWindowId ?> ' + $(e.target).attr('href') + ' #setOriginalZoom').click();
-    })
-})
+});
 </script>
 <?php
 $oAdmin_Form_Controller->addEntity(

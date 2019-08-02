@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -31,6 +31,17 @@ $oAdmin_Form_Controller
 	->path($sFormAction)
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
+
+if (!is_null(Core_Array::getPost('generate-coupon')))
+{
+	$sGuid = strtoupper(md5(uniqid(rand(), TRUE)));
+
+	Core::showJson(
+		array(
+			'coupon' => substr($sGuid, 0, 8)
+		)
+	);
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');

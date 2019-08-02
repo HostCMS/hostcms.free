@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Model extends Core_Entity
 {
@@ -44,6 +44,13 @@ class Xsl_Model extends Core_Entity
 		'xsls.sorting' => 'ASC',
 		'xsls.name' => 'ASC'
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.

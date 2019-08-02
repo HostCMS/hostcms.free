@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -332,7 +332,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Переопределяем тип поля описания на WYSIWYG
 				$this->getField('description')
-					->wysiwyg(TRUE)
+					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id
 						: 0);
@@ -486,9 +487,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Core_Templater::decorateInput($this->getField('invoice_template'));
 				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);
 
-				$oMainTab->move($this->getField('issue_discountcard'), $oMainRowDiscountcard);
 				Core_Templater::decorateInput($this->getField('discountcard_template'));
-				$oMainTab->move($this->getField('discountcard_template'), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 margin-top-25')), $oMainRowDiscountcard);
 
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
@@ -590,8 +591,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopTabExport->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')),$oGuidRow);
 				$oShopTabExport->move($this->getField('yandex_market_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
 				$oShopTabExport->move($this->getField('yandex_market_sales_notes_default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-6')),$oShopTabExportRow1);
-				$oShopTabExport->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
-				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('cpa')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabExportRow2);
+				$oShopTabExport->move($this->getField('adult')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabExportRow2);
 
 				$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
 

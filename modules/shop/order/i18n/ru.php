@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Заказы магазина',
@@ -21,6 +21,7 @@ return array(
 	'tab3' => 'Описание заказа',
 	'tab4' => 'Документы',
 	'tab5' => 'Метки',
+	'tab6' => 'Товары',
 	'invoice' => "Номер заказа",
 	'datetime' => "Дата заказа",
 	'siteuser_id' => "Клиент",
@@ -28,6 +29,7 @@ return array(
 	'cond_of_delivery_add_form_price_order' => "Сумма заказа",
 	'order_currency' => "Валюта",
 	'paid' => 'Оплачен',
+	'not_paid' => 'Не оплачен',
 	'canceled' => 'Отменен',
 	'order_items_link' => "Товары",
 	'payment_datetime' => "Дата оплаты",
@@ -136,4 +138,17 @@ return array(
 	'notification_new_order' => 'Новый заказ №%s',
 	'notification_paid_order' => 'Оплачен заказ №%s',
 	'notification_new_order_description' => '%1$s на сумму %2$s',
+	'coupon' => 'Купон',
+	'notStatus' => 'Без статуса',
+	'add_item_placeholder' => 'Введите название товара, доставки или скидки',
+	'shop_order_item_number' => '№',
+	'shop_order_item_name' => 'Название товара',
+	'shop_order_item_quantity' => 'Кол-во',
+	'shop_order_item_price' => 'Цена',
+	'shop_order_item_rate' => 'Налог',
+	'shop_order_item_type' => 'Тип товара',
+	'shop_order_item_marking' => 'Артикул',
+	'shop_order_item_warehouse' => 'Склад',
+	'shop_order_item_id' => 'Код товара',
+	'shop_order_item_total' => 'Итого:',
 );

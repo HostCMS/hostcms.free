@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -50,7 +50,7 @@ class Template_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_preloadValues = array(
-		'less' => 0,
+		'type' => 0,
 		'sorting' => 0,
 		'data_template_id' => 0
 	);
@@ -62,6 +62,13 @@ class Template_Model extends Core_Entity
 	protected $_sorting = array(
 		'templates.sorting' => 'ASC'
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.
@@ -253,11 +260,10 @@ class Template_Model extends Core_Entity
 
 		Core_File::write($this->getTemplateLessFilePath(), trim($content));
 
-		if ($this->less && strlen($content))
+		if ($this->type == 1 && strlen($content))
 		{
 			// Rebuild CSS
-			$oTemplate_Less = $this->_getTemplateLess();
-			$css = $oTemplate_Less->compile($content);
+			$css = Template_Preprocessor::factory('less')->compile($content);
 			$this->saveTemplateCssFile($css);
 		}
 
@@ -271,6 +277,58 @@ class Template_Model extends Core_Entity
 	public function loadTemplateLessFile()
 	{
 		$path = $this->getTemplateLessFilePath();
+
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
+	}
+
+	/**
+	 * Get href to template's SCSS file
+	 * @return string
+	 */
+	public function getTemplateScssFileHref()
+	{
+		return '/' . $this->_getDir() . '/style.scss';
+	}
+
+	/**
+	 * Get path to template's SCSS file
+	 * @return string
+	 */
+	public function getTemplateScssFilePath()
+	{
+		return CMS_FOLDER . $this->_getDir() . '/style.scss';
+	}
+
+	/**
+	 * Specify SCSS for template and rebuild CSS
+	 * @param string $content SCSS
+	 * @return self
+	 */
+	public function saveTemplateScssFile($content)
+	{
+		$this->save();
+		$this->_createDir();
+
+		Core_File::write($this->getTemplateScssFilePath(), trim($content));
+
+		if ($this->type == 2 && strlen($content))
+		{
+			$css = Template_Preprocessor::factory('scss')->compile($content);
+			$this->saveTemplateCssFile($css);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get LESS for template
+	 * @return string|NULL
+	 */
+	public function loadTemplateScssFile()
+	{
+		$path = $this->getTemplateScssFilePath();
 
 		return is_file($path)
 			? Core_File::read($path)
@@ -724,19 +782,17 @@ class Template_Model extends Core_Entity
 	protected $_lessVariables = NULL;
 
 	/**
-	 * Get Template_Less
-	 * @return Template_Less
+	 * Обратная совместимость с версией до 6.8.9
 	 */
-	protected function _getTemplateLess()
+	public function less($less)
 	{
-		$oTemplate_Less = new Template_Less();
-		$oTemplate_Less->setImportDir(array(CMS_FOLDER));
-		return $oTemplate_Less;
+		$this->type = $less ? 1 : 0;
+		return $this;
 	}
 
 	public function showManifest()
 	{
-		if ($this->less)
+		if ($this->type == 1)
 		{
 			$manifest = $this->loadManifestFile();
 
@@ -748,9 +804,9 @@ class Template_Model extends Core_Entity
 				{
 					try
 					{
-						$oTemplate_Less = $this->_getTemplateLess();
-						$oTemplate_Less->compile($less);
-						$this->_lessVariables = $oTemplate_Less->getVariables();
+						$oTemplate_Preprocessor_Less = Template_Preprocessor::factory('less');
+						$oTemplate_Preprocessor_Less->compile($less);
+						$this->_lessVariables = $oTemplate_Preprocessor_Less->getPreprocessor()->getVariables();
 					}
 					catch (Exception $e)
 					{

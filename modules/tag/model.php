@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Model extends Core_Entity
 {
@@ -114,38 +114,39 @@ class Tag_Model extends Core_Entity
 	{
 		if (!is_null($this->id) && is_null($this->_site_count))
 		{
+			// IS
 			$queryBuilder = Core_QueryBuilder::select(
 				array('COUNT(*)', 'count'))
 				->from('tags')
-				->leftJoin('tag_shop_items', 'tags.id', '=', 'tag_shop_items.tag_id'/*,
-					array(
-						array('AND' => array('tag_shop_items.tag_id', '=', $this->id))
-					)*/
-				)
-				->leftJoin('tag_informationsystem_items', 'tags.id', '=', 'tag_informationsystem_items.tag_id'/*,
-					array(
-						array('AND' => array('tag_informationsystem_items.tag_id', '=', $this->id))
-					)*/)
-				->open()
+				->leftJoin('tag_informationsystem_items', 'tags.id', '=', 'tag_informationsystem_items.tag_id')
 				->where('tag_informationsystem_items.tag_id', '=', $this->id)
-				->setOr()
-				->where('tag_shop_items.tag_id', '=', $this->id)
-				->close()
-				//->where('tags.id', '=', $this->id)
 				->where('tags.deleted', '=', 0);
 
 			$row = $queryBuilder->execute()->asAssoc()->current();
 			$this->_all_count = $row['count'];
 
 			$queryBuilder
-				->open()
-				->where('tag_informationsystem_items.site_id', '=', CURRENT_SITE)
-				->setOr()
-				->where('tag_shop_items.site_id', '=', CURRENT_SITE)
-				->close();
+				->where('tag_informationsystem_items.site_id', '=', CURRENT_SITE);
 
 			$row = $queryBuilder->execute()->asAssoc()->current();
 			$this->_site_count = $row['count'];
+
+			// Shop
+			$queryBuilder = Core_QueryBuilder::select(
+				array('COUNT(*)', 'count'))
+				->from('tags')
+				->leftJoin('tag_shop_items', 'tags.id', '=', 'tag_shop_items.tag_id')
+				->where('tag_shop_items.tag_id', '=', $this->id)
+				->where('tags.deleted', '=', 0);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_all_count += $row['count'];
+
+			$queryBuilder
+				->where('tag_shop_items.site_id', '=', CURRENT_SITE);
+
+			$row = $queryBuilder->execute()->asAssoc()->current();
+			$this->_site_count += $row['count'];
 		}
 	}
 
@@ -172,23 +173,23 @@ class Tag_Model extends Core_Entity
 	 */
 	protected function _checkDuplicate()
 	{
-		$oTagDublicate = Core_Entity::factory('Tag')->getByName($this->name);
+		$oTagDuplicate = Core_Entity::factory('Tag')->getByName($this->name);
 
 		// Дубликат по имени найден
-		if (!is_null($oTagDublicate) && $oTagDublicate->id != $this->id)
+		if (!is_null($oTagDuplicate) && $oTagDuplicate->id != $this->id)
 		{
-			$this->id = $oTagDublicate->id;
+			$this->id = $oTagDuplicate->id;
 		}
 		// Дубликат по имени не найден
 		else
 		{
 			// Проверяем наличие дубликата по пути
-			$oTagDublicate = Core_Entity::factory('Tag')->getByPath($this->path);
+			$oTagDuplicate = Core_Entity::factory('Tag')->getByPath($this->path);
 
 			// Дубликат по пути найден
-			if (!is_null($oTagDublicate) && $oTagDublicate->id != $this->id)
+			if (!is_null($oTagDuplicate) && $oTagDuplicate->id != $this->id)
 			{
-				$this->id = $oTagDublicate->id;
+				$this->id = $oTagDuplicate->id;
 			}
 		}
 
@@ -279,7 +280,7 @@ class Tag_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Tag_Informationsystem_Items->deleteAll(FALSE);
 		$this->Tag_Shop_Items->deleteAll(FALSE);
 
@@ -295,6 +296,31 @@ class Tag_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event tag.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('urlencode', rawurlencode($this->path));
 
@@ -303,7 +329,7 @@ class Tag_Model extends Core_Entity
 			$this->addXmlTag('count', $this->count);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

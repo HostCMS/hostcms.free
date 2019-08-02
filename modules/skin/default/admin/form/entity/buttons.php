@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Buttons extends Admin_Form_Entity
 {
@@ -18,7 +18,7 @@ class Skin_Default_Admin_Form_Entity_Buttons extends Admin_Form_Entity
 	 */
 	public function execute()
 	{
-		?><div id="ControlElements"><?php
+		?><div class="formButtons sticky-actions"><?php
 		$this->executeChildren();
 		?></div><?php
 	}

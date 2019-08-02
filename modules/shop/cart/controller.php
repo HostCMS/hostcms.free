@@ -15,12 +15,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - shop_warehouse_id($id) идентификатор склада
  * - siteuser_id($id) идентификатор пользователя сайта
  * - checkStock(TRUE|FALSE) проверять наличие товара на складе, по умолчанию FALSE
+ * - getLastError() возвращает последний статус ошибки: FALSE - без ошибок, 1 - Shop item id установлен в NULL, 2 - не найден добавляемый товар, 3 - Пользователю запрещен доступ к товару, 4 - передано нулевое количество товара или товара нет на складе.
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller extends Core_Servant_Properties
 {
@@ -37,6 +38,15 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		'siteuser_id',
 		'checkStock',
 	);
+
+	/**
+	 * Last error, default FALSE
+	 * 1 - Shop item id is NULL
+	 * 2 - Shop item doesn't exist
+	 * 3 - Siteuser doesn't have access to the shop item
+	 * 4 - zero quantity or shop item out of stock
+	 */
+	protected $_error = FALSE;
 
 	/**
 	 * Constructor.
@@ -60,6 +70,15 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get Last Error
+	 * @return boolean|int
+	 */
+	public function getLastError()
+	{
+		return $this->_error;
+	}
+
+	/**
 	 * Clear cart operation's options
 	 * @return Shop_Cart_Controller
 	 * @hostcms-event Shop_Cart_Controller.onBeforeClear
@@ -74,6 +93,8 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$this->quantity = 1;
 		$this->postpone = $this->shop_warehouse_id = 0;
 		$this->marking = '';
+
+		$this->_error = FALSE;
 
 		Core_Event::notify(get_class($this) . '.onAfterClear', $this);
 
@@ -330,6 +351,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 		if (is_null($this->shop_item_id))
 		{
+			$this->_error = 1;
 			throw new Core_Exception('Shop item id is NULL.');
 		}
 
@@ -351,6 +373,8 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 	 */
 	public function update()
 	{
+		$this->_error = FALSE;
+
 		Core_Event::notify(get_class($this) . '.onBeforeUpdate', $this);
 
 		$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
@@ -466,9 +490,18 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 				}
 				else
 				{
+					$this->_error = 4;
 					$this->delete();
 				}
 			}
+			else
+			{
+				$this->_error = 3;
+			}
+		}
+		else
+		{
+			$this->_error = 2;
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterUpdate', $this);

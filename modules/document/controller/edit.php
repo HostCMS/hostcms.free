@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -76,7 +76,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->rows(15)
 					->caption(Core::_('Document.text'))
 					->name('text')
-					->wysiwyg(TRUE)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->divAttr(array('class' => 'form-group col-xs-12'))
 					->template_id($this->_object->template_id);
 
@@ -156,7 +156,7 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->name('document_status_id')
 					->value($this->_object->document_status_id)
 					->caption(Core::_('Document.document_status_id'))
-					->divAttr(array('class' => 'form-group col-sm-12 col-md-6'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
 				$oMainRow5->add($oSelect_Statuses);
 

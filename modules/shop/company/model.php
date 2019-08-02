@@ -9,18 +9,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Company_Model extends Company_Model
 {
 	/**
-	 * Model name, e.g. 'book' for 'Book_Model'
+	 * Model name
 	 * @var mixed
 	 */
 	protected $_modelName = 'shop_company';
 
 	/**
-	 * Table name, e.g. 'books' for 'Book_Model'
+	 * Table name
 	 * @var mixed
 	 */
 	protected $_tableName = 'companies';
@@ -54,6 +54,31 @@ class Shop_Company_Model extends Company_Model
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_company.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		// Directory_Addresses
 		$aDirectory_Addresses = $this->Directory_Addresses->findAll();
 		if (isset($aDirectory_Addresses[0]))
@@ -92,7 +117,7 @@ class Shop_Company_Model extends Company_Model
 			$this->addXmlTag('site', $aDirectory_Websites[0]->value);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	static protected $_oldFields = array('address', 'phone', 'fax', 'site', 'email');

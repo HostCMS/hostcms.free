@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -140,6 +140,13 @@ class Shop_Group_Model extends Core_Entity
 	protected $_shortcodeTags = array(
 		'description'
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.
@@ -674,12 +681,12 @@ class Shop_Group_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -982,11 +989,12 @@ class Shop_Group_Model extends Core_Entity
 		$aShop_Items = $this->Shop_Items->findAll();
 		foreach ($aShop_Items as $oShop_Item)
 		{
-			$newObject->add($oShop_Item->copy());
+			$newObject->add($oShop_Item->incCountByCreate(FALSE)->copy());
 			// Recount for current group
-			$this->decCountItems();
+			//$this->decCountItems();
 		}
 
+		// Property Values
 		$aPropertyValues = $this->getPropertyValues();
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
@@ -1015,6 +1023,16 @@ class Shop_Group_Model extends Core_Entity
 					} catch (Exception $e) {}
 				}
 			}
+		}
+
+		// Property For Groups
+		$aShop_Item_Property_For_Groups = $this->Shop_Item_Property_For_Groups->findAll(FALSE);
+
+		foreach ($aShop_Item_Property_For_Groups as $oShop_Item_Property_For_Group)
+		{
+			$oNewShop_Item_Property_For_Group = clone $oShop_Item_Property_For_Group;
+			$oNewShop_Item_Property_For_Group->shop_group_id = $newObject->id;
+			$oNewShop_Item_Property_For_Group->save();
 		}
 
 		return $newObject;
@@ -1086,6 +1104,31 @@ class Shop_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_group.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags();
 
 		!isset($this->_forbiddenTags['url'])
@@ -1114,7 +1157,7 @@ class Shop_Group_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -1138,7 +1181,7 @@ class Shop_Group_Model extends Core_Entity
 			break;
 		}
 	}
-	
+
 	/**
 	 * Clear tagged cache
 	 * @return self
@@ -1231,7 +1274,7 @@ class Shop_Group_Model extends Core_Entity
 
 		return $this;
 	}
-	
+
 	/**
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
@@ -1292,7 +1335,7 @@ class Shop_Group_Model extends Core_Entity
 					break;
 				}
 			}
-			
+
 			if (count($aTmp))
 			{
 				return sprintf($format, $oProperty->name, implode($separator, $aTmp));

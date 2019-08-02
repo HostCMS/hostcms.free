@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -110,7 +110,7 @@ return array(
 	'export_shop' => "Экспорт товаров",
 	'shops_link_orders' => "Заказы",
 	'shops_add_form_link_orders' => "Оформленные заказы",
-	'show_delivery_on' => "Доставка",
+	'show_delivery_on' => "Доставки",
 	'show_type_of_delivery_link' => "Типы доставки",
 	'show_sds_link' => "Справочники",
 	'show_prices_title' => "Цены",
@@ -143,7 +143,7 @@ return array(
 	'import_price_list_file_type2' => "CommerceML",
 	'export_file_type' => "Выберите тип файла",
 	'import_price_list_file' => "Выберите файл с компьютера",
-	'alternative_file_pointer_form_import' => "<acronym title=\"Задайте относительный путь к файлу от директории системы, например, tmp/myfile.csv\">или укажите путь к файлу на сервере</acronym>",
+	'alternative_file_pointer_form_import' => "<acronym title=\"Задайте относительный путь к файлу от директории системы, например, tmp/myfile.csv или укажите путь к файлу на стороннем сервере\">или укажите путь к файлу на сервере или URL</acronym>",
 	'import_price_list_name_field_f' => "<acronym title=\"Флаг, указывающий на то, содержит ли первая строка имена полей\">Первая строка содержит имена полей</acronym>",
 	'import_price_list_separator1' => "Запятая",
 	'import_price_list_separator2' => "Точка с запятой",
@@ -312,7 +312,7 @@ return array(
 	'associated_item_price' => 'Цена',
 	'set_item_header' => 'Комплект',
 	'apply_recount_set' => 'Пересчитать комплект',
-	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара "%s"',
+	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара #%d "%s"',
 	'import_price_list_delay' => 'Задержка (в сек.)',
 	'create_modification_copy_warehouse_count' => 'Копировать остаток на складе',
 	'items_catalog_copy_form_title' => 'Копировать товар',
@@ -325,5 +325,10 @@ return array(
 	'modifications_root' => '...',
 	'items_catalog_barcodes' => 'Штрихкоды',
 	'type_barcode' => 'Введите штрихкод',
-	'placeholderSearch' => 'Поиск',
+	'shop_warehouse_incoming' => 'Оприходование при добавлении нового товара',
+	'shop_warehouse_inventory' => 'Инвентаризация при редактировании товара "%s"',
+	'edit_all_warehouses' => 'Редактировать',
+	'shop_price_setting' => 'Установка цены товара "%s"',
+	'warehouse_in_price' => 'Отразить в цене',
+	'item_cards_printlayout' => 'Шаблон документа для ценников',
 );

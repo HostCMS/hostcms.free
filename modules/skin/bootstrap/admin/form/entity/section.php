@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Section extends Skin_Default_Admin_Form_Entity_Section {
 
@@ -31,7 +31,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Section extends Skin_Default_Admin_Form_E
 					</h4>
 				</div>
 				<div id="collapse<?php echo $this->id?>" class="panel-collapse collapse in">
-					<div class="panel-body border-red">
+					<div class="panel-body">
 						<?php $this->executeChildren()?>
 					</div>
 				</div>

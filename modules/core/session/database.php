@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -35,7 +35,7 @@ class Core_Session_Database extends Core_Session
 	 * GET_LOCK timeout (sec)
 	 * @var int
 	 */
-	protected $_getLockTimeout = 1;
+	protected $_getLockTimeout = 5;
 
 	/**
 	 * Next step delay (microseconds)
@@ -227,6 +227,9 @@ class Core_Session_Database extends Core_Session
 		}
 		else
 		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+			
 			throw new Core_Exception($content);
 		}
 	}
@@ -274,7 +277,7 @@ class Core_Session_Database extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait!');
+				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
 			}
 
 			usleep($this->_nextStepDelay);

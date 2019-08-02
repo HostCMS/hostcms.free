@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Html_Entity extends Core_Servant_Properties
 {
@@ -310,13 +310,18 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 	/**
 	 * Get entity's children
-	 * @return int
+	 * @return array
 	 */
 	public function getChildren()
 	{
 		return $this->_children;
 	}
 
+	/**
+	 * Delete child by key
+	 * @param int $key
+	 * @return self
+	 */
 	public function deleteChild($key)
 	{
 		if (isset($this->_children[$key]))

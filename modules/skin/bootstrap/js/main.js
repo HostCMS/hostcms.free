@@ -41,7 +41,7 @@ function isEmpty(str) {
 		},
 		toogleInputsActive: function(windowId, status)
 		{
-			$("#" + $.getWindowId(windowId) + " #ControlElements input").attr('disabled', !status);
+			$("#" + $.getWindowId(windowId) + " .formButtons input").attr('disabled', !status);
 		},
 		getWindowId: function(WindowId)
 		{
@@ -196,6 +196,14 @@ function isEmpty(str) {
 			return false;
 		},
 		adminLoad: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminLoad', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
 			settings = jQuery.requestSettings(settings);
 
 			var path = settings.path,
@@ -330,6 +338,9 @@ function isEmpty(str) {
 
 						window.history.pushState(state, document.title, path);
 					}
+
+					// Call own event
+					$("#" + settings.windowId).trigger('adminLoadSuccess');
 					//}
 				}]
 			});
@@ -337,6 +348,14 @@ function isEmpty(str) {
 			return false;
 		},
 		adminSendForm: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminSendForm', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
 			settings = jQuery.requestSettings(settings);
 
 			settings = jQuery.extend({
@@ -454,6 +473,14 @@ function isEmpty(str) {
 		},
 		ajaxCallback: function(data, status, jqXHR)
 		{
+			var triggerReturn = $('body').triggerHandler('beforeAjaxCallback', [data]);
+
+			if (triggerReturn == 'break')
+			{
+				$.loadingScreen('hide');
+				return false;
+			}
+
 			$.loadingScreen('hide');
 			if (data == null)
 			{
@@ -615,7 +642,17 @@ function isEmpty(str) {
 				jQuery(this).empty();
 				for (var key in data)
 				{
-					jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+					if (typeof data[key] == 'object')
+					{
+						jQuery(this)
+							.append(jQuery('<option>')
+							.attr('value', data[key].value)
+							.text(data[key].name));
+					}
+					else
+					{
+						jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+					}
 				}
 			}
 		},
@@ -1219,7 +1256,7 @@ function FieldCheckShowError(WindowId, FiledId, message)
 			ElementField
 				.css('border-style', 'solid')
 				.css('border-width', '1px')
-				.css('border-color', '#DB1905')
+				.css('border-color', '#ff1861')
 				.css('background-image', "url('/admin/images/bullet_red.gif')")
 				.css('background-position', 'center right')
 				.css('background-repeat', 'no-repeat');
@@ -1291,14 +1328,19 @@ function declension(number, nominative, genitive_singular, genitive_plural)
 // http://www.tinymce.com/wiki.php/How-to_implement_a_custom_file_browser
 function HostCMSFileManager()
 {
-	this.fileBrowserCallBack = function(field_name, url, type, win)
+	//this.fileBrowserCallBack = function(field_name, url, type, win)
+	this.fileBrowserCallBack = function(callback, value, meta)
 	{
-		this.field = field_name;
-		this.callerWindow = win;
+		this.field = value;
+		//this.callerWindow = win;
+		this.callback = callback;
 
-		url = url.split('\\').join('/');
+		var url = this.field.split('\\').join('/');
 
-		var cdir = '', dir = '', lastPos = url.lastIndexOf('/');
+		var type = meta.filetype,
+			cdir = '',
+			dir = '',
+			lastPos = url.lastIndexOf('/');
 
 		if (lastPos != -1)
 		{
@@ -1314,7 +1356,7 @@ function HostCMSFileManager()
 			}
 		}
 
-		var path = "/admin/wysiwyg/filemanager/index.php?field_name=" + field_name + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
+		var path = "/admin/wysiwyg/filemanager/index.php?field_name=" + this.field + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
 
 		var x = parseInt(screen.width / 2.0) - (width / 2.0), y = parseInt(screen.height / 2.0) - (height / 2.0);
 
@@ -1328,7 +1370,7 @@ function HostCMSFileManager()
 		url = decodeURIComponent(url);
 		url = url.replace(new RegExp(/\\/g), '/');
 
-		var field = this.callerWindow.document.getElementById(this.field);
+		/*var field = this.callerWindow.document.getElementById(this.field);
 
 		field.value = url;
 		//this.callerWindow.document.forms[0].elements[this.field].value = url;
@@ -1336,7 +1378,9 @@ function HostCMSFileManager()
 		try {
 			field.onchange();
 		}
-		catch (e){}
+		catch (e){}*/
+
+		this.callback(url);
 
 		this.win.close();
 	}

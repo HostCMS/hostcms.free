@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -17,14 +17,20 @@ $sAdminFormAction = '/admin/template/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
+$oParentTemplate = Core_Entity::factory('Template', Core_Array::getGet('template_id', 0));
+
+$sFormTitle = $oParentTemplate->id
+	? $oParentTemplate->name
+	: Core::_('Template.title');
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Template.title'))
-	->pageTitle(Core::_('Template.title'));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 $template_dir_id = intval(Core_Array::getGet('template_dir_id', 0));
 $template_id = intval(Core_Array::getGet('template_id', 0));
@@ -74,6 +80,41 @@ if (!$template_id)
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+if ($oParentTemplate->id)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, $oParentTemplate->id);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, $oParentTemplate->id);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
+
+$template_id = intval(Core_Array::getGet('template_id', 0));
+$template_dir_id = intval(Core_Array::getGet('template_dir_id', 0));
+$additionalParamsProperties = "template_dir_id={$template_dir_id}&template_id={$template_id}";
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsProperties) . '" />
+
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -249,28 +290,40 @@ $oAdmin_Form_Dataset->addCondition(
 ->changeField('name', 'onclick', "$.adminLoad({path: '/admin/template/index.php',additionalParams: 'template_dir_id={template_dir_id}&template_id={id}', windowId: '{windowId}'}); return false");
 ;
 
-if ($template_id == 0)
+if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(
-			array('where' =>
-				array('template_dir_id', '=', $template_dir_id)
-			)
-		)
-		->addCondition(
-			array('where' =>
-				array('template_id', '=', 0)
-			)
-		);
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('templates.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('templates.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
-	$oAdmin_Form_Dataset
-		->addCondition(
-			array('where' =>
-				array('template_id', '=', $template_id)
+	if ($template_id == 0)
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(
+				array('where' =>
+					array('template_dir_id', '=', $template_dir_id)
+				)
 			)
-		);
+			->addCondition(
+				array('where' =>
+					array('template_id', '=', 0)
+				)
+			);
+	}
+	else
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(
+				array('where' =>
+					array('template_id', '=', $template_id)
+				)
+			);
+	}
 }
 
 // Добавляем источник данных контроллеру формы

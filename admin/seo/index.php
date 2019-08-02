@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -812,7 +812,7 @@ if (count($aSeo_Sites))
 			},
 			crosshair: {
 				mode: "x"
-			}
+			},
 		};
 
 		// Links
@@ -838,48 +838,62 @@ if (count($aSeo_Sites))
 		});
 
 		// Rating
-		var placeholderSeoRatings = $("#seo-ratings-chart");
+		<?php 
+		if (count($aRatings))
+		{
+			?>
+			var placeholderSeoRatings = $("#seo-ratings-chart");
 
-		placeholderSeoRatings.bind("plotselected", function (event, ranges) {
-			plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, $.extend(true, {}, options, {
-				xaxis: {
-					min: ranges.xaxis.from,
-					max: ranges.xaxis.to
-				}
-			}));
-		});
+			placeholderSeoRatings.bind("plotselected", function (event, ranges) {
+				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, $.extend(true, {}, options, {
+					xaxis: {
+						min: ranges.xaxis.from,
+						max: ranges.xaxis.to
+					}
+				}));
+			});
 
-		$('#seo-ratings #setOriginalZoom').on('click', function(){
-			plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
-		});
+			$('#seo-ratings #setOriginalZoom').on('click', function(){
+				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
+			});
 
-		var plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
+			var plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
 
-		$("#seo-ratings #clearSelection").click(function () {
-			plotSeoRatings.clearSelection();
-		});
+			$("#seo-ratings #clearSelection").click(function () {
+				plotSeoRatings.clearSelection();
+			});
+			<?php
+		}
+		?>
 
 		// Indexed
-		var placeholderSeoIndexed = $("#seo-indexed-chart");
+		<?php
+		if (count($aSearchable))
+		{
+			?>
+			var placeholderSeoIndexed = $("#seo-indexed-chart");
 
-		placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
-			plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
-				xaxis: {
-					min: ranges.xaxis.from,
-					max: ranges.xaxis.to
-				}
-			}));
-		});
+			placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
+				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
+					xaxis: {
+						min: ranges.xaxis.from,
+						max: ranges.xaxis.to
+					}
+				}));
+			});
 
-		$('#seo-indexed #setOriginalZoom').on('click', function(){
-			plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
-		});
+			$('#seo-indexed #setOriginalZoom').on('click', function(){
+				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+			});
 
-		var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
+			var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
 
-		$("#seo-indexed #clearSelection").click(function () {
-			plotSeoIndexed.clearSelection();
-		});
+			$("#seo-indexed #clearSelection").click(function () {
+				plotSeoIndexed.clearSelection();
+			});
+			<?php
+		}
+		?>
 	});
 </script>
 <?php

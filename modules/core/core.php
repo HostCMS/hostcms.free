@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core
 {
@@ -130,7 +130,7 @@ class Core
 		{
 			$oConstant->define();
 		}
-		
+
 		!defined('TMP_DIR') && define('TMP_DIR', 'hostcmsfiles/tmp/');
 		!defined('DEFAULT_LNG') && define('DEFAULT_LNG', 'ru');
 		!defined('BACKUP_DIR') && define('BACKUP_DIR', CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR);
@@ -169,7 +169,7 @@ class Core
 			'dateTimeFormat' => 'd.m.Y H:i:s',
 			'datePickerFormat' => 'DD.MM.YYYY',
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
-			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'PDF', 'ZIP'),
+			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP', 'PDF', 'ZIP', 'DOC', 'DOCX',  'XLS', 'XLSX'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/Los_Angeles',
 			'translate' => TRUE,
@@ -233,7 +233,7 @@ class Core
 		foreach ($aModules as $oModule)
 		{
 			self::$modulesList[$oModule->path] = $oModule;
-			
+
 			// Call module's __construct()
 			$oModule->active && $oModule->loadModule();
 		}
@@ -391,9 +391,9 @@ class Core
 		// $class = basename($class);
 		$aNamespaces = explode('\\', $class);
 		$aNamespaces = array_map('basename', $aNamespaces);
-		
+
 		$class = array_pop($aNamespaces);
-		
+
 		$aClassName = explode('_', strtolower($class));
 
 		$sFileName = array_pop($aClassName);
@@ -402,7 +402,7 @@ class Core
 		$path = empty($aNamespaces)
 			? ''
 			: implode(DIRECTORY_SEPARATOR, $aNamespaces);
-		
+
 		// If class name doesn't have '_'
 		$path .= empty($aClassName) && empty($aNamespaces)
 			? $sFileName . DIRECTORY_SEPARATOR
@@ -502,12 +502,17 @@ class Core
 	/**
 	 * Returns a string produced according to the formatting string $key.
 	 * @param string $key source string
+	 * @param boolean $convertSpecialCharacters Convert special characters, default TRUE
 	 *
 	 * <code>
+	 * // with convert special characters
 	 * echo Core::_('constant.name', 'value1', 'value2');
+	 * // without convert special characters
+	 * echo Core::_('constant.name', 'value1', 'value2', FALSE);
 	 * // Same code
 	 * // echo sprintf(Core::_('constant.name'), 'value1', 'value2');
 	 * </code>
+	 * @return string
 	 * @see Core_I18n::get()
 	 */
 	static public function _($key)
@@ -521,9 +526,14 @@ class Core
 			$value = Core_I18n::instance()->get($key);
 			array_unshift($args, $value);
 
-			foreach ($args as $argKey => $argValue)
+			$convertSpecialCharacters = is_bool(end($args)) ? array_pop($args) : TRUE;
+
+			if ($convertSpecialCharacters)
 			{
-				$argKey > 0 && $args[$argKey] = htmlspecialchars($argValue);
+				foreach ($args as $argKey => $argValue)
+				{
+					$argKey > 0 && $args[$argKey] = htmlspecialchars($argValue);
+				}
 			}
 
 			return call_user_func_array('sprintf', $args);
@@ -597,11 +607,14 @@ class Core
 		// Адрес эл. почты администратора
 		define('EMAIL_TO', $oSite->getFirstEmail());
 
+		// Технический адрес эл. почты
+		define('ERROR_EMAIL', $oSite->getErrorEmail());
+
 		// Права доступа к директории
-		define('CHMOD', octdec($oSite->chmod)); // octdec - преобразование 8-ричного в 10-тичное
+		define('CHMOD', octdec($oSite->chmod));
 
 		// Права доступа к файлу
-		define('CHMOD_FILE', octdec($oSite->files_chmod)); // octdec - преобразование 8-ричного в 10-тичное
+		define('CHMOD_FILE', octdec($oSite->files_chmod));
 
 		// Формат вывода даты
 		define('DATE_FORMAT', $oSite->date_format);
@@ -716,7 +729,7 @@ class Core
 		{
 			$scheme = /*(Core_Array::get($_SERVER, 'HTTPS') == 'on' || Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO') == 'https')*/
 				self::httpsUses() ? 'https' : 'http';
-			
+
 			$sUrl = $scheme . '://' . $aDomain[0];
 			if (!empty($_SERVER['HTTP_X_ORIGINAL_URL']))
 			{

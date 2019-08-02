@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Skin
 {
@@ -401,7 +401,7 @@ abstract class Core_Skin
 		do {
 			$aTemplates[] = $oTemplate;
 
-			$oTemplate->less && $bLess = TRUE;
+			$oTemplate->type == 1 && $bLess = TRUE;
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);

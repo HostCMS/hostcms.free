@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -37,30 +37,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/' . $lng . '.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.time.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.categories.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.tooltip.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.crosshair.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.resize.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.selection.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/flot/jquery.flot.pie.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/easypiechart/jquery.easypiechart.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/easypiechart/easypiechart-init.js')
-
-			->addJs('/modules/skin/' . $this->_skinName . '/js/charts/sparkline/jquery.sparkline.js')
-
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/nestable/jquery.nestable.min.js')
-
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/raphael-2.0.2.min.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris.js')
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/charts/morris/morris-init.js')
-
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/css/css.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/htmlmixed/htmlmixed.js')
@@ -80,15 +60,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
-			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.js')
-			// ->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/ru.js')
-			// Уже подключается выше из datetime
-			//->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/moment.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/fullcalendar.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/fullcalendar/locale-all.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js');
+			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
+			;
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
@@ -103,9 +78,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css');
+			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
+			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
+			;
 	}
 
 	/**
@@ -149,7 +125,7 @@ class Skin_Bootstrap extends Core_Skin
 		?>
 		</script>
 
-		<script src="/admin/wysiwyg/jquery.tinymce.min.js"></script>
+		<script src="/admin/wysiwyg/jquery.tinymce.min.js?<?php echo $timestamp?>"></script>
 		<?php
 		if ($this->_mode != 'install')
 		{
@@ -941,7 +917,7 @@ class Skin_Bootstrap extends Core_Skin
 											<?php if ($bSubmenu)
 											{
 												?><ul class="submenu"><?php
-												
+
 												foreach ($aTmpMenu['submenu'] as $aSubmenu)
 												{
 													$aSubmenu += array(
@@ -1035,6 +1011,7 @@ class Skin_Bootstrap extends Core_Skin
 <title><?php echo $this->_title?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="referrer" content="no-referrer" />
 <link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
 <link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
 <link rel="icon" type="image/png" href="/modules/skin/bootstrap/ico/favicon.png" />
@@ -1136,7 +1113,18 @@ class Skin_Bootstrap extends Core_Skin
 		</div>
 		</div>
 
-		<script>$("#authorization input[name='login']").focus();</script>
+		<script>
+			$("#authorization input[name='login']").focus();
+
+			// Check Google chrome data saver mode
+			if ('connection' in navigator)
+			{
+				if (navigator.connection.saveData)
+				{
+					$("input[name='ip']").prop('checked', false);
+				}
+			}
+		</script>
 		<?php
 		}
 
@@ -1165,7 +1153,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2018 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2019 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>

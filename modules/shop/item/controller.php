@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -78,6 +78,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			'price' => $price,
 			'price_discount' => $price,
 			'price_tax' => $price,
+			'coupon' => NULL,
 			'discount' => 0,
 			'discounts' => array()
 		);
@@ -132,6 +133,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			'price' => $price,
 			'price_discount' => $price,
 			'price_tax' => $price,
+			'coupon' => NULL,
 			'discount' => 0,
 			'discounts' => array()
 		);
@@ -173,17 +175,28 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				// Определяем количество скидок на товар
 				$discountPercent = $discountAmount = 0;
 
+				$couponText = isset($_SESSION['hostcmsOrder']['coupon_text']) ? $_SESSION['hostcmsOrder']['coupon_text'] : NULL;
+
 				// Цикл по идентификаторам скидок для товара
 				foreach ($aShop_Item_Discounts as $oShop_Item_Discount)
 				{
 					$oShop_Discount = $oShop_Item_Discount->Shop_Discount;
-					if ($oShop_Discount->isActive())
+					if ($oShop_Discount->isActive()
+						&& ($oShop_Discount->coupon == 0
+							|| $bCoupon = strlen($couponText) && $oShop_Discount->coupon_text == $couponText
+						)
+					)
 					{
 						$this->_aPrice['discounts'][] = $oShop_Discount;
 
 						$oShop_Discount->type == 0
 							? $discountPercent += $oShop_Discount->value
 							: $discountAmount += $oShop_Discount->value;
+							
+						if ($oShop_Discount->coupon == 1 && $bCoupon)
+						{
+							$this->_aPrice['coupon'] = $oShop_Discount->coupon_text;
+						}
 					}
 				}
 
@@ -352,7 +365,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 
 		$price = $this->getPrice($oShop_Item);
 
-		// Цены в зависимости от количества самого товара в корзине (а не все корзины)
+		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
 		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll();
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -534,7 +534,6 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			case 7: // Checkbox
 			case 10: // Hidden field
 			case 11: // Float
-			default:
 				$result = $oProperty_Value->value;
 			break;
 			case 2: // File
@@ -562,8 +561,14 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 					: '';
 			break;
 			default:
+				$result = $oProperty_Value->value;
+
 				Core_Event::notify(get_class($this) . '.onGetPropertyValueDefault', $this, array($oProperty, $oProperty_Value, $object));
-				$result = Core_Event::getLastReturn();
+				
+				if (!is_null(Core_Event::getLastReturn()))
+				{
+					$result = Core_Event::getLastReturn();
+				}
 		}
 
 		return $result;

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -99,6 +99,13 @@ class Informationsystem_Item_Model extends Core_Entity
 	);
 
 	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
+
+	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -114,6 +121,24 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
+	}
+
+	/**
+	 * Inc items'count in group during creating item
+	 * @var boolean
+	 */
+	protected $_incCountByCreate = TRUE;
+
+	/**
+	 * Inc items'count in group during creating item
+	 * @param boolean $value
+	 * @return self
+	 */
+	public function incCountByCreate($value = TRUE)
+	{
+		$this->_incCountByCreate = $value;
+
+		return $this;
 	}
 
 	/**
@@ -367,6 +392,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		$newObject = parent::copy();
 		$newObject->path = '';
 		$newObject->showed = 0;
+		$newObject->guid = Core_Guid::get();
 		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
@@ -962,12 +988,12 @@ class Informationsystem_Item_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = $this->text . ' ' . $this->description . ' ' . htmlspecialchars($this->name) . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1239,6 +1265,31 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event informationsystem_item.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$oInformationsystem = $this->Informationsystem;
 
 		$this->clearXmlTags();
@@ -1443,7 +1494,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -1492,7 +1543,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	{
 		$return = parent::create();
 
-		if (!is_null($this->Informationsystem_Group->id))
+		if ($this->_incCountByCreate && !is_null($this->Informationsystem_Group->id))
 		{
 			// Увеличение количества элементов в группе
 			$this->Informationsystem_Group->incCountItems();
@@ -1535,8 +1586,8 @@ class Informationsystem_Item_Model extends Core_Entity
 					else
 					{
 						$url = $oSiteAlias->name
-							. $this->Informationsystem->Structure->getPath()
-							. $this->getPath();
+							. $this->Informationsystem->Structure->getPath();
+							//. $this->getPath();
 					}
 
 					$oCache_Static = Core_Cache::instance('static');

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Workday_Controller_End extends Admin_Form_Action_Controller
 {
@@ -118,7 +118,7 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 								{
 									$oNotification = Core_Entity::factory('Notification');
 									$oNotification
-										->title(Core::_('User_Workday.notification_head_request_title', htmlspecialchars($name)))
+										->title(Core::_('User_Workday.notification_head_request_title', strip_tags($name)))
 										->description(Core::_('User_Workday.notification_head_request_description', $time, $reason))
 										->datetime(Core_Date::timestamp2sql(time()))
 										->module_id($oModule->id)

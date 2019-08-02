@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -19,6 +19,18 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $sFormTitle = Core::_('Shop_Warehouse.main_menu_warehouses_list');
 
+// Идентификатор магазина
+$shop_id = intval(Core_Array::getGet('shop_id'));
+
+// Идентификатор группы товаров
+$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+
+// Текущий магазин
+$oShop = Core_Entity::factory('Shop')->find($shop_id);
+
+// Текущая группа магазинов
+$oShopDir = $oShop->Shop_Dir;
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
@@ -27,6 +39,47 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
+
+if (!is_null(Core_Array::getPost('load_prices')))
+{
+	$aJSON = array();
+
+	$shop_price_id = intval(Core_Array::getPost('shop_price_id'));
+	$aItems = Core_Array::getPost('items');
+
+	foreach ($aItems as $shop_item_id)
+	{
+		$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
+
+		if (!is_null($oShop_Item))
+		{
+			/*if ($shop_price_id)
+			{
+				$price = '0.00';
+
+				$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
+
+				if (!is_null($oShop_Item_Price))
+				{
+					$price = $oShop_Item_Price->value;
+				}
+			}
+			else
+			{
+				$price = $oShop_Item->price;
+			}*/
+
+			$price = $oShop_Item->loadPrice($shop_price_id);
+
+			$aJSON[$oShop_Item->id] = array(
+				'price' => $price
+			);
+		}
+
+	}
+
+	Core::showJson($aJSON);
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -43,24 +96,62 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.inventory'))
+		->icon('fa fa-calendar-check-o')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/inventory/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.incoming'))
+		->icon('fa fa-calendar-plus-o')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/incoming/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.writeoff'))
+		->icon('fa fa-calendar-minus-o')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/writeoff/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.regrade'))
+		->icon('fa fa-calendar-o')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/regrade/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.movement'))
+		->icon('fa fa-arrows-h')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/movement/index.php', NULL, NULL, $additionalParams)
+		)
 );
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
-// Идентификатор магазина
-$shop_id = intval(Core_Array::getGet('shop_id'));
-
-// Идентификатор группы товаров
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
-
-// Текущий магазин
-$oShop = Core_Entity::factory('Shop')->find($shop_id);
-
-// Текущая группа магазинов
-$oShopDir = $oShop->Shop_Dir;
-
-	// Представитель класса хлебных крошек
+// Представитель класса хлебных крошек
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(

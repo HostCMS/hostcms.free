@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'authorization_form_title' => 'Центр администрирования',
@@ -106,4 +106,5 @@ return array(
 	'events' => 'Дела',
 	'bookmarks' => 'Закладки',
 	'sound' => 'Звук',
+	'placeholderGlobalSearch' => 'Поиск',
 );

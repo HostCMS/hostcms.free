@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -55,6 +55,10 @@ class Core_Controller extends Core_Servant_Properties
 	 * @var Tpl_Model
 	 */
 	protected $_tpl = NULL;
+
+	protected $_mode = 'json';
+
+	protected $_attributePrefix = '_';
 
 	/**
 	 * Constructor.
@@ -165,6 +169,7 @@ class Core_Controller extends Core_Servant_Properties
 		}
 
 		$this->_xsl = $oXsl;
+		$this->_mode = 'xsl';
 
 		return $this;
 	}
@@ -189,6 +194,36 @@ class Core_Controller extends Core_Servant_Properties
 			->addEntities($this->_entities);
 
 		return $this->_entity->getXml();
+	}
+
+	/**
+	 * Get ARRAY for entity and children entities
+	 * @return array
+	 */
+	public function getStdObject()
+	{
+		$this->_entity
+			->clearEntities()
+			->addEntities($this->_entities);
+
+		$oReturn = new stdClass();
+
+		$propertyName = $this->_entity->getXmlTagName();
+
+		$oReturn->$propertyName = $this->_entity->getStdObject($this->_attributePrefix);
+
+		return $oReturn;
+	}
+
+	/**
+	 * Set mode
+	 * @param string $mode
+	 * @return self
+	 */
+	public function mode($mode)
+	{
+		$this->_mode = $mode;
+		return $this;
 	}
 
 	/**
@@ -217,6 +252,7 @@ class Core_Controller extends Core_Servant_Properties
 		}
 
 		$this->_tpl = $oTpl;
+		$this->_mode = 'tpl';
 
 		return $this;
 	}
@@ -293,38 +329,42 @@ class Core_Controller extends Core_Servant_Properties
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeShow', $this);
 
-		if (!is_null($this->_xsl))
+		//if (!is_null($this->_xsl))
+		//{
+		switch ($this->_mode)
 		{
-			$sXml = $this->getXml();
+			case 'xsl':
+				$sXml = $this->getXml();
 
-			$return = Xsl_Processor::instance()
-				->xml($sXml)
-				->xsl($this->_xsl)
-				->process();
+				$return = Xsl_Processor::instance()
+					->xml($sXml)
+					->xsl($this->_xsl)
+					->process();
 
-			Core_Event::notify(get_class($this) . '.onAfterShow', $this, array($sXml));
+				Core_Event::notify(get_class($this) . '.onAfterShow', $this, array($sXml));
 
-			$this->clearEntities();
-		}
-		elseif (!is_null($this->_tpl))
-		{
-			$oTpl_Processor = Tpl_Processor::instance();
+				$this->clearEntities();
+			break;
+			case 'tpl':
+				$oTpl_Processor = Tpl_Processor::instance();
 
-			$oTpl_Processor->vars($this->_vars);
-			$this->clearVars();
+				$oTpl_Processor->vars($this->_vars);
+				$this->clearVars();
 
-			$oTpl_Processor->entities($this->_entities);
-			$this->clearEntities();
+				$oTpl_Processor->entities($this->_entities);
+				$this->clearEntities();
 
-			$return = $oTpl_Processor
-				->tpl($this->_tpl)
-				->process();
+				$return = $oTpl_Processor
+					->tpl($this->_tpl)
+					->process();
 
-			Core_Event::notify(get_class($this) . '.onAfterShow', $this);
-		}
-		else
-		{
-			throw new Core_Exception('Xsl or Tpl does not exist.');
+				Core_Event::notify(get_class($this) . '.onAfterShow', $this);
+			break;
+			case 'json':
+				$return = json_encode($this->getStdObject());
+			break;
+			default:
+				throw new Core_Exception('Core_Controller::get(), wrong mode: %mode.', array('%mode' => $this->_mode));
 		}
 
 		/*echo "<br />Build HTML from XML and XSL '{$this->_xsl->name}'",
@@ -349,6 +389,17 @@ class Core_Controller extends Core_Servant_Properties
 	public function addCacheSignature($name)
 	{
 		$this->_cacheSignatures[] = $name;
+		return $this;
+	}
+
+	/**
+	 * Change attributePrefix
+	 * @param string $attributePrefix
+	 * @return self
+	 */
+	public function setAttributePrefix($attributePrefix)
+	{
+		$this->_attributePrefix = $attributePrefix;
 		return $this;
 	}
 

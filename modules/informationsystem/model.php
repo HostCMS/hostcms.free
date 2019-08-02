@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -128,7 +128,7 @@ class Informationsystem_Model extends Core_Entity
 		'seo_item_keywords_template',
 		'seo_item_description_template'
 	);
-	
+
 	/**
 	 * List of Shortcodes tags
 	 * @var array
@@ -504,6 +504,10 @@ class Informationsystem_Model extends Core_Entity
 	/**
 	 * Recount items and subgroups
 	 * @return Informationsystem_Model
+	 * @hostcms-event informationsystem.onBeforeRecount
+	 * @hostcms-event informationsystem.onAfterRecount
+	 * @hostcms-event informationsystem.onBeforeSelectCountGroupsInRecount
+	 * @hostcms-event informationsystem.onBeforeSelectCountItemsInRecount
 	 */
 	public function recount()
 	{
@@ -515,11 +519,13 @@ class Informationsystem_Model extends Core_Entity
 			ini_set('max_execution_time', '90000');
 		}
 
+		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);
+
 		$this->_groupsTree = array();
 		$queryBuilder = Core_QueryBuilder::select('id', 'parent_id')
 			->from('informationsystem_groups')
 			->where('informationsystem_groups.informationsystem_id', '=', $information_system_id)
-			->where('informationsystem_groups.active', '=', 1)
+			//->where('informationsystem_groups.active', '=', 1) // Пресчитываем для всех групп, включая отключенные
 			->where('informationsystem_groups.deleted', '=', 0);
 
 		$aInformationsystem_Groups = $queryBuilder->execute()->asAssoc()->result();
@@ -536,6 +542,8 @@ class Informationsystem_Model extends Core_Entity
 			->where('informationsystem_groups.active', '=', 1)
 			->where('informationsystem_groups.deleted', '=', 0)
 			->groupBy('parent_id');
+
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountGroupsInRecount', $this, array($queryBuilder));
 
 		$aInformationsystem_Groups = $queryBuilder->execute()->asAssoc()->result();
 		foreach ($aInformationsystem_Groups as $aInformationsystem_Group)
@@ -561,6 +569,8 @@ class Informationsystem_Model extends Core_Entity
 			->where('informationsystem_items.deleted', '=', 0)
 			->groupBy('informationsystem_group_id');
 
+		Core_Event::notify($this->_modelName . '.onBeforeSelectCountItemsInRecount', $this, array($queryBuilder));
+
 		$aInformationsystem_Items = $queryBuilder->execute()->asAssoc()->result();
 
 		foreach ($aInformationsystem_Items as $Informationsystem_Item)
@@ -578,16 +588,9 @@ class Informationsystem_Model extends Core_Entity
 
 		$this->_groupsTree = $this->_cacheGroups = $this->_cacheItems = array();
 
-		return $this;
-	}
+		Core_Event::notify($this->_modelName . '.onAfterRecount', $this);
 
-	/**
-	 * Delete empty groups in UPLOAD path for informationsystem
-	 */
-	public function deleteEmptyDirs()
-	{
-		Core_File::deleteEmptyDirs($this->getPath());
-		return FALSE;
+		return $this;
 	}
 
 	/**
@@ -640,6 +643,15 @@ class Informationsystem_Model extends Core_Entity
 	}
 
 	/**
+	 * Delete empty groups in UPLOAD path for informationsystem
+	 */
+	public function deleteEmptyDirs()
+	{
+		Core_File::deleteEmptyDirs($this->getPath());
+		return FALSE;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event informationsystem.onBeforeRedeclaredGetXml
@@ -648,6 +660,31 @@ class Informationsystem_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event informationsystem.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('http', '//' . Core_Array::get($_SERVER, 'SERVER_NAME'))
 			->addXmlTag('url', $this->Structure->getPath())
@@ -683,7 +720,7 @@ class Informationsystem_Model extends Core_Entity
 				->addXmlTag('subgroups_total_count', $array['subgroups_total_count']);
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -712,5 +749,14 @@ class Informationsystem_Model extends Core_Entity
 			->value('<i class="fa fa-file-o"></i> ' . $countInformationsystemItems)
 			->title(Core::_('Informationsystem.all_items_count', $countInformationsystemItems))
 			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function pathBackend()
+	{
+		$this->structure_id && $this->Structure->pathBackend();
 	}
 }

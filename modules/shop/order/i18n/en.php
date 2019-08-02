@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store orders',
@@ -21,12 +21,14 @@ return array(
 	'tab3' => 'Order description',
 	'tab4' => 'Print',
 	'tab5' => 'Tags',
+	'tab6' => 'Items',
 	'invoice' => "Order number",
 	'datetime' => "Order date",
 	'siteuser_id' => "User code",
 	'source_id' => "<acronym title=\"URL tag ID (UTM, OpenStat, etc.)\">URL tags ID</acronym>",
 	'order_currency' => "Currency",
 	'paid' => 'Paid',
+	'not_paid' => 'Not paid',
 	'canceled' => 'Cancelled',
 	'order_items_link' => "Pruducts",
 	'payment_datetime' => "Payment date",
@@ -141,4 +143,17 @@ return array(
 	'notification_new_order' => 'New order №%s',
 	'notification_paid_order' => 'Paid order №%s',
 	'notification_new_order_description' => '%1$s on %2$s',
+	'coupon' => 'Coupon',
+	'notStatus' => 'Not status',
+	'add_item_placeholder' => 'Insert name of item, delivery or discount',
+	'shop_order_item_number' => '#',
+	'shop_order_item_name' => 'Name',
+	'shop_order_item_quantity' => 'Qty.',
+	'shop_order_item_price' => 'Price',
+	'shop_order_item_rate' => 'Tax',
+	'shop_order_item_type' => 'Type',
+	'shop_order_item_marking' => 'Marking',
+	'shop_order_item_warehouse' => 'Warehouse',
+	'shop_order_item_id' => 'ID',
+	'shop_order_item_total' => 'Total:',
 );

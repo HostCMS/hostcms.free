@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -21,7 +21,9 @@ $oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 $oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 $oShopDir = $oShop->Shop_Dir;
 
-$sFormTitle = $oShop->name;
+$sFormTitle = $oShopGroup->id
+	? $oShopGroup->name
+	: $oShop->name;
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -75,7 +77,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 {
 	$aJSON = array();
 
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('term'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
@@ -108,7 +110,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
 	$mode = intval(Core_Array::getGet('mode'));
 
@@ -177,7 +179,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& Core_Array::getGet('entity_id')
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$entity_id = intval(Core_Array::getGet('entity_id'));
 	$mode = intval(Core_Array::getGet('mode'));
 
@@ -265,7 +267,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet('queryString')))
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString')))));
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
@@ -527,118 +529,6 @@ $oMenu->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_delivery_on'))
-		->icon('fa fa-truck')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_sds_link'))
-		->icon('fa fa-book')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_prices_title'))
-				->icon('fa fa-usd')
-				->img('/admin/images/prices.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.system_of_pays'))
-				->icon('fa fa-credit-card')
-				->img('/admin/images/payment.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.print_forms'))
-				->icon('fa fa-print')
-				->img('/admin/images/payment.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_producers_link'))
-				->icon('fa fa-building-o')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_sellers_link'))
-				->icon('fa fa-trademark')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.main_menu_warehouses_list'))
-				->icon('fa fa-balance-scale')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.show_reports_title'))
-		->icon('fa fa-book')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_sales_order_link'))
-				->icon('fa fa-book')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_brands_order_link'))
-				->icon('fa fa-book')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-)->add(
-	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.shop_menu_title'))
 		->icon('fa fa-money')
 		->add(
@@ -703,18 +593,142 @@ $oMenu->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.affiliate_menu_title'))
-		->icon('fa fa-group')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+		->name(Core::_('Shop_Item.show_sds_link'))
+		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_prices_title'))
+				->icon('fa fa-usd')
+				->img('/admin/images/prices.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+				)
 		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.main_menu_warehouses_list'))
+				->icon('fa fa-balance-scale')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.system_of_pays'))
+				->icon('fa fa-credit-card')
+				->img('/admin/images/payment.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/payment/system/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_delivery_on'))
+				->icon('fa fa-truck')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/delivery/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.affiliate_menu_title'))
+				->icon('fa fa-group')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/affiliate/plan/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.print_forms'))
+				->icon('fa fa-print')
+				->img('/admin/images/payment.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/print/form/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_producers_link'))
+				->icon('fa fa-building-o')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/producer/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_sellers_link'))
+				->icon('fa fa-trademark')
+				->img('/admin/images/company.gif')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.show_reports_title'))
+		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_sales_order_link'))
+				->icon('fa fa-book')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.show_brands_order_link'))
+				->icon('fa fa-book')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
+				)
 		)
 );
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oMenu);
+
+if ($oShopGroup->id)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oShopGroup->id);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oShopGroup->id);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
@@ -723,16 +737,18 @@ $oAdmin_Form_Controller->addEntity(
 		->html('
 			<div class="row search-field margin-bottom-20">
 				<div class="col-xs-12">
-					<form action="/admin/shop/item/index.php" method="GET">
-						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Shop_Item.placeholderSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '">
-						<i class="fa fa-search no-margin" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '"></i>
-
-						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParams) . '" />
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
 					</form>
 				</div>
 			</div>
 		')
 );
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Хлебные крошки
 $oBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -893,26 +909,6 @@ if ($oAdminFormActionLoadShopItemList && $oAdmin_Form_Controller->getAction() ==
 	$oAdmin_Form_Controller->addAction($oShop_Controller_Load_Select_Options);
 }
 
-// Действие "Поиск"
-/*$oAdminFormActionSearch = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('searchItem');
-
-if ($oAdminFormActionSearch && $oAdmin_Form_Controller->getAction() == 'searchItem')
-{
-	$oControllerSearch = Admin_Form_Action_Controller::factory(
-		'Shop_Item_Controller_Search', $oAdminFormActionSearch
-	);
-
-	$sSearchQuery = trim(strval(Core_Array::getRequest('search')));
-
-	$oControllerSearch
-		->query($sSearchQuery);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oControllerSearch);
-}*/
-
 // Действие "Применить"
 $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -921,7 +917,7 @@ $oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAction && $oAdmin_Form_Controller->getAction() == 'apply')
 {
 	$oApplyController = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Apply', $oAction
+		'Shop_Item_Controller_Apply', $oAction
 	);
 
 	$oAdmin_Form_Controller->addAction($oApplyController);
@@ -1099,11 +1095,9 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Group'));
 $oAdmin_Form_Dataset
 	->changeField('name', 'class', 'semi-bold')
-	->addCondition(
-		array(
-				'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
-			)
-		)
+	->addCondition(array(
+			'select' => array('*', array(Core_QueryBuilder::expression("''"), 'adminPrice'), array(Core_QueryBuilder::expression("''"), 'adminRest')
+		))
 	)
 	->addCondition(array('where' => array('shop_id', '=', $oShop->id)))
 	->changeField('related', 'type', 1)
@@ -1116,7 +1110,19 @@ $oAdmin_Form_Dataset
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('shop_groups.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
@@ -1137,8 +1143,7 @@ $oAdmin_Form_Dataset
 		array('leftJoin' => array('shop_warehouse_items', 'shop_items.id', '=', 'shop_warehouse_items.shop_item_id'))
 	)
 	->addCondition(array('where' => array('shop_items.shop_id', '=', $oShop->id)))
-	->addCondition(array('groupBy' => array('shop_items.id')))
-;
+	->addCondition(array('groupBy' => array('shop_items.id')));
 
 if (strlen($sGlobalSearch))
 {
@@ -1147,14 +1152,21 @@ if (strlen($sGlobalSearch))
 			array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
 		)
 		->addCondition(array('open' => array()))
-		// Название
+		->addCondition(array('where' => array('shop_items.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
-		// Артикул
+		->addCondition(array('where' => array('shop_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))
-		// Штрихкод
 		->addCondition(array('where' => array('shop_item_barcodes.value', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('close' => array()));
 }
 else
@@ -1164,12 +1176,12 @@ else
 		->addCondition(array('where' => array('shop_items.modification_id', '=', 0)));
 }
 
+// Producers
 $oShop_Producers = $oShop->Shop_Producers;
 $oShop_Producers->queryBuilder()
 	->distinct()
 	->select('shop_producers.*')
 	->join('shop_items', 'shop_producers.id', '=', 'shop_items.shop_producer_id')
-	// ->where('shop_producers.active', '=', 1)
 	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
 	->where('shop_items.modification_id', '=', 0)
 	->where('shop_items.shortcut_id', '=', 0)
@@ -1193,6 +1205,35 @@ if (count($aShop_Producers))
 		->changeField('shop_producer_id', 'list', $options);
 }
 
+// Sellers
+$oShop_Sellers = $oShop->Shop_Sellers;
+$oShop_Sellers->queryBuilder()
+	->distinct()
+	->select('shop_sellers.*')
+	->join('shop_items', 'shop_sellers.id', '=', 'shop_items.shop_seller_id')
+	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+	->where('shop_items.modification_id', '=', 0)
+	->where('shop_items.shortcut_id', '=', 0)
+	//->groupBy('shop_sellers.id')
+	->clearOrderBy()
+	->orderBy('shop_sellers.sorting', 'ASC')
+	->orderBy('shop_sellers.name', 'ASC');
+
+$aShop_Sellers = $oShop_Sellers->findAll(FALSE);
+
+if (count($aShop_Sellers))
+{
+	$options = '';
+
+	foreach ($aShop_Sellers as $oShop_Seller)
+	{
+		$options .= $oShop_Seller->id . "=" . $oShop_Seller->name . "\n";
+	}
+
+	$oAdmin_Form_Dataset
+		->changeField('shop_seller_id', 'list', $options);
+}
+
 // Change field type
 if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 {
@@ -1202,8 +1243,7 @@ if (Core_Entity::factory('Shop', $oShop->id)->Shop_Warehouses->getCount() == 1)
 // Change field type
 $oAdmin_Form_Dataset
 	->changeField('img', 'type', 10)
-	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
-	;
+	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

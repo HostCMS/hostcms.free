@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -134,7 +134,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->move($this->getField('longitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow9)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
 			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow10)
-			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow10);
+			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21')), $oMainRow10);
 
 		// Флаг установки количества товара на складе
 		$oShopItemCountCheckBox = Admin_Form_Entity::factory('Checkbox');
@@ -145,7 +145,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->caption(Core::_("Shop_Warehouse.warehouse_default_count"))
 			->name("warehouse_default_count");
 
-		$oMainRow11->add($oShopItemCountCheckBox);
+		$oMainRow11->add($oShopItemCountCheckBox);							
 
 		$title = $this->_object->id
 			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name)
@@ -203,5 +203,30 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/**
+	 * Fill warehouses list
+	 * @param Shop_Model $oShop shop object
+	 * @return array
+	 */
+	static public function fillWarehousesList(Shop_Model $oShop)
+	{
+		// $aReturn = array(' … ');
+		$aReturn = array();
+
+		$oShop_Warehouses = $oShop->Shop_Warehouses;
+		$oShop_Warehouses->queryBuilder()
+			->clearOrderBy()
+			->orderBy('shop_warehouses.sorting')
+			->orderBy('shop_warehouses.id');
+
+		$aShop_Warehouses = $oShop_Warehouses->findAll(FALSE);
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
+		{
+			$aReturn[$oShop_Warehouse->id] = $oShop_Warehouse->name . ' [' . $oShop_Warehouse->id . ']';
+		}
+
+		return $aReturn;
 	}
 }

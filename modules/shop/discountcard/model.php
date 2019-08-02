@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -156,7 +156,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				) . '"></i> ' . htmlspecialchars($this->Shop_Discountcard_Level->name)
 			: '—';
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -177,7 +177,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		return htmlspecialchars($this->dataLogin)
 			. '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>';
-	}	
+	}
 
 	/**
 	 * Backend callback method
@@ -245,6 +245,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_discountcard.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$oShop = $this->Shop;
 
 		!isset($this->_forbiddenTags['date'])
@@ -261,6 +286,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$this->addXmlTag('discount_amount', $this->_discountAmount);
 
-		return parent::getXml();
+		return $this;
 	}
 }

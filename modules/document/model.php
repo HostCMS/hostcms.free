@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -30,6 +30,13 @@ class Document_Model extends Core_Entity
 		'user' => array(),
 		'site' => array()
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.
@@ -133,12 +140,12 @@ class Document_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->datetime = $this->datetime;
@@ -189,6 +196,19 @@ class Document_Model extends Core_Entity
 				->html('<a id="document_' . $this->id . '" type="button" class="structure_list_link" data-toggle="popover" data-placement="right" data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" data-container="#document_' . $this->id . '" title="' . Core::_('Document.structures') . '"><i class="fa fa-link gray"></i></a>
 				')
 				->execute();
+
+			Admin_Form_Entity::factory('Code')
+				->html('
+					<script>
+						$("#document_' . $this->id . '.structure_list_link").on(\'click\', function(){
+							if ($(this).has(\'.popover\').length == 0)
+							{
+								$(this).parents(\'td\').find(\'div:first-child\').css(\'position\', \'inherit\');
+							}
+						});
+					</script>
+				')
+				->execute();
 		}
 	}
 
@@ -233,7 +253,12 @@ class Document_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeExecute', $this);
 
 		$checkPanel = Core::checkPanel();
-		if ($checkPanel)
+		if ($checkPanel
+			&& ($oUser = Core_Entity::factory('User')->getCurrent())
+			&& ($oSite = Core_Entity::factory('Site', CURRENT_SITE))
+			&& $oUser->checkModuleAccess(array('document'), $oSite)
+			&& $oUser->checkObjectAccess($this)
+		)
 		{
 			?><div hostcms:id="<?php echo intval($this->id)?>" hostcms:field="editInPlace" hostcms:entity="document" hostcms:type="wysiwyg"><?php
 		}

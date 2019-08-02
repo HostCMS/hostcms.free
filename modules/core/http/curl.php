@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -93,6 +93,7 @@ class Core_Http_Curl extends Core_Http
 		//curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
 
 		curl_setopt($curl, CURLOPT_TIMEOUT, $this->_timeout);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $this->_timeout);
 		curl_setopt($curl, CURLOPT_USERAGENT, $this->_userAgent);
 		curl_setopt($curl, CURLOPT_REFERER, $this->_referer);
 
@@ -183,6 +184,7 @@ class Core_Http_Curl extends Core_Http
 
 		$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
 		$this->_headers = substr($datastr, 0, $iHeaderSize);
+
 		$this->_body = substr($datastr, $iHeaderSize);
 
 		// Close PHP cURL handle
@@ -190,7 +192,7 @@ class Core_Http_Curl extends Core_Http
 
 		//$aTmp = explode("\r\n\r\n", $datastr, 2);
 
-		unset ($datastr);
+		unset($datastr);
 
 		/*$this->_headers = Core_Array::get($aTmp, 0);
 		$this->_body = Core_Array::get($aTmp, 1);*/

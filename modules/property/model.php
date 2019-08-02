@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -275,6 +275,77 @@ class Property_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
+		// Values
+		$this->Property_Value_Ints->deleteAll(FALSE);
+		$this->Property_Value_Floats->deleteAll(FALSE);
+		$this->Property_Value_Strings->deleteAll(FALSE);
+		$this->Property_Value_Texts->deleteAll(FALSE);
+		$this->Property_Value_Datetimes->deleteAll(FALSE);
+
+		$nodeName = $methodName = NULL;
+
+		if (Core::moduleIsActive('structure') && !is_null($this->Structure_Property->id))
+		{
+			$nodeName = 'Structure';
+			$methodName = 'getDirPath';
+		}
+		elseif (Core::moduleIsActive('siteuser') && !is_null($this->Siteuser_Property->id))
+		{
+			$nodeName = 'Siteuser';
+			$methodName = 'getDirPath';
+		}
+		elseif (Core::moduleIsActive('informationsystem') && !is_null($this->Informationsystem_Item_Property->id))
+		{
+			$nodeName = 'Informationsystem_Item';
+			$methodName = 'getItemPath';
+		}
+		elseif (Core::moduleIsActive('informationsystem') && !is_null($this->Informationsystem_Group_Property->id))
+		{
+			$nodeName = 'Informationsystem_Group';
+			$methodName = 'getGroupPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Item_Property->id))
+		{
+			$nodeName = 'Shop_Item';
+			$methodName = 'getItemPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Group_Property->id))
+		{
+			$nodeName = 'Shop_Group';
+			$methodName = 'getGroupPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Order_Property->id))
+		{
+			$nodeName = 'Shop_Order';
+			$methodName = 'getOrderPath';
+		}
+
+		if (!is_null($nodeName))
+		{
+			do {
+				$oProperty_Value_Files = $this->Property_Value_Files;
+				$oProperty_Value_Files
+					->queryBuilder()
+					->limit(500);
+
+				$aProperty_Value_Files = $oProperty_Value_Files->findAll(FALSE);
+
+				foreach ($aProperty_Value_Files as $oProperty_Value_File)
+				{
+					$oProperty_Value_File
+						->setDir(
+							Core_Entity::factory($nodeName, $oProperty_Value_File->entity_id)->$methodName()
+						)
+						->delete();
+				}
+			} while (count($aProperty_Value_Files));
+		}
+		// Delte just from database
+		else
+		{
+			$this->Property_Value_Files->deleteAll(FALSE);
+		}
+
 		// Relations
 		$this->Structure_Property->delete();
 		$this->Informationsystem_Item_Property->delete();
@@ -283,13 +354,6 @@ class Property_Model extends Core_Entity
 		$this->Shop_Group_Property->delete();
 		$this->Shop_Order_Property->delete();
 		Core::moduleIsActive('siteuser') && $this->Siteuser_Property->delete();
-
-		$this->Property_Value_Ints->deleteAll(FALSE);
-		$this->Property_Value_Floats->deleteAll(FALSE);
-		$this->Property_Value_Strings->deleteAll(FALSE);
-		$this->Property_Value_Texts->deleteAll(FALSE);
-		$this->Property_Value_Datetimes->deleteAll(FALSE);
-		$this->Property_Value_Files->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -396,14 +460,41 @@ class Property_Model extends Core_Entity
 	 */
 	public function getXml()
 	{
-		$bIsList = $this->type == 3 && $this->list_id != 0 && Core::moduleIsActive('list');
-
 		$this->setConfig(
 			Core_Config::instance()->get('property_config', array()) + array('add_list_items' => TRUE)
 		);
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		$this->setConfig(
+			Core_Config::instance()->get('property_config', array()) + array('add_list_items' => TRUE)
+		);
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags();
 
 		/*if ($this->type != 2)
@@ -414,6 +505,8 @@ class Property_Model extends Core_Entity
 				->addForbiddenTag('image_small_max_height')
 				->addForbiddenTag('hide_small_image');
 		}*/
+
+		$bIsList = $this->type == 3 && $this->list_id != 0 && Core::moduleIsActive('list');
 
 		// List
 		if ($bIsList)
@@ -444,12 +537,12 @@ class Property_Model extends Core_Entity
 				}
 
 				$this->_addListItems(0, $this->List);
-				
+
 				$this->_aListItemsTree = array();
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	protected function _addListItems($parentId, $oObject)
@@ -470,6 +563,11 @@ class Property_Model extends Core_Entity
 	public function typeBackend()
 	{
 		return Core::_('Property.type' . $this->type);
+	}
+
+	public function descriptionBackend()
+	{
+		return Core_Str::cut(strip_tags($this->description), 100);
 	}
 
 	/**

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -55,9 +55,9 @@ class Shop_Order_Property_Controller_Edit extends Property_Controller_Edit
 						2 => Core::_('Shop_Order.properties_show_kind_list'),
 						3 => Core::_('Shop_Order.properties_show_kind_radio'),
 						4 => Core::_('Shop_Order.properties_show_kind_checkbox'),
+						7 => Core::_('Shop_Order.properties_show_kind_listbox'),
 						5 => Core::_('Shop_Order.properties_show_kind_checkbox_one'),
 						//6 => Core::_('Shop_Order.properties_show_kind_from_to'),
-						7 => Core::_('Shop_Order.properties_show_kind_listbox'),
 						8 => Core::_('Shop_Order.properties_show_kind_textarea'))
 					)
 					->name('display')

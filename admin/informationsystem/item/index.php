@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -20,7 +20,13 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 $iInformationsystemId = intval(Core_Array::getGet('informationsystem_id'));
 $iInformationsystemGroupId = intval(Core_Array::getGet('informationsystem_group_id', 0));
 
+$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $iInformationsystemGroupId);
+
 $oInformationsystem = Core_Entity::factory('Informationsystem')->find($iInformationsystemId);
+
+$sFormTitle = $oInformationsystem_Group->id
+	? $oInformationsystem_Group->name
+	: Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -28,8 +34,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name))
-	->pageTitle(Core::_('Informationsystem_Item.show_information_groups_title', $oInformationsystem->name));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('term')))
 {
@@ -371,6 +377,16 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+if ($iInformationsystemGroupId)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $iInformationsystemGroupId);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $iInformationsystemGroupId);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
+
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
 $oAdmin_Form_Controller->addEntity(
@@ -378,16 +394,18 @@ $oAdmin_Form_Controller->addEntity(
 		->html('
 			<div class="row search-field margin-bottom-20">
 				<div class="col-xs-12">
-					<form action="/admin/informationsystem/item/index.php" method="GET">
-						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Informationsystem_Item.placeholderSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '">
-						<i class="fa fa-search no-margin" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParamsItemProperties) . '"></i>
-
-						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm(NULL, NULL, $additionalParamsItemProperties) . '" />
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '" />
 					</form>
 				</div>
 			</div>
 		')
 );
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -676,19 +694,30 @@ if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction()
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Informationsystem_Group')
 );
-$oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
-// Ограничение источника 0 по родительской группе
+
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('*', array(Core_QueryBuilder::expression("''"), 'datetime'))
-	)
+	array('select' => array('*', array(Core_QueryBuilder::expression("''"), 'datetime')))
 )->addCondition(
 	array('where' => array('informationsystem_id', '=', $iInformationsystemId))
-);
+)
+->changeField('name', 'class', 'semi-bold');
 
 if (strlen($sGlobalSearch))
 {
 	$oAdmin_Form_Dataset
-		->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')));
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
 }
 else
 {
@@ -707,42 +736,45 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 $oAdmin_Form_Dataset
+	->addCondition(
+		array('where' => array('informationsystem_id', '=', $iInformationsystemId))
+	)
 	->changeField('active', 'link', '/admin/informationsystem/item/index.php?hostcms[action]=changeActive&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}')
 	->changeField('active', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}', action: 'changeActive', windowId: '{windowId}'}); return false")
 	->changeField('indexing', 'link', '/admin/informationsystem/item/index.php?hostcms[action]=changeIndexation&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}')
 	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}',action: 'changeIndexation', windowId: '{windowId}'}); return false")
 	->changeField('adminComment', 'type', 10)
-	// Ограничение источника 1 по родительской группе
-	/*->addCondition(
-		array('where' =>
-			array('informationsystem_group_id', '=', $iInformationsystemGroupId)
-		)
-	)*/
-	->addCondition(
-		array('where' =>
-			array('informationsystem_id', '=', $iInformationsystemId)
-		)
-	)
 	//->changeField('name', 'type', 1)
 	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
-	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
+	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('img', 'type', 10);
 
-	// Change field type
-	$oAdmin_Form_Dataset->changeField('img', 'type', 10);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('informationsystem_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)));
+}
 
-	if (strlen($sGlobalSearch))
-	{
-		$oAdmin_Form_Dataset->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')));
-	}
-	else
-	{
-		$oAdmin_Form_Dataset->addCondition(array('where' => array('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)));
-	}
-
-	// Добавляем источник данных контроллеру формы
-	$oAdmin_Form_Controller->addDataset(
-		$oAdmin_Form_Dataset
-	);
+// Добавляем источник данных контроллеру формы
+$oAdmin_Form_Controller->addDataset(
+	$oAdmin_Form_Dataset
+);
 
 // Действие "Удаление файла большого изображения"
 $oAdminFormActionDeleteLargeImage = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)

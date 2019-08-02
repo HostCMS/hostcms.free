@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -41,11 +41,11 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->getField('start_datetime')
-			->class('input-lg')
+			->class('form-control input-lg')
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
 		$this->getField('datetime')
-			->class('input-lg')
+			->class('form-control input-lg')
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
 		$this->getField('interval')

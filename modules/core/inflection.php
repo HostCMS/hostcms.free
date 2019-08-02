@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Inflection
 {
@@ -85,6 +85,18 @@ abstract class Core_Inflection
 			: $last;
 	}
 
+	/**
+	 * Get plural form of word
+	 * @param string $word word
+	 * @param int $count
+	 * @param string $lng driver
+	 * @return string
+	 */
+	/*static public function numberInWords($number, $aUnits = NULL)
+	{
+		return self::instance($lng)->numberInWords($number, $aUnits);
+	}*/
+	
 	/**
 	 * Get singular form of word
 	 * @param string $word word
@@ -178,6 +190,6 @@ abstract class Core_Inflection
 	 */
 	static public function num2str($float, $lng = 'en')
 	{
-		return self::instance($lng)->_num2str($float);
+		return self::instance($lng)->numberInWords($float);
 	}
 }

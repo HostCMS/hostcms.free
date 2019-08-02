@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -79,6 +79,13 @@ class Informationsystem_Group_Model extends Core_Entity
 		'seo_item_keywords_template',
 		'seo_item_description_template'
 	);
+
+	/**
+	 * Has revisions
+	 *
+	 * @param boolean
+	 */
+	protected $_hasRevisions = TRUE;
 
 	/**
 	 * Constructor.
@@ -292,7 +299,7 @@ class Informationsystem_Group_Model extends Core_Entity
 			break;
 		}
 	}
-	
+
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
@@ -342,8 +349,9 @@ class Informationsystem_Group_Model extends Core_Entity
 	public function copy()
 	{
 		$newObject = parent::copy();
-
-		$this->_changeCopiedName && $newObject->path(Core_Guid::get())->save();
+		$newObject->guid = Core_Guid::get();
+		$this->_changeCopiedName && $newObject->path(Core_Guid::get());
+		$newObject->save();
 
 		// Существует файл большого изображения для оригинального элемента
 		if (is_file($this->getLargeFilePath()))
@@ -368,11 +376,12 @@ class Informationsystem_Group_Model extends Core_Entity
 		$aInformationsystem_Items = $this->Informationsystem_Items->findAll();
 		foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 		{
-			$newObject->add($oInformationsystem_Item->copy());
+			$newObject->add($oInformationsystem_Item->incCountByCreate(FALSE)->copy());
 			// Recount for current group
-			$this->decCountItems();
+			//$this->decCountItems();
 		}
 
+		// Property Values
 		$aPropertyValues = $this->getPropertyValues();
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
@@ -910,12 +919,12 @@ class Informationsystem_Group_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . $this->id . ' ' . htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . htmlspecialchars($this->path) . ' ';
 
 		$oSearch_Page->title = $this->name;
@@ -1028,6 +1037,31 @@ class Informationsystem_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event informationsystem_group.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags();
 
 		!isset($this->_forbiddenTags['url'])
@@ -1041,11 +1075,11 @@ class Informationsystem_Group_Model extends Core_Entity
 			if (is_array($this->_showXmlProperties))
 			{
 				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
-				
+
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
-					
+
 					$this->addEntity($oProperty_Value);
 				}
 			}
@@ -1057,7 +1091,7 @@ class Informationsystem_Group_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -1247,7 +1281,7 @@ class Informationsystem_Group_Model extends Core_Entity
 					break;
 				}
 			}
-			
+
 			if (count($aTmp))
 			{
 				return sprintf($format, $oProperty->name, implode($separator, $aTmp));

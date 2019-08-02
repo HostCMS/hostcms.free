@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -204,7 +204,8 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 				->class('applyButton btn btn-blue')
 				->value($this->buttonName)
 				->onclick(
-					'$("#' . $newWindowId . '").parents(".modal").remove(); '
+					//'$("#' . $newWindowId . '").parents(".modal").remove(); '
+					'bootbox.hideAll(); '
 					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
 				)
 				->controller($this->_Admin_Form_Controller);

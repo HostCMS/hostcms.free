@@ -9,10 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
+	/**
+	 * Allow pay by bonuses, 1 - 100%, 0.5 - 50%, 0 - forbid pay by bonuses
+	 * @var int
+	 */
+	protected $_bonusMultiplier = 1;
+
 	/**
 	 * Create instance of payment system
 	 * @param Shop_Payment_System_Model $oShop_Payment_System_Model payment system
@@ -28,6 +34,7 @@ abstract class Shop_Payment_System_Handler
 		{
 			return new $name($oShop_Payment_System_Model);
 		}
+
 		return NULL;
 	}
 
@@ -121,6 +128,40 @@ abstract class Shop_Payment_System_Handler
 	public function round($round)
 	{
 		$this->_round = $round;
+		return $this;
+	}
+	
+	/**
+	 * Round prices
+	 * @var boolean
+	 */
+	protected $_applyDiscounts = TRUE;
+
+	/**
+	 * Apply Discounts
+	 * @param boolean $applyDiscounts
+	 * @return self
+	 */
+	public function applyDiscounts($applyDiscounts)
+	{
+		$this->_applyDiscounts = $applyDiscounts;
+		return $this;
+	}
+
+	/**
+	 * Apply Discount Cards
+	 * @var boolean
+	 */
+	protected $_applyDiscountCards = TRUE;
+
+	/**
+	 * Apply Discount Cards
+	 * @param boolean $applyDiscountCards
+	 * @return self
+	 */
+	public function applyDiscountCards($applyDiscountCards)
+	{
+		$this->_applyDiscountCards = $applyDiscountCards;
 		return $this;
 	}
 
@@ -422,7 +463,7 @@ abstract class Shop_Payment_System_Handler
 				$invoice = $oCore_Templater
 					->addObject('shop', $oShop)
 					->addObject('this', $this->_shopOrder)
-					->addFunction('ordersToday', array($this, 'ordersToday'))
+					->addFunction('ordersToday', array($this->_shopOrder, 'ordersToday'))
 					->setTemplate($oShop->invoice_template)
 					->execute();
 			}
@@ -448,7 +489,7 @@ abstract class Shop_Payment_System_Handler
 	/**
 	 * Количество заказов за сегодня
 	 */
-	public function ordersToday()
+	/*public function ordersToday()
 	{
 		$oShop_Order = $this->getShopOrder();
 		$date = date('Y-m-d');
@@ -459,7 +500,7 @@ abstract class Shop_Payment_System_Handler
 			->where('datetime', '<', "{$date} 23:59:59");
 
 		return $oShop_Orders->getCount(FALSE);
-	}
+	}*/
 
 	/**
 	 * Создание нового заказа на основе данных, указанных в orderParams
@@ -542,6 +583,13 @@ abstract class Shop_Payment_System_Handler
 
 					$this->_shopOrder->add($oShop_Order_Item);
 
+					// Save coupon
+					if (isset($aPrices['coupon']))
+					{
+						$this->_shopOrder->coupon = $aPrices['coupon'];
+						$this->_shopOrder->save();
+					}
+
 					// Reserved
 					if ($oShop->reserve && !$this->_shopOrder->paid)
 					{
@@ -570,6 +618,11 @@ abstract class Shop_Payment_System_Handler
 		if ($amount > 0)
 		{
 			// Add a discount to the purchase
+			if (!is_null($this->_orderParams['coupon_text']))
+			{
+				$this->_shopOrder->coupon = $this->_orderParams['coupon_text'];
+			}
+
 			$this->_addPurchaseDiscount($amountPurchaseDiscount, $quantityPurchaseDiscount, $aDiscountPrices);
 		}
 
@@ -587,6 +640,7 @@ abstract class Shop_Payment_System_Handler
 			&& isset($this->_orderParams['partial_payment_by_personal_account'])
 			&& $this->_orderParams['partial_payment_by_personal_account']
 			&& $this->_shopOrder->Siteuser->id
+			&& $this->_bonusMultiplier > 0 && $this->_bonusMultiplier <= 1
 		)
 		{
 			$this->_applyBonuses();
@@ -597,7 +651,7 @@ abstract class Shop_Payment_System_Handler
 		{
 			unset($_SESSION['hostcmsOrder']['coupon_text']);
 		}
-		
+
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
 
 		return $this;
@@ -612,6 +666,8 @@ abstract class Shop_Payment_System_Handler
 
 		if ($oModule && Core::moduleIsActive('notification'))
 		{
+			$aUserIDs = array();
+
 			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 			$oNotification_Subscribers->queryBuilder()
 				->where('notification_subscribers.module_id', '=', $oModule->id)
@@ -620,27 +676,40 @@ abstract class Shop_Payment_System_Handler
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
 
-			if (count($aNotification_Subscribers))
+			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 			{
-				$sCompany = strlen($this->_shopOrder->company)
-					? $this->_shopOrder->company
-					: trim($this->_shopOrder->surname . ' ' . $this->_shopOrder->name . ' ' . $this->_shopOrder->patronymic);
+				$aUserIDs[] = $oNotification_Subscriber->user_id;
+			}
+
+			// Ответственные сотрудники
+			if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
+			{
+				$aSiteuser_Users = $this->_shopOrder->Siteuser->Siteuser_Users->findAll(FALSE);
+				foreach ($aSiteuser_Users as $oSiteuser_User)
+				{
+					!in_array($oSiteuser_User->user_id, $aUserIDs)
+						&& $aUserIDs[] = $oSiteuser_User->user_id;
+				}
+			}
+
+			if (count($aUserIDs))
+			{
+				$sCompany = $this->_shopOrder->getCustomerName();
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
-					->title(sprintf(Core::_('Shop_Order.notification_new_order'), $this->_shopOrder->invoice))
-					->description(sprintf(Core::_('Shop_Order.notification_new_order_description'), $sCompany , $this->_shopOrder->sum()))
+					->title(Core::_('Shop_Order.notification_new_order', strip_tags($this->_shopOrder->invoice), FALSE))
+					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->_shopOrder->sum(), FALSE))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(1) // Новый заказ
 					->entity_id($this->_shopOrder->id)
 					->save();
 
-				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+				foreach ($aUserIDs as $user_id)
 				{
 					// Связываем уведомление с сотрудником
-					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
-						->add($oNotification);
+					Core_Entity::factory('User', $user_id)->add($oNotification);
 				}
 			}
 		}
@@ -672,9 +741,9 @@ abstract class Shop_Payment_System_Handler
 			// Сумма заказа в валюте магазина
 			$fOrderAmount = $this->_shopOrder->getAmount() * $fCurrencyCoefficient;
 
-			// Сумма заказа меньше или равна средствам
-			$fBonusesAmount = $fSiteuserAmount > $fOrderAmount
-				? $fOrderAmount
+			// Сумма заказа меньше или равна средствам (с учетом $this->_bonusMultiplier)
+			$fBonusesAmount = $fSiteuserAmount > $fOrderAmount * $this->_bonusMultiplier
+				? $fOrderAmount * $this->_bonusMultiplier
 				: $fSiteuserAmount;
 
 			// Проведение транзакции по списанию предоплаты бонусами
@@ -734,137 +803,17 @@ abstract class Shop_Payment_System_Handler
 	 * @param array $discountPrices array of item's prices
 	 * @return self
 	 */
-	protected function _addPurchaseDiscount($amount, $quantity, $discountPrices = array())
+	protected function _addPurchaseDiscount($amount, $quantity, $aDiscountPrices = array())
 	{
-		$oShop = $this->_Shop_Payment_System_Model->Shop;
-
-		// Дисконтная карта
-		$bApplyMaxDiscount = FALSE;
-		$fDiscountcard = 0;
-		if (Core::moduleIsActive('siteuser') && $this->_shopOrder->siteuser_id)
-		{
-			$oSiteuser = $this->_shopOrder->Siteuser;
-
-			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
-			{
-				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
-
-				$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
-
-				// Сумма скидки по дисконтной карте
-				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
-			}
-		}
-
-		// Скидки от суммы заказа
-		$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
-		$oShop_Purchase_Discount_Controller
-			->amount($amount)
-			->quantity($quantity)
-			->couponText(trim($this->_orderParams['coupon_text']))
-			->siteuserId($this->_shopOrder->siteuser_id ? $this->_shopOrder->siteuser_id : 0)
-			->prices($discountPrices)
-			;
-
-		// Получаем данные о купоне
-		$shop_purchase_discount_coupon_id = $shop_purchase_discount_id = 0;
-		if (strlen($oShop_Purchase_Discount_Controller->couponText))
-		{
-			$oShop_Purchase_Discounts_For_Coupon = $oShop->Shop_Purchase_Discounts->getByCouponText(
-				$oShop_Purchase_Discount_Controller->couponText
-			);
-			if (!is_null($oShop_Purchase_Discounts_For_Coupon))
-			{
-				// ID скидки по купону
-				$shop_purchase_discount_id = $oShop_Purchase_Discounts_For_Coupon->id;
-				// ID самого купона
-				$shop_purchase_discount_coupon_id = $oShop_Purchase_Discounts_For_Coupon->shop_purchase_discount_coupon_id;
-			}
-		}
-
-		$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
-
-		// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
-		if ($bApplyMaxDiscount)
-		{
-			$totalPurchaseDiscount = 0;
-
-			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-			{
-				$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
-			}
-
-			$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
-		}
-		else
-		{
-			$bApplyShopPurchaseDiscounts = TRUE;
-		}
-
-		// Если решили применять скидку от суммы заказа
-		$fAppliedDiscountsAmount = 0;
-		if ($bApplyShopPurchaseDiscounts)
-		{
-			foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
-			{
-				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-				$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
-				$oShop_Order_Item->quantity = 1;
-				$oShop_Order_Item->type = 0;
-
-				$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
-
-				// Скидка больше суммы заказа
-				$discountAmount > $amount && $discountAmount = $amount;
-
-				$oShop_Order_Item->price = -1 * $discountAmount;
-
-				// Inc total discount amount
-				$fAppliedDiscountsAmount += $discountAmount;
-
-				if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
-				{
-					$oShop_Purchase_Discount_Coupon = Core_Entity::factory('shop_purchase_discount_coupon')->find(
-						$shop_purchase_discount_coupon_id
-					);
-
-					// Списываем купон
-					if (!is_null($oShop_Purchase_Discount_Coupon->id)
-						&& $oShop_Purchase_Discount_Coupon->count != -1
-						&& $oShop_Purchase_Discount_Coupon->count != 0
-					)
-					{
-						$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
-						$oShop_Purchase_Discount_Coupon->save();
-					}
-				}
-
-				$this->_shopOrder->add($oShop_Order_Item);
-			}
-		}
-
-		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
-		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
-		{
-			if ($fDiscountcard)
-			{
-				$fAmountForCard = $amount - $fAppliedDiscountsAmount;
-
-				if ($fAmountForCard > 0)
-				{
-					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-					$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
-					$oShop_Order_Item->quantity = 1;
-					$oShop_Order_Item->type = 0;
-					$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
-						$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
-					);
-
-					$this->_shopOrder->add($oShop_Order_Item);
-				}
-			}
-		}
+		$this->_shopOrder->addPurchaseDiscount(
+			array(
+				'amount' => $amount,
+				'quantity' => $quantity,
+				'prices' => $aDiscountPrices,
+				'applyDiscounts' => $this->_applyDiscounts,
+				'applyDiscountCards' => $this->_applyDiscountCards
+			)
+		);
 
 		return $this;
 	}
@@ -1601,6 +1550,7 @@ abstract class Shop_Payment_System_Handler
 	public function changedOrder($mode)
 	{
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeChangedOrder', $this, array($mode));
+
 		if (in_array($mode, $this->_notificationModes))
 		{
 			if ($this->getShopOrderBeforeAction()->paid != $this->getShopOrder()->paid

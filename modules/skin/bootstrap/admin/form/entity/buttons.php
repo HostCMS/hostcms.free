@@ -9,6 +9,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_Entity_Buttons {}
+class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_Entity_Buttons {
+	/**
+	 * Executes the business logic.
+	 */
+	public function execute()
+	{
+		parent::execute();
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		?><script>
+		$(document).ready(function() {
+			// Указываем таймаут для узлов структуры (подгрузка xsl)
+			setTimeout(function() {
+				var jForm = $('#<?php echo $windowId?> form[id ^= "formEdit"]');
+				jForm.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) });
+				jForm.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormLocker.lock(e) });
+			}, 5000);
+
+			$('#<?php echo $windowId?> .formButtons :input').on('click', function(e) { mainFormLocker.unlock() });
+		});
+		</script><?php
+	}
+}

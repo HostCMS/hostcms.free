@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -113,7 +113,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shop_Item_Discounts->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
@@ -128,6 +128,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_discount.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$oShop = $this->Shop;
 
 		$this->clearXmlTags();
@@ -144,7 +169,80 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			? $this->addXmlTag('percent', $this->value)
 			: $this->addXmlTag('amount', $this->value);
 
-		return parent::getXml();
+		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+			htmlspecialchars($this->name)
+		);
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		!$bRightTime && $oCore_Html_Entity_Div->class('wrongTime');
+
+		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
+		if (!$this->active)
+		{
+			$oCore_Html_Entity_Div->class('inactive');
+		}
+		elseif (!$bRightTime)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+				);
+		}
+
+		if ($this->coupon && strlen($this->coupon_text))
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-sky label-sm')
+					->value(htmlspecialchars($this->coupon_text))
+			);
+		}
+
+		$oCore_Html_Entity_Div->execute();
+	}
+
+	/**
+	 * Get options for select
+	 * @return array
+	 */
+	public function getOptions()
+	{
+		$aReturn = array(" … ");
+
+		$name = $this->name;
+		$attr = array();
+
+		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
+			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
+
+		if (!$this->active || !$bRightTime)
+		{
+			$attr = array('class' => 'gray');
+		}
+
+		if ($this->coupon)
+		{
+			$name .= ' [' . htmlspecialchars($this->coupon_text) . ']';
+			$attr = array('class' => 'sky');
+		}
+
+		$aReturn = array(
+			'value' => htmlspecialchars($name),
+			'attr' => $attr
+		);
+
+		return $aReturn;
 	}
 
 	/**

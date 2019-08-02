@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -190,7 +190,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	public function moveTabBefore(Skin_Default_Admin_Form_Entity_Tab $oAdmin_Form_Entity_Tab, Skin_Default_Admin_Form_Entity_Tab $oAdmin_Form_Entity_Tab_Before)
 	{
 		$this->deleteTab($oAdmin_Form_Entity_Tab);
-		$oTabTo->addTabBefore($oAdmin_Form_Entity_Tab, $oAdmin_Form_Entity_Tab_Before);
+		$this->addTabBefore($oAdmin_Form_Entity_Tab, $oAdmin_Form_Entity_Tab_Before);
 		return $this;
 	}
 
@@ -415,7 +415,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 			$oUser = Core_Entity::factory('User')->getCurrent();
 
-			!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
+			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
+			//!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
 
 			$this->addTab($oAdmin_Form_Tab_EntityAdditional);
 		//}
@@ -568,7 +569,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					{
 						$oAdmin_Form_Entity_For_Column
 							->caption(Core::_('User.backend-field-caption'))
-							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
+							->disabled('disabled');
 
 						if ($this->_object->user_id && Core::moduleIsActive('user'))
 						{
@@ -576,7 +578,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 							$oUserLink = Admin_Form_Entity::factory('Link');
 							$oUserLink
-								// ->divAttr(array('class' => 'large-link checkbox-margin-top form-group col-xs-6 col-sm-3'))
 								->divAttr(array('class' => 'input-group-addon user-link'))
 								->a
 									->class('btn btn-labeled btn-sky')
@@ -789,7 +790,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							if (count($aMaxLength) == 2)
 							{
 								$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
-								
+
 								$value > $maxValue && $value = $maxValue;
 								$value < -$maxValue && $value = -$maxValue;
 							}

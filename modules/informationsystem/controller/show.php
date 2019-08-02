@@ -61,7 +61,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -347,15 +347,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$oInformationsystem_Items
 			->queryBuilder()
 			->open()
-			->where('informationsystem_items.start_datetime', '<', $dateTime)
-			->setOr()
-			->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
+				->where('informationsystem_items.start_datetime', '<', $dateTime)
+				->setOr()
+				->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
 			->close()
 			->setAnd()
 			->open()
-			->where('informationsystem_items.end_datetime', '>', $dateTime)
-			->setOr()
-			->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
+				->where('informationsystem_items.end_datetime', '>', $dateTime)
+				->setOr()
+				->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
 			->close()
 			->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups);
 
@@ -475,7 +475,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->showPanel && Core::checkPanel() && $this->_showPanel();
 
-		$bXsl = !is_null($this->_xsl);
+		$bTpl = $this->_mode == 'tpl';
 
 		$this->item && $this->_incShowed();
 
@@ -575,7 +575,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Informationsystem_Group_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_group_properties');
@@ -634,7 +634,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_aItem_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
-			if ($bXsl)
+			if (!$bTpl)
 			{
 				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_item_properties');
@@ -647,7 +647,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$this->_shownIDs = array();
 
-		if (!$bXsl)
+		if ($bTpl)
 		{
 			$this->assign('controller', $this);
 			$this->assign('aInformationsystem_Items', array());
@@ -676,7 +676,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$oInformationsystem_Item->clearEntities();
 
-				if ($bXsl)
+				if (!$bTpl)
 				{
 					// Ярлык может ссылаться на отключенный элемент
 					$desiredActivity = strtolower($this->itemsActivity) == 'active'
@@ -1212,8 +1212,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
-		$bXsl = !is_null($this->_xsl);
-		if ($bXsl)
+		$bTpl = $this->_mode == 'tpl';
+
+		if (!$bTpl)
 		{
 			$this->_addGroupsByParentId(0, $this);
 		}
@@ -1251,8 +1252,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			} while ($oInformationsystem_Group = $oInformationsystem_Group->getParent());
 		}
 
-		$bXsl = !is_null($this->_xsl);
-		if ($bXsl)
+		$bTpl = $this->_mode == 'tpl';
+
+		if (!$bTpl)
 		{
 			$this->_addGroupsByParentId(0, $this);
 		}
@@ -1305,7 +1307,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 							$oInformationsystem_Group->addEntity($oProperty_Value);
 						}
 					}*/
-					
+
 					$oInformationsystem_Group->showXmlProperties($this->groupsProperties);
 				}
 				else
@@ -1447,25 +1449,28 @@ class Informationsystem_Controller_Show extends Core_Controller
 								->title($sTitle)
 						)
 				);
+			}
 
-				// Folder
-				$sPath = '/admin/informationsystem/item/index.php';
-				$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
-				$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
+			// Folder
+			$sPath = '/admin/informationsystem/item/index.php';
+			$sAdditional = "&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}";
+			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
-				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
-						->href("{$sPath}?{$sAdditional}")
-						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
-						->add(
-							Core::factory('Core_Html_Entity_Img')
-								->width(16)->height(16)
-								->src('/admin/images/folder.gif')
-								->alt($sTitle)
-								->title($sTitle)
-						)
-				);
+			$oXslSubPanel->add(
+				Core::factory('Core_Html_Entity_A')
+					->href("{$sPath}?{$sAdditional}")
+					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->add(
+						Core::factory('Core_Html_Entity_Img')
+							->width(16)->height(16)
+							->src('/admin/images/folder.gif')
+							->alt($sTitle)
+							->title($sTitle)
+					)
+			);
 
+			if ($this->group)
+			{
 				// Delete
 				$sPath = '/admin/informationsystem/item/index.php';
 				$sAdditional = "hostcms[action]=markDeleted&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystem_Group->parent_id}&hostcms[checked][0][{$this->group}]=1";
@@ -1487,7 +1492,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 			$sPath = '/admin/informationsystem/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_dir_id={$oInformationsystem->informationsystem_dir_id}&hostcms[checked][1][{$oInformationsystem->id}]=1";
-			$sTitle = Core::_('Informationsystem.edit_title');
+			$sTitle = Core::_('Informationsystem.edit_title', $oInformationsystem->name);
 
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')
@@ -1505,7 +1510,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		else
 		{
 			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
-			
+
 			// Edit
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][{$this->item}]=1";

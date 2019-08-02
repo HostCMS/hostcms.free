@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -223,8 +223,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oDescriptionField
-					->wysiwyg(TRUE)
 					->rows(7)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				$oShopItemTabDescription->move($oDescriptionField, $oShopItemTabDescriptionRow1);
@@ -264,8 +264,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->moveAfter($oTextField = $this->getField('text'), isset($oOpticalAlignDescriptionCheckBox) ? $oOpticalAlignDescriptionCheckBox : $oDescriptionField, $oShopItemTabDescription);
 
 				$oTextField
-					->wysiwyg(TRUE)
 					->rows(15)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				$oShopItemTabDescription->move($oTextField, $oShopItemTabDescriptionRow3);
@@ -377,10 +377,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Добавляем тип товара
 				$oMainRow4->add($oRadioType);
 
-				$sTmpHtml = '<div class="form-group col-lg-2 col-xs-12 margin-top-21">';
-
 				if ($this->_object->id)
 				{
+					$sTmpHtml = '<div class="form-group col-lg-2 col-xs-12 margin-top-21">';
 					$additionalParams1 = "shop_item_id={$this->_object->id}&shop_group_id={$this->_object->shop_group_id}";
 					$additionalParams2 = "shop_item_id={$this->_object->id}";
 
@@ -388,10 +387,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet no-margin"></i></a>
 						<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork no-margin"></i></a>
 					</div>';
-				}
-				$sTmpHtml .= "</div>";
 
-				$oMainRow4->add(Admin_Form_Entity::factory('Code')->html($sTmpHtml));
+					$sTmpHtml .= "</div>";
+
+					$oMainRow4->add(Admin_Form_Entity::factory('Code')->html($sTmpHtml));
+				}
 
 				// Удаляем модификацию
 				$oAdditionalTab->delete($this->getField('modification_id'));
@@ -592,7 +592,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->value("$('.add-set-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+					->value("$('.add-set-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0 }, function(event, ui) {
 						$('.set-item-table > tbody').append(
 							$('<tr><td>' + ui.item.label + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + ui.item.marking + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 						);
@@ -623,7 +623,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
 
 				$oImageField
-					->divAttr(array('class' => 'form-group col-xs-12'))
 					->name("image")
 					->id("image")
 					->largeImage(array('max_width' => $oShop->image_large_max_width, 'max_height' => $oShop->image_large_max_height, 'path' => $oLargeFilePath, 'show_params' => TRUE, 'watermark_position_x' => $oShop->watermark_default_position_x, 'watermark_position_y' => $oShop->watermark_default_position_y, 'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image, 'delete_onclick' =>
@@ -691,7 +690,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(self::fillProducersList($object->shop_id))
 					->name('shop_producer_id')
-						->value($this->_object->id
+					->value($this->_object->id
 						? $this->_object->shop_producer_id
 						: (!is_null($oDefault_Shop_Producer) ? $oDefault_Shop_Producer->id : 0)
 					);
@@ -836,7 +835,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->id("item_price_id_{$oShopPrice->id}")
 							->value(htmlspecialchars($value))
 							->name("item_price_id_{$oShopPrice->id}")
-							->divAttr(array('class' => 'form-group margin-top-10 col-xs-9 col-sm-6 col-md-4'))
+							->divAttr(array('class' => 'form-group margin-top-10 col-xs-8 col-md-4'))
 							->onclick("document.getElementById('item_price_value_{$oShopPrice->id}').disabled
 						= !this.checked; if (this.checked)
 						{document.getElementById('item_price_value_{$oShopPrice->id}').value
@@ -847,7 +846,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->id("item_price_value_{$oShopPrice->id}")
 							->name("item_price_value_{$oShopPrice->id}")
 							->value($value)
-							->divAttr(array('class' => 'form-group col-xs-3 col-sm-2'))
+							->divAttr(array('class' => 'form-group col-xs-4 col-md-2'))
 						;
 
 						$value == 0 && $oItemPriceTextBox->disabled('disabled');
@@ -985,6 +984,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							);
 					}
 
+					$oHeaderDiv
+						->add(Admin_Form_Entity::factory('A')
+							->value(Core::_("Shop_Item.edit_all_warehouses"))
+							->class('pull-right margin-right-10 darkgray')
+							->onclick('$.editWarehouses(this)')
+						);
+
 					foreach ($aWarehouses as $oWarehouse)
 					{
 						// Получаем количество товара на текущем складе
@@ -995,9 +1001,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
 							: $oWarehouseItem->count;
 
-						$rowClass = !$this->_object->id || $countItems != 0
-							? 'row'
-							: 'row hidden';
+						// на складе 0 или идет добавление товара - строку скрываем!
+						$rowClass = $countItems == 0 || !$this->_object->id
+							? 'row hidden'
+							: 'row';
 
 						$oWarehouseBlock
 							->add($oWarehouseCurrentRow = Admin_Form_Entity::factory('Div')->class($rowClass));
@@ -1006,14 +1013,29 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->add(
 								Admin_Form_Entity::factory('Div')
 									->value($oWarehouse->name)
-									->class('form-group margin-top-10 col-xs-9 col-sm-6 col-md-4')
+									->class('form-group margin-top-10 col-xs-6 col-sm-3 col-md-4')
 							)
 							->add(
 								Admin_Form_Entity::factory('Input')
 									//->caption(Core::_("Shop_Item.warehouse_item_count", $oWarehouse->name))
 									->value($countItems)
 									->name("warehouse_{$oWarehouse->id}")
-									->divAttr(array('class' => 'form-group col-xs-3 col-sm-4 col-md-2'))
+									->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-2'))
+									->disabled('disabled')
+							)->add(
+								Admin_Form_Entity::factory('Div')
+									->value(Core::_('Shop_Item.warehouse_in_price'))
+									->class('form-group margin-top-10 col-xs-6 col-sm-3 col-md-4 hidden')
+							)->add(
+								Admin_Form_Entity::factory('Select')
+									// ->caption(Core::_('Shop_Warehouse_Writeoff.shop_price_id'))
+									->divAttr(
+										array('class' => 'form-group col-xs-6 col-sm-3 col-md-2')
+									)
+									->options(self::fillPricesList($oShop))
+									->class('form-control hidden')
+									->name("warehouse_shop_price_id_{$oWarehouse->id}")
+									->value(0)
 							);
 
 						if ($this->_object->id)
@@ -1237,7 +1259,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->value("$('.add-associated-item').autocompleteShopItem('{$this->_object->shop_id}', 0, function(event, ui) {
+					->value("$('.add-associated-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0}, function(event, ui) {
 						$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
 							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
 							.insertAfter($('.associated-item-table'));
@@ -1561,7 +1583,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oDescriptionField = $this->getField('description')
 					->rows(15)
-					->wysiwyg(TRUE)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
 				$oShopGroupDescriptionTab
@@ -1643,13 +1665,28 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_object->backupRevision();
 		}
 
+		$modelName = $this->_object->getModelName();
+
+		if ($modelName == 'shop_item')
+		{
+			$aTmpPrices = array();
+
+			$new_price = floatval(Core_Array::get($this->_formValues, 'price'));
+
+			if ($this->_object->price != $new_price)
+			{
+				$aTmpPrices[0] = array(
+					'old_price' => floatval($this->_object->price),
+					'new_price' => $new_price,
+				);
+			}
+		}
+
 		parent::_applyObjectProperty();
 
 		$oShop = /*$bNewObject
 			? Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)))
 			: */ $this->_object->Shop;
-
-		$modelName = $this->_object->getModelName();
 
 		$aConfig = Core_Config::instance()->get('shop_config', array()) + array(
 			'smallImagePrefix' => 'small_',
@@ -1798,29 +1835,39 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Дополнительные цены для групп пользователей
 				if (Core::moduleIsActive('siteuser') || defined('BACKEND_SHOP_PRICES'))
 				{
-					$aAdditionalPrices = $this->_object->Shop->Shop_Prices->findAll();
+					$aShop_Prices = $this->_object->Shop->Shop_Prices->findAll();
 
-					foreach ($aAdditionalPrices as $oAdditionalPrice)
+					foreach ($aShop_Prices as $oShop_Price)
 					{
-						$oAdditionalPriceValue = $this->_object
+						$oShop_Item_Price = $this->_object
 							->Shop_Item_Prices
-							->getByPriceId($oAdditionalPrice->id);
+							->getByPriceId($oShop_Price->id);
 
-						if (is_null($oAdditionalPriceValue))
+						if (is_null($oShop_Item_Price))
 						{
-							$oAdditionalPriceValue = Core_Entity::factory('Shop_Item_Price');
-							$oAdditionalPriceValue->shop_item_id = $this->_object->id;
-							$oAdditionalPriceValue->shop_price_id = $oAdditionalPrice->id;
+							$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
+							$oShop_Item_Price->shop_item_id = $this->_object->id;
+							$oShop_Item_Price->shop_price_id = $oShop_Price->id;
 						}
 
-						if (!is_null(Core_Array::getPost("item_price_id_{$oAdditionalPrice->id}")))
+						if (!is_null(Core_Array::getPost("item_price_id_{$oShop_Price->id}")))
 						{
-							$oAdditionalPriceValue->value = Core_Array::getPost("item_price_value_{$oAdditionalPrice->id}", 0);
-							$oAdditionalPriceValue->save();
+							$new_price = Core_Array::getPost("item_price_value_{$oShop_Price->id}");
+
+							if ($oShop_Item_Price->value != $new_price)
+							{
+								$aTmpPrices[$oShop_Price->id] = array(
+									'old_price' => floatval($oShop_Item_Price->value),
+									'new_price' => floatval($new_price),
+								);
+							}
+
+							$oShop_Item_Price->value = $new_price;
+							$oShop_Item_Price->save();
 						}
 						else
 						{
-							!is_null($oAdditionalPriceValue) && $oAdditionalPriceValue->delete();
+							!is_null($oShop_Item_Price) && $oShop_Item_Price->delete();
 						}
 					}
 				}
@@ -1956,32 +2003,137 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Обработка складов
 				$aShopWarehouses = $oShop->Shop_Warehouses->findAll();
-
 				foreach ($aShopWarehouses as $oShopWarehouse)
 				{
-					$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}", 0);
+					$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}");
 
-					$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-					if (is_null($oShopItemWarehouse))
+					if (!is_null($iWarehouseValue))
 					{
-						$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
-						$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
-						$oShopItemWarehouse->shop_item_id = $this->_object->id;
-					}
+						$iWarehouseShopPriceId = Core_Array::getPost("warehouse_shop_price_id_{$oShopWarehouse->id}", 0);
 
-					$oShopItemWarehouse->count = $iWarehouseValue;
-					$oShopItemWarehouse->save();
+						if ($iWarehouseShopPriceId)
+						{
+							$oShop_Item_Price = $this->_object->Shop_Item_Prices->getByShop_price_id($iWarehouseShopPriceId);
+
+							$price = !is_null($oShop_Item_Price)
+								? $oShop_Item_Price->value
+								: 0;
+						}
+						else
+						{
+							$price = $this->_object->price;
+						}
+
+						/*$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
+						if (is_null($oShopItemWarehouse))
+						{
+							$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
+							$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
+							$oShopItemWarehouse->shop_item_id = $this->_object->id;
+						}
+
+						$oShopItemWarehouse->count = $iWarehouseValue;
+						$oShopItemWarehouse->save();*/
+
+						if ($bNewObject)
+						{
+							$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
+							$oShop_Warehouse_Incoming->shop_warehouse_id = $oShopWarehouse->id;
+							$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
+							$oShop_Warehouse_Incoming->number = '';
+							$oShop_Warehouse_Incoming->posted = 0;
+							$oShop_Warehouse_Incoming->shop_price_id = $iWarehouseShopPriceId;
+							$oShop_Warehouse_Incoming->save();
+
+							$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
+							$oShop_Warehouse_Incoming->save();
+
+							$oShop_Warehouse_Incoming_Item = Core_Entity::factory('Shop_Warehouse_Incoming_Item');
+							$oShop_Warehouse_Incoming_Item->shop_item_id = $this->_object->id;
+							$oShop_Warehouse_Incoming_Item->price = $price;
+							$oShop_Warehouse_Incoming_Item->count = $iWarehouseValue;
+							$oShop_Warehouse_Incoming->add($oShop_Warehouse_Incoming_Item);
+
+							$oShop_Warehouse_Incoming->post();
+						}
+						else
+						{
+							$rest = $oShopWarehouse->getRest($this->_object->id);
+
+							if ($iWarehouseValue != $rest)
+							{
+								$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
+								$oShop_Warehouse_Inventory->shop_warehouse_id = $oShopWarehouse->id;
+								$oShop_Warehouse_Inventory->description = Core::_('Shop_Item.shop_warehouse_inventory', $this->_object->name);
+								$oShop_Warehouse_Inventory->number = '';
+								$oShop_Warehouse_Inventory->posted = 0;
+								$oShop_Warehouse_Inventory->save();
+
+								$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
+								$oShop_Warehouse_Inventory->save();
+
+								$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
+								$oShop_Warehouse_Inventory_Item->count = $iWarehouseValue;
+								$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+								$oShop_Warehouse_Inventory->post();
+							}
+						}
+					}
 				}
 
-				if (Core_Array::getPost('apply_price_for_modification'))
+				$apply_price_for_modification = Core_Array::getPost('apply_price_for_modification');
+
+				// Были изменены цены
+				if (count($aTmpPrices)
+					// Или установка цен модификациям и есть модификации
+					|| $apply_price_for_modification && $this->_object->Modifications->getCount()
+				)
 				{
-					$aModifications = $this->_object->Modifications->findAll();
-					foreach ($aModifications as $oModification)
+					$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
+					$oShop_Price_Setting->shop_id = $oShop->id;
+					$oShop_Price_Setting->number = '';
+					$oShop_Price_Setting->posted = 0;
+					$oShop_Price_Setting->description = Core::_('Shop_Item.shop_price_setting', $this->_object->name);
+					$oShop_Price_Setting->save();
+
+					$oShop_Price_Setting->number = $oShop_Price_Setting->id;
+					$oShop_Price_Setting->save();
+
+					foreach ($aTmpPrices as $shop_price_id => $aValues)
 					{
-						$oModification->price = $this->_object->price;
-						$oModification->shop_currency_id = $this->_object->shop_currency_id;
-						$oModification->save();
+						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+						$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+						$oShop_Price_Setting_Item->shop_price_id = $shop_price_id;
+						$oShop_Price_Setting_Item->shop_item_id = $this->_object->id;
+						$oShop_Price_Setting_Item->old_price = $aValues['old_price'];
+						$oShop_Price_Setting_Item->new_price = $aValues['new_price'];
+						$oShop_Price_Setting_Item->save();
 					}
+
+					// Установка цен модификациям
+					if ($apply_price_for_modification)
+					{
+						$aModifications = $this->_object->Modifications->findAll(FALSE);
+						foreach ($aModifications as $oModification)
+						{
+							//$oModification->price = $this->_object->price;
+							$oModification->shop_currency_id = $this->_object->shop_currency_id;
+							$oModification->save();
+
+							$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+							$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+							$oShop_Price_Setting_Item->shop_price_id = 0;
+							$oShop_Price_Setting_Item->shop_item_id = $oModification->id;
+							$oShop_Price_Setting_Item->old_price = $oModification->price;
+							$oShop_Price_Setting_Item->new_price = $this->_object->price;
+							$oShop_Price_Setting_Item->save();
+						}
+					}
+
+					// Проводим
+					$oShop_Price_Setting->post();
 				}
 
 				$aShortcutGroupIds = Core_Array::getPost('shortcut_group_id', array());
@@ -2844,6 +2996,27 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$iLevel == 0 && self::$_aGroupTree = array();
+
+		return $aReturn;
+	}
+
+	/**
+	 * Fill prices list
+	 * @return array
+	 */
+	public function fillPricesList(Shop_Model $oShop)
+	{
+		$aReturn = array(Core::_('Shop_Warehouse_Incoming.basic'));
+
+		// if (Core::moduleIsActive('siteuser'))
+		// {
+			$aShop_Prices = $oShop->Shop_Prices->findAll();
+
+			foreach ($aShop_Prices as $oShop_Price)
+			{
+				$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
+			}
+		// }
 
 		return $aReturn;
 	}

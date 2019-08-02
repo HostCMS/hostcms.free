@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Bit
 {
@@ -67,5 +67,17 @@ class Core_Bit
 		$bit = ($int & pow(2, $bitNumber)) > 0 ? 1 : 0;
 
 		return $bit;
+	}
+
+	/**
+	 * Extract bits from a given position.
+	 * @param int $int число
+	 * @param int $count количество бит
+	 * @param int $position позиция бита
+	 * @return int
+	 */
+	static public function extractBits($int, $count, $position)
+	{
+		return (((1 << $count) - 1) & ($int >> ($position - 1)));
 	}
 }

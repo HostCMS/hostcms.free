@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -55,6 +55,14 @@ class Shop_Cart_Model extends Core_Entity
 		'shop_item' => array(),
 		'shop_warehouse' => array(),
 		'siteuser' => array()
+	);
+
+	/**
+	 * Default sorting for models
+	 * @var array
+	 */
+	protected $_sorting = array(
+		'shop_carts.id' => 'ASC',
 	);
 
 	/**
@@ -224,22 +232,64 @@ class Shop_Cart_Model extends Core_Entity
 	}
 
 	/**
+	 * Show items count data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlWarehousesItems = TRUE;
+
+	/**
+	 * Add warehouse information to XML
+	 * @param boolean $showXmlWarehousesItems show status
+	 * @return self
+	 */
+	public function showXmlWarehousesItems($showXmlWarehousesItems = TRUE)
+	{
+		$this->_showXmlWarehousesItems = $showXmlWarehousesItems;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_cart.onBeforeRedeclaredGetXml
-	 * @hostcms-event shop_cart.onBeforeAddShopItem
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_cart.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 * @hostcms-event shop_cart.onBeforeAddShopItem
+	 */
+	protected function _prepareData()
+	{
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
-			->showXmlWarehousesItems(TRUE)
 			->showXmlBonuses(TRUE)
 			->showXmlProperties($this->_showXmlProperties)
 			->showXmlSpecialprices($this->_showXmlSpecialprices)
 			->showXmlAssociatedItems($this->_showXmlAssociatedItems)
+			->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 			->cartQuantity($this->quantity);
 
 		// Parent item for modification
@@ -256,6 +306,6 @@ class Shop_Cart_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addEntity($oShop_Item);
 
-		return parent::getXml();
+		return $this;
 	}
 }

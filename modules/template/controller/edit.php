@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -86,9 +86,9 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Template.tab_1'))
 					->name('Template');
 
-				$oLessCssTab = Admin_Form_Entity::factory('Tab')
+				$oStyleTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Template.tab_2'))
-					->name('Css/Less');
+					->name('Style');
 
 				$oJsTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Template.tab_3'))
@@ -107,8 +107,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$this
 					->addTabAfter($oTemplateTab, $oMainTab)
-					->addTabAfter($oLessCssTab, $oTemplateTab)
-					->addTabAfter($oJsTab, $oLessCssTab)
+					->addTabAfter($oStyleTab, $oTemplateTab)
+					->addTabAfter($oJsTab, $oStyleTab)
 					->addTabAfter($oLanguageTab, $oJsTab);
 
 				if (!$this->_object->template_id)
@@ -179,12 +179,27 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oTmpOptions = $oLessCss_Textarea->syntaxHighlighterOptions;
 				$oTmpOptions['mode'] = 'css';
 
-				$oLessCss_Textarea
-					->value(
-						$this->_object->less && is_file($this->_object->getTemplateLessFilePath())
+				switch($this->_object->type)
+				{
+					// LESS
+					case 1:
+						$styleValue = is_file($this->_object->getTemplateLessFilePath())
 							? $this->_object->loadTemplateLessFile()
-							: $this->_object->loadTemplateCssFile()
-					)
+							: $this->_object->loadTemplateCssFile();
+					break;
+					// SCSS
+					case 2:
+						$styleValue = version_compare(PHP_VERSION, '5.6') >= 0 && is_file($this->_object->getTemplateScssFilePath())
+							? $this->_object->loadTemplateScssFile()
+							: $this->_object->loadTemplateCssFile();
+					break;
+					// CSS
+					default:
+						$styleValue = $this->_object->loadTemplateCssFile();
+				}
+
+				$oLessCss_Textarea
+					->value($styleValue)
 					->rows(30)
 					->caption(Core::_('Template.css'))
 					->name('css')
@@ -192,13 +207,25 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->syntaxHighlighterOptions($oTmpOptions)
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
-				$oLessCssTab
+				$oStyleTab
 					->add($oCssRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oCssRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oCssRow1->add($oLessCss_Textarea);
 
-				$oMainTab->move($this->getField('less'), $oCssRow2);
+				$aStyleTypes = array(0 => 'CSS', 1 => 'LESS');
+				version_compare(PHP_VERSION, '5.6') >= 0 && $aStyleTypes[2] = 'SCSS';
+
+				// $oMainTab->move($this->getField('less'), $oCssRow2);
+				$oMainTab->delete($this->getField('type'));
+				$oSelectStyleTypes = Admin_Form_Entity::factory('Select')
+					->options($aStyleTypes)
+					->name('type')
+					->value($this->_object->type)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->caption(Core::_('Template.type'));
+
+				$oCssRow2->add($oSelectStyleTypes);
 
 				$oJs_Textarea = Admin_Form_Entity::factory('Textarea');
 
@@ -221,7 +248,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oJsRow1->add($oJs_Textarea);
 
-				if ($this->_object->less)
+				if ($this->_object->type == 1)
 				{
 					$this->addTabAfter($oManifestTab, $oJsTab);
 
@@ -358,11 +385,20 @@ EOD;
 
 			try
 			{
-				$this->_object->less
-					// Save LESS and rebuild CSS
-					? $this->_object->saveTemplateLessFile($css)
-					// Save just CSS
-					: $this->_object->saveTemplateCssFile($css);
+				switch ($this->_object->type)
+				{
+					case 1:
+						// Save LESS and rebuild CSS
+						$this->_object->saveTemplateLessFile($css);
+					break;
+					case 2:
+						// Save SCSS and rebuild CSS
+						version_compare(PHP_VERSION, '5.6') >= 0 && $this->_object->saveTemplateScssFile($css);
+					break;
+					default:
+						// Save just CSS
+						$this->_object->saveTemplateCssFile($css);
+				}
 			}
 			catch (Exception $e)
 			{

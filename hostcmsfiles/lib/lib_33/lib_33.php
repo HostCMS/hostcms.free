@@ -76,8 +76,10 @@ if (Core_Array::getPost('add_ticket'))
 
 	$oHelpdesk_Message = Core_Entity::factory('Helpdesk_Message');
 	$oHelpdesk_Message->helpdesk_status_id = $oHelpdesk_Ticket->Helpdesk->helpdesk_status_new_id;
-	$oHelpdesk_Message->subject = Core_Str::stripTags(strval(Core_Array::getPost('subject')));
-	$oHelpdesk_Message->message = strval(Core_Array::getPost('text'));
+	$oHelpdesk_Message->subject = Core_Str::removeEmoji(
+		Core_Str::stripTags(strval(Core_Array::getPost('subject')))
+	);
+	$oHelpdesk_Message->message = Core_Str::removeEmoji(strval(Core_Array::getPost('text')));
 	$oHelpdesk_Message->datetime = $oHelpdesk_Ticket->datetime;
 	$oHelpdesk_Message->modification_datetime = $oHelpdesk_Ticket->datetime;
 	$oHelpdesk_Message->inbox = 1;

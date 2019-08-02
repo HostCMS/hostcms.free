@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -17,8 +17,8 @@ class Shop_Warehouse_Model extends Core_Entity
 	 * Callback property_id
 	 * @var int
 	 */
-	public $items = 1;	
-	
+	public $items = 1;
+
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -28,6 +28,13 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_item' => array(),
 		'shop_item_reserved' => array(),
 		'shop_cart' => array(),
+		'shop_warehouse_entry' => array(),
+		'shop_warehouse_inventory' => array(),
+		'shop_warehouse_incoming' => array(),
+		'shop_warehouse_writeoff' => array(),
+		'shop_warehouse_regrade' => array(),
+		'shop_warehouse_movement_source' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'source_shop_warehouse_id'),
+		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id'),
 	);
 
 	/**
@@ -40,7 +47,7 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_country_location' => array(),
 		'shop_country_location_city' => array(),
 		'shop_country_location_city_area' => array(),
-		'user' => array()
+		'user' => array(),
 	);
 
 	/**
@@ -159,8 +166,18 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Warehouse_Items->deleteAll(FALSE);
+
 		// Удаляем связи с зарезервированными, прямая связь
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
+
+		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
+		$this->Shop_Warehouse_Inventories->deleteAll(FALSE);
+		$this->Shop_Warehouse_Incomings->deleteAll(FALSE);
+		$this->Shop_Warehouse_Writeoffs->deleteAll(FALSE);
+		$this->Shop_Warehouse_Regrades->deleteAll(FALSE);
+
+		$this->Shop_Warehouse_Movement_Sources->deleteAll(FALSE);
+		$this->Shop_Warehouse_Movement_Destinations->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -185,7 +202,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
 			->execute();
 	}
-	
+
 	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -200,5 +217,78 @@ class Shop_Warehouse_Model extends Core_Entity
 			->value($count)
 			->title($count)
 			->execute();
+	}
+
+	/**
+	 * Get rest
+	 * @param $shop_item_id shop item id
+	 * @param $dateTo date
+	 * @return float
+	 */
+	public function getRest($shop_item_id, $dateTo = NULL)
+	{
+		$count = NULL;
+
+		$oShop_Warehouse_Entries = $this->Shop_Warehouse_Entries;
+		$oShop_Warehouse_Entries->queryBuilder()
+			->where('shop_warehouse_entries.shop_item_id', '=', $shop_item_id)
+			->clearOrderBy()
+			->orderBy('shop_warehouse_entries.datetime', 'ASC');
+
+		if (!is_null($dateTo))
+		{
+			$oShop_Warehouse_Entries->queryBuilder()
+				->where('shop_warehouse_entries.datetime', '<', $dateTo);
+		}
+
+		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll(FALSE);
+		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+		{
+			$type = $oShop_Warehouse_Entry->getDocumentType();
+
+			if (!is_null($type))
+			{
+				switch ($type)
+				{
+					// Инвентаризация. Сброс к значению при инвентаризации.
+					case 0:
+						$count = $oShop_Warehouse_Entry->value;
+					break;
+					case 1: // Приход
+					case 2: // Списание
+					case 3: // Пересортица, у списываемого товара value будет отрицательным
+					case 4: // Перемещение
+					case 5: // Заказ
+					default:
+						$count += $oShop_Warehouse_Entry->value;
+					break;
+				}
+			}
+		}
+
+		return is_null($count)
+			? $count
+			: number_format($count, 2, '.', '');
+	}
+
+	/**
+	 * Set rest
+	 * @param $shop_item_id shop item id
+	 * @param $value value
+	 * @return self
+	 */
+	public function setRest($shop_item_id, $value)
+	{
+		$oShop_Warehouse_Item = $this->Shop_Warehouse_Items->getByShop_item_id($shop_item_id);
+
+		if (is_null($oShop_Warehouse_Item))
+		{
+			$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
+			$oShop_Warehouse_Item->shop_warehouse_id = $this->id;
+			$oShop_Warehouse_Item->shop_item_id = $shop_item_id;
+		}
+
+		$oShop_Warehouse_Item->count = $value;
+		$oShop_Warehouse_Item->save();
 	}
 }

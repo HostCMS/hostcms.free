@@ -6,7 +6,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../../bootstrap.php');
 
@@ -171,6 +171,7 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 			->where('shop_orders.shop_id', '=', $oShop->id)
 			->where('shop_orders.canceled', '=', 0)
 			->where('shop_orders.deleted', '=', 0)
+			->where('shop_order_items.deleted', '=', 0)
 			->where('shop_orders.datetime', 'BETWEEN', array($sDateFrom, $sDateTo))
 			->where('shop_items.shop_producer_id', '!=', 0)
 			->clearOrderBy()

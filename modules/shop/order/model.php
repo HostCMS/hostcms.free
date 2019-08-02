@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -93,6 +93,17 @@ class Shop_Order_Model extends Core_Entity
 		'payment_datetime',
 		'status_datetime',
 	);
+
+	/**
+	 * Mark entity as deleted
+	 * @return Core_Entity
+	 */
+	public function markDeleted()
+	{
+		$this->unpost();
+
+		return parent::markDeleted();
+	}
 
 	/**
 	 * Constructor.
@@ -182,6 +193,12 @@ class Shop_Order_Model extends Core_Entity
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
 
 		$this->source_id && $this->Source->delete();
+
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
+		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+		{
+			$oShop_Warehouse_Entry->delete();
+		}
 
 		return parent::delete($primaryKey);
 	}
@@ -685,6 +702,31 @@ class Shop_Order_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_order.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this
 			->clearXmlTags()
 			->addXmlTag('amount', $this->getAmount())
@@ -800,7 +842,7 @@ class Shop_Order_Model extends Core_Entity
 				->value(Shop_Controller::instance()->round($total_tax))
 		);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -860,14 +902,13 @@ class Shop_Order_Model extends Core_Entity
 
 	protected function _paidShopDiscountcard()
 	{
-		if (Core::moduleIsActive('siteuser'))
+		if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
 		{
-			$oSiteuser = $this->Siteuser;
 			$oShop = $this->Shop;
 
 			$mode = $this->paid == 0 ? -1 : 1;
 
-			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getFirst();
+			$oShop_Discountcard = $this->Siteuser->Shop_Discountcards->getFirst();
 
 			if (is_null($oShop_Discountcard))
 			{
@@ -875,8 +916,9 @@ class Shop_Order_Model extends Core_Entity
 				{
 					$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
 					$oShop_Discountcard->shop_id = $oShop->id;
-					$oShop_Discountcard->siteuser_id = $oSiteuser->id;
+					$oShop_Discountcard->siteuser_id = $this->siteuser_id;
 					$oShop_Discountcard->setSiteuserAmount();
+					$oShop_Discountcard->number = '';
 					$oShop_Discountcard->save(); // create ID
 
 					// Uses number template
@@ -911,6 +953,8 @@ class Shop_Order_Model extends Core_Entity
 
 		if ($oModule && Core::moduleIsActive('notification'))
 		{
+			$aUserIDs = array();
+
 			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 			$oNotification_Subscribers->queryBuilder()
 				->where('notification_subscribers.module_id', '=', $oModule->id)
@@ -919,27 +963,40 @@ class Shop_Order_Model extends Core_Entity
 
 			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
 
-			if (count($aNotification_Subscribers))
+			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 			{
-				$sCompany = strlen($this->company)
-					? $this->company
-					: trim($this->surname . ' ' . $this->name . ' ' . $this->patronymic);
+				$aUserIDs[] = $oNotification_Subscriber->user_id;
+			}
+
+			// Ответственные сотрудники
+			if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
+			{
+				$aSiteuser_Users = $this->Siteuser->Siteuser_Users->findAll(FALSE);
+				foreach ($aSiteuser_Users as $oSiteuser_User)
+				{
+					!in_array($oSiteuser_User->user_id, $aUserIDs)
+						&& $aUserIDs[] = $oSiteuser_User->user_id;
+				}
+			}
+
+			if (count($aUserIDs))
+			{
+				$sCompany = $this->getCustomerName();
 
 				$oNotification = Core_Entity::factory('Notification');
 				$oNotification
-					->title(Core::_('Shop_Order.notification_paid_order', $this->invoice))
-					->description(Core::_('Shop_Order.notification_new_order_description', $sCompany , $this->sum()))
+					->title(Core::_('Shop_Order.notification_paid_order', strip_tags($this->invoice), FALSE))
+					->description(Core::_('Shop_Order.notification_new_order_description', strip_tags($sCompany), $this->sum(), FALSE))
 					->datetime(Core_Date::timestamp2sql(time()))
 					->module_id($oModule->id)
 					->type(2) // Оплаченный заказ
 					->entity_id($this->id)
 					->save();
 
-				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+				// Связываем уведомление с сотрудником
+				foreach ($aUserIDs as $user_id)
 				{
-					// Связываем уведомление с сотрудником
-					Core_Entity::factory('User', $oNotification_Subscriber->user_id)
-						->add($oNotification);
+					Core_Entity::factory('User', $user_id)->add($oNotification);
 				}
 			}
 		}
@@ -968,6 +1025,9 @@ class Shop_Order_Model extends Core_Entity
 			// Удалить зарезервированные товары
 			$this->deleteReservedItems();
 
+			// Удалить электронные товары
+			$this->_deleteDigitalItems();
+
 			// Дисконтная карта
 			$this->_paidShopDiscountcard();
 		}
@@ -975,6 +1035,39 @@ class Shop_Order_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);
 
 		return $this->save();
+	}
+
+	/**
+	 * Delete digital items
+	 * @return self
+	 */
+	protected function _deleteDigitalItems()
+	{
+		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
+		{
+			$oShop_Item = $oShop_Order_Item->Shop_Item;
+
+			if ($oShop_Item->type == 1)
+			{
+				$aShop_Order_Item_Digitals = $oShop_Order_Item->Shop_Order_Item_Digitals->findAll(FALSE);
+
+				foreach ($aShop_Order_Item_Digitals as $oShop_Order_Item_Digital)
+				{
+					$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;
+
+					if ($oShop_Item_Digital->id)
+					{
+						$oShop_Item_Digital->count += $oShop_Order_Item->quantity;
+						$oShop_Item_Digital->save();
+
+						$oShop_Order_Item_Digital->delete();
+					}
+				}
+			}
+		}
+
+		return $this;
 	}
 
 	/**
@@ -998,6 +1091,8 @@ class Shop_Order_Model extends Core_Entity
 
 		$mode = $this->paid == 0 ? -1 : 1;
 
+		$aWriteoff = array();
+
 		// Получаем список товаров заказа
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
@@ -1008,57 +1103,7 @@ class Shop_Order_Model extends Core_Entity
 			if ($oShop_Item->type == 1
 				&& $oShop_Order_Item->Shop_Order_Item_Digitals->getCount(FALSE) == 0)
 			{
-				// Получаем все файлы электронного товара
-				$aShop_Item_Digitals = $oShop_Item->Shop_Item_Digitals->getBySorting();
-
-				if (count($aShop_Item_Digitals))
-				{
-					// Указываем, какой именно электронный товар добавляем в заказ
-					//$oShop_Order_Item->shop_item_digital_id = $aShop_Item_Digitals[0]->id;
-
-					$countGoodsNeed = $oShop_Order_Item->quantity;
-
-					foreach ($aShop_Item_Digitals as $oShop_Item_Digital)
-					{
-						if ($oShop_Item_Digital->count == -1 || $oShop_Item_Digital->count > 0)
-						{
-							if ($oShop_Item_Digital->count == -1)
-							{
-								$iCount = $countGoodsNeed;
-							}
-							// Списывам файлы, если их количество не равно -1
-							else
-							{
-								$iCount = $oShop_Item_Digital->count < $countGoodsNeed
-									? $oShop_Item_Digital->count
-									: $countGoodsNeed;
-							}
-
-							for ($i = 0; $i < $iCount; $i++)
-							{
-								$oShop_Order_Item_Digital = Core_Entity::factory('Shop_Order_Item_Digital');
-								$oShop_Order_Item_Digital->shop_item_digital_id = $oShop_Item_Digital->id;
-								$oShop_Order_Item->add($oShop_Order_Item_Digital);
-
-								$countGoodsNeed--;
-							}
-
-							// Списываем электронный товар, если он ограничен
-							if ($oShop_Item_Digital->count != -1)
-							{
-								$oShop_Item_Digital->count -= $iCount * $mode;
-								$oShop_Item_Digital->save();
-							}
-
-							if ($countGoodsNeed == 0)
-							{
-								break;
-							}
-						}
-					}
-				}
-
-				$oShop_Order_Item->save();
+				$oShop_Order_Item->addDigitalItems($oShop_Item);
 			}
 			// Пополнение лицевого счета
 			elseif ($oShop_Order_Item->type == 2 && Core::moduleIsActive('siteuser'))
@@ -1086,6 +1131,18 @@ class Shop_Order_Model extends Core_Entity
 				$oShop_Siteuser_Transaction->description = $oShop_Order_Item->name;
 				$oShop_Siteuser_Transaction->save();
 			}
+			// Комплект
+			elseif ($oShop_Item->type == 3 && $this->paid == 1)
+			{
+				$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
+
+				foreach ($aShop_Item_Sets as $oShop_Item_Set)
+				{
+					$oShop_Order_Item->addDigitalItems(
+						Core_Entity::factory('Shop_Item', $oShop_Item_Set->shop_item_set_id)
+					);
+				}
+			}
 
 			// Списание/начисление товаров
 			if ($oShop->write_off_paid_items)
@@ -1096,13 +1153,18 @@ class Shop_Order_Model extends Core_Entity
 
 				if (!is_null($oShop_Warehouse) && $oShop_Item->id)
 				{
-					$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Order_Item->Shop_Item->id);
+					$aWriteoff[] = array(
+						'shop_item_id' => $oShop_Item->id,
+						'shop_warehouse_id' => $oShop_Warehouse->id,
+						'count' => $oShop_Order_Item->quantity
+					);
+					/*$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item->id);
 
 					if (!is_null($oShop_Warehouse_Item))
 					{
 						$oShop_Warehouse_Item->count -= $oShop_Order_Item->quantity * $mode;
 						$oShop_Warehouse_Item->save();
-					}
+					}*/
 				}
 
 				// Комплект
@@ -1122,8 +1184,13 @@ class Shop_Order_Model extends Core_Entity
 
 							if (!is_null($oShop_Warehouse_Item))
 							{
-								$oShop_Warehouse_Item->count -= $oShop_Item_Set->count * $mode;
-								$oShop_Warehouse_Item->save();
+								$aWriteoff[] = array(
+									'shop_item_id' => $oShop_Item->id,
+									'shop_warehouse_id' => $oShop_Warehouse->id,
+									'count' => $oShop_Item_Set->count
+								);
+								/*$oShop_Warehouse_Item->count -= $oShop_Item_Set->count * $mode;
+								$oShop_Warehouse_Item->save();*/
 							}
 						}
 					}
@@ -1160,6 +1227,61 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Siteuser_Transaction->type = 2;
 					$oShop_Siteuser_Transaction->description = Core::_('Shop_Bonus.bonus_transaction_name', $this->invoice);
 					$oShop_Siteuser_Transaction->save();
+				}
+			}
+		}
+
+		// Проводки по складам
+		if ($this->paid == 0)
+		{
+			// Удаляем ранее заданные проводки
+			$this->unpost();
+		}
+		elseif (count($aWriteoff))
+		{
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
+
+			$aTmp = array();
+
+			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			{
+				$aTmp[$oShop_Warehouse_Entry->shop_item_id][] = $oShop_Warehouse_Entry;
+			}
+
+			unset($aShop_Warehouse_Entries);
+
+			// Добавляем проводки для списания заказанных товаров
+			foreach ($aWriteoff as $writeoff)
+			{
+				$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getById($writeoff['shop_warehouse_id']);
+
+				if (!is_null($oShop_Warehouse))
+				{
+					$shop_item_id = $writeoff['shop_item_id'];
+
+					if (isset($aTmp[$shop_item_id]) && count($aTmp[$shop_item_id]))
+					{
+						$oShop_Warehouse_Entry = array_unshift($aTmp[$shop_item_id]);
+					}
+					else
+					{
+						$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
+						$oShop_Warehouse_Entry->setDocument($this->id, 5);
+						$oShop_Warehouse_Entry->shop_item_id = $shop_item_id;
+					}
+
+					$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
+					$oShop_Warehouse_Entry->datetime = $this->datetime;
+					$oShop_Warehouse_Entry->value = -$writeoff['count'];
+					$oShop_Warehouse_Entry->save();
+
+					$rest = $oShop_Warehouse->getRest($shop_item_id);
+
+					if (!is_null($rest))
+					{
+						// Recount
+						$oShop_Warehouse->setRest($shop_item_id, $rest);
+					}
 				}
 			}
 		}
@@ -1364,7 +1486,24 @@ class Shop_Order_Model extends Core_Entity
 		$newObject = parent::copy();
 		$newObject->guid = Core_Guid::get();
 		$newObject->save();
-		$newObject->invoice = $newObject->id;
+
+		$oShop = $newObject->Shop;
+
+		if (strlen($oShop->invoice_template))
+		{
+			$oCore_Templater = new Core_Templater();
+			$newObject->invoice = $oCore_Templater
+				->addObject('shop', $oShop)
+				->addObject('this', $newObject)
+				->addFunction('ordersToday', array($newObject, 'ordersToday'))
+				->setTemplate($oShop->invoice_template)
+				->execute();
+		}
+		else
+		{
+			$newObject->invoice = $newObject->id;
+		}
+
 		$newObject->save();
 
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
@@ -1380,6 +1519,7 @@ class Shop_Order_Model extends Core_Entity
 	 * Add order CommerceML
 	 * @param Core_SimpleXMLElement $oXml
 	 * @hostcms-event shop_order.onBeforeGetCmlUserName
+	 * @hostcms-event shop_order.onAddCmlSelectShopOrderItems
 	 */
 	public function addCml(Core_SimpleXMLElement $oXml)
 	{
@@ -1439,7 +1579,7 @@ class Shop_Order_Model extends Core_Entity
 		$oContractor->addChild('Наименование', $sContractorName);
 		$oContractor->addChild('Роль', 'Покупатель');
 
-		$aAddress = array(
+		/*$aAddress = array(
 			$this->postcode,
 			$this->shop_country->name,
 			$this->shop_country_location_city->name,
@@ -1448,7 +1588,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
-		$sFullAddress = implode(', ', $aAddress);
+		$sFullAddress = implode(', ', $aAddress);*/
+
+		$sFullAddress = $this->getFullAddress();
 
 		if ($bCompany)
 		{
@@ -1576,7 +1718,11 @@ class Shop_Order_Model extends Core_Entity
 
 		$aDiscount_Shop_Order_Items = array();
 
-		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+		$oShop_Order_Items = $this->Shop_Order_Items;
+
+		Core_Event::notify($this->_modelName . '.onAddCmlSelectShopOrderItems', $this, array($oShop_Order_Items, $oXml));
+
+		$aShop_Order_Items = $oShop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			if ($oShop_Order_Item->getPrice() >= 0)
@@ -1636,12 +1782,22 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Get Popover Content
 	 * @return string
+	 * @hostcms-event shop_order.onBeforeOrderPopover
 	 */
 	public function orderPopover()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeOrderPopover', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		ob_start();
 
-		$aAddress = array(
+		/*$aAddress = array(
 			$this->postcode,
 			$this->Shop_Country->name,
 			$this->Shop_Country_Location_City->name,
@@ -1650,7 +1806,9 @@ class Shop_Order_Model extends Core_Entity
 			$this->flat
 		);
 		$aAddress = array_filter($aAddress, 'strlen');
-		$sFullAddress = implode(', ', $aAddress);
+		$sFullAddress = implode(', ', $aAddress);*/
+
+		$sFullAddress = $this->getFullAddress();
 
 		if (strlen($this->company))
 		{
@@ -1689,6 +1847,12 @@ class Shop_Order_Model extends Core_Entity
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_paymentsystem')?>:</b> <?php echo htmlspecialchars($this->Shop_Payment_System->name)?>
+			</div><?php
+		}
+		if ($this->shop_order_status_id)
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_order_status')?>:</b> <?php echo htmlspecialchars($this->Shop_Order_Status->name)?>
 			</div><?php
 		}
 		if (strlen($this->description))
@@ -1805,9 +1969,7 @@ class Shop_Order_Model extends Core_Entity
 		</div>
 
 		<?php
-		$sOrderContent = ob_get_clean();
-
-		return $sOrderContent;
+		return ob_get_clean();
 	}
 
 	public function order_items($oAdmin_Form_Field, $oAdmin_Form_Controller)
@@ -1866,5 +2028,347 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	public function date()
+	{
+		return Core_Date::sql2date($this->datetime);
+	}
+
+	public function getFullAddress()
+	{
+		$aAddress = array(
+			$this->postcode,
+			$this->Shop_Country->name,
+			$this->Shop_Country_Location->name,
+			$this->Shop_Country_Location_City->name,
+			$this->Shop_Country_Location_City_Area->name,
+			$this->address,
+			$this->house,
+			$this->flat
+		);
+
+		$aAddress = array_map('trim', $aAddress);
+		$aAddress = array_filter($aAddress, 'strlen');
+		$sFullAddress = implode(', ', $aAddress);
+
+		return $sFullAddress;
+	}
+
+	public function getCustomerName()
+	{
+		return strlen(trim($this->company))
+			? $this->company
+			: implode(' ', array_filter(array_map('trim', array($this->surname, $this->name, $this->patronymic)), 'strlen'));
+	}
+
+	/**
+	 * Add discounts to the shop_order
+	 * @param array $aOptions array('amount' => $amount, 'quantity' => $quantity, 'prices' => $aDiscountPrices, 'applyDiscounts' => TRUE, 'applyDiscountCards' => TRUE)
+	 * @return self
+	 */
+	public function addPurchaseDiscount($aOptions)
+	{
+		$aOptions += array(
+			'amount' => 0,
+			'quantity' => 0,
+			'prices' => array(),
+			'applyDiscounts' => TRUE,
+			'applyDiscountCards' => TRUE
+		);
+
+		if ($aOptions['amount'] > 0 && $aOptions['quantity'] > 0)
+		{
+			$amount = $aOptions['amount'];
+			$quantity = $aOptions['quantity'];
+			$aDiscountPrices = $aOptions['prices'];
+
+			$oShop = $this->Shop;
+
+			// Дисконтная карта
+			$bApplyMaxDiscount = FALSE;
+			$fDiscountcard = 0;
+
+			if ($aOptions['applyDiscountCards'] && Core::moduleIsActive('siteuser') && $this->siteuser_id)
+			{
+				$oSiteuser = $this->Siteuser;
+
+				$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
+				if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+				{
+					$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
+
+					$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
+
+					// Сумма скидки по дисконтной карте
+					$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
+				}
+			}
+
+			// Скидки от суммы заказа
+			$fAppliedDiscountsAmount = 0;
+			$bApplyShopPurchaseDiscounts = FALSE;
+
+			if ($aOptions['applyDiscounts'])
+			{
+				$oShop_Purchase_Discount_Controller = new Shop_Purchase_Discount_Controller($oShop);
+				$oShop_Purchase_Discount_Controller
+					->amount($amount)
+					->quantity($quantity)
+					->couponText($this->coupon)
+					->siteuserId($this->siteuser_id ? $this->siteuser_id : 0)
+					->prices($aDiscountPrices)
+					->dateTime($this->datetime);
+
+				// Получаем данные о купоне
+				$shop_purchase_discount_coupon_id = $shop_purchase_discount_id = 0;
+				if (strlen($oShop_Purchase_Discount_Controller->couponText))
+				{
+					$oShop_Purchase_Discounts_For_Coupon = $oShop->Shop_Purchase_Discounts->getByCouponText(
+						$oShop_Purchase_Discount_Controller->couponText
+					);
+					if (!is_null($oShop_Purchase_Discounts_For_Coupon))
+					{
+						// ID скидки по купону
+						$shop_purchase_discount_id = $oShop_Purchase_Discounts_For_Coupon->id;
+						// ID самого купона
+						$shop_purchase_discount_coupon_id = $oShop_Purchase_Discounts_For_Coupon->shop_purchase_discount_coupon_id;
+					}
+				}
+
+				$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
+
+				// Если применять только максимальную скидку, то считаем сумму скидок по скидкам от суммы заказа
+				if ($bApplyMaxDiscount)
+				{
+					$totalPurchaseDiscount = 0;
+
+					foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+					{
+						$totalPurchaseDiscount += $oShop_Purchase_Discount->getDiscountAmount();
+					}
+
+					$bApplyShopPurchaseDiscounts = $totalPurchaseDiscount > $fDiscountcard;
+				}
+				else
+				{
+					$bApplyShopPurchaseDiscounts = TRUE;
+				}
+
+				// Если решили применять скидку от суммы заказа
+				if ($bApplyShopPurchaseDiscounts)
+				{
+					foreach ($aShop_Purchase_Discounts as $oShop_Purchase_Discount)
+					{
+						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+						$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
+						$oShop_Order_Item->quantity = 1;
+						$oShop_Order_Item->type = 0;
+
+						$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
+
+						// Скидка больше суммы заказа
+						$discountAmount > $amount && $discountAmount = $amount;
+
+						$oShop_Order_Item->price = -1 * $discountAmount;
+
+						// Inc total discount amount
+						$fAppliedDiscountsAmount += $discountAmount;
+
+						if ($oShop_Purchase_Discount->id == $shop_purchase_discount_id)
+						{
+							$oShop_Purchase_Discount_Coupon = Core_Entity::factory('Shop_Purchase_Discount_Coupon')->find(
+								$shop_purchase_discount_coupon_id
+							);
+
+							if (!is_null($oShop_Purchase_Discount_Coupon->id))
+							{
+								// Списываем купон
+								if ($oShop_Purchase_Discount_Coupon->count != -1 && $oShop_Purchase_Discount_Coupon->count != 0)
+								{
+									$oShop_Purchase_Discount_Coupon->count = $oShop_Purchase_Discount_Coupon->count - 1;
+									$oShop_Purchase_Discount_Coupon->save();
+								}
+
+								// Сохраняем купон для заказа, мог быть задан выше как купон скидки на товар
+								if (!is_null($this->coupon))
+								{
+									$this->coupon = $oShop_Purchase_Discount_Coupon->text;
+									$this->save();
+								}
+							}
+						}
+
+						$this->add($oShop_Order_Item);
+					}
+				}
+			}
+
+			// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
+			if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
+			{
+				if ($fDiscountcard)
+				{
+					$fAmountForCard = $amount - $fAppliedDiscountsAmount;
+
+					if ($fAmountForCard > 0)
+					{
+						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+						$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
+						$oShop_Order_Item->quantity = 1;
+						$oShop_Order_Item->type = 0;
+						$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
+							$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
+						);
+
+						$this->add($oShop_Order_Item);
+					}
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Количество заказов за сегодня
+	 */
+	public function ordersToday()
+	{
+		$date = date('Y-m-d');
+
+		$oShop_Orders = $this->Shop->Shop_Orders;
+		$oShop_Orders->queryBuilder()
+			->where('datetime', '>', "{$date} 00:00:00")
+			->where('datetime', '<', "{$date} 23:59:59");
+
+		return $oShop_Orders->getCount(FALSE);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_order_status_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		ob_start();
+
+		$path = $oAdmin_Form_Controller->getPath();
+
+		// Список статусов дел
+		$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
+
+		$aMasShopOrderStatuses = array(array('value' => Core::_('Shop_Order.notStatus'), 'color' => '#aebec4'));
+
+		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+		{
+			$aMasShopOrderStatuses[$oShop_Order_Status->id] = array('value' => $oShop_Order_Status->name, 'color' => $oShop_Order_Status->color);
+		}
+
+		$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
+
+		$additionalParams = Core_Str::escapeJavascriptVariable(
+			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+		);
+
+		$oDiv = Core::factory('Core_Html_Entity_Span')
+			->class('padding-left-10')
+			->add(
+				$oCore_Html_Entity_Dropdownlist
+					->value($this->shop_order_status_id)
+					->options($aMasShopOrderStatuses)
+					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+				)
+			->execute();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Remove all shop warehouse entries by document
+	 * @return self
+	 */
+	public function unpost()
+	{
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
+		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+		{
+			$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+
+			$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
+
+			$oShop_Warehouse_Entry->delete();
+
+			$rest = $oShop_Warehouse->getRest($shop_item_id);
+
+			if (!is_null($rest))
+			{
+				// Recount
+				$oShop_Warehouse->setRest($shop_item_id, $rest);
+			}
+		}
+
+		return $this;
+	}
+
+	public function getPrintlayoutReplaces()
+	{
+		$oCompany = $this->company_id
+			? $this->Shop_Company
+			: $this->Shop->Shop_Company;
+
+		$aReplace = array(
+			// Core_Meta
+			'this' => $this,
+			'shop_order' => $this,
+			'company' => $oCompany,
+			'shop' => $this->Shop,
+			'total_count' => 0,
+			'Items' => array(),
+		);
+
+		$position = 1;
+
+		$total_amount = $total_quantity = $total_tax = 0;
+
+		$aShop_Order_Items = $this->Shop_Order_Items->findAll();
+		foreach ($aShop_Order_Items as $oShop_Order_Item)
+		{
+			$oShop_Item = $oShop_Order_Item->Shop_Item;
+
+			$amount = Shop_Controller::instance()->round($oShop_Order_Item->quantity * $oShop_Order_Item->price);
+
+			$tax = Shop_Controller::instance()->round($amount * $oShop_Order_Item->rate / 100);
+
+			$aReplace['Items'][] = array(
+				'position' => $position++,
+				'item' => $oShop_Item,
+				'id' => $oShop_Item->id,
+				'name' => htmlspecialchars($oShop_Order_Item->name),
+				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
+				'okei' => htmlspecialchars($oShop_Item->Shop_Measure->okei),
+				'price' => $oShop_Order_Item->price,
+				'quantity' => $oShop_Order_Item->quantity,
+				'rate' => $oShop_Order_Item->rate,
+				'rate%' => $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '',
+				'tax' => $tax,
+				'amount' => $amount,
+				'amount_tax_included' => Shop_Controller::instance()->round($amount + $tax)
+			);
+
+			$total_quantity += $oShop_Order_Item->quantity;
+			$total_tax += $tax;
+			$total_amount += $amount;
+
+			$aReplace['total_count']++;
+		}
+
+		$aReplace['quantity'] = $total_quantity;
+		$aReplace['tax'] = Shop_Controller::instance()->round($total_tax);
+		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
+		$aReplace['amount_tax_included'] = Shop_Controller::instance()->round($this->getAmount());
+		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount_tax_included']));
+
+		return $aReplace;
 	}
 }

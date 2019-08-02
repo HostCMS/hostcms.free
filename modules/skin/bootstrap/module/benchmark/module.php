@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 {
@@ -66,7 +66,14 @@ class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 
 		<script>
 		$(function() {
-			setTimeout(function() {
+			var aScripts = [
+				'jquery.easypiechart.js',
+				'easypiechart-init.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/easypiechart/').done(function() {
+				// all scripts loaded
+				setTimeout(function() {
 					var benchmarkWidget = $('#benchmarkWidget');
 
 					var barColor = getcolor(benchmarkWidget.data('barcolor')) || themeprimary,
@@ -86,8 +93,8 @@ class Skin_Bootstrap_Module_Benchmark_Module extends Benchmark_Module
 						size: size,
 						animate : animate
 					});
-
-			}, 500);
+				}, 300);
+			});
 		});
 		</script>
 	<?php

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Google extends Seo_Controller
 {
@@ -24,10 +24,10 @@ class Seo_Controller_Google extends Seo_Controller
 
 		if (is_object($oGoogleToken))
 		{
-			$this->_token = $oGoogleToken->access_token;
-
 			// Проверяем токен на актуальность
-			if (time() - $oGoogleToken->time >= $oGoogleToken->expires_in)
+			if (isset($oGoogleToken->expires_in)
+				&& time() - $oGoogleToken->time >= $oGoogleToken->expires_in
+			)
 			{
 				// Токен нужно обновить
 				$Core_Http = Core_Http::instance('curl')
@@ -47,6 +47,10 @@ class Seo_Controller_Google extends Seo_Controller
 				$this->_oSeo_Site->save();
 
 				$this->_token = $oNewGoogleToken->access_token;
+			}
+			elseif (isset($oGoogleToken->access_token))
+			{
+				$this->_token = $oGoogleToken->access_token;
 			}
 		}
 

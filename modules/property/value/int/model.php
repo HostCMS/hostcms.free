@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -100,14 +100,39 @@ class Property_Value_Int_Model extends Core_Entity
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event property_value_int.onBeforeRedeclaredGetXml
-	 * @hostcms-event property_value_int.onBeforeAddListItem
-	 * @hostcms-event property_value_int.onBeforeAddInformationsystemItem
-	 * @hostcms-event property_value_int.onBeforeAddShopItem
 	 */
 	public function getXml()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event property_value_int.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 * @hostcms-event property_value_int.onBeforeAddListItem
+	 * @hostcms-event property_value_int.onBeforeAddInformationsystemItem
+	 * @hostcms-event property_value_int.onBeforeAddShopItem
+	 */
+	protected function _prepareData()
+	{
 		$oProperty = $this->Property;
 
 		$this->clearXmlTags()
@@ -254,7 +279,7 @@ class Property_Value_Int_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

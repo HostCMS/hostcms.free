@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Constant
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Constant_Model extends Core_Entity
 {
@@ -67,28 +67,6 @@ class Constant_Model extends Core_Entity
 
 			define($this->name, $value);
 		}
-	}
-
-	/**
-	 * Get constant by name
-	 * @param string $name name
-	 * @return Constant|NULL
-	 */
-	public function getByName($name)
-	{
-		$this->queryBuilder()
-			->clear()
-			->where('name', '=', $name)
-			->limit(1);
-
-		$result = $this->findAll();
-
-		if (!empty($result))
-		{
-			return $result[0];
-		}
-
-		return NULL;
 	}
 
 	/**

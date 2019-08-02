@@ -50,7 +50,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -683,13 +683,21 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 	/**
 	 * Get UTM
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return string
 	 */
-	protected function _getUtm()
+	protected function _getUtm($oShop_Item)
 	{
 		return !is_null($this->utm_source)
 			? '?utm_source=' . $this->utm_source . (
 				!is_null($this->utm_medium)
 					? '&utm_medium=' . $this->utm_medium
+						. '&utm_campaign=' . (
+							$oShop_Item->shop_group_id
+								? $oShop_Item->Shop_Group->path
+								: ''
+						)
+						. '&utm_term=' . $oShop_Item->id
 					: ''
 			)
 			: '';
@@ -704,9 +712,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			? ' bid="' . Core_Str::xml($oShop_Item->yandex_market_bid) . '"'
 			: '';
 
-		$tag_cbid = $oShop_Item->yandex_market_cid
+		/*$tag_cbid = $oShop_Item->yandex_market_cid
 			? ' cbid="' . Core_Str::xml($oShop_Item->yandex_market_cid) . '"'
-			: '';
+			: '';*/
 
 		$available = !$this->checkAvailable || $oShop_Item->getRest() > 0 ? 'true' : 'false';
 
@@ -714,12 +722,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			? ' type="' . Core_Str::xml($this->type) . '"'
 			: '';
 
-		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . $tag_cbid . $sType . " available=\"{$available}\">\n");
+		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . " available=\"{$available}\">\n");
 
 		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
 
 		/* URL */
-		$this->stdOut->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Item->getPath() . $this->_getUtm()) . '</url>'. "\n");
+		$this->stdOut->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Item->getPath() . $this->_getUtm($oShop_Item)) . '</url>'. "\n");
 
 		/* Определяем цену со скидкой */
 		$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
@@ -863,6 +871,19 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if (!isset($this->_forbiddenTags['adult']) && $oShop_Item->adult)
 		{
 			$this->stdOut->write('<adult>true</adult>' . "\n");
+		}
+
+		/* dimensions */
+		if (!isset($this->_forbiddenTags['dimensions'])
+			&& $oShop_Item->length != 0
+			&& $oShop_Item->width != 0
+			&& $oShop_Item->height != 0
+		)
+		{
+			$sDimensions = Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 1)
+				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 1)
+				. '/' . Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 1);
+			$this->stdOut->write('<dimensions>' . $sDimensions . '</dimensions>'. "\n");
 		}
 
 		/* cpa */
@@ -1685,6 +1706,121 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	}
 
 	/**
+	 * Show promos
+	 * @return self
+	 */
+	protected function _promos()
+	{
+		$dateTime = Core_Date::timestamp2sql(time());
+
+		$this->stdOut->write("<promos>\n");
+
+		$oShop = $this->getEntity();
+
+		$oShop_Discounts = $oShop->Shop_Discounts;
+		$oShop_Discounts->queryBuilder()
+			->where('shop_discounts.active', '=', 1)
+			->where('shop_discounts.coupon', '=', 1)
+			->where('shop_discounts.public', '=', 1)
+			->where('shop_discounts.coupon_text', '!=', '')
+			->open()
+				->where('shop_discounts.start_datetime', '<', $dateTime)
+				->setOr()
+				->where('shop_discounts.start_datetime', '=', '0000-00-00 00:00:00')
+			->close()
+			->setAnd()
+			->open()
+				->where('shop_discounts.end_datetime', '>', $dateTime)
+				->setOr()
+				->where('shop_discounts.end_datetime', '=', '0000-00-00 00:00:00')
+			->close()
+			->clearOrderBy()
+			->orderBy('shop_discounts.id');
+
+		$aShop_Discounts = $oShop_Discounts->findAll(FALSE);
+
+		foreach ($aShop_Discounts as $oShop_Discount)
+		{
+			$this->_showPromo($oShop_Discount);
+		}
+
+		$this->stdOut->write("</promos>\n");
+
+		return $this;
+	}
+
+	/**
+	 * Show promo
+	 * @var $oShop_Discount Shop_Discount_Model
+	 * @return self
+	 */
+	protected function _showPromo(Shop_Discount_Model $oShop_Discount)
+	{
+		$oShop = $this->getEntity();
+
+		$this->stdOut->write('<promo id="' . Core_Str::xml($oShop_Discount->id) . '" type="promo code">' . "\n");
+
+		// Dates
+		$this->stdOut->write('<start-date>' . Core_Str::xml($oShop_Discount->start_datetime) . '</start-date>'. "\n");
+		$this->stdOut->write('<end-date>' . Core_Str::xml($oShop_Discount->end_datetime) . '</end-date>'. "\n");
+
+		// Description
+		if (strlen($oShop_Discount->description))
+		{
+			$description = Core_Str::cutSentences(
+				html_entity_decode(strip_tags($oShop_Discount->description), ENT_COMPAT, 'UTF-8'), 500
+			);
+
+			$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+		}
+
+		// Url
+		if (strlen($oShop_Discount->url))
+		{
+			$this->stdOut->write('<url>' . Core_Str::xml($oShop_Discount->url) . '</url>'. "\n");
+		}
+
+		// Promo-code
+		$this->stdOut->write('<promo-code>' . Core_Str::xml(trim($oShop_Discount->coupon_text)) . '</promo-code>'. "\n");
+
+		// Discount
+		$unit = $oShop_Discount->type
+			? 'unit="currency" currency="' . Core_Str::xml($oShop->Shop_Currency->code) . '"'
+			: 'unit="percent"';
+
+		$this->stdOut->write('<discount ' . $unit . '>' . Core_Str::xml($oShop_Discount->value) . '</discount>'. "\n");
+
+		// Purchase
+		$this->stdOut->write("<purchase>\n");
+
+		$offset = 0;
+		$limit = 100;
+
+		do {
+			$oShop_Item_Discounts = $oShop_Discount->Shop_Item_Discounts;
+			$oShop_Item_Discounts->queryBuilder()
+				->clearOrderBy()
+				->orderBy('shop_item_discounts.id', 'ASC')
+				->limit($limit)
+				->offset($offset);
+
+			$aShop_Item_Discounts = $oShop_Item_Discounts->findAll(FALSE);
+
+			foreach ($aShop_Item_Discounts as $oShop_Item_Discount)
+			{
+				$this->stdOut->write('<product offer-id="' . Core_Str::xml($oShop_Item_Discount->shop_item_id) . '" />' . "\n");
+			}
+
+			$offset += $limit;
+		}
+		while(count($aShop_Item_Discounts));
+
+		$this->stdOut->write("</purchase>\n");
+
+		$this->stdOut->write("</promo>\n");
+	}
+
+	/**
 	 * Show UML built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
@@ -1751,6 +1887,9 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		/* Товары */
 		$this->_offers();
+
+		/* Промоакции */
+		$this->_promos();
 
 		$this->stdOut->write("</shop>\n");
 		$this->stdOut->write('</yml_catalog>');

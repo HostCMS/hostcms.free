@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * </code>
  *
  * <code>
- * // Sample 2
+ * // Sample 2 
  * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName', array('column1' => 'value1', 'column2' => 'value2'))
  *	->execute();
  * </code>
@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 {
@@ -38,12 +38,18 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 	protected $_ignore = FALSE;
 
 	/**
+	 * Select
+	 * @var mixed
+	 */
+	protected $_select = NULL;
+
+	/**
 	 * Set HIGH_PRIORITY
 	 *
 	 * <code>
 	 * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName')->highPriority();
 	 * </code>
-	 * @return Core_QueryBuilder_Insert
+	 * @return self
 	 */
 	public function highPriority()
 	{
@@ -57,11 +63,26 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 	 * <code>
 	 * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName')->ignore();
 	 * </code>
-	 * @return Core_QueryBuilder_Insert
+	 * @return self
 	 */
 	public function ignore()
 	{
 		$this->_ignore = TRUE;
+		return $this;
+	}
+
+	/**
+	 * Set SELECT
+	 * @param Core_QueryBuilder_Select $oCore_QueryBuilder_Select
+	 *
+	 * <code>
+	 * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName')->select($oCore_QueryBuilder_Select);
+	 * </code>
+	 * @return self
+	 */
+	public function select(Core_QueryBuilder_Select $oCore_QueryBuilder_Select)
+	{
+		$this->_select = $oCore_QueryBuilder_Select;
 		return $this;
 	}
 
@@ -82,15 +103,22 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 
 		$query[] = "\n(" . implode(', ', $this->quoteColumns($this->_columns)) . ')';
 
-		$query[] = "\nVALUES ";
-
-		$aValues = array();
-		foreach ($this->_values as $aValue)
+		if (is_null($this->_select))
 		{
-			$aValues[] = '(' . implode(', ', $this->_quoteValues($aValue)) . ')';
-		}
+			$query[] = "\nVALUES ";
 
-		$query[] = implode(",\n", $aValues);
+			$aValues = array();
+			foreach ($this->_values as $aValue)
+			{
+				$aValues[] = '(' . implode(', ', $this->_quoteValues($aValue)) . ')';
+			}
+
+			$query[] = implode(",\n", $aValues);
+		}
+		else
+		{
+			$query[] = "\n" . $this->_select->build();
+		}
 
 		$sql = implode(' ', $query);
 

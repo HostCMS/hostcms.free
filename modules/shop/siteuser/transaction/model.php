@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Siteuser_Transaction_Model extends Core_Entity
 {
@@ -40,10 +40,10 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	);
 
 	/**
-	 * Disable markDeleted()
-	 * @var mixed
+	 * Column consist item's name
+	 * @var string
 	 */
-	protected $_marksDeleted = NULL;
+	protected $_nameColumn = 'description';
 
 	/**
 	 * List of preloaded values
@@ -114,12 +114,12 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	public function changeActive()
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
-		
+
 		$this->active = 1 - $this->active;
 		$this->save();
-		
+
 		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
-		
+
 		return $this;
 	}
 
@@ -132,6 +132,31 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_siteuser_transaction.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$this->clearXmlTags()
 			->addXmlTag('date', strftime($this->Shop->format_date, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($this->datetime)));
@@ -139,9 +164,9 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 		$this->shop_currency_id && $this->addEntity($this->Shop_Currency);
 		$this->shop_order_id && $this->addEntity($this->Shop_Order);
 
-		return parent::getXml();
+		return $this;
 	}
-	
+
 	/**
 	 * Backend callback method.
 	 * Get amount transactions until current

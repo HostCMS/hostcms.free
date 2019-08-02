@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -148,7 +148,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aTmp = array();
 		foreach ($_GET as $key => $value)
 		{
-			if (!is_array($value))
+			if (!is_array($value) && $key != '_')
 			{
 				//$aTmp[] = htmlspecialchars($key, ENT_QUOTES) . '=' . htmlspecialchars($value, ENT_QUOTES);
 				$aTmp[] = htmlspecialchars($key) . '=' . rawurlencode($value);
@@ -1773,12 +1773,14 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	protected function _filterCallbackInput($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
+		$value = strval($value);
 		$value = htmlspecialchars($value);
 		?><input type="text" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 100%" class="form-control input-sm" /><?php
 	}
 
 	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
+		$value = intval($value);
 		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="form-control">
 			<option value="0" <?php echo $value == 0 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 			<option value="1" <?php echo $value == 1 ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected'))?></option>
@@ -1867,7 +1869,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	protected function _filterCallbackSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" style="width: 100%">
+		$value = strval($value);
+		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="no-padding-left no-padding-right" style="width: 100%">
 			<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
 			<?php
 			$str_array = explode("\n", $oAdmin_Form_Field->list);
@@ -1893,6 +1896,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
+		$value = strval($value);
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$placeholder = Core::_('Siteuser.select_siteuser');
@@ -1999,10 +2003,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		?>
 		<script>
 
-		
+
 		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
 				language: '<?php echo $language?>',
-				placeholder: '<?php echo $placeholder?>'				
+				placeholder: '<?php echo $placeholder?>'
 			}).val('<?php echo $iUserId?>').trigger('change.select2');
 
 		//$(".select2-container").css('width', '100%');
@@ -2059,7 +2063,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	{
 		if (is_null($tabName))
 		{
-			$value = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
+			$mValue = trim(Core_Array::get($this->request, "{$filterPrefix}{$oAdmin_Form_Field->id}"));
 		}
 		else
 		{
@@ -2073,9 +2077,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			$bCurrent = $this->filterId === $tabName || $this->filterId === '' && $bMain;
 
 			// Значение вначале берется из POST, если его там нет, то из данных в JSON
-			$value = !$bHide
+			$mValue = !$bHide
 				? (isset($_POST['topFilter_' . $oAdmin_Form_Field->id]) && $bCurrent
-					? strval($_POST['topFilter_' . $oAdmin_Form_Field->id])
+					? $_POST['topFilter_' . $oAdmin_Form_Field->id]
 					: (
 						isset($aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value'])
 							? $aTabs[$tabName]['fields'][$oAdmin_Form_Field->name]['value']
@@ -2127,8 +2131,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				case 4: // Ссылка
 				case 10: // Функция обратного вызова
 				case 3: // Checkbox.
+				case 7: // Картинка-ссылка
 				case 8: // Выпадающий список
-					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $value, $oAdmin_Form_Field, $filterPrefix, $tabName);
+					echo call_user_func($this->_filters[$oAdmin_Form_Field->name], $mValue, $oAdmin_Form_Field, $filterPrefix, $tabName);
 				break;
 
 				case 5: // Дата-время.
@@ -2351,7 +2356,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 									}
 								break;
 								case 7: // Картинка-ссылка
-									if ($this->filterId === '' || !strlen($oAdmin_Form_Field_Changed->list))
+									//if ($this->filterId === '' || !strlen($oAdmin_Form_Field_Changed->list))
+									if (!strlen($oAdmin_Form_Field_Changed->list))
 									{
 										break;
 									}

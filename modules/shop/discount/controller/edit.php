@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -44,15 +44,16 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-		;
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$this->getField('description')->wysiwyg(TRUE);
+		$this->getField('description')->rows(7)->wysiwyg(Core::moduleIsActive('wysiwyg'));
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
-		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
-		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
+		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
+		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
+		$oMainTab->move($this->getField('url')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))->placeholder('https://'), $oMainRow3);
 
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4);
+		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
+		$oMainTab->move($this->getField('public')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 
 		$oMainTab->delete($this->getField('type'));
 
@@ -60,7 +61,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oTypeSelectField
 			->name('type')
-			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-2'))
 			->caption(Core::_('Shop_Discount.type'))
 			->options(array(
 				Core::_('Shop_Discount.form_edit_affiliate_values_type_percent'),
@@ -70,7 +71,24 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainRow1->add($oTypeSelectField);
 		$oMainTab->move($this->getField('value')
-			->divAttr(array('class' => 'form-group col-lg-2 col-md-4 col-sm-6 col-xs-6')), $oMainRow1);
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-2')), $oMainRow1);
+
+		$oMainTab->delete($this->getField('coupon'));
+
+		$oCoupon = Admin_Form_Entity::factory('Checkbox')
+			->name('coupon')
+			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-5'))
+			->caption(Core::_('Shop_Discount.coupon'))
+			->value($this->_object->coupon)
+			->onclick("$.toggleCoupon(this)");
+
+		$oMainRow1->add($oCoupon);
+
+		$hidden = !$this->_object->coupon
+			? ' hidden'
+			: '';
+
+		$oMainTab->move($this->getField('coupon_text')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-5' . $hidden)), $oMainRow1);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name)

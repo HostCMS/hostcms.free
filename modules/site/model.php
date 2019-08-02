@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -58,8 +58,12 @@ class Site_Model extends Core_Entity
 	protected $_hasMany = array(
 		'affiliate_plan' => array(),
 		'advertisement' => array(),
-		'advertisement_group' => array(),
+		'advertisement_group' => array(),		
 		'cloud' => array(),
+		'company_department_action_access' => array(),
+		'company_department_module' => array(),
+		'company_site' => array(),
+		'company' => array('through' => 'company_site'),
 		'counter' => array(),
 		'counter_browser' => array(),
 		'counter_device' => array(),
@@ -101,11 +105,7 @@ class Site_Model extends Core_Entity
 		'structure_property_dir' => array(),
 		'structure_menu' => array(),
 		'template' => array(),
-		'template_dir' => array(),
-		'company_department_action_access' => array(),
-		'company_department_module' => array(),
-		'company_site' => array(),
-		'company' => array('through' => 'company_site')
+		'template_dir' => array(),		
 	);
 
 	/**
@@ -145,7 +145,7 @@ class Site_Model extends Core_Entity
 		'error' => 'E_ALL',
 		'error404' => 0,
 		'error403' => 0,
-		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
+		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /showbanner\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
 		'closed' => 0,
 		'safe_email' => 1,
 		'html_cache_use' => 0,
@@ -982,11 +982,20 @@ class Site_Model extends Core_Entity
 				}
 			}
 
-			// Получаем список пользователей сайта
-			$aSiteusers = $this->Siteusers->findAll(FALSE);
+			$aMatchIdentityProviders = array();
+			$aSiteuser_Identity_Providers = $this->Siteuser_Identity_Providers->findAll(FALSE);
+			foreach ($aSiteuser_Identity_Providers as $oSiteuser_Identity_Provider)
+			{
+				$oNewProvider = $oSiteuser_Identity_Provider->copy();
+				$aMatchIdentityProviders[$oSiteuser_Identity_Provider->id] = $oNewProvider;
+
+				$newObject->add($oNewProvider);
+			}
 
 			$aMatchSiteusers = array();
 
+			// Получаем список пользователей сайта
+			$aSiteusers = $this->Siteusers->findAll(FALSE);
 			foreach ($aSiteusers as $oSiteuser)
 			{
 				$oNewSiteuser = $oSiteuser->copy();
@@ -1000,9 +1009,13 @@ class Site_Model extends Core_Entity
 				$aSiteuser_Identities = $oSiteuser->Siteuser_Identities->findAll(FALSE);
 				foreach ($aSiteuser_Identities as $oSiteuser_Identity)
 				{
-					$oNewSiteuser_Identity = $oSiteuser_Identity->copy();
-					$oNewSiteuser_Identity->siteuser_id = $oNewSiteuser->id;
-					$oNewSiteuser_Identity->save();
+					if (isset($aMatchIdentityProviders[$oSiteuser_Identity->siteuser_identity_provider_id]))
+					{
+						$oNewSiteuser_Identity = $oSiteuser_Identity->copy();
+						$oNewSiteuser_Identity->siteuser_id = $oNewSiteuser->id;
+						$oNewSiteuser_Identity->siteuser_identity_provider_id = $aMatchIdentityProviders[$oSiteuser_Identity->siteuser_identity_provider_id];
+						$oNewSiteuser_Identity->save();
+					}
 				}
 
 				foreach ($aProperty_Values as $oProperty_Value)
@@ -1039,13 +1052,6 @@ class Site_Model extends Core_Entity
 						$oNewSiteuser_Group_List->siteuser_id = $oNewSiteuser->id;
 						$oNewSiteuser_Group_List->save();
 					}
-				}
-
-				$aSiteuser_Identity_Providers = $this->Siteuser_Identity_Providers->findAll(FALSE);
-
-				foreach ($aSiteuser_Identity_Providers as $oSiteuser_Identity_Provider)
-				{
-					$newObject->add($oSiteuser_Identity_Provider->copy());
 				}
 			}
 
@@ -1572,6 +1578,16 @@ class Site_Model extends Core_Entity
 	}
 
 	/**
+	 * Get first error email
+	 * @return string
+	 */
+	public function getErrorEmail()
+	{
+		$aEmails = array_map('trim', explode(',', $this->error_email));
+		return $aEmails[0];
+	}
+
+	/**
 	 * Get site keys as array
 	 * @return array
 	 */
@@ -1624,6 +1640,31 @@ class Site_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event site.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		if ($this->_showXmlAlias)
 		{
 			$oSite_Alias = $this->getCurrentAlias();
@@ -1644,7 +1685,7 @@ class Site_Model extends Core_Entity
 			}
 		}
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**

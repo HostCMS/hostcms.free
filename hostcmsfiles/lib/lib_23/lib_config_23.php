@@ -461,7 +461,9 @@ if (Core::moduleIsActive('siteuser'))
 
 		if (!is_null($oSiteuser))
 		{
-			$oSiteuser->activate()->setCurrent();
+			$oSiteuser
+				->activate()
+				->setCurrent();
 			$Siteuser_Controller_Show->setEntity($oSiteuser);
 		}
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Antispam
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Antispam_Country_Model extends Core_Entity
 {
@@ -36,8 +36,8 @@ class Antispam_Country_Model extends Core_Entity
 	/**
 	 * Change allow
 	 * @return self
-	 * @hostcms-event shortcode.onBeforeChangeActive
-	 * @hostcms-event shortcode.onAfterChangeActive
+	 * @hostcms-event antispam_country.onBeforeChangeActive
+	 * @hostcms-event antispam_country.onAfterChangeActive
 	 */
 	public function changeAllow()
 	{

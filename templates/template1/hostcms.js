@@ -219,10 +219,10 @@
 				success :	function (ajaxData) {
 					Obj.oTemp = jQuery(ajaxData.content);
 
-					if (!data.preload && Obj._count_msg > Obj._limit)
+					/*if (!data.preload && Obj._count_msg > Obj._limit)
 					{
 						Obj.oTemp.find(settings.messages + ' > :first[id^='+settings.prefix_message_id+']').remove();
-					}
+					}*/
 
 					// замена сообщений чата
 					Obj.oTemp.find(settings.messages + ' > [id^='+settings.prefix_message_id+']').each(function(){

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,7 +67,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 
 				$oShop = $object->shop_delivery->Shop;
 
-				$this->getField('name')->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
+				$this->getField('name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 				// Удаляем типы доставок
 				$oAdditionalTab->delete($this->getField('shop_delivery_id'));
@@ -92,7 +92,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 				$oMainTab->moveAfter($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $this->getField('delivery_time'));
 
 				$oPriceField = $this->getField('price')
-					->divAttr(array('class' => 'form-group col-xs-8 col-sm-2'));
+					->divAttr(array('class' => 'form-group col-xs-8 col-sm-4'));
 				$oMainTab->move($oPriceField, $oMainRow4);
 
 				// Удаляем валюты
@@ -122,7 +122,7 @@ class Shop_Delivery_Condition_Controller_Edit extends Admin_Form_Action_Controll
 
 				$oTaxSelect
 					->caption(Core::_("Shop_Delivery_Condition.shop_tax_id"))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 					->options(
 						$Shop_Item_Controller_Edit->fillTaxesList()
 					)

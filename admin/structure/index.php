@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -41,14 +41,20 @@ if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('docu
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
+$oParentStructure = Core_Entity::factory('Structure', Core_Array::getGet('parent_id', 0));
+
+$sFormTitle = $oParentStructure->id
+	? $oParentStructure->name
+	: Core::_('Structure.title');
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Structure.title'))
-	->pageTitle(Core::_('Structure.title'));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -57,6 +63,7 @@ $sMenuPath = '/admin/structure/menu/index.php';
 $sPropertyPath = '/admin/structure/property/index.php';
 
 $parent_id = intval(Core_Array::getGet('parent_id', 0));
+$additionalParamsProperties = "structure_id={$parent_id}";
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
@@ -80,10 +87,10 @@ $oAdmin_Form_Entity_Menus->add(
 				->img('/admin/images/structure_gear.gif')
 				->icon('fa fa-gears')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sPropertyPath, NULL, NULL, "structure_id={$parent_id}")
+					$oAdmin_Form_Controller->getAdminLoadHref($sPropertyPath, NULL, NULL, $additionalParamsProperties)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sPropertyPath, NULL, NULL, "structure_id={$parent_id}")
+					$oAdmin_Form_Controller->getAdminLoadAjax($sPropertyPath, NULL, NULL, $additionalParamsProperties)
 				)
 		)
 )->add(
@@ -102,6 +109,37 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+if ($oParentStructure->id)
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oParentStructure->id);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, $oParentStructure->id);
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsProperties) . '"></i>
+						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsProperties) . '" />
+
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -334,16 +372,36 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 // Добавляем внешнее поле, доступное для сортировки и фильтрации
 $oAdmin_Form_Dataset->addExternalField('menu_name');
 
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('structures.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('structures.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('structures.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('structures.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('structures.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('structures.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('where' => array('structures.parent_id', '=', $parent_id)));
+}
+
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('structures.*', array('structure_menus.name', 'menu_name')))
 )->addCondition(
 	array('leftJoin' => array('structure_menus', 'structures.structure_menu_id', '=', 'structure_menus.id'))
-)->addCondition(
-	array('where' =>
-		array('parent_id', '=', $parent_id)
-	)
-)->addCondition(
+)
+->addCondition(
 	array('where' =>
 		array('structures.site_id', '=', CURRENT_SITE)
 	)

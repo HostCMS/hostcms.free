@@ -6,7 +6,7 @@
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Benchmark',
@@ -51,7 +51,7 @@ return array(
 	'changeStorageEnginesTitle' => 'Setting the Storage Engine',
 	'engine' => 'Engine',
 	'count' => 'Count',
-	'chooseStorageEnginesMsg' => 'Select the storage engine for tables. Do not forget to backup your database!',
+	'changeMsg' => 'Do not forget to backup your database!',
 	'convert' => 'Convert',
 	'convertedMsg' => 'Changed Storage Engines: %s.',
 	'add_counter' => 'Insert benchmark code into template',

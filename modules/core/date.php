@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Date
 {
@@ -203,7 +203,7 @@ class Core_Date
 	 * @param string $timestamp
 	 * @return string
 	 */
-	static public function timestamp2string($timestamp)
+	static public function timestamp2string($timestamp, $withTime = TRUE)
 	{
 		list($year, $month, $day) = array_values(date_parse(Core_Date::timestamp2sql($timestamp)));
 
@@ -232,13 +232,13 @@ class Core_Date
 		//$estimate_days = floor($estimate_time / 86400);
 		$dateZ = date('z', $timestamp);
 		$currentZ = date('z');
-		
+
 		$dateY = date('Y', $timestamp);
 		$currentY = date('Y');
-		
+
 		// Прошло часов
 		$estimate_hours = floor($estimate_time / 3600);
-		
+
 		if ($estimate_hours < 3)
 		{
 			// Прошло минут
@@ -263,26 +263,32 @@ class Core_Date
 				$sReturn = Core::_('Core.ago', $hour_prefix, $minute_prefix);
 			}
 		}
-		elseif ($dateY == $currentY && $dateZ == $currentZ)
-		{
-			$sReturn = Core::_('Core.today', $time);
-		}
-		elseif ($dateY == $currentY && $dateZ == $currentZ - 1)
-		{
-			$sReturn = Core::_('Core.yesterday', $time);
-		}
-		elseif ($dateY == $currentY && $dateZ == $currentZ + 1)
-		{
-			$sReturn = Core::_('Core.tomorrow', $time);
-		}
-		elseif ($dateY == $currentY)
-		{
-			$sReturn = Core::_('Core.estimate_date', $day, $aMonth[$month], $time);
-		}
 		else
 		{
-			$sReturn = Core::_('Core.estimate_date_year', $day, $aMonth[$month], $year, $time);
+			if ($dateY == $currentY && $dateZ == $currentZ)
+			{
+				$sReturn = Core::_('Core.today');
+			}
+			elseif ($dateY == $currentY && $dateZ == $currentZ - 1)
+			{
+				$sReturn = Core::_('Core.yesterday');
+			}
+			elseif ($dateY == $currentY && $dateZ == $currentZ + 1)
+			{
+				$sReturn = Core::_('Core.tomorrow');
+			}
+			elseif ($dateY == $currentY)
+			{
+				$sReturn = Core::_('Core.estimate_date', $day, $aMonth[$month]);
+			}
+			else
+			{
+				$sReturn = Core::_('Core.estimate_date_year', $day, $aMonth[$month], $year);
+			}
+			
+			$withTime && $sReturn .= Core::_('Core.time_postfix', $time);
 		}
+		
 
 		return $sReturn;
 	}

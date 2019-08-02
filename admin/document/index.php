@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -17,14 +17,20 @@ $sAdminFormAction = '/admin/document/index.php';
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
+$oDocumentDir = Core_Entity::factory('Document_Dir', Core_Array::getGet('document_dir_id', 0));
+
+$sFormTitle = $oDocumentDir->id
+	? $oDocumentDir->name
+	: Core::_('Document.title');
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('Document.title'))
-	->pageTitle(Core::_('Document.title'));
+	->title($sFormTitle)
+	->pageTitle($sFormTitle);
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');

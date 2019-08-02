@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Phpredis extends Core_Session
 {
@@ -71,7 +71,8 @@ class Core_Session_Phpredis extends Core_Session
 		$aConfig = Core::$mainConfig['session'] + array(
 			'server' => '127.0.0.1',
 			'port' => 6379,
-			'auth' => NULL
+			'auth' => NULL,
+			'database' => NULL
 		);
 
 		if (!$this->_redis->connect($aConfig['server'], $aConfig['port']))
@@ -84,12 +85,18 @@ class Core_Session_Phpredis extends Core_Session
 			$this->_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
 		}
 
+		if (!is_null($aConfig['database']) && !$this->_redis->select($aConfig['database']))
+		{
+			$this->_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
+		}
+
 		if (is_null($this->_prefix))
 		{
 			$this->_prefix = Core::crc32(CMS_FOLDER);
 		}
 
-		$this->_ttl = ini_get('session.gc_maxlifetime');
+		// Should be INT
+		$this->_ttl = intval(ini_get('session.gc_maxlifetime'));
 	}
 
 	/**
@@ -138,7 +145,8 @@ class Core_Session_Phpredis extends Core_Session
 
 				if (isset($aUnpackedHash[1]))
 				{
-					$this->_ttl = $aUnpackedHash[1];
+					// Should be INT
+					$this->_ttl = intval($aUnpackedHash[1]);
 
 					$this->_redis->setTimeout($key, $this->_ttl);
 				}
@@ -161,7 +169,7 @@ class Core_Session_Phpredis extends Core_Session
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
 			$key = $this->_getKey($id);
-			
+
 			$this->_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
 
 			$this->_unlock($id);
@@ -186,7 +194,7 @@ class Core_Session_Phpredis extends Core_Session
 			$this->_redis->del($key);
 
 			$this->_unlock($id);
-			
+
 			// для предотвращения автоматической повторной регистрации сеанса
 			$_SESSION = array();
 
@@ -208,7 +216,8 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$key = $this->_getKey(session_id());
 
-			$this->_ttl = $maxlifetime;
+			// Should be INT
+			$this->_ttl = intval($maxlifetime);
 
 			$this->_redis->setTimeout($key, $this->_ttl);
 		}
@@ -242,6 +251,9 @@ class Core_Session_Phpredis extends Core_Session
 		}
 		else
 		{
+			// Service Unavailable
+			Core_Response::sendHttpStatusCode(503);
+
 			throw new Core_Exception($content);
 		}
 	}
@@ -271,7 +283,7 @@ class Core_Session_Phpredis extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait!');
+				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
 			}
 
 			usleep($this->_nextStepDelay);

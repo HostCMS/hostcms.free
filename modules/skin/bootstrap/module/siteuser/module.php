@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 {
@@ -78,23 +78,29 @@ class Skin_Bootstrap_Module_Siteuser_Module extends Siteuser_Module
 
 		<script>
 		$(function() {
-			setTimeout(function() {
-				var siteuserWidget = $('#siteuserWidget');
-				siteuserWidget.sparkline('html', {
-					type: 'bar',
-					chartRangeMin: 0,
-					disableHiddenCheck: true,
-					height: siteuserWidget.data('height'),
-					width: siteuserWidget.data('width'),
-					barColor: getcolor(siteuserWidget.data('barcolor')),
-					negBarColor: getcolor(siteuserWidget.data('negbarcolor')),
-					zeroColor: getcolor(siteuserWidget.data('zerocolor')),
-					barWidth: siteuserWidget.data('barwidth'),
-					barSpacing: siteuserWidget.data('barspacing'),
-					stackedBarColor: siteuserWidget.data('stackedbarcolor')
-				});
+			var aScripts = [
+				'jquery.sparkline.js'
+			];
 
-			}, 500);
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/sparkline/').done(function() {
+				// all scripts loaded
+				setTimeout(function() {
+					var siteuserWidget = $('#siteuserWidget');
+					siteuserWidget.sparkline('html', {
+						type: 'bar',
+						chartRangeMin: 0,
+						disableHiddenCheck: true,
+						height: siteuserWidget.data('height'),
+						width: siteuserWidget.data('width'),
+						barColor: getcolor(siteuserWidget.data('barcolor')),
+						negBarColor: getcolor(siteuserWidget.data('negbarcolor')),
+						zeroColor: getcolor(siteuserWidget.data('zerocolor')),
+						barWidth: siteuserWidget.data('barwidth'),
+						barSpacing: siteuserWidget.data('barspacing'),
+						stackedBarColor: siteuserWidget.data('stackedbarcolor')
+					});
+				}, 300);
+			});
 		});
 		</script>
 		<?php

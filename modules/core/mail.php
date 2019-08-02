@@ -25,7 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -67,7 +67,7 @@ abstract class Core_Mail
 			Core_Log::instance()->clear()
 				->notify(FALSE) // avoid recursion
 				->status(Core_Log::$MESSAGE)
-				->write(sprintf('SMTP LOG: "%s"', $this->_log));
+				->write(sprintf('MAIL LOG: "%s"', $this->_log));
 		}
 
 		return TRUE;
@@ -106,7 +106,7 @@ abstract class Core_Mail
 			) + array(
 				'host' => NULL,
 				'port' => 25,
-				'log' => TRUE,
+				'log' => FALSE,
 				'timeout' => 5
 			)
 		);
@@ -513,7 +513,9 @@ abstract class Core_Mail
 		// Final bound with --
 		$content .= "--{$this->_bound}--{$sSingleSeparator}";
 
-		$subject = '=?UTF-8?B?' . base64_encode($this->_subject) . '?=';
+		$subject = $this->_subject != ''
+			? '=?UTF-8?B?' . base64_encode($this->_subject) . '?='
+			: '';
 
 		$aHeaders = array();
 		foreach ($this->_headers as $headerName => $headerValue)

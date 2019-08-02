@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -365,10 +365,10 @@ class Core_ORM
 		if (!is_null($primaryKey))
 		{
 			$oQuery_Builder = Core_QueryBuilder::delete($this->_tableName);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oQuery_Builder
 				->where($this->_primaryKey, '=', $primaryKey)
 				->execute();
@@ -846,6 +846,7 @@ class Core_ORM
 	/**
 	 * Calculate model's relation if data does not exist in self::$_relationModelCache.
 	 * @return self
+	 * @hostcms-event modelname.onAfterLoadModelCache
 	 * @hostcms-event modelname.onAfterRelations
 	 */
 	protected function _relations()
@@ -854,6 +855,9 @@ class Core_ORM
 		{
 			$this->_relations = self::$_relationModelCache[$this->_modelName];
 			//$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
+			
+			Core_Event::notify($this->_modelName . '.onAfterLoadModelCache', $this);
+			
 			return $this;
 		}
 
@@ -992,10 +996,10 @@ class Core_ORM
 		{
 			$this->_database[self::$_databaseDriver] = Core_DataBase::instance(self::$_databaseDriver);
 		}
-		
+
 		return $this->_database[self::$_databaseDriver];
 	}
-	
+
 	/**
 	 * Model initialization
 	 * @return Core_ORM
@@ -1114,7 +1118,7 @@ class Core_ORM
 		if (is_null($this->_queryBuilder))
 		{
 			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*');
-			
+
 			self::$_databaseDriver != 'default'
 				&& $this->_queryBuilder->setDataBase($this->getDatabase());
 		}
@@ -1137,14 +1141,25 @@ class Core_ORM
 
 	/**
 	 * Clear self::$_relationModelCache and Core_ORM_RelationCache
+	 * @param mixed $modelName default NULL
 	 */
-	static public function clearRelationModelCache()
+	static public function clearRelationModelCache($modelName = NULL)
 	{
-		self::$_relationModelCache = array();
-
-		if (Core::moduleIsActive('cache'))
+		if (!is_null($modelName))
 		{
-			self::$relationCache->deleteAll('Core_ORM_RelationCache');
+			if (isset(self::$_relationModelCache[$modelName]))
+			{
+				unset(self::$_relationModelCache[$modelName]);
+			}
+		}
+		else
+		{
+			self::$_relationModelCache = array();
+
+			if (Core::moduleIsActive('cache'))
+			{
+				self::$relationCache->deleteAll('Core_ORM_RelationCache');
+			}
 		}
 	}
 
@@ -1639,6 +1654,15 @@ class Core_ORM
 						$value = ($value < $aField['min']) ? $aField['min'] : $aField['max'];
 					}
 				break;
+				case 'decimal':
+					// Convert "," to "."
+					$value = str_replace(',', '.', $value);
+
+					// Remove everything except numbers and dot
+					$value = preg_replace('/[^0-9\.\-]/', '', $value);
+					
+					$value == '' && $value = 0;
+				break;
 				case 'float':
 					// Convert "," to "."
 					$value = str_replace(',', '.', $value);
@@ -1769,25 +1793,32 @@ class Core_ORM
 
 			$data = $this->_getChangedData();
 
+			$bPKexists = array_key_exists($this->_primaryKey, $data);
+
 			// Set PK
-			if (!array_key_exists($this->_primaryKey, $data))
+			if (!$bPKexists)
 			{
 				$getPrimaryKeyValue = $this->getPrimaryKey();
 
-				!is_null($getPrimaryKeyValue) && $data[$this->_primaryKey] = $getPrimaryKeyValue;
+				$bPKexists = !is_null($getPrimaryKeyValue);
+
+				$bPKexists && $data[$this->_primaryKey] = $getPrimaryKeyValue;
 			}
 
 			$oQuery_Builder = Core_QueryBuilder::insert($this->_tableName, $data);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oInsert = $oQuery_Builder->execute();
 
-			// Set primary key
-			$this->setValues(
-				array($this->_primaryKey => $oInsert->getInsertId())
-			);
+			if (!$bPKexists)
+			{
+				// Set primary key
+				$this->setValues(
+					array($this->_primaryKey => $oInsert->getInsertId())
+				);
+			}
 
 			$this->_saved = TRUE;
 
@@ -1820,10 +1851,10 @@ class Core_ORM
 			$data = $this->_getChangedData();
 
 			$oQuery_Builder = Core_QueryBuilder::update($this->_tableName);
-			
+
 			self::$_databaseDriver != 'default'
 				&& $oQuery_Builder->setDataBase($this->getDatabase());
-			
+
 			$oUpdate = $oQuery_Builder
 				->columns($data)
 				->where($this->_primaryKey, '=', $this->getPrimaryKey())

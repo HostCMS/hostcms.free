@@ -108,13 +108,15 @@
 
 			//console.log(data);
 
+			mainFormLocker.saveStatus().unlock();
+
 			jQuery.ajax({
 				context: jDivWin,
 				url: cmsrequest,
 				data: data,
 				dataType: 'json',
 				type: 'POST',
-				success: jQuery.ajaxCallback
+				success: [jQuery.ajaxCallback, function() { mainFormLocker.restoreStatus() }]
 			});
 
 			return jDivWin;
@@ -246,6 +248,35 @@
 				},
 			});
 		},
+		changePrintButton: function(object) {
+			var print_price_id = $(object).val();
+
+			$.each($('.print-price ul.dropdown-menu li:has(a) > a'), function (i, el) {
+				var onclick = $(this).attr('onclick'),
+					matches = onclick.match(/(\&\w+\S+\&)/),
+					split = matches[0].split('&'),
+					text = onclick.replace(split[1], 'shop_price_id=' + print_price_id);
+
+				$(this).attr('onclick', text);
+			});
+		},
+		showPrintButton: function(window_id, id) {
+			$('#' + window_id + ' .print-button').removeClass('hidden');
+
+			$.each($('#' + window_id + ' .print-button ul.dropdown-menu li:has(a) > a'), function (i, el) {
+				var onclick = $(this).attr('onclick'),
+					text = onclick.replace('[]', '[' + id + ']');
+
+				$(this).attr('onclick', text);
+			});
+		},
+		escapeHtml: function(str) {
+			// This does not escape quotes
+			escaped = new Option(str).innerHTML;
+
+			// Replace quotes
+			return escaped.replace(/"/g, '&quot;');
+		},
 		bookmarksPrepare: function (){
 			setInterval($.refreshBookmarksList, 120000);
 
@@ -292,23 +323,29 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('bookmarks'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('bookmarks'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0};
+					}
 
-				if (Date.now() > storageObj['expired_in'])
-				{
-					storageObj['expired_in'] = Date.now() + 120000;
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 120000;
 
-					bNeedsRequest = true;
-				}
-				else
-				{
-					$.refreshBookmarksCallback(storageObj);
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshBookmarksCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -356,8 +393,8 @@
 
 			// Создаем slimscroll
 			jScrollBookmarks.slimscroll({
-				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? '220px' : '55px',
-				//height: 'auto',
+				height: $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul li[id != "bookmark-0"]').length ? ($(window).height() * 0.7) : '55px',
+				// height: 'auto',
 				color: 'rgba(0, 0, 0, 0.3)',
 				size: '5px',
 				wheelStep: 5
@@ -509,9 +546,72 @@
 		toggleWarehouses: function() {
 			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
 		},
+		editWarehouses: function(object) {
+			$.each( $(".shop-item-warehouses-list .row"), function (index, item) {
+				$(this).removeClass('hidden');
+				$(this).find('input[name ^= warehouse_]').prop('disabled', false).focus();
+				$(this).find('select[name ^= warehouse_shop_price_id_]').removeClass('hidden');
+				$(this).find('select[name ^= warehouse_shop_price_id_]').parents('div').prev().removeClass('hidden');
+			});
+			$(object).addClass('hidden');
+		},
+		toggleShopPrice: function(shop_price_id) {
+			$('.toggle-shop-price-' + shop_price_id)
+				.toggleClass('hidden')
+				.find('input').prop('disabled', function(i, v) { return !v; });
+
+			$.each($(".shop-item-table tbody tr"), function (index, item) {
+				var button = $(this).find('a.delete-associated-item'),
+					parentTd = button.parents('td');
+
+				parentTd.detach().appendTo($(this));
+			});
+		},
+		toggleCoupon: function(object) {
+			var jInput = $('input[name=coupon_text]'),
+				length = jInput.val().length;
+
+			jInput.parents('.form-group').toggleClass('hidden');
+
+			length === 0 && $.generateCoupon(jInput);
+		},
+		generateCoupon: function(jInput) {
+			$.ajax({
+				url: '/admin/shop/discount/index.php',
+				type: 'POST',
+				data: {'generate-coupon': 1},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					jInput
+						.val(answer.coupon)
+						.focus();
+				}
+			});
+		},
+		showEmails: function(data)
+		{
+			$.ajax({
+				url: '/admin/printlayout/index.php',
+				type: 'POST',
+				data: {'showEmails': 1, 'representative': data.id},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					if (answer)
+					{
+						$(".email-select").empty().trigger("change");
+
+						$.each(answer, function(id, object){
+							var newOption = new Option(object.email + ' [' + object.type + ']', object.email, true, true);
+							$(".email-select").append(newOption).trigger('change');
+						});
+					}
+				}
+			});
+		},
 		insertSeoTemplate: function(el, text) {
-			if (el == undefined) { return; }
-			el.insertAtCaret(text);
+			el && el.insertAtCaret(text);
 		},
 		filterToggleField: function(object)
 		{
@@ -651,14 +751,6 @@
 			var $kanban = $(container + ' > .row'),
 				$prevNav = $('.horizon-prev', container),
 				$nextNav = $('.horizon-next', container);
-
-			/* console.log('container =', container);
-			console.log('$kanban.width() = ', $kanban.width());
-			console.log('$kanban.innerWidth() = ', $kanban.innerWidth());
-			console.log('$kanban.outerWidth() = ', $kanban.outerWidth());
-			console.log('$kanban.get(0).scrollWidth = ', $kanban.get(0).scrollWidth);
-			 */
-
 
 			$.fn.horizon = function () {
 				// Set mousewheel event
@@ -1262,20 +1354,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat_messages_list'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat_messages_list'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshMessagesListCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshMessagesListCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -1347,20 +1445,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshChatCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshChatCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -1427,20 +1531,26 @@
 
 				if (bLocalStorage)
 				{
-					var storage = localStorage.getItem('chat_user_statuses'),
-						storageObj = JSON.parse(storage);
+					try {
+						var storage = localStorage.getItem('chat_user_statuses'),
+							storageObj = JSON.parse(storage);
 
-					!storage && (storageObj = {expired_in: 0});
+						!storage && (storageObj = {expired_in: 0});
 
-					if (Date.now() > storageObj['expired_in'])
-					{
-						storageObj['expired_in'] = Date.now() + 10000;
+						if (Date.now() > storageObj['expired_in'])
+						{
+							storageObj['expired_in'] = Date.now() + 10000;
 
-						bNeedsRequest = true;
-					}
-					else
-					{
-						$.refreshUserStatusesCallback(storageObj);
+							bNeedsRequest = true;
+						}
+						else
+						{
+							$.refreshUserStatusesCallback(storageObj);
+						}
+					} catch(e) {
+						if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+							showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+						}
 					}
 				}
 				else
@@ -2011,23 +2121,29 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('events'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('events'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0};
+					}
 
-				if (Date.now() > storageObj['expired_in'])
-				{
-					storageObj['expired_in'] = Date.now() + 10000;
+					if (Date.now() > storageObj['expired_in'])
+					{
+						storageObj['expired_in'] = Date.now() + 10000;
 
-					bNeedsRequest = true;
-				}
-				else
-				{
-					$.refreshEventsCallback(storageObj);
+						bNeedsRequest = true;
+					}
+					else
+					{
+						$.refreshEventsCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -2504,7 +2620,7 @@
 				// В зависимости от наличия или отсутствия непрочитанных уведомлений добавляем или удаляем "wave in" для значка уведомлений
 				$('.navbar li#notifications > a').toggleClass('wave in', !!countUnreadNotifications);
 
-				//  Меняем значение баджа с числом непрочитанных уведомлений
+				// Меняем значение баджа с числом непрочитанных уведомлений
 				$('.navbar li#notifications > a > span.badge')
 					.html(countUnreadNotifications > 99 ? countUnreadNotifications = '∞' : countUnreadNotifications)
 					.toggleClass('hidden', !countUnreadNotifications);
@@ -2546,24 +2662,30 @@
 
 			if (bLocalStorage)
 			{
-				var storage = localStorage.getItem('notifications'),
-					storageObj = JSON.parse(storage);
+				try {
+					var storage = localStorage.getItem('notifications'),
+						storageObj = JSON.parse(storage);
 
-				if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
-				{
-					storageObj = {expired_in: 0, lastNotificationId: 0};
-				}
+					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
+					{
+						storageObj = {expired_in: 0, lastNotificationId: 0};
+					}
 
-				// При окрытии новой вкладки (!lastNotificationId) загружаем данные из БД, а не из хранилища
-				if (Date.now() > storageObj['expired_in'] || !lastNotificationId)
-				{
-					//storageObj['expired_in'] = Date.now() + 10000;
-					bNeedsRequest = true;
-				}
-				else if(lastNotificationId < storageObj['lastNotificationId'])
-				{
-					storageObj['localStorage'] = true;
-					$.refreshNotificationsCallback(storageObj);
+					// При окрытии новой вкладки (!lastNotificationId) загружаем данные из БД, а не из хранилища
+					if (Date.now() > storageObj['expired_in'] || !lastNotificationId)
+					{
+						//storageObj['expired_in'] = Date.now() + 10000;
+						bNeedsRequest = true;
+					}
+					else if(lastNotificationId < storageObj['lastNotificationId'])
+					{
+						storageObj['localStorage'] = true;
+						$.refreshNotificationsCallback(storageObj);
+					}
+				} catch(e) {
+					if (e.name == "NS_ERROR_FILE_CORRUPTED") {
+						showMessageSomehow("Sorry, it looks like your browser storage has been corrupted.");
+					}
 				}
 			}
 			else
@@ -3150,6 +3272,10 @@
 			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
 			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
 
+			jNewObject.find(".file-caption-wrapper")
+				.addClass('hidden')
+				.prev().removeClass('hidden');
+
 			var oDateTimePicker = jProperies.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
 
 			if(oDateTimePicker)
@@ -3521,7 +3647,7 @@
 			if ((workdayStatus == 2 || workdayStatus == 5) && !window.timerId)
 			{
 				window.timerId = setInterval(function() {
-					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible'});
+					$('.workday-timer .colon').css({ visibility: toggle ? 'hidden' : 'visible' });
 					toggle = !toggle;
 				}, 1000);
 			}
@@ -3530,8 +3656,349 @@
 			{
 				clearInterval(window.timerId);
 				window.timerId = undefined;
-				$('.workday-timer .colon').css({ visibility: 'visible'});
+				$('.workday-timer .colon').css({ visibility: 'visible' });
 			}
+		},
+		updateWarehouseCounts: function(shop_warehouse_id)
+		{
+			var aItems = [];
+
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				aItems.push($(this).data('item-id'));
+			});
+
+			$.ajax({
+				url: '/admin/shop/warehouse/inventory/index.php',
+				type: "POST",
+				data: {'update_warehouse_counts': 1, 'shop_warehouse_id': shop_warehouse_id, 'items': aItems, 'datetime': $('input[name=datetime]').val()},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+						var id = $(this).data('item-id');
+
+						if (answer[id])
+						{
+							$(this).find('.calc-warehouse-count').text(answer[id]['count']);
+
+							var jInput = $(this).find('.set-item-count');
+
+							jInput.change();
+							$.changeWarehouseCounts(jInput, 0);
+						}
+					});
+				}
+			});
+		},
+		changeWarehouseCounts: function(jInput, type)
+		{
+			jInput.change(function() {
+				// Replace ',' on '.'
+				var replace = $(this).val().replace(',', '.');
+				$(this).val(replace);
+
+				if ($(this).val() < 0)
+				{
+					$(this).val(0);
+				}
+
+				var parentTr = $(this).parents('tr'),
+					quantity = $.isNumeric($(this).val()) && $(this).val() > 0
+						? parseFloat($(this).val())
+						: 0,
+					price = $.isNumeric(parentTr.find('.price').text())
+						? parseFloat(parentTr.find('.price').text())
+						: 0,
+					sum = $.mathRound(quantity * price, 2);
+
+				switch (type)
+				{
+					// Инвентаризация
+					case 0:
+						var calcCount = $.isNumeric(parentTr.find('.calc-warehouse-count').text())
+							? parseFloat(parentTr.find('.calc-warehouse-count').text())
+							: 0,
+						diffCount = $.mathRound((quantity - calcCount), 3),
+						diffCountTd = parentTr.find('.diff-warehouse-count');
+
+						parentTr.find('.calc-warehouse-sum').text(price * calcCount);
+
+						var calcSum = $.isNumeric(parentTr.find('.calc-warehouse-sum').text())
+							? parseFloat(parentTr.find('.calc-warehouse-sum').text())
+							: 0,
+						invSumSpan = parentTr.find('.warehouse-inv-sum'),
+						diffSumSpan = parentTr.find('.diff-warehouse-sum');
+
+						diffCountTd
+							.removeClass('palegreen')
+							.removeClass('darkorange');
+
+						if (diffCount > 0)
+						{
+							diffCount = '+' + diffCount;
+							diffCountTd.addClass('palegreen');
+						}
+						else if (diffCount == 0)
+						{
+							diffCountTd
+								.removeClass('palegreen')
+								.removeClass('darkorange');
+						}
+						else
+						{
+							diffCountTd.addClass('darkorange');
+						}
+
+						// Отклонение на складе
+						diffCountTd.text(diffCount);
+
+						// Сумма учтенных
+						invSumSpan.text(sum);
+
+						var invSum = $.isNumeric(invSumSpan.text())
+							? parseFloat(invSumSpan.text())
+							: 0,
+							diffSum = $.mathRound((sum - calcSum), 2),
+							parentDiffTd = diffSumSpan.parents('td');
+
+						parentDiffTd
+							.removeClass('palegreen')
+							.removeClass('darkorange');
+
+						if (diffSum > 0)
+						{
+							diffSum = '+' + diffSum;
+							parentDiffTd.addClass('palegreen');
+						}
+						else if (diffSum == 0)
+						{
+							parentDiffTd
+								.removeClass('palegreen')
+								.removeClass('darkorange');
+						}
+						else
+						{
+							parentDiffTd.addClass('darkorange');
+						}
+
+						// Отклонение в сумме
+						diffSumSpan.text(diffSum);
+					break;
+					// Оприходование
+					case 1:
+					case 2:
+						parentTr.find('.calc-warehouse-sum').text(sum);
+						parentTr.find('.hidden-shop-price').val(price);
+					break;
+					case 5:
+						parentTr.find('.calc-warehouse-sum').text(sum);
+					break;
+				}
+			});
+		},
+		prepareShopPrices: function()
+		{
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+
+				$(this).find('td:first-child').text(index + 1);
+				var jInput = $(this).find('.set-item-new-price');
+
+				jInput.change();
+				$.changeShopPrices(jInput);
+			});
+		},
+		changeShopPrices: function(jInput) {
+			jInput.change(function() {
+				// Replace ',' on '.'
+				var replace = $(this).val().replace(',', '.');
+				$(this).val(replace);
+
+				if ($(this).val() < 0)
+				{
+					$(this).val(0);
+				}
+
+				var parentTr = $(this).parents('tr'),
+					newPrice = $.isNumeric($(this).val()) && $(this).val() > 0
+						? parseFloat($(this).val())
+						: 0,
+					shop_price_id = $(this).data('shop-price-id')
+					oldPrice = $.isNumeric(parentTr.find('.old-price-' + shop_price_id).text()) && parentTr.find('.old-price-' + shop_price_id).text() > 0
+						? parseFloat(parentTr.find('.old-price-' + shop_price_id).text())
+						: 0,
+					percent = 0,
+					diffPersentSpan = parentTr.find('.percent-diff-' + shop_price_id),
+					diffPercentValue = (newPrice * 100) / oldPrice;
+
+					diffPersentSpan
+						.removeClass('palegreen')
+						.removeClass('darkorange');
+
+					if(diffPercentValue > 100)
+					{
+						percent = '+' + $.mathRound((diffPercentValue - 100), 2);
+
+						diffPersentSpan.addClass('darkorange');
+					}
+					else
+					{
+						percent = '-' + $.mathRound((100 - diffPercentValue), 2);
+
+						diffPersentSpan.addClass('palegreen');
+					}
+
+					if (percent == '-0')
+					{
+						percent = 0;
+						diffPersentSpan
+							.removeClass('darkorange')
+							.removeClass('palegreen');
+					}
+
+					Number.isFinite(diffPercentValue) && newPrice && diffPersentSpan.text(percent + '%');
+			});
+		},
+		recalcPrice: function()
+		{
+			// $.loadingScreen('show');
+
+			var jSelect = $('select.select-price'),
+				shop_price_id = jSelect.val(),
+				aItems = [];
+
+			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				var id = $(this).data('item-id').toString();
+
+				if (id.includes(','))
+				{
+					var aIds = $(this).data('item-id').split(',');
+					$.each(aIds, function(i, shop_item_id) {
+						aItems.push(shop_item_id);
+					});
+				}
+				else
+				{
+					aItems.push(id);
+				}
+			});
+
+			$.ajax({
+				url: '/admin/shop/warehouse/index.php',
+				type: "POST",
+				data: {'load_prices': 1, 'shop_price_id': shop_price_id, 'items': aItems},
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+						var container = $(this),
+							id = container.data('item-id').toString();
+
+						if (id.includes(','))
+						{
+							var aIds = $(this).data('item-id').split(',');
+							$.each(aIds, function(i, shop_item_id) {
+								if (answer[shop_item_id])
+								{
+									var price = answer[shop_item_id]['price'],
+										type = !i ? 'writeoff' : 'incoming';
+
+									// container.find('.price-' + shop_item_id).text(price);
+									container.find('.' + type + '-price').text(price);
+
+									container.find('input[name = writeoff_price_' + shop_item_id + ']').val(price);
+									container.find('input[name = incoming_price_' + shop_item_id + ']').val(price);
+								}
+							});
+						}
+						else
+						{
+							if (answer[id])
+							{
+								container.find('.price').text(answer[id]['price']);
+
+								var jInput = container.find('.set-item-count');
+
+								jInput.change();
+								$.changeWarehouseCounts(jInput, 1);
+							}
+						}
+					});
+				}
+			});
+
+			// $.loadingScreen('hide');
+		},
+		addRegradeItem: function(shop_id, placeholder)
+		{
+			$('.shop-item-table').append(
+				'<tr id="" data-item-id="">\
+					<td class="index"></td>\
+					<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" placeholder="' + placeholder + '" /><input type="hidden" name="writeoff_item[]" value="" /></td>\
+					<td><span class="writeoff-measure"></span></td>\
+					<td><span class="writeoff-price"></span></td>\
+					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" placeholder="' + placeholder + '"/><input type="hidden" name="incoming_item[]" value="" /></td>\
+					<td><span class="incoming-measure"></span></td>\
+					<td><span class="incoming-price"></span></td>\
+					<td width="80"><input class="set-item-count form-control" name="shop_item_quantity[]" value=""/></td>\
+					<td><a class="delete-associated-item" onclick="$(this).parents(\'tr\').remove()"><i class="fa fa-times-circle darkorange"></i></a></td>\
+				</tr>'
+			);
+
+			var aItemIds = ['',''];
+
+			$('.writeoff-item-autocomplete, .incoming-item-autocomplete').autocompleteShopItem({ 'shop_id': shop_id, 'shop_currency_id': 0}, function(event, ui) {
+				var type = $(this).data('type'),
+					parentTr = $(this).parents('tr');
+
+				parentTr.find('.' + type + '-measure').text(ui.item.measure);
+				parentTr.find('.' + type + '-price').text(ui.item.price_with_tax);
+
+				$(this).next('input').val(ui.item.id);
+
+				parentTr.find('.' + type + '-item-autocomplete').attr('id', ui.item.id);
+
+				aItemIds = $.getIds(aItemIds, $(this));
+				parentTr.attr('data-item-id', aItemIds.slice(-2).join(','));
+			});
+
+			// recount index
+			$('.shop-item-table > tbody tr:last-child td.index').text($('.shop-item-table > tbody tr').length);
+		},
+		getIds: function(aItemIds, object)
+		{
+			var type = object.data('type'),
+				id = object.attr('id'),
+				index = type == 'writeoff' ? 2 : 1;
+
+			aItemIds[aItemIds.length - index] = id;
+
+			return aItemIds;
+		},
+		focusAutocomplete: function(object)
+		{
+			$(object).keydown(function(event){
+				if(event.keyCode == 13){
+					event.preventDefault();
+					$('.add-shop-item').focus();
+					return false;
+				}
+			});
+		},
+		mathRound: function(value, number)
+		{
+			switch (number)
+			{
+				case 2:
+				default:
+					coeff = 100;
+				break;
+				case 3:
+					coeff = 1000;
+				break;
+			}
+
+			// return parseFloat(value).toFixed(number);
+			return Math.round(value * coeff) / coeff;
 		}
 	});
 
@@ -3577,9 +4044,8 @@
 		selectPersonCompany: function(settings)
 		{
 			settings = $.extend({
-
 				ajax: {
-					url: "/admin/siteuser/index.php?loadEventSiteusers",
+					url: "/admin/siteuser/index.php?loadEventSiteusers=1",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -3599,18 +4065,18 @@
 				templateResult: $.templateResultItemSiteusers,
 				escapeMarkup: function(m) { return m; },
 				templateSelection: $.templateSelectionItemSiteusers,
-				width: "100%"
-
+				width: "100%",
+				dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
 			}, settings);
 
 			return this.each(function(){
 				jQuery(this).select2(settings);
 			});
 		},
-
 		selectUser: function(settings)
 		{
 			settings = $.extend({
+				minimumInputLength: 1,
 				allowClear: true,
 				templateResult: $.templateResultItemResponsibleEmployees,
 				escapeMarkup: function(m) { return m; },
@@ -3651,13 +4117,13 @@
 				jQuery(this).select2(settings);
 			});
 		},
-		autocompleteShopItem: function(shop_id, shop_currency_id, selectOption)
+		autocompleteShopItem: function(options, selectOption)
 		{
 			return this.each(function(){
 				 jQuery(this).autocomplete({
 					  source: function(request, response) {
 						$.ajax({
-						  url: '/admin/shop/index.php?autocomplete&shop_id=' + shop_id + '&shop_currency_id=' + shop_currency_id,
+						  url: '/admin/shop/index.php?autocomplete&' + $.param(options),
 						  dataType: 'json',
 						  data: {
 							queryString: request.term
@@ -3733,6 +4199,11 @@ $(function(){
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
 
+/* 	$(window).on("popstate", function() {
+
+			console.log("popstate");
+	}); */
+
 	$(window).on('resize', function(event) {
 
 		// Если ширина окна менее 570px, скрываем чекбоксы с настройками фиксации элеметов системы
@@ -3793,16 +4264,13 @@ $(function(){
 
 	$('body')
 		.on('shown.bs.dropdown', '.admin-table td div', function (){
-
 			var td = $(this).closest('td').css('overflow', 'visible');
 		})
 		.on('hidden.bs.dropdown', '.admin-table td div', function (){
-
 			var td = $(this).closest('td').css('overflow', 'hidden');
 		})
 		// Выбор элемента dropdownlist
 		.on('click', '.form-element.dropdown-menu li', function (){
-
 			var li = $(this),
 				dropdownMenu = li.parent('.dropdown-menu'),
 				containerCurrentChoice = dropdownMenu.prev('[data-toggle="dropdown"]');
@@ -4025,7 +4493,66 @@ $(function(){
 
 			$.changeUserWorkdayButtons(status);
 		});
+
+	// Sticky actions
+	$(document).on("scroll", function () {
+		// to bottom
+		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+			$('.formButtons').removeClass('sticky-actions');
+		}
+
+		// to top
+		if ($(window).scrollTop() + $(window).height() < $(document).height()) {
+			$('.formButtons').addClass('sticky-actions');
+		}
+	});
+
+	// For TinyMCE init
+	$('body').on('afterTinyMceInit', function(event, editor) {
+		editor.on('change', function() { mainFormLocker.lock() });
+	});
 });
+
+// Lazy image load
+document.addEventListener("DOMContentLoaded", function() {
+	var lazyloadThrottleTimeout;
+
+	function lazyload()
+	{
+		if(lazyloadThrottleTimeout)
+		{
+			clearTimeout(lazyloadThrottleTimeout);
+		}
+
+		lazyloadThrottleTimeout = setTimeout(function() {
+			var scrollTop = window.pageYOffset,
+				lazyloadImages = document.querySelectorAll("img.lazy");
+
+			lazyloadImages.forEach(function(img) {
+				if(img.offsetTop < (window.innerHeight + scrollTop))
+				{
+				  img.src = img.dataset.src;
+				  img.classList.remove('lazy');
+				}
+			});
+
+			/*if(lazyloadImages.length == 0)
+			{
+			  document.removeEventListener("scroll", lazyload);
+			  window.removeEventListener("resize", lazyload);
+			  window.removeEventListener("orientationChange", lazyload);
+			}*/
+		}, 200);
+	}
+
+	document.addEventListener("scroll", lazyload);
+	window.addEventListener("resize", lazyload);
+	window.addEventListener("orientationChange", lazyload);
+
+	$('#id_content').on('adminLoadSuccess', lazyload);
+
+	lazyload();
+}, false);
 
 var methods = {
 	show: function() {
@@ -4047,13 +4574,9 @@ function calendarDayClick(oDate, jsEvent)
 		contextMenuWidth = contextMenu.outerWidth(),
 		positionLeft = (jsEvent.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : jsEvent.pageX;
 
-		contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
+	contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
 
-		$('ul.dropdown-info').data('timestamp', oDate.unix());
-
-	//
-
-
+	$('ul.dropdown-info').data('timestamp', oDate.unix());
 	/*
 	 $("body").on("contextmenu", "table tr", function(e) {
 		$contextMenu.css({
@@ -4200,7 +4723,6 @@ function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
 
 function calendarEventDrop( event, delta, revertFunc, jsEvent, ui, view )
 {
-
 	$.loadingScreen('show');
 
 	var eventIdParts = event.id.split('_'),
@@ -4382,4 +4904,132 @@ function setEventStartButtons(start, windowId)
 			$('#' + windowId + ' #eventStartButtonsGroup a.active').removeClass("active");
 		}
 	}
-}
+}
+
+function formLocker()
+{
+	this._locked = false;
+	this._previousLocked = false;
+	this._delay = false;
+
+	this.lock = function(event) {
+		if (!this._delay)
+		{
+			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
+			aKeycodes = [13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
+
+			if (!this._locked && $.inArray(keycode, aKeycodes) == -1)
+			{
+				$('body').on('beforeAdminLoad beforeAjaxCallback', $.proxy(this._confirm, this));
+
+				$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
+
+				this._locked = true;
+			}
+		}
+
+		return this;
+	}
+
+	this._confirm = function() {
+		if (!confirm(i18n['lock_message']))
+		{
+			return 'break';
+		}
+		this.unlock();
+	}
+
+	this.unlock = function() {
+		this._locked = false;
+
+		$('body')
+			.unbind('beforeAdminLoad')
+			.unbind('beforeAjaxCallback');
+
+		$('h5.row-title > i.edit-lock').remove();
+
+		if (!this._delay)
+		{
+			this._delay = true;
+			setTimeout($.proxy(this._resetDelay, this), 3000);
+		}
+
+		return this;
+	}
+
+	this._resetDelay = function() {
+		this._delay = false;
+
+		return this;
+	}
+
+	this.saveStatus = function() {
+		this._previousLocked = this._locked;
+		return this;
+	}
+
+	this.restoreStatus = function() {
+		this._previousLocked ? this.lock() : this.unlock();
+		this._previousLocked = false;
+		return this;
+	}
+}
+mainFormLocker = new formLocker();
+
+// -------------
+var loadedMultiContent = [];
+$.getMultiContent = function(arr, path) {
+	function loadSctriptContent(url) {
+		return $.ajax({
+		  url: url,
+		  dataType: "text",
+		  success: function (data, textStatus, jqxhr) {
+			  //console.log(url);
+			loadedMultiContent.push(url);
+		  }
+		});
+	}
+
+    var _arr = $.map(arr, function(url) {
+		url = (path || '') + url;
+		if ($.inArray(url, loadedMultiContent) == -1)
+		{
+			//loadedMultiContent.push(url);
+			if (url.indexOf('.css') != -1)
+			{
+				$('<link>', {rel: 'stylesheet', href: url}).appendTo('head');
+			}
+			else
+			{
+				return loadSctriptContent(url);
+			}
+		}
+
+		// Already loaded, delete item from the array
+		return null;
+    });
+
+    /*_arr.push($.Deferred(function(deferred) {
+        $(deferred.resolve);
+    }));*/
+
+    return $.when.apply($, _arr).done(function() {
+		if (arguments.length)
+		{
+			// when() with multiple deferred, 'arguments' is aggregate state of all the deferreds
+			if (Array.isArray(arguments[0]))
+			{
+				for (var i=0; i < arguments.length; i++) {
+					//contentType = arguments[i][2].getResponseHeader('Content-Type');
+					//if (contentType.indexOf('javascript') != -1)
+					//console.log(arguments[i]);
+					$.globalEval(arguments[i][0]);
+				}
+			}
+			else
+			{
+				$.globalEval(arguments[0]);
+			}
+		}
+	});
+}

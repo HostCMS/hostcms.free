@@ -194,28 +194,32 @@ class Shop_Payment_System_Handler25 extends Shop_Payment_System_Handler
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
 		$out = curl_exec($curl);
-		$url = simplexml_load_string($out);
+		$oXml = simplexml_load_string($out);
 
-		$turl= $url;
+		$turl = $url;
 
 		//формируем строку url
-		$url = $url->response->url;
+		if (isset($oXml->response->url))
+		{
+			$url = $oXml->response->url;
 
-		if (!empty($turl->envelope->error)) {
+			if (!empty($oXml->envelope->error))
+			{
+				return htmlspecialchars($oXml->envelope->text);
+			}
 			ob_start();
+			?><h1>Сейчас Вы будете перенаправлены для оплаты на сайт платежной системы...</h1>
+			<form action="<?php echo $url?>" name="pay" method="post">
+			</form>
+			<script>document.pay.submit();</script>
+			<?php
 
-			echo $turl->envelope->text;
 			return ob_get_clean();
-			exit;
 		}
-		ob_start();
-		?><h1>Сейчас Вы будете перенаправлены для оплаты на сайт платежной системы...</h1>
-		<form action="<? echo $url; ?>" name="pay" method="post">
-		</form>
-		<script>document.pay.submit();</script>
-		<?php
-
-		return ob_get_clean();
+		else
+		{
+			return 'Ошибка ответа от cash24';
+		}
 	}
 
 	/**

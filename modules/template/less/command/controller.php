@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Less_Command_Controller extends Core_Command_Controller
 {
@@ -32,7 +32,8 @@ class Template_Less_Command_Controller extends Core_Command_Controller
 			{
 				$oTemplate = Core_Entity::factory('Template', $iTemplateId);
 
-				if ($oTemplate->less)
+				// If LESS
+				if ($oTemplate->type == 1)
 				{
 					if ($oTemplate->checkUserAccess())
 					{

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -295,6 +295,8 @@ $oAdmin_Form_Dataset->addCondition
 )
 	->changeField('conditions', 'link', "/admin/shop/delivery/condition/index.php?delivery_id={id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 	->changeField('conditions', 'onclick', "$.adminLoad({path: '/admin/shop/delivery/condition/index.php',additionalParams: 'delivery_id={id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}', windowId: '{windowId}'}); return false");
+	
+$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $shop_group_id);	
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

@@ -6,7 +6,7 @@
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Оценка производительности',
@@ -47,11 +47,14 @@ return array(
 	'speedUp' => 'Повышение быстродействия',
 	'database' => 'База данных',
 	'tableEngines' => 'Типы таблиц в базе данных',
+	'tableCharsets' => 'Кодировки таблиц в базе данных',
 	'severalEnginesMsg' => 'В базе данных содержатся таблицы разных типов!',
+	'severalCharsetsMsg' => 'В базе данных содержатся таблицы в разных кодировках!',
 	'changeStorageEnginesTitle' => 'Изменение системы хранения данных',
+	'changeStorageCharsetTitle' => 'Изменение кодировки',
 	'engine' => 'Тип',
 	'count' => 'Кол-во',
-	'chooseStorageEnginesMsg' => 'Выберите систему хранения для таблиц. Не забудьте сделать резервную копию базы данных!',
+	'changeMsg' => 'Не забудьте сделать резервную копию базы данных!',
 	'convert' => 'Преобразовать',
 	'convertedMsg' => 'Преобразованы таблицы: %s.',
 	'add_counter' => 'Автоматически добавить код отслеживания',

@@ -6,7 +6,7 @@
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sites',
@@ -89,4 +89,5 @@ return array(
 
 	'lng' => 'Site language',
 	'lng_default' => 'en',
+	'error_email' => '<acronym title="Technical e-mail (errors and etc.)">Technical e-mail</acronym>',
 );

@@ -66,63 +66,73 @@
 						success: function(result) {
 							//console.log(this, result);
 
-							var item = hQuery(this), type = item.attr('hostcms:type'), jEditInPlace;
-
-							switch(type)
+							var item = hQuery(this);
+							
+							if (result.status != 'Error')
 							{
-								case 'textarea':
-								case 'wysiwyg':
-									jEditInPlace = hQuery('<textarea>');
-								break;
-								case 'input':
-								default:
-									jEditInPlace = hQuery('<input>').prop('type', 'text');
-							}
+								var type = item.attr('hostcms:type'), jEditInPlace;
 
-							if (type != 'wysiwyg')
-							{
-								jEditInPlace.on('blur', function(){
-									settings.blur(jEditInPlace)
-								});
-							}
-
-							jEditInPlace.on('keydown', function(e){
-								if (e.keyCode == 13) {
-									e.preventDefault();
-									this.blur();
+								switch(type)
+								{
+									case 'textarea':
+									case 'wysiwyg':
+										jEditInPlace = hQuery('<textarea>');
+									break;
+									case 'input':
+									default:
+										jEditInPlace = hQuery('<input>').prop('type', 'text');
 								}
-								if (e.keyCode == 27) { // ESC
-									e.preventDefault();
-									var input = hQuery(this), item = input.prev();
-									item.css('display', '');
-									input.remove();
+
+								if (type != 'wysiwyg')
+								{
+									jEditInPlace.on('blur', function(){
+										settings.blur(jEditInPlace)
+									});
 								}
-							})/*.width('90%')*/.prop('name', item.parent().prop('id'))
-							.css(hQuery(this).getStyleObject())
-							.insertAfter(item)
-							.focus()
-							.val(result/*item.html()*/);
 
-							if (type == 'wysiwyg')
-							{
-								setTimeout(function(){
-									jEditInPlace.tinymce({
-										theme: "modern",
-										language: backendLng,
-										language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
-										init_instance_callback: function (editor) {
-											editor.on('blur', function (e) {
-												settings.blur(jEditInPlace);
-											});
-										},
-										script_url: "/admin/wysiwyg/tinymce.min.js"});
-								}, 300);
+								jEditInPlace.on('keydown', function(e){
+									if (e.keyCode == 13) {
+										e.preventDefault();
+										this.blur();
+									}
+									if (e.keyCode == 27) { // ESC
+										e.preventDefault();
+										var input = hQuery(this), item = input.prev();
+										item.css('display', '');
+										input.remove();
+									}
+								})/*.width('90%')*/.prop('name', item.parent().prop('id'))
+								.css(hQuery(this).getStyleObject())
+								.insertAfter(item)
+								.focus()
+								.val(result.value/*item.html()*/);
+
+								if (type == 'wysiwyg')
+								{
+									setTimeout(function(){
+										jEditInPlace.tinymce({
+											theme: "modern",
+											language: backendLng,
+											language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
+											init_instance_callback: function (editor) {
+												editor.on('blur', function (e) {
+													settings.blur(jEditInPlace);
+												});
+											},
+											script_url: "/admin/wysiwyg/tinymce.min.js"});
+									}, 300);
+								}
+
+								item.css('display', 'none');
 							}
-
-							item.css('display', 'none');
+							else
+							{
+								item.removeClass('hostcmsEditable');
+							}
 						}
 					});
-				}).addClass('hostcmsEditable');
+				})
+				.addClass('hostcmsEditable');
 			});
 		},
 		// http://upshots.org/javascript/jquery-copy-style-copycss

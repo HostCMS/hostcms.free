@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Model extends Core_Entity
 {
@@ -127,6 +127,31 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
 
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_warehouse_item.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
 		$reserved = $this->getReserved();
 
 		$this
@@ -137,7 +162,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 					->value($reserved)
 			);
 
-		return parent::getXml();
+		return $this;
 	}
 
 	/**
@@ -189,16 +214,6 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	public function adminPrice($value = NULL)
 	{
-		// Get value
-		/*if (is_null($value) || is_object($value))
-		{
-			$oShopItem = $this->Shop_Item->shortcut_id
-				? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
-				: $this->Shop_Item;
-
-			return $oShopItem->price;
-		}*/
-
 		// Relation before __construct does not exist!
 		if (isset($this->Shop_Item) && $this->Shop_Item->price != $value)
 		{
@@ -234,11 +249,24 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 */
 	public function adminCurrency()
 	{
-		$oShopItem = $this->Shop_Item->shortcut_id
+		$oShop_Item = $this->Shop_Item->shortcut_id
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShopItem->Shop_Currency->name);
+		return htmlspecialchars($oShop_Item->Shop_Currency->name);
+	}
+
+	/**
+	 * Get item's measure
+	 * @return string
+	 */
+	public function adminMeasure()
+	{
+		$oShop_Item = $this->Shop_Item->shortcut_id
+			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
+			: $this->Shop_Item;
+
+		return htmlspecialchars($oShop_Item->Shop_Measure->name);
 	}
 
 	/**
@@ -356,11 +384,29 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	/*public function countBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$this->count == '0.00' && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value('<i class="fa fa-exclamation"></i>')
+			->execute();
+	}*/
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function countBackend()
+	{
+		$class = $this->count > 0
+			? 'green'
+			: 'darkorange';
+
+		$this->count == 0 && $class = '';
+
+		Core::factory('Core_Html_Entity_Span')
+			->class($class)
+			->value($this->count)
 			->execute();
 	}
 }

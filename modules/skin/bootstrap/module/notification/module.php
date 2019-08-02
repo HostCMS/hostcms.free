@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -118,8 +118,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					{
 						$aNotification = array(
 							'id' => $oNotification->id,
-							'title' => strval($oNotification->title), // NULL => ''
-							'description' => strval($oNotification->description), // NULL => ''
+							'title' => htmlspecialchars(strval($oNotification->title)), // NULL => ''
+							'description' => htmlspecialchars(strval($oNotification->description)), // NULL => ''
 							'datetime' => Core_Date::sql2datetime($oNotification->datetime),
 							'read' => $oNotification->read
 						);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -167,7 +167,26 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				}
 				?>
 			</div>
-		</div><?php
+		</div>
+		<script>
+			$(function (){
+				// Sticky actions
+				$('.DTTTFooter').addClass('sticky-actions');
+
+				$(document).on("scroll", function () {
+					// to bottom
+					if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+						$('.DTTTFooter').removeClass('sticky-actions');
+					}
+
+					// to top
+					if ($(window).scrollTop() + $(window).height() < $(document).height()) {
+						$('.DTTTFooter').addClass('sticky-actions');
+					}
+				});
+			});
+		</script>
+		<?php
 
 		Core_Event::notify('Admin_Form_Controller.onAfterShowFooter', $oAdmin_Form_Controller);
 
@@ -423,12 +442,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							? htmlspecialchars($Admin_Word_Value->name)
 							: '&mdash;';
 
-						// Change to Font Awesome
-						if (strlen($oAdmin_Form_Field_Changed->ico))
-						{
-							$fieldName = '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
-						}
-
 						$oAdmin_Form_Field_Changed->allow_sorting
 							&& is_object($oSortingField)
 							&& $oAdmin_Form_Field->id == $oSortingField->id
@@ -460,7 +473,16 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								$sSortingOnClick = $onclickUp;
 							}
 						}
-						?><th class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php echo $fieldName?></th><?php
+						?><th title="<?php echo $fieldName?>" class="<?php echo trim($class)?>" <?php echo !empty($width) ? "width=\"{$width}\"" : ''?> onclick="<?php echo $sSortingOnClick?>"><?php
+							if (strlen($oAdmin_Form_Field_Changed->ico))
+							{
+								echo '<i class="' . htmlspecialchars($oAdmin_Form_Field_Changed->ico) . '" title="' . $fieldName . '"></i>';
+							}
+							else
+							{
+								echo $fieldName;
+							}
+						?></th><?php
 					}
 				}
 
@@ -620,6 +642,15 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							$fieldName = $oAdmin_Form_Controller->getFieldName($oAdmin_Form_Field_Changed->name);
 
+							// Badges
+							$badgesMethodName = $fieldName . 'Badge';
+							$bBadge = $oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName);
+
+							if ($bBadge)
+							{
+								?><div style="position: relative"><?php
+							}
+
 							try
 							{
 								if ($oAdmin_Form_Field_Changed->type != 10
@@ -691,11 +722,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2datetime($value);
-												
+
 												if ($oAdmin_Form_Field_Changed->editable)
 												{
 													$sCurrentLng = Core_I18n::instance()->getLng();
-													
+
 													?><div class="row">
 														<div class="date col-xs-12">
 															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
@@ -723,7 +754,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												{
 													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
 												}
-												
+
 												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
 										break;
@@ -733,11 +764,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$value = $value == '0000-00-00 00:00:00' || $value == ''
 													? ''
 													: Core_Date::sql2date($value);
-												
+
 												if ($oAdmin_Form_Field_Changed->editable)
 												{
 													$sCurrentLng = Core_I18n::instance()->getLng();
-													
+
 													?><div class="row">
 														<div class="date col-xs-12">
 															<input id="<?php echo $element_name?>" name="<?php echo $element_name?>" size="auto" type="text" value="<?php echo htmlspecialchars($value)?>" class="form-control input-sm" />
@@ -765,7 +796,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												{
 													?><span id="<?php echo $element_name?>"><?php echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php
 												}
-												
+
 												/*?><span id="<?php echo $element_name?>"<?php echo $oAdmin_Form_Field_Changed->editable ? ' class="editable"' : ''?>><?php
 												echo $oAdmin_Form_Controller->applyFormat($value, $sFormat)?></span><?php*/
 											}
@@ -950,7 +981,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								else
 								{
 									$aTmpFieldName = explode('.', $oAdmin_Form_Field_Changed->name);
-									
+
 									$backendName = (isset($aTmpFieldName[1]) ? $aTmpFieldName[1] : $aTmpFieldName[0]) . 'Backend';
 									if ($oAdmin_Form_Controller->isCallable($oEntity, $backendName))
 									{
@@ -972,11 +1003,13 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							}
 
 							// Badges
-							$badgesMethodName = $fieldName . 'Badge';
-							if ($oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName))
+							//$badgesMethodName = $fieldName . 'Badge';
+							//if ($oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName))
+							if ($bBadge)
 							{
 								// Выполним функцию обратного вызова
 								$oEntity->$badgesMethodName($oAdmin_Form_Field, $oAdmin_Form_Controller);
+								?></div><?php
 							}
 							?></td><?php
 						}

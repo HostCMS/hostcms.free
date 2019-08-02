@@ -14,14 +14,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'barcode', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
  * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
- * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание. По умолчанию МалоеОписание
+ * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание, для импорта из свойства товара используйте конструкцию вида "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение". По умолчанию МалоеОписание
  * - timeout(30) время выполнения шага импорта, получается из настроек PHP.
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 {
@@ -156,6 +156,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$this->itemDescription = 'text';
 		$this->shortDescription = 'МалоеОписание';
+		//$this->shortDescription = "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение";
 
 		$this->updateFields = $this->skipProperties = array();
 		$this->importGroups = $this->createShopItems = TRUE;
@@ -343,7 +344,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		if (isset($this->_aBaseAttributes[$sUpperGUID]))
 		{
 			$sFieldName = $this->_aBaseAttributes[$sUpperGUID];
-			$oShop_Item->$sFieldName = Shop_Controller::instance()->convertPrice($sValue);
+			$oShop_Item->$sFieldName = Shop_Controller::instance()->convertFloat($sValue);
 			$oShop_Item->save();
 
 			return $this;
@@ -395,7 +396,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oShopTax = Core_Entity::factory('Shop_Tax');
 			$oShopTax->name = $sTaxName;
 			$oShopTax->guid = $sTaxGUID;
-			$oShopTax->rate = ($sTaxRate == '' ? 0 : ($sTaxRate == 'Без налога' ? 0 : $sTaxRate));
+			$oShopTax->rate = (
+				$sTaxRate == ''
+					? 0
+					: ($sTaxRate == 'Без налога' || $sTaxRate == 'Без НДС'
+						? 0
+						: intval($sTaxRate)
+					)
+			);
 			$oShopTax->tax_is_included = 0;
 		}
 
@@ -983,6 +991,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImport
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportShopItem
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportShopItem
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportShopItemPrice
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeOffer
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterOffersShopItem
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImport
@@ -1124,6 +1133,12 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				foreach ($this->xpath($this->_oSimpleXMLElement->Каталог, $xPath) as $oXmlItem)
 				{
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopItem', $this, array($oXmlItem));
+
+					// If onBeforeImportShopItem returned FALSE, skip item
+					if (Core_Event::getLastReturn() === FALSE)
+					{
+						continue;
+					}
 
 					$sGUID = strval($oXmlItem->Ид);
 					$sGUIDmod = FALSE;
@@ -1442,6 +1457,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Прерываем этап импорта
 					if ($this->timeout && (Core::getmicrotime() - $timeout + 2 > $this->timeout))
 					{
+						Core_Session::start();
 						$_SESSION['importPosition'] = $importPosition;
 
 						$this->_aReturn['status'] = 'progress';
@@ -1536,6 +1552,12 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				{
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeOffer', $this, array($oProposal));
 
+					// If onBeforeOffer returned FALSE, skip item
+					if (Core_Event::getLastReturn() === FALSE)
+					{
+						continue;
+					}
+
 					$sItemGUID = strval($oProposal->Ид);
 
 					$sGUIDmod = FALSE;
@@ -1624,54 +1646,109 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						{
 							foreach ($this->xpath($oProposal, 'Цены/Цена') as $oPrice)
 							{
-								// Ищем цену
-								$oShopPrice = $oShop
-									->Shop_Prices
-									->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
+								Core_Event::notify(get_class($this) . '.onBeforeImportShopItemPrice', $this, array($oShopItem, $packageOfProposals, $oProposal, $oPrice));
 
-								if (!is_null($oShopPrice)
-									&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
+								if (is_null(Core_Event::getLastReturn()))
 								{
-									$oShop_Item_Price = $oShopItem
-										->Shop_Item_Prices
-										->getByPriceId($oShopPrice->id, FALSE);
+									// Ищем цену
+									$oShopPrice = $oShop
+										->Shop_Prices
+										->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
 
-									if (is_null($oShop_Item_Price))
+									if (!is_null($oShopPrice)
+										&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
 									{
-										$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
-										$oShop_Item_Price->shop_item_id = $oShopItem->id;
-										$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+										$itemPrice = strval($oPrice->ЦенаЗаЕдиницу);
+
+										// Валюта товара в основной цене
+										$baseCurrencyNode = $this->xpath($oProposal, "Цены/Цена[ИдТипаЦены='{$this->sShopDefaultPriceGUID}']");
+
+										if (isset($baseCurrencyNode[0]))
+										{
+											// Валюта у цены по умолчанию
+											$sCurrency = strval($baseCurrencyNode[0]->Валюта);
+
+											// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
+											if (!strlen($sCurrency))
+											{
+												$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='{$this->sShopDefaultPriceGUID}']");
+
+												is_object($topCurrencyNode)
+													&& $sCurrency = strval($topCurrencyNode->Валюта);
+											}
+
+											// Указан числовой код валюты, получаем по нему
+											if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
+											{
+												$sCurrency = $this->_aCurrencyCodes[$sCurrency];
+											}
+
+											$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')
+												->getByLike($sCurrency, FALSE);
+
+											// Валюта у самого товара
+											$sCurrency = strval($oPrice->Валюта);
+
+											// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
+											if (!strlen($sCurrency))
+											{
+												$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='" . strval($oPrice->ИдТипаЦены) . "']");
+
+												is_object($topCurrencyNode)
+													&& $sCurrency = strval($topCurrencyNode->Валюта);
+											}
+
+											// Указан числовой код валюты, получаем по нему
+											if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
+											{
+												$sCurrency = $this->_aCurrencyCodes[$sCurrency];
+											}
+
+											// Валюта спеццены
+											$oPrice_Currency = Core_Entity::factory('Shop_Currency')
+												->getByLike($sCurrency, FALSE);
+
+											if (!is_null($oItem_Shop_Currency)
+												&& !is_null($oPrice_Currency)
+												&& $oItem_Shop_Currency->exchange_rate
+												&& $oPrice_Currency->exchange_rate)
+											{
+												$currencyCoefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency($oPrice_Currency, $oItem_Shop_Currency);
+
+												$itemPrice *= $currencyCoefficient;
+											}
+										}
+
+										$oShop_Price_Setting = $this->_getPrices();
+
+										$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+										$oShop_Price_Setting_Item->shop_price_id = $oShopPrice->id;
+										$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+
+										$oShop_Item_Price = $oShopItem
+											->Shop_Item_Prices
+											->getByPriceId($oShopPrice->id, FALSE);
+
+										$old_price = !is_null($oShop_Item_Price)
+											? $oShop_Item_Price->value
+											: $oShopItem->price;
+
+										$oShop_Price_Setting_Item->old_price = $old_price;
+										$oShop_Price_Setting_Item->new_price = $itemPrice;
+										$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+										/*if (is_null($oShop_Item_Price))
+										{
+											$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
+											$oShop_Item_Price->shop_item_id = $oShopItem->id;
+											$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+										}
+										$oShop_Item_Price->value = $itemPrice;
+
+										$oShopItem->add($oShop_Item_Price);*/
 									}
-
-									$itemPrice = strval($oPrice->ЦенаЗаЕдиницу);
-
-									// Валюта товара в основной цене
-									$baseCurrencyNode = $this->xpath($oProposal, "Цены/Цена[ИдТипаЦены='{$this->sShopDefaultPriceGUID}']");
-
-									if (isset($baseCurrencyNode[0]))
+									elseif ($this->sShopDefaultPriceGUID == strval($oPrice->ИдТипаЦены))
 									{
-										// Валюта у цены по умолчанию
-										$sCurrency = strval($baseCurrencyNode[0]->Валюта);
-
-										// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
-										if (!strlen($sCurrency))
-										{
-											$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='{$this->sShopDefaultPriceGUID}']");
-
-											is_object($topCurrencyNode)
-												&& $sCurrency = strval($topCurrencyNode->Валюта);
-										}
-
-										// Указан числовой код валюты, получаем по нему
-										if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
-										{
-											$sCurrency = $this->_aCurrencyCodes[$sCurrency];
-										}
-
-										$oItem_Shop_Currency = Core_Entity::factory('Shop_Currency')
-											->getByLike($sCurrency, FALSE);
-
-										// Валюта у самого товара
 										$sCurrency = strval($oPrice->Валюта);
 
 										// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
@@ -1689,73 +1766,46 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											$sCurrency = $this->_aCurrencyCodes[$sCurrency];
 										}
 
-										// Валюта спеццены
-										$oPrice_Currency = Core_Entity::factory('Shop_Currency')
-											->getByLike($sCurrency, FALSE);
+										$oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
 
-										if (!is_null($oItem_Shop_Currency)
-											&& !is_null($oPrice_Currency)
-											&& $oItem_Shop_Currency->exchange_rate
-											&& $oPrice_Currency->exchange_rate)
+										if (is_null($oShop_Currency))
 										{
-											$currencyCoefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency($oPrice_Currency, $oItem_Shop_Currency);
-
-											$itemPrice *= $currencyCoefficient;
+											$oShop_Currency = Core_Entity::factory('Shop_Currency');
+											$oShop_Currency->name = $sCurrency;
+											$oShop_Currency->code = $sCurrency;
+											$oShop_Currency->exchange_rate = 1;
 										}
-									}
 
-									$oShop_Item_Price->value = $itemPrice;
+										$oShop_Price_Setting = $this->_getPrices();
 
-									$oShopItem->add($oShop_Item_Price);
-								}
-								elseif ($this->sShopDefaultPriceGUID == strval($oPrice->ИдТипаЦены))
-								{
-									$sCurrency = strval($oPrice->Валюта);
+										$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+										$oShop_Price_Setting_Item->shop_price_id = 0;
+										$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+										$oShop_Price_Setting_Item->old_price = $oShopItem->price;
+										$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
+										$oShop_Price_Setting->add($oShop_Price_Setting_Item);
 
-									// Валюта не указана у самого предложения, смотрим в ТипыЦен/ТипЦены
-									if (!strlen($sCurrency))
-									{
-										$topCurrencyNode = $this->xpath($packageOfProposals, "ТипыЦен/ТипЦены[Ид='" . strval($oPrice->ИдТипаЦены) . "']");
+										// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
 
-										is_object($topCurrencyNode)
-											&& $sCurrency = strval($topCurrencyNode->Валюта);
-									}
+										// Set ->shop_currency_id
+										$oShopItem->add($oShop_Currency);
 
-									// Указан числовой код валюты, получаем по нему
-									if (is_numeric($sCurrency) && isset($this->_aCurrencyCodes[$sCurrency]))
-									{
-										$sCurrency = $this->_aCurrencyCodes[$sCurrency];
-									}
-
-									$oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike($sCurrency, FALSE);
-
-									if (is_null($oShop_Currency))
-									{
-										$oShop_Currency = Core_Entity::factory('Shop_Currency');
-										$oShop_Currency->name = $sCurrency;
-										$oShop_Currency->code = $sCurrency;
-										$oShop_Currency->exchange_rate = 1;
-									}
-
-									$oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
-
-									$oShopItem->add($oShop_Currency);
-
-									if (!is_null($this->_oTaxForBasePrice))
-									{
-										$oShopItem->add($this->_oTaxForBasePrice);
-										$this->_oTaxForBasePrice = NULL;
-									}
-
-									// Импортируется только через "БазоваяЕдиница"
-									/*if (($sMeasureName = strval($oPrice->Единица)) != '')
-									{
-										if (is_null($oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasureName, FALSE)))
+										if (!is_null($this->_oTaxForBasePrice))
 										{
-											$oShop_Measure = Core_Entity::factory('Shop_Measure')->name($sMeasureName)->save();
+											$oShopItem->add($this->_oTaxForBasePrice);
+											$this->_oTaxForBasePrice = NULL;
 										}
-										$oShopItem->add($oShop_Measure);
-									}*/
+
+										// Импортируется только через "БазоваяЕдиница"
+										/*if (($sMeasureName = strval($oPrice->Единица)) != '')
+										{
+											if (is_null($oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasureName, FALSE)))
+											{
+												$oShop_Measure = Core_Entity::factory('Shop_Measure')->name($sMeasureName)->save();
+											}
+											$oShopItem->add($oShop_Measure);
+										}*/
+									}
 								}
 							}
 						}
@@ -1781,14 +1831,21 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 									if (!is_null($oShopWarehouse))
 									{
-										$oShop_Warehouse_Item = $oShopWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+										$oShop_Warehouse_Inventory = $this->_getInventory($oShopWarehouse->id);
+
+										$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+										$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+										$oShop_Warehouse_Inventory_Item->count = floatval($sWarehouseCount);
+										$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+										/*$oShop_Warehouse_Item = $oShopWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
 										if (is_null($oShop_Warehouse_Item))
 										{
 											$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
 												->shop_warehouse_id($oShopWarehouse->id)
 												->shop_item_id($oShopItem->id);
 										}
-										$oShop_Warehouse_Item->count(floatval($sWarehouseCount))->save();
+										$oShop_Warehouse_Item->count(floatval($sWarehouseCount))->save();*/
 									}
 								}
 							}
@@ -1817,8 +1874,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 									$oWarehouse->save();
 								}
 
-								$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+								$oShop_Warehouse_Inventory = $this->_getInventory($oWarehouse->id);
 
+								$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+								$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+								$oShop_Warehouse_Inventory_Item->count = floatval($iItemCount);
+								$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+								/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
 								if (is_null($oShop_Warehouse_Item))
 								{
 									$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
@@ -1826,7 +1889,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 										->shop_item_id($oShopItem->id);
 								}
 
-								$oShop_Warehouse_Item->count(floatval($iItemCount))->save();
+								$oShop_Warehouse_Item->count(floatval($iItemCount))->save();*/
 							}
 						}
 
@@ -1983,7 +2046,16 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				if (!is_null($oShopItem))
 				{
-					$oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
+					$oShop_Price_Setting = $this->_getPrices();
+
+					$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+					$oShop_Price_Setting_Item->shop_price_id = 0;
+					$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+					$oShop_Price_Setting_Item->old_price = $oShopItem->price;
+					$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
+					$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+					// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
 
 					if (!is_null($oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike(strval($oXmlOffer->attributes()->Валюта), FALSE)))
 					{
@@ -1991,17 +2063,24 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 					$oShopItem->save();
 
-					$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault('1', FALSE);
+					$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault(1, FALSE);
 					if (!is_null($oWarehouse))
 					{
-						$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+						$oShop_Warehouse_Inventory = $this->_getInventory($oWarehouse->id);
+
+						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+						$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+						$oShop_Warehouse_Inventory_Item->count = strval($oXmlOffer->attributes()->Количество);
+						$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+						/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
 						if (is_null($oShop_Warehouse_Item))
 						{
 							$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
 								->shop_warehouse_id($oWarehouse->id)
 								->shop_item_id($oShopItem->id);
 						}
-						$oShop_Warehouse_Item->count(strval($oXmlOffer->attributes()->Количество))->save();
+						$oShop_Warehouse_Item->count(strval($oXmlOffer->attributes()->Количество))->save();*/
 					}
 				}
 			}
@@ -2012,6 +2091,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		// Пересчет количества товаров в группах
 		$oShop->recount();
+
+		// Post all
+		$this->postAll();
 
 		Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImport', $this);
 
@@ -2576,4 +2658,63 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'962' => 'XPT',
 		'961' => 'XAG'
 	);
+
+	protected $_aShop_Warehouse_Inventory_Ids = array();
+
+	protected function _getInventory($shop_warehouse_id)
+	{
+		if (!isset($this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]))
+		{
+			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
+			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
+			$oShop_Warehouse_Inventory->description = Core::_('Shop_Exchange.shop_warehouse_inventory');
+			$oShop_Warehouse_Inventory->number = '';
+			$oShop_Warehouse_Inventory->posted = 0;
+			$oShop_Warehouse_Inventory->save();
+
+			$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
+			$oShop_Warehouse_Inventory->save();
+
+			$this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id] = $oShop_Warehouse_Inventory->id;
+		}
+
+		return Core_Entity::factory('Shop_Warehouse_Inventory', $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]);
+	}
+
+	protected $_oShop_Price_Setting_Id = NULL;
+
+	protected function _getPrices()
+	{
+		if (is_null($this->_oShop_Price_Setting_Id))
+		{
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
+			$oShop_Price_Setting->shop_id = $this->iShopId;
+			$oShop_Price_Setting->number = '';
+			$oShop_Price_Setting->posted = 0;
+			$oShop_Price_Setting->description = Core::_('Shop_Exchange.shop_price_setting');
+			$oShop_Price_Setting->save();
+
+			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
+			$oShop_Price_Setting->save();
+
+			$this->_oShop_Price_Setting_Id = $oShop_Price_Setting->id;
+		}
+
+		return Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+	}
+
+	public function postAll()
+	{
+		foreach ($this->_aShop_Warehouse_Inventory_Ids as $shop_warehouse_id => $shop_warehouse_inventory_id)
+		{
+			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory', $shop_warehouse_inventory_id);
+			$oShop_Warehouse_Inventory->post();
+		}
+
+		if (!is_null($this->_oShop_Price_Setting_Id))
+		{
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+			$oShop_Price_Setting->post();
+		}
+	}
 }

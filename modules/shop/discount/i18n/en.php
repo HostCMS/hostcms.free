@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discounts',
@@ -35,4 +35,8 @@ return array(
 	'changeStatus_success' => "Information has been successfully changed",
 	'item_discount_name' => "Discount name",
 	'description' => "Description of the discount",
+	'url' => "Url on discount description",
+	'coupon' => "Apply with coupon",
+	'coupon_text' => "Coupon",
+	'public' => "Upload to Y.Market",
 );

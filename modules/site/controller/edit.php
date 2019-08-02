@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2018 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -180,9 +180,11 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('max_size_load_image_big'), $oMainRow3);
 
 		/* $oMainRow4 */
-		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$oMainTab->move($this->getField('admin_email'), $oMainRow4);
-		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('error_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$oMainTab->move($this->getField('error_email'), $oMainRow4);
+		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */
@@ -265,9 +267,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_404 = Admin_Form_Entity::factory('Select');
 		$oSelect_404
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('error404')
 			->value($this->_object->error404)
 			->caption(Core::_('Site.error404'))
@@ -277,9 +277,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_403 = Admin_Form_Entity::factory('Select');
 		$oSelect_403
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('error403')
 			->value($this->_object->error403)
 			->caption(Core::_('Site.error403'))
@@ -288,9 +286,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oSelect_503 = Admin_Form_Entity::factory('Select');
 		$oSelect_503
-			->options(
-				$aStructureData
-			)
+			->options($aStructureData)
 			->name('closed')
 			->value($this->_object->closed)
 			->caption(Core::_('Site.closed'))
