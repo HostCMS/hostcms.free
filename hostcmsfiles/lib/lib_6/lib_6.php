@@ -440,14 +440,8 @@ else
 	}
 }
 
-// В корне выводим из всех групп
-/* if ($Shop_Controller_Show->group == 0)
-{
-	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
-}*/
-
-/* Производители */
-$oShop = $Shop_Controller_Show->getEntity();
+// Производители
+/*$oShop = $Shop_Controller_Show->getEntity();
 
 // XML-сущность, к которй будут добавляться производители
 $oProducersXmlEntity = Core::factory('Core_Xml_Entity')->name('producers');
@@ -471,12 +465,12 @@ foreach ($aShop_Producers as $oShop_Producer)
 	$oProducersXmlEntity->addEntity(
 		$oShop_Producer->clearEntities()
 	);
-}
+}*/
 
 // В корне выводим из всех групп
- if ($Shop_Controller_Show->group == 0)
+if ($Shop_Controller_Show->group == 0)
 {
-	 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
+	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
 }
 
 $Shop_Controller_Show
@@ -485,7 +479,6 @@ $Shop_Controller_Show
 	)
 	// Выводить свойства товаров
 	->itemsProperties(TRUE)
-	// ->groupsProperties(array(7428,8014))
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром

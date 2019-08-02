@@ -20,10 +20,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 	public function showEditForm()
 	{
 		$children = $this->children;
-		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
 		ob_start();
 
+		/*
+		// Добавить фильтрацию на instanceof Skin_Bootstrap_Admin_Form_Entity_Menus через array_filter и только потом count()!
 		if (count($this->children))
 		{
 			?><div class="table-toolbar">
@@ -38,51 +39,41 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 				?>
 				<div class="clear"></div>
 			</div><?php
-		}
+		}*/
 
 		// Форма
-		$oAdmin_Form_Entity_Form = $this->form->controller(
-			$Admin_Form_Controller
-		);
-
-		$oAdmin_Form_Entity_Form
-			->id($this->formId)
+		$this->_Admin_Form_Entity_Form
+			->controller($this->Admin_Form_Controller)
 			->class('adminForm')
-			->action(
-				$Admin_Form_Controller->getPath()
-			);
+			->action($this->Admin_Form_Controller->getPath());
 
 		// Закладки
 		if (count($this->tabs))
 		{
 			$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs');
-			$oAdmin_Form_Entity_Tabs->formId($this->formId);
+			$oAdmin_Form_Entity_Tabs->formId($this->_Admin_Form_Entity_Form->id);
 
 			// Все закладки к форме
-			$oAdmin_Form_Entity_Form->add(
+			$this->_Admin_Form_Entity_Form->add(
 				$oAdmin_Form_Entity_Tabs
 			);
 
 			// Add all tabs to $oAdmin_Form_Entity_Tabs
 			foreach ($this->tabs as $oAdmin_Form_Tab_Entity)
 			{
-				if ($oAdmin_Form_Tab_Entity
-					->deleteEmptyItems()
-					->getCountChildren() > 0)
+				if ($oAdmin_Form_Tab_Entity->deleteEmptyItems()->getCountChildren() > 0)
 				{
-					$oAdmin_Form_Entity_Tabs->add(
-						$oAdmin_Form_Tab_Entity
-					);
+					$oAdmin_Form_Entity_Tabs->add($oAdmin_Form_Tab_Entity);
 				}
 			}
 		}
 
 		// Кнопки
-		!is_null($this->buttons) && $oAdmin_Form_Entity_Form->add(
+		!is_null($this->buttons) && $this->_Admin_Form_Entity_Form->add(
 			$this->_addButtons()
 		);
 
-		$oAdmin_Form_Entity_Form->execute();
+		$this->_Admin_Form_Entity_Form->execute();
 
 		return ob_get_clean();
 	}

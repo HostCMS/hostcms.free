@@ -38,4 +38,5 @@ return array(
 	'rate' => 'Tax rate',
 	'recount_discounts' => 'Recount discounts',
 	'recountDiscount_success' => 'Discounts recounted successfully!',	
+	'apply_success' => 'Product information in order changed successfully',	
 );

@@ -548,6 +548,26 @@ class Structure_Controller_Show extends Core_Controller
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
+			// Shortcut
+			if ($oInformationsystem_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oInformationsystem_Group;
+				$oInformationsystem_Group = clone $oInformationsystem_Group->Shortcut;
+
+				$oInformationsystem_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
@@ -789,6 +809,26 @@ class Structure_Controller_Show extends Core_Controller
 		$aShop_Groups = $oShop_Groups->findAll();
 		foreach ($aShop_Groups as $oShop_Group)
 		{
+			// Shortcut
+			if ($oShop_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oShop_Group;
+				$oShop_Group = clone $oShop_Group->Shortcut;
+
+				$oShop_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aShop_Groups[$oShop_Group->parent_id][] = $oShop_Group;
 		}
 

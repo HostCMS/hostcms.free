@@ -38,6 +38,15 @@ abstract class Property_Controller_Value_Type
 	{
 		return $this->_modelName;
 	}
+	
+	/**
+	 * Get table name
+	 * @return string
+	 */
+	public function getTableName()
+	{
+		return $this->_tableName;
+	}
 
 	/**
 	 * Get Property_Value as object

@@ -46,8 +46,8 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['posted'] = 1;
 		}
@@ -74,10 +74,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	{
 		ob_start();
 
-		// Ответственный по сделке
-		$oUser = $this->User;
-
-		echo '<div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="' . $oUser->getAvatar() .'" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div></div>';
+		$this->User->id && $this->User->showAvatarWithName();
 
 		return ob_get_clean();
 	}

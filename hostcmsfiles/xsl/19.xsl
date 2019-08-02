@@ -213,7 +213,7 @@
 				</xsl:if>
 
 				<xsl:if test="count(siteuser) &gt; 0">
-				<img src="/images/user.png" /><span><a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a></span>
+				<img src="/images/user.png" /><span><a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a></span>
 				</xsl:if>
 
 				<xsl:if test="count(comment)">

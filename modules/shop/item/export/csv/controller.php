@@ -564,7 +564,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				$result = $oProperty_Value->value;
 
 				Core_Event::notify(get_class($this) . '.onGetPropertyValueDefault', $this, array($oProperty, $oProperty_Value, $object));
-				
+
 				if (!is_null(Core_Event::getLastReturn()))
 				{
 					$result = Core_Event::getLastReturn();
@@ -623,6 +623,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			{
 				$oShop_Groups = Core_Entity::factory('Shop_Group', $this->parentGroup)->Shop_Groups;
 			}
+
+			$oShop_Groups->queryBuilder()
+				->where('shortcut_id', '=', 0);
 
 			$aShopGroupsId = array_merge(array($this->parentGroup), $oShop_Groups->getGroupChildrenId(FALSE));
 
@@ -771,7 +774,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 							$oShopItem->guid = Core_Guid::get();
 							$oShopItem->save();
 						}
-						
+
 						$iPropertyFieldOffset = $iPropertyFieldOffsetOriginal;
 
 						// Кэш всех значений свойств товара
@@ -802,7 +805,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 								if ($oProperty->type == 2)
 								{
 									$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
-									
+
 									$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oShopItem->getItemHref())->getSmallFileHref()));
 								}
 
@@ -814,11 +817,11 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 								// File
 								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 								$iPropertyFieldOffset++;
-								
+
 								// Description
 								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 								$iPropertyFieldOffset++;
-								
+
 								// Small File
 								$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 								$iPropertyFieldOffset++;
@@ -876,7 +879,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 										if ($oProperty->type == 2)
 										{
 											$aCurrentPropertyLine[$iPropertyFieldOffset + 1] = sprintf('"%s"', $this->prepareString($oProperty_Value->file_description));
-											
+
 											$aCurrentPropertyLine[$iPropertyFieldOffset + 2] = sprintf('"%s"', $this->prepareString($oProperty_Value->setHref($oModification->getItemHref())->getSmallFileHref()));
 										}
 
@@ -888,11 +891,11 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 										// File
 										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 										$iPropertyFieldOffset++;
-										
+
 										// Description
 										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 										$iPropertyFieldOffset++;
-										
+
 										// Small File
 										$aCurrentPropertyLine[$iPropertyFieldOffset] = '""';
 										$iPropertyFieldOffset++;

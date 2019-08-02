@@ -377,7 +377,19 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 		</div>
 
 		<script type="text/javascript">
-			$(function(){
+		$(function(){
+			var aScripts = [
+				'jquery.flot.js',
+				'jquery.flot.time.min.js',
+				'jquery.flot.categories.min.js',
+				'jquery.flot.tooltip.min.js',
+				'jquery.flot.crosshair.min.js',
+				'jquery.flot.selection.min.js',
+				'jquery.flot.pie.min.js',
+				'jquery.flot.resize.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 				/*Sets Themed Colors Based on Themes*/
 				themeprimary = getThemeColorFromCss('themeprimary');
 				themesecondary = getThemeColorFromCss('themesecondary');
@@ -475,6 +487,7 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 
 				var plot = $.plot(placeholder, data, options);
 			});
+		});
 		</script>
 		<?php
 	}

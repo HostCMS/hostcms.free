@@ -129,7 +129,7 @@ Admin_Form_Entity::factory('Breadcrumb')
 );
 
 
-$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+$oUserCurrent = Core_Auth::getCurrentUser();
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 		->controller($oAdmin_Form_Controller)

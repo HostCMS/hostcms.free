@@ -274,8 +274,11 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			&& $this->_Core_Rss->xmlns('yandex', 'http://news.yandex.ru')
 			&& $this->_Core_Rss->xmlns('media', 'http://search.yahoo.com/mrss/');
 
-		$this->turbo
-			&& $this->_Core_Rss->xmlns('turbo', 'http://turbo.yandex.ru');
+		if ($this->turbo)
+		{
+			$this->_Core_Rss->xmlns('turbo', 'http://turbo.yandex.ru');
+			$this->_Core_Rss->add('turbo:cms_plugin', 'E002780CE3D29DFF362D7A37943187B5');
+		}
 
 		if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 		{
@@ -304,7 +307,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 		Core_Entity::factory('Informationsystem_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
-		$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+		$oUserCurrent = Core_Auth::getCurrentUser();
 
 		if ($this->limit)
 		{

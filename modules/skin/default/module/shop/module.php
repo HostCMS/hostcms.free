@@ -45,7 +45,7 @@ class Skin_Default_Module_Shop_Module extends Shop_Module
 	 */
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$oComments = Core_Entity::factory('Comment');
 
@@ -222,7 +222,7 @@ class Skin_Default_Module_Shop_Module extends Shop_Module
 
 			if (!$ajax)
 			{
-				$oUser = Core_Entity::factory('User')->getCurrent();
+				$oUser = Core_Auth::getCurrentUser();
 
 				$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 				$module_id = $oModule->id;

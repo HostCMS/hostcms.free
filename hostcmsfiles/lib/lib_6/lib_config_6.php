@@ -93,12 +93,53 @@ if (Core_Array::getRequest('compare'))
 	exit();
 }
 
+// Избранное
+if (Core_Array::getRequest('favorite'))
+{
+	$shop_item_id = intval(Core_Array::getRequest('favorite'));
+
+	if (Core_Entity::factory('Shop_Item', $shop_item_id)->shop_id == $oShop->id)
+	{
+		Core_Session::start();
+		Core_Session::setMaxLifeTime(86400 * 30);
+		if (isset($_SESSION['hostcmsFavorite'][$oShop->id]) && in_array($shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id]))
+		{
+			unset($_SESSION['hostcmsFavorite'][$oShop->id][
+				array_search($shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id])
+			]);
+		}
+		else
+		{
+			$_SESSION['hostcmsFavorite'][$oShop->id][] = $shop_item_id;
+		}
+	}
+
+	Core_Page::instance()->response
+		->status(200)
+		->header('Pragma', "no-cache")
+		->header('Cache-Control', "private, no-cache")
+		->header('Vary', "Accept")
+		->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
+		->header('X-Powered-By', 'HostCMS')
+		->header('Content-Disposition', 'inline; filename="files.json"');
+
+	Core_Page::instance()->response
+		->body(json_encode('OK'))
+		->header('Content-type', 'application/json; charset=utf-8');
+
+	Core_Page::instance()->response
+		->sendHeaders()
+		->showBody();
+
+	exit();
+}
+
 // Viewed items
 if ($Shop_Controller_Show->item && $Shop_Controller_Show->viewed)
 {
 	// Core_Session::start();
 	// Core_Session::setMaxLifeTime(28800, TRUE);
-	
+
 	$Shop_Controller_Show->addIntoViewed();
 }
 

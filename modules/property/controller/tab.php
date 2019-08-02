@@ -213,7 +213,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	 * @var array
 	 */
 	protected $_cacheListOptions = array();
-	
+
 	/**
 	 * Add external properties container to $parentObject
 	 * @param int $property_dir_id ID of parent directory of properties
@@ -242,7 +242,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			->where('property_dir_id', '=', $property_dir_id);
 
 		$aProperties = $oProperties->findAll();
-		foreach ($aProperties as $oProperty)
+		foreach ($aProperties as $iPropertyCounter => $oProperty)
 		{
 			$aProperty_Values = $this->_object->id
 				? $oProperty->getValues($this->_object->id, FALSE)
@@ -496,7 +496,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
 							->caption(htmlspecialchars($oProperty->name))
 							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("group_{$oProperty->id}[]")
+							->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 							->filter(TRUE);
 
 						// Элементы
@@ -508,14 +508,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
 							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}[]")
+							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 							->name("input_property_{$oProperty->id}[]");
 
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
-							
+
 							$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
 						}
 						else
@@ -524,13 +524,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							{
 								$value = $oProperty_Value->value;
 
-								$oNewAdmin_Form_Entity_InfGroups = clone $oAdmin_Form_Entity_InfGroups;
-								$oNewAdmin_Form_Entity_InfGroups
-									->id("group_{$oProperty->id}_{$oProperty_Value->id}");
+								$oNewAdmin_Form_Entity_Inf_Groups = clone $oAdmin_Form_Entity_InfGroups;
+								$oNewAdmin_Form_Entity_Inf_Groups
+									->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
 
 								$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
 								$oNewAdmin_Form_Entity_InfItems
-									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
 									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
 									->value($value);
 
@@ -539,9 +539,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
 									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-									
-								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_InfGroups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Inf_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Inf_Groups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
 							}
 						}
 					}
@@ -554,7 +554,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
 							->caption(htmlspecialchars($oProperty->name))
 							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("group_{$oProperty->id}[]")
+							->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 							->filter(TRUE);
 
 						// Элементы
@@ -566,14 +566,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
 							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}[]")
+							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
 							->name("input_property_{$oProperty->id}[]");
 
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Section, $oProperty));
-							
+
 							$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
 						}
 						else
@@ -583,10 +583,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$value = $oProperty_Value->value;
 
 								$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
+								$oNewAdmin_Form_Entity_Shop_Groups
+									->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
 
 								$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
 								$oNewAdmin_Form_Entity_Shop_Items
-									->id("property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
 									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
 									->value($value);
 
@@ -594,7 +596,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								$oNewAdmin_Form_Entity_Shop_Items_Input
 									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
 									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-									
+
 								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
 								$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
@@ -626,7 +628,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		}
 
 		Core_Event::notify('Property_Controller_Tab.onBeforeAddSection', $this, array($oAdmin_Form_Entity_Section, $property_dir_id));
-		
+
 		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
 	}
 
@@ -669,7 +671,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$iCountItems = $oInformationsystem_Items->getCount();
 
-		if ($iCountItems < Core::$mainConfig['switchSelectToAutocomplete'])
+		$bAutocomplete = $iCountItems > Core::$mainConfig['switchSelectToAutocomplete'];
+
+		if (!$bAutocomplete)
 		{
 			// Remove `count` from select list
 			$oInformationsystem_Items->queryBuilder()
@@ -714,9 +718,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$aOptions = array(' … ');
 			foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 			{
-				$aOptions[$oInformationsystem_Item->id] = !$oInformationsystem_Item->shortcut_id
-					? $oInformationsystem_Item->name
-					: $oInformationsystem_Item->Informationsystem_Item->name;
+				$aOptions[$oInformationsystem_Item->id] = Informationsystem_Controller_Load_Select_Options::getOptionName(
+					!$oInformationsystem_Item->shortcut_id
+						? $oInformationsystem_Item
+						: $oInformationsystem_Item->Informationsystem_Item
+				);
 			}
 
 			$oAdmin_Form_Entity_InfItemsSelect->options($aOptions);
@@ -733,60 +739,60 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$oAdmin_Form_Entity_InfItemsInput->value($Informationsystem_Item->name);
 		}
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->value("
-			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
-				  source: function(request, response) {
-
-					var jInput = $(this.element),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
-						jInfGroupDiv = jTopParentDiv.find('[id ^= group_]'),
-						selectedVal = $(':selected', jInfGroupDiv).val();
-
-					$.ajax({
-					  url: '/admin/informationsystem/item/index.php?autocomplete=1&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id=' + selectedVal + '',
-					  dataType: 'json',
-					  data: {
-						queryString: request.term
-					  },
-					  success: function( data ) {
-						response( data );
-					  }
-					});
-				  },
-				  minLength: 1,
-				  create: function() {
-					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
-						return $('<li></li>')
-							.data('item.autocomplete', item)
-							.append($('<a>').text(item.label))
-							.appendTo(ul);
-					}
-
-					 $(this).prev('.ui-helper-hidden-accessible').remove();
-				  },
-				  select: function( event, ui ) {
-					var jInput = $(this),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
-						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
-
-						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-				  },
-				  open: function() {
-					$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-				  },
-				  close: function() {
-					$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-				  }
-			});
-		");
-
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
 			->class('input-group')
 			->add($oAdmin_Form_Entity_InfGroups)
 			->add($oAdmin_Form_Entity_InfItemsSelect)
-			->add($oAdmin_Form_Entity_InfItemsInput)
-			->add($oCore_Html_Entity_Script);
+			->add($oAdmin_Form_Entity_InfItemsInput);
+
+		// autocomplete should be added always
+		$oDiv_Group->add(
+			Core::factory('Core_Html_Entity_Script')->value("
+				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+					 source: function(request, response) {
+						var jInput = $(this.element),
+							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
+							selectedVal = $(':selected', jInfGroupDiv).val();
+
+						$.ajax({
+						 url: '/admin/informationsystem/item/index.php?autocomplete=1&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id=' + selectedVal + '',
+						 dataType: 'json',
+						 data: {
+							queryString: request.term
+						 },
+						 success: function( data ) {
+							response( data );
+						 }
+						});
+					 },
+					 minLength: 1,
+					 create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							return $('<li></li>')
+								.data('item.autocomplete', item)
+								.append($('<a>').text(item.label))
+								.appendTo(ul);
+						}
+
+						 $(this).prev('.ui-helper-hidden-accessible').remove();
+					 },
+					 select: function( event, ui ) {
+						var jInput = $(this),
+							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
+
+							jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
+					 },
+					 open: function() {
+						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+					 },
+					 close: function() {
+						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+					 }
+				});
+			")
+		);
 
 		$oProperty->multiple && $this->imgBox(
 			$oDiv_Group,
@@ -828,7 +834,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			//->where('shop_items.modification_id', '=', 0)
 			->clearOrderBy()
 			->clearSelect()
-			->select('id', 'shortcut_id', 'modification_id', 'name');
+			->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
 
 		// Определяем поле сортировки информационных элементов
 		switch ($oShop->items_sorting_field)
@@ -903,7 +909,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_Shop_Groups
 			->value($group_id)
 			->options(array(' … ') + $aOptions)
-			->onchange("$.ajaxRequest({path: '/admin/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList',additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oProperty->shop_id}',windowId: '{$windowId}'}); return false");
+			->onchange("$.ajaxRequest({path: '/admin/shop/item/index.php', context: '{$oAdmin_Form_Entity_Shop_Items->id}', callBack: $.loadSelectOptionsCallback, action: 'loadShopItemList', additionalParams: 'shop_group_id=' + this.value + '&shop_id={$oProperty->shop_id}',windowId: '{$windowId}'}); return false");
 
 		// Items
 		$oShop_Items = $oShop->Shop_Items;
@@ -916,7 +922,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$iCountItems = $oShop_Items->getCount();
 
-		if ($iCountItems < Core::$mainConfig['switchSelectToAutocomplete'])
+		$bAutocomplete = $iCountItems > Core::$mainConfig['switchSelectToAutocomplete'];
+
+		if (!$bAutocomplete)
 		{
 			$aShop_Items = self::getShopItems($oShop_Items);
 
@@ -927,9 +935,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$aOptions = array(' … ');
 			foreach ($aShop_Items as $oShop_Item)
 			{
-				$aOptions[$oShop_Item->id] = !$oShop_Item->shortcut_id
-					? $oShop_Item->name
-					: $oShop_Item->Shop_Item->name;
+				$aOptions[$oShop_Item->id] = Shop_Controller_Load_Select_Options::getOptionName(
+					!$oShop_Item->shortcut_id
+						? $oShop_Item
+						: $oShop_Item->Shop_Item
+				);
 
 				// Shop Item's modifications
 				if ($aConfig['select_modifications'])
@@ -940,13 +950,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						->queryBuilder()
 						->clearOrderBy()
 						->clearSelect()
-						->select('id', 'shortcut_id', 'name');
+						->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
 
 					$aModifications = $oModifications->findAll(FALSE);
 
 					foreach ($aModifications as $oModification)
 					{
-						$aOptions[$oModification->id] = ' — ' . $oModification->name;
+						$aOptions[$oModification->id] = Shop_Controller_Load_Select_Options::getOptionName($oModification);
 					}
 				}
 			}
@@ -965,29 +975,35 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$oAdmin_Form_Entity_Shop_Items_Input->value($Shop_Item->name);
 		}
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-		->value("
-			$('[id ^= input_property_{$oProperty->id}]').autocomplete({
-				  source: function(request, response) {
+		$oDiv_Group = Admin_Form_Entity::factory('Div')
+			->class('input-group')
+			->add($oAdmin_Form_Entity_Shop_Groups)
+			->add($oAdmin_Form_Entity_Shop_Items)
+			->add($oAdmin_Form_Entity_Shop_Items_Input);
 
+		// autocomplete should be added always
+		$oDiv_Group->add(
+			Core::factory('Core_Html_Entity_Script')->value("
+				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+				 source: function(request, response) {
 					var jInput = $(this.element),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
-						jInfGroupDiv = jTopParentDiv.find('[id ^= group_]'),
+						jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
 					$.ajax({
-					  url: '/admin/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
-					  dataType: 'json',
-					  data: {
+					 url: '/admin/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
+					 dataType: 'json',
+					 data: {
 						queryString: request.term
-					  },
-					  success: function( data ) {
+					 },
+					 success: function( data ) {
 						response( data );
-					  }
+					 }
 					});
-				  },
-				  minLength: 1,
-				  create: function() {
+				 },
+				 minLength: 1,
+				 create: function() {
 					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 						return $('<li></li>')
 							.data('item.autocomplete', item)
@@ -996,29 +1012,22 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					}
 
 					 $(this).prev('.ui-helper-hidden-accessible').remove();
-				  },
-				  select: function( event, ui ) {
+				 },
+				 select: function( event, ui ) {
 					var jInput = $(this),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
 						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-				  },
-				  open: function() {
+				 },
+				 open: function() {
 					$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-				  },
-				  close: function() {
+				 },
+				 close: function() {
 					$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-				  }
-			});
-		");
-
-		$oDiv_Group = Admin_Form_Entity::factory('Div')
-			->class('input-group')
-			->add($oAdmin_Form_Entity_Shop_Groups)
-			->add($oAdmin_Form_Entity_Shop_Items)
-			->add($oAdmin_Form_Entity_Shop_Items_Input)
-			->add($oCore_Html_Entity_Script);
+				 }
+			});")
+		);
 
 		$oProperty->multiple && $this->imgBox(
 			$oDiv_Group,

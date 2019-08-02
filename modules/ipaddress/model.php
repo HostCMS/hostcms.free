@@ -37,9 +37,9 @@ class Ipaddress_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['deny_access'] = 1;
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 		}
 	}
 
@@ -50,8 +50,7 @@ class Ipaddress_Model extends Core_Entity
 	public function changeAccess()
 	{
 		$this->deny_access = 1 - $this->deny_access;
-		$this->save();
-		return $this;
+		return $this->save();
 	}
 
 	/**
@@ -61,8 +60,7 @@ class Ipaddress_Model extends Core_Entity
 	public function changeBackendAccess()
 	{
 		$this->deny_backend = 1 - $this->deny_backend;
-		$this->save();
-		return $this;
+		return $this->save();
 	}
 
 	/**
@@ -72,8 +70,7 @@ class Ipaddress_Model extends Core_Entity
 	public function changeStatistic()
 	{
 		$this->no_statistic = 1 - $this->no_statistic;
-		$this->save();
-		return $this;
+		return $this->save();
 	}
 
 	/**
@@ -122,5 +119,45 @@ class Ipaddress_Model extends Core_Entity
 		return htmlspecialchars(
 			Core_Str::cut($this->comment, 255)
 		);
+	}
+
+	/**
+	 * Deny access
+	 * @return self
+	 */
+	public function denyAllAccess()
+	{
+		$this->deny_access = 1;
+		return $this->save();
+	}
+
+	/**
+	 * Allow access
+	 * @return self
+	 */
+	public function allowAllAccess()
+	{
+		$this->deny_access = 0;
+		return $this->save();
+	}
+
+	/**
+	 * Deny access
+	 * @return self
+	 */
+	public function denyAllBackendAccess()
+	{
+		$this->deny_backend = 1;
+		return $this->save();
+	}
+
+	/**
+	 * Allow access
+	 * @return self
+	 */
+	public function allowAllBackendAccess()
+	{
+		$this->deny_backend = 0;
+		return $this->save();
 	}
 }

@@ -16,7 +16,7 @@ $iAdmin_Form_Id = 247;
 $sAdminFormAction = '/admin/user/absence/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
-$oUser = Core_Entity::factory('User')->getCurrent();
+$oUser = Core_Auth::getCurrentUser();
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);

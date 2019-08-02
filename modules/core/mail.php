@@ -55,7 +55,7 @@ abstract class Core_Mail
 	}
 
 	protected $_log = NULL;
-	
+
 	/**
 	 * Log error
 	 * @return boolean
@@ -72,7 +72,7 @@ abstract class Core_Mail
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * Register an existing instance as a singleton.
 	 * @param string $name
@@ -121,7 +121,7 @@ abstract class Core_Mail
 	{
 		$this
 			->bound('----------' . mb_strtoupper(uniqid(time())))
-			->separator("\n")
+			->separator("\r\n")
 			->chunklen(76)
 			->contentType('text/plain');
 
@@ -173,7 +173,7 @@ abstract class Core_Mail
 	 * Separator
 	 * @var string
 	 */
-	protected $_separator = "\n";
+	protected $_separator = NULL;
 
 	/**
 	 * Set separator
@@ -190,7 +190,7 @@ abstract class Core_Mail
 	 * The chunk length.
 	 * @var string
 	 */
-	protected $_chunklen = 76;
+	protected $_chunklen = NULL;
 
 	/**
 	 * Set chunk length
@@ -370,7 +370,7 @@ abstract class Core_Mail
 	 */
 	public function header($name, $value)
 	{
-		$this->_headers[$name] = str_replace(array("\r", "\n"), '', $value);
+		$this->_headers[$name] = str_replace(array("\r", "\n", "\0"), '', $value);
 		return $this;
 	}
 
@@ -401,6 +401,11 @@ abstract class Core_Mail
 		return $this;
 	}
 
+	protected function _getChunkedMessage()
+	{
+		return chunk_split(base64_encode($this->_message), $this->_chunklen, $this->_separator);
+	}
+
 	/**
 	 * Send mail
 	 *
@@ -412,17 +417,17 @@ abstract class Core_Mail
 		Core_Event::notify('Core_Mail.onBeforeSend', $this);
 
 		$sFrom = !is_null($this->_senderName)
-			// NO SPACES BETWEEN name and <email>
-			? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?=<{$this->_from}>"
+			// NO SPACES BETWEEN name and <email> // rolled back
+			? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?= <{$this->_from}>"
 			: $this->_from;
 
 		$this
 			->header('From', $sFrom)
-			->header('X-Mailer', 'HostCMS');
+			->header('X-Mailer', 'HostCMS/6.0');
 
 		$sTo = !is_null($this->_recipientName)
-			// NO SPACES BETWEEN name and <email>
-			? '=?UTF-8?B?' . base64_encode($this->_recipientName) . "?=<{$this->_to}>"
+			// NO SPACES BETWEEN name and <email> // rolled back
+			? '=?UTF-8?B?' . base64_encode($this->_recipientName) . "?= <{$this->_to}>"
 			: (strlen($this->_to)
 				? "<{$this->_to}>"
 				: ''
@@ -438,39 +443,62 @@ abstract class Core_Mail
 			$this->header('Return-Path', "<{$this->_from}>");
 		}
 
+		$bMultipart = count($this->_files) > 0;
+
 		$this
-			->header('MIME-Version', '1.0')
-			->header('Content-Type', "multipart/mixed; boundary=\"{$this->_bound}\"");
+			->header('MIME-Version', '1.0');
 
-		$sSingleSeparator = $this->_separator;
-		$sDoubleSeparators = $sSingleSeparator . $sSingleSeparator;
-
-		$content = "This is a multi-part message in MIME format.{$sDoubleSeparators}";
-
-		// Для почтовых рассылок, чтобы картинки были внутри письма
-		if (count($this->_files) > 0 && $this->_multipartRelated)
+		if ($bMultipart)
 		{
-			$content .= "--{$this->_bound}{$sSingleSeparator}";
-
-			// Change bound
-			$this->_bound = '---------==' . strtoupper(uniqid(time()));
-
-			$content .= "Content-Type: Multipart/Related;";
-			$content .= " boundary=\"{$this->_bound}\"";
-			$content .= $sDoubleSeparators;
+			$this->header('Content-Type', "multipart/mixed; boundary=\"{$this->_bound}\"");
+		}
+		else
+		{
+			$this
+				->header('Content-Type', "{$this->_contentType}; charset=UTF-8")
+				->header('Content-Transfer-Encoding', 'base64');
 		}
 
-		$content .= "--{$this->_bound}{$sSingleSeparator}";
-		$content .= "Content-Type: {$this->_contentType}; charset=UTF-8{$sSingleSeparator}";
-		//$content .= "Content-Transfer-Encoding: 8bit";
-		$content .= "Content-Transfer-Encoding: base64";
-		$content .= $sDoubleSeparators;
-		//$content .= str_replace("\r", "", $this->_message);
-		$content .= chunk_split(base64_encode($this->_message), $this->_chunklen, $this->_separator);
-		$content .= $sDoubleSeparators;
+		$sSingleSeparator = $this->_separator;
 
-		if (count($this->_files) > 0)
+		$sDoubleSeparators = $sSingleSeparator . $sSingleSeparator;
+
+		if (!$bMultipart)
 		{
+			$content = $this->_getChunkedMessage();
+		}
+		else
+		{
+			$content = "This is a multi-part message in MIME format.{$sDoubleSeparators}";
+
+			// Для почтовых рассылок, чтобы картинки были внутри письма
+			if ($this->_multipartRelated)
+			{
+				/*
+				1. Multipart/Mixed
+				1.1. multipart/related для рассылок, чтобы картинки были внутри письма || Multipart/Alternative для остальных случаев
+				  1.1.1.1. Text/Plain или Text/HTML
+				  1.1.1.2. Файлы, если есть
+				*/
+				$content .= "--{$this->_bound}{$sSingleSeparator}";
+
+				// Change bound
+				$this->_bound = '---------==' . strtoupper(uniqid(time()));
+				
+				// _multipartRelated для почтовых рассылок, чтобы картинки были внутри письма
+				//$content .= 'Content-Type: ' . (count($this->_files) > 0 && $this->_multipartRelated ? 'multipart/related' : 'multipart/alternative') . ';';
+				$content .= "Content-Type: Multipart/Related;";
+				$content .= " boundary=\"{$this->_bound}\"";
+				$content .= $sDoubleSeparators;
+			}
+			
+			$content .= "--{$this->_bound}{$sSingleSeparator}";
+			$content .= "Content-Type: {$this->_contentType}; charset=UTF-8{$sSingleSeparator}";
+			$content .= "Content-Transfer-Encoding: base64";
+			$content .= $sDoubleSeparators;
+			$content .= $this->_getChunkedMessage();
+			$content .= $sDoubleSeparators;
+
 			foreach ($this->_files as $value)
 			{
 				if (isset($value['filepath']) && isset($value['filename']) && is_file($value['filepath']))
@@ -508,10 +536,10 @@ abstract class Core_Mail
 
 				$content .= $sDoubleSeparators;
 			}
-		}
 
-		// Final bound with --
-		$content .= "--{$this->_bound}--{$sSingleSeparator}";
+			// Final bound with -- at the end of line
+			$content .= "--{$this->_bound}--{$sSingleSeparator}";
+		}
 
 		$subject = $this->_subject != ''
 			? '=?UTF-8?B?' . base64_encode($this->_subject) . '?='
@@ -526,5 +554,45 @@ abstract class Core_Mail
 		$header = implode($sSingleSeparator, $aHeaders);
 
 		return $this->_send($sTo, $subject, $content, $header);
+	}
+
+	/**
+	 * Get server hostname
+	 * @return string
+	 */
+	public function getServerHostname()
+    {
+        if (isset($_SERVER['SERVER_NAME']))
+		{
+            return $_SERVER['SERVER_NAME'];
+        }
+		elseif (gethostname() !== FALSE)
+		{
+            return gethostname();
+        }
+
+        return 'localhost.localdomain';
+    }
+
+	/**
+	 * Generate Message-ID
+	 * @param $uniqueid
+	 * @return self
+	 */
+	public function messageId($uniqueid = NULL)
+	{
+		if (strpos($this->_from, '@') !== FALSE)
+		{
+			$aTmp = explode('@', $this->_from);
+			$domain = array_pop($aTmp);
+		}
+		else
+		{
+			$domain = $this->getServerHostname();
+		}
+
+		$this->header('Message-ID', '<' . (is_null($uniqueid) ? Core::generateUniqueId() : sha1($uniqueid)) . '.' . date('YmdHis') . '@' . $domain . '>');
+
+		return $this;
 	}
 }

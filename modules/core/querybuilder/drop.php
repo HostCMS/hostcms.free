@@ -144,7 +144,7 @@ class Core_QueryBuilder_Drop extends Core_QueryBuilder_Statement
 
 		foreach ($tables as $tableName)
 		{
-			$sql[] = $this->_dataBase->quoteColumnName($tableName);
+			$sql[] = $this->_dataBase->quoteTableName($tableName);
 		}
 
 		return implode(', ', $sql);

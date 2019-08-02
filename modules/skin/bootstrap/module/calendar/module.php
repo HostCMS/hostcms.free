@@ -127,7 +127,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 						$aCompaniesId[] = $oCompany->id;
 					}
 
-					$oUser = Core_Entity::factory('User', 0)->getCurrent();
+					$oUser = Core_Auth::getCurrentUser();
 
 					// Получаем список должностей пользователя (сотрудника)
 					$oCompany_Department_Post_Users = $oUser->Company_Department_Post_Users;

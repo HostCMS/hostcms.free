@@ -15,7 +15,13 @@ class Property_Controller_Value_Type0 extends Property_Controller_Value_Type
 {
 	/**
 	 * Model name
-	 * @var mixed
+	 * @var string
 	 */
 	protected $_modelName = 'Property_Value_Int';
+	
+	/**
+	 * Table name
+	 * @var string
+	 */
+	protected $_tableName = 'property_value_ints';
 }

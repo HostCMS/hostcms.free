@@ -234,6 +234,7 @@ class Core_Log
 				->contentType('text/plain')
 				->header('X-HostCMS-Reason', 'Alert')
 				->header('Precedence', 'bulk')
+				->messageId()
 				->send();
 
 			error_reporting($iErrorLevel);

@@ -86,6 +86,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
 			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->where('shop_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aShop_Groups = $oShop_Groups->findAll(FALSE);
@@ -131,6 +132,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
+			->where('shop_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		switch ($mode)
@@ -196,6 +198,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
+			->where('shop_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		switch ($mode)
@@ -286,7 +289,14 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oShop_Items = $oShop->Shop_Items;
 			$oShop_Items->queryBuilder()
 				->where('shop_items.shop_group_id', '=', $iShopGroupId)
-				->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_items.modification_id', '=', 0)
+				->open()
+					->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+					->setOr()
+					->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+					->setOr()
+					->where('shop_items.path', 'LIKE', '%' . $sQuery . '%')
+				->close()
 				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Items = $oShop_Items->findAll(FALSE);
@@ -295,7 +305,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			{
 				$aJSON[] = array(
 					'id' => $oShop_Item->id,
-					'label' => $oShop_Item->name,
+					'label' => Shop_Controller_Load_Select_Options::getOptionName($oShop_Item)
 				);
 
 				// Shop Item's modifications
@@ -307,7 +317,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 						->queryBuilder()
 						->clearOrderBy()
 						->clearSelect()
-						->select('id', 'shortcut_id', 'name');
+						->select('id', 'shortcut_id', 'modification_id',  'name', 'marking');
 
 					$aModifications = $oModifications->findAll(FALSE);
 
@@ -315,7 +325,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 					{
 						$aJSON[] = array(
 							'id' => $oModification->id,
-							'label' => ' — ' . $oModification->name
+							'label' => Shop_Controller_Load_Select_Options::getOptionName($oModification)
 						);
 					}
 				}
@@ -331,6 +341,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oShop_Groups = $oShop->Shop_Groups;
 			$oShop_Groups->queryBuilder()
 				->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_groups.shortcut_id', '=', 0)
 				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aShop_Groups = $oShop_Groups->findAll(FALSE);
@@ -893,10 +904,7 @@ if ($oAdminFormActionLoadShopItemList && $oAdmin_Form_Controller->getAction() ==
 	);
 
 	$oShop_Controller_Load_Select_Options
-		->model(
-			//Core_Entity::factory('Shop_Item')->shop_id($oShop->id)
-			$oShop->Shop_Items
-		)
+		->model($oShop->Shop_Items)
 		->defaultValue(' … ')
 		->addCondition(
 			array('where' => array('shop_group_id', '=', $oShopGroup->id))

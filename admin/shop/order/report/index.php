@@ -414,133 +414,132 @@ if (!is_null(Core_Array::getPost('do_show_report')))
 			</div>
 		</div>
 		<script type="text/javascript">
-			$(function(){
-				//var shopOrdersReportDiagramData = [];
-				var gridbordercolor = "#eee",
-				themeprimary = getThemeColorFromCss('themeprimary'),
-				themesecondary = getThemeColorFromCss('themesecondary'),
-				themethirdcolor = getThemeColorFromCss('themethirdcolor'),
+		$(function(){
+			var gridbordercolor = "#eee",
+			themeprimary = getThemeColorFromCss('themeprimary'),
+			themesecondary = getThemeColorFromCss('themesecondary'),
+			themethirdcolor = getThemeColorFromCss('themethirdcolor'),
 
-				shopOrdersReportDiagramData = [
-					{
-						label: '<?php echo Core::_('Shop_Item.form_sales_order_total_summ')?>',
-						data: sumOrdersValues,
-						color: themeprimary, //'#30C4E8',
-						bars: {
-							//order: 1,
-							show: true,
-							borderWidth: 0,
-							barWidth: 0.4,
-							lineWidth: .5,
-							fillColor: {
-								colors: [{
-									opacity: 0.4
-								}, {
-									opacity: 1
-								}]
-							}
-						}
-
-					},
-					{
-						color: themesecondary,
-						label: '<?php echo Core::_('Shop_Item.form_sales_order_count_items')?>',
-						data: countItemsValues,
-						lines: {
-							show: true,
-							fill: false,
-							fillColor: {
-								colors: [{
-									opacity: 0.3
-								}, {
-									opacity: 0
-								}]
-							}
-						},
-						points: {
-							show: true
-						},
-						yaxis: 2
-					},
-					{
-						color: themethirdcolor,
-						label: '<?php echo Core::_('Shop_Item.form_sales_order_count_orders')?>',
-						data: countOrdersValues,
-						lines: {
-							show: true,
-							fill: false,
-							fillColor: {
-								colors: [{
-									opacity: 0.3
-								}, {
-									opacity: 0
-								}]
-							}
-						},
-						points: {
-							show: true
-						},
-						yaxis: 2
-					}
-				];
-
-				var options = {
-					legend: {
-						show: false
-					},
-					xaxes: [ {
-						show: false,
-						tickDecimals: 0,
-						color: gridbordercolor,
-					} ],
-					yaxes: [ {
-								min: 0,
-								color: gridbordercolor,
-								tickDecimals: 0
-							},
-							{
-								min: 0,
-								color: gridbordercolor,
-								tickDecimals: 0,
-								position: "right"
-
-					} ],
-					grid: {
-						hoverable: true,
-						clickable: false,
+			shopOrdersReportDiagramData = [
+				{
+					label: '<?php echo Core::_('Shop_Item.form_sales_order_total_summ')?>',
+					data: sumOrdersValues,
+					color: themeprimary, //'#30C4E8',
+					bars: {
+						//order: 1,
+						show: true,
 						borderWidth: 0,
-						aboveData: false,
-						color: '#fbfbfb'
-					},
-					tooltip: true,
-					tooltipOpts: {
-						defaultTheme: false,
-						//content: "<span>%lx</span>, <b>%s</b> : <span>%y</span>",
-						content: function(label, xval, yval, flotItem){
-							var labelText = flotItem.seriesIndex == 0 ? yval + ' <?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($oShop->Shop_Currency->name)) ?>' : yval;
-
-							return '<span>' + timePeriodTitles[xval] + '</span>, <b>' + label + '</b> : <span>' + labelText + '</span>';
+						barWidth: 0.4,
+						lineWidth: .5,
+						fillColor: {
+							colors: [{
+								opacity: 0.4
+							}, {
+								opacity: 1
+							}]
 						}
 					}
-				};
-				
-				var aScripts = [
-					'jquery.flot.js',
-					'jquery.flot.time.min.js',
-					'jquery.flot.categories.min.js',
-					'jquery.flot.tooltip.min.js',
-					'jquery.flot.crosshair.min.js',
-					'jquery.flot.resize.js',
-					'jquery.flot.selection.min.js',
-					'jquery.flot.pie.min.js'
-				];
 
-				$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
-					// all scripts loaded
-					var placeholder = $("#shopOrdersReportDiagram");
-					var plot = $.plot(placeholder, shopOrdersReportDiagramData, options);
-				});
+				},
+				{
+					color: themesecondary,
+					label: '<?php echo Core::_('Shop_Item.form_sales_order_count_items')?>',
+					data: countItemsValues,
+					lines: {
+						show: true,
+						fill: false,
+						fillColor: {
+							colors: [{
+								opacity: 0.3
+							}, {
+								opacity: 0
+							}]
+						}
+					},
+					points: {
+						show: true
+					},
+					yaxis: 2
+				},
+				{
+					color: themethirdcolor,
+					label: '<?php echo Core::_('Shop_Item.form_sales_order_count_orders')?>',
+					data: countOrdersValues,
+					lines: {
+						show: true,
+						fill: false,
+						fillColor: {
+							colors: [{
+								opacity: 0.3
+							}, {
+								opacity: 0
+							}]
+						}
+					},
+					points: {
+						show: true
+					},
+					yaxis: 2
+				}
+			];
+
+			var options = {
+				legend: {
+					show: false
+				},
+				xaxes: [ {
+					show: false,
+					tickDecimals: 0,
+					color: gridbordercolor,
+				} ],
+				yaxes: [ {
+							min: 0,
+							color: gridbordercolor,
+							tickDecimals: 0
+						},
+						{
+							min: 0,
+							color: gridbordercolor,
+							tickDecimals: 0,
+							position: "right"
+
+				} ],
+				grid: {
+					hoverable: true,
+					clickable: false,
+					borderWidth: 0,
+					aboveData: false,
+					color: '#fbfbfb'
+				},
+				tooltip: true,
+				tooltipOpts: {
+					defaultTheme: false,
+					//content: "<span>%lx</span>, <b>%s</b> : <span>%y</span>",
+					content: function(label, xval, yval, flotItem){
+						var labelText = flotItem.seriesIndex == 0 ? yval + ' <?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($oShop->Shop_Currency->name)) ?>' : yval;
+
+						return '<span>' + timePeriodTitles[xval] + '</span>, <b>' + label + '</b> : <span>' + labelText + '</span>';
+					}
+				}
+			};
+			
+			var aScripts = [
+				'jquery.flot.js',
+				'jquery.flot.time.min.js',
+				'jquery.flot.categories.min.js',
+				'jquery.flot.tooltip.min.js',
+				'jquery.flot.crosshair.min.js',
+				'jquery.flot.resize.js',
+				'jquery.flot.selection.min.js',
+				'jquery.flot.pie.min.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+				// all scripts loaded
+				var placeholder = $("#shopOrdersReportDiagram");
+				var plot = $.plot(placeholder, shopOrdersReportDiagramData, options);
 			});
+		});
 		</script>
 		<?php
 	}

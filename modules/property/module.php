@@ -3,15 +3,15 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Wysiwyg Module.
+ * Property Module.
  *
  * @package HostCMS
- * @subpackage Wysiwyg
+ * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Wysiwyg_Module extends Core_Module
+class Property_Module extends Core_Module
 {
 	/**
 	 * Module version
@@ -29,22 +29,5 @@ class Wysiwyg_Module extends Core_Module
 	 * Module name
 	 * @var string
 	 */
-	protected $_moduleName = 'wysiwyg';
-
-	/**
-	 * Get Module's Menu
-	 * @return array
-	 */
-	public function getMenu()
-	{
-		$this->menu = array(
-			array(
-				'sorting' => 0,
-				'block' => -1,
-				'ico' => 'fa fa-file-code-o',
-			)
-		);
-
-		return parent::getMenu();
-	}
+	protected $_moduleName = 'property';
 }

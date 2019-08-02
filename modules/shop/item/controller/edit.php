@@ -653,7 +653,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'))
 						->options($Shop_Controller_Edit->fillMeasures())
 						->name('shop_measure_id')
-						->value($this->_object->shop_measure_id)
+						->value($this->_object->id
+							? $this->_object->shop_measure_id
+							: ($this->_object->Shop->default_shop_measure_id ? $this->_object->Shop->default_shop_measure_id : 0)
+						)
 				);
 
 				$oMainTab
@@ -1319,12 +1322,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 
 			case 'shop_group':
-				if (!$object->id)
-				{
-					$object->shop_id = Core_Array::getGet('shop_id');
-					$object->parent_id = Core_Array::getGet('shop_group_id');
-				}
-
 				// Пропускаем поля, обработка которых будет вестись вручную ниже
 				$this
 					->addSkipColumn('image_large')
@@ -1337,7 +1334,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->addSkipColumn('subgroups_total_count')
 					->addSkipColumn('items_count')
 					->addSkipColumn('items_total_count')
+					->addSkipColumn('shortcut_id')
 					;
+
+				if ($object->shortcut_id != 0)
+				{
+					$object = $object->Shortcut;
+				}
+
+				if (!$object->id)
+				{
+					$object->shop_id = Core_Array::getGet('shop_id');
+					$object->parent_id = Core_Array::getGet('shop_group_id');
+				}
 
 				parent::setObject($object);
 
@@ -2970,6 +2979,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->from('shop_groups')
 				->where('shop_id', '=', $iShopId)
 				->where('deleted', '=', 0)
+				->where('shortcut_id', '=', 0)
 				->orderBy('sorting')
 				->orderBy('name')
 				->execute()->asAssoc()->result();
@@ -2989,7 +2999,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				if ($countExclude == 0 || !in_array($childrenGroup['id'], $aExclude))
 				{
-					$aReturn[$childrenGroup['id']] = str_repeat('  ', $iLevel) . $childrenGroup['name'] . ' [' . $childrenGroup['id'] . ']' ;
+					$aReturn[$childrenGroup['id']] = str_repeat('  ', $iLevel) . $childrenGroup['name'] . ' [' . $childrenGroup['id'] . ']';
 					$aReturn += self::fillShopGroup($iShopId, $childrenGroup['id'], $aExclude, $iLevel + 1);
 				}
 			}

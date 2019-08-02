@@ -342,6 +342,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->_Shop_Groups
 			->queryBuilder()
 			->where('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+			->where('shop_groups.shortcut_id', '=', 0)
 			//->where('shop_groups.active', '=', 1)
 			->clearOrderBy()
 			->orderBy('shop_groups.parent_id', 'ASC');

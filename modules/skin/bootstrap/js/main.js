@@ -782,18 +782,26 @@ function isEmpty(str) {
 			var jProperies = jQuery('#' + windowId + ' #property_' + index),
 			//jNewObject = jProperies.eq(0).clone(),
 			html = jProperies[0].outerHTML; // clone with parent
+
+			html = html
+				.replace(/oSelectFilter(\d+)/g, 'oSelectFilter$1clone' + Math.floor(Math.random() * 999999))
+				.replace(/(id_group_[\d_]*)/g, 'id_group_clone' + Math.floor(Math.random() * 999999))
+				.replace(/(id_property_[\d_]*)/g, 'id_property_clone' + Math.floor(Math.random() * 999999))
+				.replace(/(input_property_[\d_]*)/g, 'input_property_clone' + Math.floor(Math.random() * 999999))
+				;
+
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
-			iNewId = index + 'group' + Math.floor(Math.random() * 999999),
+			//iNewId = index + 'group' + Math.floor(Math.random() * 999999),
 			jDir = jNewObject.find("select[onchange]"),
 			jItem = jNewObject.find("select:not([onchange])");
 
 			jDir
-				.attr('onchange', jDir.attr('onchange').replace(jItem.attr('id'), iNewId))
+				//.attr('onchange', jDir.attr('onchange').replace(jItem.attr('id'), iNewId))
 				.val(jProperies.eq(0).find("select[onchange]").val());
 
 			jItem
 				.attr('name', 'property_' + index + '[]')
-				.attr('id', iNewId)
+				//.attr('id', iNewId)
 				.val(jProperies.eq(0).find("select:not([onchange])").val());
 
 			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");

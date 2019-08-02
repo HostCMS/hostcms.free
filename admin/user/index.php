@@ -32,7 +32,7 @@ if (Core_Auth::logged())
 			'error' => 0
 		);
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$currentDay = Core_Date::timestamp2sqldate(time());
 
@@ -143,7 +143,7 @@ if (Core_Auth::logged())
 				'window' => 'id_content',
 			);
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$company_id = intval(Core_Array::getGet('company_id', 0));
 		$absence_id = intval(Core_Array::getGet('absence_id', 0));
@@ -380,7 +380,7 @@ if (Core_Auth::logged())
 	{
 		ob_start();
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{
@@ -507,7 +507,7 @@ if (Core_Auth::logged())
 	{
 		ob_start();
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{
@@ -623,7 +623,7 @@ if (Core_Auth::logged())
 			ob_start();
 			$oEmployee = $oUser_Workday->User;
 
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
 
 			// Сотрудник, отправивший заявку, не является подчиненным авторизованного сотрудника
 			if (!$oUser->isHeadOfEmployee($oEmployee))
@@ -747,7 +747,7 @@ if (Core_Auth::logged())
 		$employee_id = intval(Core_Array::getPost('employee_id'));
 		$workday_id = intval(Core_Array::getPost('workday_id'));
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$oEmployee = Core_Entity::factory('User', $employee_id);
 
@@ -823,7 +823,7 @@ if (Core_Auth::logged())
 	// Смена бэкграунда
 	if (!is_null(Core_Array::getPost('wallpaper-id')))
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{
@@ -864,7 +864,7 @@ if (Core_Auth::logged())
 	// Bookmarks
 	if (!is_null(Core_Array::getPost('add_bookmark')) && Core_Array::getPost('name'))
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{
@@ -881,7 +881,7 @@ if (Core_Auth::logged())
 
 	if (!is_null(Core_Array::getPost('remove_bookmark')) && Core_Array::getPost('bookmark_id'))
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$bookmark_id = intval(Core_Array::getPost('bookmark_id'));
 
@@ -951,6 +951,7 @@ if (Core_Auth::logged())
 		else
 		{
 			Core_Message::show('Wrong ID', 'error');
+			die();
 		}
 
 		$aBackgounds = array(
@@ -974,7 +975,7 @@ if (Core_Auth::logged())
 	{
 		$aJSON = array('success' => 0);
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{

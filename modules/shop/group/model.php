@@ -93,6 +93,7 @@ class Shop_Group_Model extends Core_Entity
 		'shop_group' => array('foreign_key' => 'parent_id'),
 		'shop_item' => array(),
 		'shop_item_property_for_group' => array(),
+		'shortcut' => array('model' => 'Shop_Group', 'foreign_key' => 'shortcut_id'),
 	);
 
 	/**
@@ -101,6 +102,7 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop_group' => array('foreign_key' => 'parent_id'),
+		'shortcut' => array('model' => 'Shop_Group', 'foreign_key' => 'shortcut_id'),
 		'shop' => array(),
 		'siteuser_group' => array(),
 		'siteuser' => array(),
@@ -128,6 +130,7 @@ class Shop_Group_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_preloadValues = array(
+		'shortcut_id' => 0,
 		'sorting' => 0,
 		'active' => 1,
 		'indexing' => 1
@@ -158,8 +161,8 @@ class Shop_Group_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
@@ -216,13 +219,18 @@ class Shop_Group_Model extends Core_Entity
 	 * @param int $parent_id group id
 	 * @return self
 	 * @hostcms-event shop_group.onBeforeMove
+	 * @hostcms-event shop_group.onAfterMove
 	 */
 	public function move($parent_id)
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
 
 		$this->parent_id = $parent_id;
-		return $this->save();
+		$this->save()->clearCache();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**
@@ -261,6 +269,7 @@ class Shop_Group_Model extends Core_Entity
 			//->clear()
 			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
 			->where('parent_id', '=', $parent_id)
+			->where('shortcut_id', '=', 0)
 			->clearOrderBy()
 			->limit(1);
 
@@ -778,15 +787,19 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$object = $this->shortcut_id
+			? $this->Shortcut
+			: $this;
+
 		$link = $oAdmin_Form_Field->link;
 		$onclick = $oAdmin_Form_Field->onclick;
 
-		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
-		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $onclick);
 
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
 
-		if ($this->active == 0)
+		if ($object->active == 0)
 		{
 			$oCore_Html_Entity_Div->style("text-decoration: line-through");
 		}
@@ -795,19 +808,19 @@ class Shop_Group_Model extends Core_Entity
 			Core::factory('Core_Html_Entity_A')
 				->href($link)
 				->onclick($onclick)
-				->value(htmlspecialchars($this->name))
+				->value(htmlspecialchars($object->name))
 		);
 
-		if ($this->active == 1)
+		if ($object->active == 1)
 		{
-			$oCurrentAlias = $this->Shop->Site->getCurrentAlias();
+			$oCurrentAlias = $object->Shop->Site->getCurrentAlias();
 
 			if ($oCurrentAlias)
 			{
-				$href = ($this->Shop->Structure->https ? 'https://' : 'http://')
+				$href = ($object->Shop->Structure->https ? 'https://' : 'http://')
 					. $oCurrentAlias->name
-					. $this->Shop->Structure->getPath()
-					. $this->getPath();
+					. $object->Shop->Structure->getPath()
+					. $object->getPath();
 
 				$oCore_Html_Entity_Div->add(
 					Core::factory('Core_Html_Entity_A')
@@ -821,11 +834,11 @@ class Shop_Group_Model extends Core_Entity
 			}
 		}
 
-		$this->items_total_count > 0 && $oCore_Html_Entity_Div
+		$object->items_total_count > 0 && $oCore_Html_Entity_Div
 			->add(
 				Core::factory('Core_Html_Entity_Span')
 					->class('badge badge-hostcms badge-square')
-					->value($this->items_total_count)
+					->value($object->items_total_count)
 			);
 
 		$oCore_Html_Entity_Div->execute();
@@ -1225,6 +1238,7 @@ class Shop_Group_Model extends Core_Entity
 			$aBackup = array(
 				'name' => $this->name,
 				'parent_id' => $this->parent_id,
+				'shortcut_id' => $this->shortcut_id,
 				'path' => $this->path,
 				'sorting' => $this->sorting,
 				'active' => $this->active,
@@ -1260,6 +1274,7 @@ class Shop_Group_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
+
 				$this->sorting = Core_Array::get($aBackup, 'sorting');
 				$this->path = Core_Array::get($aBackup, 'path');
 				$this->description = Core_Array::get($aBackup, 'description');
@@ -1343,5 +1358,48 @@ class Shop_Group_Model extends Core_Entity
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function imgBackend()
+	{
+		if ($this->shortcut_id)
+		{
+			return '<i class="fa fa-link"></i>';
+		}
+		else
+		{
+			return '<i class="fa fa-folder-open-o"></i>';
+		}
+	}
+
+	/**
+	 * Create shortcut and move into group $group_id
+	 * @param int $group_id group id
+	 * @return Shop_Group_Model Shortcut
+	 */
+	public function shortcut($group_id = NULL)
+	{
+		$oShop_GroupShortcut = Core_Entity::factory('Shop_Group');
+
+		$object = $this->shortcut_id
+			? $this->Shortcut
+			: $this;
+
+		$oShop_GroupShortcut->shop_id = $object->shop_id;
+		$oShop_GroupShortcut->shortcut_id = $object->id;
+		$oShop_GroupShortcut->name = '';
+		$oShop_GroupShortcut->path = '';
+		$oShop_GroupShortcut->indexing = 0;
+
+		$oShop_GroupShortcut->parent_id =
+			is_null($group_id)
+			? $object->parent_id
+			: $group_id;
+
+		return $oShop_GroupShortcut->save()->clearCache();
 	}
 }

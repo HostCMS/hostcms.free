@@ -17,13 +17,13 @@ class Lib_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.8';
+	public $version = '6.9';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2019-06-27';
+	public $date = '2019-08-01';
 
 	/**
 	 * Module name

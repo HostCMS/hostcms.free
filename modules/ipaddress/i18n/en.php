@@ -35,4 +35,8 @@ return array(
 	'no_statistic' => 'Ignore in statistics',
 	'invalid_ip' => 'Invalid IP address entered.',
 	'undelete_success' => 'Item restored successfully!',
+	'denyAllAccess_success' => 'Information modified successfully!',
+	'allowAllAccess_success' => 'Information modified successfully!',
+	'denyAllBackendAccess_success' => 'Information modified successfully!',
+	'allowAllBackendAccess_success' => 'Information modified successfully!',
 );

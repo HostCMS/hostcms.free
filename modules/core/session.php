@@ -30,6 +30,15 @@ abstract class Core_Session
 	static protected $_started = FALSE;
 
 	/**
+	 * Checks if the session was started
+	 * @return boolean
+	 */
+	static public function isStarted()
+	{
+		return self::$_started;
+	}
+
+	/**
 	 * Start session
 	 * @return boolean
 	 */
@@ -71,16 +80,84 @@ abstract class Core_Session
 			}
 
 			// При повторном запуске $_SESSION уже будет
-			//if (Core_Array::getRequest(session_name())/* && !isset($_SESSION)*/)
+			//if (Core_Array::getRequest(self::getName())/* && !isset($_SESSION)*/)
 			//{
 				@session_start();
 				self::$_started = TRUE;
+				self::$_hasSessionId = TRUE;
 			//}
 
 			//self::_setCookie();
 		}
 
 		return TRUE;
+	}
+
+	/**
+	 * Get session name
+	 * @return string
+	 */
+	static public function getName()
+	{
+		return session_name();
+	}
+
+	/**
+	 * Checks if the session enabled and exists
+	 * @return boolean
+	 */
+	static public function isAcive()
+	{
+		return function_exists('session_status')
+			? session_status() === PHP_SESSION_ACTIVE
+			: session_id() !== '';
+	}
+
+	/**
+     * Is the current request has sent the session ID.
+	 * @return boolean|NULL
+	 */
+	static protected $_hasSessionId = NULL;
+
+	/**
+     * The is the current request has sent the session ID.
+	 * @return boolean
+	 */
+	static public function hasSessionId()
+	{
+		if (is_null(self::$_hasSessionId))
+		{
+			$sessionName = self::getName();
+
+			if (!empty($_COOKIE[$sessionName]) && ini_get('session.use_cookies'))
+			{
+				self::$_hasSessionId = TRUE;
+			}
+			elseif (!ini_get('session.use_only_cookies') && ini_get('session.use_trans_sid') && isset($_REQUEST[$sessionName]))
+			{
+				self::$_hasSessionId = !empty($_REQUEST[$sessionName]);
+			}
+			else
+			{
+				self::$_hasSessionId = FALSE;
+			}
+		}
+
+		return self::$_hasSessionId;
+	}
+
+	/**
+	 * Regenerate session ID
+	 * @param bool $delete_old_session Whether to delete the old associated session file or not, default FALSE
+	 */
+	static public function regenerateId($delete_old_session = FALSE)
+	{
+		if (self::isAcive())
+		{
+			!headers_sent()
+				? session_regenerate_id($delete_old_session)
+				: @session_regenerate_id($delete_old_session);
+		}
 	}
 
 	static protected $_handler = NULL;
@@ -94,15 +171,15 @@ abstract class Core_Session
 		{
 			throw new Core_Exception('Wrong Session config, needs driver');
 		}
-		
+
 		$sessionClass = isset(Core::$mainConfig['session']['class'])
 			? Core::$mainConfig['session']['class']
 			: self::_getDriverName(Core::$mainConfig['session']['driver']);
-		
+
 		//if (is_null(self::$_handler))
 		//{
 			$oCore_Session = self::$_handler = new $sessionClass();
-			
+
 			session_set_save_handler(
 				array($oCore_Session, 'sessionOpen'),
 				array($oCore_Session, 'sessionClose'),
@@ -123,7 +200,7 @@ abstract class Core_Session
 	{
 		return __CLASS__ . '_' . ucfirst($driver);
 	}
-	
+
 	/**
 	 * Set cookie with expiration date
 	 */
@@ -144,10 +221,10 @@ abstract class Core_Session
 
 			$expires = self::getMaxLifeTime();
 
-			setcookie(session_name(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE);
+			setcookie(self::getName(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE);
 
 			// Заменяем заголовок ($replace = TRUE)
-			//Core::setcookie(session_name(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE, $replace = TRUE);
+			//Core::setcookie(self::getName(), session_id(), time() + $expires, '/', $domain, FALSE, TRUE, $replace = TRUE);
 			//session_set_cookie_params(time() + $expires, '/', $domain);
 			//session_id(session_id());
 		}
@@ -163,29 +240,16 @@ abstract class Core_Session
 		//{
 			self::$_started = FALSE;
 
-			$bStarted = function_exists('session_status')
-				? session_status() == PHP_SESSION_ACTIVE
-				: session_id() !== '';
-
-			if ($bStarted)
+			if (self::isAcive())
 			{
 				session_write_close();
 			}
-			
+
 			// cause session_destroy(): Trying to destroy uninitialized session
 			//self::$_handler = NULL;
 		//}
 
 		return TRUE;
-	}
-
-	/**
-	 * Checks if the session was started
-	 * @return boolean
-	 */
-	static public function isStarted()
-	{
-		return self::$_started;
 	}
 
 	/**
@@ -229,7 +293,7 @@ abstract class Core_Session
 			: intval(ini_get('session.gc_maxlifetime'));
 	}
 
-	
+
 	/**
 	 * The open callback works like a constructor in classes and is executed when the session is being opened.
 	 * @param string $save_path save path
@@ -250,7 +314,7 @@ abstract class Core_Session
 	 * @return string
 	 */
 	abstract public function sessionRead($id);
-	
+
 	/**
 	 * The write callback is called when the session needs to be saved and closed.
 	 * @param string $id session ID
@@ -272,7 +336,7 @@ abstract class Core_Session
 	 * @return boolean
 	 */
 	abstract public function sessionGc($maxlifetime);
-	
+
 	/**
 	 * This callback is executed when a session sets maxlifetime
 	 * @param int $maxlifetime

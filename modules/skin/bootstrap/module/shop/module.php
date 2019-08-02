@@ -73,7 +73,12 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 	protected function _ordersContent()
 	{
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', 75);
 

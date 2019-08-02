@@ -218,7 +218,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		$windowId = $oAdmin_Form_Controller->getWindowId();
 
 		//Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		if ($this->_showFilter)
 		{
@@ -1152,7 +1157,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			$windowId = $oAdmin_Form_Controller->getWindowId();
 
 			// Текущий пользователь
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
+
+			if (is_null($oUser))
+			{
+				return FALSE;
+			}
 
 			// Доступные действия для пользователя
 			$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);

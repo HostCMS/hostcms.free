@@ -107,7 +107,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Site')
 );
 
-$oUser = Core_Entity::factory('User')->getCurrent();
+$oUser = Core_Auth::getCurrentUser();
 
 // Ограничение списка сайтов для непривилегированного пользователя
 if ($oUser->superuser == 0)

@@ -287,7 +287,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 					$discount -= $oShop_Order_Item->getAmount();
 					unset($aShop_Order_Items[$key]);
 				}
-				else
+				elseif ($oShop_Order_Item->shop_item_id)
 				{
 					$amount += $oShop_Order_Item->getAmount();
 				}

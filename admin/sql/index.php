@@ -81,7 +81,7 @@ $sText = Core_Array::getPost('text');
 try
 {
 	// Текущий пользователь
-	$oUser = Core_Entity::factory('User')->getCurrent();
+	$oUser = Core_Auth::getCurrentUser();
 
 	// Read Only режим
 	if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)

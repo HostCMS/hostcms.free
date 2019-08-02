@@ -40,7 +40,7 @@ $shop_groups_parent_id = Core_Array::getPost('shop_groups_parent_id', 0);
 if (Core_Array::getPost('action') == 'export')
 {
 	// Текущий пользователь
-	$oUser = Core_Entity::factory('User')->getCurrent();
+	$oUser = Core_Auth::getCurrentUser();
 
 	if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)
 	{

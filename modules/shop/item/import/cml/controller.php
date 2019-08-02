@@ -1168,7 +1168,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Search by Marking
-					if (is_null($oShopItem) && strval($oXmlItem->Артикул))
+					if (is_null($oShopItem) && trim(strval($oXmlItem->Артикул)) != '')
 					{
 						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oXmlItem->Артикул));
 					}

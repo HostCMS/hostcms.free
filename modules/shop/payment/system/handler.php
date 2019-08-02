@@ -130,7 +130,7 @@ abstract class Shop_Payment_System_Handler
 		$this->_round = $round;
 		return $this;
 	}
-	
+
 	/**
 	 * Round prices
 	 * @var boolean
@@ -207,6 +207,11 @@ abstract class Shop_Payment_System_Handler
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeExecute', $this);
 
 		Core_Session::start();
+
+		if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+		{
+			Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+		}
 
 		!isset($_SESSION['last_order_id']) && $_SESSION['last_order_id'] = 0;
 
@@ -336,7 +341,7 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		// UTM, Openstat or From
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 		if (is_null($oUser))
 		{
 			$oSource_Controller = new Source_Controller();
@@ -451,6 +456,7 @@ abstract class Shop_Payment_System_Handler
 		// об оплате или счет.
 		//if (!Core::moduleIsActive('siteuser'))
 		//{
+			Core_Session::start();
 			$_SESSION['order_' . $this->_shopOrder->id] = TRUE;
 		//}
 
@@ -1339,7 +1345,8 @@ abstract class Shop_Payment_System_Handler
 			->message($sInvoice)
 			->contentType($this->_adminMailContentType)
 			->header('X-HostCMS-Reason', 'Order')
-			->header('Precedence', 'bulk');
+			->header('Precedence', 'bulk')
+			->messageId();
 
 		// Attach order property files
 		$aProperty_Values = $oShopOrder->getPropertyValues(FALSE);
@@ -1473,6 +1480,7 @@ abstract class Shop_Payment_System_Handler
 				->contentType($this->_siteuserMailContentType)
 				->header('X-HostCMS-Reason', 'OrderConfirm')
 				->header('Precedence', 'bulk')
+				->messageId()
 				->send();
 		}
 

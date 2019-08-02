@@ -34,7 +34,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 				$oAdmin_Form_Entity->execute();
 			}
 		}
-		?></ul>
+		?>
+		</ul>
 		</div><?php
 
 		return $this;
@@ -90,9 +91,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		{
 			?><div class="page-header position-relative">
 			<div class="header-title">
-				<h1>
-					<?php echo htmlspecialchars($title)?>
-				</h1>
+				<h1><?php echo htmlspecialchars($title)?></h1>
 			</div>
 			<?php
 			if (Core_Auth::logged())
@@ -109,7 +108,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 
 				$sPagePath = strval(Core_Array::get($_SERVER,'REQUEST_URI'));
 
-				$oUser = Core_Entity::factory('User')->getCurrent();
+				$oUser = Core_Auth::getCurrentUser();
 				$oUser_Bookmark = $oUser->User_Bookmarks->getByPath($sPagePath);
 				$class = !is_null($oUser_Bookmark) ? 'active' : '';
 

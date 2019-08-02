@@ -5,13 +5,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Query builder. SELECT Database Abstraction Layer (DBAL)
  *
- * http://dev.mysql.com/doc/refman/5.5/en/select.html
+ * http://dev.mysql.com/doc/refman/5.7/en/select.html
  *
  * Subqueries
- * http://dev.mysql.com/doc/refman/5.5/en/subqueries.html
+ * http://dev.mysql.com/doc/refman/5.7/en/subqueries.html
  *
  * The Subquery as Scalar Operand
- * http://dev.mysql.com/doc/refman/5.5/en/scalar-subqueries.html
+ * http://dev.mysql.com/doc/refman/5.7/en/scalar-subqueries.html
  * <code>
  * // SELECT (SELECT MAX(`column2`) FROM `t2`) FROM `t1`
  * $oCore_QueryBuilder_Select2 = Core_QueryBuilder::select('MAX(column2)')->from('t2');
@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * </code>
  *
  * Comparisons Using Subqueries
- * http://dev.mysql.com/doc/refman/5.5/en/comparisons-using-subqueries.html
+ * http://dev.mysql.com/doc/refman/5.7/en/comparisons-using-subqueries.html
  *
  * <code>
  * // SELECT * FROM `t1` WHERE `column1` = (SELECT MAX(`column2`) FROM `t2`)
@@ -240,7 +240,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 
 	/**
-	 *
+	 * Set FROM
 	 *
 	 * <code>
 	 * // FROM `tableName`
@@ -395,11 +395,11 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		$this->_union[] = array('ALL', $object);
 		return $this;
 	}
-	
+
 	/**
 	 * ORDER BY for UNION
 	 *
-	 * http://dev.mysql.com/doc/refman/5.5/en/union.html
+	 * http://dev.mysql.com/doc/refman/5.7/en/union.html
 	 * @param string $column column
 	 * @param string $direction sorting direction
 	 * @param boolean $binary binary option
@@ -498,7 +498,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 		if (!empty($this->_select))
 		{
-			$query[] = implode(', ', $this->quoteColumns($this->_select));
+			$query[] = implode(', ', $this->_quoteColumns($this->_select));
 		}
 		else
 		{
@@ -507,7 +507,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 		if (!empty($this->_from))
 		{
-			$query[] = 'FROM ' . implode(', ', $this->quoteColumns($this->_from));
+			$query[] = 'FROM ' . implode(', ', $this->_quoteTables($this->_from));
 		}
 
 		if (!empty($this->_join))
@@ -522,7 +522,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 		if (!empty($this->_groupBy))
 		{
-			$query[] = 'GROUP BY ' . implode(', ', $this->quoteColumns($this->_groupBy));
+			$query[] = 'GROUP BY ' . implode(', ', $this->_quoteColumns($this->_groupBy));
 		}
 
 		if (!empty($this->_having))
@@ -568,7 +568,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 			{
 				$aUnion[] = ' ' . $this->_buildOrderBy($this->_unionOrderBy);
 			}
-			
+
 			if (!is_null($this->_unionLimit))
 			{
 				$aUnion[] = ' LIMIT ' . $this->_unionLimit;
@@ -594,7 +594,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		$this->_having = array();
 		return $this;
 	}
-	
+
 	/**
 	 * Get SELECT
 	 * @return array
@@ -603,7 +603,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	{
 		return $this->_select;
 	}
-	
+
 	/**
 	 * Clear SELECT list
 	 * @return Core_QueryBuilder_Select
@@ -633,7 +633,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		$this->_groupBy = array();
 		return $this;
 	}
-	
+
 	/**
 	 * Clear
 	 * @return Core_QueryBuilder_Select

@@ -153,7 +153,7 @@ class Shop_Comment_Controller_Show extends Core_Controller
 		Core_Entity::factory('Comment')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
-		Core_Entity::factory('User', 0)->getCurrent();
+		Core_Auth::getCurrentUser();
 
 		$this->calculateTotal && $this->_Comments
 			->queryBuilder()

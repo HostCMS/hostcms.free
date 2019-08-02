@@ -35,4 +35,8 @@ return array(
 	'no_statistic' => 'Не учитывать в статистике',
 	'invalid_ip' => 'Вы ввели недопустимый IP-адрес.',
 	'undelete_success' => 'Элемент восстановлен!',
+	'denyAllAccess_success' => 'Доступ успешно изменен!',
+	'allowAllAccess_success' => 'Доступ успешно изменен!',
+	'denyAllBackendAccess_success' => 'Доступ успешно изменен!',
+	'allowAllBackendAccess_success' => 'Доступ успешно изменен!',
 );

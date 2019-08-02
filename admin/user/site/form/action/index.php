@@ -24,7 +24,7 @@ $site_id = Core_Array::getGet('site_id');
 $oSite = Core_Entity::factory('Site', $site_id);
 
 // Проверка возможности доступа пользователя к сайту
-$oUser = Core_Entity::factory('User')->getCurrent();
+$oUser = Core_Auth::getCurrentUser();
 
 if ($oUser->superuser == 0
 	&& !$oUser->checkSiteAccess($oSite))

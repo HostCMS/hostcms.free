@@ -243,6 +243,8 @@ abstract class Core_Cache
 		{
 			$this->deleteTags($actualKey);
 
+			$bClear = FALSE;
+
 			foreach ($tags as $tag)
 			{
 				$oCache_Tag = Core_Entity::factory('Cache_Tag');
@@ -252,9 +254,12 @@ abstract class Core_Cache
 				$oCache_Tag->hash = $actualKey;
 				$oCache_Tag->expire = Core_Date::timestamp2sql($expire);
 				$oCache_Tag->save();
+				
+				!$bClear
+					&& $bClear = rand(0, $this->_cleaningFrequency * 0.8) == 0;
 			}
 			
-			if (rand(0, $this->_cleaningFrequency) == 0)
+			if ($bClear)
 			{
 				$iLimit = intval($this->_cleaningFrequency);
 				

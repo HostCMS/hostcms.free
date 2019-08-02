@@ -179,4 +179,5 @@ return array(
 	'discountcard_template' => 'Discount card number template',
 	'invoice_template' => 'Order invoice number template',
 	'all_shops' => 'All shops',
+	'default_shop_measure_id' => 'Default shop measure',
 );

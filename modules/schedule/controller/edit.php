@@ -49,7 +49,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
 		$this->getField('interval')
-			->class('input-lg')
+			->class('input-lg form-control')
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
 		$oMainTab
@@ -87,7 +87,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->options(is_array($aModuleActions) && count($aModuleActions) ? $aModuleActions : array(' … '))
 			->value($this->_object->action));
 
-		$oMainTab->move($this->getField('entity_id')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2);
+		$oMainTab->move($this->getField('entity_id')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
 
 		$oMainTab->move($this->getField('description'), $oMainRow3);
 

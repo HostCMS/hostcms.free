@@ -47,8 +47,8 @@ class User_Absence_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 		}
 	}
@@ -61,11 +61,9 @@ class User_Absence_Model extends Core_Entity
 	 */
 	public function employee_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$oEmployee = $this->Employee;
-
 		ob_start();
 
-		?><div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="<?php echo $oEmployee->getAvatar()?>" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oEmployee->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEmployee->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oEmployee->getFullName())?></a></div></div><?php
+		$this->Employee->id && $this->Employee->showAvatarWithName();
 
 		return ob_get_clean();
 	}

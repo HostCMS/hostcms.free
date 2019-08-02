@@ -205,10 +205,13 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 						? $oStructure->getPath()
 						: $oStructure->url;
 
-					$tinyMCELinkListArray[] = '{title: \'' . Core_Str::escapeJavascriptVariable($oStructure->menu_name) . '\', value: \'' . Core_Str::escapeJavascriptVariable($link) . '\'}';
+					if ($link != '')
+					{
+						$tinyMCELinkListArray[] = '{title: \'' . Core_Str::escapeJavascriptVariable($oStructure->menu_name) . '\', value: \'' . Core_Str::escapeJavascriptVariable($link) . '\'}';
+					}
 				}
 
-				$tinyMCELinkList = implode(",", $tinyMCELinkListArray);
+				$tinyMCELinkList = implode(',', $tinyMCELinkListArray);
 
 				unset($tinyMCELinkListArray);
 

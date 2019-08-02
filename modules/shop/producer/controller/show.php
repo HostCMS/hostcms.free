@@ -208,7 +208,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 			Core_Entity::factory('Shop_Producer')->getTableColumns();
 
 			// Load user BEFORE FOUND_ROWS()
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+			$oUserCurrent = Core_Auth::getCurrentUser();
 
 			$this->_Shop_Producers
 				->queryBuilder()

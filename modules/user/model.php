@@ -133,8 +133,8 @@ class User_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
 
@@ -165,6 +165,7 @@ class User_Model extends Core_Entity
 	 */
 	public function getCurrent()
 	{
+		Core_Session::hasSessionId() && Core_Session::start();
 		if (isset($_SESSION['current_users_id']))
 		{
 			$oUser = $this->find(intval($_SESSION['current_users_id']));
@@ -443,7 +444,7 @@ class User_Model extends Core_Entity
 	 */
 	public function markDeleted()
 	{
-		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oCurrentUser = Core_Auth::getCurrentUser();
 		if (!$oCurrentUser || $oCurrentUser->id != $this->id)
 		{
 			parent::markDeleted();
@@ -571,7 +572,7 @@ class User_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
 
-		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oCurrentUser = Core_Auth::getCurrentUser();
 
 		if (!$this->active
 			|| (!$oCurrentUser || $oCurrentUser->id != $this->id)
@@ -1047,5 +1048,18 @@ class User_Model extends Core_Entity
 		return isset($aDirectory_Emails[0])
 			? $aDirectory_Emails[0]->value
 			: NULL;
+	}
+	
+	/**
+	 * Show avatar with name
+	 */
+	public function showAvatarWithName()
+	{
+		?><div class="contracrot">
+			<div class="user-image"><img class="contracrot-ico" src="<?php echo $this->getAvatar()?>"></div>
+			<div class="user-name">
+				<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($this->getFullName())?></a>
+			</div>
+		</div><?php
 	}
 }

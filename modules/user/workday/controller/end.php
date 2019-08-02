@@ -78,7 +78,7 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 		{
 			ob_start();
 
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
 
 			if (!is_null($oUser))
 			{

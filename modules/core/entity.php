@@ -731,7 +731,7 @@ class Core_Entity extends Core_ORM
 		foreach ($this->_childrenEntities as $oChildEntity)
 		{
 			$childName = $oChildEntity instanceof Core_ORM
-				? $oChildEntity->getModelName()
+				? $oChildEntity->getXmlTagName()
 				: $oChildEntity->name;
 
 			$childArray = $oChildEntity->getStdObject($attributePrefix);

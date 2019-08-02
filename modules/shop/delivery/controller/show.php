@@ -57,6 +57,15 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		$this->paymentSystems = FALSE;
 
 		$this->_setShopDeliveries();
+		
+		if (Core_Session::hasSessionId())
+		{
+			Core_Session::start();
+			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+			 {
+				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			 }
+		}
 	}
 
 	/**
@@ -105,6 +114,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 				->name('total_amount')
 				->value($this->totalAmount)
 		);
+
+		Core_Session::start();
 
 		// Выбираем все типы доставки для данного магазина
 		$aShop_Deliveries = $this->_Shop_Deliveries->findAll();

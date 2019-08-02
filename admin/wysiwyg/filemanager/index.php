@@ -27,8 +27,8 @@ $oAdmin_Form_Controller
 	->pageTitle(Core::_('Wysiwyg_Filemanager.title'));
 
 // Корневая директория для пользователя
-//$oUser_Group = Core_Entity::factory('User')->getCurrent()->User_Group;
-$oUser = Core_Entity::factory('User')->getCurrent();
+//$oUser_Group = Core_Auth::getCurrentUser()->User_Group;
+$oUser = Core_Auth::getCurrentUser();
 $root_dir = ltrim(Core_File::pathCorrection($oUser->root_dir), DIRECTORY_SEPARATOR);
 
 $cdir = Core_Array::getRequest('cdir', '');

@@ -18,4 +18,10 @@ class Property_Controller_Value_Type11 extends Property_Controller_Value_Type
 	 * @var mixed
 	 */
 	protected $_modelName = 'Property_Value_Float';
+	
+	/**
+	 * Table name
+	 * @var string
+	 */
+	protected $_tableName = 'property_value_floats';
 }

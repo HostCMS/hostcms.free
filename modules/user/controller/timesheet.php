@@ -93,7 +93,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 		$aEntities = $aDatasets[0]->load();
 
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
@@ -528,7 +528,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 			<?php
 			$aAbsenceInfo = $this->_getAbsenceInfo($oUser, $iYear, $sMonth);
 
-			$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+			$oCurrentUser = Core_Auth::getCurrentUser();
 
 			for ($i = 1; $i <= $this->_iCountDaysInMonth; $i++)
 			{

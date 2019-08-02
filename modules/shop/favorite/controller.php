@@ -124,7 +124,7 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 	public function getAll(Shop_Model $oShop)
 	{
 		$this->moveTemporaryFavorite($oShop);
-		
+
 		// Проверяем наличие данных о пользователе
 		$aShop_Favorite = $this->siteuser_id
 			? $this->_getAllFromDb($oShop)
@@ -139,11 +139,15 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 	 */
 	public function clearSessionFavorite()
 	{
-		Core_Session::start();
-		if (isset($_SESSION['hostcmsFavorite']))
+		if (Core_Session::hasSessionId())
 		{
-			unset($_SESSION['hostcmsFavorite']);
+			Core_Session::start();
+			if (isset($_SESSION['hostcmsFavorite']))
+			{
+				unset($_SESSION['hostcmsFavorite']);
+			}
 		}
+
 		return $this;
 	}
 
@@ -177,26 +181,31 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 	 */
 	protected function _getAllFromSession(Shop_Model $oShop)
 	{
-		Core_Session::start();
-
-		$shop_id = $oShop->id;
-
-		$aFavorite = Core_Array::getSession('hostcmsFavorite', array());
-		$aFavorite[$shop_id] = Core_Array::get($aFavorite, $shop_id, array());
-
 		$aShop_Favorite = array();
-		foreach ($aFavorite[$shop_id] as $shop_item_id)
-		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
 
-			if (!is_null($oShop_Item) && $oShop_Item->active)
+		if (Core_Session::hasSessionId())
+		{
+			Core_Session::start();
+
+			$shop_id = $oShop->id;
+
+			$aFavorite = Core_Array::getSession('hostcmsFavorite', array());
+			$aFavorite[$shop_id] = Core_Array::get($aFavorite, $shop_id, array());
+
+
+			foreach ($aFavorite[$shop_id] as $shop_item_id)
 			{
-				// Temporary object
-				$oShop_Favorite = Core_Entity::factory('Shop_Favorite');
-				$oShop_Favorite->shop_item_id = $shop_item_id;
-				$oShop_Favorite->siteuser_id = 0;
-				$oShop_Favorite->shop_id = $shop_id;
-				$aShop_Favorite[] = $oShop_Favorite;
+				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
+
+				if (!is_null($oShop_Item) && $oShop_Item->active)
+				{
+					// Temporary object
+					$oShop_Favorite = Core_Entity::factory('Shop_Favorite');
+					$oShop_Favorite->shop_item_id = $shop_item_id;
+					$oShop_Favorite->siteuser_id = 0;
+					$oShop_Favorite->shop_id = $shop_id;
+					$aShop_Favorite[] = $oShop_Favorite;
+				}
 			}
 		}
 
@@ -228,10 +237,9 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 		}
 		else
 		{
-			Core_Session::start();
-
 			$Shop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);
 
+			Core_Session::hasSessionId() && Core_Session::start();
 			$aFavorite = Core_Array::getSession('hostcmsFavorite', array());
 			$aFavorite[$Shop_Item->shop_id] = Core_Array::get($aFavorite, $Shop_Item->shop_id, array());
 
@@ -268,7 +276,7 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 		}
 		else
 		{
-			Core_Session::start();
+			Core_Session::hasSessionId() && Core_Session::start();
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 			if (isset($_SESSION['hostcmsFavorite'][$oShop_Item->shop_id][$this->shop_item_id]))
 			{

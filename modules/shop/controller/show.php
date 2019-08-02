@@ -308,14 +308,6 @@ class Shop_Controller_Show extends Core_Controller
 			'page' => '\d+',
 			'producer' => '\d+',
 		);
-
-		if ($this->favorite && isset($_SESSION))
-		{
-			$hostcmsFavorite = Core_Array::get(Core_Array::getSession('hostcmsFavorite', array()), $oShop->id, array());
-			count($hostcmsFavorite) && $this->addCacheSignature('hostcmsFavorite=' . implode(',', $hostcmsFavorite));
-		}
-		
-		 isset($_SESSION['hostcmsOrder']['coupon_text']) && $this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
 	}
 
 	/**
@@ -374,9 +366,7 @@ class Shop_Controller_Show extends Core_Controller
 			case 1:
 				$this->_Shop_Items
 					->queryBuilder()
-					->orderBy('shop_items.name', $items_sorting_direction)
-					//->orderBy('shop_items.sorting', $items_sorting_direction)
-					;
+					->orderBy('shop_items.name', $items_sorting_direction);
 				break;
 			case 2:
 				$this->_Shop_Items
@@ -388,9 +378,7 @@ class Shop_Controller_Show extends Core_Controller
 			default:
 				$this->_Shop_Items
 					->queryBuilder()
-					->orderBy('shop_items.datetime', $items_sorting_direction)
-					//->orderBy('shop_items.sorting', $items_sorting_direction)
-					;
+					->orderBy('shop_items.datetime', $items_sorting_direction);
 		}
 
 		$this->_Shop_Items
@@ -531,21 +519,39 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Get items set
-	 * @return Shop_Item_Model
+	 * Get/set _Shop_Items
+	 * @param mixed $object
+	 * @return self or _Shop_Items
 	 */
-	public function shopItems()
+	public function shopItems($object = NULL)
 	{
-		return $this->_Shop_Items;
+		if (is_null($object))
+		{
+			return $this->_Shop_Items;
+		}
+		else
+		{
+			$this->_Shop_Items = $object;
+			return $this;
+		}
 	}
 
 	/**
-	 * Get groups set
-	 * @return Shop_Item_Model
+	 * Get/set _Shop_Groups
+	 * @param mixed $object
+	 * @return self or _Shop_Groups
 	 */
-	public function shopGroups()
+	public function shopGroups($object = NULL)
 	{
-		return $this->_Shop_Groups;
+		if (is_null($object))
+		{
+			return $this->_Shop_Groups;
+		}
+		else
+		{
+			$this->_Shop_Groups = $object;
+			return $this;
+		}
 	}
 
 	/**
@@ -714,7 +720,7 @@ class Shop_Controller_Show extends Core_Controller
 					$this->applyItemsForbiddenTags($oViewed_Shop_Item);
 
 					!$this->sets && $oViewed_Shop_Item->showXmlSets($this->sets);
-						
+
 					Core_Event::notify(get_class($this) . '.onBeforeAddViewedEntity', $this, array($oViewed_Shop_Item));
 
 					$oViewedEntity->addEntity($oViewed_Shop_Item);
@@ -789,7 +795,7 @@ class Shop_Controller_Show extends Core_Controller
 		Core_Entity::factory('Shop_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
-		Core_Entity::factory('User', 0)->getCurrent();
+		Core_Auth::getCurrentUser();
 
 		$this->calculateTotal && $this->_Shop_Items
 			->queryBuilder()
@@ -814,7 +820,28 @@ class Shop_Controller_Show extends Core_Controller
 
 		$this->showPanel && Core::checkPanel() && in_array($this->_mode, array('xsl', 'tpl')) && $this->_showPanel();
 
-		$bTpl = $this->_mode == 'tpl';
+		$oShop = $this->getEntity();
+
+		$hasSessionId = Core_Session::hasSessionId();
+		
+		// Before check cache
+		if ($hasSessionId)
+		{
+			$isActive = Core_Session::isAcive();
+			!$isActive && Core_Session::start();
+
+			if ($this->favorite)
+			{
+				$hostcmsFavorite = Core_Array::get(Core_Array::getSession('hostcmsFavorite', array()), $oShop->id, array());
+				count($hostcmsFavorite) && $this->addCacheSignature('hostcmsFavorite=' . implode(',', $hostcmsFavorite));
+			}
+
+			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+			{
+				$this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
+				Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			}
+		}
 
 		$this->item && $this->_incShowed();
 
@@ -834,8 +861,8 @@ class Shop_Controller_Show extends Core_Controller
 			$aTags = array();
 			$aTags[] = 'shop_group_' . intval($this->group);
 		}
-
-		$oShop = $this->getEntity();
+		
+		$bTpl = $this->_mode == 'tpl';
 
 		$oShop->showXmlCounts($this->calculateCounts);
 
@@ -856,7 +883,7 @@ class Shop_Controller_Show extends Core_Controller
 		);
 
 		// Comparing, favorite and viewed goods
-		if (isset($_SESSION))
+		if ($hasSessionId)
 		{
 			// Comparing goods
 			$this->comparing && $this->_addComparing();
@@ -896,6 +923,8 @@ class Shop_Controller_Show extends Core_Controller
 					}
 				}
 			}
+			
+			!$isActive && Core_Session::close();
 		}
 
 		$this->_shownIDs = array();
@@ -1516,6 +1545,7 @@ class Shop_Controller_Show extends Core_Controller
 				{
 					$oShop_Groups
 						->queryBuilder()
+						->where('shortcut_id', '=', 0)
 						->where('active', '=', $this->groupsActivity == 'inactive' ? 0 : 1);
 				}
 
@@ -1858,6 +1888,27 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			$oShop_Group->clearEntities();
 			$this->applyGroupsForbiddenTags($oShop_Group);
+
+			// Shortcut
+			if ($oShop_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oShop_Group;
+				$oShop_Group = clone $oShop_Group->Shortcut;
+
+				$oShop_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aShop_Groups[$oShop_Group->parent_id][] = $oShop_Group;
 		}
 
@@ -1885,6 +1936,27 @@ class Shop_Controller_Show extends Core_Controller
 		{
 			$oShop_Group->clearEntities();
 			$this->applyGroupsForbiddenTags($oShop_Group);
+
+			// Shortcut
+			if ($oShop_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oShop_Group;
+				$oShop_Group = clone $oShop_Group->Shortcut;
+
+				$oShop_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aShop_Groups[$oShop_Group->parent_id][] = $oShop_Group;
 		}
 

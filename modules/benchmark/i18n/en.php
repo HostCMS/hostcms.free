@@ -55,4 +55,7 @@ return array(
 	'convert' => 'Convert',
 	'convertedMsg' => 'Changed Storage Engines: %s.',
 	'add_counter' => 'Insert benchmark code into template',
+	'tableCharsets' => 'Table Charsets',
+	'severalCharsetsMsg' => 'The database contains tables with different charsets!',
+	'changeStorageCharsetTitle' => 'Setting charset',
 );

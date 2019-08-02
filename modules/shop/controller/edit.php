@@ -286,6 +286,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->delete($this->getField('siteuser_group_id'))
 					// Удаляем единицы измерения
 					->delete($this->getField('shop_measure_id'))
+					// Удаляем единицы измерения по умолчанию
+					->delete($this->getField('default_shop_measure_id'))
 					// Удаляем валюты
 					->delete($this->getField('shop_currency_id'))
 					// Удаляем статусы заказов
@@ -460,7 +462,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow7->add(Admin_Form_Entity::factory('Select')
 					->name('size_measure')
 					->caption(Core::_('Shop.size_measure'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(array(Core::_('Shop.size_measure_0'),
 						Core::_('Shop.size_measure_1'),
 						Core::_('Shop.size_measure_2'),
@@ -468,11 +470,23 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						Core::_('Shop.size_measure_4')))
 					->value($this->_object->size_measure), $oUrlTypeField);
 
+				// Добавляем единицы измерения по умолчанию
+				$oDefaultMeasuresField = Admin_Form_Entity::factory('Select')
+					->name('default_shop_measure_id')
+					->caption(Core::_('Shop.default_shop_measure_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->options(
+						$this->fillMeasures()
+					)
+					->value($this->_object->default_shop_measure_id);
+
+				$oMainRow7->add($oDefaultMeasuresField);
+
 				// Добавляем единицы измерения
 				$oMeasuresField = Admin_Form_Entity::factory('Select')
 					->name('shop_measure_id')
 					->caption(Core::_('Shop.shop_measure_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
 						$this->fillMeasures()
 					)
@@ -482,7 +496,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab->delete($this->getField('reserve_hours'));
 
-				$oMainRow7->add($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')));
+				$oMainRow7->add($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')));
 
 				Core_Templater::decorateInput($this->getField('invoice_template'));
 				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);

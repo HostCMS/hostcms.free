@@ -389,7 +389,7 @@
 				<td align="center" class="theme_td_author">
 					<xsl:choose>
 						<xsl:when test="forum_topic_post/siteuser/login/node()">
-							<a href="/users/info/{forum_topic_post/siteuser/login}/"><xsl:value-of select="forum_topic_post/siteuser/login"/></a>
+							<a href="/users/info/{forum_topic_post/siteuser/path}/"><xsl:value-of select="forum_topic_post/siteuser/login"/></a>
 						</xsl:when>
 						<xsl:otherwise>&labelGuest;</xsl:otherwise>
 					</xsl:choose>
@@ -410,7 +410,7 @@
 					<!-- Автор последнего сообщения -->
 					<xsl:choose>
 						<xsl:when test="last/forum_topic_post/siteuser/login/node()">
-							<a href="/users/info/{last/forum_topic_post/siteuser/login}/"><xsl:value-of select="last/forum_topic_post/siteuser/login"/></a>
+							<a href="/users/info/{last/forum_topic_post/siteuser/path}/"><xsl:value-of select="last/forum_topic_post/siteuser/login"/></a>
 						</xsl:when>
 						<xsl:otherwise>&labelGuest;</xsl:otherwise>
 					</xsl:choose>

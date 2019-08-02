@@ -159,6 +159,13 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		return $this->_aPrice;
 	}
 
+	static protected $_coupon = NULL;
+	
+	static public function coupon($coupon_text)
+	{
+		self::$_coupon = $coupon_text;
+	}
+
 	/**
 	 * Calculate the cost with tax and discounts without currencies
 	 * @param Shop_Item_Model $oShop_Item item
@@ -175,7 +182,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				// Определяем количество скидок на товар
 				$discountPercent = $discountAmount = 0;
 
-				$couponText = isset($_SESSION['hostcmsOrder']['coupon_text']) ? $_SESSION['hostcmsOrder']['coupon_text'] : NULL;
+				//$couponText = isset($_SESSION['hostcmsOrder']['coupon_text']) ? $_SESSION['hostcmsOrder']['coupon_text'] : NULL;
+				$couponText = self::$_coupon;
 
 				// Цикл по идентификаторам скидок для товара
 				foreach ($aShop_Item_Discounts as $oShop_Item_Discount)

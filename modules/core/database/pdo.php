@@ -216,7 +216,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 				$min = 0;
 				$max = 255;
 				break;
-				
+
 			case 'mediumint':
 				$type = 'int';
 				$min = -8388608;
@@ -336,9 +336,43 @@ class Core_DataBase_Pdo extends Core_DataBase
 	}
 
 	/**
+	 * Quote table name, e.g. `tableName` for 'tableName',
+	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
+	 * @param mixed $columnName string|array
+	 * @return string
+	 */
+	public function quoteTableName($tableName)
+	{
+		if (is_array($tableName))
+		{
+			// array('columnName', 'columnNameAlias') => `columnName` AS `columnNameAlias`
+			if (count($tableName) == 2)
+			{
+				list($tableName, $columnNameAlias) = $tableName;
+				return $this->quoteTableName($tableName) . ' AS ' . $this->quoteTableName($columnNameAlias);
+			}
+			else
+			{
+				list($tableName) = $tableName;
+				return $this->quoteTableName($tableName);
+			}
+		}
+		// Core_QueryBuilder_Expression
+		elseif (is_object($tableName))
+		{
+			// add brackets for subquery
+			return get_class($tableName) == 'Core_QueryBuilder_Select'
+				? '(' . $tableName->build() . ')'
+				: $tableName->build();
+		}
+
+		return $this->_tableQuoteCharacter . str_replace($this->_tableQuoteCharacter, '\\' . $this->_tableQuoteCharacter, $tableName) . $this->_tableQuoteCharacter;
+	}
+
+	/**
 	 * Quote column name, e.g. `columnName` for 'columnName',
 	 * `columnName` AS `columnNameAlias` for array('columnName', 'columnNameAlias')
-	 * @param mixed $columnName string or array
+	 * @param mixed $columnName string|array
 	 * @return string
 	 */
 	public function quoteColumnName($columnName)
@@ -366,9 +400,9 @@ class Core_DataBase_Pdo extends Core_DataBase
 		elseif (is_object($columnName))
 		{
 			// add brackets for subquery
-			return get_class($columnName) == 'Core_QueryBuilder_Select'
+			return /*get_class($columnName) == 'Core_QueryBuilder_Select'
 				? '(' . $columnName->build() . ')'
-				: $columnName->build();
+				: */$columnName->build();
 		}
 
 		if (isset($this->_quoteColumnNameCache[$columnName]))
@@ -411,7 +445,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 			{
 				$aColumnName = explode($separator, $columnName);
 
-				foreach ($aColumnName AS $key => $value)
+				foreach ($aColumnName as $key => $value)
 				{
 					$aColumnName[$key] = $this->quoteColumnName(trim($value));
 				}
@@ -422,9 +456,10 @@ class Core_DataBase_Pdo extends Core_DataBase
 			}
 		}
 
-		$return = '`' . str_replace('`', '\`', $columnName) . '`';
+		$return = $this->_columnQuoteCharacter . str_replace($this->_columnQuoteCharacter, '\\' . $this->_columnQuoteCharacter, $columnName) . $this->_columnQuoteCharacter;
 
 		$this->_addQuoteColumnNameCache($columnName, $return);
+
 		return $return;
 	}
 
