@@ -346,7 +346,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			$onclick = $this->getAdminLoadAjax($this->getPath());
 			?><td><?php
-				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/admin/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.button_to_clear')?>" type="image" src="/admin/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.button_to_clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
+				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/admin/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.clear')?>" type="image" src="/admin/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
 			?></td><?php
 		}
 		?></tr>

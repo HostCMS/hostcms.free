@@ -147,57 +147,76 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 			unset($aShop_Warehouse_Entries);
 
-			$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll(FALSE);
-			foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
-			{
-				if (isset($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]) && count($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]))
+			$limit = 500;
+			$offset = 0;
+
+			do {
+				$oShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items;
+				$oShop_Warehouse_Movement_Items->queryBuilder()
+					->limit($limit)
+					->offset($offset)
+					->clearOrderBy()
+					->orderBy('id', 'ASC');
+
+				$aShop_Warehouse_Movement_Items = $oShop_Warehouse_Movement_Items->findAll(FALSE);
+				foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
 				{
-					$oShop_Warehouse_Entry_Source = array_unshift($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]);
+					// Удаляем все накопительные значения с датой больше, чем дата документа
+					Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Movement_Item->shop_item_id, $oSource_Shop_Warehouse->id, $this->datetime);
+					Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Movement_Item->shop_item_id, $oDestination_Shop_Warehouse->id, $this->datetime);
+
+					if (isset($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]) && count($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]))
+					{
+						$oShop_Warehouse_Entry_Source = array_unshift($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]);
+					}
+					else
+					{
+						$oShop_Warehouse_Entry_Source = Core_Entity::factory('Shop_Warehouse_Entry');
+						$oShop_Warehouse_Entry_Source->setDocument($this->id, 4);
+						$oShop_Warehouse_Entry_Source->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
+					}
+
+					$oShop_Warehouse_Entry_Source->shop_warehouse_id = $oSource_Shop_Warehouse->id;
+					$oShop_Warehouse_Entry_Source->datetime = $this->datetime;
+					$oShop_Warehouse_Entry_Source->value = -$oShop_Warehouse_Movement_Item->count;
+					$oShop_Warehouse_Entry_Source->save();
+
+					if (isset($aTmp[$oDestination_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]))
+					{
+						$oShop_Warehouse_Entry_Destination = $aTmp[$oDestination_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id];
+					}
+					else
+					{
+						$oShop_Warehouse_Entry_Destination = Core_Entity::factory('Shop_Warehouse_Entry');
+						$oShop_Warehouse_Entry_Destination->setDocument($this->id, 4);
+						$oShop_Warehouse_Entry_Destination->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
+					}
+
+					$oShop_Warehouse_Entry_Destination->shop_warehouse_id = $oDestination_Shop_Warehouse->id;
+					$oShop_Warehouse_Entry_Destination->datetime = $this->datetime;
+					$oShop_Warehouse_Entry_Destination->value = $oShop_Warehouse_Movement_Item->count;
+					$oShop_Warehouse_Entry_Destination->save();
+
+					$restSource = $oSource_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
+
+					if (!is_null($restSource))
+					{
+						// Recount
+						$oSource_Shop_Warehouse->setRest($oShop_Warehouse_Movement_Item->shop_item_id, $restSource);
+					}
+
+					$restDestination = $oDestination_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
+
+					if (!is_null($restDestination))
+					{
+						// Recount
+						$oDestination_Shop_Warehouse->setRest($oShop_Warehouse_Movement_Item->shop_item_id, $restDestination);
+					}
 				}
-				else
-				{
-					$oShop_Warehouse_Entry_Source = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry_Source->setDocument($this->id, 4);
-					$oShop_Warehouse_Entry_Source->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
-				}
 
-				$oShop_Warehouse_Entry_Source->shop_warehouse_id = $oSource_Shop_Warehouse->id;
-				$oShop_Warehouse_Entry_Source->datetime = $this->datetime;
-				$oShop_Warehouse_Entry_Source->value = -$oShop_Warehouse_Movement_Item->count;
-				$oShop_Warehouse_Entry_Source->save();
-
-				if (isset($aTmp[$oDestination_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]))
-				{
-					$oShop_Warehouse_Entry_Destination = $aTmp[$oDestination_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id];
-				}
-				else
-				{
-					$oShop_Warehouse_Entry_Destination = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry_Destination->setDocument($this->id, 4);
-					$oShop_Warehouse_Entry_Destination->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
-				}
-
-				$oShop_Warehouse_Entry_Destination->shop_warehouse_id = $oDestination_Shop_Warehouse->id;
-				$oShop_Warehouse_Entry_Destination->datetime = $this->datetime;
-				$oShop_Warehouse_Entry_Destination->value = $oShop_Warehouse_Movement_Item->count;
-				$oShop_Warehouse_Entry_Destination->save();
-
-				$restSource = $oSource_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
-
-				if (!is_null($restSource))
-				{
-					// Recount
-					$oSource_Shop_Warehouse->setRest($oShop_Warehouse_Movement_Item->shop_item_id, $restSource);
-				}
-
-				$restDestination = $oDestination_Shop_Warehouse->getRest($oShop_Warehouse_Movement_Item->shop_item_id);
-
-				if (!is_null($restDestination))
-				{
-					// Recount
-					$oDestination_Shop_Warehouse->setRest($oShop_Warehouse_Movement_Item->shop_item_id, $restDestination);
-				}
+				$offset += $limit;
 			}
+			while (count($aShop_Warehouse_Movement_Items));
 
 			$this->posted = 1;
 			$this->save();
@@ -216,6 +235,10 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 4);
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
+				// Удаляем все накопительные значения с датой больше, чем дата документа
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oSource_Shop_Warehouse->id, $this->datetime);
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oDestination_Shop_Warehouse->id, $this->datetime);
+
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
 				$oShop_Warehouse_Entry->delete();
 
@@ -357,7 +380,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		$aReplace = array(
 			// Core_Meta
 			'this' => $this,
-			'company' => $this->Source_Shop_Warehouse->Shop->Shop_Company,
+			'company' => $this->Source_Shop_Warehouse->shop_company_id ? $this->Source_Shop_Warehouse->Shop_Company : $this->Source_Shop_Warehouse->Shop->Shop_Company,
 			'shop_warehouse' => $this->Source_Shop_Warehouse,
 			'destination_shop_warehouse' => $this->Destination_Shop_Warehouse,
 			'shop' => $this->Source_Shop_Warehouse->Shop,

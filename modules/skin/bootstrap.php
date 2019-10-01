@@ -36,6 +36,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/main.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/daterangepicker.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.slimscroll.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
@@ -1468,6 +1469,9 @@ class Skin_Bootstrap extends Core_Skin
 			case 'error':
 				$class = 'alert alert-danger fade in';
 			break;
+			case 'info':
+				$class = 'alert alert-info fade in';
+			break;
 			default:
 				$class = 'alert alert-success fade in';
 		}
@@ -1507,7 +1511,7 @@ class Skin_Bootstrap extends Core_Skin
 		</form>
 		<?php
 	}
-	
+
 	/**
 	 * Show Front End panels
 	 */

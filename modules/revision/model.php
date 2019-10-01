@@ -75,6 +75,39 @@ class Revision_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oRevision = Core_Entity::factory('Revision', $this->id);
+		?>
+		<script>
+		$(function() {
+			var str = JSON.stringify(<?php echo $oRevision->value?>, null, 2);
+
+			$('a#revision<?php echo $this->id?>').on('click', function (){
+				var dialog = bootbox.dialog({
+					title: '<?php echo $this->name?> <?php echo $this->datetime?>',
+					message: str,
+					backdrop: true,
+					size: 'large'
+				});
+
+				dialog.find('.bootbox-body').empty().append('<pre id="json<?php echo $this->id?>">' + str + '</pre>');
+
+				dialog.modal('show');
+			});
+		});
+		</script>
+		<?php
+
+		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . $this->name . '</a>';
+	}
+
+	/**
 	 * Get entity description
 	 * @return string
 	 */

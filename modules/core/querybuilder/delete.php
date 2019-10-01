@@ -10,7 +10,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * <code>
  * // DELETE FROM `tableName` WHERE `column1` = '17'
  * $delete = Core_QueryBuilder::delete('tableName')
- * 		->where('column1', '=', '17');
+ * 		->where('column1', '=', '17')
+ * 		->execute();
  * </code>
  *
  * <code>

@@ -25,6 +25,8 @@ class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 
 		parent::__construct();
 		$this->type('checkbox');
+
+		$this->_skipProperies['checked'] = 'checked';
 	}
 
 	/**
@@ -32,16 +34,20 @@ class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 	 */
 	public function execute()
 	{
-		if (is_null($this->checked)
-			&& $this->value != 0)
+		/*if (is_null($this->checked) && $this->value != 0)
 		{
 			$this->checked = 'checked';
-		}
+		}*/
 
 		// Значение, передаваемое при включенном checkbox
-		$this->value = 1;
+		$this->value === '' && $this->value = 1;
 
 		$aAttr = $this->getAttrsString();
+
+		if (is_null($this->checked) && $this->value != 0 || $this->checked)
+		{
+			$aAttr[] = 'checked="checked"';
+		}
 
 		$aDefaultDivAttr = array('class' => 'item_div');
 		$this->divAttr = Core_Array::union($this->divAttr, $aDefaultDivAttr);

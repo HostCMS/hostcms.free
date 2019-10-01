@@ -677,6 +677,25 @@ class User_Model extends Core_Entity
 	}
 
 	/**
+	 * Get company posts for user by company
+	 * @return array
+	 */
+	public function getCompanyPostsByCompany($iCompanyId, $isHead = NULL)
+	{
+		$oCompany_Posts = $this->Company_Posts; //->getAllByCompany_department_id($iDepartmentId);
+		$oCompany_Posts
+			->queryBuilder()
+			->where('company_department_post_users.company_id', '=', $iCompanyId);
+
+		!is_null($isHead)
+			&& $oCompany_Posts
+			->queryBuilder()
+			->where('company_department_post_users.head', '=', intval($isHead));
+
+		return $oCompany_Posts->findAll();
+	}
+
+	/**
 	 * Backend
 	 * @return self
 	 */
@@ -1009,14 +1028,13 @@ class User_Model extends Core_Entity
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
 				do {
-					// ID департамента, в котором работает $oEmployee входит в перечень, в которой $this глава
+					// ID департамента, в котором работает $oEmployee входит в перечень, в котором $this глава
 					if (in_array($oCompany_Department->id, $aHeadOfDepartmentsIDs))
 					{
 						return TRUE;
 					}
 				} while($oCompany_Department = $oCompany_Department->getParent());
 			}
-
 		}
 
 		return FALSE;
@@ -1042,6 +1060,112 @@ class User_Model extends Core_Entity
 		return FALSE;
 	}
 
+	/**
+	 * Может ли авторизованный сотрудник менять права доступа к сделке для определенного сотрудника
+	 * @param $oUser сотрудник
+	 * @return boolean
+	 */
+	public function hasAccessChangeDealPermissions4User($oUser)
+	{
+		return $this->isHeadOfEmployee($oUser);
+	}
+
+	/**
+	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в отдел
+	 * @param $oDepartment отдел
+	 * @return boolean
+	 */
+	/* public function hasEditEmployeeInDepartment($oDepartment)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в любом отделе компании
+	 * @param $oCompany компания
+	 * @return boolean
+	 */
+	/* public function hasEditEmployeeInCompany($oCompany)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+
+	/**
+	 * Может ли сотрудник изменять организационную структуру отдела - добавлять,
+	 * редактировать, удалять подотделы, менять их подчиненность
+	 * @param $oDepartment отдел
+	 * @return boolean
+	 */
+	/* public function hasEditDepartmentStructure($oDepartment)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Может ли сотрудник изменять организационную структуру компании (любого ее отдела) - добавлять, редактировать,
+	 * удалять отделы, менять их подчиненность
+	 * @param $oCompany компания
+	 * @return boolean
+	 */
+/* 	public function hasEditCompanyStructure($oCompany)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Есть ли отдел, организационную структуру которого сотрудник может менять
+	 * @param $iCompanyId идентификатор компании
+	 * @return boolean
+	 */
+	/* public function hasExistEditableDepartment($oCompany)
+	{
+		if ($this->hasEditCompanyStructure($oCompany))
+		{
+			return TRUE;
+		}
+
+		$aCompany_Departments = $oCompany->Company_Departments->findAll();
+
+		foreach($aCompany_Departments as $oCompany_Department)
+		{
+			if ($this->hasEditDepartmentStructure($oCompany_Department))
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	} */
+
 	public function getEmail()
 	{
 		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
@@ -1049,7 +1173,7 @@ class User_Model extends Core_Entity
 			? $aDirectory_Emails[0]->value
 			: NULL;
 	}
-	
+
 	/**
 	 * Show avatar with name
 	 */

@@ -31,17 +31,7 @@ if ($Shop_Controller_Show->item == 0)
 	if (Core_Array::getGet('producer_id'))
 	{
 		$iProducerId = intval(Core_Array::getGet('producer_id'));
-		$Shop_Controller_Show->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('producer_id')->value($iProducerId)
-		);
-
-		$Shop_Controller_Show->shopItems()
-			->queryBuilder()
-			->select('shop_items.*')
-			->where('shop_items.shop_producer_id', '=', $iProducerId);
-
-		$Shop_Controller_Show->addCacheSignature('producer_id=' . $iProducerId);
+		$Shop_Controller_Show->producer($iProducerId);
 	}
 
 	if (Core_Array::getGet('filter') || Core_Array::getGet('sorting'))
@@ -51,244 +41,24 @@ if ($Shop_Controller_Show->item == 0)
 				->name('filter')->value(1)
 		);
 
-		$oShop = $Shop_Controller_Show->getEntity();
-
+		// Sorting
 		$sorting = intval(Core_Array::getGet('sorting'));
+		
+		($sorting == 1 || $sorting == 2)
+			&& $Shop_Controller_Show->orderBy('absolute_price', $sorting == 1 ? 'ASC' : 'DESC');
+
+		$sorting == 3 && $Shop_Controller_Show->orderBy('shop_items.name', 'ASC');
+		
 		$Shop_Controller_Show->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('sorting')->value($sorting)
 		);
-		$Shop_Controller_Show->addCacheSignature('sorting=' . $sorting);
 
 		// Prices
-		$price_from = intval(Core_Array::getGet('price_from'));
-		$price_to = intval(Core_Array::getGet('price_to'));
-		if ($price_from || $price_to || $sorting == 1 || $sorting == 2)
-		{
-			// Получаем список валют магазина
-			$aShop_Currencies = Core_Entity::factory('Shop_Currency')->findAll();
-
-			$query_tax = 'IF(`shop_taxes`.`tax_is_included` IS NULL OR `shop_taxes`.`tax_is_included` = 1, 0, `shop_items`.`price` * `shop_taxes`.`rate` / 100)';
-			$query_currency_switch = "`shop_items`.`price` + {$query_tax}";
-			foreach ($aShop_Currencies as $oShop_Currency)
-			{
-				// Получаем коэффициент пересчета для каждой валюты
-				$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-					$oShop_Currency, $oShop->Shop_Currency
-				);
-
-				$query_currency_switch = "IF (`shop_items`.`shop_currency_id` = '{$oShop_Currency->id}', IF (COUNT(`shop_discounts`.`id`), ((`shop_items`.`price` + {$query_tax}) * (1 - SUM(DISTINCT IF(`shop_discounts`.`type` = 0, `shop_discounts`.`value`, 0)) / 100)) * {$currency_coefficient} - SUM(DISTINCT IF(`shop_discounts`.`type`, `shop_discounts`.`value`, 0)), (`shop_items`.`price`) * {$currency_coefficient}), {$query_currency_switch})";
-			}
-
-			$current_date = date('Y-m-d H:i:s');
-			$Shop_Controller_Show->shopItems()
-				->queryBuilder()
-				->select(array(Core_QueryBuilder::expression($query_currency_switch), 'absolute_price'))
-				->leftJoin('shop_item_discounts', 'shop_items.id', '=', 'shop_item_discounts.shop_item_id')
-				->leftJoin('shop_discounts', 'shop_item_discounts.shop_discount_id', '=', 'shop_discounts.id', array(
-					array('AND ' => array('shop_discounts.active', '=', 1)),
-					array('AND ' => array('shop_discounts.deleted', '=', 0)),
-					array('AND' => array('shop_discounts.start_datetime', '<=', $current_date)),
-					array('AND (' => array('shop_discounts.end_datetime', '>=', $current_date)),
-					array('OR' => array('shop_discounts.end_datetime', '=', '0000-00-00 00:00:00')),
-					array(')' => NULL)
-				))
-				->leftJoin('shop_taxes', 'shop_taxes.id', '=', 'shop_items.shop_tax_id')
-				->groupBy('shop_items.id');
-
-			if ($price_from)
-			{
-				$Shop_Controller_Show->shopItems()->queryBuilder()->having('absolute_price', '>=', $price_from);
-				$Shop_Controller_Show->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('price_from')->value($price_from)
-				);
-				$Shop_Controller_Show->addCacheSignature('price_from=' . $price_from);
-			}
-			if ($price_to)
-			{
-				$Shop_Controller_Show->shopItems()->queryBuilder()->having('absolute_price', '<=', $price_to);
-				$Shop_Controller_Show->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('price_to')->value($price_to)
-				);
-				$Shop_Controller_Show->addCacheSignature('price_to=' . $price_to);
-			}
-
-			$Shop_Controller_Show->shopItems()->queryBuilder()
-				->clearOrderBy()
-				->orderBy('absolute_price', $sorting == 1 ? 'ASC' : 'DESC');
-		}
-
-		$sorting == 3 && $Shop_Controller_Show->shopItems()->queryBuilder()
-			->clearOrderBy()
-			->orderBy('shop_items.name', 'ASC');
+		$Shop_Controller_Show->setFilterPricesConditions($_GET);
 
 		// Additional properties
-		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
-
-		$aProperties = $Shop_Controller_Show->group !== FALSE && is_null($Shop_Controller_Show->tag)
-			? $oShop_Item_Property_List->getPropertiesForGroup($Shop_Controller_Show->group)
-			: $oShop_Item_Property_List->Properties->findAll();
-
-		$aTmpProperties = array();
-		$havingCount = 0;
-		foreach ($aProperties as $oProperty)
-		{
-			// Св-во может иметь несколько значений
-			$aPropertiesValue = Core_Array::getGet('property_' . $oProperty->id);
-			if ($aPropertiesValue)
-			{
-				!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
-				$aPropertiesValue = array_map('strval', $aPropertiesValue);
-
-				$aTmpProperties[] = array($oProperty, $aPropertiesValue);
-				$havingCount++;
-			}
-			elseif (!is_null(Core_Array::getGet('property_' . $oProperty->id . '_from')))
-			{
-				$tmpFrom = Core_Array::getGet('property_' . $oProperty->id . '_from');
-				$tmpTo = Core_Array::getGet('property_' . $oProperty->id . '_to');
-
-				!is_array($tmpFrom) && $tmpFrom = array($tmpFrom);
-				!is_array($tmpTo) && $tmpTo = array($tmpTo);
-
-				// From ... to ...
-				foreach ($tmpFrom as $iKey => $sValue)
-				{
-					$to = Core_Array::get($tmpTo, $iKey);
-
-					$aTmpProperties[] = array($oProperty, array(
-							'from' => $sValue != ''
-								? ($oProperty->type == 11 ? floatval($sValue) : intval($sValue))
-								: '',
-							'to' => $to != ''
-								? ($oProperty->type == 11 ? floatval($to) : intval($to))
-								: ''
-						));
-				}
-				$havingCount++;
-			}
-		}
-
-		if (count($aTmpProperties))
-		{
-			$aTableNames = array();
-
-			$Shop_Controller_Show->shopItems()->queryBuilder()
-				->leftJoin('shop_item_properties', 'shop_items.shop_id', '=', 'shop_item_properties.shop_id')
-				->setAnd()
-				->open();
-
-			foreach ($aTmpProperties as $aTmpProperty)
-			{
-				list($oProperty, $aPropertyValues) = $aTmpProperty;
-				$tableName = $oProperty->createNewValue(0)->getTableName();
-
-				!in_array($tableName, $aTableNames) && $aTableNames[] = $tableName;
-
-				$Shop_Controller_Show->shopItems()->queryBuilder()
-					->where('shop_item_properties.property_id', '=', $oProperty->id);
-
-				if (!isset($aPropertyValues['from']))
-				{
-					// Для строк фильтр LIKE %...%
-					if ($oProperty->type == 1)
-					{
-						foreach ($aPropertyValues as $propertyValue)
-						{
-							$Shop_Controller_Show->shopItems()->queryBuilder()
-								->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
-						}
-					}
-					else
-					{
-						// Checkbox
-						$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
-
-						$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
-
-						$bCheckUnset && $Shop_Controller_Show->shopItems()->queryBuilder()->open();
-
-						$Shop_Controller_Show->shopItems()->queryBuilder()
-							->where(
-								$tableName . '.value',
-								count($aPropertyValues) == 1 ? '=' : 'IN',
-								count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
-							);
-
-						$bCheckUnset && $Shop_Controller_Show->shopItems()->queryBuilder()
-							->setOr()
-							->where($tableName . '.value', 'IS', NULL)
-							->close();
-					}
-
-					$Shop_Controller_Show->shopItems()->queryBuilder()
-						->setOr();
-
-					foreach ($aPropertyValues as $propertyValue)
-					{
-						$Shop_Controller_Show->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('property_' . $oProperty->id)->value($propertyValue)
-						);
-						$Shop_Controller_Show->addCacheSignature("property{$oProperty->id}={$propertyValue}");
-					}
-				}
-				else
-				{
-					$from = trim(Core_Array::get($aPropertyValues, 'from'));
-					$from && $Shop_Controller_Show->shopItems()->queryBuilder()
-						->open()
-						->where($tableName . '.value', '>=', $from)
-						->setOr()
-						->where($tableName . '.value', 'IS', NULL)
-						->close()
-						->setAnd();
-
-					$to = trim(Core_Array::get($aPropertyValues, 'to'));
-					$to && $Shop_Controller_Show->shopItems()->queryBuilder()
-						->open()
-						->where($tableName . '.value', '<=', $to)
-						->setOr()
-						->where($tableName . '.value', 'IS', NULL)
-						->close();
-
-					$Shop_Controller_Show->shopItems()->queryBuilder()
-						->setOr();
-
-					$Shop_Controller_Show->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('property_' . $oProperty->id . '_from')->value($from)
-					)->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('property_' . $oProperty->id . '_to')->value($to)
-					);
-
-					$Shop_Controller_Show
-						->addCacheSignature("property{$oProperty->id}_from={$from}")
-						->addCacheSignature("property{$oProperty->id}_to={$to}");
-				}
-			}
-
-			$Shop_Controller_Show->shopItems()->queryBuilder()
-				->close()
-				->groupBy('shop_items.id');
-
-			$havingCount > 1
-				&& $Shop_Controller_Show->shopItems()->queryBuilder()
-						->having(Core_Querybuilder::expression('COUNT(DISTINCT `shop_item_properties`.`property_id`)'), '=', $havingCount);
-
-			foreach ($aTableNames as $tableName)
-			{
-				$Shop_Controller_Show->shopItems()->queryBuilder()
-					->leftJoin($tableName, 'shop_items.id', '=', $tableName . '.entity_id',
-						array(
-							array('AND' => array('shop_item_properties.property_id', '=', Core_QueryBuilder::expression($tableName . '.property_id')))
-						)
-					);
-			}
-		}
+		$Shop_Controller_Show->setFilterPropertiesConditions($_GET);
 	}
 }
 else

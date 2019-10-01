@@ -207,7 +207,7 @@ abstract class Core_DataBase
 	 * @param mixed $columnName string|array
 	 * @return string
 	 */
-	//abstract public function quoteTableName($tableName);
+	abstract public function quoteTableName($tableName);
 
 	/**
 	 * Start SQL-transaction

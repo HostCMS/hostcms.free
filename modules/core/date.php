@@ -116,7 +116,7 @@ class Core_Date
 	/**
 	 * Преобразовывает дату из временной метки в формат даты-время SQL
 	 *
-	 * @param string $timestamp
+	 * @param int $timestamp
 	 * @return string дата в формате SQL
 	 */
 	static public function timestamp2sql($timestamp)
@@ -127,7 +127,7 @@ class Core_Date
 	/**
 	 * Преобразовывает дату из временной метки в формат даты SQL
 	 *
-	 * @param string $timestamp
+	 * @param int $timestamp
 	 * @return string дата в формате SQL
 	 */
 	static public function timestamp2sqldate($timestamp)
@@ -138,7 +138,7 @@ class Core_Date
 	/**
 	 * Преобразовывает дату из временной метки в формат даты
 	 *
-	 * @param string $timestamp
+	 * @param int $timestamp
 	 * @return string дата в формате Core::$mainConfig['dateFormat']
 	 */
 	static public function timestamp2date($timestamp)
@@ -147,9 +147,23 @@ class Core_Date
 	}
 
 	/**
+	 * Форматирует дату с использованием gmdate
+	 *
+	 * @param string $format
+	 * @param int $timestamp
+	 * @return string
+	 */
+	static public function gmdate($format, $timestamp)
+	{
+		return function_exists('gmdate')
+			? gmdate($format, $timestamp)
+			: date($format, $timestamp - (date('O') / 100) * 60 * 60);
+	}
+
+	/**
 	 * Преобразовывает дату из временной метки в формат даты-время
 	 *
-	 * @param string $timestamp
+	 * @param int $timestamp
 	 * @return string дата-время в формате Core::$mainConfig['dateTimeFormat']
 	 */
 	static public function timestamp2datetime($timestamp)
@@ -200,7 +214,7 @@ class Core_Date
 	/**
 	 * Преобразовывает дату из временной метки в текстовый формат
 	 *
-	 * @param string $timestamp
+	 * @param int $timestamp
 	 * @return string
 	 */
 	static public function timestamp2string($timestamp, $withTime = TRUE)
@@ -285,10 +299,10 @@ class Core_Date
 			{
 				$sReturn = Core::_('Core.estimate_date_year', $day, $aMonth[$month], $year);
 			}
-			
+
 			$withTime && $sReturn .= Core::_('Core.time_postfix', $time);
 		}
-		
+
 
 		return $sReturn;
 	}

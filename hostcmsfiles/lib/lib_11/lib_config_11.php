@@ -7,7 +7,7 @@ $Shop_Controller_Show = new Shop_Controller_Show($oShop);
 $path = Core_Page::instance()->structure->getPath();
 
 $Shop_Controller_Show
-	->pattern(rawurldecode($path) . '({xls})(page-{page}/)')
+	->pattern(rawurldecode($path) . '({path})(page-{page}/)')
 	/*->pattern(rawurldecode($path) . '({path})({xls})(page-{page}/)')
 	->patternExpressions(array(
 		'xls' => 'xls/'

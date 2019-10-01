@@ -1399,7 +1399,7 @@ abstract class Shop_Payment_System_Handler
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			// Digital items
-			$aShop_Order_Item_Digitals = $oShop_Order_Item->Shop_Order_Item_Digitals->findAll();
+			$aShop_Order_Item_Digitals = $oShop_Order_Item->Shop_Order_Item_Digitals->findAll(FALSE);
 			foreach ($aShop_Order_Item_Digitals as $oShop_Order_Item_Digital)
 			{
 				$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;

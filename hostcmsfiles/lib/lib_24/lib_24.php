@@ -279,6 +279,9 @@ if (!is_null(Core_Array::getPost('apply')))
 	$password = strval(Core_Array::getPost('password'));
 	$email = trim(strval(Core_Array::getPost('email')));
 
+	// Replace '/' to '-'
+	$login = str_replace('/', '-', $login);
+	
 	$oSiteuser->login = $login;
 	strlen($password) > 0 && $oSiteuser->password = Core_Hash::instance()->hash($password);
 	$oSiteuser->email = $email;

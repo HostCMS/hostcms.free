@@ -487,9 +487,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						{
 							$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Checkbox');
 
-							$oAdmin_Form_Entity_For_Column->value(
-								$this->_object->$columnName
-							);
+							//$oAdmin_Form_Entity_For_Column->value($this->_object->$columnName);
+							$oAdmin_Form_Entity_For_Column
+								->value(1)
+								->checked($this->_object->$columnName != 0);
+							
 							break;
 						}
 					default:

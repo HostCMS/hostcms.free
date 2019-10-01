@@ -279,11 +279,6 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 	protected function _showTable(User_Model $oUser, $iMonth, $iYear)
 	{
 		ob_start();
-
-		$this->_showTimesheetTableRow($oUser, $iMonth, $iYear);
-		$sUserTimeSheetTableRow = ob_get_clean();
-
-		ob_start();
 		$this->_showHeader($iMonth, $iYear);
 		$header = ob_get_clean();
 
@@ -309,15 +304,11 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 							</thead>
 							<tbody>
 							<?php
-							ob_start();
+
+							$this->_showTimesheetTableRow($oUser, $iMonth, $iYear, 0, $iCompanyId);
 
 							$oCompany = Core_Entity::factory('Company', $iCompanyId);
 							$this->_showDepartmentTimesheet($oCompany, $oUser, $aCompanyDepartmentsId, FALSE, NULL, array(), $colspan, $iMonth, $iYear);
-
-							$sUserDepartmentTimeSheetTableRows = ob_get_clean();
-
-							echo $sUserTimeSheetTableRow;
-							echo $sUserDepartmentTimeSheetTableRows;
 							?>
 							</tbody>
 						</table>
@@ -341,7 +332,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 						?>
 					</thead>
 					<tbody>
-						<?php echo $sUserTimeSheetTableRow?>
+						<?php $this->_showTimesheetTableRow($oUser, $iMonth, $iYear);?>
 					</tbody>
 				</table>
 			</div>
@@ -383,7 +374,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 		return $this;
 	}
 
-	protected function _showTimesheetTableRow(User_Model $oUser, $iMonth = NULL, $iYear = NULL)
+	protected function _showTimesheetTableRow(User_Model $oUser, $iMonth = NULL, $iYear = NULL, $iDepartmentId = NULL, $iCompanyId = NULL)
 	{
 		?>
 		<tr>
@@ -400,7 +391,25 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 			echo "<a href=\"/admin/user/index.php?hostcms[action]=view&amp;hostcms[checked][0][{$oUser->id}]=1\" onclick=\"$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oUser->id}]=1', windowId: 'deal-notes'}); return false\" title=\"{$name}\">{$name}</a>";
 
-			$aCompany_Posts = $oUser->Company_Posts->findAll();
+			$oCurrentUser = Core_Auth::getCurrentUser();
+
+			if (!is_null($iCompanyId))
+			{
+				// Для авторизованного сотрудника показываем его должности в данной компании
+				if ($oCurrentUser->id == $oUser->id)
+				{
+					//$aCompany_Posts = $oUser->Company_Posts->findAll();
+					$aCompany_Posts = $oUser->getCompanyPostsByCompany($iCompanyId);
+				}
+				else // Для подчиненных показываем должность в отделе
+				{
+					$aCompany_Posts = $oUser->getCompanyPostsByDepartment($iDepartmentId);
+				}
+			}
+			else
+			{
+				$aCompany_Posts = $oUser->Company_Posts->findAll();
+			}
 
 			if (count($aCompany_Posts))
 			{
@@ -528,7 +537,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 			<?php
 			$aAbsenceInfo = $this->_getAbsenceInfo($oUser, $iYear, $sMonth);
 
-			$oCurrentUser = Core_Auth::getCurrentUser();
+			//$oCurrentUser = Core_Auth::getCurrentUser();
 
 			for ($i = 1; $i <= $this->_iCountDaysInMonth; $i++)
 			{
@@ -756,7 +765,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 					{
 						if ($aUserInfo['user']->id != $oUser->id)
 						{
-							$this->_showTimesheetTableRow($aUserInfo['user'], $iMonth, $iYear);
+							$this->_showTimesheetTableRow($aUserInfo['user'], $iMonth, $iYear, $aDepartment["department"]->id);
 						}
 					}
 				}

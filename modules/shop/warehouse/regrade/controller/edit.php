@@ -214,45 +214,55 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$index = 0;
 
-		$aShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items->findAll(FALSE);
+		$limit = 100;
+		$offset = 0;
 
-		foreach ($aShop_Warehouse_Regrade_Items as $key => $oShop_Warehouse_Regrade_Item)
-		{
-			$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id);
-			$oShop_Item_Incoming = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->incoming_shop_item_id);
+		do {
+			$oShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items;
+			$oShop_Warehouse_Regrade_Items->queryBuilder()
+				->limit($limit)
+				->offset($offset)
+				->clearOrderBy()
+				->orderBy('shop_warehouse_regrade_items.id');
 
-			if (!is_null($oShop_Item_Writeoff) && !is_null($oShop_Item_Incoming))
+			$aShop_Warehouse_Regrade_Items = $oShop_Warehouse_Regrade_Items->findAll(FALSE);
+
+			foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
 			{
-				$oShop_Item_Writeoff = $oShop_Item_Writeoff->shortcut_id
-					? $oShop_Item_Writeoff->Shop_Item
-					: $oShop_Item_Writeoff;
+				$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->writeoff_shop_item_id);
+				$oShop_Item_Incoming = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Regrade_Item->incoming_shop_item_id);
 
-				$oShop_Item_Incoming = $oShop_Item_Incoming->shortcut_id
-					? $oShop_Item_Incoming->Shop_Item
-					: $oShop_Item_Incoming;
+				if (!is_null($oShop_Item_Writeoff) && !is_null($oShop_Item_Incoming))
+				{
+					$oShop_Item_Writeoff = $oShop_Item_Writeoff->shortcut_id
+						? $oShop_Item_Writeoff->Shop_Item
+						: $oShop_Item_Writeoff;
 
-				$writeoffMeasureName = $oShop_Item_Writeoff->Shop_Measure->name;
-				$incomingMeasureName = $oShop_Item_Incoming->Shop_Measure->name;
+					$oShop_Item_Incoming = $oShop_Item_Incoming->shortcut_id
+						? $oShop_Item_Incoming->Shop_Item
+						: $oShop_Item_Incoming;
 
-				$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item_Writeoff->id, "shop_warehouse_regrade_item_id={$oShop_Warehouse_Regrade_Item->id}");
+					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item_Writeoff->id, "shop_warehouse_regrade_item_id={$oShop_Warehouse_Regrade_Item->id}");
 
-				$index = $key + 1;
-
-				$itemTable .= '
-					<tr id="' . $oShop_Warehouse_Regrade_Item->id . '" data-item-id="' . $oShop_Item_Writeoff->id . ',' . $oShop_Item_Incoming->id . '">
-						<td class="index">' . $index . '</td>
-						<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars($oShop_Item_Writeoff->name) . '" /></td>
-						<td>' . htmlspecialchars($writeoffMeasureName) . '</td>
-						<td><span class="writeoff-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
-						<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars($oShop_Item_Incoming->name) . '" /></td>
-						<td>' . htmlspecialchars($incomingMeasureName) . '</td>
-						<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
-						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
-						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
-					</tr>
-				';
+					$itemTable .= '
+						<tr id="' . $oShop_Warehouse_Regrade_Item->id . '" data-item-id="' . $oShop_Item_Writeoff->id . ',' . $oShop_Item_Incoming->id . '">
+							<td class="index">' . ++$index . '</td>
+							<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars($oShop_Item_Writeoff->name) . '" /></td>
+							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name) . '</td>
+							<td><span class="writeoff-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
+							<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars($oShop_Item_Incoming->name) . '" /></td>
+							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name) . '</td>
+							<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
+							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						</tr>
+					';
+				}
 			}
+			
+			$offset += $limit;
 		}
+		while (count($aShop_Warehouse_Regrade_Items));
 
 		$itemTable .= '
 					</tbody>

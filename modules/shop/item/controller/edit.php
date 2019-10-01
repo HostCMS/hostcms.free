@@ -223,7 +223,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oDescriptionField
-					->rows(7)
+					->rows(8)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -1477,6 +1477,53 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRow1->add($resultItem);
 				}
 
+				// Группы ярлыков
+				$oAdditionalGroupsSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Item.shortcut_group_tags'))
+					->options($this->_fillShortcutGroupList($this->_object))
+					->name('shortcut_group_id[]')
+					->class('shortcut-group-tags')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group col-xs-12'));
+
+				$this->addField($oAdditionalGroupsSelect);
+
+				$oMainRow1->add($oAdditionalGroupsSelect);
+
+				$html2 = '
+					<script>
+						$(function(){
+							$(".shortcut-group-tags").select2({
+								language: "' . Core_i18n::instance()->getLng() . '",
+								minimumInputLength: 2,
+								placeholder: "' . Core::_('Shop_Item.select_group') . '",
+								tags: true,
+								allowClear: true,
+								multiple: true,
+								ajax: {
+									url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
+									dataType: "json",
+									type: "GET",
+									processResults: function (data) {
+										var aResults = [];
+										$.each(data, function (index, item) {
+											aResults.push({
+												"id": item.id,
+												"text": item.text
+											});
+										});
+										return {
+											results: aResults
+										};
+									}
+								},
+							});
+						})</script>
+					';
+
+				$oMainRow3->add(Admin_Form_Entity::factory('Code')->html($html2));
+
 				// Добавляем новое поле типа файл
 				$oImageField = Admin_Form_Entity::factory('File');
 
@@ -2067,7 +2114,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						}
 						else
 						{
-							$rest = $oShopWarehouse->getRest($this->_object->id);
+							$oWarehouseItem =
+								$this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
+
+							// $rest = $oShopWarehouse->getRest($this->_object->id);
+							$rest = is_null($oWarehouseItem) ? 0 : $oWarehouseItem->count;
 
 							if ($iWarehouseValue != $rest)
 							{
@@ -2210,7 +2261,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 			case 'shop_group':
 			default:
-
 				// Проверяем подключен ли модуль типографики.
 				if (Core::moduleIsActive('typograph'))
 				{
@@ -2239,6 +2289,40 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oShop_Item_Property_For_Group_new->save();
 					}
 				}
+
+				$aShortcutGroupIds = Core_Array::getPost('shortcut_group_id', array());
+				!is_array($aShortcutGroupIds) && $aShortcutGroupIds = array();
+
+				$aTmp = array();
+
+				// Выбранные группы
+				$aShortcuts = $oShop->Shop_Groups->getAllByShortcut_id($this->_object->id, FALSE);
+				foreach ($aShortcuts as $oShortcut)
+				{
+					!in_array($oShortcut->parent_id, $aShortcutGroupIds)
+						? $oShortcut->markDeleted()
+						: $aTmp[] = $oShortcut->parent_id;
+				}
+
+				$aNewShortcutGroupIDs = array_diff($aShortcutGroupIds, $aTmp);
+				foreach ($aNewShortcutGroupIDs as $iShortcutGroupId)
+				{
+					$oShop_Group = $oShop->Shop_Groups->getById($iShortcutGroupId);
+					if (!is_null($oShop_Group))
+					{
+						$oShop_GroupShortcut = Core_Entity::factory('Shop_Group');
+
+						$oShop_GroupShortcut->shop_id = $this->_object->shop_id;
+						$oShop_GroupShortcut->shortcut_id = $this->_object->id;
+						$oShop_GroupShortcut->parent_id = $iShortcutGroupId;
+						$oShop_GroupShortcut->name = '';
+						$oShop_GroupShortcut->path = '';
+						$oShop_GroupShortcut->indexing = 0;
+
+						$oShop_GroupShortcut->save()->clearCache();
+					}
+				}
+			break;
 		}
 
 		// Clear tagged cache
@@ -2829,13 +2913,26 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
 	 */
-	protected function _fillShortcutGroupList($oShop_Item)
+	protected function _fillShortcutGroupList($oObject)
 	{
-		$aReturnArray = array();
+		$aReturn = array();
 
-		$oShop = $oShop_Item->Shop;
+		$oShop = $oObject->Shop;
 
-		$aShortcuts = $oShop->Shop_Items->getAllByShortcut_id($oShop_Item->id, FALSE);
+		$modelName = $oObject->getModelName();
+
+		switch ($modelName)
+		{
+			case 'shop_item':
+				$oObjects = $oShop->Shop_Items;
+			break;
+			case 'shop_group':
+			default:
+				$oObjects = $oShop->Shop_Groups;
+			break;
+		}
+
+		$aShortcuts = $oObjects->getAllByShortcut_id($oObject->id, FALSE);
 		foreach ($aShortcuts as $oShortcut)
 		{
 			$oShop_Group = $oShortcut->Shop_Group;
@@ -2853,21 +2950,21 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			if (!is_null($oShop_Group->id))
 			{
-				$aReturnArray[$oShop_Group->id] = array(
+				$aReturn[$oShop_Group->id] = array(
 					'value' => $sParents . ' [' . $oShop_Group->id . ']',
 					'attr' => array('selected' => 'selected')
 				);
 			}
 			else
 			{
-				$aReturnArray[0] = array(
+				$aReturn[0] = array(
 					'value' => Core::_('Shop_Item.root') . ' [0]',
 					'attr' => array('selected' => 'selected')
 				);
 			}
 		}
 
-		return $aReturnArray;
+		return $aReturn;
 	}
 
 	/**
@@ -2877,19 +2974,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _fillTagsList($oShop_Item)
 	{
-		$aReturnArray = array();
+		$aReturn = array();
 
 		$aTags = $oShop_Item->Tags->findAll(FALSE);
 
 		foreach ($aTags as $oTag)
 		{
-			$aReturnArray[$oTag->name] = array(
+			$aReturn[$oTag->name] = array(
 				'value' => $oTag->name,
 				'attr' => array('selected' => 'selected')
 			);
 		}
 
-		return $aReturnArray;
+		return $aReturn;
 	}
 
 	/**
@@ -2899,19 +2996,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _fillBarcodesList($oShop_Item)
 	{
-		$aReturnArray = array();
+		$aReturn = array();
 
 		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
 
 		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
 		{
-			$aReturnArray[$oShop_Item_Barcode->value] = array(
+			$aReturn[$oShop_Item_Barcode->value] = array(
 				'value' => $oShop_Item_Barcode->value,
 				'attr' => array('selected' => 'selected')
 			);
 		}
 
-		return $aReturnArray;
+		return $aReturn;
 	}
 
 	/**
@@ -2921,7 +3018,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	static public function fillModificationList($oShop_Item, $like = NULL)
 	{
-		$aReturnArray = array(' … ');
+		$aReturn = array(' … ');
 
 		$iShopGroupId = $oShop_Item->modification_id
 			? $oShop_Item->Modification->shop_group_id
@@ -2947,10 +3044,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		foreach ($aTmp as $aItem)
 		{
-			$aReturnArray[$aItem['id']] = $aItem['name'];
+			$aReturn[$aItem['id']] = $aItem['name'];
 		}
 
-		return $aReturnArray;
+		return $aReturn;
 	}
 
 	/**

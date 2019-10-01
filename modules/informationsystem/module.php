@@ -157,6 +157,7 @@ class Informationsystem_Module extends Core_Module
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
 			->where('informationsystem_groups.indexing', '=', 1)
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.active', '=', 1)
 			->where('informationsystem_groups.deleted', '=', 0)
 			->where('informationsystems.deleted', '=', 0)

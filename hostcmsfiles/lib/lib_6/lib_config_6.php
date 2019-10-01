@@ -55,6 +55,45 @@ if (strlen($guid))
 	exit();
 }
 
+// Быстрый фильтр
+if (Core_Array::getRequest('fast_filter'))
+{
+	$aJson = array();
+
+	// В корне выводим из всех групп
+	if ($Shop_Controller_Show->group == 0)
+	{
+		$Shop_Controller_Show
+			->group(FALSE)
+			// ->forbidSelectModifications()
+			;
+	}
+
+	// Prices
+	$Shop_Controller_Show->setFilterPricesConditions($_POST);
+
+	// Additional properties
+	$Shop_Controller_Show->setFilterPropertiesConditions($_POST);
+
+	if (Core_Array::getPost('producer_id'))
+	{
+		$iProducerId = intval(Core_Array::getPost('producer_id'));
+		$Shop_Controller_Show->producer($iProducerId);
+	}
+
+	$Shop_Controller_Show->applyItemCondition();
+
+	$Shop_Controller_Show->group !== FALSE && $Shop_Controller_Show->applyGroupCondition();
+
+	$Shop_Controller_Show->applyFilter();
+
+	$Shop_Controller_Show->shopItems()->queryBuilder()->where('shortcut_id', '=', 0);
+
+	$aJson['count'] = intval($Shop_Controller_Show->shopItems()->getCount());
+
+	Core::showJson($aJson);
+}
+
 // Сравнение товаров
 if (Core_Array::getRequest('compare'))
 {

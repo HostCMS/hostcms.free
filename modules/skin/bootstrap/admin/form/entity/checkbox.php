@@ -13,24 +13,27 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_Entity_Checkbox {
 
-	/**
+	/** 
 	 * Executes the business logic.
 	 */
 	public function execute()
 	{
-		if (is_null($this->checked) && $this->value != 0)
+		/*if (is_null($this->checked) && $this->value != 0)
 		{
 			$this->checked = 'checked';
-		}
+		}*/
 
 		// Значение, передаваемое при включенном checkbox
-		$this->value = 1;
+		$this->value === '' && $this->value = 1;
 
 		$aAttr = $this->getAttrsString();
+		
+		if (is_null($this->checked) && $this->value != 0 || $this->checked)
+		{
+			$aAttr[] = 'checked="checked"';
+		}
 
 		$aDivAttr = array();
-
-		// Установим атрибуты div'a.
 		if (is_array($this->divAttr))
 		{
 			foreach ($this->divAttr as $attrName => $attrValue)

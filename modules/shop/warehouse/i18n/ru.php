@@ -47,4 +47,6 @@ return array(
 	'writeoff' => 'Списание',
 	'regrade' => 'Пересортица',
 	'movement' => 'Перемещение',
+	'types' => 'Типы',
+	'shop_warehouse_type' => 'Тип склада',
 );

@@ -442,6 +442,21 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Перестроить фильтр"
+$oAdminFormActionRebuildFilter = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('rebuildFilter');
+
+if ($oAdminFormActionRebuildFilter && $oAdmin_Form_Controller->getAction() == 'rebuildFilter')
+{
+	$oShop_Filter_Controller_Rebuild = Admin_Form_Action_Controller::factory(
+		'Shop_Filter_Controller_Rebuild', $oAdminFormActionRebuildFilter
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Filter_Controller_Rebuild);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Dir')

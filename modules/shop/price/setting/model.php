@@ -149,32 +149,48 @@ class Shop_Price_Setting_Model extends Core_Entity
 
 			unset($aShop_Price_Entries);
 
-			$aShop_Price_Setting_Items = $this->Shop_Price_Setting_Items->findAll(FALSE);
-			foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
-			{
-				if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
+			$limit = 500;
+			$offset = 0;
+
+			do {
+				$oShop_Price_Setting_Items = $this->Shop_Price_Setting_Items;
+				$oShop_Price_Setting_Items->queryBuilder()
+					->limit($limit)
+					->offset($offset)
+					->clearOrderBy()
+					->orderBy('id', 'ASC');
+
+				$aShop_Price_Setting_Items = $oShop_Price_Setting_Items->findAll(FALSE);
+
+				foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
 				{
-					$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
-				}
-				else
-				{
-					$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
-					$oShop_Price_Entry->setDocument($this->id, 0);
-					$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
+					if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
+					{
+						$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
+					}
+					else
+					{
+						$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
+						$oShop_Price_Entry->setDocument($this->id, 0);
+						$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
+					}
+
+					$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
+					$oShop_Price_Entry->datetime = $this->datetime;
+					$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
+					$oShop_Price_Entry->save();
+
+					// Update price
+					$Shop_Price_Entry_Controller->setPrice(
+						$oShop_Price_Setting_Item->shop_price_id,
+						$oShop_Price_Setting_Item->shop_item_id,
+						$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
+					);
 				}
 
-				$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
-				$oShop_Price_Entry->datetime = $this->datetime;
-				$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
-				$oShop_Price_Entry->save();
-
-				// Update price
-				$Shop_Price_Entry_Controller->setPrice(
-					$oShop_Price_Setting_Item->shop_price_id,
-					$oShop_Price_Setting_Item->shop_item_id,
-					$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
-				);
+				$offset += $limit;
 			}
+			while (count($aShop_Price_Setting_Items));
 
 			$this->posted = 1;
 			$this->save();

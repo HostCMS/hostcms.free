@@ -527,7 +527,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
-	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon lightgray')
+	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen')
 	{
 		// .attr("onclick", "' . $onclick . '")
 		return Admin_Form_Entity::factory('Code')
@@ -536,8 +536,22 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$(\'h5.row-title\').append(
 						$("<a>")
 							.attr("href", "' . $href . '")
-							//.attr("onclick", "\\\\\'")
 							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
+							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
+						);
+				</script>
+		');
+	}
+
+	public function getTitlePathIcon($href, $class = 'fa fa-external-link h5-edit-icon azure')
+	{
+		return Admin_Form_Entity::factory('Code')
+			->html('
+				<script>
+					$(\'h5.row-title\').append(
+						$("<a>")
+							.attr("href", "' . $href . '")
+							.attr("target", "_blank")
 							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
 						);
 				</script>

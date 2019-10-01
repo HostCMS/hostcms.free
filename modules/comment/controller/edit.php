@@ -108,6 +108,8 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab
 			->delete($this->getField('grade'));
 
+		$aConfig = Comment_Controller::getConfig();
+
 		$oMainRow4->add(
 			Admin_Form_Entity::factory('Stars')
 				->name('grade')
@@ -115,6 +117,8 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->caption(Core::_('Comment.grade'))
 				->value($this->_object->grade)
 				->divAttr(array('class' => 'form-group stars col-xs-12 col-sm-4'))
+				->step($aConfig['gradeStep'])
+				->stars($aConfig['gradeLimit'])
 		);
 
 		return $this;

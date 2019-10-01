@@ -67,7 +67,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		if (!class_exists($className))
 		{
 			throw new Core_Exception("Class '%className' does not exist",
-					array('%className' => $className));
+				array('%className' => $className));
 		}
 
 		return new $className($oAdmin_Form);

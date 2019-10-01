@@ -1230,7 +1230,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										$oProperty_Value->setValue($sData);
 									break;
 									case 11: // Float
-										$sData = Shop_Controller::instance()->convertFloat($sData);
+										$sData = Shop_Controller::convertDecimal($sData);
 										$oProperty_Value->setValue($sData);
 									break;
 									case 12: // Shop
@@ -1907,7 +1907,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 						case 11: // Float
-							$sPropertyValue = Shop_Controller::instance()->convertFloat($sPropertyValue);
+							$sPropertyValue = Shop_Controller::convertDecimal($sPropertyValue);
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 						case 12: // Shop

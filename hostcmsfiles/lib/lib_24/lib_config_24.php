@@ -33,7 +33,7 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 				if ($bAntispamAnswer)
 				{
 					$oSiteuser = Core_Entity::factory('Siteuser');
-					$oSiteuser->login = $email;
+					$oSiteuser->login = str_replace('/', '-', $email);
 					$oSiteuser->email = $email;
 					$oSiteuser->site_id = CURRENT_SITE;
 					$oSiteuser->password = Core_Guid::get();

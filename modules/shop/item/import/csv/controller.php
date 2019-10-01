@@ -3,7 +3,7 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Online shop.
+ * Import Csv Controller
  *
  * @package HostCMS
  * @subpackage Shop
@@ -156,6 +156,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	protected $_aAdditionalGroups = array();
 
 	/**
+	 * List of barcodes
+	 * @var array
+	 */
+	protected $_aBarcodes = array();
+
+	/**
 	 * Allowed object properties
 	 * @var array
 	 */
@@ -187,6 +193,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'importAction',
 		// Флаг, указывающий, включена ли индексация
 		'searchIndexation',
+		// Удалять существующие значения дополнительных свойств перед импортом новых
+		'deletePropertyValues',
+		// Удалять основные изображения
 		'deleteImage'
 	);
 
@@ -406,12 +415,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->init();
 
 		// Единожды в конструкторе, чтобы после __wakeup() не обнулялось
-		$this->_InsertedItemsCount = 0;
-		$this->_UpdatedItemsCount = 0;
-		$this->_InsertedGroupsCount = 0;
-		$this->_UpdatedGroupsCount = 0;
+		$this->_InsertedItemsCount = $this->_UpdatedItemsCount = $this->_InsertedGroupsCount = $this->_UpdatedGroupsCount = 0;
 
 		$this->_ShopItemCreatedIDs = array();
+
+		$this->deletePropertyValues = TRUE;
+		$this->searchIndexation = FALSE;
 
 		$oShop = Core_Entity::factory('Shop', $iCurrentShopId);
 
@@ -491,6 +500,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			Core::_('Shop_Exchange.siteuser_id'),
 			Core::_('Shop_Exchange.item_yandex_market_sales_notes'),
 			Core::_('Shop_Exchange.item_additional_group'),
+			Core::_('Shop_Exchange.item_barcode'),
 			Core::_('Shop_Exchange.item_guid'),
 
 			// item special prices
@@ -1573,6 +1583,28 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$aShortcuts = explode(',', $sData);
 							$this->_aAdditionalGroups = array_merge($this->_aAdditionalGroups, $aShortcuts);
 						break;
+						// Штрихкоды, через запятую
+						case 'barcodes':
+							$aBarcodes = explode(',', trim($sData));
+							$this->_aBarcodes = array_merge($this->_aBarcodes, $aBarcodes);
+
+							/*foreach ($aBarcodes as $value)
+							{
+								$oShop_Item_Barcode = $this->_oCurrentItem->Shop_Item_Barcodes->getByValue($value, FALSE);
+
+								if (is_null($oShop_Item_Barcode))
+								{
+									echo $this->_oCurrentItem;
+
+									$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
+									$oShop_Item_Barcode
+										->value($value)
+										->shop_item_id($this->_oCurrentItem->id)
+										->setType()
+										->save();
+								}
+							}*/
+						break;
 						// Идентификатор товара
 						case 'item_id':
 							$oTmpObject = $this->_oCurrentShop->Shop_Items->getById($sData, FALSE);
@@ -2188,6 +2220,25 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 				}
 
+				// Обрабатываем штрихкоды
+				if (count($this->_aBarcodes))
+				{
+					foreach ($this->_aBarcodes as $value)
+					{
+						$oShop_Item_Barcode = $this->_oCurrentItem->Shop_Item_Barcodes->getByValue($value, FALSE);
+
+						if (is_null($oShop_Item_Barcode))
+						{
+							$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
+							$oShop_Item_Barcode
+								->value($value)
+								->shop_item_id($this->_oCurrentItem->id)
+								->setType()
+								->save();
+						}
+					}
+				}
+
 				// Обрабатываем электронные файлы электронного товара
 				if ($this->_oCurrentItem->type == 1)
 				{
@@ -2210,6 +2261,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							Core_File::copy($sSourceFile, $sTargetFile);
 						} catch (Exception $e) {}
 					}
+				}
+
+				if ($this->deleteImage)
+				{
+					$this->_oCurrentItem
+						->deleteLargeImage()
+						->deleteSmallImage();
 				}
 
 				if (/*!is_null($this->_sBigImageFile) && */$this->_sBigImageFile != ''/* && $this->importAction != 2*/)
@@ -2349,21 +2407,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						}
 					}
 				}
-				elseif ($this->deleteImage)
-				{
-					// Удалить текущее большое изображение
-					if ($this->_oCurrentItem->image_large != '')
-					{
-						try
-						{
-							Core_File::delete($this->_oCurrentItem->getItemPath() . $this->_oCurrentItem->image_large);
-						} catch (Exception $e) {}
-					}
-				}
 
-				if ($this->_sSmallImageFile != ''
-				|| ($this->_sBigImageFile != ''
-				&& !$this->deleteImage))
+				if ($this->_sSmallImageFile != '' || $this->_sBigImageFile != '')
 				{
 					$this->_sSmallImageFile == '' && $this->_sSmallImageFile = $this->_sBigImageFile;
 
@@ -2486,6 +2531,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						} catch (Exception $e) {}
 					}
 				}
+
 				$this->_sBigImageFile = '';
 
 				foreach ($this->_aExternalProperties as $iPropertyID => $sPropertyValue)
@@ -2725,7 +2771,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$this->_aExternalPropertiesSmall =
 			$this->_aExternalProperties =
 			$this->_aExternalPropertiesDesc =
-			$this->_aAdditionalGroups = array();
+			$this->_aAdditionalGroups =
+			$this->_aBarcodes = array();
 
 		// Список меток для текущего товара
 		$this->_sCurrentTags = '';
@@ -2750,19 +2797,22 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	{
 		$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
 
-		if (!isset($this->_aClearedItemsPropertyValues[$oShopItem->id])
-			|| !in_array($oProperty->guid, $this->_aClearedItemsPropertyValues[$oShopItem->id]))
+		if ($this->deletePropertyValues)
 		{
-			foreach ($aPropertyValues as $oPropertyValue)
+			if (!isset($this->_aClearedItemsPropertyValues[$oShopItem->id])
+				|| !in_array($oProperty->id, $this->_aClearedItemsPropertyValues[$oShopItem->id]))
 			{
-				$oProperty->type == 2
-					&& $oPropertyValue->setDir($oShopItem->getItemPath());
-				$oPropertyValue->delete();
+				foreach ($aPropertyValues as $oPropertyValue)
+				{
+					$oProperty->type == 2
+						&& $oPropertyValue->setDir($oShopItem->getItemPath());
+					$oPropertyValue->delete();
+				}
+
+				$aPropertyValues = array();
+
+				$this->_aClearedItemsPropertyValues[$oShopItem->id][] = $oProperty->id;
 			}
-
-			$aPropertyValues = array();
-
-			$this->_aClearedItemsPropertyValues[$oShopItem->id][] = $oProperty->guid;
 		}
 
 		// File
@@ -3075,7 +3125,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						: $sPropertyValue;
 				break;
 				case 11: // Float
-					$changedValue = Shop_Controller::instance()->convertFloat($sPropertyValue);
+					$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
 				break;
 				case 12: // Shop
 					$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
@@ -3149,19 +3199,22 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		$aPropertyValues = $oProperty->getValues($oShop_Group->id, FALSE);
 
-		if (!isset($this->_aClearedGroupsPropertyValues[$oShop_Group->id])
-			|| !in_array($oProperty->guid, $this->_aClearedGroupsPropertyValues[$oShop_Group->id]))
+		if ($this->deletePropertyValues)
 		{
-			foreach ($aPropertyValues as $oPropertyValue)
+			if (!isset($this->_aClearedGroupsPropertyValues[$oShop_Group->id])
+				|| !in_array($oProperty->id, $this->_aClearedGroupsPropertyValues[$oShop_Group->id]))
 			{
-				$oProperty->type == 2
-					&& $oPropertyValue->setDir($oShop_Group->getGroupPath());
-				$oPropertyValue->delete();
+				foreach ($aPropertyValues as $oPropertyValue)
+				{
+					$oProperty->type == 2
+						&& $oPropertyValue->setDir($oShop_Group->getGroupPath());
+					$oPropertyValue->delete();
+				}
+
+				$aPropertyValues = array();
+
+				$this->_aClearedGroupsPropertyValues[$oShop_Group->id][] = $oProperty->id;
 			}
-
-			$aPropertyValues = array();
-
-			$this->_aClearedGroupsPropertyValues[$oShop_Group->id][] = $oProperty->guid;
 		}
 
 		// File
@@ -3472,7 +3525,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						: $sPropertyValue;
 				break;
 				case 11: // Float
-					$changedValue = Shop_Controller::instance()->convertFloat($sPropertyValue);
+					$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
 				break;
 				case 12: // Shop
 					$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
@@ -3773,6 +3826,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'#FFCC80',
 		'#FFCC80',
 		'#FFCC80',
+		'#FFCC80',
 
 		// item special prices
 		'#FFB74D',
@@ -3893,6 +3947,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'item_siteuser_id',
 		'item_yandex_market_sales_notes',
 		'additional_groups',
+		'barcodes',
 		'item_cml_id',
 
 		'item_special_price_from',

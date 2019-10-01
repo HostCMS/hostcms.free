@@ -491,7 +491,29 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							: '0000-00-00 00:00:00';
 					break;
 				}
+
 				$this->_object->save();
+
+				// Fast filter
+				$filter = intval(Core_Array::get($this->_formValues, 'filter'));
+
+				if (get_class($this->linkedObject) == 'Shop_Item_Property_List_Model' && $this->linkedObject->filter)
+				{
+					$Shop_Filter_Controller = new Shop_Filter_Controller($this->linkedObject);
+
+					$filter = intval(Core_Array::get($this->_formValues, 'filter'));
+
+					if ($filter)
+					{
+						!$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
+								&& $Shop_Filter_Controller->addProperty($this->_object);
+					}
+					else
+					{
+						$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
+							&& $Shop_Filter_Controller->removeProperty($this->_object);
+					}
+				}
 			break;
 			case 'property_dir':
 			break;
@@ -501,6 +523,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->linkedObject->add($this->_object);
 		}
+
+// var_dump($this->_object->Shop_Item_Property->filter);
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

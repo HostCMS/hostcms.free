@@ -28,8 +28,11 @@ class Shop_Price_Entry_Controller extends Core_Servant_Properties
 		$oShop_Price_Entries->queryBuilder()
 			->where('shop_price_entries.shop_price_id', '=', $shop_price_id)
 			->where('shop_price_entries.shop_item_id', '=', $shop_item_id)
+			// Берется последняя установка цены
 			->clearOrderBy()
-			->orderBy('shop_price_entries.datetime', 'ASC');
+			->orderBy('shop_price_entries.datetime', 'DESC')
+			->limit(1);
+			//->orderBy('shop_price_entries.datetime', 'ASC');
 
 		if (!is_null($dateTo))
 		{

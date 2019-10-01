@@ -256,7 +256,7 @@ class Core_Auth
 		header('X-Frame-Options: SAMEORIGIN');
 		header('X-Content-Type-Options: nosniff');
 		header('X-XSS-Protection: 1; mode=block');
-		header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'");
+		header('Content-Security-Policy: ' . Core::$mainConfig['backendContentSecurityPolicy']);
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{

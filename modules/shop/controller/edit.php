@@ -567,6 +567,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRowNotification->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
 
+				$oMainTab->move($this->getField('filter'), $oMainRow8);
 				$oMainTab->move($this->getField('reserve'), $oMainRow8);
 				$oMainTab->move($this->getField('send_order_email_admin'), $oMainRow9);
 				$oMainTab->move($this->getField('send_order_email_user'), $oMainRow10);

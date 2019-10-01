@@ -106,8 +106,6 @@
 			// Change window id
 			data['hostcms[window]'] = jDivWin.attr('id');
 
-			//console.log(data);
-
 			mainFormLocker.saveStatus().unlock();
 
 			jQuery.ajax({
@@ -3244,12 +3242,55 @@
 				}
 			});
 		},
+		deleteNewProperty: function(object)
+		{
+			//jQuery(object).closest('.item_div').remove();
+			jQuery(object).closest('[id ^= "property_"]').remove();
+		},
+		deleteProperty: function(object, settings)
+		{
+			//var jObject = jQuery(object).siblings('input,select:not([onchange]),textarea');
+			var jObject = jQuery(object).parents('div.input-group');
+
+			jObject = jObject.find('input:not([id^="filter_"]),select:not([onchange]),textarea');
+
+			// For files
+			if (jObject.length === 0)
+			{
+				jObject = jQuery(object).siblings('div,label').children('input');
+			}
+
+			var property_name = jObject.eq(0).attr('name');
+
+			settings = jQuery.extend({
+				operation: property_name
+			}, settings);
+
+			settings = jQuery.requestSettings(settings);
+
+			var data = jQuery.getData(settings);
+			data['hostcms[checked][' + settings.datasetId + '][' + settings.objectId + ']'] = 1;
+
+			var path = settings.path;
+
+			jQuery.ajax({
+				context: jQuery('#'+settings.windowId),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: jQuery.ajaxCallback
+			});
+
+			jQuery.deleteNewProperty(object);
+		},
 		cloneProperty: function(windowId, index)
 		{
 			var jProperies = jQuery('#' + windowId + ' #property_' + index),
+				jSourceProperty = jProperies.eq(0);
 
-			// Объект окна настроек большого изображения
-			oSpanFileSettings =  jProperies.find("span[id ^= 'file_large_settings_']");
+			// Объект окна настроек большого изображения у родителя
+			var oSpanFileSettings =  jSourceProperty.find("span[id ^= 'file_large_settings_']");
 
 			// Закрываем окно настроек большого изображения
 			if (oSpanFileSettings.length && oSpanFileSettings.children('i').hasClass('fa-times'))
@@ -3257,22 +3298,28 @@
 				oSpanFileSettings.click();
 			}
 
-			// Объект окна настроек малого изображения
-			oSpanFileSettings =  jProperies.find("span[id ^= 'file_small_settings_']");
+			// Объект окна настроек малого изображения у родителя
+			oSpanFileSettings =  jSourceProperty.find("span[id ^= 'file_small_settings_']");
 			// Закрываем окно настроек малого изображения
 			if (oSpanFileSettings.length && oSpanFileSettings.children('i').hasClass('fa-times'))
 			{
 				oSpanFileSettings.click();
 			}
 
-			var jNewObject = jProperies.eq(0).clone(),
-			iRand = Math.floor(Math.random() * 999999);
+			var html = jSourceProperty[0].outerHTML, // clone with parent
+				iRand = Math.floor(Math.random() * 999999);
 
-			jNewObject.insertAfter(
-				jQuery('#' + windowId).find('div.row[id="property_' + index + '"],div.row[id^="property_' + index + '_"]').eq(-1)
-			);
+			html = html
+				.replace(/(id_property_[\d_]*)/g, 'id_property_clone' + iRand);
 
-			jNewObject.attr('id', 'property_' + index + '_' + iRand);
+			// var jNewObject = jSourceProperty.clone();
+			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
+
+			jNewObject.insertAfter(jProperies.eq(-1));
+
+			jNewObject.find("textarea")
+				.removeAttr('wysiwyg')
+				.css('display', '');
 
 			// Change item_div ID
 			jNewObject.find("div[id^='file_']").each(function(index, object){
@@ -3292,7 +3339,7 @@
 
 			jNewObject.find("input[id^='field_id'],select,textarea").attr('name', 'property_' + index + '[]');
 			jNewObject.find("div[id^='file_small'] input[id^='small_field_id']").attr('name', 'small_property_' + index + '[]').val('');
-			jNewObject.find("input[id^='field_id'][type!=checkbox],input[id^='property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea").val('');
+			jNewObject.find("input[id^='id_property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea").val('');
 
 			jNewObject.find("input[id^='create_small_image_from_large_small_property']").attr('checked', true);
 
@@ -3303,7 +3350,7 @@
 				jQuery(object).prop('name', arr[1] + '_' + arr[2] + '[]');
 			});
 
-			jNewObject.find("div.img_control div,div.img_control div").remove();
+			jNewObject.find("div.img_control div, a[id^='preview_'], a[id^='delete_'], div[role='application']").remove();
 			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
 			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
 
@@ -3311,13 +3358,43 @@
 				.addClass('hidden')
 				.prev().removeClass('hidden');
 
-			var oDateTimePicker = jProperies.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
+			/*var oDateTimePicker = jSourceProperty.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
 
 			if(oDateTimePicker)
 			{
 				jNewObject.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').datetimepicker({locale: oDateTimePicker.locale(), format: oDateTimePicker.format()});
 				jNewObject.find('script').remove();
-			}
+			}*/
+		},
+		clonePropertyInfSys: function(windowId, index)
+		{
+			var jProperies = jQuery('#' + windowId + ' #property_' + index),
+				html = jProperies[0].outerHTML,
+				iRand = Math.floor(Math.random() * 999999); // clone with parent
+
+			html = html
+				.replace(/oSelectFilter(\d+)/g, 'oSelectFilter$1clone' + iRand)
+				.replace(/(id_group_[\d_]*)/g, 'id_group_clone' + iRand)
+				.replace(/(id_property_[\d_]*)/g, 'id_property_clone' + iRand)
+				.replace(/(input_property_[\d_]*)/g, 'input_property_clone' + iRand);
+
+			//jNewObject = jProperies.eq(0).clone(),
+			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
+				//iNewId = index + 'group' + Math.floor(Math.random() * 999999),
+				jDir = jNewObject.find("select[onchange]"),
+				jItem = jNewObject.find("select:not([onchange])");
+
+			jDir
+				//.attr('onchange', jDir.attr('onchange').replace(jItem.attr('id'), iNewId))
+				.val(jProperies.eq(0).find("select[onchange]").val());
+
+			jItem
+				.attr('name', 'property_' + index + '[]')
+				//.attr('id', iNewId)
+				.val(jProperies.eq(0).find("select:not([onchange])").val());
+
+			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
+			jNewObject.insertAfter(jProperies.eq(-1));
 		},
 		cloneFormRow: function(cloningElement){
 			if (cloningElement)
@@ -3354,7 +3431,16 @@
 				objectRow.remove();
 			}
 		},
+		cloneFile: function(windowId)
+		{
+			var jProperies = jQuery('#' + windowId + ' #file'),
+				jNewObject = jProperies.eq(0).clone();
 
+			jNewObject.find("input[type='file']").attr('name', 'file[]').val('');
+			jNewObject.find("input[type='text']").attr('name', 'description_file[]').val('');
+
+			jNewObject.insertAfter(jProperies.eq(-1));
+		},
 		// Показ сотрудников в списке select2
 		templateResultItemResponsibleEmployees: function (data, item){
 
@@ -3613,15 +3699,11 @@
 		},
 		changeDealTemplateName: function (oNewDealStep, oCurrentDealStep)
 		{
-			var rgbNew = oNewDealStep.css("background-color"),
-				hexNew = $.rgb2hex(rgbNew),
-				rgbCurrent, hexCurrent;
+			var	hexNew = $.rgb2hex(oNewDealStep.css("background-color")),
+				hexCurrent = oCurrentDealStep && $.rgb2hex(oCurrentDealStep.css("background-color"));
 
 			if (oCurrentDealStep)
 			{
-				rgbCurrent = oCurrentDealStep.css("background-color"),
-				hexCurrent = $.rgb2hex(rgbCurrent),
-
 				$(".deal-template-step-name.deal-template-step-name-inner .current-step").css("color", hexCurrent);
 				$(".deal-template-step-name.deal-template-step-name-inner .new-step").css("color", hexNew);
 			}
@@ -4236,6 +4318,29 @@
 })(jQuery);
 
 $(function(){
+
+	/*
+	$('li#user-info-dropdown').on(
+		{
+			'mouseenter': function() {
+
+				var oSpan = $(this).find('span.profile > span');
+
+				oSpan
+					.data({'original-width': oSpan.width()})
+					.css({'width': 'fit-content'});
+			},
+
+			'mouseleave': function() {
+
+				var oSpan = $(this).find('span.profile > span');
+
+				oSpan.css({'width': oSpan.data('original-width')});
+			}
+		}
+	);
+	*/
+
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
 	$(window).on('resize', function(event) {
@@ -4417,8 +4522,15 @@ $(function(){
 		})
 		.on(
 			{
-				'click': function(event) {
-
+				'click': function(event) {					
+					
+					console.log('11111111');
+					
+					if ($(this).hasClass('blocked'))
+					{						
+						return false;
+					}					
+					
 					var iconPermissionId = $(this).attr('id'), //department_5_2_3 или user_7_2_3
 						aPermissionProperties = iconPermissionId.split('_'),
 						objectTypePermission = aPermissionProperties[0] == 'department' ? 0 : 1,
@@ -4446,10 +4558,9 @@ $(function(){
 						// Идентификатор типа сделки
 						dealTemplateId = aObjUrlParams['deal_template_id'];
 					}
-
-					//$('#id_content #row_0_9').toggleHighlight();
-					/*$.adminCheckObject({objectId: 'check_0_' + dealTemplateStepId, windowId: 'id_content'});*/ $.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
-				},
+				
+					$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});					
+				}/* ,
 
 				'mousedown': function(event) {
 
@@ -4466,7 +4577,7 @@ $(function(){
 				'mouseout': function() {
 
 					$(this).removeClass('changed');
-				}
+				} */
 			},
 			'.icons_permissions i'
 		)

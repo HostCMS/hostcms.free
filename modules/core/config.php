@@ -166,7 +166,7 @@ class Core_Config
 	 */
 	protected function _escape($value)
 	{
-		if (is_numeric($value))
+		if (is_int($value) || is_float($value))
 		{
 			return $value;
 		}

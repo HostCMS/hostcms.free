@@ -331,4 +331,11 @@ return array(
 	'shop_price_setting' => 'Установка цены товара "%s"',
 	'warehouse_in_price' => 'Отразить в цене',
 	'item_cards_printlayout' => 'Шаблон документа для ценников',
+	'flag_bonus_include_modifications' => 'Учитывать модификации',
+	'change_attributes_items_title' => 'Изменить атрибуты',
+	'shop_currency_select_caption' => 'Валюта',
+	'change_attributes_success' => 'Атрибуты изменены успешно!',
+	'remove' => 'Убрать',
+	'set' => 'Установить',
+	'delete_property_values' => 'Удалять существующие значения дополнительных свойств',
 );

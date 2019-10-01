@@ -14,6 +14,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
 	/**
+	 * Check if $value is instance of Skin_Bootstrap_Admin_Form_Entity_Menus
+	 * @return boolean
+	 */
+	static protected function _justMenus($value)
+	{
+		return $value instanceof Skin_Bootstrap_Admin_Form_Entity_Menus;
+	}
+
+	/**
 	 * Show edit form
 	 * @return boolean
 	 */
@@ -23,23 +32,22 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 
 		ob_start();
 
-		/*
-		// Добавить фильтрацию на instanceof Skin_Bootstrap_Admin_Form_Entity_Menus через array_filter и только потом count()!
-		if (count($this->children))
+		$aMenus = array_filter($this->children, array(__CLASS__, '_justMenus'));
+		if (count($aMenus))
 		{
 			?><div class="table-toolbar">
 				<?php
-				foreach ($this->children as $oAdmin_Form_Entity)
+				foreach ($aMenus as $oAdmin_Form_Entity)
 				{
-					if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
-					{
+					//if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+					//{
 						$oAdmin_Form_Entity->execute();
-					}
+					//}
 				}
 				?>
 				<div class="clear"></div>
 			</div><?php
-		}*/
+		}
 
 		// Форма
 		$this->_Admin_Form_Entity_Form

@@ -523,6 +523,7 @@ class Core_Captcha
 		header('Cache-Control: no-store, no-cache, must-revalidate');
 		header('Cache-Control: post-check=0, pre-check=0', FALSE);
 		header('Pragma: no-cache');
+		header('X-Powered-By: HostCMS');
 
 		// Масштабируем базовое изображение до необходимого
 		$img3 = imagecreatetruecolor(self::$_config['width'], self::$_config['height']);

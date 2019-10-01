@@ -57,6 +57,7 @@ return array(
 	'item_large_image' => 'Item Large Image',
 	'item_small_image' => 'Item Small Image',
 	'item_shortcuts' => 'Shortcuts',
+	'item_barcodes' => 'Barcodes',
 	'item_siteuser_id' => 'Siteuser ID',
 	'quantity_from' => 'Quantity from',
 	'quantity_to' => 'Quantity to',

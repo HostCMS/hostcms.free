@@ -371,6 +371,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					{
 						$oAdmin_Form_Entity
 							->name("property_{$oProperty->id}[]")
+							->id("id_property_{$oProperty->id}_00{$iPropertyCounter}")
 							->caption(htmlspecialchars($oProperty->name))
 							->value(
 								$this->_correctPrintValue($oProperty, $oProperty->default_value)
@@ -385,11 +386,15 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									. ($oProperty->type == 7 ? ' margin-top-21' : '')
 							));
 
+						$oProperty->type == 7 && $oAdmin_Form_Entity->checked($oProperty->default_value == 1);
+
 						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
 
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
+
 							$oAdmin_Form_Entity_Section->add(
 								Admin_Form_Entity::factory('Div')
 									->class('row')
@@ -398,8 +403,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							);
 
 							$oProperty->multiple && $this->imgBox($oAdmin_Form_Entity, $oProperty);
-
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
 						}
 						else
 						{
@@ -452,7 +455,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 											)
 										));
 									break;
-
+									case 7: // Checkbox
+										$oNewAdmin_Form_Entity->checked($oProperty_Value->value == 1);
+									break;
 									case 8: // Date
 										$oNewAdmin_Form_Entity->value(
 											//Core_Date::sql2date($oProperty_Value->value)
@@ -470,7 +475,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 								$oNewAdmin_Form_Entity
 									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->id("property_{$oProperty->id}_{$oProperty_Value->id}");
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}");
 
 								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
@@ -482,7 +487,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								);
 
 								// Визуальный редактор клонировать запрещено
-								$oProperty->multiple && $oProperty->type != 6
+								$oProperty->multiple /*&& $oProperty->type != 6*/
 									&& $this->imgBox($oNewAdmin_Form_Entity, $oProperty, '$.cloneProperty', $this->getImgDeletePath());
 							}
 						}
@@ -1571,6 +1576,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	{
 		switch ($oProperty->type)
 		{
+			case 7: // Checkbox
+				$value = 1;
+			break;
 			case 8: // Date
 				$value = $value == '0000-00-00 00:00:00'
 					? ''

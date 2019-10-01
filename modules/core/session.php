@@ -268,7 +268,7 @@ abstract class Core_Session
 	{
 		self::$_maxlifetime = $maxlifetime;
 
-		if (!self::isStarted() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
+		if (!self::isStarted() && !self::isAcive() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
 		{
 			ini_set('session.gc_maxlifetime', $maxlifetime);
 		}

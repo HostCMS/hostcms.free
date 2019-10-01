@@ -198,8 +198,8 @@ abstract class Core_Http
 			->contentType('application/x-www-form-urlencoded');
 
 		$this
-			->additionalHeader('Accept-Charset', 'windows-1251,utf-8;q=0.7,*;q=0.7')
-			->additionalHeader('Accept-Language', 'ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3')
+			->additionalHeader('Accept-Charset', 'utf-8, *;q=0.9')
+			->additionalHeader('Accept-Language', 'ru-ru, ru;q=0.8, en-us;q=0.5, en;q=0.3')
 			//->additionalHeader('Keep-Alive', '300')
 			->additionalHeader('Accept', 'text/html,application/xml,application/xhtml+xml;q=0.9,text/plain;q=0.8,*/*;q=0.7');
 

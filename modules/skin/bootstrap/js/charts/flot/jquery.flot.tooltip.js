@@ -304,7 +304,7 @@
         var yPattern = /%y\.{0,1}(\d{0,})/;
         var xPatternWithoutPrecision = "%x";
         var yPatternWithoutPrecision = "%y";
-        var customTextPattern = "%ct";
+        var customTextPattern = "%tc";
 
         var x, y, customText, p;
 
@@ -323,7 +323,7 @@
             y = item.series.data[item.dataIndex][1];
             customText = item.series.data[item.dataIndex][2];
         }
-
+console.log('customText', customText);
         // I think this is only in case of threshold plugin
         if (item.series.label === null && item.series.originSeries) {
             item.series.label = item.series.originSeries.label;

@@ -9,15 +9,15 @@
  */
 require_once('../../bootstrap.php');
 
+// Код формы
+$iAdmin_Form_Id = 8;
+$sAdminFormAction = '/admin/user/index.php';
+$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
+
 if (Core_Auth::logged())
 {
 	Core_Auth::checkBackendBlockedIp();
-
-	// Код формы
-	$iAdmin_Form_Id = 8;
-	$sAdminFormAction = '/admin/user/index.php';
-	$oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
-
+	
 	// Контроллер формы
 	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 
@@ -994,7 +994,9 @@ if (Core_Auth::logged())
 
 Core_Auth::authorization($sModule = 'user');
 
-//
+// Контроллер формы
+$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
+
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()

@@ -1045,4 +1045,23 @@ class Shop_Model extends Core_Entity
 	{
 		$this->structure_id && $this->Structure->pathBackend();
 	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function rebuildBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$return = '';
+
+		if ($this->filter)
+		{
+			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
+			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
+
+			$return = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa fa-refresh"></i></a>';
+		}
+
+		return $return;
+	}
 }

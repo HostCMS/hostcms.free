@@ -365,7 +365,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$oItem_In_Cart = $this->get();
 
 		// Увеличиваем на количество уже в корзине
-		$this->quantity += $oItem_In_Cart->quantity;
+		$this->quantity = Shop_Controller::convertDecimal($this->quantity) + $oItem_In_Cart->quantity;
 
 		Core_Event::notify(get_class($this) . '.onAfterAdd', $this);
 
@@ -383,6 +383,8 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$this->_error = FALSE;
 
 		Core_Event::notify(get_class($this) . '.onBeforeUpdate', $this);
+
+		$this->quantity = Shop_Controller::convertDecimal($this->quantity);
 
 		$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 

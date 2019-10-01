@@ -16,9 +16,13 @@ class Shop_Order_Controller_Apply extends Admin_Form_Action_Controller_Type_Appl
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
+	 * @hostcms-event Shop_Order_Controller_Apply.onBeforeExecute
+	 * @hostcms-event Shop_Order_Controller_Apply.onAfterExecute
 	 */
 	public function execute($operation = NULL)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($this->_object));
+
 		$oBefore = clone $this->_object;
 
 		parent::execute($operation);
@@ -42,6 +46,8 @@ class Shop_Order_Controller_Apply extends Admin_Form_Action_Controller_Type_Appl
 			$this->_object->status_datetime = Core_Date::timestamp2sql(time());
 			$this->_object->save();
 		}
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($this->_object));
 
 		return $this;
 	}

@@ -21,9 +21,23 @@ class Skin_Default_Admin_Form_Entity_Lefttab extends Admin_Form_Entity
 		'name',
 		'caption',
 		'active',
+		'captionHTML',
 		'color',
-		'ico',
+		'ico'
 	);
+	
+	/**
+	 * Skip properties
+	 * @var array
+	 */
+	protected $_skipProperies = array(
+		'name',
+		'caption',
+		'active',
+		'captionHTML',
+		'color',
+		'ico'
+	);	
 
 	/**
 	 * Constructor.
@@ -99,14 +113,5 @@ class Skin_Default_Admin_Form_Entity_Lefttab extends Admin_Form_Entity
 	{
 		return !($value instanceof Skin_Default_Admin_Form_Entity_Div)
 			|| $value->getCountChildren();
-	}
-
-	/**
-	 * Execute all children
-	 * @return self
-	 */
-	public function executeChildren()
-	{
-		return parent::executeChildren();
 	}
 }

@@ -157,9 +157,8 @@ abstract class Core_Mail
 	 * @param string $to recipient
 	 * @param string $subject subject
 	 * @param string $message content
-	 * @param array $additional_headers additional headers
 	 */
-	abstract protected function _send($to, $subject, $message, $additional_headers);
+	abstract protected function _send($to, $subject, $message);
 
 	/**
 	 * Constructor.
@@ -460,7 +459,6 @@ abstract class Core_Mail
 		}
 
 		$sSingleSeparator = $this->_separator;
-
 		$sDoubleSeparators = $sSingleSeparator . $sSingleSeparator;
 
 		if (!$bMultipart)
@@ -545,15 +543,7 @@ abstract class Core_Mail
 			? '=?UTF-8?B?' . base64_encode($this->_subject) . '?='
 			: '';
 
-		$aHeaders = array();
-		foreach ($this->_headers as $headerName => $headerValue)
-		{
-			$aHeaders[] = "{$headerName}: {$headerValue}";
-		}
-
-		$header = implode($sSingleSeparator, $aHeaders);
-
-		return $this->_send($sTo, $subject, $content, $header);
+		return $this->_send($sTo, $subject, $content);
 	}
 
 	/**
@@ -594,5 +584,20 @@ abstract class Core_Mail
 		$this->header('Message-ID', '<' . (is_null($uniqueid) ? Core::generateUniqueId() : sha1($uniqueid)) . '.' . date('YmdHis') . '@' . $domain . '>');
 
 		return $this;
+	}
+	
+	/**
+	 * Convert $this->_headers to string with $this->_separator as separator
+	 * @return string
+	 */
+	protected function _headersToString()
+	{
+		$aHeaders = array();
+		foreach ($this->_headers as $headerName => $headerValue)
+		{
+			$aHeaders[] = "{$headerName}: {$headerValue}";
+		}
+
+		return implode($this->_separator, $aHeaders);
 	}
 }

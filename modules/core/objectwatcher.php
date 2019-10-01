@@ -83,13 +83,21 @@ class Core_ObjectWatcher
 		// Delete old items
 		if (/*rand(0, self::$_maxObjects) == 0 && */count($instance->_cache) > self::$_maxObjects)
 		{
-			$instance->_cache = array_slice($instance->_cache, floor(self::$_maxObjects / 4));
-
-			// Forces collection of any existing garbage cycles
-			function_exists('gc_collect_cycles') && gc_collect_cycles();
+			$instance->reduce();
 		}
 
 		$instance->_cache[$instance->getKey($model)] = $model;
+	}
+
+	/**
+	 * Reduce cache
+	 */
+	public function reduce()
+	{
+		$this->_cache = array_slice($this->_cache, floor(self::$_maxObjects / 4));
+
+		// Forces collection of any existing garbage cycles
+		function_exists('gc_collect_cycles') && gc_collect_cycles();
 	}
 
 	/**

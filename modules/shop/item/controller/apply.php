@@ -88,6 +88,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 	 */
 	public function execute($operation = NULL)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($this->_object));
+
 		if (get_class($this->_object) == 'Shop_Item_Model')
 		{
 			$aAdmin_Form_Fields = $this->_Admin_Form_Action->Admin_Form->Admin_Form_Fields->findAll();
@@ -156,19 +158,23 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 			$this->_itemsCount++;
 
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
-			
+
 			if ($this->_itemsCount == count($aChecked[1]))
 			{
 				// Проводки, если есть
 				!is_null($this->_oShop_Price_Setting) && $this->_oShop_Price_Setting->post();
 				!is_null($this->_oShop_Warehouse_Inventory) && $this->_oShop_Warehouse_Inventory->post();
 			}
+
+			$return = $this;
 		}
 		else
 		{
-			return parent::execute($operation);
+			$return = parent::execute($operation);
 		}
 
-		return $this;
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($this->_object));
+
+		return $return;
 	}
 }

@@ -11,6 +11,7 @@ $Shop_Controller_YandexMarket
 	->token(Core_Array::get(Core_Page::instance()->libParams, 'token', ''))
 	// ->outlets(TRUE)
 	->parseUrl()
+	// ->additionalImages(array('images'))
 	->show();
 
 exit();

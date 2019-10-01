@@ -180,4 +180,5 @@ return array(
 	'invoice_template' => 'Шаблон номера заказа',
 	'all_shops' => 'Все магазины',
 	'default_shop_measure_id' => 'Единица измерения по-умолчанию',
+	'filter' => 'Быстрый фильтр',
 );

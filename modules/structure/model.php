@@ -497,19 +497,27 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Get path for files
 	 * @return string
+	 * @hostcms-event structure.onBeforeGetPath
 	 */
 	public function getPath()
 	{
-		if ($this->path == '/')
+		Core_Event::notify($this->_modelName . '.onBeforeGetPath', $this);
+
+		$path = Core_Event::getLastReturn();
+
+		if (is_null($path))
 		{
-			return $this->path;
+			if ($this->path == '/')
+			{
+				return $this->path;
+			}
+
+			$path = rawurlencode($this->path) . '/';
+
+			$path = $this->parent_id == 0
+				? '/' . $path
+				: $this->Structure->getPath() . $path;
 		}
-
-		$path = rawurlencode($this->path) . '/';
-
-		$path = $this->parent_id == 0
-			? '/' . $path
-			: $this->Structure->getPath() . $path;
 
 		return $path;
 	}

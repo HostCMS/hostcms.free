@@ -50,7 +50,11 @@ class Ipaddress_Model extends Core_Entity
 	public function changeAccess()
 	{
 		$this->deny_access = 1 - $this->deny_access;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -60,7 +64,11 @@ class Ipaddress_Model extends Core_Entity
 	public function changeBackendAccess()
 	{
 		$this->deny_backend = 1 - $this->deny_backend;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -70,7 +78,11 @@ class Ipaddress_Model extends Core_Entity
 	public function changeStatistic()
 	{
 		$this->no_statistic = 1 - $this->no_statistic;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -128,7 +140,11 @@ class Ipaddress_Model extends Core_Entity
 	public function denyAllAccess()
 	{
 		$this->deny_access = 1;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -138,7 +154,11 @@ class Ipaddress_Model extends Core_Entity
 	public function allowAllAccess()
 	{
 		$this->deny_access = 0;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -148,7 +168,11 @@ class Ipaddress_Model extends Core_Entity
 	public function denyAllBackendAccess()
 	{
 		$this->deny_backend = 1;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 
 	/**
@@ -158,6 +182,10 @@ class Ipaddress_Model extends Core_Entity
 	public function allowAllBackendAccess()
 	{
 		$this->deny_backend = 0;
-		return $this->save();
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 }

@@ -113,16 +113,29 @@ class User_Controller_View extends Admin_Form_Action_Controller
 									<!-- <div class="stats-value pink">284</div>-->
 									<!-- <div class="stats-title">FOLLOWING</div>-->
 
-									<?php
-									$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->findAll();
-
-									foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+									<?php									
+									$aCompanies = Core_Entity::factory('Company')->findAll();
+									
+									foreach ($aCompanies as $oCompany)
 									{
-										?>
-										<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>
-										<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
-										<?php
-									}
+										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);	
+									
+										foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+										{
+											if (count($aCompanies))
+											{
+											?>											
+												<div class="h5">
+													<?php echo htmlspecialchars($oCompany->name)?>
+												</div>
+											<?php
+											}
+											?>
+											<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>
+											<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
+											<?php
+										}
+									}									
 									?>
 								</div>
 							</div>

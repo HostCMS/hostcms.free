@@ -163,7 +163,8 @@ $oMainTab
 	);
 
 // Получение списка скидок
-$aDiscounts = array();
+$aDiscounts = array('...');
+
 $aShop_Discounts = $oShop->Shop_Discounts->findAll(FALSE);
 foreach ($aShop_Discounts as $oShop_Discount)
 {
@@ -246,7 +247,6 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 	if (!$oUser->read_only)
 	{
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
-		// Shop_Controller::instance()->convertFloat нельзя использовать, т.к. может быть ведущий минус -1.0 => .1.0
 		$increase_price_rate = str_replace(',', '.', $increase_price_rate);
 
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');

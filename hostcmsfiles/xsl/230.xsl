@@ -9,6 +9,79 @@
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
 
 	<xsl:template match="/">
+		<SCRIPT type="text/javascript">
+		function fastFilter(form)
+		{
+			this._timerId = false;
+			this._form = form;
+
+			this.filterChanged = function(obj) {
+				if (this._timerId)
+				{
+					clearTimeout(this._timerId);
+				}
+
+				var $this = this;
+
+				this._timerId = setTimeout(function() {
+					$this._loadJson(obj);
+				}, 1500);
+
+				return this;
+			}
+
+			this._loadJson = function(obj) {
+				var data = this._serializeObject();
+
+				$.loadingScreen('show');
+
+				$.ajax({
+					url: './',
+					type: "POST",
+					data: data,
+					dataType: 'json',
+					success: function (result) {
+						$.loadingScreen('hide');
+
+						var jParent = obj.parent();
+
+						$('.popup-filter').remove();
+
+						jParent.css('position', 'relative');
+						jParent.append('<div class="popup-filter"><div>Найдено: ' + result.count + '</div><br/><div><input name="filter" class="button" value="Применить" type="submit"/></div></div>');
+
+						setTimeout(function() {
+							$('.popup-filter').remove();
+						}, 5000);
+					}
+				});
+			}
+
+			this._serializeObject = function () {
+				var o = {fast_filter: 1};
+				var a = this._form.serializeArray();
+				$.each(a, function () {
+					if (o[this.name] !== undefined) {
+						if (!o[this.name].push) {
+							o[this.name] = [o[this.name]];
+						}
+						o[this.name].push(this.value || '');
+					} else {
+						o[this.name] = this.value || '';
+					}
+				});
+
+				return o;
+			};
+		}
+
+		$(function() {
+			mainFastFilter = new fastFilter($('.filter').closest('form'));
+
+			$(':input').on('change', function(){ mainFastFilter.filterChanged($(this)); });
+		});
+		</SCRIPT>
+
 		<xsl:apply-templates select="/shop"/>
 	</xsl:template>
 
@@ -69,6 +142,17 @@
 				</div>
 
 				<div class="slider"></div><br/>
+
+				<fieldset>
+					<legend>
+						<span>Производитель</span>
+					</legend>
+
+					<select name="producer_id">
+						<option value="0">...</option>
+						<xsl:apply-templates select="/shop/producers/shop_producer" />
+					</select>
+				</fieldset>
 
 				<!-- Фильтр по дополнительным свойствам товара: -->
 				<xsl:if test="count(shop_item_properties//property[filter != 0 and (type = 0 or type = 1 or type = 3 or type = 7 or type = 11)])">
@@ -137,7 +221,7 @@
 				</xsl:when>
 				<!-- Отображаем флажок -->
 				<xsl:when test="filter = 5">
-					<input type="checkbox" name="property_{@id}" id="property_{@id}" style="padding-top:4px">
+					<input type="checkbox" name="property_{@id}" id="property_{@id}" value="1" style="padding-top:4px">
 						<xsl:if test="/shop/*[name()=$nodename] != ''">
 							<xsl:attribute name="checked"><xsl:value-of select="/shop/*[name()=$nodename]"/></xsl:attribute>
 						</xsl:if>
@@ -215,5 +299,19 @@
 				<xsl:value-of disable-output-escaping="yes" select="value"/>
 			</option>
 		</xsl:if>
+	</xsl:template>
+
+	<xsl:template match="shop_producer">
+		<option value="{@id}">
+			<xsl:if test="/shop/producer_id = @id">
+				<xsl:attribute name="selected">selected</xsl:attribute>
+			</xsl:if>
+
+			<xsl:value-of select="name"/>
+			
+			<xsl:if test="count/node()">
+				<xsl:text> (</xsl:text><xsl:value-of select="count"/><xsl:text>)</xsl:text>
+			</xsl:if>
+		</option>
 	</xsl:template>
 </xsl:stylesheet>

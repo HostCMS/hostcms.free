@@ -200,7 +200,7 @@
 					var uiDialog = hQuery(this).parent('.ui-dialog');
 					uiDialog.width(uiDialog.width()).height(uiDialog.height());
 
-					$(".xmlWindow").children(".ui-dialog-titlebar").append("<button id='btnMaximize' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-maximize' type='button' role='button' title='Maximize'><span class='ui-button-icon-primary ui-icon ui-icon-newwin'></span><span class='ui-button-text'>Maximize</span></button>");
+					hQuery(".xmlWindow").children(".ui-dialog-titlebar").append("<button id='btnMaximize' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-maximize' type='button' role='button' title='Maximize'><span class='ui-button-icon-primary ui-icon ui-icon-newwin'></span><span class='ui-button-text'>Maximize</span></button>");
 
 					var max = false,
 						original_width = uiDialog.width(),
@@ -209,11 +209,11 @@
 						textareaBlock = uiDialog.find('textarea'),
 						textareaBlockHeight = textareaBlock.height();
 
-					$("#btnMaximize")
+					hQuery("#btnMaximize")
 						.hover(function () {
-							$(this).addClass('ui-state-hover');
+							hQuery(this).addClass('ui-state-hover');
 						}, function () {
-							$(this).removeClass('ui-state-hover');
+							hQuery(this).removeClass('ui-state-hover');
 						})
 						.click(function (e) {
 							if (max === false)
@@ -221,13 +221,15 @@
 								// Maximaze window
 								max = true;
 
-								textareaBlock.height($(document).height() - 20 + 'px');
+								hQuery('body').addClass('bodyMaximize');
+
+								textareaBlock.height(hQuery(window).height() - 25 + 'px');
 								textareaBlock.parents('div.hostcmsWindow').height('');
 
 								uiDialog.animate({
-									height: $(document).height() + "px",
-									width: $(document).width() + "px",
-									top: 0,
+									height: hQuery(window).height() - 3 + "px",
+									width: hQuery(window).width() + "px",
+									top: hQuery(window).scrollTop(),
 									left: 0
 								}, 200);
 							}
@@ -236,6 +238,8 @@
 								// Restore window
 								max = false;
 
+								hQuery('body').removeClass('bodyMaximize');
+
 								textareaBlock.height(textareaBlockHeight + 'px');
 								textareaBlock.parents('div.hostcmsWindow').height(textareaBlockHeight + 'px');
 
@@ -243,7 +247,7 @@
 								  height: original_height + "px",
 								  width: original_width + "px",
 								  top: original_position.top + "px",
-								  left: original_position.left + "px",
+								  left: original_position.left + "px"
 								}, 200);
 							}
 
@@ -252,6 +256,8 @@
 				},
 				close: function( event, ui ) {
 					hQuery(this).dialog('destroy').remove();
+
+					hQuery('body').removeClass('bodyMaximize');
 				}
 			}, settings);
 

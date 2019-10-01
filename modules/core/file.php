@@ -439,6 +439,7 @@ class Core_File
 	static public function pathCorrection($path)
 	{
 		$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
+		$path = str_replace(array("\r", "\n", "\0"), '', $path);
 
 		do {
 			$path = str_replace(array(

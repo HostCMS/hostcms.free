@@ -393,6 +393,19 @@ if ($iInformationsystemGroupId)
 	$oAdmin_Form_Controller->addEntity(
 		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
 	);
+
+	$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
+	if ($oSiteAlias)
+	{
+		$sUrl = ($oInformationsystem->Structure->https ? 'https://' : 'http://')
+			. $oSiteAlias->name
+			. $oInformationsystem->Structure->getPath()
+			. $oInformationsystem_Group->getPath();
+
+		$oAdmin_Form_Controller->addEntity(
+			$oAdmin_Form_Controller->getTitlePathIcon($sUrl)
+		);
+	}
 }
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));

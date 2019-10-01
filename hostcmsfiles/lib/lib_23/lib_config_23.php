@@ -75,6 +75,9 @@ if (Core::moduleIsActive('siteuser'))
 
 					if(!is_null($user_login = Core_Array::get($aResult, 'login')))
 					{
+						// Replace '/' to '-'
+						$user_login = str_replace('/', '-', $user_login);
+
 						$oSiteuser = $oSite->Siteusers->getByLogin($user_login, FALSE);
 						$sUserLogin = is_null($oSiteuser) ? $user_login : '';
 					}
@@ -397,6 +400,9 @@ if (Core::moduleIsActive('siteuser'))
 				{
 					$nickname = '';
 				}
+
+				// Replace '/' to '-'
+				$nickname = str_replace('/', '-', $nickname);
 
 				$oSiteuser->login = $nickname;
 				$oSiteuser->password = Core_Hash::instance()->hash(

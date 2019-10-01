@@ -347,6 +347,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_groups_parent_id')->value($shop_groups_parent_id))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
+								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
 							);
 
 							$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -468,6 +469,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->importAction(Core_Array::getPost('import_price_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
 				->deleteImage(Core_Array::getPost('import_price_action_delete_image'))
+				->deletePropertyValues(Core_Array::getPost('delete_property_values'))
 			;
 
 			if (Core_Array::getPost('firstlineheader', 0))
@@ -671,8 +673,16 @@ else
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 			->name("import_price_action_delete_image")
+			->class('form-control colored-danger times')
 			->caption(Core::_('Shop_Item.import_price_list_action_delete_image'))
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+		)
+		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+			->name("delete_property_values")
+			->class('form-control colored-danger times')
+			->caption(Core::_('Shop_Item.delete_property_values'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
+			->value(1))
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 			->name("search_event_indexation")

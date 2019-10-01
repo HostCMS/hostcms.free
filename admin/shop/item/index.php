@@ -700,7 +700,7 @@ $oMenu->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/seller/index.php', NULL, NULL, $additionalParams)
 				)
 		)
-)->add(
+)/*->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_reports_title'))
 		->icon('fa fa-book')
@@ -726,7 +726,7 @@ $oMenu->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/report/producer/index.php', NULL, NULL, $additionalParams)
 				)
 		)
-);
+)*/;
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oMenu);
@@ -739,6 +739,19 @@ if ($oShopGroup->id)
 	$oAdmin_Form_Controller->addEntity(
 		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
 	);
+
+	$oSiteAlias = $oShop->Site->getCurrentAlias();
+	if ($oSiteAlias)
+	{
+		$sUrl = ($oShop->Structure->https ? 'https://' : 'http://')
+			. $oSiteAlias->name
+			. $oShop->Structure->getPath()
+			. $oShopGroup->getPath();
+
+		$oAdmin_Form_Controller->addEntity(
+			$oAdmin_Form_Controller->getTitlePathIcon($sUrl)
+		);
+	}
 }
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
@@ -1012,6 +1025,25 @@ if ($oAdminFormActionApplyDiscount && $oAdmin_Form_Controller->getAction() == 'a
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Shop_Item_Controller_Apply_Discount);
+}
+
+// Действие "Изменить атрибуты"
+$oAdminFormActionChangeAttribute = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('change_attributes');
+
+if ($oAdminFormActionChangeAttribute && $oAdmin_Form_Controller->getAction() == 'change_attributes')
+{
+	$oShop_Item_Controller_Change_Attribute = Admin_Form_Action_Controller::factory(
+		'Shop_Item_Controller_Change_Attribute', $oAdminFormActionChangeAttribute
+	);
+
+	$oShop_Item_Controller_Change_Attribute
+		->title(Core::_('Shop_Item.change_attributes_items_title'))
+		->Shop($oShop);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShop_Item_Controller_Change_Attribute);
 }
 
 // Действие "Удаление значения свойства"

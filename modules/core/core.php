@@ -179,7 +179,8 @@ class Core
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
 			),
-			'backendSessionLifetime' => 14400
+			'backendSessionLifetime' => 14400,
+			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'"
 		);
 	}
 

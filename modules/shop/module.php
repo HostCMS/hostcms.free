@@ -181,6 +181,7 @@ class Shop_Module extends Core_Module
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
 			->where('shop_groups.indexing', '=', 1)
+			->where('shop_groups.shortcut_id', '=', 0)
 			->where('shop_groups.active', '=', 1)
 			->where('shop_groups.deleted', '=', 0)
 			->where('shops.deleted', '=', 0)
@@ -559,4 +560,15 @@ class Shop_Module extends Core_Module
 			)
 		);
 	}
+
+	/**
+	 * Report tabs array
+	 * @var array
+	 */
+	protected $_reports = array(
+		'ordersCost' => array('Shop_Report_Controller', 'ordersCost'),
+		'ordersPaid' => array('Shop_Report_Controller', 'ordersPaid'),
+		'popularItems' => array('Shop_Report_Controller', 'popularItems'),
+		'popularProducers' => array('Shop_Report_Controller', 'popularProducers')
+	);
 }

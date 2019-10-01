@@ -434,7 +434,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oDescriptionRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('description')
-					->rows(7)
+					->rows(8)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 

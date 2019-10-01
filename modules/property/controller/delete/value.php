@@ -69,7 +69,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->value("$(\"#{$windowId} #preview_small_property_{$oProperty->id}_{$oValue->id},#{$windowId} #delete_small_property_{$oProperty->id}_{$oValue->id}\").remove()")
+								->value("$(\"#{$windowId} #preview_small_id_property_{$oProperty->id}_{$oValue->id},#{$windowId} #delete_small_id_property_{$oProperty->id}_{$oValue->id}\").remove()")
 								->execute();
 							$this->addMessage(ob_get_clean());
 						}
@@ -79,7 +79,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 							ob_start();
 							Core::factory('Core_Html_Entity_Script')
-								->value("$(\"#{$windowId} #preview_large_property_{$oProperty->id}_{$oValue->id}, #{$windowId} #delete_large_property_{$oProperty->id}_{$oValue->id}\").remove()")
+								->value("$(\"#{$windowId} #preview_large_id_property_{$oProperty->id}_{$oValue->id}, #{$windowId} #delete_large_id_property_{$oProperty->id}_{$oValue->id}\").remove()")
 								->execute();
 							$this->addMessage(ob_get_clean());
 						}

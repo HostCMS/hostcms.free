@@ -1,7 +1,6 @@
 <?php
 @ini_set('display_errors', 1);
 error_reporting(E_ALL);
-//@set_time_limit(90000);
 
 // Временная директория
 $currentMonth = date('n');
@@ -228,6 +227,8 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		//$oShop_Item_Import_Cml_Controller->skipProperties = array('Свойство1');
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$oShop_Item_Import_Cml_Controller->timeout = $iTimeout;
+		// Событийная индексация
+		//$oShop_Item_Import_Cml_Controller->searchIndexation = TRUE;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
 		if ($aReturn['status'] == 'success')
@@ -262,7 +263,7 @@ elseif ($sType == 'sale' && $sMode == 'query')
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<КоммерческаяИнформация ВерсияСхемы=\"2.08\" ДатаФормирования=\"%s\"></КоммерческаяИнформация>",
 		date("Y-m-d")));
 
-	// Gwt Max Order Id
+	// Get Max Order Id
 	$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
 	$oCore_QueryBuilder_Select
 		->from('shop_orders')

@@ -84,9 +84,6 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 					change: function (hex, opacity) {
 						if (!hex) return;
 						if (opacity) hex += ', ' + opacity;
-						try {
-							console.log(hex);
-						} catch (e) { }
 					},
 					theme: 'bootstrap'
 				});
