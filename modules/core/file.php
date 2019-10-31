@@ -749,13 +749,24 @@ class Core_File
 	 * @return array $result
 	 * - $result['large_image'] = true в случае успешного создания большого изображения, FALSE - в противном случае
 	 * - $result['small_image'] = true в случае успешного создания малого изображения, FALSE - в противном случае
+	 * @hostcms-event Core_File.onBeforeAdminUpload
+	 * @hostcms-event Core_File.onAfterAdminUpload
 	 */
 	static public function adminUpload($param)
 	{
+		Core_Event::notify('Core_File.onBeforeAdminUpload', NULL, $param);
+		
 		$result = array(
 			'large_image' => FALSE,
 			'small_image' => FALSE
 		);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult + $result;
+		}
 
 		// Путь к файлу-источнику большого изображения
 		$large_image_source = isset($param['large_image_source'])
@@ -1070,6 +1081,8 @@ class Core_File
 				$small_image_created = FALSE;
 			}
 		}
+
+		Core_Event::notify('Core_File.onAfterAdminUpload', NULL, $param);
 
 		$result['large_image'] = $large_image_created;
 		$result['small_image'] = $small_image_created;

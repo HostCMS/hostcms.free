@@ -280,8 +280,6 @@ class Informationsystem_Comment_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
 
-		$oInformationsystem = $this->getEntity();
-
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
 

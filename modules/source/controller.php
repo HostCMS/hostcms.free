@@ -69,11 +69,15 @@ class Source_Controller extends Core_Servant_Properties
 		{
 			$oSource = Core_Entity::factory('Source');
 
+			// Удалять Emoji
+			$bRemoveEmoji = strtolower(Core_Array::get(Core_DataBase::instance()->getConfig(), 'charset')) != 'utf8mb4';
+
 			foreach ($this->_allowedProperties as $propertyName)
 			{
 				$cookieName = 'hostcms_source_' . $propertyName;
 
-				isset($_COOKIE[$cookieName]) && $oSource->$propertyName = Core_Str::removeEmoji($_COOKIE[$cookieName]);
+				isset($_COOKIE[$cookieName])
+					&& $oSource->$propertyName = $bRemoveEmoji ? Core_Str::removeEmoji($_COOKIE[$cookieName]) : $_COOKIE[$cookieName];
 			}
 			$oSource->save();
 

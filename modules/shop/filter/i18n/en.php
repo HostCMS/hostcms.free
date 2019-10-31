@@ -9,5 +9,6 @@
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-
+	'rebuild_all_items' => 'Rebuild %s items',
+	'rebuild_end' => 'Rebuild completed!',
 );

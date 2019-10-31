@@ -51,7 +51,7 @@ $oTemplate_Section = Core_Entity::factory('Template_Section', $iTemplateSectionI
 
 $oTemplate = $oTemplate_Section->Template;
 
-$pageTitle = Core::_('Template_Section.section_show_title', $oTemplate->name);
+$pageTitle = Core::_('Template_Section.section_show_title', $oTemplate->name, FALSE);
 
 // Элементы строки навигации
 $oAdminFormEntityBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

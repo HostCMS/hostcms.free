@@ -78,6 +78,9 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 	$aJSON = array();
 
 	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
 	$iShopId = intval(Core_Array::getGet('shop_id'));
 	$oShop = Core_Entity::factory('Shop', $iShopId);
 
@@ -85,7 +88,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 	{
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->where('shop_groups.name', 'LIKE', $sQueryLike)
 			->where('shop_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
@@ -140,7 +143,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			// Вхождение
 			case 0:
 			default:
-				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%');
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
 			break;
 			// Вхождение с начала
 			case 1:
@@ -206,7 +209,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			// Вхождение
 			case 0:
 			default:
-				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%');
+				$oShop_Groups->queryBuilder()->where('shop_groups.name', 'LIKE', '%' . str_replace(' ', '%', $sQuery) . '%');
 			break;
 			// Вхождение с начала
 			case 1:
@@ -278,6 +281,8 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 	if (strlen($sQuery))
 	{
+		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
 		if (is_null(Core_Array::getGet('show_group')))
 		{
 			$iShopGroupId = intval(Core_Array::getGet('shop_group_id'));
@@ -291,11 +296,11 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 				->where('shop_items.shop_group_id', '=', $iShopGroupId)
 				->where('shop_items.modification_id', '=', 0)
 				->open()
-					->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+					->where('shop_items.name', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+					->where('shop_items.marking', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.path', 'LIKE', '%' . $sQuery . '%')
+					->where('shop_items.path', 'LIKE', $sQueryLike)
 				->close()
 				->limit(Core::$mainConfig['autocompleteItems']);
 
@@ -340,7 +345,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 			$oShop_Groups = $oShop->Shop_Groups;
 			$oShop_Groups->queryBuilder()
-				->where('shop_groups.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_groups.name', 'LIKE', $sQueryLike)
 				->where('shop_groups.shortcut_id', '=', 0)
 				->limit(Core::$mainConfig['autocompleteItems']);
 
@@ -604,32 +609,30 @@ $oMenu->add(
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.show_prices_title'))
+		->icon('fa fa-usd')
+		->img('/admin/images/prices.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.main_menu_warehouses_list'))
+		->icon('fa fa-balance-scale')
+		->img('/admin/images/company.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_sds_link'))
 		->icon('fa fa-book')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.show_prices_title'))
-				->icon('fa fa-usd')
-				->img('/admin/images/prices.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/index.php', NULL, NULL, $additionalParams)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Item.main_menu_warehouses_list'))
-				->icon('fa fa-balance-scale')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $additionalParams)
-				)
-		)
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.system_of_pays'))
@@ -779,14 +782,10 @@ $oBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Первая крошка на список магазинов
 $oBreadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/shop/index.php', NULL, NULL, ''
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		'/admin/shop/index.php', NULL, NULL, ''
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, ''))
 );
 
 // Крошки по директориям магазинов
@@ -799,14 +798,10 @@ if ($oShopDir->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShopDirBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		));
-	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+			->name($oShopDirBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
+	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -973,7 +968,9 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 	$Admin_Form_Action_Controller_Type_Move
 		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
 		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
-		->value($oShopGroup->id);
+		->value($oShopGroup->id)
+		->autocompletePath('/admin/shop/item/index.php?autocomplete=1&show_move_groups=1')
+		->autocompleteEntityId($oShop->id);
 
 	$iCount = $oShop->Shop_Groups->getCount();
 

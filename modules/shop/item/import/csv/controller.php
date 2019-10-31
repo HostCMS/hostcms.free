@@ -716,7 +716,24 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			throw new Core_Exception("");
 		}
 
-		fseek($fInputFile, $this->seek);
+		// Remove first BOM
+		if ($this->seek == 0)
+		{
+			$BOM = fgets($fInputFile, 4); // length - 1 байт
+
+			if ($BOM === "\xEF\xBB\xBF")
+			{
+				$this->seek = 3;
+			}
+			else
+			{
+				fseek($fInputFile, 0);
+			}
+		}
+		else
+		{
+			fseek($fInputFile, $this->seek);
+		}
 
 		$iCounter = 0;
 
@@ -1468,11 +1485,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// GUID родительской группы товаров
 						case 'group_parent_cml_id':
-							$oTmpObject = Core_Entity::factory('Shop_Group', 0);
-							if ($sData != 'ID00000000')
-							{
-								$oTmpObject = $this->_oCurrentShop->Shop_Groups->getByGuid($sData, FALSE);
-							}
+							$oTmpObject = $sData != 'ID00000000'
+								? $this->_oCurrentShop->Shop_Groups->getByGuid($sData, FALSE)
+								: Core_Entity::factory('Shop_Group', 0);
+
 							if (!is_null($oTmpObject))
 							{
 								if ($oTmpObject->id != $this->_oCurrentGroup->id)
@@ -1482,7 +1498,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										&& $this->_oCurrentGroup->save()
 										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
-
 								//$this->_oCurrentItem->shop_group_id = $oTmpObject->id;
 							}
 						break;
@@ -2725,6 +2740,13 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 					// clearCache
 					$this->_oCurrentItem->clearCache();
+
+					// Fast filter
+					if ($this->_oCurrentShop->filter)
+					{
+						$Shop_Filter_Controller = new Shop_Filter_Controller($this->_oCurrentShop);
+						$Shop_Filter_Controller->fill($this->_oCurrentItem);
+					}
 				}
 
 				Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterImportItem', $this, array($this->_oCurrentShop, $this->_oCurrentItem, $aCsvLine));

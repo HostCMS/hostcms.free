@@ -34,8 +34,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 		$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
 
-		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
-
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
@@ -326,6 +324,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<thead>
 					<tr>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_number') . '</th>
+						<th></th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_name') . '</th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_quantity') . '</th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_price') . '</th>
@@ -387,9 +386,17 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->execute();
 			$warehouse_select = ob_get_clean();
 
+			$smallImage = '';
+
+			if ($oShop_Order_Item->type == 0 && $oShop_Order_Item->Shop_Item->image_small)
+			{
+				$smallImage = '<img class="backend-thumbnail" src="' . htmlspecialchars($oShop_Order_Item->Shop_Item->getSmallFileHref()) . '" />';
+			}
+
 			$itemTable .= '
 				<tr id="' . $oShop_Order_Item->id . '">
 					<td class="index">' . ($key + 1) . '</td>
+					<td>' . $smallImage . '</td>
 					<td><input class="form-control" name="shop_order_item_name_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->name) . '" /></td>
 					<td width="5%"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->quantity . '" /></td>
 					<td width="10%"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
@@ -408,6 +415,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$itemTable .= '
 				<tr class="bold">
+					<td></td>
 					<td></td>
 					<td class="text-align-right">' . Core::_('Shop_Order.shop_order_item_total') . '</td>
 					<td width="5%" class="total_quantity text-align-right">' . $total_quantity . '</td>
@@ -516,7 +524,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					var shop_item_id = (typeof ui.item.id !== 'undefined' && ui.item.type == 'item' ? ui.item.id : 0);
 
-					appendRow(ui.item.id, ui.item.label, '1.00', price, ui.item.rate, ui.item.marking, shop_item_id);
+					appendRow(ui.item.id, ui.item.label, '1.00', price, ui.item.rate, ui.item.marking, shop_item_id, ui.item.image_small);
 
 					if (ui.item.type == 'delivery')
 					{
@@ -535,7 +543,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					if (e.which == 13) {
 						e.preventDefault();
 
-						appendRow(0, $(this).val(), '1.00', '0.00', 0, '', 0);
+						appendRow(0, $(this).val(), '1.00', '0.00', 0, '', 0, '');
 
 						$(this).val('');
 
@@ -586,12 +594,12 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$('td.total_amount').text($.mathRound(amount, 2));
 				}
 
-				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id)
+				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id, image_small)
 				{
 					var position = $('.shop-item-table > tbody tr:not(:last-child)').length + 1;
 
 					$('.shop-item-table > tbody tr:last-child').before(
-						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><img class=\"backend-thumbnail\"  src=\"' + image_small + '\" /></td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 					);
 				}
 
@@ -712,9 +720,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value($this->_object->shop_delivery_condition_id)
 				->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'))
 		);
-
-		$iOrderId = intval($this->_object->id);
-		$sOrderPath = '/admin/shop/order/index.php';
 
 		$oRecalcDeliveryPriceLink = Admin_Form_Entity::factory('Link');
 		$oRecalcDeliveryPriceLink

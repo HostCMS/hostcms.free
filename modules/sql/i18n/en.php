@@ -26,4 +26,6 @@ return array(
 	'repair_table_title' => 'Tables repairing',
 	'rows_count' => 'Found <b>%d</b> rows, showed <b>%d</b> rows. Execution time <b>%.3f</b> sec.',
 	'drop_index' => 'Duplicate index %s table %s was deleted.',
+	'duplicate_indexes' => 'Drop duplicate indexes',
+	'no_duplicate' => 'Duplicate indexes not found',
 );

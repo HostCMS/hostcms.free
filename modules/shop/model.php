@@ -95,7 +95,6 @@ class Shop_Model extends Core_Entity
 		'group_image_large_max_width' => 800,
 		'group_image_small_max_height' => 100,
 		'group_image_large_max_height' => 800,
-		'group_image_large_max_height' => 800,
 		'items_sorting_field' => 0,
 		'items_sorting_direction' => 0,
 		'groups_sorting_field' => 0,
@@ -139,8 +138,7 @@ class Shop_Model extends Core_Entity
 		'user' => array(),
 		'siteuser_group' => array(),
 		'shop_company' => array(), // old relation
-		'company' => array('foreign_key' => 'shop_company_id'), // new relation
-		'shop_country' => array()
+		'company' => array('foreign_key' => 'shop_company_id') // new relation
 	);
 
 	/**
@@ -210,6 +208,7 @@ class Shop_Model extends Core_Entity
 		'send_order_email_user',
 		'guid',
 		'yandex_market_sales_notes_default',
+		'filter'
 	);
 
 	/**
@@ -834,6 +833,16 @@ class Shop_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeRecountSets', $this);
 
+		$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
+		$oShop_Price_Setting->shop_id = $this->id;
+		$oShop_Price_Setting->number = '';
+		$oShop_Price_Setting->posted = 0;
+		$oShop_Price_Setting->description = Core::_('Shop.set_price_recount_sets');
+		$oShop_Price_Setting->save();
+
+		$oShop_Price_Setting->number = $oShop_Price_Setting->id;
+		$oShop_Price_Setting->save();
+
 		$limit = 100;
 		$offset = 0;
 
@@ -849,12 +858,21 @@ class Shop_Model extends Core_Entity
 
 			foreach ($aShop_Items as $oShop_Item)
 			{
-				$oShop_Item->recountSet();
+				$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+				$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+				$oShop_Price_Setting_Item->shop_price_id = 0;
+				$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
+				$oShop_Price_Setting_Item->old_price = $oShop_Item->price;
+				$oShop_Price_Setting_Item->new_price = $oShop_Item->getSetPrice();
+				$oShop_Price_Setting_Item->save();
 			}
 
 			$offset += $limit;
 		}
 		while (count($aShop_Items));
+
+		// Проводим
+		$oShop_Price_Setting->post();
 
 		Core_Event::notify($this->_modelName . '.onAfterRecountSets', $this);
 
@@ -1059,9 +1077,42 @@ class Shop_Model extends Core_Entity
 			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
 			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
 
-			$return = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa fa-refresh"></i></a>';
+			$Shop_Filter_Controller = new Shop_Filter_Controller($this);
+			$sTableName = $Shop_Filter_Controller->getTableName();
+
+			$oQB = Core_QueryBuilder::select(array('COUNT(*)', 'count'))
+				->from($sTableName);
+
+			$aRow = $oQB->execute()->asAssoc()->current();
+
+			$return = '<div style="position: relative"><a href="' . $href . '" onclick="' . $onclick . '"><i class="fa fa-refresh" title="' . $aRow['count'] . '"></i></a>';
+
+			if ($aRow['count'] == 0)
+			{
+				ob_start();
+
+				Core::factory('Core_Html_Entity_I')
+					->class('fa fa-exclamation-triangle darkorange')
+					->execute();
+
+				$return .= ob_get_clean();
+			}
+			$return .= '</div>';
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function shop_currency_nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->Shop_Currency->id == 0 && Core::factory('Core_Html_Entity_I')
+			->class('fa fa-exclamation-triangle darkorange')
+			->execute();
 	}
 }

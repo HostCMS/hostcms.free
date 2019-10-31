@@ -28,7 +28,6 @@ return array(
 	'sorting' => 'Sort',
 	'site_id' => 'Site Id',
 	'template_id' => 'Parent template Id',
-	'template_id' => 'Parent template',
 	'template' => '<acronym title="Template code">Template</acronym>',
 	'css' => '<acronym title="CSS or LESS">CSS/LESS/SCSS</acronym>',
 	'less' => '<acronym title="Apply LESS">LESS</acronym>',

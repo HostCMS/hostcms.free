@@ -58,13 +58,9 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, '')
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, '')
-	)
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, ''))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -82,20 +78,8 @@ if ($iShopDirId)
 
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDir->name)
-			->href
-			(
-				$oAdmin_Form_Controller->getAdminLoadHref
-				(
-					$sShopFormPath, NULL, NULL, $additionalParams
-				)
-			)
-			->onclick
-			(
-				$oAdmin_Form_Controller->getAdminLoadAjax
-				(
-					$sShopFormPath, NULL, NULL, $additionalParams
-				)
-			);
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, $additionalParams));
 	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);

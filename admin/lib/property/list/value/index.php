@@ -57,7 +57,7 @@ $oLibProperty = Core_Entity::factory('Lib_Property', $iLibPropertyId);
 
 $oLib = $oLibProperty->Lib;
 
-$pageTitle = Core::_('lib_property.lib_property_show_title', $oLib->name);
+$pageTitle = Core::_('lib_property.lib_property_show_title', $oLib->name, FALSE);
 
 // Элементы строки навигации
 $oAdminFormEntityBreadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

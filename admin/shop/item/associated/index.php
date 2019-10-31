@@ -31,7 +31,7 @@ $oShopGroupAssociated = Core_Entity::factory('Shop_Group', Core_Array::getGet('s
 
 $iModificationId = Core_Array::getGet('modification_id', 0);
 
-$sFormTitle = Core::_('Shop_Item.show_tying_products_title', $oShopItem->name);
+$sFormTitle = Core::_('Shop_Item.show_tying_products_title', $oShopItem->name, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -47,13 +47,9 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 // Первая крошка на список магазинов
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/shop/index.php'
-		))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/shop/index.php'
-		))
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
 );
 
 // Крошки по директориям магазинов
@@ -67,13 +63,9 @@ if ($oShopDir->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDirBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-			))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-			));
-	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
+	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -87,12 +79,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 	->name($oShop->name)
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-	))
+	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров
@@ -106,13 +94,9 @@ if ($oShopGroup->id)
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopGroupBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-			))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-			));
-	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
+	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -129,26 +113,18 @@ if ($oShopItem->modification_id)
 	// Крошка на текущую форму
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_("Shop_Item.item_modification_title", $oShopItem->Modification->name))
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"
-		))
+		->name(Core::_("Shop_Item.item_modification_title", $oShopItem->Modification->name, FALSE))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItem->Modification->id}"))
 	);
 }
 
 // Крошка на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name($sFormTitle)
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"
-	))
+		->name($sFormTitle)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}"))
 );
 
 // Крошки по группам товаров при выборе сопутствующего товара
@@ -161,14 +137,10 @@ if ($oShopGroupAssociated->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShopGroupBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-		));
-	}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+			->name($oShopGroupBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_item_id={$oShopItem->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
+	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -247,6 +219,9 @@ else
 	// Empty Dataset
 	$oAdmin_Form_Dataset = new Admin_Form_Dataset_Empty();
 }
+
+// Change field type
+$oAdmin_Form_Dataset->changeField('count', 'type', 1);
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

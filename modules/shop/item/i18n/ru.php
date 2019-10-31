@@ -71,7 +71,6 @@ return array(
 	'warehouse_header' => "Количество товара на складах",
 	'property_header' => "Дополнительные свойства",
 	'yandex_market_header' => "Экспорт в Яндекс.Маркет",
-	'siteuser_group_id' => 'Группа доступа',
 	'shop_users_group_parrent' => 'Как у родителя',
 	'siteuser_id' => 'Клиент',
 	'exec_typograph_for_text' => 'Типографировать текст',

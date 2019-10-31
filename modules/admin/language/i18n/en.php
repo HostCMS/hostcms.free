@@ -34,4 +34,6 @@ return array(
 
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	
+	'changeActive_success' => 'Status changed successfully!',
 );

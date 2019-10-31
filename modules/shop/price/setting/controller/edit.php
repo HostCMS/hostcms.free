@@ -511,9 +511,9 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				{
 					if ($value != '')
 					{
-						$oShop_Item_Price = $shop_price_id
-							? $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id)
-							: NULL;
+						// $oShop_Item_Price = $shop_price_id
+							// ? $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id)
+							// : NULL;
 
 						$old_price = $Shop_Price_Entry_Controller->getPrice($shop_price_id, $oShop_Item->id, $this->_object->datetime);
 

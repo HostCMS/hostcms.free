@@ -200,7 +200,7 @@ $additionalParams = 'informationsystem_id=' . $oInformationsystem->id . '&inform
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oInformationsystem->id
-			? Core::_('Informationsystem.show_comments_system_title', $oInformationsystem->name)
+			? Core::_('Informationsystem.show_comments_system_title', $oInformationsystem->name, FALSE)
 			: Core::_('Informationsystem.comments_title')
 		)
 		->href(
@@ -217,7 +217,7 @@ if (!is_null($oInformationsystem_Item->id))
 
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
-			->name(Core::_('Informationsystem_Item.show_comments_title', $oInformationsystem_Item->name))
+			->name(Core::_('Informationsystem_Item.show_comments_title', $oInformationsystem_Item->name, FALSE))
 			->href(
 				$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 			)

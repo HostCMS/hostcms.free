@@ -30,7 +30,6 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -88,10 +87,6 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 		parent::_applyObjectProperty();
 
 		// Обработка картинок
-		$param = array();
-
-		$large_image = '';
-
 		$aCore_Config = Core::$mainConfig;
 
 		$bLargeImageIsCorrect =
@@ -119,7 +114,6 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 				try {
 					Core_File::moveUploadedFile($aFileData['tmp_name'], $this->_object->getFilePath() . $large_image);
-					//$this->_object->filename = $large_image;
 					$this->_object->filename = $aFileData['name'];
 				} catch (Exception $e) {
 				}

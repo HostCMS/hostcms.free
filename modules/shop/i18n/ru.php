@@ -106,10 +106,6 @@ return array(
 	'widget_other_comments' => 'Другие комментарии',
 	'use_captcha' => 'Использовать CAPTCHA',
 	'widget_title' => 'Комментарии магазина',
-	'widget_other_comments' => 'Другие комментарии',
-	'date' => 'Дата',
-	'subject' => 'Тема',
-	'subject_not_found' => 'Тема отсутствует',
 	'tag' => 'Метка: %s',
 	'comment_mail_subject' => 'Добавление комментария/ответа на сайт',
 	'deleteEmptyDirs_success' => 'Пустые директории удалены!',
@@ -181,4 +177,7 @@ return array(
 	'all_shops' => 'Все магазины',
 	'default_shop_measure_id' => 'Единица измерения по-умолчанию',
 	'filter' => 'Быстрый фильтр',
+	'seo_template_filter' => 'Фильтр',
+	'seo_template_filter_producer' => 'Производитель',
+	'set_price_recount_sets' => 'Установка цен при пересчете комплекта',
 );

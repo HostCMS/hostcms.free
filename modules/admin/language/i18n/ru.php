@@ -33,4 +33,6 @@ return array(
 	'markDeleted_error' => 'Ошибка! Язык центра администрирования не удален!',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	
+	'changeActive_success' => 'Активность изменена успешно',
 );

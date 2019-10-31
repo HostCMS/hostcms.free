@@ -78,7 +78,10 @@ class Admin_Language_Model extends Core_Entity
 		}
 
 		// Первый язык в списке
-		$this->queryBuilder()->clear();
+		$this->queryBuilder()
+			->clear()
+			->where('active', '=', 1);
+
 		$aAdmin_Language = $this->findAll();
 
 		return count($aAdmin_Language)
@@ -101,12 +104,9 @@ class Admin_Language_Model extends Core_Entity
 
 		$aAdmin_Language = $this->findAll();
 
-		if (count($aAdmin_Language) > 0)
-		{
-			return $aAdmin_Language[0];
-		}
-
-		return NULL;
+		return isset($aAdmin_Language[0])
+			? $aAdmin_Language[0]
+			: NULL;
 	}
 
 	/**
@@ -132,5 +132,23 @@ class Admin_Language_Model extends Core_Entity
 			&& $this->Antispam_Country_Languages->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Change item status
+	 * @return self
+	 * @hostcms-event admin_language.onBeforeChangeActive
+	 * @hostcms-event admin_language.onAfterChangeActive
+	 */
+	public function changeActive()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
+
+		$this->active = 1 - $this->active;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
 	}
 }

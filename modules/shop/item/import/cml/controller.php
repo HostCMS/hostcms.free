@@ -17,6 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
  * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание, для импорта из свойства товара используйте конструкцию вида "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение". По умолчанию МалоеОписание
  * - timeout(30) время выполнения шага импорта, получается из настроек PHP.
+ * - itemSearchFields(array('cml_id', 'marking', 'barcode')) массив полей, по которым может быть найден товар
  *
  * @package HostCMS
  * @subpackage Shop
@@ -46,6 +47,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'importAction',
 		'namespace',
 		'timeout',
+		'itemSearchFields',
 		'debug'
 	);
 
@@ -171,6 +173,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$this->timeout = (!defined('DENY_INI_SET') || !DENY_INI_SET)
 			? ini_get('max_execution_time')
 			: 30;
+
+		$this->itemSearchFields = array('cml_id', 'marking', 'barcode');
 
 		Core_File::mkdir(CMS_FOLDER . TMP_DIR . '1c_exchange_files');
 	}
@@ -1056,6 +1060,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			&& version_compare(strval($this->_oSimpleXMLElement->attributes()->ВерсияСхемы), '2.0', '>=')
 		)
 		{
+			$bCmlIdItemSearchFields = in_array('cml_id', $this->itemSearchFields);
+			$bMarkingItemSearchFields = in_array('marking', $this->itemSearchFields);
+			$bBarcodeItemSearchFields = in_array('barcode', $this->itemSearchFields);
+
 			// Файл import.xml
 			if (
 				!isset($this->_oSimpleXMLElement->ПакетПредложений)
@@ -1162,10 +1170,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Товар может быть идентифицирован произвольным (например GUID или внутрисистемным) идентификатором, Штрихкодом, Артикулом. Контрагент может использовать любой удобный с его точки зрения  идентификатор - на выбор
 
 					// Search by GUID
-					$oShopItem = $oShop->Shop_Items->getByGuid($sGUID, FALSE);
+					$bCmlIdItemSearchFields
+						&& $oShopItem = $oShop->Shop_Items->getByGuid($sGUID, FALSE);
 
 					// Search by Barcode
-					if (is_null($oShopItem) && strval($oXmlItem->Штрихкод))
+					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strval($oXmlItem->Штрихкод))
 					{
 						$oTmpItemsByBarcode = $oShop->Shop_Items;
 						$oTmpItemsByBarcode->queryBuilder()
@@ -1177,7 +1186,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Search by Marking
-					if (is_null($oShopItem) && trim(strval($oXmlItem->Артикул)) != '')
+					if (is_null($oShopItem) && $bMarkingItemSearchFields && trim(strval($oXmlItem->Артикул)) != '')
 					{
 						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oXmlItem->Артикул));
 					}
@@ -1333,6 +1342,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						is_null($oShopItem->path) && $oShopItem->path = '';
 
 						$oShopItem->save()->clearCache();
+						
+						// Fast filter
+						if ($oShop->filter)
+						{
+							$Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
+							$Shop_Filter_Controller->fill($oShopItem);
+						}
 
 						// Indexation
 						$this->searchIndexation
@@ -1585,10 +1601,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Товар может быть идентифицирован произвольным (например GUID или внутрисистемным) идентификатором, Штрихкодом, Артикулом. Контрагент может использовать любой удобный с его точки зрения  идентификатор - на выбор
 
 					// Основной товар (не модификация)
-					$oShopItem = $oShop->Shop_Items->getByGuid($sItemGUID, FALSE);
+					$bCmlIdItemSearchFields
+						&& $oShopItem = $oShop->Shop_Items->getByGuid($sItemGUID, FALSE);
 
 					// Search by Barcode
-					if (is_null($oShopItem) && strval($oProposal->Штрихкод))
+					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strval($oProposal->Штрихкод))
 					{
 						$oTmpItemsByBarcode = $oShop->Shop_Items;
 						$oTmpItemsByBarcode->queryBuilder()
@@ -1600,7 +1617,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Search by Marking
-					if (is_null($oShopItem) && strval($oProposal->Артикул))
+					if (is_null($oShopItem) && $bMarkingItemSearchFields && strval($oProposal->Артикул))
 					{
 						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oProposal->Артикул));
 					}
@@ -1908,6 +1925,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 
 						$oShopItem->save()->clearCache();
+						
+						// Fast filter
+						if ($oShop->filter)
+						{
+							$Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
+							$Shop_Filter_Controller->fill($oShopItem);
+						}
 
 						$this->_aReturn['updateItemCount']++;
 
@@ -2408,22 +2432,18 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'008' => 'ALL',
 		'012' => 'DZD',
 		'840' => 'USD',
-		'978' => 'EUR',
 		'973' => 'AOA',
-		'951' => 'XCD',
 		'951' => 'XCD',
 		'032' => 'ARS',
 		'051' => 'AMD',
 		'533' => 'AWG',
 		'036' => 'AUD',
-		'978' => 'EUR',
 		'944' => 'AZN',
 		'044' => 'BSD',
 		'048' => 'BHD',
 		'050' => 'BDT',
 		'052' => 'BBD',
 		'974' => 'BYR',
-		'978' => 'EUR',
 		'084' => 'BZD',
 		'952' => 'XOF',
 		'060' => 'BMD',
@@ -2431,241 +2451,148 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'356' => 'INR',
 		'068' => 'BOB',
 		'984' => 'BOV',
-		'840' => 'USD',
 		'977' => 'BAM',
 		'072' => 'BWP',
 		'578' => 'NOK',
 		'986' => 'BRL',
-		'840' => 'USD',
 		'096' => 'BND',
 		'975' => 'BGN',
-		'952' => 'XOF',
 		'108' => 'BIF',
 		'116' => 'KHR',
 		'950' => 'XAF',
 		'124' => 'CAD',
 		'132' => 'CVE',
 		'136' => 'KYD',
-		'950' => 'XAF',
-		'950' => 'XAF',
 		'990' => 'CLF',
 		'152' => 'CLP',
 		'156' => 'CNY',
-		'036' => 'AUD',
-		'036' => 'AUD',
 		'170' => 'COP',
 		'970' => 'COU',
 		'174' => 'KMF',
-		'950' => 'XAF',
 		'976' => 'CDF',
 		'554' => 'NZD',
 		'188' => 'CRC',
-		'952' => 'XOF',
 		'191' => 'HRK',
 		'931' => 'CUC',
 		'192' => 'CUP',
 		'532' => 'ANG',
-		'978' => 'EUR',
 		'203' => 'CZK',
 		'208' => 'DKK',
 		'262' => 'DJF',
-		'951' => 'XCD',
 		'214' => 'DOP',
-		'840' => 'USD',
 		'818' => 'EGP',
 		'222' => 'SVC',
-		'840' => 'USD',
-		'950' => 'XAF',
 		'232' => 'ERN',
-		'978' => 'EUR',
 		'230' => 'ETB',
-		'978' => 'EUR',
 		'238' => 'FKP',
-		'208' => 'DKK',
 		'242' => 'FJD',
-		'978' => 'EUR',
-		'978' => 'EUR',
-		'978' => 'EUR',
 		'953' => 'XPF',
-		'978' => 'EUR',
-		'950' => 'XAF',
 		'270' => 'GMD',
 		'981' => 'GEL',
-		'978' => 'EUR',
 		'936' => 'GHS',
 		'292' => 'GIP',
-		'978' => 'EUR',
-		'208' => 'DKK',
-		'951' => 'XCD',
-		'978' => 'EUR',
-		'840' => 'USD',
 		'320' => 'GTQ',
 		'826' => 'GBP',
 		'324' => 'GNF',
-		'952' => 'XOF',
 		'328' => 'GYD',
 		'332' => 'HTG',
-		'840' => 'USD',
-		'036' => 'AUD',
-		'978' => 'EUR',
 		'340' => 'HNL',
 		'344' => 'HKD',
 		'348' => 'HUF',
 		'352' => 'ISK',
-		'356' => 'INR',
 		'360' => 'IDR',
 		'960' => 'XDR',
 		'364' => 'IRR',
 		'368' => 'IQD',
-		'978' => 'EUR',
-		'826' => 'GBP',
 		'376' => 'ILS',
-		'978' => 'EUR',
 		'388' => 'JMD',
 		'392' => 'JPY',
-		'826' => 'GBP',
 		'400' => 'JOD',
 		'398' => 'KZT',
 		'404' => 'KES',
-		'036' => 'AUD',
 		'408' => 'KPW',
 		'410' => 'KRW',
 		'414' => 'KWD',
 		'417' => 'KGS',
 		'418' => 'LAK',
-		'978' => 'EUR',
 		'422' => 'LBP',
 		'426' => 'LSL',
 		'710' => 'ZAR',
 		'430' => 'LRD',
 		'434' => 'LYD',
 		'756' => 'CHF',
-		'978' => 'EUR',
-		'978' => 'EUR',
 		'446' => 'MOP',
 		'807' => 'MKD',
 		'969' => 'MGA',
 		'454' => 'MWK',
 		'458' => 'MYR',
 		'462' => 'MVR',
-		'952' => 'XOF',
-		'978' => 'EUR',
-		'840' => 'USD',
-		'978' => 'EUR',
 		'478' => 'MRO',
 		'480' => 'MUR',
-		'978' => 'EUR',
 		'965' => 'XUA',
 		'484' => 'MXN',
 		'979' => 'MXV',
-		'840' => 'USD',
 		'498' => 'MDL',
-		'978' => 'EUR',
 		'496' => 'MNT',
-		'978' => 'EUR',
-		'951' => 'XCD',
 		'504' => 'MAD',
 		'943' => 'MZN',
 		'104' => 'MMK',
 		'516' => 'NAD',
-		'710' => 'ZAR',
-		'036' => 'AUD',
 		'524' => 'NPR',
-		'978' => 'EUR',
-		'953' => 'XPF',
-		'554' => 'NZD',
 		'558' => 'NIO',
-		'952' => 'XOF',
 		'566' => 'NGN',
-		'554' => 'NZD',
-		'036' => 'AUD',
-		'840' => 'USD',
-		'578' => 'NOK',
 		'512' => 'OMR',
 		'586' => 'PKR',
-		'840' => 'USD',
 		'590' => 'PAB',
-		'840' => 'USD',
 		'598' => 'PGK',
 		'600' => 'PYG',
 		'604' => 'PEN',
 		'608' => 'PHP',
-		'554' => 'NZD',
 		'985' => 'PLN',
-		'978' => 'EUR',
-		'840' => 'USD',
 		'634' => 'QAR',
-		'978' => 'EUR',
 		'946' => 'RON',
 		'643' => 'RUB',
 		'810' => 'RUR',
 		'646' => 'RWF',
-		'978' => 'EUR',
 		'654' => 'SHP',
-		'951' => 'XCD',
-		'951' => 'XCD',
-		'978' => 'EUR',
-		'978' => 'EUR',
-		'951' => 'XCD',
 		'882' => 'WST',
-		'978' => 'EUR',
 		'678' => 'STD',
 		'682' => 'SAR',
-		'952' => 'XOF',
 		'941' => 'RSD',
 		'690' => 'SCR',
 		'694' => 'SLL',
 		'702' => 'SGD',
-		'532' => 'ANG',
 		'994' => 'XSU',
-		'978' => 'EUR',
-		'978' => 'EUR',
 		'090' => 'SBD',
 		'706' => 'SOS',
-		'710' => 'ZAR',
 		'728' => 'SSP',
-		'978' => 'EUR',
 		'144' => 'LKR',
 		'938' => 'SDG',
 		'968' => 'SRD',
-		'578' => 'NOK',
 		'748' => 'SZL',
 		'752' => 'SEK',
 		'947' => 'CHE',
-		'756' => 'CHF',
 		'948' => 'CHW',
 		'760' => 'SYP',
 		'901' => 'TWD',
 		'972' => 'TJS',
 		'834' => 'TZS',
 		'764' => 'THB',
-		'840' => 'USD',
-		'952' => 'XOF',
-		'554' => 'NZD',
 		'776' => 'TOP',
 		'780' => 'TTD',
 		'788' => 'TND',
 		'949' => 'TRY',
 		'934' => 'TMT',
-		'840' => 'USD',
-		'036' => 'AUD',
 		'800' => 'UGX',
 		'980' => 'UAH',
 		'784' => 'AED',
-		'826' => 'GBP',
-		'840' => 'USD',
 		'997' => 'USN',
-		'840' => 'USD',
 		'940' => 'UYI',
 		'858' => 'UYU',
 		'860' => 'UZS',
 		'548' => 'VUV',
 		'937' => 'VEF',
 		'704' => 'VND',
-		'840' => 'USD',
-		'840' => 'USD',
-		'953' => 'XPF',
-		'504' => 'MAD',
 		'886' => 'YER',
 		'967' => 'ZMW',
 		'932' => 'ZWL',

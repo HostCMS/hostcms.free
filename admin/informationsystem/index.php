@@ -83,7 +83,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, '')
-	)
+		)
 );
 
 if ($informationsystem_dir_id)

@@ -597,7 +597,9 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 	$oInformationsystemItemControllerMove
 		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
 		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
-		->value($iInformationsystemGroupId);
+		->value($iInformationsystemGroupId)
+		->autocompletePath('/admin/informationsystem/item/index.php?autocomplete=1&show_move_groups=1')
+		->autocompleteEntityId($oInformationsystem->id);
 
 	$iCount = $oInformationsystem->Informationsystem_Groups->getCount();
 

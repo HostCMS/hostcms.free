@@ -265,7 +265,7 @@ class Shop_Report_Controller
 			}
 		}
 
-		$yAxisColor = array();
+		$aAvgCount = $yAxisColor = array();
 
 		$limit = 1000;
 		$offset = 0;
@@ -292,11 +292,11 @@ class Shop_Report_Controller
 					? $aTotalOrders[$sDate]++
 					: $aTotalOrders[$sDate] = 1;
 
-				$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && self::$_oDefault_Currency->id > 0
+				/*$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && self::$_oDefault_Currency->id > 0
 					? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
 						$oShop_Order->Shop_Currency, self::$_oDefault_Currency
 					)
-					: 0;
+					: 0;*/
 
 				//$fAmount = $oShop_Order->getAmount() * $fCurrencyCoefficient;
 
@@ -782,13 +782,13 @@ class Shop_Report_Controller
 				<?php
 				$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->findAll(FALSE);
+				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
 				foreach ($aShops as $oShop)
 				{
 					$aShopOptions[$oShop->id] = $oShop->name;
 				}
 
-				$oSelectShop = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('shop_id')
 					->options($aShopOptions)
 					->value(self::$_shop_id)
@@ -812,7 +812,7 @@ class Shop_Report_Controller
 			$newSiteusersDeltaPercent = $avgOrdersDeltaPercent = $avgOrdersAmountDeltaPercent = $canceledDeltaPercent = $avgCommonOrdersAmountDeltaPercent = $avgCountOrdersItemDeltaPercent = '';
 
 			// New siteusers
-			$iCountNewSiteusers = self::_selectNewSiteusers(self::$_startDatetime, self::$_endDatetime)->getCount();
+			$iCountNewSiteusers = Core::moduleIsActive('siteuser') ? self::_selectNewSiteusers(self::$_startDatetime, self::$_endDatetime)->getCount() : 0;
 
 			$iCountTotalOrders = array_sum(self::$_total_orders);
 
@@ -850,7 +850,7 @@ class Shop_Report_Controller
 			if ($compare_previous_period)
 			{
 				// New siteusers
-				$iPreviuosCountNewSiteusers = self::_selectNewSiteusers(self::$_previousStartDatetime, self::$_previousEndDatetime)->getCount();
+				$iPreviuosCountNewSiteusers = Core::moduleIsActive('siteuser') ? self::_selectNewSiteusers(self::$_previousStartDatetime, self::$_previousEndDatetime)->getCount() : 0;
 
 				if ($iCountNewSiteusers && $iPreviuosCountNewSiteusers)
 				{
@@ -1060,7 +1060,6 @@ class Shop_Report_Controller
 								}
 
 								$totalPeriodAmount = $totalPeriodOrders = $totalPeriodOrderItems = 0;
-								$weekDelta = 1;
 								foreach (self::$_aOrderedAmount as $date => $amount)
 								{
 									$ordersCount = isset(self::$_total_orders[$date])? self::$_total_orders[$date] : 0;
@@ -1180,7 +1179,6 @@ class Shop_Report_Controller
 							show: true,
 							fillColor: { colors: [{ opacity: 0.8 }, { opacity: 1 }] },
 							barWidth: 0.4,
-							lineWidth: .5,
 							align: 'center',
 							lineWidth: 1,
 							fill: true,
@@ -1272,11 +1270,6 @@ class Shop_Report_Controller
 					selection: {
 						mode: "x"
 					},
-					/*tooltip: true,
-					tooltipOpts: {
-						defaultTheme: false,
-						content: "<span>%x</span> : <span>%y <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></span>"
-					},*/
 					legend: {
 						show: true,
 						noColumns: 4,
@@ -1442,100 +1435,107 @@ class Shop_Report_Controller
 					}
 
 					$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
-						$.plot($("#bar-chart<?php echo $functionName?>"), data, options);
+						if (data.length)
+						{
+							$.plot($("#bar-chart<?php echo $functionName?>"), data, options);
 
-						var previousPoint = null,
-							previousPointLabel = null;
+							var previousPoint = null,
+								previousPointLabel = null;
 
-						$("#bar-chart<?php echo $functionName?>").bind("plothover", function (event, pos, item) {
-							if (item) {
-								if ((previousPoint != item.dataIndex) || (previousLabel != item.series.label)) {
-									previousPoint = item.dataIndex;
-									previousLabel = item.series.label;
+							$("#bar-chart<?php echo $functionName?>").bind("plothover", function (event, pos, item) {
+								if (item) {
+									if ((previousPoint != item.dataIndex) || (previousLabel != item.series.label)) {
+										previousPoint = item.dataIndex;
+										previousLabel = item.series.label;
 
+										$("#flot-tooltip").remove();
+
+										var x = item.datapoint[0],
+											y = item.datapoint[1],
+											color = item.series.color,
+											formattedY = y.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$& ');
+
+										showTooltip(item.pageX, item.pageY,
+												"<b>" + item.series.label + "</b><br /> " + formattedY,
+												color);
+									}
+								} else {
 									$("#flot-tooltip").remove();
-
-									var x = item.datapoint[0];
-										y = item.datapoint[1];
-										color = item.series.color;
-
-									showTooltip(item.pageX, item.pageY,
-											"<b>" + item.series.label + "</b><br /> " /*+ x + " = "*/ + y,
-											color);
-								}
-							} else {
-								$("#flot-tooltip").remove();
-								previousPoint = null;
-							}
-						});
-
-						plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
-
-						var offset = [],
-							leftBorder = [],
-							amounts = [],
-							plotData = plotHorizontal.getData();
-
-						$.each(plotData, function(i, barObject){
-							if (barObject.data.length > 1) {
-								$.each(barObject.data, function (index, aData){
-									if (typeof amounts[index] === 'undefined') {
-										amounts[index] = 0;
-									}
-									amounts[index] += aData[0];
-								});
-							}
-						});
-
-						$.each(plotData, function(i, barObject){
-							$.each(barObject.data, function (index, aData){
-								var value = aData[0], segmentation = barObject.data.length > 1;
-
-								if (typeof offset[index] === 'undefined') {
-									offset[index] = 0;
-									leftBorder[index] = plotHorizontal.getPlotOffset().left;
-								}
-
-								if (segmentation) {
-									offset[index] += value;
-								}
-								else
-								{
-									offset[index] = value;
-								}
-
-								if (value)
-								{
-									var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
-
-									if (segmentation) {
-										label = $.mathRound(value / amounts[index] * 100, 2) + '%';
-									}
-									else {
-										label = value;
-									}
-
-									var textLength = String(label).length * 7.5;
-
-									// Текст помещается на элемент бара
-									if (o.left - leftBorder[index] > textLength)
-									{
-										$('<div class="data-point-label">' + label + '</div>').css({
-											position: 'absolute',
-											left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
-											top: o.top - 10,
-											display: 'none',
-											color: '#fff'
-										}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
-									}
-
-									if (segmentation)
-									{
-										leftBorder[index] = o.left;
-									}
+									previousPoint = null;
 								}
 							});
-						});
+						}
+
+						if (dataHorizontal.length)
+						{
+							plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
+
+							var offset = [],
+								leftBorder = [],
+								amounts = [],
+								plotData = plotHorizontal.getData();
+
+							$.each(plotData, function(i, barObject){
+								if (barObject.data.length > 1) {
+									$.each(barObject.data, function (index, aData){
+										if (typeof amounts[index] === 'undefined') {
+											amounts[index] = 0;
+										}
+										amounts[index] += aData[0];
+									});
+								}
+							});
+
+							$.each(plotData, function(i, barObject){
+								$.each(barObject.data, function (index, aData){
+									var value = aData[0], segmentation = barObject.data.length > 1;
+
+									if (typeof offset[index] === 'undefined') {
+										offset[index] = 0;
+										leftBorder[index] = plotHorizontal.getPlotOffset().left;
+									}
+
+									if (segmentation) {
+										offset[index] += value;
+									}
+									else
+									{
+										offset[index] = value;
+									}
+
+									if (value)
+									{
+										var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
+
+										if (segmentation) {
+											label = $.mathRound(value / amounts[index] * 100, 2) + '%';
+										}
+										else {
+											label = value;
+										}
+
+										var textLength = String(label).length * 7.5;
+
+										// Текст помещается на элемент бара
+										if (o.left - leftBorder[index] > textLength)
+										{
+											$('<div class="data-point-label">' + label + '</div>').css({
+												position: 'absolute',
+												left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
+												top: o.top - 10,
+												display: 'none',
+												color: '#fff'
+											}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
+										}
+
+										if (segmentation)
+										{
+											leftBorder[index] = o.left;
+										}
+									}
+								});
+							});
+						}
 					});
 
 					var currentTab = $('.report-tabs .nav-tabs li.active'),
@@ -1565,7 +1565,7 @@ class Shop_Report_Controller
 			</div>
 			<div class="col-xs-12 col-sm-3">
 				<?php
-				$oSelectYAxis = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('order_parameter_y')
 					->options(array(
 						'region' => Core::_('Report.axis_region'),
@@ -1587,7 +1587,7 @@ class Shop_Report_Controller
 			</div>
 			<div class="col-xs-12 col-sm-3">
 				<?php
-				$oSelectXAxis = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('order_parameter_x')
 					->options(array(
 						'orders_count' => Core::_('Report.axis_orders_count'),
@@ -1606,7 +1606,7 @@ class Shop_Report_Controller
 				<div class="segmentation pull-right">
 					<div><?php echo Core::_('Report.segmentation')?></div>
 					<div><?php
-					$oSelectSegment = Admin_Form_Entity::factory('Select')
+					Admin_Form_Entity::factory('Select')
 						->id('order_segment')
 						->options(array(
 							'none' => Core::_('Report.axis_none'),
@@ -1722,13 +1722,13 @@ class Shop_Report_Controller
 				<?php
 				$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->findAll(FALSE);
+				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
 				foreach ($aShops as $oShop)
 				{
 					$aShopOptions[$oShop->id] = $oShop->name;
 				}
 
-				$oSelectShop = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('shop_id')
 					->options($aShopOptions)
 					->value(self::$_shop_id)
@@ -1750,7 +1750,7 @@ class Shop_Report_Controller
 					<div><?php echo Core::_('Report.popular_quantity')?></div>
 					<div>
 						<?php
-						$oPopularLimit = Admin_Form_Entity::factory('Select')
+						Admin_Form_Entity::factory('Select')
 							->id('popular_limit')
 							->options(array(
 								10 => 10,
@@ -1815,7 +1815,7 @@ class Shop_Report_Controller
 						$highImportanceCount = $totalItemsAmount * 0.25;
 						$mediumImportanceCount = $totalItemsAmount * 0.75;
 
-						$aHighPopularItems = array();
+						$aHighPopularItems = $aMediumPopularItems = $aLowPopularItems = array();
 						$totalHighItemsCount = $iCountHighImportanceItems = $iCountMediumImportanceItems = $iCountLowImportanceItems = 0;
 						foreach ($aPopularItems as $shop_item_id => $aTmp)
 						{
@@ -1895,7 +1895,7 @@ class Shop_Report_Controller
 			</div>
 			<div class="col-xs-12 col-sm-3">
 				<?php
-				$oSelectYAxis = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('popular_parameter_y')
 					->options(array(
 						'group' => Core::_('Report.axis_group'),
@@ -1910,7 +1910,7 @@ class Shop_Report_Controller
 			</div>
 			<div class="col-xs-12 col-sm-3">
 				<?php
-				$oSelectXAxis = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('popular_parameter_x')
 					->options(array(
 						'count_positions' => Core::_('Report.axis_count_positions'),
@@ -1928,7 +1928,7 @@ class Shop_Report_Controller
 				<div class="segmentation pull-right">
 					<div><?php echo Core::_('Report.segmentation')?></div>
 					<div><?php
-					$oSelectSegment = Admin_Form_Entity::factory('Select')
+					Admin_Form_Entity::factory('Select')
 						->id('popular_segment')
 						->options(array(
 							'none' => Core::_('Report.axis_none'),
@@ -2072,73 +2072,76 @@ class Shop_Report_Controller
 			];
 
 			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
-				plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
+				if (dataHorizontal.length)
+				{
+					plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
 
-				var offset = [],
-					leftBorder = [],
-					amounts = [],
-					plotData = plotHorizontal.getData();
+					var offset = [],
+						leftBorder = [],
+						amounts = [],
+						plotData = plotHorizontal.getData();
 
-				$.each(plotData, function(i, barObject){
-					if (barObject.data.length > 1) {
-						$.each(barObject.data, function (index, aData){
-							if (typeof amounts[index] === 'undefined') {
-								amounts[index] = 0;
-							}
-							amounts[index] += aData[0];
-						});
-					}
-				});
-
-				$.each(plotData, function(i, barObject){
-					$.each(barObject.data, function (index, aData){
-						var value = aData[0], segmentation = barObject.data.length > 1;
-
-						if (typeof offset[index] === 'undefined') {
-							offset[index] = 0;
-							leftBorder[index] = plotHorizontal.getPlotOffset().left;
-						}
-
-						if (segmentation) {
-							offset[index] += value;
-						}
-						else
-						{
-							offset[index] = value;
-						}
-
-						if (value)
-						{
-							var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
-
-							if (segmentation) {
-								label = $.mathRound(value / amounts[index] * 100, 2) + '%';
-							}
-							else {
-								label = value;
-							}
-
-							var textLength = String(label).length * 7.5;
-
-							// Текст помещается на элемент бара
-							if (o.left - leftBorder[index] > textLength)
-							{
-								$('<div class="data-point-label">' + label + '</div>').css({
-									position: 'absolute',
-									left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
-									top: o.top - 10,
-									display: 'none',
-									color: '#fff'
-								}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
-							}
-
-							if (segmentation)
-							{
-								leftBorder[index] = o.left;
-							}
+					$.each(plotData, function(i, barObject){
+						if (barObject.data.length > 1) {
+							$.each(barObject.data, function (index, aData){
+								if (typeof amounts[index] === 'undefined') {
+									amounts[index] = 0;
+								}
+								amounts[index] += aData[0];
+							});
 						}
 					});
-				});
+
+					$.each(plotData, function(i, barObject){
+						$.each(barObject.data, function (index, aData){
+							var value = aData[0], segmentation = barObject.data.length > 1;
+
+							if (typeof offset[index] === 'undefined') {
+								offset[index] = 0;
+								leftBorder[index] = plotHorizontal.getPlotOffset().left;
+							}
+
+							if (segmentation) {
+								offset[index] += value;
+							}
+							else
+							{
+								offset[index] = value;
+							}
+
+							if (value)
+							{
+								var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
+
+								if (segmentation) {
+									label = $.mathRound(value / amounts[index] * 100, 2) + '%';
+								}
+								else {
+									label = value;
+								}
+
+								var textLength = String(label).length * 7.5;
+
+								// Текст помещается на элемент бара
+								if (o.left - leftBorder[index] > textLength)
+								{
+									$('<div class="data-point-label">' + label + '</div>').css({
+										position: 'absolute',
+										left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
+										top: o.top - 10,
+										display: 'none',
+										color: '#fff'
+									}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
+								}
+
+								if (segmentation)
+								{
+									leftBorder[index] = o.left;
+								}
+							}
+						});
+					});
+				}
 			});
 		});
 		</script>
@@ -2247,22 +2250,19 @@ class Shop_Report_Controller
 		}
 
 		$aPopularProducers = self::_getPopularProducers($functionName, self::$_startDatetime, self::$_endDatetime, $groupDate, $groupInc);
-
-		$byParams = self::$_byParams;
-		$byParamSegments = self::$_byParamSegments;
 		?>
 		<div class="row">
 			<div class="col-xs-12 col-sm-4">
 				<?php
 				$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
-				$aShops = Core_Entity::factory('Shop')->findAll(FALSE);
+				$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE, FALSE);
 				foreach ($aShops as $oShop)
 				{
 					$aShopOptions[$oShop->id] = $oShop->name;
 				}
 
-				$oSelectShop = Admin_Form_Entity::factory('Select')
+				Admin_Form_Entity::factory('Select')
 					->id('shop_id')
 					->options($aShopOptions)
 					->value(self::$_shop_id)
@@ -2284,7 +2284,7 @@ class Shop_Report_Controller
 					<div><?php echo Core::_('Report.popular_quantity')?></div>
 					<div>
 						<?php
-						$oPopularLimit = Admin_Form_Entity::factory('Select')
+						Admin_Form_Entity::factory('Select')
 							->id('popular_producers_limit')
 							->options(array(
 								10 => 10,
@@ -2353,50 +2353,53 @@ class Shop_Report_Controller
 			];
 
 			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
-				// all scripts loaded
-				setTimeout(function() {
-					var placeholderBrandsDiagram = $("#pie-chart<?php echo $functionName?>");
+				if (dataPie.length)
+				{
+					// all scripts loaded
+					setTimeout(function() {
+						var placeholderBrandsDiagram = $("#pie-chart<?php echo $functionName?>");
 
-					$.plot(placeholderBrandsDiagram, dataPie, {
-						series: {
-							pie: {
-								show: true,
-								radius: 1,
-								innerRadius: 0.5,
-								label: {
-										show: true,
-										radius: 0,
-										// formatter: function(label, series) {
-											// return "<div style='font-size:8pt;'>" + label + "</div>";
-										// }
+						$.plot(placeholderBrandsDiagram, dataPie, {
+							series: {
+								pie: {
+									show: true,
+									radius: 1,
+									innerRadius: 0.5,
+									label: {
+											show: true,
+											radius: 0,
+											// formatter: function(label, series) {
+												// return "<div style='font-size:8pt;'>" + label + "</div>";
+											// }
+									}
+								}
+							},
+
+							legend: {
+								labelFormatter: function (label, series) {
+									return label + ", " + series.data[0][1];
 								}
 							}
-						},
-
-						legend: {
-							labelFormatter: function (label, series) {
-								return label + ", " + series.data[0][1];
+							,
+							grid: {
+								hoverable: true,
 							}
-						}
-						,
-						grid: {
-							hoverable: true,
-						}
-					});
+						});
 
-					placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
-						if (!obj) {
-							return;
-						}
+						placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
+							if (!obj) {
+								return;
+							}
+
+							$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
+							$("#pie-chart<?php echo $functionName?> span[id = 'pieLabel" + obj.seriesIndex + "']").show();
+						});
+
+						placeholderBrandsDiagram.resize(function(){$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();});
 
 						$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
-						$("#pie-chart<?php echo $functionName?> span[id = 'pieLabel" + obj.seriesIndex + "']").show();
-					});
-
-					placeholderBrandsDiagram.resize(function(){$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();});
-
-					$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
-				}, 200);
+					}, 200);
+				}
 			});
 		});
 		</script>

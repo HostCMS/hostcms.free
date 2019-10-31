@@ -49,7 +49,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Trash_Table.title', $titleName))
+		->name(Core::_('Trash_Table.title', $titleName, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)

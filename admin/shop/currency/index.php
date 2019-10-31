@@ -86,13 +86,13 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, '')
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, '')
-	)
+		->name(Core::_('Shop.menu'))
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, '')
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, '')
+		)
 );
 
 // Добавляем крошку на текущую форму

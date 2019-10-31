@@ -116,11 +116,7 @@ class Core_Meta
 
 				foreach ($aTmpExplode as $fieldName)
 				{
-					if (isset($object->$fieldName))
-					{
-						$return = $object->$fieldName;
-					}
-					elseif (method_exists($object, $fieldName))
+					if (is_callable(array($object, $fieldName)))
 					{
 						$attr = array();
 
@@ -150,6 +146,10 @@ class Core_Meta
 						}
 
 						$return = call_user_func_array(array($object, $fieldName), $attr);
+					}
+					elseif (isset($object->$fieldName))
+					{
+						$return = $object->$fieldName;
 					}
 					else
 					{

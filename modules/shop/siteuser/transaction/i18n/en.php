@@ -30,7 +30,6 @@ return array(
 	'type_affiliate_bonus' => 'Affiliate bonus',
 	'changeActive_success' => 'Status changed successfully!',
 	'edit_success' => 'Transaction information modified successfully.',
-	'edit_success' => 'Transaction modified successfully.',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'markDeleted_success' => 'Transaction deleted successfully!',

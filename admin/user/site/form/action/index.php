@@ -85,7 +85,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
+		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sCompanyPath, NULL, NULL, $sAdditionalCompanyParams)
 		)
@@ -105,7 +105,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add( // Список пользователей группы
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department_Module.ua_show_user_access_action_title', $oCompany_Department->name, $oSite->name))
+		->name(Core::_('Company_Department_Module.ua_show_user_access_action_title', $oCompany_Department->name, $oSite->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sFormActionsPath, NULL, NULL, $sAdditionalFormActions)
 		)
@@ -115,7 +115,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
+		->name(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)

@@ -297,7 +297,9 @@ class Shop_Cart_Model extends Core_Entity
 		{
 			$oModification = Core_Entity::factory('Shop_Item')->find($this->Shop_Item->modification_id);
 			!is_null($oModification->id) && $oShop_Item->addEntity(
-				$oModification->showXmlProperties($this->_showXmlProperties)
+				$oModification
+					->showXmlProperties($this->_showXmlProperties)
+					->showXmlAssociatedItems($this->_showXmlAssociatedItems)
 			);
 		}
 

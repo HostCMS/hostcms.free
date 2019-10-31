@@ -52,7 +52,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->id('lib_properties'))			
+			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->id('lib_properties'))
 			;
 
 		$oAdditionalTab
@@ -114,16 +114,16 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		ob_start();
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
-		$Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Script')
+		Core::factory('Core_Html_Entity_Script')
 			->value("$('#{$windowId} #lib_id').change();")
 			->execute();
 
 		$Div_Lib_Properies
 			->html(ob_get_clean());
-			
-		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);			
 
-		$oMainRow3->add($Select_LibDir);		
+		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+
+		$oMainRow3->add($Select_LibDir);
 		$oMainRow4->add($Select_Lib);
 		$oMainRow5->add($Div_Lib_Properies);
 

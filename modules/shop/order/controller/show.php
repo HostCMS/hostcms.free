@@ -57,6 +57,24 @@ class Shop_Order_Controller_Show extends Core_Controller
 	protected $_aOrder_Property_Dirs = array();
 
 	/**
+	 * Get _aOrder_Properties
+	 * @return array
+	 */
+	public function getOrderProperties()
+	{
+		return $this->_aOrder_Properties;
+	}
+
+	/**
+	 * Get _aGroup_Property_Dirs set
+	 * @return array
+	 */
+	public function getOrderPropertyDirs()
+	{
+		return $this->_aOrder_Property_Dirs;
+	}
+
+	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
 	 */
@@ -124,6 +142,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Shop_Order_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Shop_Order_Controller_Show.onBeforeAddOrdersPropertiesList
 	 */
 	public function show()
 	{
@@ -198,6 +217,8 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->name('shop_order_properties');
 
 			$this->addEntity($Shop_Order_Properties);
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddOrdersPropertiesList', $this, array($Shop_Order_Properties));
 
 			$this->_addordersPropertiesList(0, $Shop_Order_Properties);
 		}

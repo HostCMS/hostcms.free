@@ -59,11 +59,11 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 
 		return $this;
 	}
-	
+
 	protected function _apply($oAdmin_Form_Field)
 	{
 		$bChanged = FALSE;
-		
+
 		$sInputName = 'apply_check_' . $this->_datasetId . '_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
 
 		$value = Core_Array::getPost($sInputName);
@@ -74,13 +74,6 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 
 			if (property_exists($this->_object, $columnName) || isset($this->_object->$columnName))
 			{
-				$aTableColumns = $this->_object->getTableColumns();
-				
-				/*if (isset($aTableColumns[$columnName]))
-				{
-					print_r($aTableColumns[$columnName]);
-				}*/
-				
 				switch ($oAdmin_Form_Field->type)
 				{
 					case 5: // Datetime
@@ -94,10 +87,10 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 							: '0000-00-00';
 					break;
 				}
-				
+
 				$this->_object->$columnName = $value;
 				$bChanged = TRUE;
-				
+
 				// Backend Callback Method, HostCMS 6.7.9+
 				if ($oAdmin_Form_Field->type == 10 && method_exists($this->_object, $columnName))
 				{
@@ -111,7 +104,7 @@ class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controll
 				$bChanged = TRUE;
 			}
 		}
-		
+
 		return $bChanged;
 	}
 }

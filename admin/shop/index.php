@@ -31,12 +31,16 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('queryString'))
 )
 {
-	$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
+	$sQuery = trim(
+		Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))))
+	);
 
 	$aJSON = array();
 
 	if (strlen($sQuery))
 	{
+		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+		
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
@@ -67,9 +71,9 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			$oShop_Items = $oShop->Shop_Items;
 			$oShop_Items->queryBuilder()
 				->open()
-					->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
+					->where('shop_items.name', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.marking', 'LIKE', '%' . $sQuery . '%')
+					->where('shop_items.marking', 'LIKE', $sQueryLike)
 					->setOr()
 					->where('shop_items.id', 'LIKE', $sQuery)
 				->close()
@@ -134,6 +138,10 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 						'count' => $count
 					);
 				}
+				
+				$imageSmall = $oShop_Item->image_small
+					? htmlspecialchars($oShop_Item->getSmallFileHref())
+					: '';
 
 				$aJSON[] = array(
 					'type' => 'item',
@@ -147,6 +155,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					'currency' => $oShop_Currency->name,
 					'measure' => $measureName,
 					'count' => $rest,
+					'image_small' => $imageSmall,
 					'aPrices' => $aPrices,
 					'aWarehouses' => $aWarehouses
 				);
@@ -158,7 +167,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 		{
 			$oShop_Deliveries = $oShop->Shop_Deliveries;
 			$oShop_Deliveries->queryBuilder()
-				->where('shop_deliveries.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_deliveries.name', 'LIKE', $sQueryLike)
 				->where('shop_deliveries.active', '=', 1)
 				->limit(15);
 
@@ -187,7 +196,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 			$oShop_Purchase_Discounts = $oShop->Shop_Purchase_Discounts;
 
 			$oShop_Purchase_Discounts->queryBuilder()
-				->where('shop_purchase_discounts.name', 'LIKE', '%' . $sQuery . '%')
+				->where('shop_purchase_discounts.name', 'LIKE', $sQueryLike)
 				->where('shop_purchase_discounts.active', '=', 1)
 				->where('shop_purchase_discounts.start_datetime', '<=', $datetime)
 				->where('shop_purchase_discounts.end_datetime', '>=', $datetime)

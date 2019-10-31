@@ -1116,147 +1116,150 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					);
 				}
 
-				// Доступные действия для пользователя
-				$aAdmin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
-
-				$bActionAllowed = FALSE;
-
-				// Проверка на право доступа к действию
-				foreach ($aAdmin_Form_Actions as $oAdmin_Form_Action)
+				if (count($this->checked))
 				{
-					if ($oAdmin_Form_Action->name == $actionName)
-					{
-						$bActionAllowed = TRUE;
-						break;
-					}
-				}
+					// Доступные действия для пользователя
+					$aAdmin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
 
-				if ($bActionAllowed)
-				{
-					foreach ($this->checked as $datasetKey => $checkedItems)
+					$bActionAllowed = FALSE;
+
+					// Проверка на право доступа к действию
+					foreach ($aAdmin_Form_Actions as $oAdmin_Form_Action)
 					{
-						foreach ($checkedItems as $checkedItemId => $v1)
+						if ($oAdmin_Form_Action->name == $actionName)
 						{
-							if (isset($this->_datasets[$datasetKey]))
-							{
-								$oObject = $this->_datasets[$datasetKey]->getObject($checkedItemId);
-
-								// Проверка на наличие объекта и доступность действия к dataset
-								if (!is_object($oObject) || $oAdmin_Form_Action->dataset != -1
-									&& $oAdmin_Form_Action->dataset != $datasetKey)
-								{
-									break;
-								}
-
-								// Проверка через user_id на право выполнения действия над объектом
-								$bAccessToObject = $oUser->checkObjectAccess($oObject);
-
-								if (!$bAccessToObject)
-								{
-									throw new Core_Exception(
-										Core::_('User.error_object_owned_another_user'), array(), 0, FALSE
-									);
-								}
-
-								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
-								if (method_exists($oObject, 'checkBackendAccess') && !$oObject->checkBackendAccess($actionName, $oUser))
-								{
-									continue;
-								}
-
-								if (isset($this->_actionHandlers[$actionName]))
-								{
-									$actionResult = $this->_actionHandlers[$actionName]
-										->setDatasetId($datasetKey)
-										->setObject($oObject)
-										->execute($this->operation);
-
-									$this->addMessage(
-										$this->_actionHandlers[$actionName]->getMessage()
-									);
-
-									$this->addContent(
-										$this->_actionHandlers[$actionName]->getContent()
-									);
-								}
-								else
-								{
-									Core_Event::notify('Admin_Form_Controller.onCall' . $actionName, $this, array($datasetKey, $oObject, $this->operation));
-
-									$eventResult = Core_Event::getLastReturn();
-									if (is_array($eventResult))
-									{
-										list($actionResult, $message, $content) = $eventResult;
-
-										$this
-											->addMessage($message)
-											->addContent($content);
-									}
-									else
-									{
-										// Уже есть выше при проверке права доступа к действию, если действие было, то здесь также есть доступ
-										// Проверяем наличие действия с такими именем у формы
-										/*$oAdmin_Form_Action = $this->_Admin_Form->Admin_Form_Actions->getByName($actionName);
-										if (!is_null($oAdmin_Form_Action))
-										{*/
-											$actionResult = $oObject->$actionName();
-										/*}
-										else
-										{
-											throw new Core_Exception('Action "%actionName" does not exist.',
-												array('%actionName' => $actionName)
-											);
-										}*/
-									}
-								}
-
-								// Действие вернуло TRUE, прерываем выполнение
-								if ($actionResult === TRUE)
-								{
-									$this->addMessage(ob_get_clean())
-										/*->addContent('')
-										->pageTitle('')
-										->title('')*/;
-
-									return $this->show();
-								}
-								elseif ($actionResult !== NULL)
-								{
-									$aReadyAction[$oObject->getModelName()] = isset($aReadyAction[$datasetKey])
-										? $aReadyAction[$datasetKey] + 1
-										: 1;
-								}
-							}
-							else
-							{
-								throw new Core_Exception('Dataset %datasetKey does not exist.',
-									array('%datasetKey' => $datasetKey)
-								);
-							}
+							$bActionAllowed = TRUE;
+							break;
 						}
 					}
 
-					// Log
-					$oAdmin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage();
-					$sEventName = $oAdmin_Word_Value
-						? $oAdmin_Word_Value->name
-						: Core::_('Core.default_event_name');
+					if ($bActionAllowed)
+					{
+						foreach ($this->checked as $datasetKey => $checkedItems)
+						{
+							foreach ($checkedItems as $checkedItemId => $v1)
+							{
+								if (isset($this->_datasets[$datasetKey]))
+								{
+									$oObject = $this->_datasets[$datasetKey]->getObject($checkedItemId);
 
-					// Название формы для действия
-					$oAdmin_Word_Value = $oAdmin_Form_Action->Admin_Form->Admin_Word->getWordByLanguage();
-					$sFormName = $oAdmin_Word_Value
-						? $oAdmin_Word_Value->name
-						: Core::_('Core.default_form_name');
+									// Проверка на наличие объекта и доступность действия к dataset
+									if (!is_object($oObject) || $oAdmin_Form_Action->dataset != -1
+										&& $oAdmin_Form_Action->dataset != $datasetKey)
+									{
+										break;
+									}
 
-					Core_Log::instance()->clear()
-						->status(Core_Log::$SUCCESS)
-						->write(Core::_('Core.error_log_action_access_allowed', $sEventName, $sFormName));
-				}
-				else
-				{
-					throw new Core_Exception(
-						Core::_('Admin_Form.msg_error_access'), array()/*, 0, FALSE*/
-					);
+									// Проверка через user_id на право выполнения действия над объектом
+									$bAccessToObject = $oUser->checkObjectAccess($oObject);
+
+									if (!$bAccessToObject)
+									{
+										throw new Core_Exception(
+											Core::_('User.error_object_owned_another_user'), array(), 0, FALSE
+										);
+									}
+
+									// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
+									if (method_exists($oObject, 'checkBackendAccess') && !$oObject->checkBackendAccess($actionName, $oUser))
+									{
+										continue;
+									}
+
+									if (isset($this->_actionHandlers[$actionName]))
+									{
+										$actionResult = $this->_actionHandlers[$actionName]
+											->setDatasetId($datasetKey)
+											->setObject($oObject)
+											->execute($this->operation);
+
+										$this->addMessage(
+											$this->_actionHandlers[$actionName]->getMessage()
+										);
+
+										$this->addContent(
+											$this->_actionHandlers[$actionName]->getContent()
+										);
+									}
+									else
+									{
+										Core_Event::notify('Admin_Form_Controller.onCall' . $actionName, $this, array($datasetKey, $oObject, $this->operation));
+
+										$eventResult = Core_Event::getLastReturn();
+										if (is_array($eventResult))
+										{
+											list($actionResult, $message, $content) = $eventResult;
+
+											$this
+												->addMessage($message)
+												->addContent($content);
+										}
+										else
+										{
+											// Уже есть выше при проверке права доступа к действию, если действие было, то здесь также есть доступ
+											// Проверяем наличие действия с такими именем у формы
+											/*$oAdmin_Form_Action = $this->_Admin_Form->Admin_Form_Actions->getByName($actionName);
+											if (!is_null($oAdmin_Form_Action))
+											{*/
+												$actionResult = $oObject->$actionName();
+											/*}
+											else
+											{
+												throw new Core_Exception('Action "%actionName" does not exist.',
+													array('%actionName' => $actionName)
+												);
+											}*/
+										}
+									}
+
+									// Действие вернуло TRUE, прерываем выполнение
+									if ($actionResult === TRUE)
+									{
+										$this->addMessage(ob_get_clean())
+											/*->addContent('')
+											->pageTitle('')
+											->title('')*/;
+
+										return $this->show();
+									}
+									elseif ($actionResult !== NULL)
+									{
+										$aReadyAction[$oObject->getModelName()] = isset($aReadyAction[$datasetKey])
+											? $aReadyAction[$datasetKey] + 1
+											: 1;
+									}
+								}
+								else
+								{
+									throw new Core_Exception('Dataset %datasetKey does not exist.',
+										array('%datasetKey' => $datasetKey)
+									);
+								}
+							}
+						}
+
+						// Log
+						$oAdmin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage();
+						$sEventName = $oAdmin_Word_Value
+							? $oAdmin_Word_Value->name
+							: Core::_('Core.default_event_name');
+
+						// Название формы для действия
+						$oAdmin_Word_Value = $oAdmin_Form_Action->Admin_Form->Admin_Word->getWordByLanguage();
+						$sFormName = $oAdmin_Word_Value
+							? $oAdmin_Word_Value->name
+							: Core::_('Core.default_form_name');
+
+						Core_Log::instance()->clear()
+							->status(Core_Log::$SUCCESS)
+							->write(Core::_('Core.error_log_action_access_allowed', $sEventName, $sFormName));
+					}
+					else
+					{
+						throw new Core_Exception(
+							Core::_('Admin_Form.msg_error_access'), array()/*, 0, FALSE*/
+						);
+					}
 				}
 			}
 			catch (Exception $e)
@@ -1855,16 +1858,13 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 */
 	protected function _filterCallbackDateSingle($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		$date_from = htmlspecialchars($date_from);
-		$date_to = htmlspecialchars($date_to);
-
 		$divClass = is_null($tabName) ? 'col-xs-12' : 'col-xs-6 col-sm-4 col-md-3';
 
 		$sCurrentLng = Core_I18n::instance()->getLng();
 
 		?><div class="row">
 			<div class="date <?php echo $divClass?>">
-				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
+				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo htmlspecialchars($date_from)?>" class="form-control input-sm" />
 			</div>
 		</div>
 		<script>
@@ -2170,10 +2170,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	public function setDatasetConditions()
 	{
 		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
-
-		// Для каждого набора данных формируем свой фильтр,
-		// т.к. использовать псевдонимы в SQL операторе WHERE нельзя!
-		$aFilter = array();
 
 		$oAdmin_Form_Field_Order = Core_Entity::factory('Admin_Form_Field', $this->sortingFieldId);
 

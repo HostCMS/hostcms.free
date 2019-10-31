@@ -167,7 +167,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 					if (isset($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]) && count($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]))
 					{
-						$oShop_Warehouse_Entry_Source = array_unshift($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]);
+						$oShop_Warehouse_Entry_Source = array_shift($aTmp[$oSource_Shop_Warehouse->id][$oShop_Warehouse_Movement_Item->shop_item_id]);
 					}
 					else
 					{

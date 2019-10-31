@@ -28,7 +28,7 @@ $iLibDirId = intval(Core_Array::getRequest('lib_dir_id', 0));
 
 $oLib = Core_Entity::factory('Lib')->find($iLibId);
 
-$pageTitle = Core::_('lib_property.lib_property_show_title', $oLib->name);
+$pageTitle = Core::_('lib_property.lib_property_show_title', $oLib->name, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);

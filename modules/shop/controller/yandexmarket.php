@@ -710,10 +710,10 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			: '';
 	}
 
-	protected function _showOffer($oShop_Item)
+	protected function _makeOfferTag($oShop_Item)
 	{
 		$oShop = $this->getEntity();
-
+		
 		/* Устанавливаем атрибуты тега <offer>*/
 		$tag_bid = $oShop_Item->yandex_market_bid
 			? ' bid="' . Core_Str::xml($oShop_Item->yandex_market_bid) . '"'
@@ -730,6 +730,15 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			: '';
 
 		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . " available=\"{$available}\">\n");
+		
+		return $this;
+	}
+
+	protected function _showOffer($oShop_Item)
+	{
+		$oShop = $this->getEntity();
+
+		$this->_makeOfferTag($oShop_Item);
 
 		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
 

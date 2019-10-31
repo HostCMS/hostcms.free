@@ -52,13 +52,9 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, '')
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, '')
-	)
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, ''))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -76,43 +72,23 @@ if ($iShopDirId)
 
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDir->name)
-			->href
-			(
-				$oAdmin_Form_Controller->getAdminLoadHref
-				(
-					$sShopFormPath, NULL, NULL, $additionalParams
-				)
-			)
-			->onclick
-			(
-				$oAdmin_Form_Controller->getAdminLoadAjax
-				(
-					$sShopFormPath, NULL, NULL, $additionalParams
-				)
-			);
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, $additionalParams));
 	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
-		$oAdmin_Form_Entity_Breadcrumbs->add(
-			$oAdmin_Form_Entity_Breadcrumb
-		);
+		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
 	}
 }
 
 // Добавляем крошку на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Shop_Measure.show_mesures_link'))
-	->href
-	(
-		$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
-	)
-	->onclick
-	(
-		$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
-	));
+	->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0))))
+	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)));
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 

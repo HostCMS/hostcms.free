@@ -86,7 +86,6 @@ return array(
 	'move_success' => 'Information items have been transferred.',
 
 	'show_comments_title' => 'Comments to information item "%s"',
-	'shortcut_success' => "Product shortcut added successfully",
 	'show_information_propertys_title' => 'Additional properties of information system items "%s"',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',

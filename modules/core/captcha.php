@@ -411,7 +411,7 @@ class Core_Captcha
 				$x = fmod($t, 2) == 0 ? 0 : 1.5 * $radius;
 
 				// Двигаемся слева направа по изображению
-				for ($x; $x < $width + 2 * $radius; $x += 3 * $radius)
+				for (; $x < $width + 2 * $radius; $x += 3 * $radius)
 				{
 					// Наносим многоугольники
 					$this->_dawPolygon($img2, $x, $y, $radius, $corners, $ind);

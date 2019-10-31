@@ -66,6 +66,23 @@ class Shop_Favorite_Model extends Core_Entity
 	}
 
 	/**
+	 * Show modifications data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlModifications = FALSE;
+
+	/**
+	 * Add modifications XML to item
+	 * @param boolean $showXmlModifications mode
+	 * @return self
+	 */
+	public function showXmlModifications($showXmlModifications = TRUE)
+	{
+		$this->_showXmlModifications = $showXmlModifications;
+		return $this;
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event shop_favorite.onBeforeRedeclaredGetXml
@@ -102,7 +119,8 @@ class Shop_Favorite_Model extends Core_Entity
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
 			->showXmlWarehousesItems(TRUE)
-			->showXmlProperties($this->_showXmlProperties);
+			->showXmlProperties($this->_showXmlProperties)
+			->showXmlModifications($this->_showXmlModifications);
 
 		// Parent item for modification
 		if ($this->Shop_Item->modification_id)

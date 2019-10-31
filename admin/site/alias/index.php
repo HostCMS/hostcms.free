@@ -59,21 +59,13 @@ $oAdminFormEntityBreadcrumbs
 	->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('site.site_show_site_title_list'))
-			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($sSitePath)
-			)
-			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($sSitePath)
-			))
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sSitePath))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sSitePath)))
 	->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name($pageTitle)
-			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
-			)
-			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())
-			)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath()))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath()))
 		);
 
 // Хлебные крошки добавляем контроллеру
@@ -86,10 +78,7 @@ $oAdminFormAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdminFormAction && $oAdmin_Form_Controller->getAction() == 'edit')
 {
-	$oSiteAliasControllerEdit = new Site_Alias_Controller_Edit
-	(
-		$oAdminFormAction
-	);
+	$oSiteAliasControllerEdit = new Site_Alias_Controller_Edit($oAdminFormAction);
 
 	// Добавляем контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oSiteAliasControllerEdit);

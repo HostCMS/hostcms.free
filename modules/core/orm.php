@@ -861,9 +861,9 @@ class Core_ORM
 		{
 			$this->_relations = self::$_relationModelCache[$this->_modelName];
 			//$this->_hasOne = $this->_hasMany = $this->_belongsTo = array();
-			
+
 			Core_Event::notify($this->_modelName . '.onAfterLoadModelCache', $this);
-			
+
 			return $this;
 		}
 
@@ -1321,6 +1321,132 @@ class Core_ORM
 	}
 
 	/**
+	 * Get relation by $lowerProperty
+	 * @param string $lowerProperty
+	 * @return object
+	 */
+	protected function _getRelation($lowerProperty)
+	{
+		switch ($this->_relations[$lowerProperty]['type'])
+		{
+			case 'one':
+				$object = self::factory($this->_relations[$lowerProperty]['model'])
+					->clear();
+
+				if (isset($this->_relations[$lowerProperty]['through']))
+				{
+					//$tableName = Core_Inflection::getPlural($this->_relations[$lowerProperty]['through']);
+					$tableName = $this->_relations[$lowerProperty]['through_table_name'];
+
+					$object->queryBuilder()
+						// change id on id from joined table
+						->select($object->getTableName() . '.*') // select columns just from _tableName
+						->join($tableName,
+						$object->getTableName() . '.' . $object->getPrimaryKeyName(),
+						'=',
+						$tableName . '.' . $this->_relations[$lowerProperty]['dependent_key']);
+				}
+				else
+				{
+					$tableName = $object->getTableName();
+				}
+
+				$object
+					->queryBuilder()
+					->where(
+						$tableName . '.' . $this->_relations[$lowerProperty]['foreign_key'],
+						'=',
+						$this->getPrimaryKey()
+					)
+					->limit(1);
+
+				// Load values
+				$object->find();
+
+				if (is_null($object->getPrimaryKey()) && !isset($this->_relations[$lowerProperty]['through']))
+				{
+					$foreignKey = $this->_relations[$lowerProperty]['foreign_key'];
+
+					// Add relation
+					$object->$foreignKey = $this->getPrimaryKey();
+				}
+
+				// Insert into cache
+				$this->_relationCache[$lowerProperty] = $object;
+			break;
+			case 'belong':
+				$object = self::factory($this->_relations[$lowerProperty]['model']);
+
+				$_belongsByPrimary =
+					$this->_relations[$lowerProperty]['primary_key'] == $object->getPrimaryKeyName();
+
+				$foreignKey = $this->_relations[$lowerProperty]['foreign_key'];
+				$foreignKeyValue = $this->$foreignKey;
+
+				if ($_belongsByPrimary)
+				{
+					// Apply object because find() may return new object through Core_ObjectWatcher
+					$object = $object->find($foreignKeyValue);
+				}
+				else
+				{
+					if (!is_null($foreignKeyValue))
+					{
+						$object
+							->clear()
+							->queryBuilder()
+							->where(
+							$object->getTableName() . '.' . $this->_relations[$lowerProperty]['primary_key'],
+							'=',
+							$foreignKeyValue)
+							->limit(1);
+
+						// Load values
+						$object = $object->find();
+					}
+				}
+
+				// Add into cache
+				$this->_relationCache[$lowerProperty] = $object;
+			break;
+			case 'many':
+				$object = self::factory($this->_relations[$lowerProperty]['model']);
+
+				$object->queryBuilder()
+					->clear();
+
+				if (isset($this->_relations[$lowerProperty]['through']))
+				{
+					//$tableName = Core_Inflection::getPlural($this->_relations[$lowerProperty]['through']);
+					$tableName = $this->_relations[$lowerProperty]['through_table_name'];
+
+					$object->queryBuilder()
+						->select($object->getTableName() . '.*')
+						->join($tableName,
+						$object->getTableName() . '.' . $object->getPrimaryKeyName(),
+						'=',
+						$tableName . '.' . $this->_relations[$lowerProperty]['dependent_key']);
+				}
+				else
+				{
+					$tableName = $object->getTableName();
+				}
+
+				$object->queryBuilder()
+					->where(
+					$tableName . '.' . $this->_relations[$lowerProperty]['foreign_key'],
+					'=',
+					$this->getPrimaryKey());
+			break;
+			default:
+				throw new Core_Exception("Wrong relation type '%relationType' in the model '%model'",
+					array('%relationType' => $this->_relations[$lowerProperty]['type'], '%model' => $this->getModelName()));
+		}
+
+		return $object;
+	}
+
+	/**
 	 * Utilized for reading data from inaccessible properties
 	 * @param string $property property name
 	 * @return mixed
@@ -1336,121 +1462,7 @@ class Core_ORM
 
 		if (isset($this->_relations[$lowerProperty]))
 		{
-			switch ($this->_relations[$lowerProperty]['type'])
-			{
-				case 'one':
-					$object = self::factory($this->_relations[$lowerProperty]['model'])
-						->clear();
-
-					if (isset($this->_relations[$lowerProperty]['through']))
-					{
-						//$tableName = Core_Inflection::getPlural($this->_relations[$lowerProperty]['through']);
-						$tableName = $this->_relations[$lowerProperty]['through_table_name'];
-
-						$object->queryBuilder()
-							// change id on id from joined table
-							->select($object->getTableName() . '.*') // select columns just from _tableName
-							->join($tableName,
-							$object->getTableName() . '.' . $object->getPrimaryKeyName(),
-							'=',
-							$tableName . '.' . $this->_relations[$lowerProperty]['dependent_key']);
-					}
-					else
-					{
-						$tableName = $object->getTableName();
-					}
-
-					$object
-						->queryBuilder()
-						->where(
-							$tableName . '.' . $this->_relations[$lowerProperty]['foreign_key'],
-							'=',
-							$this->getPrimaryKey()
-						)
-						->limit(1);
-
-					// Load values
-					$object->find();
-
-					if (is_null($object->getPrimaryKey()) && !isset($this->_relations[$lowerProperty]['through']))
-					{
-						$foreignKey = $this->_relations[$lowerProperty]['foreign_key'];
-
-						// Add relation
-						$object->$foreignKey = $this->getPrimaryKey();
-					}
-
-					// Insert into cache
-					$this->_relationCache[$lowerProperty] = $object;
-				break;
-				case 'belong':
-
-					$object = self::factory($this->_relations[$lowerProperty]['model']);
-
-					$_belongsByPrimary =
-						$this->_relations[$lowerProperty]['primary_key'] == $object->getPrimaryKeyName();
-
-					$foreignKey = $this->_relations[$lowerProperty]['foreign_key'];
-					$foreignKeyValue = $this->$foreignKey;
-
-					if ($_belongsByPrimary)
-					{
-						// Apply object because find() may return new object through Core_ObjectWatcher
-						$object = $object->find($foreignKeyValue);
-					}
-					else
-					{
-						if (!is_null($foreignKeyValue))
-						{
-							$object
-								->clear()
-								->queryBuilder()
-								->where(
-								$object->getTableName() . '.' . $this->_relations[$lowerProperty]['primary_key'],
-								'=',
-								$foreignKeyValue)
-								->limit(1);
-
-							// Load values
-							$object = $object->find();
-						}
-					}
-
-					// Add into cache
-					$this->_relationCache[$lowerProperty] = $object;
-				break;
-				case 'many':
-					$object = self::factory($this->_relations[$lowerProperty]['model']);
-
-					$object->queryBuilder()
-						->clear();
-
-					if (isset($this->_relations[$lowerProperty]['through']))
-					{
-						//$tableName = Core_Inflection::getPlural($this->_relations[$lowerProperty]['through']);
-						$tableName = $this->_relations[$lowerProperty]['through_table_name'];
-
-						$object->queryBuilder()
-							->select($object->getTableName() . '.*')
-							->join($tableName,
-							$object->getTableName() . '.' . $object->getPrimaryKeyName(),
-							'=',
-							$tableName . '.' . $this->_relations[$lowerProperty]['dependent_key']);
-					}
-					else
-					{
-						$tableName = $object->getTableName();
-					}
-
-					$object->queryBuilder()
-						->where(
-						$tableName . '.' . $this->_relations[$lowerProperty]['foreign_key'],
-						'=',
-						$this->getPrimaryKey());
-					break;
-			}
-
-			return $object;
+			return $this->_getRelation($lowerProperty);
 		}
 
 		// Property does not exist
@@ -1514,13 +1526,13 @@ class Core_ORM
 			return TRUE;
 		}
 
-		if (Core_Event::getCount($this->_modelName . '.onCall' . $property))
+		// data-property, e.g. dataMyValue
+		if (strpos($property, 'data') === 0 && $property != 'data')
 		{
 			return TRUE;
 		}
 
-		// data-property, e.g. dataMyValue
-		if (strpos($property, 'data') === 0 && $property != 'data')
+		if (Core_Event::getCount($this->_modelName . '.onCall' . $property))
 		{
 			return TRUE;
 		}
@@ -1595,9 +1607,23 @@ class Core_ORM
 	{
 		$this->_loadColumns();
 
-		if (isset($this->_tableColumns[$name]) && array_key_exists(0, $arguments))
+		if (isset($this->_tableColumns[$name]))
 		{
-			return $this->__set($name, $arguments[0]);
+			return array_key_exists(0, $arguments)
+				? $this->__set($name, $arguments[0])
+				: $this->__get($name);
+		}
+
+		$lowerProperty = strtolower($name);
+
+		if (isset($this->_relationCache[$lowerProperty]))
+		{
+			return $this->_relationCache[$lowerProperty];
+		}
+
+		if (isset($this->_relations[$lowerProperty]))
+		{
+			return $this->_getRelation($lowerProperty);
 		}
 
 		// data-property, e.g. dataMyValue
@@ -1666,7 +1692,7 @@ class Core_ORM
 
 					// Remove everything except numbers and dot
 					$value = preg_replace('/[^0-9\.\-]/', '', $value);
-					
+
 					$value == '' && $value = 0;
 				break;
 				case 'float':
@@ -1968,13 +1994,13 @@ class Core_ORM
 			{
 				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
 			}
-			
+
 			// 'dataXXX' values
 			foreach ($this->_dataValues as $key => $value)
 			{
 				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
 			}
-			
+
 			return "Model '" . $this->_modelName . "',\nfields: " . implode(",\n", $return);
 		}
 

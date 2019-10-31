@@ -163,10 +163,10 @@ class Core_I18n
 
 			return isset($this->_cache[$lng][$className][$textName]);
 		}
-		
+
 		return FALSE;
 	}
-	
+
 	/**
 	 * Get text for key
 	 *
@@ -231,8 +231,6 @@ class Core_I18n
 			//throw new Core_Exception("Wrong argument '%key'", array('%key' => $key));
 			return "Wrong argument '" . htmlspecialchars($key) . "'.";
 		}
-
-		return NULL;
 	}
 
 	/**

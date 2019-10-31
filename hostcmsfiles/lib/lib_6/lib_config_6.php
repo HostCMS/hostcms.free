@@ -60,36 +60,56 @@ if (Core_Array::getRequest('fast_filter'))
 {
 	$aJson = array();
 
-	// В корне выводим из всех групп
-	if ($Shop_Controller_Show->group == 0)
+	if ($oShop->filter)
 	{
+		// В корне выводим из всех групп
+		if ($Shop_Controller_Show->group == 0)
+		{
+			$Shop_Controller_Show->group(FALSE);
+		}
+
+		// Запрещаем выбор модификаций при выключенном modificationsList
+		!$Shop_Controller_Show->modificationsList && $Shop_Controller_Show->forbidSelectModifications();
+
+		foreach ($_POST as $key => $value)
+		{
+			if (strpos($key, 'property_') === 0)
+			{
+				$Shop_Controller_Show->removeFilter('property', substr($key, 9));
+			}
+			elseif (strpos($key, 'price_') === 0)
+			{
+				$Shop_Controller_Show->removeFilter('price');
+			}
+		}
+
+		// Prices
+		$Shop_Controller_Show->setFilterPricesConditions($_POST);
+
+		// Additional properties
+		$Shop_Controller_Show->setFilterPropertiesConditions($_POST);
+
+		if (Core_Array::getPost('producer_id'))
+		{
+			$iProducerId = intval(Core_Array::getPost('producer_id'));
+			$Shop_Controller_Show->producer($iProducerId);
+		}
+
+		$Shop_Controller_Show->applyItemCondition();
+
+		$Shop_Controller_Show->group !== FALSE && $Shop_Controller_Show->applyGroupCondition();
+
+		$Shop_Controller_Show->applyFilter();
+
 		$Shop_Controller_Show
-			->group(FALSE)
-			// ->forbidSelectModifications()
-			;
+			->shopItems()
+			->queryBuilder()
+			->where('shortcut_id', '=', 0)
+			->clearGroupBy()
+			->clearOrderBy();
+
+		$aJson['count'] = intval($Shop_Controller_Show->shopItems()->getCount(FALSE, 'shop_items.id', TRUE));
 	}
-
-	// Prices
-	$Shop_Controller_Show->setFilterPricesConditions($_POST);
-
-	// Additional properties
-	$Shop_Controller_Show->setFilterPropertiesConditions($_POST);
-
-	if (Core_Array::getPost('producer_id'))
-	{
-		$iProducerId = intval(Core_Array::getPost('producer_id'));
-		$Shop_Controller_Show->producer($iProducerId);
-	}
-
-	$Shop_Controller_Show->applyItemCondition();
-
-	$Shop_Controller_Show->group !== FALSE && $Shop_Controller_Show->applyGroupCondition();
-
-	$Shop_Controller_Show->applyFilter();
-
-	$Shop_Controller_Show->shopItems()->queryBuilder()->where('shortcut_id', '=', 0);
-
-	$aJson['count'] = intval($Shop_Controller_Show->shopItems()->getCount());
 
 	Core::showJson($aJson);
 }

@@ -415,6 +415,25 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Move item to another group
+	 * @param int $iPropertyDirId target group id
+	 * @return Core_Entity
+	 * @hostcms-event property.onBeforeMove
+	 * @hostcms-event property.onAfterMove
+	 */
+	public function move($iPropertyDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iPropertyDirId));
+
+		$this->property_dir_id = $iPropertyDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Config
 	 * @var array
 	 */

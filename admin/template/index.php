@@ -179,7 +179,7 @@ if ($template_id)
 				. '&template_id=' . $oParentTemplate->id;
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-				->name(Core::_('Template.breadCrumb', $oParentTemplate->name))
+				->name(Core::_('Template.breadCrumb', $oParentTemplate->name, FALSE))
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
 				)

@@ -23,12 +23,9 @@ class Shop_Order_Property_Controller_Edit extends Property_Controller_Edit
 	{
 		parent::_prepareForm();
 
-		$object = $this->_object;
-
 		$modelName = $this->_object->getModelName();
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));

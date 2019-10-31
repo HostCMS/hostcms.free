@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - limit($limit) количество
  *
  *
@@ -41,6 +42,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		'favoriteUrl',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'modifications',
 		'limit'
 	);
 
@@ -82,7 +84,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 				->value($this->_oSiteuser ? $this->_oSiteuser->id : 0)
 		);
 
-		$this->itemsProperties = FALSE;
+		$this->itemsProperties = $this->modifications = FALSE;
 		$this->itemsPropertiesList = TRUE;
 
 		$this->limit = 10;
@@ -169,7 +171,10 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 				$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Favorite->shop_item_id);
 				if (!is_null($oShop_Item->id))
 				{
-					$oShop_Favorite->showXmlProperties($this->itemsProperties);
+					$oShop_Favorite
+						->showXmlProperties($this->itemsProperties)
+						->showXmlModifications($this->modifications);
+
 					$this->addEntity($oShop_Favorite->clearEntities());
 				}
 				else

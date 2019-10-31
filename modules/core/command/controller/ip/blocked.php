@@ -61,6 +61,10 @@ class Core_Command_Controller_Ip_Blocked extends Core_Command_Controller
 				{
 					$oTemplate = $oStructure->Template;
 				}
+				else
+				{
+					$oTemplate = NULL;
+				}
 
 				ob_start();
 				$oCore_Page

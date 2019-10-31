@@ -87,6 +87,30 @@ class Core_Str
 	}
 
 	/**
+	 * String starts with the specified string
+	 * @param string $haystack
+	 * @param string $needle
+	 * @return boolean
+	 */
+	static public function startsWith($haystack, $needle)
+	{
+		// Binary safe
+		return substr_compare($haystack, $needle, 0, strlen($needle)) === 0;
+	}
+	
+	/**
+	 * String end with the specified string
+	 * @param string $haystack
+	 * @param string $needle
+	 * @return boolean
+	 */
+	static public function endsWith($haystack, $needle)
+	{
+		// Binary safe
+		return substr_compare($haystack, $needle, -strlen($needle)) === 0;
+	}
+
+	/**
 	 * Cut length of words in a string
 	 * @param string $string source string
 	 * @param int $maxLen word lenght

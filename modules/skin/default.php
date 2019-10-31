@@ -342,7 +342,7 @@ if ($this->_mode != 'blank')
 						{
 							if ($oAdmin_Language->active)
 							{
-								$oCore_Html_Entity_Img = Core::factory('Core_Html_Entity_Img')
+								Core::factory('Core_Html_Entity_Img')
 									->src($this->getImageHref() . "/flags/{$oAdmin_Language->shortname}.png")
 									->id("{$oAdmin_Language->shortname}Lng")
 									->alt($oAdmin_Language->shortname)
@@ -403,7 +403,7 @@ if ($this->_mode != 'blank')
 
 						foreach ($aLng as $shortname => $name)
 						{
-							$oCore_Html_Entity_Img = Core::factory('Core_Html_Entity_Img')
+							Core::factory('Core_Html_Entity_Img')
 								->src($this->getImageHref() . "/flags/{$shortname}.png")
 								->id("{$shortname}Lng")
 								->alt($shortname)
@@ -778,7 +778,7 @@ if ($this->_mode != 'blank')
 						foreach ($aAdminPages as $type => $aAdminPage)
 						{
 							$aAdminPage += array('title' => '');
-							$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, $type, 0);
+							// $oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($oModule->id, $type, 0);
 
 							Core::factory('Core_Html_Entity_A')
 								->class("{action: '$.widgetLoad({ path: \'/admin/index.php?ajaxWidgetLoad&widgetAjax&moduleId={$oModule->id}&type={$type}\' })', img: '{$this->getImageHref()}module/{$oModule->path}.png'}")
@@ -794,10 +794,8 @@ if ($this->_mode != 'blank')
 				<?php
 				$aSites = $oUser->getSites();
 
-				$aOptions = array();
 				foreach ($aSites as $oSite)
 				{
-					//$aOptions[$oSite->id] = Core_Str::cut($oSite->name, 35);
 					Core::factory('Core_Html_Entity_A')
 						->class("{action: '$.reloadDesktop({$oSite->id})', img: '" . (
 							$oSite->id == CURRENT_SITE ? ' /modules/skin/default/images/check.png' : ''

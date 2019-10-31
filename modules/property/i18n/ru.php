@@ -76,4 +76,5 @@ return array(
 	'changeMultiple_success' => 'Множественность свойства изменена!',
 	'watermark_default_use_large_image' => 'Использовать водяной знак',
 	'watermark_default_use_small_image' => 'Использовать водяной знак для малых изображений',
+	'move_success' => 'Свойства перенесены',
 );

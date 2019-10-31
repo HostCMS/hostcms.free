@@ -397,9 +397,6 @@ class Install_Controller
 		$copyInformationsystemGroupId = intval($copyInformationsystemGroupId);
 		$copyInformationsystemPropertyValueId = intval($copyInformationsystemPropertyValueId);
 
-		$information_propertys_groups_value = '';
-		$information_propertys_groups_value_small = '';
-
 		$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $informationsystemGroupId);
 
 		$group_dir = $oInformationsystem_Group->getGroupPath();

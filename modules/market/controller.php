@@ -130,6 +130,8 @@ class Market_Controller extends Core_Servant_Properties
 		return $this;
 	}
 
+	protected $_aShop_Groups = array();
+
 	protected function _parseGroup($oXmlGroup, $parentId = 0)
 	{
 		foreach ($oXmlGroup as $value)
@@ -151,6 +153,8 @@ class Market_Controller extends Core_Servant_Properties
 				{
 					$this->_parseGroup($value->shop_group, $oObject->id);
 				}
+
+				$this->_aShop_Groups[$oObject->id] = $oObject;
 			//}
 		}
 
@@ -225,8 +229,8 @@ class Market_Controller extends Core_Servant_Properties
 
 						$shop_group_id = intval($value->shop_group_id);
 
-						$oObject->category_name = isset($aShop_Groups[$shop_group_id])
-							? $aShop_Groups[$shop_group_id]->name
+						$oObject->category_name = isset($this->_aShop_Groups[$shop_group_id])
+							? $this->_aShop_Groups[$shop_group_id]->name
 							: '';
 
 						$oObject->name = strval($value->name);
@@ -399,9 +403,6 @@ class Market_Controller extends Core_Servant_Properties
 							// Создаем директорию снова
 							Core_File::mkdir($this->tmpDir, CHMOD, TRUE);
 
-							// по умолчанию ошибок обновления нет
-							$bErrorInstall = FALSE;
-
 							if ($this->_Module->file != '')
 							{
 								$Core_Http = $this->getModuleFile($this->_Module->file);
@@ -414,8 +415,6 @@ class Market_Controller extends Core_Servant_Properties
 								$Core_Tar = new Core_Tar($source_file);
 								if (!$Core_Tar->extractModify($this->tmpDir, $this->tmpDir))
 								{
-									$bErrorInstall = TRUE;
-
 									// Возникла ошибка распаковки
 									throw new Core_Exception(
 										Core::_('Update.update_files_error')
@@ -963,7 +962,7 @@ class Market_Controller extends Core_Servant_Properties
 
 		$sWindowId = $this->controller->getWindowId();
 
-		$oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
+		Admin_Form_Entity::factory('Form')
 			->controller($this->controller)
 			->action($this->controller->getPath())
 			->add($oMainTab)

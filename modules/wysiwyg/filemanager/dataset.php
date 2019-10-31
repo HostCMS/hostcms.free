@@ -94,7 +94,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 * @return array
 	 */
 	public function load()
-	{ 
+	{
 		return is_array($this->_objects)
 			? array_slice($this->_objects, $this->_offset, $this->_limit)
 			: array();
@@ -129,7 +129,6 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		{
 			if ($dh = opendir($this->_path))
 			{
-				$i = 0;
 				// Читаем файлы и каталоги из данного каталога
 				while (($file = readdir($dh)) !== FALSE)
 				{
@@ -208,7 +207,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		else
 		{
 			is_null($this->_objects) && $this->_loadFiles();
-			
+
 			if (isset($this->_objects[$primaryKey]))
 			{
 				return $this->_objects[$primaryKey];

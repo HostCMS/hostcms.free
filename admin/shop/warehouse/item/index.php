@@ -31,7 +31,7 @@ $oShop = Core_Entity::factory('Shop')->find($shop_id);
 // Текущая группа магазинов
 $oShopDir = $oShop->Shop_Dir;
 
-$sFormTitle = Core::_('Shop_Warehouse_Item.title', $oShop_Warehouse->name);
+$sFormTitle = Core::_('Shop_Warehouse_Item.title', $oShop_Warehouse->name, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -66,9 +66,9 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
@@ -152,20 +152,6 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_warehouse_id={$oShop_Warehouse->id}&shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams))
 );
-
-/*$oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('apply');
-
-if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
-{
-	$Admin_Form_Action_Controller_Type_Apply = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Apply', $oAdminFormActionApply
-	);
-
-	// Добавляем контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Apply);
-}*/
 
 // Действие экспорта
 $oAdminFormActionExport = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)

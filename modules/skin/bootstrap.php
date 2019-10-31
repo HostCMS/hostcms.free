@@ -517,7 +517,7 @@ class Skin_Bootstrap extends Core_Skin
 												<!-- Типовые -->
 												<li class="contact hidden">
 													<div class="contact-avatar">
-														<img />
+														<img src=""/>
 													</div>
 													<div class="contact-info">
 														<div class="contact-name"><span class="badge">0</span></div>
@@ -533,7 +533,7 @@ class Skin_Bootstrap extends Core_Skin
 										<div class="chatbar-messages" style="display: none;">
 											<div class="messages-contact">
 												<div class="contact-avatar">
-													<img />
+													<img src=""/>
 												</div>
 												<div class="contact-info">
 													<div class="contact-name"></div>

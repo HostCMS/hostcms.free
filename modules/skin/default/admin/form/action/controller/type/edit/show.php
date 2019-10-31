@@ -31,7 +31,7 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 
 		// Форма
 		$this->_Admin_Form_Entity_Form
-			->controller($Admin_Form_Controller)
+			->controller($this->Admin_Form_Controller)
 			->class('adminForm')
 			->action(
 				$this->Admin_Form_Controller->getPath()

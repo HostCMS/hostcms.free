@@ -73,7 +73,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		);
 		
 		$bTop && $oCore_Html_Entity_A
-			->class("btn {$aFirstColors[$index]}");
+			->class(
+				!is_null($this->class) ? $this->class : "btn {$aFirstColors[$index]}"
+			);
 
 		$bHasSubmenu && $oCore_Html_Entity_A
 			->set('data-toggle', 'dropdown');

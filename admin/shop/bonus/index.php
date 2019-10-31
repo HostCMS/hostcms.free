@@ -62,10 +62,10 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Первая крошка на список магазинов
 $oAdmin_Form_Entity_Breadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
 );
 
 // Крошки по директориям магазинов
@@ -78,13 +78,9 @@ if ($oShopDir->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShopDirBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		));
+			->name($oShopDirBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
 	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -98,9 +94,9 @@ if ($oShopDir->id)
 // Крошка на список товаров и групп товаров магазина
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name($oShop->name)
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->name($oShop->name)
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров

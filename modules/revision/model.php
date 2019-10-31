@@ -74,6 +74,29 @@ class Revision_Model extends Core_Entity
 			) . '</span>';
 	}
 
+	protected function _printJson($value)
+	{
+		if (is_array($value))
+		{
+			foreach($value as $key => $tmp)
+			{
+				?><div class="row"><div class="col-xs-4 semi-bold"><?php
+				echo htmlspecialchars($key) . ': ';
+				?></div><div class="col-xs-8 small"><?php
+				$this->_printJson($tmp);
+				?></div></div><?php
+			}
+		}
+		elseif (is_string($value) || is_numeric($value))
+		{
+			echo '<span class="preWrap">' . htmlspecialchars($value) . '</span>';
+		}
+		elseif (is_object($value))
+		{
+			echo $value;
+		}
+	}
+
 	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -83,21 +106,23 @@ class Revision_Model extends Core_Entity
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$oRevision = Core_Entity::factory('Revision', $this->id);
+
+		$aValue = json_decode($oRevision->value, TRUE);
+
+		?><div id="revision<?php echo $this->id?>" class="hidden"><?php
+		$this->_printJson($aValue);
+		?></div><?php
+
 		?>
 		<script>
 		$(function() {
-			var str = JSON.stringify(<?php echo $oRevision->value?>, null, 2);
-
 			$('a#revision<?php echo $this->id?>').on('click', function (){
 				var dialog = bootbox.dialog({
 					title: '<?php echo $this->name?> <?php echo $this->datetime?>',
-					message: str,
+					message: $('#revision<?php echo $this->id?>').html(),
 					backdrop: true,
 					size: 'large'
 				});
-
-				dialog.find('.bootbox-body').empty().append('<pre id="json<?php echo $this->id?>">' + str + '</pre>');
-
 				dialog.modal('show');
 			});
 		});
