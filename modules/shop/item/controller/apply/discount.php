@@ -253,6 +253,13 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			}
 
 			$oShop_Item->clearCache();
+			
+			// Fast filter
+			if ($oShop_Item->Shop->filter)
+			{
+				$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
+				$Shop_Filter_Controller->fill($oShop_Item);
+			}
 		}
 
 		return $this;

@@ -39,7 +39,8 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		'group',
 		'shop',
 		'exportItemExternalProperties',
-		'exportItemModifications'
+		'exportItemModifications',
+		'producer'
 	);
 
 	/**
@@ -178,17 +179,17 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 		$xmlGoods = $xmlCatalog->addChild('Товары');
 
 		$oShop_Items = Core_Entity::factory('Shop_Item');
-		$oQueryBuilder = $oShop_Items->queryBuilder()
+		$oShop_Items->queryBuilder()
 			->where('shop_id', '=', $this->shop->id)
 			->where('modification_id', '=', 0)
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
-		if ($this->group->id)
-		{
-			$oShop_Items->queryBuilder()
-				->where('shop_group_id', 'IN', $this->_groupsID);
-		}
+		$this->group->id
+			&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', $this->_groupsID);
+
+		$this->producer
+			&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $this->producer);
 
 		$offset = 0;
 		$limit = 100;
@@ -358,11 +359,11 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
-		if ($this->group->id)
-		{
-			$oShop_Items->queryBuilder()
-				->where('shop_group_id', 'IN', $this->_groupsID);
-		}
+		$this->group->id
+			&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', $this->_groupsID);
+
+		$this->producer
+			&& $oShop_Items->queryBuilder()->where('shop_producer_id', '=', $this->producer);
 
 		$packageOfProposals = $packageOfProposals->addChild('Предложения');
 

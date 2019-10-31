@@ -16,4 +16,5 @@ return array(
 	'empty' => 'Корзина пуста',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'empty_trash' => 'Очистить корзину',
 );

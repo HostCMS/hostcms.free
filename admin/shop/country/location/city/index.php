@@ -18,8 +18,9 @@ $sAdminFormAction = '/admin/shop/country/location/city/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oShopCountryLocation = Core_Entity::factory('Shop_Country_Location')->find(Core_Array::getGet('shop_location_id', 0));
-//echo $oShopCountryLocation;
 $oShopCountry = $oShopCountryLocation->Shop_Country;
+
+$pageTitle = Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name, FALSE);
 
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
@@ -27,7 +28,7 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title($pageTitle = Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name))
+	->title($pageTitle)
 	->pageTitle($pageTitle);
 
 // Меню формы
@@ -84,7 +85,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 // Добавляем вторую крошку на местоположения
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name))
+		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/index.php', NULL, NULL, $sAdditionalParam = '&shop_country_id=' . $oShopCountry->id)
 		)

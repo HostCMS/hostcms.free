@@ -101,12 +101,8 @@ $sShopDirPath = '/admin/shop/index.php';
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, '')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, '')
-	)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, ''))
 );
 
 if ($oShop->shop_dir_id)
@@ -124,21 +120,15 @@ if ($oShop->shop_dir_id)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oShopDir->name)
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams));
 		} while ($oShopDir = $oShopDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
 		foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 		{
-			$oAdmin_Form_Entity_Breadcrumbs->add(
-				$oAdmin_Form_Entity_Breadcrumb
-			);
+			$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
 		}
 	}
 }
@@ -152,12 +142,8 @@ if ($oShop->id)
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShop->name)
-			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams)
-			)
-			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
-		)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams))
 	);
 }
 
@@ -175,12 +161,8 @@ if ($iShopGroupId)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oShopGroup->name)
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams));
 		} while ($oShopGroup = $oShopGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -201,13 +183,9 @@ if ($oShop_Item->modification_id)
 	// Крошка на текущую форму
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
-			->name(Core::_("Shop_Item.item_modification_title", $oShop_Item->Modification->name))
-			->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
-			))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"
-			))
+			->name(Core::_("Shop_Item.item_modification_title", $oShop_Item->Modification->name, FALSE))
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShop_Item->Modification->id}"))
 	);
 }
 
@@ -216,14 +194,10 @@ $additionalParams = 'shop_id=' . $oShop->id . '&shop_group_id=' . $iShopGroupId;
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->id
-			? Core::_('Shop.show_comments_title', $oShop->name)
+			? Core::_('Shop.show_comments_title', $oShop->name, FALSE)
 			: Core::_('Shop.comments_title'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-	)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
 );
 
 if (!is_null($oShop_Item->id))
@@ -233,12 +207,8 @@ if (!is_null($oShop_Item->id))
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 		Admin_Form_Entity::factory('Breadcrumb')
 			->name(Core::_('Shop_Item.show_comments_title', $oShop_Item->name))
-			->href(
-				$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-			)
-			->onclick(
-				$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-		)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
 	);
 }
 
@@ -263,12 +233,8 @@ if ($comment_parent_id)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oComment->getShortText())
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams));
 		} while ($oComment = $oComment->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);

@@ -156,7 +156,7 @@ class Shop_Controller
 	{
 		return self::convertDecimal($value);
 	}
-	
+
 	/**
 	 * Convert decimal
 	 * @param mixed $value
@@ -166,6 +166,7 @@ class Shop_Controller
 	{
 		$value = preg_replace('/[^0-9.,\-]/u', '', $value);
 		$value = str_replace(array(',', '-'), '.', $value);
+		$value === '' && $value = 0;
 		return $value;
 	}
 
@@ -263,6 +264,12 @@ class Shop_Controller
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{shop.name\}\')">' . Core::_("Shop.seo_template_shop_name") . '</a>
 					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.seoFilter \x22: \x22 \x22, \x22\}\')">' . Core::_("Shop.seo_template_filter") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedGroup, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
+					</li>
 					<li class="divider"></li>
 					<li class="disabled">
 						<a class="bold">' . Core::_("Shop.seo_template_group") . '</a>
@@ -312,6 +319,12 @@ class Shop_Controller
 					</li>
 					<li>
 						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{shop.name\}\')">' . Core::_("Shop.seo_template_shop_name") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.seoFilter \x22: \x22 \x22, \x22\}\')">' . Core::_("Shop.seo_template_filter") . '</a>
+					</li>
+					<li>
+						<a onclick="$.insertSeoTemplate(lastFocusedItem, \'\{this.filterProducer}\')">' . Core::_("Shop.seo_template_filter_producer") . '</a>
 					</li>
 					<li class="divider"></li>
 					<li class="disabled">

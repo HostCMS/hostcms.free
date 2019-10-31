@@ -29,4 +29,5 @@ return array(
 	'denyAccess_success' => 'Access denied',
 	'allowAccessChildren_success' => 'Access allowed.',
 	'denyAccessChildren_success' => 'Access denied.',
+	'move_success' => 'Additional property section moved successfully.',
 );

@@ -81,4 +81,5 @@ return array(
 	'changeMultiple_success' => 'Multiple have been changed.',
 	'watermark_default_use_large_image' => 'Use watermark by default',
 	'watermark_default_use_small_image' => 'Use watermark by default for small images',
+	'move_success' => 'Additional property moved successfully.',
 );

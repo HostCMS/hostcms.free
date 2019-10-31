@@ -39,10 +39,6 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_prepareForm();
 
-		$object = $this->_object;
-
-		$modelName = $object->getModelName();
-
 		$this->title(
 			$this->_object->id
 				? Core::_('Comment.edit_title', $this->_object->subject)

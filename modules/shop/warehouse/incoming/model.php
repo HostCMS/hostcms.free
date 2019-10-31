@@ -164,7 +164,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 
 					if (isset($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]) && count($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]))
 					{
-						$oShop_Warehouse_Entry = array_unshift($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]);
+						$oShop_Warehouse_Entry = array_shift($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]);
 					}
 					else
 					{

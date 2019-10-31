@@ -20,12 +20,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств информационных элементов, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств информационных элементов, по умолчанию TRUE
  * - itemsForbiddenTags(array('description')) массив тегов информационных элементов, запрещенных к передаче в генерируемый XML
+ * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
  * - votes(TRUE|FALSE) показывать рейтинг элемента, по умолчанию TRUE
  * - tags(TRUE|FALSE) выводить метки
  * - calculateCounts(TRUE|FALSE) вычислять общее количество информационных элементов и групп в корневой группе, по умолчанию FALSE
  * - siteuser(TRUE|FALSE) показывать данные о пользователе сайта, связанного с выбранным информационным элементом, по умолчанию TRUE
  * - siteuserProperties(TRUE|FALSE) выводить значения дополнительных свойств пользователей сайта, по умолчанию FALSE
+ * - orderBy('informationsystem_items.name', 'ASC') задает направление сортировки информационных элементов
  * - offset($offset) смещение, с которого выводить информационные элементы. По умолчанию 0
  * - limit($limit) количество выводимых элементов
  * - page(2) текущая страница, по умолчанию 0, счет ведется с 0
@@ -482,6 +484,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddGroupsPropertiesList
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
 	 */
 	public function show()
 	{
@@ -531,6 +535,18 @@ class Informationsystem_Controller_Show extends Core_Controller
 				->name('limit')
 				->value(intval($this->limit))
 		);
+
+		// Независимо от limit, т.к. может использоваться отдельно для фильтра
+		if (!$this->item)
+		{
+			$this->applyFilter();
+
+			/*$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('filter_path')
+					->value($this->_filterPath)
+			);*/
+		}
 
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
@@ -596,6 +612,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 				$this->addEntity($Informationsystem_Group_Properties);
 
+				Core_Event::notify(get_class($this) . '.onBeforeAddGroupsPropertiesList', $this, array($Informationsystem_Group_Properties));
+
 				$this->_addGroupsPropertiesList(0, $Informationsystem_Group_Properties);
 			}
 		}
@@ -652,8 +670,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_item_properties');
-
+				
 				$this->addEntity($Informationsystem_Item_Properties);
+				
+				Core_Event::notify(get_class($this) . '.onBeforeAddItemsPropertiesList', $this, array($Informationsystem_Item_Properties));
 
 				$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
 			}
@@ -867,7 +887,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		$oInformationsystem = $this->getEntity();
 
-		// Group: set shop's SEO templates
+		// Group: set informationsystem's SEO templates
 		$oInformationsystem->seo_group_title_template != ''
 			&& $this->_seoGroupTitle = $oInformationsystem->seo_group_title_template;
 		$oInformationsystem->seo_group_description_template != ''
@@ -875,7 +895,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$oInformationsystem->seo_group_keywords_template != ''
 			&& $this->_seoGroupKeywords = $oInformationsystem->seo_group_keywords_template;
 
-		// Item: set shop's SEO templates
+		// Item: set informationsystem's SEO templates
 		$oInformationsystem->seo_item_title_template != ''
 			&& $this->_seoItemTitle = $oInformationsystem->seo_item_title_template;
 		$oInformationsystem->seo_item_description_template != ''
@@ -1149,6 +1169,48 @@ class Informationsystem_Controller_Show extends Core_Controller
 		return $this->page > 0
 			? sprintf($template, $this->page + 1)
 			: '';
+	}
+
+	/**
+	 * Get properties for seo fields
+	 * @param $nameSeparator property name separator
+	 * @param $valueSeparator property value separator
+	 * @return string
+	 */
+	public function seoFilter($nameSeparator = ": ", $valueSeparator = ", ")
+	{
+		$aReturn = array();
+
+		foreach ($this->_aFilterProperties as $property_id => $aTmpProperties)
+		{
+			foreach ($aTmpProperties as $aTmpProperty)
+			{
+				list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
+
+				$line = ' ' . $oProperty->name . $nameSeparator;
+
+				foreach ($aPropertyValues as $propertyValue)
+				{
+					if ($oProperty->type == 3)
+					{
+						$oList_Item = $oProperty->List->List_Items->getById($propertyValue);
+
+						if (!is_null($oList_Item))
+						{
+							$line .= $oList_Item->value;
+						}
+					}
+					else
+					{
+						$line .= $propertyValue;
+					}
+
+					$aReturn[] = $line;
+				}
+			}
+		}
+
+		return implode($valueSeparator, $aReturn);
 	}
 
 	/**
@@ -1697,6 +1759,297 @@ class Informationsystem_Controller_Show extends Core_Controller
 				->where('informationsystem_groups.active', '=', $this->groupsActivity == 'inactive' ? 0 : 1);
 		}
 
+		return $this;
+	}
+	
+	/**
+	 * Set goods sorting
+	 * @param $column Column name, e.g. price, absolute_price
+	 * @return self
+	 */
+	public function orderBy($column, $direction = 'ASC')
+	{
+		switch ($column)
+		{
+			case 'price':
+			case 'absolute_price':
+				$this->addAbsolutePrice();
+
+				$column = 'absolute_price';
+			break;
+		}
+
+		$this->informationsystemItems()
+			->queryBuilder()
+			->clearOrderBy()
+			->orderBy($column, $direction);
+
+		$this->addCacheSignature('orderBy=' . $column . $direction);
+
+		return $this;
+	}
+
+	
+	/**
+	 * Array of Properties conditions, see addFilter()
+	 * @var array
+	 */
+	protected $_aFilterProperties = array();
+	
+	/**
+	 * Add filter condition
+	 * ->addFilter('property', 17, '=', 33)
+	 */
+	public function addFilter()
+	{
+		$args = func_get_args();
+
+		$iCountArgs = count($args);
+
+		if ($iCountArgs < 4)
+		{
+			throw new Core_Exception("addFilter() expected at least 4 arguments");
+		}
+
+		switch ($args[0])
+		{
+			case 'property':
+				/*if ($iCountArgs < 4)
+				{
+					throw new Core_Exception("addFilter('property') expected 4 arguments");
+				}*/
+
+				$oProperty = Core_Entity::factory('Property', $args[1]);
+
+				$aPropertiesValue = $args[3];
+
+				!is_array($aPropertiesValue) && $aPropertiesValue = array($aPropertiesValue);
+
+				switch ($oProperty->type)
+				{
+					case 3:
+					case 5:
+					case 12:
+					case 7:
+						$map = 'intval';
+					break;
+					case 11:
+						$map = 'floatval';
+					break;
+					default:
+						$map = 'strval';
+				}
+
+				$aPropertiesValue = array_map($map, $aPropertiesValue);
+
+				$this->_aFilterProperties[$oProperty->id][] = array($oProperty, $args[2], $aPropertiesValue);
+			break;
+			default:
+				throw new Core_Exception("The option '%option' doesn't allow",
+					array('%option' => $args[0])
+				);
+		}
+
+		return $this;
+	}
+	
+	/**
+	 * Remove filter condition
+	 * ->removeFilter('property', 17)
+	 */
+	public function removeFilter()
+	{
+		$args = func_get_args();
+
+		$iCountArgs = count($args);
+
+		if ($iCountArgs < 2)
+		{
+			throw new Core_Exception("removeFilter() expected at least 2 arguments");
+		}
+
+		switch ($args[0])
+		{
+			case 'property':
+				/*if ($iCountArgs < 2)
+				{
+					throw new Core_Exception("removeFilter('property') expected 2 arguments");
+				}*/
+
+				$property_id = $args[1];
+
+				if (isset($this->_aFilterProperties[$property_id]))
+				{
+					unset($this->_aFilterProperties[$property_id]);
+				}
+			break;
+			default:
+				throw new Core_Exception("The option '%option' doesn't allow",
+					array('%option' => $args[0])
+				);
+		}
+
+		return $this;
+	}
+	
+	/**
+	 * Apply Filter
+	 * @return self
+	 */
+	public function applyFilter()
+	{
+		$this->_basicFilter();
+
+		return $this;
+	}
+	
+	/**
+	 * Apply Basic Filter
+	 * @return self
+	 */
+	protected function _basicFilter()
+	{
+		// Filter by properties
+		if (count($this->_aFilterProperties))
+		{
+			$aTableNames = array();
+
+			$this->informationsystemItems()->queryBuilder()
+				->leftJoin('informationsystem_item_properties', 'informationsystem_items.informationsystem_id', '=', 'informationsystem_item_properties.informationsystem_id')
+				->setAnd()
+				->open();
+
+			foreach ($this->_aFilterProperties as $iPropertyId => $aTmpProperties)
+			{
+				foreach ($aTmpProperties as $aTmpProperty)
+				{
+					list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
+					$tableName = $oProperty->createNewValue(0)->getTableName();
+
+					!in_array($tableName, $aTableNames) && $aTableNames[] = $tableName;
+
+					$this->informationsystemItems()->queryBuilder()
+						->where('informationsystem_item_properties.property_id', '=', $oProperty->id);
+
+					// Для строк фильтр LIKE %...%
+					if ($oProperty->type == 1)
+					{
+						foreach ($aPropertyValues as $propertyValue)
+						{
+							$this->informationsystemItems()->queryBuilder()
+								->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
+						}
+					}
+					else
+					{
+						// 7 - Checkbox
+						$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
+
+						// 7 - Checkbox, 3 - List
+						$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
+
+						$bCheckUnset && $this->informationsystemItems()->queryBuilder()->open();
+
+						$this->informationsystemItems()->queryBuilder()
+							->where(
+								$tableName . '.value',
+								count($aPropertyValues) == 1 ? $condition : 'IN',
+								count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
+							);
+
+						$bCheckUnset && $this->informationsystemItems()->queryBuilder()
+							->setOr()
+							->where($tableName . '.value', 'IS', NULL)
+							->close();
+					}
+
+					// Между значениями значение по AND (например, значение => 10 и значение <= 99)
+					$this->informationsystemItems()->queryBuilder()->setAnd();
+
+					$this->_addFilterPropertyToXml($oProperty, $condition, $aPropertyValues);
+				}
+
+				// при смене свойства сравнение через OR
+				$this->informationsystemItems()->queryBuilder()->setOr();
+			}
+
+			$this->informationsystemItems()->queryBuilder()
+				->close()
+				->groupBy('informationsystem_items.id');
+
+			foreach ($aTableNames as $tableName)
+			{
+				$this->informationsystemItems()->queryBuilder()
+					->leftJoin($tableName, 'informationsystem_items.id', '=', $tableName . '.entity_id',
+						array(
+							array('AND' => array('informationsystem_item_properties.property_id', '=', Core_QueryBuilder::expression($tableName . '.property_id')))
+						)
+					);
+			}
+
+			$havingCount = count($this->_aFilterProperties);
+
+			$havingCount > 1
+				&& $this->informationsystemItems()->queryBuilder()
+						->having(Core_Querybuilder::expression('COUNT(DISTINCT `informationsystem_item_properties`.`property_id`)'), '=', $havingCount);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add Filter Property to the XML
+	 * @param Property_Model $oProperty
+	 * @param string $condition
+	 * @param array $aPropertyValues
+	 * @return self
+	 */
+	protected function _addFilterPropertyToXml($oProperty, $condition, $aPropertyValues)
+	{
+		switch ($condition)
+		{
+			case '>=':
+				$xmlName = 'property_' . $oProperty->id . '_from';
+			break;
+			case '<=':
+				$xmlName = 'property_' . $oProperty->id . '_to';
+			break;
+			default:
+				$xmlName = 'property_' . $oProperty->id;
+		}
+
+		foreach ($aPropertyValues as $propertyValue)
+		{
+			$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name($xmlName)
+					->value($propertyValue)
+					->addAttribute('condition', $condition)
+			);
+			$this->addCacheSignature("{$xmlName}{$condition}{$propertyValue}");
+		}
+
+		return $this;
+	}
+	
+	
+	/**
+	 * Get Filter Properties
+	 * @return array
+	 */
+	public function getFilterProperties()
+	{
+		return $this->_aFilterProperties;
+	}
+
+	/**
+	 * Set Filter Properties
+	 * @param array $array
+	 * @return self
+	 */
+	public function setFilterProperties(array $array)
+	{
+		$this->_aFilterProperties = $array;
 		return $this;
 	}
 }

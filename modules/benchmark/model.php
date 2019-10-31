@@ -114,7 +114,7 @@ class Benchmark_Model extends Core_Entity
 	 */
 	public function getMailCoefficient()
 	{
-		$iMin = $this->etalon_mail;
+		// $iMin = $this->etalon_mail;
 
 		if ($this->mail < $this->etalon_mail)
 		{

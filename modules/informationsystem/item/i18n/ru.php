@@ -88,7 +88,6 @@ return array(
 	'move_success' => 'Информационные элементы перенесены.',
 
 	'show_comments_title' => 'Комментарии к информационному элементу "%s"',
-	'shortcut_success' => 'Ярлык элемента успешно добавлен',
 
 	'show_information_propertys_title' => 'Дополнительные свойства элементов информационной системы "%s"',
 	'delete_success' => 'Элемент удален!',

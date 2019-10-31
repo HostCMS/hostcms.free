@@ -64,7 +64,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add( // Отдел
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
+		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
 		)
@@ -84,7 +84,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department_Module.ua_show_user_access_module_title', $oCompany_Department->name, $oSite->name))
+		->name(Core::_('Company_Department_Module.ua_show_user_access_module_title', $oCompany_Department->name, $oSite->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)

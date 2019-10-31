@@ -146,7 +146,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($oShop_Warehouse->name);
 		}
 
-		$oItemsWarehouseSelect = Admin_Form_Entity::factory('Select')
+		Admin_Form_Entity::factory('Select')
 			->divAttr(array('class' => ''))
 			->options($aOptions)
 			->class('form-control')

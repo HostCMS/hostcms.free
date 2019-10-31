@@ -184,6 +184,8 @@ class Core_DataBase_Pdo extends Core_DataBase
 			case 'enum':
 			case 'nvarchar':
 			case 'national varchar':
+			case 'datetime':
+			case 'year':
 				$type = 'string';
 				break;
 
@@ -211,12 +213,6 @@ class Core_DataBase_Pdo extends Core_DataBase
 				$max = 65535;
 				break;
 
-			case 'tinyint unsigned':
-				$type = 'int';
-				$min = 0;
-				$max = 255;
-				break;
-
 			case 'mediumint':
 				$type = 'int';
 				$min = -8388608;
@@ -234,11 +230,6 @@ class Core_DataBase_Pdo extends Core_DataBase
 				$type = 'int';
 				$min = 0;
 				$max = 4294967295;
-				break;
-
-			case 'datetime':
-			case 'year':
-				$type = 'string';
 				break;
 
 			case 'tinytext':

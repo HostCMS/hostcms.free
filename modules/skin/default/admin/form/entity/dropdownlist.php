@@ -54,7 +54,7 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 	//static $iFilterCount = 0;
 
 	protected $_oCore_Html_Entity_Dropdownlist = NULL;
-	
+
 	/**
 	 * Constructor.
 	 */
@@ -62,10 +62,10 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 	{
 		// Combine
 		$this->_skipProperies = array_combine($this->_skipProperies, $this->_skipProperies);
-		
+
 		$this->_oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
 		$this->_allowedProperties += $this->_oCore_Html_Entity_Dropdownlist->getAllowedProperties();
-						
+
 		// Свойства, исключаемые для dropdownlist, добавляем в список разрешенных объекта
 		$this->_allowedProperties += $this->_skipProperies;
 
@@ -76,9 +76,6 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		$oCore_Registry->set('Admin_Form_Count', $iAdmin_Form_Count + 2);
 
 		$this->id = $this->name = 'field_id_' . $iAdmin_Form_Count;
-
-		$iAdmin_Form_Count++;
-		//$this->invertor_id = 'field_id_' . $iAdmin_Form_Count;
 
 		//$this->class .= ' form-control';
 		$this->divAttr = array('class' => 'form-group col-md-6 col-xs-12');
@@ -94,7 +91,7 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		$aDefaultDivAttr = array('class' => 'item_div');
 		$this->divAttr = Core_Array::union($this->divAttr, $aDefaultDivAttr);
 
-		$aAttr = $this->getAttrsString();		
+		// $aAttr = $this->getAttrsString();
 
 		// Установим атрибуты div'a.
 		$aDivAttr = array();
@@ -114,17 +111,17 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		{
 		?><div class="input-group"><?php
 		}
-		
+
 		//var_dump($this->_allowedProperties);
-		
+
 		$this->_oCore_Html_Entity_Dropdownlist
 			->value($this->value)
 			->options($this->options)
 			->name($this->name)
 			->disabled($this->disabled)
-			->onchange($this->onchange)			
-			->execute();						
-		
+			->onchange($this->onchange)
+			->execute();
+
 		$this->executeChildren();
 
 		if (count($this->_children))
@@ -133,5 +130,5 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		}
 
 		?></div><?php
-	}	
+	}
 }

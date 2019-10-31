@@ -58,7 +58,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->addSkipColumn('items_count')
 					->addSkipColumn('items_total_count')
 					->addSkipColumn('sns_type_id');
-					
+
 				if ($object->shortcut_id != 0)
 				{
 					$object = $object->Shortcut;
@@ -591,7 +591,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				{
 					$object = $object->Shortcut;
 				}
-				
+
 				$template_id = $this->_object->Informationsystem->Structure->template_id
 					? $this->_object->Informationsystem->Structure->template_id
 					: 0;
@@ -611,9 +611,9 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->template_id($template_id)
 					->fillTab();
 
-				$title = $this->_object->id
-						? Core::_('Informationsystem_Group.information_groups_edit_form_title', $this->_object->name)
-						: Core::_('Informationsystem_Group.information_groups_add_form_title');
+				$title = $object->id
+					? Core::_('Informationsystem_Group.information_groups_edit_form_title', $object->name)
+					: Core::_('Informationsystem_Group.information_groups_add_form_title');
 
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -1105,6 +1105,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _applyObjectProperty()
 	{
+		$bNewObject = is_null($this->_object->id) && is_null(Core_Array::getPost('id'));
+
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 
 		// Backup revision
@@ -1115,11 +1117,14 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 		parent::_applyObjectProperty();
 
+		// UnIndex item
+		!$bNewObject && $this->_object->unindex();
+
 		$informationsystem_id = Core_Array::getGet('informationsystem_id');
 
-		$oInformationsystem = is_null($this->_object->id)
+		$oInformationsystem = /*is_null($this->_object->id)
 			? Core_Entity::factory('Informationsystem', $informationsystem_id)
-			: $this->_object->Informationsystem;
+			: */$this->_object->Informationsystem;
 
 		$modelName = $this->_object->getModelName();
 
@@ -1552,8 +1557,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			//$this->_object->save();
 		}
-
-		//
 
 		$this->_object->save();
 

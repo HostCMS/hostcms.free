@@ -70,7 +70,6 @@ return array(
 	'freelance' => 'Freelance',
 	'birthday' => 'Birthday',
 	'address' => 'Address',
-	'image' => 'Image',
 	'description' => 'Description',
 	'wallpaper' => 'Wallpaper',
 	'choosing_site' => 'Site choosing',
@@ -87,7 +86,9 @@ return array(
 	'view_websites' => 'Websites',
 	'break' => 'Break',
 	'timesheet_title' => 'Timesheet',
-	'select_user' => 'Select user',	
+	'select_user' => 'Select user',
 	'user_active' => 'Online %s',
 	'user_last_activity' => 'Last activity %s',
+	'editUserDepartment_success' => 'User department post information changed successfully!',
+	'deleteUserFromDepartment_success' => 'User removed from department',
 );

@@ -42,7 +42,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		$value = htmlspecialchars($value);
 		?><input type="text" name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $value?>" style="width: 97%" class="form-control input-sm" /><?php
 	}
-	
+
 	protected function _filterCallbackCheckbox($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		?><select name="admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_<?php echo $oAdmin_Form_Field->id?>" class="form-control">
@@ -69,7 +69,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		})(jQuery);
 		</script><?php
 	}
-	
+
 	/**
 	 * Date-filed (from-to)
 	 */
@@ -88,16 +88,13 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		</script>
 		<?php
 	}
-	
+
 	/**
 	 * Date-filed (single-mode)
 	 */
 	protected function _filterCallbackDateSingle($date_from, $date_to, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		$date_from = htmlspecialchars($date_from);
-		$date_to = htmlspecialchars($date_to);
-
-		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" size="8" class="form-control input-sm calendar_field" />
+		?><input type="text" name="admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" id="id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo htmlspecialchars($date_from)?>" size="8" class="form-control input-sm calendar_field" />
 		<script>
 		(function($) {
 			$("#id_admin_form_filter_from_<?php echo $oAdmin_Form_Field->id?>").datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
@@ -105,7 +102,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		</script>
 		<?php
 	}
-	
+
 	/**
 	 * Select-filed
 	 */
@@ -134,7 +131,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		</select>
 		<?php
 	}
-	
+
 	/**
 	 * Show form content in administration center
 	 * @return self
@@ -297,7 +294,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 						$this->_filters += array($oAdmin_Form_Field->name => array($this, '_filterCallbackDate'));
 					break;
 					case 7: // Картинка-ссылка
-						if (is_null($tabName) || !strlen($oAdmin_Form_Field->list))
+						if (!strlen($oAdmin_Form_Field->list))
 						{
 							break;
 						}
@@ -308,7 +305,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 						?><div style="color: #CEC3A3; text-align: center">—</div><?php
 					break;
 				}
-				
+
 				// Функция обратного вызова для фильтра
 				if (isset($this->_filters[$oAdmin_Form_Field->name]))
 				{
@@ -351,8 +348,6 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		}
 		?></tr>
 		</thead><?php
-
-		$aEntities = array();
 
 		// Устанавливаем ограничения на источники
 		$this->setDatasetConditions();
@@ -547,50 +542,6 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 										$fieldName = $Admin_Word_Value
 											? htmlspecialchars($Admin_Word_Value->name)
 											: "—";
-
-										// Warning: 01-06-11 Создать отдельное поле в таблице в БД и в нем хранить alt-ы
-										if (isset($field_value['admin_forms_field_alt']))
-										{
-											$str_array_alt = explode("\n", trim($field_value['admin_forms_field_alt']));
-
-											foreach ($str_array_alt as $str_value)
-											{
-												// Каждую строку разделяем по равно
-												$str_explode_alt = explode('=', $str_value, 2);
-
-												// сохраняем в массив варинаты значений и ссылки для них
-												if (count($str_explode_alt) > 1)
-												{
-													$alt_array[trim($str_explode_alt[0])] = trim($str_explode_alt[1]);
-												}
-											}
-										}
-										elseif (!isset($alt_array[$value]))
-										{
-											$alt_array[$value] = $fieldName;
-										}
-
-										// ToDo: Создать отдельное поле в таблице в БД и в нем хранить title-ы
-										if (isset($field_value['admin_forms_field_title']))
-										{
-											$str_array_title = explode("\n", $field_value['admin_forms_field_title']);
-
-											foreach ($str_array_title as $str_value)
-											{
-												// Каждую строку разделяем по равно
-												$str_explode_title = explode('=', $str_value, 2);
-
-												if (count($str_explode_title) > 1)
-												{
-													// сохраняем в массив варинаты значений и ссылки для них
-													$title_array[trim($str_explode_title[0])] = trim($str_explode_title[1]);
-												}
-											}
-										}
-										elseif (!isset($title_array[$value]))
-										{
-											$title_array[$value] = $fieldName;
-										}
 
 										if (isset($value_array[$value]))
 										{
@@ -878,7 +829,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		);
  		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
-		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
+		Core::factory('Core_Html_Entity_Select')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
@@ -886,7 +837,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 	}
 
 	protected $_pageNavigationDelta = 5;
-	
+
 	/**
 	 * Показ строки ссылок
 	 * @return self

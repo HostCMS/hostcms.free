@@ -9,78 +9,210 @@
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
 
 	<xsl:template match="/">
-		<SCRIPT type="text/javascript">
-		function fastFilter(form)
-		{
-			this._timerId = false;
-			this._form = form;
+		<script type="text/javascript">
+		<xsl:comment>
+		<xsl:text disable-output-escaping="yes">
+		<![CDATA[
+			function applyFilter()
+			{
+				var jForm = $('.filter').closest('form'),
+					path = jForm.attr('action'),
+					producerOption = jForm.find('select[name = producer_id] option:selected'),
+					sortingOption = jForm.find('select[name = sorting] option:selected'),
+					priceFrom = jForm.find('input[name = price_from]').val(),
+					priceTo = jForm.find('input[name = price_to]').val(),
+					priceFromOriginal = jForm.find('input[name = price_from_original]').val(),
+					priceToOriginal = jForm.find('input[name = price_to_original]').val();
 
-			this.filterChanged = function(obj) {
-				if (this._timerId)
+				if (parseInt(producerOption.attr('value')))
 				{
-					clearTimeout(this._timerId);
+					path += producerOption.data('producer') + '/';
 				}
 
-				var $this = this;
+				if (typeof priceFrom !== 'undefined' && typeof priceTo !== 'undefined'
+					&& (priceFrom !== priceFromOriginal || priceTo !== priceToOriginal)
+				)
+				{
+					path += 'price-' + priceFrom + '-' + priceTo + '/';
+				}
 
-				this._timerId = setTimeout(function() {
-					$this._loadJson(obj);
-				}, 1500);
+				var inputs = jForm.find('*[data-property]'),
+					tag_name;
 
-				return this;
-			}
+				$.each(inputs, function (index, value) {
+					var type = this.type || this.tagName.toLowerCase(),
+						jObject = $(this),
+						value = null,
+						setValue = false;
 
-			this._loadJson = function(obj) {
-				var data = this._serializeObject();
-
-				$.loadingScreen('show');
-
-				$.ajax({
-					url: './',
-					type: "POST",
-					data: data,
-					dataType: 'json',
-					success: function (result) {
-						$.loadingScreen('hide');
-
-						var jParent = obj.parent();
-
-						$('.popup-filter').remove();
-
-						jParent.css('position', 'relative');
-						jParent.append('<div class="popup-filter"><div>Найдено: ' + result.count + '</div><br/><div><input name="filter" class="button" value="Применить" type="submit"/></div></div>');
-
-						setTimeout(function() {
-							$('.popup-filter').remove();
-						}, 5000);
+					if (typeof jObject.attr('name') !== 'undefined' && jObject.attr('name').indexOf('_to') !== -1)
+					{
+						return;
 					}
-				});
-			}
 
-			this._serializeObject = function () {
-				var o = {fast_filter: 1};
-				var a = this._form.serializeArray();
-				$.each(a, function () {
-					if (o[this.name] !== undefined) {
-						if (!o[this.name].push) {
-							o[this.name] = [o[this.name]];
+					switch (type)
+					{
+						case 'checkbox':
+						case 'radio':
+							value = +jObject.is(':checked');
+							setValue = type != 'checkbox' ? true : jObject.attr('name').indexOf('[]') !== -1;
+						break;
+						case 'option':
+							value = +jObject.is(':selected');
+							setValue = true;
+						break;
+						case 'text':
+							value = jObject.val();
+							setValue = true;
+						break;
+					}
+
+					if (value && jObject.data('property') !== tag_name)
+					{
+						tag_name = jObject.data('property');
+
+						if (typeof jObject.attr('name') !== 'undefined' && jObject.attr('name').indexOf('_from') !== -1)
+						{
+							path += '';
 						}
-						o[this.name].push(this.value || '');
-					} else {
-						o[this.name] = this.value || '';
+						else
+						{
+							path += tag_name + '/';
+						}
+					}
+
+					if (setValue && value)
+					{
+						if (typeof jObject.attr('name') !== 'undefined' && jObject.attr('name').indexOf('_from') !== -1)
+						{
+							path += tag_name + '-' + jObject.val() + '-' + jObject.next().val() + '/';
+						}
+						else
+						{
+							path += typeof jObject.data('value') !== 'undefined'
+								? jObject.data('value') + '/'
+								: value + '/';
+						}
 					}
 				});
 
-				return o;
-			};
-		}
+				if (parseInt(sortingOption.attr('value')))
+				{
+					path += '?sorting=' + sortingOption.val();
+				}
 
-		$(function() {
-			mainFastFilter = new fastFilter($('.filter').closest('form'));
+				// console.log(path);
 
-			$(':input').on('change', function(){ mainFastFilter.filterChanged($(this)); });
-		});
-		</SCRIPT>
+				window.location.href = path;
+			}
+
+			function fastFilter(form)
+			{
+				this._timerId = false;
+				this._form = form;
+
+				this.filterChanged = function(obj) {
+					if (this._timerId)
+					{
+						clearTimeout(this._timerId);
+					}
+
+					var $this = this;
+
+					this._timerId = setTimeout(function() {
+						$this._loadJson(obj);
+					}, 1500);
+
+					return this;
+				}
+
+				this._loadJson = function(obj) {
+					var data = this._serializeObject();
+
+					$.loadingScreen('show');
+
+					$.ajax({
+						url: './',
+						type: "POST",
+						data: data,
+						dataType: 'json',
+						success: function (result) {
+							$.loadingScreen('hide');
+
+							if (typeof result.count !== 'undefined')
+							{
+								var jParent = obj.parents('fieldset').length
+									? obj.parents('fieldset')
+									: obj.parent();
+
+								$('.popup-filter').remove();
+
+								jParent.css('position', 'relative');
+								jParent.append('<div class="popup-filter"><div>Найдено: ' + result.count + '</div><br/><div><button class="button" onclick="applyFilter(); return false;">Применить</button></div></div>');
+
+								setTimeout(function() {
+									$('.popup-filter').remove();
+								}, 5000);
+							}
+						}
+					});
+				}
+
+				this._serializeObject = function () {
+					var o = {fast_filter: 1};
+					var a = this._form.serializeArray();
+					$.each(a, function () {
+						if (o[this.name] !== undefined) {
+							if (!o[this.name].push) {
+								o[this.name] = [o[this.name]];
+							}
+							o[this.name].push(this.value || '');
+						} else {
+							o[this.name] = this.value || '';
+						}
+					});
+
+					return o;
+				};
+			}
+
+			$(function() {
+				var jForm = $('.filter').closest('form');
+				mainFastFilter = new fastFilter(jForm);
+
+				$(':input:not(:hidden):not(button)').on('change', function(){
+					mainFastFilter.filterChanged($(this));
+				});
+
+				$('.filter-color').on('click', function(){
+					var bg = $(this).css('background-color');
+
+					$('.filter-color').each(function (index, value) {
+						$(this).removeClass('active');
+					});
+
+					$(this).addClass('active');
+
+					$('.color-input').remove();
+
+					var property_id = $(this).data('id'),
+						list_item_id = $(this).data('item-id');
+
+					$(this).append('<input type="hidden" class="color-input" id="property_' + property_id + '_' + list_item_id +'" name="property_' + property_id + '" data-property="' + $(this).data('property') + '" data-value="' + $(this).data('value') + '" value="' + list_item_id + '"/>');
+
+					mainFastFilter.filterChanged($(this));
+				});
+
+				jForm.on('submit', function(e) {
+					e.preventDefault();
+
+					applyFilter();
+				});
+			});
+		]]>
+		</xsl:text>
+		</xsl:comment>
+		</script>
 
 		<xsl:apply-templates select="/shop"/>
 	</xsl:template>
@@ -164,7 +296,8 @@
 					<input type="hidden" name="on_page" value="{/shop/on_page}" />
 				</xsl:if>
 
-				<input name="filter" class="button" value="Применить" type="submit"/>
+				<!-- <input name="filter" class="button" value="Применить" type="submit"/> -->
+				<button class="button">Применить</button>
 			</div>
 		</form>
 	</xsl:template>
@@ -187,7 +320,7 @@
 				<!-- Отображаем поле ввода -->
 				<xsl:when test="filter = 1">
 					<br/>
-					<input type="text" name="property_{@id}">
+					<input type="text" name="property_{@id}" data-property="{tag_name}">
 						<xsl:if test="/shop/*[name()=$nodename] != ''">
 							<xsl:attribute name="value"><xsl:value-of select="/shop/*[name()=$nodename]"/></xsl:attribute>
 						</xsl:if>
@@ -221,7 +354,7 @@
 				</xsl:when>
 				<!-- Отображаем флажок -->
 				<xsl:when test="filter = 5">
-					<input type="checkbox" name="property_{@id}" id="property_{@id}" value="1" style="padding-top:4px">
+					<input type="checkbox" name="property_{@id}" id="property_{@id}" value="1" style="padding-top:4px" data-property="{tag_name}">
 						<xsl:if test="/shop/*[name()=$nodename] != ''">
 							<xsl:attribute name="checked"><xsl:value-of select="/shop/*[name()=$nodename]"/></xsl:attribute>
 						</xsl:if>
@@ -234,7 +367,7 @@
 				<xsl:when test="filter = 6">
 					<div class="propertyInput">
 						<div>
-							&labelFrom; <input type="text" name="property_{@id}_from" size="5" value="{/shop/*[name()=$nodename_from]}"/> &labelTo; <input type="text" name="property_{@id}_to" size="5" value="{/shop/*[name()=$nodename_to]}"/>
+							&labelFrom; <input type="text" name="property_{@id}_from" size="5" value="{/shop/*[name()=$nodename_from]}" data-property="{tag_name}"/> &labelTo; <input type="text" name="property_{@id}_to" size="5" value="{/shop/*[name()=$nodename_to]}" data-property="{tag_name}"/>
 
 							<input name="property_{@id}_from_original" value="{/shop/*[name()=$nodename_from]}" hidden="hidden" />
 							<input name="property_{@id}_to_original" value="{/shop/*[name()=$nodename_to]}" hidden="hidden" />
@@ -254,36 +387,50 @@
 	</xsl:template>
 
 	<xsl:template match="list/list_item">
+		<xsl:variable name="list_item_id" select="@id"/>
+
 		<xsl:if test="../../filter = 2">
 			<!-- Отображаем список -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<option value="{@id}">
+			<option value="{@id}" data-property="{../../tag_name}" data-value="{value}">
 			<xsl:if test="/shop/*[name()=$nodename] = @id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-				<xsl:value-of disable-output-escaping="yes" select="value"/>
+				<xsl:value-of select="value"/>
+
+				<xsl:if test="../../filter_counts/count[@id = $list_item_id]/node()">
+					<xsl:text> (</xsl:text><xsl:value-of select="../../filter_counts/count[@id = $list_item_id]"/><xsl:text>)</xsl:text>
+				</xsl:if>
 			</option>
 		</xsl:if>
 		<xsl:if test="../../filter = 3">
 			<!-- Отображаем переключатели -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
 			<br/>
-			<input type="radio" name="property_{../../@id}" value="{@id}" id="id_property_{../../@id}_{@id}">
+			<input type="radio" name="property_{../../@id}" value="{@id}" id="id_property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="checked">checked</xsl:attribute>
 				</xsl:if>
 				<label for="id_property_{../../@id}_{@id}">
-					<xsl:value-of disable-output-escaping="yes" select="value"/>
+					<xsl:value-of select="value"/>
+
+					<xsl:if test="../../filter_counts/count[@id = $list_item_id]/node()">
+						<xsl:text> (</xsl:text><xsl:value-of select="../../filter_counts/count[@id = $list_item_id]"/><xsl:text>)</xsl:text>
+					</xsl:if>
 				</label>
 			</input>
 		</xsl:if>
 		<xsl:if test="../../filter = 4">
 			<!-- Отображаем флажки -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<input type="checkbox" value="{@id}" name="property_{../../@id}[]" id="property_{../../@id}_{@id}">
+			<input type="checkbox" value="{@id}" name="property_{../../@id}[]" id="property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="checked">checked</xsl:attribute>
 				</xsl:if>
 				<label for="property_{../../@id}_{@id}">
-					<xsl:value-of disable-output-escaping="yes" select="value"/>
+					<xsl:value-of select="value"/>
+
+					<xsl:if test="../../filter_counts/count[@id = $list_item_id]/node()">
+						<xsl:text> (</xsl:text><xsl:value-of select="../../filter_counts/count[@id = $list_item_id]"/><xsl:text>)</xsl:text>
+					</xsl:if>
 				</label>
 			</input>
 			<br/>
@@ -291,24 +438,28 @@
 		<xsl:if test="../../filter = 7">
 			<!-- Отображаем список -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<option value="{@id}">
+			<option value="{@id}" data-property="{../../tag_name}" data-value="{value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="selected">
 					</xsl:attribute>
 				</xsl:if>
 				<xsl:value-of disable-output-escaping="yes" select="value"/>
+
+				<xsl:if test="../../filter_counts/count[@id = $list_item_id]/node()">
+					<xsl:text> (</xsl:text><xsl:value-of select="../../filter_counts/count[@id = $list_item_id]"/><xsl:text>)</xsl:text>
+				</xsl:if>
 			</option>
 		</xsl:if>
 	</xsl:template>
 
 	<xsl:template match="shop_producer">
-		<option value="{@id}">
+		<option value="{@id}" data-producer="{name}">
 			<xsl:if test="/shop/producer_id = @id">
 				<xsl:attribute name="selected">selected</xsl:attribute>
 			</xsl:if>
 
 			<xsl:value-of select="name"/>
-			
+
 			<xsl:if test="count/node()">
 				<xsl:text> (</xsl:text><xsl:value-of select="count"/><xsl:text>)</xsl:text>
 			</xsl:if>

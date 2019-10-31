@@ -11,19 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Shop_Filter_Controller extends Core_Servant_Properties
+class Shop_Filter_Controller
 {
-	/**
-	 * Allowed object properties
-	 * @var array
-	 */
-	protected $_allowedProperties = array(
-		'limit',
-		'max_time',
-		'total',
-		'position'
-	);
-
 	/**
 	 * Shop order object
 	 * @var Shop_Model
@@ -36,14 +25,6 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 	 */
 	public function __construct(Shop_Model $oShop)
 	{
-		parent::__construct();
-
-		$this->limit = 5;
-		$this->max_time = 20;
-		$this->position = 0;
-
-		$this->total = $oShop->Shop_Items->getCount();
-
 		$this->_oShop = $oShop;
 	}
 
@@ -58,7 +39,7 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 		{
 			case 0: // Целое число
 			case 3: // Список
-				$sColumn = "`property{$oProperty->id}` int(11) NOT NULL DEFAULT '0'";
+				$sColumn = "`property{$oProperty->id}` int(11) DEFAULT '0'";
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
 			break;
 			case 1: // Строка
@@ -67,19 +48,19 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`(10)) USING BTREE";
 			break;
 			case 7: // Флажок
-				$sColumn = "`property{$oProperty->id}` tinyint(1) NOT NULL DEFAULT '0'";
+				$sColumn = "`property{$oProperty->id}` tinyint(1) DEFAULT '0'";
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
 			break;
 			case 8: // Дата
-				$sColumn = "`property{$oProperty->id}` date NOT NULL DEFAULT '0000-00-00'";
+				$sColumn = "`property{$oProperty->id}` date DEFAULT '0000-00-00'";
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
 			break;
 			case 9: // Дата-время
-				$sColumn = "`property{$oProperty->id}` datetime NOT NULL DEFAULT '0000-00-00 00:00:00'";
+				$sColumn = "`property{$oProperty->id}` datetime DEFAULT '0000-00-00 00:00:00'";
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
 			break;
 			case 11: // Число с плавающей запятой
-				$sColumn = "`property{$oProperty->id}` double NOT NULL DEFAULT '0'";
+				$sColumn = "`property{$oProperty->id}` double DEFAULT '0'";
 				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
 			break;
 		}
@@ -147,13 +128,29 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 			: 'MyISAM';
 
 		$query = "
-			CREATE TABLE IF NOT EXISTS `shop_filter{$this->_oShop->id}` (
+			CREATE TABLE IF NOT EXISTS `" . $this->getTableName() .  "` (
 			  {$sColumns}
 			  , {$sIndexes}
 			) ENGINE={$sEngine} DEFAULT CHARSET=utf8 AUTO_INCREMENT=0;
 		";
 
 		$oCore_DataBase->query($query);
+
+		return $this;
+	}
+
+	public function getTableName()
+	{
+		return 'shop_filter' . $this->_oShop->id;
+	}
+
+	/**
+	 * Remove shop filter table
+	 * @return self
+	 */
+	public function dropTable()
+	{
+		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() .  "`");
 
 		return $this;
 	}
@@ -168,9 +165,11 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 		if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
 		{
 			$aPropertySql = $this->_getPropertySql($oProperty);
+			
+			$sTableName = $this->getTableName();
 
-			Core_DataBase::instance()->query("ALTER TABLE `shop_filter{$this->_oShop->id}` ADD {$aPropertySql['column']}");
-			Core_DataBase::instance()->query("ALTER TABLE `shop_filter{$this->_oShop->id}` ADD INDEX {$aPropertySql['index']}");
+			Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` ADD {$aPropertySql['column']}");
+			Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` ADD INDEX {$aPropertySql['index']}");
 		}
 
 		return $this;
@@ -185,8 +184,9 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 	{
 		if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
 		{
-			// Core_DataBase::instance()->query("ALTER TABLE `shop_filter{$this->_oShop->id}` DROP INDEX `p{$oProperty->id}`");
-			Core_DataBase::instance()->query("ALTER TABLE `shop_filter{$this->_oShop->id}` DROP `property{$oProperty->id}`");
+			$sTableName = $this->getTableName();
+			// Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` DROP INDEX `p{$oProperty->id}`");
+			Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` DROP `property{$oProperty->id}`");
 		}
 
 		return $this;
@@ -201,8 +201,10 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 			$oCore_DataBase = Core_DataBase::instance();
 
 			$this->_cacheTableColumns = array();
+			
+			$sTableName = $this->getTableName();
 
-			$aTableColumns = $oCore_DataBase->getColumns('shop_filter' . $this->_oShop->id);
+			$aTableColumns = $oCore_DataBase->getColumns($sTableName);
 
 			foreach ($aTableColumns as $key => $aTableColumn)
 			{
@@ -301,9 +303,9 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 		{
 			$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
 		}
-
+		
 		// get all posible combinations
-		$aCombinations = $this->_combinations($aPV);
+		$aCombinations = count($aPV) > 1 ? $this->_combinations($aPV) : $aPV;
 
 		$oCore_DataBase = Core_DataBase::instance();
 
@@ -333,6 +335,11 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 		$oCore_DataBase->query($query);
 	}
 
+	/**
+	 * Get property default value
+	 * @param int $property_id property id
+	 * @return mixed int|string
+	 */
 	protected function _getDefaultValue($property_id)
 	{
 		$oProperty = Core_Entity::factory('Property', $property_id);
@@ -354,6 +361,8 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 			case 9:
 				$defaultValue = '0000-00-00 00:00:00';
 			break;
+			default:
+				$defaultValue = NULL;
 		}
 
 		return $defaultValue;
@@ -390,6 +399,11 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 		return $result;
 	}
 
+	/**
+	 * Check property exist
+	 * @param int $property_id property id
+	 * @return bool TRUE|FALSE
+	 */
 	public function checkPropertyExist($property_id)
 	{
 		$aTableColumns = $this->_getTableColumns();
@@ -400,76 +414,6 @@ class Shop_Filter_Controller extends Core_Servant_Properties
 			{
 				return TRUE;
 			}
-		}
-
-		return FALSE;
-	}
-
-	public function rebuild()
-	{
-		if ($this->position == 0)
-		{
-			//Drop table
-			Core_DataBase::instance()->query("DROP TABLE IF EXISTS `shop_filter{$this->_oShop->id}`");
-
-			$this->createTable();
-		}
-
-		/*$limit = 1000;
-		$offset = 0;
-
-		do {
-			$oShop_Items = $this->_oShop->Shop_Items;
-			$oShop_Items->queryBuilder()
-				->limit($limit)
-				->offset($offset)
-				->clearOrderBy()
-				->orderBy('shop_items.id');
-
-			$aShop_Items = $oShop_Items->findAll(FALSE);
-
-			foreach($aShop_Items as $oShop_Item)
-			{
-				$this->fill($oShop_Item);
-			}
-
-			$offset += $limit;
-		}
-		while($aShop_Items);*/
-
-		try
-		{
-			$timeout = Core::getmicrotime();
-
-			if ($this->total)
-			{
-				$iCounter = 0;
-
-				$aShop_Items = $this->_oShop->Shop_Items->findAll(FALSE);
-
-				while ((Core::getmicrotime() - $timeout + 3 < $this->max_time)
-					&& $iCounter < $this->limit
-					&& isset($aShop_Items[$this->position]))
-				{
-					$oShop_Item = $aShop_Items[$this->position];
-
-					$this->fill($oShop_Item);
-
-					$iCounter++;
-					$this->position = $this->position + 1;
-				}
-			}
-
-			if ($this->position >= $this->total)
-			{
-				Core_Message::show(Core::_('Shop_Filter.rebuild_end'));
-
-				return TRUE;
-			}
-		}
-		catch (Exception $e){
-			Core_Message::show($e->getMessage(), 'error');
-			return NULL;
 		}
 
 		return FALSE;

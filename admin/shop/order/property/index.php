@@ -41,10 +41,12 @@ $oAdmin_Form_Controller->addEntity(Admin_Form_Entity::factory('Menus')->add(Admi
 			->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
 			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)))));
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, ''))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, '')));
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, ''))
+);
 
 if ($oShop->shop_dir_id)
 {
@@ -57,7 +59,9 @@ if ($oShop->shop_dir_id)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"));
 	} while ($oShopDir = $oShopDir->getParent());
+	
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
+	
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
 		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
@@ -68,6 +72,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name($oShop->name)
 	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0"))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0")));
+	
 if ($oShopGroup->id)
 {
 	$oShopGroupTmp = $oShopGroup;
@@ -86,14 +91,18 @@ if ($oShopGroup->id)
 	}
 }
 
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop_Order.show_order_title', $oShop->name))
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")));
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop_Order.property_title'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")));
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Order.show_order_title', $oShop->name, FALSE))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+);
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Order.property_title'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+);
 
 if ($oPropertyDir->id)
 {
@@ -106,7 +115,9 @@ if ($oPropertyDir->id)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"));
 	} while ($oShopGroupTmp = $oShopGroupTmp->getParent());
+	
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
+	
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
 		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);

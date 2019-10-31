@@ -40,7 +40,7 @@ $sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company.company_show_title2', $oCompany_Department->name))
+		->name(Core::_('Company.company_show_title2', $oCompany_Department->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
 		)
@@ -50,7 +50,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add( // Отдел
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
+		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref('/admin/company/department/index.php', NULL, NULL, $sAdditionalCompanyParams)
 		)

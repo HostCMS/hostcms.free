@@ -34,7 +34,6 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::_prepareForm();
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 

@@ -333,4 +333,9 @@ return array(
 	'item_cards_printlayout' => 'Item card printlayout',
 	'flag_bonus_include_modifications' => 'Include modifications',
 	'delete_property_values' => 'Delete exist property values',
+	'change_attributes_items_title' => 'Change attributes',
+	'shop_currency_select_caption' => 'Currency',
+	'change_attributes_success' => 'Attributes has been successfully changed!',
+	'remove' => 'Remove',
+	'set' => 'Set',
 );

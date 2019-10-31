@@ -16,19 +16,19 @@ class Property_Dir_Model extends Core_Entity
 	/**
 	 * Backend property
 	 * @var mixed
-	 */ 
+	 */
 	public $img = 0;
-	
+
 	/**
 	 * Backend property
 	 * @var mixed
-	 */ 
+	 */
 	public $enable = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var mixed
-	 */ 
+	 */
 	public $tag_name = NULL;
 
 	/**
@@ -110,7 +110,7 @@ class Property_Dir_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Properties->deleteAll(FALSE);
 		$this->Property_Dirs->deleteAll(FALSE);
 
@@ -163,6 +163,25 @@ class Property_Dir_Model extends Core_Entity
 	}
 
 	/**
+	 * Move group to another
+	 * @param int $parent_id group id
+	 * @return self
+	 * @hostcms-event property_dir.onBeforeMove
+	 * @hostcms-event property_dir.onAfterMove
+	 */
+	public function move($parent_id)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
+
+		$this->parent_id = $parent_id;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Get parent comment
 	 * @return Property_Dir_Model|NULL
 	 */
@@ -175,7 +194,7 @@ class Property_Dir_Model extends Core_Entity
 
 		return NULL;
 	}
-	
+
 	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -200,10 +219,10 @@ class Property_Dir_Model extends Core_Entity
 
 		$aProperty_Dirs = $this->Property_Dirs->findAll(FALSE);
 		foreach ($aProperty_Dirs as $oProperty_Dir)
-		{			
+		{
 			$count += $oProperty_Dir->getChildrenCount();
 		}
 
 		return $count;
-	}	
+	}
 }

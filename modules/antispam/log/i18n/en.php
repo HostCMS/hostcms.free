@@ -6,7 +6,7 @@
  * @subpackage Antispam
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ÎÎÎ "Õîñòìýéê" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright Â© 2005-2019 ÐžÐžÐž "Ð¥Ð¾ÑÑ‚Ð¼ÑÐ¹Ðº" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Antispam',

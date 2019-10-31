@@ -24,7 +24,7 @@ class Core_Auth
 	 * @var User_Model
 	 */
 	static protected $_currentUser = NULL;
-	
+
 	/**
 	 * Check Blocked Ip. Break if IP blocked
 	 */
@@ -65,17 +65,17 @@ class Core_Auth
 
 	/**
 	 * Authorization
-	 * @param string $moduleName name of the module
+	 * @param mixed $aModuleNames name of the module
 	 */
-	static public function authorization($moduleName)
+	static public function authorization($aModuleNames)
 	{
 		self::checkBackendBlockedIp();
 
 		self::systemInit();
 
-		if (!is_array($moduleName))
+		if (!is_array($aModuleNames))
 		{
-			$aModuleNames = array($moduleName);
+			$aModuleNames = array($aModuleNames);
 		}
 
 		$sModuleName = implode(', ', $aModuleNames);
@@ -185,7 +185,6 @@ class Core_Auth
 
 			if (!$bModuleAccess)
 			{
-				$sModuleName = implode(', ', $aModuleNames);
 				$sMessage = Core::_('Core.error_log_access_was_denied', $sModuleName);
 
 				Core_Log::instance()->clear()
@@ -204,9 +203,6 @@ class Core_Auth
 			}
 
 			$oUser->updateLastActivity();
-
-			$aHostCMS = Core_Array::getRequest('hostcms', array());
-
 		}
 		catch (Exception $e)
 		{
@@ -224,7 +220,7 @@ class Core_Auth
 
 		Core_Log::instance()->clear()
 			->status(Core_Log::$SUCCESS)
-			->write(Core::_('Core.error_log_module_access_allowed', $moduleName));
+			->write(Core::_('Core.error_log_module_access_allowed', $sModuleName));
 
 		Core_Session::close();
 	}
@@ -567,8 +563,7 @@ class Core_Auth
 	 */
 	static public function logout()
 	{
-		$isActive = Core_Session::isAcive();
-		!$isActive && Core_Session::start();
+		Core_Session::start();
 
 		$aUnsets = array(
 			'current_users_id',
@@ -590,7 +585,5 @@ class Core_Auth
 		self::$_currentUser = NULL;
 
 		Core_Session::regenerateId(TRUE);
-
-		!$isActive && Core_Session::close();
 	}
 }

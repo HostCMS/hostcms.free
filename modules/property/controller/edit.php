@@ -205,7 +205,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Селектор с группой
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillPropertyDir()
+						array(' … ') + self::fillPropertyDir($this->linkedObject)
 					)
 					->name('property_dir_id')
 					->value($this->_object->property_dir_id)
@@ -400,7 +400,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oSelect_Dirs
 					->options(
-						array(' … ') + $this->fillPropertyDir(0, $this->_object->id)
+						array(' … ') + self::fillPropertyDir($this->linkedObject, 0, array($this->_object->id))
 					)
 					->name('parent_id')
 					->value($this->_object->parent_id)
@@ -425,26 +425,28 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Create visual tree of the directories
+	 * @param object $linkedObject
 	 * @param int $iPropertyDirParentId parent directory ID
-	 * @param boolean $bExclude exclude group ID
+	 * @param array $aExclude exclude group ID
 	 * @param int $iLevel current nesting level
 	 * @return array
 	 */
-	public function fillPropertyDir($iPropertyDirParentId = 0, $bExclude = FALSE, $iLevel = 0)
+	static public function fillPropertyDir($linkedObject, $iPropertyDirParentId = 0, $aExclude = array(), $iLevel = 0)
 	{
 		$iPropertyDirParentId = intval($iPropertyDirParentId);
 		$iLevel = intval($iLevel);
 
-		$childrenDirs = $this->linkedObject->Property_Dirs->getByParentId($iPropertyDirParentId);
+		$childrenDirs = $linkedObject->Property_Dirs->getByParentId($iPropertyDirParentId);
+
+		$countExclude = count($aExclude);
 
 		$aReturn = array();
-
 		foreach ($childrenDirs as $childrenDir)
 		{
-			if ($bExclude != $childrenDir->id)
+			if ($countExclude == 0 || !in_array($childrenDir->id, $aExclude))
 			{
-				$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name;
-				$aReturn += $this->fillPropertyDir($childrenDir->id, $bExclude, $iLevel+1);
+				$aReturn[$childrenDir->id] = str_repeat('  ', $iLevel) . $childrenDir->name . ' [' . $childrenDir->id . ']';
+				$aReturn += self::fillPropertyDir($linkedObject, $childrenDir->id, $aExclude, $iLevel + 1);
 			}
 		}
 
@@ -493,27 +495,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				$this->_object->save();
-
-				// Fast filter
-				$filter = intval(Core_Array::get($this->_formValues, 'filter'));
-
-				if (get_class($this->linkedObject) == 'Shop_Item_Property_List_Model' && $this->linkedObject->filter)
-				{
-					$Shop_Filter_Controller = new Shop_Filter_Controller($this->linkedObject);
-
-					$filter = intval(Core_Array::get($this->_formValues, 'filter'));
-
-					if ($filter)
-					{
-						!$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
-								&& $Shop_Filter_Controller->addProperty($this->_object);
-					}
-					else
-					{
-						$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
-							&& $Shop_Filter_Controller->removeProperty($this->_object);
-					}
-				}
 			break;
 			case 'property_dir':
 			break;
@@ -523,8 +504,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$this->linkedObject->add($this->_object);
 		}
-
-// var_dump($this->_object->Shop_Item_Property->filter);
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

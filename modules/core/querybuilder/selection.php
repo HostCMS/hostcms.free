@@ -36,7 +36,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * @var array
 	 */
 	protected $_partition = array();
-	
+
 	/**
 	 * Index Hints
 	 * @var array
@@ -108,6 +108,17 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	{
 		// Set operator as default
 		$this->_operator = $this->_defaultOperator;
+		return $this;
+	}
+
+	/**
+	 * Set operator as a default operator
+	 * @param string $operator
+	 * @return self
+	 */
+	public function setOperator($operator)
+	{
+		$this->_operator = $operator;
 		return $this;
 	}
 
@@ -304,7 +315,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		else
 		{
 			$columnNameAlias = NULL;
-			
+
 			if (is_array($tableName))
 			{
 				// array('columnName', 'columnNameAlias') => `columnName` AS `columnNameAlias`
@@ -317,19 +328,19 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 					list($tableName) = $tableName;
 				}
 			}
-				
+
 			$value = $this->_dataBase->quoteTableName($tableName);
 
 			if (is_string($tableName) && isset($this->_partition[$tableName]))
 			{
 				$value .= ' PARTITION (' . implode(', ', $this->_quoteColumns($this->_partition[$tableName])) . ')';
 			}
-			
+
 			if (!is_null($columnNameAlias))
 			{
 				$value .= ' AS ' . $this->_dataBase->quoteTableName($columnNameAlias);
 			}
-			
+
 			if (is_string($tableName) && isset($this->_indexHints[$tableName]))
 			{
 				$value .= ' ' . $this->_buildIndexHint($this->_indexHints[$tableName]);
@@ -338,7 +349,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 
 		return $value;
 	}
-	
+
 	/**
 	 * Quote columns
 	 * @param array $array
@@ -921,7 +932,7 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	{
 		$this->_where = $this->_orderBy = $this->_join
 			 = $this->_partition = $this->_indexHints = array();
-			
+
 		$this->_operator = '';
 
 		$this->_defaultOperator = 'AND';

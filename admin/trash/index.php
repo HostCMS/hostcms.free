@@ -26,6 +26,46 @@ $oAdmin_Form_Controller
 	->title(Core::_('Trash.title'))
 	->pageTitle(Core::_('Trash.title'));
 
+if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
+{
+	ob_start();
+
+	$oAdmin_Form_Dataset = new Trash_Dataset();
+
+	$aTables = $oAdmin_Form_Dataset
+		->limit(9999)
+		->fillTables()
+		->getObjects();
+
+	foreach ($aTables as $oTrash_Entity)
+	{
+		$oTrash_Entity->delete();
+	}
+
+	Core_Log::instance()->clear()
+		->status(Core_Log::$SUCCESS)
+		->write('All items have been completely deleted from Trash');
+
+	$oAdmin_Form_Controller->addMessage(ob_get_clean());
+}
+
+// Меню формы
+$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
+// Элементы меню
+$oAdmin_Form_Entity_Menus->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Trash.empty_trash'))
+		->icon('fa fa-trash')
+		->class("btn btn-danger")
+		->onclick(
+			"res = confirm('" . htmlspecialchars(Core::_('Admin_Form.confirm_dialog', Core::_('Trash.empty_trash'))) . "'); if (res) { " . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAll', NULL, '') . " } return res;"
+		)
+);
+
+// Добавляем все меню контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Trash_Dataset();
 

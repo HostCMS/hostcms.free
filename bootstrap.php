@@ -86,3 +86,4 @@ Core_Event::attach('Shop_Payment_System_Handler.onAfterChangedOrder', array('Sho
 
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
+

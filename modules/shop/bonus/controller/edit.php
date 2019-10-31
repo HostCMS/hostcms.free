@@ -28,7 +28,6 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -39,7 +38,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('description')
 			->rows(7)
 			->wysiwyg(Core::moduleIsActive('wysiwyg'));
-			
+
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);
 		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow3);

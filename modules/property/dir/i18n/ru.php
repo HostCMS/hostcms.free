@@ -29,4 +29,5 @@ return array(
 	'denyAccessChildren_success' => 'Доступ запрещен.',
 	'allowAccess_success' => 'Доступ разрешен.',
 	'denyAccess_success' => 'Доступ запрещен.',
+	'move_success' => 'Группы свойств перенесены',
 );

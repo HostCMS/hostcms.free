@@ -767,8 +767,6 @@ abstract class Core_DataBase
 			case 'character varying':
 			case 'national char varying':
 			case 'national character varying':
-				$type = 'string';
-			break;
 			case 'date':
 			case 'time':
 			case 'time with time zone':
@@ -777,6 +775,12 @@ abstract class Core_DataBase
 			case 'timestamp with time zone':
 			case 'timestamp without time zone':
 			case 'interval':
+			case 'clob':
+			case 'char large object':
+			case 'nclob':
+			case 'nchar large object':
+			case 'character large object':
+			case 'national character large object':
 				$type = 'string';
 			break;
 			case 'blob':
@@ -785,14 +789,6 @@ abstract class Core_DataBase
 			case 'binary varying':
 				$type = 'string';
 				$binary = TRUE;
-			break;
-			case 'clob':
-			case 'char large object':
-			case 'nclob':
-			case 'nchar large object':
-			case 'character large object':
-			case 'national character large object':
-				$type = 'string';
 			break;
 			case 'binary':
 				$type = 'string';

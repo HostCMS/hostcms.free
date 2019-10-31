@@ -44,24 +44,24 @@
 			{
 				$Shop_Controller_Show->group(Core_Page::instance()->object->group);
 				$iCurrentShopGroup = Core_Page::instance()->object->group;
+
+				$Shop_Controller_Show->setFilterProperties(Core_Page::instance()->object->getFilterProperties());
+				$Shop_Controller_Show->setFilterPrices(Core_Page::instance()->object->getFilterPrices());
+
+				Core_Page::instance()->object->producer
+					&& $Shop_Controller_Show->producer(Core_Page::instance()->object->producer);
 			}
 			else
 			{
 				$iCurrentShopGroup = 0;
 			}
-			
+
 			$Shop_Controller_Show->group($iCurrentShopGroup);
-			
+
 			if ($Shop_Controller_Show->group == 0)
 			{
 				$Shop_Controller_Show->group(FALSE);
 			}
-
-			$price_from = intval(Core_Array::getGet('price_from'));
-			$price_to = intval(Core_Array::getGet('price_to'));
-
-			$price_from && $Shop_Controller_Show->addFilter('price', '>=', $price_from);
-			$price_to && $Shop_Controller_Show->addFilter('price', '<=', $price_to);
 
 			// Sorting
 			if (Core_Array::getGet('sorting'))
@@ -71,42 +71,6 @@
 					Core::factory('Core_Xml_Entity')
 						->name('sorting')->value($sorting)
 				);
-			}
-
-			// Producers
-			if (Core_Array::getGet('producer_id'))
-			{
-				$iProducerId = intval(Core_Array::getGet('producer_id'));
-				$Shop_Controller_Show->producer($iProducerId);
-
-				$Shop_Controller_Show->addEntity(
-					Core::factory('Core_Xml_Entity')
-						->name('producer_id')->value($iProducerId)
-				);
-			}
-
-			// Additional properties
-			$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
-			$aProperties = $oShop_Item_Property_List->Properties->findAll();
-
-			foreach ($aProperties as $oProperty)
-			{
-				$aPropertiesValue = Core_Array::getGet('property_' . $oProperty->id);
-				if ($aPropertiesValue)
-				{
-					$Shop_Controller_Show->addFilter('property', $oProperty->id, '=', $aPropertiesValue);
-				}
-				elseif (!is_null(Core_Array::getGet('property_' . $oProperty->id . '_from')))
-				{
-					$tmpFrom = Core_Array::getGet('property_' . $oProperty->id . '_from');
-					$tmpTo = Core_Array::getGet('property_' . $oProperty->id . '_to');
-
-					$tmpFrom != ''
-						&& $Shop_Controller_Show->addFilter('property', $oProperty->id, '>=', $tmpFrom);
-
-					$tmpTo != ''
-						&& $Shop_Controller_Show->addFilter('property', $oProperty->id, '<=', $tmpTo);
-				}
 			}
 
 			/* Количество */
@@ -119,13 +83,13 @@
 				);
 			}
 
-			/* Производители */
-			$Shop_Controller_Show->addProducers();
-
 			$Shop_Controller_Show
 				//Фильтровать по ярлыкам
 				->filterShortcuts(TRUE)
 				->addMinMaxPrice()
+				->modificationsList(TRUE)
+				->addProducers()
+				->applyFilter()
 				->show();
 		}
 

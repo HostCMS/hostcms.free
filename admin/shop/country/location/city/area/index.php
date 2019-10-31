@@ -23,13 +23,15 @@ $oShopCountryLocation = $oShopCountryLocationCity->Shop_Country_Location;
 
 $oShopCountry = $oShopCountryLocation->Shop_Country;
 
+$pageTitle = Core::_('Shop_Country_Location_City_Area.show_city_area_title', $oShopCountryLocationCity->name, FALSE);
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title($pageTitle = Core::_('Shop_Country_Location_City_Area.show_city_area_title', $oShopCountryLocationCity->name))
+	->title($pageTitle)
 	->pageTitle($pageTitle);
 
 // Меню формы
@@ -61,31 +63,23 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, '')
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, '')
-	)
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopFormPath, NULL, NULL, ''))
 );
 
 // Добавляем вторую крошку на страны
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Country.show_country_link'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/index.php', NULL, NULL, '')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, '')
-		)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($prevFormPath, NULL, NULL, ''))
 );
 
 // Добавляем вторую крошку на местоположения
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name))
+		->name(Core::_('Shop_Country_Location.show_location_title', $oShopCountry->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/index.php', NULL, NULL, $sAdditionalParam = '&shop_country_id=' . $oShopCountry->id)
 		)
@@ -97,7 +91,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 // Добавляем третью крошку на города
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name))
+		->name(Core::_('Shop_Country_Location_City.show_city_title', $oShopCountryLocation->name, FALSE))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($prevFormPath = '/admin/shop/country/location/city/index.php', NULL, NULL, $sAdditionalParam = "&shop_location_id=" . $oShopCountryLocation->id)
 		)
@@ -184,10 +178,7 @@ $oAdmin_Form_Dataset->addCondition(
 );
 
 // Добавляем источник данных контроллеру формы
-$oAdmin_Form_Controller->addDataset
-(
-	$oAdmin_Form_Dataset
-);
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

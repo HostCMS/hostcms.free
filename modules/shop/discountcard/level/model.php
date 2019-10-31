@@ -95,7 +95,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		ob_start();
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+		Core::factory('Core_Html_Entity_Div')
 			->class('text-align-center')
 			->add(
 				Core::factory('Core_Html_Entity_Span')

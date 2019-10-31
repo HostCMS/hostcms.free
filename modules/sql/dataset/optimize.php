@@ -103,42 +103,6 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 					Core_Message::show($e->getMessage(), 'error');
 				}
 			}
-
-			try
-			{
-				// Проверка на дублирующиеся индексы
-				$aTableIndexes = $this->_database
-					->setQueryType(NULL)
-					->query("SHOW INDEX FROM {$sTableName}")
-					->asAssoc()->result();
-
-				$aIndexes = array();
-				foreach ($aTableIndexes as $aIndex)
-				{
-					$aIndexes[$aIndex['Key_name']][] = $aIndex['Column_name'];
-				}
-
-				 while ($aIndexRow1 = array_shift($aIndexes))
-				 {
-					foreach ($aIndexes as $aIndexKey2 => $aIndexRow2)
-					{
-						$aArray_intersect = array_intersect($aIndexRow1, $aIndexRow2);
-
-						// Пересеченный массив идентичен двум исходным
-						if (count($aArray_intersect) == count($aIndexRow1) && count($aArray_intersect) == count($aIndexRow2))
-						{
-							Core_Message::show(Core::_('Sql.drop_index', $aIndexKey2, $row->Table));
-
-							$this->_database->setQueryType(5)
-								->query("ALTER TABLE {$sTableName} DROP INDEX " . $this->_database->quoteColumnName($aIndexKey2));
-						}
-					}
-				}
-			}
-			catch (Exception $e)
-			{
-				Core_Message::show($e->getMessage(), 'error');
-			}
 		}
 
 		return $return;

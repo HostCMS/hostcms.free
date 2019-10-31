@@ -1264,7 +1264,7 @@ class Shop_Order_Model extends Core_Entity
 
 					if (isset($aTmp[$shop_item_id]) && count($aTmp[$shop_item_id]))
 					{
-						$oShop_Warehouse_Entry = array_unshift($aTmp[$shop_item_id]);
+						$oShop_Warehouse_Entry = array_shift($aTmp[$shop_item_id]);
 					}
 					else
 					{
@@ -1488,6 +1488,11 @@ class Shop_Order_Model extends Core_Entity
 	{
 		$newObject = parent::copy();
 		$newObject->guid = Core_Guid::get();
+		$newObject->datetime = Core_Date::timestamp2sql(time());
+		$newObject->payment_datetime = '';
+		$newObject->status_datetime = '';
+		$newObject->canceled = 0;
+		$newObject->paid = 0;
 		$newObject->save();
 
 		$oShop = $newObject->Shop;
@@ -1705,7 +1710,7 @@ class Shop_Order_Model extends Core_Entity
 			// Wysiwyg
 			elseif ($oPropertyValue->Property->type == 6)
 			{
-				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+				$oOrderProperty->addChild('Значение', strip_tags($oPropertyValue->value));
 			}
 			// Other type
 			elseif ($oPropertyValue->Property->type != 2)
@@ -2274,7 +2279,7 @@ class Shop_Order_Model extends Core_Entity
 			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 		);
 
-		$oDiv = Core::factory('Core_Html_Entity_Span')
+		Core::factory('Core_Html_Entity_Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist

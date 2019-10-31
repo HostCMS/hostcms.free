@@ -99,12 +99,8 @@ else
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php')
-		)
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
 	);
 
 	// Крошки по директориям магазинов
@@ -117,13 +113,9 @@ else
 		do
 		{
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-			->name($oShopDirBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref(
-					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-			))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-					'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-			));
+				->name($oShopDirBreadcrumbs->name)
+				->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
 		} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -136,14 +128,10 @@ else
 
 	// Крошка на список товаров и групп товаров магазина
 	$oAdmin_Form_Entity_Breadcrumbs->add(
-	Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShop->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-		))
+		Admin_Form_Entity::factory('Breadcrumb')
+			->name($oShop->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 	);
 
 	// Крошки по группам товаров
@@ -156,14 +144,10 @@ else
 		do
 		{
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-			->name($oShopGroupBreadcrumbs->name)
-			->href($oAdmin_Form_Controller->getAdminLoadHref(
-					'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-			))
-			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-					'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-			));
-		}while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
+				->name($oShopGroupBreadcrumbs->name)
+				->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
+		} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -177,12 +161,8 @@ else
 	$oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Item.item_cards_print'))
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"
-		))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 	);
 
 	$oAdmin_View = Admin_View::create()

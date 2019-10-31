@@ -58,13 +58,9 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref($sNextFormPath = '/admin/shop/index.php', NULL, NULL, '')
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax($sNextFormPath, NULL, NULL, '')
-	)
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sNextFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sNextFormPath, NULL, NULL, ''))
 );
 
 // Добавляем крошку на форму списка групп товаров и товаров
@@ -90,29 +86,15 @@ if ($iShopDirId)
 
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopDir->name)
-			->href
-			(
-				$oAdmin_Form_Controller->getAdminLoadHref
-				(
-					$sNextFormPath, NULL, NULL, $additionalParams
-				)
-			)
-			->onclick
-			(
-				$oAdmin_Form_Controller->getAdminLoadAjax
-				(
-					$sNextFormPath, NULL, NULL, $additionalParams
-				)
-			);
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sNextFormPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sNextFormPath, NULL, NULL, $additionalParams));
 	} while ($oShopDir = $oShopDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
-		$oAdmin_Form_Entity_Breadcrumbs->add(
-			$oAdmin_Form_Entity_Breadcrumb
-		);
+		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
 	}
 }
 
@@ -141,34 +123,23 @@ if ($shop_group_id)
 
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
-		$oAdmin_Form_Entity_Breadcrumbs->add(
-			$oAdmin_Form_Entity_Breadcrumb
-		);
+		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
 	}
 }
 
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop_Warehouse.main_menu_warehouses_list'))
-	->href
-	(
-		$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-	)
-	->onclick
-	(
-		$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam)
-	));
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Warehouse.main_menu_warehouses_list'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/index.php', NULL, NULL, $sAdditionalParam))
+);
 
 // Добавляем крошку на текущую форму
-$oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop_Warehouse_Type.title'))
-	->href
-	(
-		$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}")
-	)
-	->onclick
-	(
-		$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)
-	));
+$oAdmin_Form_Entity_Breadcrumbs->add(
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Warehouse_Type.title'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_id={$shop_id}&shop_group_id={$shop_group_id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)));
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 

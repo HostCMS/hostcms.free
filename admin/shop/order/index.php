@@ -94,16 +94,8 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Shop.menu'))
-	->href(
-		$oAdmin_Form_Controller->getAdminLoadHref(
-			$sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''
-		)
-	)
-	->onclick(
-		$oAdmin_Form_Controller->getAdminLoadAjax(
-			$sShopItemFormPath, NULL, NULL, ''
-		)
-	)
+	->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath = '/admin/shop/index.php', NULL, NULL, ''))
+	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, ''))
 );
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
@@ -121,22 +113,10 @@ if ($oShopDir->id)
 
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopBreadCrumbDir->name)
-			->href
-			(
-				$oAdmin_Form_Controller->getAdminLoadHref
-				(
-					$sShopItemFormPath, NULL, NULL, $additionalParams
-				)
-			)
-			->onclick
-			(
-				$oAdmin_Form_Controller->getAdminLoadAjax
-				(
-					$sShopItemFormPath, NULL, NULL, $additionalParams
-				)
-			)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, $additionalParams))
 		;
-	}while ($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
+	} while ($oShopBreadCrumbDir = $oShopBreadCrumbDir->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -152,14 +132,8 @@ if ($oShopDir->id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"
-			)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams)
-		)
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id=0&shop_dir_id={$oShopDir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, $sAdditionalParams))
 );
 
 // Крошки строим только если: мы не в корне или идет редактирование
@@ -178,20 +152,8 @@ if ($shop_group_id)
 
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 			->name($oShopGroup->name)
-			->href
-			(
-				$oAdmin_Form_Controller->getAdminLoadHref
-				(
-					$sShopItemFormPath, NULL, NULL, $additionalParams
-				)
-			)
-			->onclick
-			(
-				$oAdmin_Form_Controller->getAdminLoadAjax
-				(
-					$sShopItemFormPath, NULL, NULL, $additionalParams
-				)
-			);
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sShopItemFormPath, NULL, NULL, $additionalParams))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopItemFormPath, NULL, NULL, $additionalParams));
 	} while ($oShopGroup = $oShopGroup->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -208,16 +170,8 @@ if ($shop_group_id)
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Order.orders'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref(
-				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"
-			)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax(
-				$oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams
-			)
-		)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&shop_dir_id={$oShopDir->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParams))
 );
 
  // Действие редактирования

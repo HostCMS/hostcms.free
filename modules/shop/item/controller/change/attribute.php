@@ -190,6 +190,19 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.yandex_market'))
 				->controller($window_Admin_Form_Controller);
 
+			$oAdmin_Form_Entity_Select_Order_Discount = Admin_Form_Entity::factory('Select')
+				->divAttr(array('class' => 'form-group col-xs-12'))
+				->name('apply_purchase_discount')
+				->options(
+					array(
+						'' => ' … ',
+						0 => Core::_('Shop_Item.remove'),
+						1 => Core::_('Shop_Item.set')
+					)
+				)
+				->caption(Core::_('Shop_Item.apply_purchase_discount'))
+				->controller($window_Admin_Form_Controller);
+
 			$oCore_Html_Entity_Form
 				->add($oAdmin_Form_Entity_Select_Currencies)
 				->add($oAdmin_Form_Entity_Select_Measures)
@@ -199,6 +212,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->add($oAdmin_Form_Entity_Select_Active)
 				->add($oAdmin_Form_Entity_Select_Indexing)
 				->add($oAdmin_Form_Entity_Select_Yandex)
+				->add($oAdmin_Form_Entity_Select_Order_Discount)
 				;
 
 			// Идентификаторы переносимых указываем скрытыми полями в форме, чтобы не превысить лимит GET
@@ -250,7 +264,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			Core::factory('Core_Html_Entity_Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 350, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 400, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -271,10 +285,18 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			Core_Array::getPost('active') !== '' && $oShop_Item->active = intval(Core_Array::getPost('active'));
 			Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = intval(Core_Array::getPost('indexing'));
 			Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = intval(Core_Array::getPost('yandex_market'));
+			Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = intval(Core_Array::getPost('apply_purchase_discount'));
 
 			$oShop_Item->save();
 
 			$oShop_Item->clearCache();
+
+			// Fast filter
+			if ($oShop_Item->Shop->filter)
+			{
+				$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
+				$Shop_Filter_Controller->fill($oShop_Item);
+			}
 		}
 
 		return $this;

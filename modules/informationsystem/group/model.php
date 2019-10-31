@@ -320,8 +320,8 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
-		$aInformationsystem_Items = $this->Informationsystem_Items->deleteAll(FALSE);
-		$aInformationsystem_Groups = $this->Informationsystem_Groups->deleteAll(FALSE);
+		$this->Informationsystem_Items->deleteAll(FALSE);
+		$this->Informationsystem_Groups->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('revision'))
 		{

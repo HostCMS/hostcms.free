@@ -39,8 +39,6 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 	{
 		parent::_prepareForm();
 
-		$modelName = $this->_object->getModelName();
-
 		$oMainTab = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Shop_Item.tab_description'))
 			->name('main');
@@ -50,8 +48,6 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$this->addTab($oMainTab);
-
-		$oShopItem = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
 
 		$oShop = $this->_object->Shop;
 
@@ -77,8 +73,6 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->options($options)
 			->name($name)
 			->value($this->_object->id));
-
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oMainRow2->add(Admin_Form_Entity::factory('Radiogroup')
 			->radio(array(
@@ -159,8 +153,17 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				if ($shop_discount_id)
 				{
 					$oObject = Core_Entity::factory('Shop_Discount', $shop_discount_id);
-					is_null($oShop_Item->Shop_Item_Discounts->getByDiscountId($oObject->id))
-						&& $oShop_Item->add($oObject)->clearCache();
+					if (is_null($oShop_Item->Shop_Item_Discounts->getByDiscountId($oObject->id)))
+					{
+						$oShop_Item->add($oObject)->clearCache();
+
+						// Fast filter
+						if ($oShop_Item->Shop->filter)
+						{
+							$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
+							$Shop_Filter_Controller->fill($oShop_Item);
+						}
+					}
 				}
 			break;
 			case 'shop_bonus':
@@ -186,8 +189,17 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			case 1:
 				foreach ($aModifications as $oModification)
 				{
-					is_null($oModification->Shop_Item_Discounts->getByDiscountId($oObject->id))
-						&& $oModification->add($oObject)->clearCache();
+					if (is_null($oModification->Shop_Item_Discounts->getByDiscountId($oObject->id)))
+					{
+						$oModification->add($oObject)->clearCache();
+
+						// Fast filter
+						if ($oModification->Shop->filter)
+						{
+							$Shop_Filter_Controller = new Shop_Filter_Controller($oModification->Shop);
+							$Shop_Filter_Controller->fill($oModification);
+						}
+					}
 				}
 			break;
 			case 2:

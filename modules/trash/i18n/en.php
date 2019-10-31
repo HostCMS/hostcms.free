@@ -16,4 +16,5 @@ return array(
 	'empty' => 'Trash is empty',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'empty_trash' => 'Empty Trash',
 );

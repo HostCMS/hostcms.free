@@ -77,8 +77,8 @@
 			range: true,
 			//step: 1000,
 			slide: function( event, ui ) {
-				$(this).prev().find("input[name$='_from']").val(ui.values[0]);
-				$(this).prev().find("input[name$='_to']").val(ui.values[1]);
+				$(this).prev().find("input[name$='_from']").val(ui.values[0]).change();
+				$(this).prev().find("input[name$='_to']").val(ui.values[1]).change();
 			},
 			create: function(event, ui) {
 				var min_value_original = parseInt($(this).prev().find("input[name$='_from_original']").val()),
@@ -242,7 +242,7 @@
 	?>
 	<div class="left_block footer">
 		<div class="data">
-			Copyright &copy; Корпорация. Работает на <a href="http://www.hostcms.ru" title="Система управления сайтом HostCMS">HostCMS</a>
+			Copyright &copy; Корпорация. Работает на <a href="https://www.hostcms.ru" title="Система управления сайтом HostCMS">HostCMS</a>
 		</div>
 	</div>
 	<div class="center_block footer">

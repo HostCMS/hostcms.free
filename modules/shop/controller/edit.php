@@ -776,6 +776,13 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_applyObjectProperty();
 
+		// Fast filter
+		if ($this->_object->filter)
+		{
+			$Shop_Filter_Controller = new Shop_Filter_Controller($this->_object);
+			$Shop_Filter_Controller->createTable();
+		}
+
 		if (Core::moduleIsActive('notification'))
 		{
 			$oModule = Core::$modulesList['shop'];
@@ -802,7 +809,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: $aTmp[] = $oNotification_Subscriber->user_id;
 			}
 
-			$aNewRecievedNotificationSubscribers = array_diff($aRecievedNotificationSubscribers, $aTmp);
+			// $aNewRecievedNotificationSubscribers = array_diff($aRecievedNotificationSubscribers, $aTmp);
 
 			foreach ($aRecievedNotificationSubscribers as $user_id)
 			{

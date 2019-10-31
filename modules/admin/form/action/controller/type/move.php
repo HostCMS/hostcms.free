@@ -20,6 +20,8 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 	 */
 	protected $_allowedProperties = array(
 		'autocomplete',
+		'autocompletePath',
+		'autocompleteEntityId',
 		'value',
 		'title', // Form Title
 		'selectCaption', // Select caption, e.g. 'Choose a group'
@@ -74,6 +76,9 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 			$window_Admin_Form_Controller = clone $this->_Admin_Form_Controller;
 			// Select на всплывающем окне должен быть найден через ID нового окна, а не id_content
 			$window_Admin_Form_Controller->window($newWindowId);
+
+			// $className = get_class($window_Admin_Form_Controller->getDataset(0)->getEntity());
+			// die();
 
 			if (!$this->autocomplete)
 			{
@@ -136,29 +141,14 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 					->type('hidden')
 					->controller($window_Admin_Form_Controller);
 
-				$entity_id = 0;
-
-				if (Core_Array::getGet('shop_id'))
-				{
-					$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-					$entity_id = $oShop->id;
-					$path = '/admin/shop/item/index.php?autocomplete=1&show_move_groups=1';
-				}
-				elseif(Core_Array::getGet('informationsystem_id'))
-				{
-					$oInformationsystem = Core_Entity::factory('Informationsystem', Core_Array::getGet('informationsystem_id', 0));
-					$entity_id = $oInformationsystem->id;
-					$path = '/admin/informationsystem/item/index.php?autocomplete=1&show_move_groups=1';
-				}
-
-				if ($entity_id)
+				if ($this->autocompleteEntityId)
 				{
 					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 					->value("
 						$('[name = destinationName]').autocomplete({
 							  source: function(request, response) {
 								$.ajax({
-								  url: '{$path}&entity_id={$entity_id}&exclude={$exclude}&mode=' + $('select#inputMode').val(),
+								  url: '{$this->autocompletePath}&entity_id={$this->autocompleteEntityId}&exclude={$exclude}&mode=' + $('select#inputMode').val(),
 								  dataType: 'json',
 								  data: {
 									queryString: request.term
@@ -231,7 +221,6 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 				->controller($this->_Admin_Form_Controller);
 
 			$oCore_Html_Entity_Form
-				// ->add($oAdmin_Form_Entity_Select)
 				->add(
 					Admin_Form_Entity::factory('Div')
 						->class('form-group col-xs-12')

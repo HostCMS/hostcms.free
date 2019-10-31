@@ -381,7 +381,24 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 			throw new Core_Exception("");
 		}
 
-		fseek($fInputFile, $this->seek);
+		// Remove first BOM
+		if ($this->seek == 0)
+		{
+			$BOM = fgets($fInputFile, 4); // length - 1 байт
+
+			if ($BOM === "\xEF\xBB\xBF")
+			{
+				$this->seek = 3;
+			}
+			else
+			{
+				fseek($fInputFile, 0);
+			}
+		}
+		else
+		{
+			fseek($fInputFile, $this->seek);
+		}
 
 		$iCounter = 0;
 
@@ -861,11 +878,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 						break;
 						// Передан GUID родительской группы
 						case 'informationsystem_groups_parent_guid':
-							$oTmpObject = Core_Entity::factory('Informationsystem_Group', 0);
-							if ($sData != 'ID00000000')
-							{
-								$oTmpObject = $this->_oCurrentInformationsystem->Informationsystem_Groups->getByGuid($sData, FALSE);
-							}
+							$oTmpObject = $sData != 'ID00000000'
+								? $this->_oCurrentInformationsystem->Informationsystem_Groups->getByGuid($sData, FALSE)
+								: Core_Entity::factory('Informationsystem_Group', 0);
+								
 							if (!is_null($oTmpObject))
 							{
 								if ($oTmpObject->id != $this->_oCurrentGroup->id)
@@ -1201,14 +1217,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										}
 									break;
 									case 5: // Informationsystem
-										$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sPropertyValue);
+										$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getByName($sData);
 										if ($oInformationsystem_Item)
 										{
 											$oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
-										elseif (is_numeric($sPropertyValue))
+										elseif (is_numeric($sData))
 										{
-											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sPropertyValue);
+											$oInformationsystem_Item = $oProperty->Informationsystem->Informationsystem_Items->getById($sData);
 
 											$oInformationsystem_Item && $oProperty_Value->setValue($oInformationsystem_Item->id);
 										}
@@ -1234,14 +1250,14 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										$oProperty_Value->setValue($sData);
 									break;
 									case 12: // Shop
-										$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sPropertyValue);
+										$oShop_Item = $oProperty->Shop->Shop_Items->getByName($sData);
 										if ($oShop_Item)
 										{
 											$oProperty_Value->setValue($oShop_Item->id);
 										}
-										elseif (is_numeric($sPropertyValue))
+										elseif (is_numeric($sData))
 										{
-											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sPropertyValue);
+											$oShop_Item = $oProperty->Shop->Shop_Items->getById($sData);
 
 											$oShop_Item && $oProperty_Value->setValue($oShop_Item->id);
 										}
@@ -1670,8 +1686,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
 
 					Core_Event::notify('Informationsystem_Item_Import_Csv_Controller.onBeforeImportItemProperty', $this, array($this->_oCurrentInformationsystem, $this->_oCurrentItem, $oProperty, $sPropertyValue));
-
-					$iInformationsystem_Item_Property_Id = $oProperty->Informationsystem_Item_Property->id;
 
 					$aPropertyValues = $oProperty->getValues($this->_oCurrentItem->id, FALSE);
 

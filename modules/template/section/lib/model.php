@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
@@ -11,7 +11,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Template_Section_Lib_Model extends Core_Entity{
+class Template_Section_Lib_Model extends Core_Entity
+{
 	/**
 	 * Belongs to relations
 	 * @var array

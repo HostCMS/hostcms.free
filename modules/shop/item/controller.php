@@ -125,8 +125,6 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 */
 	public function calculatePriceInItemCurrency($price, Shop_Item_Model $oShop_Item, $bRound = TRUE)
 	{
-		$oShop = $oShop_Item->Shop;
-
 		$this->_aPrice = array(
 			'tax' => 0,
 			'rate' => 0,

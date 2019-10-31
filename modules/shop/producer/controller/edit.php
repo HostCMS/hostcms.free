@@ -307,8 +307,6 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$param = array();
 
-		$oShop = $this->_object->Shop;
-
 		$large_image = '';
 		$small_image = '';
 
@@ -377,16 +375,8 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				&& Core_File::isValidExtension($aSmallFileData['name'],
 				$aCore_Config['availableExtension']))
 			{
-				if ($this->_object->image_large != '')
-				{
-					// Существует ли большое изображение
-					$param['large_image_isset'] = true;
-					$create_large_image = false;
-				}
-				else
-				{
-					$create_large_image = empty($large_image);
-				}
+				// Существует ли большое изображение
+				$param['large_image_isset'] = $this->_object->image_large != '' ? TRUE : FALSE;
 
 				$file_name = $aSmallFileData['name'];
 

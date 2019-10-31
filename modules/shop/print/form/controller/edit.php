@@ -44,9 +44,6 @@ class Shop_Print_Form_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
 
-		// Магазин, которому принадлежит данный тип доставки
-		$oShop = $this->_object->Shop;
-
 		$oShopField = Admin_Form_Entity::factory('Select')
 			->name('shop_id')
 			->caption(Core::_('Shop_Print_Form.shop_id'))

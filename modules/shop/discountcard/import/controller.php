@@ -25,7 +25,6 @@ class Shop_Discountcard_Import_Controller extends Admin_Form_Action_Controller_T
 		$this->title(Core::_('Shop_Discountcard.add_list'));
 
 		$oMainTab = $this->getTab('main')->clear();
-		$oAdditionalTab = $this->getTab('additional')->clear();
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))

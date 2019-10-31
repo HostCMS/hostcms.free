@@ -418,14 +418,14 @@
 		addBookmark: function (oBookmark, jBox){
 			jBox.append(
 				'<li id="bookmark-' + oBookmark['id'] + '">\
-					<a href="' + (oBookmark['href'].length ? oBookmark['href'] : '#') + '" onclick="' + (oBookmark['onclick'].length ? oBookmark['onclick'] : '') + '">\
+					<a href="' + (oBookmark['href'].length ? $.escapeHtml(oBookmark['href']) : '#') + '" onclick="' + (oBookmark['onclick'].length ? oBookmark['onclick'] : '') + '">\
 						<div class="clearfix notification-bookmark">\
 							<div class="notification-icon">\
-								<i class="' + oBookmark['ico'] + ' bg-darkorange white"></i>\
+								<i class="' + $.escapeHtml(oBookmark['ico']) + ' bg-darkorange white"></i>\
 							</div>\
 							<div class="notification-body">\
-								<span class="title">' + oBookmark['name'] + '</span>\
-								<span class="description">' + oBookmark['href'] + '</span>\
+								<span class="title">' + $.escapeHtml(oBookmark['name']) + '</span>\
+								<span class="description">' + $.escapeHtml(oBookmark['href']) + '</span>\
 							</div>\
 							<div class="notification-extra">\
 								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + oBookmark['remove-title'] +'\', submit: \'' + oBookmark['remove-submit'] + '\', cancel: \'' + oBookmark['remove-cancel'] + '\', bookmark_id: ' + oBookmark['id'] + '}); event.stopPropagation(); event.preventDefault();"></i>\
@@ -627,6 +627,7 @@
 		toggleFilter: function() {
 			$('.topFilter').toggle();
 			$('tr.admin_table_filter').toggleClass('disabled');
+			$('#showTopFilterButton').toggleClass('active');
 		},
 		changeFilterStatus: function(settings) {
 			$.ajax({
@@ -2044,6 +2045,10 @@
 				$(".clock #hours").html(( hours < 10 ? "0" : "" ) + hours);
 			}, 500);
 		},
+		toggleRepresentativeFields: function(selector) {
+			$(selector + ' .hidden-field').toggleClass('hidden');
+			$(selector + ' .representative-show-link').parents('.row').remove();
+		},
 		generatePassword: function() {
 			var jFirstPassword = $("[name = 'password_first']"),
 				jSecondPassword = $("[name = 'password_second']");
@@ -2219,14 +2224,14 @@
 
 			jBox.append(
 				'<li id="event-' + oEvent['id'] + '">\
-					<a href="' + (oEvent['href'].length ? oEvent['href'] : '#') + '" onclick="' + (oEvent['onclick'].length ? oEvent['onclick'] : '') + '">\
+					<a href="' + (oEvent['href'].length ? $.escapeHtml(oEvent['href']) : '#') + '" onclick="' + (oEvent['onclick'].length ? oEvent['onclick'] : '') + '">\
 						<div class="clearfix notification-clock">\
 							<div class="notification-icon">\
-								<i class="' + oEvent['icon'] + ' fa-fw white" style="background-color: ' + oEvent['background-color'] + '"></i>\
+								<i class="' + $.escapeHtml(oEvent['icon']) + ' fa-fw white" style="background-color: ' + $.escapeHtml(oEvent['background-color']) + '"></i>\
 							</div>\
 							<div class="notification-body">\
-								<span class="title">' + oEvent['name'] + '</span>\
-								<span class="description"><i class="fa fa-clock-o"></i> ' + oEvent['start'] + ' — <span class="notification-time">' + oEvent['finish'] + '</span>\
+								<span class="title">' + $.escapeHtml(oEvent['name']) + '</span>\
+								<span class="description"><i class="fa fa-clock-o"></i> ' + $.escapeHtml(oEvent['start']) + ' — <span class="notification-time">' + $.escapeHtml(oEvent['finish']) + '</span>\
 							</div>\
 						</div>\
 					</a>\
@@ -2506,15 +2511,15 @@
 
 			jBox.prepend(
 				'<li id="notification-' + oNotification['id'] + '" class="' + (oNotification['read'] == 0 ? "unread" : "") + '">\
-					<a href="' + (oNotification['href'].length ? oNotification['href'] : '#') + '" onclick="' + (oNotification['onclick'].length ? oNotification['onclick'] : '') + '">\
+					<a href="' + (oNotification['href'].length ? $.escapeHtml(oNotification['href']) : '#') + '" onclick="' + (oNotification['onclick'].length ? oNotification['onclick'] : '') + '">\
 						<div class="clearfix">\
 							<div class="notification-icon">\
-								<i class="' + oNotification['icon']['ico'] + ' ' + oNotification['icon']['background-color'] + ' ' + oNotification['icon']['color'] + '"></i>\
+								<i class="' + $.escapeHtml(oNotification['icon']['ico']) + ' ' + $.escapeHtml(oNotification['icon']['background-color']) + ' ' + $.escapeHtml(oNotification['icon']['color']) + '"></i>\
 							</div>\
 							<div class="notification-body">\
-								<span class="title">' + oNotification['title'] + '</span>\
+								<span class="title">' + $.escapeHtml(oNotification['title']) + '</span>\
 								<span class="description"></span>\
-								<span class="site-name">' + (typeof oNotification['site'] !== 'undefined' && oNotification['site'] !== null ? oNotification['site'] : "") + '</span>\
+								<span class="site-name">' + (typeof oNotification['site'] !== 'undefined' && oNotification['site'] !== null ? $.escapeHtml(oNotification['site']) : "") + '</span>\
 							</div>\
 							' + notificationExtra +
 						'</div>\
@@ -4258,11 +4263,24 @@
 					  minLength: 1,
 					  create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
-							return $('<li></li>')
+							var color = 'default';
+
+							if (item.count > 0)
+							{
+								color = 'palegreen';
+							}
+							else if (item.count < 0)
+							{
+								color = 'darkorange';
+							}
+
+							return $('<li class="autocomplete-suggestion"></li>')
 								.data('item.autocomplete', item)
-								.append($('<a>').text(item.label))
-								.append($('<span>').text(item.price_with_tax + ' ' + item.currency))
-								.append($('<span>').text(item.marking))
+								.append($('<div class="image"><img class="backend-thumbnail" src="' + item.image_small + '"></div>'))
+								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
+								.append($('<div class="count"><span class="label label-' + color + ' white">' + item.count + '</span></div>'))
+								.append($('<div class="price">').text(item.price_with_tax + ' ' + item.currency))
+								.append($('<div class="marking">').text(item.marking))
 								.appendTo(ul);
 						}
 
@@ -4522,15 +4540,17 @@ $(function(){
 		})
 		.on(
 			{
-				'click': function(event) {					
-					
+				'click': function(event) {
+
 					console.log('11111111');
-					
+
+					$(this).focus();
+
 					if ($(this).hasClass('blocked'))
-					{						
+					{
 						return false;
-					}					
-					
+					}
+
 					var iconPermissionId = $(this).attr('id'), //department_5_2_3 или user_7_2_3
 						aPermissionProperties = iconPermissionId.split('_'),
 						objectTypePermission = aPermissionProperties[0] == 'department' ? 0 : 1,
@@ -4558,16 +4578,16 @@ $(function(){
 						// Идентификатор типа сделки
 						dealTemplateId = aObjUrlParams['deal_template_id'];
 					}
-				
-					$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});					
-				}/* ,
 
-				'mousedown': function(event) {
+					$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
+				},
+
+				'mousedown': function() {
 
 					$(this).removeClass('changed');
 				},
 
-				'mouseover': function(event) {
+				'mouseover': function() {
 
 					if ($(this).hasClass('changed'))
 					{
@@ -4577,7 +4597,20 @@ $(function(){
 				'mouseout': function() {
 
 					$(this).removeClass('changed');
+				},
+				/* 'focus': function() {
+
+					console.log('focused');
+
+					$(this).addClass('focused');
+				},
+
+				'blur': function() {
+
+					console.log('blur');
+					$(this).removeClass('focused');
 				} */
+
 			},
 			'.icons_permissions i'
 		)
@@ -4637,6 +4670,83 @@ $(function(){
 			}*/
 
 			$.changeUserWorkdayButtons(status);
+		})
+		// Перевод сделки на новый этап
+		.on("click", ".deal-steps li", function() {
+
+			var $this = $(this),
+				dealTemplateStepId = parseInt($this.attr("id").split("deal_template_step_")[1]) || 0,
+				dealTemplateSteps = $this.parent(".deal-steps"),
+				currentDealTemplateStepId = parseInt(dealTemplateSteps.data("stepId"));
+
+			if (dealTemplateStepId && dealTemplateStepId != currentDealTemplateStepId
+				&& $this.children("a.available").length)
+			{
+				currentDealTemplateStepName = $.escapeHtml(dealTemplateSteps.find("li#deal_template_step_" + currentDealTemplateStepId + " a").prop("title"));
+
+				// Создание сделки
+				if (!dealTemplateSteps.data("deal-id"))
+				{
+					$this
+						.find("a")
+						.addClass("current");
+
+					dealTemplateSteps
+						.find("li#deal_template_step_" + currentDealTemplateStepId + " a")
+						.removeClass("current");
+
+					dealTemplateSteps.data("stepId", dealTemplateStepId);
+
+					dealTemplateStepNameHtml = $.escapeHtml($this.children("a").prop("title"));
+					currentDealTemplateStepId = dealTemplateStepId;
+				}
+				else // Редактирование сделки
+				{
+					$("a.clear-next", dealTemplateSteps).each(function() {
+
+						$(this).removeClass("clear-next");
+					});
+
+					// Нажали на шаг уже отмеченный как "следующий",
+					// снимаем отметку для перехода
+					if ($this.children("a").hasClass("next"))
+					{
+						$(".deal-template-step-comment")
+							.parent()
+							.addClass("hidden");
+
+						$this
+							.children("a")
+							.toggleClass("next clear-next");
+
+						dealTemplateStepId = currentDealTemplateStepId;
+						dealTemplateStepNameHtml = currentDealTemplateStepName;
+					}
+					else
+					{
+						$(".deal-template-step-comment")
+							.parent()
+							.removeClass("hidden");
+
+						dealTemplateStepNameHtml = '<span class="current-step">' + currentDealTemplateStepName + '</span>' + '<span class="darkgray"> → </span>' + '<span class="new-step">' + $.escapeHtml($this.children("a").prop("title")) + '</span>';
+
+						$("a.next", dealTemplateSteps).each(function() {
+							$(this).removeClass("next");
+						});
+
+						$this.children("a.available") && $this.children("a").addClass("next"); //.removeClass("clear-next");
+					}
+				}
+
+				dealTemplateSteps
+					.parent("div")
+					.next("[name='deal_template_step_id']")
+					.val(dealTemplateStepId);
+
+				$(".deal-template-step-name.deal-template-step-name-inner").html(dealTemplateStepNameHtml);
+
+				$.changeDealTemplateName(dealTemplateSteps.find("li#deal_template_step_" + dealTemplateStepId + " a"), dealTemplateStepId != currentDealTemplateStepId ? dealTemplateSteps.find("li#deal_template_step_" + currentDealTemplateStepId + " a") : null);
+			}
 		});
 
 	// Sticky actions
@@ -4806,6 +4916,18 @@ function calendarEventRender(event, element)
 
 	// $(element).css({'background-image': 'linear-gradient(to bottom,#fff 0,#ededed 100%)'});
 	$(element).css({'background-color': '#fbfbfb'});
+
+	if (event.description)
+	{
+		element.find('.fc-content')
+			.append('<span class="fc-description">' + $.escapeHtml(event.description) + '</span>');
+	}
+
+	if (event.place)
+	{
+		element.find('.fc-content')
+			.append('<span class="fc-place"><i class="fa fa-map-marker black"></i> ' + $.escapeHtml(event.place) + '</span>');
+	}
 
 	/*element.popover({
 		title: event.title,

@@ -708,7 +708,7 @@ class Core
 		{
 			$raw = hash($bytes == 16 ? 'md5' : 'sha256', uniqid(strval(mt_rand()), TRUE), TRUE);
 		}
-			
+
 		return bin2hex($raw);
 	}
 

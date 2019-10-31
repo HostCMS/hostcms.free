@@ -44,12 +44,8 @@ $sShopDirPath = '/admin/shop/index.php';
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop.menu'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, '')
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, '')
-	)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, ''))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, ''))
 );
 
 // Путь по разделам информационных систем
@@ -68,12 +64,8 @@ if ($oShop->shop_dir_id)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oShopDir->name)
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($sShopDirPath, NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopDirPath, NULL, NULL, $additionalParams));
 		} while ($oShopDir = $oShopDir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -94,12 +86,8 @@ $sShopPath = '/admin/shop/item/index.php';
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name($oShop->name)
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
-	)
+		->href($oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams))
 );
 
 // Путь по группам информационных элементов
@@ -117,12 +105,8 @@ if ($shop_group_id)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oShopGroup->name)
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($sShopPath, NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sShopPath, NULL, NULL, $additionalParams));
 		} while ($oShopGroup = $oShopGroup->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -142,13 +126,8 @@ $additionalParams = 'shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Shop_Item.properties_item_for_groups_link'))
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-	)
-
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
 );
 
 // Путь по разделам дополнительных свойств
@@ -167,12 +146,8 @@ if ($property_dir_id)
 
 			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
 				->name($oProperty_Dir->name)
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
-				);
+				->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
+				->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams));
 		} while ($oProperty_Dir = $oProperty_Dir->getParent());
 
 		$aBreadcrumbs = array_reverse($aBreadcrumbs);

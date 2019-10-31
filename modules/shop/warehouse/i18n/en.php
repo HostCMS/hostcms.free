@@ -46,5 +46,7 @@ return array(
 	'incoming' => 'Incoming',
 	'writeoff' => 'Writeoff',
 	'regrade' => 'Regrade',
-	'movement' => 'Movement',	
+	'movement' => 'Movement',
+	'types' => 'Types',
+	'shop_warehouse_type' => 'Warehouse type',
 );

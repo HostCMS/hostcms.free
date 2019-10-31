@@ -29,6 +29,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - modificationsList(TRUE|FALSE) показывать модификации товаров текущей группы на уровне товаров группы, по умолчанию FALSE
  * - filterShortcuts(TRUE|FALSE) выбирать ярлыки товаров текущей группы на уровне товаров группы, по умолчанию FALSE. Используется для фильтрации по дополнительным свойствам.
+ * - addFilter() добавить условие отобра товаров, может задавать условие отобра по цене ->addFilter('price', '>', 100) или по значению свойства ->addFilter('property', 17, '=', 1)
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - associatedItems(TRUE|FALSE) показывать сопутствующие товары для выбранных товаров, по умолчанию FALSE
  * - comments(TRUE|FALSE) показывать комментарии для выбранных товаров, по умолчанию FALSE
@@ -48,6 +49,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - viewed(TRUE|FALSE) выводить просмотренные товары, по умолчанию TRUE
  * - viewedLimit(10) максимальное количество выводимых просмотренных товаров, по умолчанию 10
  * - viewedOrder('ASC'|'DESC'|'RAND') направление сортировки просмотренных товаров, по умолчанию DESC
+ * - orderBy('shop_items.name', 'ASC') задает направление сортировки товаров
  * - cart(TRUE|FALSE) выводить товары в корзине, по умолчанию FALSE
  * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию FALSE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
@@ -714,6 +716,7 @@ class Shop_Controller_Show extends Core_Controller
 						->id($oShop_Item->id)
 						->showXmlProperties($this->itemsProperties)
 						->showXmlComments($this->comments)
+						->showXmlModifications($this->modifications)
 						->showXmlBonuses($this->bonuses)
 						->showXmlSpecialprices($this->specialprices);
 
@@ -813,6 +816,7 @@ class Shop_Controller_Show extends Core_Controller
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_Show.onBeforeRedeclaredShow
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddGroupsPropertiesList
 	 */
 	public function show()
 	{
@@ -882,6 +886,12 @@ class Shop_Controller_Show extends Core_Controller
 				->value(intval($this->limit))
 		);
 
+		!is_null($this->producer) && $this->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('producer_id')
+				->value(intval($this->producer))
+		);
+
 		// Comparing, favorite and viewed goods
 		if ($hasSessionId)
 		{
@@ -941,7 +951,16 @@ class Shop_Controller_Show extends Core_Controller
 		}
 
 		// Независимо от limit, т.к. может использоваться отдельно для фильтра
-		!$this->item && $this->applyFilter();
+		if (!$this->item)
+		{
+			$this->applyFilter();
+
+			$this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('filter_path')
+					->value($this->_filterPath)
+			);
+		}
 
 		// До вывода свойств групп
 		if ($this->limit > 0 || $this->item)
@@ -1000,8 +1019,7 @@ class Shop_Controller_Show extends Core_Controller
 			$aProperty_Dirs = $oShop_Group_Property_List->Property_Dirs->findAll();
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
-				$oProperty_Dir->clearEntities();
-				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir;
+				$this->_aGroup_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
 			}
 
 			if (!$bTpl)
@@ -1010,6 +1028,8 @@ class Shop_Controller_Show extends Core_Controller
 					->name('shop_group_properties');
 
 				$this->addEntity($Shop_Group_Properties);
+				
+				Core_Event::notify(get_class($this) . '.onBeforeAddGroupsPropertiesList', $this, array($Shop_Group_Properties));
 
 				$this->_addGroupsPropertiesList(0, $Shop_Group_Properties);
 			}
@@ -1152,7 +1172,7 @@ class Shop_Controller_Show extends Core_Controller
 						// Parent item for modification
 						$this->parentItem && $oShop_Item->addEntity(
 							Core_Entity::factory('Shop_Item', $this->parentItem)
-								->showXmlProperties($this->itemsProperties)
+								->showXmlProperties($mShowPropertyIDs)
 								->showXmlTags($this->tags)
 								->showXmlWarehousesItems($this->warehousesItems)
 								->showXmlAssociatedItems($this->associatedItems)
@@ -1188,6 +1208,8 @@ class Shop_Controller_Show extends Core_Controller
 
 	/**
 	 * Add list of item properties
+	 * @return array
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddItemsPropertiesList
 	 */
 	protected function _itemsProperties()
 	{
@@ -1239,6 +1261,50 @@ class Shop_Controller_Show extends Core_Controller
 					$oShop_Item_Property->shop_measure_id && $oProperty->addEntity(
 						$oShop_Item_Property->Shop_Measure
 					);
+
+					if ($oShop->filter && in_array($oShop_Item_Property->filter, array(2, 3, 4, 7)))
+					{
+						$tableName = 'shop_filter' . $oShop->id;
+
+						$columnName = 'property' . $oProperty->id;
+
+						$oQueryBuilder = Core_QueryBuilder::select()
+							->clearSelect()
+							->select(array(Core_QueryBuilder::expression('COUNT(DISTINCT shop_item_id)'), 'count'), $tableName . '.' . $columnName)
+							->from($tableName)
+							->groupBy($tableName . '.' . $columnName);
+
+						$this->group !== FALSE
+							&& $oQueryBuilder->where($tableName . '.shop_group_id', '=', $this->group);
+
+						$this->producer
+							&& $oQueryBuilder->where($tableName . '.shop_producer_id', '=', $this->producer);
+
+						!$this->modificationsList
+							&& $oQueryBuilder->where($tableName . '.modification_id', '=', 0);
+
+						// Filter by properties
+						$this->applyFastFilterProperties($oQueryBuilder);
+
+						// Filter by prices
+						$this->applyFastFilterPrices($oQueryBuilder);
+
+						$aRows = $oQueryBuilder->asAssoc()->execute()->result();
+
+						// XML-сущность, к которой будет добавляться количество
+						$oFilterCountsXmlEntity = Core::factory('Core_Xml_Entity')->name('filter_counts');
+
+						// Добавляем XML-сущность контроллеру показа
+						$oProperty->addEntity($oFilterCountsXmlEntity);
+
+						foreach ($aRows as $aRow)
+						{
+							$oFilterCountsXmlEntity->addEntity(
+								Core::factory('Core_Xml_Entity')
+									->name('count')->value($aRow['count'])->addAttribute('id', $aRow[$columnName])
+							);
+						}
+					}
 				}
 			}
 		//}
@@ -1259,6 +1325,8 @@ class Shop_Controller_Show extends Core_Controller
 					->name('shop_item_properties');
 
 				$this->addEntity($Shop_Item_Properties);
+				
+				Core_Event::notify(get_class($this) . '.onBeforeAddItemsPropertiesList', $this, array($Shop_Item_Properties));
 
 				$this->_addItemsPropertiesList(0, $Shop_Item_Properties);
 			}
@@ -1475,6 +1543,8 @@ class Shop_Controller_Show extends Core_Controller
 	protected $_seoItemDescription = NULL;
 	protected $_seoItemKeywords = NULL;
 
+	protected $_filterPath = NULL;
+
 	/**
 	 * Parse URL and set controller properties
 	 * @return self
@@ -1555,85 +1625,275 @@ class Shop_Controller_Show extends Core_Controller
 
 		if ($path != '')
 		{
+			$oProperty = NULL;
+			$aPropertyValuesToSet = array();
+
+			$step = 'group';
 			$aPath = explode('/', $path);
-			foreach ($aPath as $sPath)
+			$iPathCount = count($aPath);
+
+			foreach ($aPath as $key => $sPath)
 			{
 				// Attempt to receive Shop_Group
-				$oShop_Groups = $oShop->Shop_Groups;
-
-				$this->groupsActivity = strtolower($this->groupsActivity);
-				if ($this->groupsActivity != 'all')
+				switch ($step)
 				{
-					$oShop_Groups
-						->queryBuilder()
-						->where('shortcut_id', '=', 0)
-						->where('active', '=', $this->groupsActivity == 'inactive' ? 0 : 1);
-				}
+					case 'group':
+						$oShop_Groups = $oShop->Shop_Groups;
 
-				$oShop_Group = $oShop_Groups->getByParentIdAndPath($this->group, $sPath);
-
-				if (!is_null($oShop_Group))
-				{
-					if (in_array($oShop_Group->getSiteuserGroupId(), $this->_aSiteuserGroups))
-					{
-						$this->group = $oShop_Group->id;
-
-						// Group: set shop's SEO templates
-						$oShop_Group->seo_group_title_template != ''
-							&& $this->_seoGroupTitle = $oShop_Group->seo_group_title_template;
-						$oShop_Group->seo_group_description_template != ''
-							&& $this->_seoGroupDescription = $oShop_Group->seo_group_description_template;
-						$oShop_Group->seo_group_keywords_template != ''
-							&& $this->_seoGroupKeywords = $oShop_Group->seo_group_keywords_template;
-
-						// Item: set shop's SEO templates
-						$oShop_Group->seo_item_title_template != ''
-							&& $this->_seoItemTitle = $oShop_Group->seo_item_title_template;
-						$oShop_Group->seo_item_description_template != ''
-							&& $this->_seoItemDescription = $oShop_Group->seo_item_description_template;
-						$oShop_Group->seo_item_keywords_template != ''
-							&& $this->_seoItemKeywords = $oShop_Group->seo_item_keywords_template;
-					}
-					else
-					{
-						return $this->error403();
-					}
-				}
-				else
-				{
-					// Attempt to receive Shop_Item
-					$oShop_Items = $oShop->Shop_Items;
-
-					$this->itemsActivity = strtolower($this->itemsActivity);
-					if ($this->itemsActivity != 'all')
-					{
-						$oShop_Items
-							->queryBuilder()
-							->where('shop_items.active', '=', $this->itemsActivity == 'inactive' ? 0 : 1);
-					}
-
-					$this->_applyItemConditions($oShop_Items);
-					$this->_applyWarehouseConditions($oShop_Items);
-
-					//$this->forbidSelectModifications();
-					$oShop_Items->queryBuilder()->where('shop_items.modification_id', '=', 0);
-
-					$oShop_Item = $oShop_Items->getByGroupIdAndPath($this->group, $sPath);
-
-					if (!$this->item && !is_null($oShop_Item))
-					{
-						if (in_array($oShop_Item->getSiteuserGroupId(), $this->_aSiteuserGroups))
+						$this->groupsActivity = strtolower($this->groupsActivity);
+						if ($this->groupsActivity != 'all')
 						{
-							$this->group = $oShop_Item->shop_group_id;
-							$this->item = $oShop_Item->id;
+							$oShop_Groups
+								->queryBuilder()
+								->where('shortcut_id', '=', 0)
+								->where('active', '=', $this->groupsActivity == 'inactive' ? 0 : 1);
+						}
+
+						$oShop_Group = $oShop_Groups->getByParentIdAndPath($this->group, $sPath);
+
+						if (!is_null($oShop_Group))
+						{
+							if (in_array($oShop_Group->getSiteuserGroupId(), $this->_aSiteuserGroups))
+							{
+								$this->group = $oShop_Group->id;
+
+								// Group: set shop's SEO templates
+								$oShop_Group->seo_group_title_template != ''
+									&& $this->_seoGroupTitle = $oShop_Group->seo_group_title_template;
+								$oShop_Group->seo_group_description_template != ''
+									&& $this->_seoGroupDescription = $oShop_Group->seo_group_description_template;
+								$oShop_Group->seo_group_keywords_template != ''
+									&& $this->_seoGroupKeywords = $oShop_Group->seo_group_keywords_template;
+
+								// Item: set shop's SEO templates
+								$oShop_Group->seo_item_title_template != ''
+									&& $this->_seoItemTitle = $oShop_Group->seo_item_title_template;
+								$oShop_Group->seo_item_description_template != ''
+									&& $this->_seoItemDescription = $oShop_Group->seo_item_description_template;
+								$oShop_Group->seo_item_keywords_template != ''
+									&& $this->_seoItemKeywords = $oShop_Group->seo_item_keywords_template;
+							}
+							else
+							{
+								return $this->error403();
+							}
+
+							break;
 						}
 						else
 						{
-							return $this->error403();
+							$step = 'producer';
 						}
-					}
-					else
-					{
+
+					case 'producer':
+						$Shop_Producer = $oShop->Shop_Producers->getByName($sPath);
+
+						$step = 'price';
+
+						if (!is_null($Shop_Producer))
+						{
+							$this->_filterPath .= $sPath . '/';
+
+							$this->producer = $Shop_Producer->id;
+							break;
+						}
+					case 'price':
+						$step = 'filter';
+
+						if (strpos($sPath, 'price-') === 0)
+						{
+							$aPrice = explode('-', substr($sPath, 6), 2);
+
+							if (count($aPrice) == 2 && is_numeric($aPrice[0]) && is_numeric($aPrice[1]))
+							{
+								$this
+									->addFilter('price', '>=', $aPrice[0])
+									->addFilter('price', '<=', $aPrice[1]);
+							}
+							else
+							{
+								return $this->error404();
+							}
+
+							$this->_filterPath .= $sPath . '/';
+
+							break;
+						}
+					case 'filterValue':
+						if (!is_null($oProperty))
+						{
+							if ($oProperty->type == 3)
+							{
+								$oList_Item = $oProperty->List->List_Items->getByValue($sPath);
+
+								if (!is_null($oList_Item))
+								{
+									$this->_filterPath .= $sPath . '/';
+
+									$aPropertyValuesToSet[] = $oList_Item->id;
+
+									// Последние условие выполняется сразу, а не на следующем шаге
+									if ($key + 1 == $iPathCount)
+									{
+										$step = 'finish';
+									}
+									else
+									{
+										break;
+									}
+								}
+								else
+								{
+									$step = 'filter';
+								}
+							}
+							else
+							{
+								$this->_filterPath .= $sPath . '/';
+
+								$aPropertyValuesToSet[] = $sPath;
+								$step = 'filter';
+
+								if ($key + 1 == $iPathCount)
+								{
+									$step = 'finish';
+								}
+								else
+								{
+									break;
+								}
+							}
+						}
+					case 'filter':
+						if (!is_null($oProperty))
+						{
+							if (count($aPropertyValuesToSet))
+							{
+								$this->addFilter('property', $oProperty->id,
+									count($aPropertyValuesToSet) == 1 ? '=' : 'IN',
+									count($aPropertyValuesToSet) == 1 ? $aPropertyValuesToSet[0] : $aPropertyValuesToSet
+								);
+
+								$aPropertyValuesToSet = array();
+								$oProperty = NULL;
+
+								if ($step === 'finish')
+								{
+									break;
+								}
+							}
+							else
+							{
+								return $this->error404();
+							}
+						}
+
+						$aFilterProperties = $this->getFilterPropertiesByGroup($this->group);
+
+						if (isset($aFilterProperties[$sPath]))
+						{
+							$aAvailablePropertyTypes = array(0, 1, 3, 7, 11);
+
+							$oProperty = $aFilterProperties[$sPath];
+
+							$this->_filterPath .= $sPath . '/';
+
+							if (in_array($oProperty->type, $aAvailablePropertyTypes))
+							{
+								$oShop_Item_Property = $oProperty->Shop_Item_Property;
+
+								// Checkbox
+								if ($oProperty->type == 7)
+								{
+									$this->addFilter('property', $oProperty->id, '=', 1);
+									$oProperty = NULL;
+								}
+								elseif ($oShop_Item_Property->filter != 5 && $oShop_Item_Property->filter != 6)
+								{
+									$step = 'filterValue';
+									$aPropertyValuesToSet = array();
+								}
+								else
+								{
+									return $this->error404();
+								}
+							}
+							break;
+						}
+						// Свойство от-до
+						elseif (($pos = strpos($sPath, '-')) !== FALSE)
+						{
+							$tagName = substr($sPath, 0, $pos);
+
+							if (isset($aFilterProperties[$tagName]))
+							{
+								$oProperty = $aFilterProperties[$tagName];
+
+								$this->_filterPath .= $sPath . '/';
+
+								$aValue = explode('-', substr($sPath, $pos + 1), 2);
+
+								if (count($aValue) == 2 && is_numeric($aValue[0]) && is_numeric($aValue[1]))
+								{
+									$this
+										->addFilter('property', $oProperty->id, '>=', $aValue[0])
+										->addFilter('property', $oProperty->id, '<=', $aValue[1]);
+								}
+								else
+								{
+									return $this->error404();
+								}
+
+								break;
+							}
+							else
+							{
+								$step = 'item';
+							}
+						}
+						else
+						{
+							$step = 'item';
+						}
+
+					case 'item':
+						// Attempt to receive Shop_Item
+						$oShop_Items = $oShop->Shop_Items;
+
+						$this->itemsActivity = strtolower($this->itemsActivity);
+						if ($this->itemsActivity != 'all')
+						{
+							$oShop_Items
+								->queryBuilder()
+								->where('shop_items.active', '=', $this->itemsActivity == 'inactive' ? 0 : 1);
+						}
+
+						$this->_applyItemConditions($oShop_Items);
+						$this->_applyWarehouseConditions($oShop_Items);
+
+						//$this->forbidSelectModifications();
+						$oShop_Items->queryBuilder()->where('shop_items.modification_id', '=', 0);
+
+						$oShop_Item = $oShop_Items->getByGroupIdAndPath($this->group, $sPath);
+
+						$step = 'modification';
+
+						if (!is_null($oShop_Item))
+						{
+							if (in_array($oShop_Item->getSiteuserGroupId(), $this->_aSiteuserGroups))
+							{
+								$this->group = $oShop_Item->shop_group_id;
+								$this->item = $oShop_Item->id;
+
+								break;
+							}
+							else
+							{
+								return $this->error403();
+							}
+						}
+
+					case 'modification':
 						// Товар был уже определен, по пути ищем модификацию
 						if ($this->item)
 						{
@@ -1644,6 +1904,9 @@ class Shop_Controller_Show extends Core_Controller
 								->where('shop_items.modification_id', '=', $this->item);
 
 							$oShop_Modification_Item = $oShop_Modification_Items->getByGroupIdAndPath(0, $sPath);
+
+							$step = 'nothing';
+
 							if (!is_null($oShop_Modification_Item))
 							{
 								// Родительский товар для модификации
@@ -1651,6 +1914,8 @@ class Shop_Controller_Show extends Core_Controller
 
 								// Модификация в основной товар
 								$this->item = $oShop_Modification_Item->id;
+
+								break;
 							}
 							else
 							{
@@ -1664,7 +1929,14 @@ class Shop_Controller_Show extends Core_Controller
 							$this->group = FALSE;
 							return $this->error404();
 						}
-					}
+					break;
+					case 'finish':
+						// Nothing to do
+					break;
+					default:
+						$this->group = FALSE;
+						$this->item = FALSE;
+						return $this->error404();
 				}
 			}
 		}
@@ -1820,9 +2092,50 @@ class Shop_Controller_Show extends Core_Controller
 		$seo_description != '' && Core_Page::instance()->description($seo_description);
 		$seo_keywords != '' && Core_Page::instance()->keywords($seo_keywords);
 
+		// var_dump($this->_filterPath);
+
 		Core_Event::notify(get_class($this) . '.onAfterParseUrl', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Cache for getFilterProperties
+	 * @var array
+	 */
+	protected $_cacheGetFilterPropertiesByGroup = array();
+
+	/**
+	 * Get array of properties available for filter
+	 * @param int $group_id
+	 * @return array
+	 */
+	public function getFilterPropertiesByGroup($group_id)
+	{
+		if (!isset($this->_cacheGetFilterPropertiesByGroup[$group_id]))
+		{
+			$this->_cacheGetFilterPropertiesByGroup[$group_id] = array();
+
+			$oShop = $this->getEntity();
+
+			$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
+
+			$aProperties = $group_id === FALSE
+				? $oShop_Item_Property_List->Properties->findAll()
+				: $oShop_Item_Property_List->getPropertiesForGroup($group_id);
+
+			foreach ($aProperties as $oProperty)
+			{
+				$oShop_Item_Property = $oProperty->Shop_Item_Property;
+
+				if ($oShop_Item_Property->filter)
+				{
+					$this->_cacheGetFilterPropertiesByGroup[$group_id][$oProperty->tag_name] = $oProperty;
+				}
+			}
+		}
+
+		return $this->_cacheGetFilterPropertiesByGroup[$group_id];
 	}
 
 	/**
@@ -1835,6 +2148,59 @@ class Shop_Controller_Show extends Core_Controller
 		return $this->page > 0
 			? sprintf($template, $this->page + 1)
 			: '';
+	}
+
+	/**
+	 * Get producer name
+	 * @return string
+	 */
+	public function filterProducer()
+	{
+		return $this->producer
+			? Core_Entity::factory('Shop_Producer', $this->producer)->name
+			: '';
+	}
+
+	/**
+	 * Get properties for seo fields
+	 * @param $nameSeparator property name separator
+	 * @param $valueSeparator property value separator
+	 * @return string
+	 */
+	public function seoFilter($nameSeparator = ": ", $valueSeparator = ", ")
+	{
+		$aReturn = array();
+
+		foreach ($this->_aFilterProperties as $property_id => $aTmpProperties)
+		{
+			foreach ($aTmpProperties as $aTmpProperty)
+			{
+				list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
+
+				$line = ' ' . $oProperty->name . $nameSeparator;
+
+				foreach ($aPropertyValues as $propertyValue)
+				{
+					if ($oProperty->type == 3)
+					{
+						$oList_Item = $oProperty->List->List_Items->getById($propertyValue);
+
+						if (!is_null($oList_Item))
+						{
+							$line .= $oList_Item->value;
+						}
+					}
+					else
+					{
+						$line .= $propertyValue;
+					}
+
+					$aReturn[] = $line;
+				}
+			}
+		}
+
+		return implode($valueSeparator, $aReturn);
 	}
 
 	/**
@@ -2493,16 +2859,15 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		$oShop = $this->getEntity();
 
-		$iCurrentShopGroup = intval($this->group);
-
 		$oSubMinMaxQueryBuilder = Core_QueryBuilder::select()
 			->from('shop_items')
 			->where('shop_items.deleted', '=', 0)
 			->where('shop_items.shop_id', '=', $oShop->id)
 			->where('shop_items.active', '=', 1)
 			//->open()
-			->where('shop_items.shop_group_id', '=', $iCurrentShopGroup)
 			->where('shop_items.shortcut_id', '=', 0);
+
+		$this->group !== FALSE && $oSubMinMaxQueryBuilder->where('shop_items.shop_group_id', '=', intval($this->group));
 
 		if ($oShop->filter)
 		{
@@ -2538,8 +2903,9 @@ class Shop_Controller_Show extends Core_Controller
 				->where('shop_items.shop_group_id', '=', 0)
 				->join(array('shop_items', 't'), 'shop_items.modification_id', '=', 't.id')
 				->where('t.deleted', '=', 0)
-				->where('t.active', '=', 1)
-				->where('t.shop_group_id', '=', $iCurrentShopGroup);
+				->where('t.active', '=', 1);
+
+			$this->group !== FALSE && $oSubMinMaxQueryBuilder->where('t.shop_group_id', '=', intval($this->group));
 
 			// Стандартные ограничения для товаров
 			$this->_applyItemConditionsQueryBuilder($oSubMinMaxQueryBuilder, 't');
@@ -2580,8 +2946,9 @@ class Shop_Controller_Show extends Core_Controller
 				->join(array('shop_items', 't'), 'shop_items.shortcut_id', '=', 't.id')
 				->where('t.deleted', '=', 0)
 				->where('t.active', '=', 1)
-				->where('t.shop_group_id', '=', $iCurrentShopGroup)
 				->where('t.shortcut_id', '>', 0);
+
+			$this->group !== FALSE && $oSubMinMaxQueryBuilder->where('t.shop_group_id', '=', intval($this->group));
 
 			// Стандартные ограничения для товаров
 			$this->_applyItemConditionsQueryBuilder($oSubMinMaxQueryBuilder, 't');
@@ -2652,6 +3019,33 @@ class Shop_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Set goods sorting
+	 * @param $column Column name, e.g. price, absolute_price
+	 * @return self
+	 */
+	public function orderBy($column, $direction = 'ASC')
+	{
+		switch ($column)
+		{
+			case 'price':
+			case 'absolute_price':
+				$this->addAbsolutePrice();
+
+				$column = 'absolute_price';
+			break;
+		}
+
+		$this->shopItems()
+			->queryBuilder()
+			->clearOrderBy()
+			->orderBy($column, $direction);
+
+		$this->addCacheSignature('orderBy=' . $column . $direction);
+
+		return $this;
+	}
+
+	/**
 	 * Array of Properties conditions, see addFilter()
 	 * @var array
 	 */
@@ -2666,7 +3060,7 @@ class Shop_Controller_Show extends Core_Controller
 	/**
 	 * Add filter condition
 	 * ->addFilter('property', 17, '=', 33)
-	 * ->addFilter('price', '>', 33)
+	 * ->addFilter('price', '>', 100)
 	 */
 	public function addFilter()
 	{
@@ -2724,7 +3118,48 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Remove filter condition
+	 * ->removeFilter('property', 17)
+	 * ->removeFilter('price')
+	 */
+	public function removeFilter()
+	{
+		$args = func_get_args();
 
+		$iCountArgs = count($args);
+
+		if ($iCountArgs < 1)
+		{
+			throw new Core_Exception("removeFilter() expected at least 1 arguments");
+		}
+
+		switch ($args[0])
+		{
+			case 'property':
+				if ($iCountArgs < 2)
+				{
+					throw new Core_Exception("removeFilter('property') expected 2 arguments");
+				}
+
+				$property_id = $args[1];
+
+				if (isset($this->_aFilterProperties[$property_id]))
+				{
+					unset($this->_aFilterProperties[$property_id]);
+				}
+			break;
+			case 'price':
+				$this->_aFilterPrices = array();
+			break;
+			default:
+				throw new Core_Exception("The option '%option' doesn't allow",
+					array('%option' => $args[0])
+				);
+		}
+
+		return $this;
+	}
 
 	/**
 	 * Apply Filter
@@ -2741,72 +3176,118 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Apply Fast Filter
+	 * @return self
+	 */
 	protected function _fastFilter()
 	{
 		$oShop = $this->getEntity();
 
-		$tableName = 'shop_filter' . $oShop->id;
-
 		if (count($this->_aFilterProperties) || count($this->_aFilterPrices))
 		{
-			$this->shopItems()->queryBuilder()
-				->join($tableName, 'shop_items.id', '=', $tableName . '.shop_item_id');
-		}
+			$tableName = 'shop_filter' . $oShop->id;
 
-		// Filter by properties
-		if (count($this->_aFilterProperties))
-		{
+			$QB = $this->shopItems()->queryBuilder();
+
+			$QB
+				->distinct()
+				->join($tableName, 'shop_items.id', '=', $tableName . '.shop_item_id');
+
+			// Filter by properties
+			$this->applyFastFilterProperties($QB);
+
+			// Filter by prices
+			$this->applyFastFilterPrices($QB);
+
 			foreach ($this->_aFilterProperties as $iPropertyId => $aTmpProperties)
 			{
 				foreach ($aTmpProperties as $aTmpProperty)
 				{
 					list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
 
-					// Для строк фильтр LIKE %...%
-					if ($oProperty->type == 1)
-					{
-						foreach ($aPropertyValues as $propertyValue)
-						{
-							$this->shopItems()->queryBuilder()
-								->where($tableName . '.property' . $oProperty->id, 'LIKE', "%{$propertyValue}%");
-						}
-					}
-					else
-					{
-						// 7 - Checkbox
-						$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
-
-						// 7 - Checkbox, 3 - List
-						$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
-
-						$bCheckUnset && $this->shopItems()->queryBuilder()->open();
-
-						$this->shopItems()->queryBuilder()
-							->where(
-								$tableName . '.property' . $oProperty->id,
-								count($aPropertyValues) == 1 ? $condition : 'IN',
-								count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
-							);
-
-						$bCheckUnset && $this->shopItems()->queryBuilder()
-							->setOr()
-							->where($tableName . '.property' . $oProperty->id, 'IS', NULL)
-							->close();
-					}
-
 					$this->_addFilterPropertyToXml($oProperty, $condition, $aPropertyValues);
 				}
 			}
 		}
 
-		// Filter by prices
+		return $this;
+	}
+
+	/**
+	 * Apply Fast Filter Properties
+	 * @param Core_QueryBuilder_Select $QB
+	 * @return self
+	 */
+	public function applyFastFilterProperties($QB)
+	{
+		$oShop = $this->getEntity();
+
+		$tableName = 'shop_filter' . $oShop->id;
+
+		foreach ($this->_aFilterProperties as $iPropertyId => $aTmpProperties)
+		{
+			foreach ($aTmpProperties as $aTmpProperty)
+			{
+				list($oProperty, $condition, $aPropertyValues) = $aTmpProperty;
+
+				// Для строк фильтр LIKE %...%
+				if ($oProperty->type == 1)
+				{
+					foreach ($aPropertyValues as $propertyValue)
+					{
+						$QB
+							->where($tableName . '.property' . $oProperty->id, 'LIKE', "%{$propertyValue}%");
+					}
+				}
+				else
+				{
+					// 7 - Checkbox
+					$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
+
+					// 7 - Checkbox, 3 - List
+					$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
+
+					$bCheckUnset && $QB->open();
+
+					$QB
+						->where(
+							$tableName . '.property' . $oProperty->id,
+							count($aPropertyValues) == 1 ? $condition : 'IN',
+							count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
+						);
+
+					$bCheckUnset && $QB
+						->setOr()
+						->where($tableName . '.property' . $oProperty->id, 'IS', NULL)
+						->close();
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Apply Fast Filter Prices
+	 * @param Core_QueryBuilder_Select $QB
+	 * @return self
+	 */
+	public function applyFastFilterPrices($QB)
+	{
+		$oShop = $this->getEntity();
+
+		$tableName = 'shop_filter' . $oShop->id;
+
 		if (count($this->_aFilterPrices))
 		{
+			$this->addAbsolutePrice();
+
 			foreach ($this->_aFilterPrices as $aTmpPrice)
 			{
 				list($condition, $value) = $aTmpPrice;
 
-				$this->shopItems()->queryBuilder()->where($tableName . '.price_absolute', $condition, $value);
+				$QB->where($tableName . '.price_absolute', $condition, $value);
 
 				$this->_addFilterPriceToXml($condition, $value);
 			}
@@ -2815,6 +3296,10 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Apply Basic Filter
+	 * @return self
+	 */
 	protected function _basicFilter()
 	{
 		// Filter by properties
@@ -2839,87 +3324,46 @@ class Shop_Controller_Show extends Core_Controller
 					$this->shopItems()->queryBuilder()
 						->where('shop_item_properties.property_id', '=', $oProperty->id);
 
-					//if (!isset($aPropertyValues['from']))
-					//{
-						// Для строк фильтр LIKE %...%
-						if ($oProperty->type == 1)
+					// Для строк фильтр LIKE %...%
+					if ($oProperty->type == 1)
+					{
+						foreach ($aPropertyValues as $propertyValue)
 						{
-							foreach ($aPropertyValues as $propertyValue)
-							{
-								$this->shopItems()->queryBuilder()
-									->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
-							}
-						}
-						else
-						{
-							// 7 - Checkbox
-							$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
-
-							// 7 - Checkbox, 3 - List
-							$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
-
-							$bCheckUnset && $this->shopItems()->queryBuilder()->open();
-
 							$this->shopItems()->queryBuilder()
-								->where(
-									$tableName . '.value',
-									count($aPropertyValues) == 1 ? $condition : 'IN',
-									count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
-								);
-
-							$bCheckUnset && $this->shopItems()->queryBuilder()
-								->setOr()
-								->where($tableName . '.value', 'IS', NULL)
-								->close();
+								->where($tableName . '.value', 'LIKE', "%{$propertyValue}%");
 						}
-
-						// Между значениями значение по AND (например, значение => 10 и значение <= 99)
-						$this->shopItems()->queryBuilder()
-							//->setOr()
-							->setAnd();
-
-						$this->_addFilterPropertyToXml($oProperty, $condition, $aPropertyValues);
-
-					/*}
+					}
 					else
 					{
-						$from = trim(Core_Array::get($aPropertyValues, 'from'));
-						$from && $this->shopItems()->queryBuilder()
-							->open()
-							->where($tableName . '.value', '>=', $from)
-							->setOr()
-							->where($tableName . '.value', 'IS', NULL)
-							->close()
-							->setAnd();
+						// 7 - Checkbox
+						$oProperty->type == 7 && $aPropertyValues[0] != '' && $aPropertyValues = array(1);
 
-						$to = trim(Core_Array::get($aPropertyValues, 'to'));
-						$to && $this->shopItems()->queryBuilder()
-							->open()
-							->where($tableName . '.value', '<=', $to)
+						// 7 - Checkbox, 3 - List
+						$bCheckUnset = $oProperty->type != 7 && $oProperty->type != 3;
+
+						$bCheckUnset && $this->shopItems()->queryBuilder()->open();
+
+						$this->shopItems()->queryBuilder()
+							->where(
+								$tableName . '.value',
+								count($aPropertyValues) == 1 ? $condition : 'IN',
+								count($aPropertyValues) == 1 ? $aPropertyValues[0] : $aPropertyValues
+							);
+
+						$bCheckUnset && $this->shopItems()->queryBuilder()
 							->setOr()
 							->where($tableName . '.value', 'IS', NULL)
 							->close();
+					}
 
-						$this->shopItems()->queryBuilder()
-							->setOr();
+					// Между значениями значение по AND (например, значение => 10 и значение <= 99)
+					$this->shopItems()->queryBuilder()->setAnd();
 
-						$this->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('property_' . $oProperty->id . '_from')->value($from)
-						)->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('property_' . $oProperty->id . '_to')->value($to)
-						);
-
-						$this
-							->addCacheSignature("property{$oProperty->id}_from={$from}")
-							->addCacheSignature("property{$oProperty->id}_to={$to}");
-					}*/
+					$this->_addFilterPropertyToXml($oProperty, $condition, $aPropertyValues);
 				}
 
 				// при смене свойства сравнение через OR
-				$this->shopItems()->queryBuilder()
-					->setOr();
+				$this->shopItems()->queryBuilder()->setOr();
 			}
 
 			$this->shopItems()->queryBuilder()
@@ -2961,6 +3405,13 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Add Filter Property to the XML
+	 * @param Property_Model $oProperty
+	 * @param string $condition
+	 * @param array $aPropertyValues
+	 * @return self
+	 */
 	protected function _addFilterPropertyToXml($oProperty, $condition, $aPropertyValues)
 	{
 		switch ($condition)
@@ -2989,6 +3440,12 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Add Filter Price to the XML
+	 * @param string $condition
+	 * @param mixed $value
+	 * @return self
+	 */
 	protected function _addFilterPriceToXml($condition, $value)
 	{
 		switch ($condition)
@@ -3012,8 +3469,16 @@ class Shop_Controller_Show extends Core_Controller
 		$this->addCacheSignature($xmlName . $condition . $value);
 	}
 
+	/**
+	 * AbsolutePrice has been added
+	 * @var boolean
+	 */
 	protected $_addedAbsolutePrice = FALSE;
 
+	/**
+	 * Add `absolute_price` to the query
+	 * @return self
+	 */
 	public function addAbsolutePrice()
 	{
 		if (!$this->_addedAbsolutePrice)
@@ -3028,6 +3493,11 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Apply `absolute_price` to the Query Builder
+	 * @param Core_QueryBuilder_Select $oQB
+	 * @return Core_QueryBuilder_Select
+	 */
 	protected function _applyAbsolutePrice($oQB)
 	{
 		$oShop = $this->getEntity();
@@ -3065,28 +3535,11 @@ class Shop_Controller_Show extends Core_Controller
 		return $oQB;
 	}
 
-	public function orderBy($column, $direction = 'ASC')
-	{
-		switch ($column)
-		{
-			case 'price':
-			case 'absolute_price':
-				$this->addAbsolutePrice();
-
-				$column = 'absolute_price';
-			break;
-		}
-
-		$this->shopItems()
-			->queryBuilder()
-			->clearOrderBy()
-			->orderBy($column, $direction);
-
-		$this->addCacheSignature('orderBy=' . $column . $direction);
-
-		return $this;
-	}
-
+	/**
+	 * Set Filter Prices Conditions by price_from and price_to
+	 * @param array $aData
+	 * @return self
+	 */
 	public function setFilterPricesConditions($aData)
 	{
 		$price_from = intval(Core_Array::get($aData, 'price_from'));
@@ -3098,6 +3551,11 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Set Filter Prices Conditions by $aData
+	 * @param array $aData
+	 * @return self
+	 */
 	public function setFilterPropertiesConditions($aData)
 	{
 		$oShop = $this->getEntity();
@@ -3130,11 +3588,55 @@ class Shop_Controller_Show extends Core_Controller
 		return $this;
 	}
 
+	/**
+	 * Get Filter Properties
+	 * @return array
+	 */
+	public function getFilterProperties()
+	{
+		return $this->_aFilterProperties;
+	}
+
+	/**
+	 * Set Filter Properties
+	 * @param array $array
+	 * @return self
+	 */
+	public function setFilterProperties(array $array)
+	{
+		$this->_aFilterProperties = $array;
+		return $this;
+	}
+
+	/**
+	 * Get Filter Prices
+	 * @return array
+	 */
+	public function getFilterPrices()
+	{
+		return $this->_aFilterPrices;
+	}
+
+	/**
+	 * Set Filter Prices
+	 * @param array $array
+	 * @return self
+	 */
+	public function setFilterPrices(array $array)
+	{
+		$this->_aFilterPrices = $array;
+		return $this;
+	}
+
+	/**
+	 * Add Producers to the XML
+	 * @return self
+	 */
 	public function addProducers()
 	{
 		$oShop = $this->getEntity();
 
-		// XML-сущность, к которй будут добавляться производители
+		// XML-сущность, к которой будут добавляться производители
 		$oProducersXmlEntity = Core::factory('Core_Xml_Entity')->name('producers');
 
 		// Добавляем XML-сущность контроллеру показа
@@ -3146,33 +3648,55 @@ class Shop_Controller_Show extends Core_Controller
 			->select('shop_producers.*')
 			->distinct()
 			->join('shop_items', 'shop_items.shop_producer_id', '=', 'shop_producers.id')
-			->where('shop_items.shop_group_id', '=', $this->group)
 			->where('shop_items.deleted', '=', 0);
 
-		$aShop_Producers = $oShop_Producers->findAll();
+		$this->group !== FALSE
+			&& $oShop_Producers->queryBuilder()->where('shop_items.shop_group_id', '=', $this->group);
+
+		!$this->modificationsList
+			&& $oShop_Producers->queryBuilder()->where('shop_items.modification_id', '=', 0);
+
+		$aProducerCounts = array();
+		if ($oShop->filter)
+		{
+			$tableName = 'shop_filter' . $oShop->id;
+			$oQueryBuilder = Core_QueryBuilder::select()
+				->clearSelect()
+				->select($tableName . '.shop_producer_id', array(Core_QueryBuilder::expression('COUNT(DISTINCT (shop_item_id))'), 'count'))
+				->from($tableName)
+				->groupBy($tableName . '.shop_producer_id');
+
+			$this->group !== FALSE
+				&& $oQueryBuilder->where($tableName . '.shop_group_id', '=', $this->group);
+
+			!$this->modificationsList
+				&& $oQueryBuilder->where($tableName . '.modification_id', '=', 0);
+
+			// Filter by properties
+			$this->applyFastFilterProperties($oQueryBuilder);
+
+			// Filter by prices
+			$this->applyFastFilterPrices($oQueryBuilder);
+
+			$aRows = $oQueryBuilder->asAssoc()->execute()->result();
+
+			foreach ($aRows as $row)
+			{
+				$aProducerCounts[$row['shop_producer_id']] = $row['count'];
+			}
+		}
+
+		$aShop_Producers = $oShop_Producers->findAll(FALSE);
 		foreach ($aShop_Producers as $oShop_Producer)
 		{
 			$oShop_Producer->clearEntities();
 
 			if ($oShop->filter)
 			{
-				$tableName = 'shop_filter' . $oShop->id;
-
-				$oQueryBuilder = Core_QueryBuilder::select()
-					->clearSelect()
-					->select(array('COUNT(*)', 'count'))
-					->from($tableName)
-					->where($tableName . '.shop_producer_id', '=', $oShop_Producer->id)
-					
-					;
-					
-				$this->group !== FALSE && $oQueryBuilder->where($tableName . '.shop_group_id', '=', $this->group);
-
-				$rows = $oQueryBuilder->asAssoc()->execute()->current();
-
 				$oShop_Producer->addEntity(
 					Core::factory('Core_Xml_Entity')
-						->name('count')->value($rows['count'])
+						->name('count')
+						->value(Core_Array::get($aProducerCounts, $oShop_Producer->id, 0))
 				);
 			}
 

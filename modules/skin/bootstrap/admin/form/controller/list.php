@@ -117,6 +117,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		{
 			$oCore_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')
 				->class('btn btn-sm btn-default margin-right-10')
+				->id('showTopFilterButton')
 				->onclick('$.toggleFilter(); $.changeFilterStatus({ path: \'' . $path . '\', show: +$(".topFilter").is(":visible") })')
 				->add(
 					Core::factory('Core_Html_Entity_I')

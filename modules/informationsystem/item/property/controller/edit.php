@@ -28,7 +28,6 @@ class Informationsystem_Item_Property_Controller_Edit extends Property_Controlle
 		$modelName = $this->_object->getModelName();
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		switch ($modelName)
 		{

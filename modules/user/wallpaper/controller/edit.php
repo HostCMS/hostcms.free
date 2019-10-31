@@ -27,7 +27,6 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
@@ -155,7 +154,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 				);
 			}
 		}
-		
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
 }

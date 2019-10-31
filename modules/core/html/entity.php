@@ -366,4 +366,44 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 		return $this;
 	}
+	
+	/**
+	 * Add Class
+	 * @param string $className
+	 * @return self
+	 */
+	public function addClass($className)
+	{
+		$aClass = explode(' ', $this->class);
+		
+		if (!in_array($className, $aClass))
+		{
+			$aClass[] = $className;
+		}
+		
+		$this->class = implode(' ', $aClass);
+		
+		return $this;
+	}
+	
+	/**
+	 * Remove Class
+	 * @param string $className
+	 * @return self
+	 */
+	public function removeClass($className)
+	{
+		$aClass = explode(' ', $this->class);
+		
+		$key = array_search($className, $aClass);
+		
+		if ($key !== FALSE)
+		{
+			unset($aClass[$key]);
+		}
+		
+		$this->class = implode(' ', $aClass);
+		
+		return $this;
+	}
 }

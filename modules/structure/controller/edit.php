@@ -170,8 +170,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$iLibId = 0;
-		$iLibDirId = 0;
+		// $iLibId = 0;
+		// $iLibDirId = 0;
 
 		$oRadio_Type = Admin_Form_Entity::factory('Radiogroup')
 			->name('type')
@@ -380,7 +380,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		ob_start();
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
-		$Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Script')
+		Core::factory('Core_Html_Entity_Script')
 			->value("$('#{$windowId} #lib_id').change();")
 			->execute();
 

@@ -56,10 +56,8 @@ class Core_Inflection_En extends Core_Inflection
 		'cactus' => 'cacti',
 		'focus' => 'foci',
 		'stimulus' => 'stimuli',
-		'focus' => 'foci',
 		'octopus' => 'octopi',
 		'radius' => 'radii',
-		'stimulus' => 'stimuli',
 		'terminus' => 'termini',
 
 		// Plural ends in -ices:
@@ -122,7 +120,6 @@ class Core_Inflection_En extends Core_Inflection
 		'tweezers' => 'tweezers',
 		'pajamas' => 'pajamas',
 		'police' => 'police',
-		'shorts' => 'shorts',
 		'glasses' => 'glasses',
 		'scissors' => 'scissors',
 		'mathematics' => 'mathematics',

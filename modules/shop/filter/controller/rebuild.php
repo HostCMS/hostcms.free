@@ -26,27 +26,52 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 		{
 			$oAdmin_Form_Controller = $this->getController();
 
-			$iLimit = intval(Core_Array::getRequest('limit', 5));
+			$position = Core_Array::getRequest('position', 0);
+			$limit = intval(Core_Array::getRequest('limit', 500));
 			$iDelay = intval(Core_Array::getRequest('delay', 1));
-			$iMaxTime = intval(Core_Array::getRequest('max_time', 20));
+			$iMaxTime = intval(Core_Array::getRequest('max_time', 10));
 
 			$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
 
-			$bCompleted = $oShop_Filter_Controller
-				->limit($iLimit)
-				->max_time($iMaxTime)
-				->position(Core_Array::getRequest('position', 0))
-				->rebuild();
-
-			// echo "<pre>";
-			// var_dump($bCompleted);
-			// echo "</pre>";
-
-			if ($bCompleted === FALSE)
+			if ($position == 0)
 			{
-				$sAdditionalParams = "limit={$iLimit}&delay={$iDelay}&max_time={$iMaxTime}&position=" . $oShop_Filter_Controller->position;
+				$oShop_Filter_Controller
+					->dropTable()
+					->createTable();
+			}
 
-				Core_Message::show(Core::_('Shop_Filter.rebuild_all_items', $oShop_Filter_Controller->position));
+			$timeout = Core::getmicrotime();
+
+			do {
+				$oShop_Items = $oShop->Shop_Items;
+				$oShop_Items->queryBuilder()
+					->limit($limit)
+					->offset($position)
+					->clearOrderBy()
+					->orderBy('shop_items.id');
+
+				$aShop_Items = $oShop_Items->findAll(FALSE);
+
+				foreach ($aShop_Items as $key => $oShop_Item)
+				{
+					$oShop_Filter_Controller->fill($oShop_Item);
+
+					if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
+					{
+						$position += $key + 1;
+						break 2;
+					}
+				}
+
+				$position += $limit;
+			}
+			while(count($aShop_Items));
+
+			if (count($aShop_Items) == $limit)
+			{
+				$sAdditionalParams = "limit={$limit}&delay={$iDelay}&max_time={$iMaxTime}&position=" . $position;
+
+				Core_Message::show(Core::_('Shop_Filter.rebuild_all_items', $position));
 
 				?>
 				<script type="text/javascript">
@@ -57,8 +82,10 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 				setTimeout ('set_location()', <?php echo $iDelay * 1000?>);
 				</script><?php
 			}
+			else
+			{
+				Core_Message::show(Core::_('Shop_Filter.rebuild_end'));
+			}
 		}
-
-		// return $this;
 	}
 }

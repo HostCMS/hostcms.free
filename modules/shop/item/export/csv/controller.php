@@ -647,7 +647,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			foreach ($aShopGroupsId as $iShopGroupId)
 			{
-				$aTmpArray = array();
+				// $aTmpArray = array();
 
 				$oShopGroup = Core_Entity::factory('Shop_Group', $iShopGroupId);
 

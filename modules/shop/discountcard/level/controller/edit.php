@@ -28,7 +28,6 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 		parent::setObject($object);
 
 		$oMainTab = $this->getTab('main');
-		$oAdditionalTab = $this->getTab('additional');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))

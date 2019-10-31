@@ -94,7 +94,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		// Далее может быть изменено
 		$this->_formValues = $_POST;
-		
+
 		$this->_Admin_Form_Entity_Form = Admin_Form_Entity::factory('Form');
 		$this->_Admin_Form_Entity_Form->id($this->_formId);
 	}
@@ -421,7 +421,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				->caption(Core::_('admin_form.form_forms_tab_2'))
 				->name('additional');
 
-			$oUser = Core_Auth::getCurrentUser();
+			// $oUser = Core_Auth::getCurrentUser();
 
 			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
 			//!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
@@ -491,7 +491,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							$oAdmin_Form_Entity_For_Column
 								->value(1)
 								->checked($this->_object->$columnName != 0);
-							
+
 							break;
 						}
 					default:
@@ -685,7 +685,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_return = TRUE;
 			break;
 			case 'modal':
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
+				// $windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				//$newWindowId = 'Modal_' . time();
 

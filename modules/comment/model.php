@@ -223,8 +223,8 @@ class Comment_Model extends Core_Entity
 	public function fulltextBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$aConfig = Core_Config::instance()->get('comment_config');
-		$gradeLimit = (isset($aConfig['gradeLimit'])) ? $aConfig['gradeLimit'] : 5;
-		
+		$gradeLimit = isset($aConfig['gradeLimit']) ? $aConfig['gradeLimit'] : 5;
+
 		ob_start();
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
@@ -258,10 +258,10 @@ class Comment_Model extends Core_Entity
 		if ($this->grade)
 		{
 			$aConfig = Comment_Controller::getConfig();
-			
+
 			Core::factory('Core_Html_Entity_Span')
 				->class('small green')
-				->value(str_repeat('★', $this->grade) . str_repeat('☆', $aConfig['gradeLimit'] - $this->grade))
+				->value(str_repeat('★', $this->grade) . str_repeat('☆', $gradeLimit - $this->grade))
 				->execute();
 		}
 

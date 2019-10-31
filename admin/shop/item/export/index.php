@@ -134,6 +134,7 @@ if (Core_Array::getPost('action') == 'export')
 					$oShop_Item_Export_Cml_Controller->group = Core_Entity::factory('Shop_Group', $shop_groups_parent_id);
 					$oShop_Item_Export_Cml_Controller->exportItemExternalProperties = !is_null(Core_Array::getPost('export_external_properties_allow_items'));
 					$oShop_Item_Export_Cml_Controller->exportItemModifications = !is_null(Core_Array::getPost('export_modifications_allow'));
+					$oShop_Item_Export_Cml_Controller->producer(Core_Array::getPost('shop_producer_id', 0));
 
 					header("Pragma: public");
 					header("Content-Description: File Transfer");
@@ -165,6 +166,7 @@ if (Core_Array::getPost('action') == 'export')
 					$oShop_Item_Export_Cml_Controller->group = Core_Entity::factory('Shop_Group', $shop_groups_parent_id);
 					$oShop_Item_Export_Cml_Controller->exportItemExternalProperties = !is_null(Core_Array::getPost('export_external_properties_allow_items'));
 					$oShop_Item_Export_Cml_Controller->exportItemModifications = !is_null(Core_Array::getPost('export_modifications_allow'));
+					$oShop_Item_Export_Cml_Controller->producer(Core_Array::getPost('shop_producer_id', 0));
 
 					header("Pragma: public");
 					header("Content-Description: File Transfer");
@@ -195,14 +197,10 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
 // Первая крошка на список магазинов
 $oAdmin_Form_Entity_Breadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/shop/index.php'
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-					'/admin/shop/index.php'
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php'))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php'))
 );
 
 // Крошки по директориям магазинов
@@ -215,14 +213,10 @@ if ($oShopDir->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShopDirBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"
-		));
-	}while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
+			->name($oShopDirBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDirBreadcrumbs->id}"));
+	} while ($oShopDirBreadcrumbs = $oShopDirBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
 
@@ -234,14 +228,10 @@ if ($oShopDir->id)
 
 // Крошка на список товаров и групп товаров магазина
 $oAdmin_Form_Entity_Breadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name($oShop->name)
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name($oShop->name)
+		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}"))
 );
 
 // Крошки по группам товаров
@@ -254,13 +244,9 @@ if ($oShopGroup->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oShopGroupBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-				'/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"
-		));
+			->name($oShopGroupBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroupBreadcrumbs->id}"));
 	} while ($oShopGroupBreadcrumbs = $oShopGroupBreadcrumbs->getParent());
 
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
@@ -273,14 +259,10 @@ if ($oShopGroup->id)
 
 // Крошка на текущую форму
 $oAdmin_Form_Entity_Breadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Shop_Item.export_shop'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-	$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-	$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Shop_Item.export_shop'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
@@ -453,7 +435,7 @@ $oMainTab->add(
 		Admin_Form_Entity::factory('Select')
 			->name("shop_producer_id")
 			->options(array(' … ') + Shop_Item_Controller_Edit::fillProducersList($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1 hidden-2 hidden-3', 'id' => 'shop_producer_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1', 'id' => 'shop_producer_id'))
 			->caption(Core::_('Shop_Item.import_price_list_producer'))
 			->value($oShopGroup->id)))
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(

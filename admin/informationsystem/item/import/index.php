@@ -34,14 +34,14 @@ $oAdmin_View
 
 // Первая крошка на список магазинов
 $oAdmin_Form_Entity_Breadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name(Core::_('Informationsystem.menu'))
-	->href($oAdmin_Form_Controller->getAdminLoadHref(
-		'/admin/informationsystem/index.php'
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-		'/admin/informationsystem/index.php'
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name(Core::_('Informationsystem.menu'))
+		->href($oAdmin_Form_Controller->getAdminLoadHref(
+			'/admin/informationsystem/index.php'
+		))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
+			'/admin/informationsystem/index.php'
+		))
 );
 
 // Крошки по директориям магазинов
@@ -94,13 +94,13 @@ if ($oInformationsystem_Group->id)
 	do
 	{
 		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
-		->name($oInformationsystemGroupBreadcrumbs->name)
-		->href($oAdmin_Form_Controller->getAdminLoadHref(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
-		))
-		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
-			'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
-		));
+			->name($oInformationsystemGroupBreadcrumbs->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref(
+				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+			))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
+				'/admin/informationsystem/item/index.php', NULL, NULL, "informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$oInformationsystemGroupBreadcrumbs->id}"
+			));
 	}
 	while ($oInformationsystemGroupBreadcrumbs = $oInformationsystemGroupBreadcrumbs->getParent());
 

@@ -20,13 +20,15 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 // Идентификатор страны
 $iShopCountryId = intval(Core_Array::getGet('shop_country_id', 0));
 
+$pageTitle = Core::_('Shop_Country_Location.show_location_title', Core_Entity::factory('Shop_Country', $iShopCountryId)->name);
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title($pageTitle = Core::_('Shop_Country_Location.show_location_title', Core_Entity::factory('Shop_Country', $iShopCountryId)->name))
+	->title($pageTitle)
 	->pageTitle($pageTitle);
 
 // Меню формы

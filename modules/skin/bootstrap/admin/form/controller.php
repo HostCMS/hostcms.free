@@ -254,7 +254,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		?><label><?php
 
-		$oCore_Html_Entity_Select = Core::factory('Core_Html_Entity_Select')
+		Core::factory('Core_Html_Entity_Select')
 			->class('form-control input-sm')
 			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
@@ -323,8 +323,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 */
 	public function pageNavigation()
 	{
-		$oAdmin_Form = $this->getAdminForm();
-
 		$total_count = $this->getTotalCount();
 		$total_page = $total_count / $this->limit;
 

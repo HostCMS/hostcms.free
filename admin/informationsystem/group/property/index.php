@@ -281,6 +281,48 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Перенести"
+$oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('move');
+
+if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
+{
+	$Admin_Form_Action_Controller_Type_Move = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Move', $oAdminFormActionMove
+	);
+
+	$Admin_Form_Action_Controller_Type_Move
+		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
+		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
+		->value($property_dir_id);
+
+	$linkedObject = Core_Entity::factory('Informationsystem_Group_Property_List', $informationsystem_id);
+
+	$aExclude = array();
+
+	$aChecked = $oAdmin_Form_Controller->getChecked();
+
+	foreach ($aChecked as $datasetKey => $checkedItems)
+	{
+		// Exclude just dirs
+		if ($datasetKey == 0)
+		{
+			foreach ($checkedItems as $key => $value)
+			{
+				$aExclude[] = $key;
+			}
+		}
+	}
+
+	$Admin_Form_Action_Controller_Type_Move
+		// Список директорий генерируется другим контроллером
+		->selectOptions(array(' … ') + Property_Controller_Edit::fillPropertyDir($linkedObject, 0, $aExclude));
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Property_Dir')

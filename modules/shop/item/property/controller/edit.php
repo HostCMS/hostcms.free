@@ -92,7 +92,7 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 							7 => Core::_('Shop_Item.properties_show_kind_listbox'),
 							5 => Core::_('Shop_Item.properties_show_kind_checkbox_one'),
 							6 => Core::_('Shop_Item.properties_show_kind_from_to')
-							// 8 => 
+							// 8 =>
 						)
 					)
 					->name('filter')
@@ -158,47 +158,66 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 				$Shop_Item_Property->show_in_item = intval(Core_Array::getPost('show_in_item'));
 				$Shop_Item_Property->save();
 
-			if (Core_Array::getPost('add_value'))
-			{
-				$offset = 0;
-				$limit = 100;
+				// Fast filter
+				if ($this->linkedObject->filter)
+				{
+					$Shop_Filter_Controller = new Shop_Filter_Controller($this->linkedObject);
 
-				do {
-					$oShop_Items = $Shop_Item_Property->Shop->Shop_Items;
+					$filter = intval(Core_Array::get($this->_formValues, 'filter'));
 
-					$oShop_Items
-						->queryBuilder()
-						->clearOrderBy()
-						->orderBy('id', 'ASC')
-						->offset($offset)->limit($limit);
-
-					$aShop_Items = $oShop_Items->findAll(FALSE);
-
-					foreach ($aShop_Items as $oShop_Item)
+					if ($filter)
 					{
-						$aProperty_Values = $this->_object->getValues($oShop_Item->id, FALSE);
-
-						if (!count($aProperty_Values))
-						{
-							$oProperty_Value = $this->_object->createNewValue($oShop_Item->id);
-
-							switch ($this->_object->type)
-							{
-								case 2: // Файл
-								break;
-								default:
-									$oProperty_Value->value($this->_object->default_value);
-							}
-
-							$oProperty_Value->save();
-						}
+						!$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
+							&& $Shop_Filter_Controller->addProperty($this->_object);
 					}
-
-					$offset += $limit;
+					else
+					{
+						$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
+							&& $Shop_Filter_Controller->removeProperty($this->_object);
+					}
 				}
 
-				while (count($aShop_Items));
-			}
+				if (Core_Array::getPost('add_value'))
+				{
+					$offset = 0;
+					$limit = 100;
+
+					do {
+						$oShop_Items = $Shop_Item_Property->Shop->Shop_Items;
+
+						$oShop_Items
+							->queryBuilder()
+							->clearOrderBy()
+							->orderBy('id', 'ASC')
+							->offset($offset)->limit($limit);
+
+						$aShop_Items = $oShop_Items->findAll(FALSE);
+
+						foreach ($aShop_Items as $oShop_Item)
+						{
+							$aProperty_Values = $this->_object->getValues($oShop_Item->id, FALSE);
+
+							if (!count($aProperty_Values))
+							{
+								$oProperty_Value = $this->_object->createNewValue($oShop_Item->id);
+
+								switch ($this->_object->type)
+								{
+									case 2: // Файл
+									break;
+									default:
+										$oProperty_Value->value($this->_object->default_value);
+								}
+
+								$oProperty_Value->save();
+							}
+						}
+
+						$offset += $limit;
+					}
+
+					while (count($aShop_Items));
+				}
 
 			break;
 			case 'property_dir':

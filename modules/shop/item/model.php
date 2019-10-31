@@ -551,6 +551,13 @@ class Shop_Item_Model extends Core_Entity
 			//$this->save();
 			$this->clearCache();
 
+			// Fast filter
+			if ($this->Shop->filter)
+			{
+				$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+				$Shop_Filter_Controller->fill($this);
+			}
+
 			Core_Event::notify($this->_modelName . '.onAfterAdminPrice', $this);
 		}
 
@@ -1024,6 +1031,13 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->shop_group_id = $iShopGroupId;
 		$this->save()->clearCache();
+		
+		// Fast filter
+		if ($this->Shop->filter)
+		{
+			$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+			$Shop_Filter_Controller->fill($this);
+		}
 
 		$iShopGroupId && $oShop_Group->incCountItems();
 
@@ -2157,6 +2171,22 @@ class Shop_Item_Model extends Core_Entity
 								)
 						);
 
+						// Parent item for modification
+						if ($oShop_Item->modification_id)
+						{
+							$oModification = Core_Entity::factory('Shop_Item')->find($oShop_Item->modification_id);
+							if (!is_null($oModification->id))
+							{
+								$oTmp_Modification = clone $oModification;
+								$oTmp_Shop_Item->addEntity(
+									$oTmp_Modification
+										->id($oModification->id)
+										->showXmlProperties($this->_showXmlProperties)
+										->showXmlAssociatedItems($this->_showXmlAssociatedItems)
+								);
+							}
+						}
+
 						Core_Event::notify($this->_modelName . '.onAfterAddSetEntity', $this, array($oTmp_Shop_Item, $oSetEntity));
 					}
 					else
@@ -2353,7 +2383,7 @@ class Shop_Item_Model extends Core_Entity
 				{
 					$oShop_Item_Associated_Original->shortcut_id
 						&& $oShop_Item_Associated_Original = Core_Entity::factory('Shop_Item', $oShop_Item_Associated_Original->shortcut_id);
-					
+
 					if ($oShop_Item_Associated_Original->id != $this->id)
 					{
 						// Сопутствующий товар может быть в списке, соответственное его модификации не выведутся из-за запрета на вывод модификаций для сопутствующих
@@ -2857,22 +2887,19 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Recount set
-	 * @return self
-	 * @hostcms-event shop_item.onRecountSetItem
-	 * @hostcms-event shop_item.onAfterRecountSet
+	 * Get price of set
+	 * @return decimal
+	 * @hostcms-event shop_item.onAfterGetSetPrice
 	 */
-	public function recountSet()
+	public function getSetPrice()
 	{
+		$amount = 0;
+
 		if ($this->shop_currency_id)
 		{
 			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
 
 			$Shop_Item_Controller = new Shop_Item_Controller();
-
-			$amount = 0;
-
-			//$aAvailableRest = array();
 
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
@@ -2888,32 +2915,16 @@ class Shop_Item_Model extends Core_Entity
 
 					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
 				}
-				else
-				{
-					throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $oTmp_Shop_Item->id, $oTmp_Shop_Item->name));
-				}
-
-				// Check warehouses rest
-				// Товары могут быть с разных складов, автоматически пересчитывать остатки нельзя.
-				/*if ($oShop_Item_Set->count > 0)
-				{
-					$aAvailableRest[] = floor($oTmp_Shop_Item->getRest() / $oShop_Item_Set->count);
-				}*/
-
-				Core_Event::notify($this->_modelName . '.onRecountSetItem', $this, array($oShop_Item_Set));
 			}
-
-			$this->price = $amount;
-			$this->save();
-
-			Core_Event::notify($this->_modelName . '.onAfterRecountSet', $this);
 		}
 		else
 		{
 			throw new Core_Exception(Core::_('Shop_Item.shop_item_set_not_currency', $this->id, $this->name));
 		}
 
-		return $this;
+		Core_Event::notify($this->_modelName . '.onAfterGetSetPrice', $this, array($amount));
+
+		return $amount;
 	}
 
 	/**

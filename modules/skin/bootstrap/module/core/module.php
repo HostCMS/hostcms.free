@@ -248,9 +248,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 						}
 						else
 						{
-							$oModalWindowSub->value(
-								Core_Message::get(Core::_('Admin.index_error_open_log') . $file_name, 'error')
-							);
+							Core_Message::show(Core::_('Admin.index_error_open_log') . $file_name, 'error');
 						}
 					}
 					?>

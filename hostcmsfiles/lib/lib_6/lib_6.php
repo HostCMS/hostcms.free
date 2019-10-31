@@ -43,12 +43,12 @@ if ($Shop_Controller_Show->item == 0)
 
 		// Sorting
 		$sorting = intval(Core_Array::getGet('sorting'));
-		
+
 		($sorting == 1 || $sorting == 2)
 			&& $Shop_Controller_Show->orderBy('absolute_price', $sorting == 1 ? 'ASC' : 'DESC');
 
 		$sorting == 3 && $Shop_Controller_Show->orderBy('shop_items.name', 'ASC');
-		
+
 		$Shop_Controller_Show->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('sorting')->value($sorting)
@@ -210,37 +210,16 @@ else
 	}
 }
 
-// Производители
-/*$oShop = $Shop_Controller_Show->getEntity();
-
-// XML-сущность, к которй будут добавляться производители
-$oProducersXmlEntity = Core::factory('Core_Xml_Entity')->name('producers');
-
-// Добавляем XML-сущность контроллеру показа
-$Shop_Controller_Show->addEntity($oProducersXmlEntity);
-
-// Список производителей
-$oShop_Producers = $oShop->Shop_Producers;
-$oShop_Producers->queryBuilder()
-	->select('shop_producers.*')
-	->distinct()
-	->join('shop_items', 'shop_items.shop_producer_id', '=', 'shop_producers.id')
-	->where('shop_items.shop_group_id', '=', $Shop_Controller_Show->group)
-	->where('shop_items.deleted', '=', 0);
-
-$aShop_Producers = $oShop_Producers->findAll();
-foreach ($aShop_Producers as $oShop_Producer)
-{
-	// Добавляем производителя потомком XML-сущности
-	$oProducersXmlEntity->addEntity(
-		$oShop_Producer->clearEntities()
-	);
-}*/
-
 // В корне выводим из всех групп
 if ($Shop_Controller_Show->group == 0)
 {
 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
+}
+
+// При фильтрации модификации выводятся на уровне товаров
+if (count($Shop_Controller_Show->getFilterProperties()) || count($Shop_Controller_Show->getFilterPrices()))
+{
+	$Shop_Controller_Show->modificationsList(TRUE);
 }
 
 $Shop_Controller_Show

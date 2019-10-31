@@ -43,23 +43,32 @@ $oAdmin_Form_Entity_Menus->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.optimize_table'))
 				->icon('fa fa-database')
-				//->img('/admin/images/database_refresh.gif')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sOptimizePath, '', NULL, 0, 0)
+					$oAdmin_Form_Controller->getAdminLoadHref($sOptimizePath, '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sOptimizePath, '', NULL, 0, 0)
+					$oAdmin_Form_Controller->getAdminLoadAjax($sOptimizePath, '', NULL)
 				)
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.repair_table'))
 				->icon('fa fa-wrench')
-				//->img('/admin/images/database_error.gif')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sRepairPath, '', NULL, 0, 0)
+					$oAdmin_Form_Controller->getAdminLoadHref($sRepairPath, '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sRepairPath, '', NULL, 0, 0)
+					$oAdmin_Form_Controller->getAdminLoadAjax($sRepairPath, '', NULL)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Sql.duplicate_indexes'))
+				->icon('fa fa-key')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/index.php', 'duplicate', NULL)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/index.php', 'duplicate', NULL)
 				)
 		)
 );
@@ -74,10 +83,83 @@ $oAdmin_Form_Entity_Menus->add(
 	<div class="clear"></div>
 </div>
 <?php
-$iCount = 0;
+
+$formSettings = Core_Array::getPost('hostcms', array())
+	+ array(
+		'action' => NULL,
+		'window' => 'id_content',
+	);
+
+if ($formSettings['action'] == 'duplicate')
+{
+	$iCount = 0;
+
+	$oCore_DataBase = Core_DataBase::instance();
+
+	$oCore_DataBase->setQueryType(9)
+			->query('SHOW TABLE STATUS');
+
+	$aRows = $oCore_DataBase->asObject()->result();
+
+	foreach ($aRows as $row)
+	{
+		$sTableName = $oCore_DataBase->quoteColumnName($row->Name);
+
+		try
+		{
+			// Проверка на дублирующиеся индексы
+			$aTableIndexes = $oCore_DataBase
+				->setQueryType(NULL)
+				->query("SHOW INDEX FROM {$sTableName}")
+				->asAssoc()->result();
+
+			$aIndexes = array();
+			foreach ($aTableIndexes as $aIndex)
+			{
+				$aIndexes[$aIndex['Key_name']][] = $aIndex['Column_name'];
+			}
+
+			while ($aIndexRow1 = array_shift($aIndexes))
+			{
+				$aToDelete = array();
+
+				foreach ($aIndexes as $aIndexKey2 => $aIndexRow2)
+				{
+					$aArray_intersect = array_intersect($aIndexRow1, $aIndexRow2);
+
+					// Пересеченный массив идентичен двум исходным
+					if (count($aArray_intersect) == count($aIndexRow1) && count($aArray_intersect) == count($aIndexRow2))
+					{
+						!in_array($aIndexKey2, $aToDelete) && $aToDelete[] = $aIndexKey2;
+					}
+				}
+
+				foreach ($aToDelete as $sIndexName)
+				{
+					Core_Message::show(Core::_('Sql.drop_index', $sIndexName, $row->Name), 'info');
+
+					$oCore_DataBase->setQueryType(5)
+						->query("ALTER TABLE {$sTableName} DROP INDEX " . $oCore_DataBase->quoteColumnName($sIndexName));
+
+					$iCount++;
+				}
+			}
+		}
+		catch (Exception $e)
+		{
+			Core_Message::show($e->getMessage(), 'error');
+		}
+	}
+
+	if ($iCount == 0)
+	{
+		Core_Message::show(Core::_('Sql.no_duplicate'), 'info');
+	}
+}
 
 $sText = Core_Array::getPost('text');
 
+$iCount = 0;
 try
 {
 	// Текущий пользователь

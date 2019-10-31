@@ -36,7 +36,7 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 
 		Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oCore_Response
 			->status(503)
 			->header('Content-Type', "text/html; charset=UTF-8")
@@ -48,10 +48,6 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 		$title = "Сайт {$domain} отключен администратором и в данный момент недоступен!";
 
 		ob_start();
-		$oSkin = Core_Skin::instance()
-			->title($title)
-			->header();
-
 		$oSkin = Core_Skin::instance()
 			->title($title)
 			->setMode('authorization')

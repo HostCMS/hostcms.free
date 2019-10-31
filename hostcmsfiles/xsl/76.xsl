@@ -104,13 +104,12 @@
 
 	<!-- Order Template -->
 	<xsl:template match="shop_order">
-
 		<p>
 			<xsl:if test="company != ''">
 				&labelCompany; <xsl:value-of select="company" /><br />
 			</xsl:if>
 
-	&labelName; <xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/><br />
+			&labelName; <xsl:value-of select="surname"/><xsl:text> </xsl:text><xsl:value-of select="name"/><xsl:text> </xsl:text><xsl:value-of select="patronymic"/><br />
 
 			&labelEmail; <xsl:value-of select="email" /><br />
 
@@ -178,6 +177,11 @@
 				&labelSystemInfo; <xsl:value-of select="shop_order_system_information" /><br />
 			</xsl:if>
 		</p>
+		
+		<!-- UTM, Openstat, From -->
+		<xsl:if test="source/node()">
+			<p>Service: <xsl:value-of select="service"/>, campaign: <xsl:value-of select="campaign"/>, ad: <xsl:value-of select="ad"/>, source: <xsl:value-of select="source"/>, medium: <xsl:value-of select="medium"/>, content: <xsl:value-of select="content"/>, term: <xsl:value-of select="term"/>.</p>
+		</xsl:if>
 	</xsl:template>
 
 	<!-- Ordered Item Template -->
