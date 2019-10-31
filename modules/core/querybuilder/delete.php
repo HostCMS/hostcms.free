@@ -10,7 +10,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * <code>
  * // DELETE FROM `tableName` WHERE `column1` = '17'
  * $delete = Core_QueryBuilder::delete('tableName')
- * 		->where('column1', '=', '17');
+ * 		->where('column1', '=', '17')
+ * 		->execute();
  * </code>
  *
  * <code>
@@ -175,7 +176,7 @@ class Core_QueryBuilder_Delete extends Core_QueryBuilder_Selection
 			$query[] = 'IGNORE';
 		}
 
-		$aQuoteColumns = $this->quoteColumns($this->_tableName);
+		$aQuoteColumns = $this->_quoteTables($this->_tableName);
 
 		// Delte from first table when using JOIN
 		if (!empty($this->_join))

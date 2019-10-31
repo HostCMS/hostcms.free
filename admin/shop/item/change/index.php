@@ -163,7 +163,8 @@ $oMainTab
 	);
 
 // Получение списка скидок
-$aDiscounts = array();
+$aDiscounts = array('...');
+
 $aShop_Discounts = $oShop->Shop_Discounts->findAll(FALSE);
 foreach ($aShop_Discounts as $oShop_Discount)
 {
@@ -239,14 +240,13 @@ $oAdmin_Form_Entity_Form
 		->onclick($oAdmin_Form_Controller->getAdminSendForm('do_accept_new_price'))
 	);
 
-$oUser = Core_Entity::factory('User')->getCurrent();
+$oUser = Core_Auth::getCurrentUser();
 
 if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 {
 	if (!$oUser->read_only)
 	{
 		$increase_price_rate = Core_Array::getPost('increase_price_rate');
-		// Shop_Controller::instance()->convertFloat нельзя использовать, т.к. может быть ведущий минус -1.0 => .1.0
 		$increase_price_rate = str_replace(',', '.', $increase_price_rate);
 
 		$multiply_price_rate = Core_Array::getPost('multiply_price_rate');
@@ -292,11 +292,11 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 					->from('shop_items')
 					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.shortcut_id', '=', 0)
 					->clearOrderBy()
 					->orderBy('shop_items.id', 'ASC')
 					->limit($limit)
-					->offset($offset)
-					;
+					->offset($offset);
 
 				// Учитывать модификации не установлено
 				!$bIncludeModifications
@@ -332,6 +332,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 					->set('shop_specialprices.price', Core_QueryBuilder::expression('`shop_specialprices`.`price` * ' . Core_DataBase::instance()->quote($multiply_price_rate)))
 					->join('shop_items', 'shop_specialprices.shop_item_id', '=', 'shop_items.id')
 					->where('shop_items.shop_id', '=', $oShop->id)
+					->where('shop_items.shortcut_id', '=', 0)
 					->where('shop_items.deleted', '=', 0);
 
 				// Учитывать модификации не установлено
@@ -355,7 +356,8 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 			$oShop_Items = Core_Entity::factory('Shop', $oShop->id)->Shop_Items;
 			$oShop_Items
 				->queryBuilder()
-				->where('modification_id', '=', 0);
+				->where('modification_id', '=', 0)
+				->where('shortcut_id', '=', 0);
 
 			$iParentGroup
 				&& $oShop_Items->queryBuilder()->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));

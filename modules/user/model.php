@@ -133,8 +133,8 @@ class User_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
 
@@ -165,6 +165,7 @@ class User_Model extends Core_Entity
 	 */
 	public function getCurrent()
 	{
+		Core_Session::hasSessionId() && Core_Session::start();
 		if (isset($_SESSION['current_users_id']))
 		{
 			$oUser = $this->find(intval($_SESSION['current_users_id']));
@@ -443,7 +444,7 @@ class User_Model extends Core_Entity
 	 */
 	public function markDeleted()
 	{
-		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oCurrentUser = Core_Auth::getCurrentUser();
 		if (!$oCurrentUser || $oCurrentUser->id != $this->id)
 		{
 			parent::markDeleted();
@@ -571,7 +572,7 @@ class User_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeChangeActive', $this);
 
-		$oCurrentUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oCurrentUser = Core_Auth::getCurrentUser();
 
 		if (!$this->active
 			|| (!$oCurrentUser || $oCurrentUser->id != $this->id)
@@ -673,6 +674,25 @@ class User_Model extends Core_Entity
 			->where('company_department_post_users.head', '=', intval($isHead));
 
 		return $oCompany_Department_Posts->findAll();
+	}
+
+	/**
+	 * Get company posts for user by company
+	 * @return array
+	 */
+	public function getCompanyPostsByCompany($iCompanyId, $isHead = NULL)
+	{
+		$oCompany_Posts = $this->Company_Posts; //->getAllByCompany_department_id($iDepartmentId);
+		$oCompany_Posts
+			->queryBuilder()
+			->where('company_department_post_users.company_id', '=', $iCompanyId);
+
+		!is_null($isHead)
+			&& $oCompany_Posts
+			->queryBuilder()
+			->where('company_department_post_users.head', '=', intval($isHead));
+
+		return $oCompany_Posts->findAll();
 	}
 
 	/**
@@ -1008,14 +1028,13 @@ class User_Model extends Core_Entity
 			foreach ($aCompany_Departments as $oCompany_Department)
 			{
 				do {
-					// ID департамента, в котором работает $oEmployee входит в перечень, в которой $this глава
+					// ID департамента, в котором работает $oEmployee входит в перечень, в котором $this глава
 					if (in_array($oCompany_Department->id, $aHeadOfDepartmentsIDs))
 					{
 						return TRUE;
 					}
 				} while($oCompany_Department = $oCompany_Department->getParent());
 			}
-
 		}
 
 		return FALSE;
@@ -1041,11 +1060,130 @@ class User_Model extends Core_Entity
 		return FALSE;
 	}
 
+	/**
+	 * Может ли авторизованный сотрудник менять права доступа к сделке для определенного сотрудника
+	 * @param $oUser сотрудник
+	 * @return boolean
+	 */
+	public function hasAccessChangeDealPermissions4User($oUser)
+	{
+		return $this->isHeadOfEmployee($oUser);
+	}
+
+	/**
+	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в отдел
+	 * @param $oDepartment отдел
+	 * @return boolean
+	 */
+	/* public function hasEditEmployeeInDepartment($oDepartment)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в любом отделе компании
+	 * @param $oCompany компания
+	 * @return boolean
+	 */
+	/* public function hasEditEmployeeInCompany($oCompany)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+
+	/**
+	 * Может ли сотрудник изменять организационную структуру отдела - добавлять,
+	 * редактировать, удалять подотделы, менять их подчиненность
+	 * @param $oDepartment отдел
+	 * @return boolean
+	 */
+	/* public function hasEditDepartmentStructure($oDepartment)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Может ли сотрудник изменять организационную структуру компании (любого ее отдела) - добавлять, редактировать,
+	 * удалять отделы, менять их подчиненность
+	 * @param $oCompany компания
+	 * @return boolean
+	 */
+/* 	public function hasEditCompanyStructure($oCompany)
+	{
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		$bReturn = FALSE;
+
+		return $bReturn;
+	} */
+
+	/**
+	 * Есть ли отдел, организационную структуру которого сотрудник может менять
+	 * @param $iCompanyId идентификатор компании
+	 * @return boolean
+	 */
+	/* public function hasExistEditableDepartment($oCompany)
+	{
+		if ($this->hasEditCompanyStructure($oCompany))
+		{
+			return TRUE;
+		}
+
+		$aCompany_Departments = $oCompany->Company_Departments->findAll();
+
+		foreach($aCompany_Departments as $oCompany_Department)
+		{
+			if ($this->hasEditDepartmentStructure($oCompany_Department))
+			{
+				return TRUE;
+			}
+		}
+
+		return FALSE;
+	} */
+
 	public function getEmail()
 	{
 		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
 		return isset($aDirectory_Emails[0])
 			? $aDirectory_Emails[0]->value
 			: NULL;
+	}
+
+	/**
+	 * Show avatar with name
+	 */
+	public function showAvatarWithName()
+	{
+		?><div class="contracrot">
+			<div class="user-image"><img class="contracrot-ico" src="<?php echo $this->getAvatar()?>"></div>
+			<div class="user-name">
+				<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($this->getFullName())?></a>
+			</div>
+		</div><?php
 	}
 }

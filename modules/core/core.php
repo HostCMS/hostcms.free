@@ -137,13 +137,12 @@ class Core
 
 		// Если есть ID сессии и сессия еще не запущена - то стартуем ее
 		// Запускается здесь для получения языка из сессии.
-		/* && !isset($_SESSION)*/
-		(isset($_REQUEST[session_name()]) || isset($_COOKIE[session_name()])) && Core_Session::start();
+		//Core_Session::hasSessionId() && Core_Session::start();
 
 		self::$_logged = Core_Auth::logged();
 
 		// Before _loadModuleList()
-		if (isset($_REQUEST['lng_value']) && self::$_logged)
+		if (self::$_logged && isset($_REQUEST['lng_value']))
 		{
 			Core_Auth::setCurrentLng($_REQUEST['lng_value']);
 		}
@@ -180,7 +179,8 @@ class Core
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
 			),
-			'backendSessionLifetime' => 14400
+			'backendSessionLifetime' => 14400,
+			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'"
 		);
 	}
 
@@ -664,7 +664,7 @@ class Core
 	 */
 	static public function checkPanel()
 	{
-		return (!defined('ALLOW_PANEL') || ALLOW_PANEL) && Core_Session::isStarted() && Core_Auth::logged();
+		return (!defined('ALLOW_PANEL') || ALLOW_PANEL) && Core_Auth::logged();
 	}
 
 	/**
@@ -687,6 +687,29 @@ class Core
 		/*list($usec, $sec) = explode(' ', microtime());
 		return ((float)$usec + (float)$sec);*/
 		return microtime(TRUE);
+	}
+
+	/**
+	 * Generate an unique ID
+	 * @param int $bytes default 16
+	 * @return string
+	 */
+	static public function generateUniqueId($bytes = 16)
+	{
+		if (function_exists('openssl_random_pseudo_bytes'))
+		{
+			$raw = openssl_random_pseudo_bytes($bytes);
+		}
+		elseif (function_exists('random_bytes'))
+		{
+			$raw = random_bytes($bytes);
+		}
+		else
+		{
+			$raw = hash($bytes == 16 ? 'md5' : 'sha256', uniqid(strval(mt_rand()), TRUE), TRUE);
+		}
+			
+		return bin2hex($raw);
 	}
 
 	/**

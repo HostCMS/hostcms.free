@@ -159,9 +159,18 @@ class Core_Config
 		}
 	}
 	
+	/**
+	 * Escape key or value
+	 * @param mixed
+	 * @return mixed
+	 */
 	protected function _escape($value)
 	{
-		if (is_string($value))
+		if (is_int($value) || is_float($value))
+		{
+			return $value;
+		}
+		elseif (is_string($value))
 		{
 			return "'" . str_replace("'", "\'", $value) . "'";
 		}

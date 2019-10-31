@@ -58,7 +58,7 @@ class Site_Model extends Core_Entity
 	protected $_hasMany = array(
 		'affiliate_plan' => array(),
 		'advertisement' => array(),
-		'advertisement_group' => array(),		
+		'advertisement_group' => array(),
 		'cloud' => array(),
 		'company_department_action_access' => array(),
 		'company_department_module' => array(),
@@ -105,7 +105,9 @@ class Site_Model extends Core_Entity
 		'structure_property_dir' => array(),
 		'structure_menu' => array(),
 		'template' => array(),
-		'template_dir' => array(),		
+		'template_dir' => array(),
+		'shortlink' => array(),
+		'shortlink_dir' => array(),
 	);
 
 	/**
@@ -166,8 +168,8 @@ class Site_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
 
@@ -319,6 +321,12 @@ class Site_Model extends Core_Entity
 			$this->Company_Sites->deleteAll(FALSE);
 			$this->Company_Department_Action_Accesses->deleteAll(FALSE);
 			$this->Company_Department_Modules->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('shortlink'))
+		{
+			$this->Shortlinks->deleteAll(FALSE);
+			$this->Shortlink_Dirs->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);

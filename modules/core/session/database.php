@@ -128,23 +128,25 @@ class Core_Session_Database extends Core_Session
 	{
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
+			$value = base64_encode($value);
+			
 			$oDataBase = Core_QueryBuilder::update('sessions')
 				//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
-				->set('value', base64_encode($value))
+				->set('value', $value)
 				->set('time', time())
 				->where('id', '=', $id)
 				->execute();
 
 			// Returns the number of rows affected by the last SQL statement
 			// If nothing's really was changed affected rowCount will return 0.
-			if ($oDataBase->getAffectedRows() == 0)
+			if ($oDataBase->getAffectedRows() == 0 && $value != '')
 			{
 				$maxlifetime = self::getMaxLifeTime();
 
 				Core_QueryBuilder::insert('sessions')
 					->ignore()
 					->columns('id', 'value', 'time', 'maxlifetime')
-					->values($id, base64_encode($value), time(), $maxlifetime)
+					->values($id, $value, time(), $maxlifetime)
 					->execute();
 			}
 

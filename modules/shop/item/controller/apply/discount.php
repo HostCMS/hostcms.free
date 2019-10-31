@@ -87,7 +87,8 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 
 			$oAdmin_Form_Entity_Select_Discount_Checkbox = Admin_Form_Entity::factory('Checkbox')
 				->name('flag_delete_discount')
-				->caption(Core::_('Shop_Item.flag_delete_discount'));
+				->caption(Core::_('Shop_Item.flag_delete_discount'))
+				->class('form-control colored-danger times');
 
 			$oCore_Html_Entity_Form
 				->add($oAdmin_Form_Entity_Select_Discount)
@@ -112,12 +113,18 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 					->caption(Core::_('Shop_Item.bonus_select_caption'))
 					->controller($window_Admin_Form_Controller);
 
+				$oAdmin_Form_Entity_Select_Bounus_Modifications_Checkbox = Admin_Form_Entity::factory('Checkbox')
+					->name('flag_bonus_include_modifications')
+					->caption(Core::_('Shop_Item.flag_bonus_include_modifications'));
+
 				$oAdmin_Form_Entity_Select_Bonus_Checkbox = Admin_Form_Entity::factory('Checkbox')
 					->name('flag_delete_bonus')
-					->caption(Core::_('Shop_Item.flag_delete_bonus'));
+					->caption(Core::_('Shop_Item.flag_delete_bonus'))
+					->class('form-control colored-danger times');
 
 				$oCore_Html_Entity_Form
 					->add($oAdmin_Form_Entity_Select_Bonus)
+					->add($oAdmin_Form_Entity_Select_Bounus_Modifications_Checkbox)
 					->add($oAdmin_Form_Entity_Select_Bonus_Checkbox);
 			}
 
@@ -170,7 +177,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 
 			Core::factory('Core_Html_Entity_Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 300, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 350, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -219,15 +226,29 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			{
 				$oShop_Bonus = Core_Entity::factory('Shop_Bonus', $iBonusID);
 
-				if (!is_null(Core_Array::getPost('flag_delete_bonus')))
+				$aBonusObjects = array($oShop_Item);
+
+				if (!is_null(Core_Array::getPost('flag_bonus_include_modifications')))
 				{
-					$oShop_Item->remove($oShop_Bonus);
+					$aBonusModifications = $oShop_Item->Modifications->findAll(FALSE);
+					foreach ($aBonusModifications as $oBonusModification)
+					{
+						$aBonusObjects[] = $oBonusModification;
+					}
 				}
-				else
+
+				foreach ($aBonusObjects as $oShop_Item)
 				{
-					// Устанавливаем бонус товару
-					$oShop_Item->add($oShop_Bonus)
-						&& is_null($oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($iBonusID));
+					if (!is_null(Core_Array::getPost('flag_delete_bonus')))
+					{
+						$oShop_Item->remove($oShop_Bonus);
+					}
+					else
+					{
+						// Устанавливаем бонус товару
+						$oShop_Item->add($oShop_Bonus)
+							&& is_null($oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($iBonusID));
+					}
 				}
 			}
 

@@ -46,8 +46,8 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['posted'] = 1;
 		}
@@ -74,10 +74,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 	{
 		ob_start();
 
-		// Ответственный по сделке
-		$oUser = $this->User;
-
-		echo '<div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="' . $oUser->getAvatar() .'" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div></div>';
+		$this->User->id && $this->User->showAvatarWithName();
 
 		return ob_get_clean();
 	}
@@ -148,33 +145,51 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 
 			unset($aShop_Warehouse_Entries);
 
-			$aShop_Warehouse_Incoming_Items = $this->Shop_Warehouse_Incoming_Items->findAll(FALSE);
-			foreach ($aShop_Warehouse_Incoming_Items as $oShop_Warehouse_Incoming_Item)
-			{
-				if (isset($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]) && count($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]))
+			$limit = 500;
+			$offset = 0;
+
+			do {
+				$oShop_Warehouse_Incoming_Items = $this->Shop_Warehouse_Incoming_Items;
+				$oShop_Warehouse_Incoming_Items->queryBuilder()
+					->limit($limit)
+					->offset($offset)
+					->clearOrderBy()
+					->orderBy('id', 'ASC');
+
+				$aShop_Warehouse_Incoming_Items = $oShop_Warehouse_Incoming_Items->findAll(FALSE);
+				foreach ($aShop_Warehouse_Incoming_Items as $oShop_Warehouse_Incoming_Item)
 				{
-					$oShop_Warehouse_Entry = array_unshift($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]);
-				}
-				else
-				{
-					$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-					$oShop_Warehouse_Entry->setDocument($this->id, 1);
-					$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Incoming_Item->shop_item_id;
+					// Удаляем все накопительные значения с датой больше, чем дата документа
+					Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Incoming_Item->shop_item_id, $oShop_Warehouse->id, $this->datetime);
+
+					if (isset($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]) && count($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]))
+					{
+						$oShop_Warehouse_Entry = array_unshift($aTmp[$oShop_Warehouse_Incoming_Item->shop_item_id]);
+					}
+					else
+					{
+						$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
+						$oShop_Warehouse_Entry->setDocument($this->id, 1);
+						$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Incoming_Item->shop_item_id;
+					}
+
+					$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
+					$oShop_Warehouse_Entry->datetime = $this->datetime;
+					$oShop_Warehouse_Entry->value = $oShop_Warehouse_Incoming_Item->count;
+					$oShop_Warehouse_Entry->save();
+
+					$rest = $oShop_Warehouse->getRest($oShop_Warehouse_Incoming_Item->shop_item_id);
+
+					if (!is_null($rest))
+					{
+						// Recount
+						$oShop_Warehouse->setRest($oShop_Warehouse_Incoming_Item->shop_item_id, $rest);
+					}
 				}
 
-				$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
-				$oShop_Warehouse_Entry->datetime = $this->datetime;
-				$oShop_Warehouse_Entry->value = $oShop_Warehouse_Incoming_Item->count;
-				$oShop_Warehouse_Entry->save();
-
-				$rest = $oShop_Warehouse->getRest($oShop_Warehouse_Incoming_Item->shop_item_id);
-
-				if (!is_null($rest))
-				{
-					// Recount
-					$oShop_Warehouse->setRest($oShop_Warehouse_Incoming_Item->shop_item_id, $rest);
-				}
+				$offset += $limit;
 			}
+			while (count($aShop_Warehouse_Incoming_Items));
 
 			$this->posted = 1;
 			$this->save();
@@ -193,6 +208,9 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
+				// Удаляем все накопительные значения с датой больше, чем дата документа
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse->id, $this->datetime);
+
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
 				$oShop_Warehouse_Entry->delete();
 
@@ -328,7 +346,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 		$aReplace = array(
 			// Core_Meta
 			'this' => $this,
-			'company' => $this->Shop_Warehouse->Shop->Shop_Company,
+			'company' => $this->Shop_Warehouse->shop_company_id ? $this->Shop_Warehouse->Shop_Company : $this->Shop_Warehouse->Shop->Shop_Company,
 			'shop_warehouse' => $this->Shop_Warehouse,
 			'shop' => $this->Shop_Warehouse->Shop,
 			'user' => $this->User,

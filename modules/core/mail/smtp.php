@@ -20,15 +20,21 @@ class Core_Mail_Smtp extends Core_Mail
 	 * @param string $to recipient
 	 * @param string $subject subject
 	 * @param string $message message
-	 * @param string $additional_headers additional_headers
 	 * @return self
 	 */
-	protected function _send($to, $subject, $message, $additional_headers)
+	protected function _send($to, $subject, $message)
 	{
 		$header = "Date: " . date("D, d M Y H:i:s O") . $this->_separator;
 		$header .= "Subject: {$subject}{$this->_separator}";
 		$header .= "To: {$to}{$this->_separator}";
-		$header .= $additional_headers . $this->_separator . $this->_separator;
+
+		// Remove From from headers
+		if (isset($this->_config['from']) && isset($this->_headers['From']))
+		{
+			unset($this->_headers['From']);
+		}
+
+		$header .= $this->_headersToString() . $this->_separator . $this->_separator;
 
 		$header .= $message . $this->_separator;
 
@@ -99,10 +105,10 @@ class Core_Mail_Smtp extends Core_Mail
 				}
 
 				$xbCrypto = stream_socket_enable_crypto($this->_fp, TRUE, $crypto_method);
-			
+
 				// Resend EHLO after TLS
 				$this->_serverFputs("EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
-				
+
 				// Может быть много 250-х, последний отделяется пробелом, а не минусом
 				do {
 					$server_response = $this->_serverFgets();

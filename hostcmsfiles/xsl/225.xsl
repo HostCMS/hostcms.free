@@ -165,7 +165,7 @@
 
 			<!-- Аватарка -->
 			<div class="avatar">
-				<a href="/users/info/{$siteuser/login}/" target="_blank">
+				<a href="/users/info/{$siteuser/path}/" target="_blank">
 					<xsl:choose>
 						<xsl:when test="$siteuser/property_value[tag_name='avatar']/file != ''">
 							<img src="{$siteuser/dir}{$siteuser/property_value[tag_name='avatar']/file}" />
@@ -193,7 +193,7 @@
 
 			<!-- Пользователь / Дата -->
 			<div class="user_info">
-				<p><a href="/users/info/{$siteuser/login}/" target="_blank"><xsl:value-of select="$siteuser/name" /><xsl:text> </xsl:text><b><xsl:value-of select="$siteuser/login" /></b><xsl:text> </xsl:text><xsl:value-of select="$siteuser/surname" /></a></p>
+				<p><a href="/users/info/{$siteuser/path}/" target="_blank"><xsl:value-of select="$siteuser/name" /><xsl:text> </xsl:text><b><xsl:value-of select="$siteuser/login" /></b><xsl:text> </xsl:text><xsl:value-of select="$siteuser/surname" /></a></p>
 				<p>
 					<b><xsl:value-of disable-output-escaping="yes" select="format-number(substring-before(datetime, '.'), '#')"/></b>
 					<xsl:variable name="month_year" select="substring-after(datetime, '.')"/>

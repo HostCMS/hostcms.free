@@ -60,4 +60,5 @@ return array(
 	'seo_item_description_template' => 'Шаблон description',
 	'seo_item_keywords_template' => 'Шаблон keywords',
 	'markDeleted' => 'Удалить группу',
+	'shortcut_success' => "Ярлык группы успешно добавлен",
 );

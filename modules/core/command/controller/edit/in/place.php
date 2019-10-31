@@ -43,7 +43,7 @@ class Core_Command_Controller_Edit_In_Place extends Core_Command_Controller
 
 				if (!is_null($oEntity->id))
 				{
-					$oUser = Core_Entity::factory('User')->getCurrent();
+					$oUser = Core_Auth::getCurrentUser();
 
 					// Get Module Name
 					list($moduleName) = explode('_', $modelName);

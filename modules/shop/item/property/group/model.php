@@ -105,7 +105,8 @@ class Shop_Item_Property_Group_Model extends Property_Model
 		// Дочерние группы текущей группы текущего магазина
 		$oShop_Groups = Core_Entity::factory('Shop', $shop_id)->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('parent_id', '=', $shop_group_id);
+			->where('parent_id', '=', $shop_group_id)
+			->where('shortcut_id', '=', 0);
 
 		$aChildrenId = $oShop_Groups->getGroupChildrenId();
 		foreach ($aChildrenId as $iGroupId)
@@ -132,7 +133,8 @@ class Shop_Item_Property_Group_Model extends Property_Model
 		// Дочерние группы текущей группы текущего магазина
 		$oShop_Groups = Core_Entity::factory('Shop', $shop_id)->Shop_Groups;
 		$oShop_Groups->queryBuilder()
-			->where('parent_id', '=', $shop_group_id);
+			->where('parent_id', '=', $shop_group_id)
+			->where('shortcut_id', '=', 0);
 
 		$aChildrenId = $oShop_Groups->getGroupChildrenId();
 		foreach ($aChildrenId as $iGroupId)

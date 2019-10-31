@@ -416,6 +416,9 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		{
 			$oInformationsystem_Groups = Core_Entity::factory('Informationsystem_Group', $this->parentGroup)->Informationsystem_Groups;
 		}
+		
+		$oInformationsystem_Groups->queryBuilder()
+			->where('shortcut_id', '=', 0);
 
 		$aInformationsystemGroupsId = array_merge(array($this->parentGroup), $oInformationsystem_Groups->getGroupChildrenId());
 

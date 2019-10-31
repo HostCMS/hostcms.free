@@ -144,9 +144,8 @@ class Comment_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR');
 		}
@@ -223,6 +222,9 @@ class Comment_Model extends Core_Entity
 	 */
 	public function fulltextBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$aConfig = Core_Config::instance()->get('comment_config');
+		$gradeLimit = (isset($aConfig['gradeLimit'])) ? $aConfig['gradeLimit'] : 5;
+		
 		ob_start();
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
@@ -238,7 +240,7 @@ class Comment_Model extends Core_Entity
 			->value(htmlspecialchars($this->getShortText()))
 			->execute();
 
-		$subCommentCount = $this->Comments->getCount();
+		$subCommentCount = $this->Comments->getCount(FALSE);
 
 		$subCommentCount && Core::factory('Core_Html_Entity_Span')
 			->class('count')
@@ -255,9 +257,11 @@ class Comment_Model extends Core_Entity
 
 		if ($this->grade)
 		{
+			$aConfig = Comment_Controller::getConfig();
+			
 			Core::factory('Core_Html_Entity_Span')
 				->class('small green')
-				->value(str_repeat('★', $this->grade) . str_repeat('☆', 5 - $this->grade))
+				->value(str_repeat('★', $this->grade) . str_repeat('☆', $aConfig['gradeLimit'] - $this->grade))
 				->execute();
 		}
 

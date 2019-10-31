@@ -40,7 +40,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	{
 		$this->_entity = $oCore_Entity;
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser) && $oUser->superuser != 1 && $oUser->only_access_my_own != 0)
 		{

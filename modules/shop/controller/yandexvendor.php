@@ -170,6 +170,7 @@ class Shop_Controller_YandexVendor extends Core_Controller
 			->select('shop_groups.*')
 			->join('shop_items', 'shop_items.shop_group_id', '=', 'shop_groups.id')
 			->where('shop_items.shop_producer_id', '=', $oShop_Producer->id)
+			->where('shop_groups.shortcut_id', '=', 0)
 			->groupBy('shop_groups.id');
 
 		$aShop_Groups = $oShop_Groups->findAll(FALSE);

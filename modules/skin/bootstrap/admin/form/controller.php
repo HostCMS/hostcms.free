@@ -315,79 +315,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
-	/**
-	 * Get form
-	 * @return string
-	 */
-	protected function _getForm()
-	{
-		$oAdmin_View = Admin_View::create($this->Admin_View)
-			->pageTitle($this->pageTitle)
-			->module($this->module);
-
-		$aAdminFormControllerChildren = array();
-
-		foreach ($this->_children as $oAdmin_Form_Entity)
-		{
-			if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Breadcrumbs
-				|| $oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
-			{
-				$oAdmin_View->addChild($oAdmin_Form_Entity);
-			}
-			else
-			{
-				$aAdminFormControllerChildren[] = $oAdmin_Form_Entity;
-			}
-		}
-
-		// Is filter necessary
-		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
-		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
-		{
-			// Перекрытие параметров для данного поля
-			$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
-			foreach ($this->_datasets as $datasetKey => $oTmpAdmin_Form_Dataset)
-			{
-				$oAdmin_Form_Field_Changed = $this->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
-			}
-
-			if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
-			{
-				$this->_showFilter = TRUE;
-				break;
-			}
-		}
-
-		// При показе формы могут быть добавлены сообщения в message, поэтому message показывается уже после отработки формы
-		ob_start();
-		?>
-		<div class="table-toolbar">
-			<?php $this->showFormMenus()?>
-			<div class="table-toolbar-right pull-right">
-				<?php $this->_pageSelector()?>
-			</div>
-			<div class="clear"></div>
-		</div>
-		<?php
-		foreach ($aAdminFormControllerChildren as $oAdmin_Form_Entity)
-		{
-			$oAdmin_Form_Entity->execute();
-		}
-
-		$this->showContent();
-		$this->showFooter777();
-		$content = ob_get_clean();
-
-		$oAdmin_View
-			->content($content)
-			->message($this->getMessage())
-			->show();
-
-		$this->applyEditable();
-
-		return $this;
-	}
-
 	protected $_pageNavigationDelta = 2;
 
 	/**
@@ -600,7 +527,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		return $this;
 	}
 
-	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon lightgray')
+	public function getTitleEditIcon($href, $onclick, $class = 'fa fa-pencil-square-o h5-edit-icon palegreen')
 	{
 		// .attr("onclick", "' . $onclick . '")
 		return Admin_Form_Entity::factory('Code')
@@ -609,8 +536,22 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					$(\'h5.row-title\').append(
 						$("<a>")
 							.attr("href", "' . $href . '")
-							//.attr("onclick", "\\\\\'")
 							.attr("onclick", "' . Core_Str::escapeJavascriptVariable($onclick) . '")
+							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
+						);
+				</script>
+		');
+	}
+
+	public function getTitlePathIcon($href, $class = 'fa fa-external-link h5-edit-icon azure')
+	{
+		return Admin_Form_Entity::factory('Code')
+			->html('
+				<script>
+					$(\'h5.row-title\').append(
+						$("<a>")
+							.attr("href", "' . $href . '")
+							.attr("target", "_blank")
 							.append(\'<i class="' . htmlspecialchars($class) . '"></i>\')
 						);
 				</script>

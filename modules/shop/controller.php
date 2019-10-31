@@ -148,11 +148,21 @@ class Shop_Controller
 	}
 
 	/**
-	 * Convert float
+	 * Convert decimal
 	 * @param mixed $value
 	 * @return mixed
 	 */
 	public function convertFloat($value)
+	{
+		return self::convertDecimal($value);
+	}
+	
+	/**
+	 * Convert decimal
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	static public function convertDecimal($value)
 	{
 		$value = preg_replace('/[^0-9.,\-]/u', '', $value);
 		$value = str_replace(array(',', '-'), '.', $value);
@@ -167,7 +177,7 @@ class Shop_Controller
 	 */
 	public function convertPrice($price, $decimalDigits = NULL)
 	{
-		$price = $this->convertFloat($price);
+		$price = self::convertDecimal($price);
 
 		$decimalDigits = intval(!is_null($decimalDigits) ? $decimalDigits : $this->_decimalDigits);
 		preg_match("/((\d+(\.)\d{0,{$decimalDigits}})|\d+)/u", $price, $array_price);

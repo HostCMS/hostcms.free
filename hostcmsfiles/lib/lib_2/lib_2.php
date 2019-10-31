@@ -114,7 +114,7 @@ if ($Informationsystem_Controller_Show->item == 0)
 				if ($oInformationsystem_Item->active == 0)
 				{
 					?>
-					<p>Благодарим Вас, <?php echo $author?>!
+					<p>Благодарим Вас, <?php echo htmlspecialchars($author)?>!
 					<br />Ваша запись принята. После проверки администратором она станет доступной!
 					</p>
 					<?php
@@ -122,7 +122,7 @@ if ($Informationsystem_Controller_Show->item == 0)
 				else
 				{
 					?>
-					<p>Благодарим Вас, <?php echo $author?>!
+					<p>Благодарим Вас, <?php echo htmlspecialchars($author)?>!
 					<br />Ваша запись принята и опубликована!
 					</p>
 					<?php

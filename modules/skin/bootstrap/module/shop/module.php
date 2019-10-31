@@ -73,7 +73,12 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 	protected function _ordersContent()
 	{
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		$oAdmin_Form = Core_Entity::factory('Admin_Form', 75);
 
@@ -511,7 +516,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 															}
 
 															$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();
-															$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
+															$("#<?php echo $sWindowId?> #mostOrdered span[id = 'pieLabel" + obj.seriesIndex + "']").show();
 														});
 
 														placeholderMostOrderedDiagram.resize(function(){$("#<?php echo $sWindowId?> #mostOrdered span[id ^= 'pieLabel']").hide();});
@@ -597,7 +602,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 															}
 
 															$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();
-															$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel" + obj.seriesIndex + "']").show();
+															$("#<?php echo $sWindowId?> #countBrands span[id = 'pieLabel" + obj.seriesIndex + "']").show();
 														});
 
 														placeholderBrandsDiagram.resize(function(){$("#<?php echo $sWindowId?> #countBrands span[id ^= 'pieLabel']").hide();});

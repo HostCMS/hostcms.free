@@ -43,7 +43,7 @@ return array(
 
 	'button_execute' => 'Выполнить',
 	'button_to_filter' => 'Фильтровать',
-	'button_to_clear' => 'Очистить фильтр',
+	'clear' => 'Очистить',
 
 	// Форма редактирования форм центра администрирования.
 	'form_add_forms_title' => 'Добавление формы центра администрирования',
@@ -100,8 +100,7 @@ return array(
 
 	'msg_error_access' => 'У Вас недостаточно прав для совершения этого действия или действие для формы отсутствует.',
 
-	'input_clear_filter' => 'Очистить',
-	'input_case_sensitive' => 'Учитывать регистр',
+	'case_sensitive' => 'Учитывать регистр',
 
 	'filter_selected_all' => 'Все',
 	'filter_selected' => 'Выбрано',

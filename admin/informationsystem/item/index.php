@@ -50,6 +50,7 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
 			->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
@@ -95,6 +96,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		switch ($mode)
@@ -160,6 +162,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 		$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 		$oInformationsystem_Groups->queryBuilder()
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->limit(Core::$mainConfig['autocompleteItems']);
 
 		switch ($mode)
@@ -216,7 +219,11 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Items = $oInformationsystem->Informationsystem_Items;
 			$oInformationsystem_Items->queryBuilder()
 				->where('informationsystem_items.informationsystem_group_id', '=', $iInformationsystemGroupId)
-				->where('informationsystem_items.name', 'LIKE', '%' . $sQuery . '%')
+				->open()
+					->where('informationsystem_items.name', 'LIKE', '%' . $sQuery . '%')
+					->setOr()
+					->where('informationsystem_items.path', 'LIKE', '%' . $sQuery . '%')
+				->close()
 				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Items = $oInformationsystem_Items->findAll(FALSE);
@@ -225,7 +232,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			{
 				$aJSON[] = array(
 					'id' => $oInformationsystem_Item->id,
-					'label' => $oInformationsystem_Item->name,
+					'label' => Informationsystem_Controller_Load_Select_Options::getOptionName($oInformationsystem_Item),
 				);
 			}
 		}
@@ -234,6 +241,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
 				->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
+				->where('informationsystem_groups.shortcut_id', '=', 0)
 				->limit(Core::$mainConfig['autocompleteItems']);
 
 			$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
@@ -385,6 +393,19 @@ if ($iInformationsystemGroupId)
 	$oAdmin_Form_Controller->addEntity(
 		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
 	);
+
+	$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
+	if ($oSiteAlias)
+	{
+		$sUrl = ($oInformationsystem->Structure->https ? 'https://' : 'http://')
+			. $oSiteAlias->name
+			. $oInformationsystem->Structure->getPath()
+			. $oInformationsystem_Group->getPath();
+
+		$oAdmin_Form_Controller->addEntity(
+			$oAdmin_Form_Controller->getTitlePathIcon($sUrl)
+		);
+	}
 }
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));

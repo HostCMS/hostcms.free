@@ -15,6 +15,26 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
 	/**
+	 * Get Shop_Item option name
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return string
+	 * @hostcms-event Shop_Controller_Load_Select_Options.onGetOptionName
+	 */
+	static public function getOptionName(Shop_Item_Model $oShop_Item)
+	{
+		Core_Event::notify('Shop_Controller_Load_Select_Options.onGetOptionName', $oShop_Item);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
+		return ($oShop_Item->modification_id ? ' — ' : '') . $oShop_Item->name . ($oShop_Item->marking != '' ? " ({$oShop_Item->marking})" : '');
+	}
+
+	/**
 	 * Add value
 	 * @return self
 	 */
@@ -28,9 +48,7 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 		{
 			$oTmp = new stdClass();
 			$oTmp->value = $Object->id;
-			$oTmp->name = !$Object->shortcut_id
-				? $Object->name
-				: $Object->Shop_Item->name;
+			$oTmp->name = self::getOptionName(!$Object->shortcut_id ? $Object : $Object->Shop_Item);
 
 			$this->_values[] = $oTmp;
 
@@ -43,7 +61,7 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 					->queryBuilder()
 					->clearOrderBy()
 					->clearSelect()
-					->select('id', 'shortcut_id', 'name');
+					->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
 
 				$aModifications = $oModifications->findAll(FALSE);
 
@@ -51,7 +69,7 @@ class Shop_Controller_Load_Select_Options extends Admin_Form_Action_Controller_T
 				{
 					$oTmp = new stdClass();
 					$oTmp->value = $oModification->id;
-					$oTmp->name = ' — ' . $oModification->name;
+					$oTmp->name = self::getOptionName($oModification);
 					$this->_values[] = $oTmp;
 				}
 			}

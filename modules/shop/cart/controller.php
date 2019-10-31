@@ -220,38 +220,45 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 	 */
 	protected function _getAllFromSession(Shop_Model $oShop)
 	{
-		Core_Session::start();
-
-		$shop_id = $oShop->id;
-
-		$aCart = Core_Array::getSession('hostcmsCart', array());
-		$aCart[$shop_id] = Core_Array::get($aCart, $shop_id, array());
-
 		$aShop_Cart = array();
-		foreach ($aCart[$shop_id] as $shop_item_id => $aCartItem)
+
+		if (Core_Session::hasSessionId())
 		{
-			$aCartItem += array(
-				'quantity' => 0,
-				'postpone' => 0,
-				'marking' => '',
-				'shop_warehouse_id' => 0
-			);
+			$isActive = Core_Session::isAcive();
+			!$isActive && Core_Session::start();
 
-			$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
+			$shop_id = $oShop->id;
 
-			if (!is_null($oShop_Item->id) && $oShop_Item->active)
+			$aCart = Core_Array::getSession('hostcmsCart', array());
+			$aCart[$shop_id] = Core_Array::get($aCart, $shop_id, array());
+
+			foreach ($aCart[$shop_id] as $shop_item_id => $aCartItem)
 			{
-				// Temporary object
-				$oShop_Cart = Core_Entity::factory('Shop_Cart');
-				$oShop_Cart->shop_item_id = $shop_item_id;
-				$oShop_Cart->quantity = $aCartItem['quantity'];
-				$oShop_Cart->postpone = $aCartItem['postpone'];
-				$oShop_Cart->marking = $aCartItem['marking'];
-				$oShop_Cart->shop_id = $shop_id;
-				$oShop_Cart->shop_warehouse_id = $aCartItem['shop_warehouse_id'];
-				$oShop_Cart->siteuser_id = 0;
-				$aShop_Cart[] = $oShop_Cart;
+				$aCartItem += array(
+					'quantity' => 0,
+					'postpone' => 0,
+					'marking' => '',
+					'shop_warehouse_id' => 0
+				);
+
+				$oShop_Item = Core_Entity::factory('Shop_Item')->find($shop_item_id);
+
+				if (!is_null($oShop_Item->id) && $oShop_Item->active)
+				{
+					// Temporary object
+					$oShop_Cart = Core_Entity::factory('Shop_Cart');
+					$oShop_Cart->shop_item_id = $shop_item_id;
+					$oShop_Cart->quantity = $aCartItem['quantity'];
+					$oShop_Cart->postpone = $aCartItem['postpone'];
+					$oShop_Cart->marking = $aCartItem['marking'];
+					$oShop_Cart->shop_id = $shop_id;
+					$oShop_Cart->shop_warehouse_id = $aCartItem['shop_warehouse_id'];
+					$oShop_Cart->siteuser_id = 0;
+					$aShop_Cart[] = $oShop_Cart;
+				}
 			}
+			
+			!$isActive && Core_Session::close();
 		}
 
 		return $aShop_Cart;
@@ -358,7 +365,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$oItem_In_Cart = $this->get();
 
 		// Увеличиваем на количество уже в корзине
-		$this->quantity += $oItem_In_Cart->quantity;
+		$this->quantity = Shop_Controller::convertDecimal($this->quantity) + $oItem_In_Cart->quantity;
 
 		Core_Event::notify(get_class($this) . '.onAfterAdd', $this);
 
@@ -376,6 +383,8 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$this->_error = FALSE;
 
 		Core_Event::notify(get_class($this) . '.onBeforeUpdate', $this);
+
+		$this->quantity = Shop_Controller::convertDecimal($this->quantity);
 
 		$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
 

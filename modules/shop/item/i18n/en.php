@@ -330,5 +330,7 @@ return array(
 	'edit_all_warehouses' => 'Edit',
 	'shop_price_setting' => 'Set price by edit item "%s"',
 	'warehouse_in_price' => 'In price',
-	'item_cards_printlayout' => 'Item card printlayout',	
+	'item_cards_printlayout' => 'Item card printlayout',
+	'flag_bonus_include_modifications' => 'Include modifications',
+	'delete_property_values' => 'Delete exist property values',
 );

@@ -305,9 +305,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			case 1:
 				$this->_Informationsystem_Items
 					->queryBuilder()
-					->orderBy('informationsystem_items.name', $items_sorting_direction)
-					//->orderBy('informationsystem_items.sorting', $items_sorting_direction)
-					;
+					->orderBy('informationsystem_items.name', $items_sorting_direction);
 				break;
 			case 2:
 				$this->_Informationsystem_Items
@@ -319,9 +317,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			default:
 				$this->_Informationsystem_Items
 					->queryBuilder()
-					->orderBy('informationsystem_items.datetime', $items_sorting_direction)
-					//->orderBy('informationsystem_items.sorting', $items_sorting_direction)
-					;
+					->orderBy('informationsystem_items.datetime', $items_sorting_direction);
 		}
 
 		$this->_Informationsystem_Items
@@ -408,21 +404,39 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Get items
-	 * @return Informationsystem_Item_Model
+	 * Get/set _Informationsystem_Items
+	 * @param mixed $object
+	 * @return self or _Informationsystem_Items
 	 */
-	public function informationsystemItems()
+	public function informationsystemItems($object = NULL)
 	{
-		return $this->_Informationsystem_Items;
+		if (is_null($object))
+		{
+			return $this->_Informationsystem_Items;
+		}
+		else
+		{
+			$this->_Informationsystem_Items = $object;
+			return $this;
+		}
 	}
 
 	/**
-	 * Get groups
-	 * @return Informationsystem_Item_Model
+	 * Get/set _Informationsystem_Groups
+	 * @param mixed $object
+	 * @return self or _Informationsystem_Groups
 	 */
-	public function informationsystemGroups()
+	public function informationsystemGroups($object = NULL)
 	{
-		return $this->_Informationsystem_Groups;
+		if (is_null($object))
+		{
+			return $this->_Informationsystem_Groups;
+		}
+		else
+		{
+			$this->_Informationsystem_Groups = $object;
+			return $this;
+		}
 	}
 
 	/**
@@ -450,7 +464,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		Core_Entity::factory('Informationsystem_Item')->getTableColumns();
 
 		// Load user BEFORE FOUND_ROWS()
-		Core_Entity::factory('User', 0)->getCurrent();
+		Core_Auth::getCurrentUser();
 
 		$this->calculateTotal && $this->_Informationsystem_Items
 			->queryBuilder()
@@ -917,6 +931,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				{
 					$oInformationsystem_Groups
 						->queryBuilder()
+						->where('shortcut_id', '=', 0)
 						->where('active', '=', $this->groupsActivity == 'inactive' ? 0 : 1);
 				}
 
@@ -1209,6 +1224,27 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$oInformationsystem_Group->clearEntities();
 			$this->applyGroupsForbiddenTags($oInformationsystem_Group);
+
+			// Shortcut
+			if ($oInformationsystem_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oInformationsystem_Group;
+				$oInformationsystem_Group = clone $oInformationsystem_Group->Shortcut;
+
+				$oInformationsystem_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
@@ -1237,6 +1273,27 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$oInformationsystem_Group->clearEntities();
 			$this->applyGroupsForbiddenTags($oInformationsystem_Group);
+
+			// Shortcut
+			if ($oInformationsystem_Group->shortcut_id)
+			{
+				$oShortcut_Group = $oInformationsystem_Group;
+				$oInformationsystem_Group = clone $oInformationsystem_Group->Shortcut;
+
+				$oInformationsystem_Group
+					->id($oShortcut_Group->id)
+					->addForbiddenTag('parent_id')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('original_group_id')
+							->value($oShortcut_Group->Shortcut->id)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('parent_id')
+							->value($oShortcut_Group->parent_id)
+					);
+			}
+
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 

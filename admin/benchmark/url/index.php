@@ -137,9 +137,6 @@ else
 	<script>
 	function changeConstant(name, value)
 	{
-		console.log(name);
-		console.log(value);
-
 		$.ajax({
 			type: "POST",
 			url: "/admin/benchmark/url/index.php",

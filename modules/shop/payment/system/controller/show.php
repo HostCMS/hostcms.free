@@ -60,6 +60,15 @@ class Shop_Payment_System_Controller_Show extends Core_Controller
 		$this->_Shop_Payment_Systems
 			->queryBuilder()
 			->where('shop_payment_systems.active', '=', 1);
+			
+		if (Core_Session::hasSessionId())
+		{
+			Core_Session::start();
+			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+			 {
+				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			 }
+		}
 	}
 
 	/**

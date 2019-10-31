@@ -173,7 +173,7 @@ class Skin_Default_Module_Counter_Module extends Counter_Module
 
 		if (!$ajax)
 		{
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
 
 			$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 			$module_id = $oModule->id;

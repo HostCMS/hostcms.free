@@ -99,9 +99,9 @@ class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 
 		$this->_ignore && $query[] = 'IGNORE';
 
-		$query[] = 'INTO ' . $this->_dataBase->quoteColumnName($this->_into);
+		$query[] = 'INTO ' . $this->_dataBase->quoteTableName($this->_into);
 
-		$query[] = "\n(" . implode(', ', $this->quoteColumns($this->_columns)) . ')';
+		$query[] = "\n(" . implode(', ', $this->_quoteColumns($this->_columns)) . ')';
 
 		if (is_null($this->_select))
 		{

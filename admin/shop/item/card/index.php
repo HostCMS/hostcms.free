@@ -61,6 +61,9 @@ if (!is_null(Core_Array::getPost('start')))
 		$oShop_Groups = Core_Entity::factory('Shop_Group', $iParentGroupId)->Shop_Groups;
 	}
 
+	$oShop_Groups->queryBuilder()
+		->where('shop_groups.shortcut_id', '=', 0);
+
 	$aShopGroupsId = array_merge(array($iParentGroupId), $oShop_Groups->getGroupChildrenId());
 
 	$aAllShopItems = array();

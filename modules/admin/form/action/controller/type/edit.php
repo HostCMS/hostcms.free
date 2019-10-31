@@ -37,6 +37,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	protected $_formId = NULL;
 
 	/**
+	 * Form
+	 * @var Admin_Form_Entity_Form
+	 */
+	protected $_Admin_Form_Entity_Form = NULL;
+
+	/**
 	 * Stores POST, which can change the controller
 	 * @var mixed
 	 */
@@ -70,8 +76,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	{
 		parent::__construct($oAdmin_Form_Action);
 
-		is_null($this->_formId)
-			&& $this->_formId = 'formEdit' . rand(0, 99999);
+		$this->_formId = 'formEdit' . rand(0, 99999);
 
 		// Set default title
 		$oAdmin_Word = $this->_Admin_Form_Action->Admin_Word->getWordByLanguage(
@@ -89,6 +94,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		// Далее может быть изменено
 		$this->_formValues = $_POST;
+		
+		$this->_Admin_Form_Entity_Form = Admin_Form_Entity::factory('Form');
+		$this->_Admin_Form_Entity_Form->id($this->_formId);
 	}
 
 	/**
@@ -413,7 +421,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				->caption(Core::_('admin_form.form_forms_tab_2'))
 				->name('additional');
 
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
 
 			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
 			//!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
@@ -479,9 +487,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						{
 							$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Checkbox');
 
-							$oAdmin_Form_Entity_For_Column->value(
-								$this->_object->$columnName
-							);
+							//$oAdmin_Form_Entity_For_Column->value($this->_object->$columnName);
+							$oAdmin_Form_Entity_For_Column
+								->value(1)
+								->checked($this->_object->$columnName != 0);
+							
 							break;
 						}
 					default:
@@ -689,11 +699,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 				}
 
-				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
+				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form);
 
 				$oAdmin_Form_Action_Controller_Type_Edit_Show
 					->Admin_Form_Controller($this->_Admin_Form_Controller)
-					->formId($this->_formId)
 					->tabs($this->_tabs)
 					->buttons($this->_addButtons());
 
@@ -822,13 +831,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	protected function _showEditForm()
 	{
 		// Контроллер показа формы редактирования с учетом скина
-		$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
+		$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form);
 
 		$oAdmin_Form_Action_Controller_Type_Edit_Show
 			->title($this->title)
 			->children($this->_children)
 			->Admin_Form_Controller($this->_Admin_Form_Controller)
-			->formId($this->_formId)
 			->tabs($this->_tabs)
 			->buttons($this->_addButtons());
 

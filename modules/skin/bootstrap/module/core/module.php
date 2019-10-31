@@ -127,7 +127,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 		$oCore_Log = Core_Log::instance();
 		$file_name = $oCore_Log->getLogName(date('Y-m-d'));
 
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
 		$access = Core::moduleIsActive('eventlog')
@@ -576,7 +576,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 	protected function _notesContent()
 	{
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (!is_null($oUser))
 		{
@@ -636,7 +636,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 	protected function _siteContent()
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 		$aSites = $oUser->getSites();
 
 		$aJson = array(

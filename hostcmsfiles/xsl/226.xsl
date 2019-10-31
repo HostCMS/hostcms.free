@@ -110,7 +110,7 @@
 				<xsl:if test="$new_user = 1">
 					<xsl:variable name="siteuser_id" select="siteuser_id" />
 					<xsl:variable name="siteuser" select="$siteusers[@id = $siteuser_id]" />
-					<b><a href="/users/info/{$siteuser/login}/">
+					<b><a href="/users/info/{$siteuser/path}/">
 							<xsl:if test="$siteuser/name != ''"><xsl:value-of select="$siteuser/name"/><xsl:text> </xsl:text></xsl:if>
 							<xsl:value-of select="$siteuser/surname" />
 					</a></b><br/>

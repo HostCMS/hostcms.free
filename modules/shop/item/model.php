@@ -264,9 +264,8 @@ class Shop_Item_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
-
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['guid'] = Core_Guid::get();
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['delivery'] = $this->_preloadValues['pickup'] = 1;
@@ -1597,6 +1596,12 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
 		$this->Shop_Price_Entries->deleteAll(FALSE);
 
+		// Fast filter
+		if ($this->Shop->filter)
+		{
+			Core_DataBase::instance()->query("DELETE FROM `shop_filter" . intval($this->shop_id) . "` WHERE `shop_item_id` = " . intval($this->id));
+		}
+
 		// Удаляем директорию товара
 		$this->deleteDir();
 
@@ -2346,6 +2351,9 @@ class Shop_Item_Model extends Core_Entity
 
 				foreach ($aShop_Item_Associateds as $oShop_Item_Associated_Original)
 				{
+					$oShop_Item_Associated_Original->shortcut_id
+						&& $oShop_Item_Associated_Original = Core_Entity::factory('Shop_Item', $oShop_Item_Associated_Original->shortcut_id);
+					
 					if ($oShop_Item_Associated_Original->id != $this->id)
 					{
 						// Сопутствующий товар может быть в списке, соответственное его модификации не выведутся из-за запрета на вывод модификаций для сопутствующих

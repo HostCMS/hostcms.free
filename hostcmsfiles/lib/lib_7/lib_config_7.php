@@ -1,4 +1,11 @@
 <?php
+// Disable bf-cache
+// define('SET_CACHE_CONTROL', FALSE);
+// $oCore_Response
+	// ->header("Cache-Control", "private, no-store, no-cache, must-revalidate")
+	// ->header('Pragma', 'no-cache, no-store')
+	// ->header("Expires", 0)
+	// ->sendHeaders();
 
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 

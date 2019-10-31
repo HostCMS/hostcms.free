@@ -31,7 +31,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 	 Валюта НЕ связана с $robokassa_currency, это только предлагаемая валюта по умолчанию
 	Доступные валюты: https://auth.robokassa.ru/Merchant/WebService/Service.asmx/GetCurrencies?MerchantLogin=demo&Language=ru
 	*/
-	protected $_in_curr = "BANKOCEAN2R";
+	protected $_in_curr = "BANKOCEAN3R";
 
 	// Код валюты в магазине HostCMS для валюты платежа в личном кабинете Робокассы
 	protected $_robokassa_currency = 1;
@@ -287,7 +287,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 					$discount -= $oShop_Order_Item->getAmount();
 					unset($aShop_Order_Items[$key]);
 				}
-				else
+				elseif ($oShop_Order_Item->shop_item_id)
 				{
 					$amount += $oShop_Order_Item->getAmount();
 				}
@@ -337,19 +337,20 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		<?php
 		$SignatureValue = md5(
 			$this->sendCheck
-				? "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:" . $sReceiptJson . ":{$this->_mrh_pass1}"
+				? "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:{$sReceiptJson}:{$this->_mrh_pass1}"
 				: "{$this->_mrh_login}:{$sRoboSum}:{$this->_shopOrder->id}:{$this->_mrh_pass1}"
 		);
 		?>
-		<form action="https://merchant.roboxchange.com/Index.aspx<?php echo $this->_mode == 0 ? '?IsTest=1' : ''?>" method="post">
-			<input type="hidden" name="MrchLogin" value="<?php echo $this->_mrh_login?>">
+		<form action="https://auth.robokassa.ru/Merchant/Index.aspx" method="POST">
+			<input type="hidden" name="MerchantLogin" value="<?php echo $this->_mrh_login?>">
 			<input type="hidden" name="OutSum" value="<?php echo $sRoboSum?>">
 			<input type="hidden" name="InvId" value="<?php echo $this->_shopOrder->id?>">
-			<input type="hidden" name="Desc" value="<?php echo "Оплата счета N {$this->_shopOrder->invoice}"?>">
+			<input type="hidden" name="Description" value="<?php echo htmlspecialchars("Оплата счета N {$this->_shopOrder->invoice}")?>">
 			<input type="hidden" name="SignatureValue" value="<?php echo $SignatureValue?>">
 			<input type="hidden" name="IncCurrLabel" value="<?php echo $this->_in_curr?>">
 			<input type="hidden" name="Culture" value="<?php echo $this->_culture?>">
 			<?php if ($this->sendCheck){ ?> <input type="hidden" name="Receipt" value="<?php echo htmlspecialchars($sReceiptJson)?>"><?php } ?>
+			<?php if (!$this->_mode){ ?> <input type="hidden" name="IsTest" value="1"><?php } ?>
 			<input type="submit" value="Оплатить">
 		</form>
 		<?php

@@ -199,7 +199,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 				{
 					$aJson = array();
 
-					$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+					$oCurrentUser = Core_Auth::getCurrentUser();
 					Core_Session::close();
 
 					if (!is_null($oCurrentUser))
@@ -235,7 +235,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			break;
 			// Уведомления
 			case 80:
-				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+				$oCurrentUser = Core_Auth::getCurrentUser();
 
 				Core_Session::close();
 
@@ -290,7 +290,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			break;
 			// Обновление списка сообщений
 			case 81:
-				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+				$oCurrentUser = Core_Auth::getCurrentUser();
 
 				$iLastMessageId = intval(Core_Array::getPost('last-message-id', 0));
 				$iRecipientUserId = Core_Array::getPost('recipient-user-id', 0);
@@ -349,7 +349,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			break;
 			// Обновление статусов
 			case 82:
-				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+				$oCurrentUser = Core_Auth::getCurrentUser();
 
 				Core_Session::close();
 
@@ -390,7 +390,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			break;
 			// Включение/отключение звука
 			case 84:
-				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+				$oCurrentUser = Core_Auth::getCurrentUser();
 
 				$iSoundSwitchStatus = intval(Core_Array::getPost('sound_switch_status', 0));
 
@@ -411,7 +411,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 			break;
 			// Получение закладок
 			case 85:
-				$oCurrentUser = Core_Entity::factory('User')->getCurrent();
+				$oCurrentUser = Core_Auth::getCurrentUser();
 
 				$aJson = array();
 

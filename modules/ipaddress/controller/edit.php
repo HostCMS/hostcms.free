@@ -34,4 +34,19 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $this;
 	}
+	
+			
+	/**
+	 * Processing of the form. Apply object fields.
+	 * @hostcms-event Ipaddress_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 */
+	protected function _applyObjectProperty()
+	{
+		parent::_applyObjectProperty();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+	
 }

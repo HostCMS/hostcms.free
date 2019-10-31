@@ -21,7 +21,7 @@ function isEmpty(str) {
 		cache: false,
 		error: function(jqXHR, textStatus, errorThrown){
 			$.loadingScreen('hide');
-			jqXHR.statusText != 'abort' && alert('AJAX error: ' + textStatus + ', ' + jqXHR.responseText);
+			jqXHR.statusText != 'abort' && alert('AJAX error: ' + textStatus + '! HTTP: ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.responseText);
 		}
 	});
 
@@ -672,49 +672,9 @@ function isEmpty(str) {
 			jQuery("#" + windowId + " .admin_table_filter input").val('');
 			jQuery("#" + windowId + " .admin_table_filter select").prop('selectedIndex', 0);
 
+			jQuery("#" + windowId + " .admin_table_filter select.select2-hidden-accessible").html('').select2({data: [{id: '', text: ''}]}).select2();
+
 			jQuery("#" + windowId + " .search-field input[name = globalSearch]").val('');
-		},
-		deleteNewProperty: function(object)
-		{
-			//jQuery(object).closest('.item_div').remove();
-			jQuery(object).closest('[id ^= "property_"]').remove();
-		},
-		deleteProperty: function(object, settings)
-		{
-			//var jObject = jQuery(object).siblings('input,select:not([onchange]),textarea');
-			var jObject = jQuery(object).parents('div.input-group');
-
-			jObject = jObject.find('input:not([id^="filter_"]),select:not([onchange]),textarea');
-
-			// For files
-			if (jObject.length === 0)
-			{
-				jObject = jQuery(object).siblings('div,label').children('input');
-			}
-
-			var property_name = jObject.eq(0).attr('name');
-
-			settings = jQuery.extend({
-				operation: property_name
-			}, settings);
-
-			settings = jQuery.requestSettings(settings);
-
-			var data = jQuery.getData(settings);
-			data['hostcms[checked][' + settings.datasetId + '][' + settings.objectId + ']'] = 1;
-
-			var path = settings.path;
-
-			jQuery.ajax({
-				context: jQuery('#'+settings.windowId),
-				url: path,
-				type: 'POST',
-				data: data,
-				dataType: 'json',
-				success: jQuery.ajaxCallback
-			});
-
-			jQuery.deleteNewProperty(object);
 		},
 		setCheckbox: function(windowId, checkboxId)
 		{
@@ -776,38 +736,6 @@ function isEmpty(str) {
 		deleteNewMultipleValue: function(object)
 		{
 			var jObject = jQuery(object).closest('.multiple_value').remove();
-		},
-		clonePropertyInfSys: function(windowId, index)
-		{
-			var jProperies = jQuery('#' + windowId + ' #property_' + index),
-			//jNewObject = jProperies.eq(0).clone(),
-			html = jProperies[0].outerHTML; // clone with parent
-			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
-			iNewId = index + 'group' + Math.floor(Math.random() * 999999),
-			jDir = jNewObject.find("select[onchange]"),
-			jItem = jNewObject.find("select:not([onchange])");
-
-			jDir
-				.attr('onchange', jDir.attr('onchange').replace(jItem.attr('id'), iNewId))
-				.val(jProperies.eq(0).find("select[onchange]").val());
-
-			jItem
-				.attr('name', 'property_' + index + '[]')
-				.attr('id', iNewId)
-				.val(jProperies.eq(0).find("select:not([onchange])").val());
-
-			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
-			jNewObject.insertAfter(jProperies.eq(-1));
-		},
-		cloneFile: function(windowId)
-		{
-			var jProperies = jQuery('#' + windowId + ' #file'),
-				jNewObject = jProperies.eq(0).clone();
-
-			jNewObject.find("input[type='file']").attr('name', 'file[]').val('');
-			jNewObject.find("input[type='text']").attr('name', 'description_file[]').val('');
-
-			jNewObject.insertAfter(jProperies.eq(-1));
 		},
 		showWindow: function(windowId, content, settings)
 		{

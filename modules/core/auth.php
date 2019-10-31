@@ -14,6 +14,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Core_Auth
 {
 	/**
+	 * User logged
+	 * @var boolean|NULL
+	 */
+	static protected $_logged = NULL;
+
+	/**
+	 * Current User
+	 * @var User_Model
+	 */
+	static protected $_currentUser = NULL;
+	
+	/**
 	 * Check Blocked Ip. Break if IP blocked
 	 */
 	static public function checkBackendBlockedIp()
@@ -244,7 +256,7 @@ class Core_Auth
 		header('X-Frame-Options: SAMEORIGIN');
 		header('X-Content-Type-Options: nosniff');
 		header('X-XSS-Protection: 1; mode=block');
-		header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; img-src 'self' data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'");
+		header('Content-Security-Policy: ' . Core::$mainConfig['backendContentSecurityPolicy']);
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
@@ -298,37 +310,62 @@ class Core_Auth
 	}
 
 	/**
+	 * Get Current User
+	 * @return User_Model|NULL
+	 */
+	static public function getCurrentUser()
+	{
+		return self::$_currentUser;
+	}
+
+	/**
 	 * Checks user's authorization
 	 * Проверка авторизации пользователя
 	 * @return boolean
 	 */
 	static public function logged()
 	{
-		if (isset($_SESSION['valid_user']) && strlen($_SESSION['valid_user']) > 0
-			&& isset($_SESSION['date_user']) && strlen($_SESSION['date_user']) > 0
-			&& isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
-			&& isset($_SESSION['is_superuser']))
+		if (is_null(self::$_logged))
 		{
-			// Привязки к IP не было или IP совпадают
-			if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1'))
+			self::$_logged = FALSE;
+
+			// Идентификатор сессии уже был установлен
+			if (Core_Session::hasSessionId())
 			{
-				// Пользователь существует
-				if (Core_Entity::factory('User')->getCurrent())
+				$isActive = Core_Session::isAcive();
+				!$isActive && Core_Session::start();
+
+				if (isset($_SESSION['valid_user']) && strlen($_SESSION['valid_user']) > 0
+					&& isset($_SESSION['date_user']) && strlen($_SESSION['date_user']) > 0
+					&& isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
+					&& isset($_SESSION['is_superuser']))
 				{
-					return TRUE;
+					// Привязки к IP не было или IP совпадают
+					if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1'))
+					{
+						// Пользователь существует
+						$oUser = Core_Entity::factory('User')->getCurrent();
+						if ($oUser)
+						{
+							self::$_logged = TRUE;
+							self::$_currentUser = $oUser;
+						}
+						else
+						{
+							Core_Auth::logout();
+						}
+					}
+					else
+					{
+						Core_Auth::logout();
+					}
 				}
-				else
-				{
-					Core_Auth::logout();
-				}
-			}
-			else
-			{
-				Core_Auth::logout();
+
+				!$isActive && Core_Session::close();
 			}
 		}
 
-		return FALSE;
+		return self::$_logged;
 	}
 
 	/**
@@ -471,14 +508,6 @@ class Core_Auth
 
 		if ($oUser)
 		{
-			/*If the server time is not properly set, e.g(it is behind the client time). Excution of the following code
-			session_set_cookie_params(2000);
-			will NOT set/send cookie to Internet Explorer 6.0,*/
-			/*
-			$expiry = 60*60*4;
-			setcookie(session_name(),session_id(), time()+$expiry, "/");
-			*/
-
 			// Сессия может быть уже запущена и при повторном отправке данных POST-ом при авторизации
 			//if (!isset($_SESSION['valid_user']))
 			if (@session_id() == '')
@@ -492,10 +521,10 @@ class Core_Auth
 			$_SESSION['date_user'] = date('d.m.Y H:i:s');
 			$_SESSION['is_superuser'] = $oUser->superuser;
 
-			if ($assignSessionToIp)
-			{
-				$_SESSION['current_user_ip'] = $sIp;
-			}
+			$assignSessionToIp && $_SESSION['current_user_ip'] = $sIp;
+
+			self::$_logged = TRUE;
+			self::$_currentUser = $oUser;
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$ERROR)
@@ -538,7 +567,8 @@ class Core_Auth
 	 */
 	static public function logout()
 	{
-		Core_Session::start();
+		$isActive = Core_Session::isAcive();
+		!$isActive && Core_Session::start();
 
 		$aUnsets = array(
 			'current_users_id',
@@ -556,6 +586,11 @@ class Core_Auth
 			}
 		}
 
-		session_regenerate_id(TRUE);
+		self::$_logged = FALSE;
+		self::$_currentUser = NULL;
+
+		Core_Session::regenerateId(TRUE);
+
+		!$isActive && Core_Session::close();
 	}
 }

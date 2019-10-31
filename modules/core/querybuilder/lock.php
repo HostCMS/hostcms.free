@@ -86,7 +86,7 @@ class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 
 		foreach ($tables as $tableName => $type)
 		{
-			$tableName = $this->_dataBase->quoteColumnName($tableName);
+			$tableName = $this->_dataBase->quoteTableName($tableName);
 			
 			$type = strtoupper($type);
 			

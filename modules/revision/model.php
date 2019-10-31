@@ -43,8 +43,8 @@ class Revision_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
 
@@ -72,6 +72,39 @@ class Revision_Model extends Core_Entity
 		return '<span class="badge badge-hostcms badge-square">' . htmlspecialchars(
 				!is_null($oUser->id) ? $oUser->login : 'Unknown User'
 			) . '</span>';
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oRevision = Core_Entity::factory('Revision', $this->id);
+		?>
+		<script>
+		$(function() {
+			var str = JSON.stringify(<?php echo $oRevision->value?>, null, 2);
+
+			$('a#revision<?php echo $this->id?>').on('click', function (){
+				var dialog = bootbox.dialog({
+					title: '<?php echo $this->name?> <?php echo $this->datetime?>',
+					message: str,
+					backdrop: true,
+					size: 'large'
+				});
+
+				dialog.find('.bootbox-body').empty().append('<pre id="json<?php echo $this->id?>">' + str + '</pre>');
+
+				dialog.modal('show');
+			});
+		});
+		</script>
+		<?php
+
+		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . $this->name . '</a>';
 	}
 
 	/**

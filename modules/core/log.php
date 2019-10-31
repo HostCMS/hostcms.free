@@ -18,25 +18,25 @@ class Core_Log
 	 * @var int
 	 */
 	static public $MESSAGE = 0;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
 	static public $SUCCESS = 1;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
 	static public $NOTICE = 2;
-	
+
 	/**
 	 * Backend property
 	 * @var int
 	 */
 	static public $WARNING = 3;
-	
+
 	/**
 	 * Backend property
 	 * @var int
@@ -83,7 +83,7 @@ class Core_Log
 	protected $_status = 0;
 
 	/**
-	 * Set status 
+	 * Set status
 	 * @param string $status status
 	 * @return self
 	 */
@@ -156,7 +156,7 @@ class Core_Log
 
 	/**
 	 * Write message into log
-	 * @param string $message message 
+	 * @param string $message message
 	 * @return self
 	 */
 	public function write($message)
@@ -220,20 +220,25 @@ class Core_Log
 				$this->_login, $this->_site, $page, $user_ip, 'HostCMS', 'www.hostcms.ru'
 			);
 
-			$email = defined('ERROR_EMAIL')
+			$to = defined('ERROR_EMAIL')
 				? ERROR_EMAIL
 				: SUPERUSER_EMAIL;
+
+			$from = defined('SUPERUSER_EMAIL_FROM')
+				? SUPERUSER_EMAIL_FROM
+				: $to;
 
 			$subject = "HostCMS - {$sHttpHost}: " . trim(strip_tags(mb_substr($message, 0, 150)));
 
 			Core_Mail::instance()
-				->to($email)
-				->from($email)
+				->to($to)
+				->from($from)
 				->subject($subject)
 				->message($message_mail)
 				->contentType('text/plain')
 				->header('X-HostCMS-Reason', 'Alert')
 				->header('Precedence', 'bulk')
+				->messageId()
 				->send();
 
 			error_reporting($iErrorLevel);

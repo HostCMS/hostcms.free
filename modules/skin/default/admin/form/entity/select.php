@@ -236,7 +236,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 				Core::factory('Core_Html_Entity_Input')
 					->type("button")
 					->onclick("this.form.filter_{$this->id}.value = '';oSelectFilter{$iFilterCount}.Set('');oSelectFilter{$iFilterCount}.Filter();")
-					->value(Core::_('Admin_Form.input_clear_filter'))
+					->value(Core::_('Admin_Form.clear'))
 					->class('saveButton')
 			)
 			->add(
@@ -248,7 +248,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 			->add(
 				Core::factory('Core_Html_Entity_Label')
 					->for("filter_ignorecase_{$this->id}")
-					->value(Core::_('Admin_Form.input_case_sensitive'))
+					->value(Core::_('Admin_Form.case_sensitive'))
 			)
 			->add(
 				Core::factory('Core_Html_Entity_Script')

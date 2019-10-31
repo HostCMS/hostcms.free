@@ -74,7 +74,7 @@
 			</xsl:if>
 
 			<xsl:if test="count(siteuser) &gt; 0">
-			<img src="/images/user.png" /><span><a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a></span>
+			<img src="/images/user.png" /><span><a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a></span>
 			</xsl:if>
 
 			<xsl:if test="rate/node()">
@@ -268,7 +268,7 @@
 					<xsl:choose>
 						<!-- Review was added an authorized user -->
 						<xsl:when test="count(siteuser) &gt; 0">
-						<span><a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a></span>
+						<span><a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a></span>
 						</xsl:when>
 						<!-- Review was added an unauthorized user -->
 						<xsl:otherwise>

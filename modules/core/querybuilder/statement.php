@@ -94,92 +94,15 @@ abstract class Core_QueryBuilder_Statement
 	}
 
 	/**
-	 * Build JOIN expression
-	 *
-	 * @param array $aJoins
-	 * @return string The SQL query
-	 */
-	protected function _buildJoin(array $aJoins)
-	{
-		$sql = array();
-
-		foreach ($aJoins as $aJoin)
-		{
-			list($type, $table, $column, $expression, $value, $additionalConditions) = $aJoin;
-
-			$table = !is_object($table)
-				? $this->_dataBase->quoteColumnName($table)
-				: $table->build();
-
-			if (!is_null($column))
-			{
-				if (is_null($expression) && is_null($value))
-				{
-					$condition = ' USING (' . $this->_dataBase->quoteColumnName($column) . ')';
-				}
-				else
-				{
-					if (is_null($value))
-					{
-						$expression = $expression !== 'IS' && $expression !== '='
-							? 'IS NOT'
-							: 'IS';
-
-						// Escape value
-						$value = $this->_dataBase->quote($value);
-					}
-					else
-					{
-						$value = $this->_dataBase->quoteColumnName($value);
-					}
-
-					$condition = ' ON ' . $this->_dataBase->quoteColumnName($column) . ' ' . $expression . ' ' . $value;
-
-					if (is_array($additionalConditions) && count($additionalConditions) > 0)
-					{
-						reset($additionalConditions[0]);
-						$key = key($additionalConditions[0]);
-
-						// Warning: Добавить проверку $key на перечень доступных операций (AND, OR и т.д.)
-						$condition .= ' ' . $key . ' ' . $this->_buildExpression($additionalConditions);
-					}
-				}
-			}
-			else
-			{
-				$condition = '';
-			}
-
-			$sql[] = $type . ' ' . $table . $condition;
-		}
-
-		return implode(" \n", $sql);
-	}
-
-	/**
 	 * Quote columns
 	 * @param array $array
 	 * @return array
 	 */
-	protected function quoteColumns(array $array)
+	protected function _quoteColumns(array $array)
 	{
 		foreach ($array as $key => $value)
 		{
-			if (is_array($value) && count($value) == 2 && $this->_isObjectSelect($value[0]))
-			{
-				$value = '(' . $value[0]->build() . ') AS ' . $this->_dataBase->quoteColumnName($value[1]);
-			}
-			elseif ($this->_isObjectSelect($value))
-			{
-				$value = '(' . $value->build() . ')';
-			}
-			else
-			{
-				// Escape column name
-				$value = $this->_dataBase->quoteColumnName($value);
-			}
-
-			$array[$key] = $value;
+			$array[$key] = $this->_dataBase->quoteColumnName($value);
 		}
 
 		return array_unique($array);
@@ -199,7 +122,7 @@ abstract class Core_QueryBuilder_Statement
 
 	/**
 	 * Clear LIMIT
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearLimit()
 	{
@@ -209,7 +132,7 @@ abstract class Core_QueryBuilder_Statement
 
 	/**
 	 * Clear OFFSET
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearOffset()
 	{

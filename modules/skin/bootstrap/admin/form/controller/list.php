@@ -218,7 +218,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		$windowId = $oAdmin_Form_Controller->getWindowId();
 
 		//Core_Event::notify('Admin_Form_Controller.onBeforeShowContent', $this);
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		if ($this->_showFilter)
 		{
@@ -561,7 +566,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				?>
 				<div class="btn-group">
 					<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>"><i class="fa fa-search"></i></a>
-					<a title="<?php echo Core::_('Admin_Form.button_to_clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle"></i></a>
+					<a title="<?php echo Core::_('Admin_Form.clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle"></i></a>
 				</div><?php
 			?></td><?php
 		}
@@ -1152,7 +1157,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			$windowId = $oAdmin_Form_Controller->getWindowId();
 
 			// Текущий пользователь
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
+
+			if (is_null($oUser))
+			{
+				return FALSE;
+			}
 
 			// Доступные действия для пользователя
 			$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);

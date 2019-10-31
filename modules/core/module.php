@@ -448,4 +448,60 @@ abstract class Core_Module
 
 		return $oAdmin_Word_Value;
 	}
+
+	/**
+	 * Report tabs array
+	 * @var array
+	 */
+	protected $_reports = array();
+
+	/**
+	 * Get Module Reports
+	 * @param array $aFields default ('caption', 'captionHTML')
+	 * @param array $aOptions
+	 * @return array
+	 */
+	public function getReports($aFields = array('caption', 'captionHTML'), $aOptions = array())
+	{
+		$aReturn = array();
+
+		Core_Event::notify(get_class($this) . '.onBeforeGetReports', $this, array($this->_reports));
+
+		foreach ($this->_reports as $reportName => $callback)
+		{
+			if (is_callable($callback))
+			{
+				$aReturn[$reportName] = call_user_func($callback, $aFields, $aOptions);
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Add Module Reports
+	 * @param string $reportName Report Name
+	 * @param callback $callback
+	 * @return self
+	 */
+	public function addReport($reportName, $callback)
+	{
+		$this->_reports[$reportName] = $callback;
+
+		return $this;
+	}
+
+	/**
+	 * Get Module Report
+	 * @param string $reportName Report Name
+	 * @param array $aFields default ('caption', 'captionHTML')
+	 * @param array $aOptions
+	 * @return array|NULL
+	 */
+	public function getReport($reportName, $aFields = array('caption', 'captionHTML'), $aOptions = array())
+	{
+		return isset($this->_reports[$reportName])
+			? call_user_func($this->_reports[$reportName], $aFields, $aOptions)
+			: NULL;
+	}
 }

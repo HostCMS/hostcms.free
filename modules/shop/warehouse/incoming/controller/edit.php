@@ -94,7 +94,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainRow2
 			->add(
-				Admin_Form_Entity::factory('Div')				
+				Admin_Form_Entity::factory('Div')
 					->add($oSelectResponsibleUsers)
 					->class('form-group col-xs-12 col-sm-5 col-lg-4')
 			)
@@ -190,58 +190,62 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 					<tbody>
 		';
 
-		$aShop_Warehouse_Incoming_Items = $this->_object->Shop_Warehouse_Incoming_Items->findAll(FALSE);
+		$oSiteAlias = $oShop->Site->getCurrentAlias();
+		$sShopUrl = $oSiteAlias
+			? ($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath()
+			: NULL;
 
 		$index = 0;
 
-		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+		$limit = 100;
+		$offset = 0;
 
-		foreach ($aShop_Warehouse_Incoming_Items as $key => $oShop_Warehouse_Incoming_Item)
-		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Incoming_Item->shop_item_id);
+		do {
+			$oShop_Warehouse_Incoming_Items = $this->_object->Shop_Warehouse_Incoming_Items;
+			$oShop_Warehouse_Incoming_Items->queryBuilder()
+				->limit($limit)
+				->offset($offset)
+				->clearOrderBy()
+				->orderBy('shop_warehouse_incoming_items.id');
 
-			if (!is_null($oShop_Item))
+			$aShop_Warehouse_Incoming_Items = $oShop_Warehouse_Incoming_Items->findAll(FALSE);
+
+			foreach ($aShop_Warehouse_Incoming_Items as $oShop_Warehouse_Incoming_Item)
 			{
-				$oShop_Item = $oShop_Item->shortcut_id
-					? $oShop_Item->Shop_Item
-					: $oShop_Item;
+				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Incoming_Item->shop_item_id);
 
-				$currencyName = $oShop_Item->Shop_Currency->name;
-				$measureName = $oShop_Item->Shop_Measure->name;
-
-				$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_incoming_item_id={$oShop_Warehouse_Incoming_Item->id}");
-
-				$externalLink = '';
-
-				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if (!is_null($oShop_Item))
 				{
-					$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oShop->Structure->getPath()
-						. $oShop_Item->getPath();
+					$oShop_Item = $oShop_Item->shortcut_id
+						? $oShop_Item->Shop_Item
+						: $oShop_Item;
 
-					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_incoming_item_id={$oShop_Warehouse_Incoming_Item->id}");
+
+					$externalLink = $sShopUrl
+						? '<a class="margin-left-5" target="_blank" href="' . $sShopUrl . $oShop_Item->getPath() .  '"><i class="fa fa-external-link"></i></a>'
+						: '';
+
+					$sum = $oShop_Warehouse_Incoming_Item->count * $oShop_Warehouse_Incoming_Item->price;
+
+					$itemTable .= '
+						<tr id="' . $oShop_Warehouse_Incoming_Item->id . '" data-item-id="' . $oShop_Item->id . '">
+							<td class="index">' . ++$index . '</td>
+							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
+							<td><span class="price">' . $oShop_Warehouse_Incoming_Item->price . '</span></td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Incoming_Item->id . '" value="' . $oShop_Warehouse_Incoming_Item->count . '" /></td>
+							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						</tr>
+					';
 				}
-
-				$sum = $oShop_Warehouse_Incoming_Item->count * $oShop_Warehouse_Incoming_Item->price;
-
-				$index = $key + 1;
-
-				$itemTable .= '
-					<tr id="' . $oShop_Warehouse_Incoming_Item->id . '" data-item-id="' . $oShop_Item->id . '">
-						<td class="index">' . $index . '</td>
-						<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-						<td>' . htmlspecialchars($measureName) . '</td>
-						<td><span class="price">' . $oShop_Warehouse_Incoming_Item->price . '</span></td>
-						<td>' . htmlspecialchars($currencyName) . '</td>
-						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Incoming_Item->id . '" value="' . $oShop_Warehouse_Incoming_Item->count . '" /></td>
-						<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
-						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
-					</tr>
-				';
 			}
+
+			$offset += $limit;
 		}
+		while (count($aShop_Warehouse_Incoming_Items));
 
 		$itemTable .= '
 					</tbody>

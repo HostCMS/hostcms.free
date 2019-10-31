@@ -51,9 +51,6 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					change: function (hex, opacity) {
 						if (!hex) return;
 						if (opacity) hex += ', ' + opacity;
-						try {
-							console.log(hex);
-						} catch (e) { }
 					},
 					theme: 'bootstrap'
 				});

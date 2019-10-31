@@ -145,7 +145,7 @@ return array(
 	'shop_order_item_name' => 'Название товара',
 	'shop_order_item_quantity' => 'Кол-во',
 	'shop_order_item_price' => 'Цена',
-	'shop_order_item_rate' => 'Налог',
+	'shop_order_item_rate' => 'Налог, %',
 	'shop_order_item_type' => 'Тип товара',
 	'shop_order_item_marking' => 'Артикул',
 	'shop_order_item_warehouse' => 'Склад',

@@ -46,6 +46,7 @@ if (Core::moduleIsActive('ipaddress'))
 
 ob_start();
 
+Core_Session::start();
 if (!is_null(Core_Array::getGet('skinName')))
 {
 	$skinName = Core_Array::getGet('skinName');

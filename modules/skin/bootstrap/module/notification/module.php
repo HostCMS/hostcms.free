@@ -47,7 +47,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 
-		$oCurrent_User = Core_Entity::factory('User', 0)->getCurrent();
+		$oCurrent_User = Core_Auth::getCurrentUser();
 		$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
 
 		switch ($type)
@@ -68,7 +68,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				}
 
 				$aJson = array();
-				
+
 				// Идентификатор последнего загруженного уведомления для пользователя
 				$iLastNotificationId = intval(Core_Array::getPost('lastNotificationId'));
 
@@ -88,22 +88,13 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					$oNotifications->queryBuilder()
 						->select('notifications.*', array('notification_users.read', 'read'))
 						->orderBy('notifications.id', 'ASC');
-						//->orderBy('datetime');
 
 					// При наличии ранее загруженных уведомлений загружаем новые и непрочитанные
 					if ($iLastNotificationId)
 					{
 						$oNotifications->queryBuilder()
-							//->where('notification_users.read', '=', 0)
-							//->where('notifications.id', '>', $iLastNotificationId)
-							->open()
-							// Больше уже выведенного
 							->where('notifications.id', '>', $iLastNotificationId)
-							->setOr()
-							// Непрочитанные
-							->where('notification_users.read', '=', 0)
-							->close();
-
+							->where('notification_users.read', '=', 0);
 					}
 					else // При отсутствии ранее загруженных уведомлений загружаем непрочитанные
 					{
@@ -111,7 +102,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							->where('notification_users.read', '=', 0);
 					}
 
-					$aNotifications = $oNotifications->findAll();
+					$aNotifications = $oNotifications->findAll(FALSE);
 
 					// Уведомления пользователя
 					foreach ($aNotifications as $oNotification)
@@ -152,7 +143,6 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 						{
 							$aJson['unreadNotifications'][] = $aNotification;
 						}
-
 					}
 
 					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;

@@ -465,6 +465,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									$oTmpObject->queryBuilder()
 										->where('parent_id', '=', $oTmpParentObject->id)
 										->where('name', '=', $sData)
+										->where('shortcut_id', '=', 0)
 										->limit(1);
 								}
 								else
@@ -473,6 +474,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									$oTmpObject->queryBuilder()
 										->where('parent_id', '=', intval($this->_oCurrentGroup->id))
 										->where('name', '=', $sData)
+										->where('shortcut_id', '=', 0)
 										->limit(1);
 								}
 
@@ -838,6 +840,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								$oTmpObject = $this->_oCurrentInformationsystem->Informationsystem_Groups;
 								$oTmpObject->queryBuilder()
 									->where('guid', '=', $sData)
+									->where('shortcut_id', '=', 0)
 									->limit(1);
 
 								$oTmpObject = $oTmpObject->findAll(FALSE);
@@ -1227,7 +1230,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 										$oProperty_Value->setValue($sData);
 									break;
 									case 11: // Float
-										$sData = Shop_Controller::instance()->convertFloat($sData);
+										$sData = Shop_Controller::convertDecimal($sData);
 										$oProperty_Value->setValue($sData);
 									break;
 									case 12: // Shop
@@ -1371,7 +1374,8 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 					$oInformationsystem_Groups = $this->_oCurrentInformationsystem->Informationsystem_Groups;
 					$oInformationsystem_Groups
 						->queryBuilder()
-						->where('guid', 'IN', $this->_aAdditionalGroups);
+						->where('guid', 'IN', $this->_aAdditionalGroups)
+						->where('shortcut_id', '=', 0);
 
 					$aInformationsystem_Groups = $oInformationsystem_Groups->findAll(FALSE);
 
@@ -1903,7 +1907,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 						case 11: // Float
-							$sPropertyValue = Shop_Controller::instance()->convertFloat($sPropertyValue);
+							$sPropertyValue = Shop_Controller::convertDecimal($sPropertyValue);
 							$oProperty_Value->setValue($sPropertyValue);
 						break;
 						case 12: // Shop

@@ -60,28 +60,29 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 
 		$index = $this->position % $count;
 
+		$bHasSubmenu = !empty($this->_children);
+		$bHasName = strlen($this->name) > 0;
+
 		$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
 
 		strlen($this->href) && $oCore_Html_Entity_A->href($this->href);
 		strlen($this->onclick) && $oCore_Html_Entity_A->onclick($this->onclick);
 		!is_null($this->target) && $oCore_Html_Entity_A->target($this->target);
 		strlen($this->icon) && $oCore_Html_Entity_A->add(
-			Core::factory('Core_Html_Entity_I')->class("{$this->icon} icon-separator")
+			Core::factory('Core_Html_Entity_I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
 		);
 		
 		$bTop && $oCore_Html_Entity_A
 			->class("btn {$aFirstColors[$index]}");
-		
-		$bHasSubmenu = !empty($this->_children);
-		
+
 		$bHasSubmenu && $oCore_Html_Entity_A
 			->set('data-toggle', 'dropdown');
 
-		$oCore_Html_Entity_A->add(
-			Core::factory('Core_Html_Entity_Code')
-				->value(htmlspecialchars($this->name))
-		)
-		->execute();
+		$bHasName && $oCore_Html_Entity_A->add(
+			Core::factory('Core_Html_Entity_Code')->value(htmlspecialchars($this->name))
+		);
+		
+		$oCore_Html_Entity_A->execute();
 
 		if (!$this->href && !$this->onclick)
 		{

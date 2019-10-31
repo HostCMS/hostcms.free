@@ -828,8 +828,8 @@ background:linear-gradient(top,#FFE707 0,#FFD012);
 .hostcms6 .helpdesk_not_processed{font-weight: bold}
 .hostcms6 .helpdesk_critical_level{color:#777;cursor:pointer;white-space:nowrap}
 .hostcms6 img.attachment, .hostcms6 div.helpdeskAttachment img, .hostcms6 span.helpdeskMessageSubject img {margin-bottom:-3px;margin-right:5px}
-.hostcms6 div.helpdeskAttachment{margin-top:5px;}
-.hostcms6 .helpdeskMessage{border:1px solid #F2F0EB; margin:5px 0; padding:5px;border-radius: 5px}
+.hostcms6 div.helpdeskAttachment{margin-top:5px }
+.hostcms6 .helpdeskMessage{border:1px solid #F2F0EB; margin:5px 0; padding:5px;border-radius: 5px; }
 .hostcms6 .helpdeskPadding{margin-left:10px}
 .hostcms6 .helpdeskMessageSubject{font-weight: bold}
 

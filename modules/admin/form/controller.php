@@ -67,7 +67,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		if (!class_exists($className))
 		{
 			throw new Core_Exception("Class '%className' does not exist",
-					array('%className' => $className));
+				array('%className' => $className));
 		}
 
 		return new $className($oAdmin_Form);
@@ -272,7 +272,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			->window($formSettings['window'])
 			->ajax(Core_Array::get($this->request, '_', FALSE));
 
-		$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+		$oUserCurrent = Core_Auth::getCurrentUser();
 
 		if ($oUserCurrent && $this->_Admin_Form)
 		{
@@ -577,7 +577,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				);
 			}*/
 
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+			$oUserCurrent = Core_Auth::getCurrentUser();
 			$user_id = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 
 			$this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($user_id);
@@ -1074,10 +1074,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$viewAdmin_Form_Controller->execute();
 
 		Core_Event::notify('Admin_Form_Controller.onAfterShowContent', $this);
-		// ---------------------------
 
 		$this
-			//->addContent($this->_getForm())
 			->addContent(ob_get_clean());
 
 		return $this;
@@ -1103,7 +1101,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			try
 			{
 				// Текущий пользователь
-				$oUser = Core_Entity::factory('User')->getCurrent();
+				$oUser = Core_Auth::getCurrentUser();
+
+				if (is_null($oUser))
+				{
+					return FALSE;
+				}
 
 				// Read Only режим
 				if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)
@@ -1288,7 +1291,12 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$path = Core_Str::escapeJavascriptVariable($this->getPath());
 
 		// Текущий пользователь
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		// Доступные действия для пользователя
 		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
@@ -2537,6 +2545,4 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		return $oAdmin_Form_Field_Changed;
 	}
-
-	abstract protected function _getForm();
 }

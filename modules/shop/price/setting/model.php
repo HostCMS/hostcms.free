@@ -46,8 +46,8 @@ class Shop_Price_Setting_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['posted'] = 1;
 		}
@@ -63,10 +63,7 @@ class Shop_Price_Setting_Model extends Core_Entity
 	{
 		ob_start();
 
-		// Ответственный по сделке
-		$oUser = $this->User;
-
-		echo '<div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="' . $oUser->getAvatar() .'" /></div><div class="user-name"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div></div>';
+		$this->User->id && $this->User->showAvatarWithName();
 
 		return ob_get_clean();
 	}
@@ -152,32 +149,48 @@ class Shop_Price_Setting_Model extends Core_Entity
 
 			unset($aShop_Price_Entries);
 
-			$aShop_Price_Setting_Items = $this->Shop_Price_Setting_Items->findAll(FALSE);
-			foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
-			{
-				if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
+			$limit = 500;
+			$offset = 0;
+
+			do {
+				$oShop_Price_Setting_Items = $this->Shop_Price_Setting_Items;
+				$oShop_Price_Setting_Items->queryBuilder()
+					->limit($limit)
+					->offset($offset)
+					->clearOrderBy()
+					->orderBy('id', 'ASC');
+
+				$aShop_Price_Setting_Items = $oShop_Price_Setting_Items->findAll(FALSE);
+
+				foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
 				{
-					$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
-				}
-				else
-				{
-					$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
-					$oShop_Price_Entry->setDocument($this->id, 0);
-					$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
+					if (isset($aTmp[$oShop_Price_Setting_Item->shop_item_id]))
+					{
+						$oShop_Price_Entry = $aTmp[$oShop_Price_Setting_Item->shop_price_id][$oShop_Price_Setting_Item->shop_item_id];
+					}
+					else
+					{
+						$oShop_Price_Entry = Core_Entity::factory('Shop_Price_Entry');
+						$oShop_Price_Entry->setDocument($this->id, 0);
+						$oShop_Price_Entry->shop_item_id = $oShop_Price_Setting_Item->shop_item_id;
+					}
+
+					$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
+					$oShop_Price_Entry->datetime = $this->datetime;
+					$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
+					$oShop_Price_Entry->save();
+
+					// Update price
+					$Shop_Price_Entry_Controller->setPrice(
+						$oShop_Price_Setting_Item->shop_price_id,
+						$oShop_Price_Setting_Item->shop_item_id,
+						$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
+					);
 				}
 
-				$oShop_Price_Entry->shop_price_id = $oShop_Price_Setting_Item->shop_price_id;
-				$oShop_Price_Entry->datetime = $this->datetime;
-				$oShop_Price_Entry->value = $oShop_Price_Setting_Item->new_price;
-				$oShop_Price_Entry->save();
-
-				// Update price
-				$Shop_Price_Entry_Controller->setPrice(
-					$oShop_Price_Setting_Item->shop_price_id,
-					$oShop_Price_Setting_Item->shop_item_id,
-					$Shop_Price_Entry_Controller->getPrice($oShop_Price_Setting_Item->shop_price_id, $oShop_Price_Setting_Item->shop_item_id)
-				);
+				$offset += $limit;
 			}
+			while (count($aShop_Price_Setting_Items));
 
 			$this->posted = 1;
 			$this->save();

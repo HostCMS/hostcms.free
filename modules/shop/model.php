@@ -120,7 +120,7 @@ class Shop_Model extends Core_Entity
 		'producer_image_small_max_height' => 100,
 		'producer_image_large_max_height' => 800,
 		'discountcard_template' => '{this.id}',
-		'invoice_template' => '{this.invoice}'
+		'invoice_template' => '{this.id}'
 	);
 
 	/**
@@ -135,6 +135,7 @@ class Shop_Model extends Core_Entity
 		'shop_currency' => array(),
 		'shop_order_status' => array(),
 		'shop_measure' => array(),
+		'default_shop_measure' => array('model' => 'Shop_Measure', 'foreign_key' => 'default_shop_measure_id'),
 		'user' => array(),
 		'siteuser_group' => array(),
 		'shop_company' => array(), // old relation
@@ -239,8 +240,8 @@ class Shop_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['site_id'] = defined('CURRENT_SITE') ? CURRENT_SITE : 0;
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
@@ -1043,5 +1044,24 @@ class Shop_Model extends Core_Entity
 	public function pathBackend()
 	{
 		$this->structure_id && $this->Structure->pathBackend();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function rebuildBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$return = '';
+
+		if ($this->filter)
+		{
+			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
+			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
+
+			$return = '<a href="' . $href . '" onclick="' . $onclick . '"><i class="fa fa-refresh"></i></a>';
+		}
+
+		return $return;
 	}
 }

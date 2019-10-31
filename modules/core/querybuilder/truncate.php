@@ -71,6 +71,6 @@ class Core_QueryBuilder_Truncate extends Core_QueryBuilder_Statement
 	 */
 	public function build()
 	{
-		return 'TRUNCATE TABLE ' . $this->_dataBase->quoteColumnName($this->_table);
+		return 'TRUNCATE TABLE ' . $this->_dataBase->quoteTableName($this->_table);
 	}
 }

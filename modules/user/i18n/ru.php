@@ -51,6 +51,8 @@ return array(
 	'markDeleted_success' => 'Сотрудник успешено удален',
 	'markDeleted_error' => 'Ошибка! Сотрудник не удален!',
 	'edit_success' => 'Информация о сотруднике изменена!',
+	'editUserDepartment_success' => 'Информация о должности сотрудника в отделе изменена.',
+	'deleteUserFromDepartment_success' => 'Сотрудник удален с должности.',
 	'changeActive_success' => "Информация успешно изменена",
 	'apply_success' => 'Информация изменена!',
 	'error_superuser' => 'Ошибка! В системе должен быть хотя бы один superuser!',

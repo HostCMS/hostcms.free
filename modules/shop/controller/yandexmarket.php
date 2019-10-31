@@ -8,7 +8,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
- * - forbiddenTags(array('description')) массив тегов, запрещенных к передаче в генерируемый YML.
+ * - additionalImages(array()) массив tag_name дополнительных свойств для изображений.
+ * - addForbiddenTag(name) добавить тег, запрещенный к передаче в генерируемый YML.
+ * - addForbiddenTags(array('description', 'vendor')) массив тегов, запрещенных к передаче в генерируемый YML.
+ * - removeForbiddenTag(name) удалить тег из списка запрещенных к передаче в генерируемый YML.
  * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
  * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
@@ -77,6 +80,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'delay',
 		'utm_source',
 		'utm_medium',
+		'additionalImages',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -327,6 +331,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->sno = 'OSN';
 		$this->delay = 0;
 
+		$this->additionalImages = NULL;
+
 		Core_Session::close();
 	}
 
@@ -342,6 +348,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->_Shop_Groups
 			->queryBuilder()
 			->where('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+			->where('shop_groups.shortcut_id', '=', 0)
 			//->where('shop_groups.active', '=', 1)
 			->clearOrderBy()
 			->orderBy('shop_groups.parent_id', 'ASC');
@@ -775,6 +782,29 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		if ($oShop_Item->image_large != '')
 		{
 			$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Item->getLargeFileHref()) . '</picture>'. "\n");
+		}
+
+		if (is_array($this->additionalImages))
+		{
+			$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
+
+			foreach ($this->additionalImages as $tag_name)
+			{
+				$oProperty = $linkedObject->Properties->getByTag_name($tag_name);
+
+				if ($oProperty->type == 2)
+				{
+					$aProperty_Values = $oProperty->getValues($oShop_Item->id);
+
+					foreach ($aProperty_Values as $oProperty_Value)
+					{
+						if ($oProperty_Value->file != '')
+						{
+							$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Item->getItemHref()) . $oProperty_Value->file . '</picture>'. "\n");
+						}
+					}
+				}
+			}
 		}
 
 		/* Delivery options */

@@ -534,12 +534,14 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get count object
 	 * @param boolean $bCache use cache, default TRUE
+	 * @param string $fieldName default '*'
+	 * @param boolean $distinct default FALSE
 	 * @return int
 	 */
-	public function getCount($bCache = TRUE)
+	public function getCount($bCache = TRUE, $fieldName = '*', $distinct = FALSE)
 	{
 		$this->applyMarksDeleted();
-		return parent::getCount($bCache);
+		return parent::getCount($bCache, $fieldName, $distinct);
 	}
 
 	/**
@@ -731,7 +733,7 @@ class Core_Entity extends Core_ORM
 		foreach ($this->_childrenEntities as $oChildEntity)
 		{
 			$childName = $oChildEntity instanceof Core_ORM
-				? $oChildEntity->getModelName()
+				? $oChildEntity->getXmlTagName()
 				: $oChildEntity->name;
 
 			$childArray = $oChildEntity->getStdObject($attributePrefix);

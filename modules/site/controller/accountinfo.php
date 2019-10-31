@@ -37,7 +37,7 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRow1->add(Admin_Form_Entity::factory('Input')
 			->caption(Core::_("Site.accountinfo_login"))
-			->divAttr(array('class'=>'form-group col-xs-12 col-md-6'))
+			->divAttr(array('class'=>'form-group col-xs-12 col-sm-10 col-md-8 col-lg-6'))
 			->name("HOSTCMS_USER_LOGIN")
 			->value(defined('HOSTCMS_USER_LOGIN')
 				? HOSTCMS_USER_LOGIN
@@ -46,7 +46,7 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRow2->add(Admin_Form_Entity::factory('Input')
 			->caption(Core::_("Site.accountinfo_contract_number"))
-			->divAttr(array('class'=>'form-group col-xs-12 col-md-6'))
+			->divAttr(array('class'=>'form-group col-xs-12 col-sm-10 col-md-8 col-lg-6'))
 			->name("HOSTCMS_CONTRACT_NUMBER")
 			->value(defined('HOSTCMS_CONTRACT_NUMBER')
 				? HOSTCMS_CONTRACT_NUMBER
@@ -55,7 +55,7 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRow3->add(Admin_Form_Entity::factory('Input')
 			->caption(Core::_("Site.accountinfo_pin_code"))
-			->divAttr(array('class'=>'form-group col-xs-12 col-md-6'))
+			->divAttr(array('class'=>'form-group col-xs-12 col-sm-10 col-md-8 col-lg-6'))
 			->name("HOSTCMS_PIN_CODE")
 			->value(defined('HOSTCMS_PIN_CODE')
 				? HOSTCMS_PIN_CODE

@@ -240,7 +240,7 @@ if ($this->_mode != 'blank')
 	{
 	?><div id="logout">
 		<div><a href="/admin/logout.php"><img src="<?php echo $this->getImageHref()?>logout.png"></img></a></div>
-		<div id="login"><a href="/admin/logout.php"><?php echo Core_Entity::factory('User')->getCurrent()->login?></a></div>
+		<div id="login"><a href="/admin/logout.php"><?php echo Core_Auth::getCurrentUser()->login?></a></div>
 	</div><?php
 	}
 	?></div><?php
@@ -438,7 +438,7 @@ if ($this->_mode != 'blank')
 		}
 		$this->_mode = 'index';
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		if (is_null($oUser))
 		{
@@ -906,6 +906,14 @@ if ($this->_mode != 'blank')
 		?>
 	</body>
 	</html><?php
+	}
+
+	/**
+	 * Show Front End panels
+	 */
+	public function frontend()
+	{
+		// do smth.
 	}
 
 	/**

@@ -125,8 +125,8 @@ class Property_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
@@ -308,6 +308,15 @@ class Property_Model extends Core_Entity
 		{
 			$nodeName = 'Shop_Item';
 			$methodName = 'getItemPath';
+
+			// Fast filter
+			if ($this->Shop_Item_Property->Shop->filter && $this->Shop_Item_Property->filter)
+			{
+				$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop_Item_Property->Shop);
+
+				$Shop_Filter_Controller->checkPropertyExist($this->id)
+					&& $Shop_Filter_Controller->removeProperty($this);
+			}
 		}
 		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Group_Property->id))
 		{
@@ -367,6 +376,7 @@ class Property_Model extends Core_Entity
 	{
 		$newObject = clone $this;
 		//$newObject->name .= ' [Копия от ' . date('d.m.Y H:i:s') . ']';
+		$newObject->guid = Core_Guid::get();
 		$newObject->save();
 
 		if ($bCopyRelation)

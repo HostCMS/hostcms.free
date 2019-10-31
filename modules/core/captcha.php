@@ -132,7 +132,7 @@ class Core_Captcha
 	 */
 	static public function getCaptchaId()
 	{
-		$max = 99999;
+		/*$max = 99999;
 
 		$maxValue = isset($_SESSION)
 			? count($_SESSION) + $max
@@ -146,7 +146,8 @@ class Core_Captcha
 			$i++;
 		}
 
-		return $captchaId;
+		return $captchaId;*/
+		return Core::generateUniqueId();
 	}
 
 	/**
@@ -166,7 +167,7 @@ class Core_Captcha
 		{
 			$return = $value == $_SESSION['captcha_' . $captchaId];
 
-			unset ($_SESSION['captcha_' . $captchaId]);
+			unset($_SESSION['captcha_' . $captchaId]);
 			return $return;
 		}
 
@@ -522,6 +523,7 @@ class Core_Captcha
 		header('Cache-Control: no-store, no-cache, must-revalidate');
 		header('Cache-Control: post-check=0, pre-check=0', FALSE);
 		header('Pragma: no-cache');
+		header('X-Powered-By: HostCMS');
 
 		// Масштабируем базовое изображение до необходимого
 		$img3 = imagecreatetruecolor(self::$_config['width'], self::$_config['height']);

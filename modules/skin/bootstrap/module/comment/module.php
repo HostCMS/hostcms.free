@@ -123,7 +123,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 			->limit(5);
 
 		// Права доступа пользователя к комментариям
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 		if ($oUser->superuser == 0 && $oUser->only_access_my_own == 1)
 		{
 			$oComments
@@ -263,7 +263,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 	protected function _shopContent()
 	{
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		$oComments = Core_Entity::factory('Comment');
 		$oComments->queryBuilder()

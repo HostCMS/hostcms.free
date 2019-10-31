@@ -123,9 +123,40 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$oMainRow4->add($CountryLocationCityAreasSelectField);
 
+		$oAdditionalTab->delete($this->getField('shop_warehouse_type_id'));
+
+		$aWarehouseTypes = array('...');
+
+		$aShop_Warehouse_Types = Core_Entity::factory('Shop_Warehouse_Type')->findAll(FALSE);
+		foreach ($aShop_Warehouse_Types as $oShop_Warehouse_Type)
+		{
+			$aWarehouseTypes[$oShop_Warehouse_Type->id] = $oShop_Warehouse_Type->name;
+		}
+
+		$ShopWarehouseTypeSelectField = Admin_Form_Entity::factory('Select')
+			->name('shop_warehouse_type_id')
+			->caption(Core::_('Shop_Warehouse.shop_warehouse_type'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->options($aWarehouseTypes)
+			->value($this->_object->shop_warehouse_type_id);
+
+		$oMainRow5->add($ShopWarehouseTypeSelectField);
+
+		$oAdditionalTab->delete($this->getField('shop_company_id'));
+
+		// Добавляем компании
+		$oCompaniesField = Admin_Form_Entity::factory('Select')
+			->name('shop_company_id')
+			->caption(Core::_('Shop.shop_company_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->options($this->_fillCompanies())
+			->value($this->_object->shop_company_id);
+
+		$oMainRow6->add($oCompaniesField);
+
 		$oMainTab
-			->move($this->getField('address')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
-			->move($this->getField('name_other')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
+			->move($this->getField('address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow5)
+			->move($this->getField('name_other')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow6)
 			->move($this->getField('address_info')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7)
 			->move($this->getField('working_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
 			->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
@@ -145,7 +176,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->caption(Core::_("Shop_Warehouse.warehouse_default_count"))
 			->name("warehouse_default_count");
 
-		$oMainRow11->add($oShopItemCountCheckBox);							
+		$oMainRow11->add($oShopItemCountCheckBox);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Warehouse.form_warehouses_edit', $this->_object->name)
@@ -228,5 +259,27 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		}
 
 		return $aReturn;
+	}
+
+	/**
+	 * Get companies array
+	 * @return array
+	 */
+	protected function _fillCompanies()
+	{
+		$oCompany = Core_Entity::factory('Shop_Company');
+
+		$oCompany->queryBuilder()
+			->orderBy('name');
+
+		$aCompanies = $oCompany->findAll();
+
+		$aCompanyArray = array(' … ');
+		foreach ($aCompanies as $oCompany)
+		{
+			$aCompanyArray[$oCompany->id] = $oCompany->name;
+		}
+
+		return $aCompanyArray;
 	}
 }

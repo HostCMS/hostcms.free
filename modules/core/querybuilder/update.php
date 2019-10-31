@@ -209,7 +209,7 @@ class Core_QueryBuilder_Update extends Core_QueryBuilder_Selection
 			$sql .= ' IGNORE';
 		}
 
-		$sql .= ' ' . implode(', ', $this->quoteColumns($this->_tableName));
+		$sql .= ' ' . implode(', ', $this->_quoteTables($this->_tableName));
 		
 		if (!empty($this->_join))
 		{

@@ -25,9 +25,13 @@ class Shop_Item_Associated_Controller_Apply extends Admin_Form_Action_Controller
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
+	 * @hostcms-event Shop_Item_Associated_Controller_Apply.onBeforeExecute
+	 * @hostcms-event Shop_Item_Associated_Controller_Apply.onAfterExecute
 	 */
 	public function execute($operation = NULL)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($this->_object));
+
 		// Получение списка полей объекта
 		$aColumns = $this->_object->getTableColumns();
 
@@ -61,5 +65,7 @@ class Shop_Item_Associated_Controller_Apply extends Admin_Form_Action_Controller
 				$oShopItemAssociated->save();
 			}
 		}
+
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($this->_object));
 	}
 }

@@ -52,7 +52,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 		Core_Session::close();
 
-		$oUser = Core_Entity::factory('User', 0)->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
 
 		switch ($type)
 		{
@@ -121,7 +121,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					$oEvent->start = Core_Date::timestamp2sql($iCurrentTimestamp);
 					$oEvent->save();
 
-					$oUser = Core_Entity::factory('User', 0)->getCurrent();
+					$oUser = Core_Auth::getCurrentUser();
 
 					$oEventUser = Core_Entity::factory('Event_User')
 						->user_id($oUser->id)
@@ -233,7 +233,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					<div class="tasks-list-container">
 						<ul class="tasks-list">
 						<?php
-						$oUser = Core_Entity::factory('User')->getCurrent();
+						$oUser = Core_Auth::getCurrentUser();
 
 						// Дела пользователя (сотрудника)
 						$oEvents = $oUser->Events;

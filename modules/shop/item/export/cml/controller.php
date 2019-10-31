@@ -60,11 +60,24 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 			$group->description != ''
 				&& $xml->addChild('Описание', $group->description);
 
-			$aShop_Groups = $group->Shop_Groups->findALL(FALSE);
+			// $aShop_Groups = $group->Shop_Groups->findAll(FALSE);
+
+			$oShop_Groups = $group->Shop_Groups;
+			$oShop_Groups->queryBuilder()
+				->where('shop_groups.shortcut_id', '=', 0);
+
+			$aShop_Groups = $oShop_Groups->findAll(FALSE);
 		}
 		else
 		{
-			$aShop_Groups = $this->shop->Shop_Groups->getAllByParent_id(0, FALSE);
+			// $aShop_Groups = $this->shop->Shop_Groups->getAllByParent_id(0, FALSE);
+
+			$oShop_Groups = $this->shop->Shop_Groups;
+			$oShop_Groups->queryBuilder()
+				->where('shop_groups.parent_id', '=', 0)
+				->where('shop_groups.shortcut_id', '=', 0);
+
+			$aShop_Groups = $oShop_Groups->findAll(FALSE);
 		}
 
 		if (count($aShop_Groups))

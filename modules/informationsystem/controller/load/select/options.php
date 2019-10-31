@@ -15,6 +15,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
 	/**
+	 * Get Shop_Item option name
+	 * @param Informationsystem_Item_Model $oInformationsystem_Item
+	 * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
+	 */
+	static public function getOptionName(Informationsystem_Item_Model $oInformationsystem_Item)
+	{
+		Core_Event::notify('Informationsystem_Controller_Load_Select_Options.onGetOptionName', $oInformationsystem_Item);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
+		return $oInformationsystem_Item->name;
+	}
+
+	/**
 	 * Add value
 	 * @return self
 	 */
@@ -24,13 +43,8 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 		{
 			$oTmp = new stdClass();
 			$oTmp->value = $Object->id;
-			$oTmp->name = !$Object->shortcut_id
-				? $Object->name
-				: $Object->Informationsystem_Item->name;
+			$oTmp->name = self::getOptionName(!$Object->shortcut_id ? $Object : $Object->Informationsystem_Item);
 
-			/*$this->_values[$Object->id] = !$Object->shortcut_id
-				? $Object->name
-				: $Object->Informationsystem_Item->name;*/
 			$this->_values[] = $oTmp;
 		}
 

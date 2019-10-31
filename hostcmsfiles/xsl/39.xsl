@@ -458,7 +458,7 @@
 				<td>
 					<!-- Средства сообщения с автором сообщения -->
 					<xsl:if test="siteuser/node()">
-					<a href="/users/info/{siteuser/login}/">&labelProfile;</a><xsl:text> | </xsl:text>
+					<a href="/users/info/{siteuser/path}/">&labelProfile;</a><xsl:text> | </xsl:text>
 					&labelCountMessages; <xsl:value-of select="siteuser/messages_count"/><xsl:text> | </xsl:text>
 					</xsl:if>
 					&labelDate; <xsl:value-of select="datetime"/>

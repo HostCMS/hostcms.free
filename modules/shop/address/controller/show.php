@@ -63,8 +63,16 @@ class Shop_Address_Controller_Show extends Core_Controller
 			}
 		}
 
-		$this->countries = TRUE;
-		$this->orderProperties = TRUE;
+		$this->countries = $this->orderProperties = TRUE;
+		
+		if (Core_Session::hasSessionId())
+		{
+			Core_Session::start();
+			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+			 {
+				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			 }
+		}
 	}
 
 	/**

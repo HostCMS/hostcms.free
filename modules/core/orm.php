@@ -410,7 +410,7 @@ class Core_ORM
 	/**
 	 * Find object in database and load one. Use clear() before find() with conditions!
 	 * @param mixed $primaryKey default NULL
-	 * @param bool $bCache use cache
+	 * @param boolean $bCache use cache
 	 * <code>
 	 * // Find an object and load (without lazy load)
 	 * // If an object is not found, primary key sets NULL
@@ -471,7 +471,7 @@ class Core_ORM
 
 	/**
 	 * Find all objects
-	 * @param bool $bCache use cache, default TRUE
+	 * @param boolean $bCache use cache, default TRUE
 	 * <code>
 	 * // Find objects
 	 * $aBooks = Core_ORM::factory('Book')->findAll();
@@ -531,7 +531,7 @@ class Core_ORM
 
 	/**
 	 * Delete all object
-	 * @param bool $bCache use cache
+	 * @param boolean $bCache use cache
 	 * <code>
 	 * Core_ORM::factory('Book')->Comments->deleteAll();
 	 * </code>
@@ -558,20 +558,26 @@ class Core_ORM
 
 	/**
 	 * Get count object
-	 * @param bool $bCache use cache, default TRUE
+	 * @param boolean $bCache use cache, default TRUE
+	 * @param string $fieldName default '*'
+	 * @param boolean $distinct default FALSE
 	 * @return int
 	 * <code>
 	 * $iCount = Core_ORM::factory('Book')->getCount();
 	 * var_dump($iCount);
 	 * </code>
 	 */
-	public function getCount($bCache = TRUE)
+	public function getCount($bCache = TRUE, $fieldName = '*', $distinct = FALSE)
 	{
 		$aRow = $this->queryBuilder()
 			->clearSelect()
 			->clearLimit()
 			->clearOffset()
-			->select(array('COUNT(*)', 'count'))
+			->select(array($fieldName == '*' && !$distinct
+					? 'COUNT(*)'
+					: Core_QueryBuilder::expression('COUNT(' . ($distinct ? 'DISTINCT ' : '') . $this->getDatabase()->quoteColumnName($fieldName) . ')')
+				, 'count')
+			)
 			->from($this->_tableName)
 			->execute()
 			->asAssoc()
@@ -582,7 +588,7 @@ class Core_ORM
 
 	/**
 	 * Get fist entity, ordered by primary key
-	 * @param bool $bCache use cache, default TRUE
+	 * @param boolean $bCache use cache, default TRUE
 	 * @return NULL|Core_ORM
 	 * <code>
 	 * $mObject = Core_ORM::factory('Book')->getFirst();
@@ -605,7 +611,7 @@ class Core_ORM
 
 	/**
 	 * Get last entity, ordered by primary key
-	 * @param bool $bCache use cache, default TRUE
+	 * @param boolean $bCache use cache, default TRUE
 	 * @return NULL|Core_ORM
 	 * <code>
 	 * $mObject = Core_ORM::factory('Book')->getLast();
@@ -1957,11 +1963,18 @@ class Core_ORM
 
 		if (!empty($this->_modelColumns))
 		{
+			// Model data
 			foreach ($this->_modelColumns as $key => $value)
 			{
 				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
 			}
-
+			
+			// 'dataXXX' values
+			foreach ($this->_dataValues as $key => $value)
+			{
+				$return[] = htmlspecialchars($key) . '=' . htmlspecialchars($value);
+			}
+			
 			return "Model '" . $this->_modelName . "',\nfields: " . implode(",\n", $return);
 		}
 

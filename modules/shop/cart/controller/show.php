@@ -136,6 +136,17 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			= $this->applyDiscounts = $this->applyDiscountCards = TRUE;
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
+
+		if (Core_Session::hasSessionId())
+		{
+			Core_Session::start();
+			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
+			 {
+				 $this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
+
+				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			 }
+		}
 	}
 
 	/**
@@ -384,7 +395,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			// Скидка больше суммы заказа
 			$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
 		}
-		
+
 		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
 		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
 		{

@@ -115,8 +115,8 @@ class Shop_Order_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 
 			$this->_preloadValues['guid'] = Core_Guid::get();
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
@@ -1058,8 +1058,11 @@ class Shop_Order_Model extends Core_Entity
 
 					if ($oShop_Item_Digital->id)
 					{
-						$oShop_Item_Digital->count += $oShop_Order_Item->quantity;
-						$oShop_Item_Digital->save();
+						if ($oShop_Item_Digital->count != -1)
+						{
+							$oShop_Item_Digital->count += $oShop_Order_Item->quantity;
+							$oShop_Item_Digital->save();
+						}
 
 						$oShop_Order_Item_Digital->delete();
 					}

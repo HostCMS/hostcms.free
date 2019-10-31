@@ -182,63 +182,70 @@ class Shop_Warehouse_Movement_Controller_Edit extends Admin_Form_Action_Controll
 					<tbody>
 		';
 
-		$index = 0;
+		$oSiteAlias = $oShop->Site->getCurrentAlias();
+		$sShopUrl = $oSiteAlias
+			? ($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath()
+			: NULL;
 
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
 
-		$aShop_Warehouse_Movement_Items = $this->_object->Shop_Warehouse_Movement_Items->findAll(FALSE);
-		foreach ($aShop_Warehouse_Movement_Items as $key => $oShop_Warehouse_Movement_Item)
-		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Movement_Item->shop_item_id);
+		$index = 0;
 
-			if (!is_null($oShop_Item))
+		$limit = 100;
+		$offset = 0;
+
+		do {
+			$oShop_Warehouse_Movement_Items = $this->_object->Shop_Warehouse_Movement_Items;
+			$oShop_Warehouse_Movement_Items->queryBuilder()
+				->limit($limit)
+				->offset($offset)
+				->clearOrderBy()
+				->orderBy('shop_warehouse_movement_items.id');
+
+			$aShop_Warehouse_Movement_Items = $oShop_Warehouse_Movement_Items->findAll(FALSE);
+
+			foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
 			{
-				$oShop_Item = $oShop_Item->shortcut_id
-					? $oShop_Item->Shop_Item
-					: $oShop_Item;
+				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Movement_Item->shop_item_id);
 
-				$currencyName = $oShop_Item->Shop_Currency->name;
-				$measureName = $oShop_Item->Shop_Measure->name;
-
-				$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_movement_item_id={$oShop_Warehouse_Movement_Item->id}");
-
-				$externalLink = '';
-
-				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if (!is_null($oShop_Item))
 				{
-					$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oShop->Structure->getPath()
-						. $oShop_Item->getPath();
+					$oShop_Item = $oShop_Item->shortcut_id
+						? $oShop_Item->Shop_Item
+						: $oShop_Item;
 
-					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_movement_item_id={$oShop_Warehouse_Movement_Item->id}");
+
+					$externalLink = $sShopUrl
+						? '<a class="margin-left-5" target="_blank" href="' . $sShopUrl . $oShop_Item->getPath() .  '"><i class="fa fa-external-link"></i></a>'
+						: '';
+
+					// Цены
+					$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
+
+					is_null($old_price)
+						&& $old_price = $oShop_Item->price;
+
+					$sum = $oShop_Warehouse_Movement_Item->count * $old_price;
+
+					$itemTable .= '
+						<tr id="' . $oShop_Warehouse_Movement_Item->id . '" data-item-id="' . $oShop_Item->id . '">
+							<td class="index">' . ++$index . '</td>
+							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
+							<td><span class="price">' . $old_price . '</span></td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Movement_Item->id . '" value="' . $oShop_Warehouse_Movement_Item->count . '" /></td>
+							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						</tr>
+					';
 				}
-
-				// Цены
-				$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
-
-				is_null($old_price)
-					&& $old_price = $oShop_Item->price;
-
-				$sum = $oShop_Warehouse_Movement_Item->count * $old_price;
-
-				$index = $key + 1;
-
-				$itemTable .= '
-					<tr id="' . $oShop_Warehouse_Movement_Item->id . '" data-item-id="' . $oShop_Item->id . '">
-						<td class="index">' . $index . '</td>
-						<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-						<td>' . htmlspecialchars($measureName) . '</td>
-						<td><span class="price">' . $old_price . '</span></td>
-						<td>' . htmlspecialchars($currencyName) . '</td>
-						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Movement_Item->id . '" value="' . $oShop_Warehouse_Movement_Item->count . '" /></td>
-						<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
-						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Incoming.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
-					</tr>
-				';
 			}
+
+			$offset += $limit;
 		}
+		while (count($aShop_Warehouse_Movement_Items));
 
 		$itemTable .= '
 					</tbody>

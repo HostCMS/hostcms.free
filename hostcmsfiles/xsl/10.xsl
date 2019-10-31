@@ -239,7 +239,7 @@
 				<span>
 				<xsl:choose>
 					<xsl:when test="count(siteuser) &gt; 0">
-						<a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a>
+						<a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a>
 					</xsl:when>
 					<xsl:otherwise>
 						<xsl:choose>
@@ -292,7 +292,7 @@
 					<xsl:choose>
 					<!-- Review was added an authorized user -->
 					<xsl:when test="count(siteuser) &gt; 0">
-						<span><a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a></span>
+						<span><a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a></span>
 					</xsl:when>
 					<!-- Review was added an unauthorized user -->
 					<xsl:otherwise>

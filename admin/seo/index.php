@@ -524,51 +524,62 @@ if (count($aSeo_Sites))
 {
 ?><script type="text/javascript">
 	$(function(){
-	//$(window).bind("load", function () {
-			<?php
-			foreach ($aSeo_Sites as $oSeo_Site)
+	var aScripts = [
+		'jquery.flot.js',
+		'jquery.flot.time.min.js',
+		'jquery.flot.categories.min.js',
+		'jquery.flot.tooltip.min.js',
+		'jquery.flot.crosshair.min.js',
+		'jquery.flot.selection.min.js',
+		'jquery.flot.pie.min.js',
+		'jquery.flot.resize.js'
+	];
+
+	$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+		<?php
+		foreach ($aSeo_Sites as $oSeo_Site)
+		{
+			if (isset($aLinks[$oSeo_Site->id]))
 			{
-				if (isset($aLinks[$oSeo_Site->id]))
-				{
-				?>
-				var title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
-				link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
-				valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
-				<?php
-				}
-
-				if (isset($aRatings[$oSeo_Site->id]))
-				{
-				?>
-				var title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
-				rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
-				valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
-				<?php
-				}
-
-				if (isset($aSearchable[$oSeo_Site->id]))
-				{
-				?>
-				var title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
-				searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
-				downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
-				downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
-				downloaded3xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded3xx[$oSeo_Site->id]))?>],
-				downloaded4xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded4xx[$oSeo_Site->id]))?>],
-				downloaded5xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded5xx[$oSeo_Site->id]))?>],
-				failed_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aFailed[$oSeo_Site->id]))?>],
-				excluded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aExcluded[$oSeo_Site->id]))?>],
-				valueTitlesSearchable<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesDownloaded<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesFailed<?php echo $oSeo_Site->id?> = new Array(),
-				valueTitlesExcluded<?php echo $oSeo_Site->id?> = new Array();
-				<?php
-				}
+			?>
+			var title_links<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aLinks[$oSeo_Site->id]))?>],
+			link_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aLinks[$oSeo_Site->id]))?>],
+			valueTitlesLinks<?php echo $oSeo_Site->id?> = new Array();
+			<?php
 			}
+
+			if (isset($aRatings[$oSeo_Site->id]))
+			{
+			?>
+			var title_ratings<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aRatings[$oSeo_Site->id]))?>],
+			rating_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aRatings[$oSeo_Site->id]))?>],
+			valueTitlesRatings<?php echo $oSeo_Site->id?> = new Array();
+			<?php
+			}
+
+			if (isset($aSearchable[$oSeo_Site->id]))
+			{
+			?>
+			var title_indexed<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_keys($aSearchable[$oSeo_Site->id]))?>],
+			searchable_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aSearchable[$oSeo_Site->id]))?>],
+			downloaded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded[$oSeo_Site->id]))?>],
+			downloaded2xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded2xx[$oSeo_Site->id]))?>],
+			downloaded3xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded3xx[$oSeo_Site->id]))?>],
+			downloaded4xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded4xx[$oSeo_Site->id]))?>],
+			downloaded5xx_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aDownloaded5xx[$oSeo_Site->id]))?>],
+			failed_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aFailed[$oSeo_Site->id]))?>],
+			excluded_values<?php echo $oSeo_Site->id?> = [<?php echo implode(',', array_values($aExcluded[$oSeo_Site->id]))?>],
+			valueTitlesSearchable<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesDownloaded<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesDownloaded2xx<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesDownloaded3xx<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesDownloaded4xx<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesDownloaded5xx<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesFailed<?php echo $oSeo_Site->id?> = new Array(),
+			valueTitlesExcluded<?php echo $oSeo_Site->id?> = new Array();
+			<?php
+			}
+		}
 
 		foreach ($aSeo_Sites as $oSeo_Site)
 		{
@@ -838,7 +849,7 @@ if (count($aSeo_Sites))
 		});
 
 		// Rating
-		<?php 
+		<?php
 		if (count($aRatings))
 		{
 			?>
@@ -894,6 +905,7 @@ if (count($aSeo_Sites))
 			<?php
 		}
 		?>
+		});
 	});
 </script>
 <?php

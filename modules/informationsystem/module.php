@@ -17,13 +17,13 @@ class Informationsystem_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.8';
+	public $version = '6.9';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2019-06-27';
+	public $date = '2019-08-01';
 
 	/**
 	 * Module name
@@ -157,6 +157,7 @@ class Informationsystem_Module extends Core_Module
 			->where('structures.active', '=', 1)
 			->where('structures.indexing', '=', 1)
 			->where('informationsystem_groups.indexing', '=', 1)
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.active', '=', 1)
 			->where('informationsystem_groups.deleted', '=', 0)
 			->where('informationsystems.deleted', '=', 0)

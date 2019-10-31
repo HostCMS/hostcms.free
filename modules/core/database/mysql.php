@@ -372,6 +372,40 @@ class Core_DataBase_Mysql extends Core_DataBase
 	}
 
 	/**
+	 * Quote table name, e.g. `tableName` for 'tableName',
+	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
+	 * @param mixed $columnName string|array
+	 * @return string
+	 */
+	public function quoteTableName($tableName)
+	{
+		if (is_array($tableName))
+		{
+			// array('columnName', 'columnNameAlias') => `columnName` AS `columnNameAlias`
+			if (count($tableName) == 2)
+			{
+				list($tableName, $columnNameAlias) = $tableName;
+				return $this->quoteTableName($tableName) . ' AS ' . $this->quoteTableName($columnNameAlias);
+			}
+			else
+			{
+				list($tableName) = $tableName;
+				return $this->quoteTableName($tableName);
+			}
+		}
+		// Core_QueryBuilder_Expression
+		elseif (is_object($tableName))
+		{
+			// add brackets for subquery
+			return get_class($tableName) == 'Core_QueryBuilder_Select'
+				? '(' . $tableName->build() . ')'
+				: $tableName->build();
+		}
+
+		return $this->_tableQuoteCharacter . str_replace($this->_tableQuoteCharacter, '\\' . $this->_tableQuoteCharacter, $tableName) . $this->_tableQuoteCharacter;
+	}
+
+	/**
 	 * Quote column name, e.g. `columnName` for 'columnName',
 	 * `columnName` AS `columnNameAlias` for array('columnName', 'columnNameAlias')
 	 * @param mixed $columnName string or array
@@ -458,7 +492,7 @@ class Core_DataBase_Mysql extends Core_DataBase
 			}
 		}
 
-		$return = '`' . str_replace('`', '\`', $columnName) . '`';
+		$return = $this->_columnQuoteCharacter . str_replace($this->_columnQuoteCharacter, '\\' . $this->_columnQuoteCharacter, $columnName) . $this->_columnQuoteCharacter;
 
 		$this->_addQuoteColumnNameCache($columnName, $return);
 		return $return;

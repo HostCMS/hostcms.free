@@ -68,6 +68,7 @@ return array(
 	'item_start_datetime' => '<acronym title="Date of product publication">Publication date</acronym>',
 	'item_type' => 'Product type',
 	'item_additional_group' => "Shortcute's GUID",
+	'item_barcode' => "Barcodes",
 	'specialprices_min_quantity' => "Count from",
 	'specialprices_max_quantity' => "Count to",
 	'specialprices_price' => "Price value",

@@ -50,6 +50,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			break;
 			case 'informationsystem_group':
 				$this
+					->addSkipColumn('shortcut_id')
 					->addSkipColumn('image_large')
 					->addSkipColumn('image_small')
 					->addSkipColumn('subgroups_count')
@@ -57,6 +58,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->addSkipColumn('items_count')
 					->addSkipColumn('items_total_count')
 					->addSkipColumn('sns_type_id');
+					
+				if ($object->shortcut_id != 0)
+				{
+					$object = $object->Shortcut;
+				}
 
 				// Значения директории для добавляемого объекта
 				if (!$object->id)
@@ -428,7 +434,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->add($oDescriptionRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('description')
-					->rows(7)
+					->rows(8)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($template_id);
 
@@ -581,7 +587,11 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			break;
 			case 'informationsystem_group':
 			default:
-
+				if ($object->shortcut_id != 0)
+				{
+					$object = $object->Shortcut;
+				}
+				
 				$template_id = $this->_object->Informationsystem->Structure->template_id
 					? $this->_object->Informationsystem->Structure->template_id
 					: 0;
@@ -1057,6 +1067,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			$aTmp = Core_QueryBuilder::select('id', 'parent_id', 'name')
 				->from('informationsystem_groups')
 				->where('informationsystem_id', '=', $iInformationsystemId)
+				->where('shortcut_id', '=', 0)
 				->where('deleted', '=', 0)
 				->orderBy('sorting')
 				->orderBy('name')
@@ -1077,7 +1088,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			{
 				if ($countExclude == 0 || !in_array($childrenGroup['id'], $aExclude))
 				{
-					$aReturn[$childrenGroup['id']] = str_repeat('  ', $iLevel) . $childrenGroup['name'];
+					$aReturn[$childrenGroup['id']] = str_repeat('  ', $iLevel) . $childrenGroup['name'] . ' [' . $childrenGroup['id'] . ']';
 					$aReturn += self::fillInformationsystemGroup($iInformationsystemId, $childrenGroup['id'], $aExclude, $iLevel + 1);
 				}
 			}

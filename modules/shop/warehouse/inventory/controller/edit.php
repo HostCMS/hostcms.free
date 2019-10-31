@@ -168,86 +168,76 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 					<tbody>
 		';
 
-		$aShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items->findAll(FALSE);
+		$oSiteAlias = $oShop->Site->getCurrentAlias();
+		$sShopUrl = $oSiteAlias
+			? ($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath()
+			: NULL;
 
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
 
 		$index = 0;
 
-		foreach ($aShop_Warehouse_Inventory_Items as $key => $oShop_Warehouse_Inventory_Item)
-		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Inventory_Item->shop_item_id);
+		$limit = 100;
+		$offset = 0;
 
-			if (!is_null($oShop_Item))
+		do {
+			$oShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items;
+			$oShop_Warehouse_Inventory_Items->queryBuilder()
+				->limit($limit)
+				->offset($offset)
+				->clearOrderBy()
+				->orderBy('shop_warehouse_inventory_items.id');
+
+			$aShop_Warehouse_Inventory_Items = $oShop_Warehouse_Inventory_Items->findAll(FALSE);
+
+			foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
 			{
-				$oShop_Item = $oShop_Item->shortcut_id
-					? $oShop_Item->Shop_Item
-					: $oShop_Item;
+				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($oShop_Warehouse_Inventory_Item->shop_item_id);
 
-				$currencyName = $oShop_Item->Shop_Currency->name;
-				$measureName = $oShop_Item->Shop_Measure->name;
-
-				$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_inventory_item_id={$oShop_Warehouse_Inventory_Item->id}");
-
-				$externalLink = '';
-
-				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if (!is_null($oShop_Item))
 				{
-					$sItemUrl = ($oShop->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oShop->Structure->getPath()
-						. $oShop_Item->getPath();
+					$oShop_Item = $oShop_Item->shortcut_id
+						? $oShop_Item->Shop_Item
+						: $oShop_Item;
 
-					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_inventory_item_id={$oShop_Warehouse_Inventory_Item->id}");
+
+					$externalLink = $sShopUrl
+						? '<a class="margin-left-5" target="_blank" href="' . $sShopUrl . $oShop_Item->getPath() .  '"><i class="fa fa-external-link"></i></a>'
+						: '';
+
+					// Цены
+					$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
+
+					is_null($old_price)
+						&& $old_price = $oShop_Item->price;
+
+					// Фактическое наличие
+					$rest = $this->_object->Shop_Warehouse->getRest($oShop_Item->id, $this->_object->datetime);
+					is_null($rest) && $rest = 0;
+
+					$itemTable .= '
+						<tr id="' . $oShop_Warehouse_Inventory_Item->id . '" data-item-id="' . $oShop_Item->id . '">
+							<td class="index">' . ++$index . '</td>
+							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
+							<td><span class="price">' . $old_price . '</span></td>
+							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+							<td class="calc-warehouse-count">' . $rest . '</td>
+							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
+							<td class="diff-warehouse-count"></td>
+							<td><span class="calc-warehouse-sum"></span></td>
+							<td><span class="warehouse-inv-sum"></span></td>
+							<td><span class="diff-warehouse-sum"></span></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+						</tr>
+					';
 				}
-
-				// Цены
-				$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
-
-				is_null($old_price)
-					&& $old_price = $oShop_Item->price;
-
-				// Фактическое наличие
-				$rest = $this->_object->Shop_Warehouse->getRest($oShop_Item->id, $this->_object->datetime);
-				is_null($rest) && $rest = 0;
-
-				/*if (is_null($rest))
-				{
-					$oShop_Warehouse_Items = Core_Entity::factory('Shop_Warehouse_Item');
-					$oShop_Warehouse_Items->queryBuilder()
-						->where('shop_warehouse_items.shop_warehouse_id', '=', $this->_object->shop_warehouse_id)
-						->where('shop_warehouse_items.shop_item_id', '=', $oShop_Item->id)
-						->limit(1);
-
-					$aShop_Warehouse_Items = $oShop_Warehouse_Items->findAll();
-
-					if (isset($aShop_Warehouse_Items[0]))
-					{
-						$rest = $aShop_Warehouse_Items[0]->count;
-					}
-				}*/
-
-				$index = $key + 1;
-
-				$itemTable .= '
-					<tr id="' . $oShop_Warehouse_Inventory_Item->id . '" data-item-id="' . $oShop_Item->id . '">
-						<td class="index">' . $index . '</td>
-						<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-						<td>' . htmlspecialchars($measureName) . '</td>
-						<td><span class="price">' . $old_price . '</span></td>
-						<td>' . htmlspecialchars($currencyName) . '</td>
-						<td class="calc-warehouse-count">' . $rest . '</td>
-						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
-						<td class="diff-warehouse-count"></td>
-						<td><span class="calc-warehouse-sum"></span></td>
-						<td><span class="warehouse-inv-sum"></span></td>
-						<td><span class="diff-warehouse-sum"></span></td>
-						<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
-					</tr>
-				';
 			}
+
+			$offset += $limit;
 		}
+		while (count($aShop_Warehouse_Inventory_Items));
 
 		$itemTable .= '
 					</tbody>

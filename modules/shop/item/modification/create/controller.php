@@ -80,7 +80,14 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 			$oShopItem->price = Core_Array::getPost('price');
 			$oShopItem->shop_currency_id = Core_Array::getPost('currency');
 			$oShopItem->shop_measure_id = Core_Array::getPost('measure');
-			$oShopItem->marking = str_replace("{N}", $iCount++, Core_Array::getPost('marking'));
+
+			$sTmpMarking = Core_Array::getPost('marking');
+			foreach ($aTmpResult as $aTmpList)
+			{
+				$sTmpMarking = str_replace("{P{$aTmpList['property']->id}}", $aTmpList['list_item']->value, $sTmpMarking);
+			}
+			$oShopItem->marking = str_replace('{N}', $iCount++, $sTmpMarking);
+
 			$oShopItem->shop_id = $oShopItemParent->shop_id;
 
 			Core_Event::notify('Shop_Item_Modification_Create_Controller.onBeforeNewModificationSave', $this, array($oShopItem, $oShopItemParent));

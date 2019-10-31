@@ -29,12 +29,13 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_item_reserved' => array(),
 		'shop_cart' => array(),
 		'shop_warehouse_entry' => array(),
+		'shop_warehouse_entry_accumulate' => array(),
 		'shop_warehouse_inventory' => array(),
 		'shop_warehouse_incoming' => array(),
 		'shop_warehouse_writeoff' => array(),
 		'shop_warehouse_regrade' => array(),
 		'shop_warehouse_movement_source' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'source_shop_warehouse_id'),
-		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id'),
+		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id')
 	);
 
 	/**
@@ -48,6 +49,8 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_country_location_city' => array(),
 		'shop_country_location_city_area' => array(),
 		'user' => array(),
+		'shop_warehouse_type' => array(),
+		'shop_company' => array(),
 	);
 
 	/**
@@ -69,8 +72,8 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
@@ -227,8 +230,27 @@ class Shop_Warehouse_Model extends Core_Entity
 	 */
 	public function getRest($shop_item_id, $dateTo = NULL)
 	{
-		$count = NULL;
+		// Get last accumulated value
+		$oShop_Warehouse_Entry_Accumulates = $this->Shop_Warehouse_Entry_Accumulates;
+		$oShop_Warehouse_Entry_Accumulates->queryBuilder()
+			->where('shop_warehouse_entry_accumulates.shop_item_id', '=', $shop_item_id)
+			->clearOrderBy()
+			->orderBy('shop_warehouse_entry_accumulates.datetime', 'DESC')
+			->limit(1);
 
+		if (!is_null($dateTo))
+		{
+			$oShop_Warehouse_Entry_Accumulates->queryBuilder()
+				->where('shop_warehouse_entry_accumulates.datetime', '<=', $dateTo);
+		}
+
+		$aShop_Warehouse_Entry_Accumulates = $oShop_Warehouse_Entry_Accumulates->findAll(FALSE);
+
+		$count = isset($aShop_Warehouse_Entry_Accumulates[0])
+			? $aShop_Warehouse_Entry_Accumulates[0]->value
+			: NULL;
+
+		// Получаем новые проводки, появившиеся после
 		$oShop_Warehouse_Entries = $this->Shop_Warehouse_Entries;
 		$oShop_Warehouse_Entries->queryBuilder()
 			->where('shop_warehouse_entries.shop_item_id', '=', $shop_item_id)
@@ -239,6 +261,13 @@ class Shop_Warehouse_Model extends Core_Entity
 		{
 			$oShop_Warehouse_Entries->queryBuilder()
 				->where('shop_warehouse_entries.datetime', '<', $dateTo);
+		}
+
+		// Ограничиваем выборку с даты полученного накопительного значения
+		if (isset($aShop_Warehouse_Entry_Accumulates[0]))
+		{
+			$oShop_Warehouse_Entries->queryBuilder()
+				->where('shop_warehouse_entries.datetime', '>', $aShop_Warehouse_Entry_Accumulates[0]->datetime);
 		}
 
 		$aShop_Warehouse_Entries = $oShop_Warehouse_Entries->findAll(FALSE);
@@ -264,6 +293,19 @@ class Shop_Warehouse_Model extends Core_Entity
 					break;
 				}
 			}
+		}
+
+		// Если были новые значения и нет расчитанных накопительных данных, либо со времени расчета прошло больше недели
+		if (count($aShop_Warehouse_Entries)
+			&& (!isset($aShop_Warehouse_Entry_Accumulates[0]) || Core_Date::sql2timestamp($aShop_Warehouse_Entry_Accumulates[0]->datetime) + 86400 * 7 < time())
+		)
+		{
+			$oShop_Warehouse_Entry_Accumulate = Core_Entity::factory('Shop_Warehouse_Entry_Accumulate');
+			$oShop_Warehouse_Entry_Accumulate->shop_item_id = $shop_item_id;
+			$oShop_Warehouse_Entry_Accumulate->shop_warehouse_id = $this->id;
+			$oShop_Warehouse_Entry_Accumulate->value = $count;
+			!is_null($dateTo) && $oShop_Warehouse_Entry_Accumulate->datetime = $dateTo;
+			$oShop_Warehouse_Entry_Accumulate->save();
 		}
 
 		return is_null($count)

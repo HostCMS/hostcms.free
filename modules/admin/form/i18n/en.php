@@ -43,7 +43,7 @@ return array(
 
 	'button_execute' => 'Execute',
 	'button_to_filter' => 'Filter',
-	'button_to_clear' => 'Clear filter',
+	'clear' => 'Clear',
 
 	// Форма редактирования форм центра администрирования.
 	'form_add_forms_title' => 'Add an Back-end form',
@@ -102,8 +102,7 @@ return array(
 
 	'msg_error_access' => 'You do not have enough rights to perform this operation or action does not exist.',
 
-	'input_clear_filter' => 'Clear',
-	'input_case_sensitive' => 'Case Sensitive',
+	'case_sensitive' => 'Case Sensitive',
 
 	'filter_selected_all' => 'All',
 	'filter_selected' => 'Selected',

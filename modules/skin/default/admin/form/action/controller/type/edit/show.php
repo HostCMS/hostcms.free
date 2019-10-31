@@ -22,7 +22,6 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 		ob_start();
 
 		$children = $this->children;
-		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
 		// Заголовок формы добавляется до вывода крошек, которые могут быть добавлены в контроллере
 		/*array_unshift($children,
@@ -31,31 +30,24 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 			);*/
 
 		// Форма
-		$oAdmin_Form_Entity_Form = $this->form->controller(
-			$Admin_Form_Controller
-		);
-
-		$oAdmin_Form_Entity_Form
-			->id($this->formId)
+		$this->_Admin_Form_Entity_Form
+			->controller($Admin_Form_Controller)
 			->class('adminForm')
 			->action(
-				$Admin_Form_Controller->getPath()
+				$this->Admin_Form_Controller->getPath()
 			);
 
 		foreach ($children as $oAdmin_Form_Entity)
 		{
-			//$oAdmin_Form_Entity->execute();
-			$oAdmin_Form_Entity_Form->add($oAdmin_Form_Entity);
+			$this->_Admin_Form_Entity_Form->add($oAdmin_Form_Entity);
 		}
 
 		// Закладки
 		$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs');
-		$oAdmin_Form_Entity_Tabs->formId($this->formId);
+		$oAdmin_Form_Entity_Tabs->formId($this->_Admin_Form_Entity_Form->id);
 
 		// Все закладки к форме
-		$oAdmin_Form_Entity_Form->add(
-			$oAdmin_Form_Entity_Tabs
-		);
+		$this->_Admin_Form_Entity_Form->add($oAdmin_Form_Entity_Tabs);
 
 		// Add all tabs to $oAdmin_Form_Entity_Tabs
 		foreach ($this->tabs as $oAdmin_Form_Tab_Entity)
@@ -69,10 +61,11 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 		}
 
 		// Кнопки
-		!is_null($this->buttons) && $oAdmin_Form_Entity_Form->add(
+		!is_null($this->buttons) && $this->_Admin_Form_Entity_Form->add(
 			$this->_addButtons()
-		)
-		->execute();
+		);
+
+		$this->_Admin_Form_Entity_Form->execute();
 
 		return ob_get_clean();
 	}

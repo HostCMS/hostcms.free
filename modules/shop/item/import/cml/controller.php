@@ -3,7 +3,7 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Online shop.
+ * Import CML Controller (1С)
  * 2.0.8 - http://v8.1c.ru/edi/edi_stnd/90/CML208.XSD
  * 2.1.0 - http://v8.1c.ru/edi/edi_stnd/90/CML210.XSD
  *
@@ -13,6 +13,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - createShopItems(TRUE|FALSE) создавать новые товары, по умолчанию TRUE
  * - updateFields(array()) массив полей товара, которые необходимо обновлять при импорте CML товара, если не заполнен, то обновляются все поля. Пример массива array('marking', 'barcode', 'name', 'shop_group_id', 'text', 'description', 'images', 'taxes', 'shop_producer_id', 'prices', 'warehouses')
  * - skipProperties(array()) массив названий свойств, которые исключаются из импорта.
+ * - searchIndexation(TRUE|FALSE) использовать событийную индексацию, по умолчанию FALSE
  * - itemDescription() имя поля товара, в которое загружать описание товаров, может принимать значения description, text. По умолчанию text
  * - shortDescription() название тега, из которого загружать описание товара, например МалоеОписание или КраткоеОписание, для импорта из свойства товара используйте конструкцию вида "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение". По умолчанию МалоеОписание
  * - timeout(30) время выполнения шага импорта, получается из настроек PHP.
@@ -34,6 +35,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		'createShopItems',
 		'updateFields',
 		'skipProperties',
+		'searchIndexation',
 		'itemDescription',
 		'shortDescription',
 		'iShopId',
@@ -159,7 +161,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		//$this->shortDescription = "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение";
 
 		$this->updateFields = $this->skipProperties = array();
+
 		$this->importGroups = $this->createShopItems = TRUE;
+
+		$this->searchIndexation = FALSE;
 
 		$this->importAction = 1;
 
@@ -209,6 +214,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			is_null($oShopGroup->path) && $oShopGroup->path= '';
 
 			$oShopGroup->save()->clearCache();
+
+			// Indexation
+			$this->searchIndexation
+				&& $oShopGroup->index();
 
 			// Указание Картинка для группы не соответсвует формату обмена CML!
 			$PictureData = strval($oXMLGroupNode->Картинка);
@@ -344,7 +353,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		if (isset($this->_aBaseAttributes[$sUpperGUID]))
 		{
 			$sFieldName = $this->_aBaseAttributes[$sUpperGUID];
-			$oShop_Item->$sFieldName = Shop_Controller::instance()->convertFloat($sValue);
+			$oShop_Item->$sFieldName = Shop_Controller::convertDecimal($sValue);
 			$oShop_Item->save();
 
 			return $this;
@@ -1053,8 +1062,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				&& !isset($this->_oSimpleXMLElement->ИзмененияПакетаПредложений)
 			)
 			{
+				Core_Session::start();
 				$importPosition = Core_Array::getSession('importPosition', 0);
-
 				Core_Session::close();
 
 				$currentMonth = date('n');
@@ -1168,7 +1177,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Search by Marking
-					if (is_null($oShopItem) && strval($oXmlItem->Артикул))
+					if (is_null($oShopItem) && trim(strval($oXmlItem->Артикул)) != '')
 					{
 						$oShopItem = $oShop->Shop_Items->getByMarking(strval($oXmlItem->Артикул));
 					}
@@ -1324,6 +1333,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						is_null($oShopItem->path) && $oShopItem->path = '';
 
 						$oShopItem->save()->clearCache();
+
+						// Indexation
+						$this->searchIndexation
+							&& $oShopItem->index();
 					}
 					else
 					{
@@ -1459,6 +1472,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						Core_Session::start();
 						$_SESSION['importPosition'] = $importPosition;
+						Core_Session::close();
 
 						$this->_aReturn['status'] = 'progress';
 						return $this->_aReturn;
@@ -1894,6 +1908,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 
 						$oShopItem->save()->clearCache();
+
 						$this->_aReturn['updateItemCount']++;
 
 						Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterOffersShopItem', $this, array($oShopItem, $oProposal));
@@ -2088,6 +2103,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		Core_Session::start();
 		$_SESSION['importPosition'] = 0;
+		Core_Session::close();
 
 		// Пересчет количества товаров в группах
 		$oShop->recount();
@@ -2310,6 +2326,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	/**
 	 * Import orders.xml
 	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportOrders
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportShopOrder
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportShopOrder
 	 */
 	public function importOrders()
 	{
@@ -2324,6 +2342,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		foreach ($this->xpath($this->_oSimpleXMLElement, 'Документ') as $oDocument)
 		{
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopOrder', $this, array($oDocument));
+
 			$sInvoice = strval($oDocument->Номер);
 			$oShop_Order = $oShop->Shop_Orders->getByInvoice($sInvoice);
 
@@ -2373,6 +2393,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					->status(Core_Log::$MESSAGE)
 					->write(sprintf('1С, заказ %s не найден', $sInvoice));
 			}
+
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopOrder', $this, array($oDocument, $oShop_Order));
 		}
 	}
 

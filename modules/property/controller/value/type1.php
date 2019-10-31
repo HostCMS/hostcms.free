@@ -18,4 +18,10 @@ class Property_Controller_Value_Type1 extends Property_Controller_Value_Type
 	 * @var mixed
 	 */
 	protected $_modelName = 'Property_Value_String';
+	
+	/**
+	 * Table name
+	 * @var string
+	 */
+	protected $_tableName = 'property_value_strings';
 }

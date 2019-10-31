@@ -16,7 +16,7 @@
 		</xsl:if>
 		
 		<xsl:if test = "siteuser/node()">
-			<div style="float: right"><strong><a href="{url}myPosts/">&labelMyMessages;</a></strong></div>
+	<div style="float: right"><strong><a href="{url}myPosts/">&labelMyMessages;</a></strong></div>
 		</xsl:if>
 		
 		<div style="clear: both; height: 10px"></div>
@@ -27,7 +27,7 @@
 		
 		<xsl:if	test="last_siteuser/siteuser/node()">
 			<p>
-				<xsl:text>&labelLastUser; </xsl:text><img style="margin: 0px 5px -4px 0px;" src="/hostcmsfiles/images/user.gif" /><a href="/users/info/{last_siteuser/siteuser/login}/">
+				<xsl:text>&labelLastUser; </xsl:text><img style="margin: 0px 5px -4px 0px;" src="/hostcmsfiles/images/user.gif" /><a href="/users/info/{last_siteuser/siteuser/path}/">
 					<xsl:value-of select="last_siteuser/siteuser/login" />
 				</a>
 			</p>
@@ -262,7 +262,7 @@
 								&labelGuest;
 							</xsl:when>
 							<xsl:otherwise>
-								<a href="/users/info/{forum_topic/last/forum_topic_post/siteuser/login}/"><xsl:value-of select="forum_topic/last/forum_topic_post/siteuser/login" /></a>
+								<a href="/users/info/{forum_topic/last/forum_topic_post/siteuser/path}/"><xsl:value-of select="forum_topic/last/forum_topic_post/siteuser/login" /></a>
 							</xsl:otherwise>
 						</xsl:choose>
 						

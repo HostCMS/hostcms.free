@@ -22,23 +22,22 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 		'message',
 		'children',
 		'Admin_Form_Controller',
-		'formId',
 		'tabs',
 		'buttons',
-		'form',
 	);
+
+	protected $_Admin_Form_Entity_Form = NULL;
 
 	/**
 	 * Constructor.
 	 */
-	public function __construct()
+	public function __construct($oAdmin_Form_Entity_Form)
 	{
 		parent::__construct();
 
-		$this->tabs = array();
-		$this->children = array();
+		$this->tabs = $this->children = array();
 
-		$this->form = Admin_Form_Entity::factory('Form');
+		$this->_Admin_Form_Entity_Form = $oAdmin_Form_Entity_Form;
 	}
 
 	/**
@@ -46,7 +45,7 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 	 * @param Admin_Form_Model $oAdmin_Form
 	 * @return object
 	 */
-	static public function create()
+	static public function create($oAdmin_Form_Entity_Form)
 	{
 		$className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;
 
@@ -56,7 +55,7 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 				array('%className' => $className));
 		}
 
-		return new $className();
+		return new $className($oAdmin_Form_Entity_Form);
 	}
 
 	/**

@@ -233,6 +233,8 @@ abstract class Shop_Delivery_Handler
 	{
 		$shopDeliveryInSession = $this->_Shop_Delivery_Model->id . '-' . $position;
 
+		Core_Session::start();
+
 		if (isset($_SESSION['hostcmsOrder']['deliveries'][$shopDeliveryInSession]))
 		{
 			$aTmp = $_SESSION['hostcmsOrder']['deliveries'][$shopDeliveryInSession];

@@ -166,7 +166,7 @@
 							<dd>
 								<div>
 									<xsl:for-each select="siteuser_subscribers/siteuser_relationship">
-										<a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a>
+										<a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a>
 									<xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if>
 									</xsl:for-each>
 								</div>
@@ -195,7 +195,7 @@
 					<!-- Друзья -->
 					<div>
 						<xsl:for-each select="siteuser_relationship">
-							<a href="/users/info/{siteuser/login}/"><xsl:value-of select="siteuser/login"/></a>
+							<a href="/users/info/{siteuser/path}/"><xsl:value-of select="siteuser/login"/></a>
 						<xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if>
 						</xsl:for-each>
 					</div>

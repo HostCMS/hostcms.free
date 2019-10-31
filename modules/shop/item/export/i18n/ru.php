@@ -57,6 +57,7 @@ return array(
 	'item_large_image' => 'Файл изображения для товара',
 	'item_small_image' => 'Файл малого изображения для товара',
 	'item_shortcuts' => 'Ярлыки',
+	'item_barcodes' => 'Штрихкоды',
 	'item_siteuser_id' => 'Идентификатор пользователя сайта',
 	'quantity_from' => 'Количество товара от',
 	'quantity_to' => 'Количество товара до',

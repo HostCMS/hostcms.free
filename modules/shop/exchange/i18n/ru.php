@@ -68,6 +68,7 @@ return array(
 	'item_start_datetime' => 'Дата публикации',
 	'item_type' => 'Тип товара',
 	'item_additional_group' => "Ярлыки GUID",
+	'item_barcode' => "Штрихкоды",
 	'specialprices_min_quantity' => "Количество товара от",
 	'specialprices_max_quantity' => "Количество товара до",
 	'specialprices_price' => "Значение цены",

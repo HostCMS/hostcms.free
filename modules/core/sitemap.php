@@ -276,6 +276,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		$oCore_QueryBuilder_Select
 			->from('informationsystem_groups')
 			->where('informationsystem_groups.informationsystem_id', '=', $oInformationsystem->id)
+			->where('informationsystem_groups.shortcut_id', '=', 0)
 			->where('informationsystem_groups.deleted', '=', 0);
 		$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
 		$maxId = $aRow['max_id'];
@@ -301,6 +302,7 @@ class Core_Sitemap extends Core_Servant_Properties
 				->where('informationsystem_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
 				->where('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 				->where('informationsystem_groups.active', '=', 1)
+				->where('informationsystem_groups.shortcut_id', '=', 0)
 				->where('informationsystem_groups.indexing', '=', 1);
 
 			Core_Event::notify('Core_Sitemap.onBeforeSelectInformationsystemGroups', $this, array($oInformationsystem_Groups));
@@ -441,6 +443,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		$oCore_QueryBuilder_Select
 			->from('shop_groups')
 			->where('shop_groups.shop_id', '=', $oShop->id)
+			->where('shop_groups.shortcut_id', '=', 0)
 			->where('shop_groups.deleted', '=', 0);
 		$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
 		$maxId = $aRow['max_id'];
@@ -465,6 +468,7 @@ class Core_Sitemap extends Core_Servant_Properties
 				)
 				->where('shop_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
 				->where('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+				->where('shop_groups.shortcut_id', '=', 0)
 				->where('shop_groups.active', '=', 1)
 				->where('shop_groups.indexing', '=', 1);
 

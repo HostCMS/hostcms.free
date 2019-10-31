@@ -232,9 +232,9 @@ class Core_QueryBuilder_Replace extends Core_QueryBuilder_Statement
 
 		!is_null($this->_priority) && $query[] = $this->_priority;
 
-		$query[] = 'INTO ' . $this->_dataBase->quoteColumnName($this->_into);
+		$query[] = 'INTO ' . $this->_dataBase->quoteTableName($this->_into);
 
-		$query[] = "\n(" . implode(', ', $this->quoteColumns($this->_columns)) . ')';
+		$query[] = "\n(" . implode(', ', $this->_quoteColumns($this->_columns)) . ')';
 
 		$query[] = "\nVALUES ";
 

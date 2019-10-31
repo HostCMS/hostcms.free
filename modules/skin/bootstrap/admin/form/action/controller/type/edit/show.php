@@ -14,26 +14,35 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
 	/**
+	 * Check if $value is instance of Skin_Bootstrap_Admin_Form_Entity_Menus
+	 * @return boolean
+	 */
+	static protected function _justMenus($value)
+	{
+		return $value instanceof Skin_Bootstrap_Admin_Form_Entity_Menus;
+	}
+
+	/**
 	 * Show edit form
 	 * @return boolean
 	 */
 	public function showEditForm()
 	{
 		$children = $this->children;
-		$Admin_Form_Controller = $this->Admin_Form_Controller;
 
 		ob_start();
 
-		if (count($this->children))
+		$aMenus = array_filter($this->children, array(__CLASS__, '_justMenus'));
+		if (count($aMenus))
 		{
 			?><div class="table-toolbar">
 				<?php
-				foreach ($this->children as $oAdmin_Form_Entity)
+				foreach ($aMenus as $oAdmin_Form_Entity)
 				{
-					if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
-					{
+					//if ($oAdmin_Form_Entity instanceof Skin_Bootstrap_Admin_Form_Entity_Menus)
+					//{
 						$oAdmin_Form_Entity->execute();
-					}
+					//}
 				}
 				?>
 				<div class="clear"></div>
@@ -41,48 +50,38 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		}
 
 		// Форма
-		$oAdmin_Form_Entity_Form = $this->form->controller(
-			$Admin_Form_Controller
-		);
-
-		$oAdmin_Form_Entity_Form
-			->id($this->formId)
+		$this->_Admin_Form_Entity_Form
+			->controller($this->Admin_Form_Controller)
 			->class('adminForm')
-			->action(
-				$Admin_Form_Controller->getPath()
-			);
+			->action($this->Admin_Form_Controller->getPath());
 
 		// Закладки
 		if (count($this->tabs))
 		{
 			$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs');
-			$oAdmin_Form_Entity_Tabs->formId($this->formId);
+			$oAdmin_Form_Entity_Tabs->formId($this->_Admin_Form_Entity_Form->id);
 
 			// Все закладки к форме
-			$oAdmin_Form_Entity_Form->add(
+			$this->_Admin_Form_Entity_Form->add(
 				$oAdmin_Form_Entity_Tabs
 			);
 
 			// Add all tabs to $oAdmin_Form_Entity_Tabs
 			foreach ($this->tabs as $oAdmin_Form_Tab_Entity)
 			{
-				if ($oAdmin_Form_Tab_Entity
-					->deleteEmptyItems()
-					->getCountChildren() > 0)
+				if ($oAdmin_Form_Tab_Entity->deleteEmptyItems()->getCountChildren() > 0)
 				{
-					$oAdmin_Form_Entity_Tabs->add(
-						$oAdmin_Form_Tab_Entity
-					);
+					$oAdmin_Form_Entity_Tabs->add($oAdmin_Form_Tab_Entity);
 				}
 			}
 		}
 
 		// Кнопки
-		!is_null($this->buttons) && $oAdmin_Form_Entity_Form->add(
+		!is_null($this->buttons) && $this->_Admin_Form_Entity_Form->add(
 			$this->_addButtons()
 		);
 
-		$oAdmin_Form_Entity_Form->execute();
+		$this->_Admin_Form_Entity_Form->execute();
 
 		return ob_get_clean();
 	}

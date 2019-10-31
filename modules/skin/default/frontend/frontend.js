@@ -43,34 +43,32 @@
 					return false;
 				}).on('dblclick', function(){
 
-					var item = hQuery(this);
+					var editingItem = hQuery(this);
 
-					clearTimeout(item.data('timer'));
-					item.data('timer', null);
+					clearTimeout(editingItem.data('timer'));
+					editingItem.data('timer', null);
 
 					var data = {
-						'id': item.attr('hostcms:id'),
-						'entity': item.attr('hostcms:entity'),
-						'field': item.attr('hostcms:field'),
+						'id': editingItem.attr('hostcms:id'),
+						'entity': editingItem.attr('hostcms:entity'),
+						'field': editingItem.attr('hostcms:field'),
 						'loadValue': true
 					};
 					data['_'] = Math.round(new Date().getTime());
 
 					hQuery.ajax({
 						// ajax loader
-						context: item,
+						context: editingItem,
 						url: settings.path,
 						type: 'POST',
 						data: data,
 						dataType: 'json',
 						success: function(result) {
-							//console.log(this, result);
+							var editingItem = hQuery(this);
 
-							var item = hQuery(this);
-							
 							if (result.status != 'Error')
 							{
-								var type = item.attr('hostcms:type'), jEditInPlace;
+								var type = editingItem.attr('hostcms:type'), jEditInPlace;
 
 								switch(type)
 								{
@@ -90,28 +88,42 @@
 									});
 								}
 
-								jEditInPlace.on('keydown', function(e){
-									if (e.keyCode == 13) {
-										e.preventDefault();
-										this.blur();
-									}
-									if (e.keyCode == 27) { // ESC
-										e.preventDefault();
-										var input = hQuery(this), item = input.prev();
-										item.css('display', '');
-										input.remove();
-									}
-								})/*.width('90%')*/.prop('name', item.parent().prop('id'))
-								.css(hQuery(this).getStyleObject())
-								.insertAfter(item)
-								.focus()
-								.val(result.value/*item.html()*/);
+								jEditInPlace
+									.val(result.value/*editingItem.html()*/)
+									.prop('name', editingItem.parent().prop('id'))
+									.height(editingItem.height())
+									.width(editingItem.width())
+									//.css(editingItem.getStyleObject())
+									.insertAfter(editingItem)
+									.on('keydown', function(e){
+										if (e.keyCode == 13) {
+											e.preventDefault();
+											this.blur();
+										}
+										if (e.keyCode == 27) { // ESC
+											e.preventDefault();
+											var input = hQuery(this), editingItem = input.prev();
+											editingItem.css('display', '');
+											input.remove();
+										}
+									})/*.width('90%')*/
+									.focus();
 
 								if (type == 'wysiwyg')
 								{
 									setTimeout(function(){
+										var aCss = [];
+
+										hQuery("head > link[rel = stylesheet").each(function() {
+											var linkHref = hQuery(this).attr('href');
+											if (linkHref != 'undefined')
+											{
+												aCss.push(linkHref);
+											}
+										});
+
 										jEditInPlace.tinymce({
-											theme: "modern",
+											theme: "silver",
 											language: backendLng,
 											language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
 											init_instance_callback: function (editor) {
@@ -119,15 +131,25 @@
 													settings.blur(jEditInPlace);
 												});
 											},
-											script_url: "/admin/wysiwyg/tinymce.min.js"});
+											toolbar_items_size: "small",
+											script_url: "/admin/wysiwyg/tinymce.min.js",
+											menubar: false,
+											plugins: [
+												'advlist autolink lists link image charmap print preview anchor',
+												'searchreplace visualblocks code fullscreen',
+												'insertdatetime media table paste help wordcount importcss'
+											],
+											toolbar: 'undo redo | styleselect formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
+											content_css: aCss
+										});
 									}, 300);
 								}
 
-								item.css('display', 'none');
+								editingItem.css('display', 'none');
 							}
 							else
 							{
-								item.removeClass('hostcmsEditable');
+								editingItem.removeClass('hostcmsEditable');
 							}
 						}
 					});
@@ -177,9 +199,65 @@
 				open: function( event, ui ) {
 					var uiDialog = hQuery(this).parent('.ui-dialog');
 					uiDialog.width(uiDialog.width()).height(uiDialog.height());
+
+					hQuery(".xmlWindow").children(".ui-dialog-titlebar").append("<button id='btnMaximize' class='ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-maximize' type='button' role='button' title='Maximize'><span class='ui-button-icon-primary ui-icon ui-icon-newwin'></span><span class='ui-button-text'>Maximize</span></button>");
+
+					var max = false,
+						original_width = uiDialog.width(),
+						original_height = uiDialog.height(),
+						original_position = uiDialog.position(),
+						textareaBlock = uiDialog.find('textarea'),
+						textareaBlockHeight = textareaBlock.height();
+
+					hQuery("#btnMaximize")
+						.hover(function () {
+							hQuery(this).addClass('ui-state-hover');
+						}, function () {
+							hQuery(this).removeClass('ui-state-hover');
+						})
+						.click(function (e) {
+							if (max === false)
+							{
+								// Maximaze window
+								max = true;
+
+								hQuery('body').addClass('bodyMaximize');
+
+								textareaBlock.height(hQuery(window).height() - 25 + 'px');
+								textareaBlock.parents('div.hostcmsWindow').height('');
+
+								uiDialog.animate({
+									height: hQuery(window).height() - 3 + "px",
+									width: hQuery(window).width() + "px",
+									top: hQuery(window).scrollTop(),
+									left: 0
+								}, 200);
+							}
+							else
+							{
+								// Restore window
+								max = false;
+
+								hQuery('body').removeClass('bodyMaximize');
+
+								textareaBlock.height(textareaBlockHeight + 'px');
+								textareaBlock.parents('div.hostcmsWindow').height(textareaBlockHeight + 'px');
+
+								uiDialog.animate({
+								  height: original_height + "px",
+								  width: original_width + "px",
+								  top: original_position.top + "px",
+								  left: original_position.left + "px"
+								}, 200);
+							}
+
+							return false; // to avoid submit if any form
+						});
 				},
 				close: function( event, ui ) {
 					hQuery(this).dialog('destroy').remove();
+
+					hQuery('body').removeClass('bodyMaximize');
 				}
 			}, settings);
 
@@ -195,7 +273,7 @@
 		},
 		showWindow: function(windowId, content, settings) {
 			settings = hQuery.extend({
-				autoOpen: false, resizable: true, draggable: true, Minimize: false, Closable: true
+				autoOpen: false, resizable: true, draggable: true, Minimize: false, Closable: true, dialogClass: 'xmlWindow'
 			}, settings);
 
 			var jWin = hQuery('#' + windowId);

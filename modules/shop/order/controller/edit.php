@@ -160,8 +160,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oAdditionalTab->move($this->getField('shop_id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalTabRow1);
 		$oAdditionalTab->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalTabRow2);
 
-		$oMainTab->move($this->getField('invoice')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow1);
-		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow1);
+		$oMainTab->move($this->getField('invoice')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow1);
+		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow1);
 
 		$oAdditionalTab->delete($this->getField('siteuser_id'));
 
@@ -186,7 +186,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow1
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12 col-sm-6 col-md-3 no-padding')
+						->class('form-group col-xs-12 col-sm-4 col-md-3 no-padding')
 						->add($oSiteuserSelect)
 				);
 
@@ -230,7 +230,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oItemsLink = Admin_Form_Entity::factory('Link');
 			$oItemsLink
-				->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-12 col-sm-3'))
+				->divAttr(array('class' => 'large-link margin-top-21 form-group col-xs-12 col-sm-6 col-md-3'))
 				->a
 					->class('btn btn-labeled btn-success')
 					->href($this->_Admin_Form_Controller->getAdminLoadHref(
@@ -248,22 +248,22 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow2->add($oItemsLink);
 		}
 
-		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
+		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow2);
 
 		// Add checkbox
 		$oSendMailField = Admin_Form_Entity::factory('Checkbox')
 			->caption(Core::_('Shop_Order.send_mail'))
 			->value(0)
 			->name('send_mail')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21'));
 
 		$oMainRow2->add($oSendMailField);
 
 		$oMainTab->move($this->getField('paid')->class('form-control colored-success')->divAttr(
-				array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')
+				array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')
 			), $oMainRow3);
 		$oMainTab->move($this->getField('canceled')->class('form-control colored-danger times')->divAttr(
-				array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')
+				array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21')
 			), $oMainRow3);
 
 		$oMainRow3->add(
@@ -329,12 +329,11 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_name') . '</th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_quantity') . '</th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_price') . '</th>
-						<th scope="col">' . Core::_('Shop_Order.shop_order_item_rate') . '</th>
-						<th scope="col"></th>
-						<th scope="col">' . Core::_('Shop_Order.shop_order_item_type') . '</th>
-						<th scope="col">' . Core::_('Shop_Order.shop_order_item_marking') . '</th>
-						<th scope="col">' . Core::_('Shop_Order.shop_order_item_warehouse') . '</th>
-						<th scope="col">' . Core::_('Shop_Order.shop_order_item_id') . '</th>
+						<th scope="col" class="hidden-xs hidden-sm">' . Core::_('Shop_Order.shop_order_item_rate') . '</th>
+						<th scope="col" class="hidden-xs hidden-sm">' . Core::_('Shop_Order.shop_order_item_type') . '</th>
+						<th scope="col" class="hidden-xs">' . Core::_('Shop_Order.shop_order_item_marking') . '</th>
+						<th scope="col" class="hidden-xs hidden-sm hidden-md">' . Core::_('Shop_Order.shop_order_item_warehouse') . '</th>
+						<th scope="col" class="hidden-xs hidden-sm hidden-md">' . Core::_('Shop_Order.shop_order_item_id') . '</th>
 						<th scope="col">  </th>
 					</tr>
 				</thead>
@@ -392,15 +391,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<tr id="' . $oShop_Order_Item->id . '">
 					<td class="index">' . ($key + 1) . '</td>
 					<td><input class="form-control" name="shop_order_item_name_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->name) . '" /></td>
-					<td width="80"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->quantity . '" /></td>
-					<td width="150"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
-					<td width="80"><input class="form-control" name="shop_order_item_rate_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->rate . '" /></td>
-					<td><span class="semi-bold rate-percent">%</span></td>
-					<td width="120">' . $type_select . '</td>
-					<td width="120"><input class="form-control" name="shop_order_item_marking_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->marking) . '" /></td>
-					<td width="130">' . $warehouse_select . '</td>
-					<td width="120"><input readonly="readonly" class="form-control" name="shop_order_item_id_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->shop_item_id . '" /></td>
-					<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { $(this).parents(\'tr\').remove(); recountPosition() } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+					<td width="5%"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->quantity . '" /></td>
+					<td width="10%"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
+					<td width="5%" class="hidden-xs hidden-sm"><input class="form-control" name="shop_order_item_rate_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->rate . '" /></td>
+					<td width="10%" class="hidden-xs hidden-sm">' . $type_select . '</td>
+					<td width="10%" class="hidden-xs"><input class="form-control" name="shop_order_item_marking_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->marking) . '" /></td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md">' . $warehouse_select . '</td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md"><input readonly="readonly" class="form-control" name="shop_order_item_id_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->shop_item_id . '" /></td>
+					<td width="22"><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { $(this).parents(\'tr\').remove(); recountPosition() } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 				</tr>
 			';
 
@@ -412,15 +410,14 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<tr class="bold">
 					<td></td>
 					<td class="text-align-right">' . Core::_('Shop_Order.shop_order_item_total') . '</td>
-					<td width="80" class="total_quantity text-align-right">' . $total_quantity . '</td>
-					<td width="150" class="total_amount text-align-right">' . $total_amount . '</td>
-					<td width="80"></td>
-					<td></td>
-					<td width="120"></td>
-					<td width="120"></td>
-					<td width="130"></td>
-					<td width="120"></td>
-					<td></td>
+					<td width="5%" class="total_quantity text-align-right">' . $total_quantity . '</td>
+					<td width="10%" class="total_amount text-align-right">' . $total_amount . '</td>
+					<td width="5%" class="hidden-xs hidden-sm"></td>
+					<td width="10%" class="hidden-xs hidden-sm"></td>
+					<td width="10%" class="hidden-xs"></td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md"></td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md"></td>
+					<td width="22"></td>
 				</tr>
 			</tbody>
 		</table>';
@@ -476,7 +473,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							}
 							else
 							{
-								var amount;
+								var amount = 0;
 
 								if (ui.item.discount_position > 0)
 								{
@@ -485,7 +482,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									$('.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
 										if ($(this).val() > 0)
 										{
-											aPrices.push($(this).val());
+											var quantity = $(this).parents('td').prev().find('input[name ^= \'shop_order_item_quantity\']').val();
+
+											aPrices.push($(this).val() * quantity);
 											aPrices.sort(function(a,b){return a-b;});
 											aPrices.join();
 										}
@@ -501,7 +500,12 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								else
 								{
 									$('.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
-										amount += $(this).val();
+										if ($(this).val() != 'undefined')
+										{
+											var quantity = $(this).parents('td').prev().find('input[name ^= \'shop_order_item_quantity\']').val();
+
+											amount += parseFloat($(this).val() * quantity);
+										}
 									});
 								}
 
@@ -587,7 +591,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					var position = $('.shop-item-table > tbody tr:not(:last-child)').length + 1;
 
 					$('.shop-item-table > tbody tr:last-child').before(
-						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td width=\"80\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"150\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"80\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td><span class=\"semi-bold rate-percent\">%</span></td><td width=\"120\">{$type_select}</td><td width=\"120\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"130\">{$warehouse_select}</td><td width=\"120\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 					);
 				}
 

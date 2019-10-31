@@ -113,14 +113,14 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				}
 
 				$ext = Core_File::getExtension($aFileData['name']);
-
 				$large_image = $this->_object->id . ($ext == '' ? '' : '.' . $ext);
 
 				$this->_object->createDir();
 
 				try {
 					Core_File::moveUploadedFile($aFileData['tmp_name'], $this->_object->getFilePath() . $large_image);
-					$this->_object->filename = $large_image;
+					//$this->_object->filename = $large_image;
+					$this->_object->filename = $aFileData['name'];
 				} catch (Exception $e) {
 				}
 			}

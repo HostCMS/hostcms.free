@@ -273,7 +273,7 @@ class Skin_Default_Module_Core_Module extends Core_Module
 
 		if (!$ajax)
 		{
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
 			$module_id = 0;
 			$oUser_Setting = $oUser->User_Settings->getByModuleIdAndTypeAndEntityId($module_id, $type, 0);
 

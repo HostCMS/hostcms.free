@@ -24,7 +24,7 @@ $site_id = Core_Array::getGet('site_id');
 $oSite = Core_Entity::factory('Site', $site_id);
 
 // Проверка возможности доступа пользователя к сайту
-$oUser = Core_Entity::factory('User')->getCurrent();
+$oUser = Core_Auth::getCurrentUser();
 
 if ($oUser->superuser == 0
 	&& !$oUser->checkSiteAccess($oSite))
@@ -47,8 +47,8 @@ $oAdmin_Form_Controller
 	->module(Core_Module::factory($sModule))
 	->setUp()
 	->path($sAdminFormAction)
-	->title(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
-	->pageTitle(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name));
+	->title(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
+	->pageTitle(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name));
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -57,8 +57,14 @@ $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 // $sUserGroupsPath = '/admin/user/index.php';
 
 // Путь к контроллеру формы пользователей определенной группы
-$sUsersPath = '/admin/user/index.php';
-$sAdditionalParamsUser = 'company_department_id=' . $company_department_id;
+//$sUsersPath = '/admin/company/index.php';
+//$sAdditionalParamsUser = 'company_department_id=' . $company_department_id;
+
+$sCompaniesPath = '/admin/company/index.php';
+
+$sCompanyPath = '/admin/company/department/index.php';
+$sAdditionalCompanyParams = 'company_id=' . $oCompany_Department->Company->id;
+
 
 $sChoosingSitePath = '/admin/user/site/index.php';
 $sAdditionalChoosingSite = 'company_department_id=' . $company_department_id . '&mode=action';
@@ -69,22 +75,22 @@ $sAdditionalFormActions = 'company_department_id=' . $company_department_id . '&
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_users_title'))
+		->name(Core::_('Company.company_show_title2'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref($sCompaniesPath, NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax($sCompaniesPath, NULL, NULL, '')
 	)
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Company_Department.title', $oCompany_Department->Company->name))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sUsersPath, NULL, NULL, $sAdditionalParamsUser)
+			$oAdmin_Form_Controller->getAdminLoadHref($sCompanyPath, NULL, NULL, $sAdditionalCompanyParams)
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sUsersPath, NULL, NULL, $sAdditionalParamsUser)
+			$oAdmin_Form_Controller->getAdminLoadAjax($sCompanyPath, NULL, NULL, $sAdditionalCompanyParams)
 	)
 )
 ->add(
@@ -109,7 +115,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 )
 ->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('User.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
+		->name(Core::_('Company_Department_Action_Access.ua_show_user_form_events_access_title', $oAdmin_Word_Value->name, $oCompany_Department->name))
 		->href(
 			$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath())
 		)

@@ -18,12 +18,11 @@ class Core_Mail_Sendmail extends Core_Mail
 	 * @param string $to recipient
 	 * @param string $subject subject
 	 * @param string $message message
-	 * @param string $additional_headers additional headers
 	 * @return self
 	 */
-	protected function _send($to, $subject, $message, $additional_headers)
+	protected function _send($to, $subject, $message)
 	{
-		$this->_status = @mail($to, $subject, $message, $additional_headers);
+		$this->_status = @mail($to, $subject, $message, $this->_headersToString());
 		return $this;
 	}
 }

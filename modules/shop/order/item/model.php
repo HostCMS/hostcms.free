@@ -85,8 +85,8 @@ class Shop_Order_Item_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
 
@@ -124,6 +124,36 @@ class Shop_Order_Item_Model extends Core_Entity
 				htmlspecialchars($this->name)
 			);
 		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$additionalParams = Core_Str::escapeJavascriptVariable(
+			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+		);
+
+		$aOptions = array('...');
+
+		$aShop_Warehouses = $this->Shop_Order->Shop->Shop_Warehouses->findAll(FALSE);
+		foreach ($aShop_Warehouses as $oShop_Warehouse)
+		{
+			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($oShop_Warehouse->name);
+		}
+
+		$oItemsWarehouseSelect = Admin_Form_Entity::factory('Select')
+			->divAttr(array('class' => ''))
+			->options($aOptions)
+			->class('form-control')
+			->name('shop_order_item_warehouse_' . $this->id)
+			->value($this->shop_warehouse_id)
+			->onchange("$.adminLoad({path: '{$oAdmin_Form_Controller->getPath()}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).val() }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+			->execute();
 	}
 
 	/**

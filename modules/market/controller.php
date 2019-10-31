@@ -541,7 +541,7 @@ class Market_Controller extends Core_Servant_Properties
 
 				if ($sFieldType == 'siteList')
 				{
-					$oUser = Core_Entity::factory('User')->getCurrent();
+					$oUser = Core_Auth::getCurrentUser();
 					$aObjects = $oUser->getSites();
 				}
 				elseif ($sFieldType == 'shopList')

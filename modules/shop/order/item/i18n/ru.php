@@ -38,4 +38,5 @@ return array(
 	'rate' => 'Налог',
 	'recount_discounts' => 'Пересчитать скидки',
 	'recountDiscount_success' => 'Скидки пересчитаны!',
+	'apply_success' => 'Информация о товаре в заказе изменена!',
 );

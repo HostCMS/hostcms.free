@@ -856,7 +856,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function fillSites()
 	{
-		$aSites = Core_Entity::factory('User')->getCurrent()->getSites();
+		$aSites = Core_Auth::getCurrentUser()->getSites();
 
 		$aReturn = array();
 		foreach ($aSites as $oSite)

@@ -85,8 +85,8 @@ class Core_QueryBuilder_Rename extends Core_QueryBuilder_Statement
 
 		foreach ($tables as $oldTableName => $newTableName)
 		{
-			$oldTableName = $this->_dataBase->quoteColumnName($oldTableName);
-			$newTableName = $this->_dataBase->quoteColumnName($newTableName);
+			$oldTableName = $this->_dataBase->quoteTableName($oldTableName);
+			$newTableName = $this->_dataBase->quoteTableName($newTableName);
 
 			$sql[] = $oldTableName . ' TO ' . $newTableName;
 		}

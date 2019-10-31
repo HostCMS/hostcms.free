@@ -37,9 +37,9 @@ class Ipaddress_Model extends Core_Entity
 
 		if (is_null($id) && !$this->loaded())
 		{
-			$oUserCurrent = Core_Entity::factory('User', 0)->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['deny_access'] = 1;
-			$this->_preloadValues['user_id'] = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
 		}
 	}
 
@@ -51,6 +51,9 @@ class Ipaddress_Model extends Core_Entity
 	{
 		$this->deny_access = 1 - $this->deny_access;
 		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
 		return $this;
 	}
 
@@ -62,6 +65,9 @@ class Ipaddress_Model extends Core_Entity
 	{
 		$this->deny_backend = 1 - $this->deny_backend;
 		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
 		return $this;
 	}
 
@@ -73,6 +79,9 @@ class Ipaddress_Model extends Core_Entity
 	{
 		$this->no_statistic = 1 - $this->no_statistic;
 		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
 		return $this;
 	}
 
@@ -122,5 +131,61 @@ class Ipaddress_Model extends Core_Entity
 		return htmlspecialchars(
 			Core_Str::cut($this->comment, 255)
 		);
+	}
+
+	/**
+	 * Deny access
+	 * @return self
+	 */
+	public function denyAllAccess()
+	{
+		$this->deny_access = 1;
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
+	}
+
+	/**
+	 * Allow access
+	 * @return self
+	 */
+	public function allowAllAccess()
+	{
+		$this->deny_access = 0;
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
+	}
+
+	/**
+	 * Deny access
+	 * @return self
+	 */
+	public function denyAllBackendAccess()
+	{
+		$this->deny_backend = 1;
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
+	}
+
+	/**
+	 * Allow access
+	 * @return self
+	 */
+	public function allowAllBackendAccess()
+	{
+		$this->deny_backend = 0;
+		$this->save();
+
+		Ipaddress_Controller::instance()->clearCache();
+
+		return $this;
 	}
 }

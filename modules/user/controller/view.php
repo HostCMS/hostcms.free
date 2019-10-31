@@ -45,32 +45,6 @@ class User_Controller_View extends Admin_Form_Action_Controller
 		switch ($operation)
 		{
 			case 'modal':
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-				//$newWindowId = 'Modal_' . time();
-
-				//ob_start();
-				/*?>
-				<div id="<?php echo $newWindowId?>">
-				<?php*/
-				/*if (!$this->_prepeared)
-				{
-					$this->_prepareForm();
-
-					// Событие onAfterRedeclaredPrepareForm вызывается в двух местах
-					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
-				}*/
-
-				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create();
-
-				$oAdmin_Form_Action_Controller_Type_Edit_Show
-					->Admin_Form_Controller($this->_Admin_Form_Controller)
-					//->formId($this->_formId)
-					//->tabs($this->_tabs)
-					//->buttons($this->_addButtons())
-					;
-
-				//echo ;
 				$this->addContent($this->_showEditForm());
 
 				$return = TRUE;
@@ -89,13 +63,9 @@ class User_Controller_View extends Admin_Form_Action_Controller
 					->pageTitle($this->title)
 					->module($this->_Admin_Form_Controller->getModule())
 					->content($content)
-					// ->message($oAdmin_Form_Action_Controller_Type_Edit_Show->message)
 					->show();
 
-				$this->addContent(
-					//$oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm()
-					ob_get_clean()
-				);
+				$this->addContent(ob_get_clean());
 
 				$this->_Admin_Form_Controller
 					->title($this->title)
@@ -143,16 +113,29 @@ class User_Controller_View extends Admin_Form_Action_Controller
 									<!-- <div class="stats-value pink">284</div>-->
 									<!-- <div class="stats-title">FOLLOWING</div>-->
 
-									<?php
-									$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->findAll();
-
-									foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+									<?php									
+									$aCompanies = Core_Entity::factory('Company')->findAll();
+									
+									foreach ($aCompanies as $oCompany)
 									{
-										?>
-										<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>
-										<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
-										<?php
-									}
+										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);	
+									
+										foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
+										{
+											if (count($aCompanies))
+											{
+											?>											
+												<div class="h5">
+													<?php echo htmlspecialchars($oCompany->name)?>
+												</div>
+											<?php
+											}
+											?>
+											<div class="semi-bold"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></div>
+											<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
+											<?php
+										}
+									}									
 									?>
 								</div>
 							</div>

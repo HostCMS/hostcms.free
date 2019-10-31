@@ -204,4 +204,6 @@ return array(
 	'month' => 'Month',
 	'year' => 'Year',
 	'random' => 'Random',
+
+	'time_postfix' => ' in %s',
 );

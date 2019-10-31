@@ -26,38 +26,6 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 	protected $_showFilter = FALSE;
 
 	/**
-	 * Get form
-	 * @return string
-	 */
-	protected function _getForm()
-	{
-		ob_start();
-
-		$oAdmin_View = Admin_View::create($this->Admin_View);
-		$oAdmin_View
-			->children($this->_children)
-			->pageTitle($this->pageTitle)
-			->module($this->module);
-
-		ob_start();
-
-		$this
-			->showContent()
-			->showFooter();
-
-		$content = ob_get_clean();
-
-		$oAdmin_View
-			->content($content)
-			->message($this->getMessage())
-			->show();
-
-		$this->applyEditable();
-
-		return ob_get_clean();
-	}
-
-	/**
 	 * Show form footer
 	 */
 	public function showFooter()
@@ -255,7 +223,12 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			?></td><?php
 		}
 
-		$oUser = Core_Entity::factory('User')->getCurrent();
+		$oUser = Core_Auth::getCurrentUser();
+
+		if (is_null($oUser))
+		{
+			return FALSE;
+		}
 
 		// Доступные действия для пользователя
 		$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
@@ -373,7 +346,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 		{
 			$onclick = $this->getAdminLoadAjax($this->getPath());
 			?><td><?php
-				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/admin/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.button_to_clear')?>" type="image" src="/admin/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.button_to_clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
+				?><input title="<?php echo Core::_('Admin_Form.button_to_filter')?>" type="image" src="/admin/images/filter.gif" id="admin_forms_apply_button" type="button" value="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>" /> <input title="<?php echo Core::_('Admin_Form.clear')?>" type="image" src="/admin/images/clear.png" type="button" value="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearFilter('<?php echo $windowId?>')" /><?php
 			?></td><?php
 		}
 		?></tr>
@@ -808,7 +781,12 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 			$windowId = $this->getWindowId();
 
 			// Текущий пользователь
-			$oUser = Core_Entity::factory('User')->getCurrent();
+			$oUser = Core_Auth::getCurrentUser();
+
+			if (is_null($oUser))
+			{
+				return FALSE;
+			}
 
 			// Доступные действия для пользователя
 			$aAllowed_Admin_Form_Actions = $this->_Admin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);

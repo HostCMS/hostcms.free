@@ -60,6 +60,10 @@ abstract class Core_DataBase
 	 */
 	protected $_asObject = FALSE;
 
+	protected $_columnQuoteCharacter = '`';
+	
+	protected $_tableQuoteCharacter = '`';
+
 	/**
 	 * Array of allowed separators, e.g. table.field => `table`.`field`, a + b => `a` + `b`
 	 */
@@ -192,10 +196,18 @@ abstract class Core_DataBase
 	/**
 	 * Quote column name, e.g. `columnName` for 'columnName',
 	 * `columnName` AS `columnNameAlias` for array('columnName', 'columnNameAlias')
-	 * @param mixed $columnName string or array
+	 * @param mixed $columnName string|array
 	 * @return string
 	 */
 	abstract public function quoteColumnName($columnName);
+
+	/**
+	 * Quote table name, e.g. `tableName` for 'tableName',
+	 * `tableName` AS `tableNameAlias` for array('tableName', 'tableNameAlias')
+	 * @param mixed $columnName string|array
+	 * @return string
+	 */
+	abstract public function quoteTableName($tableName);
 
 	/**
 	 * Start SQL-transaction

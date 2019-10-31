@@ -40,7 +40,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$oCore_Page = Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
 
 		$this->_uri == '' && $this->_uri = '/';
@@ -55,7 +55,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 			return $oCore_Response;
 		}
-		
+
 		$sLastChar = substr($this->_uri, -1);
 
 		// Путь заканчивается на слэш
@@ -87,7 +87,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					->where('active', '=', 1)
 					->where('shortlink', '=', ltrim($this->_uri, '/'))
 					->limit(1);
-					
+
 				$aShortlinks = $oShortlinks->findAll(FALSE);
 
 				if (isset($aShortlinks[0]))
@@ -97,7 +97,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					Core_DataBase::instance()
 						->setQueryType(2)
 						->query($sQuery);
-					
+
 					$oCore_Response
 						->status($aShortlinks[0]->type)
 						->header('Location', $aShortlinks[0]->source);
@@ -105,7 +105,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					return $oCore_Response;
 				}
 			}
-			
+
 			// Если после последнего слэша указывается имя файла с расширением в два или более символов
 			if (!defined('NOT_EXISTS_FILE_404_ERROR') || NOT_EXISTS_FILE_404_ERROR)
 			{
@@ -160,7 +160,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 					return $oCore_Response;
 				}
 			}
-			
+
 			define('STATIC_CACHE', TRUE);
 		}
 
@@ -438,8 +438,9 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		if ($bLogged)
 		{
 			$hostcmsAction = Core_Array::getGet('hostcmsAction');
-			if ($hostcmsAction)
+			if (!is_null($hostcmsAction))
 			{
+				Core_Session::start();
 				$_SESSION['HOSTCMS_SHOW_XML'] = $hostcmsAction == 'SHOW_XML';
 			}
 		}
