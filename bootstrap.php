@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -73,58 +73,5 @@ if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
 // Core_Event::attach('shop_order.onAfterChangeStatusPaid', array('Shop_Observer_Robokassa', 'onAfterChangeStatusPaid'));
 // Core_Event::attach('Shop_Payment_System_Handler.onAfterProcessOrder', array('Shop_Observer_Robokassa', 'onAfterProcessOrder'));
 
-/** Yandex.Market **/
-// Идентификатор кампании на Яндексе
-Shop_Controller_Yandexmarket_Observer::$campaignId = 21421819;
-// Идентификатор статуса заказа "Передано в доставку"
-Shop_Controller_Yandexmarket_Observer::$deliveryStatusId = 2;
-// Отладочный токен, срок жизни - 365 дней
-Shop_Controller_Yandexmarket_Observer::$token = 'AQAAAAAfQUt4AASAHcOqHpWtUkV0mucpfef1gdA';
-// Идентификатор приложения авторизации в oauth.yandex.ru
-Shop_Controller_Yandexmarket_Observer::$clientId = '88f09f274e9f4a46ad5374685af5bb5f';
-Core_Event::attach('Shop_Payment_System_Handler.onAfterChangedOrder', array('Shop_Controller_Yandexmarket_Observer', 'onAfterChangedOrder'));
-
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
-
-/*Core_Event::attach('shop.onCallwarehouseApi', array('My_Shop_Observer', 'onCallwarehouseApi'));
-
-class My_Shop_Observer
-{
-	static public function onCallwarehouseApi($object, $args)
-	{
-		// ID склада, информацию об остатке на котором добавлять
-		$warehouse_id = 1;
-
-		$oShop_Items = $object->Shop_Items;
-		$oShop_Items
-			->queryBuilder()
-			->select('shop_items.*', array('SUM(shop_warehouse_items.count)', 'dataWarehouse' . $warehouse_id))
-			->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id', array(
-					array('AND' => array('shop_warehouse_items.shop_warehouse_id', '=', $warehouse_id))
-				)
-			)
-			->groupBy('shop_items.id');
-
-		return $oShop_Items;
-	}
-}*/
-/*
-class Shop_Payment_System_Observer
-{
-	static public function onAfterPrepareXml($object, $args)
-	{
-	
-		if ($object->getShopOrder()->coupon)
-		{	
-			$oShopCoupon = Core_Entity::factory('Shop_Purchase_Discount_Coupon')->getByText($object->getShopOrder()->coupon);
-			if(!is_null($oShopCoupon))
-			{
-				$args[0]->addEntity(
-				Core::factory('Core_Xml_Entity')->name('coupon_name')->value($oShopCoupon->name)
-				);
-			}
-		}
-	}
-}
-Core_Event::attach('Shop_Payment_System_Handler.onAfterPrepareXml', array('Shop_Payment_System_Observer', 'onAfterPrepareXml'));*/

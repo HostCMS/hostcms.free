@@ -40,7 +40,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	if (strlen($sQuery))
 	{
 		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
-		
+
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
@@ -70,13 +70,14 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$oShop_Items = $oShop->Shop_Items;
 			$oShop_Items->queryBuilder()
-				->open()
-					->where('shop_items.name', 'LIKE', $sQueryLike)
+				->select('shop_items.*', array(Core_QueryBuilder::expression("IF(shop_items.modification_id, CONCAT((SELECT m.name FROM shop_items AS m WHERE m.id = shop_items.modification_id AND m.deleted = 0), ', ', shop_items.name), shop_items.name)"), 'dataName'))
+				->havingOpen()
+					->having('dataName', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.marking', 'LIKE', $sQueryLike)
+					->having('shop_items.marking', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.id', 'LIKE', $sQuery)
-				->close()
+					->having('shop_items.id', 'LIKE', $sQueryLike)
+				->havingClose()
 				->limit(15);
 
 			$aShop_Items = $oShop_Items->findAll(FALSE);
@@ -138,7 +139,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 						'count' => $count
 					);
 				}
-				
+
 				$imageSmall = $oShop_Item->image_small
 					? htmlspecialchars($oShop_Item->getSmallFileHref())
 					: '';
