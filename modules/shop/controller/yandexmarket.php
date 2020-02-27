@@ -53,7 +53,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_YandexMarket extends Core_Controller
 {
@@ -710,10 +710,15 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			: '';
 	}
 
-	protected function _makeOfferTag($oShop_Item)
+	/**
+	 * Print offer's tag
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _makeOfferTag(Shop_Item_Model $oShop_Item)
 	{
 		$oShop = $this->getEntity();
-		
+
 		/* Устанавливаем атрибуты тега <offer>*/
 		$tag_bid = $oShop_Item->yandex_market_bid
 			? ' bid="' . Core_Str::xml($oShop_Item->yandex_market_bid) . '"'
@@ -730,11 +735,16 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			: '';
 
 		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . " available=\"{$available}\">\n");
-		
+
 		return $this;
 	}
 
-	protected function _showOffer($oShop_Item)
+	/**
+	 * Print offer's content
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _showOffer(Shop_Item_Model $oShop_Item)
 	{
 		$oShop = $this->getEntity();
 
@@ -801,7 +811,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			{
 				$oProperty = $linkedObject->Properties->getByTag_name($tag_name);
 
-				if ($oProperty->type == 2)
+				if ($oProperty && $oProperty->type == 2)
 				{
 					$aProperty_Values = $oProperty->getValues($oShop_Item->id);
 
@@ -961,6 +971,22 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->itemsProperties && $this->_addPropertyValue($oShop_Item);
 
 		// outlets
+		$this->_addOutlets($oShop_Item);
+
+		Core_Event::notify(get_class($this) . '.onAfterOffer', $this, array($oShop_Item));
+
+		$this->stdOut->write('</offer>'. "\n");
+
+		return $this;
+	}
+
+	/**
+	 * Print outlets
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _addOutlets(Shop_Item_Model $oShop_Item)
+	{
 		if (is_array($this->outlets) && count($this->outlets))
 		{
 			$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->getAllByShop_warehouse_id(array_keys($this->outlets), FALSE, 'IN');
@@ -978,9 +1004,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 		}
 
-		Core_Event::notify(get_class($this) . '.onAfterOffer', $this, array($oShop_Item));
-
-		$this->stdOut->write('</offer>'. "\n");
+		return $this;
 	}
 
 	/**
@@ -991,10 +1015,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected function _deliveryOptions(Shop_Model $oShop, $oShop_Item = NULL)
 	{
+		// Доставки
 		$oShop_Item_Delivery_Options = $oShop->Shop_Item_Delivery_Options;
-
 		$oShop_Item_Delivery_Options->queryBuilder()
-			->where('shop_item_delivery_options.shop_item_id', '=', !is_null($oShop_Item) ? $oShop_Item->id : 0);
+			->where('shop_item_delivery_options.shop_item_id', '=', !is_null($oShop_Item) ? $oShop_Item->id : 0)
+			->where('shop_item_delivery_options.type', '=', 0);
 
 		$aShop_Item_Delivery_Options = $oShop_Item_Delivery_Options->findAll(FALSE);
 
@@ -1008,6 +1033,26 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 
 			$this->stdOut->write('</delivery-options>' . "\n");
+		}
+
+		// ПВЗ
+		$oShop_Item_Delivery_Options = $oShop->Shop_Item_Delivery_Options;
+		$oShop_Item_Delivery_Options->queryBuilder()
+			->where('shop_item_delivery_options.shop_item_id', '=', !is_null($oShop_Item) ? $oShop_Item->id : 0)
+			->where('shop_item_delivery_options.type', '=', 1);
+
+		$aShop_Item_Delivery_Options = $oShop_Item_Delivery_Options->findAll(FALSE);
+
+		if (count($aShop_Item_Delivery_Options))
+		{
+			$this->stdOut->write('<pickup-options>' . "\n");
+
+			foreach ($aShop_Item_Delivery_Options as $oShop_Item_Delivery_Option)
+			{
+				$this->stdOut->write('<option cost="' . $oShop_Item_Delivery_Option->cost . '" days="' . $oShop_Item_Delivery_Option->day . '" order-before="' . $oShop_Item_Delivery_Option->order_before . '"/>' . "\n");
+			}
+
+			$this->stdOut->write('</pickup-options>' . "\n");
 		}
 
 		return count($aShop_Item_Delivery_Options);

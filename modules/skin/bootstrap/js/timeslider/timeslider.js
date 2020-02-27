@@ -146,12 +146,11 @@ if (typeof jQuery === 'undefined') {
 			}*/
 		}
 
-		var strDays = day ? (day + ' д. ') : '',
-			strHours = h ? (h + ' ч. ') : '',
-			strMin = m ? ((m > 9 ? m : '0' + m) + ' м.') : '';
+		var strDays = day ? (day + i18n['day']) : '',
+			strHours = h ? (h + i18n['hour']) : '',
+			strMin = m ? ((m > 9 ? m : '0' + m) + i18n['minute']) : '';
 
 		return strDays + strHours + strMin;
-
 
 		/*
         if (h) {
@@ -969,13 +968,23 @@ if (typeof jQuery === 'undefined') {
     };
 
     TimeSlider.prototype.cursor_moving_event = function() {
+
         var _this = this;
+
         return function(e) {
+
             var pos_x = _this.get_cursor_x_position(e);
+
+			var px_per_minute = _this.$ruler.width() / (_this.options.hours_per_ruler * 60);
+
             if (_this.is_mouse_down_left) {
                 switch (_this.clicked_on) {
                     case 'timecell':
                         if (_this.time_cell_selected) {
+							//console.log('_this.time_cell_selected = ', _this.time_cell_selected);
+							/* console.log('px_per_minute = ', px_per_minute);
+
+							console.log('pos_x - _this.prev_cursor_x = ', pos_x - _this.prev_cursor_x); */
                             _this.set_time_cell_position(pos_x - _this.prev_cursor_x);
                         }
                         break;

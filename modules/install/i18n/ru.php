@@ -7,7 +7,7 @@
  * @subpackage Install
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'changeLanguage' => 'Выберите язык:',
@@ -58,7 +58,7 @@ return array(
 	'step_8' => 'Шаг 8: Завершение установки',
 
 	'step_5_warning1' => 'Номер лицензии и PIN-код можно узнать в <a href="http://www.hostcms.ru/users/" target="_blank">личном кабинете</a> на нашем сайте в разделе <a href="http://www.hostcms.ru/users/licence/" target="_blank">Лицензии</a>.',
-	'step_5_warning2' => 'Вы можете не заполнять лицензионные данные на этом этапе.',
+	'step_5_warning2' => 'Вы можете не заполнять лицензионные данные на этом этапе, просто нажмите "Далее".',
 	'step_5_warning3' => 'У только что зарегистрированных пользователей список лицензий будет пуст, вы можете <a href="http://www.hostcms.ru/shop/" target="_blank">приобрести лицензию</a> <i class="fa fa-external-link"></i> или самостоятельно <a href="http://www.hostcms.ru/users/licence/add-free/" target="_blank">создать лицензию</a> <i class="fa fa-external-link"></i> для бесплатной редакции &laquo;Халява&raquo;, нажав на кнопку &laquo;+ HostCMS.Халява&raquo;.',
 	
 	'write_error' => 'Ошибка записи в файл %s.',

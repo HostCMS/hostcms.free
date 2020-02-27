@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -521,7 +521,7 @@ $oMenu->add(
 					)
 				)
 		)
-    ->add(
+		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Group.properties'))
 				->icon('fa fa-cogs')
@@ -633,6 +633,17 @@ $oMenu->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Item.show_sds_link'))
 		->icon('fa fa-book')
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.seo_filter'))
+				->icon('fa fa-filter')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/filter/seo/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/filter/seo/index.php', NULL, NULL, $additionalParams)
+				)
+		)		
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Shop_Item.system_of_pays'))
@@ -1190,6 +1201,8 @@ if (strlen($sGlobalSearch))
 		)
 		->addCondition(array('open' => array()))
 		->addCondition(array('where' => array('shop_items.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('shop_items.guid', '=', $sGlobalSearch)))
 		->addCondition(array('setOr' => array()))
 		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 		->addCondition(array('setOr' => array()))

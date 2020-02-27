@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -34,7 +34,7 @@ return array(
 	'shop_shops_url_type_element_1' => 'Транслитерация',
 	'shop_country_id' => "<acronym title=\"Страна, указываемая по умолчанию в списке стран\">Страна по умолчанию</acronym>",
 	'shop_order_status_id' => 'Статус заказа по умолчанию',
-	'shop_measure_id' => "Единица измерения веса товара",
+	'shop_measure_id' => "Ед.изм. веса",
 	'send_order_email_admin' => "Отправлять письмо с информацией о поступившем заказе администратору",
 	'send_order_email_user' => "Отправлять письмо с информацией об оформленном заказе пользователю",
 	'comment_active' => 'Постмодерировать отзывы на товары',
@@ -109,7 +109,7 @@ return array(
 	'tag' => 'Метка: %s',
 	'comment_mail_subject' => 'Добавление комментария/ответа на сайт',
 	'deleteEmptyDirs_success' => 'Пустые директории удалены!',
-	'size_measure' => 'Единица измерения габаритов',
+	'size_measure' => 'Ед.изм. габаритов',
 	'size_measure_0' => 'мм',
 	'size_measure_1' => 'см',
 	'size_measure_2' => 'м',
@@ -117,6 +117,7 @@ return array(
 	'size_measure_4' => 'футы',
 	'reserve' => 'Резервировать заказанные товары',
 	'reserve_hours' => 'Резервировать (в часах)',
+	'max_bonus' => '<acronym title="Сколько максимум процентов от суммы чека может быть оплачено бонусами">Списывать бонус, %</acronym>',
 	'adult' => 'Для взрослых',
 	'cpa' => 'Публиковать в «Заказ на Маркете»',
 	'sales_statistics' => 'Статистика продаж',
@@ -165,6 +166,8 @@ return array(
 	'seo_template_item_currency' => 'Валюта товара',
 	'seo_template_property_value' => 'Значение свойства',
 	'seo_template_item_price_with_currency' => 'Цена с валютой',
+	'seo_template_filter' => 'Фильтр',
+	'seo_template_filter_producer' => 'Производитель',
 
 	'all_groups_count' => 'Всего групп: %s',
 	'all_items_count' => 'Всего товаров: %s',
@@ -175,9 +178,7 @@ return array(
 	'discountcard_template' => 'Шаблон номера карты',
 	'invoice_template' => 'Шаблон номера заказа',
 	'all_shops' => 'Все магазины',
-	'default_shop_measure_id' => 'Единица измерения по-умолчанию',
+	'default_shop_measure_id' => 'Ед.изм. товара',
 	'filter' => 'Быстрый фильтр',
-	'seo_template_filter' => 'Фильтр',
-	'seo_template_filter_producer' => 'Производитель',
 	'set_price_recount_sets' => 'Установка цен при пересчете комплекта',
 );

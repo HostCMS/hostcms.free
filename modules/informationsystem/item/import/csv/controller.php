@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -128,10 +128,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		'csv_fields',
 		// Путь к картинкам
 		'imagesPath',
-		// Действие с существующими инфорамционными элементами:
-		// 1 - обновить существующие инфорамционные элементамы
-		// 2 - не обновлять существующие инфорамционные элементамы
-		// 3 - удалить содержимое инфорамционной системы до импорта
+		// Действие с существующими информационными элементами:
+		// 1 - обновить существующие информационные элементы
+		// 2 - не обновлять существующие информационные элементы
+		// 3 - удалить содержимое информационной системы до импорта
 		'importAction',
 		// Флаг, указывающий, включена ли индексация
 		'searchIndexation',
@@ -174,7 +174,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 */
 	protected $_sSmallImageFile = '';
 
-/**
+	/**
 	 * Get inserted items count
 	 * @return int
 	 */
@@ -881,7 +881,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 							$oTmpObject = $sData != 'ID00000000'
 								? $this->_oCurrentInformationsystem->Informationsystem_Groups->getByGuid($sData, FALSE)
 								: Core_Entity::factory('Informationsystem_Group', 0);
-								
+
 							if (!is_null($oTmpObject))
 							{
 								if ($oTmpObject->id != $this->_oCurrentGroup->id)

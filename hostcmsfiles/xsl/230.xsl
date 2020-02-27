@@ -367,10 +367,22 @@
 				<xsl:when test="filter = 6">
 					<div class="propertyInput">
 						<div>
-							&labelFrom; <input type="text" name="property_{@id}_from" size="5" value="{/shop/*[name()=$nodename_from]}" data-property="{tag_name}"/> &labelTo; <input type="text" name="property_{@id}_to" size="5" value="{/shop/*[name()=$nodename_to]}" data-property="{tag_name}"/>
+							<xsl:text>&labelFrom; </xsl:text>
+							<input name="property_{@id}_from" size="5" type="text" value="{min}" data-property="{tag_name}">
+								<xsl:if test="/shop/*[name()=$nodename_from] != 0">
+									<xsl:attribute name="value"><xsl:value-of select="/shop/*[name()=$nodename_from]"/></xsl:attribute>
+								</xsl:if>
+							</input>
 
-							<input name="property_{@id}_from_original" value="{/shop/*[name()=$nodename_from]}" hidden="hidden" />
-							<input name="property_{@id}_to_original" value="{/shop/*[name()=$nodename_to]}" hidden="hidden" />
+							<xsl:text>&labelTo; </xsl:text>
+							<input name="property_{@id}_to" size="5" type="text" value="{max}" data-property="{tag_name}">
+								<xsl:if test="/shop/*[name()=$nodename_to] != 0">
+									<xsl:attribute name="value"><xsl:value-of select="/shop/*[name()=$nodename_to]"/></xsl:attribute>
+								</xsl:if>
+							</input>
+
+							<input name="property_{@id}_from_original" value="{min}" hidden="hidden" />
+							<input name="property_{@id}_to_original" value="{max}" hidden="hidden" />
 						</div>
 						<div class="slider"></div><br/>
 					</div>

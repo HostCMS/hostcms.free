@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -22,6 +22,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	protected $_allowedProperties = array(
 		'title', // Form Title
 		'skipColumns', // Array of skipped columns
+		'tabClass', // Additional class for Admin_Form_Entity_Tab
+		'tabsClass', // Additional class for Admin_Form_Entity_Tabs
 	);
 
 	/**
@@ -297,7 +299,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		}
 
 		return FALSE;
-		//return isset($this->_tabs[$tabName]);
 	}
 
 	/**
@@ -307,10 +308,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	public function getTab($tabName)
 	{
-		/*if (isset($this->_tabs[$tabName]))
-		{
-			return $this->_tabs[$tabName];
-		}*/
 		foreach ($this->_tabs as $oTab)
 		{
 			if ($oTab->name == $tabName)
@@ -410,7 +407,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		// Основная закладка
 		$oAdmin_Form_Tab_EntityMain = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('admin_form.form_forms_tab_1'))
-			->name('main');
+			->name('main')
+			->class($this->tabClass);
 
 		$this->addTab($oAdmin_Form_Tab_EntityMain);
 
@@ -419,10 +417,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			// Дополнительные (ключи)
 			$oAdmin_Form_Tab_EntityAdditional = Admin_Form_Entity::factory('Tab')
 				->caption(Core::_('admin_form.form_forms_tab_2'))
-				->name('additional');
+				->name('additional')
+				->class($this->tabClass);
 
 			// $oUser = Core_Auth::getCurrentUser();
-
 			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
 			//!$oUser->superuser && $oAdmin_Form_Tab_EntityAdditional->active(FALSE);
 
@@ -486,8 +484,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						if ($columnArray['max_length'] == 1)
 						{
 							$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Checkbox');
-
-							//$oAdmin_Form_Entity_For_Column->value($this->_object->$columnName);
 							$oAdmin_Form_Entity_For_Column
 								->value(1)
 								->checked($this->_object->$columnName != 0);
@@ -699,11 +695,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 				}
 
-				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form);
-
-				$oAdmin_Form_Action_Controller_Type_Edit_Show
+				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form)
 					->Admin_Form_Controller($this->_Admin_Form_Controller)
-					->tabs($this->_tabs)
+					->tabs($this->_getAdmin_Form_Entity_Tabs())
 					->buttons($this->_addButtons());
 
 				echo $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();
@@ -716,13 +710,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_applyObjectProperty();
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
 
 				$this->_return = TRUE;
 			break;
 			case 'markDeleted':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').remove();</script>');
+				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
 
 				$this->_return = TRUE;
 			break;
@@ -825,19 +819,47 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	}
 
 	/**
+	 * Get Admin_Form_Entity_Tabs
+	 * @return Admin_Form_Entity_Tabs|NULL
+	 */
+	protected function _getAdmin_Form_Entity_Tabs()
+	{
+		// Закладки
+		if (count($this->_tabs))
+		{
+			$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs')
+				->formId($this->_Admin_Form_Entity_Form->id)
+				->class($this->tabsClass);
+
+			// Add all tabs to $oAdmin_Form_Entity_Tabs
+			foreach ($this->_tabs as $oAdmin_Form_Tab_Entity)
+			{
+				if ($oAdmin_Form_Tab_Entity->deleteEmptyItems()->getCountChildren() > 0)
+				{
+					$oAdmin_Form_Entity_Tabs->add($oAdmin_Form_Tab_Entity);
+				}
+			}
+		}
+		else
+		{
+			$oAdmin_Form_Entity_Tabs = NULL;
+		}
+
+		return $oAdmin_Form_Entity_Tabs;
+	}
+
+	/**
 	 * Show edit form
 	 * @return boolean
 	 */
 	protected function _showEditForm()
 	{
 		// Контроллер показа формы редактирования с учетом скина
-		$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form);
-
-		$oAdmin_Form_Action_Controller_Type_Edit_Show
+		$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form)
 			->title($this->title)
 			->children($this->_children)
 			->Admin_Form_Controller($this->_Admin_Form_Controller)
-			->tabs($this->_tabs)
+			->tabs($this->_getAdmin_Form_Entity_Tabs())
 			->buttons($this->_addButtons());
 
 		$content = $oAdmin_Form_Action_Controller_Type_Edit_Show->showEditForm();

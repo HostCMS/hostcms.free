@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -368,7 +368,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			: $this->_object->login;
 
 		$title = $this->_object->id
-			? Core::_('User.ua_edit_user_form_title', htmlspecialchars($name))
+			? Core::_('User.ua_edit_user_form_title', $name, FALSE)
 			: Core::_('User.ua_add_user_form_title');
 
 		$this->title($title);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -131,6 +131,23 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		$aObjects = $this->findAll(FALSE);
 
 		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	}
+
+	/**
+	 * Check available discounts with position
+	 * @return boolean
+	 */
+	public function checkAvailableWithPosition()
+	{
+		$this->queryBuilder()
+			->where('active', '=', 1)
+			->where('position', '>', 0)
+			->where('start_datetime', '<=', Core_Date::timestamp2sql(time()))
+			->where('end_datetime', '>=', Core_Date::timestamp2sql(time()))
+			->clearOrderBy()
+			->limit(1);
+
+		return $this->getCount() > 0;
 	}
 
 	/**

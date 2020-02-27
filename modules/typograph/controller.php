@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Typograph
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Typograph_Controller
 {
@@ -59,36 +59,43 @@ class Typograph_Controller
 		if (!empty($oSite->css_left))
 		{
 			$str = str_replace(
-				array('<span class="'.$oSite->css_left.'"> </span>', '<span class="'.$oSite->css_left.'"></span>'), '', $str
+				array('<span class="' . $oSite->css_left . '"> </span>', '<span class="' . $oSite->css_left.'"></span>'), '', $str
 			);
-			$str = preg_replace('/(<span class="'.$oSite->css_left.'">)(\S*)(<\/span>)/iu', '\\2', $str);
+			$str = preg_replace('/(<span class="' . $oSite->css_left . '">)(\S*)(<\/span>)/iu', '\\2', $str);
 
 			// Broken text
-			$str = str_replace('<span class="'.$oSite->css_left.'">', " ", $str);
+			$str = str_replace('<span class="' . $oSite->css_left . '">', " ", $str);
 		}
 
 		if (!empty($oSite->css_right))
 		{
 			$str = str_replace(
-				array('<span class="'.$oSite->css_right.'"> </span>', '<span class="'.$oSite->css_right.'"></span>'), '', $str
+				array('<span class="' . $oSite->css_right . '"> </span>', '<span class="' . $oSite->css_right . '"></span>'), '', $str
 			);
 		}
 
 		// Удаляем теги от предыдущего оптического выравнивания
 		$str = str_replace(
-			array('<span style="margin-right: 0.3em"> </span>', '<span style="margin-right: 0.3em"></span>'), "", $str
+			array(
+				'<span style="margin-right: 0.3em"> </span>', '<span style="margin-right: 0.3em"></span>',
+				'<span style="margin-right: 0.3em;"> </span>', '<span style="margin-right: 0.3em;"></span>'
+			),
+			"", $str
 		);
-		$str = preg_replace('/(<span style="margin-left: -0.3em">)(\S*)(<\/span>)/iu', '\\2', $str);
+		$str = preg_replace('/(<span style="margin-left: -0.3em[;]?">)(\S*)(<\/span>)/iu', '\\2', $str);
 
 		// Opera bug fix
 		$str = str_replace(
 			array('<span STYLE="margin-right: 0.30em"> </span>', '<span STYLE="margin-right: 0.30em"></span>'), '', $str
 		);
-		$str = preg_replace('/(<span STYLE="margin-left: -0.30em">)(\S*)(<\/span>)/iu', '\\2', $str);
+		$str = preg_replace('/(<span STYLE="margin-left: -0.30em[;]?">)(\S*)(<\/span>)/iu', '\\2', $str);
 
 		// Broken text
 		$str = str_replace(
-			array('<span style="margin-right: 0.30em">', '<span style="margin-left: -0.30em">'), ' ', $str
+			array(
+				'<span style="margin-right: 0.30em">', '<span style="margin-left: -0.30em">',
+				'<span style="margin-right: 0.30em;">', '<span style="margin-left: -0.30em;">'
+			), ' ', $str
 		);
 
 		return $str;

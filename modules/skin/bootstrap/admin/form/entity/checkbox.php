@@ -9,11 +9,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_Entity_Checkbox {
 
-	/** 
+	/**
 	 * Executes the business logic.
 	 */
 	public function execute()
@@ -23,11 +23,14 @@ class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_
 			$this->checked = 'checked';
 		}*/
 
+		// Skip check field
+		$this->format = NULL;
+
 		// Значение, передаваемое при включенном checkbox
 		$this->value === '' && $this->value = 1;
 
 		$aAttr = $this->getAttrsString();
-		
+
 		if (is_null($this->checked) && $this->value != 0 || $this->checked)
 		{
 			$aAttr[] = 'checked="checked"';

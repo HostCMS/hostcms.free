@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Date
 {
@@ -253,7 +253,7 @@ class Core_Date
 		// Прошло часов
 		$estimate_hours = floor($estimate_time / 3600);
 
-		if ($estimate_hours < 3)
+		if ($estimate_hours > 0 && $estimate_hours < 3)
 		{
 			// Прошло минут
 			$estimate_minutes = floor($estimate_time / 60);
@@ -302,7 +302,6 @@ class Core_Date
 
 			$withTime && $sReturn .= Core::_('Core.time_postfix', $time);
 		}
-
 
 		return $sReturn;
 	}

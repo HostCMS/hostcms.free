@@ -20,7 +20,7 @@ return array (
 		'crm' => array(
 			'ico' => 'fa fa-users',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
-			'modules' => array('siteuser', 'deal', 'event', 'user', 'calendar', 'messenger', 'kanban', 'company'),
+			'modules' => array('lead', 'siteuser', 'deal', 'event', 'user', 'calendar', 'messenger', 'kanban', 'company'),
 		),
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',

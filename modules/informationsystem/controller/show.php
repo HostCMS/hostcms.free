@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -670,9 +670,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			{
 				$Informationsystem_Item_Properties = Core::factory('Core_Xml_Entity')
 					->name('informationsystem_item_properties');
-				
+
 				$this->addEntity($Informationsystem_Item_Properties);
-				
+
 				Core_Event::notify(get_class($this) . '.onBeforeAddItemsPropertiesList', $this, array($Informationsystem_Item_Properties));
 
 				$this->_addItemsPropertiesList(0, $Informationsystem_Item_Properties);
@@ -1284,30 +1284,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
-			$oInformationsystem_Group->clearEntities();
-			$this->applyGroupsForbiddenTags($oInformationsystem_Group);
-
-			// Shortcut
-			if ($oInformationsystem_Group->shortcut_id)
-			{
-				$oShortcut_Group = $oInformationsystem_Group;
-				$oInformationsystem_Group = clone $oInformationsystem_Group->Shortcut;
-
-				$oInformationsystem_Group
-					->id($oShortcut_Group->id)
-					->addForbiddenTag('parent_id')
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('original_group_id')
-							->value($oShortcut_Group->Shortcut->id)
-					)->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('parent_id')
-							->value($oShortcut_Group->parent_id)
-					);
-			}
-
-			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
+			$this->_groupIntoArray($oInformationsystem_Group);
 		}
 
 		$bTpl = $this->_mode == 'tpl';
@@ -1328,40 +1305,19 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_aInformationsystem_Groups = array();
 
+		$group_id = intval($this->group);
+
 		// Потомки текущего уровня
-		$aInformationsystem_Groups = $this->_Informationsystem_Groups->getByParentId($this->group);
+		$aInformationsystem_Groups = $this->_Informationsystem_Groups->getByParentId($group_id);
 
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
-			$oInformationsystem_Group->clearEntities();
-			$this->applyGroupsForbiddenTags($oInformationsystem_Group);
-
-			// Shortcut
-			if ($oInformationsystem_Group->shortcut_id)
-			{
-				$oShortcut_Group = $oInformationsystem_Group;
-				$oInformationsystem_Group = clone $oInformationsystem_Group->Shortcut;
-
-				$oInformationsystem_Group
-					->id($oShortcut_Group->id)
-					->addForbiddenTag('parent_id')
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('original_group_id')
-							->value($oShortcut_Group->Shortcut->id)
-					)->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('parent_id')
-							->value($oShortcut_Group->parent_id)
-					);
-			}
-
-			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
+			$this->_groupIntoArray($oInformationsystem_Group);
 		}
 
-		if ($this->group != 0)
+		if ($group_id != 0)
 		{
-			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $this->group)
+			$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $group_id)
 				->clearEntities();
 
 			do {
@@ -1377,6 +1333,47 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$this->_addGroupsByParentId(0, $this);
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Add group $oInformationsystem_Group into $this->_aInformationsystem_Groups
+	 * @param Informationsystem_Group_Model $oInformationsystem_Group
+	 * @return self
+	 */
+	protected function _groupIntoArray($oInformationsystem_Group)
+	{
+		$oInformationsystem_Group->clearEntities();
+		$this->applyGroupsForbiddenTags($oInformationsystem_Group);
+
+		$parent_id = $oInformationsystem_Group->parent_id;
+
+		// Shortcut
+		if ($oInformationsystem_Group->shortcut_id)
+		{
+			$oShortcut_Group = $oInformationsystem_Group;
+			$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
+
+			$oInformationsystem_Group = clone $oOriginal_Informationsystem_Group;
+
+			$oInformationsystem_Group
+				->id($oOriginal_Informationsystem_Group->id)
+				->addForbiddenTag('parent_id')
+				->addForbiddenTag('shortcut_id')
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('shortcut_id')
+						->value($oShortcut_Group->id)
+				)
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('parent_id')
+						->value($oShortcut_Group->parent_id)
+				);
+		}
+
+		$this->_aInformationsystem_Groups[$parent_id][] = $oInformationsystem_Group;
 
 		return $this;
 	}
@@ -1761,7 +1758,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Set goods sorting
 	 * @param $column Column name, e.g. price, absolute_price
@@ -1789,13 +1786,13 @@ class Informationsystem_Controller_Show extends Core_Controller
 		return $this;
 	}
 
-	
+
 	/**
 	 * Array of Properties conditions, see addFilter()
 	 * @var array
 	 */
 	protected $_aFilterProperties = array();
-	
+
 	/**
 	 * Add filter condition
 	 * ->addFilter('property', 17, '=', 33)
@@ -1852,7 +1849,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Remove filter condition
 	 * ->removeFilter('property', 17)
@@ -1891,7 +1888,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Apply Filter
 	 * @return self
@@ -1902,7 +1899,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
+
 	/**
 	 * Apply Basic Filter
 	 * @return self
@@ -2031,8 +2028,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * Get Filter Properties
 	 * @return array

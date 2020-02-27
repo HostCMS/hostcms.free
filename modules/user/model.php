@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -31,7 +31,7 @@ class User_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'user' => array(),
-		'company' => array('through' => 'company_department_post_user'),
+		//'company' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 	);
 
@@ -83,6 +83,7 @@ class User_Model extends Core_Entity
 		'notification_user' => array(),
 		'notification_subscriber' => array(),
 		'notification' => array('through' => 'notification_user'),
+		'deal'  => array(),
 		'deal_template_step_access_user'  => array(),
 		'deal_attachment' => array(),
 		'user_note' => array(),
@@ -96,6 +97,7 @@ class User_Model extends Core_Entity
 		'user_worktime' => array(),
 		'user_workday' => array(),
 		'user_absence' => array('foreign_key' => 'employee_id', 'model' => 'user_absence'),
+		'lead_step' => array(),
 	);
 
 	/**
@@ -547,8 +549,13 @@ class User_Model extends Core_Entity
 		if (Core::moduleIsActive('deal'))
 		{
 			$this->Deal_Attachments->deleteAll(FALSE);
-			$this->Deal_Template_Step_Access_User->deleteAll(FALSE);
 			$this->Deal_Step_Users->deleteAll(FALSE);
+			$this->Deal_Template_Step_Access_User->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('lead'))
+		{
+			$this->Lead_Steps->deleteAll(FALSE);
 		}
 
 		$this->User_Bookmarks->deleteAll(FALSE);
@@ -685,7 +692,8 @@ class User_Model extends Core_Entity
 		$oCompany_Posts = $this->Company_Posts; //->getAllByCompany_department_id($iDepartmentId);
 		$oCompany_Posts
 			->queryBuilder()
-			->where('company_department_post_users.company_id', '=', $iCompanyId);
+			->where('company_department_post_users.company_id', '=', $iCompanyId)
+			->groupBy('company_posts.id');
 
 		!is_null($isHead)
 			&& $oCompany_Posts
@@ -1017,23 +1025,26 @@ class User_Model extends Core_Entity
 					}
 				}
 			}
-
-			$aHeadOfDepartmentsIDs = array();
-			foreach ($aCompany_Departments as $oCompany_Department)
+			else
 			{
-				$aHeadOfDepartmentsIDs[] = $oCompany_Department->id;
-			}
 
-			$aCompany_Departments = $oEmployee->Company_Departments->findAll();
-			foreach ($aCompany_Departments as $oCompany_Department)
-			{
-				do {
-					// ID департамента, в котором работает $oEmployee входит в перечень, в котором $this глава
-					if (in_array($oCompany_Department->id, $aHeadOfDepartmentsIDs))
-					{
-						return TRUE;
-					}
-				} while($oCompany_Department = $oCompany_Department->getParent());
+				$aHeadOfDepartmentsIDs = array();
+				foreach ($aCompany_Departments as $oCompany_Department)
+				{
+					$aHeadOfDepartmentsIDs[] = $oCompany_Department->id;
+				}
+
+				$aCompany_Departments = $oEmployee->Company_Departments->findAll();
+				foreach ($aCompany_Departments as $oCompany_Department)
+				{
+					do {
+						// ID департамента, в котором работает $oEmployee входит в перечень, в котором $this глава
+						if (in_array($oCompany_Department->id, $aHeadOfDepartmentsIDs))
+						{
+							return TRUE;
+						}
+					} while($oCompany_Department = $oCompany_Department->getParent());
+				}
 			}
 		}
 
@@ -1067,7 +1078,38 @@ class User_Model extends Core_Entity
 	 */
 	public function hasAccessChangeDealPermissions4User($oUser)
 	{
-		return $this->isHeadOfEmployee($oUser);
+		// Администратор может менять права для всех
+		if ($this->superuser)
+		{
+			return TRUE;
+		}
+
+		// Проверяем доступ авторизованного сотрудника к форме "Этапы сделки" и действию "Изменить доступ" этой формы
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		// У авторизованного сотрудника есть доступ к модулю "Сделки"
+		if ($this->checkModuleAccess(array('deal'), $oSite))
+		{
+			$oAdminFormDealTemplateStep = Core_Entity::factory('Admin_Form', 228);
+
+			$bHasChangeAccess = FALSE;
+
+			// Доступные для сотрудника действия формы "Этапы сделок"
+			$aAllowed_Admin_Form_Actions = $oAdminFormDealTemplateStep->Admin_Form_Actions->getAllowedActionsForUser($this);
+
+			foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
+			{
+				if ($oAdmin_Form_Action->name == 'changeAccess')
+				{
+					$bHasChangeAccess = TRUE;
+					break;
+				}
+			}
+
+			return $bHasChangeAccess && $this->isHeadOfEmployee($oUser);
+		}
+
+		return FALSE;
 	}
 
 	/**

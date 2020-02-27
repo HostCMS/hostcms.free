@@ -3,13 +3,19 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Log system
+ * Log system. Notify if status >= MAIL_EVENTS_STATUS. To disable notification call ->notify(FALSE)
+ *
+ * <code>
+ * Core_Log::instance()->clear()
+ * 	->status(Core_Log::$MESSAGE)
+ * 	->write('text');
+ * </code>
  *
  * @package HostCMS
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Log
 {

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -255,7 +255,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				'action' => NULL,
 				'operation' => NULL,
 				'window' => 'id_content',
-				'view' => 'list',
+				'view' => NULL, //'list',
 				'checked' => array()
 			);
 
@@ -299,7 +299,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			{
 				$this->_oAdmin_Form_Setting->order_field_id = intval($this->sortingFieldId);
 			}
-			// Восстанавливаем сохраненный
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
 				$this->sortingFieldId = $this->_oAdmin_Form_Setting->order_field_id;
@@ -313,11 +312,21 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			{
 				$this->_oAdmin_Form_Setting->order_direction = intval($this->sortingDirection);
 			}
-			// Восстанавливаем сохраненный
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
 				$this->sortingDirection = $this->_oAdmin_Form_Setting->order_direction;
 			}
+
+			if (!is_null($this->view))
+			{
+				$this->_oAdmin_Form_Setting->view = strval($this->view);
+			}
+			elseif ($bAdmin_Form_Setting_Already_Exists)
+			{
+				$this->view = $this->_oAdmin_Form_Setting->view;
+			}
+
+			$this->view == '' && $this->view = 'list';
 
 			$this->_oAdmin_Form_Setting->save();
 		}
@@ -558,12 +567,11 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 			$this->_Admin_Language = Core_Entity::factory('Admin_Language')->getCurrent();
 
-			$formName = $this->_Admin_Form->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+			$oAdmin_Word = $this->_Admin_Form->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
 
-			if ($formName->name)
+			if ($oAdmin_Word && strlen($oAdmin_Word->name))
 			{
-				$this->title = $formName->name;
-				$this->pageTitle = $formName->name;
+				$this->title = $this->pageTitle = $oAdmin_Word->name;
 			}
 
 			// Default sorting field
@@ -1031,7 +1039,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		$oAdmin_Answer = Core_Skin::instance()->answer();
 
-		!is_null($this->module) && $oAdmin_Answer->module($this->module->getModuleName());
+		!is_null($this->module)
+			&& Core_Array::get($this->request, '_module', TRUE)
+			&& $oAdmin_Answer->module($this->module->getModuleName());
 
 		$oAdmin_Answer
 			->ajax($this->ajax)
@@ -1053,13 +1063,15 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		$viewList = $this->viewList;
 
-		if (!isset($viewList[$this->view]))
+		/*if (!isset($viewList[$this->view]))
 		{
 			throw new Core_Exception("Wrong view mode '%view'",
 				array('%view' => $this->view));
-		}
+		}*/
 
-		$className = $viewList[$this->view];
+		$className = isset($viewList[$this->view])
+			? $viewList[$this->view]
+			: reset($viewList);
 
 		if (!class_exists($className))
 		{
@@ -1112,7 +1124,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				if (defined('READ_ONLY') && READ_ONLY || $oUser->read_only && !$oUser->superuser)
 				{
 					throw new Core_Exception(
-						Core::_('User.demo_mode'), array(), 0, FALSE
+						Core::_('User.demo_mode') , array(), 0, FALSE
 					);
 				}
 
@@ -1319,14 +1331,14 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		{
 			Core::factory('Core_Html_Entity_Script')
 				->value("(function($){
-					$('#{$windowId} table .editable').editable({windowId: '{$windowId}', path: '{$path}'});
+					$('#{$windowId} .editable').editable({windowId: '{$windowId}', path: '{$path}'});
 				})(jQuery);")
 				->execute();
 		}
 
 		Core::factory('Core_Html_Entity_Script')
 			->value("(function($){
-				$('#{$windowId} table .admin_table_filter :input').on('keydown', $.filterKeyDown);
+				$('#{$windowId} .admin_table_filter :input').on('keydown', $.filterKeyDown);
 			})(jQuery);")
 			->execute();
 
@@ -1352,7 +1364,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		foreach ($aColumns as $columnName => $columnArray)
 		{
 			$subject = str_replace(
-				'{'.$columnName.'}',
+				'{' . $columnName . '}',
 				$mode == 'link'
 					? htmlspecialchars($oEntity->$columnName)
 					: Core_Str::escapeJavascriptVariable($this->jQueryEscape($oEntity->$columnName)),
@@ -1818,8 +1830,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>'});
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php
 	}
@@ -1846,8 +1858,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script>
 		<?php
@@ -1878,28 +1890,122 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	protected function _filterCallbackSelect($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
 		$value = strval($value);
-		?><select name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" class="no-padding-left no-padding-right" style="width: 100%">
-			<option value="HOST_CMS_ALL" <?php echo $value == 'HOST_CMS_ALL' ? "selected" : ''?>><?php echo htmlspecialchars(Core::_('Admin_Form.filter_selected_all'))?></option>
-			<?php
-			$str_array = explode("\n", $oAdmin_Form_Field->list);
-			$value_array = array();
 
+		$oSelect = Admin_Form_Entity::factory('Select');
+		$oSelect
+			->name($filterPrefix . $oAdmin_Form_Field->id)
+			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
+			->class('no-padding-left no-padding-right')
+			->style('width: 100%')
+			->divAttr(array())
+			->value($value);
+
+		if (is_array($oAdmin_Form_Field->list))
+		{
+			$aValue = $oAdmin_Form_Field->list;
+		}
+		else
+		{
+			$aValue = array();
+
+			$str_array = explode("\n", $oAdmin_Form_Field->list);
 			foreach ($str_array as $str_value)
 			{
 				// Каждую строку разделяем по равно
 				$str_explode = explode('=', $str_value);
 
-				if (count($str_explode) > 1 /*&& $str_explode[0] != 0*/ && $str_explode[1] != '…')
+				if (count($str_explode) > 1 && $str_explode[1] != '…')
 				{
 					// сохраняем в массив варинаты значений и ссылки для них
-					$value_array[intval(trim($str_explode[0]))] = trim($str_explode[1]);
-
-					?><option value="<?php echo htmlspecialchars($str_explode[0])?>" <?php echo $value == $str_explode[0] ? "selected" : ''?>><?php echo htmlspecialchars(trim($str_explode[1]))?></option><?php
+					$aValue[trim($str_explode[0])] = trim($str_explode[1]);
 				}
 			}
-		?>
-		</select>
-		<?php
+		}
+
+		$oSelect
+			->options(array('HOST_CMS_ALL' => Core::_('Admin_Form.filter_selected_all')) + $aValue)
+			->execute();
+	}
+
+	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		$iUserId = intval($value);
+
+		$placeholder = Core::_('User.select_user');
+		$language = Core_i18n::instance()->getLng();
+
+		$oOptgroupCompany = new stdClass();
+		$oOptgroupCompany->attributes = array('label' => '');
+
+		$aSelectResponsibleUsers = array('-1' => '');
+
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		$aCompanies = $oSite->Companies->findAll();
+		foreach ($aCompanies as $oCompany)
+		{
+			$oOptgroupCompany = new stdClass();
+			$oOptgroupCompany->attributes = array('label' => $oCompany->name, 'class' => 'company');
+			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
+
+			$aSelectResponsibleUsers[] = $oOptgroupCompany;
+		}
+
+		Core::factory('Core_Html_Entity_Select')
+			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
+			->options($aSelectResponsibleUsers)
+			->name($filterPrefix . $oAdmin_Form_Field->id)
+			->value($iUserId)
+			->execute();
+
+		?><script>
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
+				language: '<?php echo $language?>',
+				placeholder: '<?php echo $placeholder?>'
+			}).val('<?php echo $iUserId?>').trigger('change.select2');
+
+		//$(".select2-container").css('width', '100%');
+
+		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
+			.on('select2:unselect', function (){
+				$(this)
+					.next('.select2-container')
+					.find('.select2-selection--single')
+					.removeClass('user-container');
+			});
+		</script><?php
+	}
+
+	protected function _filterCallbackSiteuser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
+	{
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$siteuser_id = intval($value);
+
+			$placeholder = Core::_('Siteuser.select_siteuser');
+			$language = Core_i18n::instance()->getLng();
+
+			$oSiteuser = Core_Entity::factory('Siteuser')->getById($siteuser_id);
+			$sOptions = !is_null($oSiteuser)
+				? '<option value=' . $oSiteuser->id . ' selected="selected">' . htmlspecialchars($oSiteuser->login) . ' [' . $oSiteuser->id . ']</option>'
+				: '<option></option>';
+			?>
+			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
+				<?php echo $sOptions?>
+			</select>
+			<script>
+				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({
+					language: '<?php echo $language?>',
+					placeholder: '<?php echo $placeholder?>'
+				});
+				$(".select2-container").css('width', '100%');
+			</script>
+			<?php
+		}
+		else
+		{
+			?>—<?php
+		}
 	}
 
 	protected function _filterCallbackCounterparty($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
@@ -1922,7 +2028,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					? Core_Entity::factory('Siteuser_Company', $iCounterpartyId)->Siteuser
 					: Core_Entity::factory('Siteuser_Person', $iCounterpartyId)->Siteuser;
 
-
 				if (!is_null($oSelectedSiteuser->id))
 				{
 					$aSiteuserCompanies = $oSelectedSiteuser->Siteuser_Companies->findAll();
@@ -1931,130 +2036,38 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					{
 						$sOptionValue = 'company_' . $oSiteuserCompany->id;
 
-						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserCompany->getAvatar() . '</option>';
-
-						/* $oOptgroupSiteuser->children['company_' . $oSiteuserCompany->id] = array(
-							'value' => htmlspecialchars($oSiteuserCompany->name) . '%%%' . $oSiteuserCompany->getAvatar(),
-							'attr' => array('class' => 'siteuser-company')
-						);
- */					}
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-company" ' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserCompany->name) . '[' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserCompany->getAvatar()) . '</option>';
+					}
 
 					$aSiteuserPersons = $oSelectedSiteuser->Siteuser_People->findAll();
 					foreach ($aSiteuserPersons as $oSiteuserPerson)
 					{
 						$sOptionValue = 'person_' . $oSiteuserPerson->id;
 
-						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . $oSelectedSiteuser->login . ']' . '%%%' . $oSiteuserPerson->getAvatar() . '</option>';
-
-						/* $oOptgroupSiteuser->children['person_' . $oSiteuserPerson->id] = array(
-							'value' => htmlspecialchars($oSiteuserPerson->getFullName()) . '%%%' . $oSiteuserPerson->getAvatar(),
-							'attr' => array('class' => 'siteuser-person')
-						); */
+						$sOptions .= '<option value="' . $sOptionValue . '" class="siteuser-person"' . ($value == $sOptionValue ? 'selected="selected"' : '') . '>' . htmlspecialchars($oSiteuserPerson->getFullName()) . '[' . htmlspecialchars($oSelectedSiteuser->login) . ']' . '%%%' . htmlspecialchars($oSiteuserPerson->getAvatar()) . '</option>';
 					}
 
-					$sOptions = '<optgroup label="' . $oSelectedSiteuser->login . '" class="siteuser">' . $sOptions . '</optgroup>';
+					$sOptions = '<optgroup label="' . htmlspecialchars($oSelectedSiteuser->login) . '" class="siteuser">' . $sOptions . '</optgroup>';
 				}
 			}
-
+			// Может быть только компания или предстсавитель
+			/*else
+			{
+				$oSiteuser = Core_Entity::factory('Siteuser')->getById($value);
+				$sOptions = !is_null($oSiteuser)
+					? '<option value=' . $oSiteuser->id . ' selected="selected">' . htmlspecialchars($oSiteuser->login) . ' [' . $oSiteuser->id . ']</option>'
+					: '<option></option>';
+			}*/
 			?>
 			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
 				<?php echo $sOptions?>
 			</select>
-
 			<script>
-				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
-			</script>
-			<?php
-		}
-		else
-		{
-			?>—<?php
-		}
-	}
-
-	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
-	{
-		$iUserId = intval($value);
-
-		$placeholder = Core::_('User.select_user');
-		$language = Core_i18n::instance()->getLng();
-		//$oUser = Core_Entity::factory('Siteuser')->getById($iUserId);
-
-		///////////////////
-
-		$oOptgroupCompany = new stdClass();
-		$oOptgroupCompany->attributes = array('label' => '');
-
-		$aSelectResponsibleUsers = array('-1' => '');
-		//$aSelectResponsibleUsers[] = $oOptgroupCompany;
-
-		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-		$aCompanies = $oSite->Companies->findAll();
-		foreach ($aCompanies as $oCompany)
-		{
-			//$aTmpCompanies[] = $oCompany->id;
-
-			$oOptgroupCompany = new stdClass();
-			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
-			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
-
-			$aSelectResponsibleUsers[] = $oOptgroupCompany;
-		}
-
-		Core::factory('Core_Html_Entity_Select')
-			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
-			->options($aSelectResponsibleUsers)
-			->name($filterPrefix . $oAdmin_Form_Field->id)
-			->value($iUserId)
-			->execute();
-		?>
-		<script>
-
-
-		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
-				language: '<?php echo $language?>',
-				placeholder: '<?php echo $placeholder?>'
-			}).val('<?php echo $iUserId?>').trigger('change.select2');
-
-		//$(".select2-container").css('width', '100%');
-
-		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
-			.on('select2:unselect', function (){
-
-				$(this)
-					.next('.select2-container')
-					.find('.select2-selection--single')
-					.removeClass('user-container');
-			});
-
-		</script>
-		<?php
-
-	}
-
-	protected function _filterCallbackSiteuser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
-	{
-		if (Core::moduleIsActive('siteuser'))
-		{
-			$siteuser_id = intval($value);
-
-			$placeholder = Core::_('Siteuser.select_siteuser');
-			$language = Core_i18n::instance()->getLng();
-
-			$oSiteuser = Core_Entity::factory('Siteuser')->getById($siteuser_id);
-			$option = !is_null($oSiteuser)
-				? '<option value=' . $oSiteuser->id . ' selected="selected">' . $oSiteuser->login . ' [' . $oSiteuser->id . ']</option>'
-				: '<option></option>';
-			?>
-			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
-				<?php echo $option?>
-			</select>
-
-			<script>
-				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({language: '<?php echo $language?>', placeholder: '<?php echo $placeholder?>'});
-
-				$(".select2-container").css('width', '100%');
+				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
+					url: '/admin/siteuser/index.php?loadSiteusers&types[]=person&types[]=company',
+					language: '<?php echo $language?>',
+					placeholder: '<?php echo $placeholder?>'
+				});
 			</script>
 			<?php
 		}
@@ -2260,9 +2273,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $mFilterValue))
 									);
 								break;
-
 								case 3: // Checkbox.
-								{
 									if (!$mFilterValue)
 									{
 										break;
@@ -2297,8 +2308,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 											)
 										);
 									}
-									break;
-								}
+								break;
 								case 5: // Дата-время.
 								case 6: // Дата.
 
@@ -2366,7 +2376,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										break;
 									}
 								case 8: // Список
-								{
 									if (is_null($mFilterValue))
 									{
 										break;
@@ -2381,8 +2390,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										);
 									}
 
-									break;
-								}
+								break;
 							}
 						}
 					}

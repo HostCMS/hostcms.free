@@ -1,38 +1,34 @@
 <?php
-/**
- * Comments.
- *
- * @package HostCMS
- * @subpackage Comment
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ТОВ "Хостмейк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
-	'title' => 'Коментарі',
+	'title' => 'Коментарі ',
 	'model_name' => 'Коментарі',
-	'edit_title' => 'Редагування коментаря',
+	'edit_title' => 'Редагування коментаря "%s"',
 	'add_title' => 'Додавання коментаря',
 	'main_menu' => 'Коментар',
 	'add' => 'Додати',
-
+	'delete' => 'Видалити',
+	'edit' => 'Редагувати',
+	'change_active' => 'Змінити активність',
+	'view_comment' => 'Переглянути коментар в новому вікні',
 	'id' => 'Ідентифікатор',
 	'parent_id' => 'Код батьківського коментаря',
-	'subject' => '<acronym title="Тема комментария">Тема</acronym>',
-	'text' => '<acronym title="Текст коментаря">Текст</acronym>',
-	'author' => '<acronym title="ПІБ автора коментаря">Автор</acronym>',
-	'email' => '<acronym title="E-mail автора коментаря">E-mail</acronym>',
-	'phone' => '<acronym title="Номер телефону автора коментаря">Телефон</acronym>',
-	'active' => '<acronym title="Статус активності коментаря">Активний</acronym>',
-	'ip' => '<acronym title="IP-адреса автора коментаря">IP-адреса</acronym>',
-	'datetime' => '<acronym title="Дата відправлення коментаря">Дата та час</acronym>',
-	'grade' => '<acronym title="Оцінка, яку дав автор коментаря">Оцінка</acronym>',
-	'siteuser_id' => '<acronym title="Код користувача, який додав коментар">Код користувача</acronym>',
-
-	'edit_success' => 'Інформацію про коментар успішно змінено',
+	'subject' => 'Тема',
+	'text' => 'Текст',
+	'author' => 'Автор',
+	'email' => 'E-mail',
+	'phone' => 'Телефон',
+	'active' => 'Активний',
+	'ip' => 'IP-адреса',
+	'datetime' => 'Дата і час',
+	'grade' => 'Оцінка',
+	'siteuser_id' => 'Код користувача',
+	'edit_success' => 'Коментар успішно додано',
 	'copy_success' => 'Коментар успішно скопійовано',
-	'markDeleted_success' => 'Коментарий успішно видалено',
-	'changeActive_success' => 'Актівність коментаря змінена',
+	'markDeleted_success' => 'Коментар успішно видалено',
+	'changeActive_success' => 'Активність коментаря змінена',
 	'delete_success' => 'Елемент видалено!',
 	'undelete_success' => 'Елемент відновлено!',
+	'ban' => 'Заблокувати',
+	'ban_comment' => 'Заблокований за коментар: %s',
 );

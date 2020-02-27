@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Bonuses',
@@ -35,5 +35,12 @@ return array(
 	'item_bonus_name' => "Bonus name",
 	'description' => "Description of the bonus",
 	'bonus_transaction_name' => 'Bonuses of order %s',
-	'paid_by_bonuses' => 'Paid by bonuses',
+	'paid_by_bonuses' => 'Bonuses',
+	'min_amount' => 'Minimal amount',
+	'accrual' => 'Accrual',
+	'from' => 'from',
+	'through' => 'through',
+	'accrual_date' => 'Accrual date',
+	'accrual_days' => 'Through (days)',
+	'expire_days' => 'On (days)',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -36,69 +36,62 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
-		;
-
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
-		$oMainTab->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
-		$oMainTab->move($this->getField('value')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
+			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab->delete($this->getField('shop_currency_id'));
-		$oMainTab->delete($this->getField('mode'));
-
 		$oMainTab
+			->delete($this->getField('mode'))
+			->delete($this->getField('value'))
 			->delete($this->getField('type'))
 			->delete($this->getField('position'));
 
-		$oTypeSelectField = Admin_Form_Entity::factory('Select')
-			->name('type')
-			->caption(Core::_('Shop_Purchase_Discount.type'))
-			->options(array(
-				Core::_('Shop_Purchase_Discount.form_edit_affiliate_values_type_percent'),
-				Core::_('Shop_Purchase_Discount.form_edit_affiliate_values_type_summ'))
+		$oMainRow1->add(Admin_Form_Entity::factory('Div')
+			->class('col-xs-12 col-sm-4 col-md-3 col-lg-2 input-group select-group')
+			->add(Admin_Form_Entity::factory('Code')
+				->html('<div class="caption">' . Core::_('Shop_Purchase_Discount.value') . '</div>')
 			)
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-			->value($this->_object->type);
-			//->onchange('$.changeDiscountPosition(this)');
-
-			/*
-				changeDiscountPosition: function(object)
-				{
-					var jOption = $(object).find('option:selected'),
-						id = jOption.val(),
-						parentDiv = $("#position").parent();
-
-					id == 1 ? parentDiv.addClass("hidden") : parentDiv.removeClass("hidden");
-				},
-			*/
+			->add(Admin_Form_Entity::factory('Input')
+				->name('value')
+				->value($this->_object->value)
+				->divAttr(array('class' => ''))
+				->class('form-control semi-bold')
+			)
+			->add(Admin_Form_Entity::factory('Select')
+				->name('type')
+				->divAttr(array('class' => ''))
+				->options(array(
+					'%',
+					$this->_object->Shop->Shop_Currency->name
+				))
+				->value($this->_object->type)
+				->class('form-control input-group-addon')
+			)
+		);
 
 		$oPositionSelectField = Admin_Form_Entity::factory('Select')
 			->id('position')
 			->name('position')
 			->caption(Core::_('Shop_Purchase_Discount.position'))
 			->options(array(0 => Core::_('Shop_Purchase_Discount.total-amount'), 2 => 2, 3 => 3, 4 => 4, 5 => 5))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 			->value($this->_object->position);
 
-		$oMainRow3
-			->add($oTypeSelectField)
-			->add($oPositionSelectField);
+		$oMainRow1->add($oPositionSelectField);
 
-		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4);
-		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4);
-
-		$oMainTab->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
-		$oMainTab->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
+		$oMainTab
+			->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
+			->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
+			->move($this->getField('min_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2)
+			->move($this->getField('max_amount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow2);
 
 		$Shop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
 
-		$oMainRow5->add(
+		$oMainRow2->add(
 			Admin_Form_Entity::factory('Select')
 				->name('shop_currency_id')
 				->caption(Core::_('Shop_Purchase_Discount.shop_currency_id'))
 				->options($Shop_Controller_Edit->fillCurrencies())
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 				->value(
 					is_null($this->_object->id)
 						? $this->_object->Shop->shop_currency_id
@@ -106,7 +99,7 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				)
 		);
 
-		$oMainRow6->add(
+		$oMainRow3->add(
 			Admin_Form_Entity::factory('Radiogroup')
 				->name('mode')
 				->value($this->_object->mode)
@@ -125,8 +118,12 @@ class Shop_Purchase_Discount_Controller_Edit extends Admin_Form_Action_Controlle
 				->divAttr(array('class' => 'form-group col-xs-12'))
 		);
 
-		$oMainTab->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow7);
-		$oMainTab->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow7);
+		$oMainTab->move($this->getField('min_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4);
+		$oMainTab->move($this->getField('max_count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow4);
+
+		$oMainTab
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5)
+			->move($this->getField('coupon')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
 
 		$this->title($this->_object->id
 			? Core::_('Shop_Purchase_Discount.edit_order_discount_form_title', $this->_object->name)

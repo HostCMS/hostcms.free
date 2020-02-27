@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -77,4 +77,5 @@ return array(
 	'watermark_default_use_large_image' => 'Использовать водяной знак',
 	'watermark_default_use_small_image' => 'Использовать водяной знак для малых изображений',
 	'move_success' => 'Свойства перенесены',
+	'obligatory' => 'Обязательное для заполнения',
 );

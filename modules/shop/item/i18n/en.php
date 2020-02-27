@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products',
@@ -44,7 +44,6 @@ return array(
 	'tab_export' => 'Export/Import',
 	'tab_seo' => 'SEO',
 	'tab_associated' => 'Associated',
-	'tab_prop' => "Additional properties",
 	'shop_group_id' => 'Group',
 	'item_type_selection_group_buttons_name_simple' => "Conventional",
 	'item_type_selection_group_buttons_name_electronic' => "Digital",
@@ -172,10 +171,11 @@ return array(
 	'root_folder' => 'Root folder',
 	'import_small_images' => "Small image for %s",
 	'import_file_description' => "Description for %s",
-	'count_insert_item' => 'Products uploaded',
-	'count_update_item' => 'Products updated',
-	'create_catalog' => 'Catalogue sections created',
-	'update_catalog' => 'Catalogue sections updated',
+	'inserted_items' => 'Products uploaded — <b>%d</b>',
+	'updated_items' => 'Products updated — <b>%d</b>',
+	'created_catalogs' => 'Catalogue sections created — <b>%d</b>',
+	'updated_catalogs' => 'Catalogue sections updated — <b>%d</b>',
+	'posted_documents' => 'Проведено документов — <b>%d</b>',
 	'msg_download_price' => "The next price-list uploading step will be in 1 second",
 	'msg_download_price_complete' => "Import has finished!",
 	'export_price_list_file_type2' => "CommerceML v. 1.xx",
@@ -310,6 +310,7 @@ return array(
 	'apply_recount_set' => 'Recount Set',
 	'shop_item_set_not_currency' => 'There is no currency for item #%d "%s"',
 	'import_price_list_delay' => 'Delay (sec.)',
+	'import_entries_limit' => 'Rows in the doc',
 	'create_modification_copy_warehouse_count' => 'Copy the same warehouse rest',
 	'markDeleted' => "Delete item",
 	'items_catalog_copy_form_title' => 'Copy item',
@@ -338,4 +339,6 @@ return array(
 	'change_attributes_success' => 'Attributes has been successfully changed!',
 	'remove' => 'Remove',
 	'set' => 'Set',
+	'continue_import' => "If your browser does not support automatic redirection, please click <b><a href=\"%s\" onclick=\"%s\">here</a></b>",
+	'seo_filter' => 'SEO filter',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Dir_Model extends Core_Entity
 {
@@ -59,7 +59,8 @@ class Property_Dir_Model extends Core_Entity
 		'informationsystem_item_property_dir' => array(),
 		'informationsystem_group_property_dir' => array(),
 		'shop_item_property_dir' => array(),
-		'shop_group_property_dir' => array()
+		'shop_group_property_dir' => array(),
+		'deal_template_property_dir' => array(),
 	);
 
 	/**
@@ -116,11 +117,21 @@ class Property_Dir_Model extends Core_Entity
 
 		// Relations
 		$this->Structure_Property_Dir->delete();
-		$this->Informationsystem_Item_Property_Dir->delete();
-		$this->Informationsystem_Group_Property_Dir->delete();
-		$this->Shop_Item_Property_Dir->delete();
-		$this->Shop_Group_Property_Dir->delete();
+
+		if (Core::moduleIsActive('informationsystem'))
+		{
+			$this->Informationsystem_Item_Property_Dir->delete();
+			$this->Informationsystem_Group_Property_Dir->delete();
+		}
+
+		if (Core::moduleIsActive('shop'))
+		{
+			$this->Shop_Item_Property_Dir->delete();
+			$this->Shop_Group_Property_Dir->delete();
+		}
+
 		Core::moduleIsActive('siteuser') && $this->Siteuser_Property_Dir->delete();
+		Core::moduleIsActive('deal') && $this->Deal_Template_Property_Dir->delete();
 
 		return parent::delete($primaryKey);
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -156,7 +156,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_("Shop_Item.tab_properties"))
+					->caption(Core::_("Admin_Form.tabProperties"))
 					->name('Property');
 
 				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
@@ -236,27 +236,21 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 
 					// поля описания товара
-					$oTypographicDescriptionCheckBox = Admin_Form_Entity::factory('Checkbox');
-					$oTypographicDescriptionCheckBox
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
+					$oTypographicDescriptionCheckBox = Admin_Form_Entity::factory('Checkbox')
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
 						->caption(Core::_("Shop_Item.exec_typograph_for_text"))
 						->name("exec_typograph_for_description")
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-						//->divAttr(array('style' => 'float: left'))
-						;
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopItemTabDescriptionRow2->add($oTypographicDescriptionCheckBox);
 
 					$oOpticalAlignDescriptionCheckBox = Admin_Form_Entity::factory('Checkbox')
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
 						->name("use_trailing_punctuation_for_description")
 						->caption(Core::_("Shop_Item.use_trailing_punctuation_for_text"))
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-						;
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopItemTabDescriptionRow2->add($oOpticalAlignDescriptionCheckBox);
 				}
@@ -277,23 +271,18 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 
 					// Добавляем два суррогатных поля текста товара
-					$oTypographicTextCheckBox = Admin_Form_Entity::factory('Checkbox');
-					$oTypographicTextCheckBox
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
+					$oTypographicTextCheckBox = Admin_Form_Entity::factory('Checkbox')
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
 						->caption(Core::_("Shop_Item.exec_typograph_for_text"))
 						->name("exec_typograph_for_text")
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-						;
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopItemTabDescriptionRow4->add($oTypographicTextCheckBox);
 
-					$oOpticalAlignCheckBox = Admin_Form_Entity::factory('Checkbox');
-					$oOpticalAlignCheckBox
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
+					$oOpticalAlignCheckBox = Admin_Form_Entity::factory('Checkbox')
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
 						->name("use_trailing_punctuation_for_text")
 						->caption(Core::_("Shop_Item.use_trailing_punctuation_for_text"))
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -383,12 +372,19 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$additionalParams1 = "shop_item_id={$this->_object->id}&shop_group_id={$this->_object->shop_group_id}";
 					$additionalParams2 = "shop_item_id={$this->_object->id}";
 
-					$sTmpHtml .= '<div class="btn-group">
-						<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet no-margin"></i></a>
-						<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork no-margin"></i></a>
-					</div>';
+					$sTmpHtml .= '<div class="btn-group">';
 
-					$sTmpHtml .= "</div>";
+					$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/associated/index.php', NULL, NULL, $additionalParams1) . '" class="btn btn-default"><i class="fa fa-magnet fa-fw no-margin"></i></a>
+					<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams2) . '" class="btn btn-default"><i class="fa fa-code-fork fa-fw no-margin"></i></a>';
+
+					if ($this->_object->modification_id)
+					{
+						$additionalParams3 = "shop_item_id={$this->_object->modification_id}";
+
+						$sTmpHtml .= '<a href="' . $this->_Admin_Form_Controller->getAdminLoadHref('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" onclick="' . $this->_Admin_Form_Controller->getAdminLoadAjax('/admin/shop/item/modification/index.php', NULL, NULL, $additionalParams3) . '" class="btn btn-default"><i class="fa fa-list fa-fw no-margin"></i></a>';
+					}
+
+					$sTmpHtml .= "</div></div>";
 
 					$oMainRow4->add(Admin_Form_Entity::factory('Code')->html($sTmpHtml));
 				}
@@ -643,7 +639,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 							$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
 							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small)
-					);
+					)
+					->crop(TRUE);
 
 				$oMainRow6->add($oImageField);
 
@@ -815,7 +812,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if ($this->_object->Modifications->getCount())
 				{
 					$oModificationPrice = Admin_Form_Entity::factory('Checkbox')
-						->value(0)
+						->value(1)
+						->checked(FALSE)
 						->name("apply_price_for_modification")
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21'))
 						->caption(Core::_("Shop_Item.apply_price_for_modification"));
@@ -846,7 +844,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$oItemPriceCheckBox = Admin_Form_Entity::factory('Checkbox')
 							->caption(htmlspecialchars($oShopPrice->name))
 							->id("item_price_id_{$oShopPrice->id}")
-							->value(htmlspecialchars($value))
+							->value($value)
 							->name("item_price_id_{$oShopPrice->id}")
 							->divAttr(array('class' => 'form-group margin-top-10 col-xs-8 col-md-4'))
 							->onclick("document.getElementById('item_price_value_{$oShopPrice->id}').disabled
@@ -1077,6 +1075,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$this->getField('path')
 							->add(
 								Admin_Form_Entity::factory('A')
+									->id('path')
 									->target('_blank')
 									->href($sItemUrl)
 									->class('input-group-addon bg-blue bordered-blue')
@@ -1278,7 +1277,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							.insertAfter($('.associated-item-table'));
 
 						$('.associated-item-table > tbody').append(
-							$('<tr><td>' + $.escapeHtml(ui.item.label) + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"associated_count[]\" value=\"1\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td></td></tr>')
+							$('<tr><td>' + $.escapeHtml(ui.item.label) + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"associated_count[]\" value=\"1\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 						);
 
 						ui.item.value = '';
@@ -1428,7 +1427,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->name('ImportExport'), $oShopGroupSeoTab);
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_("Shop_Group.tab_properties"))
+					->caption(Core::_("Admin_Form.tabProperties"))
 					->name('Property');
 
 				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
@@ -1559,7 +1558,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->smallImage(array('max_width' => $oShop->group_image_small_max_width, 'max_height' => $oShop->group_image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
 						$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 						$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
-						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small));
+						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small))
+					->crop(TRUE);
 
 				// Добавляем поле картинки группы товаров
 				$oMainRow2->add($oImageField);
@@ -1638,6 +1638,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->getField('path')
 						->add(
 							Admin_Form_Entity::factory('A')
+								->id('path')
 								->target('_blank')
 								->href($sGroupUrl)
 								->class('input-group-addon bg-blue bordered-blue')
@@ -1662,30 +1663,22 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						Typograph_Controller::instance()->eraseOpticalAlignment($oDescriptionField->value)
 					);
 
-					$oTypographField = Admin_Form_Entity::factory('Checkbox');
-
-					$oTypographField
+					$oTypographField = Admin_Form_Entity::factory('Checkbox')
 						->caption(Core::_("Shop_Group.exec_typograph_for_description"))
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
 						->name("exec_typograph_for_description")
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-					;
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopGroupDescriptionTabRow2->add($oTypographField);
 
 					// и "Оптическое выравнивание"
-					$oOpticalAlignmentField = Admin_Form_Entity::factory('Checkbox');
-
-					$oOpticalAlignmentField
+					$oOpticalAlignmentField = Admin_Form_Entity::factory('Checkbox')
 						->caption(Core::_("Shop_Group.use_trailing_punctuation_for_text"))
 						->name("use_trailing_punctuation_for_text")
-						->value(
-							$oShop->typograph_default_items == 1 ? 1 : 0
-						)
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-					;
+						->value(1)
+						->checked($oShop->typograph_default_items == 1)
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopGroupDescriptionTabRow2->add($oOpticalAlignmentField);
 				}
@@ -1960,7 +1953,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					foreach ($aAddAssociatedItems as $key => $associated_item_id)
 					{
-						$iCount = $this->_object->Shop_Item_Associateds->getCountByshop_item_associated_id($associated_item_id);
+						$iCount = $this->_object->Shop_Item_Associateds->getCountByshop_item_associated_id($associated_item_id, FALSE);
 
 						if (!$iCount)
 						{
@@ -1999,7 +1992,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$aAddSetItems = Core_Array::getPost('set_item_id', array());
 				foreach ($aAddSetItems as $key => $shop_item_set_id)
 				{
-					$iCount = $this->_object->Shop_Item_Sets->getCountByshop_item_set_id($shop_item_set_id);
+					$iCount = $this->_object->Shop_Item_Sets->getCountByshop_item_set_id($shop_item_set_id, FALSE);
 
 					if (!$iCount)
 					{
@@ -2653,6 +2646,23 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		$oSiteAlias = $oShop->Site->getCurrentAlias();
+		if ($oSiteAlias)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+			$sUrl = ($oShop->Structure->https ? 'https://' : 'http://')
+				. $oSiteAlias->name
+				. $oShop->Structure->getPath()
+				. $this->_object->getPath();
+
+			$this->_Admin_Form_Controller->addMessage(
+				Core::factory('Core_Html_Entity_Script')
+					->value("$('#{$windowId} a#path').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "')")
+				->execute()
+			);
+		}
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
@@ -2752,9 +2762,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							return TRUE;
 						}
 
-						$oSameShopItem = Core_Entity::factory('Shop', $shop_id)
-							->Shop_Items
-							->getByGroupIdAndPath($parent_id, $path);
+						$oSameShopItems = Core_Entity::factory('Shop', $shop_id)->Shop_Items;
+						$oSameShopItems->queryBuilder()->where('modification_id', '=', 0);
+
+						$oSameShopItem = $oSameShopItems->getByGroupIdAndPath($parent_id, $path);
 
 						if (!is_null($oSameShopItem))
 						{

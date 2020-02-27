@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Breadcrumbs extends Core_Controller
 {
@@ -318,6 +318,12 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 				if ($this->shop_group_id)
 				{
 					$groupId = $this->shop_group_id;
+
+					if (is_array($groupId))
+					{
+						// Get First Item
+						$groupId = Core_Array::first($groupId);
+					}
 
 					Core_Event::notify(get_class($this) . '.onBeforeAddShopGroups', $this, array($groupId));
 

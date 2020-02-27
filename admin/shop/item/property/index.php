@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -335,7 +335,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 1
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('properties.*'))
+	array('select' => array('properties.*', array('shop_item_properties.id', 'dataTmp')))
 )->addCondition(
 	array('join' => array('shop_item_properties', 'shop_item_properties.property_id', '=', 'properties.id'))
 )->addCondition(

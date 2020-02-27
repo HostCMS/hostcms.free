@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -561,7 +561,7 @@ class Core_ORM
 	 * @param boolean $bCache use cache, default TRUE
 	 * @param string $fieldName default '*'
 	 * @param boolean $distinct default FALSE
-	 * @return int
+	 * @return int|FALSE
 	 * <code>
 	 * $iCount = Core_ORM::factory('Book')->getCount();
 	 * var_dump($iCount);
@@ -583,7 +583,7 @@ class Core_ORM
 			->asAssoc()
 			->current($bCache);
 
-		return $aRow['count'];
+		return is_array($aRow) ? $aRow['count'] : FALSE;
 	}
 
 	/**
@@ -2017,10 +2017,13 @@ class Core_ORM
 
 		if (!empty($this->_modelColumns))
 		{
-			foreach ($this->_modelColumns as $key => $value)
-			{
-				$return[$key] = $value;
-			}
+			$return = $this->_modelColumns;
+		}
+
+		// 'dataXXX' values
+		foreach ($this->_dataValues as $key => $value)
+		{
+			$return[$key] = $value;
 		}
 
 		return $return;

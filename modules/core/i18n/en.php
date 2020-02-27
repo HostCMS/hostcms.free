@@ -7,7 +7,7 @@
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Error while opening file to write %s; check your access rights to folder.',
@@ -161,11 +161,11 @@ return array(
 
 	'now' => 'Now',
 	'ago' => '%1$s %2$s ago',
-	'today' => 'Today at %s',
-	'yesterday' => 'Yesterday at %s',
-	'tomorrow' => 'Tomorrow at %s',
-	'estimate_date' => '%1$d %2$s at %3$s',
-	'estimate_date_year' => '%1$d %2$s %3$d at %4$s',
+	'today' => 'Today',
+	'yesterday' => 'Yesterday',
+	'tomorrow' => 'Tomorrow',
+	'estimate_date' => '%1$d %2$s',
+	'estimate_date_year' => '%1$d %2$s %3$d',
 
 	'month1' => 'January',
 	'month2' => 'February',
@@ -205,5 +205,5 @@ return array(
 	'year' => 'Year',
 	'random' => 'Random',
 
-	'time_postfix' => ' in %s',
+	'time_postfix' => ' at %s',
 );

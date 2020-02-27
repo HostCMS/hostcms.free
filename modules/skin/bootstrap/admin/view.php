@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -83,8 +83,8 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 		$title = !is_null($this->module)
 			&& ($aMenu = $this->module->getMenu())
 			&& isset($aMenu[0])
-			? Core_Array::get($aMenu[0], 'name')
-			: $this->pageTitle;
+				? Core_Array::get($aMenu[0], 'name')
+				: $this->pageTitle;
 
 		// Заголовок
 		if (strlen($title))

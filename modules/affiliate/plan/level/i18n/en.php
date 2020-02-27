@@ -6,7 +6,7 @@
  * @subpackage Affiliate
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'affiliate_values_form_title' => 'Levels of affiliate program "%s"',
@@ -27,4 +27,5 @@ return array(
 	'edit_error' => 'Error while adding level information',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'error_level' => 'Level already exist!',
 );

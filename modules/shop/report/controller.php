@@ -9,10 +9,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
+	// Basic
 	static protected $_oDefault_Currency = NULL;
 	static protected $_startDatetime = NULL;
 	static protected $_endDatetime = NULL;
@@ -42,6 +43,7 @@ class Shop_Report_Controller
 	static protected $_byParams = array();
 	static protected $_byParamSegments = array();
 
+	// Colors
 	static protected $_aYAxisColors = array();
 	static protected $_aColors = array(
 		'#E75B8D',
@@ -84,29 +86,84 @@ class Shop_Report_Controller
 		'#0ca6e4'
 	);
 
-	static protected function _selectOrders($startDatetime, $endDatetime)
+	static protected $_debug = FALSE;
+	static protected $_debugMessages = array();
+
+	static protected function _selectOrders($startDatetime, $endDatetime, $fromId, $toId)
 	{
-		$oShop_Orders = Core_Entity::factory('Shop_Order');
-		$oShop_Orders
-			->queryBuilder()
+		$oShop_Orders_QB = Core_QueryBuilder::select('shop_orders.*')
+			->from('shop_orders')
 			->straightJoin()
+			// ->indexHint('shop_orders', array('USE INDEX', 'datetime'))
 			->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
+			->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shops.deleted', '=', 0)
 			->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
-		return $oShop_Orders;
+		return $oShop_Orders_QB;
 	}
 
-	static protected function _selectPaidOrders($startDatetime, $endDatetime)
+	static protected function _selectOrdersItems($startDatetime, $endDatetime, $fromId, $toId)
 	{
-		$oShop_Orders = Core_Entity::factory('Shop_Order');
-		$oShop_Orders
-			->queryBuilder()
+		/*
+		SELECT `shop_order_items`.*, t1.datetime
+		FROM `shop_order_items`
+		INNER JOIN (
+			SELECT `shop_orders`.id, `shop_orders`.`datetime` FROM `shop_orders` INNER JOIN `shops` ON `shops`.`id` = `shop_orders`.`shop_id` WHERE `shops`.`site_id` = '2' AND `shops`.`deleted` = 0 AND `shop_orders`.`datetime` BETWEEN '2019-05-20 00:00:00' AND '2019-11-20 23:59:59' ORDER BY `id` ASC LIMIT 5000 OFFSET 0
+		) as t1 ON `shop_order_items`.shop_order_id = t1.id AND `shop_order_items`.deleted = 0
+		*/
+
+		$oShop_Orders_Items_QB = Core_QueryBuilder::select('shop_order_items.*', 't1.*');
+		$oShop_Orders_Items_QB
+			->from('shop_order_items')
+			->join(
+				array(
+					$oInnerQB = Core_QueryBuilder::select(
+							'shop_orders.id',
+							'shop_orders.datetime',
+							'shop_orders.shop_country_location_id',
+							'shop_orders.shop_country_location_city_id',
+							'shop_orders.shop_delivery_id',
+							'shop_orders.shop_payment_system_id',
+							'shop_orders.source_id',
+							'shop_orders.company_id',
+							'shop_orders.shop_order_status_id',
+							'shop_orders.paid'
+						)
+						->from('shop_orders')
+						->straightJoin()
+						// ->indexHint('shop_orders', array('USE INDEX', 'datetime'))
+						->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
+						->where('shops.site_id', '=', CURRENT_SITE)
+						->where('shops.deleted', '=', 0)
+						->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
+						->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+						->clearOrderBy()
+						->orderBy('id', 'ASC')
+						// ->offset($offset)
+						// ->limit($limit)
+				, 't1'),
+				'shop_order_items.shop_order_id', '=', 't1.id', array(
+					array('AND' => array('shop_order_items.deleted', '=', 0)
+				)
+			));
+
+		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
+
+		return $oShop_Orders_Items_QB;
+	}
+
+	static protected function _selectPaidOrders($startDatetime, $endDatetime, $fromId, $toId)
+	{
+		$oShop_Orders_QB = Core_QueryBuilder::select('shop_orders.*')
+			->from('shop_orders')
 			->straightJoin()
+			// ->indexHint('shop_orders', array('USE INDEX', 'datetime'))
 			->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
+			->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shops.deleted', '=', 0)
 			->where('shop_orders.paid', '=', 1)
@@ -114,7 +171,50 @@ class Shop_Report_Controller
 			->clearOrderBy()
 			->orderBy('id', 'ASC');
 
-		return $oShop_Orders;
+		return $oShop_Orders_QB;
+	}
+
+	static protected function _selectPaidOrdersItems($startDatetime, $endDatetime, $fromId, $toId)
+	{
+		$oShop_Orders_Items_QB = Core_QueryBuilder::select('shop_order_items.*', 't1.*');
+		$oShop_Orders_Items_QB
+			->from('shop_order_items')
+			->join(
+				array(
+					$oInnerQB = Core_QueryBuilder::select(
+							'shop_orders.id',
+							'shop_orders.datetime',
+							'shop_orders.shop_country_location_id',
+							'shop_orders.shop_country_location_city_id',
+							'shop_orders.shop_delivery_id',
+							'shop_orders.shop_payment_system_id',
+							'shop_orders.source_id',
+							'shop_orders.company_id',
+							'shop_orders.shop_order_status_id',
+							'shop_orders.paid'
+						)
+						->from('shop_orders')
+						->straightJoin()
+						// ->indexHint('shop_orders', array('USE INDEX', 'datetime'))
+						->join('shops', 'shops.id', '=', 'shop_orders.shop_id')
+						->where('shops.site_id', '=', CURRENT_SITE)
+						->where('shops.deleted', '=', 0)
+						->where('shop_orders.paid', '=', 1)
+						->where('shop_orders.id', 'BETWEEN', array($fromId, $toId))
+						->where('shop_orders.datetime', 'BETWEEN', array($startDatetime . ' 00:00:00', $endDatetime . ' 23:59:59'))
+						->clearOrderBy()
+						->orderBy('id', 'ASC')
+						// ->offset($offset)
+						// ->limit($limit)
+				, 't1'),
+				'shop_order_items.shop_order_id', '=', 't1.id', array(
+					array('AND' => array('shop_order_items.deleted', '=', 0)
+				)
+			));
+
+		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
+
+		return $oShop_Orders_Items_QB;
 	}
 
 	static protected function _selectCanceledOrders($startDatetime, $endDatetime)
@@ -249,8 +349,121 @@ class Shop_Report_Controller
 		return $oShop_Orders;
 	}
 
+	static protected function _getYAxisName($aShop_Order)
+	{
+		$color = NULL;
+
+		// Ось Y
+		switch (self::$_order_parameter_y)
+		{
+			case 'region':
+				$yAxisName = $aShop_Order['shop_country_location_id']
+					? Core_Entity::factory('Shop_Country_Location', $aShop_Order['shop_country_location_id'])->name
+					: '—';
+			break;
+			case 'city':
+				$yAxisName = $aShop_Order['shop_country_location_city_id']
+					? Core_Entity::factory('Shop_Country_Location_City', $aShop_Order['shop_country_location_city_id'])->name
+					: '—';
+			break;
+			case 'delivery':
+				$yAxisName = $aShop_Order['shop_delivery_id']
+					? Core_Entity::factory('Shop_Delivery', $aShop_Order['shop_delivery_id'])->name
+					: '—';
+			break;
+			case 'paid':
+				$yAxisName = $aShop_Order['shop_payment_system_id']
+					? Core_Entity::factory('Shop_Payment_System', $aShop_Order['shop_payment_system_id'])->name
+					: '—';
+			break;
+			case 'order_status':
+			default:
+				$yAxisName = $aShop_Order['shop_order_status_id']
+					? Core_Entity::factory('Shop_Order_Status', $aShop_Order['shop_order_status_id'])->name
+					: '—';
+
+				$aShop_Order['shop_order_status_id']
+					&& Core_Entity::factory('Shop_Order_Status', $aShop_Order['shop_order_status_id'])->color != ''
+					&& $color = Core_Entity::factory('Shop_Order_Status', $aShop_Order['shop_order_status_id'])->color;
+			break;
+			case 'seller':
+				$yAxisName = $aShop_Order['company_id']
+					? Core_Entity::factory('Shop_Company', $aShop_Order['company_id'])->name
+					: Core_Entity::factory('Shop', $aShop_Order['shop_id'])->Shop_Company->name;
+			break;
+			case 'utm_source':
+				$yAxisName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->source)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->source
+					: '—';
+			break;
+			case 'utm_medium':
+				$yAxisName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->medium)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->medium
+					: '—';
+			break;
+			case 'utm_campaign':
+				$yAxisName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->campaign)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->campaign
+					: '—';
+			break;
+		}
+
+		return array($yAxisName, $color);
+	}
+
+	static protected function _getSegmentName($aShop_Order)
+	{
+		// Сегментация
+		switch (self::$_order_segment)
+		{
+			case 'none':
+			default:
+				$segmentName = NULL;
+			break;
+			case 'region':
+				$segmentName = $aShop_Order['shop_country_location_id']
+					? Core_Entity::factory('Shop_Country_Location', $aShop_Order['shop_country_location_id'])->name
+					: '—';
+			break;
+			case 'city':
+				$segmentName = $aShop_Order['shop_country_location_city_id']
+					? Core_Entity::factory('Shop_Country_Location_City', $aShop_Order['shop_country_location_city_id'])->name
+					: '—';
+			break;
+			case 'delivery':
+				$segmentName = $aShop_Order['shop_delivery_id']
+					? Core_Entity::factory('Shop_Delivery', $aShop_Order['shop_delivery_id'])->name
+					: '—';
+			break;
+			case 'paid':
+				$segmentName = $aShop_Order['shop_payment_system_id']
+					? Core_Entity::factory('Shop_Payment_System', $aShop_Order['shop_payment_system_id'])->name
+					: '—';
+			break;
+			case 'utm_source':
+				$segmentName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->source)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->source
+					: '—';
+			break;
+			case 'utm_medium':
+				$segmentName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->medium)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->medium
+					: '—';
+			break;
+			case 'utm_campaign':
+				$segmentName = $aShop_Order['source_id'] && !is_null(Core_Entity::factory('Source', $aShop_Order['source_id'])->campaign)
+					? Core_Entity::factory('Source', $aShop_Order['source_id'])->campaign
+					: '—';
+			break;
+		}
+
+		return $segmentName;
+	}
+
 	static protected function _getOrders($functionName, $startDatetime, $endDatetime, $groupDate, $groupInc)
 	{
+		self::$_debug && $fBeginTime = Core::getmicrotime();
+
 		// Default zeros
 		$aOrderedAmount
 			= $byParams = $byParamSegments
@@ -267,116 +480,49 @@ class Shop_Report_Controller
 
 		$aAvgCount = $yAxisColor = array();
 
+		$oShop_Controller = Shop_Controller::instance();
+
+		$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'))
+			->from('shop_orders');
+
+		self::$_shop_id && $oCore_QueryBuilder_Select
+			->where('shop_orders.shop_id', '=', self::$_shop_id);
+
+		$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+
+		$iMaxId = $aRow['max_id'];
+
+		$fromId = 0;
 		$limit = 1000;
-		$offset = 0;
 
 		do {
-			$oShop_Orders = self::$functionName($startDatetime, $endDatetime);
-			$oShop_Orders
-				->queryBuilder()
-				->offset($offset)
-				->limit($limit);
+			// ---------------------
+			self::$_debug && $fBeginTime2 = Core::getmicrotime();
 
-			self::$_shop_id && $oShop_Orders
-				->queryBuilder()
+			$oShop_Orders_QB = self::$functionName($startDatetime, $endDatetime, $fromId + 1, $fromId + $limit);
+
+			self::$_shop_id && $oShop_Orders_QB
 				->where('shops.id', '=', self::$_shop_id);
 
-			$aShop_Orders = $oShop_Orders->findAll(FALSE);
+			$aShop_Orders = $oShop_Orders_QB->asAssoc()->execute()->result();
 
-			foreach ($aShop_Orders as $oShop_Order)
+			self::$_debug && self::$_debugMessages[] = sprintf("{$functionName} Query as Assoc, fromId {$fromId}, limit {$limit}: %.5f", Core::getmicrotime() - $fBeginTime2);
+
+			self::$_debug && $fBeginTime2 = Core::getmicrotime();
+
+			foreach ($aShop_Orders as $aShop_Order)
 			{
-				$sDate = date($groupDate, Core_Date::sql2timestamp($oShop_Order->datetime));
+				$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order['datetime']));
 
 				// Количество заказов
 				isset($aTotalOrders[$sDate])
 					? $aTotalOrders[$sDate]++
 					: $aTotalOrders[$sDate] = 1;
 
-				/*$fCurrencyCoefficient = $oShop_Order->Shop_Currency->id > 0 && self::$_oDefault_Currency->id > 0
-					? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-						$oShop_Order->Shop_Currency, self::$_oDefault_Currency
-					)
-					: 0;*/
-
-				//$fAmount = $oShop_Order->getAmount() * $fCurrencyCoefficient;
-
-				$fAmount = 0;
-				$aOrderItems = $oShop_Order->Shop_Order_Items->findAll(FALSE);
-
 				// Количество товаров в заказе
 				!isset($aTotalOrderItems[$sDate]) && $aTotalOrderItems[$sDate] = 0;
 
-				foreach ($aOrderItems as $oShop_Order_Item)
-				{
-					if (self::$_allow_delivery || $oShop_Order_Item->type != 1)
-					{
-						$fAmount += $oShop_Order_Item->getAmount();
-					}
-
-					// Доставка - не товар!
-					$oShop_Order_Item->type != 1
-						&& $aTotalOrderItems[$sDate] += 1;
-				}
-
-				isset($aOrderedAmount[$sDate])
-					? $aOrderedAmount[$sDate] += Shop_Controller::instance()->round($fAmount)
-					: $aOrderedAmount[$sDate] = Shop_Controller::instance()->round($fAmount);
-
-				$color = NULL;
-
-				// Ось Y
-				switch (self::$_order_parameter_y)
-				{
-					case 'region':
-						$yAxisName = $oShop_Order->shop_country_location_id
-							? $oShop_Order->Shop_Country_Location->name
-							: '—';
-					break;
-					case 'city':
-						$yAxisName = $oShop_Order->shop_country_location_city_id
-							? $oShop_Order->Shop_Country_Location_City->name
-							: '—';
-					break;
-					case 'delivery':
-						$yAxisName = $oShop_Order->shop_delivery_id
-							? $oShop_Order->Shop_Delivery->name
-							: '—';
-					break;
-					case 'paid':
-						$yAxisName = $oShop_Order->shop_payment_system_id
-							? $oShop_Order->Shop_Payment_System->name
-							: '—';
-					break;
-					case 'order_status':
-					default:
-						$yAxisName = $oShop_Order->shop_order_status_id
-							? $oShop_Order->Shop_Order_Status->name
-							: '—';
-
-						$oShop_Order->shop_order_status_id && $oShop_Order->Shop_Order_Status->color != ''
-							&& $color = $oShop_Order->Shop_Order_Status->color;
-					break;
-					case 'seller':
-						$yAxisName = $oShop_Order->company_id
-							? $oShop_Order->Shop_Company->name
-							: $oShop_Order->Shop->Shop_Company->name;
-					break;
-					case 'utm_source':
-						$yAxisName = $oShop_Order->source_id && !is_null($oShop_Order->Source->source)
-							? $oShop_Order->Source->source
-							: '—';
-					break;
-					case 'utm_medium':
-						$yAxisName = $oShop_Order->source_id && !is_null($oShop_Order->Source->medium)
-							? $oShop_Order->Source->medium
-							: '—';
-					break;
-					case 'utm_campaign':
-						$yAxisName = $oShop_Order->source_id && !is_null($oShop_Order->Source->campaign)
-							? $oShop_Order->Source->campaign
-							: '—';
-					break;
-				}
+				list($yAxisName, $color) = self::_getYAxisName($aShop_Order);
 
 				!isset($byParams[$yAxisName])
 					&& $byParams[$yAxisName] = 0;
@@ -385,88 +531,117 @@ class Shop_Report_Controller
 					&& $yAxisColor[$yAxisName] = $color;
 
 				// Ось X
-				switch (self::$_order_parameter_x)
+				if (in_array(self::$_order_parameter_x, array('orders_count', 'avg_amount')))
 				{
-					case 'orders_count':
-					default:
-						$byParams[$yAxisName] += 1;
-					break;
-					case 'orders_amount':
-						$byParams[$yAxisName] += Shop_Controller::instance()->round($fAmount);
-					break;
-					case 'paid_amount':
-						$oShop_Order->paid
-							&& $byParams[$yAxisName] += Shop_Controller::instance()->round($fAmount);
-					break;
-					case 'avg_amount':
-						$oShop_Order->paid
-							&& $byParams[$yAxisName] += Shop_Controller::instance()->round($fAmount);
+					switch (self::$_order_parameter_x)
+					{
+						case 'orders_count':
+						default:
+							$byParams[$yAxisName] += 1;
+						break;
+						case 'avg_amount':
+							!isset($aAvgCount[$yAxisName])
+								? $aAvgCount[$yAxisName] = 1
+								: $aAvgCount[$yAxisName]++;
+						break;
+					}
 
-						!isset($aAvgCount[$yAxisName])
-							? $aAvgCount[$yAxisName] = 1
-							: $aAvgCount[$yAxisName]++;
-					break;
-				}
+					!isset($byParamSegments[$yAxisName])
+						&& $byParamSegments[$yAxisName] = array();
 
-				!isset($byParamSegments[$yAxisName])
-					&& $byParamSegments[$yAxisName] = array();
+					$segmentName = self::_getSegmentName($aShop_Order);
 
-				// Сегментация
-				switch (self::$_order_segment)
-				{
-					case 'none':
-					default:
-						$segmentName = NULL;
-					break;
-					case 'region':
-						$segmentName = $oShop_Order->shop_country_location_id
-							? $oShop_Order->Shop_Country_Location->name
-							: '—';
-					break;
-					case 'city':
-						$segmentName = $oShop_Order->shop_country_location_city_id
-							? $oShop_Order->Shop_Country_Location_City->name
-							: '—';
-					break;
-					case 'delivery':
-						$segmentName = $oShop_Order->shop_delivery_id
-							? $oShop_Order->Shop_Delivery->name
-							: '—';
-					break;
-					case 'paid':
-						$segmentName = $oShop_Order->shop_payment_system_id
-							? $oShop_Order->Shop_Payment_System->name
-							: '—';
-					break;
-					case 'utm_source':
-						$segmentName = $oShop_Order->source_id && !is_null($oShop_Order->Source->source)
-							? $oShop_Order->Source->source
-							: '—';
-					break;
-					case 'utm_medium':
-						$segmentName = $oShop_Order->source_id && !is_null($oShop_Order->Source->medium)
-							? $oShop_Order->Source->medium
-							: '—';
-					break;
-					case 'utm_campaign':
-						$segmentName = $oShop_Order->source_id && !is_null($oShop_Order->Source->campaign)
-							? $oShop_Order->Source->campaign
-							: '—';
-					break;
-				}
+					if (!is_null($segmentName))
+					{
+						!isset($byParamSegments[$yAxisName][$segmentName])
+							&& $byParamSegments[$yAxisName][$segmentName] = 0;
 
-				if (!is_null($segmentName))
-				{
-					!isset($byParamSegments[$yAxisName][$segmentName])
-						&& $byParamSegments[$yAxisName][$segmentName] = 0;
-
-					$byParamSegments[$yAxisName][$segmentName]++;
+						$byParamSegments[$yAxisName][$segmentName]++;
+					}
 				}
 			}
 
-			$offset += $limit;
+			self::$_debug && self::$_debugMessages[] = sprintf("{$functionName} Process Data: %.5f", Core::getmicrotime() - $fBeginTime2);
+
+			$fromId += $limit;
 		}
-		while (count($aShop_Orders));
+		while ($fromId < $iMaxId);
+
+		$fromId = 0;
+
+		$itemsFunctionName = $functionName . 'Items';
+
+		do {
+			self::$_debug && $fBeginTime1 = Core::getmicrotime();
+
+			$oShop_Order_Items_QB = self::$itemsFunctionName($startDatetime, $endDatetime, $fromId + 1, $fromId + $limit);
+
+			$aShop_Order_Items = $oShop_Order_Items_QB->asAssoc()->execute()->result();
+
+			self::$_debug && self::$_debugMessages[] = sprintf("{$itemsFunctionName} Query, offset {$fromId}, limit {$limit}: %.5f", Core::getmicrotime() - $fBeginTime1);
+
+			self::$_debug && $fBeginTime2 = Core::getmicrotime();
+
+			foreach ($aShop_Order_Items as $aShop_Order_Item)
+			{
+				$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order_Item['datetime']));
+
+				$tax = Shop_Controller::instance()->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
+
+				$fAmount = self::$_allow_delivery || $aShop_Order_Item['type'] != 1
+					? Shop_Controller::instance()->round(Shop_Controller::instance()->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
+					: 0;
+
+				// Доставка - не товар!
+				$aShop_Order_Item['type'] != 1
+					&& $aTotalOrderItems[$sDate] += 1;
+
+				!isset($aOrderedAmount[$sDate]) && $aOrderedAmount[$sDate] = 0;
+				$aOrderedAmount[$sDate] += $oShop_Controller->round($fAmount);
+
+				list($yAxisName, $color) = self::_getYAxisName($aShop_Order_Item);
+
+				!isset($byParams[$yAxisName])
+					&& $byParams[$yAxisName] = 0;
+
+				!is_null($color) && !isset($yAxisColor[$yAxisName])
+					&& $yAxisColor[$yAxisName] = $color;
+
+				// Ось X
+				if (in_array(self::$_order_parameter_x, array('orders_amount', 'paid_amount', 'avg_amount')))
+				{
+					switch (self::$_order_parameter_x)
+					{
+						case 'orders_amount':
+							$byParams[$yAxisName] += $oShop_Controller->round($fAmount);
+						break;
+						case 'paid_amount':
+						case 'avg_amount':
+							$aShop_Order_Item['paid']
+								&& $byParams[$yAxisName] += $oShop_Controller->round($fAmount);
+						break;
+					}
+
+					!isset($byParamSegments[$yAxisName])
+						&& $byParamSegments[$yAxisName] = array();
+
+					$segmentName = self::_getSegmentName($aShop_Order_Item);
+
+					if (!is_null($segmentName))
+					{
+						!isset($byParamSegments[$yAxisName][$segmentName])
+							&& $byParamSegments[$yAxisName][$segmentName] = 0;
+
+						$byParamSegments[$yAxisName][$segmentName]++;
+					}
+				}
+			}
+
+			self::$_debug && self::$_debugMessages[] = sprintf("{$itemsFunctionName} Process Data: %.5f", Core::getmicrotime() - $fBeginTime2);
+
+			$fromId += $limit;
+		}
+		while ($fromId < $iMaxId);
 
 		// Расчет среднего чека
 		if (self::$_order_parameter_x == 'avg_amount')
@@ -476,6 +651,8 @@ class Shop_Report_Controller
 				$byParams[$yAxisName] = Shop_Controller::instance()->round($byParams[$yAxisName] / $aAvgCount[$yAxisName]);
 			}
 		}
+
+		self::$_debug && self::$_debugMessages[] = sprintf('_getOrders(), ' . $functionName . ' %.5f', Core::getmicrotime() - $fBeginTime);
 
 		return array(
 			'orderedAmount' => $aOrderedAmount,
@@ -489,6 +666,8 @@ class Shop_Report_Controller
 
 	static protected function _getPopularItems($functionName, $startDatetime, $endDatetime, $groupDate, $groupInc)
 	{
+		self::$_debug && $fBeginTime = Core::getmicrotime();
+
 		$aPopularItems = array();
 
 		$limit = 1000;
@@ -608,6 +787,8 @@ class Shop_Report_Controller
 			$offset += $limit;
 		}
 		while (count($aShop_Order_Items));
+
+		self::$_debug && self::$_debugMessages[] = sprintf('_getPopularItems(), ' . $functionName . ' %.5f', Core::getmicrotime() - $fBeginTime);
 
 		return $aPopularItems;
 	}
@@ -809,6 +990,8 @@ class Shop_Report_Controller
 		<?php
 		if ($functionName == '_selectOrders')
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
+
 			$newSiteusersDeltaPercent = $avgOrdersDeltaPercent = $avgOrdersAmountDeltaPercent = $canceledDeltaPercent = $avgCommonOrdersAmountDeltaPercent = $avgCountOrdersItemDeltaPercent = '';
 
 			// New siteusers
@@ -970,7 +1153,8 @@ class Shop_Report_Controller
 					</div>
 				</div>
 			</div>
-		<?php
+			<?php
+			self::$_debug && self::$_debugMessages[] = sprintf('_orders(), _selectOrders %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 		?>
 		<div class="row">
@@ -981,6 +1165,8 @@ class Shop_Report_Controller
 		<?php
 		if (self::$_oDefault_Currency)
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
+
 			$group_by = Core_Array::get($aOptions, 'group_by', 1);
 
 			switch ($group_by)
@@ -1103,8 +1289,97 @@ class Shop_Report_Controller
 					</div>
 				</div>
 			</div>
+			<?php
+			self::$_debug && self::$_debugMessages[] = sprintf('_orders(), Table %.5f', Core::getmicrotime() - $fBeginTime);
+		}
+		?>
+		<div class="row">
+			<div class="display" id="break_page" style="page-break-before:always"></div>
 
-			<script>
+			<div class="col-xs-12 margin-bottom-10">
+				<div class="report-title"><?php echo Core::_('Report.parameters')?></div>
+			</div>
+			<div class="col-xs-12 col-sm-3">
+				<?php
+				Admin_Form_Entity::factory('Select')
+					->id('order_parameter_y')
+					->options(array(
+						'region' => Core::_('Report.axis_region'),
+						'city' => Core::_('Report.axis_city'),
+						'delivery' => Core::_('Report.axis_delivery'),
+						'paid' => Core::_('Report.axis_paid'),
+						'order_status' => Core::_('Report.axis_order_status'),
+						'seller' => Core::_('Report.axis_seller'),
+						'utm_source' => Core::_('Report.axis_utm_source'),
+						'utm_medium' => Core::_('Report.axis_utm_medium'),
+						'utm_campaign' => Core::_('Report.axis_utm_campaign')
+					))
+					->value(self::$_order_parameter_y)
+					->name('order_parameter_y')
+					->divAttr(array('class' => ''))
+					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_y: $(this).val()}});')
+					->execute();
+				?>
+			</div>
+			<div class="col-xs-12 col-sm-3">
+				<?php
+				Admin_Form_Entity::factory('Select')
+					->id('order_parameter_x')
+					->options(array(
+						'orders_count' => Core::_('Report.axis_orders_count'),
+						'orders_amount' => Core::_('Report.axis_orders_amount'),
+						'paid_amount' => Core::_('Report.axis_paid_amount'),
+						'avg_amount' => Core::_('Report.axis_avg_amount')
+					))
+					->value(self::$_order_parameter_x)
+					->name('order_parameter_x')
+					->divAttr(array('class' => ''))
+					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_x: $(this).val()}});')
+					->execute();
+				?>
+			</div>
+			<div class="col-xs-12 col-sm-6">
+				<div class="segmentation pull-right">
+					<div><?php echo Core::_('Report.segmentation')?></div>
+					<div><?php
+					Admin_Form_Entity::factory('Select')
+						->id('order_segment')
+						->options(array(
+							'none' => Core::_('Report.axis_none'),
+							'region' => Core::_('Report.axis_region'),
+							'city' => Core::_('Report.axis_city'),
+							'delivery' => Core::_('Report.axis_delivery'),
+							'paid' => Core::_('Report.axis_paid'),
+							'utm_source' => Core::_('Report.axis_utm_source'),
+							'utm_medium' => Core::_('Report.axis_utm_medium'),
+							'utm_campaign' => Core::_('Report.axis_utm_campaign')
+						))
+						->value(self::$_order_segment)
+						->name('order_segment')
+						->divAttr(array('class' => ''))
+						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_segment: $(this).val()}});')
+						->execute();
+					?></div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-12">
+				<?php
+				$height = count(self::$_aOrderedByParams) ? count(self::$_aOrderedByParams) * 40 : 200;
+				?>
+				<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>px;"></div>
+			</div>
+			<div class="col-xs-12">
+				<div class="legend-container<?php echo $functionName?>"></div>
+			</div>
+		</div>
+		<?php
+		if (self::$_oDefault_Currency)
+		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
+
+			?><script>
 				var dataArr = [], // Set up our data array, labels array
 					tickLabelsX = [], // Setup labels for use on the Y-axis
 					previousDataArr = [],
@@ -1321,7 +1596,6 @@ class Shop_Report_Controller
 								$aAllSegments[] = $segmentName;
 							}
 						}
-
 					}
 
 					$i = 0;
@@ -1437,104 +1711,114 @@ class Shop_Report_Controller
 					$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 						if (data.length)
 						{
-							$.plot($("#bar-chart<?php echo $functionName?>"), data, options);
+							setTimeout(function() {
+								if ($("#bar-chart<?php echo $functionName?>").width() > 0)
+								{
+									$.plot($("#bar-chart<?php echo $functionName?>"), data, options);
 
-							var previousPoint = null,
-								previousPointLabel = null;
+									var previousPoint = null,
+										previousPointLabel = null;
 
-							$("#bar-chart<?php echo $functionName?>").bind("plothover", function (event, pos, item) {
-								if (item) {
-									if ((previousPoint != item.dataIndex) || (previousLabel != item.series.label)) {
-										previousPoint = item.dataIndex;
-										previousLabel = item.series.label;
+									$("#bar-chart<?php echo $functionName?>").bind("plothover", function (event, pos, item) {
+										if (item) {
+											if ((previousPoint != item.dataIndex) || (previousLabel != item.series.label)) {
+												previousPoint = item.dataIndex;
+												previousLabel = item.series.label;
 
-										$("#flot-tooltip").remove();
+												$("#flot-tooltip").remove();
 
-										var x = item.datapoint[0],
-											y = item.datapoint[1],
-											color = item.series.color,
-											formattedY = y.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$& ');
+												var x = item.datapoint[0],
+													y = item.datapoint[1],
+													color = item.series.color,
+													formattedY = y.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$& ');
 
-										showTooltip(item.pageX, item.pageY,
-												"<b>" + item.series.label + "</b><br /> " + formattedY,
-												color);
-									}
-								} else {
-									$("#flot-tooltip").remove();
-									previousPoint = null;
+												showTooltip(item.pageX, item.pageY,
+														"<b>" + item.series.label + "</b><br /> " + formattedY,
+														color);
+											}
+										} else {
+											$("#flot-tooltip").remove();
+											previousPoint = null;
+										}
+									});
 								}
-							});
+							}, 10);
 						}
 
 						if (dataHorizontal.length)
 						{
-							plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
+							setTimeout(function() {
+								if ($("#horizontal-chart<?php echo $functionName?>").width() > 0)
+								{
+									plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
 
-							var offset = [],
-								leftBorder = [],
-								amounts = [],
-								plotData = plotHorizontal.getData();
+									var offset = [],
+										leftBorder = [],
+										amounts = [],
+										plotData = plotHorizontal.getData();
 
-							$.each(plotData, function(i, barObject){
-								if (barObject.data.length > 1) {
-									$.each(barObject.data, function (index, aData){
-										if (typeof amounts[index] === 'undefined') {
-											amounts[index] = 0;
+									$.each(plotData, function(i, barObject){
+										if (barObject.data.length > 1) {
+											$.each(barObject.data, function (index, aData){
+												if (typeof amounts[index] === 'undefined') {
+													amounts[index] = 0;
+												}
+												amounts[index] += aData[0];
+											});
 										}
-										amounts[index] += aData[0];
+									});
+
+									$.each(plotData, function(i, barObject){
+										$.each(barObject.data, function (index, aData){
+											var value = aData[0], segmentation = barObject.data.length > 1;
+
+											if (typeof offset[index] === 'undefined') {
+												offset[index] = 0;
+												leftBorder[index] = plotHorizontal.getPlotOffset().left;
+											}
+
+											if (segmentation) {
+												offset[index] += value;
+											}
+											else
+											{
+												offset[index] = value;
+											}
+
+											if (value)
+											{
+												var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
+
+												if (segmentation) {
+													label = $.mathRound(value / amounts[index] * 100, 2) + '%';
+												}
+												else {
+													label = value;
+												}
+
+												var textLength = String(label).length * 7.5;
+
+												// Текст помещается на элемент бара
+												if (o.left - leftBorder[index] > textLength)
+												{
+													$('<div class="data-point-label">' + label + '</div>').css({
+														position: 'absolute',
+														left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
+														top: o.top - 10,
+														display: 'none',
+														color: '#fff'
+													}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
+												}
+
+												if (segmentation)
+												{
+													leftBorder[index] = o.left;
+												}
+											}
+										});
 									});
 								}
-							});
-
-							$.each(plotData, function(i, barObject){
-								$.each(barObject.data, function (index, aData){
-									var value = aData[0], segmentation = barObject.data.length > 1;
-
-									if (typeof offset[index] === 'undefined') {
-										offset[index] = 0;
-										leftBorder[index] = plotHorizontal.getPlotOffset().left;
-									}
-
-									if (segmentation) {
-										offset[index] += value;
-									}
-									else
-									{
-										offset[index] = value;
-									}
-
-									if (value)
-									{
-										var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
-
-										if (segmentation) {
-											label = $.mathRound(value / amounts[index] * 100, 2) + '%';
-										}
-										else {
-											label = value;
-										}
-
-										var textLength = String(label).length * 7.5;
-
-										// Текст помещается на элемент бара
-										if (o.left - leftBorder[index] > textLength)
-										{
-											$('<div class="data-point-label">' + label + '</div>').css({
-												position: 'absolute',
-												left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
-												top: o.top - 10,
-												display: 'none',
-												color: '#fff'
-											}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
-										}
-
-										if (segmentation)
-										{
-											leftBorder[index] = o.left;
-										}
-									}
-								});
-							});
+							}, 10);
 						}
 					});
 
@@ -1555,90 +1839,18 @@ class Shop_Report_Controller
 				});
 			</script>
 			<?php
+			self::$_debug && self::$_debugMessages[] = sprintf('_orders(), Plots %.5f', Core::getmicrotime() - $fBeginTime);
 		}
-		?>
-		<div class="row">
-			<div class="display" id="break_page" style="page-break-before:always"></div>
 
-			<div class="col-xs-12 margin-bottom-10">
-				<div class="report-title"><?php echo Core::_('Report.parameters')?></div>
-			</div>
-			<div class="col-xs-12 col-sm-3">
-				<?php
-				Admin_Form_Entity::factory('Select')
-					->id('order_parameter_y')
-					->options(array(
-						'region' => Core::_('Report.axis_region'),
-						'city' => Core::_('Report.axis_city'),
-						'delivery' => Core::_('Report.axis_delivery'),
-						'paid' => Core::_('Report.axis_paid'),
-						'order_status' => Core::_('Report.axis_order_status'),
-						'seller' => Core::_('Report.axis_seller'),
-						'utm_source' => Core::_('Report.axis_utm_source'),
-						'utm_medium' => Core::_('Report.axis_utm_medium'),
-						'utm_campaign' => Core::_('Report.axis_utm_campaign')
-					))
-					->value(self::$_order_parameter_y)
-					->name('order_parameter_y')
-					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_y: $(this).val()}});')
-					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-3">
-				<?php
-				Admin_Form_Entity::factory('Select')
-					->id('order_parameter_x')
-					->options(array(
-						'orders_count' => Core::_('Report.axis_orders_count'),
-						'orders_amount' => Core::_('Report.axis_orders_amount'),
-						'paid_amount' => Core::_('Report.axis_paid_amount'),
-						'avg_amount' => Core::_('Report.axis_avg_amount')
-					))
-					->value(self::$_order_parameter_x)
-					->name('order_parameter_x')
-					->divAttr(array('class' => ''))
-					->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_parameter_x: $(this).val()}});')
-					->execute();
-				?>
-			</div>
-			<div class="col-xs-12 col-sm-6">
-				<div class="segmentation pull-right">
-					<div><?php echo Core::_('Report.segmentation')?></div>
-					<div><?php
-					Admin_Form_Entity::factory('Select')
-						->id('order_segment')
-						->options(array(
-							'none' => Core::_('Report.axis_none'),
-							'region' => Core::_('Report.axis_region'),
-							'city' => Core::_('Report.axis_city'),
-							'delivery' => Core::_('Report.axis_delivery'),
-							'paid' => Core::_('Report.axis_paid'),
-							'utm_source' => Core::_('Report.axis_utm_source'),
-							'utm_medium' => Core::_('Report.axis_utm_medium'),
-							'utm_campaign' => Core::_('Report.axis_utm_campaign')
-						))
-						->value(self::$_order_segment)
-						->name('order_segment')
-						->divAttr(array('class' => ''))
-						->onchange('sendRequest({tab: $(\'.report-tabs .nav-tabs li.active\'), data: {order_segment: $(this).val()}});')
-						->execute();
-					?></div>
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-12">
-				<?php
-				$height = count(self::$_aOrderedByParams) ? count(self::$_aOrderedByParams) * 40 : 200;
-				?>
-				<div id="horizontal-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20" style="height: <?php echo $height?>px;"></div>
-			</div>
-			<div class="col-xs-12">
-				<div class="legend-container<?php echo $functionName?>"></div>
-			</div>
-		</div>
-		<?php
+		if (self::$_debug)
+		{
+			?><div><h1>Debug:</h1><?php
+			foreach (self::$_debugMessages as $debugMessage)
+			{
+				echo '<p>' . htmlspecialchars($debugMessage) . '</p>';
+			}
+			?></div><?php
+		}
 	}
 
 	static protected function _preparePopularItems($functionName, $aOptions)
@@ -1652,7 +1864,7 @@ class Shop_Report_Controller
 
 		self::$_popular_limit = isset($_SESSION['report']['popular_limit'])
 			? intval($_SESSION['report']['popular_limit'])
-			: 10;
+			: 50;
 
 		self::$_group_modifications = isset($_SESSION['report']['group_modifications'])
 			? intval($_SESSION['report']['group_modifications'])
@@ -1871,16 +2083,16 @@ class Shop_Report_Controller
 					</ul>
 					<div class="tab-content tabs-flat">
 						<div id="all_items" class="tab-pane active">
-							<?php self::_getPriorityContent($aPopularItems)?>
+							<?php self::_getPriorityContent(array_slice($aPopularItems, 0, self::$_popular_limit))?>
 						</div>
 						<div id="low_importance" class="tab-pane">
-							<?php self::_getPriorityContent($aLowPopularItems)?>
+							<?php self::_getPriorityContent(array_slice($aLowPopularItems, 0, self::$_popular_limit))?>
 						</div>
 						<div id="medium_importance" class="tab-pane">
-							<?php self::_getPriorityContent($aMediumPopularItems)?>
+							<?php self::_getPriorityContent(array_slice($aMediumPopularItems, 0, self::$_popular_limit))?>
 						</div>
 						<div id="high_importance" class="tab-pane">
-							<?php self::_getPriorityContent($aHighPopularItems)?>
+							<?php self::_getPriorityContent(array_slice($aHighPopularItems, 0, self::$_popular_limit))?>
 						</div>
 					</div>
 				</div>
@@ -2074,73 +2286,78 @@ class Shop_Report_Controller
 			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 				if (dataHorizontal.length)
 				{
-					plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
+					setTimeout(function() {
+						if ($("#horizontal-chart<?php echo $functionName?>").width() > 0)
+						{
+							plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
 
-					var offset = [],
-						leftBorder = [],
-						amounts = [],
-						plotData = plotHorizontal.getData();
+							var offset = [],
+								leftBorder = [],
+								amounts = [],
+								plotData = plotHorizontal.getData();
 
-					$.each(plotData, function(i, barObject){
-						if (barObject.data.length > 1) {
-							$.each(barObject.data, function (index, aData){
-								if (typeof amounts[index] === 'undefined') {
-									amounts[index] = 0;
+							$.each(plotData, function(i, barObject){
+								if (barObject.data.length > 1) {
+									$.each(barObject.data, function (index, aData){
+										if (typeof amounts[index] === 'undefined') {
+											amounts[index] = 0;
+										}
+										amounts[index] += aData[0];
+									});
 								}
-								amounts[index] += aData[0];
+							});
+
+							$.each(plotData, function(i, barObject){
+								$.each(barObject.data, function (index, aData){
+									var value = aData[0], segmentation = barObject.data.length > 1;
+
+									if (typeof offset[index] === 'undefined') {
+										offset[index] = 0;
+										leftBorder[index] = plotHorizontal.getPlotOffset().left;
+									}
+
+									if (segmentation) {
+										offset[index] += value;
+									}
+									else
+									{
+										offset[index] = value;
+									}
+
+									if (value)
+									{
+										var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
+
+										if (segmentation) {
+											label = $.mathRound(value / amounts[index] * 100, 2) + '%';
+										}
+										else {
+											label = value;
+										}
+
+										var textLength = String(label).length * 7.5;
+
+										// Текст помещается на элемент бара
+										if (o.left - leftBorder[index] > textLength)
+										{
+											$('<div class="data-point-label">' + label + '</div>').css({
+												position: 'absolute',
+												left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
+												top: o.top - 10,
+												display: 'none',
+												color: '#fff'
+											}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
+										}
+
+										if (segmentation)
+										{
+											leftBorder[index] = o.left;
+										}
+									}
+								});
 							});
 						}
-					});
-
-					$.each(plotData, function(i, barObject){
-						$.each(barObject.data, function (index, aData){
-							var value = aData[0], segmentation = barObject.data.length > 1;
-
-							if (typeof offset[index] === 'undefined') {
-								offset[index] = 0;
-								leftBorder[index] = plotHorizontal.getPlotOffset().left;
-							}
-
-							if (segmentation) {
-								offset[index] += value;
-							}
-							else
-							{
-								offset[index] = value;
-							}
-
-							if (value)
-							{
-								var o = plotHorizontal.pointOffset({ x: offset[index], y: aData[1] });
-
-								if (segmentation) {
-									label = $.mathRound(value / amounts[index] * 100, 2) + '%';
-								}
-								else {
-									label = value;
-								}
-
-								var textLength = String(label).length * 7.5;
-
-								// Текст помещается на элемент бара
-								if (o.left - leftBorder[index] > textLength)
-								{
-									$('<div class="data-point-label">' + label + '</div>').css({
-										position: 'absolute',
-										left: leftBorder[index] + (o.left - leftBorder[index] - textLength) / 2,
-										top: o.top - 10,
-										display: 'none',
-										color: '#fff'
-									}).appendTo(plotHorizontal.getPlaceholder()).slideToggle();
-								}
-
-								if (segmentation)
-								{
-									leftBorder[index] = o.left;
-								}
-							}
-						});
-					});
+					}, 10);
 				}
 			});
 		});
@@ -2359,46 +2576,49 @@ class Shop_Report_Controller
 					setTimeout(function() {
 						var placeholderBrandsDiagram = $("#pie-chart<?php echo $functionName?>");
 
-						$.plot(placeholderBrandsDiagram, dataPie, {
-							series: {
-								pie: {
-									show: true,
-									radius: 1,
-									innerRadius: 0.5,
-									label: {
+						if (placeholderBrandsDiagram.width() > 0)
+						{
+							$.plot(placeholderBrandsDiagram, dataPie, {
+								series: {
+									pie: {
+										show: true,
+										radius: 1,
+										innerRadius: 0.5,
+										label: {
 											show: true,
 											radius: 0,
 											// formatter: function(label, series) {
 												// return "<div style='font-size:8pt;'>" + label + "</div>";
 											// }
+										}
+									}
+								},
+
+								legend: {
+									labelFormatter: function (label, series) {
+										return label + ", " + series.data[0][1];
 									}
 								}
-							},
-
-							legend: {
-								labelFormatter: function (label, series) {
-									return label + ", " + series.data[0][1];
+								,
+								grid: {
+									hoverable: true,
 								}
-							}
-							,
-							grid: {
-								hoverable: true,
-							}
-						});
+							});
 
-						placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
-							if (!obj) {
-								return;
-							}
+							placeholderBrandsDiagram.bind("plothover", function (event, pos, obj) {
+								if (!obj) {
+									return;
+								}
+
+								$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
+								$("#pie-chart<?php echo $functionName?> span[id = 'pieLabel" + obj.seriesIndex + "']").show();
+							});
+
+							placeholderBrandsDiagram.resize(function(){$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();});
 
 							$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
-							$("#pie-chart<?php echo $functionName?> span[id = 'pieLabel" + obj.seriesIndex + "']").show();
-						});
-
-						placeholderBrandsDiagram.resize(function(){$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();});
-
-						$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
-					}, 200);
+						}
+					}, 10);
 				}
 			});
 		});
@@ -2419,7 +2639,9 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields) || in_array('content', $aFields))
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
 			self::_prepareOrders($functionName, $aOptions);
+			self::$_debug && self::$_debugMessages[] = sprintf('ordersCost(captionHTML), _prepareOrders %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 
 		if (in_array('captionHTML', $aFields))
@@ -2456,6 +2678,8 @@ class Shop_Report_Controller
 			self::_orders($functionName, $aOptions);
 			$aReturn['content'] = ob_get_clean();
 		}
+
+		$aReturn['color'] = 'primary';
 
 		return $aReturn;
 	}
@@ -2473,7 +2697,9 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields) || in_array('content', $aFields))
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
 			self::_prepareOrders($functionName, $aOptions);
+			self::$_debug && self::$_debugMessages[] = sprintf('ordersPaid(), _prepareOrders %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 
 		if (in_array('captionHTML', $aFields))
@@ -2511,6 +2737,8 @@ class Shop_Report_Controller
 			$aReturn['content'] = ob_get_clean();
 		}
 
+		$aReturn['color'] = 'info';
+
 		return $aReturn;
 	}
 
@@ -2527,7 +2755,9 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields) || in_array('content', $aFields))
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
 			self::_preparePopularItems($functionName, $aOptions);
+			self::$_debug && self::$_debugMessages[] = sprintf('popularItems(), _preparePopularItems %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 
 		if (in_array('captionHTML', $aFields))
@@ -2541,6 +2771,10 @@ class Shop_Report_Controller
 			self::_popularItems($functionName, $aOptions);
 			$aReturn['content'] = ob_get_clean();
 		}
+
+		$aReturn['color'] = 'success';
+
+		$aReturn['group'] = $aReturn['comparePrevious'] = $aReturn['previousTimeInterval'] = 0;
 
 		return $aReturn;
 	}
@@ -2558,7 +2792,9 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields) || in_array('content', $aFields))
 		{
+			self::$_debug && $fBeginTime = Core::getmicrotime();
 			self::_preparePopularProducers($functionName, $aOptions);
+			self::$_debug && self::$_debugMessages[] = sprintf('popularProducers(), _preparePopularProducers %.5f', Core::getmicrotime() - $fBeginTime);
 		}
 
 		if (in_array('captionHTML', $aFields))
@@ -2572,6 +2808,10 @@ class Shop_Report_Controller
 			self::_popularProducers($functionName, $aOptions);
 			$aReturn['content'] = ob_get_clean();
 		}
+
+		$aReturn['color'] = 'danger';
+
+		$aReturn['group'] = $aReturn['comparePrevious'] = $aReturn['previousTimeInterval'] = 0;
 
 		return $aReturn;
 	}

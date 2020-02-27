@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -1671,16 +1671,25 @@ class Informationsystem_Item_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
+				$this->informationsystem_group_id = Core_Array::get($aBackup, 'informationsystem_group_id');
+				$this->datetime = Core_Array::get($aBackup, 'datetime');
+				$this->start_datetime = Core_Array::get($aBackup, 'start_datetime');
+				$this->end_datetime = Core_Array::get($aBackup, 'end_datetime');
+				$this->active = Core_Array::get($aBackup, 'active');
+				$this->indexing = Core_Array::get($aBackup, 'indexing');
 				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->ip = Core_Array::get($aBackup, 'ip');
+				$this->showed = Core_Array::get($aBackup, 'showed');
+				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->shortcut_id = Core_Array::get($aBackup, 'shortcut_id');
 				$this->path = Core_Array::get($aBackup, 'path');
 				$this->description = Core_Array::get($aBackup, 'description');
 				$this->text = Core_Array::get($aBackup, 'text');
-				$this->active = Core_Array::get($aBackup, 'active');
-				$this->indexing = Core_Array::get($aBackup, 'indexing');
 				$this->seo_title = Core_Array::get($aBackup, 'seo_title');
 				$this->seo_description = Core_Array::get($aBackup, 'seo_description');
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
-				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 			}
 		}

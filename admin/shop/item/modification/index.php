@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -68,6 +68,22 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 	)
 ;
+
+if ($oShopItemParent->id)
+{
+	$shop_group_id = !is_null($oShopItemParent->Shop_Group->id)
+		? $oShopItemParent->Shop_Group->id
+		: 0;
+
+	$windowId = $oAdmin_Form_Controller->getWindowId();
+
+	$href = "/admin/shop/item/index.php?shop_id={$oShop->id}&shop_group_id={$shop_group_id}&hostcms[checked][0][{$oShopItemParent->id}]=1";
+	$onclick = "$.adminLoad({path: '/admin/shop/item/index.php', additionalParams: 'shop_id={$oShop->id}&shop_group_id={$shop_group_id}&hostcms[checked][1][{$oShopItemParent->id}]=1', action: 'edit', windowId: '{$windowId}'}); return false";
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Controller->getTitleEditIcon($href, $onclick)
+	);
+}
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -169,7 +185,7 @@ $oAdmin_Form_Action_Apply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAdmin_Form_Action_Apply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
 	$Admin_Form_Action_Controller_Type_Apply = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Apply', $oAdmin_Form_Action_Apply
+		'Shop_Item_Controller_Apply', $oAdmin_Form_Action_Apply
 	);
 
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Apply);

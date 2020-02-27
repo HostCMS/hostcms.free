@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Str
 {
@@ -97,7 +97,7 @@ class Core_Str
 		// Binary safe
 		return substr_compare($haystack, $needle, 0, strlen($needle)) === 0;
 	}
-	
+
 	/**
 	 * String end with the specified string
 	 * @param string $haystack
@@ -444,9 +444,9 @@ class Core_Str
 		$text = str_replace($aConfig['separators'], ' ', $text);
 
 		// Убираем двойные пробелы
-		while (stristr($text, '  '))
+		while (stristr($text, '	'))
 		{
-			$text = str_replace('  ', ' ', $text);
+			$text = str_replace('	', ' ', $text);
 		}
 
 		$text = trim($text);
@@ -704,9 +704,37 @@ class Core_Str
 	}
 
 	/**
+	 * Get Color By Entity ID
+	 * @param int $id Entity ID
+	 * @param int $maxColor Max color, 0-255, default 210
+	 * @return string HEX color, e.g. #B781AF
+	 */
+	static public function createColor($id, $maxColor = 210)
+	{
+		$crc32 = abs(Core::crc32($id));
+
+		return self::rgb2hex(
+			Core_Array::randomShuffle(array($crc32 % ($maxColor / 4), $maxColor, $crc32 % $maxColor), $id % 6)
+		);
+	}
+
+	/**
+	 * Convert RGB to HEX color
+	 * @param string $hex HEX color, e.g. #B781AF or #FF0
+	 * @return string HEX color, e.g. #B781AF
+	 */
+	static public function rgb2hex(array $array)
+	{
+		return count($array) == 3
+			? sprintf("#%02x%02x%02x", $array[0], $array[1], $array[2])
+			: '#000';
+	}
+
+	/**
 	 * Convert HEX color to RGB or RGBA
 	 * @param string $hex HEX color, e.g. #B781AF or #FF0
 	 * @param float|NULL opacity between 0 and 1, e.g. 0.85
+	 * @return string
 	 */
 	static public function hex2rgba($hex, $opacity = NULL)
 	{
@@ -767,7 +795,7 @@ class Core_Str
 
 		$hex = ltrim($hex, '#');
 
-		//Check if color has 6 or 3 characters and get values
+		// Check if color has 6 or 3 characters and get values
 		if (strlen($hex) == 6)
 		{
 			$hex = str_split($hex, 2);
@@ -790,9 +818,55 @@ class Core_Str
 			$rgb[$key] = $k < 255 ? $k : 255;
 		}
 
-		$rgb = array_map('dechex', $rgb);
+		//$rgb = array_map('dechex', $rgb);
+		//return '#' . implode('', $rgb);
 
-		return '#' . implode('', $rgb);
+		return sprintf('#%02x%02x%02x', $rgb[0], $rgb[1], $rgb[2]);
+	}
+
+	/**
+	 * Darker HEX color
+	 * @param string $hex HEX color, e.g. #B781AF or #FF0
+	 * @param float opacity between 0 and 1, e.g. 0.85
+	 */
+	static public function hex2darker($hex, $opacity)
+	{
+		$default = '#000';
+
+		if (empty($hex))
+		{
+			return $default;
+		}
+
+		$hex = ltrim($hex, '#');
+
+		// Check if color has 6 or 3 characters and get values
+		if (strlen($hex) == 6)
+		{
+			$hex = str_split($hex, 2);
+		}
+		elseif (strlen($hex) == 3)
+		{
+			$hex = array($hex[0] . $hex[0], $hex[1] . $hex[1], $hex[2] . $hex[2]);
+		}
+		else
+		{
+			return $default;
+		}
+
+		// Convert hexadec to rgb
+		$rgb = array_map('hexdec', $hex);
+
+		foreach ($rgb as $key => $iColor)
+		{
+			$k = $iColor - floor((255 - $iColor) * $opacity);
+			$rgb[$key] = $k > 0 ? $k : 0;
+		}
+
+		//$rgb = array_map('dechex', $rgb);
+		//return '#' . implode('', $rgb);
+
+		return sprintf('#%02x%02x%02x', $rgb[0], $rgb[1], $rgb[2]);
 	}
 
 	/**
@@ -852,7 +926,7 @@ class Core_Str
 	{
 		return $str . mb_substr($item, 0, 1);
 	}
-	
+
 	/**
 	 * Decode Punycode IDN
 	 * https://www.ietf.org/rfc/rfc3492.txt
@@ -867,7 +941,8 @@ class Core_Str
 			return idn_to_utf8($domain);
 		}
 
-		// Find subdomains
+		$domain = mb_strtolower($domain);
+
 		$aDomains = explode('.', $domain);
 		if (count($aDomains) > 1)
 		{
@@ -879,7 +954,7 @@ class Core_Str
 			return substr($sTmp, 1);
 		}
 
-		/* search prefix */
+		// search prefix
 		if (substr($domain, 0, 4) != 'xn--')
 		{
 			return $domain;
@@ -895,12 +970,12 @@ class Core_Str
 		$initial_n = 128;
 		$output = array();
 
-		// search delimeter
-		$delimeter = strrpos($domain, '-');
+		// search delimiter
+		$delimiter = strrpos($domain, '-');
 
-		if ($delimeter)
+		if ($delimiter)
 		{
-			for ($j = 0; $j < $delimeter; $j++)
+			for ($j = 0; $j < $delimiter; $j++)
 			{
 				$c = $domain[$j];
 				$output[] = $c;
@@ -909,25 +984,25 @@ class Core_Str
 					return $bad_input;
 				}
 			}
-			$delimeter++;
+			$delimiter++;
 		}
 		else
 		{
-			$delimeter = 0;
+			$delimiter = 0;
 		}
 
-		while ($delimeter < strlen($domain))
+		while ($delimiter < strlen($domain))
 		{
 			$iPrev = $i;
 			$w = 1;
 
 			for ($k = 36;; $k += 36)
 			{
-				if ($delimeter == strlen($domain))
+				if ($delimiter == strlen($domain))
 				{
 					return $bad_input;
 				}
-				$c = $domain[$delimeter++];
+				$c = $domain[$delimiter++];
 				$c = ord($c);
 
 				$digit = ($c - 48 < 10)
@@ -936,7 +1011,7 @@ class Core_Str
 						? $c - 65
 						: ($c - 97 < 26 ? $c - 97 : 36)
 					);
-					
+
 				if ($digit > (0x10FFFF - $i) / $w)
 				{
 					return $bad_input;
@@ -955,7 +1030,7 @@ class Core_Str
 				{
 					$t = $k - $bias;
 				}
-				
+
 				if ($digit < $t)
 				{
 					break;
@@ -979,7 +1054,7 @@ class Core_Str
 				$k2 += 36;
 			}
 			$bias = intval($k2 + 36 * $delta / ($delta + 38));
-			
+
 			if ($i / $count_output_plus_one > 0x10FFFF - $initial_n)
 			{
 				return $bad_input;
@@ -991,5 +1066,217 @@ class Core_Str
 		}
 
 		return implode('', $output);
+	}
+
+	/**
+	 * Encode to IDN ASCII
+	 * https://www.ietf.org/rfc/rfc3492.txt
+	 *
+	 * @param string $domain
+	 * @return string
+	 */
+	static public function idnToAscii($domain)
+	{
+		if (function_exists('idn_to_ascii'))
+		{
+			return idn_to_ascii($domain);
+		}
+
+		$domain = mb_strtolower($domain);
+
+		$aDomains = explode('.', $domain);
+		if (count($aDomains) > 1)
+		{
+			$sTmp = '';
+			foreach ($aDomains as $sSubdomain)
+			{
+				$sTmp .= '.' . self::idnToAscii($sSubdomain);
+			}
+			return substr($sTmp, 1);
+		}
+
+		// http://tools.ietf.org/html/rfc3492#section-6.3
+		$delta = 0;
+		$bias = 72;
+		$initial_n = 128;
+		$aOutput = array();
+
+		$aStrAsArray = array();
+		$sTmp = $domain;
+		while (mb_strlen($sTmp))
+		{
+			array_push($aStrAsArray, mb_substr($sTmp, 0, 1));
+			$sTmp = mb_substr($sTmp, 1);
+		}
+
+		// basic symbols
+		$aBasicSymbols = preg_grep('/[\x00-\x7f]/', $aStrAsArray);
+
+		if ($aBasicSymbols == $aStrAsArray)
+		{
+			return $domain;
+		}
+
+		$iBasicSymbols = count($aBasicSymbols);
+
+		if ($iBasicSymbols > 0)
+		{
+			$aOutput = $aBasicSymbols;
+			$aOutput[] = '-';
+		}
+
+		// add prefix
+		array_unshift($aOutput, 'xn--');
+
+		$iStrAsArray = count($aStrAsArray);
+		$iPrev = $iBasicSymbols;
+
+		while ($iPrev < $iStrAsArray)
+		{
+			$m = 0x10FFFF;
+
+			for ($i = 0; $i < $iStrAsArray; $i++)
+			{
+				$ord_input[$i] = self::_idnOrd($aStrAsArray[$i]);
+				if ($ord_input[$i] >= $initial_n && $ord_input[$i] < $m)
+				{
+					$m = $ord_input[$i];
+				}
+			}
+
+			if ($m - $initial_n > 0x10FFFF / ($iPrev + 1))
+			{
+				return $domain;
+			}
+
+			$delta += ($m - $initial_n) * ($iPrev + 1);
+			$initial_n = $m;
+
+			for ($i = 0; $i < $iStrAsArray; ++$i)
+			{
+				$c = $ord_input[$i];
+				if ($c < $initial_n)
+				{
+					$delta++;
+
+					if ($delta == 0)
+					{
+						return $domain;
+					}
+				}
+
+				if ($c == $initial_n)
+				{
+					$q = $delta;
+					for ($k = 36;; $k += 36)
+					{
+						if ($k <= $bias)
+						{
+							$t = 1;
+						}
+						elseif ($k >= ($bias + 26))
+						{
+							$t = 26;
+						}
+						else
+						{
+							$t = $k - $bias;
+						}
+
+						if ($q < $t)
+						{
+							break;
+						}
+
+						$tmp_int = $t + (($q - $t) % (36 - $t));
+
+						$aOutput[] = chr($tmp_int + 22 + 75 * ($tmp_int < 26));
+
+						$q = ($q - $t) / (36 - $t);
+					}
+
+					$aOutput[] = chr($q + 22 + 75 * ($q < 26));
+
+					$delta = $iPrev == $iBasicSymbols ? $delta / 700 : $delta >> 1;
+
+					$delta += ($delta / ($iPrev + 1));
+
+					$k2 = 0;
+					while ($delta > 455)
+					{
+						$delta /= 35;
+						$k2 += 36;
+					}
+
+					$bias = intval($k2 + (36 * $delta) / ($delta + 38));
+
+					$delta = 0;
+					$iPrev++;
+				}
+			}
+
+			$delta++;
+			$initial_n++;
+		}
+
+		return implode('', $aOutput);
+	}
+
+	/**
+	 * for idnToAscii()
+	 */
+	static protected function _idnOrd($char, $index = 0, &$iBytes = NULL)
+	{
+		$len = strlen($char);
+
+		$iBytes = 0;
+
+		if ($index >= $len)
+		{
+			return FALSE;
+		}
+
+		$byte = ord($char[$index]);
+
+		if ($byte <= 0x7F)
+		{
+			$iBytes = 1;
+			return $byte;
+		}
+		elseif ($byte < 0xC2)
+		{
+			return FALSE;
+		}
+		elseif ($byte <= 0xDF && $index < $len - 1)
+		{
+			$iBytes = 2;
+			return ($byte & 0x1F) << 6 | (ord($char[$index + 1]) & 0x3F);
+		}
+		elseif ($byte <= 0xEF && $index < $len - 2)
+		{
+			$iBytes = 3;
+			return ($byte & 0x0F) << 12 | (ord($char[$index + 1]) & 0x3F) << 6 | (ord($char[$index + 2]) & 0x3F);
+		}
+		elseif ($byte <= 0xF4 && $index < $len - 3)
+		{
+			$iBytes = 4;
+			return ($byte & 0x0F) << 18 | (ord($char[$index + 1]) & 0x3F) << 12 | (ord($char[$index + 2]) & 0x3F) << 6 | (ord($char[$index + 3]) & 0x3F);
+		}
+
+		return FALSE;
+	}
+
+	/**
+	 * Sanitize phone numbers
+	 * @return string
+	 */
+	static public function sanitizePhoneNumber($phone)
+	{
+		$phone = preg_replace('/^\+\s*[0-9]{1,4}\s+/', '', $phone);
+		$phone = preg_replace('/^8\s{1,}\(/', '', $phone);
+		$phone = preg_replace('/[^0-9]/', '', $phone);
+		$phone = substr($phone, -10);
+
+		return $phone;
 	}
 }

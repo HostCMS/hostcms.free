@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
@@ -205,7 +205,7 @@ class Core_Image_Gd extends Core_Image
 			if ($iImagetype == IMAGETYPE_JPEG)
 			{
 				$quality = is_null($quality)
-					? JPG_QUALITY
+					? (defined('JPG_QUALITY') ? JPG_QUALITY : 60)
 					: intval($quality);
 
 				// Изменяем размер оригинальной картинки и копируем в созданую картинку
@@ -229,7 +229,7 @@ class Core_Image_Gd extends Core_Image
 			elseif ($iImagetype == IMAGETYPE_PNG)
 			{
 				$quality = is_null($quality)
-					? PNG_QUALITY
+					? (defined('PNG_QUALITY') ? PNG_QUALITY : 6)
 					: intval($quality);
 
 				imagealphablending($targetResourceStep1, FALSE);
@@ -285,7 +285,7 @@ class Core_Image_Gd extends Core_Image
 			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP)
 			{
 				$quality = is_null($quality)
-					? 80
+					? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80)
 					: intval($quality);
 
 				// Изменяем размер оригинальной картинки и копируем в созданую картинку

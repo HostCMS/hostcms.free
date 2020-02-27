@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -340,9 +340,10 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		parent::_applyObjectProperty();
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		if ($this->_object->id)
 		{
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
 			$this->addMessage("<script>$.showPrintButton('{$windowId}', {$this->_object->id})</script>");
 		}
 
@@ -385,33 +386,43 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		foreach ($aAddShopItems as $key => $shop_item_id)
 		{
-			// $iCount = $this->_object->Shop_Warehouse_Writeoff_Items->getCountByshop_item_id($shop_item_id);
+			$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
 
-			// if (!$iCount)
-			// {
-				$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
+			ob_start();
 
-				if (!is_null($oShop_Item))
-				{
-					$oShop_Item = $oShop_Item->shortcut_id
-						? $oShop_Item->Shop_Item
-						: $oShop_Item;
+			$script = "$(\"#{$windowId} input[name='shop_item_id\\[\\]']\").eq(0).remove();";
 
-					$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
+			if (!is_null($oShop_Item))
+			{
+				$oShop_Item = $oShop_Item->shortcut_id
+					? $oShop_Item->Shop_Item
+					: $oShop_Item;
 
-					$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
-						? $_POST['shop_item_quantity'][$key]
-						: 0;
+				$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
 
-					$oShop_Warehouse_Writeoff_Item = Core_Entity::factory('Shop_Warehouse_Writeoff_Item');
-					$oShop_Warehouse_Writeoff_Item
-						->shop_warehouse_writeoff_id($this->_object->id)
-						->shop_item_id($oShop_Item->id)
-						->count($count)
-						->price($price)
-						->save();
-				}
-			// }
+				$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
+					? $_POST['shop_item_quantity'][$key]
+					: 0;
+
+				$oShop_Warehouse_Writeoff_Item = Core_Entity::factory('Shop_Warehouse_Writeoff_Item');
+				$oShop_Warehouse_Writeoff_Item
+					->shop_warehouse_writeoff_id($this->_object->id)
+					->shop_item_id($oShop_Item->id)
+					->count($count)
+					->price($price)
+					->save();
+
+				$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Writeoff_Item->id}');";
+			}
+			else
+			{
+				$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
+			}
+
+			Core::factory('Core_Html_Entity_Script')
+				->value($script)
+				->execute();
+			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
 
 		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();

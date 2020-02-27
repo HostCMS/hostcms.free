@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -255,7 +255,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 0: // Int
 				case 1: // String
 				case 2: // File
-				case 3: // List
+				/*case 3: // List*/
 				case 4: // Textarea
 				case 6: // Wysiwyg
 				case 7: // Checkbox
@@ -268,27 +268,32 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 					Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
 
+					$aFormat = $oProperty->obligatory
+						? array('minlen' => array('value' => 1))
+						: array();
+
 					switch ($oProperty->type)
 					{
 						case 0: // Int
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-								->format(array('lib' => array(
+								->format($aFormat + array('lib' => array(
 									'value' => 'integer'
 								)));
 						break;
 						case 11: // Float
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-								->format(array('lib' => array(
+								->format($aFormat + array('lib' => array(
 									'value' => 'decimal'
 								)));
 						break;
 						case 1: // String
-						case 10: // Hidden field
 						default:
+							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')->format($aFormat);
+						break;
+						case 10: // Hidden field
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
 						break;
 						case 2: // File
-
 							$largeImage = array(
 								'max_width' => $oProperty->image_large_max_width,
 								'max_height' => $oProperty->image_large_max_height,
@@ -319,29 +324,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
 								->style('width: 340px')
 								->largeImage($largeImage)
-								->smallImage($smallImage);
+								->smallImage($smallImage)
+								->crop(TRUE);
 
 							$width = 710;
 						break;
 
-						case 3: // List
-							if (Core::moduleIsActive('list'))
-							{
-								if (!isset($this->_cacheListOptions[$oProperty->list_id]))
-								{
-									$this->_cacheListOptions[$oProperty->list_id] = array(' … ');
-									$this->_cacheListOptions[$oProperty->list_id] += $oProperty->List->getListItemsTree();
-								}
-
-								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
-									->options($this->_cacheListOptions[$oProperty->list_id]);
-
-								Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyListValues', $this, array($oProperty, $oAdmin_Form_Entity));
-							}
-						break;
+						/*case 3: // List
+							// see below
+						break;*/
 
 						case 4: // Textarea
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea');
+							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')->format($aFormat);
 						break;
 
 						case 6: // Wysiwyg
@@ -357,11 +351,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						break;
 
 						case 8: // Date
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date');
+							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date')->format($aFormat);
 						break;
 
 						case 9: // Datetime
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
+							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime')->format($aFormat);
 						break;
 					}
 
@@ -386,7 +380,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 									. ($oProperty->type == 7 ? ' margin-top-21' : '')
 							));
 
-						$oProperty->type == 7 && $oAdmin_Form_Entity->checked($oProperty->default_value == 1);
+						$oProperty->type == 7
+							&& $oAdmin_Form_Entity->checked($oProperty->default_value == 1);
 
 						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
 
@@ -494,6 +489,56 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					}
 				break;
 
+				case 3: // List
+					if (Core::moduleIsActive('list'))
+					{
+						$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
+							->caption(htmlspecialchars($oProperty->name))
+							->name("property_{$oProperty->id}[]")
+							->value(NULL)
+							->divAttr(array('class' => 'form-group col-xs-12'));
+
+						$oProperty->obligatory
+							&& $oAdmin_Form_Entity_ListItems->data('required', 1);
+
+						$oAdmin_Form_Entity_ListItemsInput = Admin_Form_Entity::factory('Input')
+							->caption(htmlspecialchars($oProperty->name))
+							->divAttr(array('class' => 'form-group col-xs-12'))
+							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
+							->name("input_property_{$oProperty->id}[]");
+
+						// Значений св-в нет для объекта
+						if (count($aProperty_Values) == 0)
+						{
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_ListItems,$oAdmin_Form_Entity_Section, $oProperty));
+
+							$this->_fillList($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_ListItemsInput);
+						}
+						else
+						{
+							foreach ($aProperty_Values as $key => $oProperty_Value)
+							{
+								$value = $oProperty_Value->value;
+
+								$oNewAdmin_Form_Entity_ListItems = clone $oAdmin_Form_Entity_ListItems;
+								$oNewAdmin_Form_Entity_ListItems
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
+									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+									->value($value);
+
+								$oNewAdmin_Form_Entity_ListItemsInput = clone $oAdmin_Form_Entity_ListItemsInput;
+								$oNewAdmin_Form_Entity_ListItemsInput
+									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+								$this->_fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_ListItems, $oNewAdmin_Form_Entity_ListItemsInput);
+							}
+						}
+					}
+				break;
+
 				case 5: // ИС
 					if (Core::moduleIsActive('informationsystem'))
 					{
@@ -513,7 +558,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
 							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
 							->name("input_property_{$oProperty->id}[]");
 
 						// Значений св-в нет для объекта
@@ -637,6 +682,116 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
 	}
 
+	protected function _fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItemsSelect, $oAdmin_Form_Entity_ListItemsInput)
+	{
+		$oList_Item = Core_Entity::factory('List_Item', $value);
+
+		$bIsNullValue = is_null($value);
+		$bIsNullValue && $value = $oProperty->default_value;
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		$oList = $oProperty->List;
+
+		$iCountItems = $oList->List_Items->getCount();
+
+		$bAutocomplete = $iCountItems > Core::$mainConfig['switchSelectToAutocomplete'];
+
+		if (!$bAutocomplete)
+		{
+			if (!isset($this->_cacheListOptions[$oProperty->list_id]))
+			{
+				$this->_cacheListOptions[$oProperty->list_id] = array(' … ');
+				$this->_cacheListOptions[$oProperty->list_id] += $oProperty->List->getListItemsTree();
+			}
+
+			$oAdmin_Form_Entity_ListItemsSelect
+				->options($this->_cacheListOptions[$oProperty->list_id]);
+
+			$oAdmin_Form_Entity_ListItemsInput
+				->divAttr(array('class' => 'form-group col-xs-12 hidden'));
+		}
+		else
+		{
+			$oAdmin_Form_Entity_ListItemsSelect
+				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+				->options(array($value => $oList_Item->id));
+
+			$oAdmin_Form_Entity_ListItemsInput->value($oList_Item->value);
+		}
+
+		$input_group = $oProperty->multiple ? 'input-group' : '';
+
+		$oDiv_Group = Admin_Form_Entity::factory('Div')
+			->class($input_group)
+			->add($oAdmin_Form_Entity_ListItemsSelect)
+			->add($oAdmin_Form_Entity_ListItemsInput);
+
+		// autocomplete should be added always
+		$oDiv_Group->add(
+			Core::factory('Core_Html_Entity_Script')->value("
+				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+					 source: function(request, response) {
+						var jInput = $(this.element),
+							jTopParentDiv = jInput.parents('[id ^= property]');
+
+						$.ajax({
+							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}',
+							dataType: 'json',
+							data: {
+								queryString: request.term
+							},
+							success: function( data ) {
+								response( data );
+							}
+						});
+					 },
+					 minLength: 1,
+					 create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							return $('<li></li>')
+								.data('item.autocomplete', item)
+								.append($('<a>').text(item.label))
+								.appendTo(ul);
+						}
+
+						 $(this).prev('.ui-helper-hidden-accessible').remove();
+					 },
+					 select: function( event, ui ) {
+						var jInput = $(this),
+							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jListItemDiv = jTopParentDiv.find('select[name ^= property_]');
+
+							jListItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
+					 },
+					 open: function() {
+						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+					 },
+					 close: function() {
+						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+					 }
+				});
+			")
+		);
+
+		$oProperty->multiple && $this->imgBox(
+			$oDiv_Group,
+			$oProperty,
+			'$.cloneProperty',
+			!$bIsNullValue
+				? $this->getImgDeletePath()
+				: $this->getImgDelete()
+		);
+
+		$oAdmin_Form_Entity_Section
+			->add(
+				Admin_Form_Entity::factory('Div')
+					->id("property_{$oProperty->id}")
+					->class('row')
+					->add($oDiv_Group)
+			);
+	}
+
 	/**
 	 * Fill information systems/items list
 	 * @param int $value informationsystem_item_id
@@ -723,11 +878,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$aOptions = array(' … ');
 			foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 			{
-				$aOptions[$oInformationsystem_Item->id] = Informationsystem_Controller_Load_Select_Options::getOptionName(
+				$sName = Informationsystem_Controller_Load_Select_Options::getOptionName(
 					!$oInformationsystem_Item->shortcut_id
 						? $oInformationsystem_Item
 						: $oInformationsystem_Item->Informationsystem_Item
 				);
+
+				$aOptions[$oInformationsystem_Item->id] = $oInformationsystem_Item->active
+					? $sName
+					: array(
+						'value' => $sName,
+						'attr' => array('class' => 'darkgray line-through')
+					);
 			}
 
 			$oAdmin_Form_Entity_InfItemsSelect->options($aOptions);
@@ -839,7 +1001,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			//->where('shop_items.modification_id', '=', 0)
 			->clearOrderBy()
 			->clearSelect()
-			->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
+			->select('id', 'shortcut_id', 'modification_id', 'name', 'marking', 'active');
 
 		// Определяем поле сортировки информационных элементов
 		switch ($oShop->items_sorting_field)
@@ -940,11 +1102,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$aOptions = array(' … ');
 			foreach ($aShop_Items as $oShop_Item)
 			{
-				$aOptions[$oShop_Item->id] = Shop_Controller_Load_Select_Options::getOptionName(
+				$sName = Shop_Controller_Load_Select_Options::getOptionName(
 					!$oShop_Item->shortcut_id
 						? $oShop_Item
 						: $oShop_Item->Shop_Item
 				);
+
+				$aOptions[$oShop_Item->id] = $oShop_Item->active
+					? $sName
+					: array(
+						'value' => $sName,
+						'attr' => array('class' => 'darkgray line-through')
+					);
 
 				// Shop Item's modifications
 				if ($aConfig['select_modifications'])
@@ -955,13 +1124,20 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						->queryBuilder()
 						->clearOrderBy()
 						->clearSelect()
-						->select('id', 'shortcut_id', 'modification_id', 'name', 'marking');
+						->select('id', 'shortcut_id', 'modification_id', 'name', 'marking', 'active');
 
 					$aModifications = $oModifications->findAll(FALSE);
 
 					foreach ($aModifications as $oModification)
 					{
-						$aOptions[$oModification->id] = Shop_Controller_Load_Select_Options::getOptionName($oModification);
+						$sName = Shop_Controller_Load_Select_Options::getOptionName($oModification);
+
+						$aOptions[$oModification->id] = $oModification->active
+							? $sName
+							: array(
+								'value' => $sName,
+								'attr' => array('class' => 'darkgray line-through')
+							);
 					}
 				}
 			}

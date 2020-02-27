@@ -87,3 +87,44 @@ Core_Event::attach('Shop_Payment_System_Handler.onAfterChangedOrder', array('Sho
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
 
+/*Core_Event::attach('shop.onCallwarehouseApi', array('My_Shop_Observer', 'onCallwarehouseApi'));
+
+class My_Shop_Observer
+{
+	static public function onCallwarehouseApi($object, $args)
+	{
+		// ID склада, информацию об остатке на котором добавлять
+		$warehouse_id = 1;
+
+		$oShop_Items = $object->Shop_Items;
+		$oShop_Items
+			->queryBuilder()
+			->select('shop_items.*', array('SUM(shop_warehouse_items.count)', 'dataWarehouse' . $warehouse_id))
+			->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', 'shop_items.id', array(
+					array('AND' => array('shop_warehouse_items.shop_warehouse_id', '=', $warehouse_id))
+				)
+			)
+			->groupBy('shop_items.id');
+
+		return $oShop_Items;
+	}
+}*/
+/*
+class Shop_Payment_System_Observer
+{
+	static public function onAfterPrepareXml($object, $args)
+	{
+	
+		if ($object->getShopOrder()->coupon)
+		{	
+			$oShopCoupon = Core_Entity::factory('Shop_Purchase_Discount_Coupon')->getByText($object->getShopOrder()->coupon);
+			if(!is_null($oShopCoupon))
+			{
+				$args[0]->addEntity(
+				Core::factory('Core_Xml_Entity')->name('coupon_name')->value($oShopCoupon->name)
+				);
+			}
+		}
+	}
+}
+Core_Event::attach('Shop_Payment_System_Handler.onAfterPrepareXml', array('Shop_Payment_System_Observer', 'onAfterPrepareXml'));*/

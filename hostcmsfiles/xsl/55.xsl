@@ -20,6 +20,14 @@
 		<xsl:variable name="group" select="group"/>
 
 		<xsl:choose>
+			<!-- SEO-filter's H1 and text -->
+			<xsl:when test="shop_filter_seo/node() and shop_filter_seo/h1 != ''">
+				<h1><xsl:value-of select="shop_filter_seo/h1"/></h1>
+
+				<xsl:if test="page = 0 and shop_filter_seo/text != ''">
+					<div ><xsl:value-of disable-output-escaping="yes" select="shop_filter_seo/text"/></div>
+				</xsl:if>
+			</xsl:when>
 			<xsl:when test="$group = 0">
 				<h1 hostcms:id="{@id}" hostcms:field="name" hostcms:entity="shop">
 					<xsl:value-of select="name"/>
@@ -212,12 +220,12 @@
 				</xsl:if>
 
 				<!-- Filter String -->
-				<xsl:variable name="filter"><xsl:if test="/shop/filter_path/node() and /shop/filter_path != ''"><xsl:value-of select="/shop/filter_path"/></xsl:if></xsl:variable>
+			<xsl:variable name="filter"><xsl:if test="/shop/filter_path/node() and /shop/filter_path != ''"><xsl:value-of select="/shop/filter_path"/></xsl:if></xsl:variable>
 
 				<p style="float:right; margin: 0 40px 0 0">&labelShow;
 				<a href="{$path}{$filter}{$form_tag_url}?on_page=20">20</a><xsl:text> </xsl:text>
 				<a href="{$path}{$filter}{$form_tag_url}?on_page=50">50</a><xsl:text> </xsl:text>
-				<a href="{$path}{$filter}{$form_tag_url}?on_page=100">100</a>
+					<a href="{$path}{$filter}{$form_tag_url}?on_page=100">100</a>
 				</p>
 				<div style="clear: both"></div>
 			</form>
@@ -531,7 +539,7 @@
 		<!-- Filter String -->
 <!-- <xsl:variable name="filter"><xsl:if test="/shop/filter/node()">?filter=1&amp;sorting=<xsl:value-of select="/shop/sorting"/>&amp;price_from=<xsl:value-of select="/shop/price_from"/>&amp;price_to=<xsl:value-of select="/shop/price_to"/><xsl:for-each select="/shop/*"><xsl:if test="starts-with(name(), 'property_')">&amp;<xsl:value-of select="name()"/>[]=<xsl:value-of select="."/></xsl:if></xsl:for-each></xsl:if></xsl:variable> -->
 
-		<xsl:variable name="filter"><xsl:if test="/shop/filter_path/node() and /shop/filter_path != ''"><xsl:value-of select="/shop/filter_path"/></xsl:if></xsl:variable>
+	<xsl:variable name="filter"><xsl:if test="/shop/filter_path/node() and /shop/filter_path != ''"><xsl:value-of select="/shop/filter_path"/></xsl:if></xsl:variable>
 
 <xsl:variable name="on_page"><xsl:if test="/shop/on_page/node() and /shop/on_page > 0"><xsl:choose><xsl:when test="/shop/filter_path/node()">&amp;</xsl:when><xsl:otherwise>?</xsl:otherwise></xsl:choose>on_page=<xsl:value-of select="/shop/on_page"/></xsl:if></xsl:variable>
 

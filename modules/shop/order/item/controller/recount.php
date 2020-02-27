@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 {
@@ -34,7 +34,7 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 		// Удаляем существующие скидки
 		$oShop_Order_Items = $this->shopOrder->Shop_Order_Items;
 		$oShop_Order_Items->queryBuilder()
-			->where('shop_order_items.type', '=', 0)
+			->where('shop_order_items.type', '=', 3) // 3 - Скидка от суммы заказа
 			->where('shop_order_items.quantity', '=', 1)
 			->where('shop_order_items.price', '<', 0);
 
@@ -43,6 +43,8 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 		{
 			$oShop_Order_Item->delete();
 		}
+
+		$aDiscountPrices = array();
 
 		$aShop_Order_Items = $this->shopOrder->Shop_Order_Items->getAllByType(0, FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)

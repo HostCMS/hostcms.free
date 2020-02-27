@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 {
@@ -67,7 +67,7 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 			}
 			while(count($aShop_Items));
 
-			if (count($aShop_Items) == $limit)
+			if (count($aShop_Items))
 			{
 				$sAdditionalParams = "limit={$limit}&delay={$iDelay}&max_time={$iMaxTime}&position=" . $position;
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mail_Smtp extends Core_Mail
 {
@@ -261,7 +261,7 @@ class Core_Mail_Smtp extends Core_Mail
 			Core_Log::instance()->clear()
 				->notify(FALSE) // avoid recursion
 				->status(Core_Log::$ERROR)
-				->write(sprintf('SMTP error: "%s"', $server_response));
+				->write(sprintf('SMTP error: "%s", expect "%s"', $server_response, $response));
 		}
 
 		return $result;

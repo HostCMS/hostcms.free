@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_Entity_Select
 {
@@ -34,16 +34,15 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 
 		if ($this->filter)
 		{
-			?><div class="row">
-				<?php
-					if ($this->caseSensitive)
-					{
-						?><div class="col-xs-12 col-sm-6"><?php
-					}
-					else
-					{
-						?><div class="col-xs-7 col-sm-8"><?php
-					}
+			?><div class="row"><?php
+				if ($this->caseSensitive)
+				{
+					?><div class="col-xs-12 col-sm-6"><?php
+				}
+				else
+				{
+					?><div class="col-xs-7 col-sm-8"><?php
+				}
 		}
 
 		// Не показывать <span>, если пустой. Используется при сдвоенных селекторах

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -28,22 +28,9 @@ $oCompany = $oShop_Order->company_id
 	? $oShop_Order->Shop_Company
 	: $oShop->Shop_Company;
 
-/*$aFullAddress = array(
-	trim($oShop_Order->postcode),
-	$oShop_Order->Shop_Country->name,
-	$oShop_Order->Shop_Country_Location->name,
-	$oShop_Order->Shop_Country_Location_City->name,
-	$oShop_Order->Shop_Country_Location_City_Area->name,
-	trim($oShop_Order->address),
-	trim($oShop_Order->house),
-	trim($oShop_Order->flat)
-);
-
-$aFullAddress = array_filter($aFullAddress);
-$sFullAddress = implode(', ', $aFullAddress);*/
-
 $sFullAddress = $oShop_Order->getFullAddress();
 
+ob_start();
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -180,7 +167,6 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 }
 else
 {
-
 	?>
 	<p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p>
 
@@ -458,7 +444,6 @@ else
 			</tr><?php
 		}
 	}
-
 	?>
 	</table>
 	<table width="100%" cellspacing="0" cellpadding="3">
@@ -624,3 +609,6 @@ else
 ?>
 </body>
 </html>
+<?php
+echo ob_get_clean();
+?>

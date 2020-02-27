@@ -73,48 +73,51 @@ class Shop_Delivery_Handler6 extends Shop_Delivery_Handler
 
 					$oCalcTariff = json_decode($Core_Http->getBody());
 
-					if ($oCalcTariff->ErrorCode)
+					if (!is_null($oCalcTariff))
 					{
-						throw new Exception("Ошибка: " . strval($oCalcTariff->ErrorMessage));
-					}
-
-					if (isset($oCalcTariff->Services))
-					{
-						?>
-							<table>
-								<thead>
-									<tr>
-										<th></th>
-										<th>Название</th>
-										<th>Цена</th>
-										<th>НДС</th>
-										<th>Срок поставки</th>
-									</tr>
-								</thead>
-								<tbody>
-						<?php
-						$_SESSION['hostcmsOrder']['pickpoint'] = array();
-
-						$oShop_Currency = $this->_Shop_Delivery_Model->Shop->Shop_Currency;
-
-						foreach ($oCalcTariff->Services as $key => $oServiceTariff)
+						if ($oCalcTariff->ErrorCode)
 						{
-							$oServiceTariff->point_name = $this->_ptn_name;
-							$_SESSION['hostcmsOrder']['pickpoint'][$key] = $oServiceTariff;
+							throw new Exception("Ошибка: " . strval($oCalcTariff->ErrorMessage));
+						}
+
+						if (isset($oCalcTariff->Services))
+						{
 							?>
-								<tr>
-									<td><input value="<?php echo $key?>" name="pickpoint_condition_id" type="radio" <?php if ($key == 0) echo 'checked="checked"'?>></td>
-									<td><?php echo htmlspecialchars($oServiceTariff->Name), "\n", $this->_ptn_name?></td>
-									<td><?php echo htmlspecialchars($oServiceTariff->Tariff), " ", htmlspecialchars($oShop_Currency->name)?></td>
-									<td><?php echo htmlspecialchars($oServiceTariff->NDS), " ", htmlspecialchars($oShop_Currency->name)?></td>
-									<td><?php echo htmlspecialchars($oCalcTariff->DPMin), " - ", htmlspecialchars($oCalcTariff->DPMax)?></td>
-								</tr>
+								<table>
+									<thead>
+										<tr>
+											<th></th>
+											<th>Название</th>
+											<th>Цена</th>
+											<th>НДС</th>
+											<th>Срок поставки</th>
+										</tr>
+									</thead>
+									<tbody>
+							<?php
+							$_SESSION['hostcmsOrder']['pickpoint'] = array();
+
+							$oShop_Currency = $this->_Shop_Delivery_Model->Shop->Shop_Currency;
+
+							foreach ($oCalcTariff->Services as $key => $oServiceTariff)
+							{
+								$oServiceTariff->point_name = $this->_ptn_name;
+								$_SESSION['hostcmsOrder']['pickpoint'][$key] = $oServiceTariff;
+								?>
+									<tr>
+										<td><input value="<?php echo $key?>" name="pickpoint_condition_id" type="radio" <?php if ($key == 0) echo 'checked="checked"'?>></td>
+										<td><?php echo htmlspecialchars($oServiceTariff->Name), "\n", $this->_ptn_name?></td>
+										<td><?php echo htmlspecialchars($oServiceTariff->Tariff), " ", htmlspecialchars($oShop_Currency->name)?></td>
+										<td><?php echo htmlspecialchars($oServiceTariff->NDS), " ", htmlspecialchars($oShop_Currency->name)?></td>
+										<td><?php echo htmlspecialchars($oCalcTariff->DPMin), " - ", htmlspecialchars($oCalcTariff->DPMax)?></td>
+									</tr>
+								<?php
+							}
+							?>
+									</tbody>
+								</table>
 							<?php
 						}
-						?>
-								</tbody>
-							</table>
-						<?php
 					}
 				}
 			}

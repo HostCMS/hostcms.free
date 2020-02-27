@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Model extends Core_Entity
 {
@@ -29,6 +29,8 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 	protected $_hasMany = array(
 		'shop_warehouse_writeoff_item' => array(),
 	);
+
+	const TYPE = 2;
 
 	/**
 	 * Column consist item's name
@@ -114,7 +116,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Writeoff_Items->deleteAll(FALSE);
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 2);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -134,7 +136,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 2);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			$aTmp = array();
 
@@ -169,7 +171,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry->setDocument($this->id, 2);
+						$oShop_Warehouse_Entry->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Writeoff_Item->shop_item_id;
 					}
 
@@ -204,7 +206,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 2);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
@@ -236,7 +238,16 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 2);
+		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, self::TYPE);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars($this->Shop_Warehouse->name);
 	}
 
 	/**
@@ -371,15 +382,27 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 
 			$amount = Shop_Controller::instance()->round($oShop_Warehouse_Writeoff_Item->count * $oShop_Warehouse_Writeoff_Item->price);
 
-			$aReplace['Items'][] = array(
-				'position' => $position++,
-				'name' => htmlspecialchars($oShop_Item->name),
-				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-				'currency' => htmlspecialchars($oShop_Item->Shop_Currency->name),
-				'price' => $oShop_Warehouse_Writeoff_Item->price,
-				'quantity' => $oShop_Warehouse_Writeoff_Item->count,
-				'amount' => $amount
-			);
+			$aBarcodes = array();
+
+			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+			{
+				$aBarcodes[] = $oShop_Item_Barcode->value;
+			}
+
+			$node = new stdClass();
+
+			$node->position = $position++;
+			$node->item = $oShop_Item;
+			$node->name = htmlspecialchars($oShop_Item->name);
+			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->name);
+			$node->price = $oShop_Warehouse_Writeoff_Item->price;
+			$node->quantity = $oShop_Warehouse_Writeoff_Item->count;
+			$node->amount = $amount;
+			$node->barcodes = implode(', ', $aBarcodes);
+
+			$aReplace['Items'][] = $node;
 
 			$aReplace['total_count']++;
 

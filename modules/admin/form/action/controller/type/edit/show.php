@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_Properties
 {
@@ -35,8 +35,8 @@ abstract class Admin_Form_Action_Controller_Type_Edit_Show extends Core_Servant_
 	{
 		parent::__construct();
 
-		$this->tabs = $this->children = array();
-
+		$this->children = array();
+		
 		$this->_Admin_Form_Entity_Form = $oAdmin_Form_Entity_Form;
 	}
 

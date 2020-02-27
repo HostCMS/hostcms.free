@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Model extends Core_Entity
 {
@@ -35,6 +35,8 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
+
+	const TYPE = 3;
 
 	/**
 	 * Constructor.
@@ -114,7 +116,7 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Regrade_Items->deleteAll(FALSE);
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 3);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -134,7 +136,7 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 3);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			$aTmp = array();
 
@@ -184,11 +186,11 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry_Writeoff = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Writeoff->setDocument($this->id, 3);
+						$oShop_Warehouse_Entry_Writeoff->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry_Writeoff->shop_item_id = $oShop_Warehouse_Regrade_Item->writeoff_shop_item_id;
 
 						$oShop_Warehouse_Entry_Incoming = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Incoming->setDocument($this->id, 3);
+						$oShop_Warehouse_Entry_Incoming->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry_Incoming->shop_item_id = $oShop_Warehouse_Regrade_Item->incoming_shop_item_id;
 					}
 
@@ -234,7 +236,7 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 3);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
@@ -267,6 +269,15 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 4);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars($this->Shop_Warehouse->name);
 	}
 
 	/**
@@ -409,18 +420,40 @@ class Shop_Warehouse_Regrade_Model extends Core_Entity
 					? $oShop_Item_Incoming->Shop_Item
 					: $oShop_Item_Incoming;
 
-				$aReplace['Items'][] = array(
-					'position' => $position++,
-					'writeoff_name' => htmlspecialchars($oShop_Item_Writeoff->name),
-					'writeoff_measure' => htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name),
-					'writeoff_currency' => htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name),
-					'writeoff_price' => $oShop_Warehouse_Regrade_Item->writeoff_price,
-					'incoming_name' => htmlspecialchars($oShop_Item_Incoming->name),
-					'incoming_measure' => htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name),
-					'incoming_currency' => htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name),
-					'incoming_price' => $oShop_Warehouse_Regrade_Item->incoming_price,
-					'count' => $oShop_Warehouse_Regrade_Item->count
-				);
+				$aWriteoffBarcodes = array();
+
+				$aWriteoff_Shop_Item_Barcodes = $oShop_Item_Writeoff->Shop_Item_Barcodes->findAll(FALSE);
+				foreach ($aWriteoff_Shop_Item_Barcodes as $oShop_Item_Barcode)
+				{
+					$aWriteoffBarcodes[] = $oShop_Item_Barcode->value;
+				}
+
+				$aIncomingBarcodes = array();
+
+				$aIncoming_Shop_Item_Barcodes = $oShop_Item_Incoming->Shop_Item_Barcodes->findAll(FALSE);
+				foreach ($aIncoming_Shop_Item_Barcodes as $oShop_Item_Barcode)
+				{
+					$aIncomingBarcodes[] = $oShop_Item_Barcode->value;
+				}
+
+				$node = new stdClass();
+
+				$node->position = $position++;
+				$node->writeoff_item = $oShop_Item_Writeoff;
+				$node->writeoff_name = htmlspecialchars($oShop_Item_Writeoff->name);
+				$node->writeoff_measure = htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name);
+				$node->writeoff_currency = htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name);
+				$node->writeoff_price = $oShop_Warehouse_Regrade_Item->writeoff_price;
+				$node->writeoff_barcodes = implode(', ', $aWriteoffBarcodes);
+				$node->incoming_item = $oShop_Item_Incoming;
+				$node->incoming_name = htmlspecialchars($oShop_Item_Incoming->name);
+				$node->incoming_measure = htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name);
+				$node->incoming_currency = htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name);
+				$node->incoming_price = $oShop_Warehouse_Regrade_Item->incoming_price;
+				$node->incoming_barcodes = implode(', ', $aIncomingBarcodes);
+				$node->count = $oShop_Warehouse_Regrade_Item->count;
+
+				$aReplace['Items'][] = $node;
 
 				$aReplace['total_count']++;
 			}

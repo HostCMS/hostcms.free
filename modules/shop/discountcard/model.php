@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -22,6 +22,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		'siteuser' => array(),
 		'shop_discountcard_level' => array(),
 		'user' => array()
+	);
+
+	/**
+	 * One-to-many or many-to-many relations
+	 * @var array
+	 */
+	protected $_hasMany = array(
+		'shop_discountcard_bonus' => array()
 	);
 
 	/**
@@ -146,14 +154,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
+	public function numberBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$color = ($this->Shop_Discountcard_Level->color
+			? htmlspecialchars($this->Shop_Discountcard_Level->color)
+			: '#eee'
+		);
+
+		return '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br /><span class="small darkgray">Σ ' . htmlspecialchars($this->amount . ' ' . $this->Shop->Shop_Currency->name) . '</span>';
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
 	public function shop_discountcard_level_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$color = ($this->Shop_Discountcard_Level->color
+			? htmlspecialchars($this->Shop_Discountcard_Level->color)
+			: '#eee'
+		);
+
 		return $this->shop_discountcard_level_id
-			? '<i class="fa fa-circle" style="margin-right: 5px; color: '
-				. ($this->Shop_Discountcard_Level->color
-					? htmlspecialchars($this->Shop_Discountcard_Level->color)
-					: '#eee'
-				) . '"></i> ' . htmlspecialchars($this->Shop_Discountcard_Level->name)
+			? '<i class="fa fa-circle" style="margin-right: 5px; color: ' . $color . '"></i><span style="color: ' . $color . '">' . htmlspecialchars($this->Shop_Discountcard_Level->name) . '</span>'
 			: '—';
 	}
 
@@ -175,21 +200,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			? Core::_('Siteuser.' . $lng, Core_Date::sql2datetime($this->Siteuser->last_activity))
 			: '';
 
-		return htmlspecialchars($this->dataLogin)
-			. '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>';
+		return $this->dataLogin
+			? htmlspecialchars($this->dataLogin)
+				. '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>'
+			: '';
 	}
 
 	/**
-	 * Backend callback method
-	 * @param Admin_Form_Field $oAdmin_Form_Field
-	 * @param Admin_Form_Controller $oAdmin_Form_Controller
-	 * @return string
+	 * Set Discountcard Level By Order's Amount
+	 * @return self
 	 */
-	public function numberBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
-	{
-		return '<b>' . htmlspecialchars($this->number) . '</b><br /><span class="label label-info">Σ ' . htmlspecialchars($this->amount . ' ' . $this->Shop->Shop_Currency->name);
-	}
-
 	public function checkLevel()
 	{
 		$oShop = $this->Shop;
@@ -232,6 +252,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Shop_Discountcard_Bonuses->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -287,5 +309,54 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$this->addXmlTag('discount_amount', $this->_discountAmount);
 
 		return $this;
+	}
+
+	/**
+	 *
+	 */
+	public function getBonuses($bCache = TRUE)
+	{
+		$datetime = Core_Date::timestamp2sql(time());
+
+		$oShop_Discountcard_Bonuses = $this->Shop_Discountcard_Bonuses;
+		$oShop_Discountcard_Bonuses->queryBuilder()
+			->where('shop_discountcard_bonuses.datetime', '<=', $datetime)
+			->where('shop_discountcard_bonuses.expired', '>=', $datetime)
+			->where('shop_discountcard_bonuses.written_off', '<', Core_QueryBuilder::expression('shop_discountcard_bonuses.amount'))
+			->clearOrderBy()
+			->orderBy('shop_discountcard_bonuses.id');
+
+		return $oShop_Discountcard_Bonuses->findAll($bCache);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function bonusesBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$totalAmount = $totalWrittenoffAmount = 0;
+
+		$aShop_Discountcard_Bonuses = $this->getBonuses();
+		foreach ($aShop_Discountcard_Bonuses as $oShop_Discountcard_Bonus)
+		{
+			$totalAmount += $oShop_Discountcard_Bonus->amount;
+			$totalWrittenoffAmount += $oShop_Discountcard_Bonus->written_off;
+		}
+
+		$bonusesAmount = Shop_Controller::instance()->round($totalAmount - $totalWrittenoffAmount);
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
+
+		Core::factory('Core_Html_Entity_Div')->add(
+			Core::factory('Core_Html_Entity_A')
+				->href($link)
+				->onclick($onclick)
+				->value($bonusesAmount)
+		)
+		->execute();
 	}
 }

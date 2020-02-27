@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -39,6 +39,9 @@ $oAdmin_Form_Controller
 	->title($sFormTitle = Core::_('Shop_Order.show_order_title', $oShop->name))
 	->pageTitle($sFormTitle);
 
+$siteuser_id = intval(Core_Array::getGet('siteuser_id'));
+$siteuser_id && $oAdmin_Form_Controller->Admin_View('Admin_Internal_View');
+
 // Shop Order Print Forms
 $shop_print_form_id = intval(Core_Array::getGet('shop_print_form_id'));
 if ($shop_print_form_id)
@@ -62,32 +65,130 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
+	$oAdmin_Form_Entity_Menu = Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Order.shops_link_order'))
 		->icon('fa fa-clipboard')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Order.shops_link_order_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/order_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-		)
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Order.property_menu'))
-				->icon('fa fa-gears')
-				->img('/admin/images/page_gear.gif')
-				->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
-				->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}")))
+
 );
+
+if ($siteuser_id)
+{
+	$aTmp = array();
+
+	$aShops = Core_Entity::factory('Shop')->getAllBySite_id(CURRENT_SITE);
+	foreach ($aShops as $oShop)
+	{
+		$aTmp[] = '<option value="' . $oShop->id . '">' . htmlspecialchars($oShop->name) . '</option>';
+	}
+
+	$sOptions = implode('', $aTmp);
+
+	$oAdmin_Form_Controller->addEntity(
+		Admin_Form_Entity::factory('Code')->html('
+			<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="gridSystemModalLabel">' . Core::_('Shop_Order.select_shop') . '</h4>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="col-xs-12">
+									<select id="shop_id" name="shop_id" style="width: 100%;">'
+										. $sOptions .
+									'</select>
+								</div>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary select-shop">' . Core::_('Shop_Order.select_shop_button') . '</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
+				$(function (){
+					$(".select-shop").on("click", function(){
+						mainFormLocker.unlock();
+
+						var shop_id = parseInt($("#shop_id").val());
+
+						if (shop_id)
+						{
+							var path = \'' . Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, 'shop_id=###&siteuser_id=' . $siteuser_id . '')) . '\';
+
+							// Replace
+							path = path.replace(/\###/g, shop_id)
+							path = path.replace(/\; return false/g, ";");
+
+							eval(path);
+
+							$(".modal").modal("hide");
+						}
+					});
+				});
+			</script>
+		')
+	);
+
+	$href = '#';
+	$onclick = "$('.modal').modal('show');";
+}
+else
+{
+	$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0);
+	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0);
+}
+
+$oAdmin_Form_Entity_Menu->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Order.shops_link_order_add'))
+		->icon('fa fa-plus')
+		->img('/admin/images/order_add.gif')
+		->href($href)
+		->onclick($onclick)
+);
+
+if (!$siteuser_id)
+{
+	$oAdmin_Form_Entity_Menu->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Order.property_menu'))
+			->icon('fa fa-gears')
+			->img('/admin/images/page_gear.gif')
+			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}"))
+	);
+}
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+$additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}";
+
+if (!$siteuser_id)
+{
+	$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+	$oAdmin_Form_Controller->addEntity(
+		Admin_Form_Entity::factory('Code')
+			->html('
+				<div class="row search-field margin-bottom-20">
+					<div class="col-xs-12">
+						<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+							<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+							<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
+							<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+							<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
+						</form>
+					</div>
+				</div>
+			')
+	);
+
+	$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+}
 
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -187,6 +288,11 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 
 	$Shop_Order_Controller_Edit
 		->addEntity($oAdmin_Form_Entity_Breadcrumbs);
+
+	$siteuser_id
+		&& $Shop_Order_Controller_Edit
+			->tabsClass('tabs-flat')
+			->tabClass('tab-palegreen');
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Edit);
@@ -395,22 +501,71 @@ $oAdmin_Form_Controller->addDataset
 	$oAdmin_Form_Dataset
 );
 
-$oAdmin_Form_Dataset->addCondition(
-	array('where' => array('shop_id', '=', $oShop->id))
-);
+if ($siteuser_id)
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' => array('siteuser_id', '=', $siteuser_id))
+	);
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' => array('shop_id', '=', $oShop->id))
+	);
+
+	if (strlen($sGlobalSearch))
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(
+				array(
+					'select' => array(
+						'shop_orders.*'
+					)
+				)
+			)
+			->addCondition(array('open' => array()))
+				->addCondition(array('where' => array('shop_orders.id', '=', $sGlobalSearch)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.invoice', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.coupon', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.postcode', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.address', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.surname', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.patronymic', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.company', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.phone', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_orders.email', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('close' => array()))
+			->addCondition(
+				array('groupBy' => array('shop_orders.id'))
+			);
+	}
+}
 
 // Список значений для фильтра и поля
 $aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
-$sList = "0=…\n";
+$aList = array('0' => '—');
 foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 {
-	$sList .= "{$oShop_Order_Status->id}={$oShop_Order_Status->name}\n";
+	$aList[$oShop_Order_Status->id] = $oShop_Order_Status->name;
 }
 
 $oAdmin_Form_Dataset
 	->changeField('shop_order_status_id', 'type', 8)
-	->changeField('shop_order_status_id', 'list', trim($sList))
+	->changeField('shop_order_status_id', 'list', $aList)
 	->changeField('paid', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
+
+$oAdmin_Form_Controller->addExternalReplace('&{INTERNAL}', $siteuser_id ? "&siteuser_id={$siteuser_id}" : '');
 
 $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shortcode_Model extends Core_Entity
 {
@@ -193,6 +193,7 @@ class Shortcode_Model extends Core_Entity
 				$this->name = Core_Array::get($aBackup, 'name');
 				$this->shortcode = Core_Array::get($aBackup, 'shortcode');
 				$this->php = Core_Array::get($aBackup, 'php');
+				$this->shortcode_dir_id = Core_Array::get($aBackup, 'shortcode_dir_id');
 				$this->sorting = Core_Array::get($aBackup, 'sorting');
 				$this->active = Core_Array::get($aBackup, 'active');
 				$this->save();

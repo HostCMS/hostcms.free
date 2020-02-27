@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -114,7 +114,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					: 0;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Informationsystem_Item.tab_4'))
+					->caption(Core::_('Admin_Form.tabProperties'))
 					->name('Property');
 
 				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
@@ -347,7 +347,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 							'preserve_aspect_ratio_checkbox_checked' => $oInformationsystem->preserve_aspect_ratio_small
 						)
-					);
+					)
+					->crop(TRUE);
 
 				$oMainRow7->add($oImageField);
 
@@ -362,6 +363,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$this->getField('path')
 						->add(
 							Admin_Form_Entity::factory('A')
+								->id('path')
 								->target('_blank')
 								->href($sItemUrl)
 								->class('input-group-addon bg-blue bordered-blue')
@@ -450,14 +452,16 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oUseTypograph
 						->name("use_typograph_description")
 						->caption(Core::_('Informationsystem_Item.exec_typograph_description'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox');
 					$oUseTrailingPunctuation
 						->name("use_trailing_punctuation_description")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oDescriptionRow2
@@ -484,14 +488,16 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oUseTypograph
 						->name("use_typograph_text")
 						->caption(Core::_('Informationsystem_Item.exec_typograph_for_text'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox');
 					$oUseTrailingPunctuation
 						->name("use_trailing_punctuation_text")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation_for_text'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oDescriptionRow4
@@ -597,7 +603,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					: 0;
 
 				$oPropertyTab = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Informationsystem_Group.tab_3'))
+					->caption(Core::_('Admin_Form.tabProperties'))
 					->name('Property');
 
 				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
@@ -737,14 +743,16 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$oUseTypograph
 						->name("use_typograph_description")
 						->caption(Core::_('Informationsystem_Item.exec_typograph_description'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox');
 					$oUseTrailingPunctuation
 						->name("use_trailing_punctuation_description")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation'))
-						->value($oInformationsystem->typograph_default_items)
+						->value(1)
+						->checked($oInformationsystem->typograph_default_items == 1)
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oInformationsystemGroupDescriptionTabRow2
@@ -829,7 +837,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 						'preserve_aspect_ratio_checkbox_checked' => $oInformationsystem->preserve_aspect_ratio_group_small
 						)
-					);
+					)
+					->crop(TRUE);
 
 				$oMainRow4->add($oImageField);
 
@@ -845,6 +854,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				$this->getField('path')
 					->add(
 						Admin_Form_Entity::factory('A')
+							->id('path')
 							->target('_blank')
 							->href($sGroupUrl)
 							->class('input-group-addon bg-blue bordered-blue')
@@ -1630,6 +1640,23 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			$oMaillist_Fascicle->save();
 			$oMaillist->add($oMaillist_Fascicle);
+		}
+
+		$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
+		if ($oSiteAlias)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+			$sUrl = ($oInformationsystem->Structure->https ? 'https://' : 'http://')
+				. $oSiteAlias->name
+				. $oInformationsystem->Structure->getPath()
+				. $this->_object->getPath();
+
+			$this->_Admin_Form_Controller->addMessage(
+				Core::factory('Core_Html_Entity_Script')
+					->value("$('#{$windowId} a#path').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "')")
+				->execute()
+			);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

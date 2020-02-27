@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Entity_Tabs
 {
@@ -23,17 +23,37 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		// Tab-ы выводим только если их больше 1-го.
 		if (count($this->_children) > 1)
 		{
-			// Добавим отступ сверху и снизу
-			?><ul id="tab" class="nav nav-tabs"><?php
+			?><ul id="tab" class="nav nav-tabs <?php echo htmlspecialchars($this->class)?>"><?php
 				$tab_id = 0;
 				foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 				{
 					// Hide inactive tabs
 					if ($oAdmin_Form_Tab_Entity->active)
 					{
-						echo '<li' . ($tab_id == 0 ? ' class="active"' : '') . '>'.
-						'<a href="#' . $windowId . '-tab-' . $tab_id . '" data-toggle="tab">' . htmlspecialchars($oAdmin_Form_Tab_Entity->caption) . '</a></li>';
+						$class = $oAdmin_Form_Tab_Entity->class;
+						$tab_id == 0 && $class .= ' active';
+
+						$tabId = strlen($oAdmin_Form_Tab_Entity->id)
+							? $oAdmin_Form_Tab_Entity->id
+							: $windowId . '-tab-' . $tab_id;
+
+						?><li class="<?php echo htmlspecialchars($class)?>">
+						<a href="#<?php echo $tabId?>" data-toggle="tab"><?php
+						
+						echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
+						
+						if ($oAdmin_Form_Tab_Entity->badge !== '')
+						{
+							$badgeColor = strlen($oAdmin_Form_Tab_Entity->badgeColor)
+								? $oAdmin_Form_Tab_Entity->badgeColor
+								: 'default';
+
+							?><span class="badge badge-<?php echo htmlspecialchars($badgeColor)?> margin-left-5"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->badge)?></span><?php
+						}
+						?></a>
+						</li><?php
 					}
+
 					$tab_id++;
 				}
 			?></ul><?php
@@ -41,11 +61,11 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 
 		$tab_id = 0;
 		?>
-		<div class="tab-content">
+		<div class="tab-content <?php echo htmlspecialchars($this->class)?>">
 		<?php
 		foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 		{
-			?><div class="tab-pane fade <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo $windowId . '-tab-' . $tab_id ?>">
+			?><div class="tab-pane fade <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo (strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
 			<?php
 			$oAdmin_Form_Tab_Entity->execute();
 			?></div><?php

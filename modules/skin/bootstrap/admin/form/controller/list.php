@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -287,7 +287,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 											$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oTmpAdmin_Form_Dataset, $oAdmin_Form_Field_Changed);
 										}
 
-										if ($oAdmin_Form_Field_Changed->allow_filter || $oAdmin_Form_Field_Changed->view == 1)
+										if ($oAdmin_Form_Field_Changed->allow_filter && $oAdmin_Form_Field_Changed->view != 2 || $oAdmin_Form_Field_Changed->view == 1)
 										{
 											$Admin_Word_Value = $oAdmin_Form_Field
 												->Admin_Word
@@ -335,9 +335,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									?>
 									<div class="form-group text-align-right">
 										<div class="col-sm-offset-2 col-sm-10">
-
-											<button type="submit" class="btn btn-default" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
-
+											<button type="submit" class="btn btn-default" onclick="mainFormLocker.unlock(); <?php echo $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath())?>"><?php echo Core::_('Admin_Form.button_to_filter')?></button>
 											<div class="btn-group">
 												<a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 													<i class="fa fa-plus"></i>
@@ -346,7 +344,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													<?php
 													foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 													{
-														if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+														if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
 														{
 															$Admin_Word_Value = $oAdmin_Form_Field
 																->Admin_Word
@@ -393,6 +391,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													</li>
 												</ul>
 											</div>
+
+											<a class="btn btn-default" title="<?php echo Core::_('Admin_Form.clear')?>" onclick="$.clearTopFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle no-margin"></i></a>
 										</div>
 									</div>
 								</form>
@@ -424,8 +424,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 				$allow_filter = FALSE;
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
-					// Если столбец фрмы
-					if ($oAdmin_Form_Field->view == 0)
+					// Если Столбец+Фильтр (0) или просто Столбец (2)
+					if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 					{
 						// There is at least one filter
 						$oAdmin_Form_Field->allow_filter && $allow_filter = TRUE;
@@ -520,8 +520,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		// Main Filter
 		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 		{
-			// Если столбец формы
-			if ($oAdmin_Form_Field->view == 0)
+			// Если Столбец+Фильтр (0) или просто Столбец (2)
+			if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 			{
 				// Перекрытие параметров для данного поля
 				$oAdmin_Form_Field_Changed = $oAdmin_Form_Field;
@@ -566,7 +566,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			?><td class="apply-button"><?php
 				?>
 				<div class="btn-group">
-					<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="<?php echo $onclick?>"><i class="fa fa-search"></i></a>
+					<a class="btn btn-xs btn-palegreen" id="admin_forms_apply_button" title="<?php echo Core::_('Admin_Form.button_to_filter')?>" onclick="mainFormLocker.unlock(); <?php echo $onclick?>"><i class="fa fa-search"></i></a>
 					<a title="<?php echo Core::_('Admin_Form.clear')?>" class="btn btn-xs btn-magenta" onclick="$.clearFilter('<?php echo $windowId?>')"><i class="fa fa-times-circle"></i></a>
 				</div><?php
 			?></td><?php
@@ -629,8 +629,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 					foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 					{
-						// Если столбец фрмы
-						if ($oAdmin_Form_Field->view == 0)
+						// Если Столбец+Фильтр (0) или просто Столбец (2)
+						if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 						{
 							// Перекрытие параметров для данного поля
 							$oAdmin_Form_Field_Changed = $oAdmin_Form_Controller->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
@@ -1095,9 +1095,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 									"'); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
 							}
 
-							$sActionsFullView .= '<a class="btn btn-xs btn-' . htmlspecialchars($o_Admin_Form_Action->color) .' " title="' . $name . '" href="' . $href . '" onclick="' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i></a>';
+							$sActionsFullView .= '<a class="btn btn-xs btn-' . htmlspecialchars($o_Admin_Form_Action->color) .' " title="' . $name . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i></a>';
 
-							$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . $name . '</a></li>';
+							$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . $name . '</a></li>';
 						}
 
 						if ($iActionsCount)
@@ -1207,9 +1207,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						// надписями и при отключении картинок текст дублируется
 						/* alt="<?php echo htmlspecialchars($text)?>"*/
 
-						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
 
-						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($o_Admin_Form_Action->color) . '" ><i class="btn-label ' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
+						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($o_Admin_Form_Action->color) . '" ><i class="btn-label ' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
 					}
 				}
 

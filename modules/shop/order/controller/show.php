@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Show extends Core_Controller
 {
@@ -292,8 +292,6 @@ class Shop_Order_Controller_Show extends Core_Controller
 	public function parseUrl()
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeParseUrl', $this);
-
-		$oShop = $this->getEntity();
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern, $this->patternExpressions);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);

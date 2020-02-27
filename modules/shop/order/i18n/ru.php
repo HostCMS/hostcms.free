@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Заказы магазина',
@@ -115,9 +115,7 @@ return array(
 	'kpp' => 'КПП',
 	'property_menu' => 'Свойства заказа',
 	'property_menu_add' => 'Добавить',
-	'property_title' => 'Дополнительные свойства',
 	'show_list_of_properties_title' => "Список свойств заказа интернет-магазина \"%s\"",
-	'tab_properties' => "Дополнительные свойства",
 	'prefix' => 'Префикс',
 	'display' => 'Способ отображения свойства',
 	'properties_show_kind_none' => 'Не отображать',
@@ -151,4 +149,7 @@ return array(
 	'shop_order_item_warehouse' => 'Склад',
 	'shop_order_item_id' => 'Код товара',
 	'shop_order_item_total' => 'Итого:',
+
+	'select_shop' => 'Выбрать магазин',
+	'select_shop_button' => 'Выбрать',
 );

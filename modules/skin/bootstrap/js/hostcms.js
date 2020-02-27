@@ -320,14 +320,14 @@ function scrollTo(el, offeset) {
 }
 
 /*Show Notification*/
-function Notify(message, position, timeout, theme, icon, closable, sound) {
+function Notify(message, description, position, timeout, theme, icon, closable, sound) {
 	toastr.options.positionClass = 'toast-' + position;
 	toastr.options.extendedTimeOut = 0; //1000;
 	toastr.options.timeOut = timeout;
 	toastr.options.closeButton = closable;
 	toastr.options.iconClass = icon + ' toast-' + theme;
 	toastr.options.playSound = sound;
-	toastr['custom'](message);
+	toastr['custom'](description, message);
 }
 
 /*#region handle Settings*/

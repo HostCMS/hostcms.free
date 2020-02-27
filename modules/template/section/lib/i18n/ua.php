@@ -1,0 +1,28 @@
+<?php
+
+return array(
+	'model_name' => 'Віджети секції макета сайту',
+	'form_title' => 'Віджети секції макета сайту',
+	'current_breadcrumbs' => 'Віджети секції макета сайту',
+	'widget_form_title_edit' => 'Редагування віджета "%s"',
+	'widget_form_title_add' => 'Додавання віджета',
+	'template_section_id' => 'Ідентифікатор секції макета',
+	'id' => 'Ідентифікатор',
+	'options' => 'Опції',
+	'style' => 'Атрибут "style"',
+	'class' => 'Атрибут "class"',
+	'active' => 'Активність',
+	'sorting' => 'Порядок сортування',
+	'description' => 'Опис віджета',
+	'lib_dir_id' => 'Розділ',
+	'lib_id' => 'Сторінка',
+	'edit_success' => 'Дані успішно додані!',
+	'apply_success' => 'Інформацію змінено!',
+	'delete_success' => 'Елемент видалений!',
+	'undelete_success' => 'Елемент відновлено!',
+	'markDeleted_success' => 'Віждет секції макета сайту успішно видалена!',
+	'changeActive_success' => "Інформація успішно змінена",
+	'widget_settings' => "Налаштування віджета '%s'",
+	'widget_delete' => "Видалити віджет '%s'",
+	'widget_active' => "Зміна активності віджета '%s'",
+);

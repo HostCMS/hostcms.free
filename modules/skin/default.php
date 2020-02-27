@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default extends Core_Skin
 {
@@ -32,7 +32,6 @@ class Skin_Default extends Core_Skin
 			->addJs('/modules/skin/default/js/jquery/jquery.elastic.js')
 			->addJs('/modules/skin/default/js/jquery/jquery.tools.js')
 			->addJs('/modules/skin/bootstrap/js/jquery.form.js')
-			->addJs('/modules/skin/bootstrap/js/main.js')
 			->addJs('/modules/skin/default/js/ui/jquery-ui.js')
 			->addJs('/modules/skin/default/js/default-hostcms.js')
 			->addJs('/modules/skin/default/js/ui/i18n/jquery.ui.datepicker-' . $lng . '.js')
@@ -168,7 +167,7 @@ class Skin_Default extends Core_Skin
 		?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<title><?php echo $this->_title?></title>
+	<title><?php echo htmlspecialchars($this->_title)?></title>
 	<meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></meta>
 	<link rel="apple-touch-icon" href="/modules/skin/bootstrap/ico/icon-iphone-retina.png" />
 	<link rel="shortcut icon" type="image/x-icon" href="/modules/skin/bootstrap/ico/favicon.ico" />
@@ -448,7 +447,7 @@ if ($this->_mode != 'blank')
 		$bAjax = Core_Array::getRequest('_', FALSE);
 
 		// Widget settings
-		if (!is_null(Core_Array::getGet('userSettings')))
+		/*if (!is_null(Core_Array::getGet('userSettings')))
 		{
 			if (!is_null(Core_Array::getGet('moduleId')))
 			{
@@ -496,7 +495,7 @@ if ($this->_mode != 'blank')
 				->ajax($bAjax)
 				->execute();
 			exit();
-		}
+		}*/
 
 		// Widget ajax loading
 		if (!is_null(Core_Array::getGet('ajaxWidgetLoad')))
@@ -893,7 +892,7 @@ if ($this->_mode != 'blank')
 		if ($this->_mode != 'blank')
 		{
 		?><div id="footer">
-			<div id="copyright">&copy; 2005–2019 ООО «Хостмэйк»</div>
+			<div id="copyright">&copy; 2005–2020 ООО «Хостмэйк»</div>
 			<div id="links">
 				<p><?php echo Core::_('Admin.website')?> <a href="http://www.hostcms.ru" target="_blank">www.hostcms.ru</a></p>
 				<p><?php echo Core::_('Admin.support_email')?> <a href="mailto:support@hostcms.ru">support@hostcms.ru</a></p>

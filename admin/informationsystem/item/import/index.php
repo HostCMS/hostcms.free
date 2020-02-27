@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -762,6 +762,7 @@ Core_Skin::instance()
 	->answer()
 	->ajax(Core_Array::getRequest('_', FALSE))
 	//->content(iconv("UTF-8", "UTF-8//IGNORE//TRANSLIT", ob_get_clean()))
+	->module($sModule)	
 	->content(ob_get_clean())
 	->title(Core::_('Informationsystem_Item.import'))
 	->execute();

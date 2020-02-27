@@ -1,0 +1,28 @@
+<?php
+
+return array(
+	'model_name' => 'Купони',
+	'list_of_coupons' => 'Список купонів',
+	'coupon' => 'Купон',
+	'coupon_add' => 'Додати',
+	'not_enough_discounts' => 'Добавьте, будь ласка, хоча б одну знижку від суми замовлення!',
+	'coupon_form_table_title_add' => 'Додавання купона',
+	'coupon_form_table_title_edit' => 'Редагування купона "%s"',
+	'name' => 'Назва',
+	'shop_purchase_discount_id' => 'Знижка',
+	'active' => 'Активність',
+	'start_datetime' => "Діє від",
+	'end_datetime' => "Діє до",
+	'count' => '<acronym title="Кількість купонів, -1 &mdash; не обмежено">Кількість</acronym>',
+	'text' => '<acronym title="Код, який повинен ввести покупець для отримання знижки по купону. Ви можете його замінити на текстово-числове значення, наприклад \'SKIDKA-2008\' або \'8 березня\'">Код купона</acronym>',
+	'changeStatus_success' => "Інформація успішно змінена",
+	'markDeleted_success' => 'Дані про купон успішно видалені!',
+	'edit_success' => 'Купон успішно доданий.',
+	'delete_success' => 'Елемент видалений!',
+	'undelete_success' => 'Елемент відновлено!',
+	'id' => 'Ідентифікатор',
+	'import' => 'Імпорт купонів',
+	'import_form' => 'Файл',
+	'import_result' => 'Проімпортовано %s купонів!',
+	'import_error' => 'Виникла помилка: %s',
+);

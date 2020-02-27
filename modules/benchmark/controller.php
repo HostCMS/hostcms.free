@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк"(Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Controller
 {
@@ -207,15 +207,9 @@ class Benchmark_Controller
 
 		for ($i = 0; $i < self::$aConfig['files_count']; $i++)
 		{
-			$sFileName = $this->_temporary_directory . "test{$i}.tmp";
-
-			$rFile = fopen($sFileName, "w");
-
-			fwrite($rFile, self::$aConfig['sample_text']);
-
-			fclose($rFile);
-
-			unlink($sFileName);
+			$fileName = $this->_temporary_directory . "test{$i}.tmp";
+			Core_File::write($fileName, self::$aConfig['sample_text']);
+			Core_File::delete($fileName);
 		}
 
 		$fQueryTime = (Core::getmicrotime() - $startTime) / 3;

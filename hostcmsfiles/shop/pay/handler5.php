@@ -131,7 +131,7 @@ class Shop_Payment_System_Handler5 extends Shop_Payment_System_Handler
     }
 
     /*
-     * Обработка ответа платёжного сирвиса
+     * Обработка ответа платёжного сервиса
      */
     public function paymentProcessing()
     {

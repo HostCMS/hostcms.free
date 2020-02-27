@@ -5,22 +5,20 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'model_name' => 'Области страны',
-	'show_location_title' => "Области страны \"%s\"",
-	'menu_location' => "Область",
-	'menu_location_add' => "Добавить",
-	'location_edit_form_title' => 'Редактирование информации об области "%s"',
-	'location_add_form_title' => "Добавление информации об области",
+	'model_name' => 'Регионы страны',
+	'show_location_title' => "Регионы страны \"%s\"",
+	'location_edit_form_title' => 'Редактирование информации о регионе "%s"',
+	'location_add_form_title' => "Добавление информации о регионе",
 	'name' => "Название",
 	'sorting' => "Порядок сортировки",
 	'active' => "Активность",
 	'id' => "Идентификатор",
 	'shop_country_id' => "Идентификатор страны",
-	'edit_success' => "Область успешно добавлена!",
-	'markDeleted_success' => "Область успешно удалена!",
+	'edit_success' => "Регион успешно добавлен!",
+	'markDeleted_success' => "Регион успешно удален!",
 	'apply_success' => "Информация успешно изменена",
 	'apply_error' => "Ошибка изменения информации",
 	'delete_success' => 'Элемент удален!',

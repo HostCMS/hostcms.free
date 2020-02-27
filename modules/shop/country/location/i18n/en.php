@@ -5,22 +5,20 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'model_name' => 'Locations of country',
-	'show_location_title' => "Locations of country \"%s\"",
-	'menu_location' => "Location",
-	'menu_location_add' => "Add",
-	'location_add_form_title' => "Add location information",
-	'location_edit_form_title' => "Edit location information",
+	'model_name' => 'Regions of country',
+	'show_location_title' => "Regions of country \"%s\"",
+	'location_add_form_title' => "Add region information",
+	'location_edit_form_title' => "Edit region information",
 	'name' => "Name",
 	'sorting' => 'Sort',
 	'id' => "Id",
 	'active' => "Active",
 	'shop_country_id' => "Country id",
-	'edit_success' => "Location information updated successfully!",
-	'markDeleted_success' => "Location information deleted successfully!",
+	'edit_success' => "Region information updated successfully!",
+	'markDeleted_success' => "Region information deleted successfully!",
 	'apply_success' => "Information successfully changed",
 	'apply_error' => "Error has occurred during changing information",
 	'delete_success' => 'Item deleted successfully!',

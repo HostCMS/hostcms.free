@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -320,9 +320,6 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
-		$this->Informationsystem_Items->deleteAll(FALSE);
-		$this->Informationsystem_Groups->deleteAll(FALSE);
-
 		if (Core::moduleIsActive('revision'))
 		{
 			Revision_Controller::delete($this->getModelName(), $this->id);
@@ -335,6 +332,11 @@ class Informationsystem_Group_Model extends Core_Entity
 			$oPropertyValue->Property->type == 2 && $oPropertyValue->setDir($this->getGroupPath());
 			$oPropertyValue->delete();
 		}
+
+		$this->Informationsystem_Items->deleteAll(FALSE);
+		$this->Informationsystem_Groups->deleteAll(FALSE);
+
+		$this->Shortcuts->deleteAll(FALSE);
 
 		// Удаляем директорию информационной группы
 		$this->deleteDir();
@@ -1219,15 +1221,20 @@ class Informationsystem_Group_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
-				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->parent_id = Core_Array::get($aBackup, 'parent_id');
+				$this->shortcut_id = Core_Array::get($aBackup, 'shortcut_id');
 				$this->path = Core_Array::get($aBackup, 'path');
-				$this->description = Core_Array::get($aBackup, 'description');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
 				$this->active = Core_Array::get($aBackup, 'active');
 				$this->indexing = Core_Array::get($aBackup, 'indexing');
+				$this->description = Core_Array::get($aBackup, 'description');
 				$this->seo_title = Core_Array::get($aBackup, 'seo_title');
 				$this->seo_description = Core_Array::get($aBackup, 'seo_description');
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
+				$this->informationsystem_id = Core_Array::get($aBackup, 'informationsystem_id');
 				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 			}
 		}

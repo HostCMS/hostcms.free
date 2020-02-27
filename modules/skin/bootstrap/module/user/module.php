@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_User_Module extends User_Module
 {
@@ -86,10 +86,10 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 						$aJson[] = array(
 							'id' => $oUser->id,
-							'login' => htmlspecialchars($oUser->login),
-							'firstName' => htmlspecialchars($oUser->name),
-							'lastName' => htmlspecialchars($oUser->surname),
-							'avatar' => htmlspecialchars($oUser->getAvatar()),
+							'login' => $oUser->login,
+							'firstName' => $oUser->name,
+							'lastName' => $oUser->surname,
+							'avatar' => $oUser->getAvatar(),
 							'lastChatTime' => Core_Date::time2string($iLastMessageTime),
 							'lastActivity' => Core_Date::time2string($oUser->getLastActivity()),
 							'online' => intval($oUser->isOnline()),
@@ -261,7 +261,7 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 						$aJson['info'] = array(
 							'user_id' => $oUser_Message->User->id,
 							'avatar' => $oUser_Message->User->getAvatar(),
-							'text' => Core::_('User.new_message_from', $oUser_Message->User->name, $oUser_Message->User->surname),
+							'text' => Core::_('User.new_message_from', $oUser_Message->User->name, $oUser_Message->User->surname, FALSE),
 							'sound' => intval($oCurrentUser->sound),
 						);
 
@@ -445,15 +445,15 @@ class Skin_Bootstrap_Module_User_Module extends User_Module
 
 								$aBookmark = array(
 									'id' => $oUser_Bookmark->id,
-									'name' => htmlspecialchars($oUser_Bookmark->name),
-									'href' => htmlspecialchars($oUser_Bookmark->path),
-									'ico' => htmlspecialchars($ico),
-									'onclick' => htmlspecialchars("$(this).parents('li.open').click(); $.adminLoad({path: '"
+									'name' => $oUser_Bookmark->name,
+									'href' => $oUser_Bookmark->path,
+									'ico' => $ico,
+									'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: '"
 										. Core_Str::escapeJavascriptVariable($oUser_Bookmark->path)
-										. "'}); return false"),
-									'remove-title' => htmlspecialchars(Core::_("User_Bookmark.remove_message")),
-									'remove-submit' => htmlspecialchars(Core::_("User_Bookmark.remove_submit")),
-									'remove-cancel' => htmlspecialchars(Core::_("User_Bookmark.cancel"))
+										. "'}); return false",
+									'remove-title' => Core::_("User_Bookmark.remove_message"),
+									'remove-submit' => Core::_("User_Bookmark.remove_submit"),
+									'remove-cancel' => Core::_("User_Bookmark.cancel")
 								);
 
 								$aJson['Bookmarks'][] = $aBookmark;

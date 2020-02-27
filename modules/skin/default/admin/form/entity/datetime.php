@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 {
@@ -63,7 +63,7 @@ class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 		<script>
 		(function($) {
 			$("#<?php echo $this->id?>")
-				.datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss'});
+				.datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss',showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php
 

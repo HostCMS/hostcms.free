@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2019-10-24';
+	public $date = '2020-01-31';
 
 	/**
 	 * Module name
@@ -134,6 +134,27 @@ class Shop_Module extends Core_Module
 			case 2:
 				// Следующая индексация
 				$aTmpResult = $this->indexingShopSellers($offset, $limit);
+
+				$_SESSION['last_limit'] = count($aTmpResult);
+
+				$result = array_merge($result, $aTmpResult);
+				$count = count($result);
+
+				// Закончена индексация
+				if ($count < $limit_orig)
+				{
+					$_SESSION['search_block']++;
+					$limit = $limit_orig - $count;
+					$offset = 0;
+				}
+				else
+				{
+					return $result;
+				}
+
+			case 3:
+				// Следующая индексация
+				$aTmpResult = $this->indexingShopFilterSeos($offset, $limit);
 
 				$_SESSION['last_limit'] = count($aTmpResult);
 
@@ -297,12 +318,49 @@ class Shop_Module extends Core_Module
 
 		Core_Event::notify(get_class($this) . '.indexingShopSellers', $this, array($oShopSeller));
 
-		$aShopSellers = $oShopSeller->findAll();
+		$aShopSellers = $oShopSeller->findAll(FALSE);
 
 		$result = array();
 		foreach ($aShopSellers as $oShopSeller)
 		{
 			$result[] = $oShopSeller->indexing();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Индексация seo-фильтров
+	 *
+	 * @param int $offset
+	 * @param int $limit
+	 * @return array
+	 * @hostcms-event Shop_Module.indexingShopFilterSeos
+	 */
+	public function indexingShopFilterSeos($offset, $limit)
+	{
+		$offset = intval($offset);
+		$limit = intval($limit);
+
+		$oShop_Filter_Seos = Core_Entity::factory('Shop_Filter_Seo');
+		$oShop_Filter_Seos
+			->queryBuilder()
+			->join('shops', 'shop_filter_seos.shop_id', '=', 'shops.id')
+			->where('shop_filter_seos.deleted', '=', 0)
+			->where('shop_filter_seos.active', '=', 1)
+			->where('shops.deleted', '=', 0)
+			->clearOrderBy()
+			->orderBy('shop_filter_seos.id')
+			->limit($offset, $limit);
+
+		Core_Event::notify(get_class($this) . '.indexingShopFilterSeos', $this, array($oShop_Filter_Seos));
+
+		$aShop_Filter_Seos = $oShop_Filter_Seos->findAll(FALSE);
+
+		$result = array();
+		foreach ($aShop_Filter_Seos as $oShop_Filter_Seo)
+		{
+			$result[] = $oShop_Filter_Seo->indexing();
 		}
 
 		return $result;
@@ -374,6 +432,20 @@ class Shop_Module extends Core_Module
 
 						$oSearch_Page->addEntity($oShop_Item);
 					}
+				break;
+				case 3: // Продавцы
+					$oShop_Seller = Core_Entity::factory('Shop_Seller')->find($oSearch_Page->module_value_id);
+
+					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Seller));
+
+					!is_null($oShop_Seller->id) && $oSearch_Page->addEntity($oShop_Seller);
+				break;
+				case 4: // SEO-фильтры
+					$oShop_Filter_Seo = Core_Entity::factory('Shop_Filter_Seo')->find($oSearch_Page->module_value_id);
+
+					Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Filter_Seo));
+
+					!is_null($oShop_Filter_Seo->id) && $oSearch_Page->addEntity($oShop_Filter_Seo);
 				break;
 			}
 		}

@@ -9,12 +9,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
 	/**
-	 * Allow pay by bonuses, 1 - 100%, 0.5 - 50%, 0 - forbid pay by bonuses
+	 * DEPRECATED as of HostCMS 6.9.2
 	 * @var int
 	 */
 	protected $_bonusMultiplier = 1;
@@ -26,13 +26,18 @@ abstract class Shop_Payment_System_Handler
 	 */
 	static public function factory(Shop_Payment_System_Model $oShop_Payment_System_Model)
 	{
-		require_once($oShop_Payment_System_Model->getPaymentSystemFilePath());
+		$path = $oShop_Payment_System_Model->getPaymentSystemFilePath();
 
-		$name = 'Shop_Payment_System_Handler' . intval($oShop_Payment_System_Model->id);
-
-		if (class_exists($name))
+		if (is_file($path))
 		{
-			return new $name($oShop_Payment_System_Model);
+			require_once($path);
+
+			$name = 'Shop_Payment_System_Handler' . intval($oShop_Payment_System_Model->id);
+
+			if (class_exists($name))
+			{
+				return new $name($oShop_Payment_System_Model);
+			}
 		}
 
 		return NULL;
@@ -461,25 +466,7 @@ abstract class Shop_Payment_System_Handler
 		//}
 
 		// Номер заказа
-		if (!$bInvoice)
-		{
-			if (strlen($oShop->invoice_template))
-			{
-				$oCore_Templater = new Core_Templater();
-				$invoice = $oCore_Templater
-					->addObject('shop', $oShop)
-					->addObject('this', $this->_shopOrder)
-					->addFunction('ordersToday', array($this->_shopOrder, 'ordersToday'))
-					->setTemplate($oShop->invoice_template)
-					->execute();
-			}
-			else
-			{
-				$invoice = $this->_shopOrder->id;
-			}
-
-			$this->_shopOrder->invoice = $invoice;
-		}
+		!$bInvoice && $this->_shopOrder->createInvoice();
 
 		// Номер акта
 		!$bAcceptance_report && $this->_shopOrder->acceptance_report($this->_shopOrder->id);
@@ -537,6 +524,9 @@ abstract class Shop_Payment_System_Handler
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
 		$aDiscountPrices = array();
 
+		// Есть скидки на N-й товар, доступные для текущей даты
+		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
+
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
 		foreach ($aShop_Cart as $oShop_Cart)
 		{
@@ -569,10 +559,13 @@ abstract class Shop_Payment_System_Handler
 
 					$amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
 
-					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
-					for ($i = 0; $i < $oShop_Cart->quantity; $i++)
+					if ($bPositionDiscount)
 					{
-						$aDiscountPrices[] = $aPrices['price_discount'];
+						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+						for ($i = 0; $i < $oShop_Cart->quantity; $i++)
+						{
+							$aDiscountPrices[] = $aPrices['price_discount'];
+						}
 					}
 
 					// Сумма для скидок от суммы заказа рассчитывается отдельно
@@ -642,20 +635,30 @@ abstract class Shop_Payment_System_Handler
 			->execute();
 
 		// Частичная оплата с лицевого счета
-		if (Core::moduleIsActive('siteuser')
-			&& isset($this->_orderParams['partial_payment_by_personal_account'])
-			&& $this->_orderParams['partial_payment_by_personal_account']
-			&& $this->_shopOrder->Siteuser->id
-			&& $this->_bonusMultiplier > 0 && $this->_bonusMultiplier <= 1
-		)
+		if (Core::moduleIsActive('siteuser'))
 		{
-			$this->_applyBonuses();
+			// Списание бонусов
+			$this->applyBonuses();
+
+			// Частичная оплата с лицевого счета
+			if (isset($this->_orderParams['partial_payment_by_personal_account'])
+			&& $this->_orderParams['partial_payment_by_personal_account']
+			&& $this->_shopOrder->Siteuser->id)
+			{
+				$this->applyPartialPayment();
+			}
 		}
 
 		// Удаление купона из сессии
 		if (isset($_SESSION['hostcmsOrder']['coupon_text']))
 		{
 			unset($_SESSION['hostcmsOrder']['coupon_text']);
+		}
+
+		// Удаление примененных бонусов из сессии
+		if (isset($_SESSION['hostcmsOrder']['bonuses']))
+		{
+			unset($_SESSION['hostcmsOrder']['bonuses']);
 		}
 
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterProcessOrder', $this);
@@ -724,19 +727,93 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
-	 * Apply bonuses, order amount decrease.
-	 * @return self
+	 * Backward Compatibility
 	 */
 	protected function _applyBonuses()
 	{
-		$oShop = $this->_Shop_Payment_System_Model->Shop;
+		return $this->applyBonuses();
+	}
 
-		$fCurrencyCoefficient = $this->_shopOrder->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
-			? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-				$this->_shopOrder->Shop_Currency,
-				$oShop->Shop_Currency
-			)
-			: 0;
+	/**
+	 * Apply Bonuses
+	 * @return self
+	 */
+	public function applyBonuses()
+	{
+		if (isset($_SESSION['hostcmsOrder']['bonuses']) && $_SESSION['hostcmsOrder']['bonuses'] > 0)
+		{
+			$oShop = $this->_Shop_Payment_System_Model->Shop;
+
+			// Получаем доступные бонусы
+			$aSiteuserBonuses = $this->_shopOrder->Siteuser->getBonuses($oShop);
+
+			// Уменьшаем количество, если запрошенного количества бонусов нет
+			$requestedBonuses = $aSiteuserBonuses['total'] <= $_SESSION['hostcmsOrder']['bonuses']
+				? $aSiteuserBonuses['total']
+				: $_SESSION['hostcmsOrder']['bonuses'];
+
+			if ($requestedBonuses)
+			{
+				$fCurrencyCoefficient = $this->_shopOrder->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
+					? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+						$this->_shopOrder->Shop_Currency,
+						$oShop->Shop_Currency
+					)
+					: 0;
+
+				// Сумма заказа в валюте магазина
+				$fOrderAmount = $this->_shopOrder->getAmount() * $fCurrencyCoefficient;
+
+				$max_bonus = Shop_Controller::instance()->round($fOrderAmount * ($oShop->max_bonus / 100));
+
+				$available_bonuses = $requestedBonuses <= $max_bonus
+					? $requestedBonuses
+					: $max_bonus;
+
+				// Списание бонусов
+				$writtenOff = 0;
+				foreach ($aSiteuserBonuses['bonuses'] as $oShop_Discountcard_Bonus)
+				{
+					$delta = $oShop_Discountcard_Bonus->amount - $oShop_Discountcard_Bonus->written_off;
+
+					// На текущем этапе будут списаны все необходимые бонусы
+					if ($available_bonuses - $writtenOff <= $delta)
+					{
+						$oShop_Discountcard_Bonus->written_off += ($available_bonuses - $writtenOff);
+						$oShop_Discountcard_Bonus->save();
+						break;
+					}
+					else
+					{
+						$oShop_Discountcard_Bonus->written_off += $delta;
+						$oShop_Discountcard_Bonus->save();
+					}
+
+					$writtenOff += $delta;
+				}
+
+				// Списание оплаченной суммы из цены заказа
+				$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+				$oShop_Order_Item->name = Core::_('Shop_Bonus.paid_by_bonuses');
+				$oShop_Order_Item->quantity = 1;
+				$oShop_Order_Item->rate = 0;
+				$oShop_Order_Item->price = $available_bonuses * -1;
+				$oShop_Order_Item->marking = '';
+				$oShop_Order_Item->type = 5; // 5 - Списание бонусов в счет оплаты счета
+				$this->_shopOrder->add($oShop_Order_Item);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Apply Partial Payment by Siteuser's account
+	 * @return self
+	 */
+	public function applyPartialPayment()
+	{
+		$oShop = $this->_Shop_Payment_System_Model->Shop;
 
 		// Остаток на счете пользователя в валюте магазина
 		$fSiteuserAmount = $this->_shopOrder->Siteuser->getTransactionsAmount($oShop);
@@ -744,41 +821,48 @@ abstract class Shop_Payment_System_Handler
 		// На счете есть средства
 		if ($fSiteuserAmount)
 		{
+			$fCurrencyCoefficient = $this->_shopOrder->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
+				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+					$this->_shopOrder->Shop_Currency,
+					$oShop->Shop_Currency
+				)
+				: 0;
+
 			// Сумма заказа в валюте магазина
 			$fOrderAmount = $this->_shopOrder->getAmount() * $fCurrencyCoefficient;
 
-			// Сумма заказа меньше или равна средствам (с учетом $this->_bonusMultiplier)
-			$fBonusesAmount = $fSiteuserAmount > $fOrderAmount * $this->_bonusMultiplier
-				? $fOrderAmount * $this->_bonusMultiplier
+			// Сумма заказа меньше или равна средствам
+			$fPartialPaymentAmount = $fSiteuserAmount > $fOrderAmount
+				? $fOrderAmount
 				: $fSiteuserAmount;
 
-			// Проведение транзакции по списанию предоплаты бонусами
+			// Проведение транзакции по списанию предоплаты
 			$oShop_Siteuser_Transaction = Core_Entity::factory('Shop_Siteuser_Transaction');
 			$oShop_Siteuser_Transaction->shop_id = $oShop->id;
 			$oShop_Siteuser_Transaction->siteuser_id = $this->_shopOrder->Siteuser->id;
 			$oShop_Siteuser_Transaction->active = 1;
 
 			$oShop_Siteuser_Transaction->amount_base_currency =
-				$oShop_Siteuser_Transaction->amount = $fBonusesAmount * -1;
+				$oShop_Siteuser_Transaction->amount = $fPartialPaymentAmount * -1;
 
 			$oShop_Siteuser_Transaction->shop_currency_id = $this->_shopOrder->shop_currency_id;
 			$oShop_Siteuser_Transaction->shop_order_id = $this->_shopOrder->id;
 			$oShop_Siteuser_Transaction->type = 0;
-			$oShop_Siteuser_Transaction->description = Core::_('Shop_Bonus.paid_by_bonuses');
+			$oShop_Siteuser_Transaction->description = Core::_('Shop_Siteuser_Transaction.paid_by_personal_account');
 			$oShop_Siteuser_Transaction->save();
 
 			// Списание оплаченной суммы из цены заказа
 			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-			$oShop_Order_Item->name = Core::_('Shop_Bonus.paid_by_bonuses');
+			$oShop_Order_Item->name = Core::_('Shop_Siteuser_Transaction.paid_by_personal_account');
 			$oShop_Order_Item->quantity = 1;
 			$oShop_Order_Item->rate = 0;
-			$oShop_Order_Item->price = $fBonusesAmount * -1;
+			$oShop_Order_Item->price = $fPartialPaymentAmount * -1;
 			$oShop_Order_Item->marking = '';
-			$oShop_Order_Item->type = 3; // 3 - Списание бонусов в счет оплаты счета
+			$oShop_Order_Item->type = 6; // 6 - Частичная оплата с лицевого счета
 			$this->_shopOrder->add($oShop_Order_Item);
 
-			// Опачена полная сумма
-			if ($fBonusesAmount == $fOrderAmount)
+			// Оплачена полная сумма
+			if ($fPartialPaymentAmount == $fOrderAmount)
 			{
 				$oBefore = clone $this->_shopOrder;
 
@@ -795,6 +879,7 @@ abstract class Shop_Payment_System_Handler
 				$this
 					->shopOrderBeforeAction($oBefore)
 					->changedOrder('changeStatusPaid');
+
 				ob_get_clean();
 			}
 		}

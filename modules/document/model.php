@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -328,10 +328,13 @@ class Document_Model extends Core_Entity
 
 			if (is_array($aBackup))
 			{
+				$this->document_dir_id = Core_Array::get($aBackup, 'document_dir_id');
 				$this->document_status_id = Core_Array::get($aBackup, 'document_status_id');
 				$this->template_id = Core_Array::get($aBackup, 'template_id');
 				$this->name = Core_Array::get($aBackup, 'name');
 				$this->text = Core_Array::get($aBackup, 'text');
+				$this->site_id = Core_Array::get($aBackup, 'site_id');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 			}
 		}

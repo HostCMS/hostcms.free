@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -317,6 +317,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('locale')->value($sLocale))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_time')->value(Core_Array::getPost('import_price_max_time')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_delay')->value(Core_Array::getPost('import_price_delay')))
+								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_entries_limit')->value(Core_Array::getPost('import_entries_limit')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_max_count')->value(Core_Array::getPost('import_price_max_count')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_load_files_path')->value(Core_Array::getPost('import_price_load_files_path')))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_items')->value(Core_Array::getPost('import_price_action_items')))
@@ -370,7 +371,9 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
 						? SHOP_DEFAULT_CML_CURRENCY_NAME
 						: 'Розничная';
+
 					$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = $fRoznPrice_name;
+
 					$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
 					Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
@@ -407,6 +410,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		Core_Session::start();
 
 		$import_price_delay = intval(Core_Array::getRequest('import_price_delay'));
+		$import_entries_limit = intval(Core_Array::getRequest('import_entries_limit', 5000));
 
 		if (isset($_SESSION['Shop_Item_Import_Csv_Controller']))
 		{
@@ -439,6 +443,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->csv_fields($aConformity)
 				->time(Core_Array::getPost('import_price_max_time'))
 				->step(Core_Array::getPost('import_price_max_count'))
+				->entriesLimit($import_entries_limit > 100 ? $import_entries_limit : 100)
 				->separator(Core_Array::getPost('import_price_separator'))
 				->limiter(Core_Array::getPost('import_price_stop'))
 				->imagesPath(Core_Array::getPost('import_price_load_files_path'))
@@ -457,41 +462,62 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			}
 		}
 
+		// Режим - импорт или проведение документов
+		$mode = Core_Array::getRequest('mode', 'import');
+
 		$Shop_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
 
 		ob_start();
 
-		// CSV - next step
-		if (($iNextSeekPosition = $Shop_Item_Import_Csv_Controller->import()) !== FALSE)
-		{
-			$Shop_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
+		$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&import_price_delay={$import_price_delay}&import_entries_limit={$import_entries_limit}";
 
-			if ($Shop_Item_Import_Csv_Controller->importAction == 3)
+		if ($mode == 'import')
+		{
+			// CSV - next step
+			if (($iNextSeekPosition = $Shop_Item_Import_Csv_Controller->import()) !== FALSE)
 			{
-				$Shop_Item_Import_Csv_Controller->importAction = 1;
+				$Shop_Item_Import_Csv_Controller->seek = $iNextSeekPosition;
+
+				if ($Shop_Item_Import_Csv_Controller->importAction == 3)
+				{
+					$Shop_Item_Import_Csv_Controller->importAction = 1;
+				}
+			}
+			// CSV - complete
+			else
+			{
+				$mode = 'post';
 			}
 
 			$_SESSION['Shop_Item_Import_Csv_Controller'] = $Shop_Item_Import_Csv_Controller;
 
-			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, "shop_id={$oShop->id}&shop_group_id={$shop_group_id}&import_price_delay={$import_price_delay}");
+			$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
 
 			showStat($Shop_Item_Import_Csv_Controller);
 		}
-		// CSV - complete
+		elseif ($mode == 'post')
+		{
+			// Post step-by-step
+			if ($Shop_Item_Import_Csv_Controller->postNext())
+			{
+				$_SESSION['Shop_Item_Import_Csv_Controller'] = $Shop_Item_Import_Csv_Controller;
+
+				$sRedirectAction = $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/import/index.php', 'start_import', NULL, $sAdditionalParams . '&mode=' . $mode);
+
+				showStat($Shop_Item_Import_Csv_Controller);
+			}
+			else
+			{
+				$sRedirectAction = "";
+				Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
+				showStat($Shop_Item_Import_Csv_Controller);
+
+				$Shop_Item_Import_Csv_Controller->deleteUploadedFile();
+			}
+		}
 		else
 		{
-			// Post all
-			$Shop_Item_Import_Csv_Controller->postAll();
-
-			$sRedirectAction = "";
-			Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
-			showStat($Shop_Item_Import_Csv_Controller);
-
-			$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . $Shop_Item_Import_Csv_Controller->file;
-			if (is_file($sTmpFileFullpath))
-			{
-				Core_File::delete($sTmpFileFullpath);
-			}
+			echo 'Unknown mode "' . htmlspecialchars($mode) . '"';
 		}
 
 		$oAdmin_Form_Entity_Form->add(
@@ -505,8 +531,13 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			$iRedirectTime = 1000 * $import_price_delay;
 			Core::factory('Core_Html_Entity_Script')
 				->type('text/javascript')
-				->value('setTimeout(function (){ ' . $sRedirectAction . '}, ' . $iRedirectTime . ')')
+				->value('var timeout = setTimeout(function (){ ' . $sRedirectAction . '}, ' . $iRedirectTime . ');')
 				->execute();
+
+			echo Core::_('Shop_Item.continue_import',
+				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'start_import', NULL, 0, 0, $sAdditionalParams),
+				'clearTimeout(timeout); ' . $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'start_import', NULL, 0, 0, $sAdditionalParams)
+			);
 		}
 
 		$sOnClick = "";
@@ -522,7 +553,8 @@ else
 
 	$aConfig = Core_Config::instance()->get('shop_csv', array()) + array(
 		'maxTime' => 20,
-		'maxCount' => 100
+		'maxCount' => 100,
+		'entriesLimit' => 5000,
 	);
 
 	$oAdmin_Form_Entity_Form->add($oMainTab
@@ -668,28 +700,33 @@ else
 		->add(
 			Admin_Form_Entity::factory('Div')->class('row')->add(
 				Admin_Form_Entity::factory('Input')
-					->name("import_price_max_time")
+					->name('import_price_max_time')
 					->caption(Core::_('Shop_Item.import_price_list_max_time'))
 					->value($aConfig['maxTime'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
-					->name("import_price_max_count")
+					->name('import_price_max_count')
 					->caption(Core::_('Shop_Item.import_price_list_max_count'))
 					->value($aConfig['maxCount'])
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
 			)
 			->add(
 				Admin_Form_Entity::factory('Input')
-					->name("import_price_delay")
+					->name('import_price_delay')
 					->caption(Core::_('Shop_Item.import_price_list_delay'))
 					->value(1)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-1'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
+			)->add(
+				Admin_Form_Entity::factory('Input')
+					->name('import_entries_limit')
+					->caption(Core::_('Shop_Item.import_entries_limit'))
+					->value($aConfig['entriesLimit'])
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 hidden-1'))
 			)
 		)
-	)
-	;
+	);
 
 	$sOnClick = $oAdmin_Form_Controller->getAdminSendForm('show_form');
 
@@ -701,10 +738,11 @@ else
 
 function showStat($Shop_Item_Import_Csv_Controller)
 {
-	echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getInsertedItemsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedItemsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getInsertedGroupsCount() . '</b><br/>';
-	echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $Shop_Item_Import_Csv_Controller->getUpdatedGroupsCount() . '</b><br/>';
+	echo Core::_('Shop_Item.inserted_items', $Shop_Item_Import_Csv_Controller->getInsertedItemsCount()) . '<br/>';
+	echo Core::_('Shop_Item.updated_items', $Shop_Item_Import_Csv_Controller->getUpdatedItemsCount()) . '<br/>';
+	echo Core::_('Shop_Item.created_catalogs', $Shop_Item_Import_Csv_Controller->getInsertedGroupsCount()) . '<br/>';
+	echo Core::_('Shop_Item.updated_catalogs', $Shop_Item_Import_Csv_Controller->getUpdatedGroupsCount()) . '<br/>';
+	echo Core::_('Shop_Item.posted_documents', $Shop_Item_Import_Csv_Controller->getPosted()) . '<br/>';
 }
 
 if ($sOnClick)
@@ -739,6 +777,7 @@ Core_Skin::instance()
 	->answer()
 	->ajax(Core_Array::getRequest('_', FALSE))
 	//->content(iconv("UTF-8", "UTF-8//IGNORE//TRANSLIT", ob_get_clean()))
+	->module($sModule)
 	->content(ob_get_clean())
 	->title(Core::_('Shop_Item.import_price_list_link'))
 	->execute();

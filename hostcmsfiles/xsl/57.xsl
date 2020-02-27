@@ -7,6 +7,18 @@
 
 	<!-- Шаблон для корзины -->
 	<xsl:template match="/shop">
+		<script type="text/javascript">
+		<xsl:comment>
+		<xsl:text disable-output-escaping="yes">
+		<![CDATA[
+			$(function() {
+				//$('.shop_bonuses input[name = apply_bonuses]').change();
+			});
+		]]>
+		</xsl:text>
+		</xsl:comment>
+		</script>
+
 		<xsl:choose>
 			<xsl:when test="count(shop_cart) = 0">
 				<h1>&labelEmptyCart;</h1>
@@ -17,6 +29,17 @@
 				<p>&labelOrder;</p>
 
 				<form action="{/shop/url}cart/" method="post">
+					<xsl:variable name="available_bonuses">
+						<xsl:choose>
+							<xsl:when test="apply_bonuses/node()">
+								<xsl:value-of select="apply_bonuses" />
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:value-of select="available_bonuses" />
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:variable>
+					
 					<!-- Если есть товары -->
 					<xsl:if test="count(shop_cart[postpone = 0]) > 0">
 						<table class="shop_cart">
@@ -30,6 +53,26 @@
 							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node()">
 								<xsl:apply-templates select="shop_purchase_discount"/>
 								<xsl:apply-templates select="shop_discountcard"/>
+
+								<xsl:if test="siteuser_id > 0 and apply_bonuses/node()">
+									<tr>
+										<td>
+											Бонусы
+										</td>
+										<td></td>
+										<td></td>
+										<td>
+											<!-- Amount -->
+											<xsl:value-of select="format-number($available_bonuses * -1, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes"/>
+										</td>
+										<xsl:if test="count(/shop/shop_warehouse)">
+											<td></td>
+										</xsl:if>
+										<td></td>
+										<td></td>
+									</tr>
+								</xsl:if>
+
 								<tr class="total">
 									<td>&labelTotal;</td>
 									<td></td>
@@ -48,9 +91,27 @@
 						</table>
 					</xsl:if>
 
-					<!-- Купон -->
-					<div class="shop_coupon">
-						&labelCoupon; <input name="coupon_text" type="text" value="{coupon_text}"/>
+					<div class="coupon-bonus">
+						<!-- Купон -->
+						<div class="shop_coupon">
+							&labelCoupon; <input name="coupon_text" type="text" value="{coupon_text}"/>
+						</div>
+
+						<xsl:if test="siteuser_id > 0">
+							<div class="shop_bonuses">
+								<input type="checkbox" name="apply_bonuses" onchange="$.showCartBonuses(this);">
+									<xsl:if test="apply_bonuses/node()">
+										<xsl:attribute name="checked">checked</xsl:attribute>
+									</xsl:if>
+									Применить бонусы
+								</input>
+								<input type="text" name="bonuses" value="{$available_bonuses}">
+									<xsl:if test="not(apply_bonuses/node())">
+										<xsl:attribute name="class">hidden</xsl:attribute>
+									</xsl:if>
+								</input>
+							</div>
+						</xsl:if>
 					</div>
 
 					<!-- Если есть отложенные товары -->

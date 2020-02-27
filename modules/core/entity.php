@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -41,7 +41,7 @@ class Core_Entity extends Core_ORM
 		$this->_tagName = strval($tagName);
 		return $this;
 	}
-	
+
 	/**
 	 * Get tag name
 	 * @return string
@@ -675,8 +675,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get stdObject for entity and children entities
 	 * @return stdObject
-	 * @hostcms-event modelname.onBeforeGetXml
-	 * @hostcms-event modelname.onAfterGetXml
+	 * @hostcms-event modelname.onBeforeGetArray
+	 * @hostcms-event modelname.onAfterGetArray
 	 */
 	public function getStdObject($attributePrefix = '_')
 	{
@@ -888,7 +888,7 @@ class Core_Entity extends Core_ORM
 			: '';
 
 		return $this->_changeCopiedName
-			? Core::_('Admin.copy', $prefix . $this->$nameColumn, date('d.m.Y H:i:s'))
+			? Core::_('Admin.copy', $prefix . $this->$nameColumn, date('d.m.Y H:i:s'), FALSE)
 			: $this->$nameColumn;
 	}
 

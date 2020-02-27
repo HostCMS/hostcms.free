@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Html_Entity extends Core_Servant_Properties
 {
@@ -72,6 +72,12 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	protected $_skipProperies = array();
 
 	/**
+	 * data-values,
+	 * @var array
+	 */
+	protected $_data = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct()
@@ -130,7 +136,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	/**
 	 * Add new entity
 	 * @param Admin_Form_Entity $oCore_Html_Entity new entity
-	 * @return Core_Html_Entity
+	 * @return self
 	 */
 	public function add($oCore_Html_Entity)
 	{
@@ -174,7 +180,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	 * Add new entity before $oAdmin_Form_Entity_Before
 	 * @param Admin_Form_Entity $oCore_Html_Entity new entity
 	 * @param Admin_Form_Entity $oCore_Html_Entity_Before entity before which to add the new entity
-	 * @return Core_Html_Entity
+	 * @return self
 	 */
 	public function addBefore($oCore_Html_Entity, $oCore_Html_Entity_Before)
 	{
@@ -209,7 +215,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	 * Add new entity after $oAdmin_Form_Entity_After
 	 * @param Admin_Form_Entity $oCore_Html_Entity new entity
 	 * @param Admin_Form_Entity $oCore_Html_Entity_After entity after which to add the new entity
-	 * @return Core_Html_Entity
+	 * @return self
 	 */
 	public function addAfter($oCore_Html_Entity, $oCore_Html_Entity_After)
 	{
@@ -305,6 +311,11 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 			}
 		}
 
+		foreach ($this->_data as $key => $value)
+		{
+			$aAttr[] = "data-{$key}=\"" . htmlspecialchars($value) . "\"";
+		}
+
 		return $aAttr;
 	}
 
@@ -366,7 +377,7 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 
 		return $this;
 	}
-	
+
 	/**
 	 * Add Class
 	 * @param string $className
@@ -375,17 +386,17 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	public function addClass($className)
 	{
 		$aClass = explode(' ', $this->class);
-		
+
 		if (!in_array($className, $aClass))
 		{
 			$aClass[] = $className;
 		}
-		
+
 		$this->class = implode(' ', $aClass);
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Remove Class
 	 * @param string $className
@@ -394,16 +405,39 @@ abstract class Core_Html_Entity extends Core_Servant_Properties
 	public function removeClass($className)
 	{
 		$aClass = explode(' ', $this->class);
-		
+
 		$key = array_search($className, $aClass);
-		
+
 		if ($key !== FALSE)
 		{
 			unset($aClass[$key]);
 		}
-		
+
 		$this->class = implode(' ', $aClass);
-		
+
 		return $this;
+	}
+
+	/**
+	 * Get/set data, e.g. $obj->data('foo', 'bar'); echo $obj->data('foo');
+	 * @param string $name
+	 * @param string $value
+	 * @return self|string
+	 */
+	public function data($name)
+	{
+		$args = func_get_args();
+
+		if (count($args) == 2)
+		{
+			$this->_data[$name] = $args[1];
+			return $this;
+		}
+		else
+		{
+			return isset($this->_data[$name])
+				? $this->_data[$name]
+				: NULL;
+		}
 	}
 }

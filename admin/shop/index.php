@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -302,18 +302,6 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCountriesFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
-		/*->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Company.company_shop_title'))
-				->icon('fa fa-building-o')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sCompaniesFormPath = '/admin/shop/company/index.php', NULL, NULL, '')
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sCompaniesFormPath, NULL, NULL, '')
-				)
-		)*/
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop.show_finance'))

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_I18n
 {
@@ -255,12 +255,11 @@ class Core_I18n
 
 		$path = Core_File::pathCorrection($path);
 
-		if (is_file($path))
-		{
-			return require($path);
-		}
+		return is_file($path)
+			? require($path)
+			: array();
 
-		throw new Core_Exception("Language file '%className' with path '%path' does not exist.",
-			array('%className' => $className, '%path' => Core_Exception::cutRootPath($path)));
+		/*throw new Core_Exception("Language file '%className' with path '%path' does not exist.",
+			array('%className' => $className, '%path' => Core_Exception::cutRootPath($path)));*/
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -161,8 +161,9 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 		$oSelect_View = Admin_Form_Entity::factory('Select')
 			->options(
 				array(
-					0 => Core::_('Admin_Form_Field.field_view_column'),
-					1 => Core::_('Admin_Form_Field.field_view_filter_element'),
+					0 => Core::_('Admin_Form_Field.field_view0'),
+					1 => Core::_('Admin_Form_Field.field_view1'),
+					2 => Core::_('Admin_Form_Field.field_view2')
 				)
 			)
 			->name('view')

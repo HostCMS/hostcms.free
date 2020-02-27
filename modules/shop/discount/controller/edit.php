@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -60,7 +60,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oTypeSelectField
 			->name('type')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-2'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2'))
 			->caption(Core::_('Shop_Discount.type'))
 			->options(array(
 				Core::_('Shop_Discount.form_edit_affiliate_values_type_percent'),
@@ -70,24 +70,16 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainRow1->add($oTypeSelectField);
 		$oMainTab->move($this->getField('value')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-2')), $oMainRow1);
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2')), $oMainRow1);
 
-		$oMainTab->delete($this->getField('coupon'));
-
-		$oCoupon = Admin_Form_Entity::factory('Checkbox')
-			->name('coupon')
-			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-5'))
-			->caption(Core::_('Shop_Discount.coupon'))
-			->value($this->_object->coupon)
-			->onclick("$.toggleCoupon(this)");
-
-		$oMainRow1->add($oCoupon);
+		$oMainTab->move($this->getField('coupon')
+			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-3 col-lg-3'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
 
 		$hidden = !$this->_object->coupon
 			? ' hidden'
 			: '';
 
-		$oMainTab->move($this->getField('coupon_text')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-3 col-lg-5' . $hidden)), $oMainRow1);
+		$oMainTab->move($this->getField('coupon_text')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-5' . $hidden)), $oMainRow1);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name)

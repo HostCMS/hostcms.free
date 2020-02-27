@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -1050,6 +1050,7 @@ class Structure_Model extends Core_Entity
 				$this->indexing = Core_Array::get($aBackup, 'indexing');
 				$this->changefreq = Core_Array::get($aBackup, 'changefreq');
 				$this->priority = Core_Array::get($aBackup, 'priority');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 
 				if ($this->type == 1)

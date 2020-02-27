@@ -10,11 +10,14 @@
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
 // Проверять остаток на складе при добавлении в корзину
-$bCheckStock = FALSE;
+$bCheckStock = TRUE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 
 Shop_Delivery_Handler::checkBeforeContent($oShop);
+
+$oShop_Cart_Controller = Shop_Cart_Controller::instance();
+$oShop_Cart_Controller->checkStock($bCheckStock);
 
 // Добавление товара в корзину
 if (Core_Array::getRequest('add'))
@@ -32,13 +35,13 @@ if (Core_Array::getRequest('add'))
 	$count = Core_Array::getRequest('count', 1);
 	!is_array($count) && $count = array($count);
 
-	$oShop_Cart_Controller = Shop_Cart_Controller::instance();
+	//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 
 	foreach ($add as $key => $shop_item_id)
 	{
 		$oShop_Cart_Controller
 			->clear()
-			->checkStock($bCheckStock)
+			//->checkStock($bCheckStock)
 			->shop_item_id(intval($shop_item_id))
 			->quantity(floatval(Core_Array::get($count, $key, 1)))
 			->add();
@@ -155,13 +158,13 @@ if (Core_Array::getGet('action') == 'repeat')
 		{
 			$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll();
 
-			$oShop_Cart_Controller = Shop_Cart_Controller::instance();
+			//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 
 			foreach ($aShop_Order_Items as $oShop_Order_Item)
 			{
 				$oShop_Order_Item->shop_item_id && $oShop_Cart_Controller
 					->clear()
-					->checkStock($bCheckStock)
+					//->checkStock($bCheckStock)
 					->shop_item_id($oShop_Order_Item->shop_item_id)
 					->quantity($oShop_Order_Item->quantity)
 					->marking($oShop_Order_Item->marking)
@@ -217,8 +220,9 @@ if (Core_Array::getGet('delete'))
 
 	if ($shop_item_id)
 	{
-		$oShop_Cart_Controller = Shop_Cart_Controller::instance();
+		//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 		$oShop_Cart_Controller
+			->clear()
 			->shop_item_id($shop_item_id)
 			->delete();
 	}
@@ -231,9 +235,23 @@ if (!is_null(Core_Array::getRequest('coupon_text')))
 	$_SESSION['hostcmsOrder']['coupon_text'] = trim(strval(Core_Array::getRequest('coupon_text')));
 }
 
+// Запоминаем количество списываемых бонусов
+if (!is_null(Core_Array::getRequest('bonuses')))
+{
+	Core_Session::start();
+	if (!is_null(Core_Array::getRequest('apply_bonuses')))
+	{
+		$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+	}
+	elseif (isset($_SESSION['hostcmsOrder']['bonuses']))
+	{
+		unset($_SESSION['hostcmsOrder']['bonuses']);
+	}
+}
+
 if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 {
-	$oShop_Cart_Controller = Shop_Cart_Controller::instance();
+	//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 	$aCart = $oShop_Cart_Controller->getAll($oShop);
 
 	// Склад по умолчанию
@@ -248,7 +266,7 @@ if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 		{
 			$oShop_Cart_Controller
 				->clear()
-				->checkStock($bCheckStock)
+				//->checkStock($bCheckStock)
 				->shop_item_id($oShop_Cart->shop_item_id)
 				->quantity($quantity)
 				->postpone(is_null(Core_Array::getPost('postpone_' . $oShop_Cart->shop_item_id)) ? 0 : 1)

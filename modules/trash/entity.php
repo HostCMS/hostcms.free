@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Entity extends Core_Entity
 {
@@ -94,24 +94,27 @@ class Trash_Entity extends Core_Entity
 	 */
 	public function delete($primaryKey = NULL)
 	{
-		$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
-
-		$totalCount = $Trash_Table_Dataset->getCount();
-		$limit = 100;
-
-		while ($totalCount > 0)
+		if ($this->table_name != '')
 		{
-			$aTrash_Table_Items = $Trash_Table_Dataset
-				->limit($limit)
-				->clear()
-				->getObjects();
+			$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
 
-			foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+			$totalCount = $Trash_Table_Dataset->getCount();
+			$limit = 100;
+
+			while ($totalCount > 0)
 			{
-				$oTrash_Table_Item->delete();
-			}
+				$aTrash_Table_Items = $Trash_Table_Dataset
+					->limit($limit)
+					->clear()
+					->getObjects();
 
-			$totalCount -= $limit;
+				foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+				{
+					$oTrash_Table_Item->delete();
+				}
+
+				$totalCount -= $limit;
+			}
 		}
 
 		return $this;
@@ -123,24 +126,27 @@ class Trash_Entity extends Core_Entity
 	 */
 	public function undelete()
 	{
-		$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
-
-		$totalCount = $Trash_Table_Dataset->getCount();
-		$limit = 100;
-
-		while ($totalCount > 0)
+		if ($this->table_name != '')
 		{
-			$aTrash_Table_Items = $Trash_Table_Dataset
-				->limit($limit)
-				->clear()
-				->getObjects();
+			$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
 
-			foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+			$totalCount = $Trash_Table_Dataset->getCount();
+			$limit = 100;
+
+			while ($totalCount > 0)
 			{
-				$oTrash_Table_Item->undelete();
-			}
+				$aTrash_Table_Items = $Trash_Table_Dataset
+					->limit($limit)
+					->clear()
+					->getObjects();
 
-			$totalCount -= $limit;
+				foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+				{
+					$oTrash_Table_Item->undelete();
+				}
+
+				$totalCount -= $limit;
+			}
 		}
 
 		return $this;

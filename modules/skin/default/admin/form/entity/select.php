@@ -30,7 +30,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 {
@@ -141,6 +141,8 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		?></div><?php
 	}
 
+	protected $_aAlreadySelected = array();
+
 	protected function _showOptions($aOptions)
 	{
 		foreach ($aOptions as $key => $aValue)
@@ -162,9 +164,14 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 					$attr = array();
 				}
 
-				(!is_array($this->value) && strval($this->value) === strval($key)
-					|| is_array($this->value) && in_array($key, $this->value))
-				&& $attr['selected'] = 'selected';
+				if ((!is_array($this->value) && strval($this->value) === strval($key)
+						|| is_array($this->value) && in_array($key, $this->value)
+					) && !in_array($key, $this->_aAlreadySelected)
+				)
+				{
+					$this->_aAlreadySelected[] = $key;
+					$attr['selected'] = 'selected';
+				}
 
 				$this->_showOption($key, $value, $attr);
 			}

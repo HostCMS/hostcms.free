@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -33,7 +33,6 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery-2.0.3.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-hostcms.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/main.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/bootstrap-datetimepicker.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/daterangepicker.js')
@@ -57,12 +56,16 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/colorpicker/jquery.minicolors.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
 			;
 
@@ -81,6 +84,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/nouislider/nouislider.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/cropper.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/jquery-cropper.css')
 			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
 			;
 	}
@@ -239,7 +244,8 @@ class Skin_Bootstrap extends Core_Skin
 										$.bookmarksPrepare();
 
 										$('.navbar-account #bookmarksListBox').data({
-											moduleId: <?php echo $oModule->id?>
+											moduleId: <?php echo $oModule->id?>,
+											userId: <?php echo $oUser->id?>
 										});
 
 										$.refreshBookmarksList();
@@ -419,7 +425,9 @@ class Skin_Bootstrap extends Core_Skin
 
 								if (!is_null($oAlias))
 								{
-									?><a title="<?php echo Core::_('Admin.viewSite')?>" target="_blank" href="//<?php echo htmlspecialchars($oAlias->name)?>">
+									$schema = $oCurrentSite->https ? 'https://' : 'http://';
+
+									?><a title="<?php echo Core::_('Admin.viewSite')?>" target="_blank" href="<?php echo $schema, htmlspecialchars($oAlias->name)?>">
 										<i class="icon fa fa-desktop"></i>
 									</a><?php
 								}
@@ -1009,7 +1017,7 @@ class Skin_Bootstrap extends Core_Skin
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8" />
-<title><?php echo $this->_title?></title>
+<title><?php echo htmlspecialchars($this->_title)?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="referrer" content="no-referrer" />
@@ -1154,7 +1162,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2019 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2020 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1189,7 +1197,7 @@ class Skin_Bootstrap extends Core_Skin
 		$bAjax = Core_Array::getRequest('_', FALSE);
 
 		// Widget settings
-		if (!is_null(Core_Array::getGet('userSettings')))
+		/*if (!is_null(Core_Array::getGet('userSettings')))
 		{
 			if (!is_null(Core_Array::getGet('moduleId')))
 			{
@@ -1237,7 +1245,7 @@ class Skin_Bootstrap extends Core_Skin
 				->ajax($bAjax)
 				->execute();
 			exit();
-		}
+		}*/
 
 		// Widget ajax loading
 		if (!is_null(Core_Array::getGet('ajaxWidgetLoad')))
@@ -1468,6 +1476,9 @@ class Skin_Bootstrap extends Core_Skin
 		{
 			case 'error':
 				$class = 'alert alert-danger fade in';
+			break;
+			case 'warning':
+				$class = 'alert alert-warning fade in';
 			break;
 			case 'info':
 				$class = 'alert alert-info fade in';

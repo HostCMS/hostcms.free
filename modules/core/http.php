@@ -23,7 +23,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - referer($referer) содержимое заголовка Referer, если NULL, то будет установлен в "{схема}://{запрошенный домен}"
  * - data($key, $value) добавить POST-данные
  * - execute() отправить запрос
- * 
+ *
  * - getHeaders() получить заголовки ответа
  * - parseHeaders() получить заголовки в виде массива
  * - parseHttpStatusCode('HTTP/1.1 200 OK') получить код ответа по переданному статусу
@@ -50,7 +50,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -161,7 +161,7 @@ abstract class Core_Http
 		$this->_config['options'][$name] = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Send request
 	 * @param string $host host
@@ -429,7 +429,7 @@ abstract class Core_Http
 	 * @var int
 	 */
 	protected $_errno = 0;
-	
+
 	/**
 	 * Get Error number
 	 * @return int
@@ -438,13 +438,13 @@ abstract class Core_Http
 	{
 		return $this->_errno;
 	}
-	
+
 	/**
 	 * Error message
 	 * @var string|NULL
 	 */
 	protected $_error = NULL;
-	
+
 	/**
 	 * Get Error message
 	 * @return string|NULL
@@ -453,7 +453,7 @@ abstract class Core_Http
 	{
 		return $this->_error;
 	}
-	
+
 	/**
 	 * Executes the business logic.
 	 */
@@ -472,7 +472,7 @@ abstract class Core_Http
 			: '/';
 
 		isset($aUrl['port']) && $this->_port = $aUrl['port'];
-			
+
 		$host = Core_Array::get($aUrl, 'host', '');
 
 		$query = isset($aUrl['query']) ?
@@ -517,14 +517,14 @@ abstract class Core_Http
 	{
 		return strtoupper($matches[0]);
 	}
-	
+
 	/**
 	 * Parse header
 	 * @param string $header
 	 * @return array
 	 */
 	protected function _parseHeaders($header)
-	{			
+	{
 		$aReturn = array();
 		$fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
 

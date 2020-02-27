@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 {
@@ -52,21 +52,30 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 		$oDivClose = Admin_Form_Entity::factory('Code')->html('</div>');
 
 		$oCost = Admin_Form_Entity::factory('Input')
-			->caption(Core::_("Shop_Item_Delivery_Option.cost"))
+			->caption(Core::_('Shop_Item_Delivery_Option.cost'))
 			->name('deliveryOptionCost_[]')
-			->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'))
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-3'))
 			->format(array('lib' => array('value' => 'integer')));
 
 		$oDay = Admin_Form_Entity::factory('Input')
-			->caption(Core::_("Shop_Item_Delivery_Option.day"))
+			->caption(Core::_('Shop_Item_Delivery_Option.day'))
 			->name('deliveryOptionDay_[]')
-			->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'));
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-6 col-md-2'));
 
 		$oOrderBefore = Admin_Form_Entity::factory('Select')
-			->caption(Core::_("Shop_Item_Delivery_Option.order_before"))
+			->caption(Core::_('Shop_Item_Delivery_Option.order_before'))
 			->name('deliveryOptionOrderBefore_[]')
 			->options(range(0, 24))
-			->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-3 col-lg-3'));
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-2'));
+			
+		$oOrderType = Admin_Form_Entity::factory('Select')
+			->caption(Core::_('Shop_Item_Delivery_Option.type'))
+			->name('deliveryOptionType_[]')
+			->options(array(
+				0 => Core::_('Shop_Item_Delivery_Option.type0'),
+				1 => Core::_('Shop_Item_Delivery_Option.type1')
+			))
+			->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-2'));
 
 		if (count($aShop_Item_Delivery_Options))
 		{
@@ -75,6 +84,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 				$oCost = clone $oCost;
 				$oDay = clone $oDay;
 				$oOrderBefore = clone $oOrderBefore;
+				$oOrderType = clone $oOrderType;
 
 				$oDeliveryOptionDiv
 					->add($oDivOpen)
@@ -96,6 +106,12 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 							->name("deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}")
 							->id("deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}")
 					)
+					->add(
+						$oOrderType
+							->value($oShop_Item_Delivery_Option->type)
+							->name("deliveryOptionType_{$oShop_Item_Delivery_Option->id}")
+							->id("deliveryOptionType_{$oShop_Item_Delivery_Option->id}")
+					)
 					->add($this->imgBox())
 					->add($oDivClose)
 				;
@@ -108,6 +124,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 				->add($oCost)
 				->add($oDay)
 				->add($oOrderBefore)
+				->add($oOrderType)
 				->add($this->imgBox())
 				->add($oDivClose)
 			;
@@ -159,6 +176,7 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 					->shop_item_id(intval($this->shop_item_id))
 					->day(strval(Core_Array::getPost("deliveryOptionDay_{$oShop_Item_Delivery_Option->id}", 0)))
 					->order_before(intval(Core_Array::getPost("deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}", 0)))
+					->type(intval(Core_Array::getPost("deliveryOptionType_{$oShop_Item_Delivery_Option->id}", 0)))
 					->cost(Shop_Controller::instance()->convertPrice($cost))
 					->save();
 			}
@@ -170,11 +188,14 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 
 		// Доставка, новые значения
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
+		
 		$aDeliveryOptions = Core_Array::getPost('deliveryOptionCost_');
+		
 		if ($aDeliveryOptions)
 		{
 			$aDeliveryOptionDay = Core_Array::getPost('deliveryOptionDay_');
 			$aDeliveryOptionOrderBefore = Core_Array::getPost('deliveryOptionOrderBefore_');
+			$aDeliveryOptionType = Core_Array::getPost('deliveryOptionType_');
 
 			foreach ($aDeliveryOptions as $key => $deliveryOption)
 			{
@@ -187,13 +208,15 @@ class Shop_Item_Delivery_Option_Controller_Tab extends Core_Servant_Properties
 						->shop_item_id(intval($this->shop_item_id))
 						->day(strval(Core_Array::get($aDeliveryOptionDay, $key)))
 						->order_before(intval(Core_Array::get($aDeliveryOptionOrderBefore, $key)))
+						->type(intval(Core_Array::get($aDeliveryOptionType, $key)))
 						->cost($price)
 						->save();
 
 					ob_start();
 					Core::factory('Core_Html_Entity_Script')
 						->value("$(\"#{$windowId} input[name='deliveryOptionDay_\\[\\]']\").eq(0).prop('name', 'deliveryOptionDay_{$oShop_Item_Delivery_Option->id}');
-						$(\"#{$windowId} input[name='deliveryOptionOrderBefore_\\[\\]']\").eq(0).prop('name', 'deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}');
+						$(\"#{$windowId} select[name='deliveryOptionOrderBefore_\\[\\]']\").eq(0).prop('name', 'deliveryOptionOrderBefore_{$oShop_Item_Delivery_Option->id}');
+						$(\"#{$windowId} select[name='deliveryOptionType_\\[\\]']\").eq(0).prop('name', 'deliveryOptionType_{$oShop_Item_Delivery_Option->id}');
 						$(\"#{$windowId} input[name='deliveryOptionCost_\\[\\]']\").eq(0).prop('name', 'deliveryOptionCost_{$oShop_Item_Delivery_Option->id}');
 						")
 						->execute();

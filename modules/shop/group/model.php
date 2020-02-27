@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -94,6 +94,7 @@ class Shop_Group_Model extends Core_Entity
 		'shop_item' => array(),
 		'shop_item_property_for_group' => array(),
 		'shortcut' => array('model' => 'Shop_Group', 'foreign_key' => 'shortcut_id'),
+		'shop_filter_seo' => array(),
 	);
 
 	/**
@@ -859,7 +860,9 @@ class Shop_Group_Model extends Core_Entity
 			$this->path = Core_Guid::get();
 		}
 
-		$oSameShopItem = $oShop->Shop_Items->getByGroupIdAndPath($this->parent_id, $this->path);
+		$oSameShopItems = $oShop->Shop_Items;
+		$oSameShopItems->queryBuilder()->where('modification_id', '=', 0);
+		$oSameShopItem = $oSameShopItems->getByGroupIdAndPath($this->parent_id, $this->path);
 		if (!is_null($oSameShopItem))
 		{
 			$this->path = Core_Guid::get();
@@ -960,6 +963,10 @@ class Shop_Group_Model extends Core_Entity
 		$this->Shop_Groups->deleteAll(FALSE);
 		$this->Shop_Items->deleteAll(FALSE);
 		$this->Shop_Item_Property_For_Groups->deleteAll(FALSE);
+
+		$this->Shortcuts->deleteAll(FALSE);
+
+		$this->Shop_Filter_Seos->deleteAll(FALSE);
 
 		// Remove from search index
 		$this->unindex();
@@ -1274,15 +1281,19 @@ class Shop_Group_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
-
-				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->parent_id = Core_Array::get($aBackup, 'parent_id');
+				$this->shortcut_id = Core_Array::get($aBackup, 'shortcut_id');
 				$this->path = Core_Array::get($aBackup, 'path');
-				$this->description = Core_Array::get($aBackup, 'description');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
 				$this->active = Core_Array::get($aBackup, 'active');
 				$this->indexing = Core_Array::get($aBackup, 'indexing');
+				$this->description = Core_Array::get($aBackup, 'description');
 				$this->seo_title = Core_Array::get($aBackup, 'seo_title');
 				$this->seo_description = Core_Array::get($aBackup, 'seo_description');
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
+				$this->shop_id = Core_Array::get($aBackup, 'shop_id');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 			}
 		}

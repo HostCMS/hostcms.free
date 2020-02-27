@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -63,6 +63,16 @@ $oAdmin_Form_Entity_Menus->add(
 				->onclick(
 					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Lib.import'))
+		->icon('fa fa-download')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/lib/import/index.php', NULL, NULL, 'lib_dir_id=' . $lib_dir_id)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/lib/import/index.php', NULL, NULL, 'lib_dir_id=' . $lib_dir_id)
 		)
 );
 
@@ -142,6 +152,39 @@ if ($lib_dir_id)
 	}
 }
 
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('importLibs');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'importLibs')
+{
+	$oUserCurrent = Core_Auth::getCurrentUser();
+	if (!$oUserCurrent->read_only)
+	{
+		if (isset($_FILES['json_file']) && intval($_FILES['json_file']['size']) > 0)
+		{
+			try {
+				$content = Core_File::read($_FILES['json_file']['tmp_name']);
+
+				$oLib_Import_Controller = Admin_Form_Action_Controller::factory(
+					'Lib_Import_Controller', $oAdmin_Form_Action
+				);
+
+				$oLib_Import_Controller
+					->content($content)
+					->lib_dir_id($lib_dir_id)
+					// ->execute()
+					;
+
+				$oAdmin_Form_Controller->addAction($oLib_Import_Controller);
+			}
+			catch (Exception $exc) {
+				Core_Message::show($exc->getMessage(), "error");
+			}
+		}
+	}
+}
+
 // Действие редактирования
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -189,6 +232,21 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+// Действие "Экспорт"
+$oAdminFormActionExportLibs = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('exportLibs');
+
+if ($oAdminFormActionExportLibs && $oAdmin_Form_Controller->getAction() == 'exportLibs')
+{
+	$oLib_Export_Controller = Admin_Form_Action_Controller::factory(
+		'Lib_Export_Controller', $oAdminFormActionExportLibs
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oLib_Export_Controller);
 }
 
 // Источник данных 0
