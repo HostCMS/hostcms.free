@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Properties',
@@ -82,4 +82,5 @@ return array(
 	'watermark_default_use_large_image' => 'Use watermark by default',
 	'watermark_default_use_small_image' => 'Use watermark by default for small images',
 	'move_success' => 'Additional property moved successfully.',
+	'obligatory' => 'Obligatory',
 );

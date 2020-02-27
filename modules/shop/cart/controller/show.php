@@ -40,7 +40,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -103,6 +103,11 @@ class Shop_Cart_Controller_Show extends Core_Controller
 	protected $_oSiteuser = NULL;
 
 	/**
+	 * @var array
+	 */
+	protected $_aDiscountPrices = array();
+
+	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
 	 */
@@ -141,11 +146,11 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		{
 			Core_Session::start();
 			if (isset($_SESSION['hostcmsOrder']['coupon_text']))
-			 {
-				 $this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
+			{
+				$this->addCacheSignature('coupon=' . $_SESSION['hostcmsOrder']['coupon_text']);
 
-				 Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
-			 }
+				Shop_Item_Controller::coupon($_SESSION['hostcmsOrder']['coupon_text']);
+			}
 		}
 	}
 
@@ -233,103 +238,170 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
-		$quantityPurchaseDiscount = $amountPurchaseDiscount = $quantity = $amount = $tax = $weight = 0;
+		$quantityPurchaseDiscount = $amountPurchaseDiscount = $this->quantity = $this->amount = $this->tax = $this->weight = 0;
 
 		// Массив цен для расчета скидок каждый N-й со скидкой N%
-		$aDiscountPrices = array();
+		$this->_aDiscountPrices = array();
 
-		// Извлекаем все активные скидки с ценами на N-й товар, доступные для текущей даты
-		$oShop_Purchase_Discounts = $oShop->Shop_Purchase_Discounts;
-		$oShop_Purchase_Discounts->queryBuilder()
-			->where('active', '=', 1)
-			->where('position', '>', 0)
-			->where('start_datetime', '<=', Core_Date::timestamp2sql(time()))
-			->where('end_datetime', '>=', Core_Date::timestamp2sql(time()))
-			->clearOrderBy()
-			->limit(1);
-
-		// Есть скидки на N-й товар
-		$bPositionDiscount = $oShop_Purchase_Discounts->getCount() > 0;
+		// Есть скидки на N-й товар, доступные для текущей даты
+		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
 
 		$Shop_Cart_Controller = $this->_getCartController();
 
 		$aShop_Carts = $Shop_Cart_Controller->getAll($oShop);
 		foreach ($aShop_Carts as $oShop_Cart)
 		{
-			$oShop_Item = Core_Entity::factory('Shop_Item')->find($oShop_Cart->shop_item_id);
-			if (!is_null($oShop_Item->id))
+			$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Cart->shop_item_id);
+
+			if (!$bTpl)
 			{
-				if (!$bTpl)
-				{
-					$this->addEntity(
-						$oShop_Cart
-							->clearEntities()
-							->showXmlWarehousesItems($this->warehousesItems)
-							->showXmlProperties($this->itemsProperties)
-							->showXmlSpecialprices($this->specialprices)
-							->showXmlAssociatedItems($this->associatedItems)
-					);
-				}
-				else
-				{
-					$this->append('aShop_Carts', $oShop_Cart);
-				}
-
-				if ($oShop_Cart->postpone == 0)
-				{
-					$quantity += $oShop_Cart->quantity;
-
-					// Количество для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
-						&& $quantityPurchaseDiscount += $oShop_Cart->quantity;
-
-					// Prices
-					$oShop_Item_Controller = new Shop_Item_Controller();
-					if (Core::moduleIsActive('siteuser'))
-					{
-						$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-						$oSiteuser && $oShop_Item_Controller->siteuser($oSiteuser);
-					}
-
-					$oShop_Item_Controller->count($oShop_Cart->quantity);
-					$aPrices = $oShop_Item_Controller->getPrices($oShop_Cart->Shop_Item);
-					$amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
-
-					if ($bPositionDiscount)
-					{
-						// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
-						for ($i = 0; $i < $oShop_Cart->quantity; $i++)
-						{
-							$aDiscountPrices[] = $aPrices['price_discount'];
-						}
-					}
-
-					// Сумма для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
-						&& $amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
-
-					$tax += $aPrices['tax'] * $oShop_Cart->quantity;
-
-					$weight += $oShop_Cart->Shop_Item->weight * $oShop_Cart->quantity;
-				}
+				$this->addEntity(
+					$oShop_Cart
+						->clearEntities()
+						->showXmlWarehousesItems($this->warehousesItems)
+						->showXmlProperties($this->itemsProperties)
+						->showXmlSpecialprices($this->specialprices)
+						->showXmlAssociatedItems($this->associatedItems)
+				);
 			}
 			else
 			{
-				$oShop_Cart->delete();
+				$this->append('aShop_Carts', $oShop_Cart);
+			}
+
+			if ($oShop_Cart->postpone == 0)
+			{
+				$this->quantity += $oShop_Cart->quantity;
+
+				// Количество для скидок от суммы заказа рассчитывается отдельно
+				$oShop_Item->apply_purchase_discount
+					&& $quantityPurchaseDiscount += $oShop_Cart->quantity;
+
+				// Prices
+				$oShop_Item_Controller = new Shop_Item_Controller();
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$this->_oSiteuser
+						&& $oShop_Item_Controller->siteuser($this->_oSiteuser);
+				}
+
+				$oShop_Item_Controller->count($oShop_Cart->quantity);
+				$aPrices = $oShop_Item_Controller->getPrices($oShop_Cart->Shop_Item);
+				$this->amount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+				if ($bPositionDiscount)
+				{
+					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+					for ($i = 0; $i < $oShop_Cart->quantity; $i++)
+					{
+						$this->_aDiscountPrices[] = $aPrices['price_discount'];
+					}
+				}
+
+				// Сумма для скидок от суммы заказа рассчитывается отдельно
+				$oShop_Item->apply_purchase_discount
+					&& $amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+				$this->tax += $aPrices['tax'] * $oShop_Cart->quantity;
+
+				$this->weight += $oShop_Cart->Shop_Item->weight * $oShop_Cart->quantity;
 			}
 		}
 
 		$this->taxes && $oShop->showXmlTaxes(TRUE);
 
+		$fAppliedDiscountsAmount = $this->_getDiscoutAmount($quantityPurchaseDiscount, $amountPurchaseDiscount);
+
+		// Скидка больше суммы заказа
+		$fAppliedDiscountsAmount > $this->amount
+			&& $fAppliedDiscountsAmount = $this->amount;
+
+		// Применяем скидку от суммы заказа
+		$this->amount -= $fAppliedDiscountsAmount;
+
+		// Бонусы
+		if ($this->_oSiteuser)
+		{
+			$aSiteuserBonuses = $this->_oSiteuser->getBonuses($oShop);
+
+			$max_bonus = Shop_Controller::instance()->round($this->amount * ($oShop->max_bonus / 100));
+
+			$available_bonuses = $aSiteuserBonuses['total'] <= $max_bonus
+				? $aSiteuserBonuses['total']
+				: $max_bonus;
+
+			$aSiteuserBonuses['total'] && $this->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('siteuser_bonuses')
+					->value($aSiteuserBonuses['total'])
+			)->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('available_bonuses')
+					->value($available_bonuses)
+			);
+
+			// Применяемые бонусы
+			if (isset($_SESSION['hostcmsOrder']['bonuses']) && $_SESSION['hostcmsOrder']['bonuses'] > 0)
+			{
+				if ($_SESSION['hostcmsOrder']['bonuses'] > $available_bonuses)
+				{
+					$_SESSION['hostcmsOrder']['bonuses'] = $available_bonuses;
+				}
+
+				$this->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('apply_bonuses')
+						->value($_SESSION['hostcmsOrder']['bonuses'])
+				);
+
+				// Вычитаем бонусы
+				$this->amount -= $_SESSION['hostcmsOrder']['bonuses'];
+			}
+		}
+
+		// Total order amount
+		$this->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_amount')
+				->value($this->amount)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_discount')
+				->value($fAppliedDiscountsAmount)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_tax')
+				->value($this->tax)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_quantity')
+				->value($this->quantity)
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('total_weight')
+				->value($this->weight)
+		);
+
+		return parent::show();
+	}
+
+	/**
+	 * Get Discount Amount
+	 * @return decimal
+	 */
+	protected function _getDiscoutAmount($quantityPurchaseDiscount, $amountPurchaseDiscount)
+	{
+		$oShop = $this->getEntity();
+
+		$bTpl = $this->_mode == 'tpl';
+
 		// Дисконтная карта
-		$bApplyMaxDiscount = FALSE;
-		$fDiscountcard = 0;
+		$bApplyMaxDiscount = $bApplyShopPurchaseDiscounts = FALSE;
+		$fDiscountcard = $fAppliedDiscountsAmount = 0;
 
 		if ($this->applyDiscountCards && Core::moduleIsActive('siteuser') && $this->_oSiteuser)
 		{
-			$oSiteuser = $this->_oSiteuser;
-
-			$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
+			$oShop_Discountcard = $this->_oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
 			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
 			{
 				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
@@ -337,12 +409,9 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$bApplyMaxDiscount = $oShop_Discountcard_Level->apply_max_discount == 1;
 
 				// Сумма скидки по дисконтной карте
-				$fDiscountcard = $amount * ($oShop_Discountcard_Level->discount / 100);
+				$fDiscountcard = $this->amount * ($oShop_Discountcard_Level->discount / 100);
 			}
 		}
-
-		$fAppliedDiscountsAmount = 0;
-		$bApplyShopPurchaseDiscounts = FALSE;
 
 		if ($this->applyDiscounts)
 		{
@@ -353,7 +422,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				->quantity($quantityPurchaseDiscount)
 				->couponText($this->couponText)
 				->siteuserId($this->_oSiteuser ? $this->_oSiteuser->id : 0)
-				->prices($aDiscountPrices);
+				->prices($this->_aDiscountPrices);
 
 			$aShop_Purchase_Discounts = $oShop_Purchase_Discount_Controller->getDiscounts();
 
@@ -393,7 +462,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 
 			// Скидка больше суммы заказа
-			$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
+			$fAppliedDiscountsAmount > $this->amount && $fAppliedDiscountsAmount = $this->amount;
 		}
 
 		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
@@ -401,7 +470,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		{
 			if ($fDiscountcard)
 			{
-				$fAmountForCard = $amount - $fAppliedDiscountsAmount;
+				$fAmountForCard = $this->amount - $fAppliedDiscountsAmount;
 
 				if ($fAmountForCard > 0)
 				{
@@ -423,38 +492,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			}
 		}
 
-		// Скидка больше суммы заказа
-		$fAppliedDiscountsAmount > $amount && $fAppliedDiscountsAmount = $amount;
-
-		$this->amount = $amount - $fAppliedDiscountsAmount;
-		$this->tax = $tax;
-		$this->quantity = $quantity;
-		$this->weight = $weight;
-
-		// Total order amount
-		$this->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_amount')
-				->value($this->amount)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_discount')
-				->value($fAppliedDiscountsAmount)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_tax')
-				->value($this->tax)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_quantity')
-				->value($this->quantity)
-		)->addEntity(
-			Core::factory('Core_Xml_Entity')
-				->name('total_weight')
-				->value($this->weight)
-		);
-
-		return parent::show();
+		return $fAppliedDiscountsAmount;
 	}
 
 	/**

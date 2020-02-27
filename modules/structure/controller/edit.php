@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -52,7 +52,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->name('Sitemap');
 
 		$oPropertyTab = Admin_Form_Entity::factory('Tab')
-			->caption(Core::_('Structure.additional_params_tab'))
+			->caption(Core::_('Admin_Form.tabProperties'))
 			->name('Property');
 
 		$this
@@ -211,13 +211,23 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$this->getField('indexing')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
-		$this->getField('https')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		// $this->getField('https')
+			// ->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 		$oMainTab
 			->move($this->getField('active'), $oMainRow4)
-			->move($this->getField('indexing'), $oMainRow4)
-			->move($this->getField('https'), $oMainRow4);
+			->move($this->getField('indexing'), $oMainRow4);
+
+		$oMainTab->delete($this->getField('https'));
+
+		$oHttps = Admin_Form_Entity::factory('Checkbox')
+			->name('https')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->caption(Core::_('Structure.https'))
+			->value(1)
+			->checked($this->_object->Site->https == 1);
+
+		$oMainRow4->add($oHttps);
 
 		$oMainRow5->add($oRadio_Type);
 
@@ -316,6 +326,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->getField('path')
 				->add(
 					Admin_Form_Entity::factory('A')
+						->id('path')
 						->target('_blank')
 						->href($sItemUrl)
 						->class('input-group-addon bg-blue bordered-blue')
@@ -603,6 +614,23 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$this->_object->clearCache();
+
+		$oSite = $this->_object->Site;
+		$oSiteAlias = $oSite->getCurrentAlias();
+		if ($oSiteAlias)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+			$sUrl = ($this->_object->https ? 'https://' : 'http://')
+				. $oSiteAlias->name
+				. $this->_object->getPath();
+
+			$this->_Admin_Form_Controller->addMessage(
+				Core::factory('Core_Html_Entity_Script')
+					->value("$('#{$windowId} a#path').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "')")
+				->execute()
+			);
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

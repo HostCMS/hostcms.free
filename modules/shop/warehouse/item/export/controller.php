@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Export_Controller
 {
@@ -34,11 +34,11 @@ class Shop_Warehouse_Item_Export_Controller
 		$this->_Shop_Warehouse = $oShop_Warehouse;
 
 		$this->_aCurrentData[] = array(
-			'"' . Core::_('Shop_Item_Export.item_marking') . '"',
-			'"' . Core::_('Shop_Item_Export.item_name') . '"',
-			'"' . Core::_("Shop_Item.warehouse_import_field", $this->_prepareString($oShop_Warehouse->name)) . '"',
-			'"' . Core::_('Shop_Item_Export.item_price') . '"',
-			'"' . Core::_('Shop_Item_Export.item_currency_id') . '"',
+			'"' . Core::_('Shop_Exchange.item_marking') . '"',
+			'"' . Core::_('Shop_Exchange.item_name') . '"',
+			'"' . $this->_prepareString(Core::_("Shop_Item.warehouse_import_field", $oShop_Warehouse->name)) . '"',
+			'"' . Core::_('Shop_Exchange.item_price') . '"',
+			'"' . Core::_('Shop_Exchange.currency_id') . '"',
 		);
 	}
 

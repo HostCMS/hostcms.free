@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Skin
 {
@@ -322,6 +322,7 @@ abstract class Core_Skin
 				->where('site_id', '=', CURRENT_SITE)
 				->where('company_department_post_users.user_id', '=', $oUser->id)
 				->where('company_departments.deleted', '=', 0)
+				->groupBy('modules.path')
 				/*->join('company_department_modules', 'modules.id', '=', 'company_department_modules.module_id',
 				array(
 					array('AND' => array('company_department_id', '=', $oUser->user_group_id)),

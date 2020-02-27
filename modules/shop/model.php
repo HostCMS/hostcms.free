@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -79,6 +79,7 @@ class Shop_Model extends Core_Entity
 		'shop_discountcard' => array(),
 		'shop_discountcard_level' => array(),
 		'shop_price_setting' => array(),
+		'shop_filter_seo' => array(),
 	);
 
 	/**
@@ -344,6 +345,7 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Discountcards->deleteAll(FALSE);
 		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
 		$this->Shop_Price_Settings->deleteAll(FALSE);
+		$this->Shop_Filter_Seos->deleteAll(FALSE);
 
 		// Shop dir
 		Core_File::deleteDir($this->getPath());
@@ -1074,8 +1076,8 @@ class Shop_Model extends Core_Entity
 
 		if ($this->filter)
 		{
-			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
-			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id);
+			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id, '');
+			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id, '');
 
 			$Shop_Filter_Controller = new Shop_Filter_Controller($this);
 			$sTableName = $Shop_Filter_Controller->getTableName();

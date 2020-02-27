@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -37,9 +37,8 @@ class Informationsystem_Item_Property_Controller_Edit extends Property_Controlle
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oAddValueCheckbox = Admin_Form_Entity::factory('Checkbox')
-					->value(
-						is_null($object->id) ? 1 : 0
-					)
+					->value(1)
+					->checked(is_null($object->id))
 					->caption(Core::_("Informationsystem_Item.add_value"))
 					->name("add_value");
 

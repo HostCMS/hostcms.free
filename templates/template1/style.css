@@ -1879,3 +1879,53 @@ span.inner_thumbs {
 .filter .popup-filter > div:first-child {
   margin-bottom: 5px;
 }
+.hidden {
+  display: none !important;
+}
+.shop_coupon {
+  display: inline-block;
+}
+.shop_bonuses {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.discountcard-table {
+  width: 100%;
+}
+.discountcard-table tbody tr {
+  text-align: center;
+}
+.bonuses-wrapper {
+  display: flex;
+  height: 50vh;
+  align-items: stretch;
+  max-width: 1000px;
+  overflow-x: scroll;
+  margin-top: 20px;
+}
+.bonuses-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  margin-right: 2px;
+}
+.series-none {
+  background: wheat;
+}
+.series-bonuses {
+  background: salmon;
+  text-align: center;
+}
+.bonuses-container .date {
+  font-size: 9px;
+  margin-top: -15px;
+  color: #fff;
+  padding: 2px;
+}
+.bonuses-value {
+  font-size: 10px;
+  color: #fff;
+  margin-top: 5px;
+}

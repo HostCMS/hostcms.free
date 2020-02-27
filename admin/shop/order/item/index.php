@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -37,6 +37,9 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
+
+$siteuser_id = intval(Core_Array::getGet('siteuser_id'));
+$siteuser_id && $oAdmin_Form_Controller->Admin_View('Admin_Internal_View');
 
 if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('show_warehouse'))
@@ -256,6 +259,33 @@ if ($oAdminFormActionRecount && $oAdmin_Form_Controller->getAction() == 'recount
 	$Shop_Order_Item_Controller_Recount->shopOrder($oShop_Order);
 
 	$oAdmin_Form_Controller->addAction($Shop_Order_Item_Controller_Recount);
+}
+
+$oAdminFormActionSplit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('splitOrder');
+
+if ($oAdminFormActionSplit && $oAdmin_Form_Controller->getAction() == 'splitOrder')
+{
+	$oShop_Order_Item_Controller_Split = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Item_Controller_Split', $oAdminFormActionSplit
+	);
+
+	$oNew_Shop_Order = clone $oShop_Order;
+	$oNew_Shop_Order->guid = Core_Guid::get();
+	$oNew_Shop_Order->datetime = Core_Date::timestamp2sql(time());
+	$oNew_Shop_Order->payment_datetime = '0000-00-00 00:00:00';
+	$oNew_Shop_Order->status_datetime = '0000-00-00 00:00:00';
+	$oNew_Shop_Order->canceled = 0;
+	$oNew_Shop_Order->paid = 0;
+	$oNew_Shop_Order->save();
+
+	$oNew_Shop_Order->createInvoice();
+	$oNew_Shop_Order->save();
+
+	$oShop_Order_Item_Controller_Split->shopOrder($oNew_Shop_Order);
+
+	$oAdmin_Form_Controller->addAction($oShop_Order_Item_Controller_Split);
 }
 
 // Источник данных

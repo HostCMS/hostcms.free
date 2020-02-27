@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -154,7 +154,11 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 					array(
 						Core::_('Shop_Order_Item.order_item_type_caption0'),
 						Core::_('Shop_Order_Item.order_item_type_caption1'),
-						Core::_('Shop_Order_Item.order_item_type_caption2')
+						Core::_('Shop_Order_Item.order_item_type_caption2'),
+						Core::_('Shop_Order_Item.order_item_type_caption3'),
+						Core::_('Shop_Order_Item.order_item_type_caption4'),
+						Core::_('Shop_Order_Item.order_item_type_caption5'),
+						Core::_('Shop_Order_Item.order_item_type_caption6')
 					)
 				)
 				->name('type')

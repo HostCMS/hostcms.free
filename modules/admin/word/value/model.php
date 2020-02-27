@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Word_Value_Model extends Core_Entity
 {
@@ -25,6 +25,7 @@ class Admin_Word_Value_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'admin_language' => array(),
+		'admin_word' => array(),
 		'user' => array()
 	);
 	

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_List_Model extends Shop_Model
 {
@@ -173,7 +173,12 @@ class Shop_Item_Property_List_Model extends Shop_Model
 				->queryBuilder()
 				->join('shop_item_property_for_groups', 'shop_item_property_for_groups.shop_item_property_id', '=', 'shop_item_properties.id')
 				->where('shop_item_property_for_groups.shop_id', '=', $this->id)
-				->where('shop_item_property_for_groups.shop_group_id', '=', $shop_group_id);
+				->where('shop_item_property_for_groups.shop_group_id', is_array($shop_group_id) ? 'IN' : '=', $shop_group_id);
+				
+			is_array($shop_group_id)
+				&& $oProperties
+					->queryBuilder()
+					->groupBy('properties.id');
 		}
 
 		if (is_array($property_ids) && count($property_ids))

@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller extends Core_Servant_Properties
 {
@@ -206,7 +206,32 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 			if (!is_null($oShop_Item->id) && $oShop_Item->active)
 			{
-				$aTmp_Shop_Cart[] = $oShop_Cart;
+				// Проверять остаток для обычных товаров
+				if ($this->checkStock && $oShop_Item->type != 1)
+				{
+					$iRest = $oShop_Item->getRest() - $oShop_Item->getReserved();
+
+					// Reduce quantity
+					if ($iRest < $oShop_Cart->quantity)
+					{
+						$oShop_Cart->quantity = $iRest;
+						$oShop_Cart->save();
+					}
+
+					// Check new quantity
+					if ($oShop_Cart->quantity <= 0)
+					{
+						$oShop_Cart->delete();
+						$oShop_Cart = NULL;
+					}
+				}
+
+				!is_null($oShop_Cart)
+					&& $aTmp_Shop_Cart[] = $oShop_Cart;
+			}
+			else
+			{
+				$oShop_Cart->delete();
 			}
 		}
 
@@ -254,10 +279,30 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 					$oShop_Cart->shop_id = $shop_id;
 					$oShop_Cart->shop_warehouse_id = $aCartItem['shop_warehouse_id'];
 					$oShop_Cart->siteuser_id = 0;
-					$aShop_Cart[] = $oShop_Cart;
+
+					// Проверять остаток для обычных товаров
+					if ($this->checkStock && $oShop_Item->type != 1)
+					{
+						$iRest = $oShop_Item->getRest() - $oShop_Item->getReserved();
+
+						// Reduce quantity
+						if ($iRest < $oShop_Cart->quantity)
+						{
+							$oShop_Cart->quantity = $iRest;
+						}
+
+						// Check new quantity
+						if ($oShop_Cart->quantity <= 0)
+						{
+							$oShop_Cart = NULL;
+						}
+					}
+
+					!is_null($oShop_Cart)
+						&& $aShop_Cart[] = $oShop_Cart;
 				}
 			}
-			
+
 			!$isActive && Core_Session::close();
 		}
 
@@ -408,6 +453,10 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 			// Проверяем право пользователя добавить этот товар в корзину
 			if (in_array($oShop_Item->getSiteuserGroupId(), $aSiteuserGroups))
 			{
+				$this->quantity = $oShop_Item->type == 2
+					? floatval($this->quantity)
+					: intval($this->quantity);
+
 				// 1. Check STEP. DECIMAL, > 0, NOT $oShop_Item->quantity_step
 				if ($oShop_Item->quantity_step > 0)
 				{
@@ -443,17 +492,10 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 					}
 				}
 
-				// Если делимый товар
-				if ($oShop_Item->type == 2)
-				{
-					// Товар делимый, поэтому floatval()
-					$this->quantity = floatval($this->quantity);
-				}
-				else
-				{
-					// Товар обычный, поэтому intval()
-					$this->quantity = intval($this->quantity);
-				}
+				// Повторно после изменений quantity выше
+				$this->quantity = $oShop_Item->type == 2
+					? floatval($this->quantity)
+					: intval($this->quantity);
 
 				// Проверять остаток для обычных товаров
 				if ($this->checkStock && $oShop_Item->type != 1)

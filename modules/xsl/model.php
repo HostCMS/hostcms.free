@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Model extends Core_Entity
 {
@@ -285,7 +285,9 @@ class Xsl_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
+				$this->xsl_dir_id = Core_Array::get($aBackup, 'xsl_dir_id');
 				$this->description = Core_Array::get($aBackup, 'description');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 
 				$this->saveXslFile(Core_Array::get($aBackup, 'xsl'));

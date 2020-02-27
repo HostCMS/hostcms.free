@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -108,6 +108,12 @@ class Site_Model extends Core_Entity
 		'template_dir' => array(),
 		'shortlink' => array(),
 		'shortlink_dir' => array(),
+		'deal' => array(),
+		'deal_template' => array(),
+		'lead' => array(),
+		'lead_need' => array(),
+		'lead_maturity' => array(),
+		'lead_status' => array(),
 	);
 
 	/**
@@ -327,6 +333,20 @@ class Site_Model extends Core_Entity
 		{
 			$this->Shortlinks->deleteAll(FALSE);
 			$this->Shortlink_Dirs->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('deal'))
+		{
+			$this->Deals->deleteAll(FALSE);
+			$this->Deal_Templates->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('lead'))
+		{
+			$this->Leads->deleteAll(FALSE);
+			$this->Lead_Needs->deleteAll(FALSE);
+			$this->Lead_Maturities->deleteAll(FALSE);
+			$this->Lead_Statuses->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1704,6 +1724,15 @@ class Site_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		if ($this->https)
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-square badge-info')
+				->style('font-size: 10px !important;')
+				->value('HTTPS')
+				->execute();
+		}
+
 		$aSite_Aliases = $this->Site_Aliases->findAll();
 
 		if (count($aSite_Aliases))

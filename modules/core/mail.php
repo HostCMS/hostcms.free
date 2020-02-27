@@ -12,6 +12,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * 	->subject($subject)
  * 	->message($message_mail)
  * 	->contentType('text/plain')
+ * 	//->header('Cc', 'copy@email.com')
+ * 	//->header('Bcc', 'hidden-copy@email.com')
  * 	->header('X-HostCMS-Reason', 'Alert')
  * 	->header('Precedence', 'bulk')
  * 	->attach(array(
@@ -25,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Mail
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Mail
 {
@@ -410,6 +412,7 @@ abstract class Core_Mail
 	 *
 	 * @return mixed
 	 * @hostcms-event Core_Mail.onBeforeSend
+	 * @hostcms-event Core_Mail.onAfterPrepareSend
 	 */
 	public function send()
 	{
@@ -482,14 +485,14 @@ abstract class Core_Mail
 
 				// Change bound
 				$this->_bound = '---------==' . strtoupper(uniqid(time()));
-				
+
 				// _multipartRelated для почтовых рассылок, чтобы картинки были внутри письма
 				//$content .= 'Content-Type: ' . (count($this->_files) > 0 && $this->_multipartRelated ? 'multipart/related' : 'multipart/alternative') . ';';
 				$content .= "Content-Type: Multipart/Related;";
 				$content .= " boundary=\"{$this->_bound}\"";
 				$content .= $sDoubleSeparators;
 			}
-			
+
 			$content .= "--{$this->_bound}{$sSingleSeparator}";
 			$content .= "Content-Type: {$this->_contentType}; charset=UTF-8{$sSingleSeparator}";
 			$content .= "Content-Transfer-Encoding: base64";
@@ -543,6 +546,8 @@ abstract class Core_Mail
 			? '=?UTF-8?B?' . base64_encode($this->_subject) . '?='
 			: '';
 
+		Core_Event::notify('Core_Mail.onAfterPrepareSend', $this, array($sTo, $subject, $content));
+
 		return $this->_send($sTo, $subject, $content);
 	}
 
@@ -585,7 +590,7 @@ abstract class Core_Mail
 
 		return $this;
 	}
-	
+
 	/**
 	 * Convert $this->_headers to string with $this->_separator as separator
 	 * @return string

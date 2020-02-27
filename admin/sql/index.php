@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -116,33 +116,30 @@ if ($formSettings['action'] == 'duplicate')
 			$aIndexes = array();
 			foreach ($aTableIndexes as $aIndex)
 			{
-				$aIndexes[$aIndex['Key_name']][] = $aIndex['Column_name'];
+				$aIndexes[$aIndex['Key_name']][] = $aIndex['Column_name'] . ($aIndex['Sub_part'] != '' ? ' (' . $aIndex['Sub_part'] . ')' : '');
 			}
+
+			$aToDelete = array();
 
 			while ($aIndexRow1 = array_shift($aIndexes))
 			{
-				$aToDelete = array();
-
 				foreach ($aIndexes as $aIndexKey2 => $aIndexRow2)
 				{
-					$aArray_intersect = array_intersect($aIndexRow1, $aIndexRow2);
-
-					// Пересеченный массив идентичен двум исходным
-					if (count($aArray_intersect) == count($aIndexRow1) && count($aArray_intersect) == count($aIndexRow2))
+					if ($aIndexRow1 == $aIndexRow2)
 					{
 						!in_array($aIndexKey2, $aToDelete) && $aToDelete[] = $aIndexKey2;
 					}
 				}
+			}
 
-				foreach ($aToDelete as $sIndexName)
-				{
-					Core_Message::show(Core::_('Sql.drop_index', $sIndexName, $row->Name), 'info');
+			foreach ($aToDelete as $sIndexName)
+			{
+				Core_Message::show(Core::_('Sql.drop_index', $sIndexName, $row->Name), 'info');
 
-					$oCore_DataBase->setQueryType(5)
-						->query("ALTER TABLE {$sTableName} DROP INDEX " . $oCore_DataBase->quoteColumnName($sIndexName));
+				$oCore_DataBase->setQueryType(5)
+					->query("ALTER TABLE {$sTableName} DROP INDEX " . $oCore_DataBase->quoteColumnName($sIndexName));
 
-					$iCount++;
-				}
+				$iCount++;
 			}
 		}
 		catch (Exception $e)

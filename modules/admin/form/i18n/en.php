@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -142,4 +142,6 @@ return array(
 	'autocomplete_mode1' => 'Вхождение с начала',
 	'autocomplete_mode2' => 'Вхождение с конца',
 	'autocomplete_mode3' => 'Точное совпадение',
+
+	'tabProperties' => 'Properties',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_File
 {
@@ -521,7 +521,7 @@ class Core_File
 		$aPath = array();
 		for ($i = 0; $i < $level; $i ++)
 		{
-			$aPath[$i] = $sId{$i};
+			$aPath[$i] = $sId[$i];
 		}
 
 		if ($type == 0)
@@ -601,7 +601,7 @@ class Core_File
 				array('%file' => Core_Exception::cutRootPath($file)));
 		}
 
-		$fileName = str_replace(array("\r", "\n"), '', $fileName);
+		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);
 
 		header("Pragma: public");
 		header("Content-Type: " . Core_Mime::getFileMime($file));

@@ -6,7 +6,7 @@
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Structure',
@@ -83,7 +83,6 @@ return array(
 	'sitemap_priority_0_8' => "0.8",
 	'sitemap_priority_0_9' => "0.9",
 	'sitemap_priority_above_normal' => "1 Highest priority",
-	'additional_params_tab' => 'Additional properties',
 	'all' => 'All',
 	'like_parent' => 'Like parent',
 	// Константы, используемые в классе

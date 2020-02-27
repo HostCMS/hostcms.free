@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -166,7 +166,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
-				->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'));
+				->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'))
+				->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$title = $this->_object->id
 					? Core::_('Property.edit_title', $this->_object->name)
@@ -302,7 +303,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow9->add($oDefault_Value_DateTime);
 
 				$oDefault_Value_Checkbox = Admin_Form_Entity::factory('Checkbox')
-					->value($this->_object->default_value)
+					->value(1)
+					->checked($this->_object->default_value == 1)
 					->caption(Core::_('Property.default_value'))
 					->name('default_value_checked')
 					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12'));
@@ -326,7 +328,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('tag_name'), $oMainRow11)
 					->move($this->getField('sorting'), $oMainRow11)
-					->move($this->getField('multiple'), $oMainRow12);
+					->move($this->getField('multiple'), $oMainRow12)
+					->move($this->getField('obligatory'), $oMainRow13);
 
 				$oFormatTab
 					->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'))

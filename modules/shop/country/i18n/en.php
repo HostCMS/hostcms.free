@@ -6,14 +6,12 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Countries',
 	'shop_form_menu_countries' => "Countries",
 	'show_country_link' => "Counties reference",
-	'countries_form_menu' => "Country",
-	'countries_form_menu_add' => "Add",
 	'country_add_form_title' => "Add country information",
 	'country_edit_form_title' => "Edit country information",
 	'name' => "Country name",

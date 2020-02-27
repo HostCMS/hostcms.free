@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_View extends Admin_Form_Action_Controller
 {
@@ -97,7 +97,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 						</div>
 						<div class="col-lg-5 col-md-8 col-sm-12 profile-info">
 							<div class="header-fullname"><?php echo htmlspecialchars($this->_object->getFullName())?></div>
-							<div class="header-information"><?php echo $this->_object->description?></div>
+							<div class="header-information"><?php echo htmlspecialchars($this->_object->description)?></div>
 							<?php
 							if (strlen($this->_object->address))
 							{

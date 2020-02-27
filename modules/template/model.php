@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -973,7 +973,10 @@ class Template_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
+				$this->template_dir_id = Core_Array::get($aBackup, 'template_dir_id');
+				$this->template_id = Core_Array::get($aBackup, 'template_id');
 				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 
 				$this->saveTemplateFile(Core_Array::get($aBackup, 'template'));

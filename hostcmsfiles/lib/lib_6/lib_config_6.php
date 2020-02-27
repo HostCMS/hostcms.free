@@ -62,6 +62,8 @@ if (Core_Array::getRequest('fast_filter'))
 
 	if ($oShop->filter)
 	{
+		$Shop_Controller_Show->modificationsList(TRUE);
+
 		// В корне выводим из всех групп
 		if ($Shop_Controller_Show->group == 0)
 		{
@@ -80,6 +82,16 @@ if (Core_Array::getRequest('fast_filter'))
 			elseif (strpos($key, 'price_') === 0)
 			{
 				$Shop_Controller_Show->removeFilter('price');
+			}
+		}
+
+		// Remove all checkboxes
+		$aFilterProperties = $Shop_Controller_Show->getFilterProperties();
+		foreach ($aFilterProperties as $propertyId => $aTmpProperties)
+		{
+			if (isset($aTmpProperties[0]) && $aTmpProperties[0][0]->type == 7)
+			{
+				$Shop_Controller_Show->removeFilter('property', $propertyId);
 			}
 		}
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Model extends Core_Entity
 {
@@ -98,32 +98,9 @@ class Admin_Form_Action_Model extends Core_Entity
 	}
 
 	/**
-	 * Get form action by name
-	 * @param String $name name
-	 * @return Admin_Form_Action
-	 */
-	public function getByName($name)
-	{
-		$this->queryBuilder()
-			// т.к. с учетом заданных в связи условий формы
-			//->clear()
-			->where('name', '=', $name)
-			->limit(1);
-
-		$aAdmin_Form_Actions = $this->findAll();
-
-		if (isset($aAdmin_Form_Actions[0]))
-		{
-			return $aAdmin_Form_Actions[0];
-		}
-
-		return NULL;
-	}
-
-	/**
 	 * Get allowed actions for user
 	 * @param User_Model $oUser User object
-	 * @return array Admin_Form_Action
+	 * @return array
 	 */
 	public function getAllowedActionsForUser(User_Model $oUser)
 	{
@@ -142,6 +119,43 @@ class Admin_Form_Action_Model extends Core_Entity
 		$aAdmin_Form_Actions = $this->findAll();
 
 		return $aAdmin_Form_Actions;
+	}
+
+	/**
+	 * Cache for checkAllowedActionForUser
+	 * @var array
+	 */
+	protected $_cacheCheckAllowedActionForUser = array();
+
+	/**
+	 * Check allowed action for user
+	 * @param User_Model $oUser User object
+	 * @param string $actionName
+	 * @return boolean
+	 */
+	public function checkAllowedActionForUser(User_Model $oUser, $actionName)
+	{
+		if (!isset($this->_cacheCheckAllowedActionForUser[$oUser->id][$actionName]))
+		{
+			if ($oUser->superuser != 1)
+			{
+				$this
+					->queryBuilder()
+					->select('admin_form_actions.*')
+					->join('company_department_action_accesses', 'admin_form_actions.id', '=', 'company_department_action_accesses.admin_form_action_id')
+					->join('company_department_post_users', 'company_department_action_accesses.company_department_id', '=', 'company_department_post_users.company_department_id')
+					->where('company_department_post_users.user_id', '=', $oUser->id)
+					->where('company_department_action_accesses.site_id', '=', CURRENT_SITE)
+					->where('admin_form_actions.name', '=', $actionName)
+					->limit(1);
+			}
+
+			$aAdmin_Form_Actions = $this->findAll();
+
+			$this->_cacheCheckAllowedActionForUser[$oUser->id][$actionName] = isset($aAdmin_Form_Actions[0]);
+		}
+
+		return $this->_cacheCheckAllowedActionForUser[$oUser->id][$actionName];
 	}
 
 	/**

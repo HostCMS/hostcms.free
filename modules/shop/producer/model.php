@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -24,7 +24,8 @@ class Shop_Producer_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'shop_item' => array()
+		'shop_item' => array(),
+		'shop_filter_seo' => array(),
 	);
 
 	/**
@@ -390,5 +391,27 @@ class Shop_Producer_Model extends Core_Entity
 			->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getProducerHref());
 
 		return $this;
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return self
+	 * @hostcms-event shop_producer.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Shop_Filter_Seos->deleteAll(FALSE);
+
+		return parent::delete($primaryKey);
 	}
 }

@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'authorization_form_title' => 'Backend',
@@ -107,4 +107,6 @@ return array(
 	'bookmarks' => 'Bookmarks',
 	'sound' => 'Sound',
 	'placeholderGlobalSearch' => 'Search',
+	
+	'none' => 'None',
 );

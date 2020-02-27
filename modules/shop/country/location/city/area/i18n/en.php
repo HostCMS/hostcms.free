@@ -6,13 +6,11 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Districts of city',
 	'show_city_area_title' => "District of city/town \"%s\"",
-	'show_city_area_link' => "District",
-	'show_city_area_link_add' => "Add",
 	'add_city_area_tytle' => "Add district of city/town",
 	'edit_city_area_tytle' => "Edit district of city/town",
 	'name' => "Name",

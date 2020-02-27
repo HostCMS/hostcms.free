@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Entity extends Core_Html_Entity
 {
@@ -161,6 +161,7 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 		'email' => '/^[a-zA-Z0-9_\.\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$/',
 		// 'url' => '/^([A-Za-z]+:\/\/)?([A-Za-z0-9]+(:[A-Za-z0-9]+)?@)?([a-zA-Z0-9][-A-Za-z0-9.]*\.[A-Za-z]{2,7})(:[0-9]+)?(\/[-_.A-Za-z0-9]+)?(\?[A-Za-z0-9%&=]+)?(#\w+)?$/',
 		'url' => "/^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/",
+		'integer' => '/^[-+]?[0-9]*$/',
 		'positiveInteger' => '/^(0*[1-9])+[0-9]*$/',
 		'path' => '/^[а-яіїєґА-ЯІЇЄҐёЁA-Za-z0-9_ \-\.\/]+$/',
 		'latinBase' => '/^[A-Za-z0-9_\-]+$/',
@@ -180,48 +181,25 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 	}
 
 	/**
-	 * Apply format for field
+	 * Get allowed properties
+	 * @return array
 	 */
-	protected function _showFormat()
+	public function getAttrsString()
 	{
-		if (!is_null($this->format))
-		{
-			// Блок для ошибок выводим только при указании условий формата
-			?><div id="<?php echo $this->id?>_error" class="fieldcheck-error"></div><?php
+		$aAttr = parent::getAttrsString();
 
-			$array_field = array();
-			$message_field = array();
+		if (isset($this->format) && !is_null($this->format))
+		{
+			$aAttr[] = 'data-required="1"';
 
 			if (isset($this->format['minlen']['value']))
 			{
-				$array_field[] = "'minlen': " . intval($this->format['minlen']['value']);
+				$aAttr[] = "data-min=\"" . intval($this->format['minlen']['value']) . "\"";
 			}
 
 			if (isset($this->format['maxlen']['value']))
 			{
-				$array_field[] = "'maxlen': " . intval($this->format['maxlen']['value']);
-			}
-
-			if (isset($this->format['reg']['value']))
-			{
-				$array_field[] = "'reg': " . $this->format['reg']['value'];
-
-				// Было указано сообщение для формата
-				if (isset($this->format['reg']['message']))
-				{
-					$message_field[] = "'reg': '" . addslashes($this->format['reg']['message']) . "'";
-				}
-			}
-
-			if (isset($this->format['fieldEquality']['value']))
-			{
-				$array_field[] = "'fieldEquality': '" . $this->format['fieldEquality']['value'] . "'";
-
-				// Было указано сообщение для формата
-				if (isset($this->format['fieldEquality']['message']))
-				{
-					$message_field[] = "'fieldEquality': '" . addslashes($this->format['fieldEquality']['message']) . "'";
-				}
+				$aAttr[] = "data-max=\"" . intval($this->format['maxlen']['value']) . "\"";
 			}
 
 			if (isset($this->format['lib']['value']))
@@ -231,25 +209,50 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 				// Соответствие было найдено
 				if (!is_null($reg))
 				{
-					$array_field[] = "'reg': " . $reg;
+					$aAttr[] = "data-reg=\"" . htmlspecialchars(trim($reg, '/')) . "\"";
 
 					// Было указано сообщение для формата
 					if (isset($this->format['lib']['message']))
 					{
-						$message_field[] = "'reg': '" . addslashes($this->format['lib']['message']) . "'";
+						$aAttr[] = "data-reg-message=\"" . htmlspecialchars($this->format['lib']['message']) . "\"";
 					}
 				}
 			}
-			
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
-			
-			?><script><?php
-			?>fieldType['<?php echo $windowId?>']['<?php echo $this->id?>'] = {<?php echo implode(",\n", $array_field)?>};<?php
-			if (count($message_field) > 0)
+			elseif (isset($this->format['reg']['value']))
 			{
-				?>fieldMessage['<?php echo $windowId?>']['<?php echo $this->id?>'] = {<?php echo implode(",\n", $message_field)?>};<?php
+				$aAttr[] = "data-reg=\"" . htmlspecialchars($this->format['reg']['value']) . "\"";
+
+				// Было указано сообщение для формата
+				if (isset($this->format['reg']['message']))
+				{
+					$aAttr[] = "data-reg-message=\"" . htmlspecialchars($this->format['reg']['message']) . "\"";
+				}
 			}
-			?></script><?php
+
+			if (isset($this->format['fieldEquality']['value']))
+			{
+				$aAttr[] = "data-equality=\"" . htmlspecialchars($this->format['fieldEquality']['value']) . "\"";
+
+				// Было указано сообщение для формата
+				if (isset($this->format['fieldEquality']['message']))
+				{
+					$aAttr[] = "data-equality-message=\"" . htmlspecialchars($this->format['fieldEquality']['message']) . "\"";
+				}
+			}
+		}
+
+		return $aAttr;
+	}
+
+	/**
+	 * Apply format for field
+	 */
+	protected function _showFormat()
+	{
+		if (!is_null($this->format))
+		{
+			// Блок для ошибок выводим только при указании условий формата
+			?><div id="<?php echo $this->id?>_error" class="fieldcheck-error"></div><?php
 		}
 	}
 }

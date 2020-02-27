@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {
@@ -102,7 +102,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 				if ($columnName == 'adminPrice')
 				{
-					$sInputName = 'apply_check_1_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
+					$sInputName = 'apply_check_' . $this->_datasetId . '_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
 
 					$value = Core_Array::getPost($sInputName);
 
@@ -121,7 +121,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 				}
 				elseif ($columnName == 'adminRest')
 				{
-					$sInputName = 'apply_check_1_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
+					$sInputName = 'apply_check_' . $this->_datasetId . '_' . $this->_object->getPrimaryKey() . '_fv_' . $oAdmin_Form_Field->id;
 
 					$value = Core_Array::getPost($sInputName);
 
@@ -159,7 +159,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
 
-			if ($this->_itemsCount == count($aChecked[1]))
+			if ($this->_itemsCount == count($aChecked[$this->_datasetId]))
 			{
 				// Проводки, если есть
 				!is_null($this->_oShop_Price_Setting) && $this->_oShop_Price_Setting->post();

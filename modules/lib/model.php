@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Model extends Core_Entity
 {
@@ -49,7 +49,7 @@ class Lib_Model extends Core_Entity
 	 * @param boolean
 	 */
 	protected $_hasRevisions = TRUE;
-	
+
 	/**
 	 * Constructor.
 	 * @param int $id entity ID
@@ -175,12 +175,12 @@ class Lib_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		if (Core::moduleIsActive('revision'))
 		{
 			Revision_Controller::delete($this->getModelName(), $this->id);
-		}		
-		
+		}
+
 		// Удаляем код и настройки
 		try
 		{
@@ -323,12 +323,12 @@ class Lib_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
 
 		$eventResult = Core_Event::getLastReturn();
-		
+
 		if (!is_null($eventResult))
 		{
 			return $eventResult;
 		}
-		
+
 		$oSearch_Page->text = $this->name . ' ' . $this->description;
 
 		$oSearch_Page->title = $this->name;
@@ -348,7 +348,7 @@ class Lib_Model extends Core_Entity
 
 		return $oSearch_Page;
 	}
-	
+
 	/**
 	 * Backup revision
 	 * @return self
@@ -388,7 +388,9 @@ class Lib_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
+				$this->lib_dir_id = Core_Array::get($aBackup, 'lib_dir_id');
 				$this->description = Core_Array::get($aBackup, 'description');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 				$this->save();
 
 				$this->saveLibFile(Core_Array::get($aBackup, 'lib'));
@@ -397,5 +399,14 @@ class Lib_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, $this->id, 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa fa-upload"></i></a>';
 	}
 }

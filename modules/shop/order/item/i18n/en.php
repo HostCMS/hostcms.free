@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Order items',
@@ -30,6 +30,10 @@ return array(
 	'order_item_type_caption0' => 'Products',
 	'order_item_type_caption1' => 'Delivery',
 	'order_item_type_caption2' => 'Replenishment of account',
+	'order_item_type_caption3' => 'Discount on order amount',
+	'order_item_type_caption4' => 'Discount on discount card',
+	'order_item_type_caption5' => 'Write off bonuses',
+	'order_item_type_caption6' => 'Partial payment from personal account',
 	'edit_success' => "Product information in order added successfully",
 	'markDeleted_success' => "Product information in order deleted successfully!",
 	'replenishment_account' => 'Replenishment of "%s" account in shop "%s"',
@@ -37,6 +41,7 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'rate' => 'Tax rate',
 	'recount_discounts' => 'Recount discounts',
-	'recountDiscount_success' => 'Discounts recounted successfully!',	
-	'apply_success' => 'Product information in order changed successfully',	
+	'recountDiscount_success' => 'Discounts recounted successfully!',
+	'apply_success' => 'Product information in order changed successfully',
+	'splitOrder_success' => 'Order split successfully!',
 );

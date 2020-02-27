@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Module
 {
@@ -463,19 +463,9 @@ abstract class Core_Module
 	 */
 	public function getReports($aFields = array('caption', 'captionHTML'), $aOptions = array())
 	{
-		$aReturn = array();
-
 		Core_Event::notify(get_class($this) . '.onBeforeGetReports', $this, array($this->_reports));
 
-		foreach ($this->_reports as $reportName => $callback)
-		{
-			if (is_callable($callback))
-			{
-				$aReturn[$reportName] = call_user_func($callback, $aFields, $aOptions);
-			}
-		}
-
-		return $aReturn;
+		return $this->_reports;
 	}
 
 	/**

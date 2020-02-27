@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online store orders',
@@ -117,9 +117,7 @@ return array(
 
 	'property_menu' => 'Properties',
 	'property_menu_add' => 'Add',
-	'property_title' => 'External properties',
 	'show_list_of_properties_title' => "Properties list of online store order \"%s\"",
-	'tab_properties' => "Additional properties",
 	'prefix' => 'Prefix',
 	'display' => 'Display mode of property',
 
@@ -155,4 +153,7 @@ return array(
 	'shop_order_item_warehouse' => 'Warehouse',
 	'shop_order_item_id' => 'ID',
 	'shop_order_item_total' => 'Total:',
+
+	'select_shop' => 'Select shop',
+	'select_shop_button' => 'Select',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -168,13 +168,11 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21')), $oMainRow10);
 
 		// Флаг установки количества товара на складе
-		$oShopItemCountCheckBox = Admin_Form_Entity::factory('Checkbox');
-		$oShopItemCountCheckBox
-			->value(
-				is_null($object->id) ? 1 : 0
-			)
+		$oShopItemCountCheckBox = Admin_Form_Entity::factory('Checkbox')
 			->caption(Core::_("Shop_Warehouse.warehouse_default_count"))
-			->name("warehouse_default_count");
+			->name("warehouse_default_count")
+			->value(1)
+			->checked(is_null($object->id));
 
 		$oMainRow11->add($oShopItemCountCheckBox);
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_Entity_Lefttabs
 {
@@ -46,7 +46,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_
 				<div class="tab-content"><?php
 					foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 					{
-						?><div class="tab-pane <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo $windowId . '-tab-' . $tab_id ?>"><?php $oAdmin_Form_Tab_Entity->execute();?></div><?php
+						?><div class="tab-pane <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo $windowId . '-tab-' . $tab_id ?>"><?php $oAdmin_Form_Tab_Entity->execute()?></div><?php
 						$oAdmin_Form_Tab_Entity->active && $tab_id++;
 					}
 			?></div><?php

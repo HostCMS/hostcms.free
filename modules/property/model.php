@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -61,7 +61,8 @@ class Property_Model extends Core_Entity
 		'informationsystem_group_property' => array(),
 		'shop_item_property' => array(),
 		'shop_group_property' => array(),
-		'shop_order_property' => array()
+		'shop_order_property' => array(),
+		'deal_template_property' => array()
 	);
 
 	/**
@@ -328,6 +329,11 @@ class Property_Model extends Core_Entity
 			$nodeName = 'Shop_Order';
 			$methodName = 'getOrderPath';
 		}
+		elseif (Core::moduleIsActive('deal') && !is_null($this->Deal_Template_Property->id))
+		{
+			$nodeName = 'Deal';
+			$methodName = 'getPath';
+		}
 
 		if (!is_null($nodeName))
 		{
@@ -357,12 +363,22 @@ class Property_Model extends Core_Entity
 
 		// Relations
 		$this->Structure_Property->delete();
-		$this->Informationsystem_Item_Property->delete();
-		$this->Informationsystem_Group_Property->delete();
-		$this->Shop_Item_Property->delete();
-		$this->Shop_Group_Property->delete();
-		$this->Shop_Order_Property->delete();
+
+		if (Core::moduleIsActive('informationsystem'))
+		{
+			$this->Informationsystem_Item_Property->delete();
+			$this->Informationsystem_Group_Property->delete();
+		}
+
+		if (Core::moduleIsActive('shop'))
+		{
+			$this->Shop_Item_Property->delete();
+			$this->Shop_Group_Property->delete();
+			$this->Shop_Order_Property->delete();
+		}
+
 		Core::moduleIsActive('siteuser') && $this->Siteuser_Property->delete();
+		Core::moduleIsActive('deal') && $this->Deal_Template_Property->delete();
 
 		return parent::delete($primaryKey);
 	}
@@ -615,5 +631,29 @@ class Property_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterChangeMultiple', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if (!is_null($this->dataTmp) && $this->Shop_Item_Property->filter)
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-hostcms badge-square gray pull-right')
+				->value('<i class="fa fa-filter fa-fw"></i>')
+				->execute();
+		}
+
+		if ($this->obligatory)
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->value('<i class="fa fa-asterisk fa-fw gray"></i>')
+				->execute();
+		}
 	}
 }

@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -136,12 +136,17 @@ class Core_Image_Imagick extends Core_Image
 			if ($ext == 'jpg' || $ext == 'jpeg')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_JPEG);
-				$oImagick->setImageCompressionQuality(is_null($quality) ? JPG_QUALITY : intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('JPG_QUALITY') ? JPG_QUALITY : 60) : intval($quality));
 			}
 			elseif ($ext == 'png')
 			{
 				$oImagick->setImageCompression(Imagick::COMPRESSION_ZIP);
-				$oImagick->setImageCompressionQuality(is_null($quality) ? PNG_QUALITY : intval($quality));
+				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('PNG_QUALITY') ? PNG_QUALITY : 6) : intval($quality));
+			}
+			elseif ($ext == 'webp')
+			{
+				$oImagick->setImageFormat('webp');
+				$oImagick->setImageCompressionQuality(is_null($quality) ? (defined('WEBP_QUALITY') ? WEBP_QUALITY : 80) : intval($quality));
 			}
 			elseif ($ext == 'gif'){}
 			else
@@ -168,6 +173,7 @@ class Core_Image_Imagick extends Core_Image
 
 			// Удаляем метаданные
 			$oImagick->stripImage();
+
 			if ($preserveAspectRatio)
 			{
 				$oImagick->writeImage($targetFile);
@@ -188,6 +194,7 @@ class Core_Image_Imagick extends Core_Image
 				$oImagick->clear();
 				$oImagick->destroy();
 			}
+
 			@chmod($targetFile, CHMOD_FILE);
 		}
 		else

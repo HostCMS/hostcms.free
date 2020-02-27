@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Sitemap extends Core_Servant_Properties
 {
@@ -35,6 +35,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		'showShopItems',
 		'showModifications',
 		'showShopTags',
+		'showShopFilter',
 		'rebuildTime',
 		'defaultProtocol',
 		'urlset',
@@ -42,7 +43,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		'createIndex',
 		'perFile',
 		'fileName',
-		'multipleFileName'
+		'multipleFileName',
 	);
 
 	/**
@@ -95,6 +96,8 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$this->fileName = 'sitemap-%d.xml';
 		$this->multipleFileName = 'sitemap-%d-%d.xml';
+
+		$this->showShopFilter = TRUE;
 	}
 
 	/**
@@ -595,6 +598,15 @@ class Core_Sitemap extends Core_Servant_Properties
 				$iFrom += $this->limit;
 			}
 			while ($iFrom < $maxId);
+		}
+
+		if ($this->showShopFilter)
+		{
+			$aShop_Filter_Seos = $oShop->Shop_Filter_Seos->getAllByActive(1, FALSE);
+			foreach ($aShop_Filter_Seos as $oShop_Filter_Seo)
+			{
+				$this->addNode($path . $oShop_Filter_Seo->getUrl(), $oStructure->changefreq, $oStructure->priority, $oShop_Filter_Seo);
+			}
 		}
 
 		return $this;

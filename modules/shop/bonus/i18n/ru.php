@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Бонусы',
@@ -35,5 +35,12 @@ return array(
 	'item_bonus_name' => "Название бонуса",
 	'description' => "Описание бонуса",
 	'bonus_transaction_name' => 'Бонусы при оплате заказа %s',
-	'paid_by_bonuses' => 'Оплата бонусами с лицевого счета',
+	'paid_by_bonuses' => 'Бонусы',
+	'min_amount' => 'Минимальная сумма',
+	'accrual' => 'Начислить',
+	'from' => 'с',
+	'through' => 'через',
+	'accrual_date' => 'Дата начисления',
+	'accrual_days' => 'Через (дней)',
+	'expire_days' => 'На (дней)',
 );

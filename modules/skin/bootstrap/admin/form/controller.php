@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -111,7 +111,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
-					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
 					{
 						$field = $oAdmin_Form_Field->name;
 
@@ -172,7 +172,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
-					if ($oAdmin_Form_Field->allow_filter || $oAdmin_Form_Field->view == 1)
+					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
 					{
 						$field = $oAdmin_Form_Field->name;
 
@@ -256,7 +256,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 
 		Core::factory('Core_Html_Entity_Select')
 			->class('form-control input-sm')
-			->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
+			->onchange("mainFormLocker.unlock(); $.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', limit: this.options[this.selectedIndex].value, view: '{$view}', windowId : '{$windowId}'}); return false")
 			->options($this->_onPage)
 			->value($sCurrentValue)
 			->execute();
@@ -290,6 +290,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	{
 		if (count($this->viewList) > 1)
 		{
+			$this->view == '' && $this->view = reset($this->viewList);
+			
 			?><div class="btn-group btn-view-selector pull-left"><?php
 			foreach ($this->viewList as $viewName => $className)
 			{
@@ -298,18 +300,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				?><a id="<?php echo htmlspecialchars($viewName)?>" onclick="<?php echo $onclick?>" class="btn btn-default <?php if ($viewName == $this->view) { echo 'active'; }?>" data-view="<?php echo htmlspecialchars($viewName)?>"><?php echo Core::_('Admin_Form.' . $viewName)?></a><?php
 			}
 			?></div><?php
-
-			/*if (1==0)
-			{
-			?><div class="view-selector pull-left"><?php
-			foreach ($this->viewList as $viewName => $className)
-			{
-				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, $viewName);
-
-				?><input type="radio" onclick="<?php echo $onclick?>" id="<?php echo htmlspecialchars($viewName)?>" data-view="<?php echo htmlspecialchars($viewName)?>" name="selector" <?php if ($viewName == $this->view) { echo 'checked="checked"'; }?> /><label for="<?php echo htmlspecialchars($viewName)?>"><?php echo Core::_('Admin_Form.' . $viewName)?></label><?php
-			}
-			?></div><?php
-			}*/
 		}
 
 		return $this;

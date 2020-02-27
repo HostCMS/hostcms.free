@@ -11,8 +11,8 @@ $sCmsFolderTemporaryDirectory = CMS_FOLDER . $sMonthTemporaryDirectory;
 // Магазин для выгрузки
 $oShop = Core_Entity::factory('Shop')->find(Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
-// Размер блока выгружаемых данных (1000000 = 1 мБ)
-$iFileLimit = 1000000;
+// Размер блока выгружаемых данных (10000000 = 10 мБ)
+$iFileLimit = 10000000;
 
 // Логировать обмен
 $bDebug = TRUE;
@@ -94,16 +94,16 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 
 	if ($sType == 'catalog')
 	{
+		$bDebug && Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write('1С, удаление директорий предыдущих месяцев');
+
 		// Удаление директорий обмена за предыдущие месяцы
 		for ($i = 1; $i <= 12; $i++)
 		{
 			if ($currentMonth != $i)
 			{
 				$sTmpDir = CMS_FOLDER . $sTemporaryDirectory . 'month-' . $i;
-
-				$bDebug && Core_Log::instance()->clear()
-					->status(Core_Log::$MESSAGE)
-					->write('1С, удаление директорий предыдущего месяца ' . $i);
 
 				// Удаляем файлы предыдущего месяца
 				if (is_dir($sTmpDir)
@@ -118,10 +118,6 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 		// Удаление XML файлов
 		if (is_dir($sCmsFolderTemporaryDirectory))
 		{
-			$bDebug && Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write('1С, удаление XML-файлов предыдущего обмена');
-
 			try
 			{
 				clearstatcache();
@@ -138,7 +134,7 @@ if (($sType == 'catalog' || $sType == 'sale') && $sMode == 'checkauth')
 							{
 								$bDebug && Core_Log::instance()->clear()
 									->status(Core_Log::$MESSAGE)
-									->write('1С, удаление файла ' . $pathName);
+									->write('1С, удаление XML-файла предыдущего обмена ' . $pathName);
 
 								Core_File::delete($pathName);
 							}
@@ -183,7 +179,7 @@ elseif ($sType == 'catalog' && $sMode == 'file' && ($sFileName = Core_Array::get
 
 	if (is_file($sFullFileName)
 		// Размер меньше блока или прошло 5 минут с даты последнего изменения
-		&& (filesize($sFullFileName) < $iFileLimit * 0.95 || (filemtime($sFullFileName) + 60*5) < time())
+		&& (filesize($sFullFileName) < $iFileLimit * 0.95 || (filemtime($sFullFileName) + 60 * 5) < time())
 	)
 	{
 		$bDebug && Core_Log::instance()->clear()
@@ -214,7 +210,9 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 
 	try
 	{
-		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sCmsFolderTemporaryDirectory . $sFileName);
+		$sFullPath = $sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName);
+
+		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullPath);
 		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
 		$oShop_Item_Import_Cml_Controller->itemDescription = 'text';
 		$oShop_Item_Import_Cml_Controller->iShopGroupId = 0;
@@ -231,22 +229,23 @@ elseif ($sType == 'catalog' && $sMode == 'import' && !is_null($sFileName = Core_
 		//$oShop_Item_Import_Cml_Controller->searchIndexation = TRUE;
 		$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
+		$bDebug && Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write('1С, status: ' . $aReturn['status'] . ', timeout: ' . $oShop_Item_Import_Cml_Controller->timeout . ', type=catalog, mode=import, file=' . $sFileName . ', size=' . Core_File::filesize($sFullPath));
+
 		if ($aReturn['status'] == 'success')
 		{
 			$bDebug && Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write('1С, status: ' . $aReturn['status'] . ', timeout: ' . $oShop_Item_Import_Cml_Controller->timeout . ', type=catalog, mode=import, file=' . $sFileName . ', DELETE FILE');
+				->write('1С, Delete file: ' . $sFileName);
 
-			Core_File::delete($sCmsFolderTemporaryDirectory . Core_File::filenameCorrection($sFileName));
-		}
-		else
-		{
-			$bDebug && Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write('1С, status: ' . $aReturn['status'] . ', timeout: ' . $oShop_Item_Import_Cml_Controller->timeout . ', type=catalog, mode=import, file=' . $sFileName . ', CONTINUE ...');
+			// Перед удалением делаем копию файла для отладки
+			//Core_File::copy($sFullPath, $sFullPath . time());
+
+			Core_File::delete($sFullPath);
 		}
 
-		echo "{$BOM}" . $aReturn['status'];
+		echo $BOM . $aReturn['status'];
 	}
 	catch(Exception $exc)
 	{

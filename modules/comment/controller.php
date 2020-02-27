@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Controller
 {
@@ -21,7 +21,7 @@ class Comment_Controller
 		{
 			self::$_config = Core_Config::instance()->get('comment_config', array()) + array(
 				'gradeStep' => 1,
-				'gradeLimit' => 10,
+				'gradeLimit' => 5,
 			);
 		}
 		

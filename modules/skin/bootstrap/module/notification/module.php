@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -87,7 +87,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 
 					$oNotifications->queryBuilder()
 						->select('notifications.*', array('notification_users.read', 'read'))
-						->orderBy('notifications.id', 'ASC');
+						->orderBy('notifications.id', 'DESC')
+						->limit(30);
 
 					// При наличии ранее загруженных уведомлений загружаем новые и непрочитанные
 					if ($iLastNotificationId)
@@ -109,8 +110,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					{
 						$aNotification = array(
 							'id' => $oNotification->id,
-							'title' => htmlspecialchars(strval($oNotification->title)), // NULL => ''
-							'description' => htmlspecialchars(strval($oNotification->description)), // NULL => ''
+							'title' => strval($oNotification->title), // NULL => ''
+							'description' => strval($oNotification->description), // NULL => ''
 							'datetime' => Core_Date::sql2datetime($oNotification->datetime),
 							'read' => $oNotification->read
 						);
@@ -148,10 +149,8 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;
 
 					// Данные о продолжительности рабочего дня
-
 					$aJson['workdayDuration'] = $oCurrent_User->getWorkdayDuration(Core_Date::timestamp2sqldate(time()));
 					$aJson['workdayStatus'] = $oCurrent_User->getStatusWorkday(Core_Date::timestamp2sqldate(time()));
-
 				}
 
 				Core::showJson($aJson);

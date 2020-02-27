@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -234,11 +234,12 @@ class Core_Inflection_En extends Core_Inflection
 	static public $singularRules = array(
 		'/(^analy)ses$/i' => '\1sis', // analyses -> analysis, but ipaddresses -> ipaddress
 		//'/(ch|ss|sh|x|z|[^o][a-z]s)es$/i' => '\1', // boxes -> box, responses -> (resp(o)nse)s, (wareh(o)use)s -> warehouse
-		'/(ch|ss|sh|[aieuo]x|z|[^o][ieu]s)es$/i' => '\1', // boxes -> box, responses -> (resp(o)nse)s, (wareh(o)use)s -> warehouse
+		//'/(ch|ss|sh|[aieuo]x|z|[^o][ieu]s)es$/i' => '\1', // boxes -> box, responses -> (resp(o)nse)s, (wareh(o)use)s -> warehouse
+		'/(ch|ss|sh|[aieuo]x|z|[^omtf]us|[^vc]es|[^au]is)es$/i' => '\1', // boxes -> box, responses -> (resp(o)nse)s, (wareh(o)use)s -> warehouse, (a(b)use)s -> abuse, accuses -> accuse
 		'/([^aeiou])oes$/i' => '\1o', // echoes -> echo
 		'/([^aeiou])ies$/i' => '\1y', // stories -> story
 		'/(t|i)a$/i' => '\1um', // bacteria -> bacterium
-		'/(la|a)ses$/i' => '\1s', // aliases -> aliase
+		'/(la|ia|rra|va|cu|ep)ses$/i' => '\1s', // aliases -> alias, canvases -> canvas
 		// last condition
 		'/([a-rt-z])s$/i' => '\1' // horses -> horse
 	);

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -17,7 +17,7 @@ $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 if (Core_Auth::logged())
 {
 	Core_Auth::checkBackendBlockedIp();
-	
+
 	// Контроллер формы
 	$oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 
@@ -155,7 +155,7 @@ if (Core_Auth::logged())
 		if (!is_null($oCompany->id))
 		{
 			$oOptgroupCompany = new stdClass();
-			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
+			$oOptgroupCompany->attributes = array('label' => $oCompany->name, 'class' => 'company');
 
 			$aCompany_Departments = $oUser->getDepartmentsHeadedBy($oCompany);
 
@@ -171,7 +171,7 @@ if (Core_Auth::logged())
 				{
 					$oOptgroup = new stdClass();
 					$oOptgroup->attributes = array(
-						'label' => htmlspecialchars($oCompany_Department->name),
+						'label' => $oCompany_Department->name,
 						'class' => 'company-department',
 						'style' => "margin-left: {$iMarginLeft}px"
 					);
@@ -190,9 +190,9 @@ if (Core_Auth::logged())
 							}
 							$sUserCompanyPosts = implode('###', $aUserCompanyPosts);
 
-							$sOptionValue = htmlspecialchars($oDepartmentUser->getFullName()) . '%%%' . htmlspecialchars($oCompany_Department->name)
-								. '%%%' . (!empty($sUserCompanyPosts) ? htmlspecialchars($sUserCompanyPosts) : '')
-								. '%%%' . htmlspecialchars($oDepartmentUser->getAvatar() . '?rand=' . rand());
+							$sOptionValue = $oDepartmentUser->getFullName() . '%%%' . $oCompany_Department->name
+								. '%%%' . (!empty($sUserCompanyPosts) ? $sUserCompanyPosts : '')
+								. '%%%' . $oDepartmentUser->getAvatar() . '?rand=' . rand();
 
 							$oOptgroup->children[$oDepartmentUser->id] = array(
 								'value' => $sOptionValue,
@@ -239,7 +239,6 @@ if (Core_Auth::logged())
 
 				ob_start();
 				?><div class="contracrot"><div class="user-image"><img class="contracrot-ico" src="<?php echo $oAuthorUser->getAvatar()?>" /></div><div class="user-name" style="margin-top: 8px;"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oAuthorUser->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($oAuthorUser->getFullName())?></a></div></div><?php
-
 				$author = ob_get_clean();
 
 				$oEmployee = Core_Entity::factory('User')->find($employee_id);
@@ -839,7 +838,7 @@ if (Core_Auth::logged())
 					->where('user_settings.active', '=', 1)
 					->limit(1);
 
-				$aUser_Settings = $oUser_Settings->findAll();
+				$aUser_Settings = $oUser_Settings->findAll(FALSE);
 
 				if (isset($aUser_Settings[0]))
 				{
@@ -954,19 +953,10 @@ if (Core_Auth::logged())
 			die();
 		}
 
-		$aBackgounds = array(
-			'#f44336', '#E91E63', '#9C27B0',
-			'#673AB7', '#3F51B5', '#2196F3',
-			'#03A9F4', '#00BCD4', '#009688',
-			'#4CAF50', '#8BC34A', '#CDDC39',
-			'#FFC107', '#FF9800', '#FF5722'
-		);
-
 		// Get initials
 		$initials = Core_Str::getInitials($name);
 
-		// Choose a background color for the circle
-		$bgColor = Core_Array::get($aBackgounds, $id % 15, '#f44336');
+		$bgColor = Core_Str::createColor($id);
 
 		Core_Image::avatar($initials, $bgColor, $width = 130, $height = 130);
 	}

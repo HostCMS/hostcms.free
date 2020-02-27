@@ -30,7 +30,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller_Show extends Core_Controller
 {
@@ -43,6 +43,11 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		'itemsProperties',
 		'itemsPropertiesList',
 		'modifications',
+		'offset',
+		'page',
+		'total',		
+		'pattern',
+		'patternParams',
 		'limit'
 	);
 
@@ -86,10 +91,35 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 
 		$this->itemsProperties = $this->modifications = FALSE;
 		$this->itemsPropertiesList = TRUE;
+		$this->limit = 10;	
+		
+		$this->offset = $this->page = 0;
 
-		$this->limit = 10;
 
 		$this->favoriteUrl = $oShop->Structure->getPath() . 'favorite/';
+		
+		$this->pattern = rawurldecode($this->getEntity()->Structure->getPath()) . '({path})(page-{page}/)';
+	}
+	
+	public function parseUrl()
+	{
+		$oShop = $this->getEntity();
+		
+		$Core_Router_Route = new Core_Router_Route($this->pattern);
+		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);
+		
+		if (isset($matches['page']) && is_numeric($matches['page']))
+		{
+			if ($matches['page'] > 1)
+			{
+				$this->page($matches['page'] - 1)
+					->offset($this->limit * $this->page);
+			}
+			else
+			{
+				return $this->error404();
+			}
+		}
 	}
 
 	/**
@@ -121,7 +151,10 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('limit')
 				->value(intval($this->limit))
-		);
+		)->addEntity(
+			Core::factory('Core_Xml_Entity')
+				->name('page')
+				->value(intval($this->page)));
 
 		// Список свойств товаров
 		if ($this->itemsPropertiesList)
@@ -163,8 +196,15 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 			$Shop_Favorite_Controller = $this->_getFavoriteController();
 
 			$aShop_Favorites = $Shop_Favorite_Controller->getAll($oShop);
+			
+			$this->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('total')
+							->value(count($aShop_Favorites))
+					);
 
-			$aShop_Favorites = array_slice($aShop_Favorites, 0, $this->limit);
+
+			$aShop_Favorites = array_slice($aShop_Favorites, $this->offset, $this->limit);
 
 			foreach ($aShop_Favorites as $oShop_Favorite)
 			{

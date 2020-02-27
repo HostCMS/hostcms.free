@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
@@ -73,17 +73,5 @@ if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
 // Core_Event::attach('shop_order.onAfterChangeStatusPaid', array('Shop_Observer_Robokassa', 'onAfterChangeStatusPaid'));
 // Core_Event::attach('Shop_Payment_System_Handler.onAfterProcessOrder', array('Shop_Observer_Robokassa', 'onAfterProcessOrder'));
 
-/** Yandex.Market **/
-// Идентификатор кампании на Яндексе
-Shop_Controller_Yandexmarket_Observer::$campaignId = 21421819;
-// Идентификатор статуса заказа "Передано в доставку"
-Shop_Controller_Yandexmarket_Observer::$deliveryStatusId = 2;
-// Отладочный токен, срок жизни - 365 дней
-Shop_Controller_Yandexmarket_Observer::$token = 'AQAAAAAfQUt4AASAHcOqHpWtUkV0mucpfef1gdA';
-// Идентификатор приложения авторизации в oauth.yandex.ru
-Shop_Controller_Yandexmarket_Observer::$clientId = '88f09f274e9f4a46ad5374685af5bb5f';
-Core_Event::attach('Shop_Payment_System_Handler.onAfterChangedOrder', array('Shop_Controller_Yandexmarket_Observer', 'onAfterChangedOrder'));
-
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
-

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Группы товаров',
@@ -41,7 +41,6 @@ return array(
 	'changeActive_success' => "Информация успешно изменена",
 	'properties' => "Свойства групп",
 	'list_of_property_for_group' => "Список свойств групп товаров",
-	'tab_properties' => "Дополнительные свойства",
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'error_URL_shop_group' => 'В группе уже существует подгруппа с таким URL!',

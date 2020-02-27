@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Controller
 {
@@ -93,7 +93,7 @@ class Shop_Filter_Controller
 		$aIndexes = array(
 			'PRIMARY KEY (`id`)',
 			'KEY `shop_item_id` (`shop_item_id`)',
-			'KEY `shop_group_id` (`shop_group_id`)',
+			'KEY `shop_group_id` (`shop_group_id`,`modification_id`)',
 			'KEY `shop_currency_id` (`shop_currency_id`)',
 			'KEY `price` (`price_absolute`) USING BTREE',
 			'KEY `producer` (`shop_producer_id`) USING BTREE'
@@ -101,13 +101,16 @@ class Shop_Filter_Controller
 
 		$oShop_Item_Properties = $this->_oShop->Shop_Item_Properties;
 		$oShop_Item_Properties->queryBuilder()
+			->select('shop_item_properties.*')
+			->join('properties', 'properties.id', '=', 'shop_item_properties.property_id')
 			->where('shop_item_properties.filter', '!=', 0)
+			->where('properties.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('shop_item_properties.property_id');
 
 		$aShop_Item_Properties = $oShop_Item_Properties->findAll(FALSE);
 
-		foreach($aShop_Item_Properties as $oShop_Item_Property)
+		foreach ($aShop_Item_Properties as $oShop_Item_Property)
 		{
 			$oProperty = $oShop_Item_Property->Property;
 
@@ -118,7 +121,9 @@ class Shop_Filter_Controller
 		}
 
 		$sColumns = implode(', ', $aColumns);
-		$sIndexes = implode(', ', $aIndexes);
+
+		// A table can contain a maximum of 64 secondary indexes. 5 of them already added
+		$sIndexes = implode(', ', array_slice($aIndexes, 0, 59));
 
 		$oCore_DataBase = Core_DataBase::instance();
 		$aConfig = $oCore_DataBase->getConfig();
@@ -165,11 +170,19 @@ class Shop_Filter_Controller
 		if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
 		{
 			$aPropertySql = $this->_getPropertySql($oProperty);
-			
+
 			$sTableName = $this->getTableName();
 
-			Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` ADD {$aPropertySql['column']}");
-			Core_DataBase::instance()->query("ALTER TABLE `{$sTableName}` ADD INDEX {$aPropertySql['index']}");
+			Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `{$sTableName}` ADD {$aPropertySql['column']}");
+
+			// Check exists keys
+			$aIndexes = Core_DataBase::instance()->setQueryType(9)->query("SHOW INDEX FROM `{$sTableName}`")->result();
+
+			// A table can contain a maximum of 64 secondary indexes.
+			if (count($aIndexes) - 1 < 64)
+			{
+				Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `{$sTableName}` ADD INDEX {$aPropertySql['index']}");
+			}
 		}
 
 		return $this;
@@ -201,7 +214,7 @@ class Shop_Filter_Controller
 			$oCore_DataBase = Core_DataBase::instance();
 
 			$this->_cacheTableColumns = array();
-			
+
 			$sTableName = $this->getTableName();
 
 			$aTableColumns = $oCore_DataBase->getColumns($sTableName);
@@ -269,10 +282,14 @@ class Shop_Filter_Controller
 		// prices
 		$aPrices = $oShop_Item->getPrices();
 
+		$shop_group_id = $oShop_Item->modification_id
+			? $oShop_Item->Modification->shop_group_id
+			: $oShop_Item->shop_group_id;
+
 		$aBaseInserts = array(
 			$oShop_Item->id,
 			$oShop_Item->modification_id,
-			$oShop_Item->shop_group_id,
+			$shop_group_id,
 			$oShop_Item->shop_producer_id,
 			$oShop_Item->shop_currency_id,
 			$aPrices['price_discount'],
@@ -283,9 +300,9 @@ class Shop_Filter_Controller
 		$aPropertyIds = $this->_getPropertyIDs();
 
 		// Collect values by property_id
-		$aProperty_Values = $oShop_Item->getPropertyValues();
+		$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
 		$aTmp = array();
-		foreach($aProperty_Values as $oProperty_Value)
+		foreach ($aProperty_Values as $oProperty_Value)
 		{
 			$oProperty = $oProperty_Value->Property;
 
@@ -303,7 +320,7 @@ class Shop_Filter_Controller
 		{
 			$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
 		}
-		
+
 		// get all posible combinations
 		$aCombinations = count($aPV) > 1 ? $this->_combinations($aPV) : $aPV;
 

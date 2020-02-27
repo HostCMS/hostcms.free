@@ -17,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Entry_Model extends Core_Entity
 {
@@ -58,8 +58,8 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 
 	/*
 	 * Get uniq document ID
-	 * @param $document_id document ID
-	 * @param $type document type
+	 * @param int $document_id document ID
+	 * @param int $type document type
 	 * @return int
 	 */
 	protected function _getDocumentId($document_id, $type)
@@ -69,8 +69,8 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 
 	/*
 	 * Set uniq document ID
-	 * @param $document_id document ID
-	 * @param $type document type
+	 * @param int $document_id document ID
+	 * @param int $type document type
 	 * @return self
 	 */
 	public function setDocument($document_id, $type)
@@ -81,10 +81,10 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 	}
 
 	/*
-	 * Get entries by document id
-	 * @param $document_id document ID
-	 * @param $type document type
-	 * @param $bCache cache
+	 * Get entries by document_id
+	 * @param int $document_id document ID
+	 * @param int $type document type
+	 * @param boolean $bCache cache
 	 * @return array
 	 */
 	public function getByDocument($document_id, $type, $bCache = FALSE)
@@ -98,18 +98,32 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 	}
 
 	/*
+	 * Get entries by document_id and shop_item_id
+	 * @param int $document_id document ID
+	 * @param int $type document type
+	 * @param int|array $shop_item_id document type
+	 * @param boolean $bCache cache
+	 * @return array
+	 */
+	public function getByDocumentAndShopItem($document_id, $type, $shop_item_id, $bCache = FALSE)
+	{
+		$this->queryBuilder()
+			->where('shop_warehouse_entries.document_id', '=', $this->_getDocumentId($document_id, $type))
+			->where('shop_warehouse_entries.shop_item_id', is_array($shop_item_id) ? 'IN' : '=', $shop_item_id)
+			->clearOrderBy()
+			->orderBy('shop_warehouse_entries.id', 'ASC');
+
+		return $this->findAll($bCache);
+	}
+
+	/*
 	 * Get document type
 	 * @return int|NULL
 	 */
 	public function getDocumentType()
 	{
-		$return = NULL;
-
-		if ($this->document_id)
-		{
-			$return = Core_Bit::extractBits($this->document_id, 8, 1);
-		}
-
-		return $return;
+		return $this->document_id
+			? Core_Bit::extractBits($this->document_id, 8, 1)
+			: NULL;
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 {
@@ -21,7 +21,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 	{
 		$this->_allowedProperties += array(
 			'largeImage',
-			'smallImage'
+			'smallImage',
+			'crop',
 		);
 
 		parent::__construct();
@@ -35,6 +36,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		{
 			$this->smallImage = array();
 		}
+
+		$this->crop = FALSE;
 
 		$this->divAttr = array('class' => 'col-xs-12') + $this->divAttr;
 	}
@@ -233,7 +236,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 		$oLarge_Main_Block_Core_Html_Entity_Div
 			->add($oLarge_Input_Div);
-			
+
 		if ($this->largeImage['path'] != '' || $this->largeImage['show_params'])
 		{
 			if ($this->largeImage['path'] != '')

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -34,7 +34,7 @@ return array(
 	'shop_shops_url_type_element_1' => 'Transliteration',
 	'shop_country_id' => "<acronym title=\"Country set by default in countries list\">Default country</acronym>",
 	'shop_order_status_id' => 'Default order status',
-	'shop_measure_id' => "Product weight unit",
+	'shop_measure_id' => "Weight unit",
 	'send_order_email_admin' => "Send e-mail containing information on received order to administrator",
 	'send_order_email_user' => "Send e-mail containing information on arranged order to user",
 	'comment_active' => 'Postmoderate comments to products',
@@ -109,12 +109,12 @@ return array(
 	'tag' => 'Tag: %s',
 	'comment_mail_subject' => 'Add comment/reply to website',
 	'deleteEmptyDirs_success' => 'Empty dirs have been deleted!',
-	'size_measure'=>"Unit of measurement of the item's dimensions",
-	'size_measure_0'=>'mm',
-	'size_measure_1'=>'cm',
-	'size_measure_2'=>'m',
-	'size_measure_3'=>'inch',
-	'size_measure_4'=>'ft',
+	'size_measure' => "Size Unit",
+	'size_measure_0' => 'mm',
+	'size_measure_1' => 'cm',
+	'size_measure_2' => 'm',
+	'size_measure_3' => 'inch',
+	'size_measure_4' => 'ft',
 	'reserve' => 'Reserve ordered goods',
 	'reserve_hours' => 'Reserve (in hours)',
 	'adult' => 'Adult',
@@ -165,6 +165,8 @@ return array(
 	'seo_template_item_currency' => 'Item Currency',
 	'seo_template_property_value' => 'Property Value',
 	'seo_template_item_price_with_currency' => 'Price with Currency',
+	'seo_template_filter' => 'Filter',
+	'seo_template_filter_producer' => 'Producer',
 
 	'all_groups_count' => 'Groups: %s',
 	'all_items_count' => 'Items: %s',
@@ -175,9 +177,8 @@ return array(
 	'discountcard_template' => 'Discount card number template',
 	'invoice_template' => 'Order invoice number template',
 	'all_shops' => 'All shops',
-	'default_shop_measure_id' => 'Default shop measure',
+	'default_shop_measure_id' => 'Item Unit',
 	'filter' => 'Fast filter',
-	'seo_template_filter' => 'Filter',
-	'seo_template_filter_producer' => 'Producer',
 	'set_price_recount_sets' => 'Set prices on recount sets',
+	'max_bonus' => '<acronym title="How much maximum percent of the check amount can be paid for bonusesи">Write off bonus, %</acronym>',
 );

@@ -6,7 +6,7 @@
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Типовые динамические страницы',
@@ -32,4 +32,9 @@ return array(
 	'copy_from' => ' [Копия от %s]',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'import' => 'Импорт',
+	'import_file' => 'Выберите файл с компьютера',
+	'import_button' => 'Загрузить',
+	'importLibs_success' => 'Импорт завершен!',
+	'name_empty' => 'Название типовой динамической страницы не указано!',
 );

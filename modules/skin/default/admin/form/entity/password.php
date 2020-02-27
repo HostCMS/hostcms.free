@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 {
@@ -40,13 +40,6 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 	public function execute()
 	{
 		is_null($this->size) && is_null($this->style) && $this->style('width: 100%');
-
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-		if (is_null($this->onkeydown))
-		{
-			$this->onkeydown = $this->onkeyup = $this->onblur = "FieldCheck('{$windowId}', this)";
-		}
 
 		$aAttr = $this->getAttrsString();
 

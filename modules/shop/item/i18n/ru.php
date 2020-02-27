@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары магазина',
@@ -45,7 +45,6 @@ return array(
 	'tab_export' => 'Экспорт/Импорт',
 	'tab_seo' => 'SEO',
 	'tab_associated' => 'Сопутствующие',
-	'tab_prop' => "Дополнительные свойства",
 	'shop_group_id' => 'Группа',
 	'item_type_selection_group_buttons_name_simple' => "Обычный товар",
 	'item_type_selection_group_buttons_name_electronic' => "Электронный товар",
@@ -167,16 +166,17 @@ return array(
 	'import_price_list_action_delete_image' => "<acronym title=\"Установка данного флага позволяет удалять изображения для элементов товара, если эти изображения не переданы или пусты\">Удалять изображения для товаров при обновлении</acronym>",
 	'search_event_indexation_import' => "Использовать событийную индексацию при вставке групп товаров и товаров",
 	'import_price_list_max_time' => "Максимальное время выполнения",
-	'import_price_list_max_count' => "Максимальное кол-во импортируемых за шаг",
+	'import_price_list_max_count' => "Максимально импортировать за шаг",
 	'import_price_list_button_load' => "Загрузить",
 	'move_success' => 'Товары перенесены',
 	'root_folder' => 'Корневая группа',
 	'import_small_images' => "Малое изображение для %s",
 	'import_file_description' => "Описание файла для %s",
-	'count_insert_item' => 'Загружено товаров',
-	'count_update_item' => 'Обновлено товаров',
-	'create_catalog' => 'Создано разделов каталога',
-	'update_catalog' => 'Обновлено разделов каталога',
+	'inserted_items' => 'Загружено товаров — <b>%d</b>',
+	'updated_items' => 'Обновлено товаров — <b>%d</b>',
+	'created_catalogs' => 'Создано разделов каталога — <b>%d</b>',
+	'updated_catalogs' => 'Обновлено разделов каталога — <b>%d</b>',
+	'posted_documents' => 'Проведено документов — <b>%d</b>',
 	'msg_download_price' => "Следующий этап загрузки прайс-листа произойдет через 1 секунду",
 	'msg_download_price_complete' => "Импорт завершен!",
 	'export_price_list_file_type2' => "CommerceML v. 1.xx",
@@ -313,6 +313,7 @@ return array(
 	'apply_recount_set' => 'Пересчитать комплект',
 	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара #%d "%s"',
 	'import_price_list_delay' => 'Задержка (в сек.)',
+	'import_entries_limit' => 'Строк в документ',
 	'create_modification_copy_warehouse_count' => 'Копировать остаток на складе',
 	'items_catalog_copy_form_title' => 'Копировать товар',
 	'item_warehouse' => 'Остатки по складам',
@@ -337,4 +338,6 @@ return array(
 	'remove' => 'Убрать',
 	'set' => 'Установить',
 	'delete_property_values' => 'Удалять существующие значения дополнительных свойств',
+	'continue_import' => "Если Ваш браузер не поддерживает автоматическое перенаправление - нажмите <b><a href=\"%s\" onclick=\"%s\">здесь</a></b>",
+	'seo_filter' => 'SEO-фильтр',
 );

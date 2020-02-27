@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Note_Model extends Core_Entity
 {
@@ -18,14 +18,6 @@ class User_Note_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'id';
-
-	/**
-	 * One-to-one relations
-	 * @var array
-	 */
-	protected $_hasOne = array(
-		'user_setting' => array('foreign_key' => 'entity_id'),
-	);
 
 	/**
 	 * Belongs to relations
@@ -48,28 +40,6 @@ class User_Note_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
-	}
-
-	/**
-	 * Delete object from database
-	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Core_Entity
-	 * @hostcms-event user_note.onBeforeRedeclaredDelete
-	 */
-	public function delete($primaryKey = NULL)
-	{
-		if (is_null($primaryKey))
-		{
-			$primaryKey = $this->getPrimaryKey();
-		}
-
-		$this->id = $primaryKey;
-
-		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-
-		$this->User_Setting->delete();
-
-		return parent::delete($primaryKey);
 	}
 
 	/**

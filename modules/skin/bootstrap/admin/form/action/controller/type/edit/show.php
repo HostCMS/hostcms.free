@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
@@ -55,25 +55,11 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 			->class('adminForm')
 			->action($this->Admin_Form_Controller->getPath());
 
-		// Закладки
-		if (count($this->tabs))
+		// Закладки Admin_Form_Entity_Tabs
+		if (!is_null($this->tabs))
 		{
-			$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs');
-			$oAdmin_Form_Entity_Tabs->formId($this->_Admin_Form_Entity_Form->id);
-
 			// Все закладки к форме
-			$this->_Admin_Form_Entity_Form->add(
-				$oAdmin_Form_Entity_Tabs
-			);
-
-			// Add all tabs to $oAdmin_Form_Entity_Tabs
-			foreach ($this->tabs as $oAdmin_Form_Tab_Entity)
-			{
-				if ($oAdmin_Form_Tab_Entity->deleteEmptyItems()->getCountChildren() > 0)
-				{
-					$oAdmin_Form_Entity_Tabs->add($oAdmin_Form_Tab_Entity);
-				}
-			}
+			$this->_Admin_Form_Entity_Form->add($this->tabs);
 		}
 
 		// Кнопки
@@ -110,7 +96,7 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 			$oAdmin_Form_Entity_Button_Save = Admin_Form_Entity::factory('Button')
 				->name('save')
 				->class('btn btn-blue')
-				->value(Core::_('admin_form.save'))
+				->value(Core::_('Admin_Form.save'))
 				->onclick(
 					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save' . $sOperaionSufix)
 				);
@@ -119,7 +105,7 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 				->name('apply')
 				->class('btn btn-palegreen')
 				->type('submit')
-				->value(Core::_('admin_form.apply'))
+				->value(Core::_('Admin_Form.apply'))
 				->onclick(
 					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply' . $sOperaionSufix)
 				);
@@ -127,6 +113,46 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 			$oAdmin_Form_Entity_Buttons
 				->add($oAdmin_Form_Entity_Button_Save)
 				->add($oAdmin_Form_Entity_Button_Apply);
+
+			$aChecked = $this->Admin_Form_Controller->getChecked();
+			$aFirst = reset($aChecked);
+
+			if (is_array($aFirst) && key($aFirst))
+			{
+				/*if ($sOperaion == 'modal')
+				{
+					$windowId = $this->Admin_Form_Controller->getWindowId();
+					$modalJs = "$('#{$windowId}').parents('.bootbox').modal('hide');";
+				}
+				else
+				{
+					$modalJs = '';
+				}*/
+
+				$oAdmin_Form_Entity_Button_Delete = Admin_Form_Entity::factory('A')
+					->class('btn btn-darkorange pull-right')
+					->onclick("res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) {"
+						. $this->Admin_Form_Controller->getAdminSendForm('markDeleted', '') . " } else { return false }
+					")
+					->add(
+						Admin_Form_Entity::factory('Code')
+							->html('<i class="fa fa-trash no-margin-right"></i>')
+					);
+
+				$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Delete);
+			}
+
+			$path = $this->Admin_Form_Controller->getPath();
+
+			$oAdmin_Form_Entity_Button_Cancel = Admin_Form_Entity::factory('A')
+				->class('btn btn-default pull-right margin-right-5')
+				->onclick($this->Admin_Form_Controller->getAdminLoadAjax($path))
+				->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<i class="fa fa-arrow-circle-left no-margin-right darkgray"></i>')
+				);
+
+			$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Cancel);
 		}
 		else
 		{

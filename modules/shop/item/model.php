@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -795,7 +795,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oParentItem = $this->Modification;
 
-			$aSameItems = $oParentItem->Modifications->getAllByPath($this->path);
+			$aSameItems = $oParentItem->Modifications->getAllByPath($this->path, FALSE);
 			foreach ($aSameItems as $oSameItem)
 			{
 				if ($oSameItem->id != $this->id)
@@ -1031,7 +1031,7 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->shop_group_id = $iShopGroupId;
 		$this->save()->clearCache();
-		
+
 		// Fast filter
 		if ($this->Shop->filter)
 		{
@@ -2225,9 +2225,6 @@ class Shop_Item_Model extends Core_Entity
 			// Бонусы
 			if ($this->_showXmlBonuses && Core::moduleIsActive('siteuser'))
 			{
-				// $this->setShop_Item_Controller();
-				// $aBonuses = $this->_Shop_Item_Controller->getBonuses($this, $aPrices['price_discount']);
-
 				$aBonuses = $this->getBonuses($aPrices);
 
 				if ($aBonuses['total'])
@@ -2828,18 +2825,40 @@ class Shop_Item_Model extends Core_Entity
 			if (is_array($aBackup))
 			{
 				$this->name = Core_Array::get($aBackup, 'name');
-				$this->sorting = Core_Array::get($aBackup, 'sorting');
-				$this->path = Core_Array::get($aBackup, 'path');
-				$this->price = Core_Array::get($aBackup, 'price');
+				$this->shop_group_id = Core_Array::get($aBackup, 'shop_group_id');
+				$this->modification_id = Core_Array::get($aBackup, 'modification_id');
+				$this->datetime = Core_Array::get($aBackup, 'datetime');
+				$this->start_datetime = Core_Array::get($aBackup, 'start_datetime');
+				$this->end_datetime = Core_Array::get($aBackup, 'end_datetime');
+				$this->showed = Core_Array::get($aBackup, 'showed');
 				$this->marking = Core_Array::get($aBackup, 'marking');
-				$this->description = Core_Array::get($aBackup, 'description');
-				$this->text = Core_Array::get($aBackup, 'text');
+				$this->weight = Core_Array::get($aBackup, 'weight');
+				$this->shop_measure_id = Core_Array::get($aBackup, 'shop_measure_id');
+				$this->path = Core_Array::get($aBackup, 'path');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->shop_producer_id = Core_Array::get($aBackup, 'shop_producer_id');
+				$this->shop_seller_id = Core_Array::get($aBackup, 'shop_seller_id');
 				$this->active = Core_Array::get($aBackup, 'active');
 				$this->indexing = Core_Array::get($aBackup, 'indexing');
+				$this->length = Core_Array::get($aBackup, 'length');
+				$this->width = Core_Array::get($aBackup, 'width');
+				$this->height = Core_Array::get($aBackup, 'height');
+				$this->price = Core_Array::get($aBackup, 'price');
+				$this->shop_currency_id = Core_Array::get($aBackup, 'shop_currency_id');
+				$this->shop_tax_id = Core_Array::get($aBackup, 'shop_tax_id');
+				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->shortcut_id = Core_Array::get($aBackup, 'shortcut_id');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->text = Core_Array::get($aBackup, 'text');
+				$this->guid = Core_Array::get($aBackup, 'guid');
+				$this->yandex_market = Core_Array::get($aBackup, 'yandex_market');
 				$this->seo_title = Core_Array::get($aBackup, 'seo_title');
 				$this->seo_description = Core_Array::get($aBackup, 'seo_description');
 				$this->seo_keywords = Core_Array::get($aBackup, 'seo_keywords');
-				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->siteuser_group_id = Core_Array::get($aBackup, 'siteuser_group_id');
+				$this->apply_purchase_discount = Core_Array::get($aBackup, 'apply_purchase_discount');
+				$this->shop_id = Core_Array::get($aBackup, 'shop_id');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
 
 				if (isset($aBackup['shop_item_prices']) && Core::moduleIsActive('siteuser'))
 				{

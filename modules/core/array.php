@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Array
 {
@@ -237,7 +237,7 @@ class Core_Array
 	 * $array = array('field1', 'field2', 'field3');
 	 * $lastItem = Core_Array::end($array);
 	 *
-	 * print_r($lastItem);
+	 * var_dump($lastItem);
 	 * ?>
 	 * </code>
 	 * @return mixed
@@ -246,6 +246,26 @@ class Core_Array
 	{
 		// array needs to be a reference
 		return end($array);
+	}
+
+	/**
+	 * Get the value of the first element
+	 *
+	 * @param array $array массив
+	 * <code>
+	 * <?php
+	 * $array = array('field1', 'field2', 'field3');
+	 * $firstItem = Core_Array::first($array);
+	 *
+	 * var_dump($firstItem);
+	 * ?>
+	 * </code>
+	 * @return mixed
+	 */
+	static public function first(array $array)
+	{
+		// array needs to be a reference
+		return reset($array);
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -285,6 +285,8 @@ else
 	$oAdmin_Form_Dataset
 		->changeField('shop_discountcard_level_id', 'type', 8)
 		->changeField('shop_discountcard_level_id', 'list', trim($sList));
+		
+	$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $oShopGroup->id);
 
 	$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 }

@@ -106,6 +106,11 @@ if (Core_Array::getPost('oneStepCheckout'))
 	// Сбрасываем информацию о последнем заказе
 	$_SESSION['last_order_id'] = 0;
 
+	if (!is_null(Core_Array::getRequest('apply_bonuses')))
+	{
+		$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+	}
+
 	// Оформление в один шаг
 	$Shop_Cart_Controller = Shop_Cart_Controller::instance();
 	$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
@@ -183,6 +188,11 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 	case 1:
 		// Сбрасываем информацию о последнем заказе
 		$_SESSION['last_order_id'] = 0;
+
+		if (!is_null(Core_Array::getRequest('apply_bonuses')))
+		{
+			$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+		}
 
 		$Shop_Address_Controller_Show = new Shop_Address_Controller_Show($oShop);
 
@@ -335,6 +345,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 	case 4:
 		// Проверяем наличие товара в корзины
 		$Shop_Cart_Controller = Shop_Cart_Controller::instance();
+
 		$aShop_Cart = $Shop_Cart_Controller->getAll($oShop);
 
 		// А корзине есть товары или заполнен номер последнего заказа
@@ -348,14 +359,23 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			$_SESSION['hostcmsOrder']['partial_payment_by_personal_account'] = Core_Array::getPost('partial_payment_by_personal_account', 0);
 
 			// Если выбрана платежная система
-			if ($_SESSION['hostcmsOrder']['shop_payment_system_id'])
+			if ($shop_payment_system_id > 0)
 			{
-				Shop_Payment_System_Handler::factory(
-					Core_Entity::factory('Shop_Payment_System', $shop_payment_system_id)
-				)
-				//->allowOrderPropertyFiles(TRUE)
-				->orderParams($_SESSION['hostcmsOrder'])
-				->execute();
+				$oShop_Payment_System = $oShop->Shop_Payment_Systems->getById($shop_payment_system_id);
+
+				if ($oShop_Payment_System)
+				{
+					Shop_Payment_System_Handler::factory(
+						$oShop_Payment_System
+					)
+					//->allowOrderPropertyFiles(TRUE)
+					->orderParams($_SESSION['hostcmsOrder'])
+					->execute();
+				}
+				else
+				{
+					?><h1>Ошибка! Не выбрана платежная система.</h1><?php
+				}
 			}
 			else
 			{

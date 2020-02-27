@@ -1,0 +1,27 @@
+<?php
+
+return array(
+	'model_name' => 'Валюти',
+	'show_currency_link' => "Валюти",
+	'show_currency_title' => "Довідник валют",
+	'show_currency_menu' => "Валюта",
+	'show_currency_menu_add' => "Додати",
+	'currency_add_form_title' => "Додавання інформації про валюту",
+	'currency_edit_form_title' => 'Редагування інформації про валюту "%s"',
+	'name' => "Назва",
+	'exchange_rate' => "<acronym title=\"Скільки одиниць в базовій валюті дають за вказану валюту\">Курс</acronym>",
+	'code' => "<acronym title=\"од валюти в міжнародному форматі відповідно до ISO 4217, наприклад UAH\">Трилітерний код (ISO 4217)</acronym>",
+	'sorting' => "Порядок сортування",
+	'default' => "Базова",
+	'id' => "Ідентифікатор",
+	'edit_success' => "Валюта успішно додана!",
+	'apply_success' => "Інформація успішно змінена",
+	'setBasic_success' => "Валюта встановлена ​​основною",
+	'apply_error' => "Помилка зміни інформації",
+	'markDeleted_success' => "Інформація успішно видалена",
+	'delete_success' => 'Елемент видалений!',
+	'undelete_success' => 'Елемент відновлено!',
+	'update_currency' => 'Оновити курси валют',
+	'update_success'=>'Курси валют успішно оновлені',
+	'date'=>'Дата курсу',
+);

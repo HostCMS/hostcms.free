@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -106,10 +106,10 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				$oInformationsystemTabImage
 					->add($oImageRowSize1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRowSize2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))					
+					->add($oImageRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRowSize3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRowSize4 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))					
+					->add($oImageRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -169,7 +169,7 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 				);
 
 				$this->getField('description')
-					->rows(7)
+					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id
@@ -368,7 +368,6 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->move($this->getField('typograph_default_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
 					->move($this->getField('typograph_default_groups')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oFormatsRow6)
 					->move($this->getField('use_captcha'), $oFormatsRow7);
-
 
 				// Seo templates
 				$oMainTab

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Model extends Core_Entity
 {
@@ -35,6 +35,8 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
+
+	const TYPE = 0;
 
 	/**
 	 * Constructor.
@@ -114,7 +116,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Inventory_Items->deleteAll(FALSE);
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 0);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -134,7 +136,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 0);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			$aTmp = array();
 
@@ -169,7 +171,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry->setDocument($this->id, 0);
+						$oShop_Warehouse_Entry->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry->shop_item_id = $oShop_Warehouse_Inventory_Item->shop_item_id;
 					}
 
@@ -204,7 +206,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		{
 			$oShop_Warehouse = $this->Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, 0);
+			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
@@ -237,6 +239,15 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 3);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars($this->Shop_Warehouse->name);
 	}
 
 	/**
@@ -375,16 +386,28 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 			$inv_amount = Shop_Controller::instance()->round($oShop_Warehouse_Inventory_Item->count * $old_price);
 
-			$aReplace['Items'][] = array(
-				'position' => $position++,
-				'name' => htmlspecialchars($oShop_Item->name),
-				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-				'price' => $old_price,
-				'quantity' => $rest,
-				'amount' => $fact_amount,
-				'inv_quantity' => $oShop_Warehouse_Inventory_Item->count,
-				'inv_amount' => $inv_amount
-			);
+			$aBarcodes = array();
+
+			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+			{
+				$aBarcodes[] = $oShop_Item_Barcode->value;
+			}
+
+			$node = new stdClass();
+
+			$node->position = $position++;
+			$node->item = $oShop_Item;
+			$node->name = htmlspecialchars($oShop_Item->name);
+			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->price = $old_price;
+			$node->quantity = $rest;
+			$node->amount = $fact_amount;
+			$node->inv_quantity = $oShop_Warehouse_Inventory_Item->count;
+			$node->inv_amount = $inv_amount;
+			$node->barcodes = implode(', ', $aBarcodes);
+
+			$aReplace['Items'][] = $node;
 
 			$inv_amount_total += $inv_amount;
 			$amount_total += $rest;

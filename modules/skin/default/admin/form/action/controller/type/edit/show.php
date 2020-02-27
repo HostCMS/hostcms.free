@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
@@ -42,22 +42,11 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 			$this->_Admin_Form_Entity_Form->add($oAdmin_Form_Entity);
 		}
 
-		// Закладки
-		$oAdmin_Form_Entity_Tabs = Admin_Form_Entity::factory('Tabs');
-		$oAdmin_Form_Entity_Tabs->formId($this->_Admin_Form_Entity_Form->id);
-
-		// Все закладки к форме
-		$this->_Admin_Form_Entity_Form->add($oAdmin_Form_Entity_Tabs);
-
-		// Add all tabs to $oAdmin_Form_Entity_Tabs
-		foreach ($this->tabs as $oAdmin_Form_Tab_Entity)
+		// Закладки Admin_Form_Entity_Tabs
+		if (!is_null($this->tabs))
 		{
-			if ($oAdmin_Form_Tab_Entity->getCountChildren() > 0)
-			{
-				$oAdmin_Form_Entity_Tabs->add(
-					$oAdmin_Form_Tab_Entity
-				);
-			}
+			// Все закладки к форме
+			$this->_Admin_Form_Entity_Form->add($this->tabs);
 		}
 
 		// Кнопки

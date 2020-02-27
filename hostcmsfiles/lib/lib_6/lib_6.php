@@ -8,7 +8,12 @@ $xslName = $Shop_Controller_Show->item
 
 $Shop_Controller_Show->addEntity(
 	Core::factory('Core_Xml_Entity')
-		->name('ТекущаяГруппа')->value($Shop_Controller_Show->group)
+		->name('ТекущаяГруппа')->value(
+			intval(is_array($Shop_Controller_Show->group)
+				? Core_Array::first($Shop_Controller_Show->group)
+				: $Shop_Controller_Show->group
+			)
+		)
 )->addEntity(
 	Core::factory('Core_Xml_Entity')
 		->name('show_comments')->value(Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1))
@@ -211,7 +216,7 @@ else
 }
 
 // В корне выводим из всех групп
-if ($Shop_Controller_Show->group == 0)
+if ($Shop_Controller_Show->group == 0 || !is_null($Shop_Controller_Show->tag))
 {
 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
 }

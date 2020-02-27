@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -92,7 +92,6 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 							7 => Core::_('Shop_Item.properties_show_kind_listbox'),
 							5 => Core::_('Shop_Item.properties_show_kind_checkbox_one'),
 							6 => Core::_('Shop_Item.properties_show_kind_from_to')
-							// 8 =>
 						)
 					)
 					->name('filter')
@@ -102,23 +101,24 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 				$oMainRow1->add($oShopFilterSelect);
 
 				$oShopShowInGroupCheckbox = Admin_Form_Entity::factory('Checkbox')
-					->value($this->_object->Shop_Item_Property->show_in_group)
+					->value(1)
+					->checked($this->_object->Shop_Item_Property->show_in_group == 1)
 					->caption(Core::_("Shop_Item.show_in_group"))
 					->name("show_in_group");
 
 				$oMainRow2->add($oShopShowInGroupCheckbox);
 
 				$oShopShowInItemCheckbox = Admin_Form_Entity::factory('Checkbox')
-					->value($this->_object->Shop_Item_Property->show_in_item)
+					->value(1)
+					->checked($this->_object->Shop_Item_Property->show_in_item == 1)
 					->caption(Core::_("Shop_Item.show_in_item"))
 					->name("show_in_item");
 
 				$oMainRow3->add($oShopShowInItemCheckbox);
 
 				$oAddValueCheckbox = Admin_Form_Entity::factory('Checkbox')
-					->value(
-						is_null($object->id) ? 1 : 0
-					)
+					->value(1)
+					->checked(is_null($object->id))
 					->caption(Core::_("Shop_Item.add_value"))
 					->name("add_value");
 

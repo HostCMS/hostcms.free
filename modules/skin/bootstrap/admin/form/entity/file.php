@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Entity_File
 {
@@ -199,6 +199,17 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					)
 			);
 
+		if ($this->crop)
+		{
+			$oLarge_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
+					->value('$(function(){
+						$("#' . $windowId . ' input#' . $this->largeImage['id'] .'").on("change", function(){
+							$.showCropButton($(this), "' . $this->largeImage['id'] . '", "' . $windowId . '");
+						});
+					})')
+				);
+		}
+
 		if ($this->largeImage['path'] != '')
 		{
 			$prefixRand = strpos($this->largeImage['path'], '?') === FALSE
@@ -238,10 +249,22 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 						Core::factory('Core_Html_Entity_A')
 							->id('delete_large_' . $this->largeImage['id'])
 							->class('input-group-addon control-item')
-							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->largeImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_large_" . $this->largeImage['id'] . "').addClass('hidden'); {$this->largeImage['delete_onclick']} } else {return false;}")
+							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->largeImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_large_" . $this->largeImage['id'] . "').addClass('hidden'); $('#" . $windowId . " a#crop_" . $this->largeImage['id'] . "').removeClass('input-group-addon control-item').addClass('hidden'); {$this->largeImage['delete_onclick']} } else {return false;}")
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
 					);
 			}
+		}
+
+		if ($this->crop)
+		{
+			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename($this->largeImage['path']);
+			$oLarge_Input_Group_Div->add(
+				Core::factory('Core_Html_Entity_A')
+					->id('crop_' . $this->largeImage['id'])
+					->class($this->largeImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
+					->onclick("$.showCropModal('{$this->largeImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->largeImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
+					->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
+			);
 		}
 
 		// Настройки большого изображения
@@ -268,6 +291,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 										->class('form-control')
 										->name('large_max_width_' . $this->largeImage['name'])
 										->value($this->largeImage['max_width'])
+										->min(1)
 								)
 						)
 						->add(
@@ -292,6 +316,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 										->class('form-control')
 										->name('large_max_height_' . $this->largeImage['name'])
 										->value($this->largeImage['max_height'])
+										->min(1)
 								)
 						)
 						->add(
@@ -522,6 +547,17 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					)
 				);
 
+			if ($this->crop)
+			{
+				$oSmall_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
+					->value('$(function(){
+						$("#' . $windowId . ' input#' . $this->smallImage['id'] .'").on("change", function(){
+							$.showCropButton($(this), "' . $this->smallImage['id'] . '", "' . $windowId . '");
+						});
+					})')
+				);
+			}
+
 			if ($this->smallImage['path'] != '')
 			{
 				$prefixRand = strpos($this->smallImage['path'], '?') === FALSE
@@ -561,9 +597,21 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 							Core::factory('Core_Html_Entity_A')
 								->id('delete_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
-								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->smallImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_" . $this->smallImage['id'] . "').addClass('hidden'); {$this->smallImage['delete_onclick']} } else {return false;}")
+								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $('#" . $windowId . " input#" . $this->smallImage['id'] . "').removeClass('hidden'); $('#" . $windowId . " div#file_preview_" . $this->smallImage['id'] . "').addClass('hidden'); $('#" . $windowId . " a#crop_" . $this->smallImage['id'] . "').removeClass('input-group-addon control-item').addClass('hidden'); {$this->smallImage['delete_onclick']} } else {return false;}")
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-trash"></i>'))
 						);
+				}
+
+				if ($this->crop)
+				{
+					$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
+					$oSmall_Input_Group_Div->add(
+						Core::factory('Core_Html_Entity_A')
+							->id('crop_' . $this->smallImage['id'])
+							->class($this->smallImage['path'] == '' ? 'hidden' : 'input-group-addon control-item')
+							->onclick("$.showCropModal('{$this->smallImage['id']}', '" . Core_Str::escapeJavascriptVariable($this->smallImage['path']) . "', '" . Core_Str::escapeJavascriptVariable($originalName) . "')")
+							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-crop"></i>'))
+					);
 				}
 
 				// Настройки малого изображения
@@ -590,6 +638,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 												->class('form-control')
 												->name('small_max_width_' . $this->smallImage['name'])
 												->value($this->smallImage['max_width'])
+												->min(1)
 										)
 								)
 								->add(
@@ -614,6 +663,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 												->class('form-control')
 												->name('small_max_height_' . $this->smallImage['name'])
 												->value($this->smallImage['max_height'])
+												->min(1)
 										)
 								)
 								->add(

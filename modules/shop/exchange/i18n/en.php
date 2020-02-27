@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'!download' => '-- Not upload --',
@@ -69,6 +69,8 @@ return array(
 	'item_type' => 'Product type',
 	'item_additional_group' => "Shortcute's GUID",
 	'item_barcode' => "Barcodes",
+	'item_sets_guid' => 'Goods in the set (by GUID)',
+	'item_sets_marking' => 'Goods in the set (by Marking)',
 	'specialprices_min_quantity' => "Count from",
 	'specialprices_max_quantity' => "Count to",
 	'specialprices_price' => "Price value",

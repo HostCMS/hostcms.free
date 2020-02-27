@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Entity extends Core_Entity
 {
@@ -201,6 +201,8 @@ class Update_Entity extends Core_Entity
 					!is_dir($current_update_dir) && Core_File::mkdir($current_update_dir);
 
 					$aUpdateItems = array();
+
+					Core_Database::instance()->query('SET SESSION wait_timeout = 28800');
 
 					$aModules = $value->xpath('modules/module');
 					foreach ($aModules as $key => $module)

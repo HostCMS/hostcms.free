@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Back-end form fields',
@@ -60,8 +60,9 @@ return array(
 	'field_type_image_callback_function' => 'Calculated field (Function callback is used)',
 	
 	// Отображение	
-	'field_view_column' => 'Column',
-	'field_view_filter_element' => 'Filter',
+	'field_view0' => 'Column & Filter',
+	'field_view1' => 'Filter',
+	'field_view2' => 'Column',
 
 	// Список полей.
 	'show_form_fields_title' => 'Back-end form fields "%s"',

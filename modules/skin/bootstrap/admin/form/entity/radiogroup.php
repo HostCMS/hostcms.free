@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
 {
@@ -27,7 +27,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 
 		$this->colors(array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky'));
 	}
-	
+
 	/**
 	 * Executes the business logic.
 	 */
@@ -54,10 +54,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		}
 
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
-		?><span class="caption"><?php echo $this->caption?></span>
-		<!--<div class="btn-group">-->
-		<div class="radio-group">
-		<?php
+		?><span class="caption"><?php echo $this->caption?></span><?php
+		?><div class="radio-group"><?php
 
 		//$aClassBtnColors = array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky');
 		$aClassBtnColors = $this->colors;

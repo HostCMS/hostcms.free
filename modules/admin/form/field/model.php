@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Field_Model extends Core_Entity
 {
@@ -56,7 +56,7 @@ class Admin_Form_Field_Model extends Core_Entity
 		if (is_null($id) && !$this->loaded())
 		{
 			$this->_preloadValues['type'] = 1;
-			
+
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
@@ -103,12 +103,23 @@ class Admin_Form_Field_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$badge = $this->view
-			? '<i class="fa fa-filter fa-fw"></i>'
-			: '<i class="fa fa-bars fa-fw"></i>';
+		switch ($this->view)
+		{
+			case 0:
+			default:
+				$badge = '<i class="fa fa-bars fa-fw"></i>';
+			break;
+			case 1:
+				$badge = '<i class="fa fa-filter fa-fw"></i>';
+			break;
+			case 2:
+				$badge = '<i class="fa fa-minus fa-fw"></i>';
+			break;
+		}
 
 		$badge && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-hostcms badge-square gray pull-right')
+			->title(Core::_('Admin_Form_Field.field_view' . $this->view))
 			->value($badge)
 			->execute();
 	}

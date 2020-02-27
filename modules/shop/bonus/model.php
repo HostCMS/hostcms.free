@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Bonus_Model extends Core_Entity
 {
@@ -148,5 +148,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			: $this->addXmlTag('amount', $this->value);
 
 		return $this;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function valueBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		echo $this->type == 0
+			? '%'
+			: ' ' . htmlspecialchars($this->Shop->Shop_Currency->name);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function min_amountBackend()
+	{
+		echo $this->min_amount > 0
+			? $this->min_amount
+			: '—';
 	}
 }

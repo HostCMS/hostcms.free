@@ -1,4 +1,30 @@
+function isEmpty(str) {
+    return (!str || 0 === str.length);
+}
+
 (function($){
+	// http://james.padolsey.com/javascript/regex-selector-for-jquery/
+	jQuery.expr[':'].regex = function(elem, index, match) {
+    var matchParams = match[3].split(','),
+        validLabels = /^(data|css):/,
+        attr = {
+            method: matchParams[0].match(validLabels) ?
+                        matchParams[0].split(':')[0] : 'attr',
+            property: matchParams.shift().replace(validLabels,'')
+        },
+        regexFlags = 'ig',
+        regex = new RegExp(matchParams.join('').replace(/^\s+|\s+$/g,''), regexFlags);
+		return regex.test(jQuery(elem)[attr.method](attr.property));
+	};
+
+	$.ajaxSetup({
+		cache: false,
+		error: function(jqXHR, textStatus, errorThrown){
+			$.loadingScreen('hide');
+			jqXHR.statusText != 'abort' && alert('AJAX error: ' + textStatus + '! HTTP: ' + jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.responseText);
+		}
+	});
+
 	$.extend({
 		widgetLoad: function(settings)
 		{
@@ -24,7 +50,7 @@
 		},
 		ajaxCallbackSkin: function(data, status, jqXHR)
 		{
-			if (typeof data.module != 'undefined')
+			if (typeof data.module != 'undefined' && data.module != null)
 			{
 				// Выделить текущий пункт левого бокового меню
 				$.currentMenu(data.module);
@@ -153,7 +179,7 @@
 
 			if (typeof data.title != 'undefined' && data.title != '')
 			{
-				jObject.find(".modal-title").html(data.title);
+				jObject.find(".modal-title").text(data.title);
 			}
 		},
 		// Добавление новой заметки
@@ -268,6 +294,336 @@
 				$(this).attr('onclick', text);
 			});
 		},
+		leadStatusBar: function(lead_id, windowId) {
+			$(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage").on("click", function(){
+				if (!$(this).hasClass('finish'))
+				{
+					$(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage").each(function(){
+						$(this)
+							.removeClass("active")
+							.removeClass("previous")
+							.css('background-color', '')
+							.css('border-color', '');
+					});
+
+					$(this).addClass("active");
+					$(this).prevUntil(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id).addClass("previous");
+
+					var color = $(this).css('background-color'),
+						darkerColor = $(this).data('dark');
+
+					$(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage.previous")
+						.css('background-color', color)
+						.css('border-color', darkerColor);
+
+					$(".lead-status-name.lead-status-name-" + lead_id)
+						.text($(this).data('name'))
+						.css('color', $(this).data('color'));
+
+					// Отключаем клик, если провальный этап
+					if ($('.lead-stage-wrapper.lead-stage-wrapper-' + lead_id).find('.lead-stage.active.failed').length)
+					{
+						$('.lead-stage-wrapper.lead-stage-wrapper-' + lead_id + ' .lead-stage').each(function(){
+							$(this)
+								.unbind('click')
+								.css('cursor', 'default');
+						});
+					}
+				}
+
+				var lead_status_id = $(this).data('id'),
+					id = 'hostcms[checked][0][' + lead_id + ']',
+					post = {},
+					operation = '';
+
+				post['last_step'] = 0;
+
+				if ($(this).hasClass('finish'))
+				{
+					operation = 'finish';
+					post['last_step'] = 1;
+				}
+
+				post[id] = 1;
+				post['lead_status_id'] = lead_status_id;
+
+				$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: operation, post: post, additionalParams: '', windowId: windowId});
+			});
+
+			var jActiveLi = $(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage.active"),
+				color = jActiveLi.css('background-color'),
+				darkerColor = jActiveLi.data('dark');
+
+			jActiveLi.prevUntil(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id).addClass("previous");
+
+			$(".lead-stage-wrapper.lead-stage-wrapper-" + lead_id + " .lead-stage.previous")
+				.css('background-color', color)
+				.css('border-color', darkerColor);
+
+			// Отключаем клик, если финишный этап
+			if ($('.lead-stage-wrapper.lead-stage-wrapper-' + lead_id).find('.lead-stage.active.finish').length
+				|| $('.lead-stage-wrapper.lead-stage-wrapper-' + lead_id).find('.lead-stage.active.failed').length
+			)
+			{
+				$('.lead-stage-wrapper.lead-stage-wrapper-' + lead_id + ' .lead-stage').each(function(){
+					$(this)
+						.unbind('click')
+						.css('cursor', 'default');
+				});
+			}
+		},
+		morphLeadChangeType: function(object) {
+			$('.lead-exist-client').addClass('hidden');
+			$('.lead-deal-template').addClass('hidden');
+
+			// Существующий клиент
+			if ($(object).val() == 2)
+			{
+				$(object).parents('.row').find('.lead-exist-client').removeClass('hidden');
+				$(object).parents('.bootbox.modal').removeAttr('tabindex');
+			}
+
+			if ($(object).val() == 4)
+			{
+				$(object).parents('.row').find('.lead-deal-template').removeClass('hidden');
+			}
+		},
+		showCropButton: function(object, id, windowId) {
+			var file = object[0].files[0],
+				avialableExtensions = ["jpg", "jpeg", "png", "gif", "webp"];
+
+			if (file)
+			{
+				var fileName = file.name;
+					extension = fileName.substr((fileName.lastIndexOf(".") + 1));
+
+				if ($.inArray(extension, avialableExtensions) > -1)
+				{
+					$('#' + windowId + ' #crop_' + id).removeClass("hidden").addClass("input-group-addon control-item");
+				}
+			}
+		},
+		showCropModal: function(id, imagePath, imageName) {
+			var $input = $('input#' + id),
+				$parent = $input.parents('.input-group'),
+				file = $input[0].files[0];
+
+			// Changed file
+			if (file) {
+				// Change file name
+				imageName = file.name;
+
+				if (URL) {
+					// Change file path
+					imagePath = URL.createObjectURL(file);
+				}
+				else if (FileReader) {
+					reader = new FileReader();
+					reader.onload = function (e) {
+						// Change file path
+						imagePath = reader.result;
+					};
+					reader.readAsDataURL(file);
+				}
+			}
+
+			$parent.append(
+				'<div class="modal fade crop-image-modal" id="modal_' + id + '" tabindex="-1" role="dialog" aria-labelledby="' + id + 'ModalLabel">\
+					<div class="modal-dialog" role="document">\
+						<div class="modal-content">\
+							<div class="modal-header">\
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>\
+								<h4 class="modal-title">' + i18n['change_image'] + '</h4>\
+							</div>\
+							<div class="modal-body">\
+								<div class="img-container"><img class="img-responsive center-block" id="img_' + id + '" src="' + $.escapeHtml(imagePath) + '" /></div>\
+							</div>\
+							<div class="modal-footer">\
+								<div class="row">\
+									<div class="col-md-9 docs-buttons">\
+										<div class="btn-group">\
+											<button type="button" class="btn btn-primary" data-method="zoom" data-option="0.1" title="Zoom In">\
+												<span class="fa fa-search-plus"></span>\
+											</button>\
+											<button type="button" class="btn btn-primary" data-method="zoom" data-option="-0.1" title="Zoom Out">\
+												<span class="fa fa-search-minus"></span>\
+											</button>\
+										</div>\
+										<div class="btn-group">\
+											<button type="button" class="btn btn-warning" data-method="rotate" data-option="-90" title="Rotate Left">\
+												<span class="fa fa-rotate-left"></span>\
+											</button>\
+											<button type="button" class="btn btn-warning" data-method="rotate" data-option="90" title="Rotate Right">\
+												<span class="fa fa-rotate-right"></span>\
+											</button>\
+										</div>\
+										<div class="btn-group">\
+											<button type="button" class="btn btn-palegreen" data-method="scaleX" data-option="-1" title="Flip Horizontal">\
+												<span class="fa fa-arrows-h"></span>\
+											</button>\
+											<button type="button" class="btn btn-palegreen" data-method="scaleY" data-option="-1" title="Flip Vertical">\
+												<span class="fa fa-arrows-v"></span>\
+											</button>\
+										</div>\
+										<div class="btn-group margin-left-20">\
+											<span id="dataWidth' + id + '">0</span> &times; <span id="dataHeight' + id + '">0</span>\
+										</div>\
+									</div>\
+									<div class="col-md-3 text-align-right">\
+										<button type="button" class="btn btn-success crop-' + id + '">' + i18n['save'] + '</button>\
+									</div>\
+								</div>\
+							</div>\
+						</div>\
+					</div>\
+				</div>'
+			);
+
+			var $image = $('#img_' + id),
+				$modal = $('#modal_' + id),
+				$dataHeight = $('#dataHeight' + id),
+				$dataWidth = $('#dataWidth' + id),
+				options = {
+					autoCrop: false,
+					aspectRatio: NaN,
+					viewMode: 0,
+					crop: function (e) {
+						$dataHeight.text(Math.round(e.detail.height));
+						$dataWidth.text(Math.round(e.detail.width));
+					},
+					ready: function (e) {
+						var containerData = $(this).cropper('getContainerData'),
+							imageData = $(this).cropper('getImageData');
+
+						if (imageData.naturalWidth < containerData.width && imageData.naturalHeight < containerData.height)
+						{
+							$(this).data('cropper').zoomTo(1);
+						}
+					}
+				};
+
+			// Methods
+			$('#modal_' + id + ' .docs-buttons').on('click', '[data-method]', function () {
+				var $this = $(this),
+					data = $this.data(),
+					cropper = $image.data('cropper'),
+					cropped,
+					$target,
+					result;
+
+				if ($this.prop('disabled') || $this.hasClass('disabled')) {
+					return;
+				}
+
+				if (cropper && data.method) {
+					data = $.extend({}, data); // Clone a new one
+
+					if (typeof data.target !== 'undefined') {
+						$target = $(data.target);
+
+						if (typeof data.option === 'undefined') {
+							try {
+								data.option = JSON.parse($target.val());
+							} catch (e) {
+								console.log(e.message);
+							}
+						}
+					}
+
+					cropped = cropper.cropped;
+
+					switch (data.method) {
+						case 'rotate':
+							if (cropped && options.viewMode > 0) {
+								$image.cropper('clear');
+							}
+						break;
+						case 'getCroppedCanvas':
+							if (uploadedImageType === 'image/jpeg') {
+								if (!data.option) {
+								  data.option = {};
+								}
+
+								data.option.fillColor = '#fff';
+							}
+						break;
+					}
+
+					result = $image.cropper(data.method, data.option, data.secondOption);
+
+					switch (data.method) {
+						case 'rotate':
+						if (cropped && options.viewMode > 0) {
+							$image.cropper('crop');
+						}
+						break;
+
+						case 'scaleX':
+						case 'scaleY':
+							$(this).data('option', -data.option);
+						break;
+
+						case 'getCroppedCanvas':
+						if (result) {
+							// Bootstrap's Modal
+							$('#getCroppedCanvasModal').modal().find('.modal-body').html(result);
+
+							if (!$download.hasClass('disabled')) {
+								download.download = uploadedImageName;
+								$download.attr('href', result.toDataURL(uploadedImageType));
+							}
+						}
+						break;
+
+						case 'destroy':
+						if (uploadedImageURL) {
+							URL.revokeObjectURL(uploadedImageURL);
+							uploadedImageURL = '';
+							$image.attr('src', originalImageURL);
+						}
+						break;
+					}
+
+					if ($.isPlainObject(result) && $target) {
+						try {
+							$target.val(JSON.stringify(result));
+						} catch (e) {
+							console.log(e.message);
+						}
+					}
+				}
+			});
+
+			$modal.modal('show');
+
+			$modal.on('shown.bs.modal', function () {
+				// Cropper
+				$image.cropper(options);
+			}).on('hidden.bs.modal', function () {
+				$image.cropper('destroy');
+				$modal.remove();
+			});
+
+			$('#modal_' + id + ' .crop-' + id).on('click', function() {
+				var cropper = $image.data('cropper');
+
+				if (cropper) {
+					var canvas;
+
+					canvas = $image.cropper('getCroppedCanvas');
+					canvas.toBlob(function (blob) {
+						// Firefox < 62 workaround exploiting https://bugzilla.mozilla.org/show_bug.cgi?id=1422655
+						// specs compliant (as of March 2018 only Chrome)
+						const dT = new ClipboardEvent('').clipboardData || new DataTransfer();
+						dT.items.add(new File([blob], imageName));
+
+						$input[0].files = dT.files;
+					});
+				}
+
+				$modal.modal('hide');
+			});
+		},
 		escapeHtml: function(str) {
 			// This does not escape quotes
 			escaped = new Option(str).innerHTML;
@@ -298,17 +654,25 @@
 		refreshBookmarksCallback: function(resultData)
 		{
 			 // Есть новые дела
-			if (typeof resultData['Bookmarks'] != 'undefined' && resultData['Bookmarks'].length)
+			if (typeof resultData['Bookmarks'] != 'undefined')
 			{
 				var jEventUl = $('.navbar-account #bookmarksListBox .scroll-bookmarks > ul');
 
-				$('li[id!="bookmark-0"]', jEventUl).remove();
-				$('li[id="bookmark-0"]', jEventUl).hide();
+				$('li[id != "bookmark-0"]', jEventUl).remove();
 
-				$.each(resultData['Bookmarks'], function(index, event) {
-					// Добавляем закладку в список
-					$.addBookmark(event, jEventUl);
-				});
+				if (resultData['Bookmarks'].length)
+				{
+					$('li[id = "bookmark-0"]', jEventUl).hide();
+
+					$.each(resultData['Bookmarks'], function(index, event) {
+						// Добавляем закладку в список
+						$.addBookmark(event, jEventUl);
+					});
+				}
+				else
+				{
+					$('li[id = "bookmark-0"]', jEventUl).show();
+				}
 			}
 		},
 		refreshBookmarksList: function (){
@@ -327,10 +691,10 @@
 
 					if (!storageObj || typeof storageObj['expired_in'] == 'undefined')
 					{
-						storageObj = {expired_in: 0};
+						storageObj = {userId: 0, expired_in: 0};
 					}
 
-					if (Date.now() > storageObj['expired_in'])
+					if (jBookmarksListBox.data('userId') != storageObj['userId'] || Date.now() > storageObj['expired_in'])
 					{
 						storageObj['expired_in'] = Date.now() + 120000;
 
@@ -418,7 +782,7 @@
 		addBookmark: function (oBookmark, jBox){
 			jBox.append(
 				'<li id="bookmark-' + oBookmark['id'] + '">\
-					<a href="' + (oBookmark['href'].length ? $.escapeHtml(oBookmark['href']) : '#') + '" onclick="' + (oBookmark['onclick'].length ? oBookmark['onclick'] : '') + '">\
+					<a href="' + (oBookmark['href'].length ? $.escapeHtml(oBookmark['href']) : '#') + '" onclick="' + (oBookmark['onclick'].length ? $.escapeHtml(oBookmark['onclick']) : '') + '">\
 						<div class="clearfix notification-bookmark">\
 							<div class="notification-icon">\
 								<i class="' + $.escapeHtml(oBookmark['ico']) + ' bg-darkorange white"></i>\
@@ -428,7 +792,7 @@
 								<span class="description">' + $.escapeHtml(oBookmark['href']) + '</span>\
 							</div>\
 							<div class="notification-extra">\
-								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + oBookmark['remove-title'] +'\', submit: \'' + oBookmark['remove-submit'] + '\', cancel: \'' + oBookmark['remove-cancel'] + '\', bookmark_id: ' + oBookmark['id'] + '}); event.stopPropagation(); event.preventDefault();"></i>\
+								<i class="fa fa-times gray bookmark-delete" onclick="$.removeUserBookmark({title: \'' + $.escapeHtml(oBookmark['remove-title']) +'\', submit: \'' + $.escapeHtml(oBookmark['remove-submit']) + '\', cancel: \'' + $.escapeHtml(oBookmark['remove-cancel']) + '\', bookmark_id: ' + oBookmark['id'] + '}); event.stopPropagation(); event.preventDefault();"></i>\
 							</div>\
 						</div>\
 					</a>\
@@ -601,7 +965,14 @@
 						$(".email-select").empty().trigger("change");
 
 						$.each(answer, function(id, object){
-							var newOption = new Option(object.email + ' [' + object.type + ']', object.email, true, true);
+							var text = object.email;
+
+							if (object.type !== null)
+							{
+								text += ' [' + object.type + ']';
+							}
+
+							var newOption = new Option(text, object.email, true, true);
 							$(".email-select").append(newOption).trigger('change');
 						});
 					}
@@ -719,42 +1090,229 @@
 			$('#filter-' + filterId + ', #filter-li-' + filterId).remove();
 
 		},
-		sortableKanban: function(path, container, bUpdateData) {
-			$(container + ' .kanban-list').sortable({
-				items: "> li",
-				connectWith: container + ' .kanban-list',
-				placeholder: 'placeholder',
-				handle: ".drag-handle",
-				receive: function (event, ui) {
-					$.ajax({
-						data: { id: ui.item[0].id, sender_id: ui.sender[0].id, target_id: this.id, update_data: bUpdateData },
-						type: "POST",
-						dataType: 'json',
-						url: path,
-						success: function(result){
-							if (result.status == 'success' && result.update)
-							{
-								var jKanban = $('.kanban-board .kanban-board-header');
+		kanbanStepMove: function (windowId, path, data, moveCallback) {
+			$.ajax({
+				data: data,
+				type: "POST",
+				dataType: 'json',
+				url: path,
+				success: moveCallback
+			});
+		},
+		_kanbanStepMoveCallback: function(result){
+			if (result.status == 'success')
+			{
+				if (result.update)
+				{
+					var jKanban = $('.kanban-board .kanban-board-header');
 
-								$.each(result.update, function(id, object){
-									 jKanban.find('#data-' + id + ' .kanban-deals-count').text(object.count);
-									 jKanban.find('#data-' + id + ' .kanban-deals-amount').text(object.amount);
-								});
-							}
-						}
+					$.each(result.update, function(id, object){
+						jKanban.find('#data-' + id).html(object.data);
+						// jKanban.find('#data-' + id + ' .kanban-deals-amount').text(object.amount);
 					});
 				}
+			}
+			else if (result.status == 'error' && result.error_text)
+			{
+				alert(result.error_text);
+				$('ul#entity-list-' + result.target_id).addClass('error-drop');
+			}
+		},
+		_kanbanStepMoveLeadCallback: function(result){
+			if (result.status == 'success')
+			{
+				if(result.last_step == 1)
+				{
+					var id = 'hostcms[checked][0][' + itemObject.id + ']',
+						lead_status_id = result.lead_status_id
+						post = {};
+
+					post[id] = 1;
+					post['mode'] = 'edit';
+					post['lead_status_id'] = lead_status_id;
+
+					$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: windowId});
+				}
+				else if(result.type == 2)
+				{
+					$(itemObject).addClass('failed');
+				}
+			}
+		},
+		sortableKanban: function(options) {
+			var options = jQuery.extend({
+				path: '.',
+				container: null,
+				updateData: false,
+				windowId: 'id_content',
+				moveCallback: $._kanbanStepMoveCallback
+			}, options);
+
+			$(options.container + ' .connectedSortable').sortable({
+				items: "> li:not('.failed'):not('.finish')",
+				connectWith: options.container + ' .connectedSortable',
+				placeholder: 'placeholder',
+				handle: ".drag-handle",
+				helper: "clone",
+				// revert: true,
+				// scroll: false,
+				receive: function (event, ui) {
+					var sender_id = $(ui.sender[0]).data('step-id'),
+						target_id = $(this).data('step-id'),
+						$element = $(event.target),
+						$item = $(ui.item[0]);
+
+					if ($element.hasClass('kanban-action-item'))
+					{
+						ui.item
+							.addClass('hidden')
+							.addClass('just-hidden');
+
+						$element.css('background-color', $element.data('old-background'));
+						$element.css('color', '#fff');
+
+						target_id = $element.data('id');
+
+						$item.data('sender', target_id);
+					}
+
+					$.kanbanStepMove(options.windowId, options.path, {id: $item.data('id'), sender_id: sender_id, target_id: target_id, update_data: +options.updateData}, options.moveCallback);
+
+					setTimeout(function () {
+						if ($element.hasClass('error-drop'))
+						{
+							ui.sender.sortable("cancel");
+							$element.removeClass('error-drop');
+						}
+					}, 200);
+				},
+				start: function (event, ui) {
+					var $item = $(ui.item[0]);
+
+					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
+
+					$item.removeClass('cancel-' + $item.data('id'));
+
+					// Ghost
+					$(options.container + ' .connectedSortable').find('li:hidden')/*.not('.placeholder')*/
+						.addClass('ghost-item')
+						.addClass('cancel-' + $item.data('id'))
+						.css('opacity', .5)
+						.show();
+				},
+				stop: function (event, ui) {
+					ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').addClass('hidden');
+					ui.item.parents('.kanban-action-item').find('.return').removeClass('hidden');
+
+					$(ui.item[0]).data('target', $(event.target).data('step-id'));
+
+					if (ui.item.parents('.kanban-action-item').length)
+					{
+						setTimeout(function () {
+							$.closeActions(options.container, ui);
+						}, 3000);
+					}
+					else
+					{
+						$.closeActions(options.container, ui);
+					}
+
+					// Ghost
+					$(options.container + ' .connectedSortable').find('li.ghost-item')
+						.removeClass('ghost-item')
+						.css('opacity', 1);
+
+					$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
+				},
+				over: function (event, ui) {
+					var $element = $(event.target);
+
+					if ($element.hasClass('kanban-action-item'))
+					{
+						$element.css('background-color', $element.data('background'));
+						$element.css('color', $element.data('old-background'));
+					}
+				},
+				out: function (event, ui) {
+					var $element = $(event.target);
+
+					if ($element.hasClass('kanban-action-item'))
+					{
+						$element.css('background-color', $element.data('old-background'));
+						$element.css('color', '#fff');
+					}
+
+					$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
+				},
+				sort: function (event, ui) {
+					// removes anything that starts with "cancel-"
+					$('html').removeClass(function (index, css) {
+						return (css.match (/\bcancel-\S+/g) || []).join(' ');
+					});
+
+					var y = ui.position.top,
+						x = ui.position.left;
+
+					if (y > $(options.container).height() || x > $(options.container).width())
+					{
+						$(options.container + ' .connectedSortable').sortable("option", "scroll", false);
+					}
+				}
 			}).disableSelection();
+
+			$(options.container + ' .connectedSortable .return').on('click', function(){
+				var jLi = $(options.container + ' .connectedSortable').find('li[class *= "cancel-"]'),
+					target_id = jLi.data('target'),
+					sender_id = jLi.data('sender');
+
+				$(options.container + ' ul#entity-list-' + target_id).sortable("cancel");
+
+				$.kanbanStepMove(options.windowId, options.path, {id: $(jLi[0]).data('id'), sender_id: sender_id, target_id: target_id, update_data: 1}, options.moveCallback);
+
+				$(this).parents('.kanban-action-item').find('.kanban-action-item-name').removeClass('hidden');
+				$(this).parents('.kanban-action-item').find('.return').addClass('hidden');
+
+				$(options.container + ' .connectedSortable').find('.just-hidden').removeClass('hidden');
+			});
+		},
+		closeActions: function(container, ui) {
+			$(container + ' .kanban-action-wrapper').slideUp("slow", function(){
+				$(this)
+					.addClass('hidden')
+					.removeAttr('style');
+
+				ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').removeClass('hidden');
+				ui.item.parents('.kanban-action-item').find('.return').addClass('hidden');
+
+				$(ui.item[0]).removeClass('cancel-' + $(ui.item[0]).data('id'));
+
+				// Remove item
+				$('.kanban-actions').find('li.cancel-' + $(ui.item[0]).data('id')).remove();
+				$('.kanban-actions li.just-hidden').remove();
+			});
 		},
 		showKanban: function(container) {
-			var $kanban = $(container + ' > .row'),
+			var $kanban = $(container + ' > .row:first'),
 				$prevNav = $('.horizon-prev', container),
 				$nextNav = $('.horizon-next', container);
+
+			$kanban.hover(
+				function(){
+					// in
+					if ($kanban.get(0).clientWidth < $kanban.get(0).scrollWidth - $kanban.get(0).scrollLeft)
+					{
+						$nextNav.show();
+					}
+				}, function(){
+					// out
+					$nextNav.hide();
+				}
+			);
 
 			$.fn.horizon = function () {
 				// Set mousewheel event
 				$kanban.mousewheel(function(event, delta) {
-					this.scrollLeft += (delta * 30);
+					this.scrollLeft -= (delta * 30);
 
 					showButtons(this.scrollLeft);
 
@@ -768,7 +1326,7 @@
 						clearInterval($.fn.horizon.defaults.interval);
 					}
 
-					$.fn.horizon.defaults.interval = setInterval(function() { scrollRight(); }, 50);
+					$.fn.horizon.defaults.interval = setInterval(function() { scrollLeft(); }, 50);
 				}).mouseup(function() {
 					clearInterval($.fn.horizon.defaults.interval);
 				});
@@ -779,7 +1337,7 @@
 						clearInterval($.fn.horizon.defaults.interval);
 					}
 
-					$.fn.horizon.defaults.interval = setInterval(function() { scrollLeft(); }, 50);
+					$.fn.horizon.defaults.interval = setInterval(function() { scrollRight(); }, 50);
 				}).mouseup(function() {
 					clearInterval($.fn.horizon.defaults.interval);
 				});
@@ -803,7 +1361,7 @@
 
 			// Left scroll
 			var scrollLeft = function () {
-				var i2 = $.fn.horizon.defaults.delta - 1;
+				var i2 = $.fn.horizon.defaults.delta + 1;
 				$kanban.scrollLeft($kanban.scrollLeft() + (i2 * 30));
 
 				showButtons($kanban.scrollLeft());
@@ -811,7 +1369,7 @@
 
 			// Right scroll
 			var scrollRight = function () {
-				var i2 = $.fn.horizon.defaults.delta + 1;
+				var i2 = $.fn.horizon.defaults.delta - 1;
 				$kanban.scrollLeft($kanban.scrollLeft() + (i2 * 30));
 
 				showButtons($kanban.scrollLeft());
@@ -819,7 +1377,6 @@
 
 			// Left-Right buttons
 			var showButtons = function (index) {
-
 				if (index === 0) {
 					if ($.fn.horizon.defaults.interval)
 					{
@@ -832,7 +1389,10 @@
 						$prevNav.hide();
 					}
 
-					$nextNav.show();
+					if ($kanban.get(0).clientWidth < $kanban.get(0).scrollWidth - $kanban.get(0).scrollLeft)
+					{
+						$nextNav.show();
+					}
 				} else if ($kanban.get(0).clientWidth >= $kanban.get(0).scrollWidth - $kanban.get(0).scrollLeft) {
 					$prevNav.show();
 
@@ -917,6 +1477,8 @@
 		},
 		modalWindow: function(settings)
 		{
+			mainFormLocker.disable();
+
 			var settings = jQuery.extend({
 					title: '',
 					message: '',
@@ -924,20 +1486,29 @@
 				}, settings),
 				dialog = bootbox.dialog({
 					message: settings.message,
-					title: settings.title,
+					title: $.escapeHtml(settings.title),
 					className: settings.className,
 					onEscape: function() {}
 				}),
 				modalBody = dialog.find('.modal-body'),
 				content = dialog.find('.modal-body .bootbox-body div');
 
-			//window.bootboxDialog = dialog;
+			dialog.on('shown.bs.modal', function () {
+				$('html').css('overflow', 'hidden');
+			});
 
+			// before remove:
 			settings.onHide && dialog.on('hide.bs.modal', settings.onHide);
+			// after remove:
+			dialog.on('hidden.bs.modal', function(){
+				mainFormLocker.enable();
 
-			/*windowId = content.attr('id');
-			dialog.prop('id', windowId);
-			content.removeProp('id');*/
+				if($(".modal").hasClass('in')){
+					$('body').addClass('modal-open');
+				}
+
+				$('html').css('overflow', '');
+			});
 
 			if (typeof settings.width != 'undefined')
 			{
@@ -948,6 +1519,13 @@
 			{
 				modalBody.height(settings.height);
 			}
+
+			/*if (settings.error != '')
+			{
+				var jMessage = modalBody.find('#id_message');
+				$(jMessage[0]).empty().html(settings.error);
+				$(jMessage[0]).nextAll().remove();
+			}*/
 		},
 		chatClearMessagesList: function()
 		{
@@ -1413,7 +1991,7 @@
 		{
 			if (data["info"])
 			{
-				Notify('<img width="24px" height="24px" src="' + data["info"].avatar + '"><span style="padding-left:10px">' + data["info"].text + '</span>', 'bottom-left', '5000', 'blueberry', 'fa-comment-o', true, !!data["info"].sound);
+				Notify('<img width="24px" height="24px" src="' + $.escapeHtml(data["info"].avatar) + '"><span style="padding-left:10px">' + $.escapeHtml(data["info"].text) + '</span>', '', 'bottom-left', '7000', 'blueberry', 'fa-comment-o', true, !!data["info"].sound);
 
 				var user_id = data["info"]['user_id'],
 					jContact = $('#chat-user-id-' + user_id + ' .contact-info .contact-name'),
@@ -2018,16 +2596,13 @@
 
 			$.ajax({
 				url: '/admin/user/index.php',
-				/*url: '/admin/index.php?' + 'userSettings&moduleId=' + $(img).data('moduleId')
-					+ '&type=95'
-					+ '&width=' + ui.helper.width() + '&height=' + ui.helper.height() + '&active=' + (event.type == 'hostcmswindowbeforeclose' ? 0 : 1),*/
 				type: 'POST',
-				data: {'wallpaper-id':wallpaper_id},
+				data: {'wallpaper-id': wallpaper_id},
 				dataType: 'json',
 				error: function(){},
 				success: function (object) {
 					$('head').append('<style>body.hostcms-bootstrap1:before{ background-image: url(' + original + ') }</style>');
-				},
+				}
 			});
 		},
 		refreshClock: function() {
@@ -2084,7 +2659,6 @@
 				'click': function (event){
 					event.stopPropagation();
 				},
-
 				'touchstart': function (event) {
 					$(this).data({'isTouchStart': true});
 				}
@@ -2220,8 +2794,6 @@
 				});
 		},
 		addEvent: function (oEvent, jBox){
-			// var jBox = jBox || $('.navbar-account #notificationsClockListBox .scroll-notifications-clock > ul');
-
 			jBox.append(
 				'<li id="event-' + oEvent['id'] + '">\
 					<a href="' + (oEvent['href'].length ? $.escapeHtml(oEvent['href']) : '#') + '" onclick="' + (oEvent['onclick'].length ? oEvent['onclick'] : '') + '">\
@@ -2491,26 +3063,26 @@
 
 		// Добавление уведомления
 		addNotification: function (oNotification, jBox, soundEnabled){
-
 			var jBox = jBox || $('.navbar-account #notificationsListBox .scroll-notifications > ul'),
 				/*showAlertNotification = showAlertNotification === undefined ? true : showAlertNotification,*/
-				notificationExtra = '';
+				notificationExtra = '',
+				bUnread = oNotification['read'] == 0;
 
 			if (oNotification['extra'].length)
 			{
 				var jNotificationExtra = $('<div class="notification-extra">');
 
 				oNotification['extra'].forEach(function(item) {
-					jNotificationExtra.append('<i class="fa ' + item + ' themeprimary"></i>');
+					jNotificationExtra.append('<i class="fa ' + $.escapeHtml(item) + ' themeprimary"></i>');
 				})
 
-				oNotification['extra']['description'].length && jNotificationExtra.append('<span class="description">' + oNotification['extra']['description'] + '</span>')
+				oNotification['extra']['description'].length && jNotificationExtra.append('<span class="description">' + $.escapeHtml(oNotification['extra']['description']) + '</span>')
 
 				notificationExtra = jNotificationExtra.html();
 			}
 
 			jBox.prepend(
-				'<li id="notification-' + oNotification['id'] + '" class="' + (oNotification['read'] == 0 ? "unread" : "") + '">\
+				'<li id="notification-' + oNotification['id'] + '" class="' + (bUnread ? 'unread' : '') + '">\
 					<a href="' + (oNotification['href'].length ? $.escapeHtml(oNotification['href']) : '#') + '" onclick="' + (oNotification['onclick'].length ? oNotification['onclick'] : '') + '">\
 						<div class="clearfix">\
 							<div class="notification-icon">\
@@ -2519,16 +3091,17 @@
 							<div class="notification-body">\
 								<span class="title">' + $.escapeHtml(oNotification['title']) + '</span>\
 								<span class="description"></span>\
-								<span class="site-name">' + (typeof oNotification['site'] !== 'undefined' && oNotification['site'] !== null ? $.escapeHtml(oNotification['site']) : "") + '</span>\
+								<span class="site-name">' + (typeof oNotification['site'] !== 'undefined' && oNotification['site'] !== null ? $.escapeHtml(oNotification['site']) : '') + '</span>\
 							</div>\
 							' + notificationExtra +
 						'</div>\
 					</a>\
 				</li>')
-				.find('li#notification-' + oNotification['id'] + ' span.description').html((oNotification['description'].length ? (oNotification['description'] + '<br/>') : '') /* oNotification['datetime']*/ );
+				.find('li#notification-' + oNotification['id'] + ' span.description')
+				.html((oNotification['description'].length ? ($.escapeHtml(oNotification['description']) + '<br/>') : '') /* oNotification['datetime']*/ );
 
 			// Показываем всплывающее непрочитанное уведомление
-			!parseInt(oNotification['read']) && Notify(oNotification['title'], 'bottom-left', '5000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true, soundEnabled);
+			bUnread && Notify($.escapeHtml(oNotification['title']), $.escapeHtml(oNotification['description']), 'bottom-left', '7000', oNotification['notification']['background-color'], oNotification['notification']['ico'], true, soundEnabled);
 
 			// Открыт выпадающий список уведомлений
 			if ($('.navbar li#notifications').hasClass('open'))
@@ -3127,14 +3700,14 @@
 					if (eventId && moduleId)
 					{
 						bootbox.confirm({
-							message: "Удалить событие?",
+							message: i18n['remove_event'],
 							buttons: {
 								confirm: {
-									label: 'Да',
+									label: i18n['yes'],
 									className: 'btn-success'
 								},
 								cancel: {
-									label: 'Нет',
+									label: i18n['no'],
 									className: 'btn-danger'
 								}
 							},
@@ -3160,12 +3733,12 @@
 											{
 												// Удаляем событие из календаря
 												$('#calendar').fullCalendar( 'removeEvents', eventId + '_' + moduleId)
-												Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true, true)
 											}
 											else if (result['message']) // Ошибка, отменяем действие
 											{
 												result['error'] && revertFunc();
-												Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+												Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true, true)
 											}
 										}
 									})
@@ -3320,6 +3893,11 @@
 			// var jNewObject = jSourceProperty.clone();
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
 
+			// Clear autocomplete value
+			jNewObject.find("input.ui-autocomplete-input")
+				.attr('value', '')
+				.val('');
+
 			jNewObject.insertAfter(jProperies.eq(-1));
 
 			jNewObject.find("textarea")
@@ -3353,6 +3931,8 @@
 				var reg = /^(\S+)_(\d+)_(\d+)$/;
 				var arr = reg.exec(object.name);
 				jQuery(object).prop('name', arr[1] + '_' + arr[2] + '[]');
+				var inputId = jQuery(object).prop('id');
+				jNewObject.find("a[id='crop_" + inputId + "']").attr('onclick', "$.showCropModal('" + inputId + "', '', '')");
 			});
 
 			jNewObject.find("div.img_control div, a[id^='preview_'], a[id^='delete_'], div[role='application']").remove();
@@ -3361,15 +3941,10 @@
 
 			jNewObject.find(".file-caption-wrapper")
 				.addClass('hidden')
-				.prev().removeClass('hidden');
+				.parents('.input-group').find('input:first-child').removeClass('hidden');
 
-			/*var oDateTimePicker = jSourceProperty.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').data('DateTimePicker');
-
-			if(oDateTimePicker)
-			{
-				jNewObject.find('div[id ^= "div_property_' + index + '_"], div[id ^= "div_field_id_"]').datetimepicker({locale: oDateTimePicker.locale(), format: oDateTimePicker.format()});
-				jNewObject.find('script').remove();
-			}*/
+			// For checking field
+			jNewObject.find(':input').blur();
 		},
 		clonePropertyInfSys: function(windowId, index)
 		{
@@ -3450,11 +4025,10 @@
 		templateResultItemResponsibleEmployees: function (data, item){
 
 			var arraySelectItemParts = data.text.split("%%%"),
-				className = data.element && $(data.element).attr("class");
+				className;
 
 			if (data.id)
 			{
-
 				// Регулярное выражение для получения id select-а, на базе которого создан данный select2
 				var regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
 					myArray = regExp.exec(data._resultId);
@@ -3474,25 +4048,32 @@
 				}
 			}
 
-			if (data.element && $(data.element).attr("style"))
+			if (data.element)
 			{
-				// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
-				($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
+				var $element = $(data.element);
+
+				className = $element.attr("class");
+
+				if ($element.attr("style"))
+				{
+					// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
+					($element.is("optgroup") || $element.is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $element.attr("style"));
+				}
 			}
 
 			// Компания, отдел, ФИО сотрудника
-			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+			var resultHtml = '<span class="' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
 
 			if (arraySelectItemParts[2])
 			{
 				// Список должностей через запятую
-				resultHtml += '<span class="user-post">' + arraySelectItemParts[2].split('###').join(', ')  + '</span>';
+				resultHtml += '<span class="user-post">' + $.escapeHtml(arraySelectItemParts[2].split('###').join(', ')) + '</span>';
 			}
 
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[3]) + '" height="30px" class="user-image img-circle">' + resultHtml;
 			}
 
 			// Удаляем часть с названием отдела
@@ -3505,9 +4086,7 @@
 		templateSelectionItemResponsibleEmployees: function (data, item){
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class"),
-				//arraySelectItemIdParts = data.id.split("_"),
 				isCreator = false,
-
 				// Регулярное выражение для получения id select-а, на базе которого создан данный select2
 				regExp = /select2-([-\w]+)-result-\w+-\d+?/g,
 				myArray = regExp.exec(data._resultId);
@@ -3538,18 +4117,18 @@
 			}
 
 			// Компания, отдел, ФИО сотрудника
-			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+			var resultHtml = '<span class="' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
 
 			// Формируем title элемента
-			data.title = arraySelectItemParts[0];
+			data.title = $.escapeHtml(arraySelectItemParts[0]);
 
 			if (arraySelectItemParts[1] || arraySelectItemParts[2])
 			{
 				resultHtml += '<br />';
 				if (arraySelectItemParts[1])
 				{
-					resultHtml += '<span class="company-department">' + arraySelectItemParts[1] + '</span>';
-					data.title += " - " + arraySelectItemParts[1];
+					resultHtml += '<span class="company-department">' + $.escapeHtml(arraySelectItemParts[1]) + '</span>';
+					data.title += " - " + $.escapeHtml(arraySelectItemParts[1]);
 				}
 
 				// Список должностей через запятую
@@ -3557,8 +4136,8 @@
 				{
 					var departmentPosts = arraySelectItemParts[2].split('###').join(', ');
 
-					resultHtml += (arraySelectItemParts[1] ? ' → ' : '') + '<span class="user-post">' + departmentPosts  + '</span>';
-					data.title += " - " + departmentPosts;
+					resultHtml += (arraySelectItemParts[1] ? ' → ' : '') + '<span class="user-post">' + $.escapeHtml(departmentPosts) + '</span>';
+					data.title += " - " + $.escapeHtml(departmentPosts);
 				}
 			}
 
@@ -3568,82 +4147,100 @@
 			// Изображение
 			if (arraySelectItemParts[3])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[3] + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[3]) + '" height="30px" class="user-image pull-left img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
 		},
-
 		// Показ клиентов выпадающего списка select2
-		templateResultItemSiteusers: function (data, item){
-
+		templateResultItemSiteusers: function (data, item)
+		{
 			if (!data.text)
 			{
 				return '';
 			}
 
-			var arraySelectItemParts = data.text.split("%%%"),
-				className = data.element && $(data.element).attr("class");
-
-			if (data.element && $(data.element).attr("style"))
-			{
-				// Добавляем стили для групп и элементов. Элементам только при показе выпадающего списка
-				($(data.element).is("optgroup") || $(data.element).is("option") && $(item).hasClass("select2-results__option")) && $(item).attr("style", $(data.element).attr("style"));
-			}
+			var arraySelectItemParts = data.text.split("%%%");
 
 			// Компания/ФИО клиента
-			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+			var resultHtml = '<span>' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
 
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="20px" class="margin-right-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="20px" class="margin-right-5 img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
 		},
 
 		// Формирование результатов выбора клиентов в select2
-		templateSelectionItemSiteusers: function (data, item){
-
+		templateSelectionItemSiteusers: function (data, item)
+		{
 			var arraySelectItemParts = data.text.split("%%%"),
 				className = data.element && $(data.element).attr("class");
 
 			// Компания/ФИО клиента
-			var resultHtml = '<span class="' + className + '">' + arraySelectItemParts[0] + '</span>';
+			var resultHtml = '<span class="' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
 
 			// Устанавливает title для элемента
-			data.title = arraySelectItemParts[0];
+			data.title = $.escapeHtml(arraySelectItemParts[0]);
 
 			if (arraySelectItemParts[1])
 			{
-				resultHtml = '<img src="' + arraySelectItemParts[1] + '" height="20px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
+				resultHtml = '<img src="' + $.escapeHtml(arraySelectItemParts[1]) + '" height="20px" class="margin-top-5 margin-right-5 margin-bottom-5 img-circle">' + resultHtml;
 			}
 
 			return resultHtml;
 		},
-		joinUser2DealStep: function(deal_step_id)
+		joinUser2DealStep: function(settings)
 		{
+			// {deal_step_id} or {deal_id, deal_template_step_id}
+			settings = $.extend({
+				join_user: 1
+			}, settings);
+
+			var oButton = $('.join-user a');
+
+			$('i', oButton)
+				.removeClass('fa-check fa-times')
+				.addClass('fa-spinner fa-spin');
+
 			$.ajax({
 				url: '/admin/deal/index.php',
 				type: "POST",
 				dataType: 'json',
-				data: {'join_user': 1, 'deal_step_id': deal_step_id},
+				data: settings,
 				success: function(result) {
+					var buttonIcoClass, dealTemplateStepId, stepColor;
+
 					if (result['success'])
 					{
-						var i = 'times',
-							a = 'darkorange';
+						buttonIcoClass = 'fa-times';
+
+						oButton
+							.addClass('btn-darkorange')
+							.removeAttr('style');
 					}
 					else
 					{
-						var i = 'check',
-							a = 'azure';
+						buttonIcoClass = 'fa-check';
+
+						dealTemplateStepId = $('#deal-steps .steps').data('template-step-id');
+						stepColor = $('#deal-steps #simplewizardstep' + dealTemplateStepId + ' .step' ).css('color');
+
+						oButton
+							.removeClass('btn-darkorange')
+							.css({'color': '#fff', 'background-color': stepColor, 'border-color': stepColor});
 					}
 
-					$('.join-user').html('<a onclick="$.joinUser2DealStep(' + deal_step_id + '); $(this).find(\'i\').toggleClass(\'fa-' + i + ' fa-spinner\').addClass(\'fa-spin\');" class="btn btn-sm btn-' + a + ' pull-right"><i class="fa fa-' + i + ' right"></i> ' + result['name'] + '</a>');
+					$('span', oButton).text(result['name']);
+
+					$('i', oButton)
+						.removeClass('fa-spinner fa-spin')
+						.addClass(buttonIcoClass);
 
 					// Reload users list
-					$.loadDealStepUsers(deal_step_id);
+					$.loadDealStepUsers(result.deal_step_id);
 				}
 			});
 		},
@@ -3662,23 +4259,23 @@
 					{
 						$('.deal-step-users-list').append(
 							'<div class="row profile-container">\
-								<div class="col-xs-12"><h6 class="row-title before-palegreen no-margin-top">' + result['title'] + '</div>\
+								<div class="col-xs-12"><h6 class="row-title before-azure no-margin-top">' + $.escapeHtml(result['title']) + '</div>\
 							</div>\
 							<div class="row">\
 							</div>'
 						);
 
 						$.each(result['users'], function(i, oUser){
-							$('.deal-step-users-list').append(
-								'<div class="col-xs-12 col-sm-4">\
+							$('.deal-step-users-list .row:last-child').append(
+								'<div class="col-xs-12 col-sm-3">\
 									<div class="databox databox-graded">\
 										<div class="databox-left no-padding">\
-											<img src="' + oUser['avatar'] + '" style="width:65px; height:65px;">\
+											<img src="' + $.escapeHtml(oUser['avatar']) + '" style="width:65px; height:65px;">\
 										</div>\
 										<div class="databox-right bg-whitesmoke">\
 											<div class="databox-stat orange radius-bordered" style="right: 0; left: 7px">\
-												<div class="databox-text black semi-bold"><a class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + oUser['name'] + '</a></div>\
-												<div class="databox-text darkgray">' + oUser['post'] + '</div>\
+												<div class="databox-text black semi-bold"><a class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
+												<div class="databox-text darkgray">' + $.escapeHtml(oUser['post']) + '</div>\
 											</div>\
 										</div>\
 									</div>\
@@ -3691,6 +4288,44 @@
 				}
 			});
 		},
+		dealAddUserBlock: function(object)
+		{
+			var id = object.id.split('_', 2)[1],
+				dataset = object.type == 'company' ? 0 : 1;
+
+			$('.deal-users-row').append('<div class="col-xs-12 col-sm-6 col-lg-3 user-block">\
+				<div class="databox">\
+					<div class="databox-left no-padding">\
+						<div class="img-wrapper">\
+							<img src="' + $.escapeHtml(object.avatar) + '" style="width:65px; height:65px;"/>\
+							<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' + dataset + '][' + id + ']=1" onclick="$.modalLoad({path: \"/admin/siteuser/representative/index.php\", action: \"view\", operation: \"modal\", additionalParams: \"hostcms[checked][' + dataset + '][' + id + ']=1\", windowId: \"id_content\"}); return false">\
+								<span class="fa fa-eye fa-2x"></span>\
+							</a>\
+						</div>\
+					</div>\
+					<div class="databox-right bg-whitesmoke">\
+						<div class="databox-text">\
+							<div class="semi-bold">' + $.escapeHtml(object.name) + '</div>\
+							<div class="darkgray">' + $.escapeHtml(object.phone) + '</div>\
+							<div>' + (object.email.length
+								? '<a href="mailto:' + $.escapeHtml(object.email) + '">' + $.escapeHtml(object.email) + '</a>'
+								: '') + '</div>\
+						</div>\
+						<div class="delete-responsible-user" onclick="$.dealRemoveUserBlock($(this))">\
+							<i class="fa fa-times"></i>\
+						</div>\
+					</div>\
+				</div>\
+				<input type="hidden" name="deal_siteusers[]" value="' + object.id + '"/>\
+			</div>');
+		},
+		dealRemoveUserBlock: function(object)
+		{
+			if (confirm(i18n['confirm_delete']))
+			{
+				object.parents('.user-block').remove();
+			}
+		},		
 		rgb2hex: function(rgb)
 		{
 			if (typeof rgb !== 'undefined')
@@ -3702,21 +4337,16 @@
 				return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
 			}
 		},
-		changeDealTemplateName: function (oNewDealStep, oCurrentDealStep)
+		/* changeDealTemplateName: function (oNewDealStep, oCurrentDealStep)
 		{
-			var	hexNew = $.rgb2hex(oNewDealStep.css("background-color")),
-				hexCurrent = oCurrentDealStep && $.rgb2hex(oCurrentDealStep.css("background-color"));
+			var	hexNew = $.rgb2hex(oNewDealStep.css("color")),
+				hexCurrent = oCurrentDealStep && $.rgb2hex(oCurrentDealStep.css("color"));
 
-			if (oCurrentDealStep)
-			{
-				$(".deal-template-step-name.deal-template-step-name-inner .current-step").css("color", hexCurrent);
-				$(".deal-template-step-name.deal-template-step-name-inner .new-step").css("color", hexNew);
-			}
-			else
-			{
-				$(".deal-template-step-name.deal-template-step-name-inner").css("color", hexNew);
-			}
-		},
+				$(".deal-template-step-name .current-step").css("background-color", hexCurrent);
+				$(".deal-template-step-name .new-step").css("background-color", hexNew);
+
+
+		}, */
 		changeUserWorkdayButtons: function(status)
 		{
 			var data = {},
@@ -4133,10 +4763,817 @@
 
 			// return parseFloat(value).toFixed(number);
 			return Math.round(value * coeff) / coeff;
+		},
+		appendInput: function(windowId, InputName, InputValue)
+		{
+			var windowId = $.getWindowId(windowId), obj = $('#' + windowId + ' .adminForm');
+
+			if (obj.length && obj.eq(0).find("input[name='" + InputName + "']").length === 0)
+			{
+				obj.append(
+					$('<input>')
+					.attr('type', 'hidden')
+					.attr('name', InputName)
+					.val(InputValue));
+			}
+		},
+		toogleInputsActive: function(jForm, disableButtons)
+		{
+			jForm.find('.formButtons input').attr('disabled', disableButtons);
+		},
+		getWindowId: function(WindowId)
+		{
+			if (typeof WindowId == 'undefined' || WindowId == '')
+			{
+				WindowId = 'id_content';
+			}
+
+			return WindowId;
+		},
+		filterKeyDown: function(e) {
+			if (e.keyCode == 13) {
+				e.preventDefault();
+				//jQuery(this).parents('.admin_table').find('#admin_forms_apply_button').click();
+				jQuery(this).parentsUntil('table').find('#admin_forms_apply_button').click();
+			}
+		},
+		loadingScreen: function(method) {
+			// Method calling logic
+			if (methods[method]) {
+			  return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+			} else {
+			  alert('Method ' +  method + ' does not exist on jQuery.loadingScreen');
+			}
+		},
+		adminCheckObject: function(settings) {
+			settings = jQuery.extend({
+				objectId: '',
+				windowId: 'id_content'
+			}, settings);
+
+			var cbItem = jQuery("#"+settings.windowId+" #"+settings.objectId);
+
+			if (cbItem.length > 0)
+			{
+				// Uncheck all checkboxes with name like 'check_'
+				jQuery("#" + settings.windowId + " input[type='checkbox'][id^='check_']:not([name*='_fv_'])").prop('checked', false);
+
+				// Check checkbox
+				cbItem.prop('checked', true);
+			}
+			else
+			{
+				var Check_0_0 = jQuery('<input>')
+					.attr('type', 'checkbox')
+					.attr('id', settings.objectId);
+
+				jQuery('<div>')
+					.attr("style", 'display: none')
+					.append(Check_0_0)
+					.appendTo(
+						jQuery("#"+settings.windowId)
+					);
+
+				// After insert into DOM
+				Check_0_0.prop('checked', true);
+			}
+
+			$("#"+settings.windowId).setTopCheckbox();
+		},
+		requestSettings: function(settings) {
+			settings = jQuery.extend({
+				// position shift
+				open: function(type, data) {
+					var jWindow = jQuery(this).parent(),
+						mod = jQuery('body>.ui-dialog').length % 5;
+
+					jWindow.css('top', jWindow.offset().top + 10 * mod).css('left', jWindow.offset().left + 10 * mod);
+
+					var uiDialog = $(this).parent('.ui-dialog');
+					uiDialog.width(uiDialog.width()).height(uiDialog.height());
+				},
+				focus: function(event, ui){
+					// Текущий window
+					jQuery.data(document.body, 'currentWindowId', jQuery(this).attr('id'));
+				},
+				path: '',
+				context: '',
+				action: '',
+				operation: '',
+				additionalParams: '',
+				windowId: 'id_content',
+				datasetId: 0,
+				objectId: 0,
+				limit: '',
+				current: '',
+				sortingFieldId: '',
+				sortingDirection: '',
+				view: '',
+				post: {},
+				loadingScreen: true
+				//callBack: ''
+			}, settings);
+
+			return settings;
+		},
+		modalLoad: function(settings) {
+			settings = jQuery.requestSettings(settings);
+
+			var path = settings.path,
+				modalId = 'Modal_' + Date.now(),
+				data = jQuery.getData(
+					jQuery.extend({}, settings, {windowId: modalId})
+				);
+
+			if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}
+
+			$.loadingScreen('show');
+
+			jQuery.ajax({
+				context: jQuery('#' + settings.windowId),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				abortOnRetry: 1,
+				success: [function(returnedData) {
+					$.loadingScreen('hide');
+
+					/*var context = $(this),
+						modalDiv = $('<div>').attr('id', modalId).html(returnedData.form_html);
+
+					context.append(modalDiv);*/
+
+					settings = jQuery.extend({
+						title: returnedData.title,
+						message: '<div id="' + modalId + '"><div id="id_message"></div>' + returnedData.form_html + '</div>',
+						//windowId: modalId,
+						width: '80%',
+						error: returnedData.error
+					}, settings);
+
+					$.modalWindow(settings);
+
+					/*modalDiv.HostCMSWindow({
+						//autoOpen: true,
+						//destroyOnClose: false,
+						title: returnedData.title,
+						//AppendTo: context,
+						width: '80%',
+						// // height: 140,
+						//addContentPadding: true,
+						//modal: false,
+						//Maximize: false,
+						//inimize: false
+					});*/
+				}]
+			});
+
+			return false;
+		},
+		adminLoad: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminLoad', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
+			settings = jQuery.requestSettings(settings);
+
+			var path = settings.path,
+				data = jQuery.getData(settings);
+
+			if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}
+
+			// Элементы списка
+			var jChekedItems = jQuery("#"+settings.windowId+" :input[type='checkbox'][id^='check_']:checked"),
+				iChekedItemsCount = jChekedItems.length,
+				jItemsValue, iItemsValueCount, sValue;
+
+			var reg = /check_(\d+)_(\S+)/;
+			for (var jChekedItem, i = 0; i < iChekedItemsCount; i++)
+			{
+				jChekedItem = jChekedItems.eq(i);
+
+				var arr = reg.exec(jChekedItem.attr('id'));
+
+				data['hostcms[checked]['+arr[1]+']['+arr[2]+']'] = 1;
+
+				// arr[1] - ID источника, arr[2] - ID элемента
+				var element_id = jChekedItem.attr('id');
+
+				// Ищем значения записей, ID поля должно начинаться с ID checkbox-а
+				jItemsValue = jQuery("#"+settings.windowId+" :input[id^='apply_"+element_id+"_fv_']"),
+				iItemsValueCount = jItemsValue.length;
+
+				for (var jValueItem, k = 0; k < iItemsValueCount; k++)
+				{
+					jValueItem = jItemsValue.eq(k);
+
+					if (jValueItem.attr("type") == 'checkbox')
+					{
+						sValue = jValueItem.prop('checked') ? '1' : '0';
+					}
+					else
+					{
+						sValue = jValueItem.val();
+					}
+
+					data[jValueItem.attr('name')] = sValue;
+				}
+			}
+
+			// Фильтр
+			var jFiltersItems = jQuery("#" + settings.windowId + " :input[name^='admin_form_filter_']"),
+				iFiltersItemsCount = jFiltersItems.length;
+
+			for (var jFiltersItem, i = 0; i < iFiltersItemsCount; i++)
+			{
+				jFiltersItem = jFiltersItems.eq(i);
+
+				// Если значение фильтра до 255 символов
+				if (jFiltersItem.val().length < 256)
+				{
+					// Дописываем к передаваемым данным
+					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+				}
+			}
+
+			// Расширенные фильтры
+			var filterId = $('.topFilter').is(':visible')
+				? $('#filterTabs .active').data('filter-id')
+				: null;
+
+			data['hostcms[filterId]'] = filterId;
+
+			var jTopFiltersItems = jQuery("#"+settings.windowId+" #filter-" + filterId + " :input[name^='topFilter_']"),
+				iTopFiltersItemsCount = jTopFiltersItems.length;
+
+			for (var jFiltersItem, i=0; i < iTopFiltersItemsCount; i++)
+			{
+				jFiltersItem = jTopFiltersItems.eq(i);
+
+				// Если значение фильтра до 255 символов
+				if ((jFiltersItem.val() || '').length < 256)
+				{
+					// Дописываем к передаваемым данным
+					data[jFiltersItem.attr('name')] = jFiltersItem.val();
+				}
+			}
+
+			// Текущая страница.
+			/*if (ALimit === false)
+			{
+				ALimit = '';
+			}
+			else
+			{
+				ALimit = '&limit=' + ALimit;
+			}*/
+
+			// Очистим поле для сообщений
+			jQuery("#" + settings.windowId + " #id_message").empty();
+
+			$.loadingScreen('show');
+
+			jQuery.ajax({
+				context: jQuery('#'+settings.windowId),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				abortOnRetry: 1,
+				success: [jQuery.ajaxCallback, jQuery.ajaxCallbackSkin, function(returnedData)
+				{
+					var pjax = window.history && window.history.pushState && window.history.replaceState /*&& !navigator.userAgent.match(/(WebApps\/.+CFNetwork)/)*/;
+
+					/*if (settings.windowId == 'id_content'){*/
+					if (pjax && settings.windowId == 'id_content')
+					{
+						var state = {
+							windowId: settings.windowId,
+							url: path,
+							data: data
+						};
+						delete data['_'];
+
+						// jQuery.param(data) is too long => 400 bad request
+						// Delete empty items
+						/*for (var i in data) {
+							if (data[i] === '') {
+								delete data[i];
+							}
+						}
+						var url = path + (path.indexOf('?') >= 0 ? '&' : '?') + jQuery.param(data);
+						*/
+
+						window.history.pushState(state, document.title, path);
+					}
+
+					// Call own event
+					$("#" + settings.windowId).trigger('adminLoadSuccess');
+					//}
+				}]
+			});
+
+			return false;
+		},
+		adminSendForm: function(settings) {
+			// Call own event
+			var triggerReturn = $('body').triggerHandler('beforeAdminSendForm', [settings]);
+
+			if (triggerReturn == 'break')
+			{
+				return false;
+			}
+
+			settings = jQuery.requestSettings(settings);
+
+			settings = jQuery.extend({
+				buttonObject: ''
+			}, settings);
+
+			// Сохраним из визуальных редакторов данные
+			if (typeof tinyMCE != 'undefined')
+			{
+				tinyMCE.triggerSave();
+			}
+
+			// CodeMirror
+			jQuery("#"+settings.windowId+" .CodeMirror").each(function(){
+				this.CodeMirror.save();
+			});
+
+			var FormNode = jQuery(settings.buttonObject).closest('form'),
+				data = jQuery.getData(settings),
+				path = FormNode.attr('action');
+
+			if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}
+
+			// Очистим поле для сообщений
+			jQuery("#"+settings.windowId+" #id_message").empty();
+
+			// Отображаем экран загрузки
+			$.loadingScreen('show');
+
+			//FormNode.find(':disabled').removeAttr('disabled');
+
+			FormNode.ajaxSubmit({
+				data: data,
+				context: jQuery('#'+settings.windowId),
+				url: path,
+				//type: 'POST',
+				dataType: 'json',
+				cache: false,
+				success: jQuery.ajaxCallback
+			});
+		},
+		getData: function(settings) {
+			var data = (typeof settings.post != 'undefined') ? settings.post : {};
+
+			data['_'] = Math.round(new Date().getTime());
+
+			if (settings.action != '')
+			{
+				data['hostcms[action]'] = settings.action;
+			}
+
+			if (settings.operation != '')
+			{
+				data['hostcms[operation]'] = settings.operation;
+			}
+
+			/*if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}*/
+
+			if (settings.limit != '')
+			{
+				data['hostcms[limit]'] = settings.limit;
+			}
+
+			if (settings.current != '')
+			{
+				data['hostcms[current]'] = settings.current;
+			}
+
+			if (settings.sortingFieldId != '')
+			{
+				data['hostcms[sortingfield]'] = settings.sortingFieldId;
+			}
+
+			if (settings.sortingDirection != '')
+			{
+				data['hostcms[sortingdirection]'] = settings.sortingDirection;
+			}
+
+			if (settings.view != '')
+			{
+				data['hostcms[view]'] = settings.view;
+			}
+
+			data['hostcms[window]'] = settings.windowId;
+
+			return data;
+		},
+		beforeContentLoad: function(object)
+		{
+			if (typeof tinyMCE != 'undefined')
+			{
+				object.find('textarea').each(function(){
+					var elementId = this.id;
+					// if (tinyMCE.getInstanceById(elementId) != null)
+					if (tinyMCE.get(elementId) != null)
+					{
+						// console.log('mceRemoveControl');
+						tinyMCE.remove('#' + elementId);
+						//tinyMCE.execCommand('mceRemoveControl', false, elementId);
+						//jQuery('#content').tinymce().execCommand('mceInsertContent',false, elementId);
+					}
+				});
+			}
+		},
+		insertContent: function(jObject, content)
+		{
+			// Fix blink in FF
+			jObject.scrollTop(0).empty().html(content);
+		},
+		ajaxCallback: function(data, status, jqXHR)
+		{
+			var triggerReturn = $('body').triggerHandler('beforeAjaxCallback', [data]);
+
+			if (triggerReturn == 'break')
+			{
+				$.loadingScreen('hide');
+				return false;
+			}
+
+			$.loadingScreen('hide');
+			if (data == null)
+			{
+				alert('AJAX response error.');
+				return;
+			}
+
+			var jObject = jQuery(this);
+
+			if (data.form_html !== null && data.form_html.length)
+			{
+				jQuery.beforeContentLoad(jObject, data);
+				jQuery.insertContent(jObject, data.form_html);
+				jQuery.afterContentLoad(jObject, data);
+			}
+
+			if (data.error != '')
+			{
+				var jMessage = jObject.find('#id_message');
+
+				/*if (jMessage.length === 0)
+				{
+					jMessage = jQuery('<div>').attr('id', 'id_message');
+					jObject.prepend(jMessage);
+				}*/
+
+				jMessage.empty().html(data.error);
+			}
+
+			if (typeof data.title != 'undefined' && !isEmpty(data.title) && jObject.attr('id') == 'id_content')
+			{
+				document.title = data.title;
+			}
+		},
+		ajaxRequest: function(settings) {
+
+			settings = jQuery.requestSettings(settings);
+
+			if (typeof settings.callBack == 'undefined')
+			{
+				alert('Callback function is undefined');
+			}
+
+			var path = settings.path;
+
+			if (settings.additionalParams != ' ' && settings.additionalParams != '')
+			{
+				path += '?' + settings.additionalParams;
+			}
+
+			if (settings.loadingScreen) { $.loadingScreen('show'); }
+
+			var data = jQuery.getData(settings);
+			data['hostcms[checked][' + settings.datasetId + '][' + settings.objectId + ']'] = 1;
+
+			if (typeof settings.additionalData != 'undefined')
+			{
+				$.each(settings.additionalData, function(index, value){
+					data[index] = value;
+				})
+			}
+
+			var ajaxOptions = {
+				context: jQuery('#' + settings.windowId + ' #' + settings.context),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: settings.callBack,
+				abortOnRetry: 1
+			}
+
+			if (typeof settings.ajaxOptions != 'undefined')
+			{
+				$.each(settings.ajaxOptions, function(optionName, optionValue){
+					ajaxOptions[optionName] = optionValue;
+				})
+			}
+
+			jQuery.ajax(ajaxOptions);
+
+			return false;
+		},
+		loadDocumentText: function(data, status, jqXHR)
+		{
+			var jWindow = jQuery(this),
+				tinyTextarea = $("textarea[name='document_text']", jWindow);
+
+			$.loadingScreen('hide');
+
+			if ('template_id' in data)
+			{
+				tinyTextarea.val(data['text']);
+
+				$("select#template_id", jWindow).val(data['template_id']);
+
+				if (typeof tinyMCE != 'undefined')
+				{
+					var elementId = tinyTextarea.attr('id'),
+						editor = tinyMCE.get(elementId);
+
+					if (editor != null)
+					{
+						/*var settings = editor.settings;
+						settings['content_css'] = "...";
+						tinyMCE.remove('#' + elementId);
+						tinyTextarea.tinymce(settings);*/
+
+						$.each(data['css'], function( index, value ) {
+							editor.dom.loadCSS(value);
+						});
+					}
+				}
+			}
+		},
+		loadSelectOptionsCallback: function(data, status, jqXHR)
+		{
+			$.loadingScreen('hide');
+
+			var jTopParentDiv = jQuery(this).parents('[id ^= property]'),
+				jInput = jTopParentDiv.find('[id ^= input_]'),
+				jSelectTopParentDiv = jQuery(this).parents('div[class ^= form-group]'),
+				jInputTopParentDiv = jInput.parents('div[class ^= form-group]');
+
+			if ('mode' in data)
+			{
+				if (data['mode'] == 'select')
+				{
+					jInputTopParentDiv.addClass('hidden');
+					jSelectTopParentDiv.removeClass('hidden');
+
+					jQuery(this).empty();
+					for (var key in data['values'])
+					{
+						if (typeof data['values'][key] == 'object')
+						{
+							jQuery(this)
+								.append(jQuery('<option>')
+								.attr('value', data['values'][key].value)
+								.text(data['values'][key].name));
+						}
+						else
+						{
+							jQuery(this)
+								.append(jQuery('<option>')
+								.attr('value', key)
+								.text(data['values'][key]));
+						}
+					}
+				}
+				else if(data['mode'] == 'input')
+				{
+					jSelectTopParentDiv.addClass('hidden');
+					jInputTopParentDiv.removeClass('hidden');
+				}
+			}
+			else
+			{
+				jQuery(this).empty();
+				for (var key in data)
+				{
+					if (typeof data[key] == 'object')
+					{
+						jQuery(this)
+							.append(jQuery('<option>')
+							.attr('value', data[key].value)
+							.text(data[key].name));
+					}
+					else
+					{
+						jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+					}
+				}
+			}
+		},
+		loadDivContentAjaxCallback: function(data, status, jqXHR)
+		{
+			$.loadingScreen('hide');
+			jQuery(this).empty().html(data);
+		},
+		pasteStandartAnswer: function(data, status, jqXHR)
+		{
+			$.loadingScreen('hide');
+			jQuery(this).val(jQuery(this).val() + data);
+
+		},
+		clearFilter: function(windowId)
+		{
+			jQuery("#" + windowId + " .admin_table_filter input").val('');
+			jQuery("#" + windowId + " .admin_table_filter select").prop('selectedIndex', 0);
+
+			jQuery("#" + windowId + " .admin_table_filter select.select2-hidden-accessible").html('').select2({data: [{id: '', text: ''}]}).select2();
+
+			jQuery("#" + windowId + " .search-field input[name = globalSearch]").val('');
+		},
+		clearTopFilter: function(windowId)
+		{
+			jQuery("#" + windowId + " .topFilter input").val('');
+			jQuery("#" + windowId + " .topFilter select").prop('selectedIndex', 0);
+
+			jQuery("#" + windowId + " .topFilter select.select2-hidden-accessible").val(null).trigger("change");
+		},
+		setCheckbox: function(windowId, checkboxId)
+		{
+			jQuery("#"+windowId+" input[type='checkbox'][id='"+checkboxId+"']").attr('checked', true);
+		},
+		cloneSpecialPrice: function(windowId, cloneDelete)
+		{
+			var jSpecialPrice = jQuery(cloneDelete).closest('.spec_prices'),
+			jNewObject = jSpecialPrice.clone();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				jQuery(object).prop('name', arr[1] + '_' + '[]');
+			});
+			jNewObject.find("input").val('');
+
+			jNewObject.insertAfter(jSpecialPrice);
+		},
+		deleteNewSpecialprice: function(object)
+		{
+			var jObject = jQuery(object).closest('.spec_prices').remove();
+		},
+		cloneDeliveryOption: function(windowId, cloneDelete)
+		{
+			var jDeliveryOption = jQuery(cloneDelete).closest('.delivery_options'),
+			jNewObject = jDeliveryOption.clone();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				jQuery(object).prop('name', arr[1] + '_' + '[]');
+			});
+			jNewObject.find("input,select").val('');
+
+			jNewObject.insertAfter(jDeliveryOption);
+		},
+		deleteNewDeliveryOption: function(object)
+		{
+			var jObject = jQuery(object).closest('.delivery_options').remove();
+		},
+		cloneMultipleValue: function(windowId, cloneDelete)
+		{
+			var jMultipleValue = jQuery(cloneDelete).closest('.multiple_value'),
+			jNewObject = jMultipleValue.clone();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				jQuery(object).prop('name', arr[1] + '_' + '[]');
+			});
+			jNewObject.find("input,select").val('');
+
+			jNewObject.insertAfter(jMultipleValue);
+		},
+		deleteNewMultipleValue: function(object)
+		{
+			var jObject = jQuery(object).closest('.multiple_value').remove();
+		},
+		companyChangeFilterFieldWindowId: function(newFilterFieldWindowId)
+		{
+			if (newFilterFieldWindowId)
+			{
+				$('input[id ^= \"filter_field_id_\"]').each( function() {
+					var onKeyupText = $(this).attr('onkeyup'),
+						pos = onKeyupText.indexOf('oSelectFilter') + 'oSelectFilter'.length,
+						suffix = onKeyupText.substr(pos, 1),
+						index = 'oSelectFilter' + suffix;
+
+						if (window[index])
+						{
+							window[index].windowId = newFilterFieldWindowId;
+						}
+					}
+				)
+			}
+		},
+		showWindow: function(windowId, content, settings)
+		{
+			settings = jQuery.extend({
+				/*modal: true, */autoOpen: true, addContentPadding: false, resizable: true, draggable: true, Minimize: false, Closable: true
+			}, settings);
+
+			var jWin = jQuery('#' + windowId);
+
+			if (!jWin.length)
+			{
+				jWin = jQuery('<div>')
+					.addClass('hostcmsWindow')
+					.attr('id', windowId)
+					//.appendTo(jQuery(document))
+					.html(content)
+					.HostCMSWindow(settings)/*
+					.HostCMSWindow('open')*/;
+			}
+			return jWin;
+		},
+		// Изменение статуса заказа товара
+		changeOrderStatus: function(windowId)
+		{
+			var date = new Date(), day = date.getDate(), month = date.getMonth() + 1, hours = date.getHours(), minutes = date.getMinutes();
+
+			if (day < 10)
+			{
+				day = '0' + day;
+			}
+
+			if (month < 10)
+			{
+				month = '0' + month;
+			}
+
+			if (hours < 10)
+			{
+				hours = '0' + hours;
+			}
+
+			if (minutes < 10)
+			{
+				minutes = '0' + minutes;
+			}
+
+			$("#"+windowId+" #status_datetime").val(day + '.' + month + '.' + date.getFullYear() + ' ' + hours + ':' + minutes + ':' + '00');
+		},
+		// Установка cookies
+		// name - имя параметра
+		// value - значение параметра
+		// expires - время жизни куки в секундах
+		// path - путь куки
+		// domain - домен
+		setCookie: function(name, value, expires, path, domain, secure)
+		{
+			// если истечение передано - устанавливаем время истечения на expires секунд
+			// вперед
+			if (expires)
+			{
+				var date = new Date();
+				expires = (expires * 1000) + date.getTime();
+				date.setTime(expires);
+			}
+
+			document.cookie = name + "=" + encodeURIComponent(value) +
+			((expires) ? "; expires=" + date.toGMTString() : "") +
+			((path) ? "; path=" + path : "") +
+			((domain) ? "; domain=" + domain : "") +
+			((secure) ? "; secure" : "");
 		}
 	});
 
-	jQuery.fn.extend({
+	$.fn.extend({
 		insertAtCaret: function(newValue){
 		  return this.each(function(i) {
 			if (document.selection) {
@@ -4174,12 +5611,21 @@
 			});
 		},
 		/* --- /CHAT --- */
-
 		selectPersonCompany: function(settings)
 		{
 			settings = $.extend({
+				url: '/admin/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company',
+				allowClear: true,
+				templateResult: $.templateResultItemSiteusers,
+				escapeMarkup: function(m) { return m; },
+				templateSelection: $.templateSelectionItemSiteusers,
+				width: "100%",
+				dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
+			}, settings);
+
+			settings = $.extend({
 				ajax: {
-					url: "/admin/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company",
+					url: settings.url,
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
@@ -4191,13 +5637,7 @@
 							results: aResults
 						};
 					}
-				},
-				allowClear: true,
-				templateResult: $.templateResultItemSiteusers,
-				escapeMarkup: function(m) { return m; },
-				templateSelection: $.templateSelectionItemSiteusers,
-				width: "100%",
-				dropdownParent: $(this).closest('.modal').length ? $(this).closest('.modal') : null
+				}
 			}, settings);
 
 			return this.each(function(){
@@ -4218,7 +5658,6 @@
 				jQuery(this).select2(settings);
 			});
 		},
-
 		selectSiteuser: function(settings)
 		{
 			settings = $.extend({
@@ -4330,34 +5769,151 @@
 			$.modalWindow(settings);
 
 			object.remove();
+		},
+		toggleDisabled: function()
+		{
+			return this.each(function(){
+				this.disabled = !this.disabled;
+			});
+		},
+		editable: function(settings){
+			settings = jQuery.extend({
+				save: function(item, settings){
+
+					var data = jQuery.getData(settings), reg = /apply_check_(\d+)_(\S+)_fv_(\d+)/,
+					itemId = item.prop('id'), arr = reg.exec(itemId);
+
+					data['hostcms[checked]['+arr[1]+']['+arr[2]+']'] = 1;
+					data[itemId] = item.text();
+
+					jQuery.ajax({
+						// ajax loader
+						context: jQuery('<img>').addClass('img_line').prop('src', '/modules/skin/default/js/ui/themes/base/images/ajax-loader.gif').appendTo(item),
+						url: settings.path,
+						type: 'POST',
+						data: data,
+						dataType: 'json',
+						success: function(){this.remove();}
+					});
+				},
+				action: 'apply'
+			}, settings);
+
+			return this.each(function(index, object){
+				jQuery(object).on('dblclick', function(){
+					var item = jQuery(this).css('display', 'none'),
+					jInput = jQuery('<input>').prop('type', 'text').on('blur', function() {
+						var input = jQuery(this), item = input.prev();
+						item.text(input.val()).css('display', '');
+						input.remove();
+						settings.save(item, settings);
+					}).on('keydown', function(e){
+						if (e.keyCode == 13) {
+							e.preventDefault();
+							this.blur();
+						}
+						if (e.keyCode == 27) { // ESC
+							e.preventDefault();
+							var input = jQuery(this), item = input.prev();
+							item.css('display', '');
+							input.remove();
+						}
+					}).width('90%').prop('name', item.parent().prop('id'))
+					.insertAfter(item).focus().val(item.text());
+				});
+			});
+		},
+		clearSelect: function()
+		{
+			return this.each(function(index, object){
+				jQuery(object).empty().append(jQuery('<option>').attr('value', 0).text(' ... '));
+			});
+		},
+		toggleHighlight: function()
+		{
+			return this.each(function(){
+				var object = jQuery(this);
+				object.toggleClass('cheked');
+			});
+		},
+		highlightAllRows: function(checked)
+		{
+			return this.each(function(){
+				var object = jQuery(this);
+
+				// Устанавливаем checked для групповых чекбоксов
+				object.find("input[type='checkbox'][id^='id_admin_forms_all_check']").prop('checked', checked);
+
+				object.find("input[type='checkbox'][id^='check_']").each(function() {
+					var object = $(this);
+
+					if (object.prop('checked') != checked)
+					{
+						object.parents('tr').toggleHighlight();
+					}
+					// Устанавливаем checked
+					object.prop('checked', checked);
+				});
+			});
+		},
+		setTopCheckbox: function()
+		{
+			return this.each(function(){
+				var object = jQuery(this), bChecked = !object.find("input[type='checkbox'][id^='check_']").is(':not(:checked)');
+				object.find("input[type='checkbox'][id^='id_admin_forms_all_check']").prop('checked', bChecked);
+			});
 		}
+	});
+
+	var baseURL = location.href, popstate = ('state' in window.history && window.history.state !== null);
+	jQuery(window).bind('popstate', function(event){
+		// Ignore inital popstate that some browsers fire on page load
+		var startPop = !popstate && baseURL.split("#")[0] == location.href.split("#")[0];
+		popstate = true;
+		if (startPop){
+			return;
+		}
+
+		var state = event.state;
+		if (state && state.windowId/* && state.windowId == 'id_content'*/) {
+			var data = state.data;
+			data['_'] = Math.round(new Date().getTime());
+
+			$.loadingScreen('show');
+
+			jQuery.ajax({
+				context: jQuery('#'+state.windowId),
+				url: state.url,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: jQuery.ajaxCallback
+			});
+		}
+		else {
+			popstate = false;
+			window.location = location.href;
+		}
+	});
+
+	if (jQuery.inArray('state', jQuery.event.props) < 0){
+		jQuery.event.props.push('state');
+	}
+
+	var currentRequests = {};
+	jQuery.ajaxPrefilter(function(options, originalOptions, jqXHR){
+	  if(options.abortOnRetry){
+		if(currentRequests[options.url]){
+			currentRequests[options.url].abort();
+		}
+		currentRequests[options.url] = jqXHR;
+	  }
 	});
 
 })(jQuery);
 
 $(function(){
 
-	/*
-	$('li#user-info-dropdown').on(
-		{
-			'mouseenter': function() {
-
-				var oSpan = $(this).find('span.profile > span');
-
-				oSpan
-					.data({'original-width': oSpan.width()})
-					.css({'width': 'fit-content'});
-			},
-
-			'mouseleave': function() {
-
-				var oSpan = $(this).find('span.profile > span');
-
-				oSpan.css({'width': oSpan.data('original-width')});
-			}
-		}
-	);
-	*/
 
 	//$.notificationsPrepare();
 	//$.eventsPrepare();
@@ -4527,26 +6083,15 @@ $(function(){
 			$(this)
 				.next('.list_users')
 				.slideToggle();
-			/*
-
-			if ($(this).hasClass('collapsed'))
-			{
-
-			}
-			else
-			{
-				$(this).children('i').toggleClass('fa-caret-down fa-caret-right');
-			}*/
 		})
 		.on(
 			{
 				'click': function(event) {
 
-					console.log('11111111');
-
 					$(this).focus();
 
-					if ($(this).hasClass('blocked'))
+					// Действие, доступ к которому изменяем, недоступно для сотрудника или авторизованный сотрудник не может менять доступ к действию.
+					if ($(this).hasClass('blocked') || $(this).parent('.not-changeable').length)
 					{
 						return false;
 					}
@@ -4559,6 +6104,12 @@ $(function(){
 						actionType = aPermissionProperties[3], // тип действия (0 - создание, 1 - редактирование, 2 - просмотр, 3 - удаление)
 						sUrlParams = document.location.search,
 						dealTemplateId;
+
+					// Не обрабатываем изменение прав доступа для отделов
+					if (!objectTypePermission)
+					{
+						return false;
+					}
 
 					// Строка параметров
 					if (sUrlParams.length)
@@ -4672,55 +6223,40 @@ $(function(){
 			$.changeUserWorkdayButtons(status);
 		})
 		// Перевод сделки на новый этап
-		.on("click", ".deal-steps li", function() {
-
+		.on("click", "#deal-steps .steps li", function() {
 			var $this = $(this),
-				dealTemplateStepId = parseInt($this.attr("id").split("deal_template_step_")[1]) || 0,
-				dealTemplateSteps = $this.parent(".deal-steps"),
-				currentDealTemplateStepId = parseInt(dealTemplateSteps.data("stepId"));
+				dealTemplateStepId = parseInt($this.attr("id").split("simplewizardstep")[1]) || 0,
+				dealTemplateSteps = $this.parent(".steps"),
+				currentDealTemplateStepId = parseInt(dealTemplateSteps.data("template-step-id"));
 
 			if (dealTemplateStepId && dealTemplateStepId != currentDealTemplateStepId
-				&& $this.children("a.available").length)
+				&& $this.hasClass("available"))
 			{
-				currentDealTemplateStepName = $.escapeHtml(dealTemplateSteps.find("li#deal_template_step_" + currentDealTemplateStepId + " a").prop("title"));
-
 				// Создание сделки
-				if (!dealTemplateSteps.data("deal-id"))
+				if (!dealTemplateSteps.data("dealId"))
 				{
-					$this
-						.find("a")
-						.addClass("current");
+					$this.toggleClass("active available");
 
 					dealTemplateSteps
-						.find("li#deal_template_step_" + currentDealTemplateStepId + " a")
-						.removeClass("current");
+						.find("li#simplewizardstep" + currentDealTemplateStepId)
+						.toggleClass("active available");
 
-					dealTemplateSteps.data("stepId", dealTemplateStepId);
-
-					dealTemplateStepNameHtml = $.escapeHtml($this.children("a").prop("title"));
-					currentDealTemplateStepId = dealTemplateStepId;
+					dealTemplateSteps.data("template-step-id", dealTemplateStepId);
 				}
 				else // Редактирование сделки
 				{
-					$("a.clear-next", dealTemplateSteps).each(function() {
-
-						$(this).removeClass("clear-next");
-					});
-
 					// Нажали на шаг уже отмеченный как "следующий",
 					// снимаем отметку для перехода
-					if ($this.children("a").hasClass("next"))
+					if ($this.hasClass("next"))
 					{
 						$(".deal-template-step-comment")
 							.parent()
 							.addClass("hidden");
 
-						$this
-							.children("a")
-							.toggleClass("next clear-next");
+						$this.removeClass("next");
+						$(".deal-template-step-name").html('');
 
-						dealTemplateStepId = currentDealTemplateStepId;
-						dealTemplateStepNameHtml = currentDealTemplateStepName;
+						dealTemplateStepId = dealTemplateSteps.data("template-step-id");
 					}
 					else
 					{
@@ -4728,24 +6264,41 @@ $(function(){
 							.parent()
 							.removeClass("hidden");
 
-						dealTemplateStepNameHtml = '<span class="current-step">' + currentDealTemplateStepName + '</span>' + '<span class="darkgray"> → </span>' + '<span class="new-step">' + $.escapeHtml($this.children("a").prop("title")) + '</span>';
+					 	$(".next", dealTemplateSteps).removeClass("next");
+						$this.addClass("next");
 
-						$("a.next", dealTemplateSteps).each(function() {
-							$(this).removeClass("next");
-						});
+						currentStepLi = $("li#simplewizardstep" + currentDealTemplateStepId, dealTemplateSteps);
+						currentStepName = $.escapeHtml($("span.title", currentStepLi).text());
+						currentStepColor = $('span.step', currentStepLi).css('color');
 
-						$this.children("a.available") && $this.children("a").addClass("next"); //.removeClass("clear-next");
+						newStepName = $.escapeHtml($("span.title", $this).text());
+						newStepColor = $('span.step', $this).css('color');
+
+						$(".deal-template-step-name").html('<span class="badge current-step" style="background-color:' + currentStepColor + '">' + currentStepName + '</span><span class="darkgray"> → </span><span class="badge new-step" style="background-color:' + newStepColor + '">' + newStepName + '</span>');
+					}
+
+					// Сотрудник не принял сделку или отказался от ее выполнения
+					if (!$('.join-user a').hasClass('btn-darkorange')
+						&& !$('.join-user a').hasClass('btn-default')
+					)
+					{
+						// stepColor = $('li#simplewizardstep' + dealTemplateSteps.data("template-step-id") + ' span.step', dealTemplateSteps).css('color');
+						stepColor = $('li#simplewizardstep' + dealTemplateStepId + ' span.step', dealTemplateSteps).css('color');
+
+						var $joinUserA = $('.join-user a'),
+							dealId = $joinUserA.data('deal-id');
+
+						var onclick = !$this.hasClass('next')
+							? '{deal_step_id: ' + parseInt(dealTemplateSteps.data("step-id")) + '}'
+							: '{deal_id: ' + dealId + ', deal_template_step_id: ' + dealTemplateStepId + '}';
+
+						$joinUserA
+							.attr('onclick', '$.joinUser2DealStep(' + onclick + ')')
+							.css({'color': '#fff', 'background-color': stepColor, 'border-color': stepColor});
 					}
 				}
 
-				dealTemplateSteps
-					.parent("div")
-					.next("[name='deal_template_step_id']")
-					.val(dealTemplateStepId);
-
-				$(".deal-template-step-name.deal-template-step-name-inner").html(dealTemplateStepNameHtml);
-
-				$.changeDealTemplateName(dealTemplateSteps.find("li#deal_template_step_" + dealTemplateStepId + " a"), dealTemplateStepId != currentDealTemplateStepId ? dealTemplateSteps.find("li#deal_template_step_" + currentDealTemplateStepId + " a") : null);
+				$("[name='deal_template_step_id']").val(dealTemplateStepId);
 			}
 		});
 
@@ -4768,6 +6321,20 @@ $(function(){
 	});
 });
 
+//fix modal force focus
+/*$.fn.modal.Constructor.prototype.enforceFocus = function () {
+  var that = this;
+  $(document).on('focusin.modal', function (e) {
+	 if ($(e.target).hasClass('select2-input')) {
+		return true;
+	 }
+
+	 if (that.$element[0] !== e.target && !that.$element.has(e.target).length) {
+		that.$element.focus();
+	 }
+  });
+};*/
+
 // Lazy image load
 document.addEventListener("DOMContentLoaded", function() {
 	var lazyloadThrottleTimeout;
@@ -4784,10 +6351,11 @@ document.addEventListener("DOMContentLoaded", function() {
 				lazyloadImages = document.querySelectorAll("img.lazy");
 
 			lazyloadImages.forEach(function(img) {
-				if(img.offsetTop < (window.innerHeight + scrollTop))
+				// if(img.offsetTop < (window.innerHeight + scrollTop))
+				if(img.getBoundingClientRect().top < (window.innerHeight + scrollTop))
 				{
-				  img.src = img.dataset.src;
-				  img.classList.remove('lazy');
+					img.src = img.dataset.src;
+					img.classList.remove('lazy');
 				}
 			});
 
@@ -4805,6 +6373,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	window.addEventListener("orientationChange", lazyload);
 
 	$('#id_content').on('adminLoadSuccess', lazyload);
+	$(document).on("shown.bs.modal", lazyload);
 
 	lazyload();
 }, false);
@@ -4929,6 +6498,12 @@ function calendarEventRender(event, element)
 			.append('<span class="fc-place"><i class="fa fa-map-marker black"></i> ' + $.escapeHtml(event.place) + '</span>');
 	}
 
+	if (event.amount)
+	{
+		element.find('.fc-content')
+			.append('<span class="fc-amount semi-bold">' + $.escapeHtml(event.amount) + '</span>');
+	}
+
 	/*element.popover({
 		title: event.title,
 		//placement: 'right',
@@ -4953,7 +6528,6 @@ function calendarEventResizeStart( event, jsEvent, ui, view )
 
 function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
 {
-
 	$.loadingScreen('show');
 
 	var eventIdParts = event.id.split('_'), // Идентификатор события календаря состоит из 2-х частей - id сущности и id модуля, разделенных '_'
@@ -4974,14 +6548,14 @@ function calendarEventResize( event, delta, revertFunc, jsEvent, ui, view )
 
 				if (!result['error'] && result['message'])
 				{
-					Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+					Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true, true)
 
 					$('#calendar').fullCalendar( 'refetchEvents' );
 				}
 				else if (result['message']) // Ошибка, отменяем действие
 				{
 					result['error'] && revertFunc();
-					Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+					Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true, true)
 				}
 			}
 		})
@@ -5010,12 +6584,12 @@ function calendarEventDrop( event, delta, revertFunc, jsEvent, ui, view )
 
 			if (!result['error'] && result['message'])
 			{
-				Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'success', 'fa-check', true, true)
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'success', 'fa-check', true, true)
 			}
 			else if (result['message']) // Ошибка, отменяем действие
 			{
 				result['error'] && revertFunc();
-				Notify('<span>' + result['message'] + '</span>', 'top-right', '5000', 'danger', 'fa-warning', true, true)
+				Notify('<span>' + $.escapeHtml(result['message']) + '</span>', '', 'top-right', '7000', 'danger', 'fa-warning', true, true)
 			}
 
 			$('#calendar').fullCalendar( 'refetchEvents' );
@@ -5178,9 +6752,10 @@ function formLocker()
 	this._locked = false;
 	this._previousLocked = false;
 	this._delay = false;
+	this._enabled = true;
 
 	this.lock = function(event) {
-		if (!this._delay)
+		if (!this._delay && this._enabled)
 		{
 			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
 			aKeycodes = [13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
@@ -5238,6 +6813,16 @@ function formLocker()
 	this.restoreStatus = function() {
 		this._previousLocked ? this.lock() : this.unlock();
 		this._previousLocked = false;
+		return this;
+	}
+
+	this.enable = function() {
+		this._enabled = true;
+		return this;
+	}
+
+	this.disable = function() {
+		this._enabled = false;
 		return this;
 	}
 }
@@ -5299,3 +6884,396 @@ $.getMultiContent = function(arr, path) {
 		}
 	});
 }
+
+function cSelectFilter(windowId, sObjectId)
+{
+	this.windowId = $.getWindowId(windowId);
+	this.sObjectId = sObjectId.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
+
+	// Игнорировать регистр
+	this.ignoreCase = true;
+	this.timeout = null;
+	this.pattern = '';
+	this.aOriginalOptions = null;
+	this.sSelectedValue = '';
+
+	// Сейчас происходит фильтрация
+	this.is_filtering = false;
+
+	// Установка требуемого шаблона фильтрации
+	this.Set = function(pattern) {
+		this.pattern = pattern;
+		this.is_filtering = (pattern.length != 0);
+	}
+
+	// Указывает регулярному выражению игнорировать регистр
+	this.SetIgnoreCase = function(value) {
+		this.ignoreCase = value;
+	}
+
+	this.GetCurrentSelectObject = function() {
+		this.oCurrentSelectObject = $("#"+this.windowId+" #"+this.sObjectId);
+	}
+
+	this.Init = function() {
+
+		this.GetCurrentSelectObject();
+
+		if (this.oCurrentSelectObject.length == 1)
+		{
+			var jOptions = this.oCurrentSelectObject.children("option"), jOptionItem;
+
+			if (jOptions.length > 0)
+			{
+				// Сохраняем установленное до фильтрации значение
+				this.sSelectedValue = this.oCurrentSelectObject.val();
+				this.aOriginalOptions = jOptions;
+			}
+		}
+	}
+
+	this.Filter = function() {
+		var self = this;
+		var icon = $("#" + this.windowId + " #filter_" + this.sObjectId).prev('span').find('i');
+
+		icon.removeClass('fa-search').addClass('fa-spinner fa-spin');
+
+		setTimeout(function(){
+			// Если фильтрация - получаем объект
+			if (self.is_filtering) {
+				// Заново получаем объект, т.к. при AJAX-запросе на момент Init-а
+				// объект мог не существовать
+				self.GetCurrentSelectObject();
+			}
+
+			if (self.aOriginalOptions == null || self.aOriginalOptions.length === 0) {
+				self.Init();
+			}
+
+			if (self.oCurrentSelectObject.length == 1)
+			{
+				// Сбрасываем все значения списка
+				self.oCurrentSelectObject.empty();
+
+				if (self.is_filtering) {
+					var attributes = self.ignoreCase ? 'i' : '',
+						regexp = new RegExp(self.pattern, attributes),
+						currentOption, iOriginalOptionsLength = self.aOriginalOptions.length;
+
+					for (var i = 0; i < iOriginalOptionsLength; i++)
+					{
+						currentOption = $(self.aOriginalOptions[i]);
+
+						if (regexp.test(' ' + currentOption.text()))
+						//if (currentOption.text().indexOf(self.pattern) != -1)
+						{
+							self.oCurrentSelectObject.append(
+								currentOption
+							);
+						}
+					}
+
+					self.oCurrentSelectObject.trigger('change');
+				}
+				else {
+					// restore all values
+					self.oCurrentSelectObject.append(self.aOriginalOptions);
+				}
+			}
+
+			icon.removeClass('fa-spinner fa-spin').addClass('fa-search');
+
+			self.oCurrentSelectObject.get(0).options.selectedIndex = 0;
+			//self.oCurrentSelectObject.val(self.sSelectedValue);
+			//jImg.remove();
+		}, 100);
+	}
+}
+
+function radiogroupOnChange(windowId, value, values)
+{
+	var values = values || [0, 1];
+
+	for (var x in values) {
+		if (value != values[x])
+		{
+			$("#"+windowId+" .hidden-"+values[x]).show();
+			$("#"+windowId+" .shown-"+values[x]).hide();
+		}
+	}
+
+	$("#"+windowId+" .hidden-"+value).hide();
+	$("#"+windowId+" .shown-"+value).show();
+}
+
+// Empty arrays
+var fieldsStatus = [];
+
+// -- Проверка ячеек
+function backendFieldCheck(event)
+{
+	var $this = $(this),
+		$form = $this.parents('form'),
+		value = $this.val(),
+		fieldId = $this.attr('id'),
+		message = '',
+		minlength = $this.data('min'),
+		maxlength = $this.data('max'),
+		reg = $this.data('reg')
+		equality = $this.data('equality');
+
+	// Проверка на минимальную длину
+	if (typeof minlength != 'undefined' && minlength && value.length < minlength)
+	{
+		message += i18n['Minimum'] + ' ' + minlength + ' '
+			+ declension(minlength, i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']) + '. '
+			+ i18n['current_length'] + ' ' + value.length + '. ';
+	}
+
+	// Проверка на максимальную длину
+	if (typeof maxlength != 'undefined' && maxlength && value.length > maxlength)
+	{
+		message += i18n['Maximum'] + ' ' + maxlength + ' '
+			+ declension(maxlength, i18n['one_letter'], i18n['some_letter2'], i18n['some_letter1']) + '. '
+			+ i18n['current_length'] + ' ' + value.length + '. ';
+	}
+
+	// Проверка на регулярное выражение
+	if (typeof reg != 'undefined' && reg.length && value.length)
+	{
+		var regEx = new RegExp(reg);
+
+		if (!value.match(regEx))
+		{
+			var reg_message = $this.data('reg-message');
+
+			message += typeof reg_message != 'undefined' && reg_message.length
+				? reg_message
+				: i18n['wrong_value_format'] + ' ';
+		}
+	}
+
+	// Проверка на соответствие значений 2-х полей
+	if (typeof equality != 'undefined' && equality.length)
+	{
+		// Пытаемся получить значение поля, которому должны соответствовать
+		var $field2 = $form.find('#' + equality);
+
+		if (value != $field2.val())
+		{
+			var equality_message = $this.data('equality-message');
+
+			message += typeof equality_message != 'undefined' && equality_message.length
+				? equality_message
+				: i18n['different_fields_value'] + ' ';
+		}
+	}
+
+	// Проверка на select
+	var type = $this.get(0).tagName;
+
+	if (typeof type != 'undefined' && type.toLowerCase() == 'select')
+	{
+		if (value <= 0)
+		{
+			message += 'value is empty';
+		}
+	}
+
+	// Insert message into the message div
+	$this.nextAll("#" + fieldId + '_error').html(message);
+
+	// Устанавливаем флаг несоответствия
+	var formId = $form.attr('id');
+
+	if (typeof fieldsStatus[formId] == 'undefined')
+	{
+		fieldsStatus[formId] = [];
+	}
+
+	fieldsStatus[formId][fieldId] = (message.length > 0);
+
+	if (fieldsStatus[formId][fieldId])
+	{
+		$this
+			.css('border-style', 'solid')
+			.css('border-width', '1px')
+			.css('border-color', '#ff1861')
+			.css('background-image', "url('/admin/images/bullet_red.gif')")
+			.css('background-position', 'center right')
+			.css('background-repeat', 'no-repeat');
+	}
+	else
+	{
+		$this
+			.css('border-style', '')
+			.css('border-width', '')
+			.css('border-color', '')
+			.css('background-image', "url('/admin/images/bullet_green.gif')")
+			.css('background-position', 'center right')
+			.css('background-repeat', 'no-repeat');
+	}
+
+	// Отображать контрольные элементы
+	var disableButtons = false;
+
+	for (itemIndex in fieldsStatus[formId])
+	{
+		// если есть хоть одно несоответствие - выключаем управляющие элементы
+		if (fieldsStatus[formId][itemIndex])
+		{
+			disableButtons = true;
+			break;
+		}
+	}
+
+	$.toogleInputsActive($form, disableButtons);
+	//$form.find('.formButtons input').attr('disabled', disableButtons);
+}
+
+function CheckAllField(windowId, formId)
+{
+	var windowId = $.getWindowId(windowId);
+	$("#" + windowId + " #" + formId + " :input").each(function(){
+		// FieldCheck(windowId, this);
+		$(this).blur();
+	});
+}
+
+/**
+* Склонение после числительных
+* int number числительное
+* int nominative Именительный падеж
+* int genitive_singular Родительный падеж, единственное число
+* int genitive_plural Родительный падеж, множественное число
+*/
+function declension(number, nominative, genitive_singular, genitive_plural)
+{
+	var last_digit = number % 10;
+	var last_two_digits = number % 100;
+
+	if (last_digit == 1 && last_two_digits != 11)
+	{
+		var result = nominative;
+	}
+	else
+	{
+		var result = (last_digit == 2 && last_two_digits != 12) || (last_digit == 3 && last_two_digits != 13) || (last_digit == 4 && last_two_digits != 14)
+			? genitive_singular
+			: genitive_plural;
+	}
+
+	return result;
+}
+// /-- Проверка ячеек
+
+// http://www.tinymce.com/wiki.php/How-to_implement_a_custom_file_browser
+function HostCMSFileManager()
+{
+	//this.fileBrowserCallBack = function(field_name, url, type, win)
+	this.fileBrowserCallBack = function(callback, value, meta)
+	{
+		this.field = value;
+		//this.callerWindow = win;
+		this.callback = callback;
+
+		var url = this.field.split('\\').join('/');
+
+		var type = meta.filetype,
+			cdir = '',
+			dir = '',
+			lastPos = url.lastIndexOf('/');
+
+		if (lastPos != -1)
+		{
+			url = url.substr(0, lastPos);
+			// => /upload
+
+			lastPos = url.lastIndexOf('/');
+
+			if (lastPos != -1)
+			{
+				cdir = url.substr(0, lastPos + 1);
+				dir = url.substr(lastPos + 1);
+			}
+		}
+
+		var path = "/admin/wysiwyg/filemanager/index.php?field_name=" + this.field + "&cdir=" + cdir + "&dir=" + dir + "&type=" + type, width = screen.width / 1.2, height = screen.height / 1.2;
+
+		var x = parseInt(screen.width / 2.0) - (width / 2.0), y = parseInt(screen.height / 2.0) - (height / 2.0);
+
+		this.win = window.open(path, "FM", "top=" + y + ",left=" + x + ",scrollbars=yes,width=" + width + ",height=" + height + ",resizable=yes");
+
+		return false;
+	}
+
+	this.insertFile = function(url)
+	{
+		url = decodeURIComponent(url);
+		url = url.replace(new RegExp(/\\/g), '/');
+
+		/*var field = this.callerWindow.document.getElementById(this.field);
+
+		field.value = url;
+		//this.callerWindow.document.forms[0].elements[this.field].value = url;
+
+		try {
+			field.onchange();
+		}
+		catch (e){}*/
+
+		this.callback(url);
+
+		this.win.close();
+	}
+};
+
+/**
+ * jQuery Cookie plugin
+ *
+ * Copyright (c) 2010 Klaus Hartl (stilbuero.de)
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ *
+ */
+jQuery.cookie = function (key, value, options) {
+    // key and at least value given, set cookie...
+    if (arguments.length > 1 && String(value) !== "[object Object]") {
+        options = jQuery.extend({}, options);
+
+        if (value === null || value === undefined) {
+            options.expires = -1;
+        }
+
+        if (typeof options.expires === 'number') {
+            var days = options.expires, t = options.expires = new Date();
+            t.setDate(t.getDate() + days);
+        }
+
+        value = String(value);
+
+        return (document.cookie = [
+            encodeURIComponent(key), '=',
+            options.raw ? value : cookie_encode(value),
+            options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+            options.path ? '; path=' + options.path : '',
+            options.domain ? '; domain=' + options.domain : '',
+            options.secure ? '; secure' : ''
+        ].join(''));
+    }
+
+    // key and possibly options given, get cookie...
+    options = value || {};
+    var result, decode = options.raw ? function (s) { return s; } : decodeURIComponent;
+    return (result = new RegExp('(?:^|; )' + encodeURIComponent(key) + '=([^;]*)').exec(document.cookie)) ? decode(result[1]) : null;
+};
+
+function cookie_encode(string){
+	//full uri decode not only to encode ",; =" but to save uicode charaters
+	var decoded = encodeURIComponent(string);
+	//encod back common and allowed charaters {}:"#[] to save space and make the cookies more human readable
+	var ns = decoded.replace(/(%7B|%7D|%3A|%22|%23|%5B|%5D)/g,function(charater){return decodeURIComponent(charater);});
+	return ns;
+}
+/* /jQuery Cookie plugin */

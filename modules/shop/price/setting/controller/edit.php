@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -164,13 +164,13 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		// Розничная цена
 		$oShopPriceRow1->add(
-				$oShop_Price_Checkbox = Admin_Form_Entity::factory('Checkbox')
-					->id(0)
-					->caption(Core::_('Shop_Price_Setting.basic'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
-					->class('form-control')
-					->name("shop_price_0")
-					->onclick("$.toggleShopPrice(0)")
+			$oShop_Price_Checkbox = Admin_Form_Entity::factory('Checkbox')
+				->id(0)
+				->caption(Core::_('Shop_Price_Setting.basic'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
+				->class('form-control')
+				->name("shop_price_0")
+				->onclick("$.toggleShopPrice(0)")
 		);
 
 		in_array(0, $aExistPriceIDs) && $oShop_Price_Checkbox->checked('checked');

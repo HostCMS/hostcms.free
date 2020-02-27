@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Model extends Core_Entity
 {
@@ -279,8 +279,7 @@ class Shop_Warehouse_Model extends Core_Entity
 			{
 				switch ($type)
 				{
-					// Инвентаризация. Сброс к значению при инвентаризации.
-					case 0:
+					case 0: // Инвентаризация. Сброс к значению при инвентаризации
 						$count = $oShop_Warehouse_Entry->value;
 					break;
 					case 1: // Приход
@@ -321,7 +320,7 @@ class Shop_Warehouse_Model extends Core_Entity
 	 */
 	public function setRest($shop_item_id, $value)
 	{
-		$oShop_Warehouse_Item = $this->Shop_Warehouse_Items->getByShop_item_id($shop_item_id);
+		$oShop_Warehouse_Item = $this->Shop_Warehouse_Items->getByShop_item_id($shop_item_id, FALSE);
 
 		if (is_null($oShop_Warehouse_Item))
 		{

@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Поля формы центра администрирования',
@@ -59,8 +59,9 @@ return array(
 	'field_type_image_callback_function' => 'Вычисляемое поле (Используется обратный вызов функции)',
 	
 	// Отображение	
-	'field_view_column' => 'Столбец',
-	'field_view_filter_element' => 'Элемент фильтра',
+	'field_view0' => 'Столбец и фильтр',
+	'field_view1' => 'Элемент фильтра',
+	'field_view2' => 'Столбец',
 
 	// Список полей.
 	'show_form_fields_title' => 'Поля формы центра администрирования "%s"',

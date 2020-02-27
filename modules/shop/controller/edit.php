@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -334,7 +334,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Переопределяем тип поля описания на WYSIWYG
 				$this->getField('description')
-					->rows(7)
+					->rows(10)
 					->wysiwyg(Core::moduleIsActive('wysiwyg'))
 					->template_id($this->_object->Structure->template_id
 						? $this->_object->Structure->template_id
@@ -457,24 +457,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow6->add($oUrlTypeField);
 
-				$oMainTab->delete($this->getField('size_measure'));
-
-				$oMainRow7->add(Admin_Form_Entity::factory('Select')
-					->name('size_measure')
-					->caption(Core::_('Shop.size_measure'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
-					->options(array(Core::_('Shop.size_measure_0'),
-						Core::_('Shop.size_measure_1'),
-						Core::_('Shop.size_measure_2'),
-						Core::_('Shop.size_measure_3'),
-						Core::_('Shop.size_measure_4')))
-					->value($this->_object->size_measure), $oUrlTypeField);
-
 				// Добавляем единицы измерения по умолчанию
 				$oDefaultMeasuresField = Admin_Form_Entity::factory('Select')
 					->name('default_shop_measure_id')
 					->caption(Core::_('Shop.default_shop_measure_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 					->options(
 						$this->fillMeasures()
 					)
@@ -482,11 +469,24 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow7->add($oDefaultMeasuresField);
 
+				$oMainTab->delete($this->getField('size_measure'));
+
+				$oMainRow7->add(Admin_Form_Entity::factory('Select')
+					->name('size_measure')
+					->caption(Core::_('Shop.size_measure'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
+					->options(array(Core::_('Shop.size_measure_0'),
+						Core::_('Shop.size_measure_1'),
+						Core::_('Shop.size_measure_2'),
+						Core::_('Shop.size_measure_3'),
+						Core::_('Shop.size_measure_4')))
+					->value($this->_object->size_measure), $oUrlTypeField);
+
 				// Добавляем единицы измерения
 				$oMeasuresField = Admin_Form_Entity::factory('Select')
 					->name('shop_measure_id')
 					->caption(Core::_('Shop.shop_measure_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 					->options(
 						$this->fillMeasures()
 					)
@@ -494,9 +494,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow7->add($oMeasuresField);
 
-				$oMainTab->delete($this->getField('reserve_hours'));
-
-				$oMainRow7->add($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')));
+				$oMainTab
+					->move($this->getField('reserve_hours')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7)
+					->move($this->getField('max_bonus')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
 
 				Core_Templater::decorateInput($this->getField('invoice_template'));
 				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);
@@ -776,91 +776,96 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		parent::_applyObjectProperty();
 
-		// Fast filter
-		if ($this->_object->filter)
+		$modelName = $this->_object->getModelName();
+
+		if ($modelName == 'shop')
 		{
-			$Shop_Filter_Controller = new Shop_Filter_Controller($this->_object);
-			$Shop_Filter_Controller->createTable();
-		}
-
-		if (Core::moduleIsActive('notification'))
-		{
-			$oModule = Core::$modulesList['shop'];
-
-			$aRecievedNotificationSubscribers = Core_Array::getPost('notification_subscribers', array());
-			!is_array($aRecievedNotificationSubscribers) && $aRecievedNotificationSubscribers = array();
-
-			$aTmp = array();
-
-			// Выбранные сотрудники
-			$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
-			$oNotification_Subscribers->queryBuilder()
-				->where('notification_subscribers.module_id', '=', $oModule->id)
-				->where('notification_subscribers.type', '=', 0)
-				->where('notification_subscribers.entity_id', '=', $this->_object->id)
-				;
-
-			$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
-			foreach ($aNotification_Subscribers as $oNotification_Subscriber)
+			// Fast filter
+			if ($this->_object->filter)
 			{
-				!in_array($oNotification_Subscriber->user_id, $aRecievedNotificationSubscribers)
-					? $oNotification_Subscriber->delete()
-					: $aTmp[] = $oNotification_Subscriber->user_id;
+				$Shop_Filter_Controller = new Shop_Filter_Controller($this->_object);
+				$Shop_Filter_Controller->createTable();
 			}
 
-			// $aNewRecievedNotificationSubscribers = array_diff($aRecievedNotificationSubscribers, $aTmp);
-
-			foreach ($aRecievedNotificationSubscribers as $user_id)
+			if (Core::moduleIsActive('notification'))
 			{
+				$oModule = Core::$modulesList['shop'];
+
+				$aRecievedNotificationSubscribers = Core_Array::getPost('notification_subscribers', array());
+				!is_array($aRecievedNotificationSubscribers) && $aRecievedNotificationSubscribers = array();
+
+				$aTmp = array();
+
+				// Выбранные сотрудники
 				$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
 				$oNotification_Subscribers->queryBuilder()
 					->where('notification_subscribers.module_id', '=', $oModule->id)
-					->where('notification_subscribers.user_id', '=', intval($user_id))
+					->where('notification_subscribers.type', '=', 0)
 					->where('notification_subscribers.entity_id', '=', $this->_object->id)
 					;
 
-				$iCount = $oNotification_Subscribers->getCount();
+				$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
 
-				if (!$iCount)
+				foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 				{
-					$oNotification_Subscriber = Core_Entity::factory('Notification_Subscriber');
-					$oNotification_Subscriber
-						->module_id($oModule->id)
-						->type(0)
-						->entity_id($this->_object->id)
-						->user_id($user_id)
-						->save();
+					!in_array($oNotification_Subscriber->user_id, $aRecievedNotificationSubscribers)
+						? $oNotification_Subscriber->delete()
+						: $aTmp[] = $oNotification_Subscriber->user_id;
+				}
+
+				// $aNewRecievedNotificationSubscribers = array_diff($aRecievedNotificationSubscribers, $aTmp);
+
+				foreach ($aRecievedNotificationSubscribers as $user_id)
+				{
+					$oNotification_Subscribers = Core_Entity::factory('Notification_Subscriber');
+					$oNotification_Subscribers->queryBuilder()
+						->where('notification_subscribers.module_id', '=', $oModule->id)
+						->where('notification_subscribers.user_id', '=', intval($user_id))
+						->where('notification_subscribers.entity_id', '=', $this->_object->id)
+						;
+
+					$iCount = $oNotification_Subscribers->getCount();
+
+					if (!$iCount)
+					{
+						$oNotification_Subscriber = Core_Entity::factory('Notification_Subscriber');
+						$oNotification_Subscriber
+							->module_id($oModule->id)
+							->type(0)
+							->entity_id($this->_object->id)
+							->user_id($user_id)
+							->save();
+					}
 				}
 			}
-		}
 
-		if (
-			// Поле файла существует
-			!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
-			// и передан файл
-			&& intval($aFileData['size']) > 0)
-		{
-			if (Core_File::isValidExtension($aFileData['name'], array('png')))
+			if (
+				// Поле файла существует
+				!is_null($aFileData = Core_Array::getFiles('watermark_file', NULL))
+				// и передан файл
+				&& intval($aFileData['size']) > 0)
 			{
-				$this->_object->saveWatermarkFile($aFileData['tmp_name']);
+				if (Core_File::isValidExtension($aFileData['name'], array('png')))
+				{
+					$this->_object->saveWatermarkFile($aFileData['tmp_name']);
+				}
+				else
+				{
+					$this->addMessage(
+						Core_Message::get(
+							Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])),
+							'error'
+						)
+					);
+				}
 			}
-			else
-			{
-				$this->addMessage(
-					Core_Message::get(
-						Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])),
-						'error'
-					)
-				);
-			}
-		}
 
-		//Яндекс.Маркет доставка
-		$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
-		$oShop_Item_Delivery_Option_Controller_Tab
-			->shop_id($this->_object->id)
-			->applyObjectProperty();
+			//Яндекс.Маркет доставка
+			$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
+			$oShop_Item_Delivery_Option_Controller_Tab
+				->shop_id($this->_object->id)
+				->applyObjectProperty();
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

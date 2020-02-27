@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -107,8 +107,16 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oSiteTabCacheRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		/* $oMainRow1 */
-		$this->getField('active')->divAttr(array('class' => 'form-group col-xs-12'));
+		$this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 		$oMainTab->move($this->getField('active'), $oMainRow1);
+		$oMainTab->move($this->getField('https')->onchange('$("input[name = set_https]").parents(".form-group").toggleClass("hidden");')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
+
+		$oSetHttps = Admin_Form_Entity::factory('Checkbox')
+			->name('set_https')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3' . (!$this->_object->https ? ' hidden' : '')))
+			->caption(Core::_('Site.set_https'));
+
+		$oMainRow1->add($oSetHttps);
 
 		/* $oMainRow2 */
 		$this->getField('coding')->divAttr(array('class' => 'form-group col-lg-3 col-md-3 col-sm-6'));
@@ -188,9 +196,9 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */
-		$this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5'));
 		$oMainTab->move($this->getField('send_attendance_report'), $oMainRow5);
-		$this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 		$oMainTab->move($this->getField('safe_email'), $oMainRow5);
 
 		/* $oMainRow6 */
@@ -332,6 +340,18 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		parent::_applyObjectProperty();
+
+		$bSetHttps = Core_Array::get($this->_formValues, 'set_https') == 'on';
+
+		if ($bSetHttps || !$this->_object->https)
+		{
+			$aStructures = $this->_object->Structures->findAll(FALSE);
+			foreach ($aStructures as $oStructure)
+			{
+				$oStructure->https = $this->_object->https;
+				$oStructure->save();
+			}
+		}
 
 		if (
 			// Поле файла существует

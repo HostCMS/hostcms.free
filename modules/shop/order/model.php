@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Model extends Core_Entity
 {
@@ -38,7 +38,8 @@ class Shop_Order_Model extends Core_Entity
 	protected $_hasMany = array(
 		'shop_order_item' => array(),
 		'shop_item_reserved' => array(),
-		'shop_siteuser_transaction' => array()
+		'shop_siteuser_transaction' => array(),
+		'shop_discountcard_bonus' => array()
 	);
 
 	/**
@@ -192,12 +193,22 @@ class Shop_Order_Model extends Core_Entity
 		// Удаляем связи с зарезервированными, прямая связь
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
 
+		$this->Shop_Discountcard_Bonuses->deleteAll(FALSE);
+
 		$this->source_id && $this->Source->delete();
 
 		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
+		}
+
+		if (Core::moduleIsActive('lead'))
+		{
+			Core_QueryBuilder::update('leads')
+				->set('shop_order_id', 0)
+				->where('shop_order_id', '=', $this->id)
+				->execute();
 		}
 
 		return parent::delete($primaryKey);
@@ -867,6 +878,8 @@ class Shop_Order_Model extends Core_Entity
 		}
 	}
 
+	protected $_oShop_Discountcard = NULL;
+
 	/**
 	 * Pay the order
 	 * @return self
@@ -881,6 +894,36 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$this->paid = 1;
 			$this->payment_datetime = Core_Date::timestamp2sql(time());
+
+			// Получаем/выпускаем карту до начисления бонусов в _paidTransaction()
+			if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
+			{
+				$aShop_Discountcards = $this->Siteuser->Shop_Discountcards->getAllByShop_id($this->shop_id);
+
+				if (isset($aShop_Discountcards[0]))
+				{
+					$this->_oShop_Discountcard = $aShop_Discountcards[0];
+				}
+				else
+				{
+					$oShop = $this->Shop;
+
+					if ($oShop->issue_discountcard)
+					{
+						$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
+						$oShop_Discountcard->shop_id = $this->shop_id;
+						$oShop_Discountcard->siteuser_id = $this->siteuser_id;
+						$oShop_Discountcard->setSiteuserAmount();
+						$oShop_Discountcard->number = '';
+						$oShop_Discountcard->save(); // create ID
+
+						// Uses number template
+						$oShop_Discountcard->number = $oShop_Discountcard->generate();
+
+						$this->_oShop_Discountcard = $oShop_Discountcard;
+					}
+				}
+			}
 
 			// Списать товары
 			$this->_paidTransaction();
@@ -902,42 +945,18 @@ class Shop_Order_Model extends Core_Entity
 
 	protected function _paidShopDiscountcard()
 	{
-		if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
+		if ($this->_oShop_Discountcard)
 		{
-			$oShop = $this->Shop;
-
 			$mode = $this->paid == 0 ? -1 : 1;
-
-			$oShop_Discountcard = $this->Siteuser->Shop_Discountcards->getFirst();
-
-			if (is_null($oShop_Discountcard))
-			{
-				if ($oShop->issue_discountcard)
-				{
-					$oShop_Discountcard = Core_Entity::factory('Shop_Discountcard');
-					$oShop_Discountcard->shop_id = $oShop->id;
-					$oShop_Discountcard->siteuser_id = $this->siteuser_id;
-					$oShop_Discountcard->setSiteuserAmount();
-					$oShop_Discountcard->number = '';
-					$oShop_Discountcard->save(); // create ID
-
-					// Uses number template
-					$oShop_Discountcard->number = $oShop_Discountcard->generate();
-				}
-				else
-				{
-					return $this;
-				}
-			}
 
 			// При вызове в paid() в данный момент модель не сохранена и заказ не числится оплаченным,
 			// поэтому после создания карты ее сумма не включает текущий заказ
-			$oShop_Discountcard->amount += $this->getAmount() * $mode;
+			$this->_oShop_Discountcard->amount += $this->getAmount() * $mode;
 
-			$oShop_Discountcard->save();
+			$this->_oShop_Discountcard->save();
 
 			// update level
-			$oShop_Discountcard->checkLevel();
+			$this->_oShop_Discountcard->checkLevel();
 		}
 
 		return $this;
@@ -1019,6 +1038,17 @@ class Shop_Order_Model extends Core_Entity
 			$this->paid = 0;
 			$this->payment_datetime = '0000-00-00 00:00:00';
 
+			// Получаем карту до списания бонусов в _paidTransaction()
+			if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
+			{
+				$aShop_Discountcards = $this->Siteuser->Shop_Discountcards->getAllByShop_id($this->shop_id);
+
+				if (isset($aShop_Discountcards[0]))
+				{
+					$this->_oShop_Discountcard = $aShop_Discountcards[0];
+				}
+			}
+
 			// Вернуть списанные товары
 			$this->_paidTransaction();
 
@@ -1098,15 +1128,22 @@ class Shop_Order_Model extends Core_Entity
 
 		// Получаем список товаров заказа
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+
+		$fTotalAmount = $fTotalDiscount = 0;
+
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			$oShop_Item = $oShop_Order_Item->Shop_Item;
 
-			// электронный товар
-			if ($oShop_Item->type == 1
-				&& $oShop_Order_Item->Shop_Order_Item_Digitals->getCount(FALSE) == 0)
+			$fAmount = Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * $oShop_Order_Item->quantity;
+
+			// Электронный товар
+			if ($oShop_Item->type == 1)
 			{
-				$oShop_Order_Item->addDigitalItems($oShop_Item);
+				if ($this->paid == 1 && $oShop_Order_Item->Shop_Order_Item_Digitals->getCount(FALSE) == 0)
+				{
+					$oShop_Order_Item->addDigitalItems($oShop_Item);
+				}
 			}
 			// Пополнение лицевого счета
 			elseif ($oShop_Order_Item->type == 2 && Core::moduleIsActive('siteuser'))
@@ -1124,11 +1161,9 @@ class Shop_Order_Model extends Core_Entity
 					)
 					: 0;
 
-				$fAmount = $oShop_Order_Item->price * $oShop_Order_Item->quantity * $mode;
-
-				$oShop_Siteuser_Transaction->amount = $fAmount;
+				$oShop_Siteuser_Transaction->amount = $fAmount * $mode;
 				$oShop_Siteuser_Transaction->shop_currency_id = $this->shop_currency_id;
-				$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $fCurrencyCoefficient;
+				$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $mode * $fCurrencyCoefficient;
 				$oShop_Siteuser_Transaction->shop_order_id = $this->id;
 				$oShop_Siteuser_Transaction->type = 0;
 				$oShop_Siteuser_Transaction->description = $oShop_Order_Item->name;
@@ -1147,6 +1182,10 @@ class Shop_Order_Model extends Core_Entity
 				}
 			}
 
+			in_array($oShop_Order_Item->type, array(3, 4, 5))
+				? $fTotalDiscount += $fAmount
+				: $fTotalAmount += $fAmount;
+
 			// Списание/начисление товаров
 			if ($oShop->write_off_paid_items)
 			{
@@ -1161,13 +1200,6 @@ class Shop_Order_Model extends Core_Entity
 						'shop_warehouse_id' => $oShop_Warehouse->id,
 						'count' => $oShop_Order_Item->quantity
 					);
-					/*$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item->id);
-
-					if (!is_null($oShop_Warehouse_Item))
-					{
-						$oShop_Warehouse_Item->count -= $oShop_Order_Item->quantity * $mode;
-						$oShop_Warehouse_Item->save();
-					}*/
 				}
 
 				// Комплект
@@ -1192,46 +1224,65 @@ class Shop_Order_Model extends Core_Entity
 									'shop_warehouse_id' => $oShop_Warehouse->id,
 									'count' => $oShop_Item_Set->count
 								);
-								/*$oShop_Warehouse_Item->count -= $oShop_Item_Set->count * $mode;
-								$oShop_Warehouse_Item->save();*/
 							}
 						}
 					}
 				}
 			}
+		}
 
-			// Начисление/списание бонусов
-			if ($oShop_Item->id && Core::moduleIsActive('siteuser'))
+		// Бонусы начисляем в отдельном цикле
+		if ($this->paid == 1)
+		{
+			if ($fTotalAmount > 0 && $this->_oShop_Discountcard)
 			{
-				$oShop_Item_Controller = new Shop_Item_Controller();
-				$aBonuses = $oShop_Item_Controller->getBonuses($oShop_Item, $oShop_Order_Item->price);
+				// Рассчитываем коэффициент скидки для уменьшения цены контретной строки заказа
+				$multiplier = 1 - abs($fTotalDiscount) / $fTotalAmount;
 
-				if ($aBonuses['total'])
+				if ($multiplier <= 1)
 				{
-					// Проведение/стронирование транзакции
-					$oShop_Siteuser_Transaction = Core_Entity::factory('Shop_Siteuser_Transaction');
-					$oShop_Siteuser_Transaction->shop_id = $oShop->id;
-					$oShop_Siteuser_Transaction->siteuser_id = $this->siteuser_id;
-					$oShop_Siteuser_Transaction->active = 1;
+					foreach ($aShop_Order_Items as $oShop_Order_Item)
+					{
+						$oShop_Item = $oShop_Order_Item->Shop_Item;
 
-					// Определяем коэффициент пересчета
-					$fCurrencyCoefficient = $this->Shop_Currency->id > 0 && $oShop->Shop_Currency->id > 0
-						? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-							$this->Shop_Currency, $oShop->Shop_Currency
-						)
-						: 0;
+						// Начисление/стронирование бонусов
+						if ($oShop_Item->id)
+						{
+							$fAmount = Shop_Controller::instance()->round($oShop_Order_Item->price + $oShop_Order_Item->getTax()) * $oShop_Order_Item->quantity * $multiplier;
 
-					$fAmount = $aBonuses['total'] * $oShop_Order_Item->quantity * $mode;
+							$oShop_Item_Controller = new Shop_Item_Controller();
+							$aBonuses = $oShop_Item_Controller->getBonuses($oShop_Item, $fAmount);
 
-					$oShop_Siteuser_Transaction->amount = $fAmount;
-					$oShop_Siteuser_Transaction->shop_currency_id = $this->shop_currency_id;
-					$oShop_Siteuser_Transaction->amount_base_currency = $fAmount * $fCurrencyCoefficient;
-					$oShop_Siteuser_Transaction->shop_order_id = $this->id;
-					$oShop_Siteuser_Transaction->type = 2;
-					$oShop_Siteuser_Transaction->description = Core::_('Shop_Bonus.bonus_transaction_name', $this->invoice);
-					$oShop_Siteuser_Transaction->save();
+							if ($aBonuses['total'])
+							{
+								foreach ($aBonuses['bonuses'] as $oShop_Bonus)
+								{
+									$oShop_Discountcard_Bonus = Core_Entity::factory('Shop_Discountcard_Bonus');
+									$oShop_Discountcard_Bonus->shop_order_id = $this->id;
+
+									$oShop_Discountcard_Bonus->datetime = $oShop_Bonus->accrual_date == '0000-00-00 00:00:00'
+										? Core_Date::timestamp2sql(strtotime('+' . $oShop_Bonus->accrual_days . ' day'))
+										: $oShop_Bonus->accrual_date;
+
+									$oShop_Discountcard_Bonus->expired = Core_Date::timestamp2sql(
+										strtotime('+' . $oShop_Bonus->expire_days . ' day', Core_Date::sql2timestamp($oShop_Discountcard_Bonus->datetime))
+									);
+
+									$oShop_Discountcard_Bonus->amount = $oShop_Bonus->type == 0
+										? $fAmount * $oShop_Bonus->value / 100
+										: $oShop_Bonus->value;
+
+									$this->_oShop_Discountcard->add($oShop_Discountcard_Bonus);
+								}
+							}
+						}
+					}
 				}
 			}
+		}
+		else
+		{
+			$this->Shop_Discountcard_Bonuses->deleteAll(FALSE);
 		}
 
 		// Проводки по складам
@@ -1274,7 +1325,7 @@ class Shop_Order_Model extends Core_Entity
 					}
 
 					$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
-					$oShop_Warehouse_Entry->datetime = $this->datetime;
+					$oShop_Warehouse_Entry->datetime = $this->payment_datetime;
 					$oShop_Warehouse_Entry->value = -$writeoff['count'];
 					$oShop_Warehouse_Entry->save();
 
@@ -1480,6 +1531,26 @@ class Shop_Order_Model extends Core_Entity
 		return $aReturn;
 	}
 
+	public function createInvoice()
+	{
+		if (strlen($this->Shop->invoice_template))
+		{
+			$oCore_Templater = new Core_Templater();
+			$this->invoice = $oCore_Templater
+				->addObject('shop', $this->Shop)
+				->addObject('this', $this)
+				->addFunction('ordersToday', array($this, 'ordersToday'))
+				->setTemplate($this->Shop->invoice_template)
+				->execute();
+		}
+		else
+		{
+			$this->invoice = $this->id;
+		}
+
+		return $this;
+	}
+
 	/**
 	 * Copy object
 	 * @return Core_Entity
@@ -1489,29 +1560,13 @@ class Shop_Order_Model extends Core_Entity
 		$newObject = parent::copy();
 		$newObject->guid = Core_Guid::get();
 		$newObject->datetime = Core_Date::timestamp2sql(time());
-		$newObject->payment_datetime = '';
-		$newObject->status_datetime = '';
+		$newObject->payment_datetime = '0000-00-00 00:00:00';
+		$newObject->status_datetime = '0000-00-00 00:00:00';
 		$newObject->canceled = 0;
 		$newObject->paid = 0;
 		$newObject->save();
 
-		$oShop = $newObject->Shop;
-
-		if (strlen($oShop->invoice_template))
-		{
-			$oCore_Templater = new Core_Templater();
-			$newObject->invoice = $oCore_Templater
-				->addObject('shop', $oShop)
-				->addObject('this', $newObject)
-				->addFunction('ordersToday', array($newObject, 'ordersToday'))
-				->setTemplate($oShop->invoice_template)
-				->execute();
-		}
-		else
-		{
-			$newObject->invoice = $newObject->id;
-		}
-
+		$newObject->createInvoice();
 		$newObject->save();
 
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
@@ -1992,6 +2047,9 @@ class Shop_Order_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($aAdmin_Form_Fields, $this, $onclick, 'onclick');
 
+		// Fix popover for form in tab
+		$windowId == 'shop-orders' && $windowId = 'id_content';
+
 		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
 	}
 
@@ -2171,7 +2229,7 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 						$oShop_Order_Item->name = $oShop_Purchase_Discount->name;
 						$oShop_Order_Item->quantity = 1;
-						$oShop_Order_Item->type = 0;
+						$oShop_Order_Item->type = 3; // 3 - Скидка от суммы заказа
 
 						$discountAmount = $oShop_Purchase_Discount->getDiscountAmount();
 
@@ -2224,7 +2282,7 @@ class Shop_Order_Model extends Core_Entity
 						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 						$oShop_Order_Item->name = Core::_('Shop_Discountcard.shop_order_item_name', $oShop_Discountcard->number);
 						$oShop_Order_Item->quantity = 1;
-						$oShop_Order_Item->type = 0;
+						$oShop_Order_Item->type = 4; // 4 - Скидка по дисконтной карте
 						$oShop_Order_Item->price = -1 * Shop_Controller::instance()->round(
 							$fAmountForCard * ($oShop_Discountcard_Level->discount / 100)
 						);
@@ -2348,21 +2406,23 @@ class Shop_Order_Model extends Core_Entity
 
 			$tax = Shop_Controller::instance()->round($amount * $oShop_Order_Item->rate / 100);
 
-			$aReplace['Items'][] = array(
-				'position' => $position++,
-				'item' => $oShop_Item,
-				'id' => $oShop_Item->id,
-				'name' => htmlspecialchars($oShop_Order_Item->name),
-				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-				'okei' => htmlspecialchars($oShop_Item->Shop_Measure->okei),
-				'price' => $oShop_Order_Item->price,
-				'quantity' => $oShop_Order_Item->quantity,
-				'rate' => $oShop_Order_Item->rate,
-				'rate%' => $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '',
-				'tax' => $tax,
-				'amount' => $amount,
-				'amount_tax_included' => Shop_Controller::instance()->round($amount + $tax)
-			);
+			$node = new stdClass();
+
+			$node->position = $position++;
+			$node->item = $oShop_Item;
+			$node->id = $oShop_Item->id;
+			$node->name = htmlspecialchars($oShop_Order_Item->name);
+			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->okei = htmlspecialchars($oShop_Item->Shop_Measure->okei);
+			$node->price = $oShop_Order_Item->price;
+			$node->quantity = $oShop_Order_Item->quantity;
+			$node->rate = $oShop_Order_Item->rate;
+			$node->rate_percent = $oShop_Order_Item->rate ? $oShop_Order_Item->rate . '%' : '';
+			$node->tax = $tax;
+			$node->amount = $amount;
+			$node->amount_tax_included = Shop_Controller::instance()->round($amount + $tax);
+
+			$aReplace['Items'][] = $node;
 
 			$total_quantity += $oShop_Order_Item->quantity;
 			$total_tax += $tax;

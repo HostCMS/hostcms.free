@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Products groups',
@@ -41,7 +41,6 @@ return array(
 	'changeActive_success' => 'Status changed successfully!',
 	'properties' => "Properties",
 	'list_of_property_for_group' => "Properties list of product group",
-	'tab_properties' => "Additional properties",
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'error_URL_shop_group' => 'Group already contains subgroup with the same URL!',

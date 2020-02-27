@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_Entity_Textarea
 {
@@ -20,12 +20,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Textarea extends Skin_Default_Admin_Form_
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		($this->wysiwyg || $this->syntaxHighlighter)
-			&& $this->id = $windowId . '_' . $this->id;
-
-		if (is_null($this->onkeydown))
+		if ($this->wysiwyg || $this->syntaxHighlighter)
 		{
-			$this->onkeydown = $this->onkeyup = $this->onblur = "FieldCheck('{$windowId}', this)";
+			$this->id = $windowId . '_' . $this->id;
+			
+			// Skip check field
+			$this->format = NULL;
 		}
 
 		$aAttr = $this->getAttrsString();

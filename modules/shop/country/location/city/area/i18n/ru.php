@@ -6,15 +6,13 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'model_name' => 'Районы города',
-	'show_city_area_title' => "Районы города \"%s\"",
-	'show_city_area_link' => "Район",
-	'show_city_area_link_add' => "Добавить",
-	'add_city_area_tytle' => "Добавление района города",
-	'edit_city_area_tytle' => 'Редактирование района города "%s"',
+	'model_name' => 'Населенные пункты или районы города',
+	'show_city_area_title' => "Населенные пункты или районы города \"%s\"",
+	'add_city_area_tytle' => "Добавление населенного пункта или района города",
+	'edit_city_area_tytle' => 'Редактирование населенного пункта или района города "%s"',
 	'name' => "Название",
 	'sorting' => "Порядок сортировки",
 	'shop_country_location_city_id' => "Идентификатор города",

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'!download' => '-- Не загружать --',
@@ -69,6 +69,8 @@ return array(
 	'item_type' => 'Тип товара',
 	'item_additional_group' => "Ярлыки GUID",
 	'item_barcode' => "Штрихкоды",
+	'item_sets_guid' => 'Товары в комплекте (CML ID)',
+	'item_sets_marking' => 'Товары в комплекте (Артикулы)',
 	'specialprices_min_quantity' => "Количество товара от",
 	'specialprices_max_quantity' => "Количество товара до",
 	'specialprices_price' => "Значение цены",
@@ -77,6 +79,7 @@ return array(
 	'group_active' => "Активность группы",
 	'item_parent_associated' => "Артикул родительского товара для сопутствующего товара",
 	'item_associated_markings' => "Артикулы сопутствующих товаров",
+	
 	'siteuser_id' => "Идентификатор пользователя сайта",
 	'digital_item_name' => "Название электронного товара",
 	'item_yandex_market_sales_notes' => "Sales notes",

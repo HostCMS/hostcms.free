@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -41,22 +41,26 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addTabAfter(
 				$oItemsTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Order.tab6'))
-					->name('Items'), $oMainTab
+					->name('Items')
+					->class($this->tabClass), $oMainTab
 			)
 			->addTabAfter(
 				$oContactsTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Order.tab2'))
-					->name('Contacts'), $oItemsTab
+					->name('Contacts')
+					->class($this->tabClass), $oItemsTab
 			)
 			->addTabAfter(
 				$oDocumentsTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Order.tab4'))
-					->name('Documents'), $oContactsTab
+					->name('Documents')
+					->class($this->tabClass), $oContactsTab
 			)
 			->addTabAfter(
 				$oDescriptionTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Order.tab3'))
-					->name('Description'), $oDocumentsTab
+					->name('Description')
+					->class($this->tabClass), $oDocumentsTab
 			);
 
 		// Order tags
@@ -165,7 +169,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if (Core::moduleIsActive('siteuser'))
 		{
-			$oSiteuser = $this->_object->Siteuser;
+			$oSiteuser = !is_null(Core_Array::getGet('siteuser_id'))
+				? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id'))
+				: $this->_object->Siteuser;
 
 			$options = !is_null($oSiteuser->id)
 				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
@@ -193,7 +199,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$oDiv_Amount = Admin_Form_Entity::factory('Div')
-			->class('form-group col-xs-12 col-sm-6 col-md-3 deal-amount')
+			->class('form-group col-xs-12 col-sm-6 col-md-3 amount-currency')
 			->add(Admin_Form_Entity::factory('Input')
 				->name('sum')
 				->id('sum')
@@ -222,7 +228,13 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$shop_id = Core_Array::getGet('shop_id', 0);
 
 		$sShopOrderItemsPath = '/admin/shop/order/item/index.php';
-		$sAdditionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_dir_id={$shop_dir_id}&shop_order_id={$shop_order_id}";
+
+		$siteuser_id = intval(Core_Array::getGet('siteuser_id'));
+		$siteuserPath = $siteuser_id
+			? "&siteuser_id={$siteuser_id}"
+			: '';
+
+		$sAdditionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_dir_id={$shop_dir_id}&shop_order_id={$shop_order_id}{$siteuserPath}";
 
 		if ($objectId)
 		{
@@ -251,7 +263,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Add checkbox
 		$oSendMailField = Admin_Form_Entity::factory('Checkbox')
 			->caption(Core::_('Shop_Order.send_mail'))
-			->value(0)
+			->value(1)
+			->checked(FALSE)
 			->name('send_mail')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 margin-top-21'));
 
@@ -917,7 +930,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		);
 
 		$oPropertyTab = Admin_Form_Entity::factory('Tab')
-			->caption(Core::_("Shop_Order.tab_properties"))
+			->caption(Core::_("Admin_Form.tabProperties"))
 			->name('Property');
 
 		$this->addTabBefore($oPropertyTab, $oAdditionalTab);

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -40,7 +40,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 	if (strlen($sQuery))
 	{
 		$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
-		
+
 		$shop_id = intval(Core_Array::getGet('shop_id'));
 		$oShop = Core_Entity::factory('Shop', $shop_id);
 
@@ -70,13 +70,14 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 
 			$oShop_Items = $oShop->Shop_Items;
 			$oShop_Items->queryBuilder()
-				->open()
-					->where('shop_items.name', 'LIKE', $sQueryLike)
+				->select('shop_items.*', array(Core_QueryBuilder::expression("IF(shop_items.modification_id, CONCAT((SELECT m.name FROM shop_items AS m WHERE m.id = shop_items.modification_id AND m.deleted = 0), ', ', shop_items.name), shop_items.name)"), 'dataName'))
+				->havingOpen()
+					->having('dataName', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.marking', 'LIKE', $sQueryLike)
+					->having('shop_items.marking', 'LIKE', $sQueryLike)
 					->setOr()
-					->where('shop_items.id', 'LIKE', $sQuery)
-				->close()
+					->having('shop_items.id', 'LIKE', $sQueryLike)
+				->havingClose()
 				->limit(15);
 
 			$aShop_Items = $oShop_Items->findAll(FALSE);
@@ -138,7 +139,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 						'count' => $count
 					);
 				}
-				
+
 				$imageSmall = $oShop_Item->image_small
 					? htmlspecialchars($oShop_Item->getSmallFileHref())
 					: '';
@@ -302,18 +303,6 @@ $oAdmin_Form_Entity_Menus->add(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCountriesFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
-		/*->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Company.company_shop_title'))
-				->icon('fa fa-building-o')
-				->img('/admin/images/company.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sCompaniesFormPath = '/admin/shop/company/index.php', NULL, NULL, '')
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sCompaniesFormPath, NULL, NULL, '')
-				)
-		)*/
 	)->add(
 	Admin_Form_Entity::factory('Menu')
 	->name(Core::_('Shop.show_finance'))

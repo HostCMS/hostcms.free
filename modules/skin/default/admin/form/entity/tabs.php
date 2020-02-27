@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 {
@@ -32,7 +32,7 @@ class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 			// Добавим отступ сверху и снизу
 			?><div id="tab"><?php
 				?><img src="/admin/images/tab_top_fon_4_form_end.gif" style="position: absolute; right: 0px; bottom: 0px"><?php
-				?><ul><?php
+				?><ul class="<?php echo htmlspecialchars($this->class)?>"><?php
 				$tab_id = 0;
 				foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 				{

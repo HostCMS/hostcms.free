@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -341,7 +341,7 @@ class Core_Auth
 					{
 						// Пользователь существует
 						$oUser = Core_Entity::factory('User')->getCurrent();
-						if ($oUser)
+						if ($oUser && $oUser->active)
 						{
 							self::$_logged = TRUE;
 							self::$_currentUser = $oUser;

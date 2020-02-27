@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -259,7 +259,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					';
 				}
 			}
-			
+
 			$offset += $limit;
 		}
 		while (count($aShop_Warehouse_Regrade_Items));
@@ -325,9 +325,10 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		parent::_applyObjectProperty();
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		if ($this->_object->id)
 		{
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
 			$this->addMessage("<script>$.showPrintButton('{$windowId}', {$this->_object->id})</script>");
 		}
 
@@ -387,6 +388,10 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				$oShop_Item_Writeoff = Core_Entity::factory('Shop_Item')->getById($writeoff_shop_item_id);
 				$oShop_Item_Incoming = Core_Entity::factory('Shop_Item')->getById($incoming_shop_item_id);
 
+				ob_start();
+
+				$script = "$(\"#{$windowId} input[name='writeoff_item\\[\\]']\").eq(0).remove(); $(\"#{$windowId} input[name='incoming_item\\[\\]']\").eq(0).remove();";
+
 				if (!is_null($oShop_Item_Writeoff) && !is_null($oShop_Item_Incoming))
 				{
 					$oShop_Item_Writeoff = $oShop_Item_Writeoff->shortcut_id
@@ -413,7 +418,18 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 						->writeoff_price($writeoff_price)
 						->incoming_price($incoming_price)
 						->save();
+
+					$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Regrade_Item->id}');";
 				}
+				else
+				{
+					$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
+				}
+
+				Core::factory('Core_Html_Entity_Script')
+					->value($script)
+					->execute();
+				$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 			}
 		}
 

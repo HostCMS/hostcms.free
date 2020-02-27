@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Movement_Model extends Core_Entity
 {
@@ -36,6 +36,8 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
+
+	const TYPE = 4;
 
 	/**
 	 * Constructor.
@@ -115,7 +117,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Movement_Items->deleteAll(FALSE);
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 4);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -136,7 +138,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oSource_Shop_Warehouse = $this->Source_Shop_Warehouse;
 			$oDestination_Shop_Warehouse = $this->Destination_Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 4);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 
 			$aTmp = array();
 
@@ -172,7 +174,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry_Source = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Source->setDocument($this->id, 4);
+						$oShop_Warehouse_Entry_Source->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry_Source->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
 					}
 
@@ -188,7 +190,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 					else
 					{
 						$oShop_Warehouse_Entry_Destination = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry_Destination->setDocument($this->id, 4);
+						$oShop_Warehouse_Entry_Destination->setDocument($this->id, self::TYPE);
 						$oShop_Warehouse_Entry_Destination->shop_item_id = $oShop_Warehouse_Movement_Item->shop_item_id;
 					}
 
@@ -232,7 +234,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oSource_Shop_Warehouse = $this->Source_Shop_Warehouse;
 			$oDestination_Shop_Warehouse = $this->Destination_Shop_Warehouse;
 
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 4);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
 				// Удаляем все накопительные значения с датой больше, чем дата документа
@@ -271,6 +273,24 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 5);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function source_shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars($this->Source_Shop_Warehouse->name);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function destination_shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return htmlspecialchars($this->Destination_Shop_Warehouse->name);
 	}
 
 	/**
@@ -408,15 +428,27 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 			$amount = Shop_Controller::instance()->round($oShop_Warehouse_Movement_Item->count * $old_price);
 
-			$aReplace['Items'][] = array(
-				'position' => $position++,
-				'name' => htmlspecialchars($oShop_Item->name),
-				'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-				'currency' => htmlspecialchars($oShop_Item->Shop_Currency->name),
-				'price' => $old_price,
-				'quantity' => $oShop_Warehouse_Movement_Item->count,
-				'amount' => $amount
-			);
+			$aBarcodes = array();
+
+			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+			{
+				$aBarcodes[] = $oShop_Item_Barcode->value;
+			}
+
+			$node = new stdClass();
+
+			$node->position = $position++;
+			$node->item = $oShop_Item;
+			$node->name = htmlspecialchars($oShop_Item->name);
+			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->name);
+			$node->price = $old_price;
+			$node->quantity = $oShop_Warehouse_Movement_Item->count;
+			$node->amount = $amount;
+			$node->barcodes = implode(', ', $aBarcodes);
+
+			$aReplace['Items'][] = $node;
 
 			$aReplace['total_count']++;
 

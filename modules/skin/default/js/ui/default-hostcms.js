@@ -325,7 +325,7 @@
 				}
 			});
 		},
-		sendWindowStatus: function(event, ui)
+		/*sendWindowStatus: function(event, ui)
 		{
 			jQuery.ajax({
 				url: '/admin/index.php?' + 'userSettings&moduleId=' + ui.options.moduleId
@@ -337,7 +337,7 @@
 				dataType: 'json',
 				success: function(){}
 			});
-		},
+		},*/
 		showTab: function(windowId, tabId)
 		{
 			$("#"+windowId+" div.tab_page[id!='" + tabId + "']").hideObjects();
@@ -559,7 +559,7 @@
 
 				jQuery(object).remove();
 			});
-		},
+		}/*,
 		widgetWindow: function(settings)
 		{
 			settings = jQuery.extend({
@@ -576,8 +576,7 @@
 			return this.each(function(index, object){
 				jQuery(object).HostCMSWindow(settings);
 			});
-		}
-
+		}*/
 	});
 
 	// Предварительная загрузка изображений

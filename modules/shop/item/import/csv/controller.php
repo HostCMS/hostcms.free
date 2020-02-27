@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -162,6 +162,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	protected $_aBarcodes = array();
 
 	/**
+	 * List of items GUID in the set
+	 * @var array
+	 */
+	protected $_aSets = array();
+
+	/**
 	 * Allowed object properties
 	 * @var array
 	 */
@@ -176,6 +182,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'time',
 		// Ограничение импорта по количеству
 		'step',
+		// Ограничение количества проводок в документе
+		'entriesLimit',
 		// Настройка CSV: разделитель
 		'separator',
 		// Настройка CSV: ограничитель
@@ -403,6 +411,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->_aConfig = Core_Config::instance()->get('shop_csv', array()) + array(
 			'maxTime' => 20,
 			'maxCount' => 100,
+			'entriesLimit' => 5000,
 			'itemSearchFields' => array('marking', 'path', 'cml_id')
 		);
 
@@ -411,11 +420,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		$this->time = $this->_aConfig['maxTime'];
 		$this->step = $this->_aConfig['maxCount'];
+		$this->entriesLimit = $this->_aConfig['entriesLimit'];
 
 		$this->init();
 
 		// Единожды в конструкторе, чтобы после __wakeup() не обнулялось
-		$this->_InsertedItemsCount = $this->_UpdatedItemsCount = $this->_InsertedGroupsCount = $this->_UpdatedGroupsCount = 0;
+		$this->_InsertedItemsCount = $this->_UpdatedItemsCount = $this->_InsertedGroupsCount = $this->_UpdatedGroupsCount = $this->_posted = 0;
 
 		$this->_ShopItemCreatedIDs = array();
 
@@ -501,6 +511,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			Core::_('Shop_Exchange.item_yandex_market_sales_notes'),
 			Core::_('Shop_Exchange.item_additional_group'),
 			Core::_('Shop_Exchange.item_barcode'),
+			Core::_('Shop_Exchange.item_sets_guid'),
+			Core::_('Shop_Exchange.item_sets_marking'),
 			Core::_('Shop_Exchange.item_guid'),
 
 			// item special prices
@@ -680,6 +692,32 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get the full path of the CSV file
+	 * @return string
+	 */
+	public function getFilePath()
+	{
+		return CMS_FOLDER . TMP_DIR . $this->file;
+	}
+
+	/**
+	 * Delete uploaded CSV file
+	 * @return boolean
+	 */
+	public function deleteUploadedFile()
+	{
+		$sTmpFileFullpath = $this->getFilePath();
+
+		if (is_file($sTmpFileFullpath))
+		{
+			Core_File::delete($sTmpFileFullpath);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	/**
 	 * Импорт CSV
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImport
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterImport
@@ -709,7 +747,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				->execute();
 		}
 
-		$fInputFile = fopen(CMS_FOLDER . TMP_DIR . $this->file, 'rb');
+		$fInputFile = fopen($this->getFilePath(), 'rb');
 
 		if ($fInputFile === FALSE)
 		{
@@ -1596,29 +1634,40 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						// "Ярлыки GUID" - дополнительные группы для товара (CML_ID групп через запятую)
 						case 'additional_groups':
 							$aShortcuts = explode(',', $sData);
+							$aShortcuts = array_map('trim', $aShortcuts);
 							$this->_aAdditionalGroups = array_merge($this->_aAdditionalGroups, $aShortcuts);
 						break;
 						// Штрихкоды, через запятую
 						case 'barcodes':
 							$aBarcodes = explode(',', trim($sData));
+							$aBarcodes = array_map('trim', $aBarcodes);
 							$this->_aBarcodes = array_merge($this->_aBarcodes, $aBarcodes);
-
-							/*foreach ($aBarcodes as $value)
+						break;
+						// GUID товаров в комплекте, через запятую
+						case 'sets_guid':
+							$aSets = explode(',', trim($sData));
+							foreach ($aSets as $sSet)
 							{
-								$oShop_Item_Barcode = $this->_oCurrentItem->Shop_Item_Barcodes->getByValue($value, FALSE);
+								$oTmpObject = $this->_oCurrentShop->Shop_Items->getByGuid(trim($sSet), FALSE);
 
-								if (is_null($oShop_Item_Barcode))
+								if (!is_null($oTmpObject))
 								{
-									echo $this->_oCurrentItem;
-
-									$oShop_Item_Barcode = Core_Entity::factory('Shop_Item_Barcode');
-									$oShop_Item_Barcode
-										->value($value)
-										->shop_item_id($this->_oCurrentItem->id)
-										->setType()
-										->save();
+									$this->_aSets[] = $oTmpObject->id;
 								}
-							}*/
+							}
+						break;
+						// Артикулы товаров в комплекте, через запятую
+						case 'sets_marking':
+							$aSets = explode(',', trim($sData));
+							foreach ($aSets as $sSet)
+							{
+								$oTmpObject = $this->_oCurrentShop->Shop_Items->getByMarking(trim($sSet), FALSE);
+
+								if (!is_null($oTmpObject))
+								{
+									$this->_aSets[] = $oTmpObject->id;
+								}
+							}
 						break;
 						// Идентификатор товара
 						case 'item_id':
@@ -1730,7 +1779,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						// цена товара
 						case 'item_price':
 							$this->_aExternalPrices[0] = Shop_Controller::instance()->convertPrice($sData);
-							// $this->_oCurrentItem->price = Shop_Controller::instance()->convertPrice($sData);
 						break;
 						// активность товара
 						case 'item_active':
@@ -2166,19 +2214,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_oCurrentItem->id;
 						$oShop_Warehouse_Inventory_Item->count = Shop_Controller::instance()->convertPrice($iWarehouseCount);
 						$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
-
-						/*$oShop_Warehouse_Item = $oShop_Warehouse
-							->Shop_Warehouse_Items
-							->getByShopItemId($this->_oCurrentItem->id, FALSE);
-
-						if (is_null($oShop_Warehouse_Item))
-						{
-							$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
-							$oShop_Warehouse_Item->shop_warehouse_id = $iWarehouseID;
-							$oShop_Warehouse_Item->shop_item_id = $this->_oCurrentItem->id;
-						}
-						$oShop_Warehouse_Item->count = Shop_Controller::instance()->convertPrice($iWarehouseCount);
-						$oShop_Warehouse_Item->save();*/
 					}
 				}
 
@@ -2249,6 +2284,29 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								->value($value)
 								->shop_item_id($this->_oCurrentItem->id)
 								->setType()
+								->save();
+						}
+					}
+				}
+
+				// Обрабатываем комплекты в товаре
+				if (count($this->_aSets))
+				{
+					// Change to set
+					$this->_oCurrentItem->type == 3;
+					$this->_oCurrentItem->save();
+
+					foreach ($this->_aSets as $iTmpId)
+					{
+						$iCount = $this->_oCurrentItem->Shop_Item_Sets->getCountByshop_item_set_id($iTmpId, FALSE);
+
+						if (!$iCount)
+						{
+							$oShop_Item_Set = Core_Entity::factory('Shop_Item_Set');
+							$oShop_Item_Set
+								->shop_item_set_id($iTmpId)
+								->shop_item_id($this->_oCurrentItem->id)
+								->count(1)
 								->save();
 						}
 					}
@@ -2794,7 +2852,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$this->_aExternalProperties =
 			$this->_aExternalPropertiesDesc =
 			$this->_aAdditionalGroups =
-			$this->_aBarcodes = array();
+			$this->_aBarcodes =
+			$this->_aSets = array();
 
 		// Список меток для текущего товара
 		$this->_sCurrentTags = '';
@@ -3849,6 +3908,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'#FFCC80',
 		'#FFCC80',
 		'#FFCC80',
+		'#FFCC80',
+		'#FFCC80',
 
 		// item special prices
 		'#FFB74D',
@@ -3898,7 +3959,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'#A5D6A7',
 		'#A5D6A7',
 		'#A5D6A7');
-
 
 	public $aEntities = array(
 		'',
@@ -3970,6 +4030,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'item_yandex_market_sales_notes',
 		'additional_groups',
 		'barcodes',
+		'sets_guid',
+		'sets_marking',
 		'item_cml_id',
 
 		'item_special_price_from',
@@ -4018,11 +4080,21 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'order_item_type'
 	);
 
+	protected $_posted = 0;
+
+	public function getPosted()
+	{
+		return $this->_posted;
+	}
+
 	protected $_aShop_Warehouse_Inventory_Ids = array();
+	protected $_aShop_Warehouse_Inventory_Counts = array();
+	protected $_aShop_Warehouse_Inventory_Previous_Ids = array();
 
 	protected function _getInventory($shop_warehouse_id)
 	{
-		if (!isset($this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]))
+		if (!isset($this->_aShop_Warehouse_Inventory_Counts[$shop_warehouse_id])
+			|| $this->_aShop_Warehouse_Inventory_Counts[$shop_warehouse_id] >= $this->entriesLimit)
 		{
 			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
 			$oShop_Warehouse_Inventory->shop_warehouse_id = $shop_warehouse_id;
@@ -4034,17 +4106,26 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
 			$oShop_Warehouse_Inventory->save();
 
-			$this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id] = $oShop_Warehouse_Inventory->id;
+			$this->_aShop_Warehouse_Inventory_Previous_Ids[]
+				= $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]
+				= $oShop_Warehouse_Inventory->id;
+
+			$this->_aShop_Warehouse_Inventory_Counts[$shop_warehouse_id] = 0;
 		}
+
+		$this->_aShop_Warehouse_Inventory_Counts[$shop_warehouse_id]++;
 
 		return Core_Entity::factory('Shop_Warehouse_Inventory', $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]);
 	}
 
 	protected $_oShop_Price_Setting_Id = NULL;
+	protected $_oShop_Price_Setting_Count = NULL;
+	protected $_oShop_Price_Setting_Previous_Ids = array();
 
 	protected function _getPrices()
 	{
-		if (is_null($this->_oShop_Price_Setting_Id))
+		if (is_null($this->_oShop_Price_Setting_Count)
+			|| $this->_oShop_Price_Setting_Count >= $this->entriesLimit)
 		{
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $this->_oCurrentShop->id;
@@ -4056,24 +4137,59 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
 			$oShop_Price_Setting->save();
 
-			$this->_oShop_Price_Setting_Id = $oShop_Price_Setting->id;
+			$this->_oShop_Price_Setting_Previous_Ids[]
+				= $this->_oShop_Price_Setting_Id
+				= $oShop_Price_Setting->id;
+
+			$this->_oShop_Price_Setting_Count = 0;
 		}
+
+		$this->_oShop_Price_Setting_Count++;
 
 		return Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
 	}
 
 	public function postAll()
 	{
-		foreach ($this->_aShop_Warehouse_Inventory_Ids as $shop_warehouse_id => $shop_warehouse_inventory_id)
+		foreach ($this->_aShop_Warehouse_Inventory_Previous_Ids as $shop_warehouse_inventory_id)
 		{
 			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory', $shop_warehouse_inventory_id);
 			$oShop_Warehouse_Inventory->post();
 		}
 
-		if (!is_null($this->_oShop_Price_Setting_Id))
+		foreach ($this->_oShop_Price_Setting_Previous_Ids as $shop_price_setting_id)
 		{
-			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $shop_price_setting_id);
 			$oShop_Price_Setting->post();
 		}
+
+		return $this;
+	}
+
+	public function postNext()
+	{
+		if (count($this->_aShop_Warehouse_Inventory_Previous_Ids))
+		{
+			$shop_warehouse_inventory_id = array_shift($this->_aShop_Warehouse_Inventory_Previous_Ids);
+			$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory', $shop_warehouse_inventory_id);
+			$oShop_Warehouse_Inventory->post();
+
+			$this->_posted++;
+
+			return TRUE;
+		}
+
+		if (count($this->_oShop_Price_Setting_Previous_Ids))
+		{
+			$shop_price_setting_id = array_shift($this->_oShop_Price_Setting_Previous_Ids);
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $shop_price_setting_id);
+			$oShop_Price_Setting->post();
+
+			$this->_posted++;
+
+			return TRUE;
+		}
+
+		return FALSE;
 	}
 }

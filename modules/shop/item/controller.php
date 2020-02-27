@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -158,7 +158,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	}
 
 	static protected $_coupon = NULL;
-	
+
 	static public function coupon($coupon_text)
 	{
 		self::$_coupon = $coupon_text;
@@ -198,7 +198,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 						$oShop_Discount->type == 0
 							? $discountPercent += $oShop_Discount->value
 							: $discountAmount += $oShop_Discount->value;
-							
+
 						if ($oShop_Discount->coupon == 1 && $bCoupon)
 						{
 							$this->_aPrice['coupon'] = $oShop_Discount->coupon_text;
@@ -265,6 +265,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 * Calculate total bonuses for oShop_Item
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array array('total' => Total bonuses, 'bonuses' => array of bonuses)
+	 * @hostcms-event Shop_Item_Controller.onBeforeGetBonuses
 	 */
 	public function getBonuses(Shop_Item_Model $oShop_Item, $price)
 	{
@@ -272,6 +273,15 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			'total' => 0,
 			'bonuses' => array()
 		);
+
+		Core_Event::notify(get_class($this) . '.onBeforeGetBonuses', $this, array($oShop_Item, $price));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (is_array($eventResult))
+		{
+			return $eventResult;
+		}
 
 		// Определены ли скидки на товар
 		$aShop_Item_Bonuses = $oShop_Item->Shop_Item_Bonuses->findAll();
@@ -285,7 +295,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			foreach ($aShop_Item_Bonuses as $oShop_Item_Bonus)
 			{
 				$oShop_Bonus = $oShop_Item_Bonus->Shop_Bonus;
-				if ($oShop_Bonus->isActive())
+				if ($oShop_Bonus->isActive() && $oShop_Bonus->min_amount <= $price)
 				{
 					$aBonuses['bonuses'][] = $oShop_Bonus;
 

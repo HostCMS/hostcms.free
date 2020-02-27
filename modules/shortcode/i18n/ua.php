@@ -1,0 +1,27 @@
+<?php
+
+return array(
+	'menu' => 'Шорткоди',
+	'model_name' => 'Шорткоди',
+	'title' => 'Шорткоди',
+	'add_shortcode' => 'Шорткод',
+	'add_shortcode_dir' => 'Група',
+	'shortcode_add_form_title' => 'Додавання шорткоду',
+	'shortcode_edit_form_title' => 'Редагування шорткоду "%s"',
+	'name' => 'Назва',
+	'sorting' => 'Порядок сортування',
+	'active' => 'Активність',
+	'shortcode' => 'Шорткод',
+	'example' => 'Приклад виклику',
+	'php' => 'PHP-код шорткода',
+	'shortcode_dir_id' => 'Група',
+	'changeActive_success' => "Інформація успішно змінена",
+	'apply_success' => "Інформація успішно змінена",
+	'copy_success' => 'Шорткод успішно скопійований!',
+	'markDeleted_success' => "Шорткод видалений!",
+	'edit_success' => "Шорткод успішно доданий!",
+	'delete_success' => 'Елемент видалений!',
+	'undelete_success' => 'Елемент відновлено!',
+	'id' => 'Ідентифікатор',
+	'error_shortcode' => 'Шорткод вже існує!',
+);

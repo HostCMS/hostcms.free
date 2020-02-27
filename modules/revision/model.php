@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Revision
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -89,7 +89,7 @@ class Revision_Model extends Core_Entity
 		}
 		elseif (is_string($value) || is_numeric($value))
 		{
-			echo '<span class="preWrap">' . htmlspecialchars($value) . '</span>';
+			echo '<span class="pre-wrap">' . htmlspecialchars($value) . '</span>';
 		}
 		elseif (is_object($value))
 		{

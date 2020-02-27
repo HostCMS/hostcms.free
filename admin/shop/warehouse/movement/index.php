@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -273,6 +273,30 @@ $oAdmin_Form_Dataset->addCondition(
 );
 
 $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
+
+// Список значений для фильтра и поля
+$aShop_Warehouses_Source = Core_Entity::factory('Shop_Warehouse')->getAllByShop_id($shop_id);
+$sList = "0=…\n";
+foreach ($aShop_Warehouses_Source as $oShop_Warehouse)
+{
+	$sList .= "{$oShop_Warehouse->id}={$oShop_Warehouse->name}\n";
+}
+
+$oAdmin_Form_Dataset
+	->changeField('source_shop_warehouse_id', 'type', 8)
+	->changeField('source_shop_warehouse_id', 'list', trim($sList));
+
+// Список значений для фильтра и поля
+$aShop_Warehouses_Destination = Core_Entity::factory('Shop_Warehouse')->getAllByShop_id($shop_id);
+$sList = "0=…\n";
+foreach ($aShop_Warehouses_Destination as $oShop_Warehouse)
+{
+	$sList .= "{$oShop_Warehouse->id}={$oShop_Warehouse->name}\n";
+}
+
+$oAdmin_Form_Dataset
+	->changeField('destination_shop_warehouse_id', 'type', 8)
+	->changeField('destination_shop_warehouse_id', 'list', trim($sList));
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

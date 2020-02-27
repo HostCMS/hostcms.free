@@ -37,6 +37,7 @@
 				)
 				->groupsMode('tree')
 				->limit(0)
+				->viewed(FALSE)
 				->itemsProperties(TRUE);
 
 			if (is_object(Core_Page::instance()->object)
@@ -86,6 +87,7 @@
 			$Shop_Controller_Show
 				//Фильтровать по ярлыкам
 				->filterShortcuts(TRUE)
+				->filterCounts(TRUE)
 				->addMinMaxPrice()
 				->modificationsList(TRUE)
 				->addProducers()

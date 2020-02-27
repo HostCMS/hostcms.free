@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core
 {
@@ -180,7 +180,7 @@ class Core
 				'class' => 'Core_Session_Database',
 			),
 			'backendSessionLifetime' => 14400,
-			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: www.hostcms.ru; font-src 'self'; style-src 'self' 'unsafe-inline'"
+			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
 		);
 	}
 
@@ -743,6 +743,7 @@ class Core
 	/**
 	 * Parse URL and set controller properties
 	 * @return Core::$url
+	 * @hostcms-event Core.onAfterParseUrl
 	 */
 	static public function parseUrl()
 	{
@@ -803,6 +804,8 @@ class Core
 				self::$url['path'] = '/';
 			}
 		}
+
+		Core_Event::notify('Core.onAfterParseUrl');
 
 		return self::$url;
 	}

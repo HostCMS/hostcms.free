@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Entity_Date {
 
@@ -66,7 +66,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 
 		<script>
 		(function($) {
-			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php
 

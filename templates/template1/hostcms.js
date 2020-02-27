@@ -59,6 +59,19 @@
 			jQuery('#' + data.entity_type + '_rate_' + data.item).text(data.rate);
 			jQuery('#' + data.entity_type + '_likes_' + data.item).text(data.likes);
 			jQuery('#' + data.entity_type + '_dislikes_' + data.item).text(data.dislikes);
+		},
+		showCartBonuses: function(object)
+		{
+			var jBonusInput = $('.shop_bonuses input[name = bonuses]');
+
+			if ($(object).is(":checked"))
+			{
+				jBonusInput.removeClass('hidden');
+			}
+			else
+			{
+				jBonusInput.addClass('hidden');
+			}
 		}
 	});
 
