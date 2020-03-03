@@ -67,8 +67,6 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		// Удаляем производителей
 		$oAdditionalTab->delete($this->getField('shop_producer_id'));
 
-		$oDefault_Shop_Producer = $this->_object->Shop->Shop_Producers->getDefault();
-
 		$oShopProducerSelect = Admin_Form_Entity::factory('Select')
 			->caption(Core::_('Shop_Filter_Seo.shop_producer_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
@@ -76,7 +74,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->name('shop_producer_id')
 			->value($this->_object->id
 				? $this->_object->shop_producer_id
-				: (!is_null($oDefault_Shop_Producer) ? $oDefault_Shop_Producer->id : 0)
+				: 0
 			);
 
 		// Добавляем продавцов

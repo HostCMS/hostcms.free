@@ -131,4 +131,5 @@ return array(
 	'autocomplete_mode3' => 'Точний збіг',
 
 	'tabProperties' => 'Додаткові властивості',
+	'non_subject' => '<Без теми>',	
 );

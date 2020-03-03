@@ -35,6 +35,8 @@ $oAdmin_Form_Controller
 $aAvailableProperties = array(0, 11, 1, 7);
 Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 
+$aAvailablePropertyFilters = array(1,2,3,4,5,7);
+
 if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 {
 	$aJSON = array();
@@ -52,6 +54,7 @@ if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 	foreach ($aProperties as $oProperty)
 	{
 		in_array($oProperty->type, $aAvailableProperties)
+			&& in_array($oProperty->Shop_Item_Property->filter, $aAvailablePropertyFilters)
 			&& $aTmpProperties[$oProperty->id] = $oProperty->name;
 	}
 

@@ -227,7 +227,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 					{
 						switch ($oProperty->type)
 						{
-							case 3:
+							case 3: // List
 								if (Core::moduleIsActive('list'))
 								{
 									$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
@@ -235,6 +235,9 @@ class Shop_Filter_Seo_Model extends Core_Entity
 									!is_null($oList_Item)
 										&& $url .= rawurlencode($oList_Item->value) . '/';
 								}
+							break;
+							case 7: // Checkbox
+								// nothing to do
 							break;
 							default:
 								$url .= rawurlencode($value) . '/';

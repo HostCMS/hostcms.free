@@ -123,6 +123,7 @@ class Shop_Report_Controller
 				array(
 					$oInnerQB = Core_QueryBuilder::select(
 							'shop_orders.id',
+							'shop_orders.shop_id',
 							'shop_orders.datetime',
 							'shop_orders.shop_country_location_id',
 							'shop_orders.shop_country_location_city_id',
@@ -183,6 +184,7 @@ class Shop_Report_Controller
 				array(
 					$oInnerQB = Core_QueryBuilder::select(
 							'shop_orders.id',
+							'shop_orders.shop_id',
 							'shop_orders.datetime',
 							'shop_orders.shop_country_location_id',
 							'shop_orders.shop_country_location_city_id',
@@ -1577,8 +1579,8 @@ class Shop_Report_Controller
 
 						?>
 						aData = [ [<?php echo $xaxis?>, <?php echo $i?>] ];
-						dataHorizontal.push({label: '<?php echo $yaxis?>', data: aData, color: '<?php echo $color?>'});
-						dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo $yaxis?>']);
+						dataHorizontal.push({label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>', data: aData, color: '<?php echo $color?>'});
+						dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>']);
 						<?php
 						$i++;
 					}
@@ -1628,7 +1630,7 @@ class Shop_Report_Controller
 						}
 						?>
 						dataHorizontal.push({
-							label: '<?php echo $segmentName?>',
+							label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($segmentName))?>',
 							data: aData,
 							color: '<?php echo self::$_aColors[$key % count(self::$_aColors)]?>'
 						});
@@ -2177,8 +2179,8 @@ class Shop_Report_Controller
 			{
 				?>
 				aData = [ [<?php echo $xaxis?>, <?php echo $i?>] ];
-				dataHorizontal.push({label: '<?php echo $yaxis?>', data: aData, color: '<?php echo self::$_aColors[$i % count(self::$_aColors)]?>'});
-				dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo $yaxis?>']);
+				dataHorizontal.push({label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>', data: aData, color: '<?php echo self::$_aColors[$i % count(self::$_aColors)]?>'});
+				dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>']);
 				<?php
 				$i++;
 			}
@@ -2224,7 +2226,7 @@ class Shop_Report_Controller
 				}
 				?>
 				dataHorizontal.push({
-					label: '<?php echo $segmentName?>',
+					label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($segmentName))?>',
 					data: aData,
 					color: '<?php echo self::$_aColors[$key % count(self::$_aColors)]?>'
 				});
@@ -2543,15 +2545,13 @@ class Shop_Report_Controller
 		foreach ($aPopularProducers as $shop_producer_id => $aTmp)
 		{
 			?>
-			dataPie.push(
-				{
-					label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($aTmp['name'], $aConfig['cutNames'])))?>',
-					data: <?php echo $aTmp['quantityAmount']?>,
-					color: '<?php echo $iCountColors
-						? self::$_aColors[$i % $iCountColors]
-						: '#E75B8D'?>'
-				}
-			);
+			dataPie.push({
+				label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($aTmp['name'], $aConfig['cutNames'])))?>',
+				data: <?php echo $aTmp['quantityAmount']?>,
+				color: '<?php echo $iCountColors
+					? self::$_aColors[$i % $iCountColors]
+					: '#E75B8D'?>'
+			});
 			<?php
 			$i++;
 		}
@@ -2596,7 +2596,7 @@ class Shop_Report_Controller
 
 								legend: {
 									labelFormatter: function (label, series) {
-										return label + ", " + series.data[0][1];
+										return $.escapeHtml(label + ", " + series.data[0][1]);
 									}
 								}
 								,

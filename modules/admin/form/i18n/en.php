@@ -144,4 +144,5 @@ return array(
 	'autocomplete_mode3' => 'Точное совпадение',
 
 	'tabProperties' => 'Properties',
+	'non_subject' => '<No subject>',
 );

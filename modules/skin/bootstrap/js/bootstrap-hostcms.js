@@ -4325,7 +4325,7 @@ function isEmpty(str) {
 			{
 				object.parents('.user-block').remove();
 			}
-		},		
+		},
 		rgb2hex: function(rgb)
 		{
 			if (typeof rgb !== 'undefined')

@@ -5141,8 +5141,8 @@ li.autocomplete-suggestion .price { width: 25%; }
 	margin-bottom: 3px;
 }
 .lead-last-contact { color: #3c3c3c; background-color: #f2f2f2; margin-top: 5px }
-.lead-phone { color: #4eb91d; background-color: #f6f9f5; }
-.lead-email { color: #10a7f0; background-color: #eef3ff; }
+.lead-phone, .siteuser-email-from { color: #4eb91d; background-color: #f6f9f5; }
+.lead-email, .siteuser-email-to { color: #10a7f0; background-color: #eef3ff; }
 
 .lead-morph .modal-body { padding: 15px; }
 .lead-morph .modal-content { padding-bottom: 0 }
@@ -5192,3 +5192,7 @@ li.autocomplete-suggestion .price { width: 25%; }
 .legend-actions div[data-legend-action="delete"] { color: #ed4e2a; }
 
 .event-clients-row .user-block:first-child { padding-left: 0; }
+
+.siteuser-mail-attachments ul { padding: 0; }
+.siteuser-mail-attachments ul li { list-style-type: none; display: inline-block; }
+.siteuser-mail-attachments ul li a.name span { color: #666; float: right; margin-left: 5px; }

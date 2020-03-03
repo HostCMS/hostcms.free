@@ -495,7 +495,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
 							->caption(htmlspecialchars($oProperty->name))
 							->name("property_{$oProperty->id}[]")
-							->value(NULL)
+							// ->value(NULL)
+							->value(
+								$this->_correctPrintValue($oProperty, $oProperty->default_value)
+							)
 							->divAttr(array('class' => 'form-group col-xs-12'));
 
 						$oProperty->obligatory
