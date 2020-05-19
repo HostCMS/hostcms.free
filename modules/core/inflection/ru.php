@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_Ru extends Core_Inflection
 {
@@ -170,12 +170,16 @@ class Core_Inflection_Ru extends Core_Inflection
 	 */
 	public function numberInWords($float, $aUnits = NULL)
 	{
-		is_null($aUnits) && $aUnits = array( // Units
+		is_null($aUnits) && $aUnits = array(
 			array('копейка', 'копейки', 'копеек', 1),
 			array('рубль', 'рубля', 'рублей', 0),
 			array('тысяча', 'тысячи', 'тысяч', 1),
 			array('миллион', 'миллиона', 'миллионов', 0),
 			array('миллиард', 'милиарда', 'миллиардов', 0),
+			array('триллион', 'триллиона', 'триллионов', 0),
+			array('квадриллион', 'квадриллиона', 'квадриллионов', 0),
+			array('квинтиллион', 'квинтиллиона', 'квинтиллионов', 0),
+			array('секстиллион', 'секстиллиона', 'секстиллионов', 0),
 		);
 
 		$float = floatval($float);
@@ -206,14 +210,23 @@ class Core_Inflection_Ru extends Core_Inflection
 		$tens = array('', '', 'двадцать', 'тридцать', 'сорок', 'пятьдесят', 'шестьдесят', 'семьдесят', 'восемьдесят', 'девяносто');
 		$hundreds = array('', 'сто', 'двести', 'триста', 'четыреста', 'пятьсот', 'шестьсот', 'семьсот', 'восемьсот', 'девятьсот');
 
-		// 3 => 000000000003.00
-		list($iInteger, $fractional) = explode('.', sprintf("%015.2f", $float));
+		// Считаем количество необходимых знаков
+		$iIntLen = ceil(strlen(sprintf("%.0f", $float)) / 3) * 3 + 3;
+
+		// 3 => 003.00
+		// 12345678987.66 => 012345678987.66
+		list($iInteger, $fractional) = explode('.', sprintf("%0{$iIntLen}.2f", $float)); //15/18
 
 		$out = array();
 
 		if (intval($iInteger))
 		{
+			// Делим по 3
 			$aSplit = str_split($iInteger, 3);
+
+			// Переворачиваем, начинаем с тысяч
+			$aSplit = array_reverse($aSplit);
+
 			foreach ($aSplit as $uk => $value)
 			{
 				if (!intval($value))
@@ -221,18 +234,19 @@ class Core_Inflection_Ru extends Core_Inflection
 					continue;
 				}
 
-				$uk = count($aUnits) - $uk - 1;
+				$uk++; // в 0 - копейка, смещаем на 1
 
 				$gender = $aUnits[$uk][3];
 				list($iHundreds, $iTens, $i3) = array_map('intval', str_split($value, 1));
 
-				$out[] = $hundreds[$iHundreds];
+				$uk > 1 && array_unshift($out, $this->_morph($value, $aUnits[$uk]));
 
-				$out[] = $iTens > 1
-					? $tens[$iTens] . ' ' . $ten[$gender][$i3] # 20-99
-					: ($iTens > 0 ? $a20[$i3] : $ten[$gender][$i3]); # 10-19 | 1-9
+				array_unshift($out, $iTens > 1
+					? $tens[$iTens] . ' ' . $ten[$gender][$i3] // 20-99
+					: ($iTens > 0 ? $a20[$i3] : $ten[$gender][$i3]) // 10-19 | 1-9
+				);
 
-				$uk > 1 && $out[] = $this->_morph($value, $aUnits[$uk]);
+				array_unshift($out, $hundreds[$iHundreds]);
 			}
 		}
 		else

@@ -51,9 +51,9 @@ class Shop_Warehouse_Regrade_Item_Controller_Delete extends Admin_Form_Action_Co
 			$oShop_Warehouse->setRest($incoming_shop_item_id, is_null($incoming_rest) ? 0 : $incoming_rest);
 		}
 
-		$this->_Admin_Form_Controller->addMessage(
-			"<script>$('.shop-item-table tr#{$oShop_Warehouse_Regrade_Item->id}').remove();</script>"
-		);
+		// $this->_Admin_Form_Controller->addMessage(
+			// "<script>$('.shop-item-table tr#{$oShop_Warehouse_Regrade_Item->id}').remove();</script>"
+		// );
 
 		return TRUE;
 	}

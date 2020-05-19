@@ -341,4 +341,10 @@ return array(
 	'set' => 'Set',
 	'continue_import' => "If your browser does not support automatic redirection, please click <b><a href=\"%s\" onclick=\"%s\">here</a></b>",
 	'seo_filter' => 'SEO filter',
+	'apply_to' => 'Apply to price',
+	'warehouse_name' => 'Name',
+	'warehouse_quantity' => 'Quantity',
+	'warehouse_cell' => 'Cell',
+	'warehouse_measure' => 'Measure',
+	'shop_price_setting_modification_create' => 'Set price for modification of item "%s"',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Google extends Seo_Controller
 {
@@ -106,9 +106,9 @@ class Seo_Controller_Google extends Seo_Controller
 				{
 					if ($aHost['permissionLevel'] == 'siteOwner')
 					{
-						$pos = strpos($aHost['siteUrl'], '//' . $oSiteAlias->name);
-
-						if ($pos !== FALSE)
+						// Доменные ресурсы в Search Console, теперь два варианта, где спользуется доменный ресурс и предыдущий вариант
+						if (strpos($aHost['siteUrl'], 'sc-domain:' . $oSiteAlias->name) === 0
+							|| strpos($aHost['siteUrl'], '//' . $oSiteAlias->name) !== FALSE)
 						{
 							return $aHost['siteUrl'];
 						}

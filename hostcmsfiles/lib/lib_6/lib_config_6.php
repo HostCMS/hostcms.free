@@ -255,6 +255,8 @@ if (!is_null(Core_Array::getGet('vote')))
 				$oVote->delete();
 			}
 
+			Core_Entity::factory('Shop_Item', $entity_id)->clearCache();
+
 			$aVotingStatistic = Vote_Controller::instance()->getRate($entity_type, $entity_id);
 
 			Core_Page::instance()->response

@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'itemEditWarehouseLimit' => 20,
 	'smallImagePrefix' => 'small_',
 	'itemLargeImage' => 'item_%d.%s',
 	'itemSmallImage' => 'small_item_%d.%s',

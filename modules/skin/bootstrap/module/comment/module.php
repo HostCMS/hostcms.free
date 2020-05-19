@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -171,7 +171,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
 
-								$sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'blockIp', NULL, 0, $oComment->id);
+								// $sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'blockIp', NULL, 0, $oComment->id);
 								?>
 								<li class="task-item">
 									<div class="row">
@@ -221,13 +221,13 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													if ($bBlocked)
 													{
 													?>
-														<span class="btn btn-xs darkorange span-blocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
 													<?php
 													}
 													else
 													{
 													?>
-														<a href="<?php echo $sBlockedHref?>" onclick="$.widgetRequest({path: '<?php echo $sBlockedHref?>', context: $('#informationsystemCommentsAdminPage')}); return false" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#informationsystemCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray span-unblocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
 													<?php
 													}
 													?>
@@ -326,7 +326,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
 
-								$sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'blockIp', NULL, 0, $oComment->id);
+								// $sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'blockIp', NULL, 0, $oComment->id);
 
 								?>
 								<li class="task-item">
@@ -378,13 +378,13 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 													if ($bBlocked)
 													{
 													?>
-														<span class="btn btn-xs darkorange span-blocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
+														<span class="btn btn-xs darkorange span-blocked disabled" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i></span>
 													<?php
 													}
 													else
 													{
 													?>
-														<a href="<?php echo $sBlockedHref?>" onclick="$.widgetRequest({path: '<?php echo $sBlockedHref?>', context: $('#shopCommentsAdminPage')}); return false" class="btn btn-xs darkgray" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
+														<a onclick="$.blockIp({ ip: '<?php echo $oComment->ip?>', comment: '<?php echo Core_Str::escapeJavascriptVariable(Core::_('Comment.ban_comment', $oComment->subject))?>' }); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#shopCommentsAdminPage'), 'button': $(this).find('i') });" class="btn btn-xs darkgray span-unblocked" title="<?php echo Core::_('Comment.ban')?>"><i class="fa fa-ban"></i> </a>
 													<?php
 													}
 													?>

@@ -277,38 +277,39 @@ class Core
 		$bShowError = $error_reporting != 0 && $error_reporting >= $code;
 
 		// Уровень критичности ошибки
-		$error_level = array
-		(
-			E_ERROR => 4,
+
+		// The following error types cannot be handled with a user defined function: E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING independent of where they were raised, and most of E_STRICT raised in the file where set_error_handler() is called.
+		$error_level = array(
+			//E_ERROR => 4,
 			E_WARNING => 3,
-			E_PARSE => 4,
+			//E_PARSE => 4,
 			E_NOTICE => 2,
-			E_CORE_ERROR => 4,
-			E_CORE_WARNING => 4,
-			E_COMPILE_ERROR => 4,
-			E_COMPILE_WARNING => 4,
+			//E_CORE_ERROR => 4,
+			//E_CORE_WARNING => 4,
+			//E_COMPILE_ERROR => 4,
+			//E_COMPILE_WARNING => 4,
 			E_USER_ERROR => 4,
 			E_USER_WARNING => 3,
 			E_USER_NOTICE => 2,
-			//2048 => 0
-			2048 => -1
+			2048 => -1, // 0
+			8192 => 2,
 		);
 
 		// Название типа ошибки
-		$error_name = array
-		(
-			E_ERROR => Core::_('Core.E_ERROR'),
+		$error_name = array(
+			//E_ERROR => Core::_('Core.E_ERROR'),
 			E_WARNING => Core::_('Core.E_WARNING'),
-			E_PARSE => Core::_('Core.E_PARSE'),
+			//E_PARSE => Core::_('Core.E_PARSE'),
 			E_NOTICE => Core::_('Core.E_NOTICE'),
-			E_CORE_ERROR => Core::_('Core.E_CORE_ERROR'),
-			E_CORE_WARNING => Core::_('Core.E_CORE_WARNING'),
-			E_COMPILE_ERROR => Core::_('Core.E_COMPILE_ERROR'),
-			E_COMPILE_WARNING => Core::_('Core.E_COMPILE_WARNING'),
+			//E_CORE_ERROR => Core::_('Core.E_CORE_ERROR'),
+			//E_CORE_WARNING => Core::_('Core.E_CORE_WARNING'),
+			//E_COMPILE_ERROR => Core::_('Core.E_COMPILE_ERROR'),
+			//E_COMPILE_WARNING => Core::_('Core.E_COMPILE_WARNING'),
 			E_USER_ERROR => Core::_('Core.E_USER_ERROR'),
 			E_USER_WARNING => Core::_('Core.E_USER_WARNING'),
 			E_USER_NOTICE => Core::_('Core.E_USER_NOTICE'),
-			2048 => Core::_('Core.E_STRICT')
+			2048 => Core::_('Core.E_STRICT'),
+			8192 => Core::_('Core.E_DEPRECATED'), // since PHP 7.4 E_DEPRECATED detected during parsing, not at runtime
 		);
 
 		$current_error_level = isset($error_level[$code])

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -39,16 +39,16 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))			
+			->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
-		
+
 		$oAdditionalTab->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-		
+
 		$oMainTab
 			->move($this->getField('guid'), $oAdditionalRow1);
 
@@ -196,9 +196,9 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->caption(Core::_('Shop_Delivery.method'));
 
 		$oMainRow1->add($oSelect_Method);
-		
+
 		$oMainTab->move($this->getField('days_from')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2')), $oMainRow1);
-		$oMainTab->move($this->getField('days_to')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2')), $oMainRow1);		
+		$oMainTab->move($this->getField('days_to')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-2')), $oMainRow1);
 
 		return $this;
 	}
@@ -227,8 +227,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		{
 			$aDeliveryArray[$oDelivery->id] = array('value' => $oDelivery->name);
 			!$oDelivery->active && $aDeliveryArray[$oDelivery->id]['attr'] = array(
-				'style' => 'text-decoration: line-through',
-				'disabled' => 'disabled'
+				'class' => 'gray',
+				// 'disabled' => 'disabled'
 			);
 		}
 
@@ -372,13 +372,13 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		// Все платежные
 		$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll();
-		
+
 		$aTmp = array();
 		foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 		{
 			$aTmp[] = $oShop_Payment_System->id;
 		}
-		
+
 		// Массив идентификаторов платежных систем, связанных с доставкой
 		$aDelivery_Payment_Systems = array();
 

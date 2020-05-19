@@ -328,7 +328,7 @@ class Core_Auth
 			// Идентификатор сессии уже был установлен
 			if (Core_Session::hasSessionId())
 			{
-				$isActive = Core_Session::isAcive();
+				$isActive = Core_Session::isActive();
 				!$isActive && Core_Session::start();
 
 				if (isset($_SESSION['valid_user']) && strlen($_SESSION['valid_user']) > 0

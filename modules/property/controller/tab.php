@@ -506,16 +506,27 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$oAdmin_Form_Entity_ListItemsInput = Admin_Form_Entity::factory('Input')
 							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
+							->id("id_property_{$oProperty->id}_00{$iPropertyCounter}") // id_property_ !!!
 							->name("input_property_{$oProperty->id}[]");
+
+						$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
+							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}_mode")
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+							->options(array(
+								0 => Core::_('Admin_Form.autocomplete_mode0'),
+								1 => Core::_('Admin_Form.autocomplete_mode1'),
+								2 => Core::_('Admin_Form.autocomplete_mode2'),
+								3 => Core::_('Admin_Form.autocomplete_mode3')
+							))
+							->caption(Core::_('Admin_Form.autocomplete_mode'));
 
 						// Значений св-в нет для объекта
 						if (count($aProperty_Values) == 0)
 						{
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_ListItems,$oAdmin_Form_Entity_Section, $oProperty));
 
-							$this->_fillList($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_ListItemsInput);
+							$this->_fillList($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_ListItemsInput, $oAdmin_Form_Entity_Autocomplete_Select);
 						}
 						else
 						{
@@ -531,12 +542,16 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 								$oNewAdmin_Form_Entity_ListItemsInput = clone $oAdmin_Form_Entity_ListItemsInput;
 								$oNewAdmin_Form_Entity_ListItemsInput
-									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")  // id_property_ !!!
 									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+								$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
+								$oNewAdmin_Form_Entity_Autocomplete_Select
+									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}_mode");  // id_property_ !!!
 
 								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
-								$this->_fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_ListItems, $oNewAdmin_Form_Entity_ListItemsInput);
+								$this->_fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_ListItems, $oNewAdmin_Form_Entity_ListItemsInput, $oNewAdmin_Form_Entity_Autocomplete_Select);
 							}
 						}
 					}
@@ -685,7 +700,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
 	}
 
-	protected function _fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItemsSelect, $oAdmin_Form_Entity_ListItemsInput)
+	protected function _fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItemsSelect, $oAdmin_Form_Entity_ListItemsInput, $oAdmin_Form_Entity_Autocomplete_Select)
 	{
 		$oList_Item = Core_Entity::factory('List_Item', $value);
 
@@ -712,7 +727,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				->options($this->_cacheListOptions[$oProperty->list_id]);
 
 			$oAdmin_Form_Entity_ListItemsInput
-				->divAttr(array('class' => 'form-group col-xs-12 hidden'));
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-8 hidden'));
+
+			$oAdmin_Form_Entity_Autocomplete_Select
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden'));
 		}
 		else
 		{
@@ -728,18 +746,19 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
 			->class($input_group)
 			->add($oAdmin_Form_Entity_ListItemsSelect)
-			->add($oAdmin_Form_Entity_ListItemsInput);
+			->add($oAdmin_Form_Entity_ListItemsInput)
+			->add($oAdmin_Form_Entity_Autocomplete_Select);
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('input[id ^= id_property_{$oProperty->id}]').autocomplete({
 					 source: function(request, response) {
 						var jInput = $(this.element),
 							jTopParentDiv = jInput.parents('[id ^= property]');
 
 						$.ajax({
-							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}',
+							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}&mode=' + $('#' + jInput.attr('id') + '_mode').val(),
 							dataType: 'json',
 							data: {
 								queryString: request.term
@@ -918,7 +937,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
 					 source: function(request, response) {
 						var jInput = $(this.element),
 							jTopParentDiv = jInput.parents('[id ^= property]'),
@@ -1168,7 +1187,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
 				 source: function(request, response) {
 					var jInput = $(this.element),
 						jTopParentDiv = jInput.parents('[id ^= property]'),

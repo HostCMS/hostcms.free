@@ -43,6 +43,9 @@ return array(
 	'item_length' => 'Длина',
 	'item_width' => 'Ширина',
 	'item_height' => 'Высота',
+	'item_min_quantity' => 'Мин. кол-во',
+	'item_max_quantity' => 'Макс. кол-во',
+	'item_quantity_step' => 'Шаг',
 	'item_price' => 'Цена товара',
 	'item_active' => 'Активность товара',
 	'item_sorting' => 'Порядок сортировки товара',
@@ -54,6 +57,7 @@ return array(
 	'item_yandex_market' => 'Флаг "Экспортировать в Яндекс.Маркет"',
 	'item_yandex_market_bid' => 'Яндекс.Маркет основная расценка',
 	'item_yandex_market_cid' => 'Яндекс.Маркет расценка для карточек моделей',
+	'item_yandex_vendorcode' => 'Код товара от производителя',
 
 	'item_yandex_market_manufacturer_warranty' => 'Гарантия производителя',
 	'item_yandex_market_vendorcode' => 'Код товара от производителя',
@@ -79,7 +83,7 @@ return array(
 	'group_active' => "Активность группы",
 	'item_parent_associated' => "Артикул родительского товара для сопутствующего товара",
 	'item_associated_markings' => "Артикулы сопутствующих товаров",
-	
+
 	'siteuser_id' => "Идентификатор пользователя сайта",
 	'digital_item_name' => "Название электронного товара",
 	'item_yandex_market_sales_notes' => "Sales notes",

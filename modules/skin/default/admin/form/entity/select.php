@@ -58,6 +58,8 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 	 */
 	static $iFilterCount = 0;
 
+	protected $_aAlreadySelected = array();
+
 	/**
 	 * Constructor.
 	 */
@@ -139,9 +141,10 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		}
 
 		?></div><?php
+		
+		// Clear
+		$this->_aAlreadySelected = array();
 	}
-
-	protected $_aAlreadySelected = array();
 
 	protected function _showOptions($aOptions)
 	{

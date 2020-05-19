@@ -225,7 +225,10 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->caption(Core::_('Structure.https'))
 			->value(1)
-			->checked($this->_object->Site->https == 1);
+			->checked($this->_object->id
+				? $this->_object->https
+				: $this->_object->Site->https
+			);
 
 		$oMainRow4->add($oHttps);
 

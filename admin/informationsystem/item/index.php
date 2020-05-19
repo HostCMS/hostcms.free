@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -238,6 +238,11 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 		}
 		elseif (!is_null(Core_Array::getGet('show_group')))
 		{
+			$aJSON = array(
+				'id' => 0,
+				'label' => Core::_('Informationsystem_Item.root')
+			);
+
 			$oInformationsystem_Groups = $oInformationsystem->Informationsystem_Groups;
 			$oInformationsystem_Groups->queryBuilder()
 				->where('informationsystem_groups.name', 'LIKE', '%' . $sQuery . '%')
@@ -417,9 +422,8 @@ $oAdmin_Form_Controller->addEntity(
 				<div class="col-xs-12">
 					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
 						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
-						<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '" />
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa fa-search fa-fw"></i></button>
 					</form>
 				</div>
 			</div>

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Ipaddress
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -34,8 +34,8 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return $this;
 	}
-	
-			
+
+
 	/**
 	 * Processing of the form. Apply object fields.
 	 * @hostcms-event Ipaddress_Controller_Edit.onAfterRedeclaredApplyObjectProperty
@@ -47,6 +47,29 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		Ipaddress_Controller::instance()->clearCache();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
 	}
-	
+
+	/*
+	 * Show ip with button
+	 */
+	static public function addBlockButton($oIp, $ip, $comment = '', $oAdmin_Form_Controller)
+	{
+		if (Core::moduleIsActive('ipaddress'))
+		{
+			$windowId = $oAdmin_Form_Controller->getWindowId();
+
+			$oIp
+				->add(
+					Core::factory('Core_Html_Entity_Span')
+						->class('input-group-addon')
+						->onclick('$.blockIp({ ip: "' . $ip . '", comment: "' . Core_Str::escapeJavascriptVariable($comment) . '" })')
+						->add(
+							Core::factory('Core_Html_Entity_Span')
+								->class('fa fa-ban')
+						)
+				);
+		}
+	}
 }

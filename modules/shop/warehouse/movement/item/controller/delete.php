@@ -57,9 +57,9 @@ class Shop_Warehouse_Movement_Item_Controller_Delete extends Admin_Form_Action_C
 			$oDestination_Shop_Warehouse->setRest($shop_item_id, is_null($rest) ? 0 : $rest);
 		}
 
-		$this->_Admin_Form_Controller->addMessage(
-			"<script>$('.shop-item-table tr#{$oShop_Warehouse_Movement_Item->id}').remove();</script>"
-		);
+		// $this->_Admin_Form_Controller->addMessage(
+			// "<script>$('.shop-item-table tr#{$oShop_Warehouse_Movement_Item->id}').remove();</script>"
+		// );
 
 		return TRUE;
 	}

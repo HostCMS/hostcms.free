@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 {
@@ -29,7 +29,8 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 		{
 			return Core_Router::factory(
 				Core_Entity::factory('Structure', $oSite->closed)->getPath()
-			)->execute()->status(503);
+			)
+			->execute()->status(503);
 		}
 
 		$oCore_Response = new Core_Response();

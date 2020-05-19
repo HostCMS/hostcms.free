@@ -21,33 +21,6 @@ require_once('bootstrap.php');
 Core_Event::attach('Core_DataBase.onBeforeQuery', array('Core_Database_Observer', 'onBeforeQuery'));
 Core_Event::attach('Core_DataBase.onAfterQuery', array('Core_Database_Observer', 'onAfterQuery'));
 
-Core_Router::add('robots.txt', '/robots.txt')
-	->controller('Core_Command_Controller_Robots');
-
-Core_Router::add('favicon.ico', '/favicon.ico')
-	->controller('Core_Command_Controller_Favicon');
-
-Core_Router::add('favicon.png', '/favicon.png')
-	->controller('Core_Command_Controller_Favicon');
-
-Core_Router::add('edit-in-place.php', '/edit-in-place.php')
-	->controller('Core_Command_Controller_Edit_In_Place');
-
-Core_Router::add('hostcms-benchmark.php', '/hostcms-benchmark.php')
-	->controller('Core_Command_Controller_Benchmark');
-
-Core_Router::add('sitemap.xml', '/sitemap.xml')
-	->controller('Core_Command_Controller_Sitemap');
-	
-$oDefault_Router_Route = Core_Router::add('default', '()');
-$oDefault_Router_Route->controller('Core_Command_Controller_Default');
-
-// Контроллер совместимости с HostCMS 5
-if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-{
-	$oDefault_Router_Route->controller('Core_Command_Controller_Hostcms5_Default');
-}
-
 if (!((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~1835217467)))
 {
 	$oSite = Core_Entity::factory('Site');
@@ -143,7 +116,32 @@ if (((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'h
 	exit();
 }
 
-// Site is closed
+Core_Router::add('robots.txt', '/robots.txt')
+	->controller('Core_Command_Controller_Robots');
+
+Core_Router::add('favicon.ico', '/favicon.ico')
+	->controller('Core_Command_Controller_Favicon');
+
+Core_Router::add('favicon.png', '/favicon.png')
+	->controller('Core_Command_Controller_Favicon');
+
+Core_Router::add('edit-in-place.php', '/edit-in-place.php')
+	->controller('Core_Command_Controller_Edit_In_Place');
+
+Core_Router::add('hostcms-benchmark.php', '/hostcms-benchmark.php')
+	->controller('Core_Command_Controller_Benchmark');
+
+Core_Router::add('sitemap.xml', '/sitemap.xml')
+	->controller('Core_Command_Controller_Sitemap');
+
+Core_Router::add('default', '()')
+	->controller(
+		defined('USE_HOSTCMS_5') && USE_HOSTCMS_5
+			? 'Core_Command_Controller_Hostcms5_Default'
+			: 'Core_Command_Controller_Default'
+	);
+
+// Site is closed, after Core_Router::add('default', '()')!
 if ($oSite->active == 0 && !Core_Auth::logged())
 {
 	Core_Router::add('site_is_closed', '()')
@@ -167,7 +165,7 @@ if ($oSite_Alias->redirect)
 		$oCore_Response
 			->status(301)
 			->header('X-Powered-By', Core::xPoweredBy())
-			->header('Location', Core::$url['scheme'] . '://'
+			->header('Location', ($oSite->https ? 'https' : Core::$url['scheme']) . '://'
 				. $oDefault_Site_Alias->alias_name_without_mask
 				. Core::$url['path']
 				. (isset(Core::$url['query']) ? '?' . Core::$url['query'] : '')
@@ -218,12 +216,9 @@ if (Core::moduleIsActive('ipaddress'))
 
 	$bBlocked = $oIpaddress_Controller->isBlocked($aIp);
 
-	$aArray = array(
-		'2ba951961b6ff657bd944a43935333b6',
-		'e4b72d12ddd8948f9af53527347ed281'
-	);
+	//$aArray = array();
 
-	if ($bBlocked || in_array(md5(Core_Array::get($_SERVER, 'HTTP_HOST')), $aArray))
+	if ($bBlocked/* || in_array(md5(Core_Array::get($_SERVER, 'HTTP_HOST')), $aArray)*/)
 	{
 		// IP address found
 		Core_Router::add('ip_blocked', '()')

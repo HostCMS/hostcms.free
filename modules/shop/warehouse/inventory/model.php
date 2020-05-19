@@ -130,6 +130,10 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		return parent::delete($primaryKey);
 	}
 
+	/**
+	 * Add entries
+	 * @return self
+	 */
 	public function post()
 	{
 		if (!$this->posted)
@@ -200,20 +204,25 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Remove entries
+	 * @return self
+	 */
 	public function unpost()
 	{
 		if ($this->posted)
 		{
-			$oShop_Warehouse = $this->Shop_Warehouse;
-
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
 				// Удаляем все накопительные значения с датой больше, чем дата документа
-				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse->id, $this->datetime);
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse_Entry->shop_warehouse_id, $this->datetime);
 
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+				$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
+
+				// Delete Entry
 				$oShop_Warehouse_Entry->delete();
 
 				$rest = $oShop_Warehouse->getRest($shop_item_id);

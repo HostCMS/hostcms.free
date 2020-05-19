@@ -57,9 +57,21 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 		$objectId = intval($this->_object->id);
 
+		$oAdditionalTab->delete($this->getField('shop_company_id'));
+
+		// Добавляем компании
+		$oCompaniesField = Admin_Form_Entity::factory('Select')
+			->name('shop_company_id')
+			->caption(Core::_('Shop.shop_company_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->options($this->_fillCompanies())
+			->value($this->_object->shop_company_id);
+
+		$oMainRow2->add($oCompaniesField);
+
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+			->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow2);
 
 		// Создаем поле стран как выпадающий список
 		$CountriesSelectField = Admin_Form_Entity::factory('Select')
@@ -136,36 +148,44 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		$ShopWarehouseTypeSelectField = Admin_Form_Entity::factory('Select')
 			->name('shop_warehouse_type_id')
 			->caption(Core::_('Shop_Warehouse.shop_warehouse_type'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 			->options($aWarehouseTypes)
 			->value($this->_object->shop_warehouse_type_id);
 
-		$oMainRow5->add($ShopWarehouseTypeSelectField);
-
-		$oAdditionalTab->delete($this->getField('shop_company_id'));
-
-		// Добавляем компании
-		$oCompaniesField = Admin_Form_Entity::factory('Select')
-			->name('shop_company_id')
-			->caption(Core::_('Shop.shop_company_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-			->options($this->_fillCompanies())
-			->value($this->_object->shop_company_id);
-
-		$oMainRow6->add($oCompaniesField);
+		$oMainRow8->add($ShopWarehouseTypeSelectField);
 
 		$oMainTab
-			->move($this->getField('address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow5)
-			->move($this->getField('name_other')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow6)
+			->move($this->getField('address')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5)
+			->move($this->getField('name_other')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow5)
 			->move($this->getField('address_info')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7)
-			->move($this->getField('working_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
-			->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
-			->move($this->getField('website')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
-			->move($this->getField('latitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow9)
-			->move($this->getField('longitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow9)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
-			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow10)
-			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 margin-top-21')), $oMainRow10);
+			->move($this->getField('working_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow8)
+			->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow8)
+			->move($this->getField('website')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow8)
+			->move($this->getField('latitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9)
+			->move($this->getField('longitude')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9);
+
+		$oMainTab->delete($this->getField('separator'));
+
+		// Добавляем выбор разделителя
+		$oSeparatorSelect = Admin_Form_Entity::factory('Select')
+			->name('separator')
+			->caption(Core::_('Shop_Warehouse.separator'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+			->options(array(
+				'' => Core::_('Admin_Form.no'),
+				' ' => Core::_('Shop_Warehouse.space_separator'),
+				'-' => '-',
+				'/' => '/',
+				'_' => '_'
+			))
+			->value($this->_object->separator);
+
+		$oMainRow9->add($oSeparatorSelect);
+
+		$oMainTab
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow10)
+			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow11);
 
 		// Флаг установки количества товара на складе
 		$oShopItemCountCheckBox = Admin_Form_Entity::factory('Checkbox')

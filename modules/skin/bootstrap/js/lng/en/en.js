@@ -17,5 +17,7 @@ var i18n =
 "no": "No",
 "day": " d",
 "hour": " h",
-"minute": " m"
+"minute": " m",
+"ban_success": "IP address blocked!",
+"ban_error": "IP address already blocked!"
 };

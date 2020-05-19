@@ -79,6 +79,70 @@ class Shop_Producer_Model extends Core_Entity
 		}
 	}
 
+
+	/**
+	 * Get path for files
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return 'producers/' . rawurlencode($this->path) . '/';
+	}
+
+	/**
+	 * Search indexation
+	 * @return Search_Page
+	 * @hostcms-event shop_producer.onBeforeIndexing
+	 * @hostcms-event shop_producer.onAfterIndexing
+	 */
+	public function indexing()
+	{
+		$oSearch_Page = new stdClass();
+
+		Core_Event::notify($this->_modelName . '.onBeforeIndexing', $this, array($oSearch_Page));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
+		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . htmlspecialchars($this->address) . ' ' . htmlspecialchars($this->phone) . ' ' . htmlspecialchars($this->fax) . ' ' . htmlspecialchars($this->site) . ' ' . htmlspecialchars($this->path);
+
+		$oSearch_Page->title = $this->name;
+
+		$oSiteAlias = $this->Shop->Site->getCurrentAlias();
+		if ($oSiteAlias)
+		{
+			$oSearch_Page->url = ($this->Shop->Structure->https ? 'https://' : 'http://')
+				. $oSiteAlias->name
+				. $this->Shop->Structure->getPath()
+				. $this->getPath();
+		}
+		else
+		{
+			return NULL;
+		}
+
+		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
+		$oSearch_Page->site_id = $this->Shop->site_id;
+		$oSearch_Page->datetime = date('Y-m-d H:i:s');
+		$oSearch_Page->module = 3;
+		$oSearch_Page->module_id = $this->shop_id;
+		$oSearch_Page->inner = 0;
+		$oSearch_Page->module_value_type = 4; // search_page_module_value_type
+		$oSearch_Page->module_value_id = $this->id; // search_page_module_value_id
+
+		$oSearch_Page->siteuser_groups = array(intval($this->Shop->siteuser_group_id));
+
+		Core_Event::notify($this->_modelName . '.onAfterIndexing', $this, array($oSearch_Page));
+
+		//$oSearch_Page->save();
+
+		return $oSearch_Page;
+	}
+
 	/**
 	 * Get producer path
 	 * @return string

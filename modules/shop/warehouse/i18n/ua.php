@@ -41,4 +41,7 @@ return array(
 	'movement' => 'Переміщення',
 	'types' => 'Типи',
 	'shop_warehouse_type' => 'Тип складу',
+	'separator' => 'Роздільник осередки',
+	'space_separator' => 'Пропуск',
+	'convolution' => 'Згортка бази',
 );

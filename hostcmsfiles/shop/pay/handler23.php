@@ -47,7 +47,7 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 	 */
 	public function checkPaymentBeforeContent()
 	{
-		if (isset($_REQUEST['MNT_OPERATION_ID']))
+		if (isset($_REQUEST['MNT_OPERATION_ID']) && isset($_REQUEST['MNT_AMOUNT']))
 		{
 			// Получаем ID заказа
 			$order_id = intval(Core_Array::getRequest('MNT_TRANSACTION_ID'));
@@ -62,6 +62,26 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 					->paymentProcessing();
 			}
 			exit();
+		}
+	}
+
+	public function checkPaymentAfterContent()
+	{
+		if (isset($_REQUEST['MNT_OPERATION_ID']))
+		{
+			// Получаем ID заказа
+			$order_id = intval(Core_Array::getRequest('MNT_TRANSACTION_ID'));
+
+			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+
+			if (!is_null($oShop_Order->id))
+			{
+				$sStatus = $oShop_Order->paid == 1 ? "оплачен" : "не оплачен";
+
+				?><h1>Заказ <?php echo $sStatus?></h1>
+				<p>Заказ <strong>№ <?php echo htmlspecialchars($oShop_Order->invoice)?></strong> <?php echo $sStatus?>.</p>
+				<?php
+			}
 		}
 	}
 
@@ -80,12 +100,116 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 		/* обработка ответа от платёжной системы */
 		if (isset($_REQUEST['MNT_OPERATION_ID']))
 		{
-			$this->ProcessResult();
-			return true;
-		}
-		else
-		{
-			$this->ShowResultMessage();
+			$order_id = intval(Core_Array::getRequest('MNT_TRANSACTION_ID'));
+			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
+			if ($oShop_Order)
+			{
+				$signature = md5(
+					Core_Array::getRequest('MNT_ID') .
+					Core_Array::getRequest('MNT_TRANSACTION_ID') .
+					Core_Array::getRequest('MNT_OPERATION_ID') .
+					Core_Array::getRequest('MNT_AMOUNT') .
+					Core_Array::getRequest('MNT_CURRENCY_CODE') .
+					Core_Array::getRequest('MNT_TEST_MODE') .
+					$this->_MNT_DATAINTEGRITY_CODE
+				);
+
+				if (Core_Array::getRequest('MNT_SIGNATURE') == $signature)
+				{
+					$Sum = number_format($this->getSumWithCoeff(), 2, '.', '');
+					if ($Sum == Core_Array::getRequest('MNT_AMOUNT'))
+					{
+						$this->shopOrder($oShop_Order)->shopOrderBeforeAction(clone $oShop_Order);
+
+						$oShop_Order->system_information = "Товар оплачен через PayAnyWay.\n";
+						$oShop_Order->paid();
+
+						ob_start();
+						$this->changedOrder('changeStatusPaid');
+						ob_get_clean();
+
+						// данные для кассы
+						$kassa_inventory = null;
+						$kassa_customer = null;
+						$kassa_delivery = null;
+
+						$kassa_customer = $oShop_Order->email;
+						$inventory = array();
+						$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll();
+						if(count($aShopOrderItems))
+						{
+							foreach ($aShopOrderItems as $key => $oShopOrderItem)
+							{
+								$sItemAmount = $oShopOrderItem->getAmount();
+								$inventory[] = array("name" => str_replace('&quot;', "'", htmlspecialchars($oShopOrderItem->name)), "price" => floatval(number_format($sItemAmount, 2, '.', '')), "quantity" => $oShopOrderItem->quantity, "vatTag" => 1105);
+							}
+							$kassa_inventory = json_encode($inventory);
+						}
+
+						// сформировать xml ответ
+						if (is_array($inventory) && count($inventory) && $kassa_inventory) {
+							header("Content-type: application/xml");
+							$resultCode = 200;
+							$signature = md5($resultCode . Core_Array::getRequest('MNT_ID') . Core_Array::getRequest('MNT_TRANSACTION_ID') . $this->_MNT_DATAINTEGRITY_CODE);
+							$result = '<?xml version="1.0" encoding="UTF-8" ?>';
+							$result .= '<MNT_RESPONSE>';
+							$result .= '<MNT_ID>' . Core_Array::getRequest('MNT_ID') . '</MNT_ID>';
+							$result .= '<MNT_TRANSACTION_ID>' . Core_Array::getRequest('MNT_TRANSACTION_ID') . '</MNT_TRANSACTION_ID>';
+							$result .= '<MNT_RESULT_CODE>' . $resultCode . '</MNT_RESULT_CODE>';
+							$result .= '<MNT_SIGNATURE>' . $signature . '</MNT_SIGNATURE>';
+
+							if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
+								$result .= '<MNT_ATTRIBUTES>';
+							}
+
+							if ($kassa_inventory) {
+								$result .= '<ATTRIBUTE>';
+								$result .= '<KEY>INVENTORY</KEY>';
+								$result .= '<VALUE>' . $kassa_inventory . '</VALUE>';
+								$result .= '</ATTRIBUTE>';
+							}
+
+							if ($kassa_customer) {
+								$result .= '<ATTRIBUTE>';
+								$result .= '<KEY>CUSTOMER</KEY>';
+								$result .= '<VALUE>' . $kassa_customer . '</VALUE>';
+								$result .= '</ATTRIBUTE>';
+							}
+
+							if ($kassa_delivery) {
+								$result .= '<ATTRIBUTE>';
+								$result .= '<KEY>DELIVERY</KEY>';
+								$result .= '<VALUE>' . $kassa_delivery . '</VALUE>';
+								$result .= '</ATTRIBUTE>';
+							}
+
+							if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
+								$result .= '</MNT_ATTRIBUTES>';
+							}
+
+							$result .= '</MNT_RESPONSE>';
+						}
+						else {
+							$result = "SUCCESS";
+						}
+
+						die($result);
+
+					}
+					else
+					{
+						die('FAIL');
+					}
+				}
+				else
+				{
+					die('FAIL');
+				}
+			}
+			else
+			{
+				die('FAIL');
+			}
 			return true;
 		}
 	}
@@ -113,139 +237,6 @@ class Shop_Payment_System_Handler23 extends Shop_Payment_System_Handler
 		$this->send();
 
 		return $this;
-	}
-
-	/* оплачивает заказ */
-	function ProcessResult()
-	{
-		$order_id = intval(Core_Array::getRequest('MNT_TRANSACTION_ID'));
-		$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
-		if ($oShop_Order)
-		{
-			$signature = md5(
-				Core_Array::getRequest('MNT_ID') .
-				Core_Array::getRequest('MNT_TRANSACTION_ID') .
-				Core_Array::getRequest('MNT_OPERATION_ID') .
-				Core_Array::getRequest('MNT_AMOUNT') .
-				Core_Array::getRequest('MNT_CURRENCY_CODE') .
-				Core_Array::getRequest('MNT_TEST_MODE') .
-				$this->_MNT_DATAINTEGRITY_CODE
-			);
-
-			if (Core_Array::getRequest('MNT_SIGNATURE') == $signature)
-			{
-				$Sum = number_format($this->getSumWithCoeff(), 2, '.', '');
-				if ($Sum == Core_Array::getRequest('MNT_AMOUNT'))
-				{
-					$this->shopOrder($oShop_Order)->shopOrderBeforeAction(clone $oShop_Order);
-
-					$oShop_Order->system_information = "Товар оплачен через PayAnyWay.\n";
-					$oShop_Order->paid();
-
-					ob_start();
-					$this->changedOrder('changeStatusPaid');
-					ob_get_clean();
-
-					// данные для кассы
-					$kassa_inventory = null;
-					$kassa_customer = null;
-					$kassa_delivery = null;
-
-					$kassa_customer = $oShop_Order->email;
-					$inventory = array();
-					$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll();
-					if(count($aShopOrderItems))
-					{
-						foreach ($aShopOrderItems as $key => $oShopOrderItem)
-						{
-							$sItemAmount = $oShopOrderItem->getAmount();
-							$inventory[] = array("name" => str_replace('&quot;', "'", htmlspecialchars($oShopOrderItem->name)), "price" => floatval(number_format($sItemAmount, 2, '.', '')), "quantity" => $oShopOrderItem->quantity, "vatTag" => 1105);
-						}
-						$kassa_inventory = json_encode($inventory);
-					}
-
-					// сформировать xml ответ
-					if (is_array($inventory) && count($inventory) && $kassa_inventory) {
-						header("Content-type: application/xml");
-						$resultCode = 200;
-						$signature = md5($resultCode . Core_Array::getRequest('MNT_ID') . Core_Array::getRequest('MNT_TRANSACTION_ID') . $this->_MNT_DATAINTEGRITY_CODE);
-						$result = '<?xml version="1.0" encoding="UTF-8" ?>';
-						$result .= '<MNT_RESPONSE>';
-						$result .= '<MNT_ID>' . Core_Array::getRequest('MNT_ID') . '</MNT_ID>';
-						$result .= '<MNT_TRANSACTION_ID>' . Core_Array::getRequest('MNT_TRANSACTION_ID') . '</MNT_TRANSACTION_ID>';
-						$result .= '<MNT_RESULT_CODE>' . $resultCode . '</MNT_RESULT_CODE>';
-						$result .= '<MNT_SIGNATURE>' . $signature . '</MNT_SIGNATURE>';
-
-						if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
-							$result .= '<MNT_ATTRIBUTES>';
-						}
-
-						if ($kassa_inventory) {
-							$result .= '<ATTRIBUTE>';
-							$result .= '<KEY>INVENTORY</KEY>';
-							$result .= '<VALUE>' . $kassa_inventory . '</VALUE>';
-							$result .= '</ATTRIBUTE>';
-						}
-
-						if ($kassa_customer) {
-							$result .= '<ATTRIBUTE>';
-							$result .= '<KEY>CUSTOMER</KEY>';
-							$result .= '<VALUE>' . $kassa_customer . '</VALUE>';
-							$result .= '</ATTRIBUTE>';
-						}
-
-						if ($kassa_delivery) {
-							$result .= '<ATTRIBUTE>';
-							$result .= '<KEY>DELIVERY</KEY>';
-							$result .= '<VALUE>' . $kassa_delivery . '</VALUE>';
-							$result .= '</ATTRIBUTE>';
-						}
-
-						if ($kassa_inventory || $kassa_customer || $kassa_delivery) {
-							$result .= '</MNT_ATTRIBUTES>';
-						}
-
-						$result .= '</MNT_RESPONSE>';
-					}
-					else {
-						$result = "SUCCESS";
-					}
-
-					die($result);
-
-				}
-				else
-				{
-					die('FAIL');
-				}
-			}
-			else
-			{
-				die('FAIL');
-			}
-		}
-		else
-		{
-			die('FAIL');
-		}
-	}
-
-	// Вывод сообщения об успешности/неуспешности оплаты
-	function ShowResultMessage()
-	{
-		$oShop_Order = Core_Entity::factory('Shop_Order')->find(Core_Array::getRequest('MNT_TRANSACTION_ID', 0));
-
-		if(is_null($oShop_Order->id))
-		{
-			// Заказ не найден
-			return FALSE;
-		}
-
-		$sStatus = $oShop_Order->paid == 1 ? "оплачен" : "не оплачен";
-
-		?><h1>Заказ <?php echo $sStatus?></h1>
-		<p>Заказ <strong>№ <?php echo $oShop_Order->invoice?></strong> <?php echo $sStatus?>.</p>
-		<?php
 	}
 
 	private function cleanProductName($value)

@@ -117,6 +117,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 						$oShop_Price_Setting_Item->old_price = $this->_object->price;
 						$oShop_Price_Setting_Item->new_price = $value;
 						$oShop_Price_Setting_Item->save();
+
+						$this->_object->clearCache();
 					}
 				}
 				elseif ($columnName == 'adminRest')
@@ -142,6 +144,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
 								$oShop_Warehouse_Inventory_Item->count = $value;
 								$oShop_Warehouse_Inventory_Item->save();
+
+								$this->_object->clearCache();
 							}
 						}
 					}
@@ -153,7 +157,7 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 				}
 			}
 
-			$bChanged && $this->_object->save();
+			$bChanged && $this->_object->save()->clearCache();
 
 			$this->_itemsCount++;
 

@@ -864,7 +864,7 @@ class Shop_Report_Controller
 
 	static protected function _prepareOrders($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
@@ -1857,7 +1857,7 @@ class Shop_Report_Controller
 
 	static protected function _preparePopularItems($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
@@ -2415,7 +2415,7 @@ class Shop_Report_Controller
 
 	static protected function _preparePopularProducers($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])

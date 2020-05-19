@@ -860,11 +860,34 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 			}
 
-			//Яндекс.Маркет доставка
+			// Яндекс.Маркет доставка
 			$oShop_Item_Delivery_Option_Controller_Tab = new Shop_Item_Delivery_Option_Controller_Tab($this->_Admin_Form_Controller);
 			$oShop_Item_Delivery_Option_Controller_Tab
 				->shop_id($this->_object->id)
 				->applyObjectProperty();
+
+			// Директория цифровых товаров
+			$eitemDir = $this->_object->getPath() . '/eitems';
+
+			if (!is_dir($eitemDir))
+			{
+				Core_File::mkdir($eitemDir, CHMOD, TRUE);
+			}
+
+			$htaccessFile = $eitemDir . '/.htaccess';
+
+			$content = '<IfModule !mod_authz_core.c>
+	Order deny,allow
+	Deny from all
+</IfModule>
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>';
+
+			if (!is_file($htaccessFile) || Core_File::read($htaccessFile) != $content)
+			{
+				Core_File::write($htaccessFile, $content);
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

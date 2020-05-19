@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Market
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -205,7 +205,6 @@ class Market_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->port(80)
 			->timeout(5)
 			->execute();
 
@@ -237,7 +236,7 @@ class Market_Controller extends Core_Servant_Properties
 						$oObject->description = strval($value->description);
 						$oObject->image_large = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_large);
 						$oObject->image_small = 'https://' . $this->update_server . strval($value->dir) . strval($value->image_small);
-						$oObject->url = 'http://' . $this->update_server . strval($value->url) . '?contract=' . $md5_contract . '&pin=' . $md5_pin;
+						$oObject->url = 'https://' . $this->update_server . strval($value->url) . '?contract=' . $md5_contract . '&pin=' . $md5_pin;
 						$oObject->siteuser_id = intval($value->siteuser_id);
 						$oObject->price = strval($value->price);
 						$oObject->currency = strval($value->currency);
@@ -328,7 +327,6 @@ class Market_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->port(80)
 			->timeout(5)
 			->execute();
 
@@ -398,13 +396,13 @@ class Market_Controller extends Core_Servant_Properties
 
 						if (!$bExists)
 						{
-							is_dir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
-
-							// Создаем директорию снова
-							Core_File::mkdir($this->tmpDir, CHMOD, TRUE);
-
 							if ($this->_Module->file != '')
 							{
+								is_dir($this->tmpDir) && Core_File::deleteDir($this->tmpDir);
+
+								// Создаем директорию снова
+								Core_File::mkdir($this->tmpDir, CHMOD, TRUE);
+
 								$Core_Http = $this->getModuleFile($this->_Module->file);
 
 								// Сохраняем tar.gz
@@ -502,7 +500,7 @@ class Market_Controller extends Core_Servant_Properties
 	public function getFormField($aFieldsValue)
 	{
 		$sFieldCaption = htmlspecialchars($aFieldsValue['Caption']);
-		$sFieldName = htmlspecialchars($aFieldsValue['Name']);
+		$sFieldName = $aFieldsValue['Name'];
 		$sFieldValue = $aFieldsValue['Value'];
 		$sFieldType = strval($aFieldsValue['Type']);
 
@@ -522,16 +520,49 @@ class Market_Controller extends Core_Servant_Properties
 					);
 			break;
 
-			case 'select':
-				$oForm_Field = Admin_Form_Entity::factory('Div')->class('row')
+			case 'checkbox':
+				$oForm_Field = Admin_Form_Entity::factory('Div')
+					->class('row')
 					->add(
-						Admin_Form_Entity::factory('Select')
+						Admin_Form_Entity::factory('Checkbox')
 							->caption($sFieldCaption)
 							->name($sFieldName)
-							->options($aFieldsValue['ListValue'])
+							->value($sFieldValue !== '' ? $sFieldValue : 1)
 							->divAttr(array('class' => 'form-group col-xs-6'))
 							->controller($this->controller)
 					);
+			break;
+
+			case 'radiogroup':
+				$oForm_Field = Admin_Form_Entity::factory('Div')
+					->class('row')
+					->add(
+						Admin_Form_Entity::factory('Radiogroup')
+							->caption($sFieldCaption)
+							->name($sFieldName)
+							->value($sFieldValue)
+							->radio($aFieldsValue['ListValues'])
+							->divAttr(array('class' => 'form-group col-xs-6'))
+							->controller($this->controller)
+					);
+			break;
+
+			case 'select':
+				$oForm_Field = Admin_Form_Entity::factory('Div')->class('row')
+					->add(
+						$oAdmin_Form_Entity_Select = Admin_Form_Entity::factory('Select')
+							->caption($sFieldCaption)
+							->name($sFieldName)
+							->value($sFieldValue)
+							->options($aFieldsValue['ListValues'])
+							->divAttr(array('class' => 'form-group col-xs-6'))
+							->controller($this->controller)
+					);
+
+					$aFieldsValue['Multiple']
+						&& $oAdmin_Form_Entity_Select
+							->multiple('multiple')
+							->size(!is_null($aFieldsValue['Size']) ? $aFieldsValue['Size'] : 5);
 			break;
 
 			case 'siteList':
@@ -817,17 +848,35 @@ class Market_Controller extends Core_Servant_Properties
 				'Extension' => strval($aFieldsValue->extension),
 				'MaxWidth' => strval($aFieldsValue->max_width),
 				'MaxHeight' => strval($aFieldsValue->max_height),
-				'ListValue' => array()
+				'Multiple' => FALSE,
+				'Size' => NULL,
+				'ListValues' => array()
 			);
 
-			$aXmlValues = $aFieldsValue->xpath("value/list");
-
-			// Значения для списка
-			if (count($aXmlValues))
+			if (in_array($tmp['Type'], array('select', 'radiogroup')))
 			{
-				foreach ($aXmlValues as $oXmlValue)
+				// Значения для списка
+				$aXmlValues = $aFieldsValue->xpath("value/list");
+				if (count($aXmlValues))
 				{
-					$tmp['ListValue'][strval($oXmlValue->attributes()->value)] = strval($oXmlValue);
+					foreach ($aXmlValues as $oXmlValue)
+					{
+						$tmp['ListValues'][strval($oXmlValue->attributes()->value)] = strval($oXmlValue);
+					}
+				}
+
+				// multiple
+				$multiple = strval($aFieldsValue->multiple);
+				if ($multiple === '1' || $multiple === 'true')
+				{
+					$tmp['Multiple'] = TRUE;
+				}
+
+				// multiple size
+				$size = strval($aFieldsValue->size);
+				if ($size > 0)
+				{
+					$tmp['Size'] = intval($size);
 				}
 			}
 
@@ -859,7 +908,6 @@ class Market_Controller extends Core_Servant_Properties
 
 		$Core_Http = Core_Http::instance()
 			->url($url)
-			->port(80)
 			->timeout(5)
 			->execute();
 

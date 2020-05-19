@@ -406,7 +406,7 @@ class Core_Entity extends Core_ORM
 		}
 		else
 		{
-			throw new Core_Exception("The model '%model' cannot be undelete",
+			throw new Core_Exception("The model '%model' cannot be undeleted",
 				array('%model' => $this->getModelName()));
 		}
 

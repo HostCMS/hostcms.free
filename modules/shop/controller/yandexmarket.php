@@ -15,6 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
  * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
  * - modifications(TRUE|FALSE) экспортировать модификации, по умолчанию TRUE.
+ * - groupModifications(TRUE|FALSE) группировать модификации (атрибут group_id у offer, используется только в категориях Одежда, обувь и аксессуары, Мебель, Косметика, парфюмерия и уход, Детские товары, Аксессуары для портативной электроники), по умолчанию FALSE.
  * - recommended(TRUE|FALSE) экспортировать рекомендованные товары, по умолчанию FALSE.
  * - checkAvailable(TRUE|FALSE) проверять остаток на складе, по умолчанию TRUE. Если FALSE, то товар будет выгружаться доступным назвисимо от остатка на складе.
  * - checkRest(TRUE|FALSE) не экспортировать товары с нулевым остатком, по умолчанию FALSE. Если TRUE, то товар будет выгружаться только при наличии остатка на складе.
@@ -24,6 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - stdOut() поток вывода, может использоваться для записи результата в файл. По умолчанию Core_Out_Std
  * - sno() система налогообложения (СНО) магазина. По умолчанию OSN — общая система налогообложения (ОСН).
  * - delay() временная задержка в микросекундах, используется на виртульных хостингах с ограничнием на ресурсы в единицу времени, по умолчанию 0. значение 10000 - 0,01 секунда.
+ * - mode('between'|'offset') вариант перебора элементов, по умолчанию 'between'. Если у вас большая разница между идентификаторами товаров или групп, выберите 'offset'.
  * - utm_source() определяет рекламодателя, например, market
  * - utm_medium() определяет рекламный или маркетинговый канал (цена за клик, баннер, рассылка по электронной почте).
  *
@@ -66,6 +68,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'outlets',
 		'paymentMethod',
 		'modifications',
+		'groupModifications',
 		'recommended',
 		'checkAvailable',
 		'checkRest',
@@ -78,6 +81,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'token',
 		'sno',
 		'delay',
+		'mode',
 		'utm_source',
 		'utm_medium',
 		'additionalImages',
@@ -235,6 +239,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	protected $_Shop_Item_Controller = NULL;
 
 	/**
+	 * Группировка offer по group_id для родительского товара и модификаций
+	 */
+	protected $_currentModificationGroupId = NULL;
+
+	/**
 	 * Forbidden tags. If list of tags is empty, all tags will be shown.
 	 *
 	 * @var array
@@ -315,7 +324,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->itemsProperties = $this->modifications = $this->deliveryOptions
 			= $this->checkAvailable = TRUE;
 
-		$this->recommended = $this->checkRest = $this->outlets = FALSE;
+		$this->groupModifications = $this->recommended = $this->checkRest = $this->outlets = FALSE;
 
 		$this->paymentMethod = array();
 
@@ -330,6 +339,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$this->token = '';
 		$this->sno = 'OSN';
 		$this->delay = 0;
+		$this->mode = 'between';
 
 		$this->additionalImages = NULL;
 
@@ -351,7 +361,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			->where('shop_groups.shortcut_id', '=', 0)
 			//->where('shop_groups.active', '=', 1)
 			->clearOrderBy()
-			->orderBy('shop_groups.parent_id', 'ASC');
+			->orderBy('shop_groups.parent_id', 'ASC')
+			->orderBy('shop_groups.id', 'ASC');
 
 		return $this;
 	}
@@ -526,14 +537,16 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		// Массив отключенных ID групп
 		$aDisabledCategoriesId = array();
 
-		$maxId = $this->_getMaxGroupId();
+		$maxId = $this->mode == 'between' ? $this->_getMaxGroupId() : 0;
 
 		$iFrom = 0;
 
 		do {
 			$this->_setShopGroups();
-			$this->_Shop_Groups->queryBuilder()
-				->where('shop_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep));
+
+			$this->mode == 'between'
+				? $this->_Shop_Groups->queryBuilder()->where('shop_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep))
+				: $this->_Shop_Groups->queryBuilder()->offset($iFrom)->limit($this->onStep);
 
 			$aShop_Groups = $this->_Shop_Groups->findAll(FALSE);
 			foreach ($aShop_Groups as $oShop_Group)
@@ -560,10 +573,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 			$iFrom += $this->onStep;
 
+			$iCount = count($aShop_Groups);
+
 			// Delay execution
-			$this->delay && usleep($this->delay);
+			$this->delay && $iCount && usleep($this->delay);
 		}
-		while ($iFrom < $maxId);
+		while ($this->mode == 'between' ? $iFrom < $maxId : $iCount);
 
 		$this->stdOut->write("</categories>\n");
 
@@ -607,21 +622,21 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	{
 		$this->stdOut->write("<offers>\n");
 
-		//$offset = 0;
-
 		$oShop = $this->getEntity();
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 
 		$this->_MarketCategory = $oShop_Item_Property_List->Properties->getByTag_name('market_category');
 
-		$maxId = $this->_getMaxId();
+		$maxId = $this->mode == 'between' ? $this->_getMaxId() : 0;
 
 		$iFrom = 0;
 
 		do {
 			$this->_setShopItems();
-			$this->_Shop_Items->queryBuilder()
-				->where('shop_items.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep));
+
+			$this->mode == 'between'
+				? $this->_Shop_Items->queryBuilder()->where('shop_items.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep))
+				: $this->_Shop_Items->queryBuilder()->offset($iFrom)->limit($this->onStep);
 
 			$aShop_Items = $this->_Shop_Items->findAll(FALSE);
 
@@ -629,6 +644,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			{
 				if (isset($this->_aCategoriesId[$oShop_Item->shop_group_id]))
 				{
+					if ($this->modifications && $this->groupModifications)
+					{
+						$this->_currentModificationGroupId = $oShop_Item->id;
+					}
+					
 					if ($oShop_Item->price > 0)
 					{
 						$this->_showOffer($oShop_Item);
@@ -675,13 +695,15 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				}
 			}
 
-			//Core_File::flush();
+			// Core_File::flush();
 			$iFrom += $this->onStep;
 
+			$iCount = count($aShop_Items);
+
 			// Delay execution
-			$this->delay && usleep($this->delay);
+			$this->delay && $iCount && usleep($this->delay);
 		}
-		while ($iFrom < $maxId);
+		while ($this->mode == 'between' ? $iFrom < $maxId : $iCount);
 
 		$this->stdOut->write('</offers>'. "\n");
 
@@ -734,7 +756,11 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			? ' type="' . Core_Str::xml($this->type) . '"'
 			: '';
 
-		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . " available=\"{$available}\">\n");
+		$sGroupId = !is_null($this->_currentModificationGroupId)
+			? ' group_id="' . $this->_currentModificationGroupId . '"'
+			: '';
+
+		$this->stdOut->write('<offer id="' . $oShop_Item->id . '"'. $tag_bid . /*$tag_cbid . */$sType . $sGroupId . " available=\"{$available}\">\n");
 
 		return $this;
 	}
@@ -1959,7 +1985,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			// Disable if there aren't shop's delivery options
 			&& $this->deliveryOptions = $this->_deliveryOptions($oShop) > 0;
 
-		//Core_File::flush();
+		// Core_File::flush();
 
 		/* adult */
 		if ($oShop->adult)
@@ -1980,6 +2006,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->stdOut->close();
 
-		//Core_File::flush();
+		// Core_File::flush();
 	}
 }

@@ -38,7 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Comment_Controller_Show extends Core_Controller
 {
@@ -188,8 +188,6 @@ class Shop_Comment_Controller_Show extends Core_Controller
 				echo $inCache['content'];
 				return $this;
 			}
-
-			$aTags = array();
 		}
 
 		$this->_setComments();
@@ -240,7 +238,7 @@ class Shop_Comment_Controller_Show extends Core_Controller
 				$oShop_Item = $oComment->Shop_Item;
 
 				// Tagged cache
-				$bCache && $aTags[] = 'shop_item_' . $oShop_Item->id;
+				$bCache && $this->_cacheTags[] = 'shop_item_' . $oShop_Item->id;
 
 				$oComment->clearEntities();
 
@@ -264,8 +262,11 @@ class Shop_Comment_Controller_Show extends Core_Controller
 			$cacheKey,
 			array('content' => $content, 'shown' => $this->_shownIDs),
 			$this->_cacheName,
-			$aTags
+			$this->_cacheTags
 		);
+
+		// Clear
+		$this->_cacheTags = array();
 
 		return $this;
 	}

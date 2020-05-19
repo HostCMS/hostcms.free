@@ -22,15 +22,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$modelName = $object->getModelName();
 
-		$iShopItemId = Core_Array::getGet('shop_item_id', 0);
-
-		// Магазин
-		$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
-
-		if ($oShop->id == 0)
-		{
-			$oShop = Core_Entity::factory('Shop_Item', $iShopItemId)->Shop;
-		}
+		$shop_id = Core_Array::getGet('shop_id');
+		$shop_group_id = Core_Array::getGet('shop_group_id', 0);
+		$shop_item_id = Core_Array::getGet('shop_item_id');
 
 		switch ($modelName)
 		{
@@ -47,34 +41,85 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (!$object->id)
 				{
-					$object->shop_id = Core_Array::getGet('shop_id');
-					$object->shop_group_id = Core_Array::getGet('shop_group_id', 0);
+					$object->shop_id = $shop_id;
+					$object->shop_group_id = $shop_group_id;
+
+					$oShop = Core_Entity::factory('Shop', $shop_id);
 					$object->shop_currency_id = $oShop->shop_currency_id;
 					$object->shop_tax_id = $oShop->shop_tax_id;
 				}
 
-				if ($iShopItemId)
+				if ($shop_item_id)
 				{
-					$ShopItemModification = Core_Entity::factory('Shop_Item', $iShopItemId);
+					$ShopItemModification = Core_Entity::factory('Shop_Item', $shop_item_id);
 
-					$object->modification_id = $iShopItemId;
+					$object->modification_id = $shop_item_id;
 					$object->shop_id = $ShopItemModification->Shop->id;
 
 					$this->addSkipColumn('shop_group_id');
 				}
+			break;
+			case 'shop_group':
+				// Пропускаем поля, обработка которых будет вестись вручную ниже
+				$this
+					->addSkipColumn('image_large')
+					->addSkipColumn('image_small')
+					->addSkipColumn('image_large_width')
+					->addSkipColumn('image_large_height')
+					->addSkipColumn('image_small_width')
+					->addSkipColumn('image_small_height')
+					->addSkipColumn('subgroups_count')
+					->addSkipColumn('subgroups_total_count')
+					->addSkipColumn('items_count')
+					->addSkipColumn('items_total_count')
+					->addSkipColumn('shortcut_id');
 
-				parent::setObject($object);
+				if ($object->shortcut_id != 0)
+				{
+					$object = $object->Shortcut;
+				}
 
-				$template_id = $this->_object->Shop->Structure->template_id
-					? $this->_object->Shop->Structure->template_id
-					: 0;
+				if (!$object->id)
+				{
+					$object->shop_id = $shop_id;
+					$object->parent_id = $shop_group_id;
+				}
+			break;
+		}
 
+		return parent::setObject($object);;
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
+		$object = $this->_object;
+
+		$modelName = $object->getModelName();
+
+		$oShop = is_null($object->id)
+			? Core_Entity::factory('Shop', $object->shop_id)
+			: $object->Shop;
+
+		$oMainTab = $this->getTab('main');
+		$oAdditionalTab = $this->getTab('additional');
+
+		$template_id = $this->_object->Shop->Structure->template_id
+			? $this->_object->Shop->Structure->template_id
+			: 0;
+
+		switch ($modelName)
+		{
+			case 'shop_item':
 				$title = $this->_object->id
 					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name)
 					: Core::_('Shop_Item.items_catalog_add_form_title');
-
-				$oMainTab = $this->getTab('main');
-				$oAdditionalTab = $this->getTab('additional');
 
 				$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
@@ -972,9 +1017,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Получаем список складов магазина
-				$aWarehouses = $oShop->Shop_Warehouses->findAll();
+				$aWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
+				$aConfig = $this->_getConfig();
 
-				if (count($aWarehouses))
+				if (count($aWarehouses) <= $aConfig['itemEditWarehouseLimit'])
 				{
 					$oMainTab
 						->add($oWarehouseBlock = Admin_Form_Entity::factory('Div')->id('warehouses')->class('well with-header shop-item-warehouses-list'));
@@ -1002,64 +1048,86 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->onclick('$.editWarehouses(this)')
 						);
 
-					foreach ($aWarehouses as $oWarehouse)
-					{
-						// Получаем количество товара на текущем складе
-						$oWarehouseItem =
-							$this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id);
+					ob_start();
+					?>
+					<div class="table-scrollable no-border">
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th><?php echo Core::_('Shop_Item.warehouse_name')?></th>
+								<th><?php echo Core::_('Shop_Item.warehouse_quantity')?></th>
+								<th><?php echo Core::_('Shop_Item.warehouse_cell')?></th>
+								<th><?php echo Core::_('Shop_Item.warehouse_in_price')?></th>
+								<th><?php echo Core::_('Shop_Item.warehouse_measure')?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php
+							foreach ($aWarehouses as $oWarehouse)
+							{
+								// Получаем количество товара на текущем складе
+								$oWarehouseItem =
+									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id);
 
-						$countItems = is_null($oWarehouseItem)
-							? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
-							: $oWarehouseItem->count;
+								$countItems = is_null($oWarehouseItem)
+									? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
+									: $oWarehouseItem->count;
 
-						// на складе 0 или идет добавление товара - строку скрываем!
-						$rowClass = $countItems == 0 || !$this->_object->id
-							? 'row hidden'
-							: 'row';
+								// на складе 0 или идет добавление товара - строку скрываем!
+								$trClass = $countItems == 0 || !$this->_object->id
+									? 'hidden'
+									: '';
 
-						$oWarehouseBlock
-							->add($oWarehouseCurrentRow = Admin_Form_Entity::factory('Div')->class($rowClass));
+								$aPrices = self::fillPricesList($oShop);
 
-						$oWarehouseCurrentRow
-							->add(
-								Admin_Form_Entity::factory('Div')
-									->value($oWarehouse->name)
-									->class('form-group margin-top-10 col-xs-6 col-sm-3 col-md-4')
-							)
-							->add(
-								Admin_Form_Entity::factory('Input')
-									//->caption(Core::_("Shop_Item.warehouse_item_count", $oWarehouse->name))
-									->value($countItems)
-									->name("warehouse_{$oWarehouse->id}")
-									->divAttr(array('class' => 'form-group col-xs-6 col-sm-3 col-md-2'))
-									->disabled('disabled')
-							)->add(
-								Admin_Form_Entity::factory('Div')
-									->value(Core::_('Shop_Item.warehouse_in_price'))
-									->class('form-group margin-top-10 col-xs-6 col-sm-3 col-md-4 hidden')
-							)->add(
-								Admin_Form_Entity::factory('Select')
-									// ->caption(Core::_('Shop_Warehouse_Writeoff.shop_price_id'))
-									->divAttr(
-										array('class' => 'form-group col-xs-6 col-sm-3 col-md-2')
-									)
-									->options(self::fillPricesList($oShop))
-									->class('form-control hidden')
-									->name("warehouse_shop_price_id_{$oWarehouse->id}")
-									->value(0)
-							);
+								$aCells = $this->_getCells($oWarehouse);
+								?>
+								<tr class="<?php echo $trClass?>">
+									<td><?php echo htmlspecialchars($oWarehouse->name)?></td>
+									<td width="20%">
+										<input class="form-control" name="warehouse_<?php echo $oWarehouse->id?>" value="<?php echo $countItems?>" disabled="disabled"/>
+									</td>
+									<td width="20%">
+										<select class="form-control" name="warehouse_cell_<?php echo $oWarehouse->id?>">
+											<?php
+											foreach ($aCells as $shop_warehouse_cell_id => $name)
+											{
+												$oShop_Warehouse_Cell_Item = $oWarehouse->Shop_Warehouse_Cell_Items->getByShop_item_id($this->_object->id);
 
-						if ($this->_object->id)
-						{
-							$oWarehouseCurrentRow
-								->add(Admin_Form_Entity::factory('Div')
-									->class('margin-top-10')
-									->value(htmlspecialchars(
-										$this->_object->Shop_Measure->name
-									))
-								);
-						}
-					}
+												$selected = !is_null($oShop_Warehouse_Cell_Item) && $oShop_Warehouse_Cell_Item->shop_warehouse_cell_id == $shop_warehouse_cell_id
+													? 'selected="selected"'
+													: '';
+												?>
+												<option <?php echo $selected?> value="<?php echo $shop_warehouse_cell_id?>"><?php echo htmlspecialchars($name)?></option>
+												<?php
+											}
+											?>
+										</select>
+									</td>
+									<td width="20%">
+										<select class="form-control hidden" name="warehouse_shop_price_id_<?php echo $oWarehouse->id?>">
+											<?php
+											foreach ($aPrices as $shop_price_id => $name)
+											{
+												?>
+												<option value="<?php echo $shop_price_id?>"><?php echo htmlspecialchars($name)?></option>
+												<?php
+											}
+											?>
+										</select>
+									</td>
+									<td width="10%"><?php echo htmlspecialchars($this->_object->Shop_Measure->name)?></td>
+								</tr>
+								<?php
+							}
+							?>
+						</tbody>
+					</table>
+					</div>
+					<?php
+					$oWarehouseBlock->add(
+						Admin_Form_Entity::factory('Code')->html(ob_get_clean())
+					);
 				}
 
 				if ($object->id)
@@ -1227,8 +1295,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$currencyName = $oShop_Item->Shop_Currency->name;
 
-						// $oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')->getByShopItemId($oShop_Item->id);
-
 						$iDatasetKey = $this->_object->modification_id == 0 ? 1 : 0;
 
 						$link = $oAdmin_Form_Controller->getAdminActionLoadAjax(/*$oAdmin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $iDatasetKey, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
@@ -1331,43 +1397,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			break;
 
 			case 'shop_group':
-				// Пропускаем поля, обработка которых будет вестись вручную ниже
-				$this
-					->addSkipColumn('image_large')
-					->addSkipColumn('image_small')
-					->addSkipColumn('image_large_width')
-					->addSkipColumn('image_large_height')
-					->addSkipColumn('image_small_width')
-					->addSkipColumn('image_small_height')
-					->addSkipColumn('subgroups_count')
-					->addSkipColumn('subgroups_total_count')
-					->addSkipColumn('items_count')
-					->addSkipColumn('items_total_count')
-					->addSkipColumn('shortcut_id')
-					;
+				// Выводим заголовок формы
+				$title = $this->_object->id
+					? Core::_('Shop_Group.groups_edit_form_title', $this->_object->name)
+					: Core::_('Shop_Group.groups_add_form_title');
 
-				if ($object->shortcut_id != 0)
-				{
-					$object = $object->Shortcut;
-				}
-
-				if (!$object->id)
-				{
-					$object->shop_id = Core_Array::getGet('shop_id');
-					$object->parent_id = Core_Array::getGet('shop_group_id');
-				}
-
-				parent::setObject($object);
-
-				$template_id = $this->_object->Shop->Structure->template_id
-					? $this->_object->Shop->Structure->template_id
-					: 0;
-
-				// Получаем стандартные вкладки
-				$oMainTab = $this->getTab('main');
-				$oAdditionalTab = $this->getTab('additional');
-
-				// Добавляем новые вкладки
 				$this->addTabAfter($oShopGroupDescriptionTab = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Shop_Group.tab_group_description'))
 					->name('Description'), $oMainTab);
@@ -1694,17 +1728,24 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oSeoTitleField->rows(5);
 				$oSeoKeywordsField->rows(5);
 
-				// Выводим заголовок формы
-				$title = $this->_object->id
-					? Core::_("Shop_Group.groups_edit_form_title", $this->_object->name)
-					: Core::_("Shop_Group.groups_add_form_title");
-
 			break;
 		}
 
 		$this->title($title);
 
 		return $this;
+	}
+
+	protected function _getConfig()
+	{
+		return Core_Config::instance()->get('shop_config', array()) + array(
+			'itemEditWarehouseLimit' => 20,
+			'smallImagePrefix' => 'small_',
+			'itemLargeImage' => 'item_%d.%s',
+			'itemSmallImage' => 'small_item_%d.%s',
+			'groupLargeImage' => 'group_%d.%s',
+			'groupSmallImage' => 'small_group_%d.%s',
+		);
 	}
 
 	/**
@@ -1750,13 +1791,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id', 0)))
 			: */ $this->_object->Shop;
 
-		$aConfig = Core_Config::instance()->get('shop_config', array()) + array(
-			'smallImagePrefix' => 'small_',
-			'itemLargeImage' => 'item_%d.%s',
-			'itemSmallImage' => 'small_item_%d.%s',
-			'groupLargeImage' => 'group_%d.%s',
-			'groupSmallImage' => 'small_group_%d.%s',
-		);
+		$aConfig = $this->_getConfig();
 
 		switch ($modelName)
 		{
@@ -1765,6 +1800,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$this->_object->shop_group_id = 0;
 				}
+
+				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				// Проверяем подключен ли модуль типографики.
 				if (Core::moduleIsActive('typograph'))
@@ -1973,19 +2010,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
 				foreach ($aShop_Item_Sets as $oShop_Item_Set)
 				{
-					$count = Core_Array::getPost('set_count_' . $oShop_Item_Set->id);
+					$count = floatval(Core_Array::getPost('set_count_' . $oShop_Item_Set->id));
 
 					$count < 0 && $count = 0;
 
-					/*if ($count > 0)
-					{*/
-						$oShop_Item_Set->count = $count;
-						$oShop_Item_Set->save();
-					/*}
-					else
-					{
-						$oShop_Item_Set->delete();
-					}*/
+					$oShop_Item_Set->count = $count;
+					$oShop_Item_Set->save();
 				}
 
 				// Новые товары в сете
@@ -2004,6 +2034,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								isset($_POST['set_count'][$key]) ? $_POST['set_count'][$key] : 1
 							)
 							->save();
+
+						ob_start();
+						Core::factory('Core_Html_Entity_Script')
+							->value("$(\"#{$windowId} input[name='set_item_id\\[\\]']\").eq(0).remove();
+							$(\"#{$windowId} input[name='set_count\\[\\]']\").eq(0).prop('name', 'set_count_{$oShop_Item_Set->id}');")
+							->execute();
+						$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 					}
 				}
 
@@ -2037,7 +2074,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				// Специальные цены, новые значения
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
 				$aSpecPrices = Core_Array::getPost('specPrice_');
 				if ($aSpecPrices)
 				{
@@ -2080,86 +2116,113 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->applyObjectProperty();
 
 				// Обработка складов
-				$aShopWarehouses = $oShop->Shop_Warehouses->findAll();
-				foreach ($aShopWarehouses as $oShopWarehouse)
+				$aShopWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
+				
+				if (count($aShopWarehouses) <= $aConfig['itemEditWarehouseLimit'])
 				{
-					$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}");
-
-					if (!is_null($iWarehouseValue))
+					foreach ($aShopWarehouses as $oShopWarehouse)
 					{
-						$iWarehouseShopPriceId = Core_Array::getPost("warehouse_shop_price_id_{$oShopWarehouse->id}", 0);
+						$iWarehouseValue = Core_Array::getPost("warehouse_{$oShopWarehouse->id}");
 
-						if ($iWarehouseShopPriceId)
+						if (!is_null($iWarehouseValue))
 						{
-							$oShop_Item_Price = $this->_object->Shop_Item_Prices->getByShop_price_id($iWarehouseShopPriceId);
+							$iWarehouseShopPriceId = Core_Array::getPost("warehouse_shop_price_id_{$oShopWarehouse->id}", 0);
 
-							$price = !is_null($oShop_Item_Price)
-								? $oShop_Item_Price->value
-								: 0;
-						}
-						else
-						{
-							$price = $this->_object->price;
-						}
-
-						/*$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-						if (is_null($oShopItemWarehouse))
-						{
-							$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
-							$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
-							$oShopItemWarehouse->shop_item_id = $this->_object->id;
-						}
-
-						$oShopItemWarehouse->count = $iWarehouseValue;
-						$oShopItemWarehouse->save();*/
-
-						if ($bNewObject)
-						{
-							$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
-							$oShop_Warehouse_Incoming->shop_warehouse_id = $oShopWarehouse->id;
-							$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
-							$oShop_Warehouse_Incoming->number = '';
-							$oShop_Warehouse_Incoming->posted = 0;
-							$oShop_Warehouse_Incoming->shop_price_id = $iWarehouseShopPriceId;
-							$oShop_Warehouse_Incoming->save();
-
-							$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
-							$oShop_Warehouse_Incoming->save();
-
-							$oShop_Warehouse_Incoming_Item = Core_Entity::factory('Shop_Warehouse_Incoming_Item');
-							$oShop_Warehouse_Incoming_Item->shop_item_id = $this->_object->id;
-							$oShop_Warehouse_Incoming_Item->price = $price;
-							$oShop_Warehouse_Incoming_Item->count = $iWarehouseValue;
-							$oShop_Warehouse_Incoming->add($oShop_Warehouse_Incoming_Item);
-
-							$oShop_Warehouse_Incoming->post();
-						}
-						else
-						{
-							$oWarehouseItem =
-								$this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-
-							// $rest = $oShopWarehouse->getRest($this->_object->id);
-							$rest = is_null($oWarehouseItem) ? 0 : $oWarehouseItem->count;
-
-							if ($iWarehouseValue != $rest)
+							if ($iWarehouseShopPriceId)
 							{
-								$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
-								$oShop_Warehouse_Inventory->shop_warehouse_id = $oShopWarehouse->id;
-								$oShop_Warehouse_Inventory->description = Core::_('Shop_Item.shop_warehouse_inventory', $this->_object->name);
-								$oShop_Warehouse_Inventory->number = '';
-								$oShop_Warehouse_Inventory->posted = 0;
-								$oShop_Warehouse_Inventory->save();
+								$oShop_Item_Price = $this->_object->Shop_Item_Prices->getByShop_price_id($iWarehouseShopPriceId);
 
-								$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
-								$oShop_Warehouse_Inventory->save();
+								$price = !is_null($oShop_Item_Price)
+									? $oShop_Item_Price->value
+									: 0;
+							}
+							else
+							{
+								$price = $this->_object->price;
+							}
 
-								$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
-								$oShop_Warehouse_Inventory_Item->count = $iWarehouseValue;
-								$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+							/*$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
+							if (is_null($oShopItemWarehouse))
+							{
+								$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
+								$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
+								$oShopItemWarehouse->shop_item_id = $this->_object->id;
+							}
 
-								$oShop_Warehouse_Inventory->post();
+							$oShopItemWarehouse->count = $iWarehouseValue;
+							$oShopItemWarehouse->save();*/
+
+							if ($bNewObject)
+							{
+								$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
+								$oShop_Warehouse_Incoming->shop_warehouse_id = $oShopWarehouse->id;
+								$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
+								$oShop_Warehouse_Incoming->number = '';
+								$oShop_Warehouse_Incoming->posted = 0;
+								$oShop_Warehouse_Incoming->shop_price_id = $iWarehouseShopPriceId;
+								$oShop_Warehouse_Incoming->save();
+
+								$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
+								$oShop_Warehouse_Incoming->save();
+
+								$oShop_Warehouse_Incoming_Item = Core_Entity::factory('Shop_Warehouse_Incoming_Item');
+								$oShop_Warehouse_Incoming_Item->shop_item_id = $this->_object->id;
+								$oShop_Warehouse_Incoming_Item->price = $price;
+								$oShop_Warehouse_Incoming_Item->count = $iWarehouseValue;
+								$oShop_Warehouse_Incoming->add($oShop_Warehouse_Incoming_Item);
+
+								$oShop_Warehouse_Incoming->post();
+							}
+							else
+							{
+								$oWarehouseItem =
+									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
+
+								// $rest = $oShopWarehouse->getRest($this->_object->id);
+								$rest = is_null($oWarehouseItem) ? 0 : $oWarehouseItem->count;
+
+								if ($iWarehouseValue != $rest)
+								{
+									$oShop_Warehouse_Inventory = Core_Entity::factory('Shop_Warehouse_Inventory');
+									$oShop_Warehouse_Inventory->shop_warehouse_id = $oShopWarehouse->id;
+									$oShop_Warehouse_Inventory->description = Core::_('Shop_Item.shop_warehouse_inventory', $this->_object->name);
+									$oShop_Warehouse_Inventory->number = '';
+									$oShop_Warehouse_Inventory->posted = 0;
+									$oShop_Warehouse_Inventory->save();
+
+									$oShop_Warehouse_Inventory->number = $oShop_Warehouse_Inventory->id;
+									$oShop_Warehouse_Inventory->save();
+
+									$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+									$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
+									$oShop_Warehouse_Inventory_Item->count = $iWarehouseValue;
+									$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+									$oShop_Warehouse_Inventory->post();
+								}
+							}
+						}
+
+						// Адресное хранение
+						$iWarehouseCell = Core_Array::getPost("warehouse_cell_{$oShopWarehouse->id}");
+						if (!is_null($iWarehouseCell))
+						{
+							$oShop_Warehouse_Cell_Item = $this->_object->Shop_Warehouse_Cell_Items->getByShop_warehouse_id($oShopWarehouse->id, FALSE);
+
+							if ($iWarehouseCell)
+							{
+								if (is_null($oShop_Warehouse_Cell_Item))
+								{
+									$oShop_Warehouse_Cell_Item = Core_Entity::factory('Shop_Warehouse_Cell_Item');
+									$oShop_Warehouse_Cell_Item->shop_warehouse_id = $oShopWarehouse->id;
+									$oShop_Warehouse_Cell_Item->shop_item_id = $this->_object->id;
+								}
+								$oShop_Warehouse_Cell_Item->shop_warehouse_cell_id = intval($iWarehouseCell);
+								$oShop_Warehouse_Cell_Item->save();
+							}
+							elseif (!is_null($oShop_Warehouse_Cell_Item))
+							{
+								$oShop_Warehouse_Cell_Item->delete();
 							}
 						}
 					}
@@ -3243,5 +3306,35 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->execute();
 
 		return Admin_Form_Entity::factory('Code')->html(ob_get_clean());
+	}
+
+
+	protected function _getCells($oShop_Warehouse, $iParentId = 0, $iLevel = 0)
+	{
+		$aReturn = array(
+			0 => '...'
+		);
+
+		$iLevel = intval($iLevel);
+
+		$oShop_Warehouse_Cell_Parent = Core_Entity::factory('Shop_Warehouse_Cell', $iParentId);
+
+		// Дочерние элементы
+		$childrenCells = $oShop_Warehouse_Cell_Parent->Shop_Warehouse_Cells;
+		$childrenCells->queryBuilder()
+			->where('shop_warehouse_id', '=', $oShop_Warehouse->id);
+
+		$childrenCells = $childrenCells->findAll();
+
+		if (count($childrenCells))
+		{
+			foreach ($childrenCells as $childrenCell)
+			{
+				$aReturn[$childrenCell->id] = str_repeat('  ', $iLevel) . $childrenCell->nameWithSeparator();
+				$aReturn += $this->_getCells($oShop_Warehouse, $childrenCell->id, $iLevel + 1);
+			}
+		}
+
+		return $aReturn;
 	}
 }

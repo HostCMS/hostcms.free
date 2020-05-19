@@ -88,6 +88,7 @@ return array(
 	'E_USER_WARNING' => "Попередження",
 	'E_USER_NOTICE' => "Зауваження",
 	'E_STRICT' => "Strict",
+	'E_DEPRECATED' => "Deprecated",
 
 	'default_form_name' => 'Основна',
 	'default_event_name' => 'Перегляд',

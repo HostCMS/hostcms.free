@@ -272,6 +272,111 @@ function isEmpty(str) {
 				},
 			});
 		},
+		resizeIframe: function(object) {
+			if (object.contentWindow !== null)
+			{
+				setTimeout(function (e) {
+					object.style.height = (object.contentWindow.document.documentElement.scrollHeight) + 'px';
+				}, 100);
+			}
+
+			$(object).ready(function () {
+				setTimeout(function () {
+					$(object).contents().find('body').on('keyup', function (e) {
+						e.preventDefault();
+						if (e.keyCode == 27) {
+							$('.hostcmsWindow').dialog("close");
+						}
+					});
+				}, 50);
+			});
+		},
+		addModificationPattern: function(pattern, selectName) {
+			var jInput = $('input[name = name]'),
+				jSelectOptions = $('select[name = "' + selectName + '"] option'),
+				delimiter = $('input[name = delimiter]').val() || ' ',
+				str = jInput.val(),
+				pattern = delimiter + pattern;
+
+			if (str.indexOf(pattern) > 0)
+			{
+				jInput.val(str.replace(pattern, ''));
+				jSelectOptions.prop('selected', false);
+			}
+			else if (str.indexOf(pattern) == -1)
+			{
+				jInput.val(str + pattern);
+				jSelectOptions.prop('selected', true);
+			}
+		},
+		clearMarkingPattern: function(selector, pattern) {
+			$('input[name = ' + selector + ']').val(pattern);
+		},
+		addModificationValue: function(object, name) {
+			var bChecked = +$(object).is(':checked');
+
+			if ($.cookie(name) !== null)
+			{
+				$.cookie(name, bChecked);
+			}
+			else
+			{
+				$.cookie(name, bChecked, { expires: 365 });
+			}
+		},
+		changeSiteuserEmailType: function(object, lng) {
+			var type = parseInt($(object).val());
+
+			switch (type) {
+				case 0:
+					$('textarea#editor').tinymce().remove();
+				break;
+				case 1:
+					$('textarea#editor').tinymce({
+						script_url: "/admin/wysiwyg/tinymce.min.js",
+						language: lng,
+						language_url: '/admin/wysiwyg/langs/' + lng + '.js',
+						menubar: false,
+						statusbar: false,
+						plugins: [
+							"advlist autolink lists link image charmap print preview anchor",
+							"searchreplace visualblocks code fullscreen",
+							"insertdatetime media table paste code wordcount"
+						],
+						toolbar: "insert | undo redo |  formatselect | bold italic backcolor  | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat"
+					});
+				break;
+			}
+		},
+		blockIp: function(settings) {
+			$.loadingScreen('show');
+
+			var settings = $.extend({
+				block_ip: 1,
+				path: '/admin/ipaddress/index.php',
+			}, settings);
+
+			$.ajax({
+				context: this,
+				url: settings.path,
+				type: "POST",
+				data: settings,
+				dataType: 'json',
+				error: function(){},
+				success: function (answer) {
+					$.loadingScreen('hide');
+
+					if (answer.result == 'ok')
+					{
+						Notify('<span>' + i18n['ban_success'] + '</span>', '', 'top-right', '5000', 'success', 'fa-check', true, true);
+					}
+					else if (answer.result == 'error')
+					{
+						Notify('<span>' + i18n['ban_error'] + '</span>', '', 'top-right', '5000', 'danger', 'fa-ban', true, true);
+					}
+				}
+			});
+		},
 		changePrintButton: function(object) {
 			var print_price_id = $(object).val();
 
@@ -906,10 +1011,10 @@ function isEmpty(str) {
 			}
 		},
 		toggleWarehouses: function() {
-			$(".shop-item-warehouses-list .row:has(input[value ^= 0])").toggleClass('hidden');
+			$(".shop-item-warehouses-list tr:has(td):has(input[value ^= 0])").toggleClass('hidden');
 		},
 		editWarehouses: function(object) {
-			$.each( $(".shop-item-warehouses-list .row"), function (index, item) {
+			$.each( $(".shop-item-warehouses-list tbody > tr"), function (index, item) {
 				$(this).removeClass('hidden');
 				$(this).find('input[name ^= warehouse_]').prop('disabled', false).focus();
 				$(this).find('select[name ^= warehouse_shop_price_id_]').removeClass('hidden');
@@ -3888,7 +3993,7 @@ function isEmpty(str) {
 				iRand = Math.floor(Math.random() * 999999);
 
 			html = html
-				.replace(/(id_property_[\d_]*)/g, 'id_property_clone' + iRand);
+				.replace(/(id_property(?:_[\d]+)+)/g, 'id_property_clone' + iRand);
 
 			// var jNewObject = jSourceProperty.clone();
 			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
@@ -4560,6 +4665,19 @@ function isEmpty(str) {
 				}
 			});
 		},
+		recountIndexes: function($tr)
+		{
+			var $prev = $tr.prev(),
+				index = parseInt($prev.find('.index').text()) || 0,
+				$allNextIndexes = $prev.length ? $prev.nextAll('tr') : $tr.parent().find('tr');
+
+			$.each($allNextIndexes, function (i, item) {
+				++index;
+
+				$(item).find('td.index')
+					.text(index);
+			});
+		},
 		prepareShopPrices: function()
 		{
 			$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
@@ -4704,7 +4822,7 @@ function isEmpty(str) {
 					<td><span class="incoming-measure"></span></td>\
 					<td><span class="incoming-price"></span></td>\
 					<td width="80"><input class="set-item-count form-control" name="shop_item_quantity[]" value=""/></td>\
-					<td><a class="delete-associated-item" onclick="$(this).parents(\'tr\').remove()"><i class="fa fa-times-circle darkorange"></i></a></td>\
+					<td><a class="delete-associated-item" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class="fa fa-times-circle darkorange"></i></a></td>\
 				</tr>'
 			);
 
@@ -5383,10 +5501,13 @@ function isEmpty(str) {
 				{
 					if (typeof data[key] == 'object')
 					{
-						jQuery(this)
-							.append(jQuery('<option>')
+						oSelectOption = jQuery('<option>')
 							.attr('value', data[key].value)
-							.text(data[key].name));
+							.text(data[key].name);
+
+						data[key].disabled && oSelectOption.attr('disabled', 'disabled');
+
+						jQuery(this).append(oSelectOption);
 					}
 					else
 					{

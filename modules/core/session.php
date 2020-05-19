@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -106,11 +106,20 @@ abstract class Core_Session
 	 * Checks if the session enabled and exists
 	 * @return boolean
 	 */
-	static public function isAcive()
+	static public function isActive()
 	{
 		return function_exists('session_status')
 			? session_status() === PHP_SESSION_ACTIVE
 			: session_id() !== '';
+	}
+	
+	/**
+	 * Backward compatibility, see isActive()
+	 * @return boolean
+	 */
+	static public function isAcive()
+	{
+		return self::isActive();
 	}
 
 	/**
@@ -152,7 +161,7 @@ abstract class Core_Session
 	 */
 	static public function regenerateId($delete_old_session = FALSE)
 	{
-		if (self::isAcive())
+		if (self::isActive())
 		{
 			!headers_sent()
 				? session_regenerate_id($delete_old_session)
@@ -240,7 +249,7 @@ abstract class Core_Session
 		//{
 			self::$_started = FALSE;
 
-			if (self::isAcive())
+			if (self::isActive())
 			{
 				session_write_close();
 			}
@@ -268,7 +277,7 @@ abstract class Core_Session
 	{
 		self::$_maxlifetime = $maxlifetime;
 
-		if (!self::isStarted() && !self::isAcive() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
+		if (!self::isStarted() && !self::isActive() && (!defined('DENY_INI_SET') || !DENY_INI_SET))
 		{
 			ini_set('session.gc_maxlifetime', $maxlifetime);
 		}

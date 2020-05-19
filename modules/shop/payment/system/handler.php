@@ -339,6 +339,11 @@ abstract class Shop_Payment_System_Handler
 		$this->_shopOrder->tin = trim(strval(Core_Array::get($this->_orderParams, 'tin', '')));
 		$this->_shopOrder->kpp = trim(strval(Core_Array::get($this->_orderParams, 'kpp', '')));
 
+		if (isset($this->_orderParams['company_id']))
+		{
+			$this->_shopOrder->company_id = intval($this->_orderParams['company_id']);
+		}
+
 		if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
@@ -1567,6 +1572,18 @@ abstract class Shop_Payment_System_Handler
 				->header('Precedence', 'bulk')
 				->messageId()
 				->send();
+
+			if (Core::moduleIsActive('siteuser') && $oShopOrder->siteuser_id)
+			{
+				$oSiteuser_Email = Core_Entity::factory('Siteuser_Email');
+				$oSiteuser_Email->siteuser_id = $oShopOrder->siteuser_id;
+				$oSiteuser_Email->subject = $user_subject;
+				$oSiteuser_Email->email = $to;
+				$oSiteuser_Email->from = $from;
+				$oSiteuser_Email->type = $this->_siteuserMailContentType == 'text/html' ? 1 : 0;
+				$oSiteuser_Email->text = $sInvoice;
+				$oSiteuser_Email->save();
+			}
 		}
 
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterSendSiteuserEmail', $this, array($oCore_Mail));

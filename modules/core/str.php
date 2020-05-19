@@ -186,27 +186,31 @@ class Core_Str
 	{
 		if (defined('YANDEX_TRANSLATE_KEY') && strlen(YANDEX_TRANSLATE_KEY))
 		{
-			$url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' .
-				'key=' . urlencode(YANDEX_TRANSLATE_KEY) .
-				'&text=' . urlencode($string) .
-				'&lang=en&format=plain';
-
-			$Core_Http = Core_Http::instance()
-				->url($url)
-				->timeout(3)
-				->execute();
-
-			$data = trim($Core_Http->getBody());
-
-			if (strlen($data))
+			try
 			{
-				$oData = json_decode($data);
+				$url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' .
+					'key=' . urlencode(YANDEX_TRANSLATE_KEY) .
+					'&text=' . urlencode($string) .
+					'&lang=en&format=plain';
 
-				if (is_object($oData) && $oData->code == 200 && isset($oData->text[0]))
+				$Core_Http = Core_Http::instance()
+					->url($url)
+					->timeout(3)
+					->execute();
+
+				$data = trim($Core_Http->getDecompressedBody());
+
+				if (strlen($data))
 				{
-					return $oData->text[0];
+					$oData = json_decode($data);
+
+					if (is_object($oData) && $oData->code == 200 && isset($oData->text[0]))
+					{
+						return $oData->text[0];
+					}
 				}
 			}
+			catch (Exception $e){}
 		}
 		/*else
 		{
@@ -444,9 +448,9 @@ class Core_Str
 		$text = str_replace($aConfig['separators'], ' ', $text);
 
 		// Убираем двойные пробелы
-		while (stristr($text, '	'))
+		while (strstr($text, '  '))
 		{
-			$text = str_replace('	', ' ', $text);
+			$text = str_replace('  ', ' ', $text);
 		}
 
 		$text = trim($text);

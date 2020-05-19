@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Model extends Core_Entity
 {
@@ -78,7 +78,7 @@ class Shop_Seller_Model extends Core_Entity
 	 */
 	public function getPath()
 	{
-		return 'sellers/seller-' . $this->id . '/';
+		return 'sellers/' . rawurlencode($this->path) . '/';
 	}
 
 	/**
@@ -100,7 +100,7 @@ class Shop_Seller_Model extends Core_Entity
 			return $eventResult;
 		}
 
-		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . htmlspecialchars($this->address) . ' ' . htmlspecialchars($this->phone) . ' ' . htmlspecialchars($this->fax);
+		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . htmlspecialchars($this->address) . ' ' . htmlspecialchars($this->phone) . ' ' . htmlspecialchars($this->fax) . ' ' . htmlspecialchars($this->path);
 
 		$oSearch_Page->title = $this->name;
 

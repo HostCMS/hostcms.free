@@ -1269,7 +1269,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					else
 					{
 						throw new Core_Exception(
-							Core::_('Admin_Form.msg_error_access'), array()/*, 0, FALSE*/
+							Core::_('Admin_Form.msg_error_access', $actionName), array()/*, 0, FALSE*/
 						);
 					}
 				}
@@ -2433,7 +2433,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			{
 				$current = floor($iTotalCount / $this->limit);
 
-				if ($current <= 0)
+				if ($current <= $this->current)
 				{
 					$current = 1;
 					$offset = 0;

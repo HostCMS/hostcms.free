@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Dataset extends Admin_Form_Dataset
 {
@@ -69,8 +69,6 @@ class Update_Dataset extends Admin_Form_Dataset
 		$error = $aReturn['error'];
 		$expiration_of_support = $aReturn['expiration_of_support'];
 		$this->_objects = $aReturn['entities'];
-
-		// 
 
 		$sDatetime = !is_null($aReturn['datetime'])
 			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))

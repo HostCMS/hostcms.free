@@ -68,6 +68,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		ob_start();
 		?>
 		<div class="table-toolbar">
+			<?php
+			Core_Event::notify('Admin_Form_Controller.onBeforeShowMenu', $oAdmin_Form_Controller);
+			?>
 			<?php $this->_Admin_Form_Controller->showFormMenus()?>
 			<div class="table-toolbar-right pull-right">
 				<?php $this->_pageSelector()?>
@@ -573,8 +576,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		}
 		?></tr>
 		</thead><?php
-
-		$aEntities = array();
 
 		// Устанавливаем ограничения на источники
 		$oAdmin_Form_Controller->setDatasetConditions();

@@ -242,7 +242,7 @@ class Core_Sitemap extends Core_Servant_Properties
 			$this->addNode($sProtocol . $this->_siteAlias . $oStructure->getPath(), $oStructure->changefreq, $oStructure->priority, $oStructure);
 
 			// Informationsystem
-			if ($this->showInformationsystemGroups && isset($this->_Informationsystems[$oStructure->id]))
+			if ($this->showInformationsystemGroups && isset($this->_Informationsystems[$oStructure->id]) && Core::moduleIsActive('informationsystem'))
 			{
 				$oInformationsystem = $this->_Informationsystems[$oStructure->id];
 
@@ -250,7 +250,7 @@ class Core_Sitemap extends Core_Servant_Properties
 			}
 
 			// Shop
-			if ($this->showShopGroups && isset($this->_Shops[$oStructure->id]))
+			if ($this->showShopGroups && isset($this->_Shops[$oStructure->id]) && Core::moduleIsActive('shop'))
 			{
 				$oShop = $this->_Shops[$oStructure->id];
 
@@ -381,7 +381,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		unset($aGroupsIDs);
 
 		// Tags
-		if ($this->showInformationsystemTags)
+		if ($this->showInformationsystemTags && Core::moduleIsActive('tag'))
 		{
 			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
 			$oCore_QueryBuilder_Select
@@ -554,7 +554,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		unset($aGroupsIDs);
 
 		// Tags
-		if ($this->showShopTags)
+		if ($this->showShopTags && Core::moduleIsActive('tag'))
 		{
 			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
 			$oCore_QueryBuilder_Select

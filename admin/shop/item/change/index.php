@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -112,6 +112,7 @@ $oMainTab
 			->radio(array(0 => Core::_('Shop_Item.add_price_to_digit')))
 			->caption(Core::_('Shop_Item.select_price_form'))
 			->ico(array('fa-plus'))
+			->colors(array('btn-sky'))
 			->name('type_of_change')
 			->divAttr(array('class' => 'form-group col-xs-7 col-sm-4')))
 		->add(Admin_Form_Entity::factory('Input')
@@ -143,6 +144,32 @@ $oMainTab
 			->name('flag_include_spec_prices')
 			->caption(Core::_('Shop_Item.flag_include_spec_prices')))
 	);
+
+if (Core::moduleIsActive('siteuser'))
+{
+	$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
+
+	if (count($aShop_Prices))
+	{
+		$oMainTab->add($oPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header margin-bottom-10'));
+
+		$oPriceBlock
+			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+				->class('header bordered-azure')
+				->value(Core::_('Shop_Item.apply_to'))
+			)
+			->add($oShopPriceRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		foreach ($aShop_Prices as $oShop_Price)
+		{
+			$oShopPriceRow1->add(Admin_Form_Entity::factory('Checkbox')
+				->divAttr(array('class' => 'form-group col-xs-12 col-md-3'))
+				->name('shop_price_' . $oShop_Price->id)
+				->caption(htmlspecialchars($oShop_Price->name))
+			);
+		}
+	}
+}
 
 // Получение списка скидок
 $aDiscounts = array('...');
@@ -224,6 +251,8 @@ $oAdmin_Form_Entity_Form
 
 $oUser = Core_Auth::getCurrentUser();
 
+$limit = 500;
+
 if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 {
 	if (!$oUser->read_only)
@@ -246,12 +275,15 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 		$increase_price_rate = floatval($increase_price_rate);
 		$multiply_price_rate = floatval($multiply_price_rate);
 
+		$aShop_Prices = Core::moduleIsActive('siteuser')
+			? $oShop->Shop_Prices->findAll(FALSE)
+			: array();
+
 		// Если только увеличение цены в N раз и не указаны скидки или бонусы
 		if (Core_Array::getPost('type_of_change') == 1 && !$iDiscountID && !$iBonusID && !($bIncludeModifications && $iParentGroup))
 		{
+			// Розничная
 			$offset = 0;
-			$limit = 500;
-
 			do {
 				$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 				$oShop_Price_Setting->shop_id = $oShop->id;
@@ -299,6 +331,49 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 					->execute();
 
 				$rows = Core_DataBase::instance()->getAffectedRows();
+
+				// Цена для группы пользователей $oShop_Price
+				foreach ($aShop_Prices as $oShop_Price)
+				{
+					if (!is_null(Core_Array::getPost('shop_price_' . $oShop_Price->id)))
+					{
+						$oCore_QueryBuilder_Select = Core_QueryBuilder::select(
+								intval($oShop_Price_Setting->id),
+								intval($oShop_Price->id),
+								'shop_items.id',
+								'shop_item_prices.value',
+								array(Core_QueryBuilder::expression('`shop_item_prices`.`value` * ' . Core_DataBase::instance()->quote($multiply_price_rate)), 'new_price')
+							)
+							->from('shop_items')
+							->join('shop_item_prices', 'shop_item_prices.shop_item_id', '=', 'shop_items.id')
+							->where('shop_item_prices.shop_price_id', '=', $oShop_Price->id)
+							->where('shop_items.shop_id', '=', $oShop->id)
+							->where('shop_items.deleted', '=', 0)
+							->where('shop_items.shortcut_id', '=', 0)
+							->clearOrderBy()
+							->orderBy('shop_items.id', 'ASC')
+							->limit($limit)
+							->offset($offset);
+
+						// Учитывать модификации не установлено
+						!$bIncludeModifications
+							&& $oCore_QueryBuilder_Select->where('shop_items.modification_id', '=', 0);
+
+						$oUser->only_access_my_own
+							&& $oCore_QueryBuilder_Select->where('shop_items.user_id', '=', $oUser->id);
+
+						$iProducerID
+							&& $oCore_QueryBuilder_Select->where('shop_items.shop_producer_id', '=', $iProducerID);
+
+						$iParentGroup
+							&& $oCore_QueryBuilder_Select->where('shop_group_id', 'IN', array_merge(array($iParentGroup), Core_Entity::factory('Shop_Group', $iParentGroup)->Shop_Groups->getGroupChildrenId()));
+
+						$oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('shop_price_setting_items')
+							->columns('shop_price_setting_id', 'shop_price_id', 'shop_item_id', 'old_price', 'new_price')
+							->select($oCore_QueryBuilder_Select)
+							->execute();
+					}
+				}
 
 				// Проводим документ
 				$oShop_Price_Setting->post();
@@ -360,10 +435,18 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
 			$oShop_Price_Setting->save();
 
+			// Идентификаторы цен, которые также пересчитывать
+			$aShop_Price_IDs = array();
+			foreach ($aShop_Prices as $oShop_Price)
+			{
+				if (!is_null(Core_Array::getPost('shop_price_' . $oShop_Price->id)))
+				{
+					$aShop_Price_IDs[] = $oShop_Price->id;
+				}
+			}
+
 			// Step-by-step
 			$offset = 0;
-			$limit = 500;
-
 			do {
 				$oShop_Items->queryBuilder()
 					->offset($offset)
@@ -372,14 +455,14 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				$aShop_Items = $oShop_Items->findAll(FALSE);
 				foreach ($aShop_Items as $oShop_Item)
 				{
-					applySettings($oShop_Price_Setting, $oUser, $oShop_Item, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+					applySettings($oShop_Price_Setting, $oUser, $oShop_Item, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
 
 					if ($bIncludeModifications)
 					{
 						$aShopItemModifications = $oShop_Item->Modifications->findAll(FALSE);
 						foreach ($aShopItemModifications as $oShopItemModification)
 						{
-							applySettings($oShop_Price_Setting, $oUser, $oShopItemModification, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
+							applySettings($oShop_Price_Setting, $oUser, $oShopItemModification, $aShop_Price_IDs, $increase_price_rate, $multiply_price_rate, $iDiscountID, $iBonusID, $bSpecialPrices);
 						}
 					}
 				}
@@ -415,7 +498,7 @@ Core_Skin::instance()
 	->title(Core::_('Shop_Item.change_prices_for_shop_group'))
 	->execute();
 
-function applySettings(Shop_Price_Setting_Model $oShop_Price_Setting, User_Model $oUser, Shop_Item_Model $oShop_Item, $sTextAddition, $sTextMultiplication, $iDiscountID, $iBonusID, $bSpecialPrices)
+function applySettings(Shop_Price_Setting_Model $oShop_Price_Setting, User_Model $oUser, Shop_Item_Model $oShop_Item, array $aShop_Price_IDs, $sTextAddition, $sTextMultiplication, $iDiscountID, $iBonusID, $bSpecialPrices)
 {
 	// Проверка через user_id на право выполнения действия над объектом
 	if ($oUser->checkObjectAccess($oShop_Item))
@@ -438,49 +521,48 @@ function applySettings(Shop_Price_Setting_Model $oShop_Price_Setting, User_Model
 			{
 				$iCoefficient = 0;
 			}
-
-			//$oShop_Item->price += $sTextAddition * $iCoefficient;
-			$oShop_Price_Setting_Item->new_price = $oShop_Item->price + $sTextAddition * $iCoefficient;
-		}
-		else
-		{
-			//$oShop_Item->price *= $sTextMultiplication;
-			$oShop_Price_Setting_Item->new_price = $oShop_Item->price * $sTextMultiplication;
 		}
 
-		// $oShop_Item->save();
+		$oShop_Price_Setting_Item->new_price = Core_Array::getPost('type_of_change', 0) == 0
+			? $oShop_Item->price + $sTextAddition * $iCoefficient
+			: $oShop_Item->price * $sTextMultiplication;
+
 		$oShop_Price_Setting_Item->save();
 
 		if ($bSpecialPrices)
 		{
 			$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll(FALSE);
-
 			foreach ($aShop_Specialprices as $oShop_Specialprice)
 			{
 				if ($oShop_Specialprice->price)
 				{
-					if (Core_Array::getPost('type_of_change', 0) == 0)
-					{
-						if ($oShop_Item->shop_currency_id != 0 && $oShop_Item->Shop->shop_currency_id != 0)
-						{
-							$iCoefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-								$oShop_Item->Shop->Shop_Currency, $oShop_Item->Shop_Currency
-							);
-						}
-						else
-						{
-							$iCoefficient = 0;
-						}
-
-						$oShop_Specialprice->price += $sTextAddition * $iCoefficient;
-					}
-					else
-					{
-						$oShop_Specialprice->price *= $sTextMultiplication;
-					}
+					$oShop_Specialprice->price = Core_Array::getPost('type_of_change', 0) == 0
+						? $oShop_Specialprice->price + $sTextAddition * $iCoefficient
+						: $oShop_Specialprice->price * $sTextMultiplication;
 
 					$oShop_Specialprice->save();
 				}
+			}
+		}
+
+		// Цены для групп пользователей
+		if (count($aShop_Price_IDs))
+		{
+			$aShop_Item_Prices = $oShop_Item->Shop_Item_Prices->getAllByshop_price_id($aShop_Price_IDs, FALSE, 'IN');
+
+			foreach ($aShop_Item_Prices as $oShop_Item_Price)
+			{
+				$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+				$oShop_Price_Setting_Item->shop_price_setting_id = $oShop_Price_Setting->id;
+				$oShop_Price_Setting_Item->shop_price_id = $oShop_Item_Price->shop_price_id;
+				$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
+				$oShop_Price_Setting_Item->old_price = $oShop_Item_Price->value;
+
+				$oShop_Price_Setting_Item->new_price = Core_Array::getPost('type_of_change', 0) == 0
+					? $oShop_Item_Price->value + $sTextAddition * $iCoefficient
+					: $oShop_Item_Price->value * $sTextMultiplication;
+
+				$oShop_Price_Setting_Item->save();
 			}
 		}
 

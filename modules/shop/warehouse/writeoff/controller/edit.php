@@ -40,6 +40,10 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
 			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'))->class('form-control input-lg'), $oMainRow1);
 
+		// Дата документа меняется только если документа не проведен.
+		$this->_object->id && $this->_object->posted
+			&& $this->getField('datetime')->readonly('readonly');
+
 		// Печать
 		$printlayoutsButton = '
 			<div class="btn-group">
@@ -244,7 +248,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . $oShop_Warehouse_Writeoff_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
-							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>
 					';
 				}
@@ -266,12 +270,6 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 				->class('add-shop-item form-control')
 				->placeholder(Core::_('Shop_Warehouse_Writeoff.add_item_placeholder'))
 				->name('set_item_name')
-		)->add(
-			Admin_Form_Entity::factory('Input')
-				->class('index_value')
-				->type('hidden')
-				->name('index')
-				->value($index)
 		);
 
 		$oShopItemRow2
@@ -284,16 +282,18 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			->value("$('.add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
-				$('.index_value').val((parseInt($('.index_value').val()) + 1));
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('.index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
 
 				$('.shop-item-table > tbody').append(
-					$('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('.index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+					newRow
 				);
 				ui.item.value = '';
 				$.changeWarehouseCounts($('.set-item-count'), 2);
 				$('.set-item-count').change();
 				$('.shop-item-table tr:last-child').find('.set-item-count').focus();
 				$.focusAutocomplete($('.set-item-count'));
+
+				$.recountIndexes(newRow);
 			  });
 
 				$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
@@ -425,18 +425,12 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 		}
 
+		// Было изменение склада
+		$iOldWarehouse != $this->_object->shop_warehouse_id
+			&& $bNeedsRePost = TRUE;
+
 		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
 		Core_Array::getPost('posted') && $this->_object->post();
-
-		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
-		{
-			$aOld_Shop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse', $iOldWarehouse)->Shop_Warehouse_Entries->getByDocument($this->_object->id, 2);
-
-			foreach ($aOld_Shop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$oShop_Warehouse_Entry->delete();
-			}
-		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

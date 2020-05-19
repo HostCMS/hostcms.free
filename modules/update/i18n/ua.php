@@ -20,6 +20,7 @@ return array(
 	'server_error_respond_8' => 'Не відповідає редакція системи управління.',
 	'server_error_respond_9' => 'Ліцензія має кілька установок.',
 	'server_error_respond_10' => 'Помилка 10. Зверніться в службу підтримки. Дані на %s',
+	'server_error_respond_11' => 'Ліцензія відкликана. Зверніться в службу підтримки. Дані на %s',
 	'error_open_updatefile' => 'Файл оновлень не виявлено.',
 	'error_write_file_update' => 'Помилка запису даних в файл "%s".',
 	'update_constant_error' => 'Не виявлена ​​константа HOSTCMS_UPDATE_SERVER.',
@@ -30,4 +31,5 @@ return array(
 	'msg_update_required' => 'Запрошені оновлення %s',
 	'msg_installing_package' => 'Установка пакету оновлень %s',
 	'msg_unpack_package' => 'Розпакування файлу %s',
+	'module' => 'Модуль "%s"',	
 );

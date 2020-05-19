@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -18,6 +18,18 @@ $sAdminFormAction = '/admin/shop/price/setting/index.php';
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $sFormTitle = Core::_('Shop_Price_Setting.title');
+
+// Идентификатор магазина
+$shop_id = intval(Core_Array::getGet('shop_id'));
+
+// Идентификатор группы товаров
+$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
+
+// Текущий магазин
+$oShop = Core_Entity::factory('Shop')->find($shop_id);
+
+// Текущая группа магазинов
+$oShopDir = $oShop->Shop_Dir;
 
 $printlayout_id = intval(Core_Array::getGet('printlayout_id', 0));
 
@@ -33,34 +45,33 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+$sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}";
+
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
 		->icon('fa fa-plus')
-		->img('/admin/images/price_add.gif')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Price_Setting.convolution'))
+		->icon('fa fa-database')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/price/setting/convolution/index.php', NULL, NULL, $sAdditionalParams)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/price/setting/convolution/index.php', NULL, NULL, $sAdditionalParams)
+		)
 );
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
-
-// Идентификатор магазина
-$shop_id = intval(Core_Array::getGet('shop_id'));
-
-// Идентификатор группы товаров
-$shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
-
-// Текущий магазин
-$oShop = Core_Entity::factory('Shop')->find($shop_id);
-
-// Текущая группа магазинов
-$oShopDir = $oShop->Shop_Dir;
 
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 

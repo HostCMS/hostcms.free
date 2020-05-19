@@ -375,7 +375,10 @@ else
 			<?php echo Core::_("Shop_Order.table_mesures")?>
 		</td>
 		<td class="td_header">
-			<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_warehouse")?>
+		</td>
+		<td class="td_header">
+			<?php echo Core::_("Shop_Order.table_price") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
 		</td>
 		<td class="td_header">
 			<?php echo Core::_("Shop_Order.table_amount")?>
@@ -384,10 +387,10 @@ else
 			<?php echo Core::_("Shop_Order.table_nds_tax")?>
 		</td>
 		<td class="td_header">
-			<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_nds_value") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
 		</td>
 		<td class="td_header" style="border-right: 1px solid black; white-space: nowrap">
-			<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_amount_value") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
 		</td>
 	</tr>
 	<?php
@@ -425,6 +428,9 @@ else
 			</td>
 			<td class="td_main_2">
 			<?php echo htmlspecialchars($oShop_OrderItem->Shop_Item->Shop_Measure->name)?>
+			</td>
+			<td style="text-align: center"  class="td_main_2">
+			<?php echo htmlspecialchars($oShop_OrderItem->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars($oShop_OrderItem->getCellName())?>
 			</td>
 			<td class="td_main_2">
 			<?php echo number_format(Shop_Controller::instance()->round($oShop_OrderItem->price), 2, '.', '')?>

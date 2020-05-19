@@ -249,7 +249,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 		if (Core_Session::hasSessionId())
 		{
-			$isActive = Core_Session::isAcive();
+			$isActive = Core_Session::isActive();
 			!$isActive && Core_Session::start();
 
 			$shop_id = $oShop->id;

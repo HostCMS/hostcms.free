@@ -48,6 +48,8 @@ if (!is_null(Core_Array::getGet('vote')))
 				$deleteVote = 1;
 				$oVote->delete();
 			}
+			
+			Core_Entity::factory('Informationsystem_Item', $entity_id)->clearCache();
 
 			$aVotingStatistic = Vote_Controller::instance()->getRate($entity_type, $entity_id);
 

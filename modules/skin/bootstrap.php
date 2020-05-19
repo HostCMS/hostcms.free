@@ -1120,6 +1120,9 @@ class Skin_Bootstrap extends Core_Skin
 		<div class="widget-body">
 			<?php echo Core::_('Admin.authorization_notice2')?>
 		</div>
+		<div class="widget-body text-align-center">
+			<a href="/"><?php echo Core::_('Admin.authorization_back_to_frontend')?></a>
+		</div>
 		</div>
 
 		<script>

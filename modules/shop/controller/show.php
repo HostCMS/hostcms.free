@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - group($id) идентификатор группы магазина, если FALSE, то вывод товаров осуществляется из всех групп
+ * - group($id) идентификатор группы магазина или массив идентификаторов, если FALSE, то вывод товаров осуществляется из всех групп
  * - groupsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести
  * - groupsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств групп товаров, по умолчанию TRUE
  * - propertiesForGroups(array()) устанавливает дополнительное ограничение на вывод значений дополнительных свойств групп для массива идентификаторов групп (каким группам выводить доп. св-ва)
@@ -255,6 +255,7 @@ class Shop_Controller_Show extends Core_Controller
 
 	/**
 	 * Select modififactions, default's TRUE
+	 * @var boolean
 	 */
 	protected $_selectModifications = TRUE;
 
@@ -832,6 +833,7 @@ class Shop_Controller_Show extends Core_Controller
 	 * @return self
 	 * @hostcms-event Shop_Controller_Show.onBeforeRedeclaredShow
 	 * @hostcms-event Shop_Controller_Show.onBeforeAddGroupsPropertiesList
+	 * @hostcms-event Shop_Controller_Show.onBeforeAddShortcut
 	 */
 	public function show()
 	{
@@ -846,7 +848,7 @@ class Shop_Controller_Show extends Core_Controller
 		// Before check cache
 		if ($hasSessionId)
 		{
-			$isActive = Core_Session::isAcive();
+			$isActive = Core_Session::isActive();
 			!$isActive && Core_Session::start();
 
 			if ($this->favorite)
@@ -890,8 +892,7 @@ class Shop_Controller_Show extends Core_Controller
 				return $this;
 			}
 
-			$aTags = array();
-			$aTags[] = 'shop_group_' . (is_array($this->group) ? implode(',', $this->group) : intval($this->group));
+			$this->_cacheTags[] = 'shop_group_' . (is_array($this->group) ? implode(',', $this->group) : intval($this->group));
 		}
 
 		$bTpl = $this->_mode == 'tpl';
@@ -1127,7 +1128,7 @@ class Shop_Controller_Show extends Core_Controller
 				$this->_shownIDs[] = $oShop_Item->id;
 
 				// Tagged cache
-				$bCache && $aTags[] = 'shop_item_' . $oShop_Item->id;
+				$bCache && $this->_cacheTags[] = 'shop_item_' . $oShop_Item->id;
 
 				// Shortcut
 				$iShortcut = $oShop_Item->shortcut_id;
@@ -1177,6 +1178,8 @@ class Shop_Controller_Show extends Core_Controller
 										->name('shop_group_id')
 										->value($oShortcut_Item->shop_group_id)
 								);
+								
+							Core_Event::notify(get_class($this) . '.onBeforeAddShortcut', $this, array($oShop_Item, $oOriginal_Shop_Item));
 						}
 
 						$this->applyItemsForbiddenTags($oShop_Item);
@@ -1231,12 +1234,12 @@ class Shop_Controller_Show extends Core_Controller
 			$cacheKey,
 			array('content' => $content, 'shown' => $this->_shownIDs),
 			$this->_cacheName,
-			$aTags
+			$this->_cacheTags
 		);
 
 		// Clear
 		$this->_aShop_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
-			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
+			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = $this->_cacheTags = array();
 
 		return $this;
 	}
@@ -2149,7 +2152,7 @@ class Shop_Controller_Show extends Core_Controller
 
 			if (!$oShop_Filter_Seo)
 			{
-				if (is_numeric($this->group) && $this->group)
+				if (is_numeric($this->group) && $this->group && is_null($this->tag))
 				{
 					$oShop_Group = Core_Entity::factory('Shop_Group', $this->group);
 
@@ -2414,7 +2417,6 @@ class Shop_Controller_Show extends Core_Controller
 		$this->_aShop_Groups = array();
 
 		$aShop_Groups = $this->_Shop_Groups->findAll();
-
 		foreach ($aShop_Groups as $oShop_Group)
 		{
 			$this->_groupIntoArray($oShop_Group);
@@ -2434,12 +2436,12 @@ class Shop_Controller_Show extends Core_Controller
 		$this->_aShop_Groups = array();
 
 		$group_id = intval(!$this->parentItem
-			? $this->group
+			? (is_array($this->group)
+				? Core_Array::first($this->group)
+				: $this->group
+			)
 			: Core_Entity::factory('Shop_Item', $this->parentItem)->shop_group_id
 		);
-
-		is_array($group_id)
-			&& $group_id = Core_Array::first($group_id);
 
 		// Потомки текущего уровня
 		$aShop_Groups = $this->_Shop_Groups->getByParentId($group_id);
@@ -3151,9 +3153,10 @@ class Shop_Controller_Show extends Core_Controller
 			->queryBuilder()
 			->leftJoin(array('shop_items', 'shortcut_items'), 'shortcut_items.id', '=', 'shop_items.shortcut_id')
 			->open()
-			->where('shortcut_items.id', 'IS', NULL)
-			->setOr()
-			->where('shortcut_items.active', '=', 1);
+				->where('shortcut_items.id', 'IS', NULL)
+				->setOr()
+				->where('shortcut_items.active', '=', 1)
+				->where('shortcut_items.deleted', '=', 0);
 
 		$this->_applyItemConditionsQueryBuilder($this->_Shop_Items->queryBuilder(), 'shortcut_items');
 

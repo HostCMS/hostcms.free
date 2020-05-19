@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Admin forms.
- *
- * @package HostCMS
- * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'authorization_form_title' => 'Backend',
 	'authorization_form_login' => 'User',
@@ -19,8 +10,9 @@ return array(
 	'authorization_error_valid_user' => 'Error! Invalid login and password!<br />Your IP is <b>%s</b>, administrator informed of this event.',
 	'authorization_error_access_temporarily_unavailable' => 'Access temporarily unavailable. Please try again in %s seconds',
 	'authorization_title' => 'HostCMS Backend',
-	'authorization_notice' => '<p>* In order to enter back-end, your browser should support Cookies.</p>',
-	'authorization_notice2' => '<p>** Attachment of session to IP address decreases the risk of an authorized access to back-end.</p>',
+	'authorization_notice' => '* In order to enter back-end, your browser should support Cookies.',
+	'authorization_notice2' => '** Attachment of session to IP address decreases the risk of an authorized access to back-end.',
+	'authorization_back_to_frontend' => 'Back to the main page.',
 
 	'index_title' => "%s Backend v. %s",
 

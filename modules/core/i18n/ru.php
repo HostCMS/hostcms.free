@@ -7,7 +7,7 @@
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Ошибка открытия файла для записи %s, проверьте права доступа к директории.',
@@ -97,6 +97,7 @@ return array(
 	'E_USER_WARNING' => "Предупреждение",
 	'E_USER_NOTICE' => "Замечание",
 	'E_STRICT' => "Strict",
+	'E_DEPRECATED' => "Deprecated",
 
 	'default_form_name' => 'Основная',
 	'default_event_name' => 'Просмотр',

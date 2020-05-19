@@ -14,7 +14,105 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Core_Browser
 {
 	/**
+	 * Get device type by User Agent
+	 * @param string $userAgent
+	 * @return 0 - desktop, 1 - tablet, 2 - phone, 3 - tv, 4 - watch
+	 */
+	static public function getDevice($userAgent)
+	{
+		// Tablet
+		if (preg_match('/iP(a|ro)d|FOLIO|playbook/i', $userAgent)
+			|| preg_match('/tablet/i', $userAgent) && !preg_match('/RX-34/i', $userAgent)
+		)
+		{
+			return 1;
+		}
+		// nexus & motorola
+		elseif (preg_match('/nexus 7|nexus 9|nexus 10|xoom/i', $userAgent))
+		{
+			return 1;
+		}
+		// Android Tablet
+		elseif (preg_match('/Linux/i', $userAgent)
+			&& preg_match('/Android/i', $userAgent)
+			&& !preg_match('/Fennec|mobi|HTC.Magic|HTCX06HT|Nexus.One|SC-02B|fone.945/i', $userAgent)
+		)
+		{
+			return 1;
+		}
+		// Kindle or Kindle Fire
+		elseif (preg_match('/Kindle/i', $userAgent)
+			|| preg_match('/Mac.OS/i', $userAgent) && preg_match('/Silk/i', $userAgent)
+		)
+		{
+			return 1;
+		}
+		// pre Android 3.0 Tablet
+		elseif (preg_match('/GT-P10|SC-01C|SHW-M180S|SGH-T849|SCH-I800|SHW-M180L|SPH-P100|SGH-I987|zt180|HTC(.Flyer|\_Flyer)|Sprint.ATP51|ViewPad7|pandigital(sprnova|nova)|Ideos.S7|Dell.Streak.7|Advent.Vega|A101IT|A70BHT|MID7015|Next2|nook/i', $userAgent)
+			|| preg_match('/MB511/i', $userAgent) && preg_match('/RUTEM/i', $userAgent))
+		{
+			return 1;
+		}
+		// unique Mobile User Agent
+		elseif (preg_match('/BOLT|Fennec|Iris|Maemo|Minimo|Mobi|mowser|NetFront|Novarra|Prism|RX-34|Skyfire|Tear|XV6875|XV6975|Google.Wireless.Transcoder|sd4930ur/i', $userAgent))
+		{
+			return 2;
+		}
+		elseif (preg_match('/Opera/i', $userAgent)
+			&& preg_match('/Windows.NT.5/i', $userAgent)
+			&& preg_match('/HTC|Xda|Mini|Vario|SAMSUNG\-GT\-i8000|SAMSUNG\-SGH\-i9/i', $userAgent)
+		)
+		{
+			return 2;
+		}
+		// cros - Chromeos
+		elseif (preg_match('/Windows (NT|XP|ME|9)/i', $userAgent) || preg_match('/(?!Mi)CrOS(?!oft)/i', $userAgent))
+		{
+			return preg_match('/Phone|mobile|touch/i', $userAgent)
+				? 2
+				: 0;
+		}
+		// Mac Desktop
+		elseif (preg_match('/Macintosh/i', $userAgent)
+			&& !preg_match('/Silk/i', $userAgent))
+
+		{
+			return 0;
+		}
+		// Linux Desktop
+		elseif (preg_match('/Linux/i', $userAgent) && preg_match('/X11/i', $userAgent))
+		{
+			return 0;
+		}
+		// Solaris, SunOS, BSD Desktop
+		elseif (preg_match('/Solaris|SunOS|BSD/i', $userAgent))
+		{
+			return 0;
+		}
+		elseif (preg_match('/GoogleTV|SmartTV|smart\-tv|tuner|crkey|aftb|hbbtv|Internet.TV|adt\-|dtv|NetCast|vizio|NETTV|AppleTV|boxee|Kylo|Roku|viera|aquos|DLNADOC|CE\-HTML/i', $userAgent))
+		{
+			return 3;
+		}
+		// TV Based Gaming Console
+		elseif (preg_match('/Xbox|playstation|vita|psp|Wii|nintendo/i', $userAgent))
+		{
+			return 3;
+		}
+		elseif (preg_match('/mobile|touch| mobi|phone/i', $userAgent))
+		{
+			return 2;
+		}
+		elseif (preg_match('/glass|watch|sm\-v/i', $userAgent))
+		{
+			return 4;
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Check if browser is correct
+	 * @deprecated 6.7.0
 	 */
 	static public function check()
 	{

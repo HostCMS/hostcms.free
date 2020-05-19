@@ -97,6 +97,7 @@ return array(
 	'E_USER_WARNING' => "User Warning",
 	'E_USER_NOTICE' => "User Notice",
 	'E_STRICT' => "Strict",
+	'E_DEPRECATED' => "Deprecated",
 
 	'default_form_name' => 'Main',
 	'default_event_name' => 'Browsing',

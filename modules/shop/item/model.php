@@ -106,6 +106,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop_warehouse_regrade_writeoff_item' => array('model' => 'Shop_Warehouse_Regrade_Item', 'foreign_key' => 'writeoff_shop_item_id'),
 		'shop_price_entry' => array(),
 		'shop_price_setting_item' => array(),
+		'shop_warehouse_cell_item' => array(),
 	);
 
 	/**
@@ -410,13 +411,14 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Get Prices
+	 * @param boolean $bCache cache mode status
 	 * @return array
 	 */
-	public function getPrices()
+	public function getPrices($bCache = TRUE)
 	{
 		$this->setShop_Item_Controller();
 		// Prices
-		$aPrices = $this->_Shop_Item_Controller->getPrices($this);
+		$aPrices = $this->_Shop_Item_Controller->getPrices($this, TRUE, $bCache);
 
 		return $aPrices;
 	}
@@ -435,12 +437,24 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getRest()
+	 * @var mixed
+	 */
+	protected $_rest = NULL;
+
+	/**
 	 * Get the quantity in the active warehouses
+	 * @param boolean $bCache cache mode status
 	 * @return float
 	 * @hostcms-event shop_item.onBeforeGetRest
 	 */
-	public function getRest()
+	public function getRest($bCache = TRUE)
 	{
+		if ($bCache && !is_null($this->_rest))
+		{
+			return $this->_rest;
+		}
+
 		$queryBuilder = Core_QueryBuilder::select(array('SUM(count)', 'count'))
 			->from('shop_warehouse_items')
 			->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
@@ -452,7 +466,9 @@ class Shop_Item_Model extends Core_Entity
 
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
-		return $aResult['count'];
+		$this->_rest = $aResult['count'];
+
+		return $this->_rest;
 	}
 
 	public function reservedBackend()
@@ -461,11 +477,23 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getRest()
+	 * @var mixed
+	 */
+	protected $_reserved = NULL;
+
+	/**
 	 * Get the quantity of reserved items
+	 * @param boolean $bCache cache mode status
 	 * @return float
 	 */
-	public function getReserved()
+	public function getReserved($bCache = TRUE)
 	{
+		if ($bCache && !is_null($this->_reserved))
+		{
+			return $this->_reserved;
+		}
+
 		$oShop_Item = !$this->shortcut_id
 			? $this
 			: Core_Entity::factory('Shop_Item', $this->shortcut_id);
@@ -476,13 +504,13 @@ class Shop_Item_Model extends Core_Entity
 
 		$aShop_Item_Reserveds = $oShop_Item_Reserveds->findAll();
 
-		$reserved = 0;
+		$this->_reserved = 0;
 		foreach ($aShop_Item_Reserveds as $oShop_Item_Reserved)
 		{
-			$reserved += $oShop_Item_Reserved->count;
+			$this->_reserved += $oShop_Item_Reserved->count;
 		}
 
-		return $reserved;
+		return $this->_reserved;
 	}
 
 	/**
@@ -1606,6 +1634,8 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Warehouse_Regrade_Incoming_Items->deleteAll(FALSE);
 		$this->Shop_Warehouse_Regrade_Writeoff_Items->deleteAll(FALSE);
 		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
+
+		$this->Shop_Warehouse_Cell_Items->deleteAll(FALSE);
 
 		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
 		$this->Shop_Price_Entries->deleteAll(FALSE);

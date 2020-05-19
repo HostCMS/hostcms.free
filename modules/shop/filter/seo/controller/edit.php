@@ -200,7 +200,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$(function() {
 			$('#conditionsModal').on('show.bs.modal', function () {
-				var shop_group_id = $('select[name = "shop_group_id"]').val(),
+				var shop_group_id = $(':input[name = "shop_group_id"]').val(),
 					shop_id = $('input[name = "shop_id"]').val();
 
 				$.ajax({

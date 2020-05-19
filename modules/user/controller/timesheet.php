@@ -3,13 +3,13 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Admin forms.
+ * User_Controller_Timesheet
  *
  * @package HostCMS
- * @subpackage Skin
+ * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {

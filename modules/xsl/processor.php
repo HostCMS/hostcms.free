@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Xsl_Processor
 {
@@ -224,7 +224,7 @@ abstract class Xsl_Processor
 		// Количество закрывающихся тегов
 		$count_closing_tag = 0;
 
-		foreach ($string_array AS $key => $value)
+		foreach ($string_array as $key => $value)
 		{
 			// Удаляем в строке лишние пробелы
 			$value = trim($value);

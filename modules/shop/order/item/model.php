@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -55,7 +55,6 @@ class Shop_Order_Item_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'user' => array()
 	);
-
 
 	/**
 	 * Default sorting for models
@@ -143,7 +142,19 @@ class Shop_Order_Item_Model extends Core_Entity
 		$aShop_Warehouses = $this->Shop_Order->Shop->Shop_Warehouses->findAll(FALSE);
 		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
-			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($oShop_Warehouse->name);
+			$name = $oShop_Warehouse->name;
+
+			if ($this->shop_item_id)
+			{
+				$oShop_Warehouse_Cell_Items = $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($oShop_Warehouse->id);
+
+				if ($oShop_Warehouse_Cell_Items)
+				{
+					$name .= ' (' . $oShop_Warehouse_Cell_Items->Shop_Warehouse_Cell->nameWithSeparator() . ')';
+				}
+			}
+
+			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($name);
 		}
 
 		Admin_Form_Entity::factory('Select')
@@ -382,5 +393,23 @@ class Shop_Order_Item_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	public function getShopWarehouseCellItem()
+	{
+		return $this->shop_item_id && $this->shop_warehouse_id
+			? $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($this->shop_warehouse_id)
+			: NULL;
+	}
+
+	public function getCellName()
+	{
+		$oShop_Warehouse_Cell_Item = $this->getShopWarehouseCellItem();
+		if ($oShop_Warehouse_Cell_Item)
+		{
+			return $oShop_Warehouse_Cell_Item->Shop_Warehouse_Cell->nameWithSeparator();
+		}
+
+		return NULL;
 	}
 }

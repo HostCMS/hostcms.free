@@ -560,7 +560,9 @@ class Property_Model extends Core_Entity
 				$this->List->clearEntities()
 			);
 
-			if ($this->_config['add_list_items'])
+			if (is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
+				|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
+			)
 			{
 				$oList_Items = $this->List->List_Items;
 				$oList_Items->queryBuilder()

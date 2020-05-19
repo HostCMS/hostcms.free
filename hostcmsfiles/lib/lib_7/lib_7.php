@@ -395,6 +395,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			->xsl(
 				Core_Entity::factory('Xsl')->getByName($xslName)
 			)
+			// ->itemsForbiddenTags(array('description', 'text'))
 			->show();
 }
 

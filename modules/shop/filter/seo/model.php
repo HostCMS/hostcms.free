@@ -196,7 +196,8 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 		if ($this->shop_producer_id)
 		{
-			$url .= rawurlencode($this->Shop_Producer->path) . '/';
+			// При построении пути в фильтре используется название производителя, а не path
+			$url .= rawurlencode($this->Shop_Producer->name) . '/';
 		}
 
 		$aValues = array();
@@ -292,7 +293,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		$oSearch_Page->module = 3;
 		$oSearch_Page->module_id = $this->shop_id;
 		$oSearch_Page->inner = 0;
-		$oSearch_Page->module_value_type = 4; // search_page_module_value_type
+		$oSearch_Page->module_value_type = 5; // search_page_module_value_type
 		$oSearch_Page->module_value_id = $this->id; // search_page_module_value_id
 
 		$oSearch_Page->siteuser_groups = array(intval($this->Shop->siteuser_group_id));

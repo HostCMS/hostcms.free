@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Rss
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Rss_Read
 {
@@ -35,7 +35,7 @@ class Core_Rss_Read
 		'title' => '',
 		'link' => '',
 		'description' => '',
-		'category' => '',
+		'category' => array(),
 		'pubdate' => '',
 		'yandex:full-text' => ''
 	);
@@ -108,14 +108,6 @@ class Core_Rss_Read
 	 */
 	public function fetchOpen($parser, $name, $attrs)
 	{
-		if (count($attrs))
-		{
-			foreach ($attrs as $key => $value)
-			{
-				$this->_items[$this->_itemCount][mb_strtolower($name)][mb_strtolower($key)] = $value;
-			}
-		}
-
 		if ($name == 'RSS')
 		{
 			$this->_rss = '^RSS';
@@ -126,6 +118,33 @@ class Core_Rss_Read
 		}
 
 		$this->_tag .= '^' . $name;
+
+		if (count($attrs))
+		{
+			$sExpected = $this->_rss . '^CHANNEL^ITEM^';
+
+			if (strpos($this->_tag, $sExpected) === 0)
+			{
+				$aTagUri = explode('^', substr($this->_tag, strlen($sExpected)));
+
+				$current = &$this->_items[$this->_itemCount];
+				foreach ($aTagUri as $sTagName)
+				{
+					$sTagName = mb_strtolower($sTagName);
+					if (!isset($current[$sTagName]))
+					{
+						$current[$sTagName] = array();
+					}
+
+					$current = &$current[$sTagName];
+				}
+
+				foreach ($attrs as $key => $value)
+				{
+					$current[mb_strtolower($key)] = $value;
+				}
+			}
+		}
 
 		return $this;
 	}

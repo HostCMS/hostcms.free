@@ -377,12 +377,10 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					$aReturn = $oShop_Item_Import_Cml_Controller->import();
 
 					Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
-					echo Core::_('Shop_Item.count_insert_item') . ' — <b>' . $aReturn['insertItemCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.count_update_item') . ' — <b>' . $aReturn['updateItemCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.create_catalog') . ' — <b>' . $aReturn['insertDirCount'] . '</b><br/>';
-					echo Core::_('Shop_Item.update_catalog') . ' — <b>' . $aReturn['updateDirCount'] . '</b><br/>';
-
-
+					echo Core::_('Shop_Item.inserted_items', $aReturn['insertItemCount']) . '<br/>';
+					echo Core::_('Shop_Item.updated_items', $aReturn['updateItemCount']) . '<br/>';
+					echo Core::_('Shop_Item.created_catalogs', $aReturn['insertDirCount']) . '<br/>';
+					echo Core::_('Shop_Item.updated_catalogs', $aReturn['updateDirCount']) . '<br/>';
 				} catch (Exception $exc) {
 					Core_Message::show($exc->getMessage(), "error");
 				}
@@ -565,36 +563,47 @@ else
 						Core::_('Shop_Item.import_price_list_file_type1'),
 						Core::_('Shop_Item.import_price_list_file_type2')
 					))
-					->ico(array(
-						'fa-file-excel-o',
-						'fa-file-code-o'
-					))
+					->ico(array('fa-file-excel-o', 'fa-file-code-o'))
 					->caption(Core::_('Shop_Item.export_file_type'))
-					->divAttr(array(/*'id' => 'import_types', */'class' => 'form-group col-xs-12'))
+					->divAttr(array('class' => 'form-group col-xs-12'))
 					->name('import_price_type')
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1])")
 			)
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('File')
-				->name("csv_file")
-				->caption(Core::_('Shop_Item.import_price_list_file'))
-				->largeImage(array('show_params' => FALSE))
-				->smallImage(array('show' => FALSE))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')))
-				->add(
-					Admin_Form_Entity::factory('Input')
-						->name("alternative_file_pointer")
-						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-						->caption(Core::_('Shop_Item.alternative_file_pointer_form_import'))
-				)
+			Admin_Form_Entity::factory('Div')->class('row')->add(
+				Admin_Form_Entity::factory('File')
+					->name("csv_file")
+					->caption(Core::_('Shop_Item.import_price_list_file'))
+					->largeImage(array('show_params' => FALSE))
+					->smallImage(array('show' => FALSE))
+					->divAttr(array('class' => 'col-xs-12 col-sm-6'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Input')
+					->name("alternative_file_pointer")
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+					->caption(Core::_('Shop_Item.alternative_file_pointer_form_import'))
+			)
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
-				->name("import_price_name_field_f")
-				->caption(Core::_('Shop_Item.import_price_list_name_field_f'))
-				->value(TRUE)
-				->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
+			Admin_Form_Entity::factory('Div')->class('row')->add(
+				Admin_Form_Entity::factory('Checkbox')
+					->name("import_price_name_field_f")
+					->caption(Core::_('Shop_Item.import_price_list_name_field_f'))
+					->value(TRUE)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1'))
+			)
+			->add(
+				Admin_Form_Entity::factory('Select')
+				->name("import_price_encoding")
+				->options(array(
+					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
+					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
+				))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 hidden-1'))
+				->caption(Core::_('Shop_Item.price_list_encoding'))
+			)
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')
 			->add(Admin_Form_Entity::factory('Radiogroup')
@@ -639,16 +648,7 @@ else
 			->divAttr(array('class' => 'no-padding-left form-group col-xs-1 hidden-1')))
 		)
 		->add(
-			Admin_Form_Entity::factory('Div')->class('row')->add(
-				Admin_Form_Entity::factory('Select')
-				->name("import_price_encoding")
-				->options(array(
-					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
-					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
-				))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 hidden-1'))
-				->caption(Core::_('Shop_Item.price_list_encoding'))
-			)
+			Admin_Form_Entity::factory('Div')->class('row')
 			->add(Admin_Form_Entity::factory('Select')
 			->name("shop_groups_parent_id")
 			->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
