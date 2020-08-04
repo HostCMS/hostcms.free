@@ -44,4 +44,6 @@ return array(
 	'recountDiscount_success' => 'Discounts recounted successfully!',
 	'apply_success' => 'Product information in order changed successfully',
 	'splitOrder_success' => 'Order split successfully!',
+	'item_codes' => 'Item "%s" nomenclature code',
+	'setCodes_success' => 'Nomenclature codes changed successfully!',
 );

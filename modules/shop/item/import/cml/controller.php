@@ -1329,7 +1329,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						&& $oShopItem = $oShop->Shop_Items->getByGuid($sGUID, FALSE);
 
 					// Search by Barcode
-					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strval($oXmlItem->Штрихкод))
+					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strlen($oXmlItem->Штрихкод))
 					{
 						$oTmpItemsByBarcode = $oShop->Shop_Items;
 						$oTmpItemsByBarcode->queryBuilder()
@@ -1548,22 +1548,28 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Обрабатываем описание товара
 					foreach ($this->xpath($oXmlItem, 'Описание') as $DescriptionData)
 					{
-						if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
+						if ($DescriptionData != '')
 						{
-							$oShopItem->text = nl2br(strval($DescriptionData));
+							if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
+							{
+								$oShopItem->text = nl2br(strval($DescriptionData));
+							}
+							elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
+							{
+								$oShopItem->description = nl2br(strval($DescriptionData));
+							}
+							$oShopItem->save();
 						}
-						elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
-						{
-							$oShopItem->description = nl2br(strval($DescriptionData));
-						}
-						$oShopItem->save();
 					}
 
-					// Обрабатываем "малое описание" товара. Данный тег не соответствует стандарту CommerceML!
+					// Обрабатываем "малое описание" товара. Данный тег не соответствует стандарту
 					foreach ($this->xpath($oXmlItem, $this->shortDescription) as $DescriptionData)
 					{
-						$oShopItem->description = nl2br(strval($DescriptionData));
-						$oShopItem->save();
+						if ($DescriptionData != '')
+						{
+							$oShopItem->description = nl2br(strval($DescriptionData));
+							$oShopItem->save();
+						}
 					}
 
 					// Картинки основного товара
@@ -1999,7 +2005,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 									if (!is_null($oShopWarehouse))
 									{
-										$rest = $oShopWarehouse->getRest($oShopItem->id);
+										//$rest = $oShopWarehouse->getRest($oShopItem->id);
+										$oShop_Warehouse_Items = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id, FALSE);
+										$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
+
 										$newRest = floatval($sWarehouseCount);
 
 										if (is_null($rest) || $rest != $newRest)

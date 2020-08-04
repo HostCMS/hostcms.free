@@ -281,7 +281,7 @@ if (!is_null(Core_Array::getPost('apply')))
 
 	// Replace '/' to '-'
 	$login = str_replace('/', '-', $login);
-	
+
 	$oSiteuser->login = $login;
 	strlen($password) > 0 && $oSiteuser->password = Core_Hash::instance()->hash($password);
 	$oSiteuser->email = $email;
@@ -332,6 +332,12 @@ if (!is_null(Core_Array::getPost('apply')))
 									->addText($oSiteuser->login)
 									->addText($oSiteuser->email)
 									->execute();
+
+								// Check e-mail
+								if ($bAntispamAnswer)
+								{
+									$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($oSiteuser->email);
+								}
 							}
 							else
 							{
@@ -460,17 +466,21 @@ if (!is_null(Core_Array::getPost('apply')))
 										uploadImage($oSiteuser_Company, $aFileData);
 									}
 
-									$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
-									foreach ($aDirectory_Addresses as $oDirectory_Address)
+									if (!is_null(Core_Array::getPost("company_address{$oSiteuser_Company->id}")))
 									{
-										if (!is_null(Core_Array::getPost("company_address{$oSiteuser_Company->id}")))
+										$aDirectory_Addresses = $oSiteuser_Company->Directory_Addresses->findAll();
+										if (!isset($aDirectory_Addresses[0]))
 										{
-											$oDirectory_Address->postcode = strval(Core_Array::getPost("company_postcode{$oSiteuser_Company->id}"));
-											$oDirectory_Address->country = strval(Core_Array::getPost("company_country{$oSiteuser_Company->id}"));
-											$oDirectory_Address->city = strval(Core_Array::getPost("company_city{$oSiteuser_Company->id}"));
-											$oDirectory_Address->value = strval(Core_Array::getPost("company_address{$oSiteuser_Company->id}"));
-											$oDirectory_Address->save();
+											$aDirectory_Addresses[0] = Core_Entity::factory('Directory_Address');
+											$aDirectory_Addresses[0]->value = '';
+											$oSiteuser_Company->add($aDirectory_Addresses[0]);
 										}
+
+										$aDirectory_Addresses[0]->postcode = strval(Core_Array::getPost("company_postcode{$oSiteuser_Company->id}"));
+										$aDirectory_Addresses[0]->country = strval(Core_Array::getPost("company_country{$oSiteuser_Company->id}"));
+										$aDirectory_Addresses[0]->city = strval(Core_Array::getPost("company_city{$oSiteuser_Company->id}"));
+										$aDirectory_Addresses[0]->value = strval(Core_Array::getPost("company_address{$oSiteuser_Company->id}"));
+										$aDirectory_Addresses[0]->save();
 									}
 
 									applyDirectoryValues($oSiteuser_Company->id, $oSiteuser_Company, 'Directory_Phone');

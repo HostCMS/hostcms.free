@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Dir_Model extends Core_Entity
 {
@@ -104,6 +104,7 @@ class Informationsystem_Dir_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event informationsystem_dir.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -120,6 +121,8 @@ class Informationsystem_Dir_Model extends Core_Entity
 		{
 			$newObject->add($oInformationsystem->copy());
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

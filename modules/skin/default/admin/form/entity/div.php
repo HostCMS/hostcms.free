@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 {
@@ -28,27 +28,8 @@ class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 	public function execute()
 	{
 		$aAttr = $this->getAttrsString();
-
-		//$aDefaultDivAttr = array('class' => 'item_div');
-		//$this->divAttr = Core_Array::union($this->divAttr, $aDefaultDivAttr);
-
-		/*$aDivAttr = array();
-
-		// Установим атрибуты div'a.
-		if (is_array($this->divAttr))
-		{
-			foreach ($this->divAttr as $attrName => $attrValue)
-			{
-				$aDivAttr[] = "{$attrName}=\"" . htmlspecialchars($attrValue) . "\"";
-			}
-		}
-
-		?><div <?php echo implode(' ', $aDivAttr)?>><?php*/
-		?><div <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?><?php
-
+		?><div <?php echo implode(' ', $aAttr)?>><?php echo htmlspecialchars($this->value)?><?php
 		$this->executeChildren();
-
 		?></div><?php
-		/*?></div><?php*/
 	}
 }

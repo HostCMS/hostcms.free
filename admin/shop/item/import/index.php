@@ -146,6 +146,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 					->execute();
 
 				$aHeaders = $Core_Http->parseHeaders();
+
 				if ($Core_Http->parseHttpStatusCode($aHeaders['status']) != 200)
 				{
 					Core_Message::show('Wrong status: ' . htmlspecialchars($aHeaders['status']), "error");
@@ -370,7 +371,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 					$fRoznPrice_name = defined('SHOP_DEFAULT_CML_CURRENCY_NAME')
 						? SHOP_DEFAULT_CML_CURRENCY_NAME
-						: 'Розничная';
+						: Core::_('Shop_Item.retail_price');
 
 					$oShop_Item_Import_Cml_Controller->sShopDefaultPriceName = $fRoznPrice_name;
 

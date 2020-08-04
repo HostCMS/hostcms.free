@@ -62,7 +62,7 @@ class Skin_Default_Admin_Form_Entity_DateTime extends Admin_Form_Entity_Input
 
 		<script>
 		(function($) {
-			$("#<?php echo $this->id?>")
+			$("#<?php echo Core_Str::escapeJavascriptVariable($this->id)?>")
 				.datetimepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true, timeFormat: 'hh:mm:ss',showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php

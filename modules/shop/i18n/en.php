@@ -181,4 +181,10 @@ return array(
 	'filter' => 'Fast filter',
 	'set_price_recount_sets' => 'Set prices on recount sets',
 	'max_bonus' => '<acronym title="How much maximum percent of the check amount can be paid for bonusesи">Write off bonus, %</acronym>',
+	'filter_header' => 'Filter',
+	'filter_mode' => 'URL mode',
+	'filter_mode0' => 'Name',
+	'filter_mode1' => 'Path',
+	'mail_header' => 'Mails',
+	'shop_codetype_id' => 'Default nomenclature code',	
 );

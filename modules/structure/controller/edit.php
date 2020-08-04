@@ -530,9 +530,22 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		parent::_applyObjectProperty();
 
-		$this->_object->saveStructureFile(Core_Array::getPost('structure_source'));
-		$this->_object->saveStructureConfigFile(Core_Array::getPost('structure_config_source'));
+		// Динамическая страница
+		$structure_source = Core_Array::getPost('structure_source');
+		$structure_config_source = Core_Array::getPost('structure_config_source');
+		if ($this->_object->type == 1 || $structure_source !== '' || $structure_config_source !== '')
+		{
+			$this->_object->saveStructureFile($structure_source);
+			$this->_object->saveStructureConfigFile($structure_config_source);
+		}
+		else
+		{
+			$this->_object
+				->deleteConfigFile()
+				->deleteFile();
+		}
 
+		// Страница
 		if ($this->_object->type == 0)
 		{
 			if ($this->_object->document_id)

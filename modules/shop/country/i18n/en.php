@@ -25,6 +25,8 @@ return array(
 	'alpha2' => 'Code',
 	'active'=> 'Active',
 	'changeActive_success' => "Information successfully changed",
+	'turnOn_success' => "Countries turn on!",
+	'switchOff_success' => "Countries switch off!",
 
 	'language_tab' => 'Languages',
 	'name_en' => 'In English',

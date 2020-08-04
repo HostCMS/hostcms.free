@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Status_Model extends Core_Entity
 {
@@ -18,7 +18,9 @@ class Shop_Order_Status_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'shop' => array()
+		'shop' => array(),
+		'shop_order_status' => array('foreign_key' => 'parent_id'),
+		'shop_order_history' => array(),
 	);
 
 	/**
@@ -26,6 +28,7 @@ class Shop_Order_Status_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
+		'shop_order_status' => array('foreign_key' => 'parent_id'),
 		'user' => array()
 	);
 
@@ -65,9 +68,76 @@ class Shop_Order_Status_Model extends Core_Entity
 	 * Backend callback method
 	 * @return string
 	 */
-	public function nameBackend()
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#eee' ) . '"></i> '
-				. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1379">' . htmlspecialchars($this->name) . '</span>';
+		$link = $oAdmin_Form_Field->link;
+		$onclick = $oAdmin_Form_Field->onclick;
+
+		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $link);
+		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $onclick);
+
+		$return = '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#eee' ) . '"></i> '
+				. '<a href="' . $link . '" onclick="' . $onclick . '">' . htmlspecialchars($this->name) . '</a>';
+
+		$count = $this->getChildCount();
+		$count
+			&& $return .= '<span class="badge badge-hostcms badge-square margin-left-5">' . $count . '</span>';
+
+		return $return;
+	}
+
+	/**
+	 * Get parent status
+	 * @return Shop_Order_Status_Model|NULL
+	 */
+	public function getParent()
+	{
+		return $this->parent_id
+			? Core_Entity::factory('Shop_Order_Status', $this->parent_id)
+			: NULL;
+	}
+
+	/**
+	 * Get count of items all levels
+	 * @return int
+	 */
+	public function getChildCount()
+	{
+		$count = $this->Shop_Order_Statuses->getCount();
+
+		$aShop_Order_Statuses = $this->Shop_Order_Statuses->findAll(FALSE);
+		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
+		{
+			$count += $oShop_Order_Status->getChildCount();
+		}
+
+		return $count;
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return Core_Entity
+	 * @hostcms-event shop_order_status.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Shop_Order_Statuses->deleteAll(FALSE);
+
+		Core_QueryBuilder::update('shop_orders')
+			->set('shop_order_status_id', 0)
+			->where('shop_order_status_id', '=', $this->id)
+			->execute();
+
+		return parent::delete($primaryKey);
 	}
 }

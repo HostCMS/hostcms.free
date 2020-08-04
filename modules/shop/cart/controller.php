@@ -330,6 +330,7 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 				$oShop_Cart = Core_Entity::factory('Shop_Cart');
 				$oShop_Cart->shop_item_id = $this->shop_item_id;
 				$oShop_Cart->siteuser_id = $this->siteuser_id;
+				$oShop_Cart->quantity = 0;
 			}
 		}
 		else

@@ -54,7 +54,7 @@ class User_Session_Model extends Core_Entity
 		{
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
-			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
+			$this->_preloadValues['time'] = time();
 		}
 	}
 
@@ -65,5 +65,84 @@ class User_Session_Model extends Core_Entity
  	public function user_idBackend()
 	{
 		return $this->User->showAvatarWithName();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function timeBackend()
+	{
+		return Core_Date::timestamp2string($this->time);
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function osBackend()
+	{
+		return !is_null($this->user_agent)
+			? Core_Browser::getOs($this->user_agent)
+			: '—';
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function deviceBackend()
+	{
+		$return = '—';
+
+		if (!is_null($this->user_agent))
+		{
+			$device = Core_Browser::getDevice($this->user_agent);
+
+			switch ($device)
+			{
+				case 0:
+					$icon = 'fa-desktop';
+				break;
+				case 1:
+					$icon = 'fa-tablet';
+				break;
+				case 2:
+					$icon = 'fa-mobile-phone';
+				break;
+				case 3:
+					$icon = 'fa-tv';
+				break;
+				case 3:
+					$icon = 'fa-clock-0';
+				break;
+			}
+
+			$return = '<i class="fa ' . $icon . '" title="' . Core::_('User_Session.device' . $device) . '"></i>';
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function browserBackend()
+	{
+		return !is_null($this->user_agent)
+			? Core_Browser::getBrowser($this->user_agent)
+			: '—';
+	}
+
+	/**
+	 * Destroy user session
+	 */
+ 	public function destroy()
+	{
+		Core_Session::destroy($this->session_id);
+		$this->delete();
+		
+		return $this;
 	}
 }

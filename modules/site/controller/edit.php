@@ -196,15 +196,15 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */
-		$this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5'));
+		$this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 		$oMainTab->move($this->getField('send_attendance_report'), $oMainRow5);
-		$this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 		$oMainTab->move($this->getField('safe_email'), $oMainRow5);
 
 		/* $oMainRow6 */
-		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 		$oMainTab->move($this->getField('uploaddir'), $oMainRow6);
-		$this->getField('nesting_level')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
+		$this->getField('nesting_level')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
 		$oMainTab->move($this->getField('nesting_level'), $oMainRow6);
 
 		/* $oMainRow7 */

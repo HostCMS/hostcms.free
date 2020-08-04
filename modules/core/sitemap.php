@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - limit ограничение на единичную выборку элементов, по умолчанию 1000. При наличии достаточного объема памяти рекомендуется увеличить параметр
  * - createIndex(TRUE|FALSE) разбивать карту на несколько файлов, по умолчанию FALSE
  * - perFile Count of nodes per one file
- * - defaultProtocol('http://') протокол по умочанию
+ * - defaultProtocol('http://') протокол по умолчанию, устанавливается в зависимоти от опции https у сайта
  * - urlset(array('xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9')) массив опций для urlset
  * - fileName() схема построения имени файла, по умолчанию 'sitemap-%d.xml'
  * - multipleFileName() схема построения имени файла внутри индекса, по умолчанию 'sitemap-%d-%d.xml'
@@ -69,7 +69,7 @@ class Core_Sitemap extends Core_Servant_Properties
 		$this->_oSite = $oSite;
 
 		$this->_aSiteuserGroups = array(0, -1);
-		// Exclude close site pages
+
 		/*if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
@@ -92,7 +92,9 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$this->urlset = array('xmlns' => 'http://www.sitemaps.org/schemas/sitemap/0.9');
 
-		$this->defaultProtocol = 'http://';
+		$this->defaultProtocol = $this->_oSite->https
+			? 'https://'
+			: 'http://';
 
 		$this->fileName = 'sitemap-%d.xml';
 		$this->multipleFileName = 'sitemap-%d-%d.xml';
@@ -178,7 +180,7 @@ class Core_Sitemap extends Core_Servant_Properties
 			{
 				$sIndex = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 
-				$sProtocol = Core::httpsUses()
+				$sProtocol = $this->_oSite->https
 					? 'https://'
 					: $this->defaultProtocol;
 
@@ -232,8 +234,6 @@ class Core_Sitemap extends Core_Servant_Properties
 		$aStructure = $this->_selectStructuresByParentId($structure_id);
 
 		$dateTime = Core_Date::timestamp2sql(time());
-
-		//$oSite_Alias = $oSite->getCurrentAlias();
 
 		foreach ($aStructure as $oStructure)
 		{

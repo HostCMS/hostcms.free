@@ -44,4 +44,6 @@ return array(
 	'recountDiscount_success' => 'Скидки пересчитаны!',
 	'apply_success' => 'Информация о товаре в заказе изменена!',
 	'splitOrder_success' => 'Заказ разделен успешно!',
+	'item_codes' => 'Маркировки товара "%s"',
+	'setCodes_success' => 'Маркировки изменены!',
 );

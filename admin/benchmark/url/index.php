@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -569,7 +569,7 @@ $(function(){
 			content: function(label, xval, yval, flotItem) {
 				//console.log(arguments);
 				var dateValue = new Date(xval);
-				return "<b>" + label + "</b> : <span>" + dateValue.getDate() + "." + (dateValue.getMonth() + 1) + "." + dateValue.getFullYear() + "</span> : <span>" + yval.toFixed(3) + " сек.</span>";
+				return "<b>" + label + "</b> : <span>" + dateValue.getDate() + "." + (dateValue.getMonth() + 1) + "." + dateValue.getFullYear() + "</span> : <span>" + yval.toFixed(3) + " <?php echo Core::_('Core.shortTitleSeconds_1');?></span>";
 			}
 		},
 		crosshair: {
@@ -620,7 +620,7 @@ $(function(){
 			content: function(label, xval, yval, flotItem) {
 				//console.log(arguments);
 				var dateValue = new Date(xval);
-				return "<b>" + label + "</b> : <span>" + dateValue.getDate() + "." + (dateValue.getMonth() + 1) + "." + dateValue.getFullYear() + "</span> : <span>" + yval.toFixed(3) + " сек.</span>";
+				return "<b>" + label + "</b> : <span>" + dateValue.getDate() + "." + (dateValue.getMonth() + 1) + "." + dateValue.getFullYear() + "</span> : <span>" + yval.toFixed(3) + " <?php echo Core::_('Core.shortTitleSeconds_1');?></span>";
 			}
 		},
 		crosshair: {

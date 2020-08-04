@@ -580,6 +580,7 @@ class Site_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event site.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -1592,6 +1593,8 @@ class Site_Model extends Core_Entity
 		unset($aMatch_Documents);
 		unset($aMatchSiteuser_Groups);
 
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+
 		return $newObject;
 	}
 
@@ -1745,7 +1748,10 @@ class Site_Model extends Core_Entity
 				$oDiv->add(
 					Core::factory('Core_Html_Entity_Span')
 						->class('label label-' . ($oSite_Aliases->current ? 'palegreen' : 'default'))
-						->value(htmlspecialchars(Core_Str::cut($oSite_Aliases->name, 25)))
+						->value(htmlspecialchars(substr($oSite_Aliases->name, 0, 4) === "xn--"
+							? Core_Str::idnToUtf8($oSite_Aliases->name) . ' [' . $oSite_Aliases->name . ']'
+							: Core_Str::cut($oSite_Aliases->name, 25)
+						))
 					);
 
 			}

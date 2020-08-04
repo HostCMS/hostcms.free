@@ -35,5 +35,7 @@ return array(
 	'recount_discounts' => 'Перерахувати знижки',
 	'recountDiscount_success' => 'Знижки перераховані!',
 	'apply_success' => 'Інформація про товар у замовленні змінена!',
-	'splitOrder_success' => 'Замовлення розділений успішно!'
+	'splitOrder_success' => 'Замовлення розділений успішно!',
+	'item_codes' => 'Маркування товару "%s"',
+	'setCodes_success' => 'Маркування змінені!',
 );

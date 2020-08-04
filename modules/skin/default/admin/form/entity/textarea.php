@@ -229,7 +229,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 				$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 				$Core_Html_Entity_Script
-					->value("$(function() { setTimeout(function(){ $('#{$windowId} #{$this->id}').tinymce({ {$sInit} }); }, 300); });")
+					->value("$(function() { setTimeout(function(){ $('#" . Core_Str::escapeJavascriptVariable($windowId) . " #" . Core_Str::escapeJavascriptVariable($this->id) . "').tinymce({ {$sInit} }); }, 300); });")
 					->execute();
 			}
 		}
@@ -245,7 +245,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 			$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 			$Core_Html_Entity_Script
-				->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('{$this->id}'), {
+				->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('" . Core_Str::escapeJavascriptVariable($this->id) . "'), {
 					" . implode(",\n", $aTmp) . "
 				});
 				editor.setSize(null, '{$sHeight}');
@@ -271,21 +271,21 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		$iParentId = intval($iParentId);
 		$iLevel = intval($iLevel);
 
-		$oStructure = Core_Entity::factory('Structure', $iParentId);
-
 		$aReturn = array();
 
-		// Дочерние разделы
-		$aChildren = $oStructure->Structures->getBySiteId($iSiteId);
+		$oSite = Core_Entity::factory('Site', $iSiteId);
 
-		if (count($aChildren))
+		$oStructures = $oSite->Structures;
+		$oStructures->queryBuilder()
+			->clearOrderBy()
+			->orderBy('structures.sorting', 'ASC');
+		
+		$aChildren = $oStructures->getAllByparent_id($iParentId);
+		foreach ($aChildren as $oStructure)
 		{
-			foreach ($aChildren as $oStructure)
-			{
-				$oStructure->menu_name = str_repeat('  ', $iLevel) . $oStructure->name;
-				$aReturn[$oStructure->id] = $oStructure;
-				$aReturn += $this->_fillStructureList($iSiteId, $oStructure->id, $iLevel + 1);
-			}
+			$oStructure->menu_name = str_repeat('  ', $iLevel) . $oStructure->name;
+			$aReturn[$oStructure->id] = $oStructure;
+			$aReturn += $this->_fillStructureList($iSiteId, $oStructure->id, $iLevel + 1);
 		}
 
 		return $aReturn;

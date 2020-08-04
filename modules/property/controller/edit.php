@@ -38,7 +38,9 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			3 => Core::_('Property.type3'),
 			4 => Core::_('Property.type4'),
 			5 => Core::_('Property.type5'),
+			13 => Core::_('Property.type13'),
 			12 => Core::_('Property.type12'),
+			14 => Core::_('Property.type14'),
 			6 => Core::_('Property.type6'),
 			7 => Core::_('Property.type7'),
 			8 => Core::_('Property.type8'),
@@ -55,11 +57,13 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if (!Core::moduleIsActive('informationsystem'))
 		{
 			unset($this->_types[5]);
+			unset($this->_types[13]);
 		}
 		// Delete shop type if module is not active
 		if (!Core::moduleIsActive('shop'))
 		{
 			unset($this->_types[12]);
+			unset($this->_types[14]);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this, array($this->_Admin_Form_Controller));
@@ -231,7 +235,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('list_id')
 						->value($this->_object->list_id)
 						->caption(Core::_('Property.list_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
 
 					$oMainRow3->add($oSelect_Lists);
 				}
@@ -250,7 +254,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('informationsystem_id')
 						->value($this->_object->informationsystem_id)
 						->caption(Core::_('Property.informationsystem_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-14'));
 
 					$oMainRow4->add($oSelect_Informationsystems);
 				}
@@ -269,7 +273,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name('shop_id')
 						->value($this->_object->shop_id)
 						->caption(Core::_('Property.shop_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11'));
+						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-13'));
 
 					$oMainRow5->add($oSelect_Shops);
 				}
@@ -282,7 +286,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('description'), $oMainRow6);
 
 				$this->getField('default_value')
-					->divAttr(array('class' => 'form-group col-xs-12 hidden-2 hidden-5 hidden-7 hidden-8 hidden-9 hidden-12'));
+					->divAttr(array('class' => 'form-group col-xs-12 hidden-2 hidden-5 hidden-7 hidden-8 hidden-9 hidden-12 hidden-13 hidden-14'));
 
 				$oMainTab->move($this->getField('default_value'), $oMainRow7);
 
@@ -290,7 +294,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value)
 					->name('default_value_date')
 					->caption(Core::_('Property.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
 
 				$oMainRow8->add($oDefault_Value_Date);
 
@@ -298,7 +302,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->default_value)
 					->name('default_value_datetime')
 					->caption(Core::_('Property.default_value'))
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
 
 				$oMainRow9->add($oDefault_Value_DateTime);
 
@@ -307,7 +311,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->checked($this->_object->default_value == 1)
 					->caption(Core::_('Property.default_value'))
 					->name('default_value_checked')
-					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12'));
+					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-4 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
 
 				$oMainRow10->add($oDefault_Value_Checkbox);
 

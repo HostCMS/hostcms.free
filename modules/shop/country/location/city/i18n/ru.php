@@ -26,6 +26,8 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'active' => 'Активность',
 	'changeActive_success' => "Информация успешно изменена",
+	'turnOn_success' => "Населенные пункты включены!",
+	'switchOff_success' => "Населенные пункты выключены!",
 
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',

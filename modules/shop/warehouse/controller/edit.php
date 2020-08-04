@@ -64,8 +64,11 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->name('shop_company_id')
 			->caption(Core::_('Shop.shop_company_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-			->options($this->_fillCompanies())
-			->value($this->_object->shop_company_id);
+			->options(
+				array(0 => '…') + Company_Controller::fillCompanies($this->_object->Shop->site_id)
+			)
+			->value($this->_object->shop_company_id)
+			->data('required', 1);
 
 		$oMainRow2->add($oCompaniesField);
 
@@ -277,27 +280,5 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 		}
 
 		return $aReturn;
-	}
-
-	/**
-	 * Get companies array
-	 * @return array
-	 */
-	protected function _fillCompanies()
-	{
-		$oCompany = Core_Entity::factory('Shop_Company');
-
-		$oCompany->queryBuilder()
-			->orderBy('name');
-
-		$aCompanies = $oCompany->findAll();
-
-		$aCompanyArray = array(' … ');
-		foreach ($aCompanies as $oCompany)
-		{
-			$aCompanyArray[$oCompany->id] = $oCompany->name;
-		}
-
-		return $aCompanyArray;
 	}
 }

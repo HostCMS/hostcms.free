@@ -160,4 +160,9 @@ return array(
 
 	'table_warehouse' => "Warehouse",
 	'posted' => 'Posted',
+	'tabHistory' => 'History',
+	'change_status' => 'Change status: "%s"',
+	'paid_cancel' => 'Pull off "Paid"',
+	'posted_cancel' => 'Pull off "Posted"',
+	'canceled_cancel' => 'Pull off "Canceled"',
 );

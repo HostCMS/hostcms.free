@@ -1,4 +1,4 @@
-<?php
+ <?php
 /**
  * Online shop.
  *
@@ -347,4 +347,6 @@ return array(
 	'warehouse_cell' => 'Ячейка',
 	'warehouse_measure' => 'Ед.изм.',
 	'create_modification_delimiter' => 'Разделитель',
+	'retail_price' => 'Розничная'
+	
 );

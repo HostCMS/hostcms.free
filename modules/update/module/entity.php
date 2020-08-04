@@ -124,23 +124,23 @@ class Update_Module_Entity extends Core_Entity
 		{
 			$oMarket_Controller = Market_Controller::instance();
 			$oMarket_Controller->setMarketOptions();
+			$oMarket_Controller->tmpDir = CMS_FOLDER . 'hostcmsfiles/tmp/install' . DIRECTORY_SEPARATOR . $this->id;
+
+			is_dir($oMarket_Controller->tmpDir)
+				&& Core_File::deleteDir($oMarket_Controller->tmpDir);
+
+			// Создаем директорию снова
+			Core_File::mkdir($oMarket_Controller->tmpDir, CHMOD, TRUE);
 
 			$Core_Http = $oMarket_Controller->getModuleFile($this->file);
 
-			$tmpDir = CMS_FOLDER . 'hostcmsfiles/tmp/install' . DIRECTORY_SEPARATOR . $this->id;
-
-			is_dir($tmpDir) && Core_File::deleteDir($tmpDir);
-
-			// Создаем директорию снова
-			Core_File::mkdir($tmpDir, CHMOD, TRUE);
-
 			// Сохраняем tar.gz
-			$source_file = $tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
+			$source_file = $oMarket_Controller->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
 			Core_File::write($source_file, $Core_Http->getBody());
 
 			// Распаковываем файлы
 			$Core_Tar = new Core_Tar($source_file);
-			if (!$Core_Tar->extractModify($tmpDir, $tmpDir))
+			if (!$Core_Tar->extractModify($oMarket_Controller->tmpDir, $oMarket_Controller->tmpDir))
 			{
 				// Возникла ошибка распаковки
 				throw new Core_Exception(
@@ -149,14 +149,14 @@ class Update_Module_Entity extends Core_Entity
 			}
 
 			// Копируем файлы из ./files/ в папку системы
-			$sFilesDir = $tmpDir . DIRECTORY_SEPARATOR . 'files';
+			$sFilesDir = $oMarket_Controller->tmpDir . DIRECTORY_SEPARATOR . 'files';
 			if (is_dir($sFilesDir))
 			{
 				Core_File::copyDir($sFilesDir, CMS_FOLDER);
 			}
 
 			// Размещаем SQL из описания обновления
-			$sSqlFilename = $tmpDir . '/update.sql';
+			$sSqlFilename = $oMarket_Controller->tmpDir . '/update.sql';
 			if (is_file($sSqlFilename))
 			{
 				$sSqlCode = Core_File::read($sSqlFilename);
@@ -164,7 +164,7 @@ class Update_Module_Entity extends Core_Entity
 			}
 
 			// Размещаем PHP из описания обновления
-			$sPhpFilename = $tmpDir . '/update.php';
+			$sPhpFilename = $oMarket_Controller->tmpDir . '/update.php';
 			if (is_file($sPhpFilename))
 			{
 				include($sPhpFilename);
@@ -173,7 +173,7 @@ class Update_Module_Entity extends Core_Entity
 			clearstatcache();
 
 			// Удаляем папку с файлами в случае с успешной установкой
-			is_dir($tmpDir) && Core_File::deleteDir($tmpDir);
+			is_dir($oMarket_Controller->tmpDir) && Core_File::deleteDir($oMarket_Controller->tmpDir);
 
 			$message = Core::_('Update.install_success', $this->name);
 

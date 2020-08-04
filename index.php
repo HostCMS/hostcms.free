@@ -100,7 +100,7 @@ do {
 	{
 		$a = explode('-', $sKey) + array(0, 0, 0, 0);
 
-		!(Core::convert64b32(Core::convert64b32(hexdec($a[3])) ^ abs(Core::crc32($b))) ^ ~(Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & abs(Core::crc32($b)) ^ Core::convert64b32(hexdec($a[2])))) && Core::$url['key'] = $sKey;
+		strlen($a[2]) == 8 && strlen($a[3]) == 8 && !(Core::convert64b32(Core::convert64b32(hexdec($a[3])) ^ abs(Core::crc32($b))) ^ ~(Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms')) & abs(Core::crc32($b)) ^ Core::convert64b32(hexdec($a[2])))) && Core::$url['key'] = $sKey;
 	}
 	array_shift($d);
 } while(count($d) > 1);

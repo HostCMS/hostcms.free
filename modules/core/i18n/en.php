@@ -64,7 +64,7 @@ return array(
 
 	'error_log_attempt_to_access' => "Attempt to access %s by unregistered user was denied",
 	'error_log_several_modules' => "Error! Several identical modules were founded!",
-	'error_log_access_was_denied' => "Access denied to %s",
+	'error_log_access_was_denied' => "Access denied to module '%s'",
 	'error_log_module_disabled' => "Module %s is disabled",
 	'error_log_module_access_allowed' => "Access allowed to module \"%s\"",
 	'error_log_action_access_allowed' => "Action \"%s\" of form \"%s\"",

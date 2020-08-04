@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -33,8 +33,9 @@ $oAdmin_View
 		Core_Message::show(Core::_('typograph.warning'))
 	);
 
-$sText = Typograph_Controller::instance()
-	->process(Core_Array::getPost('text'), Core_Array::getPost('trailing_punctuation', FALSE));
+$trailing_punctuation = Core_Array::getPost('trailing_punctuation', FALSE);
+
+$sText = Typograph_Controller::instance()->process(Core_Array::getPost('text'), $trailing_punctuation);
 
 $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)
@@ -50,7 +51,8 @@ $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 		Admin_Form_Entity::factory('Checkbox')
 			->name('trailing_punctuation')
 			->caption(Core::_('typograph.trailing_punctuation'))
-			->value(Core_Array::getPost('trailing_punctuation'))
+			->checked($trailing_punctuation)
+			->value(1)
 	);
 
 // Оттипографированный текст

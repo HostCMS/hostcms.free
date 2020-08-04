@@ -356,26 +356,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	* Set $this->_oCurrentItem
-	* @param Shop_Item_Model $oCurrentItem
-	* @return self
-	*/
-	public function setCurrentItem(Shop_Item_Model $oCurrentItem)
-	{
-		$this->_oCurrentItem = $oCurrentItem;
-		return $this;
-	}
-
-	/**
-	 * Get $this->_oCurrentItem
-	 * @return Shop_Item_Model $oCurrentItem
-	 */
-	public function getCurrentItem()
-	{
-		return $this->_oCurrentItem;
-	}
-
-	/**
 	 * Initialization
 	 * @return self
 	 */
@@ -397,10 +377,58 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		// Инициализация текущей специальной цены для товара
 		$this->_oCurrentShopSpecialPrice = Core_Entity::factory('Shop_Specialprice');
 
-		$this->_oCurrentOrder = NULL;
-		$this->_oCurrentOrderItem = NULL;
+		$this->_oCurrentOrder = $this->_oCurrentOrderItem = NULL;
 
 		return $this;
+	}
+
+	/**
+	 * Get $this->_oCurrentShop
+	 * @return Shop_Model $oCurrentShop
+	 */
+	public function getCurrentShop()
+	{
+		return $this->_oCurrentShop;
+	}
+
+	/**
+	* Set $this->_oCurrentItem
+	* @param Shop_Item_Model $oCurrentItem
+	* @return self
+	*/
+	public function setCurrentItem(Shop_Item_Model $oCurrentItem)
+	{
+		$this->_oCurrentItem = $oCurrentItem;
+		return $this;
+	}
+
+	/**
+	 * Get $this->_oCurrentItem
+	 * @return Shop_Item_Model
+	 */
+	public function getCurrentItem()
+	{
+		return $this->_oCurrentItem;
+	}
+
+	/**
+	* Set $this->_oCurrentOrder
+	* @param Shop_Order_Model $oCurrentOrder
+	* @return self
+	*/
+	public function setCurrentOrder(Shop_Order_Model $oCurrentOrder)
+	{
+		$this->_oCurrentOrder = $oCurrentOrder;
+		return $this;
+	}
+
+	/**
+	 * Get $this->_oCurrentOrder
+	 * @return Shop_Order_Model
+	 */
+	public function getCurrentOrder()
+	{
+		return $this->_oCurrentOrder;
 	}
 
 	/**
@@ -735,11 +763,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 * Импорт CSV
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImport
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterImport
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeSwitch
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeFindByMarking
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterFindByMarking
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.oBeforeAdminUpload
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeAdminUpload
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeImportItemProperty
-	 * @hostcms-event Shop_Item_Import_Csv_Controller.oBeforeCaseDefault
+	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeCaseDefault
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onBeforeAssociated
 	 * @hostcms-event Shop_Item_Import_Csv_Controller.onAfterImportItem
 	 */
@@ -826,6 +855,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 				if ($sData != '')
 				{
+					Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeSwitch', $this, array($this->csv_fields[$iKey], $sData));
+
 					switch ($this->csv_fields[$iKey])
 					{
 						//=================ЗАКАЗЫ=================//
@@ -1360,7 +1391,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								}
 
 								try {
-									Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+									Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 									$aTmpReturn = Core_Event::getLastReturn();
 									is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -1476,7 +1507,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								}
 
 								try {
-									Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+									Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 									$aTmpReturn = Core_Event::getLastReturn();
 									is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -2050,7 +2081,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						default:
 							$sFieldName = $this->csv_fields[$iKey];
 
-							Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeCaseDefault', $this, array($sFieldName, $sData));
+							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeCaseDefault', $this, array($sFieldName, $sData));
 
 							if (strpos($sFieldName, "price-") === 0)
 							{
@@ -2265,7 +2296,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					// Если склада не существует, связь не добавляется
 					if (!is_null($oShop_Warehouse->id))
 					{
-						$rest = $oShop_Warehouse->getRest($this->_oCurrentItem->id);
+						//$rest = $oShop_Warehouse->getRest($this->_oCurrentItem->id);
+						$oShop_Warehouse_Items = $this->_oCurrentItem->Shop_Warehouse_Items->getByWarehouseId($oShop_Warehouse->id, FALSE);
+						$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
+
 						$newRest = Shop_Controller::instance()->convertPrice($iWarehouseCount);
 
 						if (is_null($rest) || $rest != $newRest)
@@ -2506,7 +2540,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 						try
 						{
-							Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 							$aTmpReturn = Core_Event::getLastReturn();
 							is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -2625,7 +2659,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$aPicturesParam['small_image_preserve_aspect_ratio'] = $this->_oCurrentShop->preserve_aspect_ratio_small;
 
 							try {
-								Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+								Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 								$aTmpReturn = Core_Event::getLastReturn();
 								is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -2790,7 +2824,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						}
 
 						try {
-							Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+							Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 							$aTmpReturn = Core_Event::getLastReturn();
 							is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 
@@ -3269,7 +3303,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 
 					try {
-						Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+						Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 						$aTmpReturn = Core_Event::getLastReturn();
 						is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 						$aResult = Core_File::adminUpload($aPicturesParam);
@@ -3549,7 +3583,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				}
 
 				try {
-					Core_Event::notify('Shop_Item_Import_Csv_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+					Core_Event::notify('Shop_Item_Import_Csv_Controller.onBeforeAdminUpload', $this, array($aPicturesParam));
 					$aTmpReturn = Core_Event::getLastReturn();
 					is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
 					$aResult = Core_File::adminUpload($aPicturesParam);

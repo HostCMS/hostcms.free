@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Templater extends Core_Meta
 {
@@ -88,36 +88,58 @@ class Core_Templater extends Core_Meta
 	/**
 	 * Decorate template number input
 	 * @param object $oInput
+	 * @param array $aOptions
 	 * @return self
 	 */
-	static public function decorateInput($oInput)
+	static public function decorateInput($oInput, array $aOptions = array())
 	{
 		$divId = htmlspecialchars($oInput->id . '_template');
 
-		$oInput
-			->add(Core::factory('Core_Html_Entity_Code')
-				->value('
-					<div class="input-group-btn">
-						<div id="' . $divId . '" class="margin-left-10">
-							<a href="javascript:void(0)" data-content="{day}" class="btn btn-success btn-xs">' . Core::_('Core.day') . '</a>
-							<a href="javascript:void(0)" data-content="{month}" class="btn btn-info btn-xs margin-left-5">' . Core::_('Core.month') . '</a>
-							<a href="javascript:void(0)" data-content="{year}" class="btn btn-warning btn-xs margin-left-5">' . Core::_('Core.year') . '</a>
-							<a href="javascript:void(0)" data-content="{rand(10000,99999)}" class="btn btn-danger btn-xs margin-left-5">' . Core::_('Core.random') . '</a>
-						</div>
-					</div>
-
-					<script>
-					$(function(){
-
-
-						$("#'. $divId  .' a[data-content]").on("click", function(){
-							var oInput = $(this).parents(".input-group").find("input#' . htmlspecialchars($oInput->id) . '");
-
-							oInput.val(oInput.val() + $(this).data("content"));
-						});
-					});
-					</script>
-				')
+		if (!count($aOptions))
+		{
+			$aOptions = array(
+				'{day}' => array(
+					'caption' => Core::_('Core.day'),
+					'color' => 'success'
+				),
+				'{month}' => array(
+					'caption' => Core::_('Core.month'),
+					'color' => 'info'
+				),
+				'{year}' => array(
+					'caption' => Core::_('Core.year'),
+					'color' => 'warning'
+				),
+				'{rand(10000,99999)}' => array(
+					'caption' => Core::_('Core.random'),
+					'color' => 'danger'
+				)
 			);
+		}
+
+		$sData = '<div class="input-group-btn">
+			<div id="' . $divId . '" class="margin-left-10">';
+
+		$i = 0;
+
+		foreach ($aOptions as $key => $aParam)
+		{
+			$bMargin = $i ? 'margin-left-5' : '';
+
+			$sData .= '<a href="javascript:void(0)" data-content="' . $key . '" class="btn btn-' . $aParam['color'] . ' btn-xs ' . $bMargin . '">' . $aParam['caption'] . '</a>';
+
+			$i++;
+		}
+
+		$sData .= '</div>
+			</div>
+			<script>$(function(){
+				$("#'. $divId  .' a[data-content]").on("click", function(){
+					var oInput = $(this).parents(".input-group").find("input#' . htmlspecialchars($oInput->id) . '");
+					oInput.val(oInput.val() + $(this).data("content"));
+				});
+			});</script>';
+
+		$oInput->add(Core::factory('Core_Html_Entity_Code')->value($sData));
 	}
 }

@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -28,7 +28,7 @@ $oShopGroup = Core_Entity::factory('Shop_Group', Core_Array::getRequest('shop_gr
 $aOptions = array();
 
 $oModule = Core_Entity::factory('Module')->getByPath($sModule);
-if (!is_null($oModule))
+if (!is_null($oModule) && Core::moduleIsActive('printlayout'))
 {
 	$aPrintlayouts = Core_Entity::factory('Printlayout')->getAvailable($oModule->id, 15);
 
@@ -38,7 +38,7 @@ if (!is_null($oModule))
 	}
 }
 
-if (!is_null(Core_Array::getPost('start')))
+if (!is_null(Core_Array::getPost('start')) && Core::moduleIsActive('printlayout'))
 {
 	$oPrintlayout = Core_Entity::factory('Printlayout', intval(Core_Array::getPost('printlayout_id', 0)));
 

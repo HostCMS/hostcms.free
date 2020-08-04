@@ -82,11 +82,27 @@ abstract class Core_Session
 			// При повторном запуске $_SESSION уже будет
 			//if (Core_Array::getRequest(self::getName())/* && !isset($_SESSION)*/)
 			//{
-				@session_start();
-				self::$_started = TRUE;
-				self::$_hasSessionId = TRUE;
-			//}
+			@session_start();
 
+			if (!self::$_started)
+			{
+				//echo $error = error_get_last();
+				if (Core_Array::getRequest('_', FALSE))
+				{
+					Core::showJson(array('error' => Core_Message::get(self::$_error, 'error'), 'form_html' => NULL));
+				}
+				else
+				{
+					// Service Unavailable
+					Core_Response::sendHttpStatusCode(503);
+
+					throw new Core_Exception(self::$_error . 'Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 500);</script>');
+				}
+			}
+
+			//self::$_started = TRUE; // Moved to Read & Lock
+			self::$_hasSessionId = TRUE;
+			//}
 			//self::_setCookie();
 		}
 
@@ -112,7 +128,7 @@ abstract class Core_Session
 			? session_status() === PHP_SESSION_ACTIVE
 			: session_id() !== '';
 	}
-	
+
 	/**
 	 * Backward compatibility, see isActive()
 	 * @return boolean
@@ -245,20 +261,41 @@ abstract class Core_Session
 	 */
 	static public function close()
 	{
-		//if (self::$_started)
-		//{
-			self::$_started = FALSE;
-
+		if (self::$_started)
+		{
 			if (self::isActive())
 			{
 				session_write_close();
 			}
 
+			self::$_started = FALSE;
+
 			// cause session_destroy(): Trying to destroy uninitialized session
 			//self::$_handler = NULL;
-		//}
+		}
 
 		return TRUE;
+	}
+
+	/**
+	 * Destroy Session
+	 * @param string $id session ID
+	 * @return boolean
+	 */
+	static public function destroy($id)
+	{
+		return self::$_handler->sessionDestroyer($id);
+	}
+
+	static protected $_error = NULL;
+
+	/**
+	 * Show error
+	 * @param string $content
+	 */
+	protected function _error($content)
+	{
+		self::$_error = $content;
 	}
 
 	/**
@@ -301,7 +338,6 @@ abstract class Core_Session
 			? intval(self::$_maxlifetime)
 			: intval(ini_get('session.gc_maxlifetime'));
 	}
-
 
 	/**
 	 * The open callback works like a constructor in classes and is executed when the session is being opened.

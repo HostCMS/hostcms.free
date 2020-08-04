@@ -26,6 +26,8 @@ return array(
 	'id' => 'ID',
 	'active'=> 'Active',
 	'changeActive_success' => "Information successfully changed",
+	'turnOn_success' => "Districts of city turn on!",
+	'switchOff_success' => "Districts of city switch off!",
 
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',

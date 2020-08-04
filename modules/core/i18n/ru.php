@@ -17,6 +17,7 @@ return array(
 	'error_log_message_stack' => "Файл: %s, строка %s",
 	'error_log_message_short' => "<strong>%s:</strong> %s в файле %s (строка %s)",
 	'error_log_message' => "<strong>%s:</strong> %s в файле %s (строка %s)\nСтек вызовов:\n%s",
+	'error_log_add_message' => "<strong>Ошибка!</strong> Сообщение об ошибке занесено в журнал.",
 
 	'info_cms' => 'Система управления сайтом',
 	'info_cms_site_support' => 'Техническая поддержка сайта: ',
@@ -64,8 +65,8 @@ return array(
 
 	'error_log_attempt_to_access' => "Попытка доступа к модулю %s незарегистрированным пользователем",
 	'error_log_several_modules' => "Ошибка! Найдено несколько экземпляров одинаковых модулей!",
-	'error_log_access_was_denied' => "Доступ к модулю %s запрещен",
-	'error_log_module_disabled' => "Модуль %s отключен",
+	'error_log_access_was_denied' => "Доступ к модулю '%s' запрещен",
+	'error_log_module_disabled' => "Модуль '%s' отключен",
 	'error_log_module_access_allowed' => "Доступ к модулю \"%s\" разрешен",
 	'error_log_action_access_allowed' => "Выполнено действие \"%s\", формы \"%s\"",
 	'error_log_logged' => "Вход в систему управления",
@@ -154,7 +155,7 @@ return array(
 	'kbyte' => 'КБ',
 	'mbyte' => 'МБ',
 	'gbyte' => 'ГБ',
-	
+
 	'timePeriodSeconds' => '%s сек. назад',
 	'timePeriodMinutes' => '%s мин. назад',
 	'timePeriodHours' => '%s час. назад',
@@ -163,6 +164,13 @@ return array(
 	'timePeriodMonths' => '%s мес. назад',
 	'timePeriodYears' => '%s г. назад',
 	'timePeriodYearMonths' => '%s г. %s мес. назад',
+	
+	'shortTitleSeconds' => 'с.',
+	'shortTitleSeconds_1' => 'сек.',
+	'shortTitleMinutes' => 'м.',
+	'shortTitleHours' => 'ч.',
+	'shortTitleDays' => 'д.',	
+	'shortTitleYears' => 'г.',
 
 	'now' => 'Сейчас',
 	'ago' => '%1$s %2$s назад',
@@ -171,7 +179,7 @@ return array(
 	'tomorrow' => 'Завтра',
 	'estimate_date' => '%1$d %2$s',
 	'estimate_date_year' => '%1$d %2$s %3$d г.',
-	
+
 	'time_postfix' => ' в %s',
 
 	'month1' => 'января',
@@ -199,16 +207,39 @@ return array(
 	'capitalMonth10' => 'Октябрь',
 	'capitalMonth11' => 'Ноябрь',
 	'capitalMonth12' => 'Декабрь',
-	
+
 	'hour_nominative' => 'час',
 	'hour_genitive_singular' => 'часа',
 	'hour_genitive_plural' => 'часов',
 	'minute_nominative' => 'минуту',
 	'minute_genitive_singular' => 'минуты',
 	'minute_genitive_plural' => 'минут',
-	
+
 	'day' => 'День',
 	'month' => 'Месяц',
 	'year' => 'Год',
 	'random' => 'Случайный',
+
+	'title_no_access_to_page' => 'У Вас недостаточно прав доступа к данной странице!',
+	'message_more_info' => 'За более подробной информацией обратитесь к администратору сайта.',
+	'title_domain_must_be_added' => 'Необходимо добавить домен {$domain} в список поддерживаемых системой управления сайтом HostCMS!',
+	'message_domain_must_be_added' => 'Домен <b>%s</b> необходимо добавить в список поддерживаемых системой управления сайтом <b>HostCMS</b>!',
+	'add_domain_instruction1' => 'Для добавления домена перейдите в <b><a href="/admin/site/index.php" target="_blank">"Раздел администрирования" → "Система" → "Сайты"</a></b>.',
+	'add_domain_instruction2' => 'Выберите пиктограмму <b>"Домены"</b> для требуемого сайта. На открывшейся странице нажмите на ссылку <b>"Домен"</b> → <b>"Добавить"</b>.',
+	'home_page_not_found' => 'Не найдена главная страница сайта',
+	'message_home_page_must_be_added' => 'Вам необходимо добавить главную страницу в <b>"Раздел администрирования" → "Структура сайта"</b>. <br /><b>"Название раздела"</b> для главной страницы должно быть "<b>/</b>".',
+	'site_disabled_by_administrator' => 'Сайт %s отключен администратором и в данный момент недоступен!',
+	'site_activation_instruction' => 'Для включения сайта перейдите в раздел «Сайты» и установите значение «Активность» требуемого сайта.',
+	'title_limit_available_sites_exceeded' => 'Превышен лимит доступных сайтов в системе!',
+	'message_limit_available_sites_exceeded' => 'Превышен лимит доступных активных сайтов в системе управления сайтом HostCMS!',
+	'message_remove_unnecessary_sites' => 'Удалите лишние сайты из системы (<b>"Раздел администрирования" → "Сайты"</b>) или приобретите версию без ограничения многосайтовости.',
+	'missing_template_for_page' => 'Отсутствует макет для страницы!',
+	'change template instruction' => 'Вам необходимо изменить макет для данной страницы в <b>"Раздел администрирования" → "Структура сайта"</b>. Для статичных страниц макет указываете в <b>"Раздел администрирования" → "Страницы и документы"</b>.',
+	'hosting_mismatch_system_requirements' => 'Несоответствие хостинга системным требованиям!',
+	'requires_php5' => 'Для работы системы управления сайтом HostCMS необходим один PHP 5 с установленной поддержкой <a href="http://www.hostcms.ru/documentation/libxslt/" target="_blank">Libxslt</a>.',
+	'list_tested_hosting' => 'На нашем сайте также размещен <a href="http://www.hostcms.ru/hosting/" target="_blank">список протестированных хостингов</a>, подходящих для работы HostCMS.',
+
+	'show_title' => 'Показывать',
+	'data_show_title' => 'Показывать на сайте',
+
 );

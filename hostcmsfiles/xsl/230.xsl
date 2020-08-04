@@ -401,10 +401,21 @@
 	<xsl:template match="list/list_item">
 		<xsl:variable name="list_item_id" select="@id"/>
 
+		<xsl:variable name="value">
+			<xsl:choose>
+				<xsl:when test="/shop/filter_mode = 1 and path != ''">
+					<xsl:value-of select="path" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="value" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+
 		<xsl:if test="../../filter = 2">
 			<!-- Отображаем список -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<option value="{@id}" data-property="{../../tag_name}" data-value="{value}">
+			<option value="{@id}" data-property="{../../tag_name}" data-value="{$value}">
 			<xsl:if test="/shop/*[name()=$nodename] = @id"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
 				<xsl:value-of select="value"/>
 
@@ -417,7 +428,7 @@
 			<!-- Отображаем переключатели -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
 			<br/>
-			<input type="radio" name="property_{../../@id}" value="{@id}" id="id_property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{value}">
+			<input type="radio" name="property_{../../@id}" value="{@id}" id="id_property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{$value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="checked">checked</xsl:attribute>
 				</xsl:if>
@@ -433,7 +444,7 @@
 		<xsl:if test="../../filter = 4">
 			<!-- Отображаем флажки -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<input type="checkbox" value="{@id}" name="property_{../../@id}[]" id="property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{value}">
+			<input type="checkbox" value="{@id}" name="property_{../../@id}[]" id="property_{../../@id}_{@id}" data-property="{../../tag_name}" data-value="{$value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="checked">checked</xsl:attribute>
 				</xsl:if>
@@ -450,7 +461,7 @@
 		<xsl:if test="../../filter = 7">
 			<!-- Отображаем список -->
 			<xsl:variable name="nodename">property_<xsl:value-of select="../../@id"/></xsl:variable>
-			<option value="{@id}" data-property="{../../tag_name}" data-value="{value}">
+			<option value="{@id}" data-property="{../../tag_name}" data-value="{$value}">
 				<xsl:if test="/shop/*[name()=$nodename] = @id">
 					<xsl:attribute name="selected">
 					</xsl:attribute>
@@ -465,7 +476,18 @@
 	</xsl:template>
 
 	<xsl:template match="shop_producer">
-		<option value="{@id}" data-producer="{name}">
+		<xsl:variable name="name">
+			<xsl:choose>
+				<xsl:when test="/shop/filter_mode = 0">
+					<xsl:value-of select="name" />
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="path" />
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+
+		<option value="{@id}" data-producer="{$name}">
 			<xsl:if test="/shop/producer_id = @id">
 				<xsl:attribute name="selected">selected</xsl:attribute>
 			</xsl:if>

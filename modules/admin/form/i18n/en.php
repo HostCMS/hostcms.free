@@ -145,4 +145,7 @@ return array(
 
 	'tabProperties' => 'Properties',
 	'non_subject' => '<No subject>',
+
+	'male' => 'Male',
+	'female' => 'Female',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
@@ -49,7 +49,7 @@ class Shop_Price_Setting_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['posted'] = 1;
+			$this->_preloadValues['posted'] = 0;
 		}
 	}
 
@@ -241,7 +241,8 @@ class Shop_Price_Setting_Model extends Core_Entity
 	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 10);
+		Core::moduleIsActive('printlayout')
+			&& Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 10);
 	}
 
 	/**

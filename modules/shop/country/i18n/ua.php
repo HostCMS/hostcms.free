@@ -17,6 +17,8 @@ return array(
 	'alpha2' => 'Код держави',
 	'active' => 'Активність',
 	'changeActive_success' => "Інформація успішно змінена",
+	'turnOn_success' => "Країни включені!",
+	'switchOff_success' => "Країни вимкнені!",
 
 	'language_tab' => 'Мовні версії',
 	'name_en' => 'Англійською',

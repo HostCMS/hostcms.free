@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Index_Not_Found extends Core_Command_Controller
 {
@@ -27,14 +27,14 @@ class Core_Command_Controller_Index_Not_Found extends Core_Command_Controller
 
 		Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oCore_Response
 			->status(503)
 			->header('Content-Type', "text/html; charset=UTF-8")
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$title = "Не найдена главная страница сайта!";
+		$title = Core::_('Core.home_page_not_found');
 
 		ob_start();
 		$oSkin = Core_Skin::instance()
@@ -45,8 +45,7 @@ class Core_Command_Controller_Index_Not_Found extends Core_Command_Controller
 		Core::factory('Core_Html_Entity_Div')
 			->class('indexMessage')
 			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Вам необходимо добавить главную страницу в <b>"Раздел администрирования" &#8594; "Структура сайта"</b>. <br /><b>"Название раздела"</b> для главной страницы должно быть "<b>/</b>".'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.message_home_page_must_be_added')
 			))
 			->execute();
 

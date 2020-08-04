@@ -253,7 +253,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 			foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 			{
-				$aParentGroups = array();
+				/*$aParentGroups = array();
 
 				$aTmpGroup = $oInformationsystem_Group;
 
@@ -262,7 +262,9 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 					$aParentGroups[] = $aTmpGroup->name;
 				} while ($aTmpGroup = $aTmpGroup->getParent());
 
-				$sParents = implode(' → ', array_reverse($aParentGroups));
+				$sParents = implode(' → ', array_reverse($aParentGroups));*/
+
+				$sParents = $oInformationsystem_Group->groupPathWithSeparator();
 
 				$aJSON[] = array(
 					'id' => $oInformationsystem_Group->id,
@@ -766,12 +768,7 @@ $oAdmin_Form_Dataset
 	->addCondition(
 		array('where' => array('informationsystem_id', '=', $iInformationsystemId))
 	)
-	->changeField('active', 'link', '/admin/informationsystem/item/index.php?hostcms[action]=changeActive&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}')
-	->changeField('active', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}', action: 'changeActive', windowId: '{windowId}'}); return false")
-	->changeField('indexing', 'link', '/admin/informationsystem/item/index.php?hostcms[action]=changeIndexation&hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}')
-	->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/informationsystem/item/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&informationsystem_group_id={informationsystem_group_id}&informationsystem_id={informationsystem_id}',action: 'changeIndexation', windowId: '{windowId}'}); return false")
 	->changeField('adminComment', 'type', 10)
-	//->changeField('name', 'type', 1)
 	->changeField('active', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
 	->changeField('indexing', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
 	->changeField('img', 'type', 10);

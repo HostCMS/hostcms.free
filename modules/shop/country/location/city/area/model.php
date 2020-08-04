@@ -170,4 +170,28 @@ class Shop_Country_Location_City_Area_Model extends Core_Entity
 
 		return $this;
 	}
+	
+	/**
+	 * Turn on active status
+	 * @return self
+	 */
+	public function turnOn()
+	{
+		$this->active = 1;
+		$this->save();
+
+		return $this;
+	}
+
+	/**
+	 * Switch off active status
+	 * @return self
+	 */
+	public function switchOff()
+	{
+		$this->active = 0;
+		$this->save();
+
+		return $this;
+	}	
 }

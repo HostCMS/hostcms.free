@@ -134,6 +134,7 @@ class Shop_Model extends Core_Entity
 		'shop_country' => array(),
 		'shop_currency' => array(),
 		'shop_order_status' => array(),
+		'shop_codetype' => array(),
 		'shop_measure' => array(),
 		'default_shop_measure' => array('model' => 'Shop_Measure', 'foreign_key' => 'default_shop_measure_id'),
 		'user' => array(),
@@ -441,6 +442,7 @@ class Shop_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -679,6 +681,8 @@ class Shop_Model extends Core_Entity
 		{
 			$newObject->add($oShop_Warehouse->copy());
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -975,14 +979,14 @@ class Shop_Model extends Core_Entity
 		$this->shop_measure_id && $this->addEntity($this->Shop_Measure->clearEntities());
 		$this->shop_company_id && $this->addEntity($this->Shop_Company->clearEntities());
 
-		$this->addEntity(
+		$this->size_measure !== '' && $this->addEntity(
 			Core::factory('Core_Xml_Entity')
-					->name('size_measure')
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('name')
-							->value(Core::_('Shop.size_measure_' . $this->size_measure))
-					)
+				->name('size_measure')
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('name')
+						->value(Core::_('Shop.size_measure_' . $this->size_measure))
+				)
 		);
 
 		// Warehouses

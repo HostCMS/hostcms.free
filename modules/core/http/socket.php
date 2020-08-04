@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Http
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Socket extends Core_Http
 {
@@ -44,7 +44,7 @@ class Core_Http_Socket extends Core_Http
 			);
 		}
 
-		$out = "{$this->_method} {$path}{$query} HTTP/1.0\r\n";
+		$out = "{$this->_method} {$path}{$query} HTTP/1.1\r\n";
 		$out .= "Content-Type: {$this->_contentType}\r\n";
 		$out .= "Referer: {$this->_referer}\r\n";
 		$out .= "User-Agent: {$this->_userAgent}\r\n";
@@ -100,10 +100,11 @@ class Core_Http_Socket extends Core_Http
 		while (!feof($fp))
 		{
 			$line = fgets($fp, 65536);
-			/*if ($line === FALSE)
+
+			if ($line === FALSE)
 			{
-				throw new Core_Exception("HostCMS: Socket closed by the server!");
-			}*/
+				break;
+			}
 
 			$this->_body .= $line;
 
@@ -113,6 +114,7 @@ class Core_Http_Socket extends Core_Http
 				throw new Exception("HostCMS: Timed Out, socket closed by the server!");
 			}
 
+			// Explode header until data is short
 			if (is_null($this->_headers) && strlen($this->_body) > 2048)
 			{
 				$this->_explode();
@@ -122,11 +124,6 @@ class Core_Http_Socket extends Core_Http
 		fclose($fp);
 
 		is_null($this->_headers) && $this->_explode();
-
-		/*$aTmp = explode("\r\n\r\n", $datastr, 2);
-		unset ($datastr);
-		$this->_headers = Core_Array::get($aTmp, 0);
-		$this->_body = Core_Array::get($aTmp, 1);*/
 
 		return $this;
 	}
@@ -145,5 +142,43 @@ class Core_Http_Socket extends Core_Http
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get decompressed body
+	 * @return string
+	 */
+	public function getDecompressedBody()
+	{
+		$return = parent::getDecompressedBody();
+
+		$aHeaders = array_change_key_case($this->parseHeaders(), CASE_LOWER);
+
+		if (isset($aHeaders['transfer-encoding']))
+		{
+			$encoding = is_array($aHeaders['transfer-encoding'])
+				? end($aHeaders['transfer-encoding'])
+				: $aHeaders['transfer-encoding'];
+
+			switch ($encoding)
+			{
+				// Transfer-Encoding: chunked
+				case 'chunked':
+					$res = '';
+					do
+					{
+						$nextCRLF = strpos($return, "\r\n");
+						$blockLen = hexdec(substr($return, 0, $nextCRLF));
+						$res .= substr($return, $nextCRLF + 2, $blockLen);
+						$return = substr($return, $nextCRLF + 4 + $blockLen); // <HEX-len><CRLF><content><CRLF>
+					} while ($blockLen);
+					$return = $res;
+				break;
+				default:
+					throw new Core_Exception('Core_Http_Socket unsupported transfer encoding "%name"', array('%name' => $encoding));
+			}
+		}
+
+		return $return;
 	}
 }

@@ -574,6 +574,7 @@ class Template_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event template.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -596,6 +597,8 @@ class Template_Model extends Core_Entity
 			$subTemplate->template_id = $newObject->id;
 			$subTemplate->save();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -623,13 +626,13 @@ class Template_Model extends Core_Entity
 					$css = 'SCSS';
 				break;
 			}
-			
+
 			Core::factory('Core_Html_Entity_Span')
 				->class('label label-info')
 				->value($css)
 				->execute();
 		}
-		
+
 		if (strlen($this->loadTemplateJsFile()))
 		{
 			Core::factory('Core_Html_Entity_Span')
@@ -637,7 +640,7 @@ class Template_Model extends Core_Entity
 				->value('JS')
 				->execute();
 		}
-		
+
 		$count = $this->Templates->getCount();
 		$count > 0 && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-hostcms badge-square')

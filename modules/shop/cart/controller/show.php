@@ -470,7 +470,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$fAppliedDiscountsAmount > $this->amount && $fAppliedDiscountsAmount = $this->amount;
 		}
 
-		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
+		// Не применять максимальную скидку или сумма по карте больше, чем скидка от суммы заказа
 		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
 		{
 			if ($fDiscountcard)

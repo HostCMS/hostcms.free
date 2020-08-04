@@ -318,6 +318,7 @@ class Shop_Seller_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_seller.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -334,6 +335,8 @@ class Shop_Seller_Model extends Core_Entity
 			Core_File::copy($this->getSmallFilePath(), $newObject->getSmallFilePath());
 		}
 		catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

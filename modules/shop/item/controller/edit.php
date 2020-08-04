@@ -690,8 +690,17 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow6->add($oImageField);
 
 				$oMainTab
-					->move($this->getField('marking')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow7)
-					->move($this->getField('weight')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4')), $oMainRow7);
+					->move($this->getField('marking')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
+
+				$this->getField('weight')
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
+					->add(
+						Core::factory('Core_Html_Entity_Span')
+							->class('input-group-addon dimension_patch')
+							->value(htmlspecialchars($oShop->Shop_Measure->name))
+					);
+
+				$oMainTab->move($this->getField('weight'), $oMainRow7);
 
 				// Удаляем единицы измерения
 				$oAdditionalTab->delete($this->getField('shop_measure_id'));
@@ -702,7 +711,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow7->add(
 					Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop_Item.shop_measure_id'))
-						->divAttr(array('class' => 'form-group col-xs-6 col-sm-4'))
+						->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
 						->options($Shop_Controller_Edit->fillMeasures())
 						->name('shop_measure_id')
 						->value($this->_object->id
@@ -1067,7 +1076,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							{
 								// Получаем количество товара на текущем складе
 								$oWarehouseItem =
-									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id);
+									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
 
 								$countItems = is_null($oWarehouseItem)
 									? (defined('DEFAULT_REST') ? DEFAULT_REST : 0)
@@ -1153,8 +1162,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				}
 
 				$oMainTab
-					->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow8)
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow8)
+					->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow8)
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7)
 					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
 					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10)
 					->move($this->getField('apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow10);
@@ -1773,7 +1782,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$new_price = floatval(Core_Array::get($this->_formValues, 'price'));
 
-			if ($this->_object->price != $new_price)
+			// Проводку на изменение основной цены при установке "Пересчитать комплект" не делаем
+			if ($this->_object->price != $new_price && !is_null(Core_Array::getPost('apply_recount_set')))
 			{
 				$aTmpPrices[0] = array(
 					'old_price' => floatval($this->_object->price),
@@ -2117,7 +2127,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Обработка складов
 				$aShopWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
-				
+
 				if (count($aShopWarehouses) <= $aConfig['itemEditWarehouseLimit'])
 				{
 					foreach ($aShopWarehouses as $oShopWarehouse)
@@ -2141,29 +2151,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								$price = $this->_object->price;
 							}
 
-							/*$oShopItemWarehouse = $this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
-							if (is_null($oShopItemWarehouse))
-							{
-								$oShopItemWarehouse = Core_Entity::factory('Shop_Warehouse_Item');
-								$oShopItemWarehouse->shop_warehouse_id = $oShopWarehouse->id;
-								$oShopItemWarehouse->shop_item_id = $this->_object->id;
-							}
-
-							$oShopItemWarehouse->count = $iWarehouseValue;
-							$oShopItemWarehouse->save();*/
-
 							if ($bNewObject)
 							{
-								$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
-								$oShop_Warehouse_Incoming->shop_warehouse_id = $oShopWarehouse->id;
-								$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
-								$oShop_Warehouse_Incoming->number = '';
-								$oShop_Warehouse_Incoming->posted = 0;
-								$oShop_Warehouse_Incoming->shop_price_id = $iWarehouseShopPriceId;
-								$oShop_Warehouse_Incoming->save();
-
-								$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
-								$oShop_Warehouse_Incoming->save();
+								$oShop_Warehouse_Incoming = $oShopWarehouse->createShopWarehouseIncoming($iWarehouseShopPriceId);
 
 								$oShop_Warehouse_Incoming_Item = Core_Entity::factory('Shop_Warehouse_Incoming_Item');
 								$oShop_Warehouse_Incoming_Item->shop_item_id = $this->_object->id;
@@ -2178,7 +2168,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								$oWarehouseItem =
 									$this->_object->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id);
 
-								// $rest = $oShopWarehouse->getRest($this->_object->id);
 								$rest = is_null($oWarehouseItem) ? 0 : $oWarehouseItem->count;
 
 								if ($iWarehouseValue != $rest)

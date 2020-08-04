@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Domain_Not_Found extends Core_Command_Controller
 {
@@ -36,7 +36,7 @@ class Core_Command_Controller_Domain_Not_Found extends Core_Command_Controller
 
 		$domain = htmlspecialchars(Core::$url['host']);
 
-		$title = "Необходимо добавить домен {$domain} в список поддерживаемых системой управления сайтом HostCMS!";
+		$title = Core::_('Core.title_domain_must_be_added');
 
 		ob_start();
 		$oSkin = Core_Skin::instance()
@@ -47,14 +47,11 @@ class Core_Command_Controller_Domain_Not_Found extends Core_Command_Controller
 		Core::factory('Core_Html_Entity_Div')
 			->class('indexMessage')
 			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Домен <b>'. $domain.'</b> необходимо добавить в список поддерживаемых системой управления сайтом <b>HostCMS</b>!'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.message_domain_must_be_added', $domain)
 			))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Для добавления домена перейдите в <b><a href="/admin/site/index.php" target="_blank">"Раздел администрирования" → "Система" → "Сайты"</a></b>.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.add_domain_instruction1')
 			))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Выберите пиктограмму <b>"Домены"</b> для требуемого сайта. На открывшейся странице нажмите на ссылку <b>"Домен"</b> → <b>"Добавить"</b>.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.add_domain_instruction2')
 			))
 			->execute();
 

@@ -45,34 +45,37 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			&& $this->getField('datetime')->readonly('readonly');
 
 		// Печать
-		$printlayoutsButton = '
-			<div class="btn-group">
-				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-				<ul class="dropdown-menu dropdown-palegreen">
-		';
-
-		$moduleName = $oAdmin_Form_Controller->module->getModuleName();
-
-		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
-
-		if (!is_null($oModule))
+		if (Core::moduleIsActive('printlayout'))
 		{
-			$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+			$printlayoutsButton = '
+				<div class="btn-group">
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<ul class="dropdown-menu dropdown-palegreen">
+			';
+
+			$moduleName = $oAdmin_Form_Controller->module->getModuleName();
+
+			$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
+
+			if (!is_null($oModule))
+			{
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+			}
+
+			$printlayoutsButton .= '
+					</ul>
+				</div>
+			';
+
+			$oMainRow1
+				->add(Admin_Form_Entity::factory('Div')
+					->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
+					->add(
+						Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+					)
+			);
 		}
-
-		$printlayoutsButton .= '
-				</ul>
-			</div>
-		';
-
-		$oMainRow1
-			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
-				->add(
-					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
-				)
-		);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
@@ -98,19 +101,9 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		// Удаляем поле с идентификатором ответственного сотрудника
 		$oAdditionalTab->delete($this->getField('user_id'));
 
-		$aSelectResponsibleUsers = array();
-
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-		$aCompanies = $oSite->Companies->findAll();
-		foreach ($aCompanies as $oCompany)
-		{
-			$oOptgroupCompany = new stdClass();
-			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
-			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
-
-			$aSelectResponsibleUsers[] = $oOptgroupCompany;
-		}
+		$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
 
 		$oSelectResponsibleUsers = Admin_Form_Entity::factory('Select')
 			->id('user_id')

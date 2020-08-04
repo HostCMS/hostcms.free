@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Address_Controller_Show extends Core_Controller
 {
@@ -64,7 +64,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 		}
 
 		$this->countries = $this->orderProperties = TRUE;
-		
+
 		if (Core_Session::hasSessionId())
 		{
 			Core_Session::start();
@@ -114,7 +114,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 
 			// Список свойств товаров
 			$Shop_Order_Properties = Core::factory('Core_Xml_Entity')
-					->name('shop_order_properties');
+				->name('shop_order_properties');
 
 			$this->addEntity($Shop_Order_Properties);
 

@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'!download' => '-- Не загружать --',
 	'group_id' => 'Идентификатор раздела',
@@ -46,6 +38,7 @@ return array(
 	'item_min_quantity' => 'Мин. кол-во',
 	'item_max_quantity' => 'Макс. кол-во',
 	'item_quantity_step' => 'Шаг',
+	'item_yandex_vendorcode' => 'Код товара от производителя',
 	'item_price' => 'Цена товара',
 	'item_active' => 'Активность товара',
 	'item_sorting' => 'Порядок сортировки товара',
@@ -57,7 +50,6 @@ return array(
 	'item_yandex_market' => 'Флаг "Экспортировать в Яндекс.Маркет"',
 	'item_yandex_market_bid' => 'Яндекс.Маркет основная расценка',
 	'item_yandex_market_cid' => 'Яндекс.Маркет расценка для карточек моделей',
-	'item_yandex_vendorcode' => 'Код товара от производителя',
 
 	'item_yandex_market_manufacturer_warranty' => 'Гарантия производителя',
 	'item_yandex_market_vendorcode' => 'Код товара от производителя',

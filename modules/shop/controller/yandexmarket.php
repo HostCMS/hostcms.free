@@ -648,7 +648,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					{
 						$this->_currentModificationGroupId = $oShop_Item->id;
 					}
-					
+
 					if ($oShop_Item->price > 0)
 					{
 						$this->_showOffer($oShop_Item);
@@ -868,15 +868,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		// barcode
-		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
-		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
-		{
-			// EAN-8 and EAN-13 only
-			if ($oShop_Item_Barcode->type == 1 || $oShop_Item_Barcode->type == 2)
-			{
-				$this->stdOut->write('<barcode>' . Core_Str::xml($oShop_Item_Barcode->value) . '</barcode>'. "\n");
-			}
-		}
+		$this->_addBarcodes($oShop_Item);
 
 		// (name, vendor?, vendorCode?)
 		if (strlen($oShop_Item->name) > 0)
@@ -1002,6 +994,26 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onAfterOffer', $this, array($oShop_Item));
 
 		$this->stdOut->write('</offer>'. "\n");
+
+		return $this;
+	}
+
+	/**
+	 * Add Barcodes
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _addBarcodes(Shop_Item_Model $oShop_Item)
+	{
+		$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
+		foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
+		{
+			// EAN-8 and EAN-13 only
+			if ($oShop_Item_Barcode->type == 1 || $oShop_Item_Barcode->type == 2)
+			{
+				$this->stdOut->write('<barcode>' . Core_Str::xml($oShop_Item_Barcode->value) . '</barcode>'. "\n");
+			}
+		}
 
 		return $this;
 	}
@@ -1171,7 +1183,6 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		foreach ($aProperty_Values as $oProperty_Value)
 		{
-			//$oProperty = $oProperty_Value->Property;
 			$oProperty = $this->_getProperty($oProperty_Value->property_id);
 
 			switch ($oProperty->type)
@@ -1180,9 +1191,15 @@ class Shop_Controller_YandexMarket extends Core_Controller
 				case 1: // String
 				case 4: // Textarea
 				case 6: // Wysiwyg
-				case 8: // Date
-				case 9: // Datetime
 					$value = $oProperty_Value->value;
+				break;
+
+				case 8: // Date
+					$value = Core_Date::sql2date($oProperty_Value->value);
+				break;
+
+				case 9: // Datetime
+					$value = Core_Date::sql2datetime($oProperty_Value->value);
 				break;
 
 				case 3: // List

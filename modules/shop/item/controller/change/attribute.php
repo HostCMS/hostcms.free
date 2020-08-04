@@ -203,6 +203,24 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.apply_purchase_discount'))
 				->controller($window_Admin_Form_Controller);
 
+			$oAdmin_Form_Entity_Input_Min_Quantity = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->name('min_quantity')
+				->caption(Core::_('Shop_Item.min_quantity'))
+				->controller($window_Admin_Form_Controller);
+
+			$oAdmin_Form_Entity_Input_Max_Quantity = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->name('max_quantity')
+				->caption(Core::_('Shop_Item.max_quantity'))
+				->controller($window_Admin_Form_Controller);
+
+			$oAdmin_Form_Entity_Input_Quantity_Step = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->name('quantity_step')
+				->caption(Core::_('Shop_Item.quantity_step'))
+				->controller($window_Admin_Form_Controller);
+
 			$oCore_Html_Entity_Form
 				->add($oAdmin_Form_Entity_Select_Currencies)
 				->add($oAdmin_Form_Entity_Select_Measures)
@@ -213,6 +231,9 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->add($oAdmin_Form_Entity_Select_Indexing)
 				->add($oAdmin_Form_Entity_Select_Yandex)
 				->add($oAdmin_Form_Entity_Select_Order_Discount)
+				->add($oAdmin_Form_Entity_Input_Min_Quantity)
+				->add($oAdmin_Form_Entity_Input_Max_Quantity)
+				->add($oAdmin_Form_Entity_Input_Quantity_Step)
 				;
 
 			// Идентификаторы переносимых указываем скрытыми полями в форме, чтобы не превысить лимит GET
@@ -225,7 +246,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			{
 				$oAdmin_Form_Dataset_Entity = $this->_Admin_Form_Controller->getDataset($datasetKey);
 
-				if ($oAdmin_Form_Dataset_Entity && get_class($oAdmin_Form_Dataset_Entity->getEntity()) == 'Shop_Item_Model')
+				if ($oAdmin_Form_Dataset_Entity /*&& get_class($oAdmin_Form_Dataset_Entity->getEntity()) == 'Shop_Item_Model'*/)
 				{
 					foreach ($checkedItems as $key => $value)
 					{
@@ -264,7 +285,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			Core::factory('Core_Html_Entity_Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 400, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 480, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -274,31 +295,78 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 		}
 		else
 		{
-			$oShop_Item = $this->_object;
-
-			Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = intval(Core_Array::getPost('shop_currency_id'));
-			Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = intval(Core_Array::getPost('shop_producer_id'));
-			Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = intval(Core_Array::getPost('shop_seller_id'));
-			Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = intval(Core_Array::getPost('shop_measure_id'));
-			Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = intval(Core_Array::getPost('siteuser_group_id'));
-
-			Core_Array::getPost('active') !== '' && $oShop_Item->active = intval(Core_Array::getPost('active'));
-			Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = intval(Core_Array::getPost('indexing'));
-			Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = intval(Core_Array::getPost('yandex_market'));
-			Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = intval(Core_Array::getPost('apply_purchase_discount'));
-
-			$oShop_Item->save();
-
-			$oShop_Item->clearCache();
-
-			// Fast filter
-			if ($oShop_Item->Shop->filter)
+			switch (get_class($this->_object))
 			{
-				$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
-				$Shop_Filter_Controller->fill($oShop_Item);
+				case 'Shop_Item_Model':
+					$this->_applyItem($this->_object);
+				break;
+				case 'Shop_Group_Model':
+					$this->_applyGroup($this->_object);
+				break;
 			}
 		}
 
 		return $this;
+	}
+
+	protected function _applyGroup(Shop_Group_Model $oShop_Group)
+	{
+		$aShop_Items = $oShop_Group->Shop_Items->findAll(FALSE);
+		foreach ($aShop_Items as $oShop_Item)
+		{
+			$this->_applyItem($oShop_Item);
+		}
+
+		$aShop_Groups = $oShop_Group->Shop_Groups->findAll(FALSE);
+		foreach ($aShop_Groups as $oTmp_Shop_Group)
+		{
+			$this->_applyGroup($oTmp_Shop_Group);
+		}
+
+		return $this;
+	}
+
+	protected function _applyItem(Shop_Item_Model $oShop_Item)
+	{
+		Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = intval(Core_Array::getPost('shop_currency_id'));
+		Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = intval(Core_Array::getPost('shop_producer_id'));
+		Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = intval(Core_Array::getPost('shop_seller_id'));
+		Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = intval(Core_Array::getPost('shop_measure_id'));
+		Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = intval(Core_Array::getPost('siteuser_group_id'));
+
+		Core_Array::getPost('active') !== '' && $oShop_Item->active = intval(Core_Array::getPost('active'));
+		Core_Array::getPost('indexing') !== '' && $oShop_Item->indexing = intval(Core_Array::getPost('indexing'));
+		Core_Array::getPost('yandex_market') !== '' && $oShop_Item->yandex_market = intval(Core_Array::getPost('yandex_market'));
+		Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = intval(Core_Array::getPost('apply_purchase_discount'));
+
+		Core_Array::getPost('min_quantity') !== '' && $oShop_Item->min_quantity = floatval(Core_Array::getPost('min_quantity'));
+		Core_Array::getPost('max_quantity') !== '' && $oShop_Item->max_quantity = floatval(Core_Array::getPost('max_quantity'));
+		Core_Array::getPost('quantity_step') !== '' && $oShop_Item->quantity_step = floatval(Core_Array::getPost('quantity_step'));
+
+		$oShop_Item->save();
+
+		$oShop_Item->clearCache();
+
+		// Fast filter
+		if ($oShop_Item->Shop->filter)
+		{
+			$this
+				->_getShop_Filter_Controller($oShop_Item->Shop)
+				->fill($oShop_Item);
+		}
+
+		return $this;
+	}
+
+	protected $_Shop_Filter_Controller = NULL;
+
+	protected function _getShop_Filter_Controller(Shop_Model $oShop)
+	{
+		if (is_null($this->_Shop_Filter_Controller))
+		{
+			$this->_Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
+		}
+
+		return $this->_Shop_Filter_Controller;
 	}
 }

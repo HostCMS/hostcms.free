@@ -151,7 +151,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					'price' => $aPrice['price_tax'] - $aPrice['tax'],
 					'price_with_tax' => $aPrice['price_tax'],
 					'rate' => $aPrice['rate'],
-					'marking' => $oShop_Item->marking,
+					'marking' => strval($oShop_Item->marking), // NULL => ''
 					'currency_id' => $oShop_Currency->id,
 					'currency' => $oShop_Currency->name,
 					'measure' => $measureName,
@@ -301,6 +301,17 @@ $oAdmin_Form_Entity_Menus->add(
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sCountriesFormPath, NULL, NULL, $sAdditionalParam)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Codetype.title'))
+				->icon('fa fa-code')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($sCodesFormPath = '/admin/shop/codetype/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($sCodesFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
 	)->add(

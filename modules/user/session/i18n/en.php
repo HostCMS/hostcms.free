@@ -1,13 +1,12 @@
 <?php
-/**
- * Administration center users.
- *
- * @package HostCMS
- * @subpackage User
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
-return array(
 
+return array(
+	'model_name' => 'Sessions',
+	'title' => 'Sessions',
+	'device0' => 'Desktop',
+	'device1' => 'Tablet',
+	'device2' => 'Mobile phone',
+	'device3' => 'TV',
+	'device4' => 'Watch',
+	'destroy_success' => 'User session destroy!',
 );

@@ -541,17 +541,22 @@ if ($this->_mode != 'blank')
 		// Ajax note creating
 		if (!is_null(Core_Array::getGet('ajaxCreateNote')))
 		{
-			$oUser_Note = Core_Entity::factory('User_Note')->save();
-
-			$oUser_Note->User_Setting
-				->type(98)
-				->position_x(intval(Core_Array::getGet('position_x')))
-				->position_y(intval(Core_Array::getGet('position_y')))
-				->save();
-
 			$oAdmin_Answer = Core_Skin::instance()->answer();
+
+			if (!$oUser->read_only)
+			{
+				$oUser_Note = Core_Entity::factory('User_Note')->save();
+
+				$oUser_Note->User_Setting
+					->type(98)
+					->position_x(intval(Core_Array::getGet('position_x')))
+					->position_y(intval(Core_Array::getGet('position_y')))
+					->save();
+
+				$oAdmin_Answer->content($oUser_Note->id);
+			}
+
 			$oAdmin_Answer
-				->content($oUser_Note->id)
 				->ajax($bAjax)
 				->execute();
 			exit();
@@ -560,18 +565,21 @@ if ($this->_mode != 'blank')
 		// Ajax note changing
 		if (!is_null(Core_Array::getGet('ajaxNote')))
 		{
-			$oUser_Note = Core_Entity::factory('User_Note')->find(intval(Core_Array::getGet('entity_id')));
-
-			if (!is_null($oUser_Note->id) && $oUser_Note->user_id == $oUser->id)
+			if (!$oUser->read_only)
 			{
-				switch (Core_Array::getGet('action'))
+				$oUser_Note = Core_Entity::factory('User_Note')->find(intval(Core_Array::getGet('entity_id')));
+
+				if (!is_null($oUser_Note->id) && $oUser_Note->user_id == $oUser->id)
 				{
-					case 'delete':
-						$oUser_Note->delete();
-					break;
-					case 'save':
-						$oUser_Note->value(Core_Array::getPost('value', ''))->save();
-					break;
+					switch (Core_Array::getGet('action'))
+					{
+						case 'delete':
+							$oUser_Note->delete();
+						break;
+						case 'save':
+							$oUser_Note->value(Core_Array::getPost('value', ''))->save();
+						break;
+					}
 				}
 			}
 

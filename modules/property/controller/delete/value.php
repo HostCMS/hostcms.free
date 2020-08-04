@@ -109,7 +109,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 			else
 			{
 				// Св-во не найдено
-				$this->addMessage("Свойство не найдено");
+				$this->addMessage(Core::_('Property.property_not_found'));
 			}
 		}
 

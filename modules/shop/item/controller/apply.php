@@ -96,6 +96,11 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 			$bChanged = FALSE;
 
+			$oShop = $this->_object->Shop;
+
+			$oShop->filter
+				&& $oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				$columnName = $oAdmin_Form_Field->name;
@@ -158,6 +163,9 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 			}
 
 			$bChanged && $this->_object->save()->clearCache();
+
+			$oShop->filter
+				&& $oShop_Filter_Controller->fill($this->_object);
 
 			$this->_itemsCount++;
 

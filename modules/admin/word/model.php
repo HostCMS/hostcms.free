@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Word_Model extends Core_Entity
 {
@@ -108,6 +108,7 @@ class Admin_Word_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event admin_word.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -118,6 +119,8 @@ class Admin_Word_Model extends Core_Entity
 		{
 			$newObject->add(clone $oAdmin_Word_Value);
 		}
+		
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

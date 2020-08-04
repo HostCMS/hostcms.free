@@ -310,8 +310,9 @@ class Update_Controller extends Core_Servant_Properties
 				));
 
 				$oUpdate_Entity->id = $id;
-				$oUpdate_Entity->name = html_entity_decode((string)$value->update_name, ENT_COMPAT, 'UTF-8');
-				$oUpdate_Entity->description = html_entity_decode((string)$value->update_description, ENT_COMPAT, 'UTF-8');
+				$oUpdate_Entity->name = (string)$value->update_name;
+				//$oUpdate_Entity->description = html_entity_decode((string)$value->update_description, ENT_COMPAT, 'UTF-8');
+				$oUpdate_Entity->description = (string)$value->update_description;
 				$oUpdate_Entity->beta = (int)$value->beta;
 			}
 
@@ -350,11 +351,11 @@ class Update_Controller extends Core_Servant_Properties
 				));
 
 				$oUpdate_Module_Entity->id = $id;
-				$oUpdate_Module_Entity->name = html_entity_decode((string)$value->number, ENT_COMPAT, 'UTF-8');
-				$oUpdate_Module_Entity->number = html_entity_decode((string)$value->number, ENT_COMPAT, 'UTF-8');
-				$oUpdate_Module_Entity->path = html_entity_decode((string)$value->path, ENT_COMPAT, 'UTF-8');
-				$oUpdate_Module_Entity->description = '<div><strong>' . Core::_('Update.module', htmlspecialchars((string)$value->name)) . '</strong></div>' . html_entity_decode((string)$value->description, ENT_COMPAT, 'UTF-8');
-				$oUpdate_Module_Entity->file = html_entity_decode((string)$value->file, ENT_COMPAT, 'UTF-8');
+				$oUpdate_Module_Entity->name = (string)$value->number;
+				$oUpdate_Module_Entity->number = (string)$value->number;
+				$oUpdate_Module_Entity->path = (string)$value->path;
+				$oUpdate_Module_Entity->description = '<div><strong>' . Core::_('Update.module', htmlspecialchars((string)$value->name)) . '</strong></div>' . (string)$value->description;
+				$oUpdate_Module_Entity->file = (string)$value->file;
 			}
 		}
 

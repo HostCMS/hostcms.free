@@ -141,7 +141,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 		}
 
 		?></div><?php
-		
+
 		// Clear
 		$this->_aAlreadySelected = array();
 	}
@@ -239,13 +239,13 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 				Core::factory('Core_Html_Entity_Input')
 					->size(15)
 					->id("filter_{$this->id}")
-					->onkeyup("clearTimeout(oSelectFilter{$iFilterCount}.timeout); oSelectFilter{$iFilterCount}.timeout = setTimeout(function(){oSelectFilter{$iFilterCount}.Set(document.getElementById('filter_{$this->id}').value); oSelectFilter{$iFilterCount}.Filter();}, 500)")
+					->onkeyup("clearTimeout(oSelectFilter{$iFilterCount}.timeout); oSelectFilter{$iFilterCount}.timeout = setTimeout(function(){oSelectFilter{$iFilterCount}.Set(document.getElementById('filter_" . Core_Str::escapeJavascriptVariable($this->id) . "').value); oSelectFilter{$iFilterCount}.Filter();}, 500)")
 					->onkeypress("if (event.keyCode == 13) return false;")
 			)
 			->add(
 				Core::factory('Core_Html_Entity_Input')
 					->type("button")
-					->onclick("this.form.filter_{$this->id}.value = '';oSelectFilter{$iFilterCount}.Set('');oSelectFilter{$iFilterCount}.Filter();")
+					->onclick("this.form.filter_" . Core_Str::escapeJavascriptVariable($this->id) . ".value = '';oSelectFilter{$iFilterCount}.Set('');oSelectFilter{$iFilterCount}.Filter();")
 					->value(Core::_('Admin_Form.clear'))
 					->class('saveButton')
 			)
@@ -262,7 +262,7 @@ class Skin_Default_Admin_Form_Entity_Select extends Admin_Form_Entity
 			)
 			->add(
 				Core::factory('Core_Html_Entity_Script')
-					->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('{$windowId}', '{$this->id}');")
+					->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('" . Core_Str::escapeJavascriptVariable($windowId) . "', '" . Core_Str::escapeJavascriptVariable($this->id) . "');")
 			)
 			->execute();
 

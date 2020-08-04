@@ -234,7 +234,7 @@ try
 
 								$oTr->add(
 									Core::factory('Core_Html_Entity_Td')
-										->value(Core_Str::cut(strip_tags($value), 100))
+										->value(Core_Str::cut(htmlspecialchars($value), 100))
 								);
 							}
 						}

@@ -88,7 +88,7 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'changeStatusPaid_success' => 'Статус замовлення успішно змінений',
-	'changeStatusPosted_success' => 'Статус відправки успішно змінений',	
+	'changeStatusPosted_success' => 'Статус відправки успішно змінений',
 	'edit_success' => "Інформація про замовлення успішно додана!",
 	'order_card_system_info' => 'Інформація про замовлення',
 	'show_order_status_link' => 'Довідник статусів замовлення',
@@ -148,4 +148,9 @@ return array(
 
 	'table_warehouse' => "Склад",
 	'posted' => 'Відправлений',
+	'tabHistory' => 'Історія',
+	'change_status' => 'Зміна статусу: "%s"',
+	'paid_cancel' => 'Знятий "Оплачено"',
+	'posted_cancel' => 'Знятий "Відправлений"',
+	'canceled_cancel' => 'Знятий "Скасовано"',
 );

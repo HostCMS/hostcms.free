@@ -346,7 +346,7 @@ class Core
 
 		// Если ошибка уровня E_USER_ERROR
 		$message = $code == E_USER_ERROR
-			? '<strong>Ошибка!</strong> Сообщение об ошибке занесено в журнал.'
+			? Core::_('Core.error_log_add_message')
 			: Core::_('Core.error_log_message_short', $current_error_name, $msg, $file, $line);
 
 		// Если показывать ошибки и текущий уровень ошибки не E_STRICT

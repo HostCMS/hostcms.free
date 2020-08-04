@@ -40,4 +40,5 @@ return array(
 	'msg_installing_package' => 'Установка пакета обновлений %s',
 	'msg_unpack_package' => 'Распаковка файла %s',
 	'module' => 'Модуль "%s"',
+	'update' => 'Обновление',
 );

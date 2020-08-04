@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -39,7 +39,9 @@ class Property_Value_Int_Model extends Core_Entity
 		'property' => array(),
 		'list_item' => array('foreign_key' => 'value'),
 		'informationsystem_item' => array('foreign_key' => 'value'),
+		'informationsystem_group' => array('foreign_key' => 'value'),
 		'shop_item' => array('foreign_key' => 'value'),
+		'shop_group' => array('foreign_key' => 'value'),
 	);
 
 	/**
@@ -220,6 +222,53 @@ class Property_Value_Int_Model extends Core_Entity
 			}
 		}
 
+		// Informationsystem group
+		if ($oProperty->type == 13 && Core::moduleIsActive('informationsystem'))
+		{
+			$this->addForbiddenTag('value');
+
+			if ($this->value != 0)
+			{
+				$oInformationsystem_Group = $this->Informationsystem_Group;
+
+				if ($oInformationsystem_Group->id)
+				{
+					// Allow all kinds of properties except informationsystem
+					$oInformationsystem_Group_Property_List = Core_Entity::factory('Informationsystem_Group_Property_List', $oInformationsystem_Group->informationsystem_id);
+
+					$aTmp = array();
+					$aGroupProperties = $oInformationsystem_Group_Property_List->Properties->findAll();
+					foreach ($aGroupProperties as $oGroupProperty)
+					{
+						// Зацикленность через Св-во типа ИЭ/Группа, у которого св-во ИЭ/Группа
+						($oGroupProperty->type != 13 && $oGroupProperty->type != 14
+							|| self::$aConfig['recursive_properties'] && $oGroupProperty->informationsystem_id != $oProperty->informationsystem_id
+						) && $aTmp[] = $oGroupProperty->id;
+					}
+
+					$oInformationsystem_Group->shortcut_id && $oInformationsystem_Group = $oInformationsystem_Group->Informationsystem_Group;
+
+					$oNew_Informationsystem_Group = clone $oInformationsystem_Group;
+
+					$oNew_Informationsystem_Group
+						->id($oInformationsystem_Group->id)
+						->clearEntities()
+						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+					Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oInformationsystem_Group));
+
+					$oLastReturn = Core_Event::getLastReturn();
+
+					if (!is_null($oLastReturn))
+					{
+						$oNew_Informationsystem_Group = $oLastReturn;
+					}
+
+					$this->addEntity($oNew_Informationsystem_Group);
+				}
+			}
+		}
+
 		// Shop
 		if ($oProperty->type == 12 && Core::moduleIsActive('shop'))
 		{
@@ -279,17 +328,55 @@ class Property_Value_Int_Model extends Core_Entity
 			}
 		}
 
-		return $this;
-	}
+		// Shop group
+		if ($oProperty->type == 14 && Core::moduleIsActive('shop'))
+		{
+			$this->addForbiddenTag('value');
 
-	/**
-	 * Get entity description
-	 * @return string
-	 */
-	public function getTrashDescription()
-	{
-		return htmlspecialchars(
-			Core_Str::cut($this->value, 255)
-		);
+			if ($this->value != 0)
+			{
+				$oShop_Group = $this->Shop_Group;
+
+				// Shop_Group exists
+				if ($oShop_Group->id)
+				{
+					// Allow all kinds of properties except shop
+					$oShop_Group_Property_List = Core_Entity::factory('Shop_Group_Property_List', $oShop_Group->shop_id);
+
+					$aTmp = array();
+
+					$aGroupProperties = $oShop_Group_Property_List->Properties->findAll();
+					foreach ($aGroupProperties as $oGroupProperty)
+					{
+						// Зацикленность через Св-во типа ИЭ/Товар, у которого св-во ИЭ/Товар
+						($oGroupProperty->type != 13 && $oGroupProperty->type != 14
+							|| self::$aConfig['recursive_properties'] && $oGroupProperty->shop_id != $oProperty->shop_id
+						) && $aTmp[] = $oGroupProperty->id;
+					}
+
+					$oShop_Group->shortcut_id && $oShop_Group = $oShop_Group->Shop_Group;
+
+					$oNew_Shop_Group = clone $oShop_Group;
+
+					$oNew_Shop_Group
+						->id($oShop_Group->id)
+						->clearEntities()
+						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+					Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Group));
+
+					$oLastReturn = Core_Event::getLastReturn();
+
+					if (!is_null($oLastReturn))
+					{
+						$oNew_Shop_Group = $oLastReturn;
+					}
+
+					$this->addEntity($oNew_Shop_Group);
+				}
+			}
+		}
+
+		return $this;
 	}
 }

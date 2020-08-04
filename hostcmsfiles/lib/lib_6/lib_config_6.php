@@ -62,7 +62,9 @@ if (Core_Array::getRequest('fast_filter'))
 
 	if ($oShop->filter)
 	{
-		$Shop_Controller_Show->modificationsList(TRUE);
+		$Shop_Controller_Show
+			->modificationsList(TRUE)
+			->modificationsGroup(TRUE);
 
 		// В корне выводим из всех групп
 		if ($Shop_Controller_Show->group == 0)
@@ -120,7 +122,7 @@ if (Core_Array::getRequest('fast_filter'))
 			->clearGroupBy()
 			->clearOrderBy();
 
-		$aJson['count'] = intval($Shop_Controller_Show->shopItems()->getCount(FALSE, 'shop_items.id', TRUE));
+		$aJson['count'] = $Shop_Controller_Show->getCount();
 	}
 
 	Core::showJson($aJson);

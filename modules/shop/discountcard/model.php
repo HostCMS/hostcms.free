@@ -312,7 +312,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
-	 *
+	 * Get bonuses
+	 * @param bool $bCache cache
+	 * @return array
 	 */
 	public function getBonuses($bCache = TRUE)
 	{
@@ -330,6 +332,25 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Get bonuses amount
+	 * @param bool $bCache cache
+	 * @return float
+	 */
+	public function getBonusesAmount($bCache = TRUE)
+	{
+		$totalAmount = $totalWrittenoffAmount = 0;
+
+		$aShop_Discountcard_Bonuses = $this->getBonuses($bCache);
+		foreach ($aShop_Discountcard_Bonuses as $oShop_Discountcard_Bonus)
+		{
+			$totalAmount += $oShop_Discountcard_Bonus->amount;
+			$totalWrittenoffAmount += $oShop_Discountcard_Bonus->written_off;
+		}
+
+		return Shop_Controller::instance()->round($totalAmount - $totalWrittenoffAmount);
+	}
+
+	/**
 	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -337,16 +358,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function bonusesBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$totalAmount = $totalWrittenoffAmount = 0;
-
-		$aShop_Discountcard_Bonuses = $this->getBonuses();
-		foreach ($aShop_Discountcard_Bonuses as $oShop_Discountcard_Bonus)
-		{
-			$totalAmount += $oShop_Discountcard_Bonus->amount;
-			$totalWrittenoffAmount += $oShop_Discountcard_Bonus->written_off;
-		}
-
-		$bonusesAmount = Shop_Controller::instance()->round($totalAmount - $totalWrittenoffAmount);
+		$bonusesAmount = $this->getBonusesAmount();
 
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);

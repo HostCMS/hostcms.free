@@ -48,4 +48,5 @@ return array(
 	'move_producers_groups_title' => "Перенесення виробників",
 	'move_producers_groups_id' => "Батьківська група",
 	'move_success' => 'Виробники перенесені',
+	'merge_success' => "Виробники об'єднані",	
 );

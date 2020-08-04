@@ -185,6 +185,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		<?php
 	}
 
+	/**
+	 * Get url
+	 * @return string
+	 */
 	public function getUrl()
 	{
 		$url = '';
@@ -196,8 +200,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 		if ($this->shop_producer_id)
 		{
-			// При построении пути в фильтре используется название производителя, а не path
-			$url .= rawurlencode($this->Shop_Producer->name) . '/';
+			$url .= rawurlencode($this->Shop->filter_mode == 0
+					? $this->Shop_Producer->name
+					: $this->Shop_Producer->path
+				) . '/';
 		}
 
 		$aValues = array();
@@ -234,7 +240,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 									$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
 
 									!is_null($oList_Item)
-										&& $url .= rawurlencode($oList_Item->value) . '/';
+										&& $url .= rawurlencode($this->Shop->filter_mode == 1 && $oList_Item->path != ''
+											? $oList_Item->path
+											: $oList_Item->value
+										) . '/';
 								}
 							break;
 							case 7: // Checkbox
@@ -359,6 +368,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_filter_seo.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -369,6 +379,8 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		{
 			$newObject->add(clone $oShop_Filter_Seo_Property);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

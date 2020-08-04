@@ -153,6 +153,7 @@ class Property_Dir_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event property_dir.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -169,6 +170,8 @@ class Property_Dir_Model extends Core_Entity
 		{
 			$newObject->add($oProperty->copy(FALSE));
 		}
+		
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

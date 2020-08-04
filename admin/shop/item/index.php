@@ -353,7 +353,7 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 
 			foreach ($aShop_Groups as $oShop_Group)
 			{
-				$aParentGroups = array();
+				/*$aParentGroups = array();
 
 				$aTmpGroup = $oShop_Group;
 
@@ -362,7 +362,9 @@ if (!is_null(Core_Array::getGet('autocomplete')) && !is_null(Core_Array::getGet(
 					$aParentGroups[] = $aTmpGroup->name;
 				} while ($aTmpGroup = $aTmpGroup->getParent());
 
-				$sParents = implode(' → ', array_reverse($aParentGroups));
+				$sParents = implode(' → ', array_reverse($aParentGroups));*/
+
+				$sParents = $oShop_Group->groupPathWithSeparator();
 
 				$aJSON[] = array(
 					'id' => $oShop_Group->id,
@@ -1243,15 +1245,13 @@ $aShop_Producers = $oShop_Producers->findAll(FALSE);
 
 if (count($aShop_Producers))
 {
-	$options = '';
-
+	$aOptions = array();
 	foreach ($aShop_Producers as $oShop_Producer)
 	{
-		$options .= $oShop_Producer->id . "=" . $oShop_Producer->name . "\n";
+		$aOptions[$oShop_Producer->id] = $oShop_Producer->name;
 	}
 
-	$oAdmin_Form_Dataset
-		->changeField('shop_producer_id', 'list', $options);
+	$oAdmin_Form_Dataset->changeField('shop_producer_id', 'list', $aOptions);
 }
 
 // Sellers
@@ -1272,15 +1272,38 @@ $aShop_Sellers = $oShop_Sellers->findAll(FALSE);
 
 if (count($aShop_Sellers))
 {
-	$options = '';
-
+	$aOptions = array();
 	foreach ($aShop_Sellers as $oShop_Seller)
 	{
-		$options .= $oShop_Seller->id . "=" . $oShop_Seller->name . "\n";
+		$aOptions[$oShop_Seller->id] = $oShop_Seller->name;
 	}
 
-	$oAdmin_Form_Dataset
-		->changeField('shop_seller_id', 'list', $options);
+	$oAdmin_Form_Dataset->changeField('shop_seller_id', 'list', $aOptions);
+}
+
+// Shop_Measure
+$oShop_Measures = Core_Entity::factory('Shop_Measure');
+$oShop_Measures->queryBuilder()
+	->distinct()
+	->select('shop_measures.*')
+	->join('shop_items', 'shop_measures.id', '=', 'shop_items.shop_measure_id')
+	->where('shop_items.shop_group_id', '=', $oShopGroup->id)
+	->where('shop_items.modification_id', '=', 0)
+	->where('shop_items.shortcut_id', '=', 0)
+	->clearOrderBy()
+	->orderBy('shop_measures.name', 'ASC');
+
+$aShop_Measures = $oShop_Measures->findAll(FALSE);
+
+if (count($aShop_Measures))
+{
+	$aOptions = array();
+	foreach ($aShop_Measures as $oShop_Measure)
+	{
+		$aOptions[$oShop_Measure->id] = $oShop_Measure->name;
+	}
+
+	$oAdmin_Form_Dataset->changeField('shop_measure_id', 'list', $aOptions);
 }
 
 // Change field type

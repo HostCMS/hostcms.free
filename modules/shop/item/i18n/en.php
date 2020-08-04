@@ -347,4 +347,5 @@ return array(
 	'warehouse_cell' => 'Cell',
 	'warehouse_measure' => 'Measure',
 	'shop_price_setting_modification_create' => 'Set price for modification of item "%s"',
+	'create_modification_delimiter' => 'Delimiter',
 );

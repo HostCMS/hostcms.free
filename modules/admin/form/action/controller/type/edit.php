@@ -480,8 +480,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						break;
 					case 'tinyint':
 					case 'tinyint unsigned':
-						// Только при длине 1 символ
-						if ($columnArray['max_length'] == 1)
+						// Только при длине 1 символ или пустом для MySql 8 && unsigned
+						if ($columnArray['max_length'] == 1 || $columnArray['max_length'] == '' && $columnArray['unsigned'] == 1)
 						{
 							$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Checkbox');
 							$oAdmin_Form_Entity_For_Column
@@ -673,7 +673,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				{
 					$windowId = $this->_Admin_Form_Controller->getWindowId();
 					?><script><?php
-					?>$.appendInput('<?php echo $windowId?>', '<?php echo $primaryKeyName?>', '<?php echo $this->_object->$primaryKeyName?>');<?php
+					?>$.appendInput('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($primaryKeyName)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
 					?></script><?php
 				}
 
@@ -779,8 +779,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					break;
 					case 'tinyint':
 					case 'tinyint unsigned':
-						// Только при длине 1 символ
-						if ($columnArray['max_length'] == 1)
+						// Только при длине 1 символ или пустом для MySql 8 && unsigned
+						if ($columnArray['max_length'] == 1 || $columnArray['max_length'] == '' && $columnArray['unsigned'] == 1)
 						{
 							// Checkbox
 							$value = is_null($value) ? 0 : $value;

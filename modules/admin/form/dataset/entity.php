@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -211,7 +211,9 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 			// Применение внесенных условий отбора
 			$this->_setConditions();
 
-			$queryBuilder = $this->_entity->queryBuilder()
+			$queryBuilder = $this->_entity->queryBuilder();
+
+			!is_null($this->_limit) && $queryBuilder
 				->limit($this->_limit)
 				->offset($this->_offset);
 

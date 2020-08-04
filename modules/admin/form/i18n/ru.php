@@ -141,4 +141,9 @@ return array(
 
 	'tabProperties' => 'Дополнительные свойства',
 	'non_subject' => '<Без темы>',
+
+	'male' => 'Мужской',
+	'female' => 'Женский',
+
+	'filter_enter_title' => 'Введите название фильтра',
 );

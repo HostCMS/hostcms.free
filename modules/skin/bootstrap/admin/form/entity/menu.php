@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -71,7 +71,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		strlen($this->icon) && $oCore_Html_Entity_A->add(
 			Core::factory('Core_Html_Entity_I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
 		);
-		
+
 		$bTop && $oCore_Html_Entity_A
 			->class(
 				!is_null($this->class) ? $this->class : "btn {$aFirstColors[$index]}"
@@ -83,12 +83,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		$bHasName && $oCore_Html_Entity_A->add(
 			Core::factory('Core_Html_Entity_Code')->value(htmlspecialchars($this->name))
 		);
-		
+
 		$oCore_Html_Entity_A->execute();
 
 		if (!$this->href && !$this->onclick)
 		{
-			?><a class="btn <?php echo $aSecondColors[$index]?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
+			?><a class="btn <?php echo htmlspecialchars($aSecondColors[$index])?> dropdown-toggle" data-toggle="dropdown"><i class="fa fa-angle-down"></i></a><?php
 		}
 
 		if ($bHasSubmenu)

@@ -340,4 +340,5 @@ return array(
 	'warehouse_cell' => 'Осередок',
 	'warehouse_measure' => 'Од. вим.',
 	'shop_price_setting_modification_create' => 'Установка цін модифікацій товару "%s"',
+	'create_modification_delimiter' => 'Роздільник',
 );

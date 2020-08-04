@@ -17,6 +17,8 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'changeActive_success' => "Інформація успішно змінена",
+	'turnOn_success' => "Регіони країни включені!",
+	'switchOff_success' => "Регіони країни вимкнені!",
 
 	'language_tab'=>'Мовні версії',
 	'name_en'=>'Англійською',

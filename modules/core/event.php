@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Event
 {
@@ -37,6 +37,31 @@ class Core_Event
 	static public function attach($eventName, $function)
 	{
 		self::$_attached[$eventName][] = $function;
+	}
+	
+	/**
+	 * Attach observer to the beginning of the queue
+	 * @param string $eventName event name
+	 * @param string $function function name
+	 *
+	 * <code>
+	 * class my_class
+	 * {
+	 * 	static public function my_function($object, $args)
+	 * 	{
+	 * 		// do something
+	 * 	}
+	 * }
+	 * // Attach observer my_class::my_function for event 'Class.onBeforeDelete'
+	 * Core_Event::attach('Class.onBeforeDelete', array('my_class', 'my_function'));
+	 * </code>
+	 */
+	static public function attachFirst($eventName, $function)
+	{
+		!isset(self::$_attached[$eventName])
+			&& self::$_attached[$eventName] = array();
+			
+		array_unshift(self::$_attached[$eventName], $function);
 	}
 
 	/**

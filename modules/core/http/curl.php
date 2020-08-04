@@ -30,7 +30,9 @@ class Core_Http_Curl extends Core_Http
 		$curl = @curl_init();
 
 		// Предотвращаем chunked-ответ
-		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		// Force to use HTTP 1.1 instead of 2.0
+		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
 		curl_setopt($curl, CURLOPT_URL, "{$scheme}://{$host}:{$this->_port}{$path}{$query}");
 
@@ -101,7 +103,7 @@ class Core_Http_Curl extends Core_Http
 		//curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // No certificate
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // Return in string
-
+		
 		// Close connection
 		//curl_setopt($curl, CURLOPT_FORBID_REUSE, TRUE);
 
@@ -140,6 +142,9 @@ class Core_Http_Curl extends Core_Http
 
 		// Get the target contents
 		$datastr = @curl_exec($curl);
+
+		// Sent headers
+		//var_dump(curl_getinfo($curl, CURLINFO_HEADER_OUT));
 
 		$this->_errno = curl_errno($curl);
 

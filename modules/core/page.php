@@ -80,7 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -259,7 +259,7 @@ class Core_Page extends Core_Servant_Properties
 		Core_Event::notify(get_class($this) . '.onBeforeGetCss', $this);
 
 		$return = $this->compress && Core::moduleIsActive('compression')
-			? $this->_getCssCompressed()
+			? $this->_getCssCompressed($bExternal)
 			: $this->_getCss($bExternal);
 
 		$this->css = array();
@@ -269,12 +269,14 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Get block of linked css
-	 * @param boolean $bExternal add as link
+	 * @param boolean $bExternal add as link, default TRUE
 	 * @return string
 	 */
 	protected function _getCss($bExternal = TRUE)
 	{
-		$sReturn = '';
+		$sReturn = $bExternal
+			? ''
+			: "<style type=\"text/css\">\n";
 
 		foreach ($this->css as $css)
 		{
@@ -289,25 +291,26 @@ class Core_Page extends Core_Servant_Properties
 			else
 			{
 				$sPath = CMS_FOLDER . ltrim($css, DIRECTORY_SEPARATOR);
-				$sReturn .= "<style type=\"text/css\">\n";
-				is_file($sPath) && $sReturn .= Core_File::read($sPath);
-				$sReturn .= "\n</style>\n";
+				is_file($sPath)
+					&& $sReturn .= Core_File::read($sPath);
 			}
 		}
+
+		!$bExternal
+			&& $sReturn .= "\n</style>\n";
 
 		return $sReturn;
 	}
 
 	/**
 	 * Get block of linked compressed css
+	 * @param boolean $bExternal add as link, default TRUE
 	 * @return string
 	 */
-	protected function _getCssCompressed()
+	protected function _getCssCompressed($bExternal = TRUE)
 	{
 		try
 		{
-			$sReturn = '';
-
 			$oCompression_Controller = Compression_Controller::instance('css');
 			$oCompression_Controller->clear();
 
@@ -316,8 +319,9 @@ class Core_Page extends Core_Servant_Properties
 				$oCompression_Controller->addCss($css);
 			}
 
-			$sPath = $oCompression_Controller->getPath();
-			$sReturn .= '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $sPath . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '" />' . "\n";
+			$sReturn = $bExternal
+				? '<link rel="stylesheet" type="text/css" href="' . $this->cssCDN . $oCompression_Controller->getPath() . '?' . Core_Date::sql2timestamp($this->template->timestamp) . '" />' . "\n"
+				: "<style type=\"text/css\">\n" . $oCompression_Controller->getContent() . "\n</style>\n";
 		}
 		catch (Exception $e)
 		{

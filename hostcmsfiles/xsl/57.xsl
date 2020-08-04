@@ -2,23 +2,11 @@
 <!DOCTYPE xsl:stylesheet SYSTEM "lang://57">
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:exsl="http://exslt.org/common" extension-element-prefixes="exsl">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-	
+
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
-	
+
 	<!-- Шаблон для корзины -->
 	<xsl:template match="/shop">
-		<script type="text/javascript">
-			<xsl:comment>
-				<xsl:text disable-output-escaping="yes">
-					<![CDATA[
-					$(function() {
-					//$('.shop_bonuses input[name = apply_bonuses]').change();
-					});
-					]]>
-				</xsl:text>
-			</xsl:comment>
-		</script>
-		
 		<xsl:choose>
 			<xsl:when test="count(shop_cart) = 0">
 				<h1>&labelEmptyCart;</h1>
@@ -27,7 +15,7 @@
 			<xsl:otherwise>
 				<h1>&labelTitle;</h1>
 				<p>&labelOrder;</p>
-				
+
 				<form action="{/shop/url}cart/" method="post">
 					<xsl:variable name="available_bonuses">
 						<xsl:choose>
@@ -39,7 +27,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
-					
+
 					<!-- Если есть товары -->
 					<xsl:if test="count(shop_cart[postpone = 0]) > 0">
 						<table class="shop_cart">
@@ -48,12 +36,12 @@
 							<xsl:call-template name="tableFooter">
 								<xsl:with-param name="nodes" select="shop_cart[postpone = 0]"/>
 							</xsl:call-template>
-							
+
 							<!-- Скидки -->
-							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node()">
+							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node() or apply_bonuses/node()">
 								<xsl:apply-templates select="shop_purchase_discount"/>
 								<xsl:apply-templates select="shop_discountcard"/>
-								
+
 								<xsl:if test="siteuser_id > 0 and apply_bonuses/node()">
 									<tr>
 										<td>
@@ -72,7 +60,7 @@
 										<td></td>
 									</tr>
 								</xsl:if>
-								
+
 								<tr class="total">
 									<td>&labelTotal;</td>
 									<td></td>
@@ -90,13 +78,13 @@
 							</xsl:if>
 						</table>
 					</xsl:if>
-					
+
 					<div class="coupon-bonus">
 						<!-- Купон -->
 						<div class="shop_coupon">
 							&labelCoupon; <input name="coupon_text" type="text" value="{coupon_text}"/>
 						</div>
-						
+
 						<xsl:if test="siteuser_id > 0">
 							<div class="shop_bonuses">
 								<input type="checkbox" name="apply_bonuses" onchange="$.showCartBonuses(this);">
@@ -113,7 +101,7 @@
 							</div>
 						</xsl:if>
 					</div>
-					
+
 					<!-- Если есть отложенные товары -->
 					<xsl:if test="count(shop_cart[postpone = 1]) > 0">
 						<div class="transparent">
@@ -127,10 +115,10 @@
 							</table>
 						</div>
 					</xsl:if>
-					
+
 					<!-- Кнопки -->
 					<input name="recount" value="&labelRecount;" type="submit" class="button" />
-					
+
 					<!-- Пользователь авторизован или модуль пользователей сайта отсутствует -->
 					<!-- Чтобы дать возможность заказывать неавторизованным пользователям, удалите в условии 'and (siteuser_id > 0 or siteuser_exists = 0)' -->
 					<xsl:if test="count(shop_cart[postpone = 0]) and (siteuser_id > 0 or siteuser_exists = 0)">
@@ -141,7 +129,7 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
-	
+
 	<!-- Заголовок таблицы -->
 	<xsl:template name="tableHeader">
 		<tr>
@@ -156,11 +144,11 @@
 			<th>&labelActions;</th>
 		</tr>
 	</xsl:template>
-	
+
 	<!-- Итоговая строка таблицы -->
 	<xsl:template name="tableFooter">
 		<xsl:param name="nodes"/>
-		
+
 		<tr class="total">
 			<td>&labelTotal2;</td>
 			<td><xsl:value-of select="sum($nodes/quantity)"/></td>
@@ -171,7 +159,7 @@
 						<sum><xsl:value-of select="shop_item/price * quantity"/></sum>
 					</xsl:for-each>
 				</xsl:variable>
-				
+
 				<xsl:value-of select="format-number(sum(exsl:node-set($subTotals)/sum), '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="/shop/shop_currency/name"/>
 			</td>
 			<xsl:if test="count(/shop/shop_warehouse)">
@@ -181,7 +169,7 @@
 		<td><xsl:text> </xsl:text></td>
 		</tr>
 	</xsl:template>
-	
+
 	<!-- Шаблон для товара в корзине -->
 	<xsl:template match="shop_cart">
 		<tr>
@@ -189,7 +177,7 @@
 				<a href="{shop_item/url}">
 					<xsl:value-of disable-output-escaping="yes" select="shop_item/name"/>
 				</a>
-				
+
 				<!-- Комплекты -->
 				<xsl:if test="shop_item/type = 3">
 					<xsl:for-each select="shop_item/set/shop_item">
@@ -236,7 +224,7 @@
 		<td align="center"><a href="?delete={shop_item/@id}" onclick="return confirm('&labelDeleteAlert;')" title="&labelDelete2;" alt="&labelDelete2;">&labelDelete;</a></td>
 		</tr>
 	</xsl:template>
-	
+
 	<xsl:template match="shop_purchase_discount">
 		<tr>
 			<td>
@@ -255,7 +243,7 @@
 			<td></td>
 		</tr>
 	</xsl:template>
-	
+
 	<xsl:template match="shop_discountcard">
 		<tr>
 			<td>
@@ -274,7 +262,7 @@
 			<td></td>
 		</tr>
 	</xsl:template>
-	
+
 	<!-- Warehouse option -->
 	<xsl:template match="shop_warehouse_item">
 		<xsl:if test="count != 0">
@@ -287,5 +275,5 @@
 			</option>
 		</xsl:if>
 	</xsl:template>
-	
+
 </xsl:stylesheet>

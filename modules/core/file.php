@@ -741,7 +741,8 @@ class Core_File
 			if ($fileowner)
 			{
 				$aOwnerInfo = posix_getpwuid($fileowner);
-				$aReturn[] = $aOwnerInfo['name'];
+				is_array($aOwnerInfo)
+					&& $aReturn[] = $aOwnerInfo['name'];
 			}
 		}
 
@@ -752,7 +753,8 @@ class Core_File
 			if ($filegroup)
 			{
 				$aGroupOwnerInfo = posix_getgrgid($fileowner);
-				$aReturn[] = $aGroupOwnerInfo['name'];
+				is_array($aGroupOwnerInfo)
+					&& $aReturn[] = $aGroupOwnerInfo['name'];
 			}
 		}
 

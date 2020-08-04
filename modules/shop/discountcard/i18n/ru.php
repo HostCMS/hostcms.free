@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дисконтные карты',
@@ -33,4 +33,6 @@ return array(
 	'importDiscountcards_success' => 'Дисконтные карты импортированы успешно!',
 	'format' => '<strong>Формат:</strong> номер карты;логин клиента;телефон клиента;идентификатор уровня;сумма',
 	'backendWarning' => 'Для работы дисконтных карт необходим модуль "Клиенты", который входит в редакцию "Бизнес" и "Корпорация".',
+	'backendWrongWriteoffWarning' => 'Недостаточно бонусов для списания!',
+	'backendWriteoffSuccess' => 'Бонусы списаны успешно!',
 );

@@ -3,7 +3,7 @@
 return array(
 	'model_name' => 'Статуси замовлень',
 	'shop_orders_status' => "Статуси замовлень",
-	'show_order_status_link' => 'Довідник статусів замовлення', 
+	'show_order_status_link' => 'Довідник статусів замовлення',
 	'show_order_status_link1' => "Додати",
 	'shop_orders_status_menu' => "Статус",
 	'order_status_add_form_title' => "Додавання інформації про статус замовлення",
@@ -19,4 +19,5 @@ return array(
 	'sorting' => 'Порядок сортування',
 	'apply_success' => 'Інформація про статус змінено!',
 	'color' => 'Колір',
+	'parent_id' => 'Батьківський статус',
 );

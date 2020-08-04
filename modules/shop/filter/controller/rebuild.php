@@ -45,6 +45,7 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 			do {
 				$oShop_Items = $oShop->Shop_Items;
 				$oShop_Items->queryBuilder()
+					->where('shop_items.active', '=', 1)
 					->limit($limit)
 					->offset($position)
 					->clearOrderBy()

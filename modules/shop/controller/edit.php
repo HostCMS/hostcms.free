@@ -122,11 +122,14 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRowReserveOptions = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowInvoice = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowDiscountcard = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowNotification = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oFilterBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oMailBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					// ->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -166,7 +169,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oShopTabWatermarkRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oShopTabWatermarkRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oShopTabWatermarkRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oShopTabWatermarkRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oShopTabOrders
 					->add($oShopTabOrdersRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -293,7 +297,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Удаляем статусы заказов
 					->delete($this->getField('shop_order_status_id'))
 					// Удаляем компании
-					->delete($this->getField('shop_company_id'));
+					->delete($this->getField('shop_company_id'))
+					->delete($this->getField('shop_codetype_id'));
 
 				$oMainTab
 					// Удаляем тип URL
@@ -321,8 +326,22 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->getField('groups_sorting_direction')
 				);
 
+				$Structure_Controller_Edit = new Structure_Controller_Edit($this->_Admin_Form_Action);
+
+				// Добавляем структуру
+				$oStructureSelectField = Admin_Form_Entity::factory('Select')
+					->name('structure_id')
+					->caption(Core::_('Shop.structure_id'))
+					->options(
+						array(' … ') + $Structure_Controller_Edit->fillStructureList($this->_object->site_id)
+					)
+					->value($this->_object->structure_id)
+					->divAttr(array('class' => 'form-group col-xs-12 col-lg-6'));
+
+				$oMainRow3->add($oStructureSelectField);
+
 				// Добавляем группу магазинов
-				$oMainRow1->add(Admin_Form_Entity::factory('Select')
+				$oMainRow3->add(Admin_Form_Entity::factory('Select')
 					->name('shop_dir_id')
 					->caption(Core::_('Shop.shop_dir_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-lg-6'))
@@ -342,19 +361,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab->move($this->getField('description'), $oMainRow2);
 
-				$Structure_Controller_Edit = new Structure_Controller_Edit($this->_Admin_Form_Action);
-
-				// Добавляем структуру
-				$oStructureSelectField = Admin_Form_Entity::factory('Select')
-					->name('structure_id')
-					->caption(Core::_('Shop.structure_id'))
-					->options(
-						array(' … ') + $Structure_Controller_Edit->fillStructureList($this->_object->site_id)
-					)
-					->value($this->_object->structure_id);
-
-				$oMainRow3->add($oStructureSelectField);
-
 				if (Core::moduleIsActive('siteuser'))
 				{
 					$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
@@ -365,33 +371,23 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$aSiteuser_Groups = array();
 				}
 
-				// Добавляем группы пользователей сайта
-				$oShopUserGroupSelect = Admin_Form_Entity::factory('Select')
-					->name('siteuser_group_id')
-					->caption(Core::_('Shop.siteuser_group_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					->options(array(Core::_('Shop.allgroupsaccess')) + $aSiteuser_Groups)
-					->value($this->_object->siteuser_group_id);
-
-				$oMainRow4->add($oShopUserGroupSelect);
-
-				// Добавляем компании
-				$oCompaniesField = Admin_Form_Entity::factory('Select')
-					->name('shop_company_id')
-					->caption(Core::_('Shop.shop_company_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				// Добавляем налоги
+				$oTaxField = Admin_Form_Entity::factory('Select')
+					->name('shop_tax_id')
+					->caption(Core::_('Shop.shop_tax_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
-						$this->_fillCompanies()
+						$this->fillTaxes()
 					)
-					->value($this->_object->shop_company_id);
+					->value($this->_object->shop_tax_id);
 
-				$oMainRow4->add($oCompaniesField);
+				$oMainRow4->add($oTaxField);
 
 				// Добавляем валюты
 				$oCurrencyField = Admin_Form_Entity::factory('Select')
 					->name('shop_currency_id')
 					->caption(Core::_('Shop.shop_currency_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
 						$this->fillCurrencies()
 					)
@@ -399,55 +395,84 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow4->add($oCurrencyField);
 
-				// Добавляем налоги
-				$oTaxField = Admin_Form_Entity::factory('Select')
-					->name('shop_tax_id')
-					->caption(Core::_('Shop.shop_tax_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					->options(
-						$this->fillTaxes()
-					)
-					->value($this->_object->shop_tax_id);
-
-				$oMainRow5->add($oTaxField);
-
-				// Добавляем страны
-				$oCountriesField = Admin_Form_Entity::factory('Select')
-					->name('shop_country_id')
-					->caption(Core::_('Shop.shop_country_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					->options(
-						$this->fillCountries()
-					)
-					->value($this->_object->shop_country_id);
-
-				$oMainRow5->add($oCountriesField);
-
 				// Добавляем статусы заказов
 				$oOrderStatusField = Admin_Form_Entity::factory('Select')
 					->name('shop_order_status_id')
 					->caption(Core::_('Shop.shop_order_status_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
 						$this->fillOrderStatuses()
 					)
 					->value($this->_object->shop_order_status_id);
 
-				$oMainRow5->add($oOrderStatusField);
+				$oMainRow4->add($oOrderStatusField);
 
-				$oMainTab->move($this->getField('email')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-					// clear standart url pattern
-					->format(array('lib' => array())), $oMainRow6);
+				// Добавляем страны
+				$oCountriesField = Admin_Form_Entity::factory('Select')
+					->name('shop_country_id')
+					->caption(Core::_('Shop.shop_country_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->options(
+						$this->fillCountries()
+					)
+					->value($this->_object->shop_country_id);
+
+				$oMainRow4->add($oCountriesField);
+
+				$aCodetypes = array('...');
+
+				$aShop_Codetypes = Core_Entity::factory('Shop_Codetype')->findAll(FALSE);
+				foreach ($aShop_Codetypes as $oShop_Codetype)
+				{
+					$aCodetypes[$oShop_Codetype->id] = $oShop_Codetype->name;
+				}
+
+				// Добавляем маркировки
+				$oCodetypesField = Admin_Form_Entity::factory('Select')
+					->name('shop_codetype_id')
+					->caption(Core::_('Shop.shop_codetype_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->options($aCodetypes)
+					->value($this->_object->shop_codetype_id);
+
+				$oMainRow5->add($oCodetypesField);
+
+				// Добавляем компании
+				$oCompaniesField = Admin_Form_Entity::factory('Select')
+					->name('shop_company_id')
+					->caption(Core::_('Shop.shop_company_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->options(
+						array(0 => '…') + Company_Controller::fillCompanies($this->_object->site_id)
+					)
+					->value($this->_object->shop_company_id)
+					->data('required', 1);
+
+				$oMainRow5->add($oCompaniesField);
 
 				$oMainTab->move($this->getField('items_on_page')
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow6);
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow5);
+
+				// Добавляем группы пользователей сайта
+				$oShopUserGroupSelect = Admin_Form_Entity::factory('Select')
+					->name('siteuser_group_id')
+					->caption(Core::_('Shop.siteuser_group_id'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->options(array(Core::_('Shop.allgroupsaccess')) + $aSiteuser_Groups)
+					->value($this->_object->siteuser_group_id);
+
+				$oMainRow5->add($oShopUserGroupSelect);
+
+				$oMainTab->move($this->getField('email')
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+					// clear standart url pattern
+					->format(array('lib' => array())), $oMainRow6);
 
 				// Добавляем тип URL
 				$oUrlTypeField = Admin_Form_Entity::factory('Select')
 					->name('url_type')
 					->caption(Core::_('Shop.url_type'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 					->options(
 						array(
 							Core::_('Shop.shop_shops_url_type_element_0'),
@@ -456,6 +481,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->value($this->_object->url_type);
 
 				$oMainRow6->add($oUrlTypeField);
+
+				$oMainTab->move($this->getField('reserve')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRowReserveOptions);
+				$oMainTab->move($this->getField('write_off_paid_items')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRowReserveOptions);
 
 				// Добавляем единицы измерения по умолчанию
 				$oDefaultMeasuresField = Admin_Form_Entity::factory('Select')
@@ -499,7 +527,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('max_bonus')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
 
 				Core_Templater::decorateInput($this->getField('invoice_template'));
-				$oMainTab->move($this->getField('invoice_template'), $oMainRowInvoice);
+				$oMainTab->move($this->getField('invoice_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowInvoice);
 
 				Core_Templater::decorateInput($this->getField('discountcard_template'));
 				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowDiscountcard);
@@ -508,18 +536,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
 				{
-					$aSelectSubscribers = $aSubscribers = array();
-
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-					$aCompanies = $oSite->Companies->findAll();
-					foreach ($aCompanies as $oCompany)
-					{
-						$oOptgroupCompany = new stdClass();
-						$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
-						$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
-
-						$aSelectSubscribers[] = $oOptgroupCompany;
-					}
+					$aUserOptions = $oSite->Companies->getUsersOptions();
 
 					$oModule = Core::$modulesList['shop'];
 
@@ -529,8 +547,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->where('notification_subscribers.type', '=', 0)
 						->where('notification_subscribers.entity_id', '=', $this->_object->id);
 
+					$aSubscribers = array();
 					$aNotification_Subscribers = $oNotification_Subscribers->findAll(FALSE);
-
 					foreach ($aNotification_Subscribers as $oNotification_Subscriber)
 					{
 						$aSubscribers[] = $oNotification_Subscriber->user_id;
@@ -538,8 +556,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oNotificationSubscribersSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Shop.notification_subscribers'))
-						// ->options($this->_fillNotificationSubscribersList())
-						->options($aSelectSubscribers)
+						->options($aUserOptions)
 						->name('notification_subscribers[]')
 						->class('shop-notification-subscribers')
 						->value($aSubscribers)
@@ -567,16 +584,48 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oMainRowNotification->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
 
-				$oMainTab->move($this->getField('filter'), $oMainRow8);
-				$oMainTab->move($this->getField('reserve'), $oMainRow8);
-				$oMainTab->move($this->getField('send_order_email_admin'), $oMainRow9);
-				$oMainTab->move($this->getField('send_order_email_user'), $oMainRow10);
+				$oFilterBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-azure')
+						->value(Core::_("Shop.filter_header"))
+					)
+					->add($oFilterBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oFilterBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oMainTab->move($this->getField('filter')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oFilterBlockRow1);
+
+				$oMainTab->delete($this->getField('filter_mode'));
+
+				$oFilterModeSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop.filter_mode'))
+					->options(array(
+						0 => Core::_("Shop.filter_mode0"),
+						1 => Core::_("Shop.filter_mode1"),
+					))
+					->name('filter_mode')
+					->value($this->_object->filter_mode)
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+
+				$oFilterBlockRow1->add($oFilterModeSelect);
+
+				$oMailBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-warning')
+						->value(Core::_("Shop.mail_header"))
+					)
+					->add($oMailBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMailBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMailBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$oMainTab->move($this->getField('send_order_email_admin'), $oMailBlockRow1);
+				$oMainTab->move($this->getField('send_order_email_user'), $oMailBlockRow2);
+				$oMainTab->move($this->getField('attach_digital_items'), $oMailBlockRow3);
+
 				$oMainTab->move($this->getField('comment_active'), $oMainRow11);
 				$oMainTab->move($this->getField('apply_tags_automatically'), $oMainRow12);
 				$oMainTab->move($this->getField('apply_keywords_automatically'), $oMainRow13);
-				$oMainTab->move($this->getField('write_off_paid_items'), $oMainRow14);
-				$oMainTab->move($this->getField('change_filename'), $oMainRow15);
-				$oMainTab->move($this->getField('attach_digital_items'), $oMainRow16);
 				$oMainTab->move($this->getField('use_captcha'), $oMainRow17);
 
 				$oShopTabWatermark->move($this->getField('image_large_max_width')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRowSize1);
@@ -657,6 +706,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShopTabWatermark->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')),$oShopTabWatermarkRow5);
 
 				$oShopTabWatermark->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow6);
+				$oMainTab->move($this->getField('change_filename')->divAttr(array('class' => 'form-group col-xs-12')),$oShopTabWatermarkRow7);
 
 				// Добавляем поле сортировки товара
 				$oShopTabOrdersRow1->add(Admin_Form_Entity::factory('Select')
@@ -945,9 +995,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Get order statuses array
 	 * @return array
 	 */
-	public function fillOrderStatuses()
+	public function fillOrderStatuses($iParentId = 0, $iLevel = 0)
 	{
-		$oOrderStatus = Core_Entity::factory('Shop_Order_Status');
+		/*$oOrderStatus = Core_Entity::factory('Shop_Order_Status');
 
 		$oOrderStatus->queryBuilder()
 			->orderBy('name');
@@ -960,7 +1010,28 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$aOrderStatusArray[$oOrderStatus->id] = $oOrderStatus->name;
 		}
 
-		return $aOrderStatusArray;
+		return $aOrderStatusArray;*/
+
+		$aReturn = array('...');
+
+		$iLevel = intval($iLevel);
+
+		$oShop_Order_Status_Parent = Core_Entity::factory('Shop_Order_Status', $iParentId);
+
+		// Дочерние элементы
+		$childrenStatuses = $oShop_Order_Status_Parent->Shop_Order_Statuses;
+		$childrenStatuses = $childrenStatuses->findAll();
+
+		if (count($childrenStatuses))
+		{
+			foreach ($childrenStatuses as $childrenStatus)
+			{
+				$aReturn[$childrenStatus->id] = str_repeat('  ', $iLevel) . $childrenStatus->name;
+				$aReturn += $this->fillOrderStatuses($childrenStatus->id, $iLevel + 1);
+			}
+		}
+
+		return $aReturn;
 	}
 
 	/**
@@ -1092,28 +1163,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		return $aCountryLocationCityAreaArray;
-	}
-
-	/**
-	 * Get companies array
-	 * @return array
-	 */
-	protected function _fillCompanies()
-	{
-		$oCompany = Core_Entity::factory('Shop_Company');
-
-		$oCompany->queryBuilder()
-			->orderBy('name');
-
-		$aCompanies = $oCompany->findAll();
-
-		$aCompanyArray = array(' … ');
-		foreach ($aCompanies as $oCompany)
-		{
-			$aCompanyArray[$oCompany->id] = $oCompany->name;
-		}
-
-		return $aCompanyArray;
 	}
 
 	/**

@@ -18,6 +18,8 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 	'active' => 'Активність',
 	'changeActive_success' => "Інформація успішно змінена",
+	'turnOn_success' => "Населені пункти включені!",
+	'switchOff_success' => "Населені пункти вимкнені!",
 
 	'language_tab'=>'Мовні версії',
 	'name_en'=>'Англійською',

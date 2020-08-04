@@ -95,6 +95,12 @@ else
 						->addText($oComment->subject)
 						->addText($oComment->text)
 						->execute();
+
+					// Check e-mail
+					if ($bAntispamAnswer)
+					{
+						$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($oComment->email);
+					}
 				}
 				else
 				{

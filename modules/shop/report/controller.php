@@ -959,6 +959,22 @@ class Shop_Report_Controller
 		$checked = self::$_allow_delivery
 			? 'checked="checked"'
 			: '';
+
+		$group_by = Core_Array::get($aOptions, 'group_by', 1);
+
+		switch ($group_by)
+		{
+			case 0: // day
+				$delta = 'day';
+			break;
+			case 1: // week
+			default:
+				$delta = 'week';
+			break;
+			case 2: // month
+				$delta = 'month';
+			break;
+		}
 		?>
 		<div class="row">
 			<div class="col-xs-12 col-sm-4">
@@ -1161,29 +1177,13 @@ class Shop_Report_Controller
 		?>
 		<div class="row">
 			<div class="col-xs-12">
-				<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20"></div>
+				<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20 <?php echo $group_by == 2 ? 'rotate-legend' : ''?>"></div>
 			</div>
 		</div>
 		<?php
 		if (self::$_oDefault_Currency)
 		{
 			self::$_debug && $fBeginTime = Core::getmicrotime();
-
-			$group_by = Core_Array::get($aOptions, 'group_by', 1);
-
-			switch ($group_by)
-			{
-				case 0: // day
-					$delta = 'day';
-				break;
-				case 1: // week
-				default:
-					$delta = 'week';
-				break;
-				case 2: // month
-					$delta = 'month';
-				break;
-			}
 			?>
 			<div class="row">
 				<div class="col-xs-12">
@@ -1679,17 +1679,10 @@ class Shop_Report_Controller
 				$(function() {
 					var aScripts = [
 						'jquery.flot.js',
-						// 'jquery.flot.time.min.js',
-						// 'jquery.flot.categories.min.js',
 						'jquery.flot.tooltip.min.js',
-						// 'jquery.flot.crosshair.min.js',
-						// 'jquery.flot.selection.min.js',
 						'jquery.flot.pie.min.js',
-						// 'jquery.flot.resize.js',
 						'jquery.flot.stack.min.js',
 						'jquery.flot.axislabels.js'
-						// 'jquery.flot.fillbetween.min.js',
-						// 'jquery.flot.orderBars.js',
 					];
 
 					function showTooltip(x, y, contents, color) {
@@ -2762,7 +2755,7 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields))
 		{
-			$aReturn['captionHTML'] = '<div class="tab-description">ТОП-' . self::$_popular_limit . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . Core::_('Shop.report_top') . self::$_popular_limit . '</div>';
 		}
 
 		if (in_array('content', $aFields))
@@ -2799,7 +2792,7 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields))
 		{
-			$aReturn['captionHTML'] = '<div class="tab-description">ТОП-' . self::$_popular_producers_limit . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . Core::_('Shop.report_top') . self::$_popular_producers_limit . '</div>';
 		}
 
 		if (in_array('content', $aFields))

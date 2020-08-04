@@ -336,8 +336,10 @@ class Core_Auth
 					&& isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
 					&& isset($_SESSION['is_superuser']))
 				{
+					$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+
 					// Привязки к IP не было или IP совпадают
-					if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1'))
+					if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == $ip)
 					{
 						// Пользователь существует
 						$oUser = Core_Entity::factory('User')->getCurrent();
@@ -345,6 +347,27 @@ class Core_Auth
 						{
 							self::$_logged = TRUE;
 							self::$_currentUser = $oUser;
+
+							$sessionId = session_id();
+							$userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT', NULL);
+							$oDataBase = Core_QueryBuilder::update('user_sessions')
+								->set('user_id', self::$_currentUser->id)
+								->set('time', time())
+								->set('user_agent', $userAgent)
+								->set('ip', $ip)
+								->where('session_id', '=', $sessionId)
+								->execute();
+
+							// Returns the number of rows affected by the last SQL statement
+							// If nothing's really was changed affected rowCount will return 0.
+							if ($oDataBase->getAffectedRows() == 0)
+							{
+								Core_QueryBuilder::insert('user_sessions')
+									->ignore()
+									->columns('session_id', 'user_id', 'time', 'user_agent', 'ip')
+									->values($sessionId, self::$_currentUser->id, time(), $userAgent, $ip)
+									->execute();
+							}
 						}
 						else
 						{

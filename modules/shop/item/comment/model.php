@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Comment_Model extends Comment_Model
 {
@@ -56,6 +56,7 @@ class Shop_Item_Comment_Model extends Comment_Model
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_item_comment.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -70,6 +71,8 @@ class Shop_Item_Comment_Model extends Comment_Model
 
 		// restore original _nameColumn
 		$this->_nameColumn = $nameColumn;
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

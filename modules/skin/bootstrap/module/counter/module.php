@@ -7,7 +7,7 @@
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 {
@@ -50,7 +50,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 		{
 			?><div class="col-xs-12" id="counterAdminPage">
 				<script>
-				$.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#counterAdminPage') });
+				$.widgetLoad({ path: '<?php echo Core_Str::escapeJavascriptVariable($this->_path)?>', context: $('#counterAdminPage') });
 				</script>
 			</div><?php
 		}
@@ -70,7 +70,7 @@ class Skin_Bootstrap_Module_Counter_Module extends Counter_Module
 					<a data-toggle="maximize">
 						<i class="fa fa-expand gray"></i>
 					</a>
-					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo $this->_path?>', context: $('#counterAdminPage'), 'button': $(this).find('i') });">
+					<a data-toggle="refresh" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '<?php echo Core_Str::escapeJavascriptVariable($this->_path)?>', context: $('#counterAdminPage'), 'button': $(this).find('i') });">
 						<i class="fa fa-refresh gray"></i>
 					</a>
 				</div>

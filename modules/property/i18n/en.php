@@ -37,6 +37,8 @@ return array(
 	'type10' => 'Hidden field',
 	'type11' => 'Real number',
 	'type12' => 'Shop',
+	'type13' => 'Information system group',
+	'type14' => 'Shop group',
 
 	'list_id' => '<acronym title="Select list of values for property">Lists</acronym>',
 	'informationsystem_id' => '<acronym title="Information system sets as a property">Information system</acronym>',

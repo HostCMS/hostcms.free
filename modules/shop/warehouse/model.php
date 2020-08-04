@@ -363,4 +363,23 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		return ob_get_clean();
 	}
+
+	/**
+	 * Create Shop_Warehouse_Incoming
+	 * @param int $shop_price_id default 0
+	 * @return Shop_Warehouse_Incoming_Model
+	 */
+	public function createShopWarehouseIncoming($shop_price_id = 0)
+	{
+		$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
+		$oShop_Warehouse_Incoming->shop_warehouse_id = $this->id;
+		$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
+		$oShop_Warehouse_Incoming->number = '';
+		$oShop_Warehouse_Incoming->posted = 0;
+		$oShop_Warehouse_Incoming->shop_price_id = $shop_price_id;
+		$oShop_Warehouse_Incoming->save();
+
+		$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
+		return $oShop_Warehouse_Incoming->save();
+	}
 }

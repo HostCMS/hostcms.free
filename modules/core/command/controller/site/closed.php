@@ -44,9 +44,7 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$domain = htmlspecialchars(Core::$url['host']);
-
-		$title = "Сайт {$domain} отключен администратором и в данный момент недоступен!";
+		$title = Core::_('Core.site_disabled_by_administrator', Core::$url['host']);
 
 		ob_start();
 		$oSkin = Core_Skin::instance()
@@ -57,8 +55,7 @@ class Core_Command_Controller_Site_Closed extends Core_Command_Controller
 		Core::factory('Core_Html_Entity_Div')
 			->class('indexMessage')
 			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Для включения сайта перейдите в&nbsp;раздел &laquo;Сайты&raquo; и&nbsp;установите значение &laquo;Активность&raquo; требуемого сайта.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.site_activation_instruction')
 			))
 			->execute();
 

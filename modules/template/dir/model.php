@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Dir_Model extends Core_Entity
 {
@@ -93,6 +93,7 @@ class Template_Dir_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event template_dir.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -113,6 +114,8 @@ class Template_Dir_Model extends Core_Entity
 			$oNewTemplateDir = $oTemplateDir->copy();
 			$newObject->add($oNewTemplateDir);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

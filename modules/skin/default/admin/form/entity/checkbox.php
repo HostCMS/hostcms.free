@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 {
@@ -65,12 +65,9 @@ class Skin_Default_Admin_Form_Entity_Checkbox extends Admin_Form_Entity_Input
 
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 
-		/*?><input <?php echo implode(' ', $aAttr) ?>/><?php
-		?><span class="caption" style="display: inline"><label for="<?php echo $this->id?>"><?php echo $this->caption?></label></span><?php*/
-
 		if ($this->postingUnchecked)
 		{
-			?><input type="hidden" name="<?php echo $this->name?>" value="0" /><?php
+			?><input type="hidden" name="<?php echo htmlspecialchars($this->name)?>" value="0" /><?php
 		}
 
 		?><label><input <?php echo implode(' ', $aAttr) ?>/> <?php

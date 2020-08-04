@@ -29,12 +29,10 @@ class Skin_Default_Admin_Form_Entity_Button extends Admin_Form_Entity_Input
 	{
 		if (!is_null($this->onclick) && is_object($this->_Admin_Form_Controller))
 		{
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
 			$this->onclick = 'var $form = $(this).parents("form"); $.toogleInputsActive($form, true); setTimeout(function(){ $.toogleInputsActive($form, false) }, 1000); ' .  $this->onclick;
 		}
 
 		$aAttr = $this->getAttrsString();
-
 		?><input <?php echo implode(' ', $aAttr) ?>/> <?php
 	}
 }

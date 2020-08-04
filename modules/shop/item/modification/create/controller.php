@@ -82,16 +82,7 @@ class Shop_Item_Modification_Create_Controller extends Admin_Form_Action_Control
 			if (!is_null($oShop_Warehouse))
 			{
 				// Создается назависимо от Core_Array::getPost('copy_warehouse_count')
-				$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
-				$oShop_Warehouse_Incoming->shop_warehouse_id = $oShop_Warehouse->id;
-				$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
-				$oShop_Warehouse_Incoming->number = '';
-				$oShop_Warehouse_Incoming->posted = 0;
-				$oShop_Warehouse_Incoming->shop_price_id = 0;
-				$oShop_Warehouse_Incoming->save();
-
-				$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
-				$oShop_Warehouse_Incoming->save();
+				$oShop_Warehouse_Incoming = $oShop_Warehouse->createShopWarehouseIncoming();
 			}
 
 			$oShop->filter

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Order statuses',
@@ -27,4 +27,5 @@ return array(
 	'sorting' => 'Sort',
 	'apply_success' => 'Status information modified successfully!',
 	'color' => 'Color',
+	'parent_id' => 'Parent status',
 );

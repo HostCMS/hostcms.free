@@ -342,6 +342,7 @@ class Shop_Producer_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_producer.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -356,6 +357,8 @@ class Shop_Producer_Model extends Core_Entity
 		{
 			Core_File::copy($this->getSmallFilePath(), $newObject->getSmallFilePath());
 		} catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -414,6 +417,28 @@ class Shop_Producer_Model extends Core_Entity
 	{
 		$this->shop_producer_dir_id = $shop_producer_dir_id;
 		$this->save();
+		return $this;
+	}
+
+	/**
+	 * Merge shop producers
+	 * @param Shop_Producer_Model $oObject
+	 * @return self
+	 */
+	public function merge(Shop_Producer_Model $oObject)
+	{
+		Core_QueryBuilder::update('shop_items')
+			->set('shop_producer_id', $this->id)
+			->where('shop_producer_id', '=', $oObject->id)
+			->execute();
+
+		Core_QueryBuilder::update('shop_filter_seos')
+			->set('shop_producer_id', $this->id)
+			->where('shop_producer_id', '=', $oObject->id)
+			->execute();
+
+		$oObject->delete();
+
 		return $this;
 	}
 

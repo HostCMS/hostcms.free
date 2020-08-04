@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Update_Module extends Update_Module
 {
@@ -57,7 +57,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 								$sDatetime = !is_null($aUpdates['datetime'])
 									? strftime(DATE_TIME_FORMAT, strtotime($aUpdates['datetime']))
 									: '';
-									
+
 								echo Core_Str::cutSentences(
 									Core::_('Update.server_error_respond_' . $error, $sDatetime), 120
 								);
@@ -68,7 +68,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 							}
 							else
 							{
-								echo Core_Inflection::getPlural('Обновление', $iUpdateCounts, 'ru');
+								echo Core_Inflection::getPlural(Core::_('Update.update'), $iUpdateCounts, 'ru');
 							}
 						?></div>
 						<div class="databox-stat themethirdcolor radius-bordered">

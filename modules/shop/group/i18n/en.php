@@ -60,4 +60,5 @@ return array(
 	'seo_item_keywords_template' => 'KEYWORDS template',
 	'markDeleted' => 'Delete group',
 	'shortcut_success' => "Group shortcut added successfully",
+	'change_attributes_success' => 'Attributes changed successfully!',
 );

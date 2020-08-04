@@ -52,7 +52,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['posted'] = 1;
+			$this->_preloadValues['posted'] = 0;
 		}
 	}
 
@@ -274,7 +274,8 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 5);
+		Core::moduleIsActive('printlayout')
+			&& Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 5);
 	}
 
 	/**

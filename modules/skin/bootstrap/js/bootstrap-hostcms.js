@@ -272,6 +272,91 @@ function isEmpty(str) {
 				},
 			});
 		},
+		getSeoFilterPropertyValues: function(object)
+		{
+			$.ajax({
+				url: '/admin/shop/filter/seo/index.php',
+				data: { 'get_values': 1, 'property_id': $(object).val() },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					if (result.status == 'success')
+					{
+						$('.property-values').html(result.html);
+					}
+				}
+			});
+		},
+		applySeoFilterConditions: function()
+		{
+			var property_id = $('#conditionsModal select[name = "modal_property_id"]').val(),
+				jPropertyValue = $('#conditionsModal *[name = "modal_property_value"]'),
+				type = jPropertyValue.attr('type'),
+				property_value = null;
+
+				switch (type)
+				{
+					case 'checkbox':
+						property_value = +jPropertyValue.is(':checked');
+					break;
+					default:
+						property_value = jPropertyValue.val();
+				}
+
+				$.ajax({
+					url: '/admin/shop/filter/seo/index.php',
+					data: { 'add_property': 1, 'property_id': property_id, 'property_value': property_value },
+					dataType: 'json',
+					type: 'POST',
+					success: function(result){
+						if (result.status == 'success')
+						{
+							var sorting = [];
+
+							$('.filter-conditions .dd-item').each(function () {
+								var id = parseFloat($(this).data('sorting'));
+								sorting.push(id);
+							});
+							sorting.sort(function(a, b) { return a - b });
+
+							var newSorting = sorting[sorting.length - 1] + 1;
+
+							$('.filter-conditions').append('<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="' + newSorting + '"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom">' + result.html + '<a class="delete-associated-item" onclick="$(this).parents(\'.dd\').remove()"><i class="fa fa-times-circle darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="property_value_sorting[]" value="' + newSorting + '"/>');
+
+							// Reload nestable list
+							$.loadSeoFilterNestable();
+						}
+
+						$('#conditionsModal').modal('hide');
+					}
+				});
+		},
+		loadSeoFilterNestable: function()
+		{
+			var aScripts = [
+				'jquery.nestable.min.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/nestable/').done(function() {
+				$('.filter-conditions .dd').nestable({
+					maxDepth: 1,
+					// handleClass: 'form-horizontal',
+					emptyClass: ''
+				});
+
+				$('.filter-conditions .dd-handle a, .filter-conditions .dd-handle .property-data').on('mousedown', function (e) {
+					e.stopPropagation();
+				});
+
+				$('.filter-conditions .dd').on('change', function() {
+					$('.filter-conditions input[type = "hidden"]').remove();
+
+					$.each($('.filter-conditions li.dd-item'), function(i, object){
+						$('.filter-conditions').append('<input type="hidden" name="property_value_sorting' + $(object).data('id') + '" value="' + i + '"/>');
+					});
+				});
+			});
+		},
 		resizeIframe: function(object) {
 			if (object.contentWindow !== null)
 			{
@@ -321,7 +406,7 @@ function isEmpty(str) {
 			}
 			else
 			{
-				$.cookie(name, bChecked, { expires: 365 });
+				$.cookie(name, bChecked, { expires: 365 }); // days
 			}
 		},
 		changeSiteuserEmailType: function(object, lng) {
@@ -727,6 +812,485 @@ function isEmpty(str) {
 				}
 
 				$modal.modal('hide');
+			});
+		},
+		showAttachmentModal: function(id, name, oActions) {
+			var message = '';
+
+			$.each(oActions, function (i, oAction){
+				var href = typeof oAction.href !== 'undefined'
+						? ' href="' + oAction.href + '"'
+						: '',
+					onclick = typeof oAction.onclick !== 'undefined'
+						? ' onclick="' + oAction.onclick + '"'
+						: '',
+					sClass = typeof oAction.class !== 'undefined'
+						? ' class="' + oAction.class + '"'
+						: '';
+					target = typeof oAction.target !== 'undefined' && oAction.target
+						? ' target="_blank"'
+						: '';
+					/*name = typeof oAction.img !== 'undefined'
+						? '<img src="' + oAction.img + '">'
+						: $.escapeHtml(oAction.name);*/
+
+				message += '<div class="dms-attachment-action-button"><a' + href + onclick + sClass + target + '>' + $.escapeHtml(oAction.name) + '</a></div>';
+			});
+
+			if (message.length)
+			{
+				var dialog = bootbox.dialog({
+					title: name,
+					message: message,
+					backdrop: true,
+					size: 'small'
+				});
+
+				dialog.modal('show');
+
+				// Centered modal
+				/*dialog.find('.modal-content').css({
+					'margin-top': function (){
+						var w = $(window).height(),
+							b = $(".modal-dialog").height(),
+							h = (w - b) / 2;
+
+						console.log(w, b, h);
+						console.log($(this).height());
+
+						return h + "px";
+					}
+				});*/
+
+				$("body").on("shown.bs.modal", ".modal", function() {
+					$(this).find('div.modal-dialog').css({
+						'margin-top': function () {
+							var modal_height = $('.modal-dialog').first().height();
+							var window_height = $(window).height();
+							return ((window_height/2) - (modal_height/2));
+						}
+					});
+				});
+
+				dialog.on('keyup', function (e) {
+					if (e.keyCode == 27) {
+						dialog.modal("hide");
+					}
+				});
+			}
+		},
+		showAddEditForm: function($object, dms_workflow_template_id)
+		{
+			var dms_workflow_template_step_id = $object.data('step-id');
+
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'show_modal': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'dms_workflow_template_id': dms_workflow_template_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('body').append(result.html);
+					$('#actionsModal' + dms_workflow_template_step_id).modal('show');
+
+					$('#actionsModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		startDmsWorkflow: function(dms_document_id)
+		{
+			$.ajax({
+				url: '/admin/dms/document/index.php',
+				data: { 'show_workflow_modal': 1, 'dms_document_id': dms_document_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('body').append(result.html);
+
+					$('#dmsWorkflowModal' + dms_document_id).modal('show');
+
+					$('#dmsWorkflowModal' + dms_document_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		applyDmsWorkflowTemplate: function(dms_document_id, dms_workflow_template_id)
+		{
+			$('#dmsWorkflowModal' + dms_document_id).modal('hide');
+
+			$.ajax({
+				url: '/admin/dms/document/index.php',
+				data: { 'show_workflow_document_modal': 1, 'dms_document_id': dms_document_id, 'dms_workflow_template_id': dms_workflow_template_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('body').append(result.html);
+
+					setTimeout(function(){
+						$.loadDmsStepsNestable();
+					}, 500);
+
+					$('#dmsWorkflowDocumentModal' + dms_document_id).modal('show');
+
+					$('#dmsWorkflowDocumentModal' + dms_document_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		applyDmsWorkflowTemplateDocument: function(dms_document_id, dms_workflow_template_id)
+		{
+			$.ajax({
+				url: '/admin/dms/document/index.php',
+				data: { 'start_workflow': 1, 'dms_document_id': dms_document_id, 'dms_workflow_template_id': dms_workflow_template_id, 'data': $('#dmsWorkflowDocumentModal' + dms_document_id).find('input[type=hidden]').serialize() },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('#dmsWorkflowDocumentModal' + dms_document_id).modal('hide');
+				}
+			});
+		},
+		modalEditTemplateUsers: function($object)
+		{
+			var dms_workflow_template_step_id = $object.data('step-id'),
+				route_type = $object.parents('li').data('route-type'),
+				jParent = $object.parents('.dd-item');
+
+			$.ajax({
+				url: '/admin/dms/document/index.php',
+				data: { 'edit_template_users_modal': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'data': jParent.find('input[type=hidden]').serialize(), 'route_type': route_type },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('body').append(result.html);
+					$('#documentActionsModal' + dms_workflow_template_step_id).modal('show');
+
+					$('#documentActionsModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
+						// recount badges
+						var allHiddenInputs = jParent.find('input[type=hidden][name *= modal_]').length,
+							countTemplates = jParent.find('input[name *= "t-"]').length;
+
+						jParent.find('.users-count span.sky').text(allHiddenInputs - countTemplates);
+						jParent.find('.users-count span.warning').text(countTemplates);
+
+						$(this).remove();
+					});
+				}
+			});
+		},
+		applyEditUsersModal: function(dms_workflow_template_step_id)
+		{
+			var $jParentLi = $('.dms-workflow-template-actions-modal').find('[data-id = "' + dms_workflow_template_step_id + '"]');
+
+			// remove old inputs
+			$jParentLi.find('input[type=hidden]').remove();
+
+			$('#documentActionsModal' + dms_workflow_template_step_id).find('[data-step-id = "' + dms_workflow_template_step_id + '"] input[type=hidden]').each(function(index){
+				var bStar = $(this).parents('li').find('.fa-star').length;
+					hiddenId = $(this).parents('li').find('input[name=hidden_element]').val(),
+					value = $(this).val(),
+					responsible = bStar ? 1 : 0;
+
+				if (typeof hiddenId !== 'undefined')
+				{
+					value = $('#' + hiddenId).val();
+
+					var responsibleCheckboxChecked = +$('#' + hiddenId).parents('div').next().next().find('input[type=checkbox]').is(':checked');
+
+					if (typeof responsibleCheckboxChecked !== 'undefined')
+					{
+						responsible = responsibleCheckboxChecked;
+					}
+				}
+
+				if (typeof value !== 'undefined')
+				{
+					$jParentLi.append('<input type="hidden" name="modal_users_' + dms_workflow_template_step_id + '[' + value + ']" value="' + responsible + '"/>');
+
+				}
+			});
+
+			$jParentLi.data('route-type', +$('#documentActionsModal' + dms_workflow_template_step_id + ' select[name = route_type]').val());
+			$jParentLi.append('<input type="hidden" name="route_type' + dms_workflow_template_step_id  + '" value="' + $jParentLi.data('route-type') + '"/>');
+
+			$('#documentActionsModal' + dms_workflow_template_step_id).modal('hide');
+		},
+		loadUsersModalNestable: function()
+		{
+			var aScripts = [
+				'jquery.nestable.min.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/nestable/').done(function() {
+				$('.dms-workflow-template-users .dd').nestable({
+					maxDepth: 1,
+					emptyClass: ''
+				});
+
+				$('.dms-workflow-template-users .dd-handle select, .dms-workflow-template-users .dd-handle .select2, .dms-workflow-template-users a, .dms-workflow-template-users .dd-handle label').on('mousedown', function (e) {
+					e.stopPropagation();
+				});
+			});
+		},
+		addModalNestableRow: function($object, $type)
+		{
+			var color,
+				icon;
+
+			switch ($type)
+			{
+				case 0: // user
+					color = 'sky';
+					icon = 'fa fa-user';
+				break;
+				case 1: // template
+					color = 'warning';
+					icon = 'fa fa-users';
+				break;
+			}
+
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'add_modal_row': 1, 'type': $type },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					if (result.status == 'success')
+					{
+						var responsible_checkbox = '';
+						if ($type == 0)
+						{
+							responsible_checkbox = '<label class="checkbox-inline no-padding-top" title="Ответственный"><input name="responsible[]" type="checkbox" value="1" class="form-control"><span class="text"></span></label>'
+						}
+
+						$('.dms-workflow-template-users').append('<div class="dd"><ol class="dd-list"><li class="dd-item bordered-' + color + '"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom"><div class="col-xs-12"><div class="row">' + result.html + '<div class="col-xs-12 col-sm-2 margin-top-10 text-align-right">' + responsible_checkbox + '<i class="' + icon + ' fa-fw ' + color + '"></i><a class="delete-associated-item margin-left-5" style="margin-top: -4px;" onclick="$(this).parents(\'.dd\').remove()"><i class="fa fa-times-circle darkorange"></i></a></div></div></div></div></div></div><input type="hidden" name="hidden_element" value="' + result.id + '"/></li></ol></div>');
+
+						$.loadUsersModalNestable();
+					}
+				}
+			});
+		},
+		loadDmsStepsNestable: function()
+		{
+			var aScripts = [
+				'jquery.nestable.min.js'
+			];
+
+			$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/nestable/').done(function() {
+				$('.dms-workflow-template-actions .dd').nestable({
+					maxDepth: 1,
+					emptyClass: ''
+				});
+
+				$('.dms-workflow-template-actions .dd-handle a, .dms-workflow-template-actions .dd-handle .property-data').on('mousedown', function (e) {
+					e.stopPropagation();
+				});
+
+				$('.dms-workflow-template-actions .dd').on('change', function() {
+					$.resortDmsStepsList();
+				});
+			});
+		},
+		resortDmsStepsList: function()
+		{
+			var aSorting = {}, sorting = 1;
+
+			$('.dms-workflow-template-actions .dd-item').each(function () {
+				var id = $(this).data('id');
+				aSorting[id] = sorting;
+
+				$(this).find('.dd-handle .step-sorting').text(sorting);
+				sorting++;
+			});
+
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'resort_list': 1, 'sorting': aSorting },
+				dataType: 'json',
+				type: 'POST',
+				success: function(){}
+			});
+		},
+		applyActions: function(dms_workflow_template_id, dms_workflow_template_step_id)
+		{
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'apply_action': 1, 'data': $('.actions-form').serialize(), 'dms_workflow_template_step_id': dms_workflow_template_step_id, 'dms_workflow_template_id': dms_workflow_template_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$.loadDmsWorkflowTemplateStepList(dms_workflow_template_id);
+					$('#actionsModal' + dms_workflow_template_step_id).modal('hide');
+				}
+			});
+		},
+		loadActionsList: function(dms_workflow_template_id)
+		{
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'show_actions_list': 1, 'dms_workflow_template_id': dms_workflow_template_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('.actions_list').empty();
+					$('.actions_list').append(result.html);
+				}
+			});
+		},
+		loadDmsWorkflowTemplateStepList: function(dms_workflow_template_id)
+		{
+			$.loadActionsList(dms_workflow_template_id);
+
+			setTimeout(function(){
+				$.loadDmsStepsNestable();
+			}, 500);
+		},
+		addEditRoute: function($object)
+		{
+			var dms_workflow_template_step_id = $object.data('step-id');
+
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'add_route': 1, 'dms_workflow_template_step_id': dms_workflow_template_step_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$('body').append(result.html);
+					$('#routesModal' + dms_workflow_template_step_id).modal('show');
+
+					$('#routesModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		cloneModalDmsStateRow: function($object)
+		{
+			var $jParent = $object.parents('.row'),
+				$jClone = $jParent.clone();
+
+			$jClone.find('.btn').remove();
+			$jClone.find('select').val(0);
+
+			$('.routes-form').append($jClone);
+		},
+		applyRoutes: function(dms_workflow_template_id, dms_workflow_template_step_id)
+		{
+			$.ajax({
+				url: '/admin/dms/workflow/template/index.php',
+				data: { 'apply_route': 1, 'data': $('.routes-form').serialize(), 'dms_workflow_template_step_id': dms_workflow_template_step_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(result){
+					$.loadDmsWorkflowTemplateStepList(dms_workflow_template_id);
+					$('#routesModal' + dms_workflow_template_step_id).modal('hide');
+				}
+			});
+		},
+		dmsEditDocument: function(dms_document_version_attachment_id, cloud_id)
+		{
+			$.ajax({
+				url: '/admin/dms/document/version/attachment/index.php',
+				data: { 'open_edit_file': 1, 'dms_document_version_attachment_id': dms_document_version_attachment_id, 'cloud_id': cloud_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(answer){
+					if (answer.url != null)
+					{
+						var params = 'scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=0,height=0,left=-1000,top=-1000',
+							newWindow = window.open(answer.url, '_blank', params);
+
+						var timer = setInterval(function() {
+							if(newWindow.closed) {
+								clearInterval(timer);
+
+								$.ajax({
+									url: '/admin/dms/document/version/attachment/index.php',
+									data: { 'close_edit_file': 1, 'file_id': answer.file_id, 'dms_document_version_attachment_id': dms_document_version_attachment_id, 'cloud_id': cloud_id },
+									dataType: 'json',
+									type: 'POST',
+									success: function(answer){
+										if (answer.status == 'success')
+										{
+											bootbox.hideAll();
+
+											if (answer.document_id)
+											{
+												$.adminLoad({ path: '/admin/dms/document/version/attachment/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-attachments', loadingScreen: false });
+
+												$.adminLoad({ path: '/admin/dms/document/version/index.php', additionalParams: 'dms_document_id=' + answer.document_id + '&hideMenu=1&_module=0', windowId: 'document-versions', loadingScreen: false });
+											}
+										}
+									}
+								});
+							}
+						}, 1000);
+					}
+					else
+					{
+						Notify(i18n['edit_error'], "", "top-right", 5000, "darkorange", "fa-exclamation-triangle", true, false);
+					}
+				}
+			});
+		},
+		changeDmsDocumentType: function(dms_document_type_id, dms_document_id, windowId)
+		{
+			if (dms_document_type_id)
+			{
+				$.ajax({
+					url: '/admin/dms/document/type/index.php',
+					data: { 'load_fields': 1, 'dms_document_id': dms_document_id, 'dms_document_type_id': dms_document_type_id, 'windowId': windowId },
+					dataType: 'json',
+					type: 'POST',
+					success: function(answer){
+						$('.dms-fields')
+							.empty()
+							.html(answer.html);
+					}
+				});
+			}
+		},
+		showStateHistory: function(dms_document_id, dms_document_type_id)
+		{
+			$.ajax({
+				url: '/admin/dms/document/index.php',
+				data: { 'load_state_history': 1, 'dms_document_id': dms_document_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(answer){
+					var dialog = bootbox.dialog({
+						title: answer.title,
+						message: answer.html,
+						backdrop: true,
+						size: 'large'
+					});
+
+					dialog.modal('show');
+
+					dialog.on('shown.bs.modal', function() {
+						dialog.find('.modal-body')
+							.slimscroll({
+								height: '400px',
+								color: 'rgba(0, 0, 0, 0.3)',
+								size: '5px'
+							});
+					});
+				}
+			});
+		},
+		dmsWorkflowShowStateValues: function(object, windowId)
+		{
+			$.ajaxRequest({
+				path: '/admin/dms/workflow/index.php',
+				callBack: function(data, status, jqXHR) {
+					$('#' + windowId + ' #progress_dms_state_value_id, #' + windowId + ' #success_dms_state_value_id, #' + windowId + ' #failed_dms_state_value_id').appendOptions(data);
+				},
+				action: 'loadDmsStateValues',
+				additionalParams: 'loadDmsStateValues&dms_state_id=' + object.value,
+				windowId: windowId,
+				loadingScreen: false
 			});
 		},
 		escapeHtml: function(str) {
@@ -2729,6 +3293,10 @@ function isEmpty(str) {
 			$(selector + ' .hidden-field').toggleClass('hidden');
 			$(selector + ' .representative-show-link').parents('.row').remove();
 		},
+		toggleEventFields: function(object, selector) {
+			$(selector).toggleClass('hidden');
+			object.parents('.row').remove();
+		},
 		generatePassword: function() {
 			var jFirstPassword = $("[name = 'password_first']"),
 				jSecondPassword = $("[name = 'password_second']");
@@ -4025,9 +4593,10 @@ function isEmpty(str) {
 			// Удаляем скрипт просмотра загуженного изображения
 			jNewObject.find("input[id ^= 'property_" + index + "_'][type='file'] ~ script").remove();
 
-			jNewObject.find("input[id^='field_id'],select,textarea").attr('name', 'property_' + index + '[]');
+			jNewObject.find("input[id^='field_id'],select:not([id$='_mode']),textarea").attr('name', 'property_' + index + '[]');
 			jNewObject.find("div[id^='file_small'] input[id^='small_field_id']").attr('name', 'small_property_' + index + '[]').val('');
 			jNewObject.find("input[id^='id_property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea").val('');
+			jNewObject.find("select[id$='_mode'] option:first").prop('selected', true).change();
 
 			jNewObject.find("input[id^='create_small_image_from_large_small_property']").attr('checked', true);
 
@@ -4069,14 +4638,20 @@ function isEmpty(str) {
 				jDir = jNewObject.find("select[onchange]"),
 				jItem = jNewObject.find("select:not([onchange])");
 
-			jDir
-				//.attr('onchange', jDir.attr('onchange').replace(jItem.attr('id'), iNewId))
-				.val(jProperies.eq(0).find("select[onchange]").val());
+			// Свойство - инфоэлемент
+			if (jDir.length)
+			{
+				jDir.val(jProperies.eq(0).find("select[onchange]").val());
+				jItem.val(jProperies.eq(0).find("select:not([onchange])"));
+			}
+			else // свойство - группа
+			{
+				jItem.val(0);
+			}
 
 			jItem
 				.attr('name', 'property_' + index + '[]')
-				//.attr('id', iNewId)
-				.val(jProperies.eq(0).find("select:not([onchange])").val());
+				.val();
 
 			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
 			jNewObject.insertAfter(jProperies.eq(-1));
@@ -4225,7 +4800,8 @@ function isEmpty(str) {
 			var resultHtml = '<span class="' + className + '">' + $.escapeHtml(arraySelectItemParts[0]) + '</span>';
 
 			// Формируем title элемента
-			data.title = $.escapeHtml(arraySelectItemParts[0]);
+			//data.title = $.escapeHtml(arraySelectItemParts[0]);
+			data.title = arraySelectItemParts[0];
 
 			if (arraySelectItemParts[1] || arraySelectItemParts[2])
 			{
@@ -4233,7 +4809,8 @@ function isEmpty(str) {
 				if (arraySelectItemParts[1])
 				{
 					resultHtml += '<span class="company-department">' + $.escapeHtml(arraySelectItemParts[1]) + '</span>';
-					data.title += " - " + $.escapeHtml(arraySelectItemParts[1]);
+					//data.title += " - " + $.escapeHtml(arraySelectItemParts[1]);
+					data.title += " - " + arraySelectItemParts[1];
 				}
 
 				// Список должностей через запятую
@@ -4242,7 +4819,8 @@ function isEmpty(str) {
 					var departmentPosts = arraySelectItemParts[2].split('###').join(', ');
 
 					resultHtml += (arraySelectItemParts[1] ? ' → ' : '') + '<span class="user-post">' + $.escapeHtml(departmentPosts) + '</span>';
-					data.title += " - " + $.escapeHtml(departmentPosts);
+					//data.title += " - " + $.escapeHtml(departmentPosts);
+					data.title += " - " + departmentPosts;
 				}
 			}
 
@@ -5401,7 +5979,9 @@ function isEmpty(str) {
 			}
 
 			var ajaxOptions = {
-				context: jQuery('#' + settings.windowId + ' #' + settings.context),
+				context: jQuery.prototype.isPrototypeOf(settings.context)
+					? settings.context
+					: (settings.context.length ? jQuery('#' + settings.windowId + ' #' + settings.context) : {}),
 				url: path,
 				type: 'POST',
 				data: data,
@@ -5469,8 +6049,8 @@ function isEmpty(str) {
 					jInputTopParentDiv.addClass('hidden');
 					jSelectTopParentDiv.removeClass('hidden');
 
-					jQuery(this).empty();
-					for (var key in data['values'])
+					jQuery(this).empty().appendOptions(data['values']);
+					/*for (var key in data['values'])
 					{
 						if (typeof data['values'][key] == 'object')
 						{
@@ -5486,7 +6066,7 @@ function isEmpty(str) {
 								.attr('value', key)
 								.text(data['values'][key]));
 						}
-					}
+					}*/
 				}
 				else if(data['mode'] == 'input')
 				{
@@ -5496,7 +6076,9 @@ function isEmpty(str) {
 			}
 			else
 			{
-				jQuery(this).empty();
+				jQuery(this).empty().appendOptions(data);
+
+				/*var oSelectOption;
 				for (var key in data)
 				{
 					if (typeof data[key] == 'object')
@@ -5511,9 +6093,12 @@ function isEmpty(str) {
 					}
 					else
 					{
-						jQuery(this).append(jQuery('<option>').attr('value', key).text(data[key]));
+						jQuery(this)
+							.append(jQuery('<option>')
+							.attr('value', key)
+							.text(data[key]));
 					}
-				}
+				}*/
 			}
 		},
 		loadDivContentAjaxCallback: function(data, status, jqXHR)
@@ -5695,7 +6280,37 @@ function isEmpty(str) {
 	});
 
 	$.fn.extend({
-		insertAtCaret: function(newValue){
+		appendOptions: function(array) {
+			return this.each(function(i) {
+				var $option, $select = $(this);
+
+				$select.empty();
+				for (var key in array)
+				{
+					if (typeof array[key] == 'object')
+					{
+						$option =
+							jQuery('<option>')
+								.attr('value', array[key].value)
+								.text(array[key].name);
+
+						typeof array[key].disabled !== 'undefined'
+							&& array[key].disabled
+							&& oSelectOption.attr('disabled', 'disabled');
+
+						$select.append($option);
+					}
+					else
+					{
+						$select
+							.append(jQuery('<option>')
+							.attr('value', key)
+							.text(array[key]));
+					}
+				}
+			});
+		},
+		insertAtCaret: function(newValue) {
 		  return this.each(function(i) {
 			if (document.selection) {
 			  //For browsers like Internet Explorer
@@ -5718,7 +6333,7 @@ function isEmpty(str) {
 			  this.value += newValue;
 			  this.focus();
 			}
-		  })
+		  });
 		},
 		/* --- CHAT --- */
 		addChatBadge: function(count)
@@ -6732,8 +7347,8 @@ function cancelAllDay(windowId)
 	{
 		$('#' + windowId + " input[name='all_day']").prop("checked", false);
 
-		$('#' + windowId +  " select[name='duration_type']").parent("div").removeClass("invisible");
-		$('#' + windowId +  " input[name='duration']").parent("div").removeClass("invisible");
+		// $('#' + windowId +  " input[name='duration']").parents(".form-group").removeClass("invisible");
+		$('#' + windowId +  " select[name='duration_type']").parents("div").removeClass("invisible");
 
 		var formatDateTimePicker = "DD.MM.YYYY HH:mm:ss";
 
@@ -6770,6 +7385,8 @@ function setDuration(start, end, windowId)
 
 		$('#' + windowId +  " select[name='duration_type']").val(durationType);
 	}
+
+// console.log(duration);
 
 	$('#' + windowId +  " input[name='duration']").val(duration);
 }
@@ -6816,9 +7433,19 @@ function getDurationMilliseconds(windowId)
 
 function setStartAndFinish(start, end, windowId)
 {
-
+	// console.log('setStartAndFinish', start, end);
 	$('#' + windowId + ' input[name="start"]').parent().data("DateTimePicker").date(new Date(start));
-	$('#' + windowId + ' input[name="finish"]').parent().data("DateTimePicker").date(new Date(end));
+
+	var finishParent = $('#' + windowId + ' input[name="finish"]').parent().data("DateTimePicker");
+
+	if (end)
+	{
+		finishParent.date(new Date(end));
+	}
+	else
+	{
+		//finishParent.clear();
+	}
 
 	setEventStartButtons(start, windowId);
 }

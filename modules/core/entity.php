@@ -895,6 +895,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Copy object
 	 * @return Core_Entity new copied object
+	 * @hostcms-event modelname.onBeforeCopy
+	 * @hostcms-event modelname.onAfterCopy
 	 */
 	public function copy()
 	{
