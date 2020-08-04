@@ -60,6 +60,7 @@ class Shop_Item_Model extends Core_Entity
 	 * @var string
 	 */
 	public $absolute_price = NULL;
+	public $price_absolute = NULL;
 
 	/**
 	 * Callback property_id
@@ -106,6 +107,7 @@ class Shop_Item_Model extends Core_Entity
 		'shop_warehouse_regrade_writeoff_item' => array('model' => 'Shop_Warehouse_Regrade_Item', 'foreign_key' => 'writeoff_shop_item_id'),
 		'shop_price_entry' => array(),
 		'shop_price_setting_item' => array(),
+		'shop_warehouse_cell_item' => array(),
 	);
 
 	/**
@@ -410,13 +412,14 @@ class Shop_Item_Model extends Core_Entity
 
 	/**
 	 * Get Prices
+	 * @param boolean $bCache cache mode status
 	 * @return array
 	 */
-	public function getPrices()
+	public function getPrices($bCache = TRUE)
 	{
 		$this->setShop_Item_Controller();
 		// Prices
-		$aPrices = $this->_Shop_Item_Controller->getPrices($this);
+		$aPrices = $this->_Shop_Item_Controller->getPrices($this, TRUE, $bCache);
 
 		return $aPrices;
 	}
@@ -435,12 +438,24 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getRest()
+	 * @var mixed
+	 */
+	protected $_rest = NULL;
+
+	/**
 	 * Get the quantity in the active warehouses
+	 * @param boolean $bCache cache mode status
 	 * @return float
 	 * @hostcms-event shop_item.onBeforeGetRest
 	 */
-	public function getRest()
+	public function getRest($bCache = TRUE)
 	{
+		if ($bCache && !is_null($this->_rest))
+		{
+			return $this->_rest;
+		}
+
 		$queryBuilder = Core_QueryBuilder::select(array('SUM(count)', 'count'))
 			->from('shop_warehouse_items')
 			->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
@@ -452,7 +467,9 @@ class Shop_Item_Model extends Core_Entity
 
 		$aResult = $queryBuilder->execute()->asAssoc()->current();
 
-		return $aResult['count'];
+		$this->_rest = $aResult['count'];
+
+		return $this->_rest;
 	}
 
 	public function reservedBackend()
@@ -461,11 +478,23 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Cache for getRest()
+	 * @var mixed
+	 */
+	protected $_reserved = NULL;
+
+	/**
 	 * Get the quantity of reserved items
+	 * @param boolean $bCache cache mode status
 	 * @return float
 	 */
-	public function getReserved()
+	public function getReserved($bCache = TRUE)
 	{
+		if ($bCache && !is_null($this->_reserved))
+		{
+			return $this->_reserved;
+		}
+
 		$oShop_Item = !$this->shortcut_id
 			? $this
 			: Core_Entity::factory('Shop_Item', $this->shortcut_id);
@@ -476,13 +505,13 @@ class Shop_Item_Model extends Core_Entity
 
 		$aShop_Item_Reserveds = $oShop_Item_Reserveds->findAll();
 
-		$reserved = 0;
+		$this->_reserved = 0;
 		foreach ($aShop_Item_Reserveds as $oShop_Item_Reserved)
 		{
-			$reserved += $oShop_Item_Reserved->count;
+			$this->_reserved += $oShop_Item_Reserved->count;
 		}
 
-		return $reserved;
+		return $this->_reserved;
 	}
 
 	/**
@@ -854,17 +883,21 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function save()
 	{
-		if (is_null($this->path))
+		if (!$this->shortcut_id)
 		{
-			$this->makePath();
+			if (is_null($this->path))
+			{
+				$this->makePath();
+			}
+			elseif (in_array('path', $this->_changedColumns))
+			{
+				$this->checkDuplicatePath();
+			}
 		}
-		elseif (in_array('path', $this->_changedColumns))
-		{
-			$this->checkDuplicatePath();
-		}
+
 		parent::save();
 
-		if ($this->path == '' && !$this->deleted && $this->makePath())
+		if (!$this->shortcut_id && $this->path == '' && !$this->deleted && $this->makePath())
 		{
 			$this->path != '' && $this->save();
 		}
@@ -894,6 +927,7 @@ class Shop_Item_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_item.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -923,12 +957,21 @@ class Shop_Item_Model extends Core_Entity
 			catch (Exception $e) {}
 		}
 
-		$aWarehousesValues = $this->Shop_Warehouse_Items->findAll();
-		foreach ($aWarehousesValues as $oWarehousesValue)
+		$aShop_Warehouse_Items = $this->Shop_Warehouse_Items->findAll();
+		foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
 		{
-			$newWarehouseValue = clone $oWarehousesValue;
-			$newWarehouseValue->shop_item_id = $newObject->id;
-			$newWarehouseValue->save();
+			if ($oShop_Warehouse_Item->count != '0.00')
+			{
+				$oShop_Warehouse_Incoming = $oShop_Warehouse_Item->Shop_Warehouse->createShopWarehouseIncoming();
+
+				$oShop_Warehouse_Incoming_Item = Core_Entity::factory('Shop_Warehouse_Incoming_Item');
+				$oShop_Warehouse_Incoming_Item->shop_item_id = $newObject->id;
+				$oShop_Warehouse_Incoming_Item->price = $newObject->price;
+				$oShop_Warehouse_Incoming_Item->count = $oShop_Warehouse_Item->count;
+				$oShop_Warehouse_Incoming->add($oShop_Warehouse_Incoming_Item);
+
+				$oShop_Warehouse_Incoming->post();
+			}
 		}
 
 		$aPropertyValues = $this->getPropertyValues(FALSE);
@@ -979,8 +1022,6 @@ class Shop_Item_Model extends Core_Entity
 		$aModifications = $this->Modifications->findAll();
 		foreach ($aModifications as $oModification)
 		{
-			//$oNewModification = clone $oModification;
-
 			$oNewModification = $oModification->copy();
 			$newObject->add($oNewModification, 'modifications');
 		}
@@ -1000,6 +1041,8 @@ class Shop_Item_Model extends Core_Entity
 				$newObject->add($oTag);
 			}
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -1064,6 +1107,12 @@ class Shop_Item_Model extends Core_Entity
 			: $this->unindex();
 
 		$this->clearCache();
+
+		if ($this->Shop->filter)
+		{
+			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+			$oShop_Filter_Controller->fill($this);
+		}
 
 		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
 
@@ -1145,7 +1194,7 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Get path for files
+	 * Get item's path
 	 * @return string
 	 * @hostcms-event shop_item.onBeforeGetPath
 	 */
@@ -1607,6 +1656,8 @@ class Shop_Item_Model extends Core_Entity
 		$this->Shop_Warehouse_Regrade_Writeoff_Items->deleteAll(FALSE);
 		$this->Shop_Warehouse_Entries->deleteAll(FALSE);
 
+		$this->Shop_Warehouse_Cell_Items->deleteAll(FALSE);
+
 		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
 		$this->Shop_Price_Entries->deleteAll(FALSE);
 
@@ -1640,8 +1691,8 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('shop_group_id', '=', $group_id)
-			->where('shortcut_id', '=', 0);
+			->where('shop_items.shop_group_id', '=', $group_id)
+			->where('shop_items.shortcut_id', '=', 0);
 
 		return $this->findAll();
 	}
@@ -1657,9 +1708,9 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$this->queryBuilder()
 			//->clear()
-			->where('path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
-			->where('shop_group_id', '=', $group_id)
-			->where('shortcut_id', '=', 0)
+			->where('shop_items.path', 'LIKE', Core_DataBase::instance()->escapeLike($path))
+			->where('shop_items.shop_group_id', '=', $group_id)
+			->where('shop_items.shortcut_id', '=', 0)
 			->clearOrderBy()
 			->limit(1);
 
@@ -2899,6 +2950,12 @@ class Shop_Item_Model extends Core_Entity
 
 			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
 		}
+		elseif (strlen($this->image_large))
+		{
+			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+
+			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+		}
 		else
 		{
 			return '<i class="fa fa-file-text-o"></i>';
@@ -2930,9 +2987,15 @@ class Shop_Item_Model extends Core_Entity
 
 				if ($oTmp_Shop_Item->shop_currency_id)
 				{
-					$aPrice = $Shop_Item_Controller->getPrices($oTmp_Shop_Item);
+					$fCurrencyCoefficient = $oTmp_Shop_Item->Shop_Currency->id > 0 && $this->Shop_Currency->id > 0
+						? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+							$oTmp_Shop_Item->Shop_Currency, $this->Shop_Currency
+						)
+						: 0;
+					
+					$aPrice = $Shop_Item_Controller->calculatePriceInItemCurrency($oTmp_Shop_Item->price, $oTmp_Shop_Item);
 
-					$amount += $aPrice['price_discount'] * $oShop_Item_Set->count;
+					$amount += $aPrice['price_discount'] * $fCurrencyCoefficient * $oShop_Item_Set->count;
 				}
 			}
 		}
@@ -2950,7 +3013,7 @@ class Shop_Item_Model extends Core_Entity
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
 	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-	 * @param int $property_id Property ID
+	 * @param string $separator separator
 	 * @return string
 	 */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
@@ -2980,11 +3043,14 @@ class Shop_Item_Model extends Core_Entity
 						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
-						$oList_Item = $oProperty->List->List_Items->getById(
-							$oProperty_Value->value, FALSE
-						);
+						if ($oProperty_Value->value)
+						{
+							$oList_Item = $oProperty->List->List_Items->getById(
+								$oProperty_Value->value, FALSE
+							);
 
-						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+							!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+						}
 					break;
 					case 7: // Checkbox
 					break;

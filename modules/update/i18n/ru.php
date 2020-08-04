@@ -6,7 +6,7 @@
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Обновления',
@@ -28,6 +28,7 @@ return array(
 	'server_error_respond_8' => 'Не соответствует редакция системы управления.',
 	'server_error_respond_9' => 'Лицензия имеет несколько установок.',
 	'server_error_respond_10' => 'Ошибка 10. Обратитесь в службу поддержки. Данные на %s',
+	'server_error_respond_11' => 'Лицензия отозвана. Обратитесь в службу поддержки. Данные на %s',
 	'error_open_updatefile' => 'Файл обновлений не обнаружен.',
 	'error_write_file_update' => 'Ошибка записи данных в файл "%s".',
 	'update_constant_error' => 'Не обнаружена константа HOSTCMS_UPDATE_SERVER.',
@@ -38,4 +39,6 @@ return array(
 	'msg_update_required' => 'Запрошено обновление %s',
 	'msg_installing_package' => 'Установка пакета обновлений %s',
 	'msg_unpack_package' => 'Распаковка файла %s',
+	'module' => 'Модуль "%s"',
+	'update' => 'Обновление',
 );

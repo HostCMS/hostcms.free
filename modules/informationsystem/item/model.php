@@ -386,6 +386,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event informationsystem_item.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -445,6 +446,8 @@ class Informationsystem_Item_Model extends Core_Entity
 				$newObject->add($oTag);
 			}
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -1718,6 +1721,12 @@ class Informationsystem_Item_Model extends Core_Entity
 
 			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
 		}
+		elseif (strlen($this->image_large))
+		{
+			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+
+			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+		}
 		else
 		{
 			return '<i class="fa fa-file-text-o"></i>';
@@ -1758,11 +1767,14 @@ class Informationsystem_Item_Model extends Core_Entity
 						$aTmp[] = strftime($this->Informationsystem->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
-						$oList_Item = $oProperty->List->List_Items->getById(
-							$oProperty_Value->value, FALSE
-						);
+						if ($oProperty_Value->value)
+						{
+							$oList_Item = $oProperty->List->List_Items->getById(
+								$oProperty_Value->value, FALSE
+							);
 
-						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+							!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+						}
 					break;
 					case 7: // Checkbox
 					break;

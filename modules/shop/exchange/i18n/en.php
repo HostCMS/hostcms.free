@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'!download' => '-- Not upload --',
 	'group_id' => 'Section IS',
@@ -36,17 +28,21 @@ return array(
 	'item_marking' => 'Marking of goods',
 	'item_description' => 'Product description',
 	'item_text' => 'Product text',
-	'item_image_large' => 'Product image file',
-	'item_image_small' => 'Small image file for product',
+	'item_image_large' => 'Large image',
+	'item_image_small' => 'Small image',
 	'item_tags' => 'Tags',
-	'item_weight' => 'Product weight',
+	'item_weight' => 'Weight',
 	'item_length' => 'Lenght',
 	'item_width' => 'Width',
 	'item_height' => 'Height',
+	'item_min_quantity' => 'Min quantity',
+	'item_max_quantity' => 'Max quantity',
+	'item_quantity_step' => 'Step',
+	'item_yandex_vendorcode' => 'vendorCode',
 	'item_price' => 'Product price',
 	'item_active' => 'Product activity',
 	'item_sorting' => 'Product sorting order',
-	'item_path' => 'Path to product',
+	'item_path' => 'Path to item',
 	'item_seo_title' => 'Meta element title',
 	'item_seo_description' => 'Meta element description',
 	'item_seo_keywords' => 'Meta element keywords',

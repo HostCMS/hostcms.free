@@ -560,22 +560,44 @@ class Property_Model extends Core_Entity
 				$this->List->clearEntities()
 			);
 
-			if ($this->_config['add_list_items'])
+			if (is_bool($this->_config['add_list_items']) && $this->_config['add_list_items']
+				|| is_array($this->_config['add_list_items']) && in_array($this->id, $this->_config['add_list_items'])
+			)
 			{
 				$oList_Items = $this->List->List_Items;
 				$oList_Items->queryBuilder()
 					->where('list_items.active', '=', 1);
 
-				if (!is_null($this->_limitListItems))
+				// MySQL 5.7 very slow with this subquery, changed to FROM (subquery) as prop_tmp
+				/*if (!is_null($this->_limitListItems))
 				{
 					$oList_Items->queryBuilder()
 						->where('list_items.id', 'IN', $this->_limitListItems);
+				}*/
+
+				if (is_array($this->_limitListItems))
+				{
+					if (count($this->_limitListItems))
+					{
+						$oList_Items->queryBuilder()
+							->where('list_items.id', 'IN', $this->_limitListItems);
+					}
+					else
+					{
+						// Передан пустой массив, нет элементов для добавления
+						return $this;
+					}
+				}
+				elseif (is_object($this->_limitListItems))
+				{
+					$oList_Items->queryBuilder()
+						->from(array($this->_limitListItems, 'prop_tmp'))
+						->where('list_items.id', '=', Core_QueryBuilder::expression('`prop_tmp`.`value`'));
 				}
 
 				Core_Event::notify($this->_modelName . '.onBeforeGetXmlAddListItems', $this, array($oList_Items));
 
 				$aList_Items = $oList_Items->findAll(FALSE);
-
 				foreach ($aList_Items as $oList_Item)
 				{
 					$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item;

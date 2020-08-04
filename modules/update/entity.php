@@ -23,6 +23,12 @@ class Update_Entity extends Core_Entity
 	 * Backend property
 	 * @var int
 	 */
+	public $img = 0;
+
+	/**
+	 * Backend property
+	 * @var int
+	 */
 	public $name = NULL;
 
 	/**
@@ -337,6 +343,11 @@ class Update_Entity extends Core_Entity
 						Core_ORM::clearColumnCache();
 						Core_ORM::clearRelationModelCache();
 
+						if (function_exists('opcache_reset'))
+						{
+							opcache_reset();
+						}
+
 						if (isset($aTmpUpdateItem['file']))
 						{
 							include($aTmpUpdateItem['file']);
@@ -390,7 +401,9 @@ class Update_Entity extends Core_Entity
 		Core_Event::notify(get_class($this) . '.onAfterInstall', $this);
 
 		// Load new updates list
-		$this->loadUpdates();
+		//$this->loadUpdates();
+
+		Update_Controller::instance()->deleteUpdateFile();
 
 		return NULL;
 	}

@@ -178,9 +178,8 @@ if (!$siteuser_id)
 					<div class="col-xs-12">
 						<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
 							<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-							<i class="fa fa-search no-margin" onclick="$(this).siblings(\'input[type=submit]\').click()"></i>
 							<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
-							<input type="submit" class="hidden" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '" />
+							<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
 						</form>
 					</div>
 				</div>
@@ -563,7 +562,9 @@ foreach ($aShop_Order_Statuses as $oShop_Order_Status)
 $oAdmin_Form_Dataset
 	->changeField('shop_order_status_id', 'type', 8)
 	->changeField('shop_order_status_id', 'list', $aList)
-	->changeField('paid', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
+	->changeField('paid', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('posted', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'))
+	->changeField('canceled', 'list', "1=" . Core::_('Admin_Form.yes') . "\n" . "0=" . Core::_('Admin_Form.no'));
 
 $oAdmin_Form_Controller->addExternalReplace('&{INTERNAL}', $siteuser_id ? "&siteuser_id={$siteuser_id}" : '');
 

@@ -29,7 +29,7 @@
 		<div class="row">
 			<div class="col-xs-12 col-sm-6">
 				<!-- QR-код -->
-				<img src="http://decodeit.ru/image.php?type=qr&amp;value=ST00012|Name={company/name}|PersonalAcc={company/current_account}|BankName={company/bank_name}|BIC={company/bic}|CorrespAcc={company/correspondent_account}|PayeelNN={company/tin}|LastName={shop_order/surname}|FirstName={shop_order/name}|MiddleName={shop_order/patronymic}|Purpose=Оплата счета {shop_order/invoice}|РауеrАddress={shop_order/postcode}, {shop_order/address}|Sum={$totalAmout}|Phone={shop_order/phone}" width="400" height="400" border="0" title="QR код" />
+				<img src="http://decodeit.ru/image.php?type=qr&amp;value=ST00012|Name={company/name}|PersonalAcc={company/current_account}|BankName={company/bank_name}|BIC={company/bic}|CorrespAcc={company/correspondent_account}|PayeeINN={company/tin}|LastName={shop_order/surname}|FirstName={shop_order/name}|MiddleName={shop_order/patronymic}|Purpose=Оплата счета {shop_order/invoice}|РауеrАddress={shop_order/postcode}, {shop_order/address}|Sum={$totalAmout}|Phone={shop_order/phone}" width="400" height="400" border="0" title="QR код" />
 			</div>
 			<div class="col-xs-12 col-sm-6">
 				<h2>Оплата через Сбербанк.Онлайн</h2>

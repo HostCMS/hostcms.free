@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сотрудники',
@@ -90,4 +90,5 @@ return array(
 	'select_user' => 'Укажите сотрудника',
 	'user_active' => 'Онлайн %s',
 	'user_last_activity' => 'Последняя активность %s',
+	'session' => 'Сессии',
 );

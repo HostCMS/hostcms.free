@@ -126,6 +126,12 @@ else
 						->addText($oComment->subject)
 						->addText($oComment->text)
 						->execute();
+
+					// Check e-mail
+					if ($bAntispamAnswer)
+					{
+						$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($oComment->email);
+					}
 				}
 				else
 				{
@@ -218,7 +224,7 @@ else
 // В корне выводим из всех групп
 if ($Shop_Controller_Show->group == 0 || !is_null($Shop_Controller_Show->tag))
 {
-	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
+	// $Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
 }
 
 // При фильтрации модификации выводятся на уровне товаров
@@ -236,7 +242,8 @@ $Shop_Controller_Show
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром
-	//->modificationsList(TRUE)
+	->modificationsList(TRUE)
+	// ->modificationsGroup(TRUE)
 	// Режим вывода групп
 	//->groupsMode('none')
 	// Выводить доп. св-ва групп
@@ -246,4 +253,5 @@ $Shop_Controller_Show
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
 	// ->barcodes(TRUE)
+	// ->warehouseMode('in-stock')
 	->show();

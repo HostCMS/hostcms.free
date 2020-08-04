@@ -139,6 +139,7 @@ class Shortcode_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shortcode.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -148,6 +149,8 @@ class Shortcode_Model extends Core_Entity
 
 		// Rebuild shortcodes list
 		Shortcode_Controller::instance()->rebuild();
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

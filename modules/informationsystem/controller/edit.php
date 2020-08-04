@@ -113,7 +113,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->add($oImageRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oImageRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oImageRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oImageRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oInformationsystemTabSeoTemplates
 					->add($oInformationsystemGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
@@ -419,7 +420,8 @@ class Informationsystem_Controller_Edit extends Admin_Form_Action_Controller_Typ
 					->move($this->getField('watermark_default_use_small_image')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow4)
 					->move($this->getField('watermark_default_position_x')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
 					->move($this->getField('watermark_default_position_y')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oImageRow5)
-					->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow6);
+					->move($this->getField('create_small_image')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow6)
+					->move($this->getField('change_filename')->divAttr(array('class' => 'form-group col-xs-12')), $oImageRow7);
 			break;
 			case 'informationsystem_dir':
 			default:

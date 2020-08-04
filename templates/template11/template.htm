@@ -41,13 +41,14 @@
 				->itemsProperties(TRUE);
 
 			if (is_object(Core_Page::instance()->object)
-			&& get_class(Core_Page::instance()->object) == 'Shop_Controller_Show')
+				&& get_class(Core_Page::instance()->object) == 'Shop_Controller_Show')
 			{
 				$Shop_Controller_Show->group(Core_Page::instance()->object->group);
 				$iCurrentShopGroup = Core_Page::instance()->object->group;
 
 				$Shop_Controller_Show->setFilterProperties(Core_Page::instance()->object->getFilterProperties());
 				$Shop_Controller_Show->setFilterPrices(Core_Page::instance()->object->getFilterPrices());
+				$Shop_Controller_Show->setFilterMainProperties(Core_Page::instance()->object->getFilterMainProperties());
 
 				Core_Page::instance()->object->producer
 					&& $Shop_Controller_Show->producer(Core_Page::instance()->object->producer);
@@ -88,8 +89,9 @@
 				//Фильтровать по ярлыкам
 				->filterShortcuts(TRUE)
 				->filterCounts(TRUE)
-				->addMinMaxPrice()
 				->modificationsList(TRUE)
+				->modificationsGroup(TRUE)				
+				->addMinMaxPrice()
 				->addProducers()
 				->applyFilter()
 				->show();

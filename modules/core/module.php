@@ -68,7 +68,7 @@ abstract class Core_Module
 	 * The singleton instances.
 	 * @var mixed
 	 */
-	static public $instance = NULL;
+	static protected $_instance = NULL;
 
 	/**
 	 * Description of Admin Forms
@@ -147,18 +147,28 @@ abstract class Core_Module
 	 */
 	static public function factory($moduleName)
 	{
-		if (isset(self::$instance[$moduleName]))
+		if (!isset(self::$_instance[$moduleName]))
 		{
-			return self::$instance[$moduleName];
+			self::$_instance[$moduleName] = self::getModule($moduleName);
 		}
 
+		return self::$_instance[$moduleName];
+	}
+
+	/**
+	 * Get module instance
+	 * @param string $moduleName module name
+	 * @return mixed
+	 */
+	static public function getModule($moduleName)
+	{
 		$modelName = ucfirst($moduleName) . '_Module';
 
 		if (class_exists($modelName))
 		{
 			$oReflectionClass = new ReflectionClass($modelName);
 
-			return self::$instance[$moduleName] = !$oReflectionClass->isAbstract()
+			return !$oReflectionClass->isAbstract()
 				? new $modelName()
 				: NULL;
 		}

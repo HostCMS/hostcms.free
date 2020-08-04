@@ -285,6 +285,7 @@ class Lib_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event lib.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -306,6 +307,8 @@ class Lib_Model extends Core_Entity
 		{
 			$newObject->add($oLibProperty->copy());
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

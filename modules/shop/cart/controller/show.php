@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
  * - taxes(TRUE|FALSE) выводить список налогов, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
@@ -52,6 +53,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'couponText',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'itemsForbiddenTags',
 		'warehousesItems',
 		'taxes',
 		'specialprices',
@@ -139,6 +141,8 @@ class Shop_Cart_Controller_Show extends Core_Controller
 
 		$this->itemsPropertiesList = $this->warehousesItems
 			= $this->applyDiscounts = $this->applyDiscountCards = TRUE;
+			
+		$this->itemsForbiddenTags = array();
 
 		$this->cartUrl = $oShop->Structure->getPath() . 'cart/';
 
@@ -262,6 +266,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 						->showXmlProperties($this->itemsProperties)
 						->showXmlSpecialprices($this->specialprices)
 						->showXmlAssociatedItems($this->associatedItems)
+						->setItemsForbiddenTags($this->itemsForbiddenTags)
 				);
 			}
 			else
@@ -465,7 +470,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			$fAppliedDiscountsAmount > $this->amount && $fAppliedDiscountsAmount = $this->amount;
 		}
 
-		// Не применять максимальную скидку или сумму по карте больше, чем скидка от суммы заказа
+		// Не применять максимальную скидку или сумма по карте больше, чем скидка от суммы заказа
 		if (!$bApplyMaxDiscount || !$bApplyShopPurchaseDiscounts)
 		{
 			if ($fDiscountcard)

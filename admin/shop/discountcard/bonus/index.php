@@ -33,8 +33,50 @@ $oAdmin_Form_Controller
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
 
+// Списание бонусов
+if ($oAdmin_Form_Controller->getAction() == 'writeoff_bonuses')
+{
+	$writeoffAmount = Core_Array::getPost('writeoff', 0);
+	$bonusesAmount = $oShop_Discountcard->getBonusesAmount();
+
+	if ($writeoffAmount > $bonusesAmount)
+	{
+		$oAdmin_Form_Controller->addMessage(Core_Message::get(Core::_('Shop_Discountcard.backendWrongWriteoffWarning'), 'error'));
+	}
+	else
+	{
+		// Списание бонусов
+		$writtenOff = 0;
+
+		$aShop_Discountcard_Bonuses = $oShop_Discountcard->getBonuses(FALSE);
+		foreach ($aShop_Discountcard_Bonuses as $oShop_Discountcard_Bonus)
+		{
+			$delta = $oShop_Discountcard_Bonus->amount - $oShop_Discountcard_Bonus->written_off;
+
+			// На текущем этапе будут списаны все необходимые бонусы
+			if ($writeoffAmount - $writtenOff <= $delta)
+			{
+				$oShop_Discountcard_Bonus->written_off += ($writeoffAmount - $writtenOff);
+				$oShop_Discountcard_Bonus->save();
+				break;
+			}
+			else
+			{
+				$oShop_Discountcard_Bonus->written_off += $delta;
+				$oShop_Discountcard_Bonus->save();
+			}
+
+			$writtenOff += $delta;
+		}
+
+		$oAdmin_Form_Controller->addMessage(Core_Message::get(Core::_('Shop_Discountcard.backendWriteoffSuccess'), 'success'));
+	}
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
+$additionalParams = "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&shop_discountcard_id={$oShop_Discountcard->id}";
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
@@ -47,11 +89,29 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-	)
-;
+	);
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+$bonusesAmount = $oShop_Discountcard->getBonusesAmount(FALSE);
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="widget flat margin-bottom-20">
+				<div class="widget-body bordered-left bordered-warning">
+					<form class="form-inline" role="form" action="' . $oAdmin_Form_Controller->getPath() . '" method="POST">
+						<div class="form-group">
+							<input name="writeoff" type="text" class="form-control" placeholder="' . Core::_('Shop_Discountcard_Bonus.available', $bonusesAmount, $oShop->Shop_Currency->name) . '">
+						</div>
+
+						<button type="submit" class="btn btn-warning" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('writeoff_bonuses') . '">' . Core::_('Shop_Discountcard_Bonus.writeoff') . '</button>
+					</form>
+				</div>
+			</div>
+		')
+);
 
 // Хлебные крошки
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

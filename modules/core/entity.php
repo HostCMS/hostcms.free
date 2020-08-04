@@ -406,7 +406,7 @@ class Core_Entity extends Core_ORM
 		}
 		else
 		{
-			throw new Core_Exception("The model '%model' cannot be undelete",
+			throw new Core_Exception("The model '%model' cannot be undeleted",
 				array('%model' => $this->getModelName()));
 		}
 
@@ -895,6 +895,8 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Copy object
 	 * @return Core_Entity new copied object
+	 * @hostcms-event modelname.onBeforeCopy
+	 * @hostcms-event modelname.onAfterCopy
 	 */
 	public function copy()
 	{

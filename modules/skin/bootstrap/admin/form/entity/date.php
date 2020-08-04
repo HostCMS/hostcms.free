@@ -39,8 +39,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 
 		$aDivAttr = array();
 
-		$sCurrentLng = Core_I18n::instance()->getLng();
-
 		// Установим атрибуты div'a.
 		if (is_array($this->divAttr))
 		{
@@ -50,10 +48,10 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 			}
 		}
 
+		$sCurrentLng = Core_I18n::instance()->getLng();
+
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
-
 		?><span class="caption"><?php echo $this->caption?></span><?php
-
 		?><div id="div_<?php echo $this->id?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
 			<span class="input-group-addon">
@@ -66,7 +64,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 
 		<script>
 		(function($) {
-			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #div_<?php echo Core_Str::escapeJavascriptVariable($this->id)?>').datetimepicker({locale: '<?php echo Core_Str::escapeJavascriptVariable($sCurrentLng)?>', format: '<?php echo Core_Str::escapeJavascriptVariable(Core::$mainConfig['datePickerFormat'])?>', showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php
 

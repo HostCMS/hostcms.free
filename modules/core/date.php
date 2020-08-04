@@ -185,27 +185,27 @@ class Core_Date
 		// Секунды
 		elseif ($time >= 0 && $time < 60)
 		{
-			$sLastMessageTime = $time . ' с.';
+			$sLastMessageTime = $time . ' ' . Core::_('Core.shortTitleSeconds');
 		}
 		// Минуты
 		elseif ($time >= 60 && $time < 60 * 60)
 		{
-			$sLastMessageTime = floor($time / 60) . ' м.';
+			$sLastMessageTime = floor($time / 60) . ' ' . Core::_('Core.shortTitleMinutes');
 		}
 		// Часы
 		elseif ($time >= 60 * 60 && $time < 60 * 60 * 24)
 		{
-			$sLastMessageTime = floor($time / 60 / 60) . ' ч.';
+			$sLastMessageTime = floor($time / 60 / 60) . ' ' . Core::_('Core.shortTitleHours');
 		}
 		// Дни
 		elseif ($time >= 60 * 60 * 24 && $time < 60 * 60 * 24 * 365)
 		{
-			$sLastMessageTime = floor($time / 60 / 60 / 24) . ' д.';
+			$sLastMessageTime = floor($time / 60 / 60 / 24) . ' ' . Core::_('Core.shortTitleDays');
 		}
 		// Годы
 		else
 		{
-			$sLastMessageTime = floor($time / 60 / 60 / 24 / 365) . ' г.';
+			$sLastMessageTime = floor($time / 60 / 60 / 24 / 365) . ' ' . Core::_('Core.shortTitleYears');
 		}
 
 		return $sLastMessageTime;

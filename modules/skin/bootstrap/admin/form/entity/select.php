@@ -78,6 +78,9 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 		}
 
 		?></div><?php
+
+		// Clear
+		$this->_aAlreadySelected = array();
 	}
 
 	/**
@@ -116,7 +119,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 		$iFilterCount = self::$iFilterCount;
 
 		Admin_Form_Entity::factory('Div')
-			->class($this->caseSensitive ? 'col-xs-7 col-sm-3 col-md-4' : 'col-xs-5 col-sm-4 col-md-4 col-lg-4 no-padding-left')
+			->class($this->caseSensitive ? 'col-xs-10 col-md-5' : 'col-xs-5 col-sm-4 col-md-4 col-lg-4 no-padding-left')
 			->add(
 				Admin_Form_Entity::factory('Div')
 					->class('input-group' . (strlen($this->caption) ? ' margin-top-21' : ''))
@@ -133,12 +136,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			if ($this->caseSensitive)
 			{
 				Admin_Form_Entity::factory('Div')
-					->class('col-xs-5 col-sm-3 col-md-2 no-padding-left' . (strlen($this->caption) ? ' margin-top-21' : ''))
+					->class('col-xs-2 col-md-1 no-padding-left' . (strlen($this->caption) ? ' margin-top-25' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
-							->html('<label class="checkbox-inline">' .
-							'<input id="filter_ignorecase_' . $this->id . '" class="form-control" type="checkbox" value="1" checked="checked" onclick="oSelectFilter' . $iFilterCount . '.SetIgnoreCase(!this.checked); oSelectFilter' . $iFilterCount . '.Filter()" />' .
-							'<span class="text"> ' . Core::_('Admin_Form.case_sensitive') . '</span></label>')
+							->html('<label class="checkbox-inline" title="' . Core::_('Admin_Form.case_sensitive') . '">' .
+							'<input id="filter_ignorecase_' . $this->id . '" class="form-control colored-blue font" type="checkbox" value="1" checked="checked" onclick="oSelectFilter' . $iFilterCount . '.SetIgnoreCase(!this.checked); oSelectFilter' . $iFilterCount . '.Filter()" />' .
+							'<span class="text"></span></label>')
 					)
 					->execute();
 			}

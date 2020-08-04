@@ -46,7 +46,7 @@ return array(
 	'site_dates' => 'Formats',
 	'site_errors' => 'Errors',
 	'site_robots_txt' => 'robots.txt',
-	'site_licence' => 'License',
+	'site_licence' => 'Keys',
 	'site_cache_options' => ' Cache',
 	'edit_success' => 'Website information modified successfully!',
 	'edit_error' => 'Error occurred during changing website information!',

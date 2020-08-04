@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,8 +51,14 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		isset($this->_formValues['name'])
 			&& $this->_formValues['name'] = str_replace(array('http://', 'https://', '*.'), '*.', trim($this->_formValues['name'], " \t\n\r\0\x0B/"));
-		
+
 		parent::_applyObjectProperty();
+
+		if (preg_match('/[а-яёА-ЯЁ]+/u', $this->_object->name, $matches))
+		{
+			$this->_object->name = Core_Str::idnToAscii($this->_object->name);
+			$this->_object->save();
+		}
 
 		if (!is_null(Core_Array::getPost('current')))
 		{

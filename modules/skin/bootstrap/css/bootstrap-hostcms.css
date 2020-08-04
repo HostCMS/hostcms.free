@@ -795,7 +795,8 @@ body.hostcms-bootstrap1:before {
 .hostcms-bootstrap1 .widget-body,
 .hostcms-bootstrap1 .dashboard-box .box-header .deadline,
 .hostcms-bootstrap1 .dashboard-box .box-body,
-.hostcms-bootstrap1 .orders-list {
+.hostcms-bootstrap1 .orders-list,
+.hostcms-bootstrap1 .mail-body {
 	background: none repeat scroll 0 0 rgba(255,255,255,.95);
 	color:	#333;
 }
@@ -822,6 +823,7 @@ body.hostcms-bootstrap1:before {
 .hostcms-bootstrap1.body-authorization footer,
 .hostcms-bootstrap1.body-authorization footer a,
 .hostcms-bootstrap1.body-authorization .hostcms-notice .widget-body,
+.hostcms-bootstrap1.body-authorization .hostcms-notice .widget-body a,
 .hostcms-bootstrap1.body-authorization .loginbox-forgot
  {
 	color: #FFF;
@@ -900,7 +902,8 @@ body.hostcms-bootstrap1:before {
 /*.page-sidebar.menu-compact~.page-content{margin-left:47px}*/
 
 .DTTTFooter{
-	padding-left: 5px;
+	padding-left: 0;
+	padding-right: 0;
 	/*padding-top: 10px;*/
 	padding-bottom: 10px;
 	overflow: visible;
@@ -1305,6 +1308,7 @@ input[type="file"].form-control + .input-group-addon{
 input[type=checkbox]~span.text, input[type=radio]~span.text {z-index: 12}
 
 input[type=checkbox].times:checked~.text:before,input[type=radio].times:checked~.text:before{ content:'' }
+input[type=checkbox].font:checked~.text:before,input[type=radio].font:checked~.text:before{ content:'\f031' }
 
 /*
 .tooltip-magenta.tooltip > .tooltip-inner , .tooltip-magenta.tooltip.top .tooltip-arrow, .tooltip-magenta.tooltip.right .tooltip-arrow ,
@@ -1320,9 +1324,9 @@ input[type=checkbox].times:checked~.text:before,input[type=radio].times:checked~
 
 .editable {
 	cursor: url("/modules/skin/default/images/cursor/edit.png"), text;
-	min-height: 10px;
-	min-width: 10px;
-	/* display: inline-block; */
+}
+.editable:empty {
+	padding: 0 5px; border-bottom: 1px dotted #aaa
 }
 
 /*.btn-group > .btn:last-child {*/
@@ -1590,7 +1594,8 @@ body.body-blank .page-breadcrumbs, body.body-blank .page-header {display:none}
 	border-color: #f95a93;
 }
 
-.typograph_result{font-size:110%;height:150px;overflow:auto;margin:15px 0;padding:0 0 0 15px;border-left:3px solid #db1905;}
+.typograph_result{ font-size:110%; height:150px; overflow:auto; margin:15px 0; padding:0 0 0 15px; border-left:3px solid #ed4e2a; resize: vertical }
+
 .typograph_result span, .typograph_result nobr{background-color:#FFD79D}
 
 div.wrongTime {color: #AAA}
@@ -2234,6 +2239,9 @@ div.message-info div.contact-name { display: block; overflow: hidden; text-overf
 	white-space: nowrap;
 	width: 62px;
 }
+
+.dms-document-attachments-dropzone #dropzone { min-height: 90px; }
+.dms-document-attachments-dropzone #dropzone .dz-message { margin-top: 2em !important; }
 
 .navbar .navbar-inner .navbar-header .navbar-account .account-area > li .dropdown-menu.dropdown-login-area > li.theme-area .colorpicker > li {
 	height: 30px !important;
@@ -3218,9 +3226,9 @@ li.select2-selection__choice .company-department,
 	margin-top: 25px;
 }
 input.checkbox-slider[type="checkbox"] ~ .text::before { content:"" !important; }
-.event-title { margin-top: 5px; }
+/* .event-title { margin-top: 5px; } */
 .event-title-deadline::before { color: #f04618; margin-right: 5px; }
-.event-description { display: block; color: #999; font-size: 11px; line-height: 17px; margin-top: 5px; }
+.event-description { display: block; color: #999; font-size: 11px; line-height: 17px; /*margin-top: 5px;*/ }
 .event-date, .deal-start-datetime { color: #555; font-size: 85%; margin-top: 5px; display: inline-block; }
 .event-date a { color: #999; font-size: inherit; }
 .red { color: #f04618 !important; }
@@ -3317,10 +3325,10 @@ a.fc-day-number { color: #999 !important; }
 	line-height: inherit;
 }
 
-.cursor-pointer
-{
-	cursor: pointer;
-}
+.cursor-pointer { cursor: pointer; }
+.cursor-grab { cursor: grab; }
+.cursor-grabbing { cursor: grabbing; }
+
 
 .title_department, .title_users
 {
@@ -4238,53 +4246,52 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 	margin-bottom: 5px;
 } */
 
-#deal-events .deal-event-actions {
+#deal-events .deal-event-actions, #lead-events .deal-event-actions {
 	position: absolute;
 	right: 10px;
 	top: 2px;
 	display: none;
 }
-#deal-events .deal-event-row td { position: relative; }
-#deal-events .deal-event-row:hover td .deal-event-actions { display: block; }
-#deal-events .deal-event-actions span {
+#deal-events .deal-event-row td, #lead-events .deal-event-row td { position: relative; }
+#deal-events .deal-event-row:hover td .deal-event-actions, #lead-events .deal-event-row:hover td .deal-event-actions { display: block; }
+#deal-events .deal-event-actions span, #lead-events .deal-event-actions span {
 	color: #d0d0d0;
 	display: inline-block;
 	margin-left: 3px;
 }
-#deal-events .deal-event-actions span i { font-size: 11px; }
-#deal-events .deal-event-actions span:hover { cursor: pointer; }
+#deal-events .deal-event-actions span i, #lead-events .deal-event-actions span i { font-size: 11px; }
+#deal-events .deal-event-actions span:hover, #lead-events .deal-event-actions span:hover { cursor: pointer; }
 
-#deal-events .admin-table
+#deal-events .admin-table, #lead-events .admin-table
 {
 	border-left: 0px;
 	border-right: 0px
 }
 
-#deal-events .user-info {
-
+#deal-events .user-info, #lead-events .user-info {
 	display: flex;
 	margin-bottom: 5px;
 }
 
-#deal-events .user-info .user-image {
+#deal-events .user-info .user-image, #lead-events .user-info .user-image {
 	margin-right: 10px;
 	margin-top: 2px;
 }
 
-#deal-events .user-info .user-image img {
+#deal-events .user-info .user-image img, #lead-events .user-info .user-image img {
 	background-clip: padding-box;
 	border-radius: 50%;
 	height: 30px;
 	width: 30px;
 }
 
-#deal-events .user-info .user-name {
+#deal-events .user-info .user-name, #lead-events .user-info .user-name {
 	color: #999;
 	font-size: 11px;
 	margin: auto 0;
 }
 
-#deal-events .table-toolbar, #deal-shop-items .table-toolbar {
+#deal-events .table-toolbar, #deal-shop-items .table-toolbar, #lead-events .table-toolbar, #lead-shop-items .table-toolbar {
 	padding-top: 0;
 }
 
@@ -4348,7 +4355,6 @@ div.table-scrollable.no-border { border: 0 !important; }
 
 .large-link.siteuser-link i { margin-right: 0; }
 .large-link.siteuser-link a { margin: 1px 0 0 1px; }
-.cursor-pointer {cursor: pointer}
 
 /* .view-property-table th { text-align:center; } */
 .view-property-table td:first-child { width: 40%; }
@@ -4472,11 +4478,41 @@ table.deals-aggregate-user-info thead th.border-bottom-darkorange { border-botto
 	top: 0;
 }
 
-.permissions-table-left table { background-color: transparent; }
+.permissions-table-left table
+{
+	background-color: transparent;
+	cursor: default;
+	display: inline-block;
+	width: 0px;
+}
 
 .permissions-table-left table tr td:last-child:not(.deals-aggregate-user-department) { border: none}
 
 .visible-fixed { background-color: #fff }
+
+.permissions-table-left-department
+{
+	height: 33px;
+	position: relative;
+}
+.permissions-table-left-department .inner
+{
+	background-color: inherit;
+	padding: 6px 0px;
+	position: absolute;
+	top: 0px;
+	width: max-content;
+}
+
+.table-scrollable table.deal-template-access tr td:nth-child(2),
+.table-scrollable table.deal-template-access tr td:first-child,
+.table-scrollable table.deal-template-access tr th:nth-child(2),
+.table-scrollable table.deal-template-access tr th:first-child,
+.permissions-table-top-left table
+{
+	cursor: default;
+}
+
 
 .agregate-user-tab .tab-content { padding: 0 !important; margin-top: 10px; border-top: 0; }
 ul#agregate-user-info li a[data-toggle="tab"] { border-radius: 0; }
@@ -4645,9 +4681,17 @@ table.company-structure tbody tr td { padding: 10px; }
 }
 
 .search-field { position: relative }
-.search-field i { position: absolute; top: 10px; cursor: pointer }
+.search-field i.fa-times-circle, .search-field .global-search-button { position: absolute; top: 10px; cursor: pointer; }
 .search-field i.fa-times-circle { right: 25px }
-.search-field i.fa-search { right: 45px }
+.search-field .global-search-button {
+	right: 45px;
+	background: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0;
+	line-height: 1;
+}
+.search-field .global-search-button i { font-size: 13px; margin: 0 }
 
 /* .shop-item-table.deals-aggregate-user-info thead, .shop-item-table.deals-aggregate-user-info tbody { border: 1px solid #e9e9e9; } */
 .border-right { border-right: 1px solid #e9e9e9 !important; }
@@ -5141,8 +5185,8 @@ li.autocomplete-suggestion .price { width: 25%; }
 	margin-bottom: 3px;
 }
 .lead-last-contact { color: #3c3c3c; background-color: #f2f2f2; margin-top: 5px }
-.lead-phone { color: #4eb91d; background-color: #f6f9f5; }
-.lead-email { color: #10a7f0; background-color: #eef3ff; }
+.lead-phone, .siteuser-email-from { color: #4eb91d; background-color: #f6f9f5; }
+.lead-email, .siteuser-email-to { color: #10a7f0; background-color: #eef3ff; }
 
 .lead-morph .modal-body { padding: 15px; }
 .lead-morph .modal-content { padding-bottom: 0 }
@@ -5192,3 +5236,139 @@ li.autocomplete-suggestion .price { width: 25%; }
 .legend-actions div[data-legend-action="delete"] { color: #ed4e2a; }
 
 .event-clients-row .user-block:first-child { padding-left: 0; }
+
+.siteuser-mail-attachments ul { padding: 0; }
+.siteuser-mail-attachments ul li { list-style-type: none; display: inline-block; }
+.siteuser-mail-attachments ul li a.name span { color: #666; float: right; margin-left: 5px; }
+
+.span-unblocked { height: 24px; }
+
+.clear-pattern .input-group { width: 100%; position: relative; }
+.clear-pattern i {
+	position: absolute;
+	right: 7px;
+	z-index: 100;
+	top: 10px;
+}
+.clear-pattern i:hover { cursor: pointer; }
+
+.dms-document-attachments-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.dms-document-attachments-list > li {
+	color: #777;
+	margin-bottom: 10px;
+}
+.dms-document-attachments-list > li img { float: left; margin-top: 2px; }
+.dms-document-attachments-list > li div{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.dms-document-attachments-list > li .name { cursor: pointer; }
+.dms-document-attachments-list > li .date {
+    margin-left: 21px;
+    font-size: 10px;
+    color: #ccc;
+}
+.dms-document-attachments-list > li .remove-file {
+	text-decoration: none;
+	 color: #ccc;
+	 font-size: 10px;
+}
+.dms-document-attachments-list > li .remove-file:hover { cursor: pointer; color: #ef694b; }
+
+.tree-folder-name i { margin-right: 3px; }
+
+.bootbox-body .dms-attachment-action-button:not(:first-child) {
+	margin-top: 5px !important;
+}
+.dms-attachment-action-button a {
+	width: 100%;
+}
+.dms-document-approve-block { margin-bottom: 15px; }
+.dms-document-approve-block hr { width: 50%; }
+.dms-document-approve-block .text { white-space: pre-wrap; }
+.dms-document-approve-block .badge.date{ color: #666; background-color: #f2f2f2 !important; }
+.dms-document-approve-block:hover .actions-block { display: inline-block; }
+.dms-document-approve-block .actions-block { display: none; }
+.dms-document-approve-block .action-edit { margin-left: 5px; margin-right: 3px; }
+.dms-document-approve-block .action-edit:hover, .dms-document-approve-block .action-markDeleted:hover { cursor: pointer; }
+.dms-document-approve-block .action-edit i { color: #7cba00; }
+.dms-document-approve-block .action-markDeleted i { color: #ed4e2a; }
+
+.mail-container .mail-body { padding: 12px; overflow: initial; }
+
+.mail-sidebar .mail-menu li.dms-class a { /*display: flex; align-items: center;*/ padding-left: 0; padding-top: 0; padding-bottom: 5px; }
+.mail-container .mail-sidebar .mail-menu > li:hover a { background-color: #f7f7f7; }
+.mail-sidebar .mail-menu li { padding-left: 15px !important; }
+.mail-container .mail-sidebar .mail-menu > li a i { margin-right: 5px !important; }
+.mail-container .mail-sidebar .mail-menu > li a { font-size: 12px; }
+.mail-container .mail-sidebar .mail-menu > li span.name { padding-right: 5px; }
+
+i.shop-order-item-codes:hover { cursor: pointer; }
+
+.form-group.form-group-header { margin-bottom: 5px !important; }
+.state-history-button {
+	float: right;
+	margin-top: 3px;
+	cursor: pointer;
+}
+
+.dms-workflow-template-actions .control-label { font-weight: inherit; }
+.dd-item .delete-associated-item:hover, .dd-item .edit-modal:hover { cursor: pointer; }
+.dms-workflow-template-actions .dd, .dms-workflow-template-actions-modal .dd { max-width: 100% !important; }
+
+.dms-workflow-template-users .select2-container .select2-search--inline { float: none !important; }
+.dms-workflow-template-users .select2-container .select2-search__field { width: 100% !important; }
+
+/* Fix sortable item drag in bootstrap modal  */
+.dd-dragel { z-index: 10000 !important; }
+.add-route:hover { cursor: pointer; }
+
+.routes-form .input-group-addon { padding: 0; border: none; background-color: inherit; }
+
+
+.dms-workflow-document-modal {
+  padding: 0 !important;
+}
+.dms-workflow-document-modal .modal-dialog {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 20px;
+}
+.dms-workflow-document-modal .modal-content {
+  height: auto;
+  min-height: 100%;
+  border: 0 none;
+  border-radius: 0;
+  box-shadow: none;
+  position:relative;
+}
+.dms-workflow-document-modal .modal-footer {
+  border-radius: 0;
+  bottom:0px;
+  position:absolute;
+  width:100%;
+}
+
+.rotate-legend .flot-x-axis .flot-tick-label {
+    white-space: nowrap;
+    transform: translate(-25px, 0) rotate(-60deg);
+    text-indent: -100%;
+    transform-origin: top right;
+    text-align: right !important;
+}
+
+.label.label-related {
+	white-space: inherit;
+	width: 100% !important;
+}
+.label.label-related i.fa {
+	font-size: 11px;
+}
+
+.grid { display: grid !important; }

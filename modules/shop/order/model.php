@@ -39,7 +39,8 @@ class Shop_Order_Model extends Core_Entity
 		'shop_order_item' => array(),
 		'shop_item_reserved' => array(),
 		'shop_siteuser_transaction' => array(),
-		'shop_discountcard_bonus' => array()
+		'shop_discountcard_bonus' => array(),
+		'shop_order_history' => array()
 	);
 
 	/**
@@ -95,6 +96,8 @@ class Shop_Order_Model extends Core_Entity
 		'status_datetime',
 	);
 
+	const TYPE = 5;
+
 	/**
 	 * Mark entity as deleted
 	 * @return Core_Entity
@@ -102,6 +105,9 @@ class Shop_Order_Model extends Core_Entity
 	public function markDeleted()
 	{
 		$this->unpost();
+
+		// Удалить зарезервированные товары
+		$this->deleteReservedItems();
 
 		return parent::markDeleted();
 	}
@@ -189,6 +195,7 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		$this->Shop_Order_Items->deleteAll(FALSE);
+		$this->Shop_Order_Histories->deleteAll(FALSE);
 
 		// Удаляем связи с зарезервированными, прямая связь
 		$this->Shop_Item_Reserveds->deleteAll(FALSE);
@@ -197,7 +204,7 @@ class Shop_Order_Model extends Core_Entity
 
 		$this->source_id && $this->Source->delete();
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
+		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 		{
 			$oShop_Warehouse_Entry->delete();
@@ -265,7 +272,29 @@ class Shop_Order_Model extends Core_Entity
 			}
 		}
 
+		$this->Shop->write_off_paid_items && $this->paid
+			&& $this->post();
+
 		Core_Event::notify($this->_modelName . '.onAfterChangeStatusPaid', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Change posted
+	 * @return self
+	 * @hostcms-event shop_order.onBeforeChangeStatusPosted
+	 * @hostcms-event shop_order.onAfterChangeStatusPosted
+	 */
+	public function changeStatusPosted()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeStatusPosted', $this);
+
+		$this->posted == 0
+			? $this->post()
+			: $this->unpost();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeStatusPosted', $this);
 
 		return $this;
 	}
@@ -375,6 +404,9 @@ class Shop_Order_Model extends Core_Entity
 		$this->canceled = 1 - $this->canceled;
 		$this->save();
 
+		// Удалить зарезервированные товары
+		$this->deleteReservedItems();
+
 		if ($this->shop_payment_system_id)
 		{
 			if ($oShop_Payment_System_Handler)
@@ -393,6 +425,8 @@ class Shop_Order_Model extends Core_Entity
 				));
 			}
 		}
+
+		$this->historyPushCanceled();
 
 		Core_Event::notify($this->_modelName . '.onAfterChangeStatusCanceled', $this);
 
@@ -936,6 +970,9 @@ class Shop_Order_Model extends Core_Entity
 
 			// Дисконтная карта
 			$this->_paidShopDiscountcard();
+
+			// История
+			$this->historyPushPaid();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterPaid', $this);
@@ -1060,6 +1097,9 @@ class Shop_Order_Model extends Core_Entity
 
 			// Дисконтная карта
 			$this->_paidShopDiscountcard();
+
+			// История
+			$this->historyPushCanceled();
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterCancelPaid', $this);
@@ -1124,8 +1164,6 @@ class Shop_Order_Model extends Core_Entity
 
 		$mode = $this->paid == 0 ? -1 : 1;
 
-		$aWriteoff = array();
-
 		// Получаем список товаров заказа
 		$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
 
@@ -1185,50 +1223,6 @@ class Shop_Order_Model extends Core_Entity
 			in_array($oShop_Order_Item->type, array(3, 4, 5))
 				? $fTotalDiscount += $fAmount
 				: $fTotalAmount += $fAmount;
-
-			// Списание/начисление товаров
-			if ($oShop->write_off_paid_items)
-			{
-				$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
-					? $oShop_Order_Item->Shop_Warehouse
-					: $oShop->Shop_Warehouses->getDefault();
-
-				if (!is_null($oShop_Warehouse) && $oShop_Item->id)
-				{
-					$aWriteoff[] = array(
-						'shop_item_id' => $oShop_Item->id,
-						'shop_warehouse_id' => $oShop_Warehouse->id,
-						'count' => $oShop_Order_Item->quantity
-					);
-				}
-
-				// Комплект
-				if ($oShop_Item->type == 3)
-				{
-					if (!is_null($oShop_Warehouse) && $oShop_Item->id)
-					{
-						$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
-							? $oShop_Order_Item->Shop_Warehouse
-							: $oShop->Shop_Warehouses->getDefault();
-
-						$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
-
-						foreach ($aShop_Item_Sets as $oShop_Item_Set)
-						{
-							$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item_Set->shop_item_set_id);
-
-							if (!is_null($oShop_Warehouse_Item))
-							{
-								$aWriteoff[] = array(
-									'shop_item_id' => $oShop_Item->id,
-									'shop_warehouse_id' => $oShop_Warehouse->id,
-									'count' => $oShop_Item_Set->count
-								);
-							}
-						}
-					}
-				}
-			}
 		}
 
 		// Бонусы начисляем в отдельном цикле
@@ -1286,58 +1280,11 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		// Проводки по складам
-		if ($this->paid == 0)
+		if ($oShop->write_off_paid_items)
 		{
-			// Удаляем ранее заданные проводки
-			$this->unpost();
-		}
-		elseif (count($aWriteoff))
-		{
-			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
-
-			$aTmp = array();
-
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$aTmp[$oShop_Warehouse_Entry->shop_item_id][] = $oShop_Warehouse_Entry;
-			}
-
-			unset($aShop_Warehouse_Entries);
-
-			// Добавляем проводки для списания заказанных товаров
-			foreach ($aWriteoff as $writeoff)
-			{
-				$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getById($writeoff['shop_warehouse_id']);
-
-				if (!is_null($oShop_Warehouse))
-				{
-					$shop_item_id = $writeoff['shop_item_id'];
-
-					if (isset($aTmp[$shop_item_id]) && count($aTmp[$shop_item_id]))
-					{
-						$oShop_Warehouse_Entry = array_shift($aTmp[$shop_item_id]);
-					}
-					else
-					{
-						$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
-						$oShop_Warehouse_Entry->setDocument($this->id, 5);
-						$oShop_Warehouse_Entry->shop_item_id = $shop_item_id;
-					}
-
-					$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
-					$oShop_Warehouse_Entry->datetime = $this->payment_datetime;
-					$oShop_Warehouse_Entry->value = -$writeoff['count'];
-					$oShop_Warehouse_Entry->save();
-
-					$rest = $oShop_Warehouse->getRest($shop_item_id);
-
-					if (!is_null($rest))
-					{
-						// Recount
-						$oShop_Warehouse->setRest($shop_item_id, $rest);
-					}
-				}
-			}
+			$this->paid
+				? $this->post()
+				: $this->unpost();
 		}
 
 		// Транзакции пользователю за уровни партнерской программы
@@ -1450,6 +1397,157 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
+	 * Add entries
+	 * @return self
+	 */
+	public function post()
+	{
+		if (!$this->posted)
+		{
+			$oShop = $this->Shop;
+
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+
+			$aTmp = array();
+
+			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			{
+				$aTmp[$oShop_Warehouse_Entry->shop_item_id][] = $oShop_Warehouse_Entry;
+			}
+
+			unset($aShop_Warehouse_Entries);
+
+			// Списание/начисление товаров
+			if ($oShop->write_off_paid_items)
+			{
+				$aWriteoff = array();
+
+				// Получаем список товаров заказа
+				$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+				foreach ($aShop_Order_Items as $oShop_Order_Item)
+				{
+					$oShop_Item = $oShop_Order_Item->Shop_Item;
+					$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
+						? $oShop_Order_Item->Shop_Warehouse
+						: $oShop->Shop_Warehouses->getDefault();
+
+					if (!is_null($oShop_Warehouse) && $oShop_Item->id)
+					{
+						$aWriteoff[] = array(
+							'shop_item_id' => $oShop_Item->id,
+							'shop_warehouse_id' => $oShop_Warehouse->id,
+							'count' => $oShop_Order_Item->quantity
+						);
+					}
+
+					// Комплект
+					if ($oShop_Item->type == 3)
+					{
+						if (!is_null($oShop_Warehouse) && $oShop_Item->id)
+						{
+							$oShop_Warehouse = $oShop_Order_Item->shop_warehouse_id
+								? $oShop_Order_Item->Shop_Warehouse
+								: $oShop->Shop_Warehouses->getDefault();
+
+							$aShop_Item_Sets = $oShop_Item->Shop_Item_Sets->findAll(FALSE);
+							foreach ($aShop_Item_Sets as $oShop_Item_Set)
+							{
+								$oShop_Warehouse_Item = $oShop_Warehouse->Shop_Warehouse_Items->getByShopItemId($oShop_Item_Set->shop_item_set_id);
+
+								if (!is_null($oShop_Warehouse_Item))
+								{
+									$aWriteoff[] = array(
+										'shop_item_id' => $oShop_Item_Set->shop_item_set_id,
+										'shop_warehouse_id' => $oShop_Warehouse->id,
+										'count' => $oShop_Item_Set->count
+									);
+								}
+							}
+						}
+					}
+				}
+
+				// Добавляем проводки для списания заказанных товаров
+				foreach ($aWriteoff as $writeoff)
+				{
+					$oShop_Warehouse = Core_Entity::factory('Shop_Warehouse')->getById($writeoff['shop_warehouse_id']);
+
+					if (!is_null($oShop_Warehouse))
+					{
+						$shop_item_id = $writeoff['shop_item_id'];
+
+						if (isset($aTmp[$shop_item_id]) && count($aTmp[$shop_item_id]))
+						{
+							$oShop_Warehouse_Entry = array_shift($aTmp[$shop_item_id]);
+						}
+						else
+						{
+							$oShop_Warehouse_Entry = Core_Entity::factory('Shop_Warehouse_Entry');
+							$oShop_Warehouse_Entry->setDocument($this->id, self::TYPE);
+							$oShop_Warehouse_Entry->shop_item_id = $shop_item_id;
+						}
+
+						$oShop_Warehouse_Entry->shop_warehouse_id = $oShop_Warehouse->id;
+						$oShop_Warehouse_Entry->datetime = Core_Date::timestamp2sql(time()); // Отгрузка проводится текущей датой
+						$oShop_Warehouse_Entry->value = -$writeoff['count'];
+						$oShop_Warehouse_Entry->save();
+
+						$rest = $oShop_Warehouse->getRest($shop_item_id);
+
+						if (!is_null($rest))
+						{
+							// Recount
+							$oShop_Warehouse->setRest($shop_item_id, $rest);
+						}
+					}
+				}
+			}
+
+			$this->posted = 1;
+			$this->save();
+
+			$this->historyPushPosted();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Remove all shop warehouse entries by document
+	 * @return self
+	 */
+	public function unpost()
+	{
+		if ($this->posted)
+		{
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			{
+				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+
+				$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
+
+				$oShop_Warehouse_Entry->delete();
+
+				$rest = $oShop_Warehouse->getRest($shop_item_id);
+
+				if (!is_null($rest))
+				{
+					// Recount
+					$oShop_Warehouse->setRest($shop_item_id, $rest);
+				}
+			}
+
+			$this->posted = 0;
+			$this->save();
+
+			$this->historyPushPosted();
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Get item path include CMS_FOLDER
 	 * @return string
 	 */
@@ -1554,6 +1652,7 @@ class Shop_Order_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_order.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -1574,6 +1673,8 @@ class Shop_Order_Model extends Core_Entity
 		{
 			$newObject->add(clone $oShop_Order_Item);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -1716,6 +1817,27 @@ class Shop_Order_Model extends Core_Entity
 		$oOrderProperty->addChild('Наименование', 'Заказ оплачен');
 		$oOrderProperty->addChild('Значение', $this->paid == 1 ? 'true' : 'false');
 
+		// Заказ отменен
+		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
+		$oOrderProperty->addChild('Наименование', 'Отменен');
+		$oOrderProperty->addChild('Значение', $this->canceled == 1 ? 'true' : 'false');
+
+		if ($this->shop_order_status_id)
+		{
+			// Статус заказа
+			$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
+			$oOrderProperty->addChild('Наименование', 'Статус заказа');
+			$oOrderProperty->addChild('Значение', $this->Shop_Order_Status->name);
+
+			if ($this->status_datetime != '0000-00-00 00:00:00')
+			{
+				// Статус заказа
+				$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
+				$oOrderProperty->addChild('Наименование', 'Дата изменения статуса');
+				$oOrderProperty->addChild('Значение', $this->status_datetime);
+			}
+		}
+
 		// Способ доставки
 		$oOrderProperty = $oOrderProperties->addChild('ЗначениеРеквизита');
 		$oOrderProperty->addChild('Наименование', 'Способ доставки');
@@ -1818,6 +1940,14 @@ class Shop_Order_Model extends Core_Entity
 				$oValue = $oProperty->addChild('ЗначениеРеквизита');
 				$oValue->addChild('Наименование', 'ТипНоменклатуры');
 				$oValue->addChild('Значение', $oShop_Order_Item->type == 1 ? 'Услуга' : 'Товар');
+
+				if ($oShop_Order_Item->shop_warehouse_id)
+				{
+					$oWarehouses = $oCurrentItemXml->addChild('Склады');
+					$oWarehouse = $oWarehouses->addChild('Склад');
+					$oWarehouse->addAttribute('Ид', $oShop_Order_Item->Shop_Warehouse->guid);
+					$oWarehouse->addChild('Количество', $oShop_Order_Item->quantity);
+				}
 			}
 			else
 			{
@@ -1922,6 +2052,12 @@ class Shop_Order_Model extends Core_Entity
 		{
 			?><div>
 				<b><?php echo Core::_('Shop_Order.order_card_description')?>:</b> <?php echo htmlspecialchars($this->description)?>
+			</div><?php
+		}
+		if ($this->payment_datetime != '0000-00-00 00:00:00')
+		{
+			?><div>
+				<b><?php echo Core::_('Shop_Order.order_card_status_of_pay')?>:</b> <?php echo Core_Date::sql2datetime($this->payment_datetime)?>
 			</div><?php
 		}
 		?>
@@ -2297,7 +2433,8 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Количество заказов за сегодня
+	 * Get orders today
+	 * @return int
 	 */
 	public function ordersToday()
 	{
@@ -2321,16 +2458,6 @@ class Shop_Order_Model extends Core_Entity
 
 		$path = $oAdmin_Form_Controller->getPath();
 
-		// Список статусов дел
-		$aShop_Order_Statuses = Core_Entity::factory('Shop_Order_Status')->findAll();
-
-		$aMasShopOrderStatuses = array(array('value' => Core::_('Shop_Order.notStatus'), 'color' => '#aebec4'));
-
-		foreach ($aShop_Order_Statuses as $oShop_Order_Status)
-		{
-			$aMasShopOrderStatuses[$oShop_Order_Status->id] = array('value' => $oShop_Order_Status->name, 'color' => $oShop_Order_Status->color);
-		}
-
 		$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
 
 		$additionalParams = Core_Str::escapeJavascriptVariable(
@@ -2342,7 +2469,7 @@ class Shop_Order_Model extends Core_Entity
 			->add(
 				$oCore_Html_Entity_Dropdownlist
 					->value($this->shop_order_status_id)
-					->options($aMasShopOrderStatuses)
+					->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
 					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
 				)
 			->execute();
@@ -2351,32 +2478,9 @@ class Shop_Order_Model extends Core_Entity
 	}
 
 	/**
-	 * Remove all shop warehouse entries by document
-	 * @return self
+	 * Get printlayout replaces
+	 * @return array
 	 */
-	public function unpost()
-	{
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, 5);
-		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-		{
-			$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
-
-			$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
-
-			$oShop_Warehouse_Entry->delete();
-
-			$rest = $oShop_Warehouse->getRest($shop_item_id);
-
-			if (!is_null($rest))
-			{
-				// Recount
-				$oShop_Warehouse->setRest($shop_item_id, $rest);
-			}
-		}
-
-		return $this;
-	}
-
 	public function getPrintlayoutReplaces()
 	{
 		$oCompany = $this->company_id
@@ -2421,6 +2525,7 @@ class Shop_Order_Model extends Core_Entity
 			$node->tax = $tax;
 			$node->amount = $amount;
 			$node->amount_tax_included = Shop_Controller::instance()->round($amount + $tax);
+			$node->warehouse_cell = !is_null($oShop_Order_Item->getCellName()) ? htmlspecialchars($oShop_Order_Item->getCellName()) : '';
 
 			$aReplace['Items'][] = $node;
 
@@ -2437,6 +2542,333 @@ class Shop_Order_Model extends Core_Entity
 		$aReplace['amount_tax_included'] = Shop_Controller::instance()->round($this->getAmount());
 		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount_tax_included']));
 
+		$aReplace['delivery_name'] = $this->shop_delivery_id ? Core_Str::ucfirst($this->Shop_Delivery->name) : '';
+
+		$aReplace['payment_name'] = $this->shop_payment_system_id ? Core_Str::ucfirst($this->Shop_Payment_System->name) : '';
+		$aReplace['payment_status'] = $this->paid ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
+		$aReplace['payment_date'] =  $this->paid ? Core_Date::sql2date($this->payment_datetime) : '';
+		$aReplace['payment_datetime'] =  $this->paid ? Core_Date::sql2datetime($this->payment_datetime) : '';
+
+		$aReplace['status_date'] =  $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2date($this->status_datetime) : '';
+		$aReplace['status_datetime'] =  $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2datetime($this->status_datetime) : '';
+
 		return $aReplace;
+	}
+
+	/**
+	 * Get property value for SEO-templates
+	 * @param int $property_id Property ID
+	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
+	 * @param string $separator separator
+	 * @return string
+	 */
+	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
+	{
+		$oProperty = Core_Entity::factory('Property', $property_id);
+		$aProperty_Values = $oProperty->getValues($this->id, FALSE);
+
+		if (count($aProperty_Values))
+		{
+			$aTmp = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+					case 11: // Float
+						$aTmp[] = $oProperty_Value->value;
+					break;
+					case 8: // Date
+						$aTmp[] = strftime($this->Shop->format_date, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 9: // Datetime
+						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
+					break;
+					case 3: // List
+						if ($oProperty_Value->value)
+						{
+							$oList_Item = $oProperty->List->List_Items->getById(
+								$oProperty_Value->value, FALSE
+							);
+
+							!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+						}
+					break;
+					case 7: // Checkbox
+					break;
+					case 5: // Informationsystem
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Informationsystem_Item->name;
+						}
+					break;
+					case 12: // Shop
+						if ($oProperty_Value->value)
+						{
+							$aTmp[] = $oProperty_Value->Shop_Item->name;
+						}
+					break;
+					case 2: // File
+					case 10: // Hidden field
+					default:
+					break;
+				}
+			}
+
+			if (count($aTmp))
+			{
+				return sprintf($format, $oProperty->name, implode($separator, $aTmp));
+			}
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Push paid history
+	 * @return self
+	 */
+	public function historyPushPaid()
+	{
+		$oShop_Order_History = Core_Entity::factory('Shop_Order_History');
+		$oShop_Order_History->shop_order_id = $this->id;
+		$oShop_Order_History->shop_order_status_id = $this->shop_order_status_id;
+		$oShop_Order_History->text = $this->paid
+			? Core::_('Shop_Order.paid')
+			: Core::_('Shop_Order.paid_cancel');
+		$oShop_Order_History->save();
+
+		return $this;
+	}
+
+	/**
+	 * Push posted history
+	 * @return self
+	 */
+	public function historyPushPosted()
+	{
+		$oShop_Order_History = Core_Entity::factory('Shop_Order_History');
+		$oShop_Order_History->shop_order_id = $this->id;
+		$oShop_Order_History->shop_order_status_id = $this->shop_order_status_id;
+		$oShop_Order_History->text = $this->posted
+			? Core::_('Shop_Order.posted')
+			: Core::_('Shop_Order.posted_cancel');
+		$oShop_Order_History->save();
+
+		return $this;
+	}
+
+	/**
+	 * Push canceled history
+	 * @return self
+	 */
+	public function historyPushCanceled()
+	{
+		$oShop_Order_History = Core_Entity::factory('Shop_Order_History');
+		$oShop_Order_History->shop_order_id = $this->id;
+		$oShop_Order_History->shop_order_status_id = $this->shop_order_status_id;
+		$oShop_Order_History->text = $this->canceled
+			? Core::_('Shop_Order.canceled')
+			: Core::_('Shop_Order.canceled_cancel');
+		$oShop_Order_History->save();
+
+		return $this;
+	}
+
+	/**
+	 * Push change status history
+	 * @return self
+	 */
+	public function historyPushChangeStatus()
+	{
+		$oShop_Order_History = Core_Entity::factory('Shop_Order_History');
+		$oShop_Order_History->shop_order_id = $this->id;
+		$oShop_Order_History->shop_order_status_id = $this->shop_order_status_id;
+		$oShop_Order_History->text = Core::_('Shop_Order.change_status', $this->_object->Shop_Order_Status->name, FALSE);
+		$oShop_Order_History->save();
+
+		return $this;
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'shop_id' => $this->shop_id,
+				'company_id' => $this->company_id,
+				'shop_country_location_id' => $this->shop_country_location_id,
+				'shop_country_id' => $this->shop_country_id,
+				'shop_country_location_city_id' => $this->shop_country_location_city_id,
+				'shop_country_location_city_area_id' => $this->shop_country_location_city_area_id,
+				'shop_delivery_id' => $this->shop_delivery_id,
+				'shop_delivery_condition_id' => $this->shop_delivery_condition_id,
+				'siteuser_id' => $this->siteuser_id,
+				'source_id' => $this->source_id,
+				'name' => $this->name,
+				'surname' => $this->surname,
+				'patronymic' => $this->patronymic,
+				'email' => $this->email,
+				'acceptance_report' => $this->acceptance_report,
+				'acceptance_report_datetime' => $this->acceptance_report_datetime,
+				'vat_invoice' => $this->vat_invoice,
+				'vat_invoice_datetime' => $this->vat_invoice_datetime,
+				'company' => $this->company,
+				'tin' => $this->tin,
+				'kpp' => $this->kpp,
+				'fax' => $this->fax,
+				'shop_order_status_id' => $this->shop_order_status_id,
+				'shop_currency_id' => $this->shop_currency_id,
+				'shop_payment_system_id' => $this->shop_payment_system_id,
+				'datetime' => $this->datetime,
+				'paid' => $this->paid,
+				'posted' => $this->posted,
+				'payment_datetime' => $this->payment_datetime,
+				'address' => $this->address,
+				'house' => $this->house,
+				'flat' => $this->flat,
+				'postcode' => $this->postcode,
+				'phone' => $this->phone,
+				'description' => $this->description,
+				'system_information' => $this->system_information,
+				'canceled' => $this->canceled,
+				'user_id' => $this->user_id,
+				'invoice' => $this->invoice,
+				'status_datetime' => $this->status_datetime,
+				'guid' => $this->guid,
+				'delivery_information' => $this->delivery_information,
+				'ip' => $this->ip,
+				'coupon' => $this->coupon,
+				'unloaded' => $this->unloaded
+			);
+
+			$aBackup['shop_order_items'] = array();
+
+			$aShop_Order_Items = $this->Shop_Order_Items->findAll(FALSE);
+			foreach ($aShop_Order_Items as $oShop_Order_Item)
+			{
+				$aBackup['shop_order_items'][$oShop_Order_Item->id] = array(
+					'shop_item_id' => $oShop_Order_Item->shop_item_id,
+					'shop_order_id' => $oShop_Order_Item->shop_order_id,
+					'name' => $oShop_Order_Item->name,
+					'quantity' => $oShop_Order_Item->quantity,
+					'price' => $oShop_Order_Item->price,
+					'marking' => $oShop_Order_Item->marking,
+					'rate' => $oShop_Order_Item->rate,
+					'user_id' => $oShop_Order_Item->user_id,
+					'hash' => $oShop_Order_Item->hash,
+					'shop_item_digital_id' => $oShop_Order_Item->shop_item_digital_id,
+					'type' => $oShop_Order_Item->type,
+					'shop_warehouse_id' => $oShop_Order_Item->shop_warehouse_id
+				);
+			}
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->shop_id = Core_Array::get($aBackup, 'shop_id');
+				$this->company_id = Core_Array::get($aBackup, 'company_id');
+				$this->shop_country_location_id = Core_Array::get($aBackup, 'shop_country_location_id');
+				$this->shop_country_id = Core_Array::get($aBackup, 'shop_country_id');
+				$this->shop_country_location_city_id = Core_Array::get($aBackup, 'shop_country_location_city_id');
+				$this->shop_country_location_city_area_id = Core_Array::get($aBackup, 'shop_country_location_city_area_id');
+				$this->shop_delivery_id = Core_Array::get($aBackup, 'shop_delivery_id');
+				$this->shop_delivery_condition_id = Core_Array::get($aBackup, 'shop_delivery_condition_id');
+				$this->siteuser_id = Core_Array::get($aBackup, 'siteuser_id');
+				$this->source_id = Core_Array::get($aBackup, 'source_id');
+				$this->name = Core_Array::get($aBackup, 'name');
+				$this->surname = Core_Array::get($aBackup, 'surname');
+				$this->patronymic = Core_Array::get($aBackup, 'patronymic');
+				$this->email = Core_Array::get($aBackup, 'email');
+				$this->acceptance_report = Core_Array::get($aBackup, 'acceptance_report');
+				$this->acceptance_report_datetime = Core_Array::get($aBackup, 'acceptance_report_datetime');
+				$this->vat_invoice = Core_Array::get($aBackup, 'vat_invoice');
+				$this->company = Core_Array::get($aBackup, 'company');
+				$this->tin = Core_Array::get($aBackup, 'tin');
+				$this->kpp = Core_Array::get($aBackup, 'kpp');
+				$this->fax = Core_Array::get($aBackup, 'fax');
+				$this->shop_order_status_id = Core_Array::get($aBackup, 'shop_order_status_id');
+				$this->shop_currency_id = Core_Array::get($aBackup, 'shop_currency_id');
+				$this->shop_payment_system_id = Core_Array::get($aBackup, 'shop_payment_system_id');
+				$this->datetime = Core_Array::get($aBackup, 'datetime');
+				$this->paid = Core_Array::get($aBackup, 'paid');
+				$this->posted = Core_Array::get($aBackup, 'posted');
+				$this->payment_datetime = Core_Array::get($aBackup, 'payment_datetime');
+				$this->address = Core_Array::get($aBackup, 'address');
+				$this->house = Core_Array::get($aBackup, 'house');
+				$this->flat = Core_Array::get($aBackup, 'flat');
+				$this->postcode = Core_Array::get($aBackup, 'postcode');
+				$this->phone = Core_Array::get($aBackup, 'phone');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->system_information = Core_Array::get($aBackup, 'system_information');
+				$this->canceled = Core_Array::get($aBackup, 'canceled');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+				$this->invoice = Core_Array::get($aBackup, 'invoice');
+				$this->status_datetime = Core_Array::get($aBackup, 'status_datetime');
+				$this->guid = Core_Array::get($aBackup, 'guid');
+				$this->delivery_information = Core_Array::get($aBackup, 'delivery_information');
+				$this->ip = Core_Array::get($aBackup, 'ip');
+				$this->coupon = Core_Array::get($aBackup, 'coupon');
+				$this->unloaded = Core_Array::get($aBackup, 'unloaded');
+
+				$this->save();
+
+				if (isset($aBackup['shop_order_items']))
+				{
+					foreach ($aBackup['shop_order_items'] as $shop_order_item_id => $aShopOrderItem)
+					{
+						$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item')->getById($shop_order_item_id);
+
+						if (is_null($oShop_Order_Item))
+						{
+							$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
+						}
+
+						$oShop_Order_Item->shop_item_id = Core_Array::get($aShopOrderItem, 'shop_item_id');
+						$oShop_Order_Item->shop_order_id = Core_Array::get($aShopOrderItem, 'shop_order_id');
+						$oShop_Order_Item->name = Core_Array::get($aShopOrderItem, 'name');
+						$oShop_Order_Item->quantity = Core_Array::get($aShopOrderItem, 'quantity');
+						$oShop_Order_Item->price = Core_Array::get($aShopOrderItem, 'price');
+						$oShop_Order_Item->marking = Core_Array::get($aShopOrderItem, 'marking');
+						$oShop_Order_Item->rate = Core_Array::get($aShopOrderItem, 'rate');
+						$oShop_Order_Item->user_id = Core_Array::get($aShopOrderItem, 'user_id');
+						$oShop_Order_Item->hash = Core_Array::get($aShopOrderItem, 'hash');
+						$oShop_Order_Item->shop_item_digital_id = Core_Array::get($aShopOrderItem, 'shop_item_digital_id');
+						$oShop_Order_Item->type = Core_Array::get($aShopOrderItem, 'type');
+						$oShop_Order_Item->shop_warehouse_id = Core_Array::get($aShopOrderItem, 'shop_warehouse_id');
+
+						$oShop_Order_Item->save();
+					}
+				}
+			}
+		}
+
+		return $this;
 	}
 }

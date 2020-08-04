@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -271,6 +271,19 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Объединить"
+$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('merge');
+
+if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
+{
+	$oShopProducerControllerMerge = new Admin_Form_Action_Controller_Type_Merge($oAdminFormActionMerge);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShopProducerControllerMerge);
+}
+
 // Действие "Перенести"
 $oAdminFormActionMove = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -296,10 +309,10 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 			}
 		}
 	}
-	
+
 	$oShop_Producer_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Shop_Producer_Controller_Edit', $oAdmin_Form_Action
-	);	
+	);
 
 	$oShopProducerControllerMove
 		->title(Core::_('Shop_Producer.move_producers_groups_title'))

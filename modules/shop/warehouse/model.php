@@ -35,7 +35,9 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_writeoff' => array(),
 		'shop_warehouse_regrade' => array(),
 		'shop_warehouse_movement_source' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'source_shop_warehouse_id'),
-		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id')
+		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id'),
+		'shop_warehouse_cell' => array(),
+		'shop_warehouse_cell_item' => array(),
 	);
 
 	/**
@@ -182,6 +184,9 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Warehouse_Movement_Sources->deleteAll(FALSE);
 		$this->Shop_Warehouse_Movement_Destinations->deleteAll(FALSE);
 
+		$this->Shop_Warehouse_Cells->deleteAll(FALSE);
+		$this->Shop_Warehouse_Cell_Items->deleteAll(FALSE);
+
 		return parent::delete($primaryKey);
 	}
 
@@ -203,6 +208,10 @@ class Shop_Warehouse_Model extends Core_Entity
 			->class('badge badge-hostcms badge-square')
 			->value($aResult['count'])
 			->title(Core::_('Shop_Warehouse.shop_items_count'))
+			->execute();
+
+		$this->shop_warehouse_type_id && Core::factory('Core_Html_Entity_Code')
+			->value('<span class="badge badge-square badge-max-width margin-left-5" title="' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '" style="background-color: ' . htmlspecialchars($this->Shop_Warehouse_Type->color) . '">' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '</span>')
 			->execute();
 	}
 
@@ -331,5 +340,46 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$oShop_Warehouse_Item->count = $value;
 		$oShop_Warehouse_Item->save();
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$windowId = $oAdmin_Form_Controller->getWindowId();
+
+		$aExternalReplace = $oAdmin_Form_Controller->getExternalReplace();
+
+		ob_start();
+		Core::factory('Core_Html_Entity_A')
+			->value(htmlspecialchars($this->name))
+			->href("/admin/shop/warehouse/cell/index.php?shop_warehouse_id={$this->id}&shop_id={$aExternalReplace['{shop_id}']}&shop_group_id={$aExternalReplace['{shop_group_id}']}")
+			->onclick("$.adminLoad({path: '/admin/shop/warehouse/cell/index.php',additionalParams: 'shop_warehouse_id=" . $this->id . "&shop_id=" . $aExternalReplace['{shop_id}'] . "&shop_group_id=" . $aExternalReplace['{shop_group_id}'] . "', windowId: '{$windowId}'}); return false;")
+			->execute();
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Create Shop_Warehouse_Incoming
+	 * @param int $shop_price_id default 0
+	 * @return Shop_Warehouse_Incoming_Model
+	 */
+	public function createShopWarehouseIncoming($shop_price_id = 0)
+	{
+		$oShop_Warehouse_Incoming = Core_Entity::factory('Shop_Warehouse_Incoming');
+		$oShop_Warehouse_Incoming->shop_warehouse_id = $this->id;
+		$oShop_Warehouse_Incoming->description = Core::_('Shop_Item.shop_warehouse_incoming');
+		$oShop_Warehouse_Incoming->number = '';
+		$oShop_Warehouse_Incoming->posted = 0;
+		$oShop_Warehouse_Incoming->shop_price_id = $shop_price_id;
+		$oShop_Warehouse_Incoming->save();
+
+		$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
+		return $oShop_Warehouse_Incoming->save();
 	}
 }

@@ -94,6 +94,7 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'changeStatusPaid_success' => 'Status of the order successfully changed',
+	'changeStatusPosted_success' => 'Sent status successfully changed',
 	'edit_success' => "Order information added successfully!",
 	'order_card_system_info' => 'Order information',
 	'cond_of_delivery_add_form_price_order' => "Order amount",
@@ -156,4 +157,12 @@ return array(
 
 	'select_shop' => 'Select shop',
 	'select_shop_button' => 'Select',
+
+	'table_warehouse' => "Warehouse",
+	'posted' => 'Posted',
+	'tabHistory' => 'History',
+	'change_status' => 'Change status: "%s"',
+	'paid_cancel' => 'Pull off "Paid"',
+	'posted_cancel' => 'Pull off "Posted"',
+	'canceled_cancel' => 'Pull off "Canceled"',
 );

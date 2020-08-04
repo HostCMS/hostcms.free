@@ -285,6 +285,38 @@ class Structure_Model extends Core_Entity
 	}
 
 	/**
+	 * Delete Structure Config File
+	 * @return self
+	 */
+	public function deleteConfigFile()
+	{
+		try
+		{
+			is_file($this->getStructureConfigFilePath())
+				&& Core_File::delete($this->getStructureConfigFilePath());
+		}
+		catch (Exception $e) {}
+
+		return $this;
+	}
+
+	/**
+	 * Delete Structure File
+	 * @return self
+	 */
+	public function deleteFile()
+	{
+		try
+		{
+			is_file($this->getStructureFilePath())
+				&& Core_File::delete($this->getStructureFilePath());
+		}
+		catch (Exception $e) {}
+
+		return $this;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
@@ -306,21 +338,11 @@ class Structure_Model extends Core_Entity
 			Revision_Controller::delete($this->getModelName(), $this->id);
 		}
 
-		// Config file
-		try
-		{
-			is_file($this->getStructureConfigFilePath()) && Core_File::delete($this->getStructureConfigFilePath());
-		}
-		catch (Exception $e) {}
+		$this
+			->deleteConfigFile()
+			->deleteFile();
 
-		// File
-		try
-		{
-			is_file($this->getStructureFilePath()) && Core_File::delete($this->getStructureFilePath());
-		}
-		catch (Exception $e) {}
-
-		$aStructures = $this->Structures->findAll();
+		$aStructures = $this->Structures->findAll(FALSE);
 		foreach ($aStructures as $oStructure)
 		{
 			$oStructure->delete();
@@ -565,6 +587,7 @@ class Structure_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event structure.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -575,7 +598,6 @@ class Structure_Model extends Core_Entity
 		$aPropertyValues = $this->getPropertyValues(FALSE);
 
 		// Create destination dir
-
 		count($aPropertyValues) && $newObject->createDir();
 
 		foreach ($aPropertyValues as $oPropertyValue)
@@ -635,6 +657,8 @@ class Structure_Model extends Core_Entity
 			}
 			catch (Exception $e) {}
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

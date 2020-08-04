@@ -35,7 +35,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
-	
+
 	const TYPE = 1;
 
 	/**
@@ -51,7 +51,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['posted'] = 1;
+			$this->_preloadValues['posted'] = 0;
 		}
 	}
 
@@ -130,6 +130,10 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 		return parent::delete($primaryKey);
 	}
 
+	/**
+	 * Add entries
+	 * @return self
+	 */
 	public function post()
 	{
 		if (!$this->posted)
@@ -200,20 +204,25 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Remove all shop warehouse entries by document
+	 * @return self
+	 */
 	public function unpost()
 	{
 		if ($this->posted)
 		{
-			$oShop_Warehouse = $this->Shop_Warehouse;
-
-			$aShop_Warehouse_Entries = $oShop_Warehouse->Shop_Warehouse_Entries->getByDocument($this->id, self::TYPE);
+			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
 
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
 				// Удаляем все накопительные значения с датой больше, чем дата документа
-				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse->id, $this->datetime);
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse_Entry->shop_warehouse_id, $this->datetime);
 
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+				$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
+
+				// Delete Entry
 				$oShop_Warehouse_Entry->delete();
 
 				$rest = $oShop_Warehouse->getRest($shop_item_id);
@@ -238,7 +247,8 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, self::TYPE);
+		Core::moduleIsActive('printlayout')
+			&& Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, self::TYPE);
 	}
 
 	/**

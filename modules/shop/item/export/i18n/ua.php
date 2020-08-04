@@ -1,6 +1,7 @@
 <?php
 
 return array(
+	'item_full_path' => 'URL товару',
 	'order_guid' => 'GUID замовлення',
 	'order_invoice' => 'Номер замовлення',
 	'order_country' => 'Країна',

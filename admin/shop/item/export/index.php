@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -428,9 +428,11 @@ $oMainTab->add(
 		Admin_Form_Entity::factory('Select')
 			->name("shop_groups_parent_id")
 			->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1', 'id' => 'shop_groups_parent_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1', 'id' => 'shop_groups_parent_id'))
 			->caption(Core::_('Shop_Item.import_price_list_parent_group'))
-			->value($oShopGroup->id)))
+			->value($oShopGroup->id)
+			->filter(TRUE)
+		))
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Admin_Form_Entity::factory('Select')
 			->name("shop_producer_id")

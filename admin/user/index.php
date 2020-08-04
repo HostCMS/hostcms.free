@@ -1031,6 +1031,16 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/wallpaper/index.php', NULL, NULL, '')
 		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('User.session'))
+		->icon('fa fa-check')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/user/session/index.php', NULL, NULL, '')
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/session/index.php', NULL, NULL, '')
+		)
 );
 
 // Добавляем все меню контроллеру

@@ -28,7 +28,7 @@ return array(
 	'shop_company_id' => 'Компания',
 	'shop_currency_id' => "Валюта по умолчанию",
 	'email' => "<acronym title=\"E-mail (группа e-mail, через запятую), на который(е) будет отправляться информация о поступившем заказе\">E-mail куратора магазина</acronym>",
-	'items_on_page' => 'Число элементов на странице',
+	'items_on_page' => 'Элементов на страницу',
 	'url_type' => 'Тип формирования URL',
 	'shop_shops_url_type_element_0' => 'Идентификатор',
 	'shop_shops_url_type_element_1' => 'Транслитерация',
@@ -181,4 +181,12 @@ return array(
 	'default_shop_measure_id' => 'Ед.изм. товара',
 	'filter' => 'Быстрый фильтр',
 	'set_price_recount_sets' => 'Установка цен при пересчете комплекта',
+	'filter_header' => 'Фильтр',
+	'filter_mode' => 'Режим URL',
+	'filter_mode0' => 'Название',
+	'filter_mode1' => 'Путь',
+	'mail_header' => 'Письма',
+	'shop_codetype_id' => 'Маркировка по-умолчанию',
+	'report_top' => 'ТОП-',
+
 );

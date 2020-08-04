@@ -409,15 +409,18 @@ abstract class Core_Http
 
 		if (isset($aHeaders['content-encoding']))
 		{
-			switch ($aHeaders['content-encoding'])
+			$encoding = is_array($aHeaders['content-encoding'])
+				? end($aHeaders['content-encoding'])
+				: $aHeaders['content-encoding'];
+
+			switch ($encoding)
 			{
 				case 'gzip':
 					$content = substr($this->_body, 10);
 					return $content != '' ? gzinflate($content) : '';
 				break;
 				default:
-					throw new Core_Exception('Core_Http unsupported compression method "%name"', array('%name' =>
-					$aHeaders['content-encoding']));
+					throw new Core_Exception('Core_Http unsupported compression method "%name"', array('%name' => $encoding));
 			}
 		}
 
@@ -504,7 +507,7 @@ abstract class Core_Http
 	 */
 	public function parseHttpStatusCode($status)
 	{
-		preg_match('|HTTP/\d\.\d\s+(\d+)\s+.*|', $status, $match);
+		preg_match('|HTTP/\d(?:\.\d)?\s+(\d+)|', $status, $match);
 		return Core_Array::get($match, 1);
 	}
 

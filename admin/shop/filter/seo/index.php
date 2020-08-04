@@ -35,6 +35,8 @@ $oAdmin_Form_Controller
 $aAvailableProperties = array(0, 11, 1, 7);
 Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 
+$aAvailablePropertyFilters = array(1,2,3,4,5,7);
+
 if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 {
 	$aJSON = array();
@@ -52,6 +54,7 @@ if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 	foreach ($aProperties as $oProperty)
 	{
 		in_array($oProperty->type, $aAvailableProperties)
+			&& in_array($oProperty->Shop_Item_Property->filter, $aAvailablePropertyFilters)
 			&& $aTmpProperties[$oProperty->id] = $oProperty->name;
 	}
 
@@ -64,7 +67,7 @@ if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 			->name('modal_property_id')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 			->class('form-control property-select')
-			->onchange('$.getPropertyValues(this)')
+			->onchange('$.getSeoFilterPropertyValues(this)')
 			->execute();
 
 		$aJSON['html'] = ob_get_clean();
@@ -375,8 +378,30 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Filter_Seo')
 );
 
+// Фильтр по группе
+if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556'])
+	&& $oAdmin_Form_Controller->request['admin_form_filter_1556'] != '')
+{
+	$mFilterValue = $oAdmin_Form_Controller->convertLike(strval($oAdmin_Form_Controller->request['admin_form_filter_1556']));
+
+	$oAdmin_Form_Dataset->addCondition(
+		array('select' => array('shop_filter_seos.*'))
+	)->addCondition(
+		array('leftJoin' => array('shop_groups', 'shop_filter_seos.shop_group_id', '=', 'shop_groups.id'))
+	)
+	->addCondition(
+		array('where' => array('shop_groups.name', 'LIKE', $mFilterValue))
+	);
+
+	$oAdmin_Form_Controller->request['admin_form_filter_1556'] = NULL;
+}
+
 $oAdmin_Form_Dataset
 	->addCondition(array('where' => array('shop_filter_seos.shop_id', '=', $oShop->id)));
+
+// Список значений для фильтра и поля
+$oAdmin_Form_Dataset
+	->changeField('shop_producer_id', 'list', Shop_Item_Controller_Edit::fillProducersList($oShop->id));
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

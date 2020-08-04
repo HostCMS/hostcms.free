@@ -26,6 +26,8 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'active'=> 'Active',
 	'changeActive_success' => "Information successfully changed",
+	'turnOn_success' => "Cities turn on!",
+	'switchOff_success' => "Cities switch off!",
 
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',

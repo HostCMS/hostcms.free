@@ -486,6 +486,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeRedeclaredShow
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddGroupsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddShortcut
 	 */
 	public function show()
 	{
@@ -510,8 +511,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				return $this;
 			}
 
-			$aTags = array();
-			$aTags[] = 'informationsystem_group_' . intval($this->group);
+			$this->_cacheTags[] = 'informationsystem_group_' . intval($this->group);
 		}
 
 		$oInformationsystem = $this->getEntity();
@@ -697,7 +697,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_shownIDs[] = $oInformationsystem_Item->id;
 
 				// Tagged cache
-				$bCache && $aTags[] = 'informationsystem_item_' . $oInformationsystem_Item->id;
+				$bCache && $this->_cacheTags[] = 'informationsystem_item_' . $oInformationsystem_Item->id;
 
 				// Shortcut
 				$iShortcut = $oInformationsystem_Item->shortcut_id;
@@ -737,6 +737,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 									->name('informationsystem_group_id')
 									->value($oShortcut_Item->informationsystem_group_id)
 							);
+							
+						Core_Event::notify(get_class($this) . '.onBeforeAddShortcut', $this, array($oInformationsystem_Item, $oOriginal_Informationsystem_Item));
 					}
 
 					if ($oInformationsystem_Item->id // Can be shortcut on markDeleted item
@@ -794,12 +796,12 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$cacheKey,
 			array('content' => $content, 'shown' => $this->_shownIDs),
 			$this->_cacheName,
-			$aTags
+			$this->_cacheTags
 		);
 
 		// Clear
 		$this->_aInformationsystem_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
-			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = array();
+			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = $this->_cacheTags = array();
 
 		return $this;
 	}

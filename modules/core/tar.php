@@ -219,7 +219,7 @@ class Core_Tar
 			else
 			{
 				$this->_cleanFile();
-				$this->_error('Ошибка в списке файлов!');
+				$this->_error('Tar: File List Error!');
 				return false;
 			}
 
@@ -292,7 +292,7 @@ class Core_Tar
 			elseif (is_string($p_filelist))
 			$v_list = explode($this->_separator, $p_filelist);
 			else {
-				$this->_error('Ошибка в списке файлов!');
+				$this->_error('Tar: File List Error!');
 				return false;
 
 			}
@@ -433,7 +433,7 @@ class Core_Tar
 		elseif (is_string($p_filelist))
 		$v_list = explode($this->_separator, $p_filelist);
 		else {
-			$this->_error('Ошибка в списке строк!');
+			$this->_error('Tar: Row List Error!');
 			return false;
 		}
 
@@ -498,12 +498,12 @@ class Core_Tar
 		}
 		else
 		{
-			$this->_error('Неизвестный тип компресси ('.$this->_compress_type.')');
+			$this->_error('Unknown compression type (' . $this->_compress_type . ')');
 		}
 
 		if ($this->_file == 0)
 		{
-			$this->_error("Ошибка открытия для записи '".$this->_tarname."'");
+		$this->_error("File open error '{$this->_tarname}'");
 			return false;
 		}
 
@@ -522,14 +522,13 @@ class Core_Tar
 			if ($this->_temp_tarname == '') {
 				$this->_temp_tarname = uniqid('tar').'.tmp';
 				if (!$v_file_from = @fopen($this->_tarname, 'rb')) {
-					$this->_error('Ошибка открытия для чтения \''
+					$this->_error('Read file error \''
 					.$this->_tarname.'\'');
 					$this->_temp_tarname = '';
 					return false;
 				}
 				if (!$v_file_to = @fopen($this->_temp_tarname, 'wb')) {
-					$this->_error('Ошибка открытия для записи \''
-					.$this->_temp_tarname.'\'');
+					$this->_error('Write file error \'' .$this->_temp_tarname.'\'');
 					$this->_temp_tarname = '';
 					return false;
 				}
@@ -553,11 +552,11 @@ class Core_Tar
 		else if ($this->_compress_type == 'none')
 		$this->_file = fopen($v_filename, "rb");
 		else
-		$this->_error('Неизвестный тип компрессии ('
+		$this->_error('Unknown compression type ('
 		.$this->_compress_type.')');
 
 		if ($this->_file == 0) {
-			$this->_error('Не могу открыть для чтения \''.$v_filename.'\'');
+			$this->_error('Can not open to read \''.$v_filename.'\'');
 			return false;
 		}
 
@@ -577,12 +576,11 @@ class Core_Tar
 		else if ($this->_compress_type == 'none')
 		$this->_file = fopen($this->_tarname, "r+b");
 		else
-		$this->_error('Неизвестный тип компрессии ('
+		$this->_error('Unknown compression type ('
 		.$this->_compress_type.')');
 
 		if ($this->_file == 0) {
-			$this->_error('Не могу открыть для чтения/записи \''
-			.$this->_tarname.'\'');
+			$this->_error('Tar: Open file error \'' . $this->_tarname . '\'');
 			return false;
 		}
 
@@ -604,8 +602,7 @@ class Core_Tar
 			else if ($this->_compress_type == 'none')
 			@fclose($this->_file);
 			else
-			$this->_error('Неизвестный тип компрессии ('
-			.$this->_compress_type.')');
+			$this->_error('Unknown compression type ('.$this->_compress_type.')');
 
 			$this->_file = 0;
 		}
@@ -659,8 +656,7 @@ class Core_Tar
 				else if ($this->_compress_type == 'none')
 				@fputs($this->_file, $p_binary_data);
 				else
-				$this->_error('Неизвестный тип компрессии ('
-				.$this->_compress_type.')');
+				$this->_error('Unknown compression type (' . $this->_compress_type . ')');
 			} else {
 				if ($this->_compress_type == 'gz')
 				@gzputs($this->_file, $p_binary_data, $p_len);
@@ -669,8 +665,7 @@ class Core_Tar
 				else if ($this->_compress_type == 'none')
 				@fputs($this->_file, $p_binary_data, $p_len);
 				else
-				$this->_error('Неизвестный тип компрессии ('
-				.$this->_compress_type.')');
+				$this->_error('Unknown compression type (' .$this->_compress_type.')');
 
 			}
 		}
@@ -692,8 +687,7 @@ class Core_Tar
 			else if ($this->_compress_type == 'none')
 			$v_block = @fread($this->_file, 512);
 			else
-			$this->_error('Неизвестный тип компрессии ('
-			.$this->_compress_type.')');
+			$this->_error('Unknown compression type (' . $this->_compress_type.')');
 		}
 		return $v_block;
 	}
@@ -719,8 +713,7 @@ class Core_Tar
 			} else if ($this->_compress_type == 'none')
 			@fseek($this->_file, @ftell($this->_file)+($p_len*512));
 			else
-			$this->_error('Неизвестный тип компрессии ('
-			.$this->_compress_type.')');
+			$this->_error('Unknown compression type (' .$this->_compress_type.')');
 		}
 		return true;
 	}

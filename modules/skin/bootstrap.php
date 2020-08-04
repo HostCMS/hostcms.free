@@ -861,7 +861,7 @@ class Skin_Bootstrap extends Core_Skin
 		}
 		unset($aModules);
 
-		Core_Event::notify(get_class($this) . '.onLoadSkinConfig', $this);
+		Core_Event::notify(get_class($this) . '.onLoadSkinConfig', $this, array($this->_config));
 
 		if (isset($this->_config['adminMenu']))
 		{
@@ -995,6 +995,17 @@ class Skin_Bootstrap extends Core_Skin
 
 	}
 
+	/**
+	 * Set config
+	 * @param mixed $config
+	 * @return self
+	 */
+	public function setConfig($config)
+	{
+		$this->_config = $config;
+		return $this;
+	}
+
 	public function loadingContainer()
 	{
 		?><!-- Loading Container -->
@@ -1119,6 +1130,9 @@ class Skin_Bootstrap extends Core_Skin
 		</div>
 		<div class="widget-body">
 			<?php echo Core::_('Admin.authorization_notice2')?>
+		</div>
+		<div class="widget-body text-align-center">
+			<a href="/"><?php echo Core::_('Admin.authorization_back_to_frontend')?></a>
 		</div>
 		</div>
 
@@ -1295,11 +1309,15 @@ class Skin_Bootstrap extends Core_Skin
 		// Ajax note creating
 		if (!is_null(Core_Array::getGet('ajaxCreateNote')))
 		{
-			$oUser_Note = Core_Entity::factory('User_Note')->save();
-
 			$oAdmin_Answer = Core_Skin::instance()->answer();
+
+			if (!$oUser->read_only)
+			{
+				$oUser_Note = Core_Entity::factory('User_Note')->save();
+				$oAdmin_Answer->content($oUser_Note->id);
+			}
+
 			$oAdmin_Answer
-				->content($oUser_Note->id)
 				->ajax($bAjax)
 				->execute();
 			exit();
@@ -1308,18 +1326,21 @@ class Skin_Bootstrap extends Core_Skin
 		// Ajax note changing
 		if (!is_null(Core_Array::getGet('ajaxNote')))
 		{
-			$oUser_Note = Core_Entity::factory('User_Note')->find(intval(Core_Array::getGet('entity_id')));
-
-			if (!is_null($oUser_Note->id) && $oUser_Note->user_id == $oUser->id)
+			if (!$oUser->read_only)
 			{
-				switch (Core_Array::getGet('action'))
+				$oUser_Note = Core_Entity::factory('User_Note')->find(intval(Core_Array::getGet('entity_id')));
+
+				if (!is_null($oUser_Note->id) && $oUser_Note->user_id == $oUser->id)
 				{
-					case 'delete':
-						$oUser_Note->markDeleted();
-					break;
-					case 'save':
-						$oUser_Note->value(Core_Array::getPost('value', ''))->save();
-					break;
+					switch (Core_Array::getGet('action'))
+					{
+						case 'delete':
+							$oUser_Note->markDeleted();
+						break;
+						case 'save':
+							$oUser_Note->value(Core_Array::getPost('value', ''))->save();
+						break;
+					}
 				}
 			}
 
@@ -1551,7 +1572,9 @@ class Skin_Bootstrap extends Core_Skin
 		do {
 			$aTemplates[] = $oTemplate;
 
-			$oTemplate->type == 1 && $bLess = TRUE;
+			$oTemplate->type == 1
+				&& strlen($oTemplate->loadManifestFile())
+				&& $bLess = TRUE;
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);

@@ -36,7 +36,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_
 						$aAttr = $oAdmin_Form_Tab_Entity->getAttrsString();
 
 						?><li <?php echo implode(' ', $aAttr) ?> class="tab-<?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->color)?><?php echo $class?>"><?php
-							?><a href="#<?php echo $windowId . '-tab-' . $tab_id ?>" data-toggle="tab"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption)?><i class="<?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->ico)?>"></i><?php echo $oAdmin_Form_Tab_Entity->captionHTML?></a><?php
+							?><a href="#<?php echo htmlspecialchars($windowId . '-tab-' . $tab_id)?>" data-toggle="tab"><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption)?><i class="<?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->ico)?>"></i><?php echo $oAdmin_Form_Tab_Entity->captionHTML?></a><?php
 						?></li><?php
 						$tab_id++;
 					}
@@ -46,7 +46,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Lefttabs extends Skin_Default_Admin_Form_
 				<div class="tab-content"><?php
 					foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 					{
-						?><div class="tab-pane <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo $windowId . '-tab-' . $tab_id ?>"><?php $oAdmin_Form_Tab_Entity->execute()?></div><?php
+						?><div class="tab-pane <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo htmlspecialchars($windowId . '-tab-' . $tab_id)?>"><?php $oAdmin_Form_Tab_Entity->execute()?></div><?php
 						$oAdmin_Form_Tab_Entity->active && $tab_id++;
 					}
 			?></div><?php

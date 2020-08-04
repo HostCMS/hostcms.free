@@ -24,6 +24,8 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'changeActive_success' => "Информация успешно изменена",
+	'turnOn_success' => "Регионы страны включены!",
+	'switchOff_success' => "Регионы страны выключены!",
 
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',

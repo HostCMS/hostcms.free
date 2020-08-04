@@ -41,6 +41,88 @@ $oAdmin_Form_Controller
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
 $siteuser_id && $oAdmin_Form_Controller->Admin_View('Admin_Internal_View');
 
+if (Core_Array::getPost('load_modal') && Core_Array::getPost('shop_order_item_id'))
+{
+	$aJSON = array();
+
+	$shop_order_item_id = intval(Core_Array::getPost('shop_order_item_id'));
+
+	$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item')->getById($shop_order_item_id);
+
+	if (!is_null($oShop_Order_Item))
+	{
+		$oShop = $oShop_Order_Item->Shop_Order->Shop;
+
+		$aTypes = array();
+
+		$aShop_Codetypes = Core_Entity::factory('Shop_Codetype')->findAll(FALSE);
+		foreach ($aShop_Codetypes as $oShop_Codetype)
+		{
+			$aTypes[$oShop_Codetype->id] = $oShop_Codetype->name;
+		}
+
+		$aShop_Order_Item_Codes = $oShop_Order_Item->Shop_Order_Item_Codes->findAll(FALSE);
+
+		ob_start();
+		?>
+		<div class="modal fade" id="codes-<?php echo $oShop_Order_Item->id?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<form action="/admin/shop/order/item/index.php" method="POST">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<h4 class="modal-title" id="myModalLabel"><?php echo Core::_('Shop_Order_Item.item_codes', $oShop_Order_Item->name)?></h4>
+						</div>
+						<div class="modal-body">
+							<?php
+							for ($i = 1; $i <= $oShop_Order_Item->quantity; $i++)
+							{
+								$oShop_Order_Item_Code = count($aShop_Order_Item_Codes)
+									? array_shift($aShop_Order_Item_Codes)
+									: NULL;
+
+								$value = $oShop_Order_Item_Code
+									? $oShop_Order_Item_Code->code
+									: '';
+								?>
+								<div class="row">
+									<div class="col-xs-12 col-sm-6 margin-bottom-5">
+										<input class="form-control" type="text" name="shop_order_item_code<?php echo $oShop_Order_Item_Code ? $oShop_Order_Item_Code->id : '[]'?>" value="<?php echo htmlspecialchars($value)?>"/>
+									</div>
+									<div class="col-xs-12 col-sm-6 margin-bottom-5">
+										<select name="shop_codetype<?php echo $oShop_Order_Item_Code ? $oShop_Order_Item_Code->id : '[]'?>" class="form-control">
+											<option value="0">...</option>
+											<?php
+											foreach ($aTypes as $value => $name)
+											{
+												$selected = $oShop_Order_Item_Code && $oShop_Order_Item_Code->shop_codetype_id == $value || is_null($oShop_Order_Item_Code) && $oShop->shop_codetype_id == $value
+													? 'selected="selected"'
+													: '';
+
+												?><option <?php echo $selected?> value="<?php echo $value?>"><?php echo htmlspecialchars($name)?></option><?php
+											}
+											?>
+										</select>
+									</div>
+								</div>
+								<?php
+							}
+							?>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary" onclick="<?php echo $oAdmin_Form_Controller->checked(array(0 => array($oShop_Order_Item->id => 1)))->getAdminSendForm('setCodes', NULL)?>"><?php echo Core::_('Admin_Form.apply')?></button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<?php
+		$aJSON['html'] = ob_get_clean();
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('show_warehouse'))
 	&& !is_null(Core_Array::getGet('queryString'))
@@ -286,6 +368,21 @@ if ($oAdminFormActionSplit && $oAdmin_Form_Controller->getAction() == 'splitOrde
 	$oShop_Order_Item_Controller_Split->shopOrder($oNew_Shop_Order);
 
 	$oAdmin_Form_Controller->addAction($oShop_Order_Item_Controller_Split);
+}
+
+// Действие "Установить маркировки"
+$oAdminFormActionSetCode = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('setCodes');
+
+if ($oAdminFormActionSetCode && $oAdmin_Form_Controller->getAction() == 'setCodes')
+{
+	$oShopOrderItemControllerCodes = Admin_Form_Action_Controller::factory(
+		'Shop_Order_Item_Controller_Code', $oAdminFormActionSetCode
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oShopOrderItemControllerCodes);
 }
 
 // Источник данных

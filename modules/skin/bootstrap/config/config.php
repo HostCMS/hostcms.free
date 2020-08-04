@@ -15,7 +15,7 @@ return array (
 		'services' => array(
 			'ico' => 'fa fa-cubes',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
-			'modules' => array('helpdesk', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'message', 'report'),
+			'modules' => array('helpdesk', 'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'message', 'report'),
 		),
 		'crm' => array(
 			'ico' => 'fa fa-users',

@@ -30,7 +30,9 @@ class Core_Http_Curl extends Core_Http
 		$curl = @curl_init();
 
 		// Предотвращаем chunked-ответ
-		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+		// Force to use HTTP 1.1 instead of 2.0
+		//curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
 		curl_setopt($curl, CURLOPT_URL, "{$scheme}://{$host}:{$this->_port}{$path}{$query}");
 
@@ -101,12 +103,25 @@ class Core_Http_Curl extends Core_Http
 		//curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // No certificate
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // Return in string
-
+		
 		// Close connection
 		//curl_setopt($curl, CURLOPT_FORBID_REUSE, TRUE);
 
 		// TLS 1.2
 		//curl_setopt($curl, CURLOPT_SSLVERSION, 6);
+
+		// Additional headers
+		if (count($this->_additionalHeaders))
+		{
+			$aTmp = array();
+			foreach ($this->_additionalHeaders as $name => $value)
+			{
+				$aTmp[] = "{$name}: {$value}";
+			}
+			curl_setopt($curl, CURLOPT_HTTPHEADER, $aTmp);
+		}
+
+		$bEmulateFollowlocation = FALSE;
 
 		if (!isset($this->_config['options'][CURLOPT_FOLLOWLOCATION]))
 		{
@@ -121,65 +136,54 @@ class Core_Http_Curl extends Core_Http
 			else
 			{
 				curl_setopt($curl, CURLOPT_FOLLOWLOCATION, FALSE);
-
-				$mr = $maxredirect = 5;
-
-				if ($mr > 0)
-				{
-					$newurl = curl_getinfo($curl, CURLINFO_EFFECTIVE_URL);
-
-					$rch = curl_copy_handle($curl);
-					curl_setopt($rch, CURLOPT_HEADER, TRUE);
-					curl_setopt($rch, CURLOPT_NOBODY, TRUE);
-					curl_setopt($rch, CURLOPT_FORBID_REUSE, TRUE);
-					curl_setopt($rch, CURLOPT_RETURNTRANSFER, TRUE);
-					do {
-						curl_setopt($rch, CURLOPT_URL, $newurl);
-						$header = curl_exec($rch);
-						if (curl_errno($rch))
-						{
-							$code = 0;
-						}
-						else
-						{
-							$code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
-							if ($code == 301 || $code == 302) {
-								preg_match('/Location:(.*?)\n/', $header, $matches);
-								$newurl = trim(array_pop($matches));
-							}
-							else
-							{
-								$code = 0;
-							}
-						}
-					} while ($code && --$mr);
-
-					curl_close($rch);
-
-					if (!$mr)
-					{
-						return false;
-					}
-					curl_setopt($curl, CURLOPT_URL, $newurl);
-				}
+				$bEmulateFollowlocation = TRUE;
 			}
-		}
-
-		// Additional headers
-		if (count($this->_additionalHeaders))
-		{
-			$aTmp = array();
-			foreach ($this->_additionalHeaders as $name => $value)
-			{
-				$aTmp[] = "{$name}: {$value}";
-			}
-			curl_setopt($curl, CURLOPT_HTTPHEADER, $aTmp);
 		}
 
 		// Get the target contents
 		$datastr = @curl_exec($curl);
 
+		// Sent headers
+		//var_dump(curl_getinfo($curl, CURLINFO_HEADER_OUT));
+
 		$this->_errno = curl_errno($curl);
+
+		if ($bEmulateFollowlocation && !$this->_errno)
+		{
+			$iMaxRedirects = 5;
+
+			do {
+				$code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+				if ($code == 301 || $code == 302)
+				{
+					preg_match('/Location:(.*?)\n/', $datastr, $matches);
+					$newurl = trim(array_pop($matches));
+					if (strlen($newurl))
+					{
+						$rch = curl_copy_handle($curl);
+						@curl_close($curl);
+						$curl = $rch;
+						//curl_setopt($rch, CURLOPT_FORBID_REUSE, TRUE);
+						curl_setopt($curl, CURLOPT_URL, $newurl);
+
+						// follow location
+						$datastr = @curl_exec($curl);
+
+						// set new errno
+						$this->_errno = curl_errno($curl);
+					}
+					else
+					{
+						$code = 0;
+					}
+				}
+				else
+				{
+					$code = 0;
+				}
+			} while ($code && --$iMaxRedirects);
+		}
+
 		$this->_error = curl_error($curl);
 
 		$iHeaderSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);

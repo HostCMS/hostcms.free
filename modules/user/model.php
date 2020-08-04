@@ -550,7 +550,7 @@ class User_Model extends Core_Entity
 		{
 			$this->Deal_Attachments->deleteAll(FALSE);
 			$this->Deal_Step_Users->deleteAll(FALSE);
-			$this->Deal_Template_Step_Access_User->deleteAll(FALSE);
+			$this->Deal_Template_Step_Access_Users->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('lead'))

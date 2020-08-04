@@ -161,6 +161,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event admin_form_action.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -168,6 +169,8 @@ class Admin_Form_Action_Model extends Core_Entity
 
 		$newObjectWord = $this->Admin_Word->copy();
 		$newObject->add($newObjectWord);
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -64,6 +64,23 @@ class Shop_Cart_Model extends Core_Entity
 	protected $_sorting = array(
 		'shop_carts.id' => 'ASC',
 	);
+
+	/**
+	 * Forbidden tags array
+	 * @var array
+	 */
+	protected $_itemsForbiddenTags = array();
+
+	/**
+	 * Set forbidden tags array
+	 * @param array $aForbiddenTags forbidden tags array
+	 * @return self
+	 */
+	public function setItemsForbiddenTags(array $aForbiddenTags)
+	{
+		$this->_itemsForbiddenTags = $aForbiddenTags;
+		return $this;
+	}
 
 	/**
 	 * Backend callback method
@@ -305,8 +322,28 @@ class Shop_Cart_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Item));
 
+		$this->applyItemsForbiddenTags($oShop_Item);
+
 		$this->clearXmlTags()
 			->addEntity($oShop_Item);
+
+		return $this;
+	}
+
+	/**
+	 * Apply forbidden xml tags for items
+	 * @param Shop_Item_Model $oShop_Item item
+	 * @return self
+	 */
+	public function applyItemsForbiddenTags($oShop_Item)
+	{
+		if (!is_null($this->_itemsForbiddenTags))
+		{
+			foreach ($this->_itemsForbiddenTags as $forbiddenTag)
+			{
+				$oShop_Item->addForbiddenTag($forbiddenTag);
+			}
+		}
 
 		return $this;
 	}

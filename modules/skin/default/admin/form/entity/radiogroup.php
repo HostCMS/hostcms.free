@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 {
@@ -82,7 +82,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 		if ($this->buttonset)
 		{
 			$sButtonsetId = 'buttonset_' . Core_Array::get($aDivAttr, 'id');
-			?><div id="<?php echo $sButtonsetId?>"><?php
+			?><div id="<?php echo htmlspecialchars($sButtonsetId)?>"><?php
 		}
 		
 		?><span class="caption"><?php echo $this->caption?></span><?php
@@ -95,11 +95,11 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 			{
 				$tmpAttr[] = 'checked="checked"';
 			}
-			$tmpAttr[] = 'id="' . htmlspecialchars($this->id) . $key . '"';
+			$tmpAttr[] = 'id="' . htmlspecialchars($this->id . $key) . '"';
 			$tmpAttr[] = 'value="' . htmlspecialchars($key) . '"';
 
 			?><input <?php echo implode(' ', $tmpAttr) ?>/><?php
-			?><span class="caption" style="display: inline"><label for="<?php echo $this->id, $key?>"<?php echo implode(' ', $aLabelAttr)?>><?php echo $value?></label></span><?php
+			?><span class="caption" style="display: inline"><label for="<?php echo htmlspecialchars($this->id . $key)?>"<?php echo implode(' ', $aLabelAttr)?>><?php echo htmlspecialchars($value)?></label></span><?php
 
 			echo $this->separator;
 		}
@@ -108,7 +108,7 @@ class Skin_Default_Admin_Form_Entity_Radiogroup extends Admin_Form_Entity_Input
 		{
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 			?></div><script>$(function() {
-				$('#<?php echo $windowId?> #<?php echo $sButtonsetId?>').buttonset();
+				$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #<?php echo Core_Str::escapeJavascriptVariable($sButtonsetId)?>').buttonset();
 			});</script><?php
 		}
 		

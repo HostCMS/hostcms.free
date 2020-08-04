@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 {
@@ -26,6 +26,9 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return boolean
+	 * @hostcms-event Property_Controller_Delete_Value.onBeforeDeleteSmallFile
+	 * @hostcms-event Property_Controller_Delete_Value.onBeforeDeleteLargeFile
+	 * @hostcms-event Property_Controller_Delete_Value.onBeforeDelete
 	 */
 	public function execute($operation = NULL)
 	{
@@ -35,11 +38,6 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 		}
 
 		preg_match('/(\w*)property_(\d*)_(\d*)/i', $operation, $matches);
-
-		/*ob_start();
-		print_r($matches);
-		$this->addMessage($operation);
-		$this->addMessage(ob_get_clean());*/
 
 		if (count($matches) == 4)
 		{
@@ -65,6 +63,8 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 
 						if ($matches[1] == 'small_')
 						{
+							Core_Event::notify('Property_Controller_Delete_Value.onBeforeDeleteSmallFile', $this, array($oProperty, $oValue));
+
 							$oValue->deleteSmallFile();
 
 							ob_start();
@@ -75,6 +75,8 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 						}
 						elseif ($matches[1] == 'large_')
 						{
+							Core_Event::notify('Property_Controller_Delete_Value.onBeforeDeleteLargeFile', $this, array($oProperty, $oValue));
+
 							$oValue->deleteLargeFile();
 
 							ob_start();
@@ -85,6 +87,8 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 						}
 						else
 						{
+							Core_Event::notify('Property_Controller_Delete_Value.onBeforeDelete', $this, array($oProperty, $oValue));
+
 							$oValue->delete();
 						}
 
@@ -105,7 +109,7 @@ class Property_Controller_Delete_Value extends Admin_Form_Action_Controller
 			else
 			{
 				// Св-во не найдено
-				$this->addMessage("Свойство не найдено");
+				$this->addMessage(Core::_('Property.property_not_found'));
 			}
 		}
 

@@ -23,7 +23,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_E
 
 		?><script>
 		$(document).ready(function() {
-			var jForm = $('#<?php echo $windowId?> form[id ^= "formEdit"]');
+			var jForm = $('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> form[id ^= "formEdit"]');
 
 			// Указываем таймаут для узлов структуры (подгрузка xsl)
 			setTimeout(function() {
@@ -31,7 +31,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_E
 				jForm.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormLocker.lock(e) });
 			}, 5000);
 
-			$('#<?php echo $windowId?> .formButtons :input').on('click', function(e) { mainFormLocker.unlock() });
+			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> .formButtons :input').on('click', function(e) { mainFormLocker.unlock() });
 
 			jForm.on('keyup change paste blur', ':input[data-required]', backendFieldCheck);
 		});

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Property_Controller_Value_Type
 {
@@ -38,7 +38,7 @@ abstract class Property_Controller_Value_Type
 	{
 		return $this->_modelName;
 	}
-	
+
 	/**
 	 * Get table name
 	 * @return string
@@ -108,12 +108,9 @@ abstract class Property_Controller_Value_Type
 
 		$aProperty_Values = $oProperty_Values->findAll();
 
-		if (isset($aProperty_Values[0]))
-		{
-			return $aProperty_Values[0];
-		}
-
-		return NULL;
+		return isset($aProperty_Values[0])
+			? $aProperty_Values[0]
+			: NULL;
 	}
 
 	/**

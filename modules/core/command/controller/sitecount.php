@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Sitecount extends Core_Command_Controller
 {
@@ -27,14 +27,14 @@ class Core_Command_Controller_Sitecount extends Core_Command_Controller
 
 		Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oCore_Response
 			->status(503)
 			->header('Content-Type', "text/html; charset=UTF-8")
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$title = 'Превышен лимит доступных сайтов в системе!';
+		$title = Core::_('Core.title_limit_available_sites_exceeded');
 
 		ob_start();
 		$oSkin = Core_Skin::instance()
@@ -45,11 +45,9 @@ class Core_Command_Controller_Sitecount extends Core_Command_Controller
 		Core::factory('Core_Html_Entity_Div')
 			->class('indexMessage')
 			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Превышен лимит доступных активных сайтов в системе управления сайтом HostCMS!'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.message_limit_available_sites_exceeded')
 			))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Удалите лишние сайты из системы (<b>"Раздел администрирования" &#8594; "Сайты"</b>) или приобретите версию без ограничения многосайтовости.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.message_remove_unnecessary_sites')
 			))
 			->execute();
 

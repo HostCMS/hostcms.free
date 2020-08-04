@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Xslt extends Core_Command_Controller
 {
@@ -27,14 +27,14 @@ class Core_Command_Controller_Xslt extends Core_Command_Controller
 
 		Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oCore_Response
 			->status(503)
 			->header('Content-Type', "text/html; charset=UTF-8")
 			->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 			->header('X-Powered-By', 'HostCMS');
 
-		$title = 'Несоответствие хостинга системным требованиям!';
+		$title = Core::_('Core.hosting_mismatch_system_requirements');
 
 		ob_start();
 		$oSkin = Core_Skin::instance()
@@ -45,11 +45,9 @@ class Core_Command_Controller_Xslt extends Core_Command_Controller
 		Core::factory('Core_Html_Entity_Div')
 			->class('indexMessage')
 			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'Для работы системы управления сайтом HostCMS необходим один PHP 5 с установленной поддержкой <a href="http://www.hostcms.ru/documentation/libxslt/" target="_blank">Libxslt</a>.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.requires_php5')
 			))
-			->add(Core::factory('Core_Html_Entity_P')->value(
-				'На нашем сайте также размещен <a href="http://www.hostcms.ru/hosting/" target="_blank">список протестированных хостингов</a>, подходящих для работы HostCMS.'
+			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.list_tested_hosting')
 			))
 			->execute();
 

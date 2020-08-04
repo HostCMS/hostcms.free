@@ -52,7 +52,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['posted'] = 1;
+			$this->_preloadValues['posted'] = 0;
 		}
 	}
 
@@ -131,6 +131,10 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		return parent::delete($primaryKey);
 	}
 
+	/**
+	 * Add entries
+	 * @return self
+	 */
 	public function post()
 	{
 		if (!$this->posted)
@@ -227,35 +231,33 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		return $this;
 	}
 
+	/**
+	 * Remove entries
+	 * @return self
+	 */
 	public function unpost()
 	{
 		if ($this->posted)
 		{
-			$oSource_Shop_Warehouse = $this->Source_Shop_Warehouse;
-			$oDestination_Shop_Warehouse = $this->Destination_Shop_Warehouse;
-
 			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
+
 			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
 			{
 				// Удаляем все накопительные значения с датой больше, чем дата документа
-				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oSource_Shop_Warehouse->id, $this->datetime);
-				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oDestination_Shop_Warehouse->id, $this->datetime);
+				Shop_Warehouse_Entry_Accumulate_Controller::deleteEntries($oShop_Warehouse_Entry->shop_item_id, $oShop_Warehouse_Entry->shop_warehouse_id, $this->datetime);
 
 				$shop_item_id = $oShop_Warehouse_Entry->shop_item_id;
+				$oShop_Warehouse = $oShop_Warehouse_Entry->Shop_Warehouse;
+
+				// Delete Entry
 				$oShop_Warehouse_Entry->delete();
 
-				$restSource = $oSource_Shop_Warehouse->getRest($shop_item_id);
-				if (!is_null($restSource))
-				{
-					// Recount
-					$oSource_Shop_Warehouse->setRest($shop_item_id, $restSource);
-				}
+				$rest = $oShop_Warehouse->getRest($shop_item_id);
 
-				$restDestination = $oDestination_Shop_Warehouse->getRest($shop_item_id);
-				if (!is_null($restDestination))
+				if (!is_null($rest))
 				{
 					// Recount
-					$oDestination_Shop_Warehouse->setRest($shop_item_id, $restDestination);
+					$oShop_Warehouse->setRest($shop_item_id, $rest);
 				}
 			}
 
@@ -272,7 +274,8 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 	 */
 	public function printBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 5);
+		Core::moduleIsActive('printlayout')
+			&& Printlayout_Controller::getBackendPrintButton($oAdmin_Form_Controller, $this->id, 5);
 	}
 
 	/**
@@ -411,7 +414,7 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		);
 
 		$position = 1;
-		$total_amount = 0;
+		$total_quantity = $total_amount = 0;
 
 		$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll();
 
@@ -452,9 +455,11 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 
 			$aReplace['total_count']++;
 
+			$total_quantity += $oShop_Warehouse_Movement_Item->count;
 			$total_amount += $amount;
 		}
 
+		$aReplace['quantity'] = $total_quantity;
 		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
 		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
 

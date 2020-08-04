@@ -26,9 +26,9 @@ class Core_Mail_Smtp extends Core_Mail
 	{
 		$header = "Date: " . date("D, d M Y H:i:s O") . $this->_separator;
 		$header .= "Subject: {$subject}{$this->_separator}";
-		$header .= "To: {$to}{$this->_separator}";
+		//$header .= "To: {$to}{$this->_separator}";
 
-		// Remove From from headers
+		// Remove 'From' from headers
 		if (isset($this->_config['from']) && isset($this->_headers['From']))
 		{
 			unset($this->_headers['From']);

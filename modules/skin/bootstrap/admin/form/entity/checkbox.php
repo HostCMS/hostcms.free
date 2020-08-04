@@ -49,7 +49,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_
 
 		if ($this->postingUnchecked)
 		{
-			?><input type="hidden" name="<?php echo $this->name?>" value="0" /><?php
+			?><input type="hidden" name="<?php echo htmlspecialchars($this->name)?>" value="0" /><?php
 		}
 
 		if (count($this->_children))

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Dir_Model extends Core_Entity
 {
@@ -87,6 +87,7 @@ class Xsl_Dir_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event xsl_dir.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -106,6 +107,8 @@ class Xsl_Dir_Model extends Core_Entity
 				$oXsl->changeCopiedName(TRUE)->copy()
 			);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

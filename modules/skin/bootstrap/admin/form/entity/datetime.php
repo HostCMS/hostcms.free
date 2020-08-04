@@ -54,7 +54,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 
 		?><span class="caption"><?php echo $this->caption?></span><?php
 
-		?><div id="div_<?php echo $this->id?>" class="input-group">
+		?><div id="div_<?php echo htmlspecialchars($this->id)?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
 			<span class="input-group-addon">
 				<span class="fa fa-calendar"></span>
@@ -66,7 +66,7 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 
 		<script>
 		(function($) {
-			$('#<?php echo $windowId?> #div_<?php echo $this->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #div_<?php echo Core_Str::escapeJavascriptVariable($this->id)?>').datetimepicker({locale: '<?php echo Core_Str::escapeJavascriptVariable($sCurrentLng)?>', format: '<?php echo Core_Str::escapeJavascriptVariable(Core::$mainConfig['dateTimePickerFormat'])?>', showTodayButton: true, showClear: true});
 		})(jQuery);
 		</script><?php
 

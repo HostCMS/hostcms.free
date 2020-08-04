@@ -163,6 +163,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_purchase_discount.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -174,6 +175,8 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			$oNew_Shop_Purchase_Discount_Coupon = $oShop_Purchase_Discount_Coupon->copy();
 			$newObject->add($oNew_Shop_Purchase_Discount_Coupon);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

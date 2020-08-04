@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Admin forms.
- *
- * @package HostCMS
- * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'authorization_form_title' => 'Центр администрирования',
 	'authorization_form_login' => 'Пользователь',
@@ -19,8 +10,9 @@ return array(
 	'authorization_error_valid_user' => 'Ошибка! Неверные данные!<br />Ваш IP-адрес <b>%s</b>, администратор уведомлен о событии.',
 	'authorization_error_access_temporarily_unavailable' => 'Доступ временно запрещен. Вы можете попробовать ввести пароль через %s сек.',
 	'authorization_title' => 'Вход в центр администрирования HostCMS',
-	'authorization_notice' => '<p>* Для входа в центр администрирования в браузере должно быть разрешено использование Cookies.</p>',
-	'authorization_notice2' => '<p>** Привязка сессии к IP-адресу уменьшает риск несанкционированного доступа к центру администрирования.</p>',
+	'authorization_notice' => '* Для входа в центр администрирования в браузере должно быть разрешено использование Cookies.',
+	'authorization_notice2' => '** Привязка сессии к IP-адресу уменьшает риск несанкционированного доступа к центру администрирования.',
+	'authorization_back_to_frontend' => 'Вернуться на главную страницу сайта.',
 
 	'index_title' => "Система управления сайтом %s v. %s",
 
@@ -62,6 +54,7 @@ return array(
 
 	'free' => 'Приобретите коммерческую версию и получите:',
 	'notes' => 'Заметки',
+	'add_note' => 'Добавить заметку',
 	'notes_save' => 'Заметки успешно сохранены.',
 	'save_notes' => 'Сохранить',
 

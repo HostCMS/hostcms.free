@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -296,21 +296,6 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
-}
-
-// Блокировка IP-адреса
-$oAdminFormActionBlock = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('blockIp');
-
-if ($oAdminFormActionBlock && $oAdmin_Form_Controller->getAction() == 'blockIp')
-{
-	$oComment_Controller_Block = Admin_Form_Action_Controller::factory(
-		'Comment_Controller_Block', $oAdminFormActionBlock
-	);
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oComment_Controller_Block);
 }
 
 // Источник данных

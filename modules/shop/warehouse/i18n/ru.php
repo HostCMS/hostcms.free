@@ -49,4 +49,7 @@ return array(
 	'movement' => 'Перемещение',
 	'types' => 'Типы',
 	'shop_warehouse_type' => 'Тип склада',
+	'separator' => 'Разделитель ячейки',
+	'space_separator' => 'Пробел',
+	'convolution' => 'Свёртка базы',
 );

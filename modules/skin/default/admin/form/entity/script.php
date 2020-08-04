@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Script extends Admin_Form_Entity
 {
@@ -31,16 +31,15 @@ class Skin_Default_Admin_Form_Entity_Script extends Admin_Form_Entity
 	protected $_skipProperies = array(
 		'value' // идет в значение <script>
 	);
-	
+
 	/**
 	 * Executes the business logic.
 	 */
 	public function execute()
 	{
-		$aAttr = $this->getAttrsString();
-
 		echo PHP_EOL;
-		
+
+		$aAttr = $this->getAttrsString();
 		?><script <?php echo implode(' ', $aAttr) ?>><?php echo $this->value?><?php
 		parent::execute();
 		?></script><?php

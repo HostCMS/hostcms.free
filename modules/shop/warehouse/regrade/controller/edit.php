@@ -40,35 +40,42 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			->move($this->getField('number')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1)
 			->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'))->class('form-control input-lg'), $oMainRow1);
 
+		// Дата документа меняется только если документа не проведен.
+		$this->_object->id && $this->_object->posted
+			&& $this->getField('datetime')->readonly('readonly');
+
 		// Печать
-		$printlayoutsButton = '
-			<div class="btn-group">
-				<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
-				<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
-				<ul class="dropdown-menu dropdown-palegreen">
-		';
-
-		$moduleName = $oAdmin_Form_Controller->module->getModuleName();
-
-		$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
-
-		if (!is_null($oModule))
+		if (Core::moduleIsActive('printlayout'))
 		{
-			$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+			$printlayoutsButton = '
+				<div class="btn-group">
+					<a class="btn btn-labeled btn-success" href="javascript:void(0);"><i class="btn-label fa fa-print"></i>' . Core::_('Printlayout.print') . '</a>
+					<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
+					<ul class="dropdown-menu dropdown-palegreen">
+			';
+
+			$moduleName = $oAdmin_Form_Controller->module->getModuleName();
+
+			$oModule = Core_Entity::factory('Module')->getByPath($moduleName);
+
+			if (!is_null($oModule))
+			{
+				$printlayoutsButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 4, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+			}
+
+			$printlayoutsButton .= '
+					</ul>
+				</div>
+			';
+
+			$oMainRow1
+				->add(Admin_Form_Entity::factory('Div')
+					->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
+					->add(
+						Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
+					)
+			);
 		}
-
-		$printlayoutsButton .= '
-				</ul>
-			</div>
-		';
-
-		$oMainRow1
-			->add(Admin_Form_Entity::factory('Div')
-				->class('form-group col-xs-12 col-sm-4 col-lg-3 margin-top-21 text-align-center print-button' . (!$this->_object->id ? ' hidden' : ''))
-				->add(
-					Admin_Form_Entity::factory('Code')->html($printlayoutsButton)
-				)
-		);
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1);
 
@@ -94,19 +101,9 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		// Удаляем поле с идентификатором ответственного сотрудника
 		$oAdditionalTab->delete($this->getField('user_id'));
 
-		$aSelectResponsibleUsers = array();
-
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-		$aCompanies = $oSite->Companies->findAll();
-		foreach ($aCompanies as $oCompany)
-		{
-			$oOptgroupCompany = new stdClass();
-			$oOptgroupCompany->attributes = array('label' => htmlspecialchars($oCompany->name), 'class' => 'company');
-			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
-
-			$aSelectResponsibleUsers[] = $oOptgroupCompany;
-		}
+		$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
 
 		$oSelectResponsibleUsers = Admin_Form_Entity::factory('Select')
 			->id('user_id')
@@ -254,7 +251,7 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name) . '</td>
 							<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
-							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) {' . $onclick . '} return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>
 					';
 				}
@@ -269,21 +266,6 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				</table>
 			</div>
 		';
-
-		// $placeholder = Core::_('Shop_Warehouse_Regrade.add_item_placeholder');
-
-		/*$oAddItemLink = Admin_Form_Entity::factory('Link');
-				$oAddItemLink
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
-					->a
-						->class('btn btn-palegreen')
-						->onclick("$.addRegradeItem({$oShop->id}, '{$placeholder}')")
-						->value(Core::_('Shop_Warehouse_Regrade.add_item'));
-				$oAddItemLink
-					->icon
-						->class('fa fa-plus');
-
-		$oShopItemRow2->add($oAddItemLink);*/
 
 		$oShopItemRow2
 			->add(Admin_Form_Entity::factory('Div')
@@ -433,18 +415,12 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
+		// Было изменение склада
+		$iOldWarehouse != $this->_object->shop_warehouse_id
+			&& $bNeedsRePost = TRUE;
+
 		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
 		Core_Array::getPost('posted') && $this->_object->post();
-
-		if ($iOldWarehouse != $this->_object->shop_warehouse_id)
-		{
-			$aOld_Shop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse', $iOldWarehouse)->Shop_Warehouse_Entries->getByDocument($this->_object->id, 3);
-
-			foreach ($aOld_Shop_Warehouse_Entries as $oShop_Warehouse_Entry)
-			{
-				$oShop_Warehouse_Entry->delete();
-			}
-		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

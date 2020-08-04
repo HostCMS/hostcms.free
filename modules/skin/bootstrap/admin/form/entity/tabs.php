@@ -38,7 +38,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 							: $windowId . '-tab-' . $tab_id;
 
 						?><li class="<?php echo htmlspecialchars($class)?>">
-						<a href="#<?php echo $tabId?>" data-toggle="tab"><?php
+						<a href="#<?php echo htmlspecialchars($tabId)?>" data-toggle="tab"><?php
 						
 						echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
 						
@@ -65,7 +65,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		<?php
 		foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 		{
-			?><div class="tab-pane fade <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo (strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
+			?><div class="tab-pane fade <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo htmlspecialchars(strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
 			<?php
 			$oAdmin_Form_Tab_Entity->execute();
 			?></div><?php

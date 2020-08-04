@@ -181,6 +181,7 @@ class Xsl_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event xsl.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -204,6 +205,8 @@ class Xsl_Model extends Core_Entity
 			//Core_File::copy($this->getXslFilePath(), $newObject->getXslFilePath());
 		}
 		catch (Exception $e) {}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

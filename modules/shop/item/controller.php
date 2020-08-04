@@ -365,6 +365,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 *
 	 * @param Shop_Item_Model $oShop_Item товар
 	 * @param boolean $bRound round prices
+	 * @param boolean $bCache cache mode status
 	 * @return array возвращает массив значений цен для данного пользователя
 	 * - $price['tax'] сумма налога
 	 * - $price['rate'] размер налога
@@ -372,7 +373,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 * - $price['price_tax'] цена с учетом налога
 	 * - $price['price_discount'] цена с учетом налога и со скидкой
 	 */
-	public function getPrices(Shop_Item_Model $oShop_Item, $bRound = TRUE)
+	public function getPrices(Shop_Item_Model $oShop_Item, $bRound = TRUE, $bCache = TRUE)
 	{
 		if (is_null($oShop_Item->id))
 		{
@@ -382,7 +383,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		$price = $this->getPrice($oShop_Item);
 
 		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
-		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll();
+		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll($bCache);
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{
 			if ($this->count >= $oShop_Specialprice->min_quantity && ($this->count <= $oShop_Specialprice->max_quantity || $oShop_Specialprice->max_quantity == 0))

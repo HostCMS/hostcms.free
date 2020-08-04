@@ -25,6 +25,8 @@ return array(
 	'alpha2' => 'Код государства',
 	'active' => 'Активность',
 	'changeActive_success' => "Информация успешно изменена",
+	'turnOn_success' => "Страны включены!",
+	'switchOff_success' => "Страны выключены!",
 
 	'language_tab' => 'Языковые версии',
 	'name_en' => 'На английском',

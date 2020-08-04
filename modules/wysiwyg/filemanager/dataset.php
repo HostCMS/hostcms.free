@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 {
@@ -144,7 +144,6 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 							$Wysiwyg_Filemanager_File = $this->_newObject();
 							$Wysiwyg_Filemanager_File->setSortField($sortField);
 							$Wysiwyg_Filemanager_File->path = $this->_path;
-							//$Wysiwyg_Filemanager_File->name = mb_convert_encoding($file, 'UTF-8');
 							$Wysiwyg_Filemanager_File->name = @iconv(mb_detect_encoding($file, mb_detect_order(), TRUE), "UTF-8", $file);
 							$Wysiwyg_Filemanager_File->datetime = Core_Date::timestamp2sql($stat[9]);
 							$Wysiwyg_Filemanager_File->type = $filetype;
@@ -155,9 +154,38 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 									: number_format($stat['size'], 0, '.', ' ')
 								);
 							$Wysiwyg_Filemanager_File->mode = Core_File::getFilePerms($filePath, TRUE);
+							$Wysiwyg_Filemanager_File->owner = Core_File::getFileOwners($filePath);
 							$Wysiwyg_Filemanager_File->hash = sha1($Wysiwyg_Filemanager_File->name);
 
-							$this->_objects[$Wysiwyg_Filemanager_File->hash] = $Wysiwyg_Filemanager_File;
+							$bAdd = TRUE;
+							foreach ($this->_conditions as $condition)
+							{
+								foreach ($condition as $operator => $args)
+								{
+									if ($operator == 'where' && $args[0] == 'name')
+									{
+										$value = $Wysiwyg_Filemanager_File->{$args[0]};
+
+										if ($args[1] == 'LIKE')
+										{
+											if (strpos($args[2], '%') === FALSE && strpos($args[2], '_') === FALSE)
+											{
+												$value !== $args[2]
+													&& $bAdd = FALSE;
+											}
+											else
+											{
+												$pattern = preg_quote($args[2], '/');
+												$pattern = str_replace(array('%', '_'), array('.*?', '.'), $pattern);
+
+												!preg_match('/^' . $pattern . '$/', $value)
+													&& $bAdd = FALSE;
+											}
+										}
+									}
+								}
+							}
+							$bAdd && $this->_objects[$Wysiwyg_Filemanager_File->hash] = $Wysiwyg_Filemanager_File;
 						}
 					}
 				}

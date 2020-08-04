@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Event_Module extends Event_Module
 {
@@ -50,9 +50,9 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
 
-		Core_Session::close();
-
 		$oUser = Core_Auth::getCurrentUser();
+
+		Core_Session::close();
 
 		switch ($type)
 		{
@@ -98,36 +98,35 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 			case 3: // Добавление дела
 				if ($ajax)
 				{
-					$aJson = array();
-
 					$sEventName = Core_Array::getPost('event_name');
 
+					$aJson = array();
 					$aJson['event_name'] = $sEventName;
 
-					$oEvent = Core_Entity::factory('Event');
-					$oEvent->name = $sEventName;
-
-					// Тип дел по умолчанию
-					$oDefaultEventType = Core_Entity::factory('Event_Type')->getDefault();
-
-					if (!is_null($oDefaultEventType))
+					if (!$oUser->read_only)
 					{
-						$oEvent->event_type_id = $oDefaultEventType->id;
+						$oEvent = Core_Entity::factory('Event');
+						$oEvent->name = $sEventName;
+
+						// Тип дел по умолчанию
+						$oDefaultEventType = Core_Entity::factory('Event_Type')->getDefault();
+
+						if (!is_null($oDefaultEventType))
+						{
+							$oEvent->event_type_id = $oDefaultEventType->id;
+						}
+
+						$iCurrentTimestamp = time();
+						$oEvent->datetime = Core_Date::timestamp2sql($iCurrentTimestamp);
+						$oEvent->start = Core_Date::timestamp2sql($iCurrentTimestamp);
+						$oEvent->save();
+
+						$oEventUser = Core_Entity::factory('Event_User')
+							->user_id($oUser->id)
+							->creator(1);
+
+						$oEvent->add($oEventUser);
 					}
-
-					$iCurrentTimestamp = time();
-
-					$oEvent->datetime = Core_Date::timestamp2sql($iCurrentTimestamp);
-					$oEvent->start = Core_Date::timestamp2sql($iCurrentTimestamp);
-					$oEvent->save();
-
-					$oUser = Core_Auth::getCurrentUser();
-
-					$oEventUser = Core_Entity::factory('Event_User')
-						->user_id($oUser->id)
-						->creator(1);
-
-					$oEvent->add($oEventUser);
 
 					Core::showJson($aJson);
 				}
@@ -137,15 +136,12 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 				$iRequestUserId = intval(Core_Array::getPost('currentUserId'));
 
-				if (!is_null($oUser) && $oUser->id == $iRequestUserId)
+				if (!is_null($oUser) && $oUser->id == $iRequestUserId && !$oUser->read_only)
 				{
 					$aJson['userId'] = $oUser->id;
 					$aJson['newEvents'] = array();
 
-					$dateTime = date('Y-m-d');
-
 					$aEvents = $oUser->Events->getToday(FALSE);
-
 					foreach ($aEvents as $oEvent)
 					{
 						$aEvent = array(
@@ -191,6 +187,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 	{
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 
+		$oUser = Core_Auth::getCurrentUser();
 		?>
 		<div class="widget events">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
@@ -203,10 +200,15 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 					<a data-toggle="upload" data-module-id="<?php echo $oModule->id?>">
 						<i class="fa fa-refresh gray"></i>
 					</a>
-					<a href="#" data-toggle="toggle-actions">
-						<i class="fa fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
-						<i class="fa fa-search darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
-					</a>
+					<?php
+					if (!$oUser->read_only)
+					{
+						?><a href="#" data-toggle="toggle-actions">
+							<i class="fa fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
+							<i class="fa fa-search darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
+						</a><?php
+					}
+					?>
 				</div>
 			</div><!--Widget Header-->
 
@@ -217,18 +219,22 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 							<input type="text" class="form-control" placeholder="<?php echo Core::_('Event.placeholderSearch');?>">
 							<i class="fa fa-search gray"></i>
 						</span>
-
-						<span class="add-event hidden">
-							<form>
-								<div class="input-group input-icon">
-									<input type="text" name="event_name" class="form-control" placeholder="<?php echo Core::_('Event.placeholderEventName');?>">
-									<i class="fa fa-plus gray"></i>
-									<span id="sendForm" class="input-group-addon bg-azure bordered-azure" onclick="$(this).parents('form').submit()">
-										<i class="fa fa-check no-margin"></i>
-									</span>
-								</div>
-							</form>
-						</span>
+						<?php
+						if (!$oUser->read_only)
+						{
+							?><span class="add-event hidden">
+								<form>
+									<div class="input-group input-icon">
+										<input type="text" name="event_name" class="form-control" placeholder="<?php echo Core::_('Event.placeholderEventName');?>">
+										<i class="fa fa-plus gray"></i>
+										<span id="sendForm" class="input-group-addon bg-azure bordered-azure" onclick="$(this).parents('form').submit()">
+											<i class="fa fa-check no-margin"></i>
+										</span>
+									</div>
+								</form>
+							</span><?php
+						}
+						?>
 					</div>
 					<div class="tasks-list-container">
 						<ul class="tasks-list">
@@ -244,8 +250,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 							->orderBy('important', 'DESC')
 							->limit(15);
 
-						$aEvents = $oEvents->findAll();
-
+						$aEvents = $oEvents->findAll(FALSE);
 						?>
 						<li id="event-0" class="task-item empty-item gray<?php echo count($aEvents) ? ' hidden' : '' ?>">
 							<?php echo Core::_('Event.widget_empty') ?>
@@ -254,6 +259,24 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 
 						if (count($aEvents))
 						{
+							// Список статусов дел
+							$aEventStatuses = Core_Entity::factory('Event_Status')->findAll();
+
+							$aMasEventStatuses = array(
+								array(
+									'value' => Core::_('Event.notStatus'),
+									'color' => '#aebec4'
+								)
+							);
+
+							foreach ($aEventStatuses as $oEventStatus)
+							{
+								$aMasEventStatuses[$oEventStatus->id] = array(
+									'value' => $oEventStatus->name,
+									'color' => $oEventStatus->color
+								);
+							}
+
 							// Список статусов дел
 							$aEvent_Statuses = Core_Entity::factory('Event_Status', 0)->findAll();
 
@@ -274,23 +297,6 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 										if ($oEvent->deadline())
 										{
 											?><div class="btn-group"><i class="fa fa-exclamation-circle red margin-right-10"></i></div><?php
-										}
-										// Список статусов дел
-										$aEventStatuses = Core_Entity::factory('Event_Status')->findAll();
-
-										$aMasEventStatuses = array(
-											array(
-												'value' => Core::_('Event.notStatus'),
-												'color' => '#aebec4'
-											)
-										);
-
-										foreach ($aEventStatuses as $oEventStatus)
-										{
-											$aMasEventStatuses[$oEventStatus->id] = array(
-												'value' => $oEventStatus->name,
-												'color' => $oEventStatus->color
-											);
 										}
 
 										$iAdmin_Form_Id = 220;

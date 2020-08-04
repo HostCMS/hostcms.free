@@ -179,4 +179,10 @@ return array(
 	'filter' => 'Швидкий фільтр',
 	'set_price_recount_sets' => 'Установка цін при перерахунку комплекту',
 	'max_bonus' => '<acronym title="Скільки максимум відсотків від суми чека може бути оплачено бонусами">Списувати бонус, %</acronym>',
+	'filter_header' => 'Фільтр',
+	'filter_mode' => 'Режим URL',
+	'filter_mode0' => 'Назва',
+	'filter_mode1' => 'Шлях',
+	'mail_header' => 'Листи',
+	'shop_codetype_id' => 'Маркування за замовчуванням',
 );

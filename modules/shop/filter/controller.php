@@ -14,10 +14,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Shop_Filter_Controller
 {
 	/**
-	 * Shop order object
 	 * @var Shop_Model
 	 */
 	protected $_oShop = NULL;
+
+	/**
+	 * @var Shop_Item_Controller
+	 */
+	protected $_oShop_Item_Controller = NULL;
 
 	/**
 	 * Constructor.
@@ -26,6 +30,8 @@ class Shop_Filter_Controller
 	public function __construct(Shop_Model $oShop)
 	{
 		$this->_oShop = $oShop;
+
+		$this->_oShop_Item_Controller = new Shop_Item_Controller();
 	}
 
 	/**
@@ -268,88 +274,96 @@ class Shop_Filter_Controller
 			->where('shop_item_id', '=', $oShop_Item->id)
 			->execute();
 
-		$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
-
-		$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oDefaultCurrency->id > 0
-			? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
-				$oShop_Item->Shop_Currency, $oDefaultCurrency
-			)
-			: 0;
-
-		// warehouse rest
-		$available = $oShop_Item->getRest() > 0 ? 1 : 0;
-
-		// prices
-		$aPrices = $oShop_Item->getPrices();
-
-		$shop_group_id = $oShop_Item->modification_id
-			? $oShop_Item->Modification->shop_group_id
-			: $oShop_Item->shop_group_id;
-
-		$aBaseInserts = array(
-			$oShop_Item->id,
-			$oShop_Item->modification_id,
-			$shop_group_id,
-			$oShop_Item->shop_producer_id,
-			$oShop_Item->shop_currency_id,
-			$aPrices['price_discount'],
-			$aPrices['price_discount'] * $fCurrencyCoefficient, // price_absolute
-			$available
-		);
-
-		$aPropertyIds = $this->_getPropertyIDs();
-
-		// Collect values by property_id
-		$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
-		$aTmp = array();
-		foreach ($aProperty_Values as $oProperty_Value)
+		if ($oShop_Item->active)
 		{
-			$oProperty = $oProperty_Value->Property;
+			$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
 
-			if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
+			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oDefaultCurrency->id > 0
+				? Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+					$oShop_Item->Shop_Currency, $oDefaultCurrency
+				)
+				: 0;
+
+			// warehouse rest
+			$available = $oShop_Item->getRest() > 0 ? 1 : 0;
+
+			// prices
+			// $aPrices = $oShop_Item->getPrices();
+			$aPrices = $this->_oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
+
+			$shop_group_id = $oShop_Item->modification_id
+				? $oShop_Item->Modification->shop_group_id
+				: $oShop_Item->shop_group_id;
+
+			$aBaseInserts = array(
+				$oShop_Item->id,
+				$oShop_Item->modification_id,
+				$shop_group_id,
+				$oShop_Item->shop_producer_id,
+				$oShop_Item->shop_currency_id,
+				$aPrices['price_discount'],
+				$aPrices['price_discount'] * $fCurrencyCoefficient, // price_absolute
+				$available
+			);
+
+			$aPropertyIds = $this->_getPropertyIDs();
+
+			// Collect values by property_id
+			$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
+			$aTmp = array();
+			foreach ($aProperty_Values as $oProperty_Value)
 			{
-				if (isset($aPropertyIds[$oProperty->id]))
+				$oProperty = $oProperty_Value->Property;
+
+				if (in_array($oProperty->type, $this->_aAvailablePropertyTypes))
 				{
-					$aTmp[$oProperty->id][] = $oProperty_Value->value;
+					if (isset($aPropertyIds[$oProperty->id]))
+					{
+						// Свойство множественное или ранее для этого единичного значения не было значения
+						if ($oProperty->multiple || !isset($aTmp[$oProperty->id]))
+						{
+							$aTmp[$oProperty->id][] = $oProperty_Value->value;
+						}
+					}
 				}
 			}
-		}
 
-		$aPV = array();
-		foreach ($aPropertyIds as $property_id)
-		{
-			$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
-		}
-
-		// get all posible combinations
-		$aCombinations = count($aPV) > 1 ? $this->_combinations($aPV) : $aPV;
-
-		$oCore_DataBase = Core_DataBase::instance();
-
-		$aInserts = array();
-
-		if (count($aCombinations))
-		{
-			foreach ($aCombinations as $aCombination)
+			$aPV = array();
+			foreach ($aPropertyIds as $property_id)
 			{
-				$aValues = array_merge($aBaseInserts, $aCombination);
-				$aValues = array_map(array($oCore_DataBase, 'quote'), $aValues);
+				$aPV[] = isset($aTmp[$property_id]) ? $aTmp[$property_id] : array($this->_getDefaultValue($property_id));
+			}
 
+			// get all posible combinations
+			$aCombinations = count($aPV) > 1 ? $this->_combinations($aPV) : $aPV;
+
+			$oCore_DataBase = Core_DataBase::instance();
+
+			$aInserts = array();
+
+			if (count($aCombinations))
+			{
+				foreach ($aCombinations as $aCombination)
+				{
+					$aValues = array_merge($aBaseInserts, $aCombination);
+					$aValues = array_map(array($oCore_DataBase, 'quote'), $aValues);
+
+					$aInserts[] = '(' . implode(', ', $aValues) . ')';
+				}
+			}
+			else
+			{
+				$aValues = array_map(array($oCore_DataBase, 'quote'), $aBaseInserts);
 				$aInserts[] = '(' . implode(', ', $aValues) . ')';
 			}
+
+			$aTableColumnNames = $this->_getTableColumns();
+			$sTableColumnNames = implode(',', $aTableColumnNames);
+
+			$query = "INSERT INTO `{$tableName}` ({$sTableColumnNames}) VALUES " . implode(",\n", $aInserts);
+
+			$oCore_DataBase->query($query);
 		}
-		else
-		{
-			$aValues = array_map(array($oCore_DataBase, 'quote'), $aBaseInserts);
-			$aInserts[] = '(' . implode(', ', $aValues) . ')';
-		}
-
-		$aTableColumnNames = $this->_getTableColumns();
-		$sTableColumnNames = implode(',', $aTableColumnNames);
-
-		$query = "INSERT INTO `{$tableName}` ({$sTableColumnNames}) VALUES " . implode(",\n", $aInserts);
-
-		$oCore_DataBase->query($query);
 	}
 
 	/**

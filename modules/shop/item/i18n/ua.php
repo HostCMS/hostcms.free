@@ -334,4 +334,11 @@ return array(
 	'delete_property_values' => 'Видаляти існуючі значення додаткових властивостей',
 	'continue_import' => "Якщо Ваш браузер не підтримує автоматичне перенаправлення - натисніть <b><a href=\"%s\" onclick=\"%s\">тут</a></b>",
 	'seo_filter' => 'SEO-фильтр',
+	'apply_to' => 'Застосувати до ціни',
+	'warehouse_name' => 'Назва',
+	'warehouse_quantity' => 'Кількість',
+	'warehouse_cell' => 'Осередок',
+	'warehouse_measure' => 'Од. вим.',
+	'shop_price_setting_modification_create' => 'Установка цін модифікацій товару "%s"',
+	'create_modification_delimiter' => 'Роздільник',
 );

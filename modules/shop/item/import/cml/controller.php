@@ -137,6 +137,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	 */
 	protected $_aConfig = NULL;
 
+	protected $_tmpPath = NULL;
+
 	/**
 	 * Constructor.
 	 * @param string $sXMLFilePath file path
@@ -178,7 +180,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$this->itemSearchFields = array('cml_id', 'marking', 'barcode');
 
-		Core_File::mkdir(CMS_FOLDER . TMP_DIR . '1c_exchange_files');
+		$this->_tmpPath = CMS_FOLDER . TMP_DIR . '1c_exchange_files/' . 'month-' . date('n') . '/';
+
+		Core_File::mkdir($this->_tmpPath, CHMOD, TRUE);
 	}
 
 	/**
@@ -195,54 +199,64 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		{
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportShopGroup', $this, array($oXMLGroupNode));
 
-			$oShopGroup = Core_Entity::factory('Shop', $this->iShopId)
+			$oShop_Group = Core_Entity::factory('Shop', $this->iShopId)
 				->Shop_Groups
 				->getByGuid(strval($oXMLGroupNode->Ид), FALSE);
 
-			$this->_bNewShopGroup = is_null($oShopGroup);
+			$this->_bNewShopGroup = is_null($oShop_Group);
 
 			$this->_bNewShopGroup
-				&& $oShopGroup = Core_Entity::factory('Shop_Group');
+				&& $oShop_Group = Core_Entity::factory('Shop_Group');
 
-			$this->_checkUpdateGroupField('name') && $oShopGroup->name = strval($oXMLGroupNode->Наименование);
+			$this->_checkUpdateGroupField('name') && $oShop_Group->name = strval($oXMLGroupNode->Наименование);
 
-			$oShopGroup->guid = strval($oXMLGroupNode->Ид);
+			$oShop_Group->guid = strval($oXMLGroupNode->Ид);
 
 			$this->_checkUpdateGroupField('description') && count($aDescriptionArray = $this->xpath($oXMLGroupNode, 'Описание'))
-				&& $oShopGroup->description = strval($aDescriptionArray[0]);
+				&& $oShop_Group->description = strval($aDescriptionArray[0]);
 
-			$this->_checkUpdateGroupField('parent_id') && $oShopGroup->parent_id = $iParentId;
+			$this->_checkUpdateGroupField('parent_id') && $oShop_Group->parent_id = $iParentId;
 
-			$oShopGroup->shop_id = $this->iShopId;
+			$oShop_Group->shop_id = $this->iShopId;
 
-			is_null($oShopGroup->id)
+			$bNewGroup = is_null($oShop_Group->id);
+
+			$bNewGroup
 				? $this->_aReturn['insertDirCount']++
 				: $this->_aReturn['updateDirCount']++;
 
-			is_null($oShopGroup->path) && $oShopGroup->path= '';
+			is_null($oShop_Group->path) && $oShop_Group->path= '';
 
-			$oShopGroup->save()->clearCache();
+			$oShop_Group->save()->clearCache();
 
 			// Indexation
 			$this->searchIndexation
-				&& $oShopGroup->index();
+				&& $oShop_Group->index();
 
-			// Указание Картинка для группы не соответсвует формату обмена CML!
+			if ($bNewGroup)
+			{
+				$oParent_Group = $oShop_Group->getParent();
+
+				$oParent_Group
+					&& $oParent_Group->incCountGroups();
+			}
+
+			// Указание "Картинка" для группы не соответствует формату обмена CML!
 			$PictureData = strval($oXMLGroupNode->Картинка);
 
 			if (strlen($PictureData)
 				&& Core_File::isValidExtension($PictureData, Core::$mainConfig['availableExtension']))
 			{
 				// Папка назначения
-				$sDestinationFolder = $oShopGroup->getGroupPath();
+				$sDestinationFolder = $oShop_Group->getGroupPath();
 
 				// Создаем папку назначения
-				$oShopGroup->createDir();
+				$oShop_Group->createDir();
 
 				$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($PictureData, '/\\');
 				$sSourceFileBaseName = basename($sSourceFile, '');
 
-				$oShop = $oShopGroup->Shop;
+				$oShop = $oShop_Group->Shop;
 
 				if (!$oShop->change_filename)
 				{
@@ -257,7 +271,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$sTargetFileExtension = ".{$sTargetFileExtension}";
 					}
 
-					$sTargetFileName = "shop_group_image{$oShopGroup->id}{$sTargetFileExtension}";
+					$sTargetFileName = "shop_group_image{$oShop_Group->id}{$sTargetFileExtension}";
 				}
 
 				// Создаем массив параметров для загрузки картинок элементу
@@ -286,20 +300,20 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				$aPicturesParam['large_image_watermark'] = $oShop->watermark_default_use_large_image;
 
 				// Удаляем старое большое изображение
-				if ($oShopGroup->image_large)
+				if ($oShop_Group->image_large)
 				{
 					try
 					{
-						Core_File::delete($oShopGroup->getLargeFilePath());
+						Core_File::delete($oShop_Group->getLargeFilePath());
 					} catch (Exception $e) {}
 				}
 
 				// Удаляем старое малое изображение
-				if ($oShopGroup->image_small)
+				if ($oShop_Group->image_small)
 				{
 					try
 					{
-						Core_File::delete($oShopGroup->getSmallFilePath());
+						Core_File::delete($oShop_Group->getSmallFilePath());
 					} catch (Exception $e) {}
 				}
 
@@ -318,22 +332,22 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				if ($result['large_image'])
 				{
-					$oShopGroup->image_large = $sTargetFileName;
-					$oShopGroup->setLargeImageSizes();
+					$oShop_Group->image_large = $sTargetFileName;
+					$oShop_Group->setLargeImageSizes();
 				}
 
 				if ($result['small_image'])
 				{
-					$oShopGroup->image_small = "small_{$sTargetFileName}";
-					$oShopGroup->setSmallImageSizes();
+					$oShop_Group->image_small = "small_{$sTargetFileName}";
+					$oShop_Group->setSmallImageSizes();
 				}
-				$oShopGroup->save();
+				$oShop_Group->save();
 			}
 
 			// Дочерние группы
 			foreach ($this->xpath($oXMLGroupNode, 'Группы') as $oSubGroup)
 			{
-				$this->_importGroups($oSubGroup, $oShopGroup->id);
+				$this->_importGroups($oSubGroup, $oShop_Group->id);
 			}
 
 			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopGroup', $this, array($oXMLGroupNode));
@@ -448,8 +462,14 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		if (isset($this->_aPropertyValues[$oProperty->id])
 			// Значение меняем/устанавливаем только в случае явного наличия элемента в значениях справочника!
 			&& !isset($this->_aPropertyValues[$oProperty->id][$sValue])
+			// Но свойство не файл, так как для файлов 1С тоже указывает тип "Справочник"
+			&& $oProperty->type != 2
 		)
 		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('1С, свойство "%s" ожидается списочного типа, но справочник не заполнен!', $oProperty->name));
+
 			return $this;
 		}
 
@@ -466,7 +486,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			break;
 			// Файл
 			case 2:
-				$changedValue = NULL;
+				$changedValue = $value;
 			break;
 			// Список
 			case 3:
@@ -542,7 +562,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			{
 				foreach ($aPropertyValues as $oProperty_Value)
 				{
-					if ($oProperty_Value->value == $changedValue)
+					if ($oProperty->type == 2 && $oProperty_Value->file_name == basename($changedValue)
+						|| $oProperty->type != 2 && $oProperty_Value->value == $changedValue)
 					{
 						return $this;
 					}
@@ -557,13 +578,131 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					: $oProperty->createNewValue($oShopItem->id);
 			}
 
-			/*if ($oProperty->type == 7)
+			if ($oProperty->type == 2)
 			{
-				mb_strtoupper($value) == 'ДА' ? $value = 1 : $value = intval($value);
-			}*/
+				// Папка назначения
+				$sDestinationFolder = $oShopItem->getItemPath();
 
-			$oProperty_Value->setValue($changedValue);
-			$oProperty_Value->save();
+				// Файл-источник
+				$sSourceFile = Core_File::pathCorrection($changedValue);
+
+				$sSourceFileBaseName = basename($sSourceFile, '');
+
+				if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']))
+				{
+					// Создаем папку назначения
+					$oShopItem->createDir();
+
+					$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($sSourceFile, '/\\');
+
+					if (!$oShop->change_filename)
+					{
+						$sTargetFileName = $sSourceFileBaseName;
+					}
+					else
+					{
+						$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+						$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+							? '.jpg'
+							: ".{$sTargetFileExtension}";
+
+						$oProperty_Value->save();
+						$sTargetFileName = "shop_property_file_{$oShopItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
+						//$sTargetFileName = "shop_property_file_{$oShopItem->id}_{$oProperty->id}{$sTargetFileExtension}";
+					}
+
+					// Создаем массив параметров для загрузки картинок элементу
+					$aPicturesParam = array();
+					$aPicturesParam['large_image_isset'] = TRUE;
+					$aPicturesParam['large_image_source'] = $sSourceFile;
+					$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+					$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+					$aPicturesParam['watermark_file_path'] = $oShop->getWatermarkFilePath();
+					$aPicturesParam['watermark_position_x'] = $oShop->watermark_default_position_x;
+					$aPicturesParam['watermark_position_y'] = $oShop->watermark_default_position_y;
+					$aPicturesParam['large_image_preserve_aspect_ratio'] = $oShop->preserve_aspect_ratio;
+					//$aPicturesParam['large_image_max_width'] = $oShop->image_large_max_width;
+					$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
+					//$aPicturesParam['large_image_max_height'] = $oShop->image_large_max_height;
+					$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
+					$aPicturesParam['large_image_watermark'] = $oShop->watermark_default_use_large_image;
+
+					// Малое изображение не передано
+					$aPicturesParam['create_small_image_from_large'] = TRUE;
+					$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+					$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+					$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+					$sSourceFileSmall = NULL;
+
+					$aPicturesParam['small_image_max_width'] = $oProperty->image_small_max_width;
+					$aPicturesParam['small_image_max_height'] = $oProperty->image_small_max_height;
+					$aPicturesParam['small_image_watermark'] = $oShop->watermark_default_use_small_image;
+					$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+					// Удаляем старое большое изображение
+					if ($oProperty_Value->file != '')
+					{
+						if ($sDestinationFolder . $oProperty_Value->file != $sSourceFile)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+							} catch (Exception $e) {}
+						}
+					}
+
+					// Удаляем старое малое изображение
+					if ($oProperty_Value->file_small != '')
+					{
+						if ($sDestinationFolder . $oProperty_Value->file_small != $sSourceFileSmall)
+						{
+							try
+							{
+								Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+							} catch (Exception $e) {}
+						}
+					}
+
+					try {
+						Core_Event::notify('Shop_Item_Import_Cml_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+						$aTmpReturn = Core_Event::getLastReturn();
+						is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+						$aResult = Core_File::adminUpload($aPicturesParam);
+					}
+					catch (Exception $e)
+					{
+						Core_Message::show($e->getMessage(), 'error');
+
+						$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+					}
+
+					if ($aResult['large_image'])
+					{
+						$oProperty_Value->file = $sTargetFileName;
+						$oProperty_Value->file_name = $sSourceFileBaseName;
+					}
+
+					if ($aResult['small_image'])
+					{
+						$oProperty_Value->file_small = "small_{$sTargetFileName}";
+						$oProperty_Value->file_small_name = '';
+					}
+
+					$oProperty_Value->save();
+				}
+				else
+				{
+					Core_Log::instance()->clear()
+						->status(Core_Log::$MESSAGE)
+						->write(sprintf('1С, запрещенное расширение файла "%s"!', $sSourceFile));
+				}
+			}
+			else
+			{
+				$oProperty_Value->setValue($changedValue);
+				$oProperty_Value->save();
+			}
 		}
 
 		return $this;
@@ -1095,9 +1234,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				$importPosition = Core_Array::getSession('importPosition', 0);
 				Core_Session::close();
 
-				$currentMonth = date('n');
-				$sTmpPath = CMS_FOLDER . TMP_DIR . '1c_exchange_files/' . 'month-' . $currentMonth . '/';
-
 				if (isset($this->_oSimpleXMLElement->Классификатор) && $importPosition == 0)
 				{
 					$classifier = $this->_oSimpleXMLElement->Классификатор;
@@ -1139,9 +1275,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$this->_importProperties($classifier);
 
 					// Сохраняем классификатор
-					$sJsonFilePath = $sTmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Классификатор->Ид) . '.json';
-
-					Core_File::mkdir($sTmpPath, CHMOD, TRUE);
+					$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Классификатор->Ид) . '.json';
 
 					Core_File::write($sJsonFilePath, json_encode(
 						array(
@@ -1153,7 +1287,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				// Классификатора не было, но указан его ИД
 				elseif (isset($this->_oSimpleXMLElement->Каталог->ИдКлассификатора))
 				{
-					$sJsonFilePath = $sTmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Каталог->ИдКлассификатора) . '.json';
+					$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Каталог->ИдКлассификатора) . '.json';
 
 					if (is_file($sJsonFilePath))
 					{
@@ -1195,7 +1329,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						&& $oShopItem = $oShop->Shop_Items->getByGuid($sGUID, FALSE);
 
 					// Search by Barcode
-					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strval($oXmlItem->Штрихкод))
+					if (is_null($oShopItem) && $bBarcodeItemSearchFields && strlen($oXmlItem->Штрихкод))
 					{
 						$oTmpItemsByBarcode = $oShop->Shop_Items;
 						$oTmpItemsByBarcode->queryBuilder()
@@ -1226,6 +1360,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 						// Создаем товар
 						$oShopItem = Core_Entity::factory('Shop_Item')->guid($sGUID);
+
 						// Минимально необходимы данные
 						$oShopItem->name = $sItemName;
 						$oShopItem->path = '';
@@ -1315,7 +1450,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 								? $oShopItem->shop_group_id = $oShop_Group->id
 								: $oShopItem->Modification->shop_group_id($oShop_Group->id)->save();
 
-							$this->_bNewShopItem && $oShop_Group->incCountItems();
+							// see Shop_Item_Model::save()
+							//$this->_bNewShopItem && $oShop_Group->incCountItems();
 						}
 						else
 						{
@@ -1412,53 +1548,32 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Обрабатываем описание товара
 					foreach ($this->xpath($oXmlItem, 'Описание') as $DescriptionData)
 					{
-						if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
+						if ($DescriptionData != '')
 						{
-							$oShopItem->text = nl2br(strval($DescriptionData));
+							if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
+							{
+								$oShopItem->text = nl2br(strval($DescriptionData));
+							}
+							elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
+							{
+								$oShopItem->description = nl2br(strval($DescriptionData));
+							}
+							$oShopItem->save();
 						}
-						elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
-						{
-							$oShopItem->description = nl2br(strval($DescriptionData));
-						}
-						$oShopItem->save();
 					}
 
-					// Обрабатываем "малое описание" товара. Данный тег не соответствует стандарту CommerceML!
+					// Обрабатываем "малое описание" товара. Данный тег не соответствует стандарту
 					foreach ($this->xpath($oXmlItem, $this->shortDescription) as $DescriptionData)
 					{
-						$oShopItem->description = nl2br(strval($DescriptionData));
-						$oShopItem->save();
+						if ($DescriptionData != '')
+						{
+							$oShopItem->description = nl2br(strval($DescriptionData));
+							$oShopItem->save();
+						}
 					}
 
 					// Картинки основного товара
 					$this->_checkUpdateField('images') && $this->importImages($oShopItem, $this->xpath($oXmlItem, 'Картинка'));
-
-					// До обработки свойств из 1С нужно записать значения "по умолчанию" для всех свойств, заданных данной группе товара
-					/*$aProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties;
-					$aProperties
-						->queryBuilder()
-						->join('shop_item_property_for_groups', 'shop_item_property_for_groups.shop_item_property_id', '=', 'shop_item_properties.id')
-						->where('shop_item_property_for_groups.shop_id', '=', $oShop->id)
-						->where('shop_item_property_for_groups.shop_group_id', '=', $oShopItem->Shop_Group->id);
-
-					$aProperties = $aProperties->findAll(FALSE);
-
-					foreach ($aProperties as $oProperty)
-					{
-						if ($oProperty->type == 2)
-						{
-							continue;
-						}
-
-						$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
-
-						if (count($aPropertyValues) == 0)
-						{
-							$oProperty_Value = $oProperty->createNewValue($oShopItem->id);
-							$oProperty_Value->setValue($oProperty->default_value);
-							$oProperty_Value->save();
-						}
-					}*/
 
 					// Добавляем значения для общих свойств всех товаров
 					foreach ($this->xpath($oXmlItem, 'ЗначенияСвойств/ЗначенияСвойства') as $ItemPropertyValue)
@@ -1771,12 +1886,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											}
 										}
 
-										$oShop_Price_Setting = $this->getPrices();
-
-										$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-										$oShop_Price_Setting_Item->shop_price_id = $oShopPrice->id;
-										$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
-
 										$oShop_Item_Price = $oShopItem
 											->Shop_Item_Prices
 											->getByPriceId($oShopPrice->id, FALSE);
@@ -1785,19 +1894,27 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											? $oShop_Item_Price->value
 											: $oShopItem->price;
 
-										$oShop_Price_Setting_Item->old_price = $old_price;
-										$oShop_Price_Setting_Item->new_price = $itemPrice;
-										$oShop_Price_Setting->add($oShop_Price_Setting_Item);
-
-										/*if (is_null($oShop_Item_Price))
+										if ($old_price != $itemPrice)
 										{
-											$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
-											$oShop_Item_Price->shop_item_id = $oShopItem->id;
-											$oShop_Item_Price->shop_price_id = $oShopPrice->id;
-										}
-										$oShop_Item_Price->value = $itemPrice;
+											$oShop_Price_Setting = $this->getPrices();
 
-										$oShopItem->add($oShop_Item_Price);*/
+											$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+											$oShop_Price_Setting_Item->shop_price_id = $oShopPrice->id;
+											$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+											$oShop_Price_Setting_Item->old_price = $old_price;
+											$oShop_Price_Setting_Item->new_price = $itemPrice;
+											$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+											/*if (is_null($oShop_Item_Price))
+											{
+												$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
+												$oShop_Item_Price->shop_item_id = $oShopItem->id;
+												$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+											}
+											$oShop_Item_Price->value = $itemPrice;
+
+											$oShopItem->add($oShop_Item_Price);*/
+										}
 									}
 									elseif ($this->sShopDefaultPriceGUID == strval($oPrice->ИдТипаЦены))
 									{
@@ -1828,16 +1945,21 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											$oShop_Currency->exchange_rate = 1;
 										}
 
-										$oShop_Price_Setting = $this->getPrices();
+										$newPrice = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
 
-										$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-										$oShop_Price_Setting_Item->shop_price_id = 0;
-										$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
-										$oShop_Price_Setting_Item->old_price = $oShopItem->price;
-										$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
-										$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+										if ($newPrice != $oShopItem->price)
+										{
+											$oShop_Price_Setting = $this->getPrices();
 
-										// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
+											$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+											$oShop_Price_Setting_Item->shop_price_id = 0;
+											$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+											$oShop_Price_Setting_Item->old_price = $oShopItem->price;
+											$oShop_Price_Setting_Item->new_price = $newPrice;
+											$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+											// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oPrice->ЦенаЗаЕдиницу));
+										}
 
 										// Set ->shop_currency_id
 										$oShopItem->add($oShop_Currency);
@@ -1883,12 +2005,21 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 									if (!is_null($oShopWarehouse))
 									{
-										$oShop_Warehouse_Inventory = $this->getInventory($oShopWarehouse->id);
+										//$rest = $oShopWarehouse->getRest($oShopItem->id);
+										$oShop_Warehouse_Items = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id, FALSE);
+										$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
 
-										$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-										$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
-										$oShop_Warehouse_Inventory_Item->count = floatval($sWarehouseCount);
-										$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+										$newRest = floatval($sWarehouseCount);
+
+										if (is_null($rest) || $rest != $newRest)
+										{
+											$oShop_Warehouse_Inventory = $this->getInventory($oShopWarehouse->id);
+
+											$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+											$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+											$oShop_Warehouse_Inventory_Item->count = $newRest;
+											$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+										}
 									}
 								}
 							}
@@ -1917,22 +2048,28 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 									$oWarehouse->save();
 								}
 
-								$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
+								$rest = $oWarehouse->getRest($oShopItem->id);
+								$newRest = floatval($iItemCount);
 
-								$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-								$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
-								$oShop_Warehouse_Inventory_Item->count = floatval($iItemCount);
-								$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
-
-								/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
-								if (is_null($oShop_Warehouse_Item))
+								if (is_null($rest) || $rest != $newRest)
 								{
-									$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
-										->shop_warehouse_id($oWarehouse->id)
-										->shop_item_id($oShopItem->id);
-								}
+									$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
 
-								$oShop_Warehouse_Item->count(floatval($iItemCount))->save();*/
+									$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+									$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+									$oShop_Warehouse_Inventory_Item->count = $newRest;
+									$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+									/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+									if (is_null($oShop_Warehouse_Item))
+									{
+										$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
+											->shop_warehouse_id($oWarehouse->id)
+											->shop_item_id($oShopItem->id);
+									}
+
+									$oShop_Warehouse_Item->count(floatval($iItemCount))->save();*/
+								}
 							}
 						}
 
@@ -1960,11 +2097,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			foreach ($this->xpath($catalog, 'Свойство') as $oXmlProperty)
 			{
 				$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
-				$oShopProperty = $oShop_Item_Property_List
+				$oProperty = $oShop_Item_Property_List
 					->Properties
 					->getByGuid(strval($oXmlProperty->attributes()->Идентификатор), FALSE);
 
-				if (is_null($oShopProperty))
+				if (is_null($oProperty))
 				{
 					$oProperty = Core_Entity::factory('Property');
 					$oProperty->name = strval($oXmlProperty->attributes()->Наименование);
@@ -2058,32 +2195,162 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				foreach ($this->xpath($oXmlItem, 'ЗначениеСвойства') as $oXmlPropertyValue)
 				{
 					$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
-					$oShopProperty = $oShop_Item_Property_List
+					$oProperty = $oShop_Item_Property_List
 						->Properties
 						->getByGuid(strval($oXmlPropertyValue->attributes()->ИдентификаторСвойства), FALSE);
 
-					if (!is_null($oShopProperty) && $oShopProperty->type != 2 && $oShopProperty->type != 3)
+					if (!is_null($oProperty) /*&& $oProperty->type != 2*/ && $oProperty->type != 3)
 					{
+						$sValue = strval($oXmlPropertyValue->attributes()->Значение);
+
 						if (is_null(Core_Entity::factory('Shop', $this->iShopId)
 							->Shop_Item_Property_For_Groups
-							->getByShopItemPropertyIdAndGroupId($oShopProperty->Shop_Item_Property->id, $oShopItem->shop_group_id)))
+							->getByShopItemPropertyIdAndGroupId($oProperty->Shop_Item_Property->id, $oShopItem->shop_group_id)))
 						{
 							Core_Entity::factory('Shop_Item_Property_For_Group')
 								->shop_group_id($oShopItem->shop_group_id)
-								->shop_item_property_id($oShopProperty->Shop_Item_Property->id)
+								->shop_item_property_id($oProperty->Shop_Item_Property->id)
 								->shop_id($this->iShopId)
 								->save();
 						}
 
-						$aPropertyValues = $oShopProperty->getValues($oShopItem->id, FALSE);
+						$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
 
-						$oProperty_Value = isset($aPropertyValues[0])
-							? $aPropertyValues[0]
-							: $oShopProperty->createNewValue($oShopItem->id);
+						// File
+						if ($oProperty->type == 2)
+						{
+							/*if ($oProperty->multiple)
+							{
+								$oProperty_Value = $oProperty->createNewValue($oShopItem->id);
+							}
+							else
+							{*/
+							$oProperty_Value = isset($aPropertyValues[0])
+								? $aPropertyValues[0]
+								: $oProperty->createNewValue($oShopItem->id);
+							//}
 
-						$sValue = strval($oXmlPropertyValue->attributes()->Значение);
-						$oProperty_Value->setValue($sValue);
-						$oProperty_Value->save();
+							// Папка назначения
+							$sDestinationFolder = $oShopItem->getItemPath();
+
+							// Файл-источник
+							$sSourceFile = Core_File::pathCorrection($sValue);
+
+							$sSourceFileBaseName = basename($sSourceFile, '');
+
+							if (Core_File::isValidExtension($sSourceFile, Core::$mainConfig['availableExtension']))
+							{
+								// Создаем папку назначения
+								$oShopItem->createDir();
+
+								$sSourceFile = CMS_FOLDER . $this->sPicturesPath . ltrim($sSourceFile, '/\\');
+
+								if (!$oShop->change_filename)
+								{
+									$sTargetFileName = $sSourceFileBaseName;
+								}
+								else
+								{
+									$sTargetFileExtension = Core_File::getExtension($sSourceFileBaseName);
+									$sTargetFileExtension = $sTargetFileExtension == '' || strlen($sTargetFileExtension) > 5
+										? '.jpg'
+										: ".{$sTargetFileExtension}";
+
+									$oProperty_Value->save();
+									$sTargetFileName = "shop_property_file_{$oShopItem->id}_{$oProperty_Value->id}{$sTargetFileExtension}";
+									//$sTargetFileName = "shop_property_file_{$oShopItem->id}_{$oProperty->id}{$sTargetFileExtension}";
+								}
+
+								// Создаем массив параметров для загрузки картинок элементу
+								$aPicturesParam = array();
+								$aPicturesParam['large_image_isset'] = TRUE;
+								$aPicturesParam['large_image_source'] = $sSourceFile;
+								$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
+								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
+								$aPicturesParam['watermark_file_path'] = $oShop->getWatermarkFilePath();
+								$aPicturesParam['watermark_position_x'] = $oShop->watermark_default_position_x;
+								$aPicturesParam['watermark_position_y'] = $oShop->watermark_default_position_y;
+								$aPicturesParam['large_image_preserve_aspect_ratio'] = $oShop->preserve_aspect_ratio;
+								//$aPicturesParam['large_image_max_width'] = $oShop->image_large_max_width;
+								$aPicturesParam['large_image_max_width'] = $oProperty->image_large_max_width;
+								//$aPicturesParam['large_image_max_height'] = $oShop->image_large_max_height;
+								$aPicturesParam['large_image_max_height'] = $oProperty->image_large_max_height;
+								$aPicturesParam['large_image_watermark'] = $oShop->watermark_default_use_large_image;
+
+								// Малое изображение не передано
+								$aPicturesParam['create_small_image_from_large'] = TRUE;
+								$aPicturesParam['small_image_source'] = $aPicturesParam['large_image_source'];
+								$aPicturesParam['small_image_name'] = $aPicturesParam['large_image_name'];
+								$aPicturesParam['small_image_target'] = $sDestinationFolder . "small_{$sTargetFileName}";
+
+								$sSourceFileSmall = NULL;
+
+								$aPicturesParam['small_image_max_width'] = $oProperty->image_small_max_width;
+								$aPicturesParam['small_image_max_height'] = $oProperty->image_small_max_height;
+								$aPicturesParam['small_image_watermark'] = $oShop->watermark_default_use_small_image;
+								$aPicturesParam['small_image_preserve_aspect_ratio'] = $aPicturesParam['large_image_preserve_aspect_ratio'];
+
+								// Удаляем старое большое изображение
+								if ($oProperty_Value->file != '')
+								{
+									if ($sDestinationFolder . $oProperty_Value->file != $sSourceFile)
+									{
+										try
+										{
+											Core_File::delete($sDestinationFolder . $oProperty_Value->file);
+										} catch (Exception $e) {}
+									}
+								}
+
+								// Удаляем старое малое изображение
+								if ($oProperty_Value->file_small != '')
+								{
+									if ($sDestinationFolder . $oProperty_Value->file_small != $sSourceFileSmall)
+									{
+										try
+										{
+											Core_File::delete($sDestinationFolder . $oProperty_Value->file_small);
+										} catch (Exception $e) {}
+									}
+								}
+
+								try {
+									Core_Event::notify('Shop_Item_Import_Cml_Controller.oBeforeAdminUpload', $this, array($aPicturesParam));
+									$aTmpReturn = Core_Event::getLastReturn();
+									is_array($aTmpReturn) && $aPicturesParam = $aTmpReturn;
+									$aResult = Core_File::adminUpload($aPicturesParam);
+								}
+								catch (Exception $e)
+								{
+									Core_Message::show($e->getMessage(), 'error');
+
+									$aResult = array('large_image' => FALSE, 'small_image' => FALSE);
+								}
+
+								if ($aResult['large_image'])
+								{
+									$oProperty_Value->file = $sTargetFileName;
+									$oProperty_Value->file_name = '';
+								}
+
+								if ($aResult['small_image'])
+								{
+									$oProperty_Value->file_small = "small_{$sTargetFileName}";
+									$oProperty_Value->file_small_name = '';
+								}
+
+								$oProperty_Value->save();
+							}
+						}
+						else
+						{
+							$oProperty_Value = isset($aPropertyValues[0])
+								? $aPropertyValues[0]
+								: $oProperty->createNewValue($oShopItem->id);
+
+							$oProperty_Value->setValue($sValue);
+							$oProperty_Value->save();
+						}
 					}
 				}
 			}
@@ -2097,16 +2364,20 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				if (!is_null($oShopItem))
 				{
-					$oShop_Price_Setting = $this->getPrices();
+					$newPrice = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
+					if ($oShopItem->price != $newPrice)
+					{
+						$oShop_Price_Setting = $this->getPrices();
 
-					$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-					$oShop_Price_Setting_Item->shop_price_id = 0;
-					$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
-					$oShop_Price_Setting_Item->old_price = $oShopItem->price;
-					$oShop_Price_Setting_Item->new_price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
-					$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+						$oShop_Price_Setting_Item->shop_price_id = 0;
+						$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
+						$oShop_Price_Setting_Item->old_price = $oShopItem->price;
+						$oShop_Price_Setting_Item->new_price = $newPrice;
+						$oShop_Price_Setting->add($oShop_Price_Setting_Item);
 
-					// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
+						// $oShopItem->price = Shop_Controller::instance()->convertPrice(strval($oXmlOffer->attributes()->Цена));
+					}
 
 					if (!is_null($oShop_Currency = Core_Entity::factory('Shop_Currency')->getByLike(strval($oXmlOffer->attributes()->Валюта), FALSE)))
 					{
@@ -2117,21 +2388,27 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault(1, FALSE);
 					if (!is_null($oWarehouse))
 					{
-						$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
+						$rest = $oWarehouse->getRest($oShopItem->id);
+						$newRest = strval($oXmlOffer->attributes()->Количество);
 
-						$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-						$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
-						$oShop_Warehouse_Inventory_Item->count = strval($oXmlOffer->attributes()->Количество);
-						$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
-
-						/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
-						if (is_null($oShop_Warehouse_Item))
+						if (is_null($rest) || $rest != $newRest)
 						{
-							$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
-								->shop_warehouse_id($oWarehouse->id)
-								->shop_item_id($oShopItem->id);
+							$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
+
+							$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+							$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+							$oShop_Warehouse_Inventory_Item->count = $newRest;
+							$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+							/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+							if (is_null($oShop_Warehouse_Item))
+							{
+								$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
+									->shop_warehouse_id($oWarehouse->id)
+									->shop_item_id($oShopItem->id);
+							}
+							$oShop_Warehouse_Item->count(strval($oXmlOffer->attributes()->Количество))->save();*/
 						}
-						$oShop_Warehouse_Item->count(strval($oXmlOffer->attributes()->Количество))->save();*/
 					}
 				}
 			}

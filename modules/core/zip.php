@@ -9,11 +9,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip
 {
-	protected $_ZipArchive = NULL;
+	protected $_Zip = NULL;
 
 	protected $_excludeDir = array();
 
@@ -23,7 +23,28 @@ class Core_Zip
 	 */
 	static public function available()
 	{
-		return class_exists('ZipArchive');
+		return TRUE;
+	}
+
+	/**
+	 * Get Zip Class Name
+	 * @return boolean
+	 */
+	static public function getZipClassName()
+	{
+		return class_exists('ZipArchive')
+			? 'ZipArchive'
+			: 'Core_Zip_Pclzip';
+	}
+
+	/**
+	 * Get Zip Class
+	 * @return boolean
+	 */
+	static public function getZipClass()
+	{
+		$name = self::getZipClassName();
+		return new $name();
 	}
 
 	protected $_iFiles = 0;
@@ -50,21 +71,21 @@ class Core_Zip
 				{
 					if (is_readable($filePath))
 					{
-						$this->_ZipArchive->addFile($filePath, $localPath);
+						$this->_Zip->addFile($filePath, $localPath);
 						$this->_iFiles++;
 
 						if ($this->_iFiles == 2048)
 						{
 							// Reopen
-							if ($this->_ZipArchive->close())
+							if ($this->_Zip->close())
 							{
-								$result = $this->_ZipArchive->open($this->_outputPath);
-								
+								$result = $this->_Zip->open($this->_outputPath);
+
 								if ($result !== TRUE)
 								{
 									throw new Core_Exception('ZipArchive re-open error, code: %code', array('%code' => $result));
 								}
-								
+
 								$this->_iFiles = 0;
 							}
 							else
@@ -94,7 +115,7 @@ class Core_Zip
 					if ($use)
 					{
 						// Add sub-directory.
-						$this->_ZipArchive->addEmptyDir($localPath);
+						$this->_Zip->addEmptyDir($localPath);
 						$this->_folderToZip($filePath, $exclusiveLength);
 					}
 				}
@@ -122,14 +143,14 @@ class Core_Zip
 
 		$this->_iFiles = 0;
 
-		$this->_ZipArchive = new ZipArchive();
-		$result = $this->_ZipArchive->open($this->_outputPath, ZIPARCHIVE::CREATE);
+		//$this->_Zip = new ZipArchive();
+		$this->_Zip = self::getZipClass();
+		$result = $this->_Zip->open($this->_outputPath, ZIPARCHIVE::CREATE);
 
 		if ($result === TRUE)
 		{
 			$this->_folderToZip($sourcePath, strlen($sourcePath . DIRECTORY_SEPARATOR));
-			//$this->_ZipArchive->addFromString("README.txt", "test file");
-			$this->_ZipArchive->close();
+			$this->_Zip->close();
 		}
 		else
 		{

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -36,7 +36,7 @@ class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 
 		if ($href && $onclick)
 		{
-			?><a href="<?php echo $href?>" onclick="<?php echo $onclick?>"><?php
+			?><a href="<?php echo htmlspecialchars($href)?>" onclick="<?php echo htmlspecialchars($onclick)?>"><?php
 		}
 		else
 		{
@@ -71,28 +71,21 @@ class Skin_Default_Admin_Form_Entity_Menu extends Admin_Form_Entity
 
 		$menu_id++;
 
-		$show_sub_items_script = 'OnMouseOver="HostCMSMenuOver(\''.$li_id.'\','. 1 .", '" . 'id_' . $menu_id . '\');" OnMouseOut="HostCMSMenuOut(\''.$li_id."', 1, '" . 'id_' . $menu_id .'\');"';
-
-		echo '<td valign="bottom" id="'.$li_id.'" '.$show_sub_items_script.' class="li_lev_1">';
+		echo '<td valign="bottom" id="'.$li_id.'" OnMouseOver="HostCMSMenuOver(\'' . $li_id . '\','. 1 .", '" . 'id_' . $menu_id . '\');" OnMouseOut="HostCMSMenuOut(\'' . $li_id . "', 1, '" . 'id_' . $menu_id .'\');" class="li_lev_1">';
 
 		$this->_showMenuItem();
 
 		if (!empty($this->_children))
 		{
 			?><div id="id_<?php echo $menu_id?>" class="shadowed" style="display: none"><ul><?php
-
 			// Вывод подменю
 			foreach ($this->_children as $key => $subMenu)
 			{
 				$li_id = "id_menu_item_{$menu_id}_{$key}";
-
-				//$show_sub_items_script = 'OnMouseOver="HostCMSMenuOver(\''.$li_id.'\',' . 0 . ", '".''.'\');" OnMouseOut="HostCMSMenuOut(\''.$li_id."', 0, '".''.'\');"';
-
-				?><li id="<?php echo $li_id?>"><?php
+				?><li id="<?php echo htmlspecialchars($li_id)?>"><?php
 				$subMenu->_showMenuItem();
 				?></li><?php
 			}
-
 			?></ul></div><?php
 		}
 

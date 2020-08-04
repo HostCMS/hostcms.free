@@ -239,7 +239,7 @@ class Core_Inflection_En extends Core_Inflection
 		'/([^aeiou])oes$/i' => '\1o', // echoes -> echo
 		'/([^aeiou])ies$/i' => '\1y', // stories -> story
 		'/(t|i)a$/i' => '\1um', // bacteria -> bacterium
-		'/(la|ia|rra|va|cu|ep)ses$/i' => '\1s', // aliases -> alias, canvases -> canvas
+		'/(la|ia|rra|va|cu|tu|ep)ses$/i' => '\1s', // aliases -> alias, canvases -> canvas, statuses -> status
 		// last condition
 		'/([a-rt-z])s$/i' => '\1' // horses -> horse
 	);

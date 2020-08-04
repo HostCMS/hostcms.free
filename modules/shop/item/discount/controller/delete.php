@@ -3,13 +3,13 @@
 defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
- * Online shop.
+ * Shop_Item_Discount_Controller_Delete
  *
  * @package HostCMS
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -33,6 +33,10 @@ class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 				$oEntity = NULL;
 		}
 
-		!is_null($oEntity) && $oEntity->delete();
+		if (!is_null($oEntity))
+		{
+			$oEntity->delete();
+			$oShop_Item->clearCache();
+		}
 	}
 }

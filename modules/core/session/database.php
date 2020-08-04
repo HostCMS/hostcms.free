@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -102,6 +102,8 @@ class Core_Session_Database extends Core_Session
 
 			$this->_read = TRUE;
 
+			self::$_started = TRUE;
+
 			if ($row)
 			{
 				// Update last change time
@@ -129,7 +131,7 @@ class Core_Session_Database extends Core_Session
 		if ($this->_read/* && $this->_lock($id)*/)
 		{
 			$value = base64_encode($value);
-			
+
 			$oDataBase = Core_QueryBuilder::update('sessions')
 				//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
 				->set('value', $value)
@@ -199,10 +201,10 @@ class Core_Session_Database extends Core_Session
 
 		// Set cookie with expiration date
 		//self::_setCookie();
-		
+
 		return TRUE;
 	}
-	
+
 	/**
 	 * The garbage collector callback is invoked internally by PHP periodically in order to purge old session data.
 	 * @param string $maxlifetime max life time
@@ -215,25 +217,6 @@ class Core_Session_Database extends Core_Session
 			->execute();
 
 		return TRUE;
-	}
-
-	/**
-	 * Show error
-	 * @param string $content
-	 */
-	protected function _error($content)
-	{
-		if (Core_Array::getRequest('_', FALSE))
-		{
-			Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL));
-		}
-		else
-		{
-			// Service Unavailable
-			Core_Response::sendHttpStatusCode(503);
-			
-			throw new Core_Exception($content);
-		}
 	}
 
 	/**
@@ -279,12 +262,12 @@ class Core_Session_Database extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout. Please wait! Refreshing page ... <script>setTimeout(function() {window.location.reload(true);}, 1000);</script>');
+				$this->_error('HostCMS session lock error: Timeout.');
+				return FALSE;
 			}
 
 			usleep($this->_nextStepDelay);
 		}
-
 		return FALSE;
 	}
 

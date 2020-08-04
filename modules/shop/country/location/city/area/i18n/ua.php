@@ -18,6 +18,8 @@ return array(
 	'id' => 'Ідентифікатор',
 	'active' => 'Активність',
 	'changeActive_success' => "Інформація успішно змінена",
+	'turnOn_success' => "Райони міста включені!",
+	'switchOff_success' => "Райони міста вимкнені!",
 
 	'language_tab'=>'Мовні версії',
 	'name_en'=>'Англійською',

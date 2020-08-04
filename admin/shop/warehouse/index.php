@@ -381,7 +381,8 @@ $oAdmin_Form_Dataset->addCondition(
 
 $oAdmin_Form_Controller
 	->addExternalReplace('{shop_group_id}', $shop_group_id)
-	->addExternalReplace('{shop_id}', $shop_id);
+	->addExternalReplace('{shop_id}', $shop_id)
+	;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

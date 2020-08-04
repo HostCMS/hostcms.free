@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -294,7 +294,7 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					if (!is_null($oSameXsl) && $oSameXsl->id != $id)
 					{
 						$this->addMessage(
-							Core_Message::get(Core::_('Xsl.xsl_already_exists'))
+							Core_Message::get(Core::_('Xsl.xsl_already_exists'), 'error')
 						);
 						return TRUE;
 					}

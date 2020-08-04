@@ -78,9 +78,13 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 				{
 					// Получаем информацию о элементе - значение, ико, цвет
 					$aItemInfo = $this->_getItemInfo($key);
+
+					$marginLeft = isset($aItemInfo['level']) && $aItemInfo['level']
+						? " margin-left: " . ($aItemInfo['level'] * 5) . "px;"
+						: '';
 					?>
 					<li id="<?php echo htmlspecialchars($key)?>" <?php echo $indexValueItem == $key ? 'selected="selected"' : ''?>>
-						<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($aItemInfo['color'])?>"><i class="<?php echo htmlspecialchars($aItemInfo['icon'])?>"></i><?php echo htmlspecialchars($aItemInfo['value'])?></a>
+						<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($aItemInfo['color'])?>;<?php echo $marginLeft?>"><i class="<?php echo htmlspecialchars($aItemInfo['icon'])?>"></i><?php echo htmlspecialchars($aItemInfo['value'])?></a>
 					</li>
 					<?php
 				}
@@ -115,7 +119,8 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 		$aItemInfo += array(
 			'icon' => 'fa fa-circle fa-dropdownlist',
 			'color' => '#aebec4',
-			'value' => NULL
+			'value' => NULL,
+			'level' => 0
 		);
 
 		return $aItemInfo;

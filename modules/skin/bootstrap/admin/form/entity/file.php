@@ -153,25 +153,8 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			}
 		}
 
-		$oLarge_Main_Block_Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-			->class('row');
-
 		$oLarge_Core_Html_Entity_Div
 			->class((count($this->_children) ? 'input-group' : '') . ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : ''));
-
-		if (count($this->_children))
-		{
-			$oLarge_Core_Html_Entity_Div
-				->add(
-					Core::factory('Core_Html_Entity_Div')
-						->class('col-xs-12')
-						->add($oLarge_Main_Block_Core_Html_Entity_Div)
-				);
-		}
-		else
-		{
-			$oLarge_Core_Html_Entity_Div->add($oLarge_Main_Block_Core_Html_Entity_Div);
-		}
 
 		//$sDivClass = 'col-xs-12 col-sm-6';
 
@@ -181,7 +164,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 		$oLarge_Input_Div = Core::factory('Core_Html_Entity_Div')
 			->id('file_large_' . $iAdmin_Form_Count)
-			->class('form-group ' . $sDivClass)
+			->class('form-group ' . $sDivClass . ' grid')
 			->add(
 				Core::factory('Core_Html_Entity_Span')
 					->class('caption')
@@ -226,8 +209,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			);
 		}
 
-		$oLarge_Main_Block_Core_Html_Entity_Div
-			->add($oLarge_Input_Div);
+		$oLarge_Core_Html_Entity_Div->add($oLarge_Input_Div);
 
 		if ($this->largeImage['path'] != '' || $this->largeImage['show_params'])
 		{
@@ -503,7 +485,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 		if ($this->largeImage['show_description'])
 		{
-			$oLarge_Main_Block_Core_Html_Entity_Div
+			$oLarge_Core_Html_Entity_Div
 				->add(
 					Core::factory('Core_Html_Entity_Div')
 						->class('form-group col-xs-12 col-sm-6')
@@ -529,7 +511,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$oSmall_Input_Div = Core::factory('Core_Html_Entity_Div')
 				->id('file_small_' . $iAdmin_Form_Count)
-				->class('form-group ' . $sDivClass . ($this->smallImage['show_description'] ? ' clear' : ''))
+				->class('form-group ' . $sDivClass . ($this->smallImage['show_description'] ? ' clear' : '') . ' grid')
 				->add(
 					Core::factory('Core_Html_Entity_Span')
 						->class('caption')
@@ -574,8 +556,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				);
 			}
 
-			$oLarge_Main_Block_Core_Html_Entity_Div
-				->add($oSmall_Input_Div);
+			$oLarge_Core_Html_Entity_Div->add($oSmall_Input_Div);
 
 			if ($this->smallImage['path'] != '' || $this->smallImage['show_params'])
 			{
@@ -782,7 +763,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 
 					if ($this->smallImage['show_description'])
 					{
-						$oLarge_Main_Block_Core_Html_Entity_Div
+						$oLarge_Core_Html_Entity_Div
 							->add(
 								Core::factory('Core_Html_Entity_Div')
 								->class('form-group col-xs-12 col-sm-6')

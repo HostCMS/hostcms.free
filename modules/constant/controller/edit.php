@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Constant
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -85,7 +85,6 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						? Core::_('Constant_Dir.edit', $this->_object->name)
 						: Core::_('Constant_Dir.add')
 					);
-
 			break;
 		}
 
@@ -150,7 +149,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		return parent::execute($operation);
 	}
-	
+
 	/**
 	 * Processing of the form. Apply object fields.
 	 * @return self
@@ -160,7 +159,7 @@ class Constant_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$this->_formValues['name'] = trim(Core_Array::get($this->_formValues, 'name'));
-		
+
 		return parent::_applyObjectProperty();
 	}
 }

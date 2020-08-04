@@ -63,18 +63,14 @@ class Skin_Default_Admin_Form_Entity_Password extends Admin_Form_Entity_Input
 		{
 			?><div class="input-group"><?php
 		}
-
 		?>
 		<input <?php echo implode(' ', $aAttr) ?>/>
 		<?php
 		if ($this->generatePassword)
 		{
-			?>
-			<a class="generate-password" onclick="$.generatePassword();"><i class="fa fa-keyboard-o"></i></a>
-			<?php
+			?><a class="generate-password" onclick="$.generatePassword();"><i class="fa fa-keyboard-o"></i></a><?php
 		}
 
-		// Могут быть дочерние элементы элементы
 		$this->executeChildren();
 
 		$this->_showFormat();

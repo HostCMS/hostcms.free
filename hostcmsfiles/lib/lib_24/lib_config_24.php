@@ -24,6 +24,12 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 					$bAntispamAnswer = $Antispam_Controller
 						->addText($email)
 						->execute();
+
+					// Check e-mail
+					if ($bAntispamAnswer)
+					{
+						$bAntispamAnswer = Antispam_Domain_Controller::checkEmail($email);
+					}
 				}
 				else
 				{

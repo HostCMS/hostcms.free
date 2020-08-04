@@ -574,6 +574,7 @@ class Template_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event template.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -597,6 +598,8 @@ class Template_Model extends Core_Entity
 			$subTemplate->save();
 		}
 
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+
 		return $newObject;
 	}
 
@@ -608,6 +611,36 @@ class Template_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		if (strlen($this->loadTemplateCssFile()))
+		{
+			switch ($this->type)
+			{
+				case 0:
+				default:
+					$css = 'CSS';
+				break;
+				case 1:
+					$css = 'LESS';
+				break;
+				case 2:
+					$css = 'SCSS';
+				break;
+			}
+
+			Core::factory('Core_Html_Entity_Span')
+				->class('label label-info')
+				->value($css)
+				->execute();
+		}
+
+		if (strlen($this->loadTemplateJsFile()))
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('label label-warning')
+				->value('JS')
+				->execute();
+		}
+
 		$count = $this->Templates->getCount();
 		$count > 0 && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-hostcms badge-square')

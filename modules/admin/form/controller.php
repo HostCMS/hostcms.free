@@ -106,8 +106,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function addAdditionalParam($key, $value)
 	{
-		$this->additionalParams .= '&' . htmlspecialchars($key) . '=' . rawurlencode($value);
-		return $this;
+		return $this->setAdditionalParam(
+			$this->additionalParams . '&' . htmlspecialchars($key) . '=' . rawurlencode($value)
+		);
 	}
 
 	/**
@@ -118,6 +119,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	public function setAdditionalParam($value)
 	{
 		$this->additionalParams = $value;
+
+		// Добавляем замену для additionalParams
+		$this->_externalReplace['{additionalParams}'] = $value;
+
 		return $this;
 	}
 
@@ -148,14 +153,14 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aTmp = array();
 		foreach ($_GET as $key => $value)
 		{
-			if (!is_array($value) && $key != '_')
+			if (!is_array($value) && $key != '_' && strpos($key, 'admin_form_filter_') === FALSE && strpos($key, 'topFilter_') === FALSE)
 			{
 				//$aTmp[] = htmlspecialchars($key, ENT_QUOTES) . '=' . htmlspecialchars($value, ENT_QUOTES);
 				$aTmp[] = htmlspecialchars($key) . '=' . rawurlencode($value);
 			}
 		}
 
-		$this->additionalParams = implode('&', $aTmp);
+		$this->setAdditionalParam(implode('&', $aTmp));
 
 		$this->formSettings();
 		return $this;
@@ -292,16 +297,19 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				$oUserCurrent->add($this->_oAdmin_Form_Setting);
 			}
 
-			!is_null($this->limit) && $this->_oAdmin_Form_Setting->on_page = intval($this->limit);
-			!is_null($this->current) && $this->_oAdmin_Form_Setting->page_number = intval($this->current);
+			!is_null($this->limit)
+				&& $this->_oAdmin_Form_Setting->on_page = intval($this->limit);
+
+			!is_null($this->current)
+				&& $this->_oAdmin_Form_Setting->page_number = intval($this->current);
 
 			if (!is_null($this->sortingFieldId))
 			{
-				$this->_oAdmin_Form_Setting->order_field_id = intval($this->sortingFieldId);
+				$this->_oAdmin_Form_Setting->order_field_id = $this->sortingFieldId;
 			}
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->sortingFieldId = $this->_oAdmin_Form_Setting->order_field_id;
+				$this->sortingFieldId(intval($this->_oAdmin_Form_Setting->order_field_id));
 			}
 
 			// Set sorting field
@@ -310,11 +318,11 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 			if (!is_null($this->sortingDirection))
 			{
-				$this->_oAdmin_Form_Setting->order_direction = intval($this->sortingDirection);
+				$this->_oAdmin_Form_Setting->order_direction = $this->sortingDirection;
 			}
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->sortingDirection = $this->_oAdmin_Form_Setting->order_direction;
+				$this->sortingDirection(intval($this->_oAdmin_Form_Setting->order_direction));
 			}
 
 			if (!is_null($this->view))
@@ -323,7 +331,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->view = $this->_oAdmin_Form_Setting->view;
+				$this->view($this->_oAdmin_Form_Setting->view);
 			}
 
 			$this->view == '' && $this->view = 'list';
@@ -797,6 +805,17 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Set action
+	 * @param string $action
+	 * @return self
+	 */
+	public function action($action)
+	{
+		$this->action = !is_null($action) ? preg_replace('/[^A-Za-z0-9_-]/', '', $action) : NULL;
+		return $this;
+	}
+
+	/**
 	 * Get action
 	 * @return string
 	 */
@@ -806,12 +825,34 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Set operation
+	 * @param string $operation
+	 * @return self
+	 */
+	public function operation($operation)
+	{
+		$this->operation = !is_null($operation) ? preg_replace('/[^A-Za-z0-9_-]/', '', $operation) : NULL;
+		return $this;
+	}
+
+	/**
 	 * Get operation
 	 * @return string
 	 */
 	public function getOperation()
 	{
 		return $this->operation;
+	}
+
+	/**
+	 * Set filterId
+	 * @param string $filterId
+	 * @return self
+	 */
+	public function filterId($filterId)
+	{
+		$this->filterId = preg_replace('/[^A-Za-z0-9_-]/', '', $filterId);
+		return $this;
 	}
 
 	/**
@@ -904,19 +945,24 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Window ID
-	 * @var int
-	 */
-	//protected $_windowId = NULL;
-
-	/**
 	 * Set window ID
-	 * @param int $windowId ID
+	 * @param string $windowId
 	 * @return self
 	 */
 	public function window($windowId)
 	{
-		$this->windowId = $windowId;
+		$this->windowId = preg_replace('/[^A-Za-z0-9_-]/', '', $windowId);
+		return $this;
+	}
+
+	/**
+	 * Set view
+	 * @param string $view
+	 * @return self
+	 */
+	public function view($view)
+	{
+		$this->view = !is_null($view) ? preg_replace('/[^A-Za-z0-9_-]/', '', $view) : NULL;
 		return $this;
 	}
 
@@ -1269,7 +1315,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 					else
 					{
 						throw new Core_Exception(
-							Core::_('Admin_Form.msg_error_access'), array()/*, 0, FALSE*/
+							Core::_('Admin_Form.msg_error_access', $actionName), array()/*, 0, FALSE*/
 						);
 					}
 				}
@@ -1286,14 +1332,172 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 		}
 
-		$this
-			->addMessage(ob_get_clean());
+		$this->addMessage(ob_get_clean());
+
+		$formSettings = Core_Array::get($this->request, 'hostcms');
+		if (is_array($formSettings) && Core_Array::get($formSettings, 'export') == 'csv')
+		{
+			header('Pragma: public');
+			header('Content-Description: File Transfer');
+			header('Content-Type: application/force-download');
+			header('Content-Disposition: attachment; filename="' . addslashes($this->title) . '_' .date('Y_m_d_H_i_s').'.csv";');
+			header('Content-Transfer-Encoding: binary');
+
+			$oAdmin_Language = $this->getAdminLanguage();
+			$this->limit = NULL;
+
+			$aData = array();
+
+			$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				// 0 - Столбец и фильтр, 2 - Столбец
+				if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+				{
+					$Admin_Word_Value = $oAdmin_Form_Field
+						->Admin_Word
+						->getWordByLanguage($oAdmin_Language->id);
+
+					$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+						? $Admin_Word_Value->name
+						: NULL;
+
+					$aData[] = $this->prepareString($fieldName);
+				}
+			}
+			$this->_printRow($aData);
+
+			$this->setDatasetConditions();
+			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
+			{
+				$aEntities = $oAdmin_Form_Dataset->load();
+
+				foreach ($aEntities as $oEntity)
+				{
+					$aData = array();
+					foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+					{
+						// 0 - Столбец и фильтр, 2 - Столбец
+						if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+						{
+							// Перекрытие параметров для данного поля
+							$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
+
+							$fieldName = $oAdmin_Form_Field_Changed->name;
+
+							if (isset($oEntity->$fieldName))
+							{
+								// значение свойства
+								$value = $oEntity->$fieldName;
+							}
+							elseif ($this->isCallable($oEntity, $fieldName))
+							{
+								// Выполним функцию обратного вызова
+								$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+							}
+							else
+							{
+								$value = NULL;
+							}
+
+							$sFormat = $oAdmin_Form_Field_Changed->format;
+
+							switch ($oAdmin_Form_Field_Changed->type)
+							{
+								case 1: // Текст.
+								case 2: // Поле ввода.
+								case 4: // Ссылка.
+								case 7: // Картинка-ссылка.
+									if (!is_null($value))
+									{
+										$value = $this->applyFormat($value, $sFormat);
+									}
+								break;
+								case 3: // Checkbox.
+									$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
+								break;
+								case 5: // Дата-время.
+									if (!is_null($value))
+									{
+										$value = $value == '0000-00-00 00:00:00' || $value == ''
+											? ''
+											: Core_Date::sql2datetime($value);
+									}
+								break;
+								case 6: // Дата.
+									if (!is_null($value))
+									{
+										$value = $value == '0000-00-00 00:00:00' || $value == ''
+											? ''
+											: Core_Date::sql2date($value);
+									}
+								break;
+								case 8: // Выпадающий список
+									if (is_array($oAdmin_Form_Field_Changed->list))
+									{
+										$aValue = $oAdmin_Form_Field_Changed->list;
+									}
+									else
+									{
+										$aValue = array();
+
+										$aListExplode = explode("\n", $oAdmin_Form_Field_Changed->list);
+										foreach ($aListExplode as $str_value)
+										{
+											// Каждую строку разделяем по равно
+											$str_explode = explode('=', $str_value);
+
+											if (count($str_explode) > 1 && $str_explode[1] != '…')
+											{
+												// сохраняем в массив варинаты значений и ссылки для них
+												$aValue[trim($str_explode[0])] = trim($str_explode[1]);
+											}
+										}
+									}
+
+									if (isset($aValue[$value]))
+									{
+										$value = $aValue[$value];
+									}
+								break;
+							}
+
+							$aData[] = $value;
+						}
+					}
+
+					$this->_printRow($aData);
+				}
+			}
+			die();
+		}
 
 		$this
 			->perform()
 			->show();
 
 		Core_Event::notify('Admin_Form_Controller.onAfterExecute', $this);
+	}
+
+	/**
+	 * Prepare string
+	 * @param string $string
+	 * @return string
+	 */
+	public function prepareString($string)
+	{
+		return str_replace('"', '""', trim($string));
+	}
+
+	/**
+	 * Print array
+	 * @param array $aData
+	 * @return self
+	 */
+	protected function _printRow($aData)
+	{
+		echo implode(';', $aData) . "\n";
+		return $this;
 	}
 
 	/**
@@ -1415,8 +1619,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 			else
 			{
-				$this->sortingFieldId = NULL;
-				$this->sortingDirection = NULL;
+				$this->sortingFieldId = $this->sortingDirection = NULL;
 			}
 		}
 		return $this;
@@ -1442,24 +1645,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		return $this;
 	}
-
-
-	/**
-	 * Current Filter Id
-	 * @var int
-	 */
-	//protected $_filterId = NULL;
-
-	/**
-	 * Set Filter ID
-	 * @param mixed $sortingDirection direction
-	 * @return self
-	 */
-	/*public function filterId($filterId)
-	{
-		$this->filterId = strval($filterId);
-		return $this;
-	}*/
 
 	/**
 	 * Backend callback method
@@ -1567,6 +1752,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$aData[] = "sortingDirection: '{$sortingDirection}'";
 
 		is_null($view) && $view = $this->view;
+		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
 		$aData[] = "view: '{$view}'";
 
 		$aData[] = "windowId: '{$windowId}'";
@@ -1677,9 +1863,25 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		strlen($windowId) && $aData[] = "hostcms[window]={$windowId}";
 
 		is_null($view) && $view = $this->view;
+		$view = rawurlencode($view);
 		$aData[] = "hostcms[view]={$view}";
 
+		$aData[] = "hostcms[filterId]=" . rawurlencode($this->filterId);
+
 		is_null($additionalParams) && $additionalParams = $this->additionalParams;
+
+		// Filter values for paginations and etc.
+		foreach ($_REQUEST as $key => $value)
+		{
+			if (!is_array($value) && $value !== ''
+				&& !isset($_GET[$key])
+				&& (strpos($key, 'admin_form_filter_') === 0 || strpos($key, 'topFilter_') === 0)
+				&& $value != 'HOST_CMS_ALL'
+			)
+			{
+				$aData[] = htmlspecialchars($key) . '=' . rawurlencode($value);
+			}
+		}
 
 		//$additionalParams = str_replace(array("'", '"'), array("\'", '&quot;'), $additionalParams);
 		if ($additionalParams)
@@ -1774,6 +1976,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$aData[] = "sortingDirection: '{$sortingDirection}'";
 
 		is_null($view) && $view = $this->view;
+		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
 		$aData[] = "view: '{$view}'";
 
 		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
@@ -1908,8 +2111,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		{
 			$aValue = array();
 
-			$str_array = explode("\n", $oAdmin_Form_Field->list);
-			foreach ($str_array as $str_value)
+			$aListExplode = explode("\n", $oAdmin_Form_Field->list);
+			foreach ($aListExplode as $str_value)
 			{
 				// Каждую строку разделяем по равно
 				$str_explode = explode('=', $str_value);
@@ -1929,27 +2132,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	protected function _filterCallbackUser($value, $oAdmin_Form_Field, $filterPrefix, $tabName)
 	{
-		$iUserId = intval($value);
+		$iUserId = $value
+			? intval($value)
+			: 'HOST_CMS_ALL';
 
 		$placeholder = Core::_('User.select_user');
 		$language = Core_i18n::instance()->getLng();
 
-		$oOptgroupCompany = new stdClass();
-		$oOptgroupCompany->attributes = array('label' => '');
-
-		$aSelectResponsibleUsers = array('-1' => '');
-
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-		$aCompanies = $oSite->Companies->findAll();
-		foreach ($aCompanies as $oCompany)
-		{
-			$oOptgroupCompany = new stdClass();
-			$oOptgroupCompany->attributes = array('label' => $oCompany->name, 'class' => 'company');
-			$oOptgroupCompany->children = $oCompany->fillDepartmentsAndUsers($oCompany->id);
-
-			$aSelectResponsibleUsers[] = $oOptgroupCompany;
-		}
+		$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
 
 		Core::factory('Core_Html_Entity_Select')
 			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
@@ -2050,7 +2241,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					$sOptions = '<optgroup label="' . htmlspecialchars($oSelectedSiteuser->login) . '" class="siteuser">' . $sOptions . '</optgroup>';
 				}
 			}
-			// Может быть только компания или предстсавитель
+			// Может быть только компания или представитель
 			/*else
 			{
 				$oSiteuser = Core_Entity::factory('Siteuser')->getById($value);
@@ -2176,6 +2367,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			|| method_exists($oEntity, 'isCallable') && $oEntity->isCallable($fieldName);
 	}
 
+	public function convertLike($str)
+	{
+		return str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($str)));
+	}
+
 	/**
 	 * Set dataset conditions
 	 * @return self
@@ -2267,7 +2463,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										break;
 									}
 
-									$mFilterValue = str_replace(array('*', '?'), array('%', '_'), Core_DataBase::instance()->escapeLike(trim($mFilterValue)));
+									$mFilterValue = $this->convertLike($mFilterValue);
 
 									$oAdmin_Form_Dataset->addCondition(
 										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $mFilterValue))
@@ -2370,7 +2566,6 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 									}
 								break;
 								case 7: // Картинка-ссылка
-									//if ($this->filterId === '' || !strlen($oAdmin_Form_Field_Changed->list))
 									if (!strlen($oAdmin_Form_Field_Changed->list))
 									{
 										break;
@@ -2414,10 +2609,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				reset($this->_datasets);
 				$oAdmin_Form_Dataset = current($this->_datasets);
 
-				$oAdmin_Form_Dataset
+				!is_null($this->limit) && $oAdmin_Form_Dataset
 					->limit($this->limit)
-					->offset($offset)
-					->load();
+					->offset($offset);
+
+				$oAdmin_Form_Dataset->load();
 
 				// Данные уже были загружены при первом применении лимитов и одном источнике
 				$bLoaded = TRUE;
@@ -2433,7 +2629,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			{
 				$current = floor($iTotalCount / $this->limit);
 
-				if ($current <= 0)
+				if ($current <= $this->current)
 				{
 					$current = 1;
 					$offset = 0;
@@ -2449,27 +2645,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			}
 		//}
 
-		// При экспорте в CSV лимиты недействительны
-		/*if ($this->export_csv)
-		{
-			if (isset($this->form_params['limit']))
-			{
-				unset($this->form_params['limit']);
-			}
-		}*/
-
 		try
 		{
-			// $iTotalCount - 48
 			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
-				// 0й - 17
 				$datasetCount = $oAdmin_Form_Dataset->getCount();
 
-				// 17 >
 				if ($datasetCount > $offset)
 				{
-					$oAdmin_Form_Dataset
+					!is_null($this->limit) && $oAdmin_Form_Dataset
 						->limit($this->limit)
 						->offset($offset)
 						->loaded($bLoaded);
@@ -2483,7 +2667,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 				}
 
 				// Предыдущие можем смотреть только для 1-го источника и следующих
-				if ($datasetKey > 0)
+				if (!is_null($this->limit) && $datasetKey > 0)
 				{
 					// Если число элементов предыдущего источника меньше текущего начала
 					$prevDatasetCount = $this->_datasets[$datasetKey - 1]->getCount();

@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Staff',
@@ -91,4 +91,5 @@ return array(
 	'user_last_activity' => 'Last activity %s',
 	'editUserDepartment_success' => 'User department post information changed successfully!',
 	'deleteUserFromDepartment_success' => 'User removed from department',
+	'session' => 'Sessions',
 );

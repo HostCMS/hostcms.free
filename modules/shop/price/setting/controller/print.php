@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 {
@@ -57,16 +57,19 @@ class Shop_Price_Setting_Controller_Print extends Printlayout_Controller_Print
 					$position = 1;
 
 					$aShop_Price_Setting_Items = $oShop_Price_Setting->Shop_Price_Setting_Items->getAllByShop_price_id($shop_price_id);
+
 					foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
 					{
 						$oShop_Item = $oShop_Price_Setting_Item->Shop_Item;
 
-						$aReplace['Items'][] = array(
-							'position' => $position++,
-							'name' => htmlspecialchars($oShop_Item->name),
-							'measure' => htmlspecialchars($oShop_Item->Shop_Measure->name),
-							'price' => $oShop_Price_Setting_Item->new_price
-						);
+						$node = new stdClass();
+
+						$node->position = $position++;
+						$node->name = htmlspecialchars($oShop_Item->name);
+						$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
+						$node->price = $oShop_Price_Setting_Item->new_price;
+
+						$aReplace['Items'][] = $node;
 					}
 
 					$this->_oPrintlayout_Controller

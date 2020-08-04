@@ -71,50 +71,6 @@ if (!is_null(Core_Array::getPost('update_warehouse_counts')) && Core_Array::getP
 	Core::showJson($aJSON);
 }
 
-/*if (!is_null(Core_Array::getPost('load_warehouse_counts')) && Core_Array::getPost('shop_warehouse_id'))
-{
-	$aJSON = array();
-
-	$shop_warehouse_id = intval(Core_Array::getPost('shop_warehouse_id'));
-	$aItems = Core_Array::getPost('items');
-
-	foreach ($aItems as $shop_item_id)
-	{
-		$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
-
-		if (!is_null($oShop_Item))
-		{
-			$oShop_Item = $oShop_Item->shortcut_id
-				? $oShop_Item->Shop_Item
-				: $oShop_Item;
-
-			$factWarehouseCount = $factWarehouseSum = '0.00';
-
-			$oShop_Warehouse_Items = Core_Entity::factory('Shop_Warehouse_Item');
-			$oShop_Warehouse_Items->queryBuilder()
-				->where('shop_warehouse_items.shop_warehouse_id', '=', $shop_warehouse_id)
-				->where('shop_warehouse_items.shop_item_id', '=', $oShop_Item->id)
-				->limit(1);
-
-			$aShop_Warehouse_Items = $oShop_Warehouse_Items->findAll();
-
-			if (isset($aShop_Warehouse_Items[0]))
-			{
-				$factWarehouseCount = floatval($aShop_Warehouse_Items[0]->count);
-			}
-
-			$factWarehouseSum = floatval($factWarehouseCount * $oShop_Item->price);
-
-			$aJSON[$oShop_Item->id] = array(
-				'count' => $factWarehouseCount,
-				'sum' => round($factWarehouseSum, 2)
-			);
-		}
-	}
-
-	Core::showJson($aJSON);
-}*/
-
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
@@ -129,6 +85,16 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Warehouse.convolution'))
+		->icon('fa fa-database')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/warehouse/convolution/index.php', NULL, NULL, $sAdditionalParams = "shop_id={$oShop->id}&shop_group_id={$shop_group_id}")
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/warehouse/convolution/index.php', NULL, NULL, $sAdditionalParams)
 		)
 );
 

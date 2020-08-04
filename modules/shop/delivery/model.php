@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -165,6 +165,7 @@ class Shop_Delivery_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_delivery.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -233,6 +234,8 @@ class Shop_Delivery_Model extends Core_Entity
 			$offset += $limit;
 		}
 		while (count($aShop_Delivery_Conditions));
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}

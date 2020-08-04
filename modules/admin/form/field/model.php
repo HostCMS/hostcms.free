@@ -87,11 +87,15 @@ class Admin_Form_Field_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event admin_form_field.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
 		$newObject = parent::copy();
 		$newObject->add($this->admin_word->copy());
+		
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+		
 		return $newObject;
 	}
 

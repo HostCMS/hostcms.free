@@ -123,6 +123,7 @@ class Shop_Report_Controller
 				array(
 					$oInnerQB = Core_QueryBuilder::select(
 							'shop_orders.id',
+							'shop_orders.shop_id',
 							'shop_orders.datetime',
 							'shop_orders.shop_country_location_id',
 							'shop_orders.shop_country_location_city_id',
@@ -183,6 +184,7 @@ class Shop_Report_Controller
 				array(
 					$oInnerQB = Core_QueryBuilder::select(
 							'shop_orders.id',
+							'shop_orders.shop_id',
 							'shop_orders.datetime',
 							'shop_orders.shop_country_location_id',
 							'shop_orders.shop_country_location_city_id',
@@ -862,7 +864,7 @@ class Shop_Report_Controller
 
 	static protected function _prepareOrders($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
@@ -957,6 +959,22 @@ class Shop_Report_Controller
 		$checked = self::$_allow_delivery
 			? 'checked="checked"'
 			: '';
+
+		$group_by = Core_Array::get($aOptions, 'group_by', 1);
+
+		switch ($group_by)
+		{
+			case 0: // day
+				$delta = 'day';
+			break;
+			case 1: // week
+			default:
+				$delta = 'week';
+			break;
+			case 2: // month
+				$delta = 'month';
+			break;
+		}
 		?>
 		<div class="row">
 			<div class="col-xs-12 col-sm-4">
@@ -1159,29 +1177,13 @@ class Shop_Report_Controller
 		?>
 		<div class="row">
 			<div class="col-xs-12">
-				<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20"></div>
+				<div id="bar-chart<?php echo $functionName?>" class="chart chart-lg margin-top-20 <?php echo $group_by == 2 ? 'rotate-legend' : ''?>"></div>
 			</div>
 		</div>
 		<?php
 		if (self::$_oDefault_Currency)
 		{
 			self::$_debug && $fBeginTime = Core::getmicrotime();
-
-			$group_by = Core_Array::get($aOptions, 'group_by', 1);
-
-			switch ($group_by)
-			{
-				case 0: // day
-					$delta = 'day';
-				break;
-				case 1: // week
-				default:
-					$delta = 'week';
-				break;
-				case 2: // month
-					$delta = 'month';
-				break;
-			}
 			?>
 			<div class="row">
 				<div class="col-xs-12">
@@ -1577,8 +1579,8 @@ class Shop_Report_Controller
 
 						?>
 						aData = [ [<?php echo $xaxis?>, <?php echo $i?>] ];
-						dataHorizontal.push({label: '<?php echo $yaxis?>', data: aData, color: '<?php echo $color?>'});
-						dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo $yaxis?>']);
+						dataHorizontal.push({label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>', data: aData, color: '<?php echo $color?>'});
+						dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>']);
 						<?php
 						$i++;
 					}
@@ -1628,7 +1630,7 @@ class Shop_Report_Controller
 						}
 						?>
 						dataHorizontal.push({
-							label: '<?php echo $segmentName?>',
+							label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($segmentName))?>',
 							data: aData,
 							color: '<?php echo self::$_aColors[$key % count(self::$_aColors)]?>'
 						});
@@ -1677,17 +1679,10 @@ class Shop_Report_Controller
 				$(function() {
 					var aScripts = [
 						'jquery.flot.js',
-						// 'jquery.flot.time.min.js',
-						// 'jquery.flot.categories.min.js',
 						'jquery.flot.tooltip.min.js',
-						// 'jquery.flot.crosshair.min.js',
-						// 'jquery.flot.selection.min.js',
 						'jquery.flot.pie.min.js',
-						// 'jquery.flot.resize.js',
 						'jquery.flot.stack.min.js',
 						'jquery.flot.axislabels.js'
-						// 'jquery.flot.fillbetween.min.js',
-						// 'jquery.flot.orderBars.js',
 					];
 
 					function showTooltip(x, y, contents, color) {
@@ -1855,7 +1850,7 @@ class Shop_Report_Controller
 
 	static protected function _preparePopularItems($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
@@ -2177,8 +2172,8 @@ class Shop_Report_Controller
 			{
 				?>
 				aData = [ [<?php echo $xaxis?>, <?php echo $i?>] ];
-				dataHorizontal.push({label: '<?php echo $yaxis?>', data: aData, color: '<?php echo self::$_aColors[$i % count(self::$_aColors)]?>'});
-				dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo $yaxis?>']);
+				dataHorizontal.push({label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>', data: aData, color: '<?php echo self::$_aColors[$i % count(self::$_aColors)]?>'});
+				dataHorizontalTicksY.push([<?php echo $i?>, '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($yaxis))?>']);
 				<?php
 				$i++;
 			}
@@ -2224,7 +2219,7 @@ class Shop_Report_Controller
 				}
 				?>
 				dataHorizontal.push({
-					label: '<?php echo $segmentName?>',
+					label: '<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars($segmentName))?>',
 					data: aData,
 					color: '<?php echo self::$_aColors[$key % count(self::$_aColors)]?>'
 				});
@@ -2413,7 +2408,7 @@ class Shop_Report_Controller
 
 	static protected function _preparePopularProducers($functionName, $aOptions)
 	{
-		$isActive = Core_Session::isAcive();
+		$isActive = Core_Session::isActive();
 		!$isActive && Core_Session::start();
 
 		self::$_shop_id = isset($_SESSION['report']['shop_id'])
@@ -2543,15 +2538,13 @@ class Shop_Report_Controller
 		foreach ($aPopularProducers as $shop_producer_id => $aTmp)
 		{
 			?>
-			dataPie.push(
-				{
-					label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($aTmp['name'], $aConfig['cutNames'])))?>',
-					data: <?php echo $aTmp['quantityAmount']?>,
-					color: '<?php echo $iCountColors
-						? self::$_aColors[$i % $iCountColors]
-						: '#E75B8D'?>'
-				}
-			);
+			dataPie.push({
+				label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($aTmp['name'], $aConfig['cutNames'])))?>',
+				data: <?php echo $aTmp['quantityAmount']?>,
+				color: '<?php echo $iCountColors
+					? self::$_aColors[$i % $iCountColors]
+					: '#E75B8D'?>'
+			});
 			<?php
 			$i++;
 		}
@@ -2596,7 +2589,7 @@ class Shop_Report_Controller
 
 								legend: {
 									labelFormatter: function (label, series) {
-										return label + ", " + series.data[0][1];
+										return $.escapeHtml(label + ", " + series.data[0][1]);
 									}
 								}
 								,
@@ -2762,7 +2755,7 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields))
 		{
-			$aReturn['captionHTML'] = '<div class="tab-description">ТОП-' . self::$_popular_limit . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . Core::_('Shop.report_top') . self::$_popular_limit . '</div>';
 		}
 
 		if (in_array('content', $aFields))
@@ -2799,7 +2792,7 @@ class Shop_Report_Controller
 
 		if (in_array('captionHTML', $aFields))
 		{
-			$aReturn['captionHTML'] = '<div class="tab-description">ТОП-' . self::$_popular_producers_limit . '</div>';
+			$aReturn['captionHTML'] = '<div class="tab-description">' . Core::_('Shop.report_top') . self::$_popular_producers_limit . '</div>';
 		}
 
 		if (in_array('content', $aFields))

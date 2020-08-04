@@ -23,7 +23,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 		$modelName = $object->getModelName();
 
 		$informationsystem_id = Core_Array::getGet('informationsystem_id');
-		$informationsystem_group_id = Core_Array::getGet('informationsystem_group_id');
+		$informationsystem_group_id = Core_Array::getGet('informationsystem_group_id', 0);
 
 		switch ($modelName)
 		{
@@ -64,7 +64,6 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					$object = $object->Shortcut;
 				}
 
-				// Значения директории для добавляемого объекта
 				if (!$object->id)
 				{
 					$object->informationsystem_id = $informationsystem_id;

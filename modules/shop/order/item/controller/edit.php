@@ -198,6 +198,12 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->Shop_Order->backupRevision();
+		}
+
 		// New order item
 		if (!$this->_object->id)
 		{

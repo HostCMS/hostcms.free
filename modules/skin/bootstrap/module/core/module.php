@@ -133,7 +133,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 		$access = Core::moduleIsActive('eventlog')
 			? $oUser->checkModuleAccess(array('eventlog'), $oSite)
 			: FALSE;
-		
+
 		?><div class="widget">
 			<div class="widget-header bordered-bottom bordered-themeprimary">
 				<i class="widget-icon fa fa-tasks themeprimary"></i>
@@ -240,7 +240,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 								$sEventlogHref = '/admin/eventlog/index.php';
 								?>
 								<br />
-								<div class="footer">						
+								<div class="footer">
 									<a class="btn btn-info" href="<?php echo $sEventlogHref?>" onclick="$.adminLoad({path: '<?php echo $sEventlogHref?>'}); return false"><i class="fa fa-book"></i><?php echo Core::_('Admin.index_events_journal_link')?></a>
 								</div>
 								<?php
@@ -578,29 +578,31 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 		if (!is_null($oUser))
 		{
-			$aUser_Notes = $oUser->User_Notes->findAll(FALSE);
-
 			?><div id="overview" class="row">
 				<div class="col-xs-12">
 					<div class="widget">
 						<div class="widget-header bordered-bottom bordered-darkorange">
 							<i class="widget-icon fa fa-tasks darkorange"></i>
 							<span class="widget-caption darkorange"><?php echo Core::_('Admin.notes')?></span>
-							<div class="widget-buttons">
+							<?php
+							if (!$oUser->read_only)
+							{
+								?><div class="widget-buttons">
 								<a onclick="$.addNote()">
-									<i class="fa fa-plus darkorange" title="Добавить заметку"></i>
+									<i class="fa fa-plus darkorange" title="<?php echo Core::_('Admin.add_note')?>"></i>
 								</a>
-							</div>
+								</div><?php
+							}
+							?>
 						</div>
 						<div class="widget-body">
 							<div id="user-notes" class="row">
-
 								<!-- Default note -->
 								<div id="default-user-note" class="user-note col-xs-12 col-sm-6 col-md-4 col-lg-3">
 									<div class="row">
 										<div class="user-note-block">
 											<div>
-												<textarea></textarea>
+												<textarea<?php echo $oUser->read_only ? ' readonly="readonly"' : ''?>></textarea>
 											</div>
 											<div class="user-note-state bg-darkorange">
 												<a data-id="0" onclick="res = confirm('<?php echo Core::_('Admin_form.msg_information_delete')?>'); if (res) { $.destroyNote($(this).parents('div.user-note')) } return false"><i class="fa fa-remove"></i></a>
@@ -610,6 +612,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 								</div>
 								<script>
 								<?php
+								$aUser_Notes = $oUser->User_Notes->findAll(FALSE);
 								foreach ($aUser_Notes as $oUser_Note)
 								{
 									?>

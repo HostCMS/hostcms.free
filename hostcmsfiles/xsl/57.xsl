@@ -7,18 +7,6 @@
 
 	<!-- Шаблон для корзины -->
 	<xsl:template match="/shop">
-		<script type="text/javascript">
-		<xsl:comment>
-		<xsl:text disable-output-escaping="yes">
-		<![CDATA[
-			$(function() {
-				//$('.shop_bonuses input[name = apply_bonuses]').change();
-			});
-		]]>
-		</xsl:text>
-		</xsl:comment>
-		</script>
-
 		<xsl:choose>
 			<xsl:when test="count(shop_cart) = 0">
 				<h1>&labelEmptyCart;</h1>
@@ -39,7 +27,7 @@
 							</xsl:otherwise>
 						</xsl:choose>
 					</xsl:variable>
-					
+
 					<!-- Если есть товары -->
 					<xsl:if test="count(shop_cart[postpone = 0]) > 0">
 						<table class="shop_cart">
@@ -50,7 +38,7 @@
 							</xsl:call-template>
 
 							<!-- Скидки -->
-							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node()">
+							<xsl:if test="count(shop_purchase_discount) or shop_discountcard/node() or apply_bonuses/node()">
 								<xsl:apply-templates select="shop_purchase_discount"/>
 								<xsl:apply-templates select="shop_discountcard"/>
 

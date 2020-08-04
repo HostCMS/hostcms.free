@@ -26,6 +26,8 @@ return array(
 	'id' => 'Идентификатор',
 	'active' => 'Активность',
 	'changeActive_success' => "Информация успешно изменена",
+	'turnOn_success' => "Районы включены!",
+	'switchOff_success' => "Районы выключены!",
 
 	'language_tab'=>'Языковые версии',
 	'name_en'=>'На английском',

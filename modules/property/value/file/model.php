@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_File_Model extends Core_Entity
 {
@@ -326,16 +326,5 @@ class Property_Value_File_Model extends Core_Entity
 			->addXmlTag('tag_name', $this->Property->tag_name);
 
 		return $this;
-	}
-
-	/**
-	 * Get entity description
-	 * @return string
-	 */
-	public function getTrashDescription()
-	{
-		return htmlspecialchars(
-			Core_Str::cut($this->file_name, 255)
-		);
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Entity
 {
@@ -54,6 +54,12 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 * @var string
 	 */
 	public $mode = NULL;
+
+	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $owner = NULL;
 
 	/**
 	 * Backend property
@@ -184,7 +190,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	public function getTableColumns()
 	{
 		return array_flip(
-			array('hash', 'name', 'type', 'datetime', 'size', 'mode', 'user_id')
+			array('hash', 'name', 'type', 'datetime', 'size', 'mode', 'owner', 'user_id')
 		);
 	}
 
@@ -224,7 +230,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 				->execute();
 		}
 	}
-	
+
 	/**
 	 * Get file image
 	 */

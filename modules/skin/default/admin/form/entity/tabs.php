@@ -40,7 +40,7 @@ class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 					if ($oAdmin_Form_Tab_Entity->active)
 					{
 						$class = $tab_id == 0 ? ' current_li' : '';
-						?><li class="li_tab<?php echo $class?>" id="li_tab_page_<?php echo $tab_id?>" onclick="$.showTab('<?php echo $this->_Admin_Form_Controller->getWindowId()?>', 'tab_page_<?php echo $tab_id?>')"><?php
+						?><li class="li_tab<?php echo $class?>" id="li_tab_page_<?php echo $tab_id?>" onclick="$.showTab('<?php echo Core_Str::escapeJavascriptVariable($this->_Admin_Form_Controller->getWindowId())?>', 'tab_page_<?php echo $tab_id?>')"><?php
 							?><span><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption)?></span><?php
 						?></li><?php
 						$tab_id++;

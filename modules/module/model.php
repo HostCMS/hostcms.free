@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -316,6 +316,8 @@ class Module_Model extends Core_Entity
 			$this->Notifications->deleteAll(FALSE);
 			$this->Notification_Subscribers->deleteAll(FALSE);
 		}
+		
+		$this->uninstall();
 
 		return parent::delete($primaryKey);
 	}

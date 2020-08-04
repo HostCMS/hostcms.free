@@ -67,8 +67,6 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		// Удаляем производителей
 		$oAdditionalTab->delete($this->getField('shop_producer_id'));
 
-		$oDefault_Shop_Producer = $this->_object->Shop->Shop_Producers->getDefault();
-
 		$oShopProducerSelect = Admin_Form_Entity::factory('Select')
 			->caption(Core::_('Shop_Filter_Seo.shop_producer_id'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
@@ -76,7 +74,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->name('shop_producer_id')
 			->value($this->_object->id
 				? $this->_object->shop_producer_id
-				: (!is_null($oDefault_Shop_Producer) ? $oDefault_Shop_Producer->id : 0)
+				: 0
 			);
 
 		// Добавляем продавцов
@@ -103,106 +101,16 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 						</div>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-success" onclick="$.applyConditions()"><?php echo Core::_('Shop_Filter_Seo.add')?></button>
+						<button type="button" class="btn btn-success" onclick="$.applySeoFilterConditions()"><?php echo Core::_('Shop_Filter_Seo.add')?></button>
 					</div>
 				</div>
 			</div>
 		</div>
 
 		<script>
-		(function($){
-			$.extend({
-				getPropertyValues: function(object)
-				{
-					$.ajax({
-						url: '/admin/shop/filter/seo/index.php',
-						data: { 'get_values': 1, 'property_id': $(object).val() },
-						dataType: 'json',
-						type: 'POST',
-						success: function(result){
-							if (result.status == 'success')
-							{
-								$('.property-values').html(result.html);
-							}
-						}
-					});
-				},
-				applyConditions: function()
-				{
-					var property_id = $('#conditionsModal select[name = "modal_property_id"]').val(),
-						jPropertyValue = $('#conditionsModal *[name = "modal_property_value"]'),
-						type = jPropertyValue.attr('type'),
-						property_value = null;
-
-						switch (type)
-						{
-							case 'checkbox':
-								property_value = +jPropertyValue.is(':checked');
-							break;
-							default:
-								property_value = jPropertyValue.val();
-						}
-
-						$.ajax({
-							url: '/admin/shop/filter/seo/index.php',
-							data: { 'add_property': 1, 'property_id': property_id, 'property_value': property_value },
-							dataType: 'json',
-							type: 'POST',
-							success: function(result){
-								if (result.status == 'success')
-								{
-									var sorting = [];
-
-									$('.filter-conditions .dd-item').each(function () {
-										var id = parseFloat($(this).data('sorting'));
-										sorting.push(id);
-									});
-									sorting.sort(function(a, b) { return a - b });
-
-									var newSorting = sorting[sorting.length - 1] + 1;
-
-									$('.filter-conditions').append('<div class="dd"><ol class="dd-list"><li class="dd-item bordered-palegreen" data-sorting="' + newSorting + '"><div class="dd-handle"><div class="form-horizontal"><div class="form-group no-margin-bottom">' + result.html + '<a class="delete-associated-item" onclick="$(this).parents(\'.dd\').remove()"><i class="fa fa-times-circle darkorange"></i></a></div></div></li></ol></div></div><input type="hidden" name="property_value_sorting[]" value="' + newSorting + '"/>');
-
-									// Reload nestable list
-									$.loadNestable();
-								}
-
-								$('#conditionsModal').modal('hide');
-							}
-						});
-				},
-				loadNestable: function()
-				{
-					var aScripts = [
-						'jquery.nestable.min.js'
-					];
-
-					$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/nestable/').done(function() {
-						$('.filter-conditions .dd').nestable({
-							maxDepth: 1,
-							// handleClass: 'form-horizontal',
-							emptyClass: ''
-						});
-
-						$('.filter-conditions .dd-handle a, .filter-conditions .dd-handle .property-data').on('mousedown', function (e) {
-							e.stopPropagation();
-						});
-
-						$('.filter-conditions .dd').on('change', function() {
-							$('.filter-conditions input[type = "hidden"]').remove();
-
-							$.each($('.filter-conditions li.dd-item'), function(i, object){
-								$('.filter-conditions').append('<input type="hidden" name="property_value_sorting' + $(object).data('id') + '" value="' + i + '"/>');
-							});
-						});
-					});
-				}
-			});
-		})(jQuery);
-
 		$(function() {
 			$('#conditionsModal').on('show.bs.modal', function () {
-				var shop_group_id = $('select[name = "shop_group_id"]').val(),
+				var shop_group_id = $(':input[name = "shop_group_id"]').val(),
 					shop_id = $('input[name = "shop_id"]').val();
 
 				$.ajax({
@@ -227,7 +135,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				});
 			});
 
-			$.loadNestable();
+			$.loadSeoFilterNestable();
 		});
 		</script>
 		<?php

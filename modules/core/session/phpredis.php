@@ -139,6 +139,8 @@ class Core_Session_Phpredis extends Core_Session
 
 			$this->_read = TRUE;
 
+			self::$_started = TRUE;
+
 			if ($value !== FALSE)
 			{
 				$aUnpackedHash = unpack($this->_format, substr($value, 0, 4));
@@ -237,25 +239,6 @@ class Core_Session_Phpredis extends Core_Session
 	{
 		// Nothing to do
 		return TRUE;
-	}
-
-	/**
-	 * Show error
-	 * @param string $content
-	 */
-	protected function _error($content)
-	{
-		if (Core_Array::getRequest('_', FALSE))
-		{
-			Core::showJson(array('error' => Core_Message::get($content, 'error'), 'form_html' => NULL));
-		}
-		else
-		{
-			// Service Unavailable
-			Core_Response::sendHttpStatusCode(503);
-
-			throw new Core_Exception($content);
-		}
 	}
 
 	/**

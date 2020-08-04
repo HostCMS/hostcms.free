@@ -158,7 +158,7 @@ class Shop_Country_Location_City_Model extends Core_Entity
 			->title($count)
 			->execute();
 	}
-	
+
 	/**
 	 * Backend callback method
 	 * @return string
@@ -175,7 +175,7 @@ class Shop_Country_Location_City_Model extends Core_Entity
 		}
 
 		$oCore_Html_Entity_Div->execute();
-	}	
+	}
 
 	/**
 	 * Change active status
@@ -191,6 +191,30 @@ class Shop_Country_Location_City_Model extends Core_Entity
 		$this->save();
 
 		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Turn on active status
+	 * @return self
+	 */
+	public function turnOn()
+	{
+		$this->active = 1;
+		$this->save();
+
+		return $this;
+	}
+
+	/**
+	 * Switch off active status
+	 * @return self
+	 */
+	public function switchOff()
+	{
+		$this->active = 0;
+		$this->save();
 
 		return $this;
 	}

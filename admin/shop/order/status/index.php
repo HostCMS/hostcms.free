@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -14,6 +14,10 @@ Core_Auth::authorization($sModule = 'shop');
 // Код формы
 $iAdmin_Form_Id = 63;
 $sAdminFormAction = '/admin/shop/order/status/index.php';
+
+// Идентификатор родительской группы
+$iShopDirId = intval(Core_Array::getGet('shop_dir_id', 0));
+$parent_id = intval(Core_Array::getGet('parent_id', 0));
 
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
@@ -45,9 +49,6 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
-
-// Идентификатор родительской группы
-$iShopDirId = intval(Core_Array::getGet('shop_dir_id', 0));
 
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
@@ -90,6 +91,39 @@ $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name(Core::_('Shop_Order_Status.show_order_status_link'))
 	->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0))))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $sAdditionalParam)));
+
+if ($parent_id)
+{
+	$oParentStatus = Core_Entity::factory('Shop_Order_Status')->find($parent_id);
+
+	if (!is_null($oParentStatus->id))
+	{
+		$aBreadcrumbs = array();
+
+		do
+		{
+			$additionalParams = "&shop_dir_id={$iShopDirId}&parent_id={$oParentStatus->id}";
+
+			$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
+				->name($oParentStatus->name)
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)
+				);
+		} while ($oParentStatus = $oParentStatus->getParent());
+
+		$aBreadcrumbs = array_reverse($aBreadcrumbs);
+
+		foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
+		{
+			$oAdmin_Form_Entity_Breadcrumbs->add(
+				$oAdmin_Form_Entity_Breadcrumb
+			);
+		}
+	}
+}
 
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
@@ -149,11 +183,16 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Order_Status')
 );
 
+$oAdmin_Form_Dataset
+	->addCondition(array('where' => array('parent_id', '=', $parent_id)));
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset
 (
 	$oAdmin_Form_Dataset
 );
+
+$oAdmin_Form_Controller->addExternalReplace('{shop_dir_id}', $iShopDirId);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

@@ -46,7 +46,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 	public function adminPage($type = 0, $ajax = FALSE)
 	{
 		$type = intval($type);
-
 		$oModule = Core_Entity::factory('Module')->getByPath($this->_moduleName);
 		$this->_path = "/admin/index.php?ajaxWidgetLoad&moduleId={$oModule->id}&type={$type}";
 
@@ -71,7 +70,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				break;
 
 			case 2: // Изменение статуса дела
-
 				if ($ajax)
 				{
 					Core_Session::close();
@@ -94,7 +92,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 				break;
 
 			case 3: // Добавление дела
-
 				if ($ajax)
 				{
 					Core_Session::close();
@@ -194,10 +191,6 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					</a>
 					<a data-toggle="upload" onclick="$(this).find('i').addClass('fa-spin'); $.widgetLoad({ path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=0', context: $('#calendarAdminPage')});">
 						<i class="fa fa-refresh gray"></i>
-					</a>
-					<a href="#" data-toggle="toggle-actions">
-						<i class="fa fa-plus darkgray" title="<?php echo Core::_('Event.titleAddEvent');?>"></i>
-						<i class="fa fa-search darkgray hidden" title="<?php echo Core::_('Event.titleSearch');?>"></i>
 					</a>
 				</div>
 			</div><!--Widget Header-->

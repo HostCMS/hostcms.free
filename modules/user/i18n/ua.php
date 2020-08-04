@@ -83,4 +83,5 @@ return array(
 	'user_last_activity' => 'Остання активність %s',
 	'editUserDepartment_success' => 'Інформація про посади співробітника у відділі змінена.',
 	'deleteUserFromDepartment_success' => 'Співробітник видалений з відділу.',
+	'session' => 'Сесії',
 );

@@ -698,8 +698,15 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	 */
 	public function getStructure($path, $site_id)
 	{
+		$path = Core_Str::ltrimUri($path);
+		
+		if ($path === '/')
+		{
+			return NULL;
+		}
+
 		//$aPath = explode('/', trim($path, '/'));
-		$aPath = explode('/', Core_Str::rtrimUri(Core_Str::ltrimUri($path)));
+		$aPath = explode('/', Core_Str::rtrimUri($path));
 
 		// Index page
 		if (count($aPath) == 1 && $aPath[0] == '')

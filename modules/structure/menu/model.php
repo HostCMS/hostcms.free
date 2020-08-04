@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Menu_Model extends Core_Entity
 {
@@ -66,5 +66,30 @@ class Structure_Menu_Model extends Core_Entity
 			->where('site_id', '=', $site_id);
 
 		return $this->findAll();
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return Core_Entity
+	 * @hostcms-event structure_menu.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		Core_QueryBuilder::update('structures')
+			->set('structure_menu_id', 0)
+			->where('structure_menu_id', '=', $this->id)
+			->execute();
+
+		return parent::delete($primaryKey);
 	}
 }

@@ -52,4 +52,5 @@ return array(
 	'seo_item_keywords_template' => 'Шаблон keywords',
 	'markDeleted' => 'Видалити групу',
 	'shortcut_success' => "Ярлик групи успішно доданий",
+	'change_attributes_success' => 'Атрибути змінені успішно!',
 );

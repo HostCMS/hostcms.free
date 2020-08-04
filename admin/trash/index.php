@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -46,7 +46,9 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 		->status(Core_Log::$SUCCESS)
 		->write('All items have been completely deleted from Trash');
 
-	$oAdmin_Form_Controller->addMessage(ob_get_clean());
+	$oAdmin_Form_Controller
+		->clearChecked()
+		->addMessage(ob_get_clean());
 }
 
 // Меню формы

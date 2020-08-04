@@ -100,7 +100,7 @@ return array(
 
 	'watermark_position_y' => '<acronym title="Watermark position in Y-direction (in pixels or per cents)">Y-direction</acronym>',
 
-	'msg_error_access' => 'You do not have enough rights to perform this operation or action does not exist.',
+	'msg_error_access' => 'You do not have enough rights to perform action "%s" or action does not exist.',
 
 	'case_sensitive' => 'Case Sensitive',
 
@@ -144,4 +144,8 @@ return array(
 	'autocomplete_mode3' => 'Точное совпадение',
 
 	'tabProperties' => 'Properties',
+	'non_subject' => '<No subject>',
+
+	'male' => 'Male',
+	'female' => 'Female',
 );

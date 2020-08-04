@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -43,6 +43,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	protected $_hasMany = array(
 		'shop_order_item_digital' => array(),
+		'shop_order_item_code' => array(),
 	);
 
 	/**
@@ -55,7 +56,6 @@ class Shop_Order_Item_Model extends Core_Entity
 		'shop_warehouse' => array(),
 		'user' => array()
 	);
-
 
 	/**
 	 * Default sorting for models
@@ -86,6 +86,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		if (is_null($id) && !$this->loaded())
 		{
 			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['quantity'] = 1;
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
 	}
@@ -143,7 +144,19 @@ class Shop_Order_Item_Model extends Core_Entity
 		$aShop_Warehouses = $this->Shop_Order->Shop->Shop_Warehouses->findAll(FALSE);
 		foreach ($aShop_Warehouses as $oShop_Warehouse)
 		{
-			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($oShop_Warehouse->name);
+			$name = $oShop_Warehouse->name;
+
+			if ($this->shop_item_id)
+			{
+				$oShop_Warehouse_Cell_Items = $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($oShop_Warehouse->id);
+
+				if ($oShop_Warehouse_Cell_Items)
+				{
+					$name .= ' (' . $oShop_Warehouse_Cell_Items->Shop_Warehouse_Cell->nameWithSeparator() . ')';
+				}
+			}
+
+			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($name);
 		}
 
 		Admin_Form_Entity::factory('Select')
@@ -174,6 +187,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		$this->Shop_Order_Item_Digitals->deleteAll(FALSE);
+		$this->Shop_Order_Item_Codes->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -382,5 +396,115 @@ class Shop_Order_Item_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/*
+	 * Get shop warehouse cell item
+	 * @return Shop_Warehouse_Cell_Item|NULL
+	 */
+	public function getShopWarehouseCellItem()
+	{
+		return $this->shop_item_id && $this->shop_warehouse_id
+			? $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($this->shop_warehouse_id)
+			: NULL;
+	}
+
+	/*
+	 * Get shop warehouse cell name
+	 * @return Shop_Warehouse_Cell|NULL
+	 */
+	public function getCellName()
+	{
+		$oShop_Warehouse_Cell_Item = $this->getShopWarehouseCellItem();
+		if ($oShop_Warehouse_Cell_Item)
+		{
+			return $oShop_Warehouse_Cell_Item->Shop_Warehouse_Cell->nameWithSeparator();
+		}
+
+		return NULL;
+	}
+
+	public function showCodesBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->type == 0)
+		{
+			$count = $this->Shop_Order_Item_Codes->getCount(FALSE);
+
+			Core::factory('Core_Html_Entity_Span')
+				->id('code-badge' . $this->id)
+				->class('badge badge-ico badge-darkorange white')
+				->value($count < 100 ? $count : '∞')
+				->execute();
+		}
+	}
+
+	public function showCodesBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		// Если тип "Товар"
+		if ($this->type == 0)
+		{
+			ob_start();
+			?>
+			<i class="fa fa-code shop-order-item-codes codes-<?php echo $this->id?>"></i>
+			<script>
+				$(function() {
+					$('.codes-<?php echo $this->id?>').on('click', function(){
+						$.ajax({
+							url: '/admin/shop/order/item/index.php',
+							type: "POST",
+							data: {'load_modal': 1, 'shop_order_item_id': <?php echo $this->id?>},
+							dataType: 'json',
+							error: function(){},
+							success: function (result) {
+								$('body').append(result.html);
+
+								var jModal = $('#codes-<?php echo $this->id?>');
+
+								jModal.modal('show');
+
+								jModal.on('shown.bs.modal', function() {
+									var jInputs = $(this).find('input.form-control');
+
+									jInputs.eq(0)
+										.focus()
+										.select();
+
+									jInputs.bind('paste', function() {
+										$(this).parents('.row').next().find('input.form-control')
+											.focus()
+											.select();
+									})
+									.on('keyup', function (e) {
+										if (e.keyCode == 13) {
+											$(this).parents('.row').next().find('input.form-control')
+												.focus()
+												.select();
+										}
+									})
+									.on('focus', function () {
+										$(this).select();
+									});
+								});
+
+								jModal.on('hidden.bs.modal', function (e) {
+									jModal.remove();
+								});
+
+								// Close modal
+								$(window).on('keyup', function (e) {
+									if (e.keyCode == 27) {
+										jModal.modal('hide');
+										jModal.remove();
+									}
+								});
+							}
+						});
+					});
+				});
+			</script>
+			<?php
+
+			return ob_get_clean();
+		}
 	}
 }

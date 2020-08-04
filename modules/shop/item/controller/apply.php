@@ -96,6 +96,11 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 			$bChanged = FALSE;
 
+			$oShop = $this->_object->Shop;
+
+			$oShop->filter
+				&& $oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				$columnName = $oAdmin_Form_Field->name;
@@ -117,6 +122,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 						$oShop_Price_Setting_Item->old_price = $this->_object->price;
 						$oShop_Price_Setting_Item->new_price = $value;
 						$oShop_Price_Setting_Item->save();
+
+						$this->_object->clearCache();
 					}
 				}
 				elseif ($columnName == 'adminRest')
@@ -142,6 +149,8 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 								$oShop_Warehouse_Inventory_Item->shop_item_id = $this->_object->id;
 								$oShop_Warehouse_Inventory_Item->count = $value;
 								$oShop_Warehouse_Inventory_Item->save();
+
+								$this->_object->clearCache();
 							}
 						}
 					}
@@ -153,7 +162,10 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 				}
 			}
 
-			$bChanged && $this->_object->save();
+			$bChanged && $this->_object->save()->clearCache();
+
+			$oShop->filter
+				&& $oShop_Filter_Controller->fill($this->_object);
 
 			$this->_itemsCount++;
 

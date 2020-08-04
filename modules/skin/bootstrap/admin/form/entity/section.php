@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Section extends Skin_Default_Admin_Form_Entity_Section {
 
@@ -25,12 +25,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Section extends Skin_Default_Admin_Form_E
 			<div <?php echo implode(' ', $aAttr)?>>
 				<div class="panel-heading">
 					<h4 class="panel-title">
-						<a class="accordion-toggle" data-toggle="collapse" data-parent="#<?php echo $this->id?>" href="#collapse<?php echo $this->id?>">
-							<?php echo $this->caption ?>
+						<a class="accordion-toggle" data-toggle="collapse" data-parent="#<?php echo htmlspecialchars($this->id)?>" href="#collapse<?php echo htmlspecialchars($this->id)?>">
+							<?php echo $this->caption?>
 						</a>
 					</h4>
 				</div>
-				<div id="collapse<?php echo $this->id?>" class="panel-collapse collapse in">
+				<div id="collapse<?php echo htmlspecialchars($this->id)?>" class="panel-collapse collapse in">
 					<div class="panel-body">
 						<?php $this->executeChildren()?>
 					</div>

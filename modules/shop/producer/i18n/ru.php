@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Производители',
@@ -56,4 +56,5 @@ return array(
 	'move_producers_groups_title' => "Перенос производителей",
 	'move_producers_groups_id' => "Родительская группа",
 	'move_success' => 'Производители перенесены',
+	'merge_success' => 'Производители объединены',
 );

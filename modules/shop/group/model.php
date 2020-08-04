@@ -977,6 +977,7 @@ class Shop_Group_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_group.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -1054,6 +1055,8 @@ class Shop_Group_Model extends Core_Entity
 			$oNewShop_Item_Property_For_Group->shop_group_id = $newObject->id;
 			$oNewShop_Item_Property_For_Group->save();
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
@@ -1305,7 +1308,7 @@ class Shop_Group_Model extends Core_Entity
 	 * Get property value for SEO-templates
 	 * @param int $property_id Property ID
 	 * @param strint $format string format, e.g. '%s: %s'. %1$s - Property Name, %2$s - List of Values
-	 * @param int $property_id Property ID
+	 * @param string $separator separator
 	 * @return string
 	 */
 	public function propertyValue($property_id, $format = '%2$s', $separator = ', ')
@@ -1335,11 +1338,14 @@ class Shop_Group_Model extends Core_Entity
 						$aTmp[] = strftime($this->Shop->format_datetime, Core_Date::sql2timestamp($oProperty_Value->value));
 					break;
 					case 3: // List
-						$oList_Item = $oProperty->List->List_Items->getById(
-							$oProperty_Value->value, FALSE
-						);
+						if ($oProperty_Value->value)
+						{
+							$oList_Item = $oProperty->List->List_Items->getById(
+								$oProperty_Value->value, FALSE
+							);
 
-						!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+							!is_null($oList_Item) && $aTmp[] = $oList_Item->value;
+						}
 					break;
 					case 7: // Checkbox
 					break;

@@ -61,6 +61,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['start_datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['end_datetime'] = Core_Date::timestamp2sql(strtotime("+1 year"));
+			$this->_preloadValues['expire_days'] = 365;
 		}
 	}
 
@@ -162,6 +163,29 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			? '%'
 			: ' ' . htmlspecialchars($this->Shop->Shop_Currency->name);
 	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->accrual_date != '0000-00-00 00:00:00')
+		{
+			$class = 'label-sky';
+			$text = Core::_('Shop_Bonus.from') . ' ' . Core_Date::sql2datetime($this->accrual_date);
+		}
+		else
+		{
+			$class = 'label-pink';
+			$text = Core::_('Shop_Bonus.accrual_days') . ': ' . $this->accrual_days;
+		}
+
+		?><span class="margin-left-5 label <?php echo $class?> pull-right"><?php echo $text  . ', ' . Core::_('Shop_Bonus.expire_days') . ': ' . $this->expire_days?></span><?php
+	}
+
 
 	/**
 	 * Backend callback method

@@ -28,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Controller extends Core_Servant_Properties
 {
@@ -56,9 +56,23 @@ class Core_Controller extends Core_Servant_Properties
 	 */
 	protected $_tpl = NULL;
 
+	/**
+	 * Controller's mode
+	 * @var string
+	 */
 	protected $_mode = 'json';
 
+	/**
+	 * Attribute's prefix
+	 * @var string
+	 */
 	protected $_attributePrefix = '_';
+
+	/**
+	 * Cache tags
+	 * @var array
+	 */
+	protected $_cacheTags = array();
 
 	/**
 	 * Constructor.
@@ -416,6 +430,36 @@ class Core_Controller extends Core_Servant_Properties
 	public function getShownIDs()
 	{
 		return $this->_shownIDs;
+	}
+
+	/**
+	 * Add Cache Tag
+	 * @param string $tagName
+	 * @return self
+	 */
+	public function addCacheTag($tagName)
+	{
+		$this->_cacheTags[] = $tagName;
+		return $this;
+	}
+
+	/**
+	 * Get Cache Tags
+	 * @return array
+	 */
+	public function getCacheTags()
+	{
+		return $this->_cacheTags;
+	}
+
+	/**
+	 * Clear Cache Tag
+	 * @return self
+	 */
+	public function clearCacheTag()
+	{
+		$this->_cacheTags = array();
+		return $this;
 	}
 
 	/**

@@ -56,8 +56,6 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 		?><span class="caption"><?php echo $this->caption?></span><?php
 		?><div class="radio-group"><?php
-
-		//$aClassBtnColors = array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky');
 		$aClassBtnColors = $this->colors;
 		$i = 0;
 
@@ -76,7 +74,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 
 			<label class="checkbox-inline">
 			<input <?php echo implode(' ', $tmpAttr) ?> />
-			<span class="btn btn-labeled <?php echo $i < count($aClassBtnColors) ? $aClassBtnColors[$i++] : $aClassBtnColors[$i = 0]?>">
+			<span class="btn btn-labeled <?php echo htmlspecialchars($i < count($aClassBtnColors) ? $aClassBtnColors[$i++] : $aClassBtnColors[$i = 0])?>">
 			<?php
 			// ico к пункту
 			if (isset($this->ico[$key]))

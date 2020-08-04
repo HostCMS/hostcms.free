@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-01-31';
+	public $date = '2020-08-04';
 
 	/**
 	 * Module name
@@ -153,6 +153,27 @@ class Shop_Module extends Core_Module
 				}
 
 			case 3:
+				// Следующая индексация
+				$aTmpResult = $this->indexingShopProducers($offset, $limit);
+
+				$_SESSION['last_limit'] = count($aTmpResult);
+
+				$result = array_merge($result, $aTmpResult);
+				$count = count($result);
+
+				// Закончена индексация
+				if ($count < $limit_orig)
+				{
+					$_SESSION['search_block']++;
+					$limit = $limit_orig - $count;
+					$offset = 0;
+				}
+				else
+				{
+					return $result;
+				}
+
+			case 4:
 				// Следующая индексация
 				$aTmpResult = $this->indexingShopFilterSeos($offset, $limit);
 
@@ -302,9 +323,9 @@ class Shop_Module extends Core_Module
 		$offset = intval($offset);
 		$limit = intval($limit);
 
-		$oShopSeller = Core_Entity::factory('Shop_Seller');
+		$oShop_Sellers = Core_Entity::factory('Shop_Seller');
 
-		$oShopSeller
+		$oShop_Sellers
 			->queryBuilder()
 			->join('shops', 'shop_sellers.shop_id', '=', 'shops.id')
 			->join('structures', 'shops.structure_id', '=', 'structures.id')
@@ -316,14 +337,54 @@ class Shop_Module extends Core_Module
 			->orderBy('shop_sellers.id')
 			->limit($offset, $limit);
 
-		Core_Event::notify(get_class($this) . '.indexingShopSellers', $this, array($oShopSeller));
+		Core_Event::notify(get_class($this) . '.indexingShopSellers', $this, array($oShop_Sellers));
 
-		$aShopSellers = $oShopSeller->findAll(FALSE);
+		$aShop_Sellers = $oShop_Sellers->findAll(FALSE);
 
 		$result = array();
-		foreach ($aShopSellers as $oShopSeller)
+		foreach ($aShop_Sellers as $oShop_Seller)
 		{
-			$result[] = $oShopSeller->indexing();
+			$result[] = $oShop_Seller->indexing();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Индексация производителей
+	 *
+	 * @param int $offset
+	 * @param int $limit
+	 * @return array
+	 * @hostcms-event Shop_Module.indexingShopProducers
+	 */
+	public function indexingShopProducers($offset, $limit)
+	{
+		$offset = intval($offset);
+		$limit = intval($limit);
+
+		$oShop_Producers = Core_Entity::factory('Shop_Producer');
+
+		$oShop_Producers
+			->queryBuilder()
+			->join('shops', 'shop_producers.shop_id', '=', 'shops.id')
+			->join('structures', 'shops.structure_id', '=', 'structures.id')
+			->where('structures.active', '=', 1)
+			->where('structures.indexing', '=', 1)
+			->where('shop_producers.deleted', '=', 0)
+			->where('shops.deleted', '=', 0)
+			->where('structures.deleted', '=', 0)
+			->orderBy('shop_producers.id')
+			->limit($offset, $limit);
+
+		Core_Event::notify(get_class($this) . '.indexingShopProducers', $this, array($oShop_Producers));
+
+		$aShop_Producers = $oShop_Producers->findAll(FALSE);
+
+		$result = array();
+		foreach ($aShop_Producers as $oShop_Producer)
+		{
+			$result[] = $oShop_Producer->indexing();
 		}
 
 		return $result;

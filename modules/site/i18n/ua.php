@@ -38,7 +38,7 @@ return array(
 	'site_dates' => 'Формати',
 	'site_errors' => 'Помилки',
 	'site_robots_txt' => 'robots.txt',
-	'site_licence' => 'Ліцензія',
+	'site_licence' => 'Ключі',
 	'site_cache_options' => ' Кешування',
 	'edit_success' => 'Сайт успішно доданий!',
 	'edit_error' => 'Помилка! Сайт не доданий!',

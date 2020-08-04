@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -95,10 +95,25 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
 		}
 
-		$oMainTab->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
-		$oMainTab->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow3);
-		$oMainTab->move($this->getField('ip')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
+		$oMainTab
+			->move($this->getField('email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
+			->move($this->getField('phone')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow3);
+
+		$oMainTab->delete($this->getField('ip'));
+
+		$oIp = Admin_Form_Entity::factory('Input')
+			->caption(Core::_('Comment.ip'))
+			->name('ip')
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->value($this->_object->ip)
+			->format(array('maxlen' => array('value' => 46), 'lib' => array('value' => 'ip')));
+
+		$oMainRow4->add($oIp);
+
+		// Show button
+		Ipaddress_Controller_Edit::addBlockButton($oIp, $this->_object->ip, Core::_('Comment.ban_comment', $this->_object->subject), $this->_Admin_Form_Controller);
+
 		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
 
 		$oMainTab

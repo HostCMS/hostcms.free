@@ -24,6 +24,8 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'changeActive_success' => "Information successfully changed",
+	'turnOn_success' => "Regions of country turn on!",
+	'switchOff_success' => "Regions of country switch off!",
 
 	'language_tab'=>'Languages',
 	'name_en'=>'In English',

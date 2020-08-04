@@ -184,29 +184,72 @@ class Core_Str
 	 */
 	static public function translate($string)
 	{
-		if (defined('YANDEX_TRANSLATE_KEY') && strlen(YANDEX_TRANSLATE_KEY))
+		// Yandex Cloud Translate
+		if (defined('YANDEX_CLOUD_SECRET_KEY') && strlen(YANDEX_CLOUD_SECRET_KEY)
+			&& defined('YANDEX_CLOUD_FOLDER_ID') && strlen(YANDEX_CLOUD_FOLDER_ID))
 		{
-			$url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' .
-				'key=' . urlencode(YANDEX_TRANSLATE_KEY) .
-				'&text=' . urlencode($string) .
-				'&lang=en&format=plain';
-
-			$Core_Http = Core_Http::instance()
-				->url($url)
-				->timeout(3)
-				->execute();
-
-			$data = trim($Core_Http->getBody());
-
-			if (strlen($data))
+			try
 			{
-				$oData = json_decode($data);
+				$requestData = json_encode(
+					array(
+						'folder_id' => YANDEX_CLOUD_FOLDER_ID,
+						'texts' => $string,
+						'targetLanguageCode' => 'en'
+					)
+				);
 
-				if (is_object($oData) && $oData->code == 200 && isset($oData->text[0]))
+				$Core_Http = Core_Http::instance('curl');
+				$Core_Http
+					->clear()
+					->additionalHeader('Authorization', 'Api-Key ' . YANDEX_CLOUD_SECRET_KEY)
+					->contentType('application/json')
+					->method('POST')
+					->url('https://translate.api.cloud.yandex.net/translate/v2/translate')
+					->rawData($requestData)
+					->execute();
+
+				$data = trim($Core_Http->getDecompressedBody());
+
+				if (strlen($data))
 				{
-					return $oData->text[0];
+					$oData = json_decode($data);
+
+					if (is_object($oData) && isset($oData->translations[0]))
+					{
+						return $oData->translations[0]->text;
+					}
 				}
 			}
+			catch (Exception $e){}
+		}
+		// Yandex Translate available until Aug 15, 2020
+		elseif (defined('YANDEX_TRANSLATE_KEY') && strlen(YANDEX_TRANSLATE_KEY))
+		{
+			try
+			{
+				$url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' .
+					'key=' . urlencode(YANDEX_TRANSLATE_KEY) .
+					'&text=' . urlencode($string) .
+					'&lang=en&format=plain';
+
+				$Core_Http = Core_Http::instance()
+					->url($url)
+					->timeout(3)
+					->execute();
+
+				$data = trim($Core_Http->getDecompressedBody());
+
+				if (strlen($data))
+				{
+					$oData = json_decode($data);
+
+					if (is_object($oData) && $oData->code == 200 && isset($oData->text[0]))
+					{
+						return $oData->text[0];
+					}
+				}
+			}
+			catch (Exception $e){}
 		}
 		/*else
 		{
@@ -444,9 +487,9 @@ class Core_Str
 		$text = str_replace($aConfig['separators'], ' ', $text);
 
 		// Убираем двойные пробелы
-		while (stristr($text, '	'))
+		while (strstr($text, '  '))
 		{
-			$text = str_replace('	', ' ', $text);
+			$text = str_replace('  ', ' ', $text);
 		}
 
 		$text = trim($text);
@@ -938,7 +981,10 @@ class Core_Str
 	{
 		if (function_exists('idn_to_utf8'))
 		{
-			return idn_to_utf8($domain);
+			// fix INTL_IDNA_VARIANT_2003 is deprecated
+			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<')
+				? idn_to_utf8($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46)
+				: idn_to_utf8($domain);
 		}
 
 		$domain = mb_strtolower($domain);
@@ -1079,7 +1125,10 @@ class Core_Str
 	{
 		if (function_exists('idn_to_ascii'))
 		{
-			return idn_to_ascii($domain);
+			// fix INTL_IDNA_VARIANT_2003 is deprecated
+			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<')
+				? idn_to_ascii($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46)
+				: idn_to_ascii($domain);
 		}
 
 		$domain = mb_strtolower($domain);

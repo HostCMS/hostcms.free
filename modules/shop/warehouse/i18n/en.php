@@ -49,4 +49,7 @@ return array(
 	'movement' => 'Movement',
 	'types' => 'Types',
 	'shop_warehouse_type' => 'Warehouse type',
+	'separator' => 'Cell separator',
+	'space_separator' => 'Space',
+	'convolution' => 'Convolution',
 );

@@ -22,12 +22,12 @@ class Core_File
 	static public function getResizeExtensions()
 	{
 		$aReturn = self::$resizeExtensions;
-		
+
 		if (PHP_VERSION_ID >= 70100)
 		{
 			$aReturn[] = 'WEBP';
 		}
-		
+
 		return $aReturn;
 	}
 
@@ -45,7 +45,7 @@ class Core_File
 
 			// Create destination dir
 			self::mkdir(dirname($destination), CHMOD, TRUE);
-			
+
 			if (move_uploaded_file($source, $destination))
 			{
 				chmod($destination, $chmod);
@@ -725,6 +725,45 @@ class Core_File
 	}
 
 	/**
+	* Получение строки владельцев к файлу
+	*
+	* @param string $filename имя файла
+	* @return string строка владельцев к файлу
+	*/
+	static public function getFileOwners($filename)
+	{
+		$aReturn = array();
+
+		if (function_exists('posix_getpwuid'))
+		{
+			$fileowner = fileowner($filename);
+
+			if ($fileowner)
+			{
+				$aOwnerInfo = posix_getpwuid($fileowner);
+				is_array($aOwnerInfo)
+					&& $aReturn[] = $aOwnerInfo['name'];
+			}
+		}
+
+		if (function_exists('posix_getgrgid'))
+		{
+			$filegroup = filegroup($filename);
+
+			if ($filegroup)
+			{
+				$aGroupOwnerInfo = posix_getgrgid($fileowner);
+				is_array($aGroupOwnerInfo)
+					&& $aReturn[] = $aGroupOwnerInfo['name'];
+			}
+		}
+
+		return count($aReturn)
+			? implode(':', $aReturn)
+			: '—';
+	}
+
+	/**
 	 * Загрузка файлов в центре администрирования
 	 * @param array $param массив параметров
 	 * - $param['large_image_source'] путь к файлу-источнику большого изображения
@@ -755,7 +794,7 @@ class Core_File
 	static public function adminUpload($param)
 	{
 		Core_Event::notify('Core_File.onBeforeAdminUpload', NULL, $param);
-		
+
 		$result = array(
 			'large_image' => FALSE,
 			'small_image' => FALSE

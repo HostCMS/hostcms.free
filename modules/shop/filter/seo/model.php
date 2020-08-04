@@ -185,6 +185,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		<?php
 	}
 
+	/**
+	 * Get url
+	 * @return string
+	 */
 	public function getUrl()
 	{
 		$url = '';
@@ -196,7 +200,10 @@ class Shop_Filter_Seo_Model extends Core_Entity
 
 		if ($this->shop_producer_id)
 		{
-			$url .= rawurlencode($this->Shop_Producer->path) . '/';
+			$url .= rawurlencode($this->Shop->filter_mode == 0
+					? $this->Shop_Producer->name
+					: $this->Shop_Producer->path
+				) . '/';
 		}
 
 		$aValues = array();
@@ -227,14 +234,20 @@ class Shop_Filter_Seo_Model extends Core_Entity
 					{
 						switch ($oProperty->type)
 						{
-							case 3:
+							case 3: // List
 								if (Core::moduleIsActive('list'))
 								{
 									$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
 
 									!is_null($oList_Item)
-										&& $url .= rawurlencode($oList_Item->value) . '/';
+										&& $url .= rawurlencode($this->Shop->filter_mode == 1 && $oList_Item->path != ''
+											? $oList_Item->path
+											: $oList_Item->value
+										) . '/';
 								}
+							break;
+							case 7: // Checkbox
+								// nothing to do
 							break;
 							default:
 								$url .= rawurlencode($value) . '/';
@@ -289,7 +302,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		$oSearch_Page->module = 3;
 		$oSearch_Page->module_id = $this->shop_id;
 		$oSearch_Page->inner = 0;
-		$oSearch_Page->module_value_type = 4; // search_page_module_value_type
+		$oSearch_Page->module_value_type = 5; // search_page_module_value_type
 		$oSearch_Page->module_value_id = $this->id; // search_page_module_value_id
 
 		$oSearch_Page->siteuser_groups = array(intval($this->Shop->siteuser_group_id));
@@ -355,6 +368,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	/**
 	 * Copy object
 	 * @return Core_Entity
+	 * @hostcms-event shop_filter_seo.onAfterRedeclaredCopy
 	 */
 	public function copy()
 	{
@@ -365,6 +379,8 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		{
 			$newObject->add(clone $oShop_Filter_Seo_Property);
 		}
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
 	}
