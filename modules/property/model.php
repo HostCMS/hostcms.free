@@ -59,9 +59,11 @@ class Property_Model extends Core_Entity
 		'siteuser_property' => array(),
 		'informationsystem_item_property' => array(),
 		'informationsystem_group_property' => array(),
+		'informationsystem_comment_property' => array(),
 		'shop_item_property' => array(),
 		'shop_group_property' => array(),
 		'shop_order_property' => array(),
+		'shop_comment_property' => array(),
 		'deal_template_property' => array()
 	);
 
@@ -305,6 +307,11 @@ class Property_Model extends Core_Entity
 			$nodeName = 'Informationsystem_Group';
 			$methodName = 'getGroupPath';
 		}
+		elseif (Core::moduleIsActive('informationsystem') && !is_null($this->Informationsystem_Comment_Property->id))
+		{
+			$nodeName = 'Comment';
+			$methodName = 'getPath';
+		}
 		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Item_Property->id))
 		{
 			$nodeName = 'Shop_Item';
@@ -328,6 +335,11 @@ class Property_Model extends Core_Entity
 		{
 			$nodeName = 'Shop_Order';
 			$methodName = 'getOrderPath';
+		}
+		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Comment_Property->id))
+		{
+			$nodeName = 'Comment';
+			$methodName = 'getPath';
 		}
 		elseif (Core::moduleIsActive('deal') && !is_null($this->Deal_Template_Property->id))
 		{
@@ -368,6 +380,7 @@ class Property_Model extends Core_Entity
 		{
 			$this->Informationsystem_Item_Property->delete();
 			$this->Informationsystem_Group_Property->delete();
+			$this->Informationsystem_Comment_Property->delete();
 		}
 
 		if (Core::moduleIsActive('shop'))
@@ -375,6 +388,7 @@ class Property_Model extends Core_Entity
 			$this->Shop_Item_Property->delete();
 			$this->Shop_Group_Property->delete();
 			$this->Shop_Order_Property->delete();
+			$this->Shop_Comment_Property->delete();
 		}
 
 		Core::moduleIsActive('siteuser') && $this->Siteuser_Property->delete();

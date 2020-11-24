@@ -352,7 +352,7 @@ class Core_Image_Gd extends Core_Image
 		if (!is_file($source))
 		{
 			throw new Core_Exception("The file '%source' does not exist.",
-				array('%source' => Core_Exception::cutRootPath($source)));
+				array('%source' => Core::cutRootPath($source)));
 		}
 
 		$return = FALSE;
@@ -392,9 +392,25 @@ class Core_Image_Gd extends Core_Image
 					imagedestroy($sourceResource);
 				}
 			}
+			elseif ($ext == 'webp' && function_exists('imagecreatefromwebp'))
+			{
+				$sourceResource = imagecreatefromwebp($source);
+
+				if ($sourceResource)
+				{
+					imagealphablending($sourceResource, FALSE);
+					imagesavealpha($sourceResource, TRUE);
+
+					$sourceResource = self::_addWatermark($sourceResource, $watermarkResource, $watermarkX, $watermarkY);
+					$return = imagewebp($sourceResource, $target, defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
+					@chmod($target, CHMOD_FILE);
+
+					imagedestroy($sourceResource);
+				}
+			}
 			elseif ($ext == 'gif')
 			{
-				$sourceResource = imagecreatefromgif ($source);
+				$sourceResource = imagecreatefromgif($source);
 
 				if ($sourceResource)
 				{

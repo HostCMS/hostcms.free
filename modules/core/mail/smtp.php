@@ -26,12 +26,18 @@ class Core_Mail_Smtp extends Core_Mail
 	{
 		$header = "Date: " . date("D, d M Y H:i:s O") . $this->_separator;
 		$header .= "Subject: {$subject}{$this->_separator}";
-		//$header .= "To: {$to}{$this->_separator}";
+		$header .= "To: {$to}{$this->_separator}"; // 000298317
 
-		// Remove 'From' from headers
+		// Change 'From' header
 		if (isset($this->_config['from']) && isset($this->_headers['From']))
 		{
 			unset($this->_headers['From']);
+
+			$sFrom = !is_null($this->_senderName)
+				? '=?UTF-8?B?' . base64_encode($this->_senderName) . "?= <{$this->_config['from']}>"
+				: $this->_config['from'];
+
+			$this->header('From', $sFrom);
 		}
 
 		$header .= $this->_headersToString() . $this->_separator . $this->_separator;
@@ -56,7 +62,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 			}
 			while (!feof($this->_fp)
@@ -64,7 +71,7 @@ class Core_Mail_Smtp extends Core_Mail
 				&& substr($server_response, 3, 1) != ' '
 			);
 
-			$this->_serverFputs("EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
+			$this->_serverFputs("EHLO " . $this->_getServerName() . "\r\n");
 
 			// Может быть много 250-х, последний отделяется пробелом, а не минусом
 			do {
@@ -74,7 +81,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 			}
 			while (!feof($this->_fp)
@@ -92,7 +100,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 
 				// http://php.net/manual/ru/function.stream-socket-enable-crypto.php#119122
@@ -107,7 +116,7 @@ class Core_Mail_Smtp extends Core_Mail
 				$xbCrypto = stream_socket_enable_crypto($this->_fp, TRUE, $crypto_method);
 
 				// Resend EHLO after TLS
-				$this->_serverFputs("EHLO " . Core_Array::get($_SERVER, 'SERVER_NAME') . "\r\n");
+				$this->_serverFputs("EHLO " . $this->_getServerName() . "\r\n");
 
 				// Может быть много 250-х, последний отделяется пробелом, а не минусом
 				do {
@@ -117,7 +126,8 @@ class Core_Mail_Smtp extends Core_Mail
 					{
 						fclose($this->_fp);
 						$this->log();
-						return FALSE;
+						$this->_status = FALSE;
+						return $this;
 					}
 				}
 				while (!feof($this->_fp)
@@ -135,7 +145,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 
 				$this->_serverFputs(base64_encode($this->_config['username']) . "\r\n");
@@ -144,7 +155,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 
 				$this->_serverFputs(base64_encode($this->_config['password']) . "\r\n");
@@ -153,7 +165,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 			}
 
@@ -166,7 +179,8 @@ class Core_Mail_Smtp extends Core_Mail
 			{
 				fclose($this->_fp);
 				$this->log();
-				return FALSE;
+				$this->_status = FALSE;
+				return $this;
 			}
 
 			$aRecipients = explode(',', $to);
@@ -178,7 +192,8 @@ class Core_Mail_Smtp extends Core_Mail
 				{
 					fclose($this->_fp);
 					$this->log();
-					return FALSE;
+					$this->_status = FALSE;
+					return $this;
 				}
 			}
 
@@ -188,7 +203,8 @@ class Core_Mail_Smtp extends Core_Mail
 			{
 				fclose($this->_fp);
 				$this->log();
-				return FALSE;
+				$this->_status = FALSE;
+				return $this;
 			}
 
 			$this->_serverFputs($header . "\r\n.\r\n");
@@ -197,11 +213,14 @@ class Core_Mail_Smtp extends Core_Mail
 			{
 				fclose($this->_fp);
 				$this->log();
-				return FALSE;
+				$this->_status = FALSE;
+				return $this;
 			}
 
 			$this->_serverFputs("QUIT\r\n");
 			fclose($this->_fp);
+
+			$this->log();
 
 			$this->_status = TRUE;
 		}
@@ -265,5 +284,14 @@ class Core_Mail_Smtp extends Core_Mail
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get Server Name
+	 * @return string
+	 */
+	protected function _getServerName()
+	{
+		return Core_Array::get($_SERVER, 'SERVER_NAME', gethostname());
 	}
 }

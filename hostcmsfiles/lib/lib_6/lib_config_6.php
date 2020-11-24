@@ -25,6 +25,9 @@ $Shop_Controller_Show
 	->limit($limit)
 	->parseUrl();
 
+// Выводить товары из подгрупп
+$Shop_Controller_Show->subgroups(TRUE);
+
 // Обработка скачивания файла электронного товара
 $guid = Core_Array::getGet('download_file');
 if (strlen($guid))

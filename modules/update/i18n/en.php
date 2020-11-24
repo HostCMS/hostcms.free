@@ -40,4 +40,5 @@ return array(
 	'msg_installing_package' => 'Installing package %s',
 	'msg_unpack_package' => 'Unpacking file %s',
 	'module' => 'Module "%s"',
+	'update' => 'Update',	
 );

@@ -43,6 +43,14 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 
 		$oCore_Response->header('X-Powered-By', 'HostCMS');
 
+		if (isset(Core::$mainConfig['headers']) && is_array(Core::$mainConfig['headers']))
+		{
+			foreach (Core::$mainConfig['headers'] as $headerName => $headerValue)
+			{
+				$oCore_Response->header($headerName, $headerValue);
+			}
+		}
+
 		$this->_uri == '' && $this->_uri = '/';
 
 		if ($this->_uri == '/index.php' && !Core::isIIS()
@@ -141,6 +149,32 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		}
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
+		// Content-Security-Policy
+		$oSite->csp != ''
+			&& $oCore_Response->header('Content-Security-Policy', $oSite->csp);
+
+		// XSS protect
+		if ($oSite->protect)
+		{
+			$bXSS = FALSE;
+			foreach ($_GET as $getKey => $getValue)
+			{
+				if (Core_Security::checkXSS($getValue))
+				{
+					unset($_GET[$getKey]);
+					unset($_REQUEST[$getKey]);
+					$bXSS = TRUE;
+				}
+			}
+
+			if ($bXSS)
+			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write('XSS attempt was detected');
+			}
+		}
 
 		// Отдача статичного кэша в случае, если правила mod_rewrite не сработали
 		// из-за %{HTTP_COOKIE} !^.*PHPSESSID=.*$
@@ -407,19 +441,23 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			if (!is_null($oCdn_Site) && $oCdn_Site->active)
 			{
 				$oCdn = $oCdn_Site->Cdn;
-				$oCdn_Controller = Cdn_Controller::instance($oCdn->driver);
-				$oCdn_Controller->setCdnSite($oCdn_Site);
 
-				$oCdn_Site->css
-					&& $oCore_Page->cssCDN = '//' . htmlspecialchars($oCdn_Controller->getCssDomain());
-				$oCdn_Site->js
-					&& $oCore_Page->jsCDN = '//' . htmlspecialchars($oCdn_Controller->getJsDomain());
-				$oCdn_Site->informationsystem
-					&& $oCore_Page->informationsystemCDN = '//' . htmlspecialchars($oCdn_Controller->getInformationsystemDomain());
-				$oCdn_Site->shop
-					&& $oCore_Page->shopCDN = '//' . htmlspecialchars($oCdn_Controller->getShopDomain());
-				$oCdn_Site->structure
-					&& $oCore_Page->structureCDN = '//' . htmlspecialchars($oCdn_Controller->getStructureDomain());
+				if (!is_null($oCdn->driver))
+				{
+					$oCdn_Controller = Cdn_Controller::instance($oCdn->driver);
+					$oCdn_Controller->setCdnSite($oCdn_Site);
+
+					$oCdn_Site->css
+						&& $oCore_Page->cssCDN = '//' . htmlspecialchars($oCdn_Controller->getCssDomain());
+					$oCdn_Site->js
+						&& $oCore_Page->jsCDN = '//' . htmlspecialchars($oCdn_Controller->getJsDomain());
+					$oCdn_Site->informationsystem
+						&& $oCore_Page->informationsystemCDN = '//' . htmlspecialchars($oCdn_Controller->getInformationsystemDomain());
+					$oCdn_Site->shop
+						&& $oCore_Page->shopCDN = '//' . htmlspecialchars($oCdn_Controller->getShopDomain());
+					$oCdn_Site->structure
+						&& $oCore_Page->structureCDN = '//' . htmlspecialchars($oCdn_Controller->getStructureDomain());
+				}
 			}
 		}
 
@@ -558,6 +596,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		!defined('CURRENT_VERSION') && define('CURRENT_VERSION', '6.0');
 
 		$bIsUtf8 = strtoupper($oSite->coding) == 'UTF-8';
+
+		// End all another opened and hadn't closed. On the right way ob_get_level() == 1
+		/*while (ob_get_level() > 1)
+		{
+			ob_end_flush();
+		}*/
 
 		//if (defined('OB_START'))
 		//{
@@ -699,7 +743,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	public function getStructure($path, $site_id)
 	{
 		$path = Core_Str::ltrimUri($path);
-		
+
 		if ($path === '/')
 		{
 			return NULL;

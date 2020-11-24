@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Model extends Core_Entity
 {
@@ -20,6 +20,7 @@ class Template_Section_Lib_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'template_section' => array(),
 		'lib' => array(),
+		'user' => array(),
 	);
 
 	/**
@@ -41,6 +42,21 @@ class Template_Section_Lib_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'active' => 1,
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Change status

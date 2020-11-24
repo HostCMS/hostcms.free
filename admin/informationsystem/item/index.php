@@ -372,20 +372,15 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 )
 ->add(
-		Admin_Form_Entity::factory('Menu')
+	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Item.show_all_comments_top_menu'))
+		->img('/admin/images/comments.gif')
 		->icon('fa fa-comments')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Informationsystem_Item.show_comments_link_show_all_comments'))
-				->img('/admin/images/comments.gif')
-				->icon('fa fa-comments')
-				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemComments, NULL, NULL, $additionalParamsComments)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemComments, NULL, NULL, $additionalParamsComments)
-				)
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref($sInformationsystemComments, NULL, NULL, $additionalParamsComments)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax($sInformationsystemComments, NULL, NULL, $additionalParamsComments)
 		)
 );
 
@@ -763,6 +758,10 @@ $oAdmin_Form_Controller->addDataset(
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Informationsystem_Item')
 );
+
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $oAdmin_Form_Dataset
 	->addCondition(

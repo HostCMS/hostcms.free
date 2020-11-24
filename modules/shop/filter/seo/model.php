@@ -29,6 +29,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		'shop' => array(),
 		'shop_group' => array(),
 		'shop_producer' => array(),
+		'user' => array(),
 	);
 
 	/**
@@ -47,6 +48,21 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	protected $_preloadValues = array(
 		'active' => 1
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Change item status
@@ -258,6 +274,54 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Get XML for entity and children entities
+	 * @return string
+	 * @hostcms-event shop_filter_seo.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_filter_seo.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->clearXmlTags();
+
+		!isset($this->_forbiddenTags['url'])
+			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getUrl());
+
+		$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll();
+		foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
+		{
+			$this->addEntity($oShop_Filter_Seo_Property->clearXmlTags());
+		}
+
+		return $this;
 	}
 
 	/**

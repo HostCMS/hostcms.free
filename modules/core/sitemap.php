@@ -6,6 +6,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Google sitemap
  * http://www.sitemaps.org/protocol.html
  *
+ * - showInformationsystemGroups(TRUE|FALSE) выводить группы информационных систем, по умолчанию TRUE
+ * - showInformationsystemItems(TRUE|FALSE) выводить элементы информационных систем, по умолчанию TRUE
+ * - showInformationsystemTags(TRUE|FALSE) выводить метки информационных систем, по умолчанию FALSE
+ * - showShopGroups(TRUE|FALSE) выводить группы магазина, по умолчанию TRUE
+ * - showShopItems(TRUE|FALSE) выводить товары магазина, по умолчанию TRUE
+ * - showModifications(TRUE|FALSE) выводить модификации товаров магазина, по умолчанию FALSE
+ * - showShopTags(TRUE|FALSE) выводить метки товаров магазина, по умолчанию FALSE
+ * - showShopFilter(TRUE|FALSE) выводить SEO-фильтр магазина, по умолчанию TRUE
  * - rebuildTime время в секундах, которое должно пройти с момента создания sitemap.xml для его перегенерации. По умолчанию 14400
  * - limit ограничение на единичную выборку элементов, по умолчанию 1000. При наличии достаточного объема памяти рекомендуется увеличить параметр
  * - createIndex(TRUE|FALSE) разбивать карту на несколько файлов, по умолчанию FALSE
@@ -86,7 +94,13 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$this->rebuildTime = 14400; // 4 часа
 		$this->limit = 1000;
-		$this->createIndex = FALSE;
+
+		$this->showInformationsystemTags = $this->showModifications = $this->showShopTags
+			= $this->createIndex = FALSE;
+
+		$this->showInformationsystemGroups = $this->showInformationsystemItems
+			= $this->showShopGroups = $this->showShopItems
+			= $this->showShopFilter = TRUE;
 
 		$this->_Informationsystems = $this->_Shops = array();
 
@@ -98,8 +112,6 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		$this->fileName = 'sitemap-%d.xml';
 		$this->multipleFileName = 'sitemap-%d-%d.xml';
-
-		$this->showShopFilter = TRUE;
 	}
 
 	/**

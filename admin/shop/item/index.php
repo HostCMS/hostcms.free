@@ -86,6 +86,14 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 
 	if (strlen($sQuery))
 	{
+		if (!is_null(Core_Array::getGet('includeRoot')))
+		{
+			$aJSON[0] = array(
+				'id' => 0,
+				'text' => Core::_('Shop_Item.root') . ' [0]'
+			);
+		}
+
 		$oShop_Groups = $oShop->Shop_Groups;
 		$oShop_Groups->queryBuilder()
 			->where('shop_groups.name', 'LIKE', $sQueryLike)
@@ -101,6 +109,40 @@ if (!is_null(Core_Array::getGet('shortcuts')) && !is_null(Core_Array::getGet('te
 			$aJSON[] = array(
 				'id' => $oShop_Group->id,
 				'text' => $sParents . ' [' . $oShop_Group->id . ']',
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
+if (!is_null(Core_Array::getGet('items')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
+	$iShopId = intval(Core_Array::getGet('shop_id'));
+	$oShop = Core_Entity::factory('Shop', $iShopId);
+
+	if (strlen($sQuery))
+	{
+		$oShop_Items = $oShop->Shop_Items;
+		$oShop_Items->queryBuilder()
+			->where('shop_items.name', 'LIKE', $sQueryLike)
+			->where('shop_items.shortcut_id', '=', 0)
+			->where('shop_items.modification_id', '=', 0)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$aShop_Items = $oShop_Items->findAll(FALSE);
+
+		foreach ($aShop_Items as $oShop_Item)
+		{
+			$aJSON[] = array(
+				'id' => $oShop_Item->id,
+				'text' => $oShop_Item->name . ' [' . $oShop_Item->id . ']',
 			);
 		}
 	}
@@ -423,10 +465,21 @@ $oMenu->add(
 				->icon('fa fa-folder-open-o')
 				->img('/admin/images/folder_page_gear.gif')
 				->href(
-          $oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
 				)
 				->onclick(
-          $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/property/for/group/index.php', NULL, NULL, $additionalParams)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Item.items_catalog_add_form_tab_link'))
+				->icon('fa fa-folder-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/tab/index.php', NULL, NULL, $additionalParams)
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/tab/index.php', NULL, NULL, $additionalParams)
 				)
 		)
 		->add(
@@ -435,10 +488,10 @@ $oMenu->add(
 				->icon('fa fa-comments')
 				->img('/admin/images/comments.gif')
 				->href(
-          $oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/comment/index.php', NULL, NULL, $additionalParams)
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/comment/index.php', NULL, NULL, $additionalParams)
 				)
 				->onclick(
-          $oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/comment/index.php', NULL, NULL, $additionalParams)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/comment/index.php', NULL, NULL, $additionalParams)
 				)
 		)
 		->add(
@@ -1183,6 +1236,11 @@ $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Источник данных 1
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Item'));
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $oAdmin_Form_Dataset
 	->addCondition(

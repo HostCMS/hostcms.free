@@ -246,7 +246,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->options(
 				array(' … ') + $Document_Controller_Edit->fillDocumentDir($this->_object->site_id)
 			)
-			->value($oDocument->document_dir_id) //
+			->value($oDocument->document_dir_id)
 			->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: 'document_id', callBack: $.loadSelectOptionsCallback, action: 'loadDocumentList', additionalParams: 'document_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$oMainRow6->add($Select_DocumentDir);
@@ -268,7 +268,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-lg-6 hidden-1 hidden-2 hidden-3'))
 			->options($aDocumentForDir)
 			->value($this->_object->document_id)
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: '{$this->_formId}', callBack: $.loadDocumentText, additionalParams: 'loadDocumentText&document_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->onchange("$('#{$windowId} .document-edit').removeClass('hidden'); $.ajaxRequest({path: '/admin/structure/index.php', context: '{$this->_formId}', callBack: $.loadDocumentText, additionalParams: 'loadDocumentText&document_id=' + this.value, windowId: '{$windowId}'}); return false");
 			;
 
 		$Select_Document
@@ -276,9 +276,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->href(
-						$this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, $this->_object->document_id, 'document_dir_id=' . intval($oDocument->document_dir_id))
+						$this->_object->document_id
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, $oDocument->id, 'document_dir_id=' . intval($oDocument->document_dir_id))
+							: ''
 					)
-					->class('input-group-addon bg-blue bordered-blue')
+					->class('document-edit input-group-addon bg-blue bordered-blue' . ($this->_object->document_id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -301,40 +303,51 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aTemplateOptions = $Template_Controller_Edit->fillTemplateList($this->_object->site_id);
 
-		$oSelect_Template_Id = Admin_Form_Entity::factory('Select')
+		$oSelect_Template = Admin_Form_Entity::factory('Select')
 			->options(
 				count($aTemplateOptions) ? $aTemplateOptions : array(' … ')
 			)
 			->name('template_id')
+			->id('template_id')
 			->value($template_id)
 			->caption(Core::_('Structure.template_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-lg-6 hidden-3'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-lg-6 hidden-3'))
+			->onchange("$('#{$windowId} .template-edit').attr('href', '/admin/template/index.php?hostcms[action]=edit&hostcms[checked][1][' + this.value + ']=1'); return false");
 
-		$oMainRow13->add($oSelect_Template_Id);
+		$oSelect_Template
+			->add(
+				Admin_Form_Entity::factory('A')
+					->target('_blank')
+					->class('template-edit input-group-addon bg-blue bordered-blue')
+					->value('<i class="fa fa-pencil"></i>')
+			);
+
+		$oMainRow13->add($oSelect_Template);
 
 		$oAdditionalTab->delete($this->getField('template_id'));
 
 		$this->getField('path')
+			->id('path')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 		$oSite = $this->_object->Site;
 		$oSiteAlias = $oSite->getCurrentAlias();
+
 		if ($oSiteAlias)
 		{
-			$sItemUrl = ($this->_object->https ? 'https://' : 'http://')
-				. $oSiteAlias->name
-				. $this->_object->getPath()
-				;
+			$this->getField('path')->add(
+				$pathLink = Admin_Form_Entity::factory('A')
+					->id('pathLink')
+					->class('input-group-addon bg-blue bordered-blue')
+					->value('<i class="fa fa-external-link"></i>')
+			);
 
-			$this->getField('path')
-				->add(
-					Admin_Form_Entity::factory('A')
-						->id('path')
-						->target('_blank')
-						->href($sItemUrl)
-						->class('input-group-addon bg-blue bordered-blue')
-						->value('<i class="fa fa-external-link"></i>')
-				);
+			if ($this->_object->id)
+			{
+				$pathLink
+					->target('_blank')
+					->href(($this->_object->https ? 'https://' : 'http://') . $oSiteAlias->name . $this->_object->getPath());
+			}
 		}
 
 		// -!- Row --
@@ -355,8 +368,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->options(
 				array(' … ') + $Lib_Controller_Edit->fillLibDir(0)
 			)
-			->value($oLib->lib_dir_id) //
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
+			->value($oLib->lib_dir_id)
+			->onchange("$('#{$windowId} .lib-edit').addClass('hidden'); $.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$aLibForDir = array(' … ');
 		$aLibs = Core_Entity::factory('Lib_Dir', intval($oLib->lib_dir_id)) // Может быть NULL
@@ -375,7 +388,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => 'form-group col-xs-12 col-lg-6 hidden-0 hidden-1 hidden-3'))
 			->options($aLibForDir)
 			->value($this->_object->lib_id)
-			->onchange("$.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_properties', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false")
+			->onchange("$.ajaxRequest({path: '/admin/structure/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties', additionalParams: 'lib_id=' + this.value, windowId: '{$windowId}'}); return false")
 			;
 
 		$Select_Lib
@@ -383,9 +396,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->href(
-						$this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $this->_object->lib_id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+						$this->_object->lib_id
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $oLib->id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+							: ''
 					)
-					->class('input-group-addon bg-blue bordered-blue')
+					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($this->_object->lib_id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -395,7 +410,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// DIV для св-в типовой дин. страницы
 		// Для выбранного стандартно
 		Core::factory('Core_Html_Entity_Script')
-			->value("$('#{$windowId} #lib_id').change();")
+			->value("$('#{$windowId} #lib_id').change(); $('#{$windowId} #template_id').change();")
 			->execute();
 
 		$Div_Lib_Properies
@@ -545,6 +560,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->deleteFile();
 		}
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		// Страница
 		if ($this->_object->type == 0)
 		{
@@ -572,17 +589,13 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			if (!$this->_object->document_id)
 			{
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
-
-				?>
-				<script>
+				?><script>
 				$('#<?php echo $windowId?> #document_id')
 					.append($("<option></option>")
 						.attr("value", <?php echo htmlspecialchars($oDocument->id)?>)
 						.attr("selected", "selected")
 						.text("<?php echo htmlspecialchars($oDocument->name)?>"))
-				</script>
-				<?php
+				</script><?php
 			}
 
 			$this->_object->document_id = $oDocument->id;
@@ -635,15 +648,14 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSiteAlias = $oSite->getCurrentAlias();
 		if ($oSiteAlias)
 		{
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
-
 			$sUrl = ($this->_object->https ? 'https://' : 'http://')
 				. $oSiteAlias->name
 				. $this->_object->getPath();
 
 			$this->_Admin_Form_Controller->addMessage(
 				Core::factory('Core_Html_Entity_Script')
-					->value("$('#{$windowId} a#path').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "')")
+					->value("$('#{$windowId} input#path').val('" . Core_Str::escapeJavascriptVariable($this->_object->path) . "');
+					$('#{$windowId} a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "').attr('target', '_blank')")
 				->execute()
 			);
 		}

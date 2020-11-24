@@ -43,6 +43,7 @@ return array(
 	'item_active' => 'Активность товара',
 	'item_sorting' => 'Порядок сортировки товара',
 	'item_path' => 'Путь к товару',
+	'item_full_path' => 'Полный путь к товару',
 	'item_seo_title' => "Заголовок (title)",
 	'item_seo_description' => "Значение мета-тега description для страницы с товаром",
 	'item_seo_keywords' => "Значение мета-тега keywords для страницы с товаром",

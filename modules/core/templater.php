@@ -27,7 +27,8 @@ class Core_Templater extends Core_Meta
 		$this
 			->addFunction('day', array('Core_Templater', 'day'))
 			->addFunction('month', array('Core_Templater', 'month'))
-			->addFunction('year', array('Core_Templater', 'year'));
+			->addFunction('year', array('Core_Templater', 'year'))
+			->addFunction('generateChars', array('Core_Str', 'generateChars'));
 	}
 
 	/**
@@ -113,6 +114,10 @@ class Core_Templater extends Core_Meta
 				'{rand(10000,99999)}' => array(
 					'caption' => Core::_('Core.random'),
 					'color' => 'danger'
+				),
+				'{generateChars(7)}' => array(
+					'caption' => Core::_('Core.generateChars'),
+					'color' => 'maroon'
 				)
 			);
 		}

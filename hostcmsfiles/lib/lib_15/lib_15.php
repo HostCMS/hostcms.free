@@ -40,6 +40,7 @@ foreach ($aSourcesList as $url)
 				$oInformationsystem_Item->text = Core_Array::get($aItem, 'yandex:full-text', $aItem['description'])
 					. "<p>Источник: <a href=\"{$aItem['link']}\">{$aItem['link']}</a>";
 				$oInformationsystem_Item->datetime = Core_Date::timestamp2sql(strtotime($aItem['pubdate']));
+				$oInformationsystem_Item->path = '';
 
 				$oInformationsystem_Item->informationsystem_group_id = !is_null($oInformationsystem_Group->id)
 					? $oInformationsystem_Group->id : 0;
@@ -49,11 +50,8 @@ foreach ($aSourcesList as $url)
 					// Save informationsystem item
 					$oInformationsystem->add($oInformationsystem_Item);
 
-					if (isset($aItem['enclosure']['url']))
+					if (isset($aItem['enclosure']['url']) && strpos($aItem['enclosure']['url'], 'http') === 0)
 					{
-						// Если ссылка не начинается с http://
-						strpos($aItem['enclosure']['url'], 'http://') !== 0 && $aItem['enclosure']['url'] = 'http://' . $aItem['enclosure']['url'];
-					
 						$Core_Http = Core_Http::instance()
 							->url($aItem['enclosure']['url'])
 							->port(80)
@@ -62,9 +60,9 @@ foreach ($aSourcesList as $url)
 
 						// Определяем расширение файла
 						$ext = Core_File::getExtension($aItem['enclosure']['url']);
-						
-						$temp_file = tempnam(TMP_DIR, "rss") . '.' . $ext;
-						Core_File::write($temp_file, $Core_Http->getBody());
+
+						$temp_file = tempnam(TMP_DIR, 'rss') . '.' . $ext;
+						Core_File::write($temp_file, $Core_Http->getDecompressedBody());
 
 						$param = array();
 
@@ -92,12 +90,12 @@ foreach ($aSourcesList as $url)
 						$param['watermark_position_x'] = $oInformationsystem->watermark_default_position_x;
 						$param['watermark_position_y'] = $oInformationsystem->watermark_default_position_y;
 						$param['large_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio;
-						$param['small_image_max_width'] = $oInformationsystem->group_image_small_max_width;
-						$param['small_image_max_height'] = $oInformationsystem->group_image_small_max_height;
+						$param['small_image_max_width'] = $oInformationsystem->image_small_max_width;
+						$param['small_image_max_height'] = $oInformationsystem->image_small_max_height;
 						$param['small_image_watermark'] = $oInformationsystem->watermark_default_use_small_image;
 						$param['small_image_preserve_aspect_ratio'] = $oInformationsystem->preserve_aspect_ratio_small;
-						$param['large_image_max_width'] = $oInformationsystem->group_image_large_max_width;
-						$param['large_image_max_height'] = $oInformationsystem->group_image_large_max_height;
+						$param['large_image_max_width'] = $oInformationsystem->image_large_max_width;
+						$param['large_image_max_height'] = $oInformationsystem->image_large_max_height;
 						$param['large_image_watermark'] = $oInformationsystem->watermark_default_use_large_image;
 
 						$oInformationsystem_Item->createDir();

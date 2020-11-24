@@ -40,6 +40,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'showProperties',
 		'showInformationsystem',
 		'showShop',
+		'showProducer',
 		'showForum',
 		'showMessage',
 		'showHelpdesk',
@@ -48,6 +49,7 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 		'informationsystem_group_id',
 		'shop_item_id',
 		'shop_group_id',
+		'shop_producer_id',
 		'forum_category_id',
 		'forum_topic_id',
 		'forbiddenTags',
@@ -84,7 +86,8 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		$this->current = Core_Page::instance()->structure->id;
 
-		$this->showInformationsystem = $this->showShop = $this->showForum = $this->showMessage = $this->showHelpdesk = TRUE;
+		$this->showInformationsystem = $this->showShop = $this->showProducer = $this->showForum
+			= $this->showMessage = $this->showHelpdesk = TRUE;
 
 		$this->cache = TRUE;
 	}
@@ -165,6 +168,11 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 				}
 			}
 
+			if ($this->showProducer && Core_Page::instance()->object instanceof Shop_Producer_Controller_Show)
+			{
+				$this->shop_producer_id = Core_Page::instance()->object->producer;
+			}
+
 			if ($this->showMessage && Core_Page::instance()->object instanceof Message_Controller_Show)
 			{
 				$this->message_topic_id = Core_Page::instance()->object->topic;
@@ -212,268 +220,260 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 		$this->_breadcrumbs = array();
 
-		if (is_object(Core_Page::instance()->object))
+		if ($this->showInformationsystem)
 		{
-			if ($this->showInformationsystem && Core_Page::instance()->object instanceof Informationsystem_Controller_Show)
+			if ($this->informationsystem_item_id)
 			{
-				if ($this->informationsystem_item_id)
+				$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->informationsystem_item_id);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
+
+				$oInformationsystem_Item
+					->clearEntities()
+					->addForbiddenTag('url')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('link')
+							->value(
+								$oInformationsystem_Item->Informationsystem->Structure->getPath() . $oInformationsystem_Item->getPath()
+							)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('show')
+							->value($oInformationsystem_Item->active)
+					);
+
+				$this->addBreadcrumb($oInformationsystem_Item);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItem', $this, array($oInformationsystem_Item));
+			}
+
+			if ($this->informationsystem_group_id)
+			{
+				$groupId = $this->informationsystem_group_id;
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemGroups', $this, array($groupId));
+
+				$aInformationsystem_Groups = array();
+
+				while ($groupId)
 				{
-					$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->informationsystem_item_id);
+					$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $groupId);
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
-
-					$oInformationsystem_Item
+					$oInformationsystem_Group
 						->clearEntities()
 						->addForbiddenTag('url')
 						->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('link')
 								->value(
-									$oInformationsystem_Item->Informationsystem->Structure->getPath() . $oInformationsystem_Item->getPath()
+									$oInformationsystem_Group->Informationsystem->Structure->getPath() . $oInformationsystem_Group->getPath()
 								)
 						)->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('show')
-								->value($oInformationsystem_Item->active)
+								->value($oInformationsystem_Group->active)
 						);
 
-					$this->addBreadcrumb($oInformationsystem_Item);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItem', $this, array($oInformationsystem_Item));
+					$groupId = $oInformationsystem_Group->parent_id;
+					$aInformationsystem_Groups[] = $oInformationsystem_Group;
 				}
 
-				if ($this->informationsystem_group_id)
+				$this->addBreadcrumbs($aInformationsystem_Groups);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroups', $this, array($aInformationsystem_Groups));
+			}
+		}
+
+		if ($this->showShop)
+		{
+			if ($this->shop_item_id)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddShopItem', $this, array($oShop_Item));
+
+				$oShop_Item
+					->clearEntities()
+					->addForbiddenTag('url')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('link')
+							->value(
+								$oShop_Item->Shop->Structure->getPath() . $oShop_Item->getPath()
+							)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('show')
+							->value($oShop_Item->active)
+					);
+
+				// Если модификация, то сначала идет родительский товар, а в нем модификация
+				if ($oShop_Item->modification_id)
 				{
-					$groupId = $this->informationsystem_group_id;
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemGroups', $this, array($groupId));
-
-					$aInformationsystem_Groups = array();
-
-					while ($groupId)
-					{
-						$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $groupId);
-
-						$oInformationsystem_Group
-							->clearEntities()
-							->addForbiddenTag('url')
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('link')
-									->value(
-										$oInformationsystem_Group->Informationsystem->Structure->getPath() . $oInformationsystem_Group->getPath()
-									)
-							)->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('show')
-									->value($oInformationsystem_Group->active)
-							);
-
-						$groupId = $oInformationsystem_Group->parent_id;
-						$aInformationsystem_Groups[] = $oInformationsystem_Group;
-					}
-
-					$this->addBreadcrumbs($aInformationsystem_Groups);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroups', $this, array($aInformationsystem_Groups));
+					$oShop_Item = $oShop_Item->Modification
+						->clearEntities()
+						->addEntity($oShop_Item);
 				}
+
+				$this->addBreadcrumb($oShop_Item);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddShopItem', $this, array($oShop_Item));
 			}
 
-			if ($this->showShop && Core_Page::instance()->object instanceof Shop_Controller_Show)
+			if ($this->shop_group_id)
 			{
-				if ($this->shop_item_id)
+				$groupId = $this->shop_group_id;
+
+				if (is_array($groupId))
 				{
-					$oShop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);
+					// Get First Item
+					$groupId = Core_Array::first($groupId);
+				}
 
-					Core_Event::notify(get_class($this) . '.onBeforeAddShopItem', $this, array($oShop_Item));
+				Core_Event::notify(get_class($this) . '.onBeforeAddShopGroups', $this, array($groupId));
 
-					$oShop_Item
+				$aShop_Groups = array();
+
+				while ($groupId)
+				{
+					$oShop_Group = Core_Entity::factory('Shop_Group', $groupId);
+
+					$oShop_Group
 						->clearEntities()
 						->addForbiddenTag('url')
 						->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('link')
 								->value(
-									$oShop_Item->Shop->Structure->getPath() . $oShop_Item->getPath()
+									$oShop_Group->Shop->Structure->getPath() . $oShop_Group->getPath()
 								)
 						)->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('show')
-								->value($oShop_Item->active)
+								->value($oShop_Group->active)
 						);
 
-					// Если модификация, то сначала идет родительский товар, а в нем модификация
-					if ($oShop_Item->modification_id)
-					{
-						$oShop_Item = $oShop_Item->Modification
-							->clearEntities()
-							->addEntity($oShop_Item);
-					}
-
-					$this->addBreadcrumb($oShop_Item);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddShopItem', $this, array($oShop_Item));
+					$groupId = $oShop_Group->parent_id;
+					$aShop_Groups[] = $oShop_Group;
 				}
 
-				if ($this->shop_group_id)
-				{
-					$groupId = $this->shop_group_id;
+				$this->addBreadcrumbs($aShop_Groups);
 
-					if (is_array($groupId))
-					{
-						// Get First Item
-						$groupId = Core_Array::first($groupId);
-					}
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddShopGroups', $this, array($groupId));
-
-					$aShop_Groups = array();
-
-					while ($groupId)
-					{
-						$oShop_Group = Core_Entity::factory('Shop_Group', $groupId);
-
-						$oShop_Group
-							->clearEntities()
-							->addForbiddenTag('url')
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('link')
-									->value(
-										$oShop_Group->Shop->Structure->getPath() . $oShop_Group->getPath()
-									)
-							)->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('show')
-									->value($oShop_Group->active)
-							);
-
-						$groupId = $oShop_Group->parent_id;
-						$aShop_Groups[] = $oShop_Group;
-					}
-
-					$this->addBreadcrumbs($aShop_Groups);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($aShop_Groups));
-				}
+				Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($aShop_Groups));
 			}
+		}
 
-			if ($this->showMessage && Core_Page::instance()->object instanceof Message_Controller_Show)
+		if ($this->showProducer && $this->shop_producer_id)
+		{
+			$oShop_Producer = Core_Entity::factory('Shop_Producer', $this->shop_producer_id);
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddShopProducer', $this, array($oShop_Producer));
+
+			$oShop_Producer
+				->clearEntities()
+				->addForbiddenTag('url')
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('link')
+						->value(
+							$oShop_Producer->Shop->Structure->getPath() . $oShop_Producer->getPath()
+						)
+				)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('show')
+						->value(1)
+				);
+
+			$this->addBreadcrumb($oShop_Producer);
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopProducer', $this, array($oShop_Producer));
+		}
+
+
+		if ($this->showMessage && $this->message_topic_id)
+		{
+			$oMessage_Topic = Core_Entity::factory('Message_Topic', $this->message_topic_id);
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddMessageTopic', $this, array($oMessage_Topic));
+
+			$sPath = Core_Page::instance()->structure->getPath() . $oMessage_Topic->id . '/';
+
+			$oMessage_Topic
+				->clearEntities()
+				->addForbiddenTag('url')
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('link')
+						->value($sPath)
+				)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('show')
+						->value(1)
+				);
+
+			$this->addBreadcrumb($oMessage_Topic);
+
+			Core_Event::notify(get_class($this) . '.onAfterAddMessageTopic', $this, array($oMessage_Topic));
+		}
+
+		if ($this->showHelpdesk && $this->helpdesk_ticket_id)
+		{
+			$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket', $this->helpdesk_ticket_id);
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
+
+			$sPath = Core_Page::instance()->structure->getPath() . 'ticket-' . $oHelpdesk_Ticket->id . '/';
+
+			$oHelpdesk_Ticket
+				->clearEntities()
+				->addForbiddenTag('url')
+				->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('link')
+						->value($sPath)
+				)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('name')
+						->value($oHelpdesk_Ticket->number)
+				)->addEntity(
+					Core::factory('Core_Xml_Entity')
+						->name('show')
+						->value(1)
+				);
+
+			$this->addBreadcrumb($oHelpdesk_Ticket);
+
+			Core_Event::notify(get_class($this) . '.onAfterAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
+		}
+
+		if ($this->showForum)
+		{
+			if ($this->forum_topic_id)
 			{
-				if ($this->message_topic_id)
+				$oForum_Topic = Core_Entity::factory('Forum_Topic', $this->forum_topic_id);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddForumTopic', $this, array($oForum_Topic));
+
+				$oForum_Topic_Post = $oForum_Topic->Forum_Topic_Posts->getFirstPost();
+
+				if (!is_null($oForum_Topic_Post))
 				{
-					$oMessage_Topic = Core_Entity::factory('Message_Topic', $this->message_topic_id);
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddMessageTopic', $this, array($oMessage_Topic));
-
-					$sPath = Core_Page::instance()->structure->getPath() . $oMessage_Topic->id . '/';
-
-					$oMessage_Topic
+					$oForum_Topic
 						->clearEntities()
 						->addForbiddenTag('url')
 						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('link')
-								->value($sPath)
-						)->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('show')
-								->value(1)
-						);
-
-					$this->addBreadcrumb($oMessage_Topic);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddMessageTopic', $this, array($oMessage_Topic));
-				}
-			}
-
-			if ($this->showHelpdesk && Core_Page::instance()->object instanceof Helpdesk_Controller_Show)
-			{
-				if ($this->helpdesk_ticket_id)
-				{
-					$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket', $this->helpdesk_ticket_id);
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
-
-					$sPath = Core_Page::instance()->structure->getPath() . 'ticket-' . $oHelpdesk_Ticket->id . '/';
-
-					$oHelpdesk_Ticket
-						->clearEntities()
-						->addForbiddenTag('url')
-						->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('link')
-								->value($sPath)
-						)->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('name')
-								->value($oHelpdesk_Ticket->number)
-						)->addEntity(
-							Core::factory('Core_Xml_Entity')
-								->name('show')
-								->value(1)
-						);
-
-					$this->addBreadcrumb($oHelpdesk_Ticket);
-
-					Core_Event::notify(get_class($this) . '.onAfterAddHelpdeskTicket', $this, array($oHelpdesk_Ticket));
-				}
-			}
-
-			if ($this->showForum && Core_Page::instance()->object instanceof Forum_Controller_Show)
-			{
-				if ($this->forum_topic_id)
-				{
-					$oForum_Topic = Core_Entity::factory('Forum_Topic', $this->forum_topic_id);
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddForumTopic', $this, array($oForum_Topic));
-
-					$oForum_Topic_Post = $oForum_Topic->Forum_Topic_Posts->getFirstPost();
-
-					if (!is_null($oForum_Topic_Post))
-					{
-						$oForum_Topic
-							->clearEntities()
-							->addForbiddenTag('url')
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('name')
-									->value(
-										$oForum_Topic_Post->subject
-									)
-							)
-							->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('link')
-									->value(
-										$oForum_Topic->getPath()
-									)
-							)->addEntity(
-								Core::factory('Core_Xml_Entity')
-									->name('show')
-									->value(1)
-							);
-
-						$this->addBreadcrumb($oForum_Topic);
-
-						Core_Event::notify(get_class($this) . '.onAfterAddForumTopic', $this, array($oForum_Topic));
-					}
-				}
-
-				if ($this->forum_category_id)
-				{
-					$oForum_Category = Core_Entity::factory('Forum_Category', $this->forum_category_id);
-
-					Core_Event::notify(get_class($this) . '.onBeforeAddForumCategory', $this, array($oForum_Category));
-
-					$oForum_Category
-						->clearEntities()
-						->addForbiddenTag('url')
+								->value(
+									$oForum_Topic_Post->subject
+								)
+						)
 						->addEntity(
 							Core::factory('Core_Xml_Entity')
 								->name('link')
 								->value(
-									$oForum_Category->getPath()
+									$oForum_Topic->getPath()
 								)
 						)->addEntity(
 							Core::factory('Core_Xml_Entity')
@@ -481,10 +481,36 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 								->value(1)
 						);
 
-					$this->addBreadcrumb($oForum_Category);
+					$this->addBreadcrumb($oForum_Topic);
 
-					Core_Event::notify(get_class($this) . '.onAfterAddForumCategory', $this, array($oForum_Category));
+					Core_Event::notify(get_class($this) . '.onAfterAddForumTopic', $this, array($oForum_Topic));
 				}
+			}
+
+			if ($this->forum_category_id)
+			{
+				$oForum_Category = Core_Entity::factory('Forum_Category', $this->forum_category_id);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddForumCategory', $this, array($oForum_Category));
+
+				$oForum_Category
+					->clearEntities()
+					->addForbiddenTag('url')
+					->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('link')
+							->value(
+								$oForum_Category->getPath()
+							)
+					)->addEntity(
+						Core::factory('Core_Xml_Entity')
+							->name('show')
+							->value(1)
+					);
+
+				$this->addBreadcrumb($oForum_Category);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddForumCategory', $this, array($oForum_Category));
 			}
 		}
 

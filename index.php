@@ -124,6 +124,9 @@ Core_Router::add('favicon.ico', '/favicon.ico')
 
 Core_Router::add('favicon.png', '/favicon.png')
 	->controller('Core_Command_Controller_Favicon');
+	
+Core_Router::add('favicon.svg', '/favicon.svg')
+	->controller('Core_Command_Controller_Favicon');
 
 Core_Router::add('edit-in-place.php', '/edit-in-place.php')
 	->controller('Core_Command_Controller_Edit_In_Place');

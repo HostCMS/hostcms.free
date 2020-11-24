@@ -54,6 +54,7 @@ return array(
 
 	'free' => 'Придбайте комерційну версію і отримаєте:',
 	'notes' => 'Нотатки',
+	'add_note' => 'Додати нотатку',
 	'notes_save' => 'Нотатки успішно збережені.',
 	'save_notes' => 'Зберегти',
 
@@ -99,6 +100,6 @@ return array(
 	'bookmarks' => 'Закладки',
 	'sound' => 'Звук',
 	'placeholderGlobalSearch' => 'Пошук',
-	
+
 	'none' => 'Відсутній',
 );

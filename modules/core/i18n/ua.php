@@ -63,6 +63,7 @@ return array(
 	'error_log_authorization_error' => 'Невірні дані для аутентифікації',
 	'error_log_exit' => 'Вихід із системи управління',
 	'session_destroy_error' => 'Помилка закриття сеансу',
+	'error_log_add_message' => "<strong>Помилка!</strong> Повідомлення про помилку занесено в журнал.",
 
 	'error_message' => "Вітаємо!\n"
 	. "Тільки що на сайті відбулася подія, інформація про яку представлена ​​нижче:\n"
@@ -145,7 +146,7 @@ return array(
 	'kbyte' => 'КБ',
 	'mbyte' => 'МБ',
 	'gbyte' => 'ГБ',
-	
+
 	'timePeriodSeconds' => '%s сек. тому',
 	'timePeriodMinutes' => '%s хв. тому',
 	'timePeriodHours' => '%s год. тому',
@@ -155,6 +156,13 @@ return array(
 	'timePeriodYears' => '%s р. тому',
 	'timePeriodYearMonths' => '%s р. %s міс. тому',
 
+	'shortTitleSeconds' => 'с.',
+	'shortTitleSeconds_1' => 'сек.',
+	'shortTitleMinutes' => 'м.',
+	'shortTitleHours' => 'ч.',
+	'shortTitleDays' => 'д.',
+	'shortTitleYears' => 'г.',
+
 	'now' => 'Зараз',
 	'ago' => '%1$s %2$s назад',
 	'today' => 'Cьогодні',
@@ -162,7 +170,7 @@ return array(
 	'tomorrow' => 'Завтра',
 	'estimate_date' => '%1$d %2$s',
 	'estimate_date_year' => '%1$d %2$s %3$d р.',
-	
+
 	'time_postfix' => ' в %s',
 
 	'month1' => 'січня',
@@ -190,16 +198,39 @@ return array(
 	'capitalMonth10' => 'Жовтень',
 	'capitalMonth11' => 'Листопад',
 	'capitalMonth12' => 'Грудень',
-	
+
 	'hour_nominative' => 'годину',
 	'hour_genitive_singular' => 'години',
 	'hour_genitive_plural' => 'годин',
 	'minute_nominative' => 'хвилину',
 	'minute_genitive_singular' => 'хвилини',
 	'minute_genitive_plural' => 'хвилин',
-	
+
 	'day' => 'День',
 	'month' => 'Місяц',
 	'year' => 'Рік',
 	'random' => 'Випадковий',
+	'generateChars' => 'Символи',
+
+	'title_no_access_to_page' => 'У Вас недостатньо прав доступу до даної сторінки!',
+	'message_more_info' => 'За більш детальною інформацією звертайтеся до адміністратора сайту.',
+	'title_domain_must_be_added' => 'Необхідно додати домен %s в список підтримуваних системою управління сайтом HostCMS!',
+	'message_domain_must_be_added' => 'Домен <b>%s</b> необхідно додати в список підтримуваних системою управління сайтом <b>HostCMS</b>!',
+	'add_domain_instruction1' => 'Для додавання домену перейдіть в <b><a href="/admin/site/index.php" target="_blank">"Розділ адміністрування" → "Система" → "Сайти"</a></b>.',
+	'add_domain_instruction2' => 'Виберіть піктограму <b>"Домени"</b> для необхідного сайту. На сторінці, натисніть в меню <b>"Додати"</b>.',
+	'home_page_not_found' => 'Чи не знайдена головна сторінка сайту',
+	'message_home_page_must_be_added' => 'Вам необхідно додати головну сторінку в <b>"Розділ адміністрування" → "Структура сайту"</b>. <br/> <b> "Назва розділу"</b> для головної сторінки повинно бути "<b>/</b>".',
+	'site_disabled_by_administrator' => 'Сайт %s відключений адміністратором і в даний момент недоступний!',
+	'site_activation_instruction' => 'Для включення сайту перейдіть в розділ «Сайти» і встановіть значення «Активність» необхідного сайту.',
+	'title_limit_available_sites_exceeded' => 'Перевищено ліміт доступних сайтів в системі!',
+	'message_limit_available_sites_exceeded' => 'Перевищено ліміт доступних активних сайтів в системі управління сайтом HostCMS!',
+	'message_remove_unnecessary_sites' => 'Видаліть зайві сайти з системи (<b>"Розділ адміністрування" → "Сайти"</b>) або придбайте версію без обмеження Многосайтовий.',
+	'missing_template_for_page' => 'Відсутня макет для сторінки!',
+	'change template instruction' => 'Вам необхідно змінити макет для даної сторінки в <b>"Розділ адміністрування" → "Структура сайту"</b>. Для статичних сторінок макет вказуєте в <b>"Розділ адміністрування" → "Сторінки і документи"</b>.',
+	'hosting_mismatch_system_requirements' => 'Невідповідність хостингу системним вимогам!',
+	'requires_php5' => 'Для роботи системи управління сайтом HostCMS необхідний PHP 5 з встановленою підтримкою <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a>.',
+	'list_tested_hosting' => 'На нашому сайті також розміщений <a href="https://www.hostcms.ru/hosting/" target="_blank"> список протестованих хостингів</a>, придатних для роботи HostCMS.',
+
+	'show_title' => 'Показувати',
+	'data_show_title' => 'Показувати на сайті',
 );

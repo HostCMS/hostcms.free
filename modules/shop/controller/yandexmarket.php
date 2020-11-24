@@ -8,9 +8,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию TRUE.
+ * - itemsForbiddenProperties(array()) исключать значения дополнительных свойств товаров, по умолчанию array().
  * - additionalImages(array()) массив tag_name дополнительных свойств для изображений.
- * - addForbiddenTag(name) добавить тег, запрещенный к передаче в генерируемый YML.
+ * - addForbiddenTag('tag-name') добавить тег, запрещенный к передаче в генерируемый YML.
  * - addForbiddenTags(array('description', 'vendor')) массив тегов, запрещенных к передаче в генерируемый YML.
+ * - cdata(array('description')) массив тегов, передаваемых с форматированием в виде блока символьных данных — CDATA, по умолчанию array(). Если длина кода превышает установленные лимиты, будет произведено удаление тегов и сокращение текста до установленных лимитов.
  * - removeForbiddenTag(name) удалить тег из списка запрещенных к передаче в генерируемый YML.
  * - outlets(array()) массив соответствия ID склада в системе и ID точки продаж в Яндекс.Маркет.
  * - paymentMethod(array('CASH_ON_DELIVERY' => 1, 'CARD_ON_DELIVERY' => 1, 'YANDEX' => 5)) массив соответствия способов оплаты (CASH_ON_DELIVERY, CARD_ON_DELIVERY, YANDEX) и ID платежных систем в системе управления.
@@ -65,6 +67,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	protected $_allowedProperties = array(
 		'itemsProperties',
+		'itemsForbiddenProperties',
 		'outlets',
 		'paymentMethod',
 		'modifications',
@@ -85,6 +88,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'utm_source',
 		'utm_medium',
 		'additionalImages',
+		'cdata',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -321,27 +325,23 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->_setShopGroups();
 
-		$this->itemsProperties = $this->modifications = $this->deliveryOptions
-			= $this->checkAvailable = TRUE;
+		$this->itemsProperties = $this->modifications = $this->deliveryOptions = $this->checkAvailable = TRUE;
 
 		$this->groupModifications = $this->recommended = $this->checkRest = $this->outlets = FALSE;
 
-		$this->paymentMethod = array();
+		$this->paymentMethod = $this->cdata = $this->itemsForbiddenProperties = array();
 
 		$this->type = 'offer';
 		$this->onStep = 500;
-
-		$this->stdOut = new Core_Out_Std();
-
-		$this->_Shop_Item_Controller = new Shop_Item_Controller();
-
-		$this->mode = NULL;
 		$this->token = '';
 		$this->sno = 'OSN';
 		$this->delay = 0;
 		$this->mode = 'between';
 
-		$this->additionalImages = NULL;
+		$this->mode = $this->additionalImages = NULL;
+
+		$this->stdOut = new Core_Out_Std();
+		$this->_Shop_Item_Controller = new Shop_Item_Controller();
 
 		Core_Session::close();
 	}
@@ -649,7 +649,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 						$this->_currentModificationGroupId = $oShop_Item->id;
 					}
 
-					if ($oShop_Item->price > 0)
+					// Если отключена группировка groupModifications или нет модификаций, то основной товар показывается
+					if ($oShop_Item->price > 0 && (!$this->groupModifications || $oShop_Item->Modifications->getCount() == 0))
 					{
 						$this->_showOffer($oShop_Item);
 					}
@@ -779,7 +780,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeOffer', $this, array($oShop_Item));
 
 		/* URL */
-		$this->stdOut->write('<url>' . Core_Str::xml($this->_shopPath . $oShop_Item->getPath() . $this->_getUtm($oShop_Item)) . '</url>'. "\n");
+		/* Если модификация и включен groupModifications, то путь берется от родительского товара */
+
+		$this->stdOut->write('<url>' . Core_Str::xml(
+			$this->groupModifications && $oShop_Item->modification_id
+				? $this->_shopPath . $oShop_Item->Modification->getPath() . $this->_getUtm($oShop_Item->Modification)
+				: $this->_shopPath . $oShop_Item->getPath() . $this->_getUtm($oShop_Item)
+		) . '</url>'. "\n");
 
 		/* Определяем цену со скидкой */
 		$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
@@ -824,7 +831,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		/* PICTURE */
-		if ($oShop_Item->image_large != '')
+		// Если модификация с пустым изображением и включено копирование groupModifications, то берем изображение основного товара.
+		if ($this->groupModifications && $oShop_Item->modification_id && $oShop_Item->image_large == '')
+		{
+			$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Item->Modification->getLargeFileHref()) . '</picture>'. "\n");
+		}
+		elseif ($oShop_Item->image_large != '')
 		{
 			$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Item->getLargeFileHref()) . '</picture>'. "\n");
 		}
@@ -839,13 +851,17 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 				if ($oProperty && $oProperty->type == 2)
 				{
-					$aProperty_Values = $oProperty->getValues($oShop_Item->id);
+					$oEntity = $this->groupModifications && $oShop_Item->modification_id
+						? $oShop_Item->Modification
+						: $oShop_Item;
+
+					$aProperty_Values = $oProperty->getValues($oEntity->id);
 
 					foreach ($aProperty_Values as $oProperty_Value)
 					{
 						if ($oProperty_Value->file != '')
 						{
-							$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oShop_Item->getItemHref()) . $oProperty_Value->file . '</picture>'. "\n");
+							$this->stdOut->write('<picture>' . $this->protocol . '://' . Core_Str::xml($this->_siteAlias->name . $oEntity->getItemHref()) . $oProperty_Value->file . '</picture>'. "\n");
 						}
 					}
 				}
@@ -875,8 +891,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		{
 			if ($this->type != 'vendor.model')
 			{
+				$oEntity = $this->groupModifications && $oShop_Item->modification_id
+					? $oShop_Item->Modification
+					: $oShop_Item;
+
 				/* NAME */
-				$this->stdOut->write('<name>' . Core_Str::xml($oShop_Item->name) . '</name>'. "\n");
+				$this->stdOut->write('<name>' . Core_Str::xml($oEntity->name) . '</name>'. "\n");
 			}
 
 			if (!isset($this->_forbiddenTags['vendor']) && $oShop_Item->shop_producer_id)
@@ -893,17 +913,29 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* DESCRIPTION */
 		if (!isset($this->_forbiddenTags['description']))
 		{
-			$description = !empty($oShop_Item->description)
-				? $oShop_Item->description
-				: $oShop_Item->text;
+			$oEntity = $this->groupModifications && $oShop_Item->modification_id
+				? $oShop_Item->Modification
+				: $oShop_Item;
 
-			if (strlen($description))
+			$description = !empty($oEntity->description)
+				? $oEntity->description
+				: $oEntity->text;
+
+			$iDescriptionLen = mb_strlen($description);
+			if ($iDescriptionLen)
 			{
-				$description = Core_Str::cutSentences(
-					html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
-				);
+				if (!is_array($this->cdata) || !in_array('description', $this->cdata) || $iDescriptionLen > 3000)
+				{
+					$description = Core_Str::cutSentences(
+						html_entity_decode(strip_tags($description), ENT_COMPAT, 'UTF-8'), 3000
+					);
 
-				$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+					$this->stdOut->write('<description>' . Core_Str::xml($description) . '</description>'. "\n");
+				}
+				else
+				{
+					$this->stdOut->write("<description><![CDATA[\n" . $description . "\n]]></description>\n");
+				}
 			}
 		}
 
@@ -986,7 +1018,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 		}
 
-		$this->itemsProperties && $this->_addPropertyValue($oShop_Item);
+		$this->itemsProperties
+			&& $this->_addPropertyValues($oShop_Item);
 
 		// outlets
 		$this->_addOutlets($oShop_Item);
@@ -1164,131 +1197,187 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		return $this->_cacheListItems[$listItemId];
 	}
 
+	protected $_bAge = FALSE;
+
 	/**
-	 * Print Shop_Item properties
+	 * Print Shop_Item Properties
 	 * @param Shop_Item_Model $oShop_Item
 	 * @return self
 	 */
-	protected function _addPropertyValue(Shop_Item_Model $oShop_Item)
+	protected function _addPropertyValues(Shop_Item_Model $oShop_Item)
 	{
 		// Доп. св-ва выводятся в <param>
 		// <param name="Максимальный формат">А4</param>
 		//$aProperty_Values = $oShop_Item->getPropertyValues(FALSE);
 
-		$aProperty_Values = is_array($this->itemsProperties)
+		$aProperty_Values = is_array($this->itemsProperties) && !count($this->itemsForbiddenProperties)
 			? Property_Controller_Value::getPropertiesValues($this->itemsProperties, $oShop_Item->id, FALSE)
 			: $oShop_Item->getPropertyValues(FALSE);
 
-		$bAge = FALSE;
+		$this->_bAge = FALSE;
 
+		$aAlreadyExistProperties = array();
 		foreach ($aProperty_Values as $oProperty_Value)
 		{
-			$oProperty = $this->_getProperty($oProperty_Value->property_id);
-
-			switch ($oProperty->type)
+			// Исключаем запрещенные
+			if (!in_array($oProperty_Value->property_id, $this->itemsForbiddenProperties))
 			{
-				case 0: // Int
-				case 1: // String
-				case 4: // Textarea
-				case 6: // Wysiwyg
-					$value = $oProperty_Value->value;
-				break;
+				$oProperty = $this->_getProperty($oProperty_Value->property_id);
 
-				case 8: // Date
-					$value = Core_Date::sql2date($oProperty_Value->value);
-				break;
-
-				case 9: // Datetime
-					$value = Core_Date::sql2datetime($oProperty_Value->value);
-				break;
-
-				case 3: // List
-					//$oList_Item = $oProperty->List->List_Items->getById(
-					//	$oProperty_Value->value/*, FALSE*/
-					//);
-
-					//$value = !is_null($oList_Item)
-					//	? $oList_Item->value
-					//	: NULL;
-					$value = Core::moduleIsActive('list')
-						? $this->_getCacheListItem($oProperty, $oProperty_Value->value)
-						: NULL;
-				break;
-
-				case 7: // Checkbox
-					$value = $oProperty_Value->value == 1 ? 'есть' : NULL;
-				break;
-
-				case 2: // File
-				case 5: // ИС
-				case 10: // Hidden field
-				default:
-					$value = NULL;
-				break;
-			}
-
-			if (!is_null($value))
-			{
-				$sTagName = 'param';
-
-				$unit = $oProperty->type == 0 && $oProperty->Shop_Item_Property->shop_measure_id
-					? ' unit="' . Core_Str::xml($oProperty->Shop_Item_Property->Shop_Measure->name) . '"'
-					: '';
-
-				$sAttr = ' name="' . Core_Str::xml($oProperty->name) . '"' . $unit;
-
-				if ($this->type != 'offer')
+				if (!in_array($oProperty->type, array(2, 5, 12, 13, 10, 14)) && $oProperty_Value->value !== '')
 				{
-					switch ($this->type)
-					{
-						case 'vendor.model':
-							$aTmpArray = $this->aVendorTags;
-						break;
-						case 'book':
-							$aTmpArray = $this->aBookTags;
-						break;
-						case 'audiobook':
-							$aTmpArray = $this->aAudiobookTags;
-						break;
-						case 'artist.title':
-							$aTmpArray = $this->aArtistTitleTags;
-						break;
-						case 'tour':
-							$aTmpArray = $this->aTourTags;
-						break;
-						case 'event-ticket':
-							$aTmpArray = $this->aEventTicketTags;
-						break;
-						default:
-							throw new Core_Exception("Wrong type '%type'",
-								array('%type' => $this->type)
-							);
-					}
-
-					if (isset($aTmpArray[$oProperty->tag_name]))
-					{
-						$sTagName = $aTmpArray[$oProperty->tag_name];
-						$sAttr = '';
-					}
+					$aAlreadyExistProperties[] = $oProperty->id;
 				}
 
-				if ($value !== '')
+				$this->_addPropertyValue($oProperty_Value);
+			}
+		}
+
+		// Копировать свойства основного товара в модификацию и модификация
+		if ($this->groupModifications && $oShop_Item->modification_id)
+		{
+			$aProperty_Values = is_array($this->itemsProperties) && !count($this->itemsForbiddenProperties)
+				? Property_Controller_Value::getPropertiesValues($this->itemsProperties, $oShop_Item->Modification->id, FALSE)
+				: $oShop_Item->Modification->getPropertyValues(FALSE);
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				// Исключаем запрещенные
+				if (!in_array($oProperty_Value->property_id, $this->itemsForbiddenProperties))
 				{
-					if (!in_array($sTagName, $this->_aForbid))
+					$oProperty = $this->_getProperty($oProperty_Value->property_id);
+
+					if (!in_array($oProperty->id, $aAlreadyExistProperties))
 					{
-						$this->stdOut->write('<' . $sTagName . $sAttr . '>'
-							. Core_Str::xml(html_entity_decode(strip_tags($value), ENT_COMPAT, 'UTF-8'))
-						. '</' . $sTagName . '>'. "\n");
+						$this->_addPropertyValue($oProperty_Value);
 					}
-					elseif ($sTagName == 'age-year' && $value !== '' && in_array($value, $this->_aAgeYears))
-					{
-						$this->stdOut->write('<age unit="year">' . intval($value) . '</age>'. "\n");
-						$bAge = TRUE;
-					}
-					elseif (!$bAge && $sTagName == 'age-month' && $value !== '' && in_array($value, $this->_aAgeMonthes))
-					{
-						$this->stdOut->write('<age unit="month">' . intval($value) . '</age>'. "\n");
-					}
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Print Property_Value
+	 * @param mixed $oProperty_Value
+	 * @return self
+	 */
+	protected function _addPropertyValue($oProperty_Value)
+	{
+		$oProperty = $this->_getProperty($oProperty_Value->property_id);
+
+		switch ($oProperty->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 4: // Textarea
+			case 6: // Wysiwyg
+				$value = $oProperty_Value->value;
+			break;
+
+			case 8: // Date
+				$value = Core_Date::sql2date($oProperty_Value->value);
+			break;
+
+			case 9: // Datetime
+				$value = Core_Date::sql2datetime($oProperty_Value->value);
+			break;
+
+			case 3: // List
+				//$oList_Item = $oProperty->List->List_Items->getById(
+				//	$oProperty_Value->value/*, FALSE*/
+				//);
+
+				//$value = !is_null($oList_Item)
+				//	? $oList_Item->value
+				//	: NULL;
+				$value = Core::moduleIsActive('list')
+					? $this->_getCacheListItem($oProperty, $oProperty_Value->value)
+					: NULL;
+			break;
+
+			case 7: // Checkbox
+				$value = $oProperty_Value->value == 1 ? 'есть' : NULL;
+			break;
+
+			case 2: // File
+			case 5: // Элемент информационной системы
+			case 13: // Группа информационной системы
+			case 12: // Товар интернет-магазина
+			case 14: // Группа интернет-магазина
+			case 10: // Hidden field
+			default:
+				$value = NULL;
+			break;
+		}
+
+		if (!is_null($value))
+		{
+			$sTagName = 'param';
+
+			$unit = $oProperty->type == 0 && $oProperty->Shop_Item_Property->shop_measure_id
+				? ' unit="' . Core_Str::xml($oProperty->Shop_Item_Property->Shop_Measure->name) . '"'
+				: '';
+
+			// 000298107. Название параметра - не более 200 байт (не символов), значение - не более 500 байт (не символов)
+			$sAttr = ' name="' . Core_Str::xml(Core_Str::cut($oProperty->name, 100)) . '"' . $unit;
+
+			if ($this->type != 'offer')
+			{
+				switch ($this->type)
+				{
+					case 'vendor.model':
+						$aTmpArray = $this->aVendorTags;
+					break;
+					case 'book':
+						$aTmpArray = $this->aBookTags;
+					break;
+					case 'audiobook':
+						$aTmpArray = $this->aAudiobookTags;
+					break;
+					case 'artist.title':
+						$aTmpArray = $this->aArtistTitleTags;
+					break;
+					case 'tour':
+						$aTmpArray = $this->aTourTags;
+					break;
+					case 'event-ticket':
+						$aTmpArray = $this->aEventTicketTags;
+					break;
+					default:
+						throw new Core_Exception("Wrong type '%type'",
+							array('%type' => $this->type)
+						);
+				}
+
+				if (isset($aTmpArray[$oProperty->tag_name]))
+				{
+					$sTagName = $aTmpArray[$oProperty->tag_name];
+					$sAttr = '';
+				}
+			}
+
+			if ($value !== '')
+			{
+				if (!in_array($sTagName, $this->_aForbid))
+				{
+					$this->stdOut->write('<' . $sTagName . $sAttr . '>'
+						. Core_Str::xml(
+							Core_Str::cut(
+								html_entity_decode(strip_tags($value), ENT_COMPAT, 'UTF-8')
+							, 250)
+						)
+					. '</' . $sTagName . '>'. "\n");
+				}
+				elseif ($sTagName == 'age-year' && $value !== '' && in_array($value, $this->_aAgeYears))
+				{
+					$this->stdOut->write('<age unit="year">' . intval($value) . '</age>'. "\n");
+					$this->_bAge = TRUE;
+				}
+				elseif (!$this->_bAge && $sTagName == 'age-month' && $value !== '' && in_array($value, $this->_aAgeMonthes))
+				{
+					$this->stdOut->write('<age unit="month">' . intval($value) . '</age>'. "\n");
 				}
 			}
 		}

@@ -165,4 +165,11 @@ return array(
 	'paid_cancel' => 'Pull off "Paid"',
 	'posted_cancel' => 'Pull off "Posted"',
 	'canceled_cancel' => 'Pull off "Canceled"',
+	'warehouse_entries_header' => 'Warehouse entries',
+	'position' => '#',
+	'nomenclature' => 'Nomenclature',
+	'quantity' => 'Quantity',
+	'warehouse' => 'Warehouse',
+	'date' => 'Date',
+	'change_user' => 'Change responsible user: "%s"',
 );

@@ -75,3 +75,4 @@ if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
 
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
+

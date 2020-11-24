@@ -1,0 +1,27 @@
+<?php
+
+return array(
+	'model_name' => 'Tabs',
+	'title' => 'Tabs',
+	'add_title' => 'Add tab',
+	'edit_title' => 'Edit tab "%s"',
+	'name' => 'Name',
+	'caption' => 'Caption',
+	'text' => 'Text',
+	'shop_id' => 'Shop ID',
+	'icon' => 'Icon',
+	'color' => 'Color',
+	'id' => 'ID',
+	'sorting' => 'Sorting',
+	'shop_tab_group' => 'Groups',
+	'shop_tab_item' => 'Items',
+	'select_item' => 'Select item',
+	'select_tab' => 'Select tab',
+	'edit_success' => "Tab added succesfully!",
+	'apply_success' => "Tab changed succesfully!",
+	'markDeleted_success' => "Tab deleted succesfully!",
+	'delete_success' => 'Element deleted!',
+	'undelete_success' => 'Element restored!',
+	'add_shortcode_dir' => 'Dir',
+	'shop_tab_dir_id' => 'Dir',
+);

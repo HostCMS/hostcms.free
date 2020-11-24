@@ -239,13 +239,17 @@ class Core_Image_Imagick extends Core_Image
 				$sourceImage->setImageCompression(Imagick::COMPRESSION_JPEG);
 				$sourceImage->setImageCompressionQuality(JPG_QUALITY);
 			}
+			elseif ($ext == 'webp')
+			{
+				$sourceImage->setImageFormat('webp');
+				$sourceImage->setImageCompressionQuality(defined('WEBP_QUALITY') ? WEBP_QUALITY : 80);
+			}
 			elseif ($ext == 'png')
 			{
 				$sourceImage->setImageCompression(Imagick::COMPRESSION_ZIP);
 				$sourceImage->setImageCompressionQuality(PNG_QUALITY);
 			}
-			elseif ($ext == 'gif')
-			{}
+			elseif ($ext == 'gif') {}
 			else
 			{
 				$sourceImage->clear();

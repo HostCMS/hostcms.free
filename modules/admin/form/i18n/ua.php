@@ -131,5 +131,10 @@ return array(
 	'autocomplete_mode3' => 'Точний збіг',
 
 	'tabProperties' => 'Додаткові властивості',
-	'non_subject' => '<Без теми>',	
+	'non_subject' => '<Без теми>',
+
+	'male' => 'Чоловік',
+	'female' => 'Жіночий',
+
+	'filter_enter_title' => 'Введіть назву фільтра',
 );

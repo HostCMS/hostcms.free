@@ -30,8 +30,7 @@ class User_Session_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'user' => array(),
-		'session' => array(),
+		'user' => array()
 	);
 
 	/**
@@ -65,6 +64,17 @@ class User_Session_Model extends Core_Entity
  	public function user_idBackend()
 	{
 		return $this->User->showAvatarWithName();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function imgBackend()
+	{
+		!is_null($this->dataSession) && Core::factory('Core_Html_Entity_Span')
+			->value('<i class="fa fa-check palegreen" title="Session exists"></i>')
+			->execute();
 	}
 
 	/**
@@ -142,7 +152,7 @@ class User_Session_Model extends Core_Entity
 	{
 		Core_Session::destroy($this->session_id);
 		$this->delete();
-		
+
 		return $this;
 	}
 }

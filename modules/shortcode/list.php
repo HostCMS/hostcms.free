@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @package HostCMS 6\Shortcode
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 
 class Shortcode_List
@@ -29,8 +29,8 @@ class Shortcode_List
 		
 		ob_start();
 		?>
-		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
-		<script>
+		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+		<script type="text/javascript">
 			ymaps.ready(init);
 		
 			function init() {
@@ -77,7 +77,7 @@ class Shortcode_List
 		ob_start();
 		?>
 		<script async defer src="https://maps.googleapis.com/maps/api/js?key=<?php echo htmlspecialchars($args['key'])?>&callback=initMap"></script>
-		<script>
+		<script type="text/javascript">
 			function initMap() {
 				var myLatlng = new google.maps.LatLng(<?php echo htmlspecialchars($args['latlng'])?>);
 				var mapOptions = {

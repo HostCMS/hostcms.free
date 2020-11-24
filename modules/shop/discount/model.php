@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -81,9 +81,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function isActive()
 	{
+		$time = time();
+		$dayFieldName = 'day' . date('N');
+
 		return $this->active
-			&& Core_Date::sql2timestamp($this->start_datetime) <= time()
-			&& Core_Date::sql2timestamp($this->end_datetime) >= time();
+			&& Core_Date::sql2timestamp($this->start_datetime) <= $time
+			&& Core_Date::sql2timestamp($this->end_datetime) >= $time
+			&& $time >= strtotime($this->start_time)
+			&& $time <= strtotime($this->end_time)
+			&& $this->$dayFieldName == 1;
 	}
 
 	/**
@@ -207,6 +213,52 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 					->class('label label-sky label-sm')
 					->value(htmlspecialchars($this->coupon_text))
 			);
+		}
+
+		if ($this->start_time != '00:00:00' || $this->end_time != '23:59:59')
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-orange label-sm')
+					->value($this->start_time . ' – ' . $this->end_time)
+			);
+		}
+
+		// Check if necessary show days
+		$allDays = TRUE;
+		for ($i = 1; $i <= 7; $i++)
+		{
+			$fieldName = 'day' . $i;
+			if (!$this->$fieldName)
+			{
+				$allDays = FALSE;
+				break;
+			}
+		}
+
+		if ($allDays)
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('label label-palegreen label-sm')
+					->value(Core::_('Shop_Discount.all_days'))
+				);
+		}
+		else
+		{
+			// Show days
+			for ($i = 1; $i <= 7; $i++)
+			{
+				$fieldName = 'day' . $i;
+				if ($this->$fieldName)
+				{
+					$oCore_Html_Entity_Div->add(
+						Core::factory('Core_Html_Entity_Span')
+							->class('label label-palegreen label-sm')
+							->value(Core::_('Shop_Discount.' . $fieldName))
+						);
+				}
+			}
 		}
 
 		$oCore_Html_Entity_Div->execute();

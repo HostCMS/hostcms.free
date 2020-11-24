@@ -62,11 +62,11 @@ else
 		->pageTitle(Core::_('Informationsystem.comments_title'));
 }
 
+// Меню формы
+$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
 if (!is_null($oInformationsystem_Item->id) || $comment_parent_id)
 {
-	// Меню формы
-	$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
-
 	// Элементы меню
 	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
@@ -85,10 +85,25 @@ if (!is_null($oInformationsystem_Item->id) || $comment_parent_id)
 					)
 			)
 	);
-
-	// Добавляем все меню контроллеру
-	$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 }
+
+$additionalParamsProperties = 'informationsystem_id=' . $informationsystem_id . '&informationsystem_group_id=' . $iInformationsystemGroupId;
+
+$oAdmin_Form_Entity_Menus->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
+		->img('/admin/images/page_gear.gif')
+		->icon('fa fa-gears')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+		)
+);
+
+// Добавляем все меню контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -318,10 +333,31 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Удаление значения свойства"
+$oAdminFormActiondeletePropertyValue = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deletePropertyValue');
+
+if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
+{
+	$oCommentControllerdeletePropertyValue = Admin_Form_Action_Controller::factory(
+		'Property_Controller_Delete_Value', $oAdminFormActiondeletePropertyValue
+	);
+
+	$oCommentControllerdeletePropertyValue
+		->linkedObject(Core_Entity::factory('Informationsystem_Comment_Property_List', $informationsystem_id));
+
+	$oAdmin_Form_Controller->addAction($oCommentControllerdeletePropertyValue);
+}
+
 // Источник данных
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Informationsystem_Item_Comment')
 );
+
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $bItem = !is_null($oInformationsystem_Item->id);
 

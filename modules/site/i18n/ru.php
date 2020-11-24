@@ -64,7 +64,8 @@ return array(
 	'site_link_add' => 'Добавить',
 	'copy_success' => 'Информация о сайте успешно скопирована',
 	'copy_error' => 'Ошибка копирования информации о сайте',
-	'ico_files_uploaded' => '<acronym title="ICO-файл для сайта">Favicon</acronym>',
+	'favicon' => '<acronym title="Favicon-файл для сайта, поддерживает .ico, .png, .svg">Favicon</acronym>',
+	'deleteFavicon_success' => 'Favicon успешно удален',
 	'default' => 'По умолчанию',
 
 	'menu2_caption' => 'Настройки',
@@ -83,7 +84,7 @@ return array(
 	'choose_site_template' => 'Выбор макета сайта',
 	'choose_color_scheme' => 'Выбор цветовой схемы',
 	'template_settings' => 'Настройки макета',
-	'delete_current_site' => 'Запрещено удаление сайта пользователем, который принадлежит удаляемому сайту!',
+	'delete_current_site' => 'Запрещено удаление текущего сайта, предварительно переключитесь на другой сайт!',
 	'delete_last_site' => 'Запрещено удаление последнего сайта!',
 	'delete_site_all_superusers_belongs' => 'Невозможно удалить сайт,так как все суперпользователи принадлежат ему!',
 
@@ -92,4 +93,26 @@ return array(
 	'error_email' => '<acronym title="Технический e-mail (ошибки и т.д.)">Технический e-mail</acronym>',
 	'https' => 'HTTPS',
 	'set_https' => 'Установить HTTPS',
+
+	'site_csp' => 'CSP',
+	'csp-header-default-src' => 'Default',
+	'csp-header-script-src' => 'Script',
+	'csp-header-style-src' => 'Style',
+	'csp-header-img-src' => 'Image',
+	'csp-header-font-src' => 'Font',
+	'csp-header-connect-src' => 'Connect',
+	'csp-header-media-src' => 'Media',
+	'csp-header-object-src' => 'Object',
+	'csp-header-frame-src' => 'Frame',
+
+	'none' => 'Запретить доступ ко всему',
+	'all' => 'Полный доступ, исключая схемы data: blob: filesystem:',
+	'self' => 'Текущий источник (исключая его поддомены)',
+	'blob' => 'Разрешить blob:',
+	'data' => 'Расширенные данные, например, изображения в base64',
+	'inline' => 'Разрешить использовать инлайн-сущности, например, "script"',
+	'eval' => 'Разрешить использовать eval()',
+	'hosts' => 'Разделенные пробелами, * для поддоменов, можно указать только схему, например, https:',
+
+	'protect' => 'Защита от атак',
 );

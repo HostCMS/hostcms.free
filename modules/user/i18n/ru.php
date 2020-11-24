@@ -70,7 +70,7 @@ return array(
 	'chat_count_new_message' => 'Новые сообщения: ',
 	'new_message_from' => 'Новое сообщение от %s %s',
 	'wallpaper' => 'Обои',
-	'backend-field-caption' => 'Сотрудник',
+	'backend-field-caption' => 'Ответственный',
 
 	'choosing_site' => 'Выбор сайта',
 	'ua_show_user_form_events_access_title' => 'Доступ к действиям формы "%s"',
@@ -91,4 +91,12 @@ return array(
 	'user_active' => 'Онлайн %s',
 	'user_last_activity' => 'Последняя активность %s',
 	'session' => 'Сессии',
+
+	'responsible' => 'Отправить ответственному',
+	'additional_receivers' => 'Дополнительные получатели',
+	'theme' => 'Тема',
+	'text' => 'Текст',
+	'from' => 'E-mail отправителя',
+	'sender_name' => 'Имя отправителя',
+	'title' => 'Заголовок',
 );

@@ -305,4 +305,58 @@ class Core_Date
 
 		return $sReturn;
 	}
+	
+	static public function getDuration($duration)
+	{
+		$duration < 0 && $duration = 0;
+
+		$aReturn = array(
+			'value' => $duration,
+			'type' => 0
+		);
+
+		if ($duration == 0)
+		{
+			return $aReturn;
+		}
+
+		// Days
+		if ($duration % 1440 == 0)
+		{
+			$aReturn['value'] = $duration / 1440;
+			$aReturn['type'] = 2;
+		}
+		// Hours
+		elseif ($duration % 1440 > 0 && $duration % 60 == 0)
+		{
+			$aReturn['value'] = $duration / 60;
+			$aReturn['type'] = 1;
+		}
+		// Minutes
+		elseif ($duration % 60 > 0)
+		{
+			$aReturn['value'] = $duration;
+			$aReturn['type'] = 0;
+		}
+
+		return $aReturn;
+	}
+
+	static public function convertDuration($duration, $type)
+	{
+		$duration < 0 && $duration = 0;
+
+		switch ($type)
+		{
+			case 0:
+				return $duration;
+			break;
+			case 1:
+				return $duration * 60;
+			break;
+			case 2:
+				return $duration * 60 * 24;
+			break;
+		}
+	}	
 }

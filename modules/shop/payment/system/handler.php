@@ -544,7 +544,7 @@ abstract class Shop_Payment_System_Handler
 					$quantity += $oShop_Cart->quantity;
 
 					// Количество для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
+					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
 						&& $quantityPurchaseDiscount += $oShop_Cart->quantity;
 
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
@@ -574,7 +574,7 @@ abstract class Shop_Payment_System_Handler
 					}
 
 					// Сумма для скидок от суммы заказа рассчитывается отдельно
-					$oShop_Item->apply_purchase_discount
+					$oShop_Item->apply_purchase_discount && $oShop_Item->type != 4
 						&& $amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
 
 					$oShop_Order_Item->price = $aPrices['price_discount'] - $aPrices['tax'];
@@ -594,17 +594,6 @@ abstract class Shop_Payment_System_Handler
 						$this->_shopOrder->save();
 					}
 
-					// Reserved
-					if ($oShop->reserve && !$this->_shopOrder->paid)
-					{
-						$oShop_Item_Reserved = Core_Entity::factory('Shop_Item_Reserved');
-						$oShop_Item_Reserved->shop_order_id = $this->_shopOrder->id;
-						$oShop_Item_Reserved->shop_item_id = intval($oShop_Order_Item->shop_item_id);
-						$oShop_Item_Reserved->shop_warehouse_id = intval($oShop_Order_Item->shop_warehouse_id);
-						$oShop_Item_Reserved->count = $oShop_Order_Item->quantity;
-						$oShop_Item_Reserved->save();
-					}
-
 					Core_Event::notify('Shop_Payment_System_Handler.onAfterAddShopOrderItem', $this, array($oShop_Order_Item, $oShop_Cart));
 
 					// Delete item from the cart
@@ -618,6 +607,10 @@ abstract class Shop_Payment_System_Handler
 				$oShop_Cart->delete();
 			}
 		}
+
+		// Reserved
+		$oShop->reserve && !$this->_shopOrder->paid
+			&& $this->_shopOrder->reserveItems();
 
 		if ($amount > 0)
 		{
@@ -1621,19 +1614,8 @@ abstract class Shop_Payment_System_Handler
 
 		$date_str = Core_Date::sql2datetime($this->getShopOrder()->datetime);
 
-		// Изменение темы письма при оплате
-		if ($this->getShopOrder()->paid)
-		{
-			$this->adminMailSubject(
-				sprintf($oShop->confirm_admin_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
-			);
-
-			$this->siteuserMailSubject(
-				sprintf($oShop->confirm_user_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
-			);
-		}
 		// Изменение темы письма при отмене заказа
-		elseif ($this->getShopOrder()->canceled)
+		if ($this->getShopOrder()->canceled)
 		{
 			$this->adminMailSubject(
 				sprintf($oShop->cancel_admin_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
@@ -1641,6 +1623,17 @@ abstract class Shop_Payment_System_Handler
 
 			$this->siteuserMailSubject(
 				sprintf($oShop->cancel_user_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
+			);
+		}
+		// Изменение темы письма при оплате
+		elseif ($this->getShopOrder()->paid)
+		{
+			$this->adminMailSubject(
+				sprintf($oShop->confirm_admin_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
+			);
+
+			$this->siteuserMailSubject(
+				sprintf($oShop->confirm_user_subject, $this->getShopOrder()->invoice, $oShop->name, $date_str)
 			);
 		}
 

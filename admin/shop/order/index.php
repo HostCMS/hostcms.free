@@ -495,10 +495,12 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 // Добавляем источник данных контроллеру формы
-$oAdmin_Form_Controller->addDataset
-(
-	$oAdmin_Form_Dataset
-);
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 if ($siteuser_id)
 {
@@ -573,6 +575,7 @@ $oAdmin_Form_Controller
 	->addExternalReplace('{shop_dir_id}', $oShopDir->id);
 
 $oAdmin_Form_Controller->addFilter('siteuser_id', array($oAdmin_Form_Controller, '_filterCallbackSiteuser'));
+$oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

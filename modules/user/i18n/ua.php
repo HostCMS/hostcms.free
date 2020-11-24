@@ -84,4 +84,11 @@ return array(
 	'editUserDepartment_success' => 'Інформація про посади співробітника у відділі змінена.',
 	'deleteUserFromDepartment_success' => 'Співробітник видалений з відділу.',
 	'session' => 'Сесії',
+
+	'responsible' => 'Надіслати відповідального',
+	'additional_receivers' => 'Додаткові одержувачі',
+	'theme' => 'Тема',
+	'text' => 'Текст',
+	'from' => 'E-mail відправника',
+	'sender_name' => 'Ім відправника',
 );

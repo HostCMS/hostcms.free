@@ -447,12 +447,12 @@ class Core_Page extends Core_Servant_Properties
 	{
 		switch ($mode)
 		{
+			case 'defer':
+				$return = ' defer="defer"';
+			break;
 			case TRUE:
 			case 'async':
 				$return = ' async="async"';
-			break;
-			case 'defer':
-				$return = ' defer="defer"';
 			break;
 			default:
 				$return = '';
@@ -594,9 +594,12 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Show 403 error
 	 * @return self
+	 * @hostcms-event Core_Page.onBeforeError403
 	 */
 	public function error403()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeError403', $this);
+
 		$oCore_Response = $this->deleteChild()->response->status(403);
 
 		// Если определена константа с ID страницы для 403 ошибки и она не равна нулю
@@ -628,9 +631,12 @@ class Core_Page extends Core_Servant_Properties
 	/**
 	 * Show 404 error
 	 * @return self
+	 * @hostcms-event Core_Page.onBeforeError404
 	 */
 	public function error404()
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeError404', $this);
+
 		$oCore_Response = $this->deleteChild()->response->status(404);
 
 		$oSite = Core_Entity::factory('Site', CURRENT_SITE);

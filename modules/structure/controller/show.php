@@ -549,7 +549,8 @@ class Structure_Controller_Show extends Core_Controller
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
 			// Shortcut
-			if ($oInformationsystem_Group->shortcut_id)
+			if ($oInformationsystem_Group->shortcut_id
+				&& $oInformationsystem_Group->shortcut_id != $oInformationsystem_Group->parent_id)
 			{
 				$oShortcut_Group = $oInformationsystem_Group;
 				$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
@@ -704,7 +705,8 @@ class Structure_Controller_Show extends Core_Controller
 			foreach ($this->_aInformationsystem_Items[$parent_id] as $oInformationsystem_Item)
 			{
 				// Shortcut
-				$oInformationsystem_Item->shortcut_id && $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
+				$oInformationsystem_Item->shortcut_id
+					&& $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 
 				$oInformationsystem_Item
 					->clearEntities()
@@ -816,7 +818,8 @@ class Structure_Controller_Show extends Core_Controller
 		foreach ($aShop_Groups as $oShop_Group)
 		{
 			// Shortcut
-			if ($oShop_Group->shortcut_id)
+			if ($oShop_Group->shortcut_id
+				&& $oShop_Group->shortcut_id != $oShop_Group->parent_id)
 			{
 				$oShortcut_Group = $oShop_Group;
 				$oOriginal_Shop_Group = $oShop_Group->Shortcut;
@@ -990,7 +993,8 @@ class Structure_Controller_Show extends Core_Controller
 			foreach ($this->_aShop_Items[$parent_id] as $oShop_Item)
 			{
 				// Shortcut
-				$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
+				$oShop_Item->shortcut_id
+					&& $oShop_Item = $oShop_Item->Shop_Item;
 
 				$oShop_Item
 					->clearEntities()

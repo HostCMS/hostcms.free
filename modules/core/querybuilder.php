@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder
 {
@@ -158,6 +158,16 @@ abstract class Core_QueryBuilder
 	 * @return Core_QueryBuilder_Expression
 	 */
 	static public function expression()
+	{
+		$args = func_get_args();
+		return Core_QueryBuilder::factory('Expression', $args);
+	}
+	
+	/**
+	 * Create and return an Expression Database Abstraction Layer
+	 * @return Core_QueryBuilder_Expression
+	 */
+	static public function raw()
 	{
 		$args = func_get_args();
 		return Core_QueryBuilder::factory('Expression', $args);

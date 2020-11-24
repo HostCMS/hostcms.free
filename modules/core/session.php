@@ -38,6 +38,27 @@ abstract class Core_Session
 		return self::$_started;
 	}
 
+	static protected $_debug = FALSE;
+
+	static public function debug($debug = TRUE)
+	{
+		self::$_debug = $debug;
+	}
+
+	static protected function _log($actionName)
+	{
+		$aDebugTrace = Core::debugBacktrace();
+
+		$message = "Core_Session::{$actionName}()";
+
+		foreach ($aDebugTrace as $aTrace)
+		{
+			$message .= "\n{$aTrace['file']}:{$aTrace['line']} {$aTrace['function']}";
+		}
+
+		Core_Log::instance()->clear()->status(0)->write($message);
+	}
+
 	/**
 	 * Start session
 	 * @return boolean
@@ -46,6 +67,8 @@ abstract class Core_Session
 	{
 		if (!self::isStarted())
 		{
+			self::$_debug && self::_log('start');
+
 			// Destroy existing session started by session.auto_start
 			if (is_null(self::$_handler) && session_id())
 			{
@@ -263,6 +286,8 @@ abstract class Core_Session
 	{
 		if (self::$_started)
 		{
+			self::$_debug && self::_log('close');
+
 			if (self::isActive())
 			{
 				session_write_close();

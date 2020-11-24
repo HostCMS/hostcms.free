@@ -53,7 +53,9 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 		$this->_Admin_Form_Entity_Form
 			->controller($this->Admin_Form_Controller)
 			->class('adminForm')
-			->action($this->Admin_Form_Controller->getPath());
+			//->action($this->Admin_Form_Controller->getPath());
+			// сломает редактирование
+			->action($this->Admin_Form_Controller->getAdminLoadHref($this->Admin_Form_Controller->getPath()));
 
 		// Закладки Admin_Form_Entity_Tabs
 		if (!is_null($this->tabs))

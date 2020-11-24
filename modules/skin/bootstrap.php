@@ -71,7 +71,10 @@ class Skin_Bootstrap extends Core_Skin
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap.min.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/css/font-awesome.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/fontawesome.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/solid.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/5/css/brands.min.css')
+			->addCss('/modules/skin/' . $this->_skinName . '/fonts/fontawesome/4/css/font-awesome.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/fonts/open-sans/open-sans.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/hostcms.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/animate.min.css')
@@ -209,6 +212,115 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						?><div class="navbar-account">
 							<ul class="account-area">
+								<li id="phone">
+									<a href="#" title="<?php echo Core::_('Admin.phone')?>" data-toggle="dropdown" class="dropdown-toggle">
+										<i class="icon fa fa-phone"></i>
+										<!--<span class="badge hidden"></span>-->
+									</a>
+									<div id="phoneListBox" class="pull-left dropdown-menu dropdown-arrow dropdown-bookmark dropdown-notifications dropdown-phone">
+										<div>
+											<input class="form-control phone-number" type="text" placeholder="Введите номер телефона"/>
+											<span class="backspace-button hidden"><i class="fas fa-backspace"></i></span>
+										</div>
+										<div class="pad hidden">
+											<div class="dial-pad">
+												<div class="digits">
+													<div class="wrapper"><div class="dig number-dig" name="1">1</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="2">2</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="3">3</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="4">4</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="5">5</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="6">6</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="7">7</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="8">8</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="9">9</div></div>
+													<div class="wrapper"><div class="dig number-dig astrisk" name="*">*</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="0">0</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="#">#</div></div>
+													<div class="wrapper"><div class="dig number-dig" name="+">+</div></div>
+												</div>
+											</div>
+										</div>
+										<div class="phone-action-buttons">
+											<div class="call"><a href="#"><i class="fas fa-phone-alt palegreen"></i></a></div>
+											<div class="hangup hidden"><a href="#"><i class="fas fa-phone-slash darkorange"></i></a></div>
+											<div class="timer white hidden">00:53</div>
+											<div class="microphone"><a href="#"><i class="fas fa-microphone gray"></i></a></div>
+											<div class="keyboard"><a href="#"><i class="fas fa-keyboard"></i></a></div>
+										</div>
+									</div>
+									<script>
+									$(function (){
+										var jPhoneListBox = $('.navbar-account #phoneListBox');
+
+										jPhoneListBox.on({
+											'click': function (event){
+												event.stopPropagation();
+											},
+											'touchstart': function (event) {
+												$(this).data({'isTouchStart': true});
+											}
+										});
+
+										$(function(){
+											$.extend({
+												toggleBackspace: function()
+												{
+													var phone = $('.phone-number').val();
+
+													if (phone.length)
+													{
+														$('.backspace-button').removeClass('hidden');
+													}
+													else
+													{
+														$('.backspace-button').addClass('hidden');
+													}
+												}
+											});
+
+											$('.phone-number').on('keyup', function(){
+												$.toggleBackspace();
+											});
+
+											$('.backspace-button').on('click', function(){
+												// $('.phone-number').focus();
+
+												var phone = $('.phone-number').val();
+												$('.phone-number').val(phone.substring(0, phone.length - 1));
+
+												if (phone.length == 1)
+												{
+													$('.backspace-button').addClass('hidden');
+												}
+											});
+
+											$('.microphone').on('click', function(){
+												$(this).find('i').toggleClass('fa-microphone gray fa-microphone-slash darkorange');
+											});
+
+											$('.keyboard').on('click', function(){
+												$('.pad').toggleClass('hidden');
+												$(this).find('i').toggleClass('azure');
+												$('.phone-action-buttons').toggleClass('padding-bottom-10');
+												$('.phone-number').focus();
+											});
+
+											$('.dial-pad .number-dig').on('click', function(){
+												var phone = $('.phone-number').val();
+												$('.phone-number').val(phone + $(this).text());
+
+												$.toggleBackspace();
+												$('.phone-number').focus();
+											});
+
+											$('.navbar li#phone').on('shown.bs.dropdown', function (event){
+												$('.phone-number').focus();
+											});
+										});
+									});
+									</script>
+								</li>
 								<li id="bookmarks">
 									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-star-o"></i>
@@ -304,7 +416,7 @@ class Skin_Bootstrap extends Core_Skin
 																		</div>
 																		<div class="notification-body">
 																			<span class="title"><?php echo htmlspecialchars($oEvent->name)?></span>
-																			<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> — <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->finish)?></span></span>
+																			<span class="description"><i class="fa fa-clock-o"></i> <?php echo Event_Controller::getDateTime($oEvent->start)?> — <span class="notification-time"><?php echo Event_Controller::getDateTime($oEvent->deadline)?></span></span>
 																		</div>
 																	</div>
 																</a>
@@ -408,7 +520,8 @@ class Skin_Bootstrap extends Core_Skin
 											'moduleId': <?php echo $oModule->id?>
 										});
 
-										$.refreshNotificationsList();
+										// Вызываем позже - после фомирования Navbar
+										//$.refreshNotificationsList();
 									});
 									</script>
 									<?php
@@ -582,7 +695,7 @@ class Skin_Bootstrap extends Core_Skin
 										$(function(){
 											// Chat
 											$('.page-container').append($('#chatbar'));
-											$("#chat-link, div.back").on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=77', context: $('#chatbar .contacts-list') }, $.chatGetUsersList );
+											$("#chat-link, #chatbar div.back").on('click', {path: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oModule->id?>&type=77', context: $('#chatbar .contacts-list') }, function(event) { $(this).hasClass('open') && $.chatGetUsersList(event) });
 
 											$('.contacts-list')
 												.on('click', 'li.contact', $.chatClearMessagesList)
@@ -692,6 +805,7 @@ class Skin_Bootstrap extends Core_Skin
 
 									<script>
 									$(function(){
+
 										$('li.workday #workdayControl').data('status', <?php echo $workdayStatus?>);
 
 										$('#user-info-dropdown .dropdown-menu li:not(.workday)').on({
@@ -701,6 +815,9 @@ class Skin_Bootstrap extends Core_Skin
 										});
 
 										$.blinkColon(<?php echo $workdayStatus?>);
+
+										// Вызываем после(!) выполнения всех скриптов в Navbar, потому что refreshNotificationsList использует данные, формируемые указанными скриптами.
+										$.refreshNotificationsList();
 									});
 									</script>
 									<!--/Login Area Dropdown-->
@@ -1961,7 +2078,7 @@ class Skin_Bootstrap extends Core_Skin
 						{
 							if (isset($history['file']) && isset($history['line']))
 							{
-								$sdebugBacktrace .= Core::_('Core.sql_debug_backtrace', Core_Exception::cutRootPath($history['file']), $history['line']);
+								$sdebugBacktrace .= Core::_('Core.sql_debug_backtrace', Core::cutRootPath($history['file']), $history['line']);
 							}
 						}
 

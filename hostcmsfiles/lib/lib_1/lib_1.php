@@ -197,4 +197,5 @@ $Informationsystem_Controller_Show
 		Core_Entity::factory('Xsl')->getByName($xslName)
 	)
 	->itemsProperties(TRUE)
+	->commentsProperties(TRUE)
 	->show();

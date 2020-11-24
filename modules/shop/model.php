@@ -80,6 +80,10 @@ class Shop_Model extends Core_Entity
 		'shop_discountcard_level' => array(),
 		'shop_price_setting' => array(),
 		'shop_filter_seo' => array(),
+		'shop_tab_dir' => array(),
+		'shop_tab' => array(),
+		'shop_comment_property' => array(),
+		'shop_comment_property_dir' => array(),
 	);
 
 	/**
@@ -318,12 +322,19 @@ class Shop_Model extends Core_Entity
 		$oShop_Order_Property_List->Properties->deleteAll(FALSE);
 		$oShop_Order_Property_List->Property_Dirs->deleteAll(FALSE);
 
+		// Доп. свойства комменариев
+		$oShop_Comment_Property_List = Core_Entity::factory('Shop_Comment_Property_List', $this->id);
+		$oShop_Comment_Property_List->Properties->deleteAll(FALSE);
+		$oShop_Comment_Property_List->Property_Dirs->deleteAll(FALSE);
+
 		$this->Shop_Item_Property_Dirs->deleteAll(FALSE);
 		$this->Shop_Item_Properties->deleteAll(FALSE);
 		$this->Shop_Group_Property_Dirs->deleteAll(FALSE);
 		$this->Shop_Group_Properties->deleteAll(FALSE);
 		$this->Shop_Order_Property_Dirs->deleteAll(FALSE);
 		$this->Shop_Order_Properties->deleteAll(FALSE);
+		$this->Shop_Comment_Property_Dirs->deleteAll(FALSE);
+		$this->Shop_Comment_Properties->deleteAll(FALSE);
 
 		$this->Shop_Affiliate_Plans->deleteAll(FALSE);
 		$this->Shop_Carts->deleteAll(FALSE);
@@ -347,6 +358,8 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
 		$this->Shop_Price_Settings->deleteAll(FALSE);
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
+		$this->Shop_Tab_Dirs->deleteAll(FALSE);
+		$this->Shop_Tabs->deleteAll(FALSE);
 
 		// Shop dir
 		Core_File::deleteDir($this->getPath());

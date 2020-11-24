@@ -123,7 +123,7 @@ $windowId = $oAdmin_Form_Controller->getWindowId();
 
 if ($oAdmin_Form_Controller->getAction() == 'show_form')
 {
-	if (!$oUserCurrent->read_only)
+	if (!$oUserCurrent->read_only && !$oUserCurrent->only_access_my_own)
 	{
 		$sFileName = $sTmpPath = NULL;
 
@@ -507,6 +507,13 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 			}
 			else
 			{
+				// Fast filter
+				if ($oShop->filter)
+				{
+					$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($oShop);
+					$Shop_Filter_Group_Controller->rebuild();
+				}
+
 				$sRedirectAction = "";
 				Core_Message::show(Core::_('Shop_Item.msg_download_price_complete'));
 				showStat($Shop_Item_Import_Csv_Controller);

@@ -179,7 +179,21 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 				if (Core_Array::getPost('add_value'))
 				{
-					$offset = 0;
+					$tableName = Property_Controller_Value::factory($this->_object->type)->getTableName();
+
+					Core_QueryBuilder::insert($tableName)
+						->columns('property_id', 'entity_id', 'value')
+						->select(
+							Core_QueryBuilder::select(intval($this->_object->id), 'shop_items.id', Core_QueryBuilder::raw(Core_DataBase::instance()->quote($this->_object->default_value)))
+								->from('shop_items')
+								->leftJoin($tableName, $tableName . '.entity_id', '=', 'shop_items.id')
+								->where($tableName . '.entity_id', 'IS', NULL)
+								->where('shop_items.shop_id', '=', $Shop_Item_Property->shop_id)
+								->where('shop_items.deleted', '=', 0)
+						)
+						->execute();
+
+					/*$offset = 0;
 					$limit = 100;
 
 					do {
@@ -215,10 +229,8 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 
 						$offset += $limit;
 					}
-
-					while (count($aShop_Items));
+					while (count($aShop_Items));*/
 				}
-
 			break;
 			case 'property_dir':
 			break;

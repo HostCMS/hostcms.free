@@ -188,7 +188,8 @@ if ($oSiteuser->id)
 }
 
 $Siteuser_Controller_Show->xsl(
-	Core_Entity::factory('Xsl')->getByName($xslUserAuthorization)
-)
-	->showGroups(true)
+		Core_Entity::factory('Xsl')->getByName($xslUserAuthorization)
+	)
+	->showGroups(TRUE)
+	// ->showDiscountcards(TRUE)
 	->show();

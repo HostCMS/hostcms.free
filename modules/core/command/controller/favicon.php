@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Favicon extends Core_Command_Controller
 {
@@ -27,42 +27,32 @@ class Core_Command_Controller_Favicon extends Core_Command_Controller
 
 		Core_Page::instance()
 			->response($oCore_Response);
-		
+
 		$oSite = Core_Entity::factory('Site')->getByAlias(Core::$url['host']);
 
-		if ($oSite)
+		if ($oSite && $oSite->favicon != '')
 		{
-			$ico_path = $oSite->getIcoFilePath();
-			$png_path = $oSite->getPngFilePath();
+			$faviconPath = $oSite->getFaviconPath();
 
 			$oCore_Response
 				->header('Last-Modified', gmdate('D, d M Y H:i:s', time()) . ' GMT')
 				->header('X-Powered-By', 'HostCMS');
 
-			if (is_readable($ico_path))
+			if (is_readable($faviconPath))
 			{
 				$oCore_Response
 					->status(200)
-					->header('Content-Type', 'image/x-icon')
-					->body(Core_File::read($ico_path));
-			}
-			elseif (is_readable($png_path))
-			{
-				$oCore_Response
-					->status(200)
-					->header('Content-Type', 'image/png')
-					->body(Core_File::read($png_path));
+					->header('Content-Type', Core_Mime::getFileMime($faviconPath))
+					->body(Core_File::read($faviconPath));
 			}
 			else
 			{
-				$oCore_Response
-					->status(404);
+				$oCore_Response->status(404);
 			}
 		}
 		else
 		{
-			$oCore_Response
-				->status(404);
+			$oCore_Response->status(404);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterShowAction', $this, array($oCore_Response));

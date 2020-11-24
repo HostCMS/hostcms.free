@@ -17,6 +17,9 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 	// местоположение магазина (отправки), почтовый индекс, Ростов-на-Дону
 	private $_from = '344000';
 	
+	// ключ из http://www.postcalc.ru/lk/
+	private $_key = 'test';
+	
 	protected $_insurance = TRUE;  // Страхование   TRUE/FALSE 
 	
 	protected $_iBase = 'Partial'; // База для расчета страховки (только при оценке товарного вложения больше 0!) Partial / Full
@@ -67,6 +70,7 @@ class Shop_Delivery_Handler1 extends Shop_Delivery_Handler
 		{
 			$url = "http://api.postcalc.ru?";
 			$aParams['st'] = 'site';
+			$aParams['key'] = $this->_key;
 			$aParams['ml'] = 'email';
 			$aParams['person'] = 'person';
 			

@@ -166,4 +166,5 @@ return array(
 	'quantity' => 'Количество',
 	'warehouse' => 'Склад',
 	'date' => 'Дата',
+	'change_user' => 'Изменение ответственного: "%s"',
 );

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -183,26 +183,30 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 
 	$lib_id = intval(Core_Array::getGet('lib_id'));
 
-	$oTemplate_Section_Lib_Controller_Libproperties
-		->libId($lib_id);
+	$oTemplate_Section_Lib_Controller_Libproperties->libId($lib_id);
 
 	$oAdmin_Form_Controller->addAction($oTemplate_Section_Lib_Controller_Libproperties);
 }
 
 // Источник данных 1
-$oAdminFormDataset = new Admin_Form_Dataset_Entity(
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Template_Section_Lib')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Ограничение источника 1 по родительской группе
-$oAdminFormDataset->addCondition(
+$oAdmin_Form_Dataset->addCondition(
 	array('where' =>
 		array('template_section_id', '=', $iTemplateSectionId)
 	)
 );
 
 // Добавляем источник данных контроллеру формы
-$oAdmin_Form_Controller->addDataset($oAdminFormDataset);
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

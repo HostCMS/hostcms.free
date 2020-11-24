@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Digital_Model extends Core_Entity
 {
@@ -107,7 +107,7 @@ class Shop_Item_Digital_Model extends Core_Entity
 	 */
 	public function getFilePath()
 	{
-		return $this->Shop_Item->Shop->getPath() . '/eitems/item_catalog_' . $this->Shop_Item->id . '/';
+		return $this->setMarksDeleted(NULL)->Shop_Item->setMarksDeleted(NULL)->Shop->getPath() . '/eitems/item_catalog_' . $this->Shop_Item->id . '/';
 	}
 
 	/**
@@ -168,7 +168,11 @@ class Shop_Item_Digital_Model extends Core_Entity
 	{
 		try
 		{
-			Core_File::delete($this->getFullFilePath());
+			$path = $this->getFullFilePath();
+			if (is_file($path))
+			{
+				Core_File::delete($path);
+			}
 		} catch (Exception $e) {}
 
 		$this->filename = '';
@@ -196,7 +200,12 @@ class Shop_Item_Digital_Model extends Core_Entity
 
 		try
 		{
-			Core_File::delete($this->getFullFilePath());
+			$path = $this->getFullFilePath();
+
+			if (is_file($path))
+			{
+				Core_File::delete($path);
+			}
 		} catch (Exception $e){}
 
 		return parent::delete($primaryKey);

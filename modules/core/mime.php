@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Mime
 {
@@ -142,7 +142,7 @@ class Core_Mime
 		'htm' => 'text/html',
 		'html' => 'text/html',
 		'icb' => 'image/x-icb',
-		'ico' => 'image/x-ico',
+		'ico' => 'image/x-icon',
 		'ics' => 'text/calendar',
 		'idl' => 'text/x-idl',
 		'ief' => 'image/ief',

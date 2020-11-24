@@ -43,6 +43,7 @@ return array(
 	'item_active' => 'Product activity',
 	'item_sorting' => 'Product sorting order',
 	'item_path' => 'Path to item',
+	'item_full_path' => 'Full path to item',
 	'item_seo_title' => 'Meta element title',
 	'item_seo_description' => 'Meta element description',
 	'item_seo_keywords' => 'Meta element keywords',

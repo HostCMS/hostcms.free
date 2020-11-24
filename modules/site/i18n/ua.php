@@ -56,7 +56,8 @@ return array(
 	'site_link_add' => 'Додати',
 	'copy_success' => 'Інформація про сайт успішно скопійована',
 	'copy_error' => 'Помилка копіювання інформації про сайт',
-	'ico_files_uploaded' => '<acronym title="ICO-файл для сайту">Favicon</acronym>',
+	'favicon' => '<acronym title="Favicon-файл для сайту, підтримує розширення .ico, .png, .svg">Favicon</acronym>',
+	'deleteFavicon_success' => 'Favicon успішно видалено',
 	'default' => 'За замовчуванням',
 
 	'menu2_caption' => 'Налаштування',
@@ -75,7 +76,7 @@ return array(
 	'choose_site_template' => 'Вибір макета сайту',
 	'choose_color_scheme' => 'Вибір колірної схеми',
 	'template_settings' => 'Налаштування макета',
-	'delete_current_site' => 'Заборонено видалення сайту користувачем, який належить видаляємому сайту!',
+	'delete_current_site' => 'Заборонено видалення поточного сайту, попередньо перейдіть на інший сайт!',
 	'delete_last_site' => 'Заборонено видалення останнього сайту!',
 	'delete_site_all_superusers_belongs' => 'Неможливо видалити сайт, так як всі суперкористувачі належать йому!',
 
@@ -84,4 +85,26 @@ return array(
 	'error_email' => '<acronym title="Технічний e-mail (помилки і т.д.)">Технічний e-mail</acronym>',
 	'https' => 'HTTPS',
 	'set_https' => 'Встановити HTTPS',
+
+	'site_csp' => 'CSP',
+	'csp-header-default-src' => 'Default',
+	'csp-header-script-src' => 'Script',
+	'csp-header-style-src' => 'Style',
+	'csp-header-img-src' => 'Image',
+	'csp-header-font-src' => 'Font',
+	'csp-header-connect-src' => 'Connect',
+	'csp-header-media-src' => 'Media',
+	'csp-header-object-src' => 'Object',
+	'csp-header-frame-src' => 'Frame',
+
+	'none' => 'Заборонити доступ до всього',
+	'all' => 'Повний доступ, виключаючи схеми data: blob: filesystem:',
+	'self' => 'Поточний джерело (виключаючи його піддомени)',
+	'blob' => 'Дозволити blob:',
+	'data' => 'Розширені дані, наприклад, зображення в base64',
+	'inline' => 'Дозволити використовувати інлайн-суті, наприклад, "script"',
+	'eval' => 'Дозволити використовувати eval()',
+	'hosts' => 'Розділені пробілами, * для піддоменів, можна вказати тільки схему, наприклад, https:',
+
+	'protect' => 'Захист від атак',
 );

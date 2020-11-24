@@ -44,18 +44,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	protected $_Admin_Language = NULL;
 
 	/**
-	 * Default form sorting field
-	 * @var string
-	 */
-	//protected $_sortingAdmin_Form_Field = NULL;
-
-	/**
-	 * String of additional parameters
-	 * @var string
-	 */
-	//protected $_additionalParams = NULL;
-
-	/**
 	 * Create new form controller
 	 * @param Admin_Form_Model $oAdmin_Form
 	 * @return object
@@ -148,12 +136,19 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 		}
 
-		Core::initConstants(Core_Entity::factory('Site', CURRENT_SITE));
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+		Core::initConstants($oSite);
 
 		$aTmp = array();
 		foreach ($_GET as $key => $value)
 		{
-			if (!is_array($value) && $key != '_' && strpos($key, 'admin_form_filter_') === FALSE && strpos($key, 'topFilter_') === FALSE)
+			// XSS protect
+			if ($oSite->protect && Core_Security::checkXSS($value))
+			{
+				unset($_GET[$key]);
+				unset($_REQUEST[$key]);
+			}
+			elseif (!is_array($value) && $key != '_' && strpos($key, 'admin_form_filter_') === FALSE && strpos($key, 'topFilter_') === FALSE)
 			{
 				//$aTmp[] = htmlspecialchars($key, ENT_QUOTES) . '=' . htmlspecialchars($value, ENT_QUOTES);
 				$aTmp[] = htmlspecialchars($key) . '=' . rawurlencode($value);
@@ -2033,8 +2028,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true});
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script><?php
 	}
@@ -2061,8 +2056,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true});
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+
+			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script>
 		<?php
@@ -2084,7 +2080,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'});
+			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script>
 		<?php
@@ -2153,17 +2149,16 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
 				language: '<?php echo $language?>',
 				placeholder: '<?php echo $placeholder?>'
-			}).val('<?php echo $iUserId?>').trigger('change.select2');
-
-		//$(".select2-container").css('width', '100%');
-
-		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>')
+			})
+			.val('<?php echo $iUserId?>')
+			.trigger('change.select2')
 			.on('select2:unselect', function (){
 				$(this)
 					.next('.select2-container')
 					.find('.select2-selection--single')
 					.removeClass('user-container');
 			});
+			//$(".select2-container").css('width', '100%');
 		</script><?php
 	}
 

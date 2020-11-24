@@ -306,7 +306,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			);
 		}
 
-		$this->addXmlTag('discount_amount', $this->_discountAmount);
+		!is_null($this->_discountAmount)
+			&& $this->addXmlTag('discount_amount', $this->_discountAmount);
 
 		return $this;
 	}

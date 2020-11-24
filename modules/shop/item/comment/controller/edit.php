@@ -24,7 +24,30 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 
 		$object = $this->_object;
 
+		$oShop = is_null($object->id)
+			? Core_Entity::factory('Shop', $object->Comment_Shop_Item->Shop_Item->shop_id)
+			: $object->Comment_Shop_Item->Shop_Item->Shop;
+
 		$oAdditionalTab = $this->getTab('additional');
+
+		$template_id = $oShop->Structure->template_id
+			? $oShop->Structure->template_id
+			: 0;
+
+		$oPropertyTab = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('Admin_Form.tabProperties'))
+			->name('Property');
+
+		$this->addTabBefore($oPropertyTab, $oAdditionalTab);
+
+		// Properties
+		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+			->setObject($this->_object)
+			->setDatasetId($this->getDatasetId())
+			->linkedObject(Core_Entity::factory('Shop_Comment_Property_List', $oShop->id))
+			->setTab($oPropertyTab)
+			->template_id($template_id)
+			->fillTab();
 
 		$oAdditionalTab
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -66,6 +89,12 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 
 		// Cached tags
 		$Comment_Shop_Item->Shop_Item->clearCache();
+
+		// Properties
+		Property_Controller_Tab::factory($this->_Admin_Form_Controller)
+			->setObject($this->_object)
+			->linkedObject(Core_Entity::factory('Shop_Comment_Property_List', $Comment_Shop_Item->Shop_Item->shop_id))
+			->applyObjectProperty();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 

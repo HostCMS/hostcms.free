@@ -198,7 +198,7 @@ class Core_Browser
 		}
 		else
 		{
-			$browser = Core::_('Counter.other');
+			$browser = '-';
 		}
 
 		return $browser;
@@ -275,7 +275,7 @@ class Core_Browser
 		}
 		else
 		{
-			$os = Core::_('Counter.other');
+			$os = '-';
 		}
 
 		return $os;

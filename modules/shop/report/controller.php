@@ -838,10 +838,11 @@ class Shop_Report_Controller
 						{
 							$imgSrc = htmlspecialchars($oShop_Item->getSmallFileHref());
 						}
+						// В htmlspecialchars(htmlspecialchars($aTmp['name'])) вложенный вызов htmlspecialchars необходим для корректного отображения заголовка popover'а при наличии в тексте заголовка тэга <script>
 						?>
 						<tr>
 							<td><?php echo $oShop_Item->shop_group_id ? htmlspecialchars($oShop_Item->Shop_Group->name) : Core::_('Report.root')?></td>
-							<td><a href="<?php echo $sItemUrl?>" target="_blank" data-container="body" data-titleclass="bordered-palegreen" data-toggle="popover-hover" data-placement="top" data-title="<?php echo htmlspecialchars($aTmp['name'])?>" data-content="<div class='text-align-center'><img src='<?php echo $imgSrc?>' /></div>"><?php echo htmlspecialchars($aTmp['name'])?></a></td>
+							<td><a href="<?php echo $sItemUrl?>" target="_blank" data-container="body" data-titleclass="bordered-palegreen" data-toggle="popover-hover" data-placement="top" data-title="<?php echo htmlspecialchars(htmlspecialchars($aTmp['name']))?>" data-content="<div class='text-align-center'><img src='<?php echo $imgSrc?>' /></div>"><?php echo htmlspecialchars($aTmp['name'])?></a></td>
 							<td><?php echo htmlspecialchars($aTmp['marking'])?></td>
 							<td><?php echo round($aTmp['quantityAmount'])?></td>
 							<td><?php echo $aTmp['totalAmount']?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>
@@ -977,7 +978,7 @@ class Shop_Report_Controller
 		}
 		?>
 		<div class="row">
-			<div class="col-xs-12 col-sm-4">
+			<div class="form-group col-xs-12 col-sm-6 col-lg-5">
 				<?php
 				$aShopOptions = array(0 => Core::_('Report.all_shops'));
 
@@ -997,7 +998,7 @@ class Shop_Report_Controller
 					->execute();
 				?>
 			</div>
-			<div class="col-xs-12 col-sm-4 margin-top-5">
+			<div class="form-group col-xs-12 col-sm-6 margin-top-5">
 				<div class="pull-left text margin-right-10"><?php echo Core::_('Report.allow_delivery')?></div>
 				<label>
 					<input class="checkbox-slider toggle colored-success" name="allow_delivery" onchange="$(this).val(+this.checked); sendRequest({tab: $('.report-tabs .nav-tabs li.active'), data: {allow_delivery: $(this).val()}});" type="checkbox" value="<?php echo self::$_allow_delivery?>" <?php echo $checked?>/>
@@ -1125,7 +1126,7 @@ class Shop_Report_Controller
 				}
 			}
 			?>
-			<div class="row siteusers-block margin-top-20">
+			<div class="row siteusers-block">
 				<div class="col-xs-12 col-sm-3">
 					<div class="report-name"><?php echo Core::_('Report.widget_new_clients')?></div>
 					<div class="report-description">
@@ -1704,15 +1705,19 @@ class Shop_Report_Controller
 					}
 
 					$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
+
+						var plots = [];
+
 						if (data.length)
 						{
 							setTimeout(function() {
 								if ($("#bar-chart<?php echo $functionName?>").width() > 0)
 								{
-									$.plot($("#bar-chart<?php echo $functionName?>"), data, options);
-
-									var previousPoint = null,
+									var plot = $.plot($("#bar-chart<?php echo $functionName?>"), data, options),
+										previousPoint = null,
 										previousPointLabel = null;
+
+									plots.push(plot);
 
 									$("#bar-chart<?php echo $functionName?>").bind("plothover", function (event, pos, item) {
 										if (item) {
@@ -1745,12 +1750,13 @@ class Shop_Report_Controller
 							setTimeout(function() {
 								if ($("#horizontal-chart<?php echo $functionName?>").width() > 0)
 								{
-									plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
-
-									var offset = [],
+									var plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal),
+										offset = [],
 										leftBorder = [],
 										amounts = [],
 										plotData = plotHorizontal.getData();
+
+									plots.push(plotHorizontal);
 
 									$.each(plotData, function(i, barObject){
 										if (barObject.data.length > 1) {
@@ -1815,6 +1821,28 @@ class Shop_Report_Controller
 								}
 							}, 10);
 						}
+
+						/* $(window).on('resize', function (){
+
+							console.log('window resize');
+
+							for (var i = 0; i < plots.length; i++)
+							{
+								//plots[i].draw();
+
+								//width()/height()
+
+								console.log('plots[i].width() =', plots[i].width());
+
+
+								console.log('plots[i].getPlaceholder() =', plots[i].getPlaceholder());
+
+
+								// plots[i].resize();
+								// plots[i].setupGrid();
+								// plots[i].draw();
+							}
+						}); */
 					});
 
 					var currentTab = $('.report-tabs .nav-tabs li.active'),
@@ -2284,9 +2312,8 @@ class Shop_Report_Controller
 					setTimeout(function() {
 						if ($("#horizontal-chart<?php echo $functionName?>").width() > 0)
 						{
-							plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal);
-
-							var offset = [],
+							var plotHorizontal = $.plot($("#horizontal-chart<?php echo $functionName?>"), dataHorizontal, optionsHorizontal),
+								offset = [],
 								leftBorder = [],
 								amounts = [],
 								plotData = plotHorizontal.getData();
@@ -2351,6 +2378,13 @@ class Shop_Report_Controller
 									}
 								});
 							});
+
+							/* $(window).on('resize', function (){
+
+								plotHorizontal.resize();
+								plotHorizontal.setupGrid();
+								plotHorizontal.draw();
+							}); */
 						}
 					}, 10);
 				}
@@ -2571,7 +2605,7 @@ class Shop_Report_Controller
 
 						if (placeholderBrandsDiagram.width() > 0)
 						{
-							$.plot(placeholderBrandsDiagram, dataPie, {
+							var plot = $.plot(placeholderBrandsDiagram, dataPie, {
 								series: {
 									pie: {
 										show: true,
@@ -2610,6 +2644,13 @@ class Shop_Report_Controller
 							placeholderBrandsDiagram.resize(function(){$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();});
 
 							$("#pie-chart<?php echo $functionName?> span[id ^= 'pieLabel']").hide();
+
+							/* $(window).on('resize', function (){
+
+								plot.resize();
+								plot.setupGrid();
+								plot.draw();
+							}); */
 						}
 					}, 10);
 				}

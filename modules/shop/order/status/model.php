@@ -115,6 +115,36 @@ class Shop_Order_Status_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if (Core::moduleIsActive('bot'))
+		{
+			$oModule = Core_Entity::factory('Module')->getByPath('shop');
+
+			$aBot_Modules = Bot_Controller::getBotModules($oModule->id, 0, $this->id);
+
+			foreach ($aBot_Modules as $oBot_Module)
+			{
+				$oBot = $oBot_Module->Bot;
+				
+				$sParents = $oBot->bot_dir_id
+					? $oBot->Bot_Dir->dirPathWithSeparator() . ' → '
+					: '';
+							
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-square badge-hostcms')
+					->value('<i class="fa fa-android"></i> ' . $sParents . htmlspecialchars($oBot->name))
+					->execute();
+			}
+		}
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity

@@ -11,9 +11,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * // Sample 1
  * $oCore_QueryBuilder_Replace = Core_QueryBuilder::replace('tableName')
  * 	->columns('column1', 'column2', 'column3')
+ *	// Option 1
  * 	->values('value1', 'value2', 11)
- * 	->values('value3', 'value4', 17)
- * 	->values('value5', 'value6', 19)
+ * 	// Option 2
+ * 	->values(array('value3', 'value4', 17))
  *	->execute();
  * </code>
  *
@@ -27,7 +28,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Replace extends Core_QueryBuilder_Statement
 {
@@ -187,16 +188,20 @@ class Core_QueryBuilder_Replace extends Core_QueryBuilder_Statement
 	 * <code>
 	 * $oCore_QueryBuilder_Replace = Core_QueryBuilder::replace('tableName')
 	 * 	->columns('column1', 'column2', 'column3')
+	 *	// Option 1
 	 * 	->values('value1', 'value2', 11)
-	 * 	->values('value3', 'value4', 17)
-	 * 	->values('value5', 'value6', 19);
+	 * 	// Option 2
+	 * 	->values(array('value3', 'value4', 17))
 	 * </code>
 	 * @return Core_QueryBuilder_Replace
 	 */
 	public function values()
 	{
 		$args = func_get_args();
-		$this->_values[] = $args;
+
+		$this->_values[] = count($args) == 1 && is_array($args[0])
+			? $args[0]
+			: $args;
 
 		return $this;
 	}

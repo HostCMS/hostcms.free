@@ -132,4 +132,13 @@ abstract class Property_Controller_Value_Type
 
 		return $oProperty_Values->findAll($bCache);
 	}
+	
+	/**
+	 * Convert object to string
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return get_class($this) . '; Model: ' . $this->_modelName . '; Table: ' . $this->_tableName;
+	}
 }

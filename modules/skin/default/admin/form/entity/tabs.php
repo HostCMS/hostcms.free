@@ -18,8 +18,27 @@ class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
-		'formId'
+		'formId',
+		'current'
 	);
+
+	/**
+	 * Skip properties
+	 * @var array
+	 */
+	protected $_skipProperies = array(
+		'current'
+	);
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		$this->current(0);
+	}
 
 	/**
 	 * Executes the business logic.
@@ -39,7 +58,7 @@ class Skin_Default_Admin_Form_Entity_Tabs extends Admin_Form_Entity
 					// Hide inactive tabs
 					if ($oAdmin_Form_Tab_Entity->active)
 					{
-						$class = $tab_id == 0 ? ' current_li' : '';
+						$class = $tab_id == $this->current ? ' current_li' : '';
 						?><li class="li_tab<?php echo $class?>" id="li_tab_page_<?php echo $tab_id?>" onclick="$.showTab('<?php echo Core_Str::escapeJavascriptVariable($this->_Admin_Form_Controller->getWindowId())?>', 'tab_page_<?php echo $tab_id?>')"><?php
 							?><span><?php echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption)?></span><?php
 						?></li><?php

@@ -80,21 +80,21 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	 * Основные свойства товара
 	 * @var array
 	 */
-	private $_aItemBase_Properties;
+	private $_aItemBaseProperties;
 
 	/**
 	 * Base properties of item groups
 	 * Основные свойства групп товаров
 	 * @var array
 	 */
-	private $_aGroupBase_Properties;
+	private $_aGroupBaseProperties;
 
 	/**
 	 * Special prices of item
 	 * Основные свойства дополнительных цен товаров
 	 * @var array
 	 */
-	private $_aSpecialPriceBase_Properties;
+	private $_aSpecialPriceBaseProperties;
 
 	/**
 	 * CSV data
@@ -128,6 +128,114 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Get Group Titles
+	 * @return array
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onGetGroupTitles
+	 */
+	public function getGroupTitles()
+	{
+		$return = array(
+			'"' . Core::_('Shop_Exchange.group_name') . '"',
+			'"' . Core::_('Shop_Exchange.group_guid') . '"',
+			'"' . Core::_('Shop_Exchange.parent_group_guid') . '"',
+			'"' . Core::_('Shop_Exchange.group_seo_title') . '"',
+			'"' . Core::_('Shop_Exchange.group_seo_description') . '"',
+			'"' . Core::_('Shop_Exchange.group_seo_keywords') . '"',
+			'"' . Core::_('Shop_Exchange.group_description') . '"',
+			'"' . Core::_('Shop_Exchange.group_path') . '"',
+			'"' . Core::_('Shop_Exchange.group_image_large') . '"',
+			'"' . Core::_('Shop_Exchange.group_image_small') . '"',
+			'"' . Core::_('Shop_Exchange.group_sorting') . '"'
+		);
+
+		Core_Event::notify(get_class($this) . '.onGetGroupTitles', $this, array($return));
+
+		return !is_null(Core_Event::getLastReturn())
+			? Core_Event::getLastReturn()
+			: $return;
+	}
+
+	/**
+	 * Get Item Titles
+	 * @return array
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onGetItemTitles
+	 */
+	public function getItemTitles()
+	{
+		$return = array(
+			'"' . Core::_('Shop_Exchange.item_guid') . '"',
+			'"' . Core::_('Shop_Exchange.item_id') . '"',
+			'"' . Core::_('Shop_Exchange.item_marking') . '"',
+			'"' . Core::_('Shop_Exchange.item_parent_marking') . '"',
+			'"' . Core::_('Shop_Exchange.item_name') . '"',
+			'"' . Core::_('Shop_Exchange.item_description') . '"',
+			'"' . Core::_('Shop_Exchange.item_text') . '"',
+			'"' . Core::_('Shop_Exchange.item_weight') . '"',
+			'"' . Core::_('Shop_Exchange.item_length') . '"',
+			'"' . Core::_('Shop_Exchange.item_width') . '"',
+			'"' . Core::_('Shop_Exchange.item_height') . '"',
+			'"' . Core::_('Shop_Exchange.item_min_quantity') . '"',
+			'"' . Core::_('Shop_Exchange.item_max_quantity') . '"',
+			'"' . Core::_('Shop_Exchange.item_quantity_step') . '"',
+			'"' . Core::_('Shop_Exchange.item_type') . '"',
+			'"' . Core::_('Shop_Exchange.item_tags') . '"',
+			'"' . Core::_('Shop_Exchange.item_price') . '"',
+			'"' . Core::_('Shop_Exchange.item_active') . '"',
+			'"' . Core::_('Shop_Exchange.item_sorting') . '"',
+			'"' . Core::_('Shop_Exchange.item_path') . '"',
+			'"' . Core::_('Shop_Exchange.item_full_path') . '"',
+			'"' . Core::_('Shop_Exchange.tax_id') . '"',
+			'"' . Core::_('Shop_Exchange.currency_id') . '"',
+			'"' . Core::_('Shop_Exchange.seller_name') . '"',
+			'"' . Core::_('Shop_Exchange.producer_name') . '"',
+			'"' . Core::_('Shop_Exchange.measure_value') . '"',
+			'"' . Core::_('Shop_Exchange.item_seo_title') . '"',
+			'"' . Core::_('Shop_Exchange.item_seo_description') . '"',
+			'"' . Core::_('Shop_Exchange.item_seo_keywords') . '"',
+			'"' . Core::_('Shop_Exchange.item_indexing') . '"',
+			'"' . Core::_('Shop_Exchange.item_yandex_market') . '"',
+			'"' . Core::_('Shop_Exchange.item_yandex_market_bid') . '"',
+			'"' . Core::_('Shop_Exchange.item_yandex_market_cid') . '"',
+			'"' . Core::_('Shop_Exchange.item_yandex_vendorcode') . '"',
+			'"' . Core::_('Shop_Exchange.item_datetime') . '"',
+			'"' . Core::_('Shop_Exchange.item_start_datetime') . '"',
+			'"' . Core::_('Shop_Exchange.item_end_datetime') . '"',
+			'"' . Core::_('Shop_Exchange.item_image_large') . '"',
+			'"' . Core::_('Shop_Exchange.item_image_small') . '"',
+			'"' . Core::_('Shop_Exchange.item_additional_group') . '"',
+			'"' . Core::_('Shop_Exchange.item_barcode') . '"',
+			'"' . Core::_('Shop_Exchange.item_sets_guid') . '"',
+			'"' . Core::_('Shop_Exchange.siteuser_id') . '"',
+		);
+		Core_Event::notify(get_class($this) . '.onGetItemTitles', $this, array($return));
+
+		return !is_null(Core_Event::getLastReturn())
+			? Core_Event::getLastReturn()
+			: $return;
+	}
+
+	/**
+	 * Get Item's Special Prices Titles
+	 * @return array
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onGetItemSpecialpricesTitles
+	 */
+	public function getItemSpecialpricesTitles()
+	{
+		$return = array(
+			'"' . Core::_('Shop_Exchange.specialprices_min_quantity') . '"',
+			'"' . Core::_('Shop_Exchange.specialprices_max_quantity') . '"',
+			'"' . Core::_('Shop_Exchange.specialprices_price') . '"',
+			'"' . Core::_('Shop_Exchange.specialprices_percent') . '"',
+		);
+
+		Core_Event::notify(get_class($this) . '.onGetItemSpecialpricesTitles', $this, array($return));
+
+		return !is_null(Core_Event::getLastReturn())
+			? Core_Event::getLastReturn()
+			: $return;
+	}
+
+	/**
 	 * Init
 	 * @return self
 	 */
@@ -138,7 +246,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			$oShop = Core_Entity::factory('Shop', $this->shopId);
 
 			$oSite_Alias = $oShop->Site->getCurrentAlias();
-			$this->_shopUrl = ($oShop->Site->https ? 'https://' : 'http://') . $oSite_Alias->name .  $oShop->Structure->getPath();
+			$this->_shopUrl = $oSite_Alias
+				? ($oShop->Site->https ? 'https://' : 'http://') . $oSite_Alias->name .  $oShop->Structure->getPath()
+				: '';
 
 			// Заполняем склады
 			$this->_aShopWarehouses = $oShop->Shop_Warehouses->findAll(FALSE);
@@ -151,95 +261,27 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			$this->exportGroupExternalProperties
 				&& $this->_aGroup_Properties = Core_Entity::factory('Shop_Group_Property_List', $this->shopId)->Properties->findAll(FALSE);
 
-			// Название раздела - Порядок сортировки раздела
-			$this->_aGroupBase_Properties = array(
-				// 11
-				"", "", "", "", "", "", "", "", "", "",
-				""
-			);
-
-			// CML ID идентификатор товара - Ярлыки
-			$this->_aItemBase_Properties = array(
-				// 43
-				"", "", "", "", "", "", "", "", "", "",
-				"", "", "", "", "", "", "", "", "", "",
-				"", "", "", "", "", "", "", "", "", "",
-				"", "", "", "", "", "", "", "", "", "",
-				"", "", ""
-			);
-
-			$this->_aSpecialPriceBase_Properties = array(
-				// 4
-				"", "", "", ""
-			);
+			$this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
 
 			$this->_iCurrentDataPosition = 0;
 
-			$this->_aShopPrices = $oShop->Shop_prices->findAll(FALSE);
+			$aGroupTitles = $this->getGroupTitles();
+			$aItemTitles = $this->getItemTitles();
+			$aItemSpecialpricesTitles = $this->getItemSpecialpricesTitles();
+
+			// Название раздела - Порядок сортировки раздела
+			$this->_aGroupBaseProperties = array_pad(array(), count($aGroupTitles), '');
+
+			// CML ID идентификатор товара - Ярлыки
+			$this->_aItemBaseProperties = array_pad(array(), count($aItemTitles), '');
+
+			$this->_aSpecialPriceBaseProperties = array_pad(array(), count($aItemSpecialpricesTitles), '');
 
 			// 0-вая строка - заголовок CSV-файла
-			$this->_aCurrentData[$this->_iCurrentDataPosition] = array(
-				// 11 cells
-				'"' . Core::_('Shop_Exchange.group_name') . '"',
-				'"' . Core::_('Shop_Exchange.group_guid') . '"',
-				'"' . Core::_('Shop_Exchange.parent_group_guid') . '"',
-				'"' . Core::_('Shop_Exchange.group_seo_title') . '"',
-				'"' . Core::_('Shop_Exchange.group_seo_description') . '"',
-				'"' . Core::_('Shop_Exchange.group_seo_keywords') . '"',
-				'"' . Core::_('Shop_Exchange.group_description') . '"',
-				'"' . Core::_('Shop_Exchange.group_path') . '"',
-				'"' . Core::_('Shop_Exchange.group_image_large') . '"',
-				'"' . Core::_('Shop_Exchange.group_image_small') . '"',
-				'"' . Core::_('Shop_Exchange.group_sorting') . '"',
-				// 43
-				'"' . Core::_('Shop_Exchange.item_guid') . '"',
-				'"' . Core::_('Shop_Exchange.item_id') . '"',
-				'"' . Core::_('Shop_Exchange.item_marking') . '"',
-				'"' . Core::_('Shop_Exchange.item_parent_marking') . '"',
-				'"' . Core::_('Shop_Exchange.item_name') . '"',
-				'"' . Core::_('Shop_Exchange.item_description') . '"',
-				'"' . Core::_('Shop_Exchange.item_text') . '"',
-				'"' . Core::_('Shop_Exchange.item_weight') . '"',
-				'"' . Core::_('Shop_Exchange.item_length') . '"',
-				'"' . Core::_('Shop_Exchange.item_width') . '"',
-				'"' . Core::_('Shop_Exchange.item_height') . '"',
-				'"' . Core::_('Shop_Exchange.item_min_quantity') . '"',
-				'"' . Core::_('Shop_Exchange.item_max_quantity') . '"',
-				'"' . Core::_('Shop_Exchange.item_quantity_step') . '"',
-				'"' . Core::_('Shop_Exchange.item_type') . '"',
-				'"' . Core::_('Shop_Exchange.item_tags') . '"',
-				'"' . Core::_('Shop_Exchange.item_price') . '"',
-				'"' . Core::_('Shop_Exchange.item_active') . '"',
-				'"' . Core::_('Shop_Exchange.item_sorting') . '"',
-				'"' . Core::_('Shop_Exchange.item_path') . '"',
-				'"' . Core::_('Shop_Exchange.item_full_path') . '"',
-				'"' . Core::_('Shop_Exchange.tax_id') . '"',
-				'"' . Core::_('Shop_Exchange.currency_id') . '"',
-				'"' . Core::_('Shop_Exchange.seller_name') . '"',
-				'"' . Core::_('Shop_Exchange.producer_name') . '"',
-				'"' . Core::_('Shop_Exchange.measure_value') . '"',
-				'"' . Core::_('Shop_Exchange.item_seo_title') . '"',
-				'"' . Core::_('Shop_Exchange.item_seo_description') . '"',
-				'"' . Core::_('Shop_Exchange.item_seo_keywords') . '"',
-				'"' . Core::_('Shop_Exchange.item_indexing') . '"',
-				'"' . Core::_('Shop_Exchange.item_yandex_market') . '"',
-				'"' . Core::_('Shop_Exchange.item_yandex_market_bid') . '"',
-				'"' . Core::_('Shop_Exchange.item_yandex_market_cid') . '"',
-				'"' . Core::_('Shop_Exchange.item_yandex_vendorcode') . '"',
-				'"' . Core::_('Shop_Exchange.item_datetime') . '"',
-				'"' . Core::_('Shop_Exchange.item_start_datetime') . '"',
-				'"' . Core::_('Shop_Exchange.item_end_datetime') . '"',
-				'"' . Core::_('Shop_Exchange.item_image_large') . '"',
-				'"' . Core::_('Shop_Exchange.item_image_small') . '"',
-				'"' . Core::_('Shop_Exchange.item_additional_group') . '"',
-				'"' . Core::_('Shop_Exchange.item_barcode') . '"',
-				'"' . Core::_('Shop_Exchange.item_sets_guid') . '"',
-				'"' . Core::_('Shop_Exchange.siteuser_id') . '"',
-				// 4
-				'"' . Core::_('Shop_Exchange.specialprices_min_quantity') . '"',
-				'"' . Core::_('Shop_Exchange.specialprices_max_quantity') . '"',
-				'"' . Core::_('Shop_Exchange.specialprices_price') . '"',
-				'"' . Core::_('Shop_Exchange.specialprices_percent') . '"',
+			$this->_aCurrentData[$this->_iCurrentDataPosition] = array_merge(
+				$aGroupTitles,
+				$aItemTitles,
+				$aItemSpecialpricesTitles
 			);
 
 			// Добавляем в заголовок информацию о свойствах товара
@@ -291,115 +333,58 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Get special prices data for item
-	 * @param Shop_Item $oShopItem item
-	 */
-	private function getSpecialPriceData($oShopItem)
-	{
-		// Получаем список специальных цен товара
-		$aShop_Specialprices = $oShopItem->Shop_Specialprices->findAll(FALSE);
-
-		$aTmpArray = array_merge(
-			$this->_aGroupBase_Properties,
-			$this->_aItemBase_Properties,
-			$this->_aSpecialPriceBase_Properties
-		);
-
-		// CML ID ТОВАРА
-		$aTmpArray[11] = $oShopItem->guid;
-
-		// ~11+43=54
-		$iSpecialPriceOffsetOriginal = count($this->_aGroupBase_Properties)
-			+ count($this->_aItemBase_Properties);
-
-		foreach ($aShop_Specialprices as $oShop_Specialprice)
-		{
-			$iOffset = $iSpecialPriceOffsetOriginal;
-			$aTmpArray[$iOffset++] = $oShop_Specialprice->min_quantity;
-			$aTmpArray[$iOffset++] = $oShop_Specialprice->max_quantity;
-			$aTmpArray[$iOffset++] = $oShop_Specialprice->price;
-			$aTmpArray[$iOffset++] = $oShop_Specialprice->percent;
-
-			$this->_printRow($aTmpArray);
-
-			$oShop_Specialprice->clear();
-		}
-
-		return $this;
-	}
-
-	/**
-	 * Get item data
-	 * @param int $oShopItem item
+	 * Get Full Shop Item Data
+	 * @param int $oShopItem
 	 * @return array
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onAfterGetItemData
 	 */
-	protected function _getItemData($oShopItem)
+	public function getItemData($oShopItem)
 	{
-		$aItemProperties = $aGroupProperties = $aWarehouses = $aShopPrices = array();
-
-		foreach ($this->_aItem_Properties as $oProperty)
-		{
-			$oProperty_Value = is_array($this->_cachePropertyValues[$oShopItem->id][$oProperty->id])
-				? array_shift($this->_cachePropertyValues[$oShopItem->id][$oProperty->id])
-				: NULL;
-
-			$aItemProperties[] = sprintf('"%s"', $this->prepareString(
-				$oProperty_Value
-					? $this->_getPropertyValue($oProperty, $oProperty_Value, $oShopItem)
-					: ''
-			));
-
-			if ($oProperty->type == 2)
-			{
-				$aItemProperties[] = $oProperty_Value
-					? sprintf('"%s"', $oProperty_Value->file_description)
-					: '';
-
-				$aItemProperties[] = $oProperty_Value
-					? ($oProperty_Value->file_small == ''
-						? ''
-						: sprintf('"%s"', $oProperty_Value->getSmallFileHref())
-					)
-					: '';
-			}
-
-			$oProperty_Value && $oProperty_Value->clear();
-		}
-
-		for ($i = 0; $i < $this->_iGroup_Properties_Count; $i++)
-		{
-			$aGroupProperties[] = '';
-		}
-
-		foreach ($this->_aShopWarehouses as $oWarehouse)
-		{
-			$oShop_Warehouse_Item = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
-			$aWarehouses[] = !is_null($oShop_Warehouse_Item) ? $oShop_Warehouse_Item->count : 0;
-		}
-
-		foreach ($this->_aShopPrices as $oShopPrice)
-		{
-			$oShop_Price = $oShopItem->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
-			$aShopPrices[] = !is_null($oShop_Price) ? $oShop_Price->value : 0;
-		}
-
-		$aTmpArray = $this->_aGroupBase_Properties;
+		$aGroupData = $this->_aGroupBaseProperties;
 
 		$oShop_Group = $oShopItem->shop_group_id
 			? Core_Entity::factory('Shop_Group', $oShopItem->shop_group_id)
 			: NULL;
 
-		$aTmpArray[1] = is_null($oShop_Group)
+		$aGroupData[1] = is_null($oShop_Group)
 			? 'ID00000000'
 			: $oShop_Group->guid;
 
 		if ($oShop_Group)
 		{
-			$aTmpArray[3] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_title));
-			$aTmpArray[4] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_description));
-			$aTmpArray[5] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_keywords));
+			$aGroupData[3] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_title));
+			$aGroupData[4] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_description));
+			$aGroupData[5] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_keywords));
 		}
 
+		$result = array_merge($aGroupData,
+			$this->getItemBasicData($oShopItem),
+			$this->_aSpecialPriceBaseProperties,
+			$this->getItemProperties($oShopItem),
+			array_pad(array(), $this->_iGroup_Properties_Count, ''),
+			$this->getWarehouseItems($oShopItem),
+			$this->getPrices($oShopItem)
+		);
+
+		Core_Event::notify(get_class($this) . '.onAfterGetItemData', $this, array($result, $oShopItem));
+
+		if (!is_null(Core_Event::getLastReturn()))
+		{
+			$result = Core_Event::getLastReturn();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get Basic Item Data
+	 * @param int $oShopItem
+	 * @return array
+	 * @hostcms-event Shop_Item_Export_Csv_Controller.onAfterItemBasicData
+	 */
+	public function getItemBasicData($oShopItem)
+	{
+		// Метки
 		if (Core::moduleIsActive('tag'))
 		{
 			$aTmpTags = array();
@@ -416,7 +401,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		}
 		else
 		{
-			$sTags = "";
+			$sTags = '';
 		}
 
 		// Ярлыки
@@ -447,6 +432,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 		// Наборы
 		$aTmpSets = array();
+
 		if ($oShopItem->type == 3)
 		{
 			$aShop_Item_Sets = $oShopItem->Shop_Item_Sets->findAll(FALSE);
@@ -458,75 +444,173 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			unset($aShop_Item_Sets);
 		}
 
-		return array_merge($aTmpArray,
-			array(
-				sprintf('"%s"', $this->prepareString($oShopItem->guid)),
-				sprintf('"%s"', $oShopItem->id),
-				sprintf('"%s"', $this->prepareString($oShopItem->marking)),
-				sprintf('"%s"', $oShopItem->modification_id
-					? $this->prepareString($oShopItem->Modification->marking)
-					: ''),
-				sprintf('"%s"', $this->prepareString($oShopItem->name)),
-				sprintf('"%s"', $this->prepareString($oShopItem->description)),
-				sprintf('"%s"', $this->prepareString($oShopItem->text)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->weight)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->length)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->width)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->height)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->min_quantity)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->max_quantity)),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->quantity_step)),
-				sprintf('"%s"', $oShopItem->type),
-				sprintf('"%s"', $sTags),
-				sprintf('"%s"', $this->prepareFloat($oShopItem->price)),
-				sprintf('"%s"', $oShopItem->active),
-				sprintf('"%s"', $oShopItem->sorting),
-				sprintf('"%s"', $this->prepareString($oShopItem->path)),
-				sprintf('"%s"', $this->prepareString($this->_shopUrl . $oShopItem->getPath())),
-				sprintf('"%s"', $oShopItem->shop_tax_id),
-				sprintf('"%s"', $oShopItem->shop_currency_id),
-				sprintf('"%s"', $oShopItem->shop_seller_id
-					? $this->prepareString($oShopItem->Shop_Seller->name)
-					: ''),
-				sprintf('"%s"', $oShopItem->shop_producer_id
-					? $this->prepareString($oShopItem->Shop_Producer->name)
-					: ''),
-				sprintf('"%s"', $oShopItem->shop_measure_id
-					? $this->prepareString($oShopItem->Shop_Measure->name)
-					: ''),
-				sprintf('"%s"', $this->prepareString($oShopItem->seo_title)),
-				sprintf('"%s"', $this->prepareString($oShopItem->seo_description)),
-				sprintf('"%s"', $this->prepareString($oShopItem->seo_keywords)),
-				sprintf('"%s"', $this->prepareString($oShopItem->indexing)),
-				sprintf('"%s"', $oShopItem->yandex_market),
-				sprintf('"%s"', $oShopItem->yandex_market_bid),
-				sprintf('"%s"', $oShopItem->yandex_market_cid),
-				sprintf('"%s"', $oShopItem->vendorcode),
-				sprintf('"%s"', $oShopItem->datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oShopItem->datetime)
-				),
-				sprintf('"%s"', $oShopItem->start_datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oShopItem->start_datetime)
-				),
-				sprintf('"%s"', $oShopItem->end_datetime == '0000-00-00 00:00:00'
-					? '0000-00-00 00:00:00'
-					: Core_Date::sql2datetime($oShopItem->end_datetime)
-				),
-				sprintf('"%s"', ($oShopItem->image_large == '') ? '' : $oShopItem->getLargeFileHref()),
-				sprintf('"%s"', ($oShopItem->image_small == '') ? '' : $oShopItem->getSmallFileHref()),
-				sprintf('"%s"', implode(',', $aTmpShortcuts)),
-				sprintf('"%s"', implode(',', $aTmpBarcodes)),
-				sprintf('"%s"', implode(',', $aTmpSets)),
-				sprintf('"%s"', $oShopItem->siteuser_id)
+		$result = array(
+			sprintf('"%s"', $this->prepareString($oShopItem->guid)),
+			sprintf('"%s"', $oShopItem->id),
+			sprintf('"%s"', $this->prepareString($oShopItem->marking)),
+			sprintf('"%s"', $oShopItem->modification_id
+				? $this->prepareString($oShopItem->Modification->marking)
+				: ''),
+			sprintf('"%s"', $this->prepareString($oShopItem->name)),
+			sprintf('"%s"', $this->prepareString($oShopItem->description)),
+			sprintf('"%s"', $this->prepareString($oShopItem->text)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->weight)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->length)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->width)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->height)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->min_quantity)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->max_quantity)),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->quantity_step)),
+			sprintf('"%s"', $oShopItem->type),
+			sprintf('"%s"', $sTags),
+			sprintf('"%s"', $this->prepareFloat($oShopItem->price)),
+			sprintf('"%s"', $oShopItem->active),
+			sprintf('"%s"', $oShopItem->sorting),
+			sprintf('"%s"', $this->prepareString($oShopItem->path)),
+			sprintf('"%s"', $this->prepareString($this->_shopUrl . $oShopItem->getPath())),
+			sprintf('"%s"', $oShopItem->shop_tax_id),
+			sprintf('"%s"', $oShopItem->shop_currency_id),
+			sprintf('"%s"', $oShopItem->shop_seller_id
+				? $this->prepareString($oShopItem->Shop_Seller->name)
+				: ''),
+			sprintf('"%s"', $oShopItem->shop_producer_id
+				? $this->prepareString($oShopItem->Shop_Producer->name)
+				: ''),
+			sprintf('"%s"', $oShopItem->shop_measure_id
+				? $this->prepareString($oShopItem->Shop_Measure->name)
+				: ''),
+			sprintf('"%s"', $this->prepareString($oShopItem->seo_title)),
+			sprintf('"%s"', $this->prepareString($oShopItem->seo_description)),
+			sprintf('"%s"', $this->prepareString($oShopItem->seo_keywords)),
+			sprintf('"%s"', $this->prepareString($oShopItem->indexing)),
+			sprintf('"%s"', $oShopItem->yandex_market),
+			sprintf('"%s"', $oShopItem->yandex_market_bid),
+			sprintf('"%s"', $oShopItem->yandex_market_cid),
+			sprintf('"%s"', $oShopItem->vendorcode),
+			sprintf('"%s"', $oShopItem->datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oShopItem->datetime)
 			),
-			$this->_aSpecialPriceBase_Properties,
-			$aItemProperties,
-			$aGroupProperties,
-			$aWarehouses,
-			$aShopPrices
+			sprintf('"%s"', $oShopItem->start_datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oShopItem->start_datetime)
+			),
+			sprintf('"%s"', $oShopItem->end_datetime == '0000-00-00 00:00:00'
+				? '0000-00-00 00:00:00'
+				: Core_Date::sql2datetime($oShopItem->end_datetime)
+			),
+			sprintf('"%s"', ($oShopItem->image_large == '') ? '' : $oShopItem->getLargeFileHref()),
+			sprintf('"%s"', ($oShopItem->image_small == '') ? '' : $oShopItem->getSmallFileHref()),
+			sprintf('"%s"', implode(',', $aTmpShortcuts)),
+			sprintf('"%s"', implode(',', $aTmpBarcodes)),
+			sprintf('"%s"', implode(',', $aTmpSets)),
+			sprintf('"%s"', $oShopItem->siteuser_id)
 		);
+
+		Core_Event::notify(get_class($this) . '.onAfterItemBasicData', $this, array($result, $oShopItem));
+
+		if (!is_null(Core_Event::getLastReturn()))
+		{
+			$result = Core_Event::getLastReturn();
+		}
+
+		return $result;
+	}
+
+	public function getItemProperties($oShopItem)
+	{
+		$aItemProperties = array();
+
+		foreach ($this->_aItem_Properties as $oProperty)
+		{
+			$oProperty_Value = is_array($this->_cachePropertyValues[$oShopItem->id][$oProperty->id])
+				? array_shift($this->_cachePropertyValues[$oShopItem->id][$oProperty->id])
+				: NULL;
+
+			$aItemProperties[] = sprintf('"%s"', $this->prepareString(
+				$oProperty_Value
+					? $this->_getPropertyValue($oProperty, $oProperty_Value, $oShopItem)
+					: ''
+			));
+
+			if ($oProperty->type == 2)
+			{
+				$aItemProperties[] = $oProperty_Value
+					? sprintf('"%s"', $oProperty_Value->file_description)
+					: '';
+
+				$aItemProperties[] = $oProperty_Value
+					? ($oProperty_Value->file_small == ''
+						? ''
+						: sprintf('"%s"', $oProperty_Value->getSmallFileHref())
+					)
+					: '';
+			}
+
+			$oProperty_Value && $oProperty_Value->clear();
+		}
+
+		return $aItemProperties;
+	}
+
+	public function getWarehouseItems($oShopItem)
+	{
+		$aWarehouses = array();
+
+		foreach ($this->_aShopWarehouses as $oWarehouse)
+		{
+			$oShop_Warehouse_Item = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oWarehouse->id, FALSE);
+			$aWarehouses[] = !is_null($oShop_Warehouse_Item) ? $oShop_Warehouse_Item->count : 0;
+		}
+
+		return $aWarehouses;
+	}
+
+	public function getPrices($oShopItem)
+	{
+		$aShopPrices = array();
+
+		foreach ($this->_aShopPrices as $oShopPrice)
+		{
+			$oShop_Price = $oShopItem->Shop_Item_Prices->getByPriceId($oShopPrice->id, FALSE);
+			$aShopPrices[] = !is_null($oShop_Price) ? $oShop_Price->value : 0;
+		}
+
+		return $aShopPrices;
+	}
+
+	/**
+	 * Get special prices data for item
+	 * @param Shop_Item $oShopItem item
+	 */
+	public function getSpecialPriceData($oShopItem)
+	{
+		// Получаем список специальных цен товара
+		$aShop_Specialprices = $oShopItem->Shop_Specialprices->findAll(FALSE);
+
+		$aTmpArray = array_merge(
+			$this->_aGroupBaseProperties,
+			$this->_aItemBaseProperties
+		);
+
+		// CML ID ТОВАРА
+		$aTmpArray[11] = $oShopItem->guid;
+
+		foreach ($aShop_Specialprices as $oShop_Specialprice)
+		{
+			$this->_printRow(
+				array_merge($aTmpArray, array(
+					$oShop_Specialprice->min_quantity,
+					$oShop_Specialprice->max_quantity,
+					$oShop_Specialprice->price,
+					$oShop_Specialprice->percent
+				))
+			);
+
+			$oShop_Specialprice->clear();
+		}
+
+		return $this;
 	}
 
 	/**
@@ -648,6 +732,12 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	 */
 	public function execute()
 	{
+		$oUser = Core_Auth::getCurrentUser();
+		if ($oUser->only_access_my_own)
+		{
+			return FALSE;
+		}
+
 		$this->init();
 
 		$sFilename = 'CSV_' . date("Y_m_d_H_i_s") . '.csv';
@@ -694,15 +784,15 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			foreach ($aShopGroupsId as $iShopGroupId)
 			{
-				// $aTmpArray = array();
-
 				$oShopGroup = Core_Entity::factory('Shop_Group', $iShopGroupId);
 
 				$oShopItems = $oShopGroup->Shop_Items;
 				$oShopItems
 					->queryBuilder()
 					->where('modification_id', '=', 0)
-					->where('shortcut_id', '=', 0);
+					->where('shortcut_id', '=', 0)
+					->clearOrderBy()
+					->orderBy('id', 'ASC');
 
 				$this->producer
 					&& $oShopItems->queryBuilder()->where('shop_producer_id', '=', $this->producer);
@@ -724,13 +814,13 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 					);
 
 					// Пропускаем поля товара
-					foreach ($this->_aItemBase_Properties as $sNullData)
+					foreach ($this->_aItemBaseProperties as $sNullData)
 					{
 						$aTmpArray[] = $sNullData;
 					}
 
 					// Пропускаем поля специальных цен товара
-					foreach ($this->_aSpecialPriceBase_Properties as $sNullData)
+					foreach ($this->_aSpecialPriceBaseProperties as $sNullData)
 					{
 						$aTmpArray[] = $sNullData;
 					}
@@ -793,9 +883,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 					$oShopItems->queryBuilder()->where('shop_id', '=', $this->shopId);
 				}
 
-				$iPropertyFieldOffsetOriginal = count($this->_aGroupBase_Properties)
-					+ count($this->_aItemBase_Properties)
-					+ count($this->_aSpecialPriceBase_Properties);
+				$iPropertyFieldOffsetOriginal = count($this->_aGroupBaseProperties)
+					+ count($this->_aItemBaseProperties)
+					+ count($this->_aSpecialPriceBaseProperties);
 
 				$offset = 0;
 				$limit = 500;
@@ -811,7 +901,6 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 				}
 
 				do {
-
 					if (!is_null($sStartDate) && !is_null($sEndDate))
 					{
 						$oShopItems
@@ -846,7 +935,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 						}
 
 						// Строка с основными данными о товаре
-						$this->_printRow($this->_getItemData($oShopItem));
+						$this->_printRow($this->getItemData($oShopItem));
 
 						$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
 
@@ -922,7 +1011,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 										= $oProperty->getValues($oModification->id, FALSE);
 								}
 
-								$this->_printRow($this->_getItemData($oModification));
+								$this->_printRow($this->getItemData($oModification));
 
 								$aCurrentPropertyLine = array_fill(0, $iPropertyFieldOffset, '""');
 

@@ -30,7 +30,8 @@ class Shortcode_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_belongsTo = array(
-		'shortcode_dir' => array()
+		'shortcode_dir' => array(),
+		'user' => array()
 	);
 
 	/**
@@ -49,6 +50,21 @@ class Shortcode_Model extends Core_Entity
 		'sorting' => 0,
 		'active' => 1,
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Has revisions

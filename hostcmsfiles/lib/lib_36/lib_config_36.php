@@ -262,6 +262,11 @@ elseif ($sType == 'sale' && $sMode == 'query')
 		"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<КоммерческаяИнформация ВерсияСхемы=\"2.08\" ДатаФормирования=\"%s\"></КоммерческаяИнформация>",
 		date("Y-m-d")));
 
+	if ($oShop->shop_company_id && method_exists($oShop->Company, 'addCml'))
+	{
+		$oShop->Company->addCml($oXml);
+	}
+
 	// Get Max Order Id
 	$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
 	$oCore_QueryBuilder_Select
@@ -276,6 +281,7 @@ elseif ($sType == 'sale' && $sMode == 'query')
 
 	$iFrom = 0;
 	$onStep = 500;
+	$iCounter = 0;
 
 	do {
 		$oShop_Orders = $oShop->Shop_Orders;
@@ -290,12 +296,24 @@ elseif ($sType == 'sale' && $sMode == 'query')
 			$oShop_Order->unloaded = 1;
 			$oShop_Order->save();
 		}
+
+		$iCounter += count($aShop_Orders);
+
 		$iFrom += $onStep;
 	}
 	while ($iFrom < $maxId);
 
+	$bDebug && Core_Log::instance()->clear()
+		->status(Core_Log::$MESSAGE)
+		->write('1С, type=sale, mode=query. Completed, found ' . $iCounter . ' orders');
+
 	header('Content-type: text/xml; charset=UTF-8');
-	echo $BOM, $oXml->asXML();
+	echo $BOM;
+	echo $oXml->asXML();
+
+	/*$dom = dom_import_simplexml($oXml)->ownerDocument;
+	$dom->formatOutput = TRUE;
+	echo $dom->saveXML(NULL, LIBXML_NOEMPTYTAG);*/
 }
 elseif ($sType == 'sale' && $sMode == 'success')
 {

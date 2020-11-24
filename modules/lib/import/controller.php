@@ -29,6 +29,12 @@ class Lib_Import_Controller extends Admin_Form_Action_Controller
 	 */
 	public function execute($operation = NULL)
 	{
+		$oUser = Core_Auth::getCurrentUser();
+		if ($oUser->only_access_my_own)
+		{
+			return FALSE;
+		}
+
 		$aContent = json_decode($this->content, TRUE);
 
 		if (isset($aContent['name']))

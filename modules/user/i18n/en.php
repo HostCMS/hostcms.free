@@ -92,4 +92,11 @@ return array(
 	'editUserDepartment_success' => 'User department post information changed successfully!',
 	'deleteUserFromDepartment_success' => 'User removed from department',
 	'session' => 'Sessions',
+	
+	'responsible' => 'Send to responsible',
+	'additional_receivers' => 'Additional recipients',
+	'theme' => 'Theme',
+	'text' => 'Text',
+	'from' => 'E-mail of the sender',
+	'sender_name' => 'Sender name',	
 );

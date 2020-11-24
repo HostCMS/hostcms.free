@@ -31,7 +31,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 					if ($oAdmin_Form_Tab_Entity->active)
 					{
 						$class = $oAdmin_Form_Tab_Entity->class;
-						$tab_id == 0 && $class .= ' active';
+						$tab_id == $this->current && $class .= ' active';
 
 						$tabId = strlen($oAdmin_Form_Tab_Entity->id)
 							? $oAdmin_Form_Tab_Entity->id
@@ -65,7 +65,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 		<?php
 		foreach ($this->_children as $oAdmin_Form_Tab_Entity)
 		{
-			?><div class="tab-pane fade <?php echo $tab_id == 0 ? 'in active' : ''?>" id="<?php echo htmlspecialchars(strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
+			?><div class="tab-pane fade <?php echo $tab_id == $this->current ? 'in active' : ''?>" id="<?php echo htmlspecialchars(strlen($oAdmin_Form_Tab_Entity->id) ? $oAdmin_Form_Tab_Entity->id : $windowId . '-tab-' . $tab_id) ?>">
 			<?php
 			$oAdmin_Form_Tab_Entity->execute();
 			?></div><?php

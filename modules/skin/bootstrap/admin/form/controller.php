@@ -291,7 +291,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 		if (count($this->viewList) > 1)
 		{
 			$this->view == '' && $this->view = reset($this->viewList);
-			
+
 			?><div class="btn-group btn-view-selector pull-left"><?php
 			foreach ($this->viewList as $viewName => $className)
 			{
@@ -331,7 +331,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				->class('dataTables_paginate paging_bootstrap');
 
 			$oCore_Html_Entity_Ul = Core::factory('Core_Html_Entity_Ul')
-				->class('pagination');
+				->class('pagination pull-left');
 
 			$oCore_Html_Entity_Div->add($oCore_Html_Entity_Ul);
 
@@ -375,7 +375,6 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 			$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
-			$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
 			if ($this->current == 1)
 			{
@@ -399,6 +398,11 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				// Выведем … со ссылкой на 2-ю страницу, если показываем с 3-й
 				if ($link_num_begin > 1)
 				{
+					// Добавляем "1"
+					$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
+
+					// Заменяем "1" на "..."
+					$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
 					$href = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, 2);
 					$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, 2);
 
@@ -409,6 +413,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 						->value('…');
 				}
 			}
+
+			$oCore_Html_Entity_Li->add($oCore_Html_Entity_A);
 
 			// Страница не является первой и не является последней.
 			for ($i = 1; $i < $count_link - 1; $i++)
@@ -508,6 +514,24 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 					->href($this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, $page))
 					->onclick($this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, $page));
 			}
+
+			$sHref = $this->getAdminLoadHref($this->getPath(), NULL, NULL, NULL, NULL, '');
+			$sOnclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, '');
+
+			$oCore_Html_Entity_Li = Core::factory('Core_Html_Entity_Li')
+				->class('page-selector-wrap')
+				->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<span class="page-selector-show-button">№</span>
+								<div class="page-selector input-group input-group-xs hide">
+									<input type="text" class="form-control input-xs">
+									<span class="input-group-btn">
+										<a href="' . $sHref . '" onclick="' . $sOnclick .  '" class="btn btn-xs btn-default icon-only"><i class="fa fa-caret-right success circular"></i></a>
+									</span>
+								</div>
+						')
+				);
+			$oCore_Html_Entity_Ul->add($oCore_Html_Entity_Li);
 
 			$oCore_Html_Entity_Div->execute();
 		}

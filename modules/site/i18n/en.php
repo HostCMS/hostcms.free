@@ -64,7 +64,8 @@ return array(
 	'site_link_add' => 'Add',
 	'copy_success' => 'Website information copied successfully',
 	'copy_error' => 'Error while copying website information',
-	'ico_files_uploaded' => '<acronym title="Site favicon">Favicon</acronym>',
+	'favicon' => '<acronym title="Site favicon">Favicon, supports .ico, .png, .svg</acronym>',
+	'deleteFavicon_success' => 'Favicon deleted successfully',
 	'default' => 'Default',
 	'menu2_caption' => 'Settings',
 	'menu2_sub_caption' => 'Registration data',
@@ -83,7 +84,7 @@ return array(
 	'choose_color_scheme' => 'Choose color scheme',
 	'template_settings' => 'Template settings',
 
-	'delete_current_site' => 'User that belongs to the website cannot delete it!',
+	'delete_current_site' => 'It is forbidden to delete the current site, first switch to another site!',
 	'delete_last_site' => 'You cannot delete the last website!',
 	'delete_site_all_superusers_belongs' => 'Unable to delete website that all superusers belong to!',
 
@@ -92,4 +93,26 @@ return array(
 	'error_email' => '<acronym title="Technical e-mail (errors and etc.)">Technical e-mail</acronym>',
 	'https' => 'HTTPS',
 	'set_https' => 'Set HTTPS',
+
+	'site_csp' => 'CSP',
+	'csp-header-default-src' => 'Default',
+	'csp-header-script-src' => 'Script',
+	'csp-header-style-src' => 'Style',
+	'csp-header-img-src' => 'Image',
+	'csp-header-font-src' => 'Font',
+	'csp-header-connect-src' => 'Connect',
+	'csp-header-media-src' => 'Media',
+	'csp-header-object-src' => 'Object',
+	'csp-header-frame-src' => 'Frame',
+
+	'none' => 'Deny all access',
+	'all' => 'Wildcard, allows any URL except data: blob: filesystem: schemes.',
+	'self' => 'URI must have the same scheme, host, and port as the protected resource\'s URI',
+	'blob' => 'Allows blob: URIs to be used as a content source.',
+	'data' => 'Embedded data, such as a base64 encoded image',
+	'inline' => 'Inline html entities, such as "script"',
+	'eval' => 'Allow a script to run eval()',
+	'hosts' => 'Space separated, * for wildcard subdomains, you can specify just a scheme, e.g. https:',
+
+	'protect' => 'Protection against attacks',
 );

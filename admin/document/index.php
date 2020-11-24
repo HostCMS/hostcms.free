@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -35,13 +35,33 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+$additionalParams = 'document_dir_id=' . $oDocumentDir->id;
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
+
 $sStatusPath = '/admin/document/status/index.php';
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Document.documents'))
-		// ->icon('fa fa-file-text')
 		->icon('fa fa-plus')
 		->img('/admin/images/page_add.gif')
 		->href(
@@ -54,18 +74,12 @@ $oAdmin_Form_Entity_Menus->add(
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Document_Dir.folders'))
-		->icon('fa fa-folder-open')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/folder_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
@@ -155,24 +169,6 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 	$oAdmin_Form_Controller->addAction($oDocument_Controller_Edit);
 }
 
-// Действие "Удалить нетекущие версии документа"
-/*$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
-	->Admin_Form_Actions
-	->getByName('deleteOldDocumentVersions');
-
-if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'deleteOldDocumentVersions')
-{
-	$oDocument_Controller_deleteOldDocumentVersions = Admin_Form_Action_Controller::factory(
-		'Document_Version_Controller_Dir_Oldversions', $oAdmin_Form_Action
-	);
-
-	$oDocument_Controller_deleteOldDocumentVersions
-		->document_dir_id(Core_Array::getGet('document_dir_id', 0));
-
-	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oDocument_Controller_deleteOldDocumentVersions);
-}*/
-
 // Действие "Применить"
 $oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
@@ -209,18 +205,32 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 // Ограничение источника 0 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('parent_id', '=', $document_dir_id)
-	)
-)->addCondition(
-	array('where' =>
-		array('site_id', '=', CURRENT_SITE)
-	)
-)
-->changeField('name', 'type', 4)
-->changeField('name', 'link', '/admin/document/index.php?document_dir_id={id}')
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/document/index.php', additionalParams: 'document_dir_id={id}', windowId: '{windowId}'}); return false");
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('document_dirs.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('document_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' =>
+			array('parent_id', '=', $document_dir_id)
+		)
+	)->addCondition(
+		array('where' =>
+			array('site_id', '=', CURRENT_SITE)
+		)
+	);
+}
+
+$oAdmin_Form_Dataset
+	->changeField('name', 'type', 4)
+	->changeField('name', 'link', '/admin/document/index.php?document_dir_id={id}')
+	->changeField('name', 'onclick', "$.adminLoad({path: '/admin/document/index.php', additionalParams: 'document_dir_id={id}', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -232,16 +242,33 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Document')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Ограничение источника 1 по родительской группе
-$oAdmin_Form_Dataset->addCondition(
-	array('where' =>
-		array('document_dir_id', '=', $document_dir_id)
-	)
-)->addCondition(
-	array('where' =>
-		array('site_id', '=', CURRENT_SITE)
-	)
-);
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+		->addCondition(array('where' => array('documents.id', '=', $sGlobalSearch)))
+		->addCondition(array('setOr' => array()))
+		->addCondition(array('where' => array('documents.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(
+		array('where' =>
+			array('document_dir_id', '=', $document_dir_id)
+		)
+	)->addCondition(
+		array('where' =>
+			array('site_id', '=', CURRENT_SITE)
+		)
+	);
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

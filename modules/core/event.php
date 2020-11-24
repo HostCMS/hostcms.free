@@ -23,6 +23,7 @@ class Core_Event
 	 * Attach observer
 	 * @param string $eventName event name
 	 * @param string $function function name
+	 * @param mixed $options additional options, default NULL
 	 *
 	 * <code>
 	 * function my_function($object, $args)
@@ -34,15 +35,16 @@ class Core_Event
 	 * Core_Event::attach('Class.onBeforeDelete', $function);
 	 * </code>
 	 */
-	static public function attach($eventName, $function)
+	static public function attach($eventName, $function, $options = NULL)
 	{
-		self::$_attached[$eventName][] = $function;
+		self::$_attached[$eventName][] = array($function, $options);
 	}
 	
 	/**
 	 * Attach observer to the beginning of the queue
 	 * @param string $eventName event name
 	 * @param string $function function name
+	 * @param mixed $options additional options, default NULL
 	 *
 	 * <code>
 	 * class my_class
@@ -56,12 +58,12 @@ class Core_Event
 	 * Core_Event::attach('Class.onBeforeDelete', array('my_class', 'my_function'));
 	 * </code>
 	 */
-	static public function attachFirst($eventName, $function)
+	static public function attachFirst($eventName, $function, $options = NULL)
 	{
 		!isset(self::$_attached[$eventName])
 			&& self::$_attached[$eventName] = array();
 			
-		array_unshift(self::$_attached[$eventName], $function);
+		array_unshift(self::$_attached[$eventName], array($function, $options));
 	}
 
 	/**
@@ -79,9 +81,9 @@ class Core_Event
 	{
 		if (isset(self::$_attached[$eventName]))
 		{
-			foreach (self::$_attached[$eventName] as $key => $value)
+			foreach (self::$_attached[$eventName] as $key => $aValue)
 			{
-				if ($function === $value)
+				if ($function === $aValue[0])
 				{
 					unset(self::$_attached[$eventName][$key]);
 				}
@@ -127,9 +129,9 @@ class Core_Event
 
 		if (isset(self::$_attached[$eventName]))
 		{
-			foreach (self::$_attached[$eventName] as $observer)
+			foreach (self::$_attached[$eventName] as $aValue)
 			{
-				self::$_lastReturn = call_user_func($observer, $object, $args);
+				self::$_lastReturn = call_user_func($aValue[0], $object, $args, $aValue[1]);
 				if (self::$_lastReturn === FALSE)
 				{
 					break;

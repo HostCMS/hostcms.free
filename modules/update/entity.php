@@ -248,7 +248,7 @@ class Update_Entity extends Core_Entity
 
 							$source_file = $current_update_dir . '/' . $current_update_list_id . '_' . $original_filename;
 
-							$content = $Core_Http->getBody();
+							$content = $Core_Http->getDecompressedBody();
 
 							if (strlen($content) > 100)
 							{

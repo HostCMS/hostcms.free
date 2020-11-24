@@ -378,6 +378,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Filter_Seo')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Фильтр по группе
 if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556'])
 	&& $oAdmin_Form_Controller->request['admin_form_filter_1556'] != '')

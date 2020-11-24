@@ -67,7 +67,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oImageField
-			->divAttr(array('class' => 'form-group col-xs-12'))
+			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
 			->name("image")
 			->id("image")
 			->largeImage(array(

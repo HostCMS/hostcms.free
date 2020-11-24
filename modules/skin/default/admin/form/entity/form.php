@@ -56,7 +56,8 @@ class Skin_Default_Admin_Form_Entity_Form extends Admin_Form_Entity
 					jForm.css('display', 'block');
 				}, 500);
 			}
-			CheckAllField('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>");
+
+			mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>");
 		});
 		</script>
 		</div><?php

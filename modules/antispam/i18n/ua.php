@@ -6,4 +6,5 @@ return array(
 	'title' => 'Антиспам',
 	'countries_list' => 'Список країн',
 	'stopwords' => 'Стоп-слова',
+	'domains' => 'Домени',
 );

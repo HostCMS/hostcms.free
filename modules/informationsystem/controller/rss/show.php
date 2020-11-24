@@ -426,7 +426,7 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 
 				$turboContent .= '<h1>' . $this->_currentItem['title'] . '</h1>' . PHP_EOL .
 					'</header>' . PHP_EOL .
-					'<h2>' . $this->_currentItem['title'] . '</h2>' . PHP_EOL .
+					//'<h2>' . $this->_currentItem['title'] . '</h2>' . PHP_EOL .
 					$fullText . PHP_EOL;
 
 				$this->_currentItem[] = array(

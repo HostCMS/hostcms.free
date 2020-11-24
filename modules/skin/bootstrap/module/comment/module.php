@@ -170,8 +170,6 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								$sChangeActiveHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'changeActive', NULL, 0, $oComment->id);
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
-
-								// $sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sInformationsystemCommentsHref, 'blockIp', NULL, 0, $oComment->id);
 								?>
 								<li class="task-item">
 									<div class="row">
@@ -325,9 +323,6 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 								$sChangeActiveHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'changeActive', NULL, 0, $oComment->id);
 
 								$sMarkDeletedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'markDeleted', NULL, 0, $oComment->id);
-
-								// $sBlockedHref = $oComments_Admin_Form_Controller->getAdminActionLoadHref($sShopCommentsHref, 'blockIp', NULL, 0, $oComment->id);
-
 								?>
 								<li class="task-item">
 									<div class="row">

@@ -153,8 +153,9 @@ class Site_Model extends Core_Entity
 		'error' => 'E_ALL',
 		'error404' => 0,
 		'error403' => 0,
-		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /hostcmsfiles\nDisallow: /showbanner\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*",
+		'robots' => "User-Agent: *\nDisallow: /admin\nDisallow: /search\nDisallow: /templates\nDisallow: /showbanner\nDisallow: /captcha.php\nDisallow: /403\nDisallow: /404\nAllow: /hostcmsfiles/css/*\nAllow: /hostcmsfiles/js/*\nAllow: /hostcmsfiles/jquery/*",
 		'closed' => 0,
+		'protect' => 1,
 		'safe_email' => 1,
 		'html_cache_use' => 0,
 		'html_cache_with' => '/*',
@@ -369,7 +370,7 @@ class Site_Model extends Core_Entity
 			Core_File::deleteDir(CMS_FOLDER . $this->uploaddir . 'structure_' . intval($this->id));
 		} catch (Exception $e) {}
 
-		$this->deleteIcoFile();
+		$this->deleteFavicon();
 
 		return parent::delete($primaryKey);
 	}
@@ -378,12 +379,15 @@ class Site_Model extends Core_Entity
 	 * Delete favicon file
 	 * @return self
 	 */
-	public function deleteIcoFile()
+	public function deleteFavicon()
 	{
-		try
+		if ($this->favicon != '')
 		{
-			Core_File::delete($this->getIcoFilePath());
-		} catch (Exception $e) {}
+			try
+			{
+				Core_File::delete($this->getFaviconPath());
+			} catch (Exception $e) {}
+		}
 
 		return $this;
 	}
@@ -456,39 +460,21 @@ class Site_Model extends Core_Entity
 	}
 
 	/**
-	 * Create favicon directory
-	 * @return self
-	 */
-	protected function _createFaviconDir()
-	{
-		$uploaddir_path = $this->_getFaviconPath();
-
-		if (!is_dir($uploaddir_path))
-		{
-			try
-			{
-				Core_File::mkdir($uploaddir_path);
-			} catch (Exception $e) {}
-		}
-		return $this;
-	}
-
-	/**
 	 * Get favicon file path
 	 * @return string
 	 */
-	public function getIcoFilePath()
+	public function getFaviconPath()
 	{
-		return $this->_getFaviconPath() . "/site_" . intval($this->id) . ".ico";
+		return $this->_getFaviconPath() . '/' . $this->favicon;
 	}
 
 	/**
 	 * Get favicon file href
 	 * @return string
 	 */
-	public function getIcoFileHref()
+	public function getFaviconHref()
 	{
-		return '/' . $this->uploaddir . "favicon/site_" . intval($this->id) . ".ico";
+		return '/' . $this->uploaddir . "favicon/" . $this->favicon;
 	}
 
 	/**
@@ -496,59 +482,24 @@ class Site_Model extends Core_Entity
 	 * @param string $fileSourcePath source file path
 	 * @return self
 	 */
-	public function saveIcoFile($fileSourcePath)
+	public function saveFavicon($name, $fileSourcePath)
 	{
-		$this->save()->_createFaviconDir();
-		Core_File::upload($fileSourcePath, $this->getIcoFilePath());
+		$this->deleteFavicon();
 
-		// Delete loaded PNG-file
-		if (is_file($this->getPngFilePath()))
+		$this->favicon = $name;
+		$this->save();
+
+		$faviconPath = $this->_getFaviconPath();
+
+		if (!is_dir($faviconPath))
 		{
 			try
 			{
-				Core_File::delete($this->getPngFilePath());
+				Core_File::mkdir($faviconPath);
 			} catch (Exception $e) {}
 		}
 
-		return $this;
-	}
-
-	/**
-	 * Get favicon file path
-	 * @return string
-	 */
-	public function getPngFilePath()
-	{
-		return $this->_getFaviconPath() . "/site_" . intval($this->id) . ".png";
-	}
-
-	/**
-	 * Get favicon file href
-	 * @return string
-	 */
-	public function getPngFileHref()
-	{
-		return '/' . $this->uploaddir . "favicon/site_" . intval($this->id) . ".png";
-	}
-
-	/**
-	 * Specify favicon file
-	 * @param string $fileSourcePath source file path
-	 * @return self
-	 */
-	public function savePngFile($fileSourcePath)
-	{
-		$this->save()->_createFaviconDir();
-		Core_File::upload($fileSourcePath, $this->getPngFilePath());
-
-		// Delete loaded ICO-file
-		if (is_file($this->getIcoFilePath()))
-		{
-			try
-			{
-				Core_File::delete($this->getIcoFilePath());
-			} catch (Exception $e) {}
-		}
+		Core_File::upload($fileSourcePath, $this->getFaviconPath());
 
 		return $this;
 	}
@@ -587,7 +538,7 @@ class Site_Model extends Core_Entity
 		$newObject = parent::copy();
 
 		try {
-			Core_File::copy($this->getIcoFilePath(), $newObject->getIcoFilePath());
+			Core_File::copy($this->getFaviconPath(), $newObject->getFaviconPath());
 		}
 		catch (Exception $e) {}
 
@@ -1736,33 +1687,171 @@ class Site_Model extends Core_Entity
 				->execute();
 		}
 
+		if ($this->protect)
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-square badge-azure')
+				->style('font-size: 10px !important;')
+				->value('<i class="fa fa-shield"></i>')
+				->title(Core::_('Site.protect'))
+				->execute();
+		}
+
+		if (strlen($this->csp))
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-square badge-maroon')
+				->style('font-size: 10px !important;')
+				->title('Content-Security-Policy: ' . $this->csp)
+				->value('CSP')
+				->execute();
+		}
+
 		$aSite_Aliases = $this->Site_Aliases->findAll();
 
 		if (count($aSite_Aliases))
 		{
-			$aTmpSite_Aliases = array_slice($aSite_Aliases, 0, 5);
+			$oDiv = Core::factory('Core_Html_Entity_Div')->class('margin-top-5');
 
-			$oDiv = Core::factory('Core_Html_Entity_Div');
+			$aTmpSite_Aliases = array_slice($aSite_Aliases, 0, 12);
 			foreach ($aTmpSite_Aliases as $oSite_Aliases)
 			{
 				$oDiv->add(
-					Core::factory('Core_Html_Entity_Span')
-						->class('label label-' . ($oSite_Aliases->current ? 'palegreen' : 'default'))
+					$oSpan = Core::factory('Core_Html_Entity_Span')
+						->class('label label-' . ($oSite_Aliases->current ? 'palegreen' : 'gray'))
 						->value(htmlspecialchars(substr($oSite_Aliases->name, 0, 4) === "xn--"
 							? Core_Str::idnToUtf8($oSite_Aliases->name) . ' [' . $oSite_Aliases->name . ']'
 							: Core_Str::cut($oSite_Aliases->name, 25)
 						))
 					);
 
+				if ($oSite_Aliases->redirect)
+				{
+					$oSpan->add(
+						Core::factory('Core_Html_Entity_I')
+							->class('fa fa-arrow-circle-right azure fa-small')
+					);
+				}
 			}
 
 			count($aTmpSite_Aliases) < count($aSite_Aliases) && $oDiv->add(
 				Core::factory('Core_Html_Entity_Span')
-					->class('label label-default')
+					->class('label label-gray')
 					->value('…')
 				);
 
 			$oDiv->execute();
 		}
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'name' => $this->name,
+				'active' => $this->active,
+				'coding' => $this->coding,
+				'sorting' => $this->sorting,
+				'locale' => $this->locale,
+				'timezone' => $this->timezone,
+				'max_size_load_image' => $this->max_size_load_image,
+				'max_size_load_image_big' => $this->max_size_load_image_big,
+				'admin_email' => $this->admin_email,
+				'error_email' => $this->error_email,
+				'lng' => $this->lng,
+				'send_attendance_report' => $this->send_attendance_report,
+				'chmod' => $this->chmod,
+				'files_chmod' => $this->files_chmod,
+				'date_format' => $this->date_format,
+				'date_time_format' => $this->date_time_format,
+				'error' => $this->error,
+				'error404' => $this->error404,
+				'error403' => $this->error403,
+				'robots' => $this->robots,
+				'key' => $this->key,
+				'user_id' => $this->user_id,
+				'closed' => $this->closed,
+				'safe_email' => $this->safe_email,
+				'protect' => $this->protect,
+				'https' => $this->https,
+				'html_cache_use' => $this->html_cache_use,
+				'html_cache_with' => $this->html_cache_with,
+				'html_cache_without' => $this->html_cache_without,
+				'css_left' => $this->css_left,
+				'css_right' => $this->css_right,
+				'html_cache_clear_probability' => $this->html_cache_clear_probability,
+				'notes' => $this->notes,
+				'uploaddir' => $this->uploaddir,
+				'nesting_level' => $this->nesting_level,
+				'csp' => $this->csp,
+			);
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->name = Core_Array::get($aBackup, 'name');
+				$this->active = Core_Array::get($aBackup, 'active');
+				$this->coding = Core_Array::get($aBackup, 'coding');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->locale = Core_Array::get($aBackup, 'locale');
+				$this->timezone = Core_Array::get($aBackup, 'timezone');
+				$this->max_size_load_image = Core_Array::get($aBackup, 'max_size_load_image');
+				$this->max_size_load_image_big = Core_Array::get($aBackup, 'max_size_load_image_big');
+				$this->admin_email = Core_Array::get($aBackup, 'admin_email');
+				$this->error_email = Core_Array::get($aBackup, 'error_email');
+				$this->lng = Core_Array::get($aBackup, 'lng');
+				$this->send_attendance_report = Core_Array::get($aBackup, 'send_attendance_report');
+				$this->chmod = Core_Array::get($aBackup, 'chmod');
+				$this->files_chmod = Core_Array::get($aBackup, 'files_chmod');
+				$this->date_format = Core_Array::get($aBackup, 'date_format');
+				$this->date_time_format = Core_Array::get($aBackup, 'date_time_format');
+				$this->error = Core_Array::get($aBackup, 'error');
+				$this->error404 = Core_Array::get($aBackup, 'error404');
+				$this->error403 = Core_Array::get($aBackup, 'error403');
+				$this->robots = Core_Array::get($aBackup, 'robots');
+				$this->key = Core_Array::get($aBackup, 'key');
+				$this->user_id = Core_Array::get($aBackup, 'user_id');
+				$this->closed = Core_Array::get($aBackup, 'closed');
+				$this->safe_email = Core_Array::get($aBackup, 'safe_email');
+				$this->protect = Core_Array::get($aBackup, 'protect');
+				$this->https = Core_Array::get($aBackup, 'https');
+				$this->html_cache_use = Core_Array::get($aBackup, 'html_cache_use');
+				$this->html_cache_with = Core_Array::get($aBackup, 'html_cache_with');
+				$this->html_cache_without = Core_Array::get($aBackup, 'html_cache_without');
+				$this->css_left = Core_Array::get($aBackup, 'css_left');
+				$this->css_right = Core_Array::get($aBackup, 'css_right');
+				$this->html_cache_clear_probability = Core_Array::get($aBackup, 'html_cache_clear_probability');
+				$this->notes = Core_Array::get($aBackup, 'notes');
+				$this->uploaddir = Core_Array::get($aBackup, 'uploaddir');
+				$this->nesting_level = Core_Array::get($aBackup, 'nesting_level');
+				$this->csp = Core_Array::get($aBackup, 'csp');
+				$this->save();
+			}
+		}
+
+		return $this;
 	}
 }

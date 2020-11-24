@@ -710,7 +710,8 @@ class User_Model extends Core_Entity
 	public function smallAvatar()
 	{
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-			->class('avatar-user');
+			->class('avatar-user')
+			->title($this->getFullName());
 
 		$oCore_Html_Entity_Div
 			->add(
@@ -1217,15 +1218,25 @@ class User_Model extends Core_Entity
 	}
 
 	/**
+	 * Get avatar with name
+	 */
+	public function getAvatarWithName()
+	{
+		$link = $this->only_access_my_own
+			? '<span>' . htmlspecialchars($this->getFullName()) . '</span>'
+			: '<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>';
+
+		return '<div class="contracrot">
+			<div class="user-image"><img class="contracrot-ico" src="' . $this->getAvatar() . '"></div>
+			<div class="user-name">' . $link . '</div>
+		</div>';
+	}
+
+	/**
 	 * Show avatar with name
 	 */
 	public function showAvatarWithName()
 	{
-		?><div class="contracrot">
-			<div class="user-image"><img class="contracrot-ico" src="<?php echo $this->getAvatar()?>"></div>
-			<div class="user-name">
-				<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: 'id_content'}); return false"><?php echo htmlspecialchars($this->getFullName())?></a>
-			</div>
-		</div><?php
+		echo $this->getAvatarWithName();
 	}
 }

@@ -72,6 +72,7 @@ return array(
 	'error_log_authorization_error' => 'Incorrect authentication data',
 	'error_log_exit' => 'Logout',
 	'session_destroy_error' => 'Error session closing',
+	'error_log_add_message' => "<strong>Error!</strong> Message error add into log",
 
 	'error_message' => "Hello!\n"
 	. "This event was occurred on site:\n"
@@ -168,6 +169,8 @@ return array(
 	'estimate_date' => '%1$d %2$s',
 	'estimate_date_year' => '%1$d %2$s %3$d',
 
+	'time_postfix' => ' at %s',
+
 	'month1' => 'January',
 	'month2' => 'February',
 	'month3' => 'March',
@@ -201,10 +204,38 @@ return array(
 	'minute_genitive_singular' => 'minutes',
 	'minute_genitive_plural' => 'minutes',
 
+	'shortTitleSeconds' => 's.',
+	'shortTitleSeconds_1' => 'sec.',
+	'shortTitleMinutes' => 'm.',
+	'shortTitleHours' => 'h.',
+	'shortTitleDays' => 'd.',
+	'shortTitleYears' => 'y.',
+
 	'day' => 'Day',
 	'month' => 'Month',
 	'year' => 'Year',
 	'random' => 'Random',
+	'generateChars' => 'Symbols',	
 
-	'time_postfix' => ' at %s',
+	'title_no_access_to_page' => 'You are not allowed to access this page!',
+	'message_more_info' => 'For more information, contact the site administrator.',
+	'title_domain_must_be_added' => 'You need to add domain %s to the list of the site domains!',
+	'message_domain_must_be_added' => 'Domain <b>%s</b> must be added to the list of domains supported by the <b>HostCMS</b>!',
+	'add_domain_instruction1' => 'To add a domain, go to the <b><a href="/admin/site/index.php" target="_blank">"Backend" → "System" → "Sites"</a></b>.',
+	'add_domain_instruction2' => 'Select the pictogram <b>"Domains"</b> for the required site, on the opened page click the menu <b>"Add"</b>.',
+	'home_page_not_found' => 'Home page not found',
+	'message_home_page_must_be_added' => 'You need to add main page to <b>"Backend" → "Structure"</b>. <br /><b>"Path"</b> for the main page should be "<b>/</b>".',
+	'site_disabled_by_administrator' => 'Site %s has been disabled by the administrator and unavailable!',
+	'site_activation_instruction' => 'To enable the site, go to the "Sites" section and set the "Activity" value of the required site.',
+	'title_limit_available_sites_exceeded' => 'The limit of available sites has been exceeded!',
+	'message_limit_available_sites_exceeded' => 'The limit of available sites in the HostCMS has been exceeded!',
+	'message_remove_unnecessary_sites' => 'Remove unnecessary sites from the system (<b>"Backend" → "System" → "Sites"</b>) or purchase the version without the limit of multisite.',
+	'missing_template_for_page' => 'Missing template for page!',
+	'change template instruction' => 'You need to change main page in <b>"Backend" → "Structure" → "Structure"</b>',
+	'hosting_mismatch_system_requirements' => 'Hosting mismatch with the system requirements!',
+	'requires_php5' => 'You need PHP 5 or PHP 7 with installed <a href="https://www.hostcms.ru/documentation/server/ibxslt/" target="_blank">Libxslt</a> for work.',
+	'list_tested_hosting' => 'Our website contains <a href="https://www.hostcms.ru/hosting/" target="_blank">list of tested hosting</a> suitable for HostCMS.',
+
+	'show_title' => 'Show',
+	'data_show_title' => 'Show on site',
 );

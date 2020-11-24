@@ -22,4 +22,5 @@ return array(
 	'allowAccess_success' => 'Доступ дозволено.',
 	'denyAccess_success' => 'Доступ заборонено.',
 	'move_success' => 'Групи властивостей перенесені',
+	'root' => 'Корiнь',
 );

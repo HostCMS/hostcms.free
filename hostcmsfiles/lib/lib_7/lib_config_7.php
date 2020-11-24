@@ -10,7 +10,7 @@
 $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
 
 // Проверять остаток на складе при добавлении в корзину
-$bCheckStock = TRUE;
+$bCheckStock = FALSE;
 
 Shop_Payment_System_Handler::checkBeforeContent($oShop);
 
@@ -35,13 +35,10 @@ if (Core_Array::getRequest('add'))
 	$count = Core_Array::getRequest('count', 1);
 	!is_array($count) && $count = array($count);
 
-	//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
-
 	foreach ($add as $key => $shop_item_id)
 	{
 		$oShop_Cart_Controller
 			->clear()
-			//->checkStock($bCheckStock)
 			->shop_item_id(intval($shop_item_id))
 			->quantity(floatval(Core_Array::get($count, $key, 1)))
 			->add();
@@ -158,13 +155,10 @@ if (Core_Array::getGet('action') == 'repeat')
 		{
 			$aShop_Order_Items = $oShop_Order->Shop_Order_Items->findAll();
 
-			//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
-
 			foreach ($aShop_Order_Items as $oShop_Order_Item)
 			{
 				$oShop_Order_Item->shop_item_id && $oShop_Cart_Controller
 					->clear()
-					//->checkStock($bCheckStock)
 					->shop_item_id($oShop_Order_Item->shop_item_id)
 					->quantity($oShop_Order_Item->quantity)
 					->marking($oShop_Order_Item->marking)
@@ -206,7 +200,6 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 	$aArray = array('…');
 	foreach ($aObjects as $Object)
 	{
-		//$aArray['_' . $Object->id] = $Object->name;
 		$aArray['_' . $Object->id] = $Object->getName();
 	}
 
@@ -220,7 +213,6 @@ if (Core_Array::getGet('delete'))
 
 	if ($shop_item_id)
 	{
-		//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 		$oShop_Cart_Controller
 			->clear()
 			->shop_item_id($shop_item_id)
@@ -251,7 +243,6 @@ if (!is_null(Core_Array::getRequest('bonuses')))
 
 if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 {
-	//$oShop_Cart_Controller = Shop_Cart_Controller::instance();
 	$aCart = $oShop_Cart_Controller->getAll($oShop);
 
 	// Склад по умолчанию
@@ -266,7 +257,6 @@ if (Core_Array::getPost('recount') || Core_Array::getPost('step') == 1)
 		{
 			$oShop_Cart_Controller
 				->clear()
-				//->checkStock($bCheckStock)
 				->shop_item_id($oShop_Cart->shop_item_id)
 				->quantity($quantity)
 				->postpone(is_null(Core_Array::getPost('postpone_' . $oShop_Cart->shop_item_id)) ? 0 : 1)

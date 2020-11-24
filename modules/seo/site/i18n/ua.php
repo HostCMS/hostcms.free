@@ -1,4 +1,4 @@
- <?php
+<?php
 
 return array(
 	'model_name' => 'Пошукові системи',

@@ -453,7 +453,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 								$this->_object->$columnName
 							);
 
-						break;
+					break;
 					case 'date':
 						$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Date');
 
@@ -461,8 +461,15 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							->value(
 								$this->_object->$columnName
 							);
+					break;
+					case 'time':
+						$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Time');
 
-						break;
+						$oAdmin_Form_Entity_For_Column
+							->value(
+								$this->_object->$columnName
+							);
+					break;
 					case 'tinytext':
 					case 'text':
 					case 'mediumtext':
@@ -477,7 +484,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							->value(
 								$this->_object->$columnName
 							);
-						break;
+					break;
 					case 'tinyint':
 					case 'tinyint unsigned':
 						// Только при длине 1 символ или пустом для MySql 8 && unsigned
@@ -506,7 +513,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						$columnName == 'id'
 							&& $oAdmin_Form_Entity_For_Column->readonly('readonly');
 
-						break;
+					break;
 				}
 
 				$format = array();
@@ -573,30 +580,84 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 					if ($columnName == 'user_id')
 					{
+						if (Core::moduleIsActive('user'))
+						{
+							$oCurrentUser = Core_Auth::getCurrentUser();
+
+							if (!$oCurrentUser->only_access_my_own)
+							{
+								$this->_tabs[$sTabName]->delete($oAdmin_Form_Entity_For_Column);
+
+								$placeholder = Core::_('User.select_user');
+								$language = Core_i18n::instance()->getLng();
+
+								$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+								$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
+
+								$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Select')
+									->id('responsible_user')
+									->options($aSelectResponsibleUsers)
+									->name('user_id')
+									->value($this->_object->$columnName);
+
+								$oScript = Admin_Form_Entity::factory('Script')
+									->value("$('#responsible_user').selectUser({
+											language: '" . $language . "',
+											placeholder: '" . $placeholder . "'
+										})
+										.val('" . $this->_object->$columnName . "')
+										.trigger('change.select2')
+										.on('select2:unselect', function (){
+											$(this)
+												.next('.select2-container')
+												.find('.select2-selection--single')
+												.removeClass('user-container');
+										});"
+									);
+
+								$this->_tabs[$sTabName]->add(
+									Admin_Form_Entity::factory('Div')->class('row')
+										->add($oAdmin_Form_Entity_For_Column)
+										->add($oScript)
+								);
+							}
+							else
+							{
+								$oAdmin_Form_Entity_For_Column
+									->type('hidden')
+									// ->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
+									->disabled('disabled');
+
+								if ($this->_object->user_id)
+								{
+									$oUser = $this->_object->User;
+
+									/*$oUserLink = Admin_Form_Entity::factory('Link');
+									$oUserLink
+										->divAttr(array('class' => 'input-group-addon user-link'))
+										->a
+											->class('btn btn-labeled btn-sky')
+											->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
+											->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
+											->value($oUser->login)
+											->target('_blank');
+									$oUserLink
+										->icon
+											->class('btn-label fa fa-user');
+
+									$oAdmin_Form_Entity_For_Column->add($oUserLink);*/
+
+									$oAdmin_Form_Entity_For_Column->add(
+										Admin_Form_Entity::factory('Code')
+											->html($oUser->getAvatarWithName())
+									);
+								}
+							}
+						}
+
 						$oAdmin_Form_Entity_For_Column
 							->caption(Core::_('User.backend-field-caption'))
-							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
-							->disabled('disabled');
-
-						if ($this->_object->user_id && Core::moduleIsActive('user'))
-						{
-							$oUser = $this->_object->User;
-
-							$oUserLink = Admin_Form_Entity::factory('Link');
-							$oUserLink
-								->divAttr(array('class' => 'input-group-addon user-link'))
-								->a
-									->class('btn btn-labeled btn-sky')
-									->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
-									->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
-									->value($oUser->login)
-									->target('_blank');
-							$oUserLink
-								->icon
-									->class('btn-label fa fa-user');
-
-							$oAdmin_Form_Entity_For_Column->add($oUserLink);
-						}
+							->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 					}
 				}
 
@@ -745,8 +806,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		$aColumns = $this->_object->getTableColumns();
 
-		// Show on the additional tab, but not change!
-		$this->skipColumns = $this->skipColumns + array('user_id' => 'user_id');
+		// Show on the additional tab, but not change, while only_access_my_own!
+		$oCurrentUser = Core_Auth::getCurrentUser();
+		$oCurrentUser->only_access_my_own
+			&& $this->skipColumns = $this->skipColumns + array('user_id' => 'user_id');
 
 		// Применение данных к объекту
 		foreach ($aColumns as $columnName => $columnArray)
@@ -785,6 +848,20 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							// Checkbox
 							$value = is_null($value) ? 0 : $value;
 						}
+						elseif (!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
+						{
+							$value = intval($value);
+						}
+					break;
+					case 'smallint':
+					case 'smallint unsigned':
+					case 'mediumint':
+					case 'mediumint unsigned':
+					case 'int':
+					case 'int unsigned':
+					case 'integer unsigned':
+						(!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
+							&& $value = intval($value);
 					break;
 					case 'decimal':
 						if ($value != 0 && isset($columnArray['max_length']))

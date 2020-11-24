@@ -1,4 +1,4 @@
- <?php
+<?php
 /**
  * Online shop.
  *
@@ -46,10 +46,11 @@ return array(
 	'tab_seo' => 'SEO',
 	'tab_associated' => 'Сопутствующие',
 	'shop_group_id' => 'Группа',
-	'item_type_selection_group_buttons_name_simple' => "Обычный товар",
-	'item_type_selection_group_buttons_name_electronic' => "Электронный товар",
-	'item_type_selection_group_buttons_name_divisible' => "Делимый товар",
+	'item_type_selection_group_buttons_name_simple' => "Обычный",
+	'item_type_selection_group_buttons_name_electronic' => "Электронный",
+	'item_type_selection_group_buttons_name_divisible' => "Делимый",
 	'item_type_selection_group_buttons_name_set' => "Комплект",
+	'item_type_selection_group_buttons_name_certificate' => "Сертификат",
 	'shop_item_catalog_modification_flag' => "Модификация для товара",
 	'shop_seller_id' => "Продавец",
 	'shop_producer_id' => "Производитель",
@@ -310,6 +311,7 @@ return array(
 	'quantity' => 'Количество',
 	'associated_item_price' => 'Цена',
 	'set_item_header' => 'Комплект',
+	'certificate_item_header' => 'Сертификат',
 	'apply_recount_set' => 'Пересчитать комплект',
 	'shop_item_set_not_currency' => 'Остутствует указание валюты у товара #%d "%s"',
 	'import_price_list_delay' => 'Задержка (в сек.)',
@@ -347,6 +349,9 @@ return array(
 	'warehouse_cell' => 'Ячейка',
 	'warehouse_measure' => 'Ед.изм.',
 	'create_modification_delimiter' => 'Разделитель',
-	'retail_price' => 'Розничная'
-	
+	'retail_price' => 'Розничная',
+	'items_catalog_add_form_tab_link' => 'Вкладки',
+	'shop_tab_header' => 'Вкладки',
+	'certificate_discount' => 'Скидка',
+	'create_modification_use_property_name' => 'Использовать название свойства',
 );

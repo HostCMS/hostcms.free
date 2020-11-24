@@ -341,4 +341,12 @@ return array(
 	'warehouse_measure' => 'Од. вим.',
 	'shop_price_setting_modification_create' => 'Установка цін модифікацій товару "%s"',
 	'create_modification_delimiter' => 'Роздільник',
+	'retail_price' => 'Роздрібна',
+	'items_catalog_add_form_tab_link' => 'Виберіть',
+	'shop_tab_header' => 'Виберіть',
+
+	'certificate_discount' => 'Знижка',
+	'certificate_item_header' => 'Сертифікат',
+	'item_type_selection_group_buttons_name_certificate' => "Сертифікат",
+	'create_modification_use_property_name' => 'Використовувати назву властивості',
 );

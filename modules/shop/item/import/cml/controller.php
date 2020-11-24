@@ -156,12 +156,18 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			? $this->_aConfig['predefinedAdditionalProperties']
 			: array();
 
-		$this->_oSimpleXMLElement = new SimpleXMLElement(
-			Core_File::read($sXMLFilePath), defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0
-		);
+		$str = Core_File::read($sXMLFilePath);
+
+		// Remove BOM
+		if (substr($str, 0, 3) === "\xEF\xBB\xBF")
+		{
+			$str = substr($str, 3);
+		}
+
+		$this->_oSimpleXMLElement = new SimpleXMLElement($str, defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0);
+
 		$this->sShopDefaultPriceName = 'РОЗНИЧНАЯ';
 		$this->sShopDefaultPriceGUID = '';
-
 		$this->itemDescription = 'text';
 		$this->shortDescription = 'МалоеОписание';
 		//$this->shortDescription = "ЗначенияСвойств/ЗначенияСвойства[./Ид='8f4f5254-31f4-11e9-7792-fa163e79bc3b']/Значение";
@@ -215,7 +221,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$this->_checkUpdateGroupField('description') && count($aDescriptionArray = $this->xpath($oXMLGroupNode, 'Описание'))
 				&& $oShop_Group->description = strval($aDescriptionArray[0]);
 
-			$this->_checkUpdateGroupField('parent_id') && $oShop_Group->parent_id = $iParentId;
+			$this->_checkUpdateGroupField('parent_id')
+				&& $oShop_Group->id != $iParentId
+				&& $oShop_Group->parent_id = $iParentId;
 
 			$oShop_Group->shop_id = $this->iShopId;
 
@@ -341,6 +349,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oShop_Group->image_small = "small_{$sTargetFileName}";
 					$oShop_Group->setSmallImageSizes();
 				}
+
 				$oShop_Group->save();
 			}
 
@@ -1676,7 +1685,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						{
 							// В связи с разницей логик HostCMS и 1С по хранению налогов, поле "учтено в сумме" больше не будет импортироваться
 							$iInSum = strval($oPrice->Налог->УчтеноВСумме);
-							strtoupper($iInSum) == 'TRUE' ? $oShopTax->tax_is_included = 1 : $oShopTax->tax_is_included = 0;
+
+							strtoupper($iInSum) == 'TRUE'
+								? $oShopTax->tax_is_included = 1
+								: $oShopTax->tax_is_included = 0;
+
 							$this->_oTaxForBasePrice = $oShopTax->save();
 						}
 
@@ -1784,6 +1797,16 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 								&& $oShopItem->marking = strval($oProposal->Артикул);
 
 							$this->_checkUpdateField('name') && $oShopItem->name = strval($oProposal->Наименование);
+						}
+
+						// Отключение товара после определения модификация или нет
+						$oAttributes = $oProposal->attributes();
+						if (isset($oAttributes['Статус']) && $oAttributes['Статус'] == 'Удален'
+							|| isset($oProposal->Статус) && strval($oProposal->Статус) == 'Удален')
+						{
+							$oShopItem->active = 0;
+							$oShopItem->save();
+							continue;
 						}
 
 						// Товар найден, начинаем обновление
@@ -2420,6 +2443,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		// Пересчет количества товаров в группах
 		$oShop->recount();
+
+		// Fast filter
+		if ($oShop->filter)
+		{
+			$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($oShop);
+			$Shop_Filter_Group_Controller->rebuild();
+		}
 
 		// Post all
 		$this->postAll();

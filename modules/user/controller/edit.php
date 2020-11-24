@@ -223,7 +223,7 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					'show' => FALSE
 				)
 			)
-			->divAttr(array('class' => 'form-group col-lg-6 col-md-6 col-sm-12 col-xs-12'));
+			->divAttr(array('class' => 'input-group col-lg-6 col-md-6 col-sm-12 col-xs-12'));
 
 		$oPersonalDataRow3->add($oImageField);
 

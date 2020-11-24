@@ -64,8 +64,13 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			$aItemInfo = $this->_getItemInfo($indexValueItem);
 
 			?>
-			<a data-toggle="dropdown" style="color: <?php echo $aItemInfo['color'] ?>" href="javascript:void(0);" aria-expanded="false">
-				<i class="<?php echo $aItemInfo['icon']?>"></i><?php echo htmlspecialchars($aItemInfo['value']) . (!$this->disabled ? '<i class="fa fa-angle-down icon-separator-left"></i>' : '')?>
+			<a data-toggle="dropdown" style="color: <?php echo $aItemInfo['color'] ?>" href="javascript:void(0);" aria-expanded="false"><?php
+				if ($aItemInfo['icon'] != '')
+				{
+					?><i class="<?php echo $aItemInfo['icon']?>"></i><?php
+				}
+
+				echo htmlspecialchars($aItemInfo['value']) . (!$this->disabled ? '<i class="fa fa-angle-down icon-separator-left"></i>' : '')?>
 			</a>
 			<?php
 			if (!$this->disabled)
@@ -84,7 +89,13 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 						: '';
 					?>
 					<li id="<?php echo htmlspecialchars($key)?>" <?php echo $indexValueItem == $key ? 'selected="selected"' : ''?>>
-						<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($aItemInfo['color'])?>;<?php echo $marginLeft?>"><i class="<?php echo htmlspecialchars($aItemInfo['icon'])?>"></i><?php echo htmlspecialchars($aItemInfo['value'])?></a>
+						<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($aItemInfo['color'])?>;<?php echo $marginLeft?>"><?php
+						if ($aItemInfo['icon'] != '')
+						{
+							?><i class="<?php echo htmlspecialchars($aItemInfo['icon'])?>"></i><?php
+						}
+
+						echo htmlspecialchars($aItemInfo['value'])?></a>
 					</li>
 					<?php
 				}

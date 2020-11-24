@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Export_Controller
 {
@@ -59,6 +59,12 @@ class Shop_Discountcard_Export_Controller
 	 */
 	public function execute()
 	{
+		$oUser = Core_Auth::getCurrentUser();
+		if ($oUser->only_access_my_own)
+		{
+			return FALSE;
+		}
+		
 		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");

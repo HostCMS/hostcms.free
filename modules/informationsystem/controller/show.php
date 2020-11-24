@@ -19,6 +19,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - item(123) идентификатор показываемого информационного элемента
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств информационных элементов, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств информационных элементов, по умолчанию TRUE
+ * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
  * - itemsForbiddenTags(array('description')) массив тегов информационных элементов, запрещенных к передаче в генерируемый XML
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
@@ -81,6 +83,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'item',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'commentsProperties',
+		'commentsPropertiesList',
 		'itemsForbiddenTags',
 		'comments',
 		'votes',
@@ -181,6 +185,36 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * List of properties for item
+	 * @var array
+	 */
+	protected $_aComment_Properties = array();
+
+	/**
+	 * List of property directories for item
+	 * @var array
+	 */
+	protected $_aComment_Property_Dirs = array();
+
+	/**
+	 * Get _aComment_Properties set
+	 * @return array
+	 */
+	public function getCommentProperties()
+	{
+		return $this->_aComment_Properties;
+	}
+
+	/**
+	 * Get _aItem_Property_Dirs set
+	 * @return array
+	 */
+	public function getCommentPropertyDirs()
+	{
+		return $this->_aComment_Property_Dirs;
+	}
+
+	/**
 	 * Information system's items object
 	 * @var Informationsystem_Item_Model
 	 */
@@ -232,10 +266,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$this->limit = 10;
 		$this->group = $this->offset = $this->page = 0;
 		$this->item = NULL;
-		$this->groupsProperties = $this->itemsProperties = $this->propertiesForGroups = $this->comments
+		$this->groupsProperties = $this->itemsProperties = $this->commentsProperties = $this->propertiesForGroups = $this->comments
 			= $this->tags = $this->calculateCounts = $this->siteuserProperties = FALSE;
 
-		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->groupsPropertiesList
+		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
 			= $this->votes = $this->showPanel = $this->calculateTotal = TRUE;
 
 		$this->groupsMode = 'tree';
@@ -501,6 +535,14 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$bCache = $this->cache && Core::moduleIsActive('cache');
 		if ($bCache)
 		{
+			foreach ($this->_aFilterProperties as $iPropertyId => $aTmpProperties)
+			{
+				foreach ($aTmpProperties as $aTmpProperty)
+				{
+					$this->addCacheSignature('property=' . $iPropertyId . ',' . $aTmpProperty[1] . ',' . implode('#', $aTmpProperty[2]));
+				}
+			}
+
 			$oCore_Cache = Core_Cache::instance(Core::$mainConfig['defaultCache']);
 			$inCache = $oCore_Cache->get($cacheKey = strval($this), $this->_cacheName);
 
@@ -679,6 +721,44 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 		}
 
+		// Показывать дополнительные свойства комментариев
+		if ($this->commentsProperties && $this->commentsPropertiesList)
+		{
+			$oInformationsystem_Comment_Property_List = Core_Entity::factory('Informationsystem_Comment_Property_List', $oInformationsystem->id);
+
+			$oProperties = $oInformationsystem_Comment_Property_List->Properties;
+			if (is_array($this->commentsPropertiesList) && count($this->commentsPropertiesList))
+			{
+				$oProperties->queryBuilder()
+					->where('properties.id', 'IN', $this->commentsPropertiesList);
+			}
+			$aProperties = $oProperties->findAll();
+
+			foreach ($aProperties as $oProperty)
+			{
+				$this->_aComment_Properties[$oProperty->property_dir_id][] = $oProperty->clearEntities();
+			}
+
+			$aProperty_Dirs = $oInformationsystem_Comment_Property_List->Property_Dirs->findAll();
+			foreach ($aProperty_Dirs as $oProperty_Dir)
+			{
+				$oProperty_Dir->clearEntities();
+				$this->_aComment_Property_Dirs[$oProperty_Dir->parent_id][] = $oProperty_Dir->clearEntities();
+			}
+
+			if (!$bTpl)
+			{
+				$Comment_Properties = Core::factory('Core_Xml_Entity')
+					->name('comment_properties');
+
+				$this->addEntity($Comment_Properties);
+
+				Core_Event::notify(get_class($this) . '.onBeforeAddCommentsPropertiesList', $this, array($Comment_Properties));
+
+				$this->_addCommentsPropertiesList(0, $Comment_Properties);
+			}
+		}
+
 		$this->_shownIDs = array();
 
 		if ($bTpl)
@@ -737,7 +817,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 									->name('informationsystem_group_id')
 									->value($oShortcut_Item->informationsystem_group_id)
 							);
-							
+
 						Core_Event::notify(get_class($this) . '.onBeforeAddShortcut', $this, array($oInformationsystem_Item, $oOriginal_Informationsystem_Item));
 					}
 
@@ -760,6 +840,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 						// Properties for informationsystem's item entity
 						$oInformationsystem_Item->showXmlProperties($this->itemsProperties);
+						$oInformationsystem_Item->showXmlCommentProperties($this->commentsProperties);
 
 						// Tags
 						$oInformationsystem_Item->showXmlTags($this->tags);
@@ -1352,7 +1433,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$parent_id = $oInformationsystem_Group->parent_id;
 
 		// Shortcut
-		if ($oInformationsystem_Group->shortcut_id)
+		if ($oInformationsystem_Group->shortcut_id
+			&& $oInformationsystem_Group->shortcut_id != $oInformationsystem_Group->parent_id)
 		{
 			$oShortcut_Group = $oInformationsystem_Group;
 			$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
@@ -1461,6 +1543,31 @@ class Informationsystem_Controller_Show extends Core_Controller
 		if (isset($this->_aItem_Properties[$parent_id]))
 		{
 			$parentObject->addEntities($this->_aItem_Properties[$parent_id]);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add items properties list to $parentObject
+	 * @param int $parent_id parent group ID
+	 * @param object $parentObject object
+	 * @return self
+	 */
+	protected function _addCommentsPropertiesList($parent_id, $parentObject)
+	{
+		if (isset($this->_aComment_Property_Dirs[$parent_id]))
+		{
+			foreach ($this->_aComment_Property_Dirs[$parent_id] as $oProperty_Dir)
+			{
+				$parentObject->addEntity($oProperty_Dir);
+				$this->_addCommentsPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+			}
+		}
+
+		if (isset($this->_aComment_Properties[$parent_id]))
+		{
+			$parentObject->addEntities($this->_aComment_Properties[$parent_id]);
 		}
 
 		return $this;
@@ -1763,21 +1870,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 	/**
 	 * Set goods sorting
-	 * @param $column Column name, e.g. price, absolute_price
+	 * @param $column Column name
 	 * @return self
 	 */
 	public function orderBy($column, $direction = 'ASC')
 	{
-		switch ($column)
-		{
-			case 'price':
-			case 'absolute_price':
-				$this->addAbsolutePrice();
-
-				$column = 'absolute_price';
-			break;
-		}
-
 		$this->informationsystemItems()
 			->queryBuilder()
 			->clearOrderBy()
@@ -1787,7 +1884,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		return $this;
 	}
-
 
 	/**
 	 * Array of Properties conditions, see addFilter()
@@ -2019,18 +2115,53 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		foreach ($aPropertyValues as $propertyValue)
 		{
+			switch ($oProperty->type)
+			{
+				case 8: // date
+					$propertyValue = $propertyValue == '0000-00-00 00:00:00'
+						? ''
+						: Core_Date::sql2date($propertyValue);
+				break;
+				case 9: // datetime
+					$propertyValue = $propertyValue == '0000-00-00 00:00:00'
+						? ''
+						: Core_Date::sql2datetime($propertyValue);
+				break;
+			}
+
 			$this->addEntity(
 				Core::factory('Core_Xml_Entity')
 					->name($xmlName)
 					->value($propertyValue)
 					->addAttribute('condition', $condition)
 			);
-			$this->addCacheSignature("{$xmlName}{$condition}{$propertyValue}");
 		}
 
 		return $this;
 	}
 
+	/**
+	 * Convert property value, e.g. '23.11.2020' => '2020-11-23 00:00:00'
+	 * @param Property_Model $oProperty
+	 * @param mixed $value
+	 * @return string
+	 */
+	protected function _convertReceivedPropertyValue(Property_Model $oProperty, $value)
+	{
+		switch ($oProperty->type)
+		{
+			case 8: // date
+				$value != ''
+					&& $value = Core_Date::date2sql($value);
+			break;
+			case 9: // datetime
+				$value != ''
+					&& $value = Core_Date::datetime2sql($value);
+			break;
+		}
+
+		return $value;
+	}
 
 	/**
 	 * Get Filter Properties

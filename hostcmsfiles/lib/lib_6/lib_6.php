@@ -22,11 +22,7 @@ $Shop_Controller_Show->addEntity(
 		->name('show_add_comments')->value(Core_Array::get(Core_Page::instance()->libParams, 'showAddComment', 2))
 );
 
-$Shop_Controller_Show
-	->tags(TRUE)
-	->comments(TRUE)
-	->associatedItems(TRUE)
-	->modifications(TRUE);
+$Shop_Controller_Show->tags(TRUE);
 
 if ($Shop_Controller_Show->item == 0)
 {
@@ -68,6 +64,12 @@ if ($Shop_Controller_Show->item == 0)
 }
 else
 {
+	$Shop_Controller_Show
+		->associatedItems(TRUE)
+		->modifications(TRUE)
+		->comments(TRUE)
+		->tabs(TRUE);
+
 	if (Core_Array::getPost('add_comment') && Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1))
 	{
 		$oShop = $Shop_Controller_Show->getEntity();
@@ -239,6 +241,8 @@ $Shop_Controller_Show
 	)
 	// Выводить свойства товаров
 	->itemsProperties(TRUE)
+	->commentsProperties(TRUE)
+	// ->seoFilters(TRUE)
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром

@@ -54,6 +54,7 @@ return array(
 
 	'free' => 'Purchase the commercial version, and you will acquire:',
 	'notes' => 'Notes',
+	'add_note' => 'Add note',
 	'notes_save' => 'Notes saved successfully.',
 	'save_notes' => 'Save',
 
@@ -99,6 +100,6 @@ return array(
 	'bookmarks' => 'Bookmarks',
 	'sound' => 'Sound',
 	'placeholderGlobalSearch' => 'Search',
-	
+
 	'none' => 'None',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -48,7 +48,11 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab
 					->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-					->move($this->getField('shortcode')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2)
+					->move($this->getField('shortcode')->divAttr(array('class' => 'form-group col-xs-12'))->format(
+						array(
+							'reg' => array('value' => '^[A-Za-z0-9_]+$')
+						)
+					), $oMainRow2)
 					->move($this->getField('example')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
 
 				$oMainTab->delete($this->getField('php'));
@@ -202,10 +206,10 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Backup revision
 		if (Core::moduleIsActive('revision')  && $this->_object->id)
 		{
-			$modelName = 'shortcode'
+			$modelName == 'shortcode'
 				&& $this->_object->backupRevision();
 		}
-		
+
 		parent::_applyObjectProperty();
 
 		switch ($modelName)

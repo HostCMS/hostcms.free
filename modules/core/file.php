@@ -53,13 +53,13 @@ class Core_File
 			else
 			{
 				throw new Core_Exception("Move uploaded file '%source' error.",
-					array('%source' => Core_Exception::cutRootPath($source)));
+					array('%source' => Core::cutRootPath($source)));
 			}
 		}
 		else
 		{
 			throw new Core_Exception("The file '%source' is not uploaded file.",
-				array('%source' => Core_Exception::cutRootPath($source)));
+				array('%source' => Core::cutRootPath($source)));
 		}
 	}
 
@@ -87,7 +87,7 @@ class Core_File
 				else
 				{
 					throw new Core_Exception("Copy file '%source' error.",
-						array('%source' => Core_Exception::cutRootPath($source)));
+						array('%source' => Core::cutRootPath($source)));
 				}
 			}
 			return TRUE;
@@ -95,7 +95,7 @@ class Core_File
 		else
 		{
 			throw new Core_Exception("The file '%source' does not exist.",
-				array('%source' => Core_Exception::cutRootPath($source)));
+				array('%source' => Core::cutRootPath($source)));
 		}
 	}
 
@@ -132,7 +132,7 @@ class Core_File
 			else
 			{
 				throw new Core_Exception("Open dir '%source' error.",
-					array('%source' => Core_Exception::cutRootPath($source)));
+					array('%source' => Core::cutRootPath($source)));
 			}
 		}
 		else
@@ -170,13 +170,13 @@ class Core_File
 			if (!rename($oldname, $newname))
 			{
 				throw new Core_Exception("Rename file/dir '%oldname' error.",
-					array('%oldname' => Core_Exception::cutRootPath($oldname)));
+					array('%oldname' => Core::cutRootPath($oldname)));
 			}
 		}
 		else
 		{
 			throw new Core_Exception("The file/dir '%oldname' does not exist.",
-				array('%oldname' => Core_Exception::cutRootPath($oldname)));
+				array('%oldname' => Core::cutRootPath($oldname)));
 		}
 	}
 
@@ -191,13 +191,13 @@ class Core_File
 			if (!unlink($fileName))
 			{
 				throw new Core_Exception("Delete file '%fileName' error.",
-					array('%fileName' => Core_Exception::cutRootPath($fileName)));
+					array('%fileName' => Core::cutRootPath($fileName)));
 			}
 		}
 		else
 		{
 			throw new Core_Exception("The file '%fileName' does not exist.",
-				array('%fileName' => Core_Exception::cutRootPath($fileName)));
+				array('%fileName' => Core::cutRootPath($fileName)));
 		}
 	}
 
@@ -212,12 +212,31 @@ class Core_File
 		// Forbidden to delete home directory
 		if (strtolower($dirname) == strtolower(CMS_FOLDER))
 		{
-			throw new Core_Exception("Forbidden to delete home directory.");
+			throw new Core_Exception('Forbidden to delete home directory.');
 		}
 
+		// Check $dirname and CMS_FOLDER
 		if ($dirname !== FALSE && strpos($dirname, CMS_FOLDER) !== 0)
 		{
-			throw new Core_Exception("Forbidden to delete directory out of CMS_FOLDER.");
+			$bForbidden = TRUE;
+
+			// Check $dirname and another cms_folders dirs
+			if (isset(Core::$mainConfig['cms_folders']) && is_array(Core::$mainConfig['cms_folders']))
+			{
+				foreach (Core::$mainConfig['cms_folders'] as $dirToCheck)
+				{
+					if (strpos($dirname, $dirToCheck) === 0)
+					{
+						$bForbidden = FALSE;
+						break;
+					}
+				}
+			}
+
+			if ($bForbidden)
+			{
+				throw new Core_Exception('Forbidden to delete directory %dir out of CMS_FOLDER.', array('%dir' => $dirname));
+			}
 		}
 
 		if (is_dir($dirname) && !is_link($dirname))
@@ -334,7 +353,7 @@ class Core_File
 				fclose($handle);
 
 				throw new Core_Exception("File '%fileName' write error.",
-					array('%fileName' => Core_Exception::cutRootPath($fileName)));
+					array('%fileName' => Core::cutRootPath($fileName)));
 			}
 
 			flock($handle, LOCK_UN);
@@ -346,7 +365,7 @@ class Core_File
 		else
 		{
 			throw new Core_Exception("File '%fileName' open error .",
-				array('%fileName' => Core_Exception::cutRootPath($fileName)));
+				array('%fileName' => Core::cutRootPath($fileName)));
 		}
 	}
 
@@ -364,7 +383,7 @@ class Core_File
 		else
 		{
 			throw new Core_Exception("The file '%fileName' does not exist.",
-				array('%fileName' => Core_Exception::cutRootPath($fileName)));
+				array('%fileName' => Core::cutRootPath($fileName)));
 		}
 	}
 
@@ -404,7 +423,7 @@ class Core_File
 			else
 			{
 				throw new Core_Exception("The directory '%pathname' directory has not been created.",
-					array('%pathname' => Core_Exception::cutRootPath($pathname)));
+					array('%pathname' => Core::cutRootPath($pathname)));
 			}
 		}
 	}
@@ -469,7 +488,7 @@ class Core_File
 	 */
 	static public function getExtension($path)
 	{
-		return strtolower(substr(strrchr($path, "."), 1));
+		return strtolower(substr(strrchr($path, '.'), 1));
 	}
 
 	/**
@@ -598,7 +617,7 @@ class Core_File
 		if (!is_file($file))
 		{
 			throw new Core_Exception("The file '%file' does not exist.",
-				array('%file' => Core_Exception::cutRootPath($file)));
+				array('%file' => Core::cutRootPath($file)));
 		}
 
 		$fileName = str_replace(array("\r", "\n", "\0"), '', $fileName);

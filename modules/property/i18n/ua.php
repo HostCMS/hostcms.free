@@ -72,4 +72,5 @@ return array(
 	'watermark_default_use_small_image' => 'Використовувати водяний знак для малих зображень',
 	'move_success' => 'Властивості перенесені',
 	'obligatory' => 'Обов\'язкове для заповнення',
+	'property_not_found' => 'Властивість не знайдено',
 );

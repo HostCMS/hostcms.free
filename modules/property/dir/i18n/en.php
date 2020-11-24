@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Property sections',
@@ -30,4 +30,5 @@ return array(
 	'allowAccessChildren_success' => 'Access allowed.',
 	'denyAccessChildren_success' => 'Access denied.',
 	'move_success' => 'Additional property section moved successfully.',
+	'root' => 'Root',	
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Dataset_Repair extends Admin_Form_Dataset
 {
@@ -51,7 +51,7 @@ class Sql_Dataset_Repair extends Admin_Form_Dataset
 		$aTables = $this->_database->getTables();
 		$aRepair = array();
 		
-		foreach ($aTables as $key => $sTable)
+		foreach ($aTables as $sTable)
 		{
 			$aTableStatus = $this->_database->setQueryType(0)
 				->asAssoc()

@@ -99,6 +99,7 @@ return array(
 	'events' => 'Дела',
 	'bookmarks' => 'Закладки',
 	'sound' => 'Звук',
+	'phone' => 'Телефония',
 	'placeholderGlobalSearch' => 'Поиск',
 	
 	'none' => 'Отсутствует',

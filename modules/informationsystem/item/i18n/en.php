@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Information items',
@@ -15,7 +15,6 @@ return array(
 	'show_information_groups_link2' => 'Add',
 	'show_information_groups_link3' => 'Properties',
 	'show_all_comments_top_menu' => 'Comments',
-	'show_comments_link_show_all_comments' => 'All comments',
 
 	'information_items_add_form_title' => 'Add information item',
 	'information_items_edit_form_title' => 'Edit information item',
@@ -138,4 +137,5 @@ return array(
 	'msg_download_complete' => "Import has finished!",
 	'information_items_copy_form_title' => 'Copy item',
 	'add_value'=>'Add the default property values ​​for the items with unset values',
+	'file_does_not_specified' => 'File not specified',	
 );

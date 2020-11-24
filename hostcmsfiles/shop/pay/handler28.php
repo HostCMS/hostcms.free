@@ -8,12 +8,13 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 	/*
 	 * Идентификатор магазина в системе WEBPAY
 	 */
-	protected $_wsb_storeid = "myMerchantLogin";
+	protected $_wsb_storeid = 12345678;
 
 	/*
-	 * Секретный ключ магазина в системе WEBPAY
+	 * Секретный ключ магазина в системе WEBPAY. Сгенерируйте сложный символьный ключ.
+	 * Это поле может содержать случайную последовательность символов за исключение знака &
 	 */
-	protected $_secret_key = "mySecretKey";
+	protected $_secret_key = 'webpaySecretKey';
 
 	/*
 	 * Идентификатор языка формы оплаты
@@ -25,6 +26,7 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 	/*
 	 * Идентификатор валюты. Буквенный трехзначный код валюты согласно ISO4271.
 	 * Допустимые значения: BYN, USD, EUR, RUB
+	 * Для тестовой среды только BYN
 	 */
 	protected $_wsb_currency_name = 'RUB';
 
@@ -63,10 +65,10 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 	 */
 	public function checkPaymentBeforeContent()
 	{
-		if (isset($_REQUEST['wsb_order_num']) && isset($_REQUEST['wsb_tid']))
+		if (isset($_REQUEST['site_order_id']) && isset($_REQUEST['transaction_id']))
 		{
 			// Получаем ID заказа
-			$order_id = intval(Core_Array::getRequest('wsb_order_num'));
+			$order_id = intval(Core_Array::getRequest('site_order_id'));
 
 			$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
 
@@ -78,14 +80,6 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 					->paymentProcessing();
 			}
 		}
-	}
-
-	/**
-	 * Метод, вызываемый в коде ТДС через Shop_Payment_System_Handler::checkAfterContent($oShop);
-	 */
-	public function checkPaymentAfterContent()
-	{
-
 	}
 
 	/**
@@ -142,7 +136,36 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 	 */
 	public function paymentProcessing()
 	{
-		$this->ProcessResult();
+		if ($this->_shopOrder->paid)
+		{
+			return FALSE;
+		}
+
+		if (!isset($_POST['wsb_signature']))
+		{
+			return FALSE;
+		}
+
+		$webpay_signature = $_POST['wsb_signature'];
+
+		$our_signature = md5($_POST['batch_timestamp'] . $_POST['currency_id'] . $_POST['amount'] . $_POST['payment_method'] . $_POST['order_id'] . $_POST['site_order_id'] . $_POST['transaction_id'] . $_POST['payment_type'] . $_POST['rrn'] . $this->_secret_key);
+
+		// payment_type - тип транзакции. Успешной оплате соответствуют значения: 1 и 4
+		if ($our_signature == $webpay_signature && in_array($_POST['payment_type'], array(1, 4)))
+		{
+			header('HTTP/1.0 200 OK');
+			$this->_shopOrder->system_information = sprintf("Заказ оплачен через WEBPAY\nID платежа в системе WEBPAY:\t{$_POST['transaction_id']}\nСтатус платежа:\t{$_POST['payment_type']}\n\n");
+
+			$this->_shopOrder->paid();
+			$this->setXSLs();
+			$this->send();
+		}
+		else
+		{
+			header('HTTP/1.0 400 Bad request');
+			$this->_shopOrder->system_information = sprintf("Заказ НЕ оплачен через WEBPAY\nID платежа в системе WEBPAY:\t{$_POST['transaction_id']}\nСтатус платежа:\t{$_POST['payment_type']}\n\n");
+			$this->_shopOrder->save();
+		}
 
 		return TRUE;
 	}
@@ -160,7 +183,7 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 
 		$wsb_seed = time();
 
-		if(!is_null($oShop_Currency->id))
+		if (!is_null($oShop_Currency->id))
 		{
 			?>
 			<h1>Оплата через систему WEBPAY</h1>
@@ -172,7 +195,7 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 				<?php
 				if (!is_null($this->_wsb_language_id))
 				{
-					?><input type="hidden" name="wsb_language_id" value="<?php echo $this->_wsb_language_id?>"><?php
+					?><input type="hidden" name="wsb_language_id" value="<?php echo htmlspecialchars($this->_wsb_language_id)?>"><?php
 				}
 				?>
 				<input type="hidden" name="wsb_storeid" value="<?php echo $this->_wsb_storeid?>">
@@ -184,10 +207,11 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 					?><input type="hidden" name="wsb_test" value="1"><?php
 				}
 				?>
-				<input type="hidden" name="wsb_currency_id" value="<?php echo $this->_wsb_currency_name?>">
+				<input type="hidden" name="wsb_currency_id" value="<?php echo htmlspecialchars($this->_wsb_currency_name)?>">
 				<input type="hidden" name="wsb_seed" value="<?php echo $wsb_seed?>">
-				<input type="hidden" name="wsb_customer_name" value="<?php echo implode(' ', array($oShop_Order->surname, $oShop_Order->name, $oShop_Order->patronymic))?>">
-				<input type="hidden" name="wsb_customer_address" value="<?php echo $oShop_Order->getFullAddress()?>">
+				<input type="hidden" name="wsb_customer_name" value="<?php echo htmlspecialchars(implode(' ', array($oShop_Order->surname, $oShop_Order->name, $oShop_Order->patronymic)))?>">
+				<input type="hidden" name="wsb_customer_address" value="<?php echo htmlspecialchars($oShop_Order->getFullAddress())?>">
+				<input type="hidden" name="wsb_order_contract" value="Заказ №<?php echo htmlspecialchars($oShop_Order->invoice)?>">
 				<input type="hidden" name="wsb_email" value="<?php echo htmlspecialchars($oShop_Order->email)?>">
 				<?php
 				$wsb_total = 0;
@@ -233,6 +257,10 @@ class Shop_Payment_System_Handler28 extends Shop_Payment_System_Handler
 				<input name="submit" value="Перейти к оплате" type="submit"/>
 			</form>
 			<?php
+		}
+		else
+		{
+			?><h1>Валюта не найдена</h1><?php
 		}
 	}
 }

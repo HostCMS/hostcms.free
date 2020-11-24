@@ -95,6 +95,8 @@ class Shop_Group_Model extends Core_Entity
 		'shop_item_property_for_group' => array(),
 		'shortcut' => array('model' => 'Shop_Group', 'foreign_key' => 'shortcut_id'),
 		'shop_filter_seo' => array(),
+		'shop_tab' => array('through' => 'shop_tab_group'),
+		'shop_tab_group' => array(),
 	);
 
 	/**
@@ -226,8 +228,27 @@ class Shop_Group_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($parent_id));
 
+		$oPreviousParent = clone $this;
+
 		$this->parent_id = $parent_id;
 		$this->save()->clearCache();
+
+		// Fast filter
+		if ($this->Shop->filter)
+		{
+			$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($this->Shop);
+
+			do {
+				$Shop_Filter_Group_Controller->fill($oPreviousParent->id);
+				$oPreviousParent = $oPreviousParent->getParent();
+			} while($oPreviousParent);
+
+			$oParent = $this;
+			do {
+				$Shop_Filter_Group_Controller->fill($oParent->id);
+				$oParent = $oParent->getParent();
+			} while($oParent);
+		}
 
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
 
@@ -967,6 +988,7 @@ class Shop_Group_Model extends Core_Entity
 		$this->Shortcuts->deleteAll(FALSE);
 
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
+		$this->Shop_Tab_Groups->deleteAll(FALSE);
 
 		// Remove from search index
 		$this->unindex();
@@ -1383,39 +1405,38 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function imgBackend()
 	{
-		if ($this->shortcut_id)
-		{
-			return '<i class="fa fa-link"></i>';
-		}
-		else
-		{
-			return '<i class="fa fa-folder-open-o"></i>';
-		}
+		return $this->shortcut_id
+			? '<i class="fa fa-link"></i>'
+			: '<i class="fa fa-folder-open-o"></i>';
 	}
 
 	/**
 	 * Create shortcut and move into group $group_id
 	 * @param int $group_id group id
-	 * @return Shop_Group_Model Shortcut
+	 * @return Shop_Group_Model|NULL
 	 */
 	public function shortcut($group_id = NULL)
 	{
-		$oShop_GroupShortcut = Core_Entity::factory('Shop_Group');
-
 		$object = $this->shortcut_id
 			? $this->Shortcut
 			: $this;
 
+		$oShop_GroupShortcut = Core_Entity::factory('Shop_Group');
 		$oShop_GroupShortcut->shop_id = $object->shop_id;
+		$oShop_GroupShortcut->parent_id = is_null($group_id)
+			? $object->parent_id
+			: $group_id;
 		$oShop_GroupShortcut->shortcut_id = $object->id;
+
+		// Ярлык ссылается на группу, в которую помещен
+		if ($oShop_GroupShortcut->parent_id == $oShop_GroupShortcut->shortcut_id)
+		{
+			return NULL;
+		}
+
 		$oShop_GroupShortcut->name = '';
 		$oShop_GroupShortcut->path = '';
 		$oShop_GroupShortcut->indexing = 0;
-
-		$oShop_GroupShortcut->parent_id =
-			is_null($group_id)
-			? $object->parent_id
-			: $group_id;
 
 		return $oShop_GroupShortcut->save()->clearCache();
 	}

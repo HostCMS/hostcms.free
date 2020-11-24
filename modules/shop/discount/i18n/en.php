@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discounts',
@@ -19,6 +19,17 @@ return array(
 	'name' => 'Name',
 	'start_datetime' => "Valid from",
 	'end_datetime' => "Valid to",
+	'start_time' => "Sart time",
+	'end_time' => "End time",
+	'days' => "Days of the week",
+	'all_days' => "All days of the week",
+	'day1' => "Monday",
+	'day2' => "Tuesday",
+	'day3' => "Wednesday",
+	'day4' => "Thursday",
+	'day5' => "Friday",
+	'day6' => "Saturday",
+	'day7' => "Sunday",
 	'active' => 'Active',
 	'value' => '<acronym title="Discount amount; can be measured by per cents or a currency">Discount amount</acronym>',
 	'type' => '<acronym title="Discount type - per cent or a sum in a selected currency">Discount type</acronym>',
