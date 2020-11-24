@@ -5712,4 +5712,12 @@ table.dms-workflow-execution-view tr td { text-align: left !important; }
   padding-top: 5px;
 }
 
+.tabs-left-collapse { 
+	cursor: pointer;
+	float: left;
+	font-size: 18px;
+}
+
+.tabs-left-collapse.active { font-size: 14px; }
+
 /* .chart { min-width: 450px; } */
