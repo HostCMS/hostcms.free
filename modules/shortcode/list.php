@@ -66,7 +66,7 @@ class Shortcode_List
 	static public function google_map($args, $body)
 	{
 		$args += array(
-			'key' => 'AIzaSyADtuSUbqq2MNdQ3Q0_xBr5Fbdzkvv1XY4',
+			'key' => '---',
 			'latlng' => '55.684758, 37.738521',
 			'content' => 'Маркер места',
 			'width' => '500px',
