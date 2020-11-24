@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Купоны',
@@ -33,4 +33,5 @@ return array(
 	'import_form' => 'Файл',
 	'import_result' => 'Проимпортировано %s купонов!',
 	'import_error' => 'Произошла ошибка: %s',
+	'shop_order_id' => 'Заказ',
 );

@@ -31,5 +31,6 @@ return array(
 	'msg_update_required' => 'Запрошені оновлення %s',
 	'msg_installing_package' => 'Установка пакету оновлень %s',
 	'msg_unpack_package' => 'Розпакування файлу %s',
-	'module' => 'Модуль "%s"',	
+	'module' => 'Модуль "%s"',
+	'update' => 'Оновлення',
 );

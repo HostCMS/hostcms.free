@@ -131,6 +131,7 @@ return array(
 	'schedule-searchIndexGroup' => 'Индексировать группу товаров',
 	'schedule-searchUnindexItem' => 'Снять товар с индексации',
 	'schedule-recountShop' => 'Пересчет групп и товаров',
+	'schedule-rebuildFastfilter' => 'Перестроить быстрый фильтр',
 	'order_admin_subject' => 'Тема письма о поступившем заказе куратору магазина',
 	'order_user_subject' => 'Тема письма о поступившем заказе пользователю',
 	'confirm_admin_subject' => 'Тема письма подтверждения оплаты куратору магазина',
@@ -188,5 +189,9 @@ return array(
 	'mail_header' => 'Письма',
 	'shop_codetype_id' => 'Маркировка по-умолчанию',
 	'report_top' => 'ТОП-',
-
+	'certificate_header' => 'Сертификаты',
+	'certificate_template' => 'Шаблон номера купона',
+	'certificate_subject' => 'Тема письма',
+	'certificate_text' => 'Текст письма',
+	'certificate_template_coupon_id' => 'ID купона',
 );

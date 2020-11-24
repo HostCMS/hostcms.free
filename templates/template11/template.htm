@@ -58,12 +58,10 @@
 				$iCurrentShopGroup = 0;
 			}
 
-			$Shop_Controller_Show->group($iCurrentShopGroup);
-
-			if ($Shop_Controller_Show->group == 0)
-			{
-				$Shop_Controller_Show->group(FALSE);
-			}
+			$Shop_Controller_Show
+				->group($iCurrentShopGroup)
+				->subgroups(Core_Page::instance()->object->subgroups)
+				->applyGroupCondition();
 
 			// Sorting
 			if (Core_Array::getGet('sorting'))
@@ -90,7 +88,7 @@
 				->filterShortcuts(TRUE)
 				->filterCounts(TRUE)
 				->modificationsList(TRUE)
-				->modificationsGroup(TRUE)				
+				->modificationsGroup(TRUE)
 				->addMinMaxPrice()
 				->addProducers()
 				->applyFilter()

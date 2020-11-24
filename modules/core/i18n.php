@@ -260,6 +260,6 @@ class Core_I18n
 			: array();
 
 		/*throw new Core_Exception("Language file '%className' with path '%path' does not exist.",
-			array('%className' => $className, '%path' => Core_Exception::cutRootPath($path)));*/
+			array('%className' => $className, '%path' => Core::cutRootPath($path)));*/
 	}
 }

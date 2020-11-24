@@ -25,7 +25,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 
 		parent::__construct();
 
-		$this->colors(array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky'));
+		$this->colors(array('btn-palegreen', 'btn-warning', 'btn-danger', 'btn-sky', 'btn-maroon'));
 	}
 
 	/**

@@ -153,4 +153,11 @@ return array(
 	'paid_cancel' => 'Знятий "Оплачено"',
 	'posted_cancel' => 'Знятий "Відправлений"',
 	'canceled_cancel' => 'Знятий "Скасовано"',
+	'warehouse_entries_header' => 'Проведення',
+	'position' => '№',
+	'nomenclature' => 'Номенклатура',
+	'quantity' => 'Кількість',
+	'warehouse' => 'Склад',
+	'date' => 'Дата',
+	'change_user' => 'Зміна відповідального: "%s"',
 );

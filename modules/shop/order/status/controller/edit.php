@@ -13,6 +13,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  */
 class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
+	/* Type of bot module */
+	const TYPE = 0;
+
 	/**
 	 * Set object
 	 * @param object $object object
@@ -45,7 +48,7 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->name('parent_id')
 			->value($this->_object->parent_id)
 			->caption(Core::_('Shop_Order_Status.parent_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-6'));
 
 		$oMainRow2->add($oSelect_Statuses);
 
@@ -78,10 +81,19 @@ class Shop_Order_Status_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
-			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
+			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow2)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
 			->add($oScript);
+
+		if ($this->_object->id && Core::moduleIsActive('bot'))
+		{
+			$oModule = Core_Entity::factory('Module')->getByPath('shop');
+
+			$this->addTabAfter(
+				Bot_Controller::getBotTab($oModule, $this->_object->id, self::TYPE), $oMainTab
+			);
+		}
 
 		$title = $this->_object->id
 			? Core::_('Shop_Order_Status.order_status_edit_form_title', $this->_object->name)

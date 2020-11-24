@@ -150,8 +150,6 @@ class Core_Http_Socket extends Core_Http
 	 */
 	public function getDecompressedBody()
 	{
-		$return = parent::getDecompressedBody();
-
 		$aHeaders = array_change_key_case($this->parseHeaders(), CASE_LOWER);
 
 		if (isset($aHeaders['transfer-encoding']))
@@ -164,21 +162,23 @@ class Core_Http_Socket extends Core_Http
 			{
 				// Transfer-Encoding: chunked
 				case 'chunked':
-					$res = '';
+					$rawBody = $this->_body;
+					$this->_body = '';
+
 					do
 					{
-						$nextCRLF = strpos($return, "\r\n");
-						$blockLen = hexdec(substr($return, 0, $nextCRLF));
-						$res .= substr($return, $nextCRLF + 2, $blockLen);
-						$return = substr($return, $nextCRLF + 4 + $blockLen); // <HEX-len><CRLF><content><CRLF>
+						$nextCRLF = strpos($rawBody, "\r\n");
+						$blockLen = hexdec(substr($rawBody, 0, $nextCRLF));
+						$this->_body .= substr($rawBody, $nextCRLF + 2, $blockLen);
+						$rawBody = substr($rawBody, $nextCRLF + 4 + $blockLen); // <HEX-len><CRLF><content><CRLF>
 					} while ($blockLen);
-					$return = $res;
+
 				break;
 				default:
 					throw new Core_Exception('Core_Http_Socket unsupported transfer encoding "%name"', array('%name' => $encoding));
 			}
 		}
 
-		return $return;
+		return parent::getDecompressedBody();
 	}
 }

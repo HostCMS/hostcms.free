@@ -15,30 +15,6 @@ Core_Auth::authorization($sModule = 'structure');
 $iAdmin_Form_Id = 82;
 $sAdminFormAction = '/admin/structure/index.php';
 
-if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('document_id'))
-{
-	$oDocument = Core_Entity::factory('Document', intval(Core_Array::getGet('document_id')));
-
-	$aCSS = array();
-
-	if ($oDocument->template_id)
-	{
-		$oTemplate = $oDocument->Template;
-
-		do{
-			$aCSS[] = "/templates/template{$oTemplate->id}/style.css?" . Core_Date::sql2timestamp($oTemplate->timestamp);
-		} while ($oTemplate = $oTemplate->getParent());
-	}
-
-	$aJson = array(
-		'template_id' => $oDocument->template_id,
-		'text' => $oDocument->text,
-		'css' => $aCSS
-	);
-
-	Core::showJSON($aJson);
-}
-
 $oAdmin_Form = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id);
 
 $oParentStructure = Core_Entity::factory('Structure', Core_Array::getGet('parent_id', 0));
@@ -55,6 +31,33 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title($sFormTitle)
 	->pageTitle($sFormTitle);
+
+if (!is_null(Core_Array::getGet('loadDocumentText')) && Core_Array::getGet('document_id'))
+{
+	$oDocument = Core_Entity::factory('Document', intval(Core_Array::getGet('document_id')));
+
+	$aCSS = array();
+
+	if ($oDocument->template_id)
+	{
+		$oTemplate = $oDocument->Template;
+
+		do{
+			$aCSS[] = "/templates/template{$oTemplate->id}/style.css?" . Core_Date::sql2timestamp($oTemplate->timestamp);
+		} while ($oTemplate = $oTemplate->getParent());
+	}
+
+	$aJson = array(
+		'id' => $oDocument->id,
+		'document_dir_id' => $oDocument->document_dir_id,
+		'template_id' => $oDocument->template_id,
+		'editHref' => $oAdmin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, $oDocument->id, 'document_dir_id=' . intval($oDocument->document_dir_id)),
+		'text' => $oDocument->text,
+		'css' => $aCSS
+	);
+
+	Core::showJSON($aJson);
+}
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
@@ -294,8 +297,7 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 
 	$lib_id = intval(Core_Array::getGet('lib_id'));
 
-	$oStructure_Controller_Libproperties
-		->libId($lib_id);
+	$oStructure_Controller_Libproperties->libId($lib_id);
 
 	$oAdmin_Form_Controller->addAction($oStructure_Controller_Libproperties);
 }
@@ -366,6 +368,11 @@ if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction()
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Structure')
 );
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Добавляем внешнее поле, доступное для сортировки и фильтрации
 $oAdmin_Form_Dataset->addExternalField('menu_name');

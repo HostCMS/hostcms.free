@@ -178,12 +178,30 @@ class Core_Str
 	}
 
 	/**
-	 * Translation from russian to english
+	 * Last detected language code by self::translate()
+	 * @var NULL|string
+	 */
+	static protected $_detectedLng = NULL;
+
+	/**
+	 * Get last detected language code by self::translate()
+	 * @return NULL|string
+	 */
+	static public function getLastDetectedLanguageCode()
+	{
+		return self::$_detectedLng;
+	}
+
+	/**
+	 * Translation from russian to $targetLanguageCode
 	 * @param string $string source string
+	 * @param string $targetLanguageCode target language
 	 * @return string
 	 */
-	static public function translate($string)
+	static public function translate($string, $targetLanguageCode = 'en')
 	{
+		self::$_detectedLng = NULL;
+
 		// Yandex Cloud Translate
 		if (defined('YANDEX_CLOUD_SECRET_KEY') && strlen(YANDEX_CLOUD_SECRET_KEY)
 			&& defined('YANDEX_CLOUD_FOLDER_ID') && strlen(YANDEX_CLOUD_FOLDER_ID))
@@ -194,7 +212,7 @@ class Core_Str
 					array(
 						'folder_id' => YANDEX_CLOUD_FOLDER_ID,
 						'texts' => $string,
-						'targetLanguageCode' => 'en'
+						'targetLanguageCode' => $targetLanguageCode
 					)
 				);
 
@@ -216,6 +234,9 @@ class Core_Str
 
 					if (is_object($oData) && isset($oData->translations[0]))
 					{
+						// Save detected language code
+						self::$_detectedLng = $oData->translations[0]->detectedLanguageCode;
+
 						return $oData->translations[0]->text;
 					}
 				}
@@ -223,14 +244,14 @@ class Core_Str
 			catch (Exception $e){}
 		}
 		// Yandex Translate available until Aug 15, 2020
-		elseif (defined('YANDEX_TRANSLATE_KEY') && strlen(YANDEX_TRANSLATE_KEY))
+		/*elseif (defined('YANDEX_TRANSLATE_KEY') && strlen(YANDEX_TRANSLATE_KEY))
 		{
 			try
 			{
 				$url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' .
 					'key=' . urlencode(YANDEX_TRANSLATE_KEY) .
 					'&text=' . urlencode($string) .
-					'&lang=en&format=plain';
+					'&lang=' . $targetLanguageCode . '&format=plain';
 
 				$Core_Http = Core_Http::instance()
 					->url($url)
@@ -250,12 +271,6 @@ class Core_Str
 				}
 			}
 			catch (Exception $e){}
-		}
-		/*else
-		{
-			Core_Log::instance()->clear()
-				->status(Core_Log::$MESSAGE)
-				->write('Can not translate. Constant YANDEX_TRANSLATE_KEY is undefined.');
 		}*/
 
 		return NULL;
@@ -1327,5 +1342,21 @@ class Core_Str
 		$phone = substr($phone, -10);
 
 		return $phone;
+	}
+
+	/**
+	 * Get string of rand chars
+	 * @return string
+	 */
+	static public function generateChars($number)
+	{
+		$return = '';
+
+		for ($i = 0; $i < $number; $i++)
+		{
+			$return .= chr(rand(65, 90));
+		}
+
+		return $return;
 	}
 }

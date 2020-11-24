@@ -103,48 +103,63 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							->where('notification_users.read', '=', 0);
 					}
 
-					$aNotifications = $oNotifications->findAll(FALSE);
+					$current = 0;
+					$steps = 4;
 
-					// Уведомления пользователя
-					foreach ($aNotifications as $oNotification)
-					{
-						$aNotification = array(
-							'id' => $oNotification->id,
-							'title' => strval($oNotification->title), // NULL => ''
-							'description' => strval($oNotification->description), // NULL => ''
-							'datetime' => Core_Date::sql2datetime($oNotification->datetime),
-							'read' => $oNotification->read
-						);
+					do {
+						$aNotifications = $oNotifications->findAll(FALSE);
 
-						$aNotificationDecorations = array();
-						if ($oNotification->module_id)
+						// Уведомления пользователя
+						foreach ($aNotifications as $oNotification)
 						{
-							$oCore_Module = $oNotification->Module->Core_Module;
+							$aNotification = array(
+								'id' => $oNotification->id,
+								'title' => strval($oNotification->title), // NULL => ''
+								'description' => strval($oNotification->description), // NULL => ''
+								'datetime' => Core_Date::sql2datetime($oNotification->datetime),
+								'read' => $oNotification->read
+							);
 
-							if (!is_null($oCore_Module))
+							$aNotificationDecorations = array();
+							if ($oNotification->module_id)
 							{
-								$aNotificationDecorations = $oCore_Module->getNotificationDesign($oNotification->type, $oNotification->entity_id);
+								$oCore_Module = $oNotification->Module->Core_Module;
 
-								$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
-								$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
-								$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
-								$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
-								$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');
-								$aNotification['site'] = Core_Array::get($aNotificationDecorations, 'site');
+								if (!is_null($oCore_Module))
+								{
+									$aNotificationDecorations = $oCore_Module->getNotificationDesign($oNotification->type, $oNotification->entity_id);
+
+									$aNotification['href'] = Core_Array::get($aNotificationDecorations, 'href');
+									$aNotification['onclick'] = "$(this).parents('li.open').click(); " . Core_Array::get($aNotificationDecorations, 'onclick');
+									$aNotification['icon'] = Core_Array::get($aNotificationDecorations, 'icon');
+									$aNotification['notification'] = Core_Array::get($aNotificationDecorations, 'notification');
+									$aNotification['extra'] = Core_Array::get($aNotificationDecorations, 'extra');
+									$aNotification['site'] = Core_Array::get($aNotificationDecorations, 'site');
+								}
+							}
+
+							// Новое сообщение
+							if ($oNotification->id > $iLastNotificationId)
+							{
+								$aJson['newNotifications'][] = $aNotification;
+							}
+							// Непрочитанное ранее загруженное сообщение
+							else/*if (!$oNotification->read)*/
+							{
+								$aJson['unreadNotifications'][] = $aNotification;
 							}
 						}
-
-						// Новое сообщение
-						if ($oNotification->id > $iLastNotificationId)
+						
+						if (count($aNotifications))
 						{
-							$aJson['newNotifications'][] = $aNotification;
+							break;
 						}
-						// Непрочитанное ранее загруженное сообщение
-						else/*if (!$oNotification->read)*/
-						{
-							$aJson['unreadNotifications'][] = $aNotification;
-						}
-					}
+						
+						sleep(2);
+						
+						$current++;
+						
+					} while ($current < $steps);
 
 					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;
 

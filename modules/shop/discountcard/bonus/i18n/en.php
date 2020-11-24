@@ -24,4 +24,7 @@ return array(
 	'delete_success' => 'Element deleted!',
 	'undelete_success' => 'Element restored!',
 	'markDeleted_success' => 'Bonus information deleted successfully!',
+	'writeoff' => 'Writeoff',
+	'writeoff_title' => 'Writeoff bonuses by card "%s"',
+	'available' => 'Available %s %s',
 );

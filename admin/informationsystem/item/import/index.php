@@ -304,7 +304,7 @@ $sOnClick = NULL;
 
 if ($oAdmin_Form_Controller->getAction() == 'show_form')
 {
-	if (!$oUserCurrent->read_only)
+	if (!$oUserCurrent->read_only && !$oUserCurrent->only_access_my_own)
 	{
 		$sFileName = isset($_FILES['csv_file']) && intval($_FILES['csv_file']['size']) > 0
 			? $_FILES['csv_file']['tmp_name']

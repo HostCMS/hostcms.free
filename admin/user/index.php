@@ -1171,6 +1171,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('User')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
 	array(

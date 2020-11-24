@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -70,18 +70,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
-		/*->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/script_code_red_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-		)*/
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Constant_Dir.menu_group'))
@@ -93,18 +81,6 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
-		/*->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Constant_Dir.menu_group_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/script_code_red_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-		)*/
 );
 
 // Добавляем все меню контроллеру
@@ -150,16 +126,28 @@ if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 	$oAdmin_Form_Controller->addAction($oControllerApply);
 }
 
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Constant_Dir'));
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Constant_Dir')
+);
+
 $oAdmin_Form_Dataset->addCondition(array('where' =>array('parent_id', '=', $oConstant_Dir->id)));
 $oAdmin_Form_Dataset->changeField('active', 'type', 1);
+
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
-
 // Источник данных 1
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Constant'));
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Constant')
+);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 $oAdmin_Form_Dataset->addCondition(array('where' =>array('constant_dir_id', '=', $oConstant_Dir->id)));
 $oAdmin_Form_Dataset->changeField('name', 'type', 1);
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 

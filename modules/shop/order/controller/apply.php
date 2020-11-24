@@ -47,6 +47,7 @@ class Shop_Order_Controller_Apply extends Admin_Form_Action_Controller_Type_Appl
 			$this->_object->save();
 
 			$this->_object->historyPushChangeStatus();
+			$this->_object->notifyBotsChangeStatus();
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($this->_object));

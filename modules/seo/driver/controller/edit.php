@@ -6,10 +6,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Seo Driver Backend Editing Controller.
  *
  * @package HostCMS
- * @subpackage Form
+ * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Driver_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {

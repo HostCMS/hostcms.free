@@ -9,17 +9,28 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * <code>
  * // Sample 1
- * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName')
+ * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('table_name')
  * 	->columns('column1', 'column2', 'column3')
+ *	// Option 1
  * 	->values('value1', 'value2', 11)
- * 	->values('value3', 'value4', 17)
- * 	->values('value5', 'value6', 19)
+ *	// Option 2
+ * 	->values(array('value3', 'value4', 17))
  *	->execute();
  * </code>
  *
  * <code>
- * // Sample 2 
- * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('tableName', array('column1' => 'value1', 'column2' => 'value2'))
+ * // Sample 2
+ * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('table_name', array('column1' => 'value1', 'column2' => 'value2'))
+ *	->execute();
+ * </code>
+ *
+ * <code>
+ * // Sample 3
+ * $oCore_QueryBuilder_Insert = Core_QueryBuilder::insert('table_name')
+ * 	->columns('column1', 'column2', 'column3')
+ * 	->select(
+ *  	Core_QueryBuilder::select('*')->from('source_table')
+ *  )
  *	->execute();
  * </code>
  *
@@ -27,7 +38,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Insert extends Core_QueryBuilder_Replace
 {

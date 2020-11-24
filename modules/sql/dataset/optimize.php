@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Sql
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Dataset_Optimize extends Admin_Form_Dataset
 {
@@ -58,7 +58,7 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 
 		foreach ($aTables as $key => $sTable)
 		{
-			$aTables[$key] = $this->_database->quoteColumnName($sTable);
+			$aTables[$key] = $this->_database->quoteTableName($sTable);
 		}
 
 		try
@@ -71,32 +71,19 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 			Core_Message::show($e->getMessage(), 'error');
 		}
 
-		$return = $this->_objects = $this->_database->asObject(NULL)->result();
+		$this->_objects = $this->_database->asObject(NULL)->result();
 
-		foreach ($return as $row)
+		foreach ($aTables as $sTable)
 		{
-			$sTableName = $this->_database->quoteColumnName($row->Table);
-
 			// Сбрасывать для этих таблиц AUTO_INCREMENT нельзя
-			if (strpos($row->Table, 'admin_form') === FALSE
-			&& strpos($row->Table, 'admin_language') === FALSE
-			&& strpos($row->Table, 'admin_word') === FALSE)
+			if (strpos($sTable, 'admin_form') === FALSE
+				&& strpos($sTable, 'admin_language') === FALSE
+				&& strpos($sTable, 'admin_word') === FALSE)
 			{
 				try
 				{
-					// Get table engine
-					$aExplode = explode('.', $row->Table);
-					$aTableStatus = $this->_database->setQueryType(0)
-						->asAssoc()
-						->query("SHOW TABLE STATUS LIKE " . $this->_database->quote(end($aExplode)))
-						->current();
-
-					// Just for MyISAM
-					//if (strtolower(Core_Array::get($aTableStatus, 'Engine')) == 'myisam')
-					//{
-						$this->_database->setQueryType(5)
-							->query("ALTER TABLE {$sTableName} AUTO_INCREMENT = 1");
-					//}
+					$this->_database->setQueryType(5)
+						->query("ALTER TABLE {$sTable} AUTO_INCREMENT = 1");
 				}
 				catch (Exception $e)
 				{
@@ -105,7 +92,7 @@ class Sql_Dataset_Optimize extends Admin_Form_Dataset
 			}
 		}
 
-		return $return;
+		return $this->_objects;
 	}
 
 	/**

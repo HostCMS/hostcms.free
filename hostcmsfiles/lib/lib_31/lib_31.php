@@ -65,7 +65,7 @@ if (Core_Array::getPost('apply') && $amount > 0)
 	$oShop_Order_Item->shop_warehouse_id = 0;
 	$oShop_Order_Item->price = $amount;
 	$oShop_Order_Item->type = 2;
-	$oShop_Order_Item->name = Core::_('Shop_Order_Item.replenishment_account', $oSiteuser->login, $oShop->name);
+	$oShop_Order_Item->name = Core::_('Shop_Order_Item.replenishment_account', $oSiteuser->login, $oShop->name, FALSE);
 	$oShop_Order->add($oShop_Order_Item);
 
 	$oShop_Payment_System_Handler = Shop_Payment_System_Handler::factory($oShop_Order->Shop_Payment_System);

@@ -794,6 +794,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainRow6->add($oRecalcDeliveryPriceLink);
 
+		$oAdditionalTab->move($this->getField('user_id'), $oMainRow7);
+
 		// Печать
 		$printButton = '
 			<div class="btn-group">
@@ -823,7 +825,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop = Core_Entity::factory('Shop', Core_Array::getGet('shop_id', 0));
 			$oShop_Group = Core_Entity::factory('Shop_Group', Core_Array::getGet('shop_group_id', 0));
 
-			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 0, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id);
+			$printButton .= Printlayout_Controller::getPrintButtonHtml($this->_Admin_Form_Controller, $oModule->id, 0, 'hostcms[checked][0][' . $this->_object->id . ']=1&shop_id=' . $oShop->id . '&shop_group_id=' . $oShop_Group->id, TRUE);
 		}
 
 		$printButton .= '
@@ -969,68 +971,74 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oDocumentsTabRow4->add($oAdmin_Form_Entity_Div_Print_Form_Buttons);
 
-			$oDocumentsWarehouseEntriesBlock
-				->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
-					->class('header bordered-palegreen')
-					->value(Core::_('Shop_Order.warehouse_entries_header'))
-				)
-				->add($oDocumentsWarehouseEntriesRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-
-			$itemTable = '
-				<div class="table-scrollable">
-					<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
-						<thead>
-							<tr>
-								<th scope="col">' . Core::_('Shop_Order.position') . '</th>
-								<th scope="col">' . Core::_('Shop_Order.nomenclature') . '</th>
-								<th scope="col">' . Core::_('Shop_Order.quantity') . '</th>
-								<th scope="col">' . Core::_('Shop_Order.warehouse') . '</th>
-								<th scope="col">' . Core::_('Shop_Order.date') . '</th>
-							</tr>
-						</thead>
-						<tbody>
-			';
-
-			$position = 0;
-
-			$oShop = $this->_object->Shop;
-			$oSiteAlias = $oShop->Site->getCurrentAlias();
-			$sShopUrl = $oSiteAlias
-				? ($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath()
-				: NULL;
-
+			// Проводки
 			$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->_object->id, 5);
 
-			foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+			if (count($aShop_Warehouse_Entries))
 			{
-				$externalLink = $sShopUrl
-					? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Warehouse_Entry->Shop_Item->getPath()) .  '"><i class="fa fa-external-link"></i></a>'
-					: '';
+				$itemTable = '
+					<div class="table-scrollable">
+						<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+							<thead>
+								<tr>
+									<th scope="col">' . Core::_('Shop_Order.position') . '</th>
+									<th scope="col">' . Core::_('Shop_Order.nomenclature') . '</th>
+									<th scope="col">' . Core::_('Shop_Order.quantity') . '</th>
+									<th scope="col">' . Core::_('Shop_Order.warehouse') . '</th>
+									<th scope="col">' . Core::_('Shop_Order.date') . '</th>
+								</tr>
+							</thead>
+							<tbody>
+				';
+
+				$position = 0;
+
+				$oShop = $this->_object->Shop;
+				$oSiteAlias = $oShop->Site->getCurrentAlias();
+				$sShopUrl = $oSiteAlias
+					? ($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath()
+					: NULL;
+
+
+
+				foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
+				{
+					$externalLink = $sShopUrl
+						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Warehouse_Entry->Shop_Item->getPath()) .  '"><i class="fa fa-external-link"></i></a>'
+						: '';
+
+					$itemTable .= '
+						<tr>
+							<td>' . ++$position . '</td>
+							<td>' . htmlspecialchars($oShop_Warehouse_Entry->Shop_Item->name) . $externalLink . '</td>
+							<td> ' . ($oShop_Warehouse_Entry->value * -1) . '</td>
+							<td> ' . htmlspecialchars($oShop_Warehouse_Entry->Shop_Warehouse->name) . '</td>
+							<td> ' . Core_Date::sql2datetime($oShop_Warehouse_Entry->datetime) . '</td>
+						</tr>
+					';
+				}
 
 				$itemTable .= '
-					<tr>
-						<td>' . ++$position . '</td>
-						<td>' . htmlspecialchars($oShop_Warehouse_Entry->Shop_Item->name) . $externalLink . '</td>
-						<td> ' . ($oShop_Warehouse_Entry->value * -1) . '</td>
-						<td> ' . htmlspecialchars($oShop_Warehouse_Entry->Shop_Warehouse->name) . '</td>
-						<td> ' . Core_Date::sql2datetime($oShop_Warehouse_Entry->datetime) . '</td>
-					</tr>
+							</tbody>
+						</table>
+					</div>
 				';
-			}
 
-			$itemTable .= '
-						</tbody>
-					</table>
-				</div>
-			';
-
-			$oDocumentsWarehouseEntriesRow1
-				->add(Admin_Form_Entity::factory('Div')
-					->class('form-group col-xs-12')
-					->add(
-						Admin_Form_Entity::factory('Code')->html($itemTable)
+				$oDocumentsWarehouseEntriesBlock
+					->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
+						->class('header bordered-palegreen')
+						->value(Core::_('Shop_Order.warehouse_entries_header'))
 					)
-			);
+					->add($oDocumentsWarehouseEntriesRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oDocumentsWarehouseEntriesRow1
+					->add(Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-12')
+						->add(
+							Admin_Form_Entity::factory('Code')->html($itemTable)
+						)
+				);
+			}
 		}
 
 		$oAdditionalTab->delete(
@@ -1071,22 +1079,51 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			ob_start();
 			?>
 				<div class="col-xs-12">
-					<table class="table">
+					<table class="table table-hover deal-history-table">
 						<tbody>
 							<?php
+							$prevDate = NULL;
+							$bClass = TRUE;
+
 							foreach ($aShop_Order_Histories as $oShop_Order_History)
 							{
-								?><tr>
-									<td><?php echo Core_Date::sql2datetime($oShop_Order_History->datetime)?></td>
+								$iDatetime = Core_Date::sql2timestamp($oShop_Order_History->datetime);
+								$sDate = Core_Date::timestamp2date($iDatetime);
+
+								if ($prevDate != $sDate)
+								{
+									$bClass = FALSE;
+
+									// Печатаем полоску
+									?>
+									<tr class="border-top-none">
+										<td colspan="5">
+											<div class="hr-container">
+												<hr class="hr-text" data-content="<?php echo Core_Date::timestamp2string(Core_Date::date2timestamp($sDate), FALSE)?>" />
+											</div>
+										</td>
+									</tr>
+									<?php
+									$prevDate = $sDate;
+								}
+
+								$class = !$bClass
+									? 'class="border-top-none"'
+									: '';
+
+								?><tr <?php echo $class?>>
+									<td class="darkgray"><?php echo date("H:i", $iDatetime)?></td>
+									<td class="text-align-left"><span style="color: <?php echo htmlspecialchars($oShop_Order_History->color)?>"><?php echo htmlspecialchars($oShop_Order_History->text)?></span></td>
 									<td><?php if ($oShop_Order_History->shop_order_status_id)
 									{
 										echo '<i class="fa fa-circle margin-right-5" style="color: ' . ($oShop_Order_History->Shop_Order_Status->color ? htmlspecialchars($oShop_Order_History->Shop_Order_Status->color) : '#eee') . '"></i> '
 										. htmlspecialchars($oShop_Order_History->Shop_Order_Status->name);
 									}?></td>
-									<td><?php echo htmlspecialchars($oShop_Order_History->text)?></td>
 									<td><?php echo $oShop_Order_History->user_id ? $oShop_Order_History->User->showAvatarWithName() : ''?></td>
 									<td><?php echo $oShop_Order_History->ip?></td>
 								</tr><?php
+
+								$bClass = TRUE;
 							}
 							?>
 						</tbody>
@@ -1282,20 +1319,21 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop_Order_Item->save();
 		}
 
+		// Reserved
+		$this->_object->Shop->reserve && !$this->_object->paid && !$this->_object->canceled
+			&& $this->_object->reserveItems();
+
 		// В случае ручного изменения в форме, основное списание/начисление производится в Shop_Order_Model::_paidTransaction()
 		Core_Array::get($this->_formValues, 'posted')
 			? $this->_object->post()
 			: $this->_object->unpost();
 
 		// История заказа
-		$previousObject->shop_order_status_id != $this->_object->shop_order_status_id
-			&& $this->_object->historyPushChangeStatus();
-
-		/*$previousObject->paid != $this->_object->paid
-			&& $this->_object->historyPushPaid();
-
-		$previousObject->posted != Core_Array::get($this->_formValues, 'posted')
-			&& $this->_object->historyPushPosted();*/
+		if ($previousObject->shop_order_status_id != $this->_object->shop_order_status_id)
+		{
+			$this->_object->historyPushChangeStatus();
+			$this->_object->notifyBotsChangeStatus();
+		}
 
 		$previousObject->canceled != $this->_object->canceled
 			&& $this->_object->historyPushCanceled();

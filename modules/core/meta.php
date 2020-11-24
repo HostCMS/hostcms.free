@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Meta
 {
@@ -105,6 +105,7 @@ class Core_Meta
 		// object
 		if (isset($this->_objects[$matches[2]]))
 		{
+			//if (isset($this->_objects['Items'])) print_r($this->_objects['Items']);
 			$object = $this->_objects[$matches[2]];
 
 			if (isset($matches[3]))
@@ -118,38 +119,20 @@ class Core_Meta
 				{
 					if (is_callable(array($object, $fieldName)))
 					{
-						$attr = array();
-
-						if (isset($matches[4]) && $matches[4] != '')
-						{
-							preg_match_all('/\s*(?:(?:"([^"]*)")|(?:\'([^\']*)\')|([^"\'\s]+))/', $matches[4], $matchesAttr);
-
-							if (isset($matchesAttr[0]))
-							{
-								foreach ($matchesAttr[0] as $key => $attrName)
-								{
-									$value = $matchesAttr[1][$key] != ''
-										? $matchesAttr[1][$key]
-										: (
-											$matchesAttr[2][$key] != ''
-												? $matchesAttr[2][$key]
-												: $matchesAttr[3][$key]
-										);
-
-									($value === 'true' || $value === 'TRUE') && $value = TRUE;
-									($value === 'false' || $value === 'FALSE') && $value = FALSE;
-									($value === 'null' || $value === 'NULL') && $value = NULL;
-
-									$attr[] = $value;
-								}
-							}
-						}
+						$attr = isset($matches[4]) && $matches[4] != ''
+							? $this->_parseArgs($matches[4])
+							: array();
 
 						$return = call_user_func_array(array($object, $fieldName), $attr);
 					}
 					elseif (isset($object->$fieldName))
 					{
 						$return = $object->$fieldName;
+					}
+					// Items.0.item.name
+					elseif (is_array($object) && is_numeric($fieldName) && isset($object[$fieldName]))
+					{
+						$return = $object[$fieldName];
 					}
 					else
 					{
@@ -161,9 +144,11 @@ class Core_Meta
 					$object = $return;
 				}
 
+				$return = strip_tags($return);
+
 				return is_null($functionName)
-					? strip_tags($return)
-					: call_user_func($functionName, strip_tags($return));
+					? $return
+					: call_user_func($functionName, $return);
 					//: $functionName($return);
 			}
 			else
@@ -173,15 +158,25 @@ class Core_Meta
 		}
 		elseif (isset($this->_functions[$matches[2]]))
 		{
-			return call_user_func($this->_functions[$matches[2]]);
+			$attr = isset($matches[4]) && $matches[4] != ''
+				? $this->_parseArgs($matches[4])
+				: array();
+
+			return call_user_func_array($this->_functions[$matches[2]], $attr);
 		}
 		else
 		{
 			preg_match_all('/\s*([a-zA-Z]*)\s*\(([^\)]*)\)/', $matches[2], $matchesAttr);
 
-			if (isset($matchesAttr[1][0]) && is_callable($matchesAttr[1][0]))
+			if (isset($matchesAttr[1][0]))
 			{
-				return call_user_func_array($matchesAttr[1][0], strlen($matchesAttr[2][0]) ? explode(',', $matchesAttr[2][0]) : NULL);
+				$functionName = isset($this->_functions[$matchesAttr[1][0]])
+					? $this->_functions[$matchesAttr[1][0]]
+					: $matchesAttr[1][0];
+
+				return is_callable($functionName)
+					? call_user_func_array($functionName, strlen($matchesAttr[2][0]) ? explode(',', $matchesAttr[2][0]) : NULL)
+					: $matches[0];
 			}
 			else
 			{
@@ -189,6 +184,34 @@ class Core_Meta
 				return $matches[0];
 			}
 		}
+	}
+
+	protected function _parseArgs($str)
+	{
+		preg_match_all('/\s*(?:(?:"([^"]*)")|(?:\'([^\']*)\')|([^"\'\s]+))/', $str, $matchesAttr);
+
+		$attr = array();
+		if (isset($matchesAttr[0]))
+		{
+			foreach ($matchesAttr[0] as $key => $attrName)
+			{
+				$value = $matchesAttr[1][$key] != ''
+					? $matchesAttr[1][$key]
+					: (
+						$matchesAttr[2][$key] != ''
+							? $matchesAttr[2][$key]
+							: $matchesAttr[3][$key]
+					);
+
+				($value === 'true' || $value === 'TRUE') && $value = TRUE;
+				($value === 'false' || $value === 'FALSE') && $value = FALSE;
+				($value === 'null' || $value === 'NULL') && $value = NULL;
+
+				$attr[] = $value;
+			}
+		}
+
+		return $attr;
 	}
 
 	/**

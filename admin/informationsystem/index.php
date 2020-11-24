@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -31,37 +31,27 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
-		Admin_Form_Entity::factory('Menu')
+	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem.show_comments_link3'))
-		->icon('fa fa-newspaper-o')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Informationsystem.show_information_systems_link'))
-				->img('/admin/images/folder_page_add.gif')
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
+		->img('/admin/images/folder_page_add.gif')
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
 )
 ->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Informationsystem_Dir.dir_add'))
-		->icon('fa fa-folder-open')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Admin_Form.add'))
-				->img('/admin/images/folder_page_add.gif')
-				->icon('fa fa-plus')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->img('/admin/images/folder_page_add.gif')
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
 

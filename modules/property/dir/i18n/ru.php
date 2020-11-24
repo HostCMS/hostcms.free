@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Разделы свойств',
@@ -30,4 +30,5 @@ return array(
 	'allowAccess_success' => 'Доступ разрешен.',
 	'denyAccess_success' => 'Доступ запрещен.',
 	'move_success' => 'Группы свойств перенесены',
+	'root' => 'Корень',
 );

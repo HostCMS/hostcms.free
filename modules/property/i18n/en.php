@@ -85,4 +85,5 @@ return array(
 	'watermark_default_use_small_image' => 'Use watermark by default for small images',
 	'move_success' => 'Additional property moved successfully.',
 	'obligatory' => 'Obligatory',
+	'property_not_found' => 'Property not found',	
 );

@@ -1324,14 +1324,9 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function imgBackend()
 	{
-		if ($this->shortcut_id)
-		{
-			return '<i class="fa fa-link"></i>';
-		}
-		else
-		{
-			return '<i class="fa fa-folder-open-o"></i>';
-		}
+		return $this->shortcut_id
+			? '<i class="fa fa-link"></i>'
+			: '<i class="fa fa-folder-open-o"></i>';
 	}
 
 	/**
@@ -1341,22 +1336,27 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function shortcut($group_id = NULL)
 	{
-		$oInformationsystem_GroupShortcut = Core_Entity::factory('Informationsystem_Group');
-
 		$object = $this->shortcut_id
 			? $this->Shortcut
 			: $this;
 
+		$oInformationsystem_GroupShortcut = Core_Entity::factory('Informationsystem_Group');
 		$oInformationsystem_GroupShortcut->informationsystem_id = $object->informationsystem_id;
-		$oInformationsystem_GroupShortcut->shortcut_id = $object->id;
-		$oInformationsystem_GroupShortcut->name = '';
-		$oInformationsystem_GroupShortcut->path = '';
-		$oInformationsystem_GroupShortcut->indexing = 0;
-
 		$oInformationsystem_GroupShortcut->parent_id =
 			is_null($group_id)
 			? $object->parent_id
 			: $group_id;
+		$oInformationsystem_GroupShortcut->shortcut_id = $object->id;
+
+		// Ярлык ссылается на группу, в которую помещен
+		if ($oInformationsystem_GroupShortcut->parent_id == $oInformationsystem_GroupShortcut->shortcut_id)
+		{
+			return NULL;
+		}
+
+		$oInformationsystem_GroupShortcut->name = '';
+		$oInformationsystem_GroupShortcut->path = '';
+		$oInformationsystem_GroupShortcut->indexing = 0;
 
 		return $oInformationsystem_GroupShortcut->save()->clearCache();
 	}

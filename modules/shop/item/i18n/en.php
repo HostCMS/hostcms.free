@@ -348,4 +348,12 @@ return array(
 	'warehouse_measure' => 'Measure',
 	'shop_price_setting_modification_create' => 'Set price for modification of item "%s"',
 	'create_modification_delimiter' => 'Delimiter',
+	'retail_price' => 'Retail',
+	'items_catalog_add_form_tab_link' => 'Tabs',
+	'shop_tab_header' => 'Tabs',
+
+	'certificate_discount' => 'Discount',
+	'certificate_item_header' => 'Certificate',
+	'item_type_selection_group_buttons_name_certificate' => "Certificate",
+	'create_modification_use_property_name' => 'Use property name',	
 );

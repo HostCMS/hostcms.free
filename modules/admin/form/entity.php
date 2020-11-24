@@ -220,7 +220,7 @@ abstract class Admin_Form_Entity extends Core_Html_Entity
 			}
 			elseif (isset($this->format['reg']['value']))
 			{
-				$aAttr[] = "data-reg=\"" . htmlspecialchars($this->format['reg']['value']) . "\"";
+				$aAttr[] = "data-reg=\"" . htmlspecialchars(trim($this->format['reg']['value'], '/')) . "\"";
 
 				// Было указано сообщение для формата
 				if (isset($this->format['reg']['message']))

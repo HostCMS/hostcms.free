@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Observer_Robokassa
 {
@@ -27,7 +27,7 @@ class Shop_Observer_Robokassa
 				->timeout(5)
 				->execute();
 
-			$aResponce = json_decode($Core_Http->getBody(), TRUE);
+			$aResponce = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 			if (Core_Array::get($aResponce, 'errorCode') > 0)
 			{

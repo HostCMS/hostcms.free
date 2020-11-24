@@ -38,7 +38,7 @@ class Seo_Controller_Google extends Seo_Controller
 					->data('refresh_token', $oGoogleToken->refresh_token)
 					->execute();
 
-				$oNewGoogleToken = json_decode($Core_Http->getBody());
+				$oNewGoogleToken = json_decode($Core_Http->getDecompressedBody());
 
 				$oNewGoogleToken->refresh_token = $oGoogleToken->refresh_token;
 				$oNewGoogleToken->time = time();
@@ -133,7 +133,7 @@ class Seo_Controller_Google extends Seo_Controller
 			->additionalHeader("Authorization", "Bearer {$this->_token}")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error']))
 		{
@@ -220,7 +220,7 @@ class Seo_Controller_Google extends Seo_Controller
 			->rawData($sData)
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error']))
 		{
@@ -252,7 +252,7 @@ class Seo_Controller_Google extends Seo_Controller
 				->rawData($sNewData)
 				->execute();
 
-			$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+			$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 			if (isset($aAnswer['error']))
 			{
@@ -299,7 +299,7 @@ class Seo_Controller_Google extends Seo_Controller
 			->rawData($sData)
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error']))
 		{

@@ -144,6 +144,11 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Ipaddress')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset

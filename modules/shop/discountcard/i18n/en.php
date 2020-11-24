@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discount cards',
@@ -33,4 +33,6 @@ return array(
 	'importDiscountcards_success' => 'Discount cards inported successfully!',
 	'format' => '<strong>Format:</strong> number;login;phone;shop_discountcard_level_id;amount',
 	'backendWarning' => 'To use discount cards you need the "Clients" module, which is part of the "Business" and "Corporation" editions.',
+	'backendWrongWriteoffWarning' => 'Not enough bonuses to write off!',
+	'backendWriteoffSuccess' => 'Bonuses debited successfull!',
 );

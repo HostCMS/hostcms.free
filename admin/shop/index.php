@@ -234,34 +234,24 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop.header_admin_forms'))
-		->icon('fa fa-shopping-cart')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop.menu_shop_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/shop_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
+		->icon('fa fa-plus')
+		->img('/admin/images/shop_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Dir.shop_dir_top_menu_title'))
-		->icon('fa fa-folder-open')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Dir.shop_dir_sub_menu_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/folder_page_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->icon('fa fa-plus')
+		->img('/admin/images/folder_page_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')

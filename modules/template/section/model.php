@@ -24,6 +24,7 @@ class Template_Section_Model extends Core_Entity{
 	 */
 	protected $_belongsTo = array(
 		'template' => array(),
+		'user' => array(),
 	);
 
 	/**
@@ -50,6 +51,21 @@ class Template_Section_Model extends Core_Entity{
 	protected $_sorting = array(
 		'template_sections.sorting' => 'ASC'
 	);
+
+	/**
+	 * Constructor.
+	 * @param int $id entity ID
+	 */
+	public function __construct($id = NULL)
+	{
+		parent::__construct($id);
+
+		if (is_null($id) && !$this->loaded())
+		{
+			$oUser = Core_Auth::getCurrentUser();
+			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+		}
+	}
 
 	/**
 	 * Delete object from database

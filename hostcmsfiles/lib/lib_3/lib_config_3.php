@@ -19,6 +19,8 @@ if (Core::moduleIsActive('search'))
 			->where('shops.site_id', '=', CURRENT_SITE)
 			->where('shop_items.active', '=', 1)
 			->where('shop_items.indexing', '=', 1)
+			//->where('shop_items.modification_id', '=', 0)
+			->where('shop_items.shortcut_id', '=', 0)
 			->where('shop_items.name', 'LIKE', '%' . $sQuery . '%')
 			->limit(10)
 			->clearOrderBy();

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -141,7 +141,10 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Источник данных 0
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shortcode_Dir'));
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shortcode_Dir')
+);
+
 $oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 $oAdmin_Form_Dataset
 	->addCondition(array('where' => array('parent_id', '=', $oShortcode_Dir->id)));
@@ -149,7 +152,14 @@ $oAdmin_Form_Dataset
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Источник данных 1
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shortcode'));
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
+	Core_Entity::factory('Shortcode')
+);
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Ограничение источника 1 по родительской группе
 $oAdmin_Form_Dataset

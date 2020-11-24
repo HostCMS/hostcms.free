@@ -6,7 +6,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные элементы',
@@ -15,7 +15,6 @@ return array(
 	'show_information_groups_link2' => 'Добавить',
 	'show_information_groups_link3' => 'Дополнительные свойства',
 	'show_all_comments_top_menu' => 'Комментарии',
-	'show_comments_link_show_all_comments' => 'Все комментарии',
 
 	'information_items_add_form_title' => 'Добавление информационного элемента',
 	'information_items_edit_form_title' => 'Редактирование информационного элемента "%s"',
@@ -141,4 +140,5 @@ return array(
 	'msg_download_complete' => "Импорт завершен!",
 	'information_items_copy_form_title' => 'Копировать элемент',
 	'add_value' => 'Добавить отсутствующие значения свойства по умолчанию у элементов',
+	'file_does_not_specified' => 'Файл не указан',
 );

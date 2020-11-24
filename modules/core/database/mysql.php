@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_DataBase_Mysql extends Core_DataBase
 {
@@ -259,6 +259,13 @@ class Core_DataBase_Mysql extends Core_DataBase
 				$type = 'int';
 				$min = 0;
 				$max = 16777215;
+				break;
+
+			case 'int':
+			case 'integer':
+				$type = 'int';
+				$min = -2147483648;
+				$max = 2147483647;
 				break;
 
 			case 'int unsigned':

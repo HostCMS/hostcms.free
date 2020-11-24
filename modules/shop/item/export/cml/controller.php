@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 {
@@ -127,6 +127,12 @@ class Shop_Item_Export_Cml_Controller extends Core_Servant_Properties
 	 */
 	public function exportImport()
 	{
+		$oUser = Core_Auth::getCurrentUser();
+		if ($oUser->only_access_my_own)
+		{
+			return FALSE;
+		}
+
 		if ($this->group === NULL)
 		{
 			throw new Core_Exception('Parent group does not specified!');

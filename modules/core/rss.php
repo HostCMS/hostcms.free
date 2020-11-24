@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Rss
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Rss
 {
@@ -188,7 +188,8 @@ class Core_Rss
 		// $xml = $oRss->asXML();
 		$dom = dom_import_simplexml($oRss)->ownerDocument;
 		$dom->formatOutput = TRUE;
-		$xml = $dom->saveXML();
+		//$xml = $dom->saveXML();
+		$xml = $dom->saveXML(NULL, LIBXML_NOEMPTYTAG);
 
 		return $xml;
 	}

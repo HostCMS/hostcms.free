@@ -251,19 +251,11 @@
                 }
 
                 publish(response);
-                //var PlaySound = 0;
-                //PlaySound = 1;
                 if (isIE8orlower() == 0 && options.playSound) {
                     var audioElement = document.createElement("audio");
-                    audioElement.setAttribute("src", "/modules/skin/bootstrap/sound/alert.mp3");
-                    //$.get();
-                    audioElement.addEventListener("load", function () {
-                        audioElement.play()
-                    }, true);
-					audioElement.muted = true; // add HostCMS
-                    audioElement.pause();
-                    audioElement.play();
-					audioElement.muted = false; // add HostCMS
+					audioElement.setAttribute("src", "/modules/skin/bootstrap/sound/alert.mp3");
+
+					var promise = audioElement.play();
                 }
 
                 if (options.debug && console) {

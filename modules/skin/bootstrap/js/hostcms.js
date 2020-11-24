@@ -332,44 +332,8 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 
 /*#region handle Settings*/
 function InitiateSettings() {
-	if (readCookie("navbar-fixed-top") !=null) {
-		if (readCookie("navbar-fixed-top") == "true") {
-			$('#checkbox_fixednavbar').prop('checked', true);
-			$('.navbar').addClass('navbar-fixed-top');
-		}
-	}
-
-	if (readCookie("sidebar-fixed") !=null) {
-		if (readCookie("sidebar-fixed") == "true") {
-			$('#checkbox_fixedsidebar').prop('checked', true);
-			$('.page-sidebar').addClass('sidebar-fixed');
-
-			//Slim Scrolling for Sidebar Menu in fix state
-			if (!$(".page-sidebar").hasClass("menu-compact")) {
-				var position = (readCookie("rtl-support") || location.pathname == "/index-rtl-fa.html" || location.pathname == "/index-rtl-ar.html") ? 'right' : 'left';
-				$('.sidebar-menu').slimscroll({
-					height: 'auto',
-					position: position,
-					size: '3px',
-					color: themeprimary
-				});
-			}
-		}
-
-	}
-	if (readCookie("breadcrumbs-fixed") != null) {
-		if (readCookie("breadcrumbs-fixed") == "true") {
-			$('#checkbox_fixedbreadcrumbs').prop('checked', true);
-			$('.page-breadcrumbs').addClass('breadcrumbs-fixed');
-		}
-	}
-	if (readCookie("page-header-fixed") != null) {
-		if (readCookie("page-header-fixed") == "true") {
-			$('#checkbox_fixedheader').prop('checked', true);
-			$('.page-header').addClass('page-header-fixed');
-		}
-	}
-
+	// HostCMS
+	readCookiesForInitiateSettings();
 
 	$('#checkbox_fixednavbar')
 		.change(function () {

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 Core_Auth::authorization($sModule = 'shop');
@@ -22,24 +22,23 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Shop_Order.show_list_of_properties_title', $oShop->name))
 	->pageTitle(Core::_('Shop_Order.show_list_of_properties_title', $oShop->name));
-$oAdmin_Form_Controller->addEntity(Admin_Form_Entity::factory('Menus')->add(Admin_Form_Entity::factory('Menu')
-	->name(Core::_('Property.menu'))
-	->icon('fa fa-gears')
-	->add(Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Admin_Form.add'))
-		->icon('fa fa-plus')
-		->img('/admin/images/page_gear_add.gif')
-		->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0))
-		->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0))))
-	->add(Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Property_Dir.menu'))
-		->icon('fa fa-folder-o')
-		->add(Admin_Form_Entity::factory('Menu')
-			->name(Core::_('Admin_Form.add'))
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Menus')->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Property.menu'))
+			->icon('fa fa-plus')
+			->img('/admin/images/page_gear_add.gif')
+			->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0))
+			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0))
+	)->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Property_Dir.menu'))
 			->icon('fa fa-plus')
 			->img('/admin/images/folder_gear_add.gif')
 			->href($oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
-			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)))));
+			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0))
+		)
+);
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
@@ -59,9 +58,9 @@ if ($oShop->shop_dir_id)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/index.php', NULL, NULL, "shop_dir_id={$oShopDir->id}"));
 	} while ($oShopDir = $oShopDir->getParent());
-	
+
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
-	
+
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
 		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
@@ -72,7 +71,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->name($oShop->name)
 	->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0"))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/item/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id=0")));
-	
+
 if ($oShopGroup->id)
 {
 	$oShopGroupTmp = $oShopGroup;
@@ -99,7 +98,7 @@ $oAdmin_Form_Entity_Breadcrumbs->add(
 );
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
-		->name(Core::_('Shop_Order.property_title'))
+		->name(Core::_('Shop_Order.property_menu'))
 		->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 		->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}"))
 );
@@ -115,9 +114,9 @@ if ($oPropertyDir->id)
 			->href($oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"))
 			->onclick($oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/order/property/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={$oShopGroupTmp->id}"));
 	} while ($oShopGroupTmp = $oShopGroupTmp->getParent());
-	
+
 	$aBreadcrumbs = array_reverse($aBreadcrumbs);
-	
+
 	foreach ($aBreadcrumbs as $oAdmin_Form_Entity_Breadcrumb)
 	{
 		$oAdmin_Form_Entity_Breadcrumbs->add($oAdmin_Form_Entity_Breadcrumb);
@@ -180,16 +179,22 @@ $oAdmin_Form_Dataset
 
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Property'));
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 $oAdmin_Form_Dataset
 	->addCondition(array('select' => array('properties.*')))
 	->addCondition(array('join' => array('shop_order_properties', 'shop_order_properties.property_id', '=', 'properties.id')))
 	->addCondition(array('where' =>array('shop_order_properties.shop_id', '=', $oShop->id)))
 	->addCondition(array('where' =>array('property_dir_id', '=', $oPropertyDir->id)));
 
-$oAdmin_Form_Dataset	
+$oAdmin_Form_Dataset
 	->changeField('multiple', 'link', "/admin/shop/order/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}")
-	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");	
-	
+	->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/order/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");
+
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 $oAdmin_Form_Controller->execute();

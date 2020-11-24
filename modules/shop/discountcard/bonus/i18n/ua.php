@@ -24,4 +24,7 @@ return array(
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
 	'markDeleted_success' => 'Дані про бонус успішно видалені!',
+	'writeoff' => 'Списати',
+	'writeoff_title' => 'Списання бонусів по карті "%s"',
+	'available' => 'Доступно %s %s',
 );

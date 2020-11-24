@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -76,12 +76,13 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->options(
 				array(' … ') + $Lib_Controller_Edit->fillLibDir(0)
 			)
-			->value($oLib->lib_dir_id) //
+			->value($oLib->lib_dir_id)
 			->onchange("$.ajaxRequest({path: '/admin/structure/index.php',context: 'lib_id', callBack: $.loadSelectOptionsCallback, action: 'loadLibList',additionalParams: 'lib_dir_id=' + this.value,windowId: '{$windowId}'}); return false");
 
 		$aLibForDir = array(' … ');
 		$aLibs = Core_Entity::factory('Lib_Dir', intval($oLib->lib_dir_id)) // Может быть NULL
-			->Libs->findAll();
+			->Libs
+			->findAll();
 
 		foreach ($aLibs as $oTmpLib)
 		{
@@ -95,7 +96,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->divAttr(array('id' => 'lib', 'class' => 'form-group col-xs-12 col-lg-6'))
 			->options($aLibForDir)
 			->value($this->_object->lib_id)
-			->onchange("$.ajaxRequest({path: '/admin/template/section/lib/index.php',context: 'lib_properties', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false")
+			->onchange("$.ajaxRequest({path: '/admin/template/section/lib/index.php', context: '{$this->_formId}', callBack: $.loadDivContentAjaxCallback, objectId: {$objectId}, action: 'loadLibProperties',additionalParams: 'lib_id=' + this.value,windowId: '{$windowId}'}); return false")
 			;
 
 		$Select_Lib
@@ -103,9 +104,11 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->href(
-						$this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $this->_object->lib_id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+						$this->_object->lib_id
+							? $this->_object->lib_id . $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $oLib->id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+							: ''
 					)
-					->class('input-group-addon bg-blue bordered-blue')
+					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($this->_object->lib_id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 

@@ -23,7 +23,7 @@ class User_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-08-04';
+	public $date = '2020-11-03';
 
 	/**
 	 * Module name
@@ -170,6 +170,13 @@ class User_Module extends Core_Module
 				$sIconColor = "white";
 				$sBackgroundColor = "bg-danger";
 				$sNotificationColor = 'danger';
+			break;
+			// Уведомление от бота User_Bot_Send_Notification
+			case 3:
+				$sIconIco = "fa-android";
+				$sIconColor = "white";
+				$sBackgroundColor = "bg-azure";
+				$sNotificationColor = 'azure';
 			break;
 			default:
 				$sIconIco = "fa-info";

@@ -226,6 +226,10 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->unloaded(0)
 			->save();
 
+		// Reserved
+		$this->_object->Shop_Order->Shop->reserve && !$this->_object->Shop_Order->paid
+			&& $this->_object->Shop_Order->reserveItems();
+
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;

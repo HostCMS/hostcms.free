@@ -295,7 +295,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				{
 				?>
 				<div id="company-<?php echo $iCompanyId?>" class="tab-pane <?php echo $sActiveClassName?>">
-					<div class="table-scrollable">
+					<div class="admin-table-wrap table-scrollable">
 						<table class="table table-hover deals-aggregate-user-info">
 							<thead>
 								<?php

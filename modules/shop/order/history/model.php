@@ -51,6 +51,7 @@ class Shop_Order_History_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
+			$this->_preloadValues['color'] = '#333333';
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 		}
 	}

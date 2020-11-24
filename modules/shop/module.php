@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-08-04';
+	public $date = '2020-11-03';
 
 	/**
 	 * Module name
@@ -40,6 +40,7 @@ class Shop_Module extends Core_Module
 		1 => 'searchIndexGroup',
 		2 => 'searchUnindexItem',
 		3 => 'recountShop',
+		4 => 'rebuildFastfilter',
 	);
 
 	/**
@@ -590,6 +591,46 @@ class Shop_Module extends Core_Module
 				// Recount shop
 				case 3:
 					Core_Entity::factory('Shop', $entityId)->recount();
+				break;
+				// Rebuild fastfilter
+				case 4:
+					$oShop = Core_Entity::factory('Shop', $entityId);
+
+					// Groups
+					$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($oShop);
+					$Shop_Filter_Group_Controller
+						->dropTable()
+						->createTable()
+						->rebuild();
+
+					// Items
+					$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+					$oShop_Filter_Controller
+						->dropTable()
+						->createTable();
+
+					$limit = 1000;
+					$position = 0;
+
+					do {
+						$oShop_Items = $oShop->Shop_Items;
+						$oShop_Items->queryBuilder()
+							->where('shop_items.active', '=', 1)
+							->limit($limit)
+							->offset($position)
+							->clearOrderBy()
+							->orderBy('shop_items.id');
+
+						$aShop_Items = $oShop_Items->findAll(FALSE);
+
+						foreach ($aShop_Items as $oShop_Item)
+						{
+							$oShop_Filter_Controller->fill($oShop_Item);
+						}
+
+						$position += $limit;
+					}
+					while(count($aShop_Items));
 				break;
 			}
 		}

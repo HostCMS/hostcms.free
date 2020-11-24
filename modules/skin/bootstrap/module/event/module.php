@@ -148,7 +148,7 @@ class Skin_Bootstrap_Module_Event_Module extends Event_Module
 							'id' => $oEvent->id,
 							'name' => $oEvent->name,
 							'start' => Event_Controller::getDateTime($oEvent->start),
-							'finish' => Event_Controller::getDateTime($oEvent->finish),
+							'deadline' => Event_Controller::getDateTime($oEvent->deadline),
 							'href' => "/admin/event/index.php?hostcms[action]=edit&hostcms[operation]=&hostcms[current]=1&hostcms[checked][0][{$oEvent->id}]=1",
 							'onclick' => "$(this).parents('li.open').click(); $.adminLoad({path: '/admin/event/index.php?hostcms[action]=edit&amp;hostcms[operation]=&amp;hostcms[current]=1&amp;hostcms[checked][0][{$oEvent->id}]=1'}); return false",
 							'icon' => $oEvent->Event_Type->icon,

@@ -258,6 +258,11 @@ $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('shop_warehouse_writeoffs.*'))
 )

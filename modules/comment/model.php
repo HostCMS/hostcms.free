@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -172,6 +172,8 @@ class Comment_Model extends Core_Entity
 
 		$this->Comments->deleteAll(FALSE);
 
+		$this->deleteDir();
+
 		return parent::delete($primaryKey);
 	}
 
@@ -222,8 +224,7 @@ class Comment_Model extends Core_Entity
 	 */
 	public function fulltextBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$aConfig = Core_Config::instance()->get('comment_config');
-		$gradeLimit = isset($aConfig['gradeLimit']) ? $aConfig['gradeLimit'] : 5;
+		$aConfig = Comment_Controller::getConfig();
 
 		ob_start();
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->link);
@@ -255,13 +256,11 @@ class Comment_Model extends Core_Entity
 				->execute();
 		}
 
-		if ($this->grade)
+		if ($this->grade && $this->grade <= $aConfig['gradeLimit'])
 		{
-			$aConfig = Comment_Controller::getConfig();
-
 			Core::factory('Core_Html_Entity_Span')
 				->class('small green')
-				->value(str_repeat('★', $this->grade) . str_repeat('☆', $gradeLimit - $this->grade))
+				->value(str_repeat('★', $this->grade) . str_repeat('☆', $aConfig['gradeLimit'] - $this->grade))
 				->execute();
 		}
 
@@ -324,6 +323,65 @@ class Comment_Model extends Core_Entity
 		return isset($aComments[0]) ? $aComments[0] : NULL;
 	}
 
+	protected function _getHref()
+	{
+		return UPLOADDIR . 'comments/' . Core_File::getNestingDirPath($this->id, SITE_NESTING_LEVEL) . '/comment_' . $this->id . '/';
+	}
+
+	/**
+	 * Get item path
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return CMS_FOLDER . $this->_getHref();
+	}
+
+	/**
+	 * Get item href
+	 * @return string
+	 */
+	public function getHref()
+	{
+		return '/' . $this->_getHref();
+	}
+
+	/**
+	 * Create files directory
+	 * @return self
+	 */
+	public function createDir()
+	{
+		clearstatcache();
+
+		if (!is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::mkdir($this->getPath(), CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete item's directory for files
+	 * @return self
+	 */
+	public function deleteDir()
+	{
+		if (is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::deleteDir($this->getPath());
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
 	/**
 	 * Show properties in XML
 	 * @var boolean
@@ -338,6 +396,23 @@ class Comment_Model extends Core_Entity
 	public function showXmlProperties($showXmlProperties = TRUE)
 	{
 		$this->_showXmlProperties = $showXmlProperties;
+		return $this;
+	}
+
+	/**
+	 * Show Siteuser properties in XML
+	 * @var boolean
+	 */
+	protected $_showXmlSiteuserProperties = FALSE;
+
+	/**
+	 * Show Siteuser properties in XML
+	 * @param boolean $showXmlSiteuserProperties
+	 * @return self
+	 */
+	public function showXmlSiteuserProperties($showXmlSiteuserProperties = TRUE)
+	{
+		$this->_showXmlSiteuserProperties = $showXmlSiteuserProperties;
 		return $this;
 	}
 
@@ -370,6 +445,94 @@ class Comment_Model extends Core_Entity
 	}
 
 	/**
+	 * Values of all properties of item
+	 * @var array
+	 */
+	protected $_propertyValues = NULL;
+
+	/**
+	 * Values of all properties of item
+	 * Значения всех свойств товара
+	 * @param boolean $bCache cache mode status
+	 * @param array $aPropertiesId array of properties' IDs
+	 * @return array Property_Value
+	 */
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array())
+	{
+		if ($bCache && !is_null($this->_propertyValues))
+		{
+			return $this->_propertyValues;
+		}
+
+		if (!is_array($aPropertiesId) || !count($aPropertiesId))
+		{
+			if ($this->Comment_Informationsystem_Item->id)
+			{
+				$entityModel = 'Informationsystem_Comment_Property_List';
+				$entityId = $this->Comment_Informationsystem_Item->Informationsystem_Item->informationsystem_id;
+			}
+			elseif ($this->Comment_Shop_Item->id)
+			{
+				$entityModel = 'Shop_Comment_Property_List';
+				$entityId = $this->Comment_Shop_Item->Shop_Item->shop_id;
+			}
+
+			$aProperties = Core_Entity::factory($entityModel, $entityId)
+				->Properties
+				->findAll();
+
+			$aPropertiesId = array();
+			foreach ($aProperties as $oProperty)
+			{
+				$aPropertiesId[] = $oProperty->id;
+			}
+		}
+
+		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache);
+
+		// setHref()
+		foreach ($aReturn as $oProperty_Value)
+		{
+			$this->_preparePropertyValue($oProperty_Value);
+		}
+
+		$bCache && $this->_propertyValues = $aReturn;
+
+		return $aReturn;
+	}
+
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		if ($this->Comment_Informationsystem_Item->id)
+		{
+			$oEntity = $this->Informationsystem_Item->Informationsystem;
+		}
+		elseif ($this->Comment_Shop_Item->id)
+		{
+			$oEntity = $this->Shop_Item->Shop;
+		}
+
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref($this->getHref())
+					->setDir($this->getPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($oEntity->format_date);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($oEntity->format_datetime);
+			break;
+		}
+	}
+
+	/**
 	 * Prepare entity and children entities
 	 * @return self
 	 */
@@ -383,8 +546,54 @@ class Comment_Model extends Core_Entity
 		{
 			$this->addEntity($this->Siteuser
 				->clearEntities()
-				->showXmlProperties($this->_showXmlProperties)
+				->showXmlProperties($this->_showXmlSiteuserProperties)
 			);
+		}
+
+		if ($this->_showXmlProperties)
+		{
+			if (is_array($this->_showXmlProperties))
+			{
+				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+
+				foreach ($aProperty_Values as $oProperty_Value)
+				{
+					$this->_preparePropertyValue($oProperty_Value);
+				}
+			}
+			else
+			{
+				$aProperty_Values = $this->getPropertyValues();
+				// Add all values
+				//$this->addEntities($aProperty_Values);
+			}
+
+			$aListIDs = array();
+
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				// List_Items
+				if ($oProperty_Value->Property->type == 3)
+				{
+					$aListIDs[] = $oProperty_Value->value;
+				}
+
+				$this->addEntity($oProperty_Value);
+			}
+
+			if (Core::moduleIsActive('list'))
+			{
+				// Cache necessary List_Items
+				if (count($aListIDs))
+				{
+					$oList_Items = Core_Entity::factory('List_Item');
+					$oList_Items->queryBuilder()
+						->where('id', 'IN', $aListIDs)
+						->clearOrderBy();
+
+					$oList_Items->findAll(TRUE);
+				}
+			}
 		}
 
 		if ($this->_showXmlVotes && Core::moduleIsActive('siteuser'))

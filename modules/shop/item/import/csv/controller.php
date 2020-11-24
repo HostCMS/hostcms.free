@@ -168,6 +168,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	protected $_aSets = array();
 
 	/**
+	 * Path to the temprorary json file
+	 * @var NULL|string
+	 */
+	protected $_jsonPath = NULL;
+
+	/**
 	 * Allowed object properties
 	 * @var array
 	 */
@@ -246,7 +252,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	/**
 	 * IDs of created shop_items
 	 */
-	protected $_ShopItemCreatedIDs = array();
+	protected $_aCreatedItemIDs = array();
 
 	/**
 	 * Get inserted items count
@@ -464,9 +470,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$this->init();
 
 		// Единожды в конструкторе, чтобы после __wakeup() не обнулялось
+		$this->_jsonPath = CMS_FOLDER . TMP_DIR . 'csv_' . time() . '.json';
 		$this->_InsertedItemsCount = $this->_UpdatedItemsCount = $this->_InsertedGroupsCount = $this->_UpdatedGroupsCount = $this->_posted = 0;
 
-		$this->_ShopItemCreatedIDs = array();
+		//$this->_aCreatedItemIDs = array();
 
 		$this->deletePropertyValues = TRUE;
 		$this->searchIndexation = FALSE;
@@ -713,7 +720,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			->addOption(CURLOPT_FOLLOWLOCATION, TRUE)
 			->execute();
 
-		$content = $Core_Http->getBody();
+		$content = $Core_Http->getDecompressedBody();
 
 		$aHeaders = $Core_Http->parseHeaders();
 		$sStatus = Core_Array::get($aHeaders, 'status');
@@ -794,7 +801,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		if ($fInputFile === FALSE)
 		{
-			throw new Core_Exception("");
+			throw new Core_Exception('');
 		}
 
 		// Remove first BOM
@@ -1722,7 +1729,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							{
 								// 2 - не обновлять существующие товары
 								if ($this->importAction == 2
-									&& !isset($this->_ShopItemCreatedIDs[$oTmpObject->id])
+									&& !isset($this->_aCreatedItemIDs[$oTmpObject->id])
 								)
 								{
 									$this->_clearWhileLoop();
@@ -1756,7 +1763,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								{
 									// 2 - не обновлять существующие товары
 									if ($this->importAction == 2
-										&& !isset($this->_ShopItemCreatedIDs[$aTmpObject[0]->id])
+										&& !isset($this->_aCreatedItemIDs[$aTmpObject[0]->id])
 									)
 									{
 										$this->_clearWhileLoop();
@@ -1864,7 +1871,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									{
 										// 2 - не обновлять существующие товары
 										if ($this->importAction == 2
-											&& !isset($this->_ShopItemCreatedIDs[$oTmpObject[0]->id])
+											&& !isset($this->_aCreatedItemIDs[$oTmpObject[0]->id])
 										)
 										{
 											$this->_clearWhileLoop();
@@ -1929,7 +1936,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								{
 									// 2 - не обновлять существующие товары
 									if ($this->importAction == 2
-										&& !isset($this->_ShopItemCreatedIDs[$aTmpObject[0]->id])
+										&& !isset($this->_aCreatedItemIDs[$aTmpObject[0]->id])
 									)
 									{
 										$this->_clearWhileLoop();
@@ -2064,7 +2071,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 									{
 										// 2 - не обновлять существующие товары
 										if ($this->importAction == 2
-											&& !isset($this->_ShopItemCreatedIDs[$oTmpObject[0]->id])
+											&& !isset($this->_aCreatedItemIDs[$oTmpObject[0]->id])
 										)
 										{
 											$this->_clearWhileLoop();
@@ -2192,7 +2199,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$this->_incInsertedItems($this->_oCurrentItem->id);
 
 				// Добавлем в список созданных товаров
-				$this->_ShopItemCreatedIDs[$this->_oCurrentItem->id] = $this->_oCurrentItem->id;
+				$this->_aCreatedItemIDs[$this->_oCurrentItem->id] = $this->_oCurrentItem->id;
 			}
 
 			$aTagsName = array();
@@ -3841,17 +3848,16 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 */
 	public function clear()
 	{
-		$this->_oCurrentShop =
-		$this->_oCurrentGroup =
-		$this->_oCurrentItem =
-		$this->_oCurrentOrder =
-		$this->_oCurrentOrderItem =
-		$this->_oCurrentShopEItem =
-		$this->_oCurrentShopSpecialPrice = NULL;
+		$this->_oCurrentShop = $this->_oCurrentGroup = $this->_oCurrentItem = $this->_oCurrentOrder
+			= $this->_oCurrentOrderItem = $this->_oCurrentShopEItem = $this->_oCurrentShopSpecialPrice = NULL;
 
 		$this->_aTags = NULL;
 
 		$this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues = array();
+
+		// see __sleep()/__wakeup()
+		$this->_aInsertedGroupIDs = $this->_aClearedItemsPropertyValues = $this->_aClearedGroupsPropertyValues
+			= $this->_aUpdatedGroupIDs = $this->_aInsertedItemIDs = $this->_aUpdatedItemIDs = $this->_aCreatedItemIDs = array();
 
 		return $this;
 	}
@@ -3862,6 +3868,18 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	 */
 	public function __sleep()
 	{
+		file_put_contents($this->_jsonPath, json_encode(
+			array(
+				'_aInsertedGroupIDs' => $this->_aInsertedGroupIDs,
+				'_aClearedItemsPropertyValues' => $this->_aClearedItemsPropertyValues,
+				'_aClearedGroupsPropertyValues' => $this->_aClearedGroupsPropertyValues,
+				'_aUpdatedGroupIDs' => $this->_aUpdatedGroupIDs,
+				'_aInsertedItemIDs' => $this->_aInsertedItemIDs,
+				'_aUpdatedItemIDs' => $this->_aUpdatedItemIDs,
+				'_aCreatedItemIDs' => $this->_aCreatedItemIDs
+			)
+		));
+
 		$this->clear();
 
 		return array_keys(
@@ -3895,6 +3913,19 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		// Инициализация текущей специальной цены для товара
 		$this->_oCurrentShopSpecialPrice = Core_Entity::factory('Shop_Specialprice');
+
+		if (is_file($this->_jsonPath))
+		{
+			$aJSON = json_decode(Core_File::read($this->_jsonPath), TRUE);
+
+			$this->_aInsertedGroupIDs = Core_Array::get($aJSON, '_aInsertedGroupIDs', array());
+			$this->_aClearedItemsPropertyValues = Core_Array::get($aJSON, '_aClearedItemsPropertyValues', array());
+			$this->_aClearedGroupsPropertyValues = Core_Array::get($aJSON, '_aClearedGroupsPropertyValues', array());
+			$this->_aUpdatedGroupIDs = Core_Array::get($aJSON, '_aUpdatedGroupIDs', array());
+			$this->_aInsertedItemIDs = Core_Array::get($aJSON, '_aInsertedItemIDs', array());
+			$this->_aUpdatedItemIDs = Core_Array::get($aJSON, '_aUpdatedItemIDs', array());
+			$this->_aCreatedItemIDs = Core_Array::get($aJSON, '_aCreatedItemIDs', array());
+		}
 
 		return $this;
 	}
@@ -4269,6 +4300,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting->post();
 		}
 
+		if (is_file($this->_jsonPath))
+		{
+			Core_File::delete($this->_jsonPath);
+		}
+
 		return $this;
 	}
 
@@ -4294,6 +4330,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			$this->_posted++;
 
 			return TRUE;
+		}
+
+		if (is_file($this->_jsonPath))
+		{
+			Core_File::delete($this->_jsonPath);
 		}
 
 		return FALSE;

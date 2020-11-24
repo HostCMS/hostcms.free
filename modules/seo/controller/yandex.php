@@ -166,7 +166,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 				->additionalHeader("Accept", "application/json")
 				->execute();
 
-			$sAnswer = $Core_Http->getBody();
+			$sAnswer = $Core_Http->getDecompressedBody();
 
 			if ($sAnswer === FALSE)
 			{
@@ -204,7 +204,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -293,7 +293,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->rawData($sData)
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -321,7 +321,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -349,7 +349,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -377,7 +377,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		var_dump($aAnswer);
 
@@ -407,7 +407,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -434,7 +434,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 				->additionalHeader("Accept", "application/json")
 				->execute();
 
-			$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+			$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 			if (isset($aAnswer['error_code']))
 			{
@@ -463,7 +463,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -494,11 +494,11 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
-			throw new Core_Exception("getSitePopularQueries(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
+			throw new Core_Exception("getQueries(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
 		}
 
 		return isset($aAnswer['queries'])
@@ -538,7 +538,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
@@ -566,11 +566,11 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{
-			throw new Core_Exception("getTicHistory(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
+			throw new Core_Exception("getSqiHistory(), Server response %code: %message", array('%code' => $aAnswer['error_code'], '%message' => $aAnswer['error_message']), 0, FALSE);
 		}
 
 		return $aAnswer;
@@ -594,7 +594,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			->additionalHeader("Accept", "application/json")
 			->execute();
 
-		$aAnswer = json_decode($Core_Http->getBody(), TRUE);
+		$aAnswer = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 		if (isset($aAnswer['error_code']))
 		{

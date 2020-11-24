@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 {
@@ -227,6 +227,7 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 	 * @param string $destinationPoint destination point
 	 * @param Shop_Item_Model $oShop_Item shop item object
 	 * @return self
+	 * @hostcms-event Shop_Item_Controller_Pricetag.onAfterDrawing
 	 */
 	public function cloneRange($sourceDimension, $destinationPoint, Shop_Item_Model $oShop_Item)
 	{
@@ -324,14 +325,22 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 
 				if ($drawing->getName() != 'Barcode')
 				{
-					// Новая картинка
-					$newDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-					$newDrawing->setName($destinationPoint . $drawing->getName());
-					$newDrawing->setPath($this->_aDrawingCollectionFiles[$sourceCoordinate]);
-					$newDrawing->setCoordinates($newCoordinate);
-					$newDrawing->setOffsetX($drawing->getOffsetX());
-					$newDrawing->setOffsetY($drawing->getOffsetY());
-					$newDrawing->setWidthAndHeight($drawing->getWidth(), $drawing->getHeight());
+					Core_Event::notify('Shop_Item_Controller_Pricetag.onAfterDrawing', $this, array($oShop_Item, $drawing, $newCoordinate, $destinationPoint));
+
+					$newDrawing = Core_Event::getLastReturn();
+
+					if (is_null($newDrawing))
+					{
+						// Новая картинка
+						$newDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+						$newDrawing->setName($destinationPoint . $drawing->getName());
+						$newDrawing->setPath($this->_aDrawingCollectionFiles[$sourceCoordinate]);
+						$newDrawing->setCoordinates($newCoordinate);
+						$newDrawing->setOffsetX($drawing->getOffsetX());
+						$newDrawing->setOffsetY($drawing->getOffsetY());
+						$newDrawing->setWidthAndHeight($drawing->getWidth(), $drawing->getHeight());
+					}
+
 					$newDrawing->setWorksheet($this->_newSheet);
 				}
 				else

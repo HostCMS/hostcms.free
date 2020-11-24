@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Out
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Out_File extends Core_Out
 {
@@ -56,7 +56,7 @@ class Core_Out_File extends Core_Out
 		}
 
 		throw new Core_Exception("File '%fileName' open error.",
-			array('%fileName' => Core_Exception::cutRootPath($this->filePath)));
+			array('%fileName' => Core::cutRootPath($this->filePath)));
 	}
 
 	/**

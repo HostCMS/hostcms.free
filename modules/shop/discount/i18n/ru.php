@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки',
@@ -19,6 +19,17 @@ return array(
 	'name' => 'Название',
 	'start_datetime' => "Действует от",
 	'end_datetime' => "Действует до",
+	'start_time' => "Время от",
+	'end_time' => "Время до",
+	'days' => "Дни недели",
+	'all_days' => "Все дни недели",
+	'day1' => "Понедельник",
+	'day2' => "Вторник",
+	'day3' => "Среда",
+	'day4' => "Четверг",
+	'day5' => "Пятница",
+	'day6' => "Суббота",
+	'day7' => "Воскресенье",
 	'active' => "Активность",
 	'value' => '<acronym title="Величина скидки, может измеряться в процентах или в фиксированном размере">Величина скидки</acronym>',
 	'type' => '<acronym title="Тип скидки - процент или сумма в выбранной валюте">Тип скидки</acronym>',

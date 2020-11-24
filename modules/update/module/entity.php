@@ -136,7 +136,7 @@ class Update_Module_Entity extends Core_Entity
 
 			// Сохраняем tar.gz
 			$source_file = $oMarket_Controller->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
-			Core_File::write($source_file, $Core_Http->getBody());
+			Core_File::write($source_file, $Core_Http->getDecompressedBody());
 
 			// Распаковываем файлы
 			$Core_Tar = new Core_Tar($source_file);

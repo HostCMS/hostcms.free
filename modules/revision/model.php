@@ -111,14 +111,12 @@ class Revision_Model extends Core_Entity
 
 		?><div id="revision<?php echo $this->id?>" class="hidden"><?php
 		$this->_printJson($aValue);
-		?></div><?php
-
-		?>
+		?></div>
 		<script>
 		$(function() {
 			$('a#revision<?php echo $this->id?>').on('click', function (){
 				var dialog = bootbox.dialog({
-					title: '<?php echo $this->name?> <?php echo $this->datetime?>',
+					title: $.escapeHtml('<?php echo Core_Str::escapeJavascriptVariable($this->name)?> <?php echo $this->datetime?>'),
 					message: $('#revision<?php echo $this->id?>').html(),
 					backdrop: true,
 					size: 'large'
@@ -129,7 +127,7 @@ class Revision_Model extends Core_Entity
 		</script>
 		<?php
 
-		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . $this->name . '</a>';
+		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . htmlspecialchars($this->name) . '</a>';
 	}
 
 	/**

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -155,7 +155,7 @@ class Site_Alias_Model extends Core_Entity
 				->timeout(5)
 				->execute();
 
-			$xml = $Core_Http->getBody();
+			$xml = $Core_Http->getDecompressedBody();
 			//echo htmlspecialchars($xml);
 			$oXml = simplexml_load_string($xml);
 

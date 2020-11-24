@@ -33,7 +33,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_E
 
 			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> .formButtons :input').on('click', function(e) { mainFormLocker.unlock() });
 
-			jForm.on('keyup change paste blur', ':input[data-required]', backendFieldCheck);
+			jForm.on('keyup change paste blur', ':input[data-required]', function(e) { mainFieldChecker.check($(this)) });
 		});
 		</script><?php
 	}

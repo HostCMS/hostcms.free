@@ -260,7 +260,7 @@ class Core_Rss_Read
 			->url($url)
 			->execute();
 
-		$this->_data = $Core_Http->getBody();
+		$this->_data = $Core_Http->getDecompressedBody();
 
 		$aHeaders = $Core_Http->parseHeaders();
 

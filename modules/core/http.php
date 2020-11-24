@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - getHeaders() получить заголовки ответа
  * - parseHeaders() получить заголовки в виде массива
  * - parseHttpStatusCode('HTTP/1.1 200 OK') получить код ответа по переданному статусу
- * - getBody() получить ответ
+ * - getBody() получить сырой ответ, может быть сжат и разбит на chunk-и
  * - getDecompressedBody() получить распакованный ответ
  * - getErrno() получить номер ошибки
  * - getError() получить текст ошибки

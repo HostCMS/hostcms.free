@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Level_Model extends Core_Entity
 {
@@ -105,6 +105,20 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			->execute();
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->apply_max_discount && Core::factory('Core_Html_Entity_Span')
+			->class('label label-yellow label-sm')
+			->value('MAX')
+			->execute();
 	}
 
 	/**

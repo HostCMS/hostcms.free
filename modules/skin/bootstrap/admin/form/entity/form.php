@@ -28,7 +28,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Form extends Skin_Default_Admin_Form_Enti
 		<?php
 		if (!is_null($this->id))
 		{
-		?><script>$(function() { CheckAllField('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>"); });</script><?php
+		?><script>$(function() { mainFieldChecker.checkAll('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', "<?php echo htmlspecialchars($this->id)?>"); });</script><?php
 		}
 		?>
 		</div><?php

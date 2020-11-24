@@ -168,6 +168,7 @@ class Core
 			'dateTimeFormat' => 'd.m.Y H:i:s',
 			'datePickerFormat' => 'DD.MM.YYYY',
 			'dateTimePickerFormat' => 'DD.MM.YYYY HH:mm:ss',
+			'timePickerFormat' => 'HH:mm:ss',
 			'availableExtension' => array ('JPG', 'JPEG', 'GIF', 'PNG', 'WEBP', 'PDF', 'ZIP', 'DOC', 'DOCX',  'XLS', 'XLSX'),
 			'defaultCache' => 'file',
 			'timezone' => 'America/Los_Angeles',
@@ -175,9 +176,14 @@ class Core
 			'chat' => TRUE,
 			'switchSelectToAutocomplete' => 100,
 			'autocompleteItems' => 10,
+			'cms_folders' => NULL,
 			'session' => array(
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
+			),
+			'headers' => array(
+				'X-Content-Type-Options' => 'nosniff',
+				'X-XSS-Protection' => '1;mode=block',
 			),
 			'backendSessionLifetime' => 14400,
 			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
@@ -322,24 +328,11 @@ class Core
 			: 'Undefined error';
 
 		$aStack = array();
-
-		if (function_exists('debug_backtrace'))
+		
+		$aDebugTrace = Core::debugBacktrace();
+		foreach ($aDebugTrace as $aTrace)
 		{
-			$debug_backtrace = debug_backtrace();
-
-			foreach ($debug_backtrace as $history)
-			{
-				if (isset($history['file']) && isset($history['line']))
-				{
-					// Отрезаем полный путь к файлу, если есть, dirname для приведения слэшей к нужному виду
-					if (strpos($history['file'], dirname(CMS_FOLDER)) === 0)
-					{
-						$history['file'] = substr($history['file'], strlen(CMS_FOLDER));
-					}
-
-					$aStack[] = Core::_('Core.error_log_message_stack', $history['file'], $history['line']);
-				}
-			}
+			$aStack[] = Core::_('Core.error_log_message_stack', $aTrace['file'], $aTrace['line']);
 		}
 
 		$sStack = implode(",\n", $aStack);
@@ -370,6 +363,52 @@ class Core
 		{
 			exit();
 		}
+	}
+
+	/**
+	 * Get debug trace
+	 * @return array
+	 */
+	static public function debugBacktrace()
+	{
+		$aDebugTrace = array();
+
+		if (function_exists('debug_backtrace'))
+		{
+			$debug_backtrace = debug_backtrace();
+			array_shift($debug_backtrace);
+			
+			foreach ($debug_backtrace as $history)
+			{
+				if (isset($history['file']) && isset($history['line']))
+				{
+					$history['file'] = self::cutRootPath($history['file']);
+
+					$aDebugTrace[] = array(
+						'file' => $history['file'],
+						'line' => $history['line'],
+						'function' => (isset($history['class']) && isset($history['type']) ? $history['class'] . $history['type'] : '') . $history['function']
+					);
+				}
+			}
+		}
+
+		return $aDebugTrace;
+	}
+	
+	/**
+	 * Cut CMS_FOLDER from $path
+	 * @param string $path path
+	 * @return string
+	 */
+	static public function cutRootPath($path)
+	{
+		if (strpos($path, dirname(CMS_FOLDER)) === 0)
+		{
+			$path = substr($path, strlen(CMS_FOLDER));
+		}
+
+		return $path;
 	}
 
 	/**

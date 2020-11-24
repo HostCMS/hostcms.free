@@ -17,6 +17,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - checkStock(TRUE|FALSE) проверять наличие товара на складе, по умолчанию FALSE
  * - getLastError() возвращает последний статус ошибки: FALSE - без ошибок, 1 - Shop item id установлен в NULL, 2 - не найден добавляемый товар, 3 - Пользователю запрещен доступ к товару, 4 - передано нулевое количество товара или товара нет на складе.
  *
+ * Доступные свойства:
+ *
+ * - totalQuantity общее количество неотложенного товара
+ * - totalAmount сумма неотложенного товара
+ * - totalTax налог неотложенного товара
+ * - totalWeight суммарный вес неотложенного товара
+ * - totalVolume суммарный объем неотложенного товара
+ * - totalQuantityForPurchaseDiscount общее количество неотложенного товара для расчета скидки от суммы заказа
+ * - totalAmountForPurchaseDiscount сумма неотложенного товара для расчета скидки от суммы заказа
+ * - totalDiscountPrices цены товаров для расчета скидки на N-й товар
+ *
+ *
  * @package HostCMS
  * @subpackage Shop
  * @version 6.x
@@ -37,6 +49,15 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		'shop_warehouse_id',
 		'siteuser_id',
 		'checkStock',
+
+		'totalQuantity',
+		'totalAmount',
+		'totalTax',
+		'totalWeight',
+		'totalVolume',
+		'totalQuantityForPurchaseDiscount',
+		'totalAmountForPurchaseDiscount',
+		'totalDiscountPrices',
 	);
 
 	/**
@@ -172,6 +193,68 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 		$aShop_Cart = $this->siteuser_id
 			? $this->_getAllFromDb($oShop)
 			: $this->_getAllFromSession($oShop);
+
+		// Есть скидки на N-й товар, доступные для текущей даты
+		$bPositionDiscount = $oShop->Shop_Purchase_Discounts->checkAvailableWithPosition();
+
+		$this->totalAmount = $this->totalQuantity = $this->totalTax = $this->totalWeight = $this->totalVolume
+			= $this->totalQuantityForPurchaseDiscount = $this->totalAmountForPurchaseDiscount
+			= 0;
+
+		$aDiscountPrices = array();
+
+		$oShop_Item_Controller = new Shop_Item_Controller();
+
+		foreach ($aShop_Cart as $oShop_Cart)
+		{
+			if ($oShop_Cart->postpone == 0 && $oShop_Cart->shop_item_id)
+			{
+				$oShop_Item = Core_Entity::factory('Shop_Item', $oShop_Cart->shop_item_id);
+
+				$bSkipItem = $oShop_Item->type == 4;
+
+				$this->totalQuantity += $oShop_Cart->quantity;
+
+				// Количество для скидок от суммы заказа рассчитывается отдельно
+				$oShop_Item->apply_purchase_discount && !$bSkipItem
+					&& $this->totalQuantityForPurchaseDiscount += $oShop_Cart->quantity;
+
+				// Prices
+				if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
+				{
+					$oShop_Item_Controller->siteuser(
+						Core_Entity::factory('Siteuser', $this->siteuser_id)
+					);
+				}
+
+				$oShop_Item_Controller->count($oShop_Cart->quantity);
+				$aPrices = $oShop_Item_Controller->getPrices($oShop_Item);
+				$this->totalAmount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+				if ($bPositionDiscount && !$bSkipItem)
+				{
+					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
+					for ($i = 0; $i < $oShop_Cart->quantity; $i++)
+					{
+						$aDiscountPrices[] = $aPrices['price_discount'];
+					}
+				}
+
+				// Сумма для скидок от суммы заказа рассчитывается отдельно
+				$oShop_Item->apply_purchase_discount && !$bSkipItem
+					&& $this->totalAmountForPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+				$this->totalTax += $aPrices['tax'] * $oShop_Cart->quantity;
+
+				$this->totalWeight += $oShop_Item->weight * $oShop_Cart->quantity;
+
+				$this->totalVolume += Shop_Controller::convertSizeMeasure($oShop_Item->length, $oShop->size_measure, 0)
+					* Shop_Controller::convertSizeMeasure($oShop_Item->width, $oShop->size_measure, 0)
+					* Shop_Controller::convertSizeMeasure($oShop_Item->height, $oShop->size_measure, 0);
+			}
+		}
+
+		$this->totalDiscountPrices = $aDiscountPrices;
 
 		return $aShop_Cart;
 	}

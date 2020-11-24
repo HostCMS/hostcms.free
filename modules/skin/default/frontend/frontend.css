@@ -52,10 +52,10 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 
 /* Layout helpers
 ----------------------------------*/
-.backendBody .ui-helper-hidden {
+body.backendBody .ui-helper-hidden {
 	display: none;
 }
-.backendBody .ui-helper-hidden-accessible {
+body.backendBody .ui-helper-hidden-accessible {
 	border: 0;
 	clip: rect(0 0 0 0);
 	height: 1px;
@@ -65,7 +65,7 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 	position: absolute;
 	width: 1px;
 }
-.backendBody .ui-helper-reset {
+body.backendBody .ui-helper-reset {
 	margin: 0;
 	padding: 0;
 	border: 0;
@@ -75,19 +75,19 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 	font-size: 100%;
 	list-style: none;
 }
-.backendBody .ui-helper-clearfix:before,
-.backendBody .ui-helper-clearfix:after {
+body.backendBody .ui-helper-clearfix:before,
+body.backendBody .ui-helper-clearfix:after {
 	content: "";
 	display: table;
 	border-collapse: collapse;
 }
-.backendBody .ui-helper-clearfix:after {
+body.backendBody .ui-helper-clearfix:after {
 	clear: both;
 }
-.backendBody .ui-helper-clearfix {
+body.backendBody .ui-helper-clearfix {
 	min-height: 0; /* support: IE7 */
 }
-.backendBody .ui-helper-zfix {
+body.backendBody .ui-helper-zfix {
 	width: 100%;
 	height: 100%;
 	top: 0;
@@ -97,14 +97,14 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 	filter:Alpha(Opacity=0); /* support: IE8 */
 }
 
-.backendBody .ui-front {
+body.backendBody .ui-front {
 	z-index: 100;
 }
 
 
 /* Interaction Cues
 ----------------------------------*/
-.backendBody .ui-state-disabled {
+body.backendBody .ui-state-disabled {
 	cursor: default !important;
 }
 
@@ -113,7 +113,7 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 ----------------------------------*/
 
 /* states and images */
-.backendBody .ui-icon {
+body.backendBody .ui-icon {
 	display: block;
 	text-indent: -99999px;
 	overflow: hidden;
@@ -125,88 +125,88 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 ----------------------------------*/
 
 /* Overlays */
-.backendBody .ui-widget-overlay {
+body.backendBody .ui-widget-overlay {
 	position: fixed;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
 }
-.backendBody .ui-draggable-handle {
+body.backendBody .ui-draggable-handle {
 	-ms-touch-action: none;
 	touch-action: none;
 }
-.backendBody .ui-resizable {
+body.backendBody .ui-resizable {
 	position: relative;
 }
-.backendBody .ui-resizable-handle {
+body.backendBody .ui-resizable-handle {
 	position: absolute;
 	font-size: 0.1px;
 	display: block;
 	-ms-touch-action: none;
 	touch-action: none;
 }
-.backendBody .ui-resizable-disabled .ui-resizable-handle,
-.backendBody .ui-resizable-autohide .ui-resizable-handle {
+body.backendBody .ui-resizable-disabled .ui-resizable-handle,
+body.backendBody .ui-resizable-autohide .ui-resizable-handle {
 	display: none;
 }
-.backendBody .ui-resizable-n {
+body.backendBody .ui-resizable-n {
 	cursor: n-resize;
 	height: 7px;
 	width: 100%;
 	top: -5px;
 	left: 0;
 }
-.backendBody .ui-resizable-s {
+body.backendBody .ui-resizable-s {
 	cursor: s-resize;
 	height: 7px;
 	width: 100%;
 	bottom: -5px;
 	left: 0;
 }
-.backendBody .ui-resizable-e {
+body.backendBody .ui-resizable-e {
 	cursor: e-resize;
 	width: 7px;
 	right: -5px;
 	top: 0;
 	height: 100%;
 }
-.backendBody .ui-resizable-w {
+body.backendBody .ui-resizable-w {
 	cursor: w-resize;
 	width: 7px;
 	left: -5px;
 	top: 0;
 	height: 100%;
 }
-.backendBody .ui-resizable-se {
+body.backendBody .ui-resizable-se {
 	cursor: se-resize;
 	width: 12px;
 	height: 12px;
 	right: 1px;
 	bottom: 1px;
 }
-.backendBody .ui-resizable-sw {
+body.backendBody .ui-resizable-sw {
 	cursor: sw-resize;
 	width: 9px;
 	height: 9px;
 	left: -5px;
 	bottom: -5px;
 }
-.backendBody .ui-resizable-nw {
+body.backendBody .ui-resizable-nw {
 	cursor: nw-resize;
 	width: 9px;
 	height: 9px;
 	left: -5px;
 	top: -5px;
 }
-.backendBody .ui-resizable-ne {
+body.backendBody .ui-resizable-ne {
 	cursor: ne-resize;
 	width: 9px;
 	height: 9px;
 	right: -5px;
 	top: -5px;
 }
-.backendBody .ui-button {
+body.backendBody .ui-button {
 	display: inline-block;
 	position: relative;
 	padding: 0;
@@ -217,100 +217,100 @@ ul.tpl-template-variables span.bold { font-weight: bold; }
 	text-align: center;
 	overflow: visible; /* removes extra width in IE */
 }
-.backendBody .ui-button,
-.backendBody .ui-button:link,
-.backendBody .ui-button:visited,
-.backendBody .ui-button:hover,
-.backendBody .ui-button:active {
+body.backendBody .ui-button,
+body.backendBody .ui-button:link,
+body.backendBody .ui-button:visited,
+body.backendBody .ui-button:hover,
+body.backendBody .ui-button:active {
 	text-decoration: none;
 }
 /* to make room for the icon, a width needs to be set here */
-.backendBody .ui-button-icon-only {
+body.backendBody .ui-button-icon-only {
 	width: 2.2em;
 }
 /* button elements seem to need a little more width */
-button.backendBody .ui-button-icon-only {
+buttonbody.backendBody .ui-button-icon-only {
 	width: 2.4em;
 }
-.backendBody .ui-button-icons-only {
+body.backendBody .ui-button-icons-only {
 	width: 3.4em;
 }
-button.backendBody .ui-button-icons-only {
+buttonbody.backendBody .ui-button-icons-only {
 	width: 3.7em;
 }
 
 /* button text element */
-.backendBody .ui-button .ui-button-text {
+body.backendBody .ui-button .ui-button-text {
 	display: block;
 	line-height: normal;
 }
-.backendBody .ui-button-text-only .ui-button-text {
+body.backendBody .ui-button-text-only .ui-button-text {
 	padding: .4em 1em;
 }
-.backendBody .ui-button-icon-only .ui-button-text,
-.backendBody .ui-button-icons-only .ui-button-text {
+body.backendBody .ui-button-icon-only .ui-button-text,
+body.backendBody .ui-button-icons-only .ui-button-text {
 	padding: .4em;
 	text-indent: -9999999px;
 }
-.backendBody .ui-button-text-icon-primary .ui-button-text,
-.backendBody .ui-button-text-icons .ui-button-text {
+body.backendBody .ui-button-text-icon-primary .ui-button-text,
+body.backendBody .ui-button-text-icons .ui-button-text {
 	padding: .4em 1em .4em 2.1em;
 }
-.backendBody .ui-button-text-icon-secondary .ui-button-text,
-.backendBody .ui-button-text-icons .ui-button-text {
+body.backendBody .ui-button-text-icon-secondary .ui-button-text,
+body.backendBody .ui-button-text-icons .ui-button-text {
 	padding: .4em 2.1em .4em 1em;
 }
-.backendBody .ui-button-text-icons .ui-button-text {
+body.backendBody .ui-button-text-icons .ui-button-text {
 	padding-left: 2.1em;
 	padding-right: 2.1em;
 }
 /* no icon support for input elements, provide padding by default */
-input.backendBody .ui-button {
+inputbody.backendBody .ui-button {
 	padding: .4em 1em;
 }
 
 /* button icon element(s) */
-.backendBody .ui-button-icon-only .ui-icon,
-.backendBody .ui-button-text-icon-primary .ui-icon,
-.backendBody .ui-button-text-icon-secondary .ui-icon,
-.backendBody .ui-button-text-icons .ui-icon,
-.backendBody .ui-button-icons-only .ui-icon {
+body.backendBody .ui-button-icon-only .ui-icon,
+body.backendBody .ui-button-text-icon-primary .ui-icon,
+body.backendBody .ui-button-text-icon-secondary .ui-icon,
+body.backendBody .ui-button-text-icons .ui-icon,
+body.backendBody .ui-button-icons-only .ui-icon {
 	position: absolute;
 	top: 50%;
 	margin-top: -8px;
 }
-.backendBody .ui-button-icon-only .ui-icon {
+body.backendBody .ui-button-icon-only .ui-icon {
 	left: 50%;
 	margin-left: -8px;
 }
-.backendBody .ui-button-text-icon-primary .ui-button-icon-primary,
-.backendBody .ui-button-text-icons .ui-button-icon-primary,
-.backendBody .ui-button-icons-only .ui-button-icon-primary {
+body.backendBody .ui-button-text-icon-primary .ui-button-icon-primary,
+body.backendBody .ui-button-text-icons .ui-button-icon-primary,
+body.backendBody .ui-button-icons-only .ui-button-icon-primary {
 	left: .5em;
 }
-.backendBody .ui-button-text-icon-secondary .ui-button-icon-secondary,
-.backendBody .ui-button-text-icons .ui-button-icon-secondary,
-.backendBody .ui-button-icons-only .ui-button-icon-secondary {
+body.backendBody .ui-button-text-icon-secondary .ui-button-icon-secondary,
+body.backendBody .ui-button-text-icons .ui-button-icon-secondary,
+body.backendBody .ui-button-icons-only .ui-button-icon-secondary {
 	right: .5em;
 }
 
 /* button sets */
-.backendBody .ui-buttonset {
+body.backendBody .ui-buttonset {
 	margin-right: 7px;
 }
-.backendBody .ui-buttonset .ui-button {
+body.backendBody .ui-buttonset .ui-button {
 	margin-left: 0;
 	margin-right: -.3em;
 }
 
 /* workarounds */
 /* reset extra padding in Firefox, see h5bp.com/l */
-input.backendBody .ui-button::-moz-focus-inner,
-button.backendBody .ui-button::-moz-focus-inner {
+inputbody.backendBody .ui-button::-moz-focus-inner,
+buttonbody.backendBody .ui-button::-moz-focus-inner {
 	border: 0;
 	padding: 0;
 }
-.backendBody .ui-dialog {
+body.backendBody .ui-dialog {
 	overflow: hidden;
 	position: absolute;
 	top: 0;
@@ -318,23 +318,32 @@ button.backendBody .ui-button::-moz-focus-inner {
 	padding: .2em;
 	outline: 0;
 }
-.backendBody .ui-dialog .ui-dialog-titlebar {
+body.backendBody .ui-dialog .ui-dialog-titlebar {
 	padding: .4em 1em;
 	position: relative;
 	line-height: normal;
 }
-.backendBody .ui-dialog .ui-dialog-titlebar button {
+body.backendBody .ui-dialog .ui-dialog-titlebar button {
 	background: none !important
 }
-.backendBody .ui-dialog .ui-dialog-title {
+body.backendBody .ui-dialog .ui-dialog-title {
 	float: left;
 	margin: .1em 0;
 	white-space: nowrap;
 	width: 90%;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	
+    display: initial;
+    padding: initial;
+    background: initial;
+    font-size: initial;
+    text-transform: initial;
+    font-weight: initial;
+    color: initial;
+    text-align: initial;
 }
-.backendBody .ui-dialog .ui-dialog-titlebar-close {
+body.backendBody .ui-dialog .ui-dialog-titlebar-close {
 	position: absolute;
 	right: .3em;
 	top: 50%;
@@ -343,65 +352,65 @@ button.backendBody .ui-button::-moz-focus-inner {
 	padding: 1px;
 	height: 20px;
 }
-.backendBody .ui-dialog .ui-dialog-content {
+body.backendBody .ui-dialog .ui-dialog-content {
 	position: relative;
 	border: 0;
 	padding: .5em 1em;
 	background: none;
 	overflow: auto;
 }
-.backendBody .ui-dialog .ui-dialog-buttonpane {
+body.backendBody .ui-dialog .ui-dialog-buttonpane {
 	text-align: left;
 	border-width: 1px 0 0 0;
 	background-image: none;
 	margin-top: .5em;
 	padding: .3em 1em .5em .4em;
 }
-.backendBody .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+body.backendBody .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
 	float: right;
 }
-.backendBody .ui-dialog .ui-dialog-buttonpane button {
+body.backendBody .ui-dialog .ui-dialog-buttonpane button {
 	margin: .5em .4em .5em 0;
 	cursor: pointer;
 }
-.backendBody .ui-dialog .ui-resizable-se {
+body.backendBody .ui-dialog .ui-resizable-se {
 	width: 12px;
 	height: 12px;
 	right: -5px;
 	bottom: -5px;
 	background-position: 16px 16px;
 }
-.backendBody .ui-draggable .ui-dialog-titlebar {
+body.backendBody .ui-draggable .ui-dialog-titlebar {
 	cursor: move;
 }
 
 /* -- Added -- */
-.backendBody .ui-dialog {background-color: #FFF; border: 1px solid #D8D8D8; border-radius: 9px; box-shadow: 0 2px 2px rgba(204, 204, 204, 0.7); padding: 0; z-index: 11000 }
-.backendBody .ui-dialog-content-transparent{ background: #FFF; padding-top: 2px; background: url("images/transparent_bg_white.png") repeat scroll 0 0 transparent
+body.backendBody .ui-dialog {background-color: #FFF; border: 1px solid #D8D8D8; border-radius: 9px; box-shadow: 0 2px 2px rgba(204, 204, 204, 0.7); padding: 0; z-index: 11000 }
+body.backendBody .ui-dialog-content-transparent{ background: #FFF; padding-top: 2px; background: url("images/transparent_bg_white.png") repeat scroll 0 0 transparent
 }
-.backendBody .ui-dialog .ui-dialog-titlebar {  box-sizing: border-box; user-select: none; padding: .4em .5em;
+body.backendBody .ui-dialog .ui-dialog-titlebar {  box-sizing: border-box; user-select: none; padding: .4em .5em;
 background: #F2F2F2 !important; font-size: 10pt;
 font-family: Arial, Verdana, 'MS Sans Serif', sans-serif !important;
 border-width: 0px 0px 1px 0px; border-color: #F2F2F2;
 text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
-.backendBody .ui-dialog .ui-dialog-title { color: #000; font-weight: bold; margin: .1em 16px .2em 0; text-shadow: 1px 1px 0 rgba(255,255,255,0.8); white-space: nowrap }
-.backendBody .ui-dialog .ui-dialog-content {  box-sizing: border-box; background: #FFF; border-radius: 0 0 9px 9px; padding: 0 0 0.3em 0 }
+body.backendBody .ui-dialog .ui-dialog-title { color: #000; font-weight: bold; margin: .1em 16px .2em 0; text-shadow: 1px 1px 0 rgba(255,255,255,0.8); white-space: nowrap }
+body.backendBody .ui-dialog .ui-dialog-content {  box-sizing: border-box; background: #FFF; border-radius: 0 0 9px 9px; padding: 0 0 0.3em 0 }
 
-.backendBody .ui-dialog .ui-dialog-titlebar .ui-button-icon-only { background: none; border: 0 }
-.backendBody .ui-dialog .ui-dialog-content iframe {  box-sizing: border-box; }
-.backendBody .ui-draggable-dragging {opacity: 0.5; box-shadow: none !important}
-.backendBody .ui-draggable-dragging .ui-dialog-content {display: none !important}
+body.backendBody .ui-dialog .ui-dialog-titlebar .ui-button-icon-only { background: none; border: 0 }
+body.backendBody .ui-dialog .ui-dialog-content iframe {  box-sizing: border-box; }
+body.backendBody .ui-draggable-dragging {opacity: 0.5; box-shadow: none !important}
+body.backendBody .ui-draggable-dragging .ui-dialog-content {display: none !important}
 
 /* states and images */
-.backendBody .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_222222_256x240.png) !important }
-.backendBody .ui-icon-closethick { background-position: -96px -128px; }
+body.backendBody .ui-icon { width: 16px; height: 16px; background-image: url(images/ui-icons_222222_256x240.png) !important }
+body.backendBody .ui-icon-closethick { background-position: -96px -128px; }
 
 /* Sections */
-.backendBody .hostcmsSection {
+body.backendBody .hostcmsSection {
 	border: 1px dashed rgba(45, 195, 232, .8);
 }
 
-.backendBody .hostcmsSection:after {
+body.backendBody .hostcmsSection:after {
   content: "";
   visibility: hidden;
   display: block;
@@ -409,8 +418,8 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
   clear: both;
 }
 
-.backendBody .hostcmsSection, .backendBody .hostcmsSection .hostcmsSectionWidget { position: relative; }
-.backendBody .hostcmsSection .hostcmsSectionPanel, .backendBody .hostcmsSection .hostcmsSectionWidgetPanel {
+body.backendBody .hostcmsSection, body.backendBody .hostcmsSection .hostcmsSectionWidget { position: relative; }
+body.backendBody .hostcmsSection .hostcmsSectionPanel, body.backendBody .hostcmsSection .hostcmsSectionWidgetPanel {
 	background: rgba(255, 255, 255, 0.85) none repeat scroll 0 0;
 	border-radius: 8px;
 	box-shadow: 0 0 5px rgba(100, 100, 100, 0.6);
@@ -422,9 +431,9 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	font-size: 10pt;
 	line-height: 1em;
 }
-.backendBody .hostcmsSection .hostcmsSectionPanel div, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel div { padding: 5px 5px 0 5px; }
-.backendBody .hostcmsSection .hostcmsSectionPanel i, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel i { color: #5a636a; font-size: 14px; }
-.backendBody .hostcmsSection .hostcmsSectionPanel .draggable-indicator, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel  .draggable-indicator {
+body.backendBody .hostcmsSection .hostcmsSectionPanel div, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel div { padding: 5px 5px 0 5px; }
+body.backendBody .hostcmsSection .hostcmsSectionPanel i, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel i { color: #5a636a; font-size: 14px; }
+body.backendBody .hostcmsSection .hostcmsSectionPanel .draggable-indicator, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel  .draggable-indicator {
 	width: 16px;
 	height: 8px;
 	right: 0.5em;
@@ -433,19 +442,19 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	margin: auto;
 	padding: 1px 0;
 }
-.backendBody .hostcmsSection .hostcmsSectionPanel .draggable-indicator rect, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel rect {
+body.backendBody .hostcmsSection .hostcmsSectionPanel .draggable-indicator rect, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel rect {
 	fill: #ccc;
 }
-.backendBody .hostcmsSection .hostcmsSectionPanel .fa-plus { color: #5eba16 }
-.backendBody .hostcmsSection .hostcmsSectionPanel .fa-cog, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-cog, .backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o { color: #a2a2a2 }
-.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-times { color: #f55555 }
-.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o.active { color: #fabb00 }
+body.backendBody .hostcmsSection .hostcmsSectionPanel .fa-plus { color: #5eba16 }
+body.backendBody .hostcmsSection .hostcmsSectionPanel .fa-cog, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-cog, body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o { color: #a2a2a2 }
+body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-times { color: #f55555 }
+body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel .fa-lightbulb-o.active { color: #fabb00 }
 
 /* Section Widgets */
-.backendBody .hostcmsSection .hostcmsSectionWidget { border: 1px dashed #ccc; }
-.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel span { cursor: pointer }
+body.backendBody .hostcmsSection .hostcmsSectionWidget { border: 1px dashed #ccc; }
+body.backendBody .hostcmsSectionWidget .hostcmsSectionWidgetPanel span { cursor: pointer }
 
-.backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle {
+body.backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle {
     background-color: #ccc;
     position: absolute;
     right: 0;
@@ -457,7 +466,7 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	z-index: 10002;
 	width: 22px;
 }
-.backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle i {
+body.backendBody .hostcmsSection .hostcmsSectionWidget .drag-handle i {
 	padding: 5px;
 	color: #a2a2a2;
 }
@@ -736,7 +745,7 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 /*#endregion ColorPicker*/
 
 /* Left slide panel */
-.backendBody .template-settings {
+body.backendBody .template-settings {
 	background: rgba(0, 0, 0, .75) none repeat scroll 0 0;
 	border-radius: 5px 0 0 5px;
 	color: #333;
@@ -750,13 +759,13 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	z-index: 11000;
 	color: #fff;
 }
-.backendBody .template-settings.show {
+body.backendBody .template-settings.show {
 	right: 300px;
 }
-.backendBody .template-settings:hover {
+body.backendBody .template-settings:hover {
 	cursor: pointer;
 }
-.backendBody .template-settings .slidepanel {
+body.backendBody .template-settings .slidepanel {
 	font-family: Arial, sans-serif;
 	position: fixed;
 	top: 0;
@@ -777,16 +786,16 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	-moz-border-radius: 0 5px 0 0;
 	border-radius: 0 5px 0 0;
 }
-.backendBody .template-settings.show .slidepanel {
+body.backendBody .template-settings.show .slidepanel {
 	right: 0;
 }
 
-.backendBody .template-settings .slidepanel .panel-item { margin-bottom: 10px; }
-.backendBody .template-settings .slidepanel .panel-item label { font-weight: 400; }
+body.backendBody .template-settings .slidepanel .panel-item { margin-bottom: 10px; }
+body.backendBody .template-settings .slidepanel .panel-item label { font-weight: 400; }
 
-.backendBody .template-settings .slidepanel .panel-section-heading { margin-top: 10px; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid rgba(211, 211, 211, 0.17); padding-bottom: 5px; }
+body.backendBody .template-settings .slidepanel .panel-section-heading { margin-top: 10px; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid rgba(211, 211, 211, 0.17); padding-bottom: 5px; }
 
-.backendBody .template-settings .slidepanel .panel-heading { background: rgba(248, 248, 248, 0.19) none repeat scroll 0 0;  margin-bottom: 5px; border-radius: 0; color: #fff; font-weight: bold; text-align: center; }
+body.backendBody .template-settings .slidepanel .panel-heading { background: rgba(248, 248, 248, 0.19) none repeat scroll 0 0;  margin-bottom: 5px; border-radius: 0; color: #fff; font-weight: bold; text-align: center; }
 
 .ui-dialog.xmlWindow .ui-dialog-titlebar-maximize {
 	position: absolute;
@@ -797,5 +806,5 @@ text-align: center; border-radius: 9px 9px 0 0; box-sizing: border-box; }
 	margin: -10px 0 0 0;
 	padding: 1px;
 }
-.backendBody.bodyMaximize { overflow: hidden; }
+body.backendBody.bodyMaximize { overflow: hidden; }
 .xmlWindow textarea { width: 100% !important; padding: 5px; }

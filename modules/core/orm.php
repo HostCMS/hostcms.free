@@ -530,6 +530,36 @@ class Core_ORM
 	}
 
 	/**
+	 * Retrieve a small chunk and feeds each one into $callback for processing. It stops looping when $callback returns FALSE
+	 * @param int $count chunk size
+	 * @param callable $callback
+	 * @param boolean $bCache use cache
+	 * @return boolean
+	 */
+	public function chunk($count, $callback, $bCache = TRUE)
+	{
+		$offset = $step = 0;
+
+		do {
+			$this
+				->queryBuilder()
+				->limit($count)
+				->offset($offset);
+
+			$aObjects = $this->findAll($bCache);
+
+			if ($callback($aObjects, $step++) === FALSE)
+			{
+				return FALSE;
+			}
+
+			$offset += $count;
+		} while (count($aObjects) == $count);
+
+		return TRUE;
+	}
+
+	/**
 	 * Delete all object
 	 * @param boolean $bCache use cache
 	 * <code>

@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Libproperties extends Lib_Controller_Libproperties
 {
@@ -38,15 +38,24 @@ class Template_Section_Lib_Controller_Libproperties extends Lib_Controller_Libpr
 		else
 		{
 			$LA = $this->_object->id
-				? json_decode($this->_object->options, TRUE)
+				? (
+					$this->_object->options != ''
+						? json_decode($this->_object->options, TRUE)
+						: array()
+				)
 				: array();
-
-			!is_array($LA) && $LA = array();
-			// $LA = json_decode($LA, TRUE);
 
 			$this->getOptionsList($LA);
 		}
 
-		Core::showJson(ob_get_clean());
+		$aJson = array(
+			'id' => $oLib->id,
+			'editHref' => $this->_libId
+				? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $oLib->id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+				: '',
+			'optionsHtml' => ob_get_clean()
+		);
+
+		Core::showJson($aJson);
 	}
 }

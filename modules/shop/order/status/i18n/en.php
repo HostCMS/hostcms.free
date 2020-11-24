@@ -28,4 +28,7 @@ return array(
 	'apply_success' => 'Status information modified successfully!',
 	'color' => 'Color',
 	'parent_id' => 'Parent status',
+	'employees' => 'Employees',
+	'on_duty' => 'On duty',
+	'working_hours' => 'Working hours only',
 );

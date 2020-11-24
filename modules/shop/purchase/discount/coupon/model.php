@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 {
@@ -35,6 +35,7 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop_purchase_discount' => array(),
+		'shop_order' => array(),
 		'user' => array()
 	);
 

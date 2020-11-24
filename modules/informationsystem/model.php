@@ -35,7 +35,9 @@ class Informationsystem_Model extends Core_Entity
 		'informationsystem_group_property' => array(),
 		'informationsystem_group_property_dir' => array(),
 		'informationsystem_item_property' => array(),
-		'informationsystem_item_property_dir' => array()
+		'informationsystem_item_property_dir' => array(),
+		'informationsystem_comment_property' => array(),
+		'informationsystem_comment_property_dir' => array()
 	);
 
 	/**
@@ -366,7 +368,6 @@ class Informationsystem_Model extends Core_Entity
 
 		// Доп. свойства информационных элементов
 		$oInformationsystem_Item_Property_List = Core_Entity::factory('Informationsystem_Item_Property_List', $this->id);
-
 		$oInformationsystem_Item_Property_List->Properties->deleteAll(FALSE);
 		$oInformationsystem_Item_Property_List->Property_Dirs->deleteAll(FALSE);
 
@@ -374,6 +375,11 @@ class Informationsystem_Model extends Core_Entity
 		$oInformationsystem_Group_Property_List = Core_Entity::factory('Informationsystem_Group_Property_List', $this->id);
 		$oInformationsystem_Group_Property_List->Properties->deleteAll(FALSE);
 		$oInformationsystem_Group_Property_List->Property_Dirs->deleteAll(FALSE);
+
+		// Доп. свойства комментариев
+		$oInformationsystem_Comment_Property_List = Core_Entity::factory('Informationsystem_Comment_Property_List', $this->id);
+		$oInformationsystem_Comment_Property_List->Properties->deleteAll(FALSE);
+		$oInformationsystem_Comment_Property_List->Property_Dirs->deleteAll(FALSE);
 
 		$this->Informationsystem_Item_Property_Dirs->deleteAll(FALSE);
 		$this->Informationsystem_Item_Properties->deleteAll(FALSE);

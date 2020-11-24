@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../bootstrap.php');
 
@@ -192,12 +192,17 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Источник данных 1
-$oAdminFormDataset = new Admin_Form_Dataset_Entity(
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib_Property_List_Value')
 );
 
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
 // Ограничение источника 1 по родительской группе
-$oAdminFormDataset->addCondition(
+$oAdmin_Form_Dataset->addCondition(
 	array('where' =>
 		array('lib_property_id', '=', $iLibPropertyId)
 	)
@@ -205,7 +210,7 @@ $oAdminFormDataset->addCondition(
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
-	$oAdminFormDataset
+	$oAdmin_Form_Dataset
 );
 
 // Показ формы

@@ -225,7 +225,6 @@ class Update_Controller extends Core_Servant_Properties
 
 		if (is_array($this->modules))
 		{
-//print_r($this->modules);
 			foreach ($this->modules as $key => $aModule)
 			{
 				$Core_Http->data('module[' . $key . ']', $aModule['path']);
@@ -235,13 +234,14 @@ class Update_Controller extends Core_Servant_Properties
 
 		$Core_Http
 			->url($url)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		$aHeaders = $Core_Http->parseHeaders();
 
 		if (isset($aHeaders['status']) && $Core_Http->parseHttpStatusCode($aHeaders['status']) == 200)
 		{
-			Core_File::write($this->getFilePath(), $Core_Http->getBody());
+			Core_File::write($this->getFilePath(), $Core_Http->getDecompressedBody());
 		}
 		else
 		{
@@ -272,9 +272,10 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(15)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
-		return $Core_Http->getBody();
+		return $Core_Http->getDecompressedBody();
 	}
 
 	/**
@@ -383,6 +384,7 @@ class Update_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(15)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		return $Core_Http;

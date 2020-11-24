@@ -57,7 +57,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Checkbox extends Skin_Default_Admin_Form_
 			?><div class="input-group"><?php
 		}
 
-		?><label class="checkbox-inline"><input <?php echo implode(' ', $aAttr)?>/><span class="text"> <?php echo $this->caption?></span></label>
+		?><label class="checkbox-inline"><input <?php echo implode(' ', $aAttr)?>/><span class="text"><?php echo $this->caption?></span></label>
 
 		<?php
 		if (count($this->_children))

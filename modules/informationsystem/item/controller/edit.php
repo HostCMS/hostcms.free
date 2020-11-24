@@ -273,7 +273,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				// Добавляем новое поле типа файл
-				$oImageField = Admin_Form_Entity::factory('File');
+				$oImageField = Admin_Form_Entity::factory('File')
+					->divAttr(array('class' => ''));
 
 				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
@@ -351,27 +352,27 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oMainRow7->add($oImageField);
 
+				$this->getField('path')
+					->id('path')
+					->format(array('maxlen' => array('value' => 255)));
+
 				$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					$sItemUrl = ($oInformationsystem->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oInformationsystem->Structure->getPath()
-						. $this->_object->getPath();
+					$this->getField('path')->add(
+						$pathLink = Admin_Form_Entity::factory('A')
+							->id('pathLink')
+							->class('input-group-addon bg-blue bordered-blue')
+							->value('<i class="fa fa-external-link"></i>')
+					);
 
-					$this->getField('path')
-						->add(
-							Admin_Form_Entity::factory('A')
-								->id('path')
-								->target('_blank')
-								->href($sItemUrl)
-								->class('input-group-addon bg-blue bordered-blue')
-								->value('<i class="fa fa-external-link"></i>')
-						);
+					if ($this->_object->id)
+					{
+						$pathLink
+							->target('_blank')
+							->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
+					}
 				}
-
-				$this->getField('path')
-					->format(array('maxlen' => array('value' => 255)));
 
 				$oMainTab->move($this->getField('path'), $oMainRow8);
 
@@ -760,7 +761,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				}
 
 				// Добавляем новое поле типа файл
-				$oImageField = Admin_Form_Entity::factory('File');
+				$oImageField = Admin_Form_Entity::factory('File')
+					->divAttr(array('class' => ''));;
 
 				$oLargeFilePath = is_file($this->_object->getLargeFilePath())
 					? $this->_object->getLargeFileHref()
@@ -841,28 +843,28 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oMainRow4->add($oImageField);
 
+				// Path
+				$this->getField('path')
+					->id('path')
+					->format(array('maxlen' => array('value' => 255)));
+
 				$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
 				if ($oSiteAlias)
 				{
-					$sGroupUrl = ($oInformationsystem->Structure->https ? 'https://' : 'http://')
-						. $oSiteAlias->name
-						. $oInformationsystem->Structure->getPath()
-						. $this->_object->getPath();
-				}
-
-				$this->getField('path')
-					->add(
-						Admin_Form_Entity::factory('A')
-							->id('path')
-							->target('_blank')
-							->href($sGroupUrl)
+					$this->getField('path')->add(
+						$pathLink = Admin_Form_Entity::factory('A')
+							->id('pathLink')
 							->class('input-group-addon bg-blue bordered-blue')
 							->value('<i class="fa fa-external-link"></i>')
-				);
+					);
 
-				// Path
-				$this->getField('path')
-					->format(array('maxlen' => array('value' => 255)));
+					if ($this->_object->id)
+					{
+						$pathLink
+							->target('_blank')
+							->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
+					}
+				}
 
 				$oMainTab->move($this->getField('path'), $oMainRow5);
 
@@ -1653,7 +1655,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 			$this->_Admin_Form_Controller->addMessage(
 				Core::factory('Core_Html_Entity_Script')
-					->value("$('#{$windowId} a#path').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "')")
+					->value("$('#{$windowId} input#path').val('" . Core_Str::escapeJavascriptVariable($this->_object->path) . "');
+					$('#{$windowId} a#pathLink').attr('href', '" . Core_Str::escapeJavascriptVariable($sUrl) . "').attr('target', '_blank')")
 				->execute()
 			);
 		}

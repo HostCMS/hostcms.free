@@ -25,4 +25,5 @@ return array(
 	'import_form' => 'Файл',
 	'import_result' => 'Проімпортовано %s купонів!',
 	'import_error' => 'Виникла помилка: %s',
+	'shop_order_id' => 'Замовлення',
 );

@@ -6,10 +6,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Core command controller.
  *
  * @package HostCMS
- * @subpackage Core\Command
+ * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Command_Controller extends Core_Command_Controller
 {

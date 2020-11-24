@@ -34,7 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -168,6 +168,25 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 
 	/**
+	 * Get SELECT
+	 * @return array
+	 */
+	public function getSelect()
+	{
+		return $this->_select;
+	}
+
+	/**
+	 * Clear SELECT list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearSelect()
+	{
+		$this->_select = array();
+		return $this;
+	}
+
+	/**
 	 * Set HIGH_PRIORITY
 	 *
 	 * <code>
@@ -259,6 +278,16 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 
 	/**
+	 * Clear FROM
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearFrom()
+	{
+		$this->_from = array();
+		return $this;
+	}
+
+	/**
 	 * Open bracket in HAVING
 	 * @return Core_QueryBuilder_Select
 	 */
@@ -299,9 +328,6 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * // HAVING `a1` > '2'
 	 * $Core_QueryBuilder_Select->having('a1', '>', '2');
 	 *
-	 * // HAVING `f5` IS TRUE
-	 * $Core_QueryBuilder_Select->having('f5', 'IS', TRUE);
-	 *
 	 * // HAVING `a4` IN (17, 19, NULL, 'NULL')
 	 * $Core_QueryBuilder_Select->having('a4', 'IN', array(17,19, NULL, 'NULL'));
 	 *
@@ -322,6 +348,51 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		// Set operator as default
 		$this->setDefaultOperator();
 
+		return $this;
+	}
+
+	/**
+	 * Add OR and HAVING, e.g. HAVING ... OR $column $expression $value
+	 *
+	 * <code>
+	 * // HAVING `a1` > 2 OR `a2` < 7
+	 * $Core_QueryBuilder_Select->having('a1', '>', 2)->orHaving('a2', '<', 7);
+	 * </code>
+	 * @param string $column column
+	 * @param string $expression expression
+	 * @param string $value value
+	 * @return self
+	 */
+	public function orHaving($column, $expression, $value)
+	{
+		return $this
+			->setOr()
+			->having($column, $expression, $value);
+	}
+
+	/**
+	 * Add raw expression into HAVING.
+	 * ATTENTION! Danger, you should escape the query yourself!
+	 *
+	 * <code>
+	 * // HAVING `a1` > 2
+	 * $Core_QueryBuilder_Select->havingRaw("`a1` > 2");
+	 * </code>
+	 * @param string $expr expression
+	 * @return self
+	 */
+	public function havingRaw($expr)
+	{
+		return $this->having(Core_QueryBuilder::raw($expr));
+	}
+
+	/**
+	 * Clear HAVING list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearHaving()
+	{
+		$this->_having = array();
 		return $this;
 	}
 
@@ -350,6 +421,25 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	public function group($column)
 	{
 		return $this->groupBy($column);
+	}
+
+	/**
+	 * Get GROUP BY
+	 * @return array
+	 */
+	public function getGroupBy()
+	{
+		return $this->_groupBy;
+	}
+
+	/**
+	 * Clear GROUP BY list
+	 * @return Core_QueryBuilder_Select
+	 */
+	public function clearGroupBy()
+	{
+		$this->_groupBy = array();
+		return $this;
 	}
 
 	/**
@@ -586,52 +676,38 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	}
 
 	/**
-	 * Clear HAVING list
-	 * @return Core_QueryBuilder_Select
+	 * Retrieve a small chunk and feeds each one into $callback for processing. It stops looping when $callback returns FALSE
+	 * @param int $count chunk size
+	 * @param callable $callback
+	 * @param boolean $bCache use cache
+	 * @return boolean
 	 */
-	public function clearHaving()
+	public function chunk($count, $callback, $bCache = TRUE)
 	{
-		$this->_having = array();
-		return $this;
-	}
+		$offset = $step = 0;
 
-	/**
-	 * Get SELECT
-	 * @return array
-	 */
-	public function getSelect()
-	{
-		return $this->_select;
-	}
+		do {
+			$sql = $this
+				->limit($count)
+				->offset($offset)
+				->build();
 
-	/**
-	 * Clear SELECT list
-	 * @return Core_QueryBuilder_Select
-	 */
-	public function clearSelect()
-	{
-		$this->_select = array();
-		return $this;
-	}
+			// Set type of query
+			$oCore_DataBase = $this->_dataBase
+				->setQueryType($this->_queryType)
+				->query($sql);
 
-	/**
-	 * Clear FROM
-	 * @return Core_QueryBuilder_Select
-	 */
-	public function clearFrom()
-	{
-		$this->_from = array();
-		return $this;
-	}
+			$aRows = $oCore_DataBase->result($bCache);
 
-	/**
-	 * Clear GROUP BY list
-	 * @return Core_QueryBuilder_Select
-	 */
-	public function clearGroupBy()
-	{
-		$this->_groupBy = array();
-		return $this;
+			if ($callback($aRows, $step++) === FALSE)
+			{
+				return FALSE;
+			}
+
+			$offset += $count;
+		} while (count($aRows) == $count);
+
+		return TRUE;
 	}
 
 	/**

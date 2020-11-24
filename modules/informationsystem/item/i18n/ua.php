@@ -7,7 +7,6 @@ return array(
 	'show_information_groups_link2' => 'Додати',
 	'show_information_groups_link3' => 'Додаткові властивості',
 	'show_all_comments_top_menu' => 'Коментарі',
-	'show_comments_link_show_all_comments' => 'Всі коментарі',
 
 	'information_items_add_form_title' => 'Додавання інформаційного елемента',
 	'information_items_edit_form_title' => 'Редагування інформаційного елемента "%s"',
@@ -131,4 +130,5 @@ return array(
 	'msg_download_complete' => "Імпорт завершено!",
 	'information_items_copy_form_title' => 'Копіювати елемент',
 	'add_value' => 'Додати відсутні значення властивості за замовчуванням у елементів',
+	'file_does_not_specified' => 'Файл не вказано',
 );

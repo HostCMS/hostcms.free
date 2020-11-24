@@ -23,6 +23,8 @@ class Shop_Filter_Controller
 	 */
 	protected $_oShop_Item_Controller = NULL;
 
+	protected $_aAvailablePropertyTypes = array(0, 1, 3, 5, 7, 8, 9, 11, 12, 13, 14);
+
 	/**
 	 * Constructor.
 	 * @param Shop_Model $oShop shop
@@ -45,29 +47,33 @@ class Shop_Filter_Controller
 		{
 			case 0: // Целое число
 			case 3: // Список
+			case 5: // Элемент информационной системы
+			case 12: // Товар интернет-магазина
+			case 13: // Группа информационной системы
+			case 14: // Группа интернет-магазина
 				$sColumn = "`property{$oProperty->id}` int(11) DEFAULT '0'";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`)";
 			break;
 			case 1: // Строка
 			default:
 				$sColumn = "`property{$oProperty->id}` varchar(255) DEFAULT NULL";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`(10)) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`(10))";
 			break;
 			case 7: // Флажок
 				$sColumn = "`property{$oProperty->id}` tinyint(1) DEFAULT '0'";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`)";
 			break;
 			case 8: // Дата
 				$sColumn = "`property{$oProperty->id}` date DEFAULT '0000-00-00'";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`)";
 			break;
 			case 9: // Дата-время
 				$sColumn = "`property{$oProperty->id}` datetime DEFAULT '0000-00-00 00:00:00'";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`)";
 			break;
 			case 11: // Число с плавающей запятой
 				$sColumn = "`property{$oProperty->id}` double DEFAULT '0'";
-				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`) USING BTREE";
+				$sIndex = "`p{$oProperty->id}` (`property{$oProperty->id}`)";
 			break;
 		}
 
@@ -99,10 +105,10 @@ class Shop_Filter_Controller
 		$aIndexes = array(
 			'PRIMARY KEY (`id`)',
 			'KEY `shop_item_id` (`shop_item_id`)',
-			'KEY `shop_group_id` (`shop_group_id`,`modification_id`)',
+			'KEY `shop_group_id` (`shop_group_id`,`modification_id`,`price_absolute`)',
 			'KEY `shop_currency_id` (`shop_currency_id`)',
-			'KEY `price` (`price_absolute`) USING BTREE',
-			'KEY `producer` (`shop_producer_id`) USING BTREE'
+			'KEY `price` (`price_absolute`)',
+			'KEY `producer` (`shop_producer_id`)'
 		);
 
 		$oShop_Item_Properties = $this->_oShop->Shop_Item_Properties;
@@ -115,7 +121,6 @@ class Shop_Filter_Controller
 			->orderBy('shop_item_properties.property_id');
 
 		$aShop_Item_Properties = $oShop_Item_Properties->findAll(FALSE);
-
 		foreach ($aShop_Item_Properties as $oShop_Item_Property)
 		{
 			$oProperty = $oShop_Item_Property->Property;
@@ -258,8 +263,6 @@ class Shop_Filter_Controller
 		return $this->_cachePropertyIDs;
 	}
 
-	protected $_aAvailablePropertyTypes = array(0, 1, 3, 7, 8, 9, 11);
-
 	/**
 	 * Fill table rows
 	 * @param object $oProperty Property_Model object
@@ -267,7 +270,7 @@ class Shop_Filter_Controller
 	 */
 	public function fill(Shop_Item_Model $oShop_Item)
 	{
-		$tableName = 'shop_filter' . $this->_oShop->id;
+		$tableName = $this->getTableName();
 
 		// remove
 		Core_QueryBuilder::delete($tableName)
@@ -276,6 +279,10 @@ class Shop_Filter_Controller
 
 		if ($oShop_Item->active)
 		{
+			/*Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('Filter Fill ' . $oShop_Item->id);*/
+					
 			$oDefaultCurrency = Core_Entity::factory('Shop_Currency')->getDefault();
 
 			$fCurrencyCoefficient = $oShop_Item->Shop_Currency->id > 0 && $oDefaultCurrency->id > 0
@@ -339,6 +346,9 @@ class Shop_Filter_Controller
 
 			$oCore_DataBase = Core_DataBase::instance();
 
+			$aTableColumnNames = $this->_getTableColumns();
+			$sTableColumnNames = implode(',', $aTableColumnNames);
+
 			$aInserts = array();
 
 			if (count($aCombinations))
@@ -349,6 +359,13 @@ class Shop_Filter_Controller
 					$aValues = array_map(array($oCore_DataBase, 'quote'), $aValues);
 
 					$aInserts[] = '(' . implode(', ', $aValues) . ')';
+
+					if (count($aInserts) > 50)
+					{
+						$this->_insert($tableName, $sTableColumnNames, $aInserts);
+
+						$aInserts = array();
+					}
 				}
 			}
 			else
@@ -357,13 +374,18 @@ class Shop_Filter_Controller
 				$aInserts[] = '(' . implode(', ', $aValues) . ')';
 			}
 
-			$aTableColumnNames = $this->_getTableColumns();
-			$sTableColumnNames = implode(',', $aTableColumnNames);
-
-			$query = "INSERT INTO `{$tableName}` ({$sTableColumnNames}) VALUES " . implode(",\n", $aInserts);
-
-			$oCore_DataBase->query($query);
+			count($aInserts)
+				&& $this->_insert($tableName, $sTableColumnNames, $aInserts);
 		}
+	}
+
+	protected function _insert($tableName, $sTableColumnNames, array $aValues)
+	{
+		Core_DataBase::instance()->query(
+			"INSERT INTO `{$tableName}` ({$sTableColumnNames}) VALUES " . implode(",\n", $aValues)
+		);
+
+		return $this;
 	}
 
 	/**

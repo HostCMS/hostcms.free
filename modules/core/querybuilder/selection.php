@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
@@ -551,9 +551,6 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * // WHERE `a1` > '2'
 	 * $Core_QueryBuilder_Select->where('a1', '>', '2');
 	 *
-	 * // WHERE `f5` IS TRUE
-	 * $Core_QueryBuilder_Select->where('f5', 'IS', 'TRUE');
-	 *
 	 * // WHERE `a4` IN (17, 19, NULL, 'NULL')
 	 * $Core_QueryBuilder_Select->where('a4', 'IN', array(17, 19, NULL, 'NULL'));
 	 *
@@ -575,6 +572,281 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		$this->setDefaultOperator();
 
 		return $this;
+	}
+
+	/**
+	 * Add OR and WHERE, e.g. WHERE ... OR $column $expression $value
+	 *
+	 * <code>
+	 * // WHERE `a1` > 2 OR `a2` < 7
+	 * $Core_QueryBuilder_Select->where('a1', '>', 2)->orWhere('a2', '<', 7);
+	 * </code>
+	 * @param string $column column
+	 * @param string $expression expression
+	 * @param string $value value
+	 * @return self
+	 */
+	public function orWhere($column, $expression = NULL, $value = NULL)
+	{
+		return $this
+			->setOr()
+			->where($column, $expression, $value);
+	}
+
+	/**
+	 * Add raw expression into WHERE.
+	 * ATTENTION! Danger, you should escape the query yourself!
+	 *
+	 * <code>
+	 * // WHERE `a1` > 2
+	 * $Core_QueryBuilder_Select->whereRaw("`a1` > 2");
+	 * </code>
+	 * @param string $expr expression
+	 * @return self
+	 */
+	public function whereRaw($expr)
+	{
+		return $this->where(Core_QueryBuilder::raw($expr));
+	}
+
+	/**
+	 * Verify two columns
+	 *
+	 * <code>
+	 * // WHERE `a1` = `a2`
+	 * $Core_QueryBuilder_Select->whereColumn('a1', '=', 'a2');
+	 * </code>
+	 * @param string $column1 first column
+	 * @param string $expression expression
+	 * @param string $column2 second column
+	 * @return self
+	 */
+	public function whereColumn($column1, $expression, $column2)
+	{
+		return $this->where($column1, $expression, Core_QueryBuilder::raw($this->_dataBase->quoteColumnName($column2)));
+	}
+
+	/**
+	 * Set OR and verify two columns
+	 *
+	 * <code>
+	 * // WHERE ... OR `a1` = `a2`
+	 * $Core_QueryBuilder_Select->orWhereColumn('a1', '=', 'a2');
+	 * </code>
+	 * @param string $column1 first column
+	 * @param string $expression expression
+	 * @param string $column2 second column
+	 * @return self
+	 */
+	public function orWhereColumn($column1, $expression, $column2)
+	{
+		return $this
+			->setOr()
+			->whereColumn($column1, $expression, $column2);
+	}
+
+	/**
+	 * Add WHERE $column BETWEEN x AND y
+	 *
+	 * <code>
+	 * // WHERE `a7` BETWEEN 1 AND 10
+	 * $Core_QueryBuilder_Select->whereBetween('a7', 1, 10);
+	 * </code>
+	 * @param string $column column
+	 * @param string $from
+	 * @param string $to
+	 * @return self
+	 */
+	public function whereBetween($column, $from, $to)
+	{
+		return $this->where($column, 'BETWEEN', array($from, $to));
+	}
+
+	/**
+	 * Add OR and WHERE $column BETWEEN x AND y
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` BETWEEN 1 AND 10
+	 * $Core_QueryBuilder_Select->orWhereBetween('a7', 1, 10);
+	 * </code>
+	 * @param string $column column
+	 * @param string $from
+	 * @param string $to
+	 * @return self
+	 */
+	public function orWhereBetween($column, $from, $to)
+	{
+		return $this
+			->setOr()
+			->whereBetween($column, $from, $to);
+	}
+
+	/**
+	 * Add WHERE $column NOT BETWEEN x AND y
+	 *
+	 * <code>
+	 * // WHERE `a7` NOT BETWEEN 1 AND 10
+	 * $Core_QueryBuilder_Select->whereNotBetween('a7', 1, 10);
+	 * </code>
+	 * @param string $column column
+	 * @param string $from
+	 * @param string $to
+	 * @return self
+	 */
+	public function whereNotBetween($column, $from, $to)
+	{
+		return $this->where($column, 'NOT BETWEEN', array($from, $to));
+	}
+
+	/**
+	 * Add OR and WHERE $column NOT BETWEEN x AND y
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` NOT BETWEEN 1 AND 10
+	 * $Core_QueryBuilder_Select->orWhereNotBetween('a7', 1, 10);
+	 * </code>
+	 * @param string $column column
+	 * @param string $from
+	 * @param string $to
+	 * @return self
+	 */
+	public function orWhereNotBetween($column, $from, $to)
+	{
+		return $this
+			->setOr()
+			->whereNotBetween($column, $from, $to);
+	}
+
+	/**
+	 * Add WHERE $column IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE `a7` IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->whereIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param string $value value
+	 * @return self
+	 */
+	public function whereIn($column, array $value)
+	{
+		return $this->where($column, 'IN', $value);
+	}
+
+	/**
+	 * Add OR and WHERE $column IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->orWhereIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param string $value value
+	 * @return self
+	 */
+	public function orWhereIn($column, array $value)
+	{
+		return $this
+			->setOr()
+			->whereIn($column, $value);
+	}
+
+	/**
+	 * Add WHERE $column NOT IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE `a7` NOT IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->whereNotIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param string $value value
+	 * @return self
+	 */
+	public function whereNotIn($column, array $value)
+	{
+		return $this->where($column, 'IN', $value);
+	}
+
+	/**
+	 * Add OR and WHERE $column NOT IN (x, y)
+	 *
+	 * <code>
+	 * // WHERE ... OR `a7` NOT IN (1, 2, 'aaa')
+	 * $Core_QueryBuilder_Select->orWhereNotIn('a7', array(1, 2, 'aaa'));
+	 * </code>
+	 * @param string $column column
+	 * @param string $value value
+	 * @return self
+	 */
+	public function orWhereNotIn($column, array $value)
+	{
+		return $this
+			->setOr()
+			->whereNotIn($column, $value);
+	}
+
+	/**
+	 * Add WHERE $column IS NULL
+	 *
+	 * <code>
+	 * // WHERE `a1` IS NULL
+	 * $Core_QueryBuilder_Select->whereIsNull('a1');
+	 * </code>
+	 * @param string $column column
+	 * @return self
+	 */
+	public function whereIsNull($column)
+	{
+		return $this->where($column, 'IS', NULL);
+	}
+
+	/**
+	 * Add OR and WHERE $column IS NULL
+	 *
+	 * <code>
+	 * // WHERE `a1` IS NULL OR `a2` IS NULL
+	 * $Core_QueryBuilder_Select->whereIsNull('a1')->orWhereIsNull('a2');
+	 * </code>
+	 * @param string $column column
+	 * @return self
+	 */
+	public function orWhereIsNull($column)
+	{
+		return $this
+			->setOr()
+			->whereIsNull($column);
+	}
+
+	/**
+	 * Add WHERE $column IS NOT NULL
+	 *
+	 * <code>
+	 * // WHERE `a2` IS NOT NULL
+	 * $Core_QueryBuilder_Select->whereIsNotNull('a2');
+	 * </code>
+	 * @param string $column column
+	 * @return self
+	 */
+	public function whereIsNotNull($column)
+	{
+		return $this->where($column, 'IS NOT', NULL);
+	}
+
+	/**
+	 * Add OR and WHERE $column IS NOT NULL
+	 *
+	 * <code>
+	 * // WHERE `a1` IS NOT NULL
+	 * $Core_QueryBuilder_Select->orWhereIsNotNull('a1');
+	 * </code>
+	 * @param string $column column
+	 * @return self
+	 */
+	public function orWhereIsNotNull($column)
+	{
+		return $this
+			->setOr()
+			->whereIsNotNull($column);
 	}
 
 	/**
@@ -786,6 +1058,24 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
+	 * Add raw expression into ORDER BY.
+	 * ATTENTION! Danger, you should escape the query yourself!
+	 *
+	 * <code>
+	 * // ORDER BY `field1` + `field2` ASC
+	 * $Core_QueryBuilder_Select->orderByRaw('`field1` + `field2` ASC');
+	 * </code>
+	 * @param string $expr expression
+	 * @return self
+	 */
+	public function orderByRaw($expr)
+	{
+		$this->_orderBy[] = array($expr);
+
+		return $this;
+	}
+
+	/**
 	 * Build ORDER BY expression
 	 *
 	 * @param array $aOrderBy
@@ -799,14 +1089,22 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		{
 			foreach ($aOrderBy as $aOrder)
 			{
-				list($column, $direction, $binary) = $aOrder;
+				if (count($aOrder) == 3)
+				{
+					list($column, $direction, $binary) = $aOrder;
 
-				$column = $direction == 'RAND()'
-					? ''
-					// Quote column name
-					: $this->_dataBase->quoteColumnName($column);
+					$column = $direction == 'RAND()'
+						? ''
+						// Quote column name
+						: $this->_dataBase->quoteColumnName($column);
 
-				$orderSql[] = ($binary ? ' BINARY ' : '') . $column . ' ' . $direction;
+					$orderSql[] = ($binary ? ' BINARY ' : '') . $column . ' ' . $direction;
+				}
+				else
+				{
+					list($column) = $aOrder;
+					$orderSql[] = (is_object($column) ? $column->build() : $column);
+				}
 			}
 
 			return 'ORDER BY ' . implode(', ', $orderSql);

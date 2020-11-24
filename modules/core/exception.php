@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Exception extends Exception
 {
@@ -33,11 +33,11 @@ class Core_Exception extends Exception
 
 		if ($bShowDebugTrace)
 		{
-			$aDebugTrace = $this->getDebugTrace();
+			$aDebugTrace = Core::debugBacktrace();
 
 			foreach ($aDebugTrace as $aTrace)
 			{
-				$message .= "\n<br />{$aTrace['line']} {$aTrace['file']}";
+				$message .= "\n<br />{$aTrace['file']}:{$aTrace['line']} {$aTrace['function']}";
 			}
 		}
 
@@ -52,40 +52,13 @@ class Core_Exception extends Exception
 	}
 
 	/**
-	 * Get debug trace
-	 * @return array
-	 */
-	public function getDebugTrace()
-	{
-		$debug_backtrace = debug_backtrace();
-
-		$aDebugTrace = array();
-
-		foreach ($debug_backtrace as $history)
-		{
-			if (isset($history['file']) && isset($history['line']))
-			{
-				$history['file'] = self::cutRootPath($history['file']);
-
-				$aDebugTrace[] = array('file' => $history['file'], 'line' => $history['line']);
-			}
-		}
-
-		return $aDebugTrace;
-	}
-
-	/**
 	 * Cut CMS_FOLDER from $path
 	 * @param string $path path
 	 * @return string
+	 * @see Core::cutRootPath
 	 */
 	static public function cutRootPath($path)
 	{
-		if (strpos($path, dirname(CMS_FOLDER)) === 0)
-		{
-			$path = substr($path, strlen(CMS_FOLDER));
-		}
-
-		return $path;
+		return Core::cutRootPath($path);
 	}
 }

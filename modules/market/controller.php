@@ -206,9 +206,10 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(5)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
-		$data = $Core_Http->getBody();
+		$data = $Core_Http->getDecompressedBody();
 
 		$oXml = @simplexml_load_string($data);
 
@@ -328,9 +329,10 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(5)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
-		$data = $Core_Http->getBody();
+		$data = $Core_Http->getDecompressedBody();
 
 		if (empty($data))
 		{
@@ -407,7 +409,7 @@ class Market_Controller extends Core_Servant_Properties
 
 								// Сохраняем tar.gz
 								$source_file = $this->tmpDir . DIRECTORY_SEPARATOR . 'tmpfile.tar.gz';
-								Core_File::write($source_file, $Core_Http->getBody());
+								Core_File::write($source_file, $Core_Http->getDecompressedBody());
 
 								// Распаковываем файлы
 								$Core_Tar = new Core_Tar($source_file);
@@ -909,6 +911,7 @@ class Market_Controller extends Core_Servant_Properties
 		$Core_Http = Core_Http::instance()
 			->url($url)
 			->timeout(5)
+			->referer(Core_Array::get($_SERVER, 'HTTP_HOST'))
 			->execute();
 
 		return $Core_Http;

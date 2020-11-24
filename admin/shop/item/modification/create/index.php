@@ -214,6 +214,15 @@ $oMainRow1->add(
 		->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
 		->options($aMeasures)
 		->value($oShopItemParent->shop_measure_id)
+)->add(
+	Admin_Form_Entity::factory('Checkbox')
+		->caption(Core::_('Shop_Item.create_modification_use_property_name'))
+		->name('use_property_name')
+		->value(
+			isset($_COOKIE['use_property_name']) ? intval($_COOKIE['use_property_name']) : 1
+		)
+		->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 margin-top-21'))
+		->onchange("$.addModificationValue(this, 'use_property_name')")
 );
 
 $markingPattern = sprintf("%s-{N}", $oShopItemParent->marking);

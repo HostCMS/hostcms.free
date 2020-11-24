@@ -69,6 +69,14 @@ class Shop_Item_Model extends Core_Entity
 	public $adminRest = NULL;
 
 	/**
+	 * One-to-one relations
+	 * @var array
+	 */
+	protected $_hasOne = array(
+		'shop_item_certificate' => array()
+	);
+
+	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
 	 */
@@ -108,6 +116,9 @@ class Shop_Item_Model extends Core_Entity
 		'shop_price_entry' => array(),
 		'shop_price_setting_item' => array(),
 		'shop_warehouse_cell_item' => array(),
+		'shop_tab' => array('through' => 'shop_tab_item'),
+		'shop_tab_item' => array(),
+		'shop_item_certificate' => array(),
 	);
 
 	/**
@@ -1660,6 +1671,9 @@ class Shop_Item_Model extends Core_Entity
 
 		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
 		$this->Shop_Price_Entries->deleteAll(FALSE);
+		$this->Shop_Tab_Items->deleteAll(FALSE);
+
+		$this->Shop_Item_Certificate->delete();
 
 		// Fast filter
 		if ($this->Shop->filter)
@@ -1840,6 +1854,23 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show tabs data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlTabs = FALSE;
+
+	/**
+	 * Add tabs XML to item
+	 * @param boolean $showXmlTabs mode
+	 * @return self
+	 */
+	public function showXmlTabs($showXmlTabs = TRUE)
+	{
+		$this->_showXmlTabs = $showXmlTabs;
+		return $this;
+	}
+
+	/**
 	 * What comments show in XML? (active|inactive|all)
 	 * @var string
 	 */
@@ -2006,6 +2037,26 @@ class Shop_Item_Model extends Core_Entity
 	public function showXmlSiteuserProperties($showXmlSiteuserProperties = TRUE)
 	{
 		$this->_showXmlSiteuserProperties = $showXmlSiteuserProperties;
+		return $this;
+	}
+
+	/**
+	 * Show siteuser properties in XML
+	 * @var boolean
+	 */
+	protected $_showXmlCommentProperties = FALSE;
+
+	/**
+	 * Show siteuser properties in XML
+	 * @param boolean $showXmlCommentProperties mode
+	 * @return self
+	 */
+	public function showXmlCommentProperties($showXmlCommentProperties = TRUE)
+	{
+		$this->_showXmlCommentProperties = is_array($showXmlCommentProperties)
+			? array_combine($showXmlCommentProperties, $showXmlCommentProperties)
+			: $showXmlCommentProperties;
+
 		return $this;
 	}
 
@@ -2375,15 +2426,19 @@ class Shop_Item_Model extends Core_Entity
 
 				foreach ($aShop_Items_Modifications as $oShop_Items_Modification)
 				{
-					$oShop_Items_Modification->clearEntities();
+					$oTmp_Shop_Items_Modification = clone $oShop_Items_Modification;
+					
+					$oTmp_Shop_Items_Modification
+						->id($oShop_Items_Modification->id)
+						->clearEntities();
 
-					// Apply forbidden tags for modifications
+					// Apply forbidden tags
 					foreach ($aForbiddenTags as $tagName)
 					{
-						$oShop_Items_Modification->addForbiddenTag($tagName);
+						$oTmp_Shop_Items_Modification->addForbiddenTag($tagName);
 					}
 
-					$oShop_Items_Modification
+					$oTmp_Shop_Items_Modification
 						->showXmlComments($this->_showXmlComments)
 						->showXmlAssociatedItems(FALSE)
 						->showXmlModifications(FALSE)
@@ -2395,11 +2450,11 @@ class Shop_Item_Model extends Core_Entity
 						->showXmlProperties($this->_showXmlProperties);
 
 					Core_Event::notify($this->_modelName . '.onBeforeAddModification', $this, array(
-						$oShop_Items_Modification
+						$oTmp_Shop_Items_Modification
 					));
 
 					$oModificationEntity->addEntity(
-						$oShop_Items_Modification
+						$oTmp_Shop_Items_Modification
 					);
 				}
 			}
@@ -2439,7 +2494,7 @@ class Shop_Item_Model extends Core_Entity
 						$oShop_Item_Associated->id = $oShop_Item_Associated_Original->id;
 						$oShop_Item_Associated->clearEntities();
 
-						// Apply forbidden tags for modifications
+						// Apply forbidden tags
 						foreach ($aForbiddenTags as $tagName)
 						{
 							$oShop_Item_Associated->addForbiddenTag($tagName);
@@ -2449,6 +2504,7 @@ class Shop_Item_Model extends Core_Entity
 							->showXmlComments($this->_showXmlComments)
 							->showXmlAssociatedItems(FALSE)
 							->showXmlModifications(FALSE)
+							->showXmlSets(FALSE)
 							->showXmlSpecialprices($this->_showXmlSpecialprices)
 							->showXmlTags($this->_showXmlTags)
 							->showXmlWarehousesItems($this->_showXmlWarehousesItems)
@@ -2541,6 +2597,29 @@ class Shop_Item_Model extends Core_Entity
 			$this->_aComments = array();
 		}
 
+		if ($this->_showXmlTabs)
+		{
+			$oShop_Tab = Core_Entity::factory('Shop_Tab');
+			$oShop_Tab
+				->queryBuilder()
+				->join('shop_tab_groups', 'shop_tabs.id', '=', 'shop_tab_groups.shop_tab_id')
+				->where('shop_tab_groups.shop_id', '=', $this->shop_id)
+				->where('shop_tab_groups.shop_group_id', '=', $this->shop_group_id);
+
+			$aShop_Tabs = $oShop_Tab->findAll();
+
+			$aShop_Tabs = array_unique(array_merge($aShop_Tabs, $this->Shop_Tabs->findAll()));
+
+			if (count($aShop_Tabs))
+			{
+				$oTabEntity = Core::factory('Core_Xml_Entity')
+					->name('shop_tabs')
+					->addEntities($aShop_Tabs);
+
+				$this->addEntity($oTabEntity);
+			}
+		}
+
 		if ($this->_showXmlProperties)
 		{
 			if (is_array($this->_showXmlProperties))
@@ -2610,7 +2689,8 @@ class Shop_Item_Model extends Core_Entity
 			{
 				$parentObject->addEntity($oComment
 					->clearEntities()
-					->showXmlProperties($this->_showXmlSiteuserProperties)
+					->showXmlProperties($this->_showXmlCommentProperties)
+					->showXmlSiteuserProperties($this->_showXmlSiteuserProperties)
 					->showXmlVotes($this->_showXmlVotes)
 					->dateFormat($this->Shop->format_date)
 					->dateTimeFormat($this->Shop->format_datetime)
@@ -2790,10 +2870,25 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		// Divisible
+		$this->type == 2 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-warning white')
+			->style('padding-left: 2px;')
+			->value('<i class="fa fa-puzzle-piece fa-fw"></i>')
+			->execute();
+
+		// Set
 		$this->type == 3 && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-purple white')
+			->class('badge badge-ico badge-sky white')
 			->style('padding-left: 1px;')
 			->value('<i class="fa fa-archive fa-fw"></i>')
+			->execute();
+
+		// Certificate
+		$this->type == 4 && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-ico badge-maroon white')
+			->style('padding-left: 1px;')
+			->value('<i class="fa fa-certificate fa-fw"></i>')
 			->execute();
 	}
 
@@ -2992,7 +3087,7 @@ class Shop_Item_Model extends Core_Entity
 							$oTmp_Shop_Item->Shop_Currency, $this->Shop_Currency
 						)
 						: 0;
-					
+
 					$aPrice = $Shop_Item_Controller->calculatePriceInItemCurrency($oTmp_Shop_Item->price, $oTmp_Shop_Item);
 
 					$amount += $aPrice['price_discount'] * $fCurrencyCoefficient * $oShop_Item_Set->count;

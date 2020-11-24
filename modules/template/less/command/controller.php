@@ -6,10 +6,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Core command controller.
  *
  * @package HostCMS
- * @subpackage Core\Command
+ * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Less_Command_Controller extends Core_Command_Controller
 {
@@ -41,14 +41,14 @@ class Template_Less_Command_Controller extends Core_Command_Controller
 
 						if (strlen($less))
 						{
-							$variableName = preg_quote(Core_Array::getPost('name'), '/');
-							$variableValue = preg_quote(Core_Array::getPost('value'), '/');
+							$variableName = preg_quote(Core_Array::getPost('name'), '#');
+							$variableValue = str_replace(array('\\', '{', '}'), array('\\\\', '\{', '\}'), Core_Array::getPost('value'));
 
 							//@color-rgba: rgba(232, 176, 21, 0.8);
 
 							if (trim($variableValue) != '')
 							{
-								$less = preg_replace("/(@{$variableName})\s*:\s*.*?;/si", '${1}: ' . $variableValue . ';', $less);
+								$less = preg_replace("#(@{$variableName})\s*:\s*.*?;#si", '${1}: ' . $variableValue . ';', $less);
 
 								$oTemplate->saveTemplateLessFile($less);
 

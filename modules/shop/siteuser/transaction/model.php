@@ -168,6 +168,17 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function shop_order_idBackend()
+	{
+		return $this->shop_order_id
+			? '<a href="/admin/shop/order/index.php?hostcms[action]=edit&hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '" onclick="$.adminLoad({path: \'/admin/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '\', view: \'list\', windowId: \'id_content\'}); return false">' . $this->Shop_Order->invoice . '</a>'
+			: '—';
+	}
+
+	/**
 	 * Backend callback method.
 	 * Get amount transactions until current
 	 * @return float

@@ -188,6 +188,15 @@ class Shop_Order_Item_Model extends Core_Entity
 
 		$this->Shop_Order_Item_Digitals->deleteAll(FALSE);
 		$this->Shop_Order_Item_Codes->deleteAll(FALSE);
+		
+		if ($this->shop_item_id)
+		{
+			$aShop_Item_Reserveds = $this->Shop_Order->Shop_Item_Reserveds->getAllByshop_item_id($this->shop_item_id);
+			foreach ($aShop_Item_Reserveds as $oShop_Item_Reserved)
+			{
+				$oShop_Item_Reserved->delete();
+			}
+		}
 
 		return parent::delete($primaryKey);
 	}

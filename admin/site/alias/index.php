@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -117,11 +117,16 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
-$oAdminFormDataset = new Admin_Form_Dataset_Entity(
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Site_Alias')
 );
 
-$oAdminFormDataset->addCondition(
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
+
+$oAdmin_Form_Dataset->addCondition(
 	array('where' =>
 		array('site_id', '=', $iSiteId)
 	)
@@ -129,7 +134,7 @@ $oAdminFormDataset->addCondition(
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
-	$oAdminFormDataset
+	$oAdmin_Form_Dataset
 );
 
 // Предупреждение

@@ -128,6 +128,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRowDiscountcard = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRowNotification = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oFilterBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+					->add($oCertificateBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					->add($oMailBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 					// ->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -527,11 +528,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('max_bonus')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow7);
 
 				Core_Templater::decorateInput($this->getField('invoice_template'));
-				$oMainTab->move($this->getField('invoice_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowInvoice);
+				$oMainTab->move($this->getField('invoice_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oMainRowInvoice);
 
 				Core_Templater::decorateInput($this->getField('discountcard_template'));
-				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-md-6')), $oMainRowDiscountcard);
-				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 margin-top-25')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('discountcard_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oMainRowDiscountcard);
+				$oMainTab->move($this->getField('issue_discountcard')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-6 margin-top-25')), $oMainRowDiscountcard);
 
 				// Notification subscribers
 				if (Core::moduleIsActive('notification'))
@@ -593,7 +594,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oFilterBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 				;
 
-				$oMainTab->move($this->getField('filter')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 margin-top-21')), $oFilterBlockRow1);
+				$oMainTab->move($this->getField('filter')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-5 col-lg-3 margin-top-21')), $oFilterBlockRow1);
 
 				$oMainTab->delete($this->getField('filter_mode'));
 
@@ -605,9 +606,59 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					))
 					->name('filter_mode')
 					->value($this->_object->filter_mode)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+					->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-5 col-lg-4'));
 
 				$oFilterBlockRow1->add($oFilterModeSelect);
+
+				$oCertificateBlock
+					->add(Admin_Form_Entity::factory('Div')
+						->class('header bordered-maroon')
+						->value(Core::_("Shop.certificate_header"))
+					)
+					->add($oCertificateBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oCertificateBlockRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oCertificateBlockRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+				;
+
+				$aTemplateOptions = array(
+					'{coupon_id}' => array(
+						'caption' => Core::_('Shop.certificate_template_coupon_id'),
+						'color' => 'sky'
+					),
+					'{day}' => array(
+						'caption' => Core::_('Core.day'),
+						'color' => 'success'
+					),
+					'{month}' => array(
+						'caption' => Core::_('Core.month'),
+						'color' => 'info'
+					),
+					'{year}' => array(
+						'caption' => Core::_('Core.year'),
+						'color' => 'warning'
+					),
+					'{rand(10000,99999)}' => array(
+						'caption' => Core::_('Core.random'),
+						'color' => 'danger'
+					),
+					'{generateChars(7)}' => array(
+						'caption' => Core::_('Core.generateChars'),
+						'color' => 'maroon'
+					)
+				);
+
+				Core_Templater::decorateInput($this->getField('certificate_template'), $aTemplateOptions);
+				$oMainTab->move($this->getField('certificate_template')->divAttr(array('class' => 'form-group col-xs-12 col-lg-6')), $oCertificateBlockRow1);
+
+				$oMainTab->move($this->getField('certificate_subject'), $oCertificateBlockRow2);
+
+				$this->getField('certificate_text')
+					->rows(10)
+					->wysiwyg(Core::moduleIsActive('wysiwyg'))
+					->template_id($this->_object->Structure->template_id
+						? $this->_object->Structure->template_id
+						: 0);
+				$oMainTab->move($this->getField('certificate_text'), $oCertificateBlockRow3);
 
 				$oMailBlock
 					->add(Admin_Form_Entity::factory('Div')
@@ -835,6 +886,9 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				$Shop_Filter_Controller = new Shop_Filter_Controller($this->_object);
 				$Shop_Filter_Controller->createTable();
+
+				$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($this->_object);
+				$Shop_Filter_Group_Controller->createTable();
 			}
 
 			if (Core::moduleIsActive('notification'))

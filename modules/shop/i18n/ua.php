@@ -127,6 +127,7 @@ return array(
 	'schedule-searchIndexGroup' => 'Індексувати групу товарів',
 	'schedule-searchUnindexItem' => 'Зняти товар з індексації',
 	'schedule-recountShop' => 'Перерахунок груп і товарів',
+	'schedule-rebuildFastfilter' => 'Перебудувати швидкий фільтр',
 	'order_admin_subject' => 'Тема листа про замовлення куратору магазину',
 	'order_user_subject' => 'Тема листа про замовлення користувачеві',
 	'confirm_admin_subject' => 'Тема листа підтвердження оплати куратору магазину',
@@ -185,4 +186,10 @@ return array(
 	'filter_mode1' => 'Шлях',
 	'mail_header' => 'Листи',
 	'shop_codetype_id' => 'Маркування за замовчуванням',
+	'report_top' => 'ТОП-',
+	'certificate_header' => 'Керування сертифікатами',
+	'certificate_template' => 'Шаблон номера купона',
+	'certificate_subject' => 'Тема листа',
+	'certificate_text' => 'Текст листа',
+	'certificate_template_coupon_id' => 'ID купона',
 );

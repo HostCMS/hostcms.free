@@ -10,7 +10,7 @@ if (Core::moduleIsActive('siteuser'))
 	);
 
 	// Авторизация OAuth
-	if(!is_null($oauth_provider = Core_Array::getGet('oauth_provider')))
+	if (!is_null($oauth_provider = Core_Array::getGet('oauth_provider')))
 	{
 		try
 		{
@@ -34,14 +34,14 @@ if (Core::moduleIsActive('siteuser'))
 	$bTwitter = !is_null($oauth_token = Core_Array::getGet('oauth_token')) && !is_null($oauth_verifier = Core_Array::getGet('oauth_verifier'));
 
 	// Встречаем ответ Вконтакте/Facebook/Одноклассники/Google+/Яндекс/Mail.ru/Twitter
-	if(!is_null($code = Core_Array::getGet('code')) || $bTwitter)
+	if (!is_null($code = Core_Array::getGet('code')) || $bTwitter)
 	{
 		Core_Session::start();
 		$oauth_provider = Core_Array::get($_SESSION, 'oauth_provider');
 
 		$oSiteuser_Oauth_Controller = Siteuser_Oauth_Controller::factory($oauth_provider);
 
-		if(is_null($oSiteuser_Oauth_Controller))
+		if (is_null($oSiteuser_Oauth_Controller))
 		{
 			throw new Exception('Class does not exist');
 		}
@@ -63,17 +63,16 @@ if (Core::moduleIsActive('siteuser'))
 		{
 			if (!is_null($user_id = Core_Array::get($aResult, 'user_id')))
 			{
-				$oCurrentSiteuser = NULL;
-
 				$oSiteuser_Identity_Provider = Core_Entity::factory('Siteuser_Identity_Provider', $oauth_provider);
 
-				$oSiteuser = $oSiteuser_Identity_Provider->getSiteuserByIdentity($user_id);
+				$oFoundSiteuser = $oSiteuser_Identity_Provider->getSiteuserByIdentity($user_id);
 
-				if (is_null($oSiteuser))
+				// Пользователь через oAuth не найден и текущий пользователь не авторизован
+				if (is_null($oFoundSiteuser) && !$oSiteuser->id)
 				{
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-					if(!is_null($user_login = Core_Array::get($aResult, 'login')))
+					if (!is_null($user_login = Core_Array::get($aResult, 'login')))
 					{
 						// Replace '/' to '-'
 						$user_login = str_replace('/', '-', $user_login);
@@ -86,7 +85,7 @@ if (Core::moduleIsActive('siteuser'))
 						$sUserLogin = '';
 					}
 
-					if(!is_null($user_email = Core_Array::get($aResult, 'email')))
+					if (!is_null($user_email = Core_Array::get($aResult, 'email')))
 					{
 						$oSiteuser = $oSite->Siteusers->getByEmail($user_email, FALSE);
 						$sUserEmail = is_null($oSiteuser) ? $user_email : '';
@@ -112,7 +111,7 @@ if (Core::moduleIsActive('siteuser'))
 						$oSiteuser_Property_List = Core_Entity::factory('Siteuser_Property_List', CURRENT_SITE);
 						$oProperty = $oSiteuser_Property_List->Properties->getByname('Аватар', FALSE);
 
-						if(!is_null($oProperty))
+						if (!is_null($oProperty))
 						{
 							// Папка назначения
 							$sDestinationFolder = $oSiteuser->getDirPath();
@@ -208,12 +207,6 @@ if (Core::moduleIsActive('siteuser'))
 						$oSiteuser->save();
 					}
 
-					// Add siteuser's identity
-					$oSiteuser_Identity = Core_Entity::factory('Siteuser_Identity');
-					$oSiteuser_Identity->siteuser_identity_provider_id = $oauth_provider;
-					$oSiteuser_Identity->identity = $user_id;
-					$oSiteuser->add($oSiteuser_Identity);
-
 					// Add into default group
 					$oSiteuser_Group = $oSiteuser->Site->Siteuser_Groups->getDefault();
 					if (!is_null($oSiteuser_Group))
@@ -228,10 +221,26 @@ if (Core::moduleIsActive('siteuser'))
 						->applyAffiliate(Core_Array::get($_COOKIE, 'affiliate_name'));
 				}
 
+				// Пользователь через oAuth не найден
+				if (is_null($oFoundSiteuser))
+				{
+					// Add siteuser's identity
+					$oSiteuser_Identity = Core_Entity::factory('Siteuser_Identity');
+					$oSiteuser_Identity->siteuser_identity_provider_id = $oauth_provider;
+					$oSiteuser_Identity->identity = $user_id;
+					$oSiteuser->add($oSiteuser_Identity);
+				}
+				// Авторизация через соцсеть, текущим является тот, которого вернул oAuth контроллер
+				elseif (!$oSiteuser->id)
+				{
+					$oSiteuser = $oFoundSiteuser;
+				}
+
 				$oSiteuser->setCurrent();
+				$Siteuser_Controller_Show->setEntity($oSiteuser);
 
 				$oauth_location = Core_Array::get($_SESSION, 'oauth_location');
-				!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));			
+				!is_null($oauth_location) && $Siteuser_Controller_Show->go(strval($oauth_location));
 			}
 		}
 		else
@@ -470,6 +479,7 @@ if (Core::moduleIsActive('siteuser'))
 			$oSiteuser
 				->activate()
 				->setCurrent();
+
 			$Siteuser_Controller_Show->setEntity($oSiteuser);
 		}
 	}

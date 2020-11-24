@@ -204,11 +204,13 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [{$sRadiogroupOnChangeList}])")
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
+				$oMainRow2->add($oSelect_Type);
+
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete($this->getField('property_dir_id'));
 
 				// Селектор с группой
-				$oSelect_Dirs
+				/*$oSelect_Dirs
 					->options(
 						array(' … ') + self::fillPropertyDir($this->linkedObject)
 					)
@@ -217,9 +219,13 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Property_Dir.parent_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 
-				$oMainRow2
-					->add($oSelect_Type)
-					->add($oSelect_Dirs);
+				$oMainRow2->add($oSelect_Dirs);*/
+
+				$aResult = $this->propertyDirShow($this->linkedObject, 'property_dir_id');
+				foreach ($aResult as $resultItem)
+				{
+					$oMainRow2->add($resultItem);
+				}
 
 				// Список
 				if (Core::moduleIsActive('list'))
@@ -227,17 +233,87 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oAdditionalTab->delete($this->getField('list_id'));
 
 					$oList_Controller_Edit = new List_Controller_Edit($this->_Admin_Form_Action);
-					// Селектор с группой
-					$oSelect_Lists = Admin_Form_Entity::factory('Select')
-						->options(
-							array(' … ') + $oList_Controller_Edit->fillLists(CURRENT_SITE)
-						)
-						->name('list_id')
-						->value($this->_object->list_id)
-						->caption(Core::_('Property.list_id'))
-						->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
 
-					$oMainRow3->add($oSelect_Lists);
+					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+					$iCountLists = $oSite->Lists->getCount();
+
+					if ($iCountLists < Core::$mainConfig['switchSelectToAutocomplete'])
+					{
+						// Селектор с группой
+						$oSelect_Lists = Admin_Form_Entity::factory('Select')
+							->options(
+								array(' … ') + $oList_Controller_Edit->fillLists(CURRENT_SITE)
+							)
+							->name('list_id')
+							->value($this->_object->list_id)
+							->caption(Core::_('Property.list_id'))
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
+
+						$oMainRow3->add($oSelect_Lists);
+					}
+					else
+					{
+						$oList = Core_Entity::factory('List', $this->_object->list_id);
+
+						$oListInput = Admin_Form_Entity::factory('Input')
+							->caption(Core::_('Property.list_id'))
+							->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'))
+							->name('list_name');
+
+						$this->_object->list_id
+							&& $oListInput->value($oList->name . ' [' . $oList->id . ']');
+
+						$oListInputHidden = Admin_Form_Entity::factory('Input')
+							->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+							->name('list_id')
+							->value($this->_object->list_id)
+							->type('hidden');
+
+						$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+							->value("
+								$('[name = list_name]').autocomplete({
+									  source: function(request, response) {
+
+										$.ajax({
+										  url: '/admin/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
+										  dataType: 'json',
+										  data: {
+											queryString: request.term
+										  },
+										  success: function( data ) {
+											response( data );
+										  }
+										});
+									  },
+									  minLength: 1,
+									  create: function() {
+										$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+											return $('<li></li>')
+												.data('item.autocomplete', item)
+												.append($('<a>').text(item.label))
+												.appendTo(ul);
+										}
+
+										 $(this).prev('.ui-helper-hidden-accessible').remove();
+									  },
+									  select: function( event, ui ) {
+										$('[name = list_id]').val(ui.item.id);
+									  },
+									  open: function() {
+										$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+									  },
+									  close: function() {
+										$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+									  }
+								});
+							");
+
+						$oMainRow3
+							->add($oListInput)
+							->add($oListInputHidden)
+							->add($oCore_Html_Entity_Script)
+							;
+					}
 				}
 
 				// Информационные системы
@@ -291,7 +367,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab->move($this->getField('default_value'), $oMainRow7);
 
 				$oDefault_Value_Date = Admin_Form_Entity::factory('Date')
-					->value($this->_object->default_value)
+					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_date')
 					->caption(Core::_('Property.default_value'))
 					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
@@ -299,7 +375,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainRow8->add($oDefault_Value_Date);
 
 				$oDefault_Value_DateTime = Admin_Form_Entity::factory('DateTime')
-					->value($this->_object->default_value)
+					->value($this->_object->default_value == '0000-00-00 00:00:00' ? '' : $this->_object->default_value)
 					->name('default_value_datetime')
 					->caption(Core::_('Property.default_value'))
 					->divAttr(array('class' => 'form-group col-sm-6 col-md-4 col-lg-3 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-8 hidden-10 hidden-11 hidden-12 hidden-13 hidden-14'));
@@ -405,7 +481,7 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('name'), $oMainRow1);
 
-				$oSelect_Dirs
+				/*$oSelect_Dirs
 					->options(
 						array(' … ') + self::fillPropertyDir($this->linkedObject, 0, array($this->_object->id))
 					)
@@ -414,7 +490,13 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Property_Dir.parent_id'))
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
-				$oMainRow2->add($oSelect_Dirs);
+				$oMainRow2->add($oSelect_Dirs);*/
+
+				$aResult = $this->propertyDirShow($this->linkedObject, 'parent_id');
+				foreach ($aResult as $resultItem)
+				{
+					$oMainRow2->add($resultItem);
+				}
 
 				$oMainTab
 					->move($this->getField('description'), $oMainRow3)
@@ -428,6 +510,103 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		Core_Event::notify('Property_Controller_Edit.onAfterPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 
 		return $this;
+	}
+
+	/**
+	 * Показ списка групп или поле ввода с autocomplete для большого количества групп
+	 * @param string $fieldName имя поля группы
+	 * @return array  массив элементов, для добавления в строку
+	 */
+	public function propertyDirShow($linkedObject, $fieldName)
+	{
+		$return = array();
+
+		$iCountDirs = $linkedObject->Property_Dirs->getCount();
+
+		switch (get_class($this->_object))
+		{
+			case 'Property_Model':
+				$aExclude = array();
+				$class = 'form-group col-xs-12 col-md-6';
+			break;
+			case 'Property_Dir_Model':
+			default:
+				$aExclude = array($this->_object->id);
+				$class = 'form-group col-xs-12';
+		}
+
+		if ($iCountDirs < Core::$mainConfig['switchSelectToAutocomplete'])
+		{
+			$oPropertyDirSelect = Admin_Form_Entity::factory('Select');
+			$oPropertyDirSelect
+				->caption(Core::_('Property_Dir.parent_id'))
+				->options(array(' … ') + self::fillPropertyDir($linkedObject, 0, $aExclude))
+				->name($fieldName)
+				->value($this->_object->$fieldName)
+				->divAttr(array('class' => $class));
+
+			$return = array($oPropertyDirSelect);
+		}
+		else
+		{
+			$oProperty_Dir = Core_Entity::factory('Property_Dir', $this->_object->$fieldName);
+
+			$oPropertyDirInput = Admin_Form_Entity::factory('Input')
+				->caption(Core::_('Property_Dir.parent_id'))
+				->divAttr(array('class' => $class))
+				->name('property_dir_name');
+
+			$this->_object->$fieldName
+				&& $oPropertyDirInput->value($oProperty_Dir->name . ' [' . $oProperty_Dir->id . ']');
+
+			$oPropertyDirInputHidden = Admin_Form_Entity::factory('Input')
+				->divAttr(array('class' => 'form-group col-xs-12 hidden'))
+				->name($fieldName)
+				->value($this->_object->$fieldName)
+				->type('hidden');
+
+			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+				->value("
+					$('[name = property_dir_name]').autocomplete({
+						  source: function(request, response) {
+							$.ajax({
+							  url: '/admin/property/index.php?autocomplete=1&show_dir=1&linkedObjectName=" . $linkedObject->getModelName() . "&linkedObjectId=" . $linkedObject->getPrimaryKey() . "',
+							  dataType: 'json',
+							  data: {
+								queryString: request.term
+							  },
+							  success: function( data ) {
+								response( data );
+							  }
+							});
+						  },
+						  minLength: 1,
+						  create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+								return $('<li></li>')
+									.data('item.autocomplete', item)
+									.append($('<a>').text(item.label))
+									.appendTo(ul);
+							}
+
+							 $(this).prev('.ui-helper-hidden-accessible').remove();
+						  },
+						  select: function( event, ui ) {
+							$('[name = {$fieldName}]').val(ui.item.id);
+						  },
+						  open: function() {
+							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+						  },
+						  close: function() {
+							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+						  }
+					});
+				");
+
+			$return = array($oPropertyDirInput, $oPropertyDirInputHidden, $oCore_Html_Entity_Script);
+		}
+
+		return $return;
 	}
 
 	/**

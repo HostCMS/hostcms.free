@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,7 +67,7 @@ class User_Wallpaper_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 					'show' => FALSE
 				)
 			)
-			->divAttr(array('class' => 'form-group col-xs-12'));
+			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'));
 
 		$oMainRow2->add($oImageField);
 

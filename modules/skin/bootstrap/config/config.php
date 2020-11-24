@@ -15,12 +15,12 @@ return array (
 		'services' => array(
 			'ico' => 'fa fa-cubes',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_services'),
-			'modules' => array('helpdesk', 'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'message', 'report'),
+			'modules' => array('helpdesk', 'dms', 'form', 'list', 'forum', 'maillist', 'poll', 'search', 'bot', 'message', 'report'),
 		),
 		'crm' => array(
 			'ico' => 'fa fa-users',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_crm'),
-			'modules' => array('lead', 'siteuser', 'deal', 'event', 'user', 'calendar', 'messenger', 'kanban', 'company'),
+			'modules' => array('lead', 'siteuser', 'crm_project', 'deal', 'event', 'user', 'calendar', 'messenger', 'kanban', 'company'),
 		),
 		'tools' => array(
 			'ico' => 'fa fa-briefcase',

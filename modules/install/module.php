@@ -23,5 +23,5 @@ class Install_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-08-04';
+	public $date = '2020-11-03';
 }

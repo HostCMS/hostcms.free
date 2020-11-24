@@ -33,36 +33,26 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
+
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib.lib_page'))
-		->icon('fa fa-file-code-o')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Lib.lib_show_add_link'))
-				->icon('fa fa-plus')
-				->img('/admin/images/script_code_red_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
 )->add(
+
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Lib_Dir.lib_dir_folder'))
-		->icon('fa fa-folder-open')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Lib_Dir.lib_dir_show_add_link'))
-				->icon('fa fa-plus')
-				->img('/admin/images/folder_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 )->add(
 	Admin_Form_Entity::factory('Menu')
@@ -277,6 +267,11 @@ $oAdmin_Form_Controller->addDataset(
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Lib')
 );
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 if (strlen($sGlobalSearch))
 {

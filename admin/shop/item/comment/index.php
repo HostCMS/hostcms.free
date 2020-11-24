@@ -63,33 +63,43 @@ else
 		->pageTitle(Core::_('Shop.comments_title'));
 }
 
+// Меню формы
+$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
+
 if (!is_null($oShop_Item->id) || $comment_parent_id)
 {
-	// Меню формы
-	$oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
-
 	// Элементы меню
-	$oAdmin_Form_Entity_Menus->add(
-		Admin_Form_Entity::factory('Menu')
+	$oAdmin_Form_Entity_Menus->add(		
+		Admin_Form_Entity::factory('Menu')			
 			->name(Core::_('Shop.items_catalog_add_form_comment_link'))
-			->icon('fa fa-comment-o')
-			->add(
-				Admin_Form_Entity::factory('Menu')
-					->name(Core::_('Shop.items_catalog_add_form_comment_link_add'))
-					->icon('fa fa-plus')
-					->img('/admin/images/comment_add.gif')
-					->href(
-						$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-					)
-					->onclick(
-						$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-					)
+			->icon('fa fa-plus')
+			->img('/admin/images/comment_add.gif')
+			->href(
+				$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+			)			
 	);
-
-	// Добавляем все меню контроллеру
-	$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 }
+
+$additionalParamsProperties = 'shop_id=' . $shop_id . '&shop_group_id=' . $iShopGroupId;
+
+$oAdmin_Form_Entity_Menus->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Item.property_header'))
+		->img('/admin/images/page_gear.gif')
+		->icon('fa fa-gears')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+		)
+);
+
+// Добавляем все меню контроллеру
+$oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -298,10 +308,32 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
 }
 
+// Действие "Удаление значения свойства"
+$oAdminFormActiondeletePropertyValue = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deletePropertyValue');
+
+if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction() == 'deletePropertyValue')
+{
+	$oCommentControllerdeletePropertyValue = Admin_Form_Action_Controller::factory(
+		'Property_Controller_Delete_Value', $oAdminFormActiondeletePropertyValue
+	);
+
+	$oCommentControllerdeletePropertyValue
+		->linkedObject(Core_Entity::factory('Shop_Comment_Property_List', $shop_id));
+
+	$oAdmin_Form_Controller->addAction($oCommentControllerdeletePropertyValue);
+}
+
 // Источник данных
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Item_Comment')
 );
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $bItem = !is_null($oShop_Item->id);
 

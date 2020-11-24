@@ -1221,6 +1221,26 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show siteuser properties in XML
+	 * @var boolean
+	 */
+	protected $_showXmlCommentProperties = FALSE;
+
+	/**
+	 * Show siteuser properties in XML
+	 * @param boolean $showXmlCommentProperties mode
+	 * @return self
+	 */
+	public function showXmlCommentProperties($showXmlCommentProperties = TRUE)
+	{
+		$this->_showXmlCommentProperties = is_array($showXmlCommentProperties)
+			? array_combine($showXmlCommentProperties, $showXmlCommentProperties)
+			: $showXmlCommentProperties;
+
+		return $this;
+	}
+
+	/**
 	 * Showing part of text in XML
 	 * @var int
 	 */
@@ -1521,7 +1541,8 @@ class Informationsystem_Item_Model extends Core_Entity
 				$parentObject->addEntity(
 					$oComment
 						->clearEntities()
-						->showXmlProperties($this->_showXmlSiteuserProperties)
+						->showXmlProperties($this->_showXmlCommentProperties)
+						->showXmlSiteuserProperties($this->_showXmlSiteuserProperties)
 						->showXmlVotes($this->_showXmlVotes)
 						->dateFormat($this->InformationSystem->format_date)
 						->dateTimeFormat($this->InformationSystem->format_datetime)

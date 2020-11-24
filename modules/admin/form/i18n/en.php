@@ -148,4 +148,6 @@ return array(
 
 	'male' => 'Male',
 	'female' => 'Female',
+	
+	'filter_enter_title' => 'Enter filter name',	
 );

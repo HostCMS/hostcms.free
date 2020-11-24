@@ -14,39 +14,39 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 class Property_Controller_Tab extends Core_Servant_Properties
 {
 	/**
-	 * Allowed object properties
-	 * @var array
-	 */
+	* Allowed object properties
+	* @var array
+	*/
 	protected $_allowedProperties = array(
 		'linkedObject',
 		'template_id',
 	);
 
 	/**
-	 * POST data
-	 * @var array
-	 */
+	* POST data
+	* @var array
+	*/
 	protected $_POST = array();
 
 	/**
-	 * Form controller
-	 * @var Admin_Form_Controller
-	 */
+	* Form controller
+	* @var Admin_Form_Controller
+	*/
 	protected $_Admin_Form_Controller = NULL;
 
 	/**
-	 * Get _Admin_Form_Controller
-	 * @return Admin_Form_Controller
-	 */
+	* Get _Admin_Form_Controller
+	* @return Admin_Form_Controller
+	*/
 	public function getAdmin_Form_Controller()
 	{
 		return $this->_Admin_Form_Controller;
 	}
 
 	/**
-	 * Constructor.
-	 * @param Admin_Form_Controller $Admin_Form_Controller controller
-	 */
+	* Constructor.
+	* @param Admin_Form_Controller $Admin_Form_Controller controller
+	*/
 	public function __construct(Admin_Form_Controller $Admin_Form_Controller)
 	{
 		$this->_Admin_Form_Controller = $Admin_Form_Controller;
@@ -60,9 +60,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Create and return an object of Property_Controller_Tab for current skin
-	 * @return object
-	 */
+	* Create and return an object of Property_Controller_Tab for current skin
+	* @return object
+	*/
 	static public function factory(Admin_Form_Controller $Admin_Form_Controller)
 	{
 		$className = 'Skin_' . ucfirst(Core_Skin::instance()->getSkinName()) . '_' . __CLASS__;
@@ -78,16 +78,16 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Object
-	 * @var object
-	 */
+	* Object
+	* @var object
+	*/
 	protected $_object = NULL;
 
 	/**
-	 * Set object
-	 * @param Core_Entity $object object
-	 * @return self
-	 */
+	* Set object
+	* @param Core_Entity $object object
+	* @return self
+	*/
 	public function setObject(Core_Entity $object)
 	{
 		$this->_object = $object;
@@ -95,25 +95,25 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Get object
-	 * @return Core_Entity
-	 */
+	* Get object
+	* @return Core_Entity
+	*/
 	public function getObject()
 	{
 		return $this->_object;
 	}
 
 	/**
-	 * Dataset ID
-	 * @var int
-	 */
+	* Dataset ID
+	* @var int
+	*/
 	protected $_datasetId = NULL;
 
 	/**
-	 * Set ID of dataset
-	 * @param int $datasetId ID of dataset
-	 * @return self
-	 */
+	* Set ID of dataset
+	* @param int $datasetId ID of dataset
+	* @return self
+	*/
 	public function setDatasetId($datasetId)
 	{
 		$this->_datasetId = $datasetId;
@@ -121,16 +121,16 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Tab
-	 * @var Skin_Default_Admin_Form_Entity_Tab
-	 */
+	* Tab
+	* @var Skin_Default_Admin_Form_Entity_Tab
+	*/
 	protected $_tab = NULL;
 
 	/**
-	 * Set tab
-	 * @param Skin_Default_Admin_Form_Entity_Tab $tab tab
-	 * @return self
-	 */
+	* Set tab
+	* @param Skin_Default_Admin_Form_Entity_Tab $tab tab
+	* @return self
+	*/
 	public function setTab(Skin_Default_Admin_Form_Entity_Tab $tab)
 	{
 		$this->_tab = $tab;
@@ -138,9 +138,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Show properties on tab
-	 * @return self
-	 */
+	* Show properties on tab
+	* @return self
+	*/
 	public function fillTab()
 	{
 		$this->_setPropertyDirs(0, $this->_tab);
@@ -157,11 +157,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Show plus button
-	 * @param Property_Model $oProperty property
-	 * @param string $function function name
-	 * @return string
-	 */
+	* Show plus button
+	* @param Property_Model $oProperty property
+	* @param string $function function name
+	* @return string
+	*/
 	public function getImgAdd($oProperty, $addFunction = '$.cloneProperty')
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -179,10 +179,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Show minus button
-	 * @param string $onclick onclick attribute value
-	 * @return string
-	 */
+	* Show minus button
+	* @param string $onclick onclick attribute value
+	* @return string
+	*/
 	public function getImgDelete($onclick = '$.deleteNewProperty(this)')
 	{
 		ob_start();
@@ -200,31 +200,31 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Get path to delete image
-	 * @return string
-	 */
+	* Get path to delete image
+	* @return string
+	*/
 	public function getImgDeletePath()
 	{
-		return "res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { $.deleteProperty(this, {path: '{$this->_Admin_Form_Controller->getPath()}', action: 'deletePropertyValue', datasetId: '{$this->_datasetId}', objectId: '{$this->_object->id}'}) } else {return false}";
+		return "res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { mainFormLocker.unlock(); $.deleteProperty(this, {path: '{$this->_Admin_Form_Controller->getPath()}', action: 'deletePropertyValue', datasetId: '{$this->_datasetId}', objectId: '{$this->_object->id}'}) } else {return false}";
 	}
 
 	/**
-	 * List Options Cache
-	 * @var array
-	 */
+	* List Options Cache
+	* @var array
+	*/
 	protected $_cacheListOptions = array();
 
 	/**
-	 * Add external properties container to $parentObject
-	 * @param int $property_dir_id ID of parent directory of properties
-	 * @param object $parentObject
-	 * @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
-	 * @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
-	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
-	 * @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
-	 * @hostcms-event Property_Controller_Tab.onSetPropertyType
-	 * @hostcms-event Property_Controller_Tab.onBeforeAddSection
-	 */
+	* Add external properties container to $parentObject
+	* @param int $property_dir_id ID of parent directory of properties
+	* @param object $parentObject
+	* @hostcms-event Property_Controller_Tab.onBeforeAddFormEntity
+	* @hostcms-event Property_Controller_Tab.onBeforeCreatePropertyValue
+	* @hostcms-event Property_Controller_Tab.onAfterCreatePropertyValue
+	* @hostcms-event Property_Controller_Tab.onAfterCreatePropertyListValues
+	* @hostcms-event Property_Controller_Tab.onSetPropertyType
+	* @hostcms-event Property_Controller_Tab.onBeforeAddSection
+	*/
 	protected function _setPropertyDirs($property_dir_id = 0, $parentObject)
 	{
 		$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Section')
@@ -570,6 +570,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						// Элементы
 						$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
+							->id("id_property_{$oProperty->id}")
 							->name("property_{$oProperty->id}[]")
 							->value(NULL)
 							->divAttr(array('class' => 'form-group col-xs-12'))
@@ -621,6 +622,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					{
 						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
 							->caption(htmlspecialchars($oProperty->name))
+							->id("id_property_{$oProperty->id}")
 							->name("property_{$oProperty->id}[]")
 							->value(NULL)
 							->divAttr(array('class' => 'form-group col-xs-12'))
@@ -676,6 +678,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						// Элементы
 						$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
+							->id("id_property_{$oProperty->id}")
 							->name("property_{$oProperty->id}[]")
 							->value(NULL)
 							->divAttr(array('class' => 'form-group col-xs-12'))
@@ -728,6 +731,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						// Директории
 						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
 							->caption(htmlspecialchars($oProperty->name))
+							->id("id_property_{$oProperty->id}")
 							->name("property_{$oProperty->id}[]")
 							->value(NULL)
 							->divAttr(array('class' => 'form-group col-xs-12'))
@@ -857,7 +861,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
 				$('input[id ^= id_property_{$oProperty->id}]').autocomplete({
-					 source: function(request, response) {
+					source: function(request, response) {
 						var jInput = $(this.element),
 							jTopParentDiv = jInput.parents('[id ^= property]');
 
@@ -871,9 +875,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								response( data );
 							}
 						});
-					 },
-					 minLength: 1,
-					 create: function() {
+					},
+					minLength: 1,
+					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
@@ -881,21 +885,30 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								.appendTo(ul);
 						}
 
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					 },
-					 select: function( event, ui ) {
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function(event, ui) {
 						var jInput = $(this),
-							jTopParentDiv = jInput.parents('[id ^= property]'),
-							jListItemDiv = jTopParentDiv.find('select[name ^= property_]');
+							jListItemDiv = jInput.parents('[id ^= property]').find('select[name ^= property_]');
 
-							jListItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-					 },
-					 open: function() {
+							jListItemDiv.empty().append($('<option>', {value: ui.item.id, text: ui.item.label}).attr('selected', 'selected'));
+					},
+					open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					 },
-					 close: function() {
+					},
+					change: function(event, ui) {
+						// Set to empty value
+						if (ui.item === null)
+						{
+							var jInput = $(this),
+								jListItemDiv = jInput.parents('[id ^= property]').find('select[name ^= property_]');
+
+							jListItemDiv.empty().append($('<option>', { value: '', text: ''}).attr('selected', 'selected'));
+						}
+					},
+					close: function() {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					 }
+					}
 				});
 			")
 		);
@@ -967,7 +980,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
 				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
-					 source: function(request, response) {
+					source: function(request, response) {
 						var jInput = $(this.element),
 							jTopParentDiv = jInput.parents('[id ^= property]');
 
@@ -981,9 +994,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								response( data );
 							}
 						});
-					 },
-					 minLength: 1,
-					 create: function() {
+					},
+					minLength: 1,
+					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
@@ -991,21 +1004,21 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								.appendTo(ul);
 						}
 
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					 },
-					 select: function( event, ui ) {
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function( event, ui ) {
 						var jInput = $(this),
 							jTopParentDiv = jInput.parents('[id ^= property]'),
 							jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 							jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-					 },
-					 open: function() {
+					},
+					open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					 },
-					 close: function() {
+					},
+					close: function() {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					 }
+					}
 				});
 			")
 		);
@@ -1029,12 +1042,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Fill information systems/items list
-	 * @param int $value informationsystem_item_id
-	 * @param Property_Model $oProperty property
-	 * @param Admin_Form_Entity_Select $oAdmin_Form_Entity_InfGroups
-	 * @param Admin_Form_Entity_Select $oAdmin_Form_Entity_InfItemsSelect
-	 */
+	* Fill information systems/items list
+	* @param int $value informationsystem_item_id
+	* @param Property_Model $oProperty property
+	* @param Admin_Form_Entity_Select $oAdmin_Form_Entity_InfGroups
+	* @param Admin_Form_Entity_Select $oAdmin_Form_Entity_InfItemsSelect
+	*/
 	protected function _fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItemsSelect, $oAdmin_Form_Entity_InfItemsInput)
 	{
 		$Informationsystem_Item = Core_Entity::factory('Informationsystem_Item', $value);
@@ -1152,7 +1165,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
 				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
-					 source: function(request, response) {
+					source: function(request, response) {
 						var jInput = $(this.element),
 							jTopParentDiv = jInput.parents('[id ^= property]'),
 							jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
@@ -1168,9 +1181,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								response( data );
 							}
 						});
-					 },
-					 minLength: 1,
-					 create: function() {
+					},
+					minLength: 1,
+					create: function() {
 						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
@@ -1178,21 +1191,21 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								.appendTo(ul);
 						}
 
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					 },
-					 select: function( event, ui ) {
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function( event, ui ) {
 						var jInput = $(this),
 							jTopParentDiv = jInput.parents('[id ^= property]'),
 							jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 							jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-					 },
-					 open: function() {
+					},
+					open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					 },
-					 close: function() {
+					},
+					close: function() {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					 }
+					}
 				});
 			")
 		);
@@ -1331,25 +1344,25 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
 				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
-				 source: function(request, response) {
+				source: function(request, response) {
 					var jInput = $(this.element),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
 						jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
 					$.ajax({
-					 url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$oShop->id}',
-					 dataType: 'json',
-					 data: {
+					url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$oShop->id}',
+					dataType: 'json',
+					data: {
 						queryString: request.term
-					 },
-					 success: function( data ) {
+					},
+					success: function( data ) {
 						response( data );
-					 }
+					}
 					});
-				 },
-				 minLength: 1,
-				 create: function() {
+				},
+				minLength: 1,
+				create: function() {
 					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 						return $('<li></li>')
 							.data('item.autocomplete', item)
@@ -1357,21 +1370,21 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							.appendTo(ul);
 					}
 
-					 $(this).prev('.ui-helper-hidden-accessible').remove();
-				 },
-				 select: function( event, ui ) {
+					$(this).prev('.ui-helper-hidden-accessible').remove();
+				},
+				select: function( event, ui ) {
 					var jInput = $(this),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
 						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-				 },
-				 open: function() {
+				},
+				open: function() {
 					$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-				 },
-				 close: function() {
+				},
+				close: function() {
 					$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-				 }
+				}
 			});")
 		);
 
@@ -1394,12 +1407,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Fill shops/items list
-	 * @param int $value shop_item_id
-	 * @param Property_Model $oProperty property
-	 * @param Admin_Form_Entity_Select $oAdmin_Form_Entity_Shop_Groups
-	 * @param Admin_Form_Entity_Select $oAdmin_Form_Entity_Shop_Items
-	 */
+	* Fill shops/items list
+	* @param int $value shop_item_id
+	* @param Property_Model $oProperty property
+	* @param Admin_Form_Entity_Select $oAdmin_Form_Entity_Shop_Groups
+	* @param Admin_Form_Entity_Select $oAdmin_Form_Entity_Shop_Items
+	*/
 	protected function _fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input)
 	{
 		$Shop_Item = Core_Entity::factory('Shop_Item', $value);
@@ -1513,25 +1526,25 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
 				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
-				 source: function(request, response) {
+				source: function(request, response) {
 					var jInput = $(this.element),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
 						jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
 					$.ajax({
-					 url: '/admin/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
-					 dataType: 'json',
-					 data: {
+					url: '/admin/shop/item/index.php?autocomplete=1&shop_id={$oShop->id}&shop_group_id=' + selectedVal + '',
+					dataType: 'json',
+					data: {
 						queryString: request.term
-					 },
-					 success: function( data ) {
+					},
+					success: function( data ) {
 						response( data );
-					 }
+					}
 					});
-				 },
-				 minLength: 1,
-				 create: function() {
+				},
+				minLength: 1,
+				create: function() {
 					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
 						return $('<li></li>')
 							.data('item.autocomplete', item)
@@ -1539,21 +1552,21 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							.appendTo(ul);
 					}
 
-					 $(this).prev('.ui-helper-hidden-accessible').remove();
-				 },
-				 select: function( event, ui ) {
+					$(this).prev('.ui-helper-hidden-accessible').remove();
+				},
+				select: function( event, ui ) {
 					var jInput = $(this),
 						jTopParentDiv = jInput.parents('[id ^= property]'),
 						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
-				 },
-				 open: function() {
+				},
+				open: function() {
 					$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-				 },
-				 close: function() {
+				},
+				close: function() {
 					$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-				 }
+				}
 			});")
 		);
 
@@ -1576,9 +1589,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Get property list
-	 * @return array
-	 */
+	* Get property list
+	* @return array
+	*/
 	protected function _getProperties()
 	{
 		// Properties
@@ -1586,11 +1599,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Apply object property
-	 * @hostcms-event Property_Controller_Tab.onBeforeApplyObjectProperty
-	 * @hostcms-event Property_Controller_Tab.onAfterApplyObjectProperty
-	 * @hostcms-event Property_Controller_Tab.onApplyObjectProperty
-	 */
+	* Apply object property
+	* @hostcms-event Property_Controller_Tab.onBeforeApplyObjectProperty
+	* @hostcms-event Property_Controller_Tab.onAfterApplyObjectProperty
+	* @hostcms-event Property_Controller_Tab.onApplyObjectProperty
+	*/
 	public function applyObjectProperty()
 	{
 		$aProperties = $this->_getProperties()->findAll();
@@ -1797,10 +1810,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Return value by key from POST
-	 * @param string $name key
-	 * @return string
-	 */
+	* Return value by key from POST
+	* @param string $name key
+	* @return string
+	*/
 	protected function _getEachPost($name)
 	{
 		if (!isset($this->_POST[$name]))
@@ -1821,13 +1834,13 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Load files
-	 * @param array $aLargeFile large file data
-	 * @param array $aSmallFile small file data
-	 * @param Property_Value_File_Model $oFileValue value of file object
-	 * @param Property_Model $oProperty property
-	 * @param string $sPropertyName property name
-	 */
+	* Load files
+	* @param array $aLargeFile large file data
+	* @param array $aSmallFile small file data
+	* @param Property_Value_File_Model $oFileValue value of file object
+	* @param Property_Model $oProperty property
+	* @param string $sPropertyName property name
+	*/
 	protected function _loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oProperty, $sPropertyName)
 	{
 		$oFileValue->setDir(
@@ -2052,11 +2065,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Correct save value by property type
-	 * @param Property $oProperty property
-	 * @param string $value value
-	 * @return string
-	 */
+	* Correct save value by property type
+	* @param Property $oProperty property
+	* @param string $value value
+	* @return string
+	*/
 	protected function _correctValue($oProperty, $value)
 	{
 		switch ($oProperty->type)
@@ -2092,11 +2105,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	}
 
 	/**
-	 * Correct print value by property type
-	 * @param Property $oProperty property
-	 * @param string $value value
-	 * @return string
-	 */
+	* Correct print value by property type
+	* @param Property $oProperty property
+	* @param string $value value
+	* @return string
+	*/
 	protected function _correctPrintValue($oProperty, $value)
 	{
 		switch ($oProperty->type)

@@ -160,8 +160,7 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 }
 
 // Источник данных 0
-$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity
-(
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Country_Location_City_Area')
 );
 
@@ -170,6 +169,11 @@ $oAdmin_Form_Dataset->addCondition(
 		array('shop_country_location_city_id', '=', $oShopCountryLocationCity->id)
 	)
 );
+
+// Доступ только к своим
+$oUser = Core_Auth::getCurrentUser();
+$oUser->only_access_my_own
+	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);

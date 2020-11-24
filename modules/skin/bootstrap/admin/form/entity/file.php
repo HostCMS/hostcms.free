@@ -153,8 +153,10 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 			}
 		}
 
-		$oLarge_Core_Html_Entity_Div
-			->class((count($this->_children) ? 'input-group' : '') . ($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : ''));
+		$oLarge_Core_Html_Entity_Div->class(
+			(count($this->_children) ? 'input-group' : '') .
+			($oLarge_Core_Html_Entity_Div->class != '' ? ' ' . $oLarge_Core_Html_Entity_Div->class : '')
+		);
 
 		//$sDivClass = 'col-xs-12 col-sm-6';
 

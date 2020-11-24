@@ -25,6 +25,8 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$object->lng = Core::_('Site.lng_default');
 		}
 
+		$this->addSkipColumn('favicon');
+
 		parent::setObject($object);
 
 		$oSiteTabAccessRights = Admin_Form_Entity::factory('Tab')
@@ -43,6 +45,10 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('Site.site_robots_txt'))
 			->name('Robots');
 
+		$oSiteTabCsp = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('Site.site_csp'))
+			->name('Csp');
+
 		$oSiteTabLicense = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Site.site_licence'))
 			->name('License');
@@ -53,11 +59,14 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab = $this->getTab('main');
 
+		$oMainTab->delete($this->getField('csp'));
+
 		$this->addTabAfter($oSiteTabAccessRights, $oMainTab)
 			->addTabAfter($oSiteTabFormats, $oSiteTabAccessRights)
 			->addTabAfter($oSiteTabErrors, $oSiteTabFormats)
 			->addTabAfter($oSiteTabRobots, $oSiteTabErrors)
-			->addTabAfter($oSiteTabLicense, $oSiteTabRobots);
+			->addTabAfter($oSiteTabCsp, $oSiteTabRobots)
+			->addTabAfter($oSiteTabLicense, $oSiteTabCsp);
 
 		// Hide Cache tab
 		if (Core::moduleIsActive('cache'))
@@ -97,6 +106,9 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSiteTabRobots
 			->add($oSiteTabRobotsRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
+		$oSiteTabCsp
+			->add($oSiteTabCspRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
 		$oSiteTabLicense
 			->add($oSiteTabLicenseRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -107,8 +119,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oSiteTabCacheRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		/* $oMainRow1 */
-		$this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
-		$oMainTab->move($this->getField('active'), $oMainRow1);
+		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
 		$oMainTab->move($this->getField('https')->onchange('$("input[name = set_https]").parents(".form-group").toggleClass("hidden");')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
 
 		$oSetHttps = Admin_Form_Entity::factory('Checkbox')
@@ -196,10 +207,9 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */
-		$this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
-		$oMainTab->move($this->getField('send_attendance_report'), $oMainRow5);
-		$this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
-		$oMainTab->move($this->getField('safe_email'), $oMainRow5);
+		$oMainTab->move($this->getField('send_attendance_report')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow5);
+		$oMainTab->move($this->getField('protect')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
+		$oMainTab->move($this->getField('safe_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4')), $oMainRow5);
 
 		/* $oMainRow6 */
 		$this->getField('uploaddir')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'));
@@ -211,24 +221,20 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$sFormPath = $this->_Admin_Form_Controller->getPath();
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$oIcoFileField = Admin_Form_Entity::factory('File');
-		$oIcoFileField
-			->type("file")
-			->caption(Core::_('Site.ico_files_uploaded'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+		$oFavicon = Admin_Form_Entity::factory('File');
+		$oFavicon
+			->type('file')
+			->caption(Core::_('Site.favicon'))
+			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
 			->name("icofile")
 			->id("icofile")
 			->largeImage(
 				array(
-					'path' => is_file($this->_object->getIcoFilePath())
-						? $this->_object->getIcoFileHref()
-						: (
-							is_file($this->_object->getPngFilePath())
-								? $this->_object->getPngFileHref()
-								: ''
-						),
+					'path' => $this->_object->favicon != '' && is_file($this->_object->getFaviconPath())
+						? $this->_object->getFaviconHref()
+						: '',
 					'show_params' => FALSE,
-					'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteIcoFile', windowId: '{$windowId}'}); return false",
+					'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteFavicon', windowId: '{$windowId}'}); return false",
 				)
 			)
 			->smallImage(
@@ -237,7 +243,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				)
 			);
 
-		$oMainRow7->add($oIcoFileField);
+		$oMainRow7->add($oFavicon);
 
 		/* $oSiteTabAccessRightsRow1 */
 		$this->getField('chmod')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -305,6 +311,139 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('robots')->rows(15)->divAttr(array('class' => 'form-group col-xs-12'));
 		$oMainTab->move($this->getField('robots'), $oSiteTabRobotsRow1);
 
+		$aTmpCSP = explode(';', $this->_object->csp);
+		$aTmpCSP = array_map('trim', $aTmpCSP);
+
+		$aSCP = array();
+		foreach ($aTmpCSP as $sTmpCSP)
+		{
+			$aRow = explode(' ', $sTmpCSP, 2);
+			if (count($aRow) == 2)
+			{
+				$aSCP[$aRow[0]] = explode(' ', $aRow[1]);
+			}
+		}
+
+		$sUl = '';
+		$sCode = '';
+		$i = 0;
+
+		$aColors = array(
+			'palegreen',
+			'darkorange',
+			'magenta',
+			'blueberry',
+			'azure',
+			'pink',
+			'sky',
+			'maroon',
+			'orange',
+		);
+
+		foreach ($this->_aCSPList as $wellHeader => $aWellFields)
+		{
+			$class = $i == 0
+				? 'in active'
+				: '';
+
+			$sUl .= '<li class="tab-' . (isset($aColors[$i]) ? $aColors[$i] : 'palegreen') . ' ' . $class . '">
+				<a data-toggle="tab" href="#' . $wellHeader . '">
+					' . Core::_("Site.csp-header-" . $wellHeader) . '
+				</a>
+			</li>';
+
+			$sCode .= '<div id="' . $wellHeader . '" class="tab-pane ' . $class . '">';
+			foreach ($aWellFields as $fieldSourceName => $fieldName)
+			{
+				$sFullFieldName = $wellHeader . '-' . $fieldName;
+
+				$sCode .= '<div class="row"><div class="form-group csp">
+					<label for="' . htmlspecialchars($sFullFieldName) . '" class="col-sm-2 control-label no-padding-right">' . Core_Str::ucfirst($fieldName) . '</label>
+					<div class="col-sm-10">';
+
+				if ($fieldName != 'hosts')
+				{
+					if (isset($aSCP[$wellHeader]) && in_array($fieldSourceName, $aSCP[$wellHeader]))
+					{
+						$checked = 'checked="checked"';
+
+						// Remove from values
+						$unsetKey = array_search($fieldSourceName, $aSCP[$wellHeader]);
+						if ($unsetKey !== FALSE)
+						{
+							unset($aSCP[$wellHeader][$unsetKey]);
+						}
+					}
+					else
+					{
+						$checked = '';
+					}
+
+					$sCode .= '<div class="checkbox">
+						<label>
+							<input type="checkbox" data-parent="' . $wellHeader . '" name="' . htmlspecialchars($sFullFieldName) . '"' . $checked . '>
+							<span class="text">' . Core::_('Site.' . $fieldName) . '</span>
+						</label>
+					</div>';
+				}
+				else
+				{
+					$sValues = isset($aSCP[$wellHeader])
+						? implode(' ', $aSCP[$wellHeader])
+						: '';
+
+					$sCode .= '<input type="text" value="' . htmlspecialchars($sValues) . '" class="form-control" data-parent="' . $wellHeader . '" name="' . htmlspecialchars($sFullFieldName) . '" id="' . htmlspecialchars($sFullFieldName) . '">
+					<p class="help-block">' . Core::_('Site.' . $fieldName) . '</p>';
+				}
+
+				$sCode .= '</div></div>
+					</div>';
+			}
+
+			$sCode .= '</div>';
+
+			$i++;
+		}
+
+		$sHtmlTabs = '<div class="col-xs-12">
+			<div class="tabbable">
+				<ul class="nav nav-tabs" id="cspTab">' . $sUl . '</ul>
+				<div class="tab-content">' . $sCode . '</div>
+			</div>
+		</div>';
+
+		$oSiteTabCspRow1
+			->add(Admin_Form_Entity::factory('Code')->html($sHtmlTabs))
+			->add(Admin_Form_Entity::factory('Script')
+				->value("$(function() {
+					function disableInputs(object)
+					{
+						var aChunks = $(object).attr('name').split('-');
+
+						switch (aChunks[2])
+						{
+							case 'none':
+								$('input[name *= ' + $(object).data('parent') + ']').not(object).prop('disabled', function(i, v) { return !v; });
+							break;
+							case 'all':
+								$('input[name *= ' + $(object).data('parent') + ']:not([name *= -data], [name *= -blob])').not(object).prop('disabled', function(i, v) { return !v; });
+							break;
+						}
+					}
+
+					var selector = $('input[name *= -none], input[name *= -all]'),
+						checkedSelector = $('input[name *= -none]:checked, input[name *= -all]:checked');
+
+					selector.on('click', function(){
+						disableInputs(this);
+					});
+
+					checkedSelector.each(function(){
+						disableInputs(this);
+					});
+				});")
+			);
+
 		/* $oSiteTabLicenseRow1 */
 		$this->getField('key')->divAttr(array('class' => 'form-group col-xs-12'));
 		$oMainTab->move($this->getField('key'), $oSiteTabLicenseRow1);
@@ -339,7 +478,57 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
+
+		/*
+		'default-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		*/
+		$aCSP = array();
+
+		foreach ($this->_aCSPList as $wellHeader => $aWellFields)
+		{
+			$aArgs = array();
+			foreach ($aWellFields as $fieldSourceName => $fieldName)
+			{
+				$sFullFieldName = $wellHeader . '-' . $fieldName;
+
+				if (isset($this->_formValues[$sFullFieldName]))
+				{
+					if ($fieldName != 'hosts')
+					{
+						$aArgs[] = $fieldSourceName;
+					}
+					else
+					{
+						if (strlen(trim($this->_formValues[$sFullFieldName])))
+						{
+							$aArgs[] = trim($this->_formValues[$sFullFieldName]);
+						}
+					}
+				}
+			}
+
+			count($aArgs)
+				&& $aCSP[] = $wellHeader . ' ' . implode(' ', $aArgs);
+		}
+
+		// Content-Security-Policy
+		$this->_object->csp = count($aCSP)
+			? implode('; ', $aCSP)
+			: '';
+		$this->_object->save();
 
 		$bSetHttps = Core_Array::get($this->_formValues, 'set_https') == 'on';
 
@@ -359,22 +548,17 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// и передан файл
 			&& intval($aFileData['size']) > 0)
 		{
-			// ICO
-			if (Core_File::isValidExtension($aFileData['name'], array('ico')))
+			// Favison
+			if (Core_File::isValidExtension($aFileData['name'], array('ico', 'png', 'svg')))
 			{
-				$this->_object->saveIcoFile($aFileData['tmp_name']);
-			}
-			// PNG
-			elseif (Core_File::isValidExtension($aFileData['name'], array('png')))
-			{
-				$this->_object->savePngFile($aFileData['tmp_name']);
+				$faviconName = 'site_' . $this->_object->id . '.' . Core_File::getExtension($aFileData['name']);
+				$this->_object->saveFavicon($faviconName, $aFileData['tmp_name']);
 			}
 			else
 			{
 				$this->addMessage(
 					Core_Message::get(
-						Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])),
-						'error'
+						Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])), 'error'
 					)
 				);
 			}
@@ -402,4 +586,81 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		return $aReturn;
 	}
 
+	protected $_aCSPList = array(
+		'default-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'script-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"'unsafe-inline'" => 'inline',
+			"'unsafe-eval'" => 'eval',
+			"hosts" => 'hosts',
+		),
+		'style-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"'unsafe-inline'" => 'inline',
+			"hosts" => 'hosts',
+		),
+		'img-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'font-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'connect-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'media-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'object-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+		'frame-src' => array(
+			"'none'" => 'none',
+			"*" => 'all',
+			"'self'" => 'self',
+			"blob:" => 'blob',
+			"data:" => 'data',
+			"hosts" => 'hosts',
+		),
+	);
 }

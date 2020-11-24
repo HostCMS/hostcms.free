@@ -287,9 +287,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 			->shop_country_location_city_id($_SESSION['hostcmsOrder']['shop_country_location_city_id'])
 			->shop_country_location_city_area_id($_SESSION['hostcmsOrder']['shop_country_location_city_area_id'])
 			->couponText(
-				Core_Str::stripTags(
-					Core_Array::get(Core_Array::get($_SESSION, 'hostcmsOrder', array()), 'coupon_text')
-				)
+				Core_Str::stripTags(Core_Array::get(Core_Array::getSession('hostcmsOrder', array()), 'coupon_text'))
 			)
 			->postcode($_SESSION['hostcmsOrder']['postcode'])
 			->setUp()
