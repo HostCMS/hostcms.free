@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -60,16 +60,46 @@ if ($shop_print_form_id)
 	exit();
 }
 
+if (Core_Array::getPost('recalcFormula'))
+{
+	$aJSON = array(
+		'status' => 'error'
+	);
+
+	$shop_order_id = intval(Core_Array::getPost('shop_order_id'));
+
+	$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+
+	if (!is_null($oShop_Order))
+	{
+		$shop_delivery_condition_name = Core_Array::getPost('shop_delivery_condition_name');
+		$price = Core_Array::getPost('shop_delivery_condition_price');
+
+		$oShop_Order_Item_Delivery = $oShop_Order->Shop_Order_Items->getByType(1);
+		if (is_null($oShop_Order_Item_Delivery))
+		{
+			$oShop_Order_Item_Delivery = Core_Entity::factory('Shop_Order_Item');
+			$oShop_Order_Item_Delivery->shop_order_id = $oShop_Order->id;
+			$oShop_Order_Item_Delivery->type = 1;
+		}
+
+		$oShop_Order_Item_Delivery->price = $price;
+		$oShop_Order_Item_Delivery->quantity = 1;
+		$oShop_Order_Item_Delivery->name = Core::_('Shop_Delivery.delivery_with_condition', $oShop_Order->Shop_Delivery->name, $shop_delivery_condition_name);
+		$oShop_Order_Item_Delivery->save();
+
+		$aJSON = array(
+			'status' => 'success',
+			'shop_order_item_id' => $oShop_Order_Item_Delivery->id,
+			'message' => Core::_('Shop_Order.recalc_delivery_success')
+		);
+	}
+
+	Core::showJson($aJSON);
+}
+
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
-
-// Элементы меню
-$oAdmin_Form_Entity_Menus->add(
-	$oAdmin_Form_Entity_Menu = Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Order.shops_link_order'))
-		->icon('fa fa-clipboard')
-
-);
 
 if ($siteuser_id)
 {
@@ -141,7 +171,7 @@ else
 	$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0);
 }
 
-$oAdmin_Form_Entity_Menu->add(
+$oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Shop_Order.shops_link_order_add'))
 		->icon('fa fa-plus')
@@ -152,7 +182,7 @@ $oAdmin_Form_Entity_Menu->add(
 
 if (!$siteuser_id)
 {
-	$oAdmin_Form_Entity_Menu->add(
+	$oAdmin_Form_Entity_Menus->add(
 		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop_Order.property_menu'))
 			->icon('fa fa-gears')
@@ -165,10 +195,11 @@ if (!$siteuser_id)
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
-$additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}";
-
+// Глобальный поиск
 if (!$siteuser_id)
 {
+	$additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}";
+	
 	$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
 	$oAdmin_Form_Controller->addEntity(
@@ -339,7 +370,13 @@ if ($oAdminFormActionloadDeliveryConditionsList && $oAdmin_Form_Controller->getA
 		->model(Core_Entity::factory('Shop_Delivery_Condition'))
 		->defaultValue(' … ')
 		->addCondition(
-			array('where' => array('shop_delivery_id', '=', Core_Array::getGet('delivery_id')))
+			array('join' => array('shop_deliveries', 'shop_delivery_conditions.shop_delivery_id', '=', 'shop_deliveries.id'))
+		)
+		->addCondition(
+			array('where' => array('shop_delivery_conditions.shop_delivery_id', '=', Core_Array::getGet('delivery_id')))
+		)
+		->addCondition(
+			array('where' => array('shop_deliveries.type', '=', 0))
 		);
 
 	$oAdmin_Form_Controller->addAction($oControllerloadDeliveryConditionsList);
@@ -499,7 +536,7 @@ $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 if ($siteuser_id)

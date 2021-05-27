@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Module_Entity extends Core_Entity
 {
@@ -54,6 +54,12 @@ class Update_Module_Entity extends Core_Entity
 	 * @var string
 	 */
 	public $file = NULL;
+	
+	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $beta = NULL;
 
 	/**
 	 * Name of the model
@@ -192,5 +198,19 @@ class Update_Module_Entity extends Core_Entity
 		Update_Controller::instance()->deleteUpdateFile();
 
 		return NULL;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$this->beta && Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-darkorange')
+			->value('β')
+			->execute();
 	}
 }

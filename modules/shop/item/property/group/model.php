@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_Group_Model extends Property_Model
 {
@@ -24,7 +24,7 @@ class Shop_Item_Property_Group_Model extends Property_Model
 	 * @var string
 	 */
 	protected $_tableName = 'properties';
-	
+
 	/**
 	 * Name of the model
 	 * @var string
@@ -42,8 +42,8 @@ class Shop_Item_Property_Group_Model extends Property_Model
 		$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group')->getByShopItemPropertyIdAndGroupId($this->Shop_Item_Property->id, $shop_group_id);
 
 		!is_null($oShop_Item_Property_For_Group)
-			? $this->denyAccess()
-			: $this->allowAccess();
+			? $this->denyAccess($shop_group_id)
+			: $this->allowAccess($shop_group_id);
 
 		return $this;
 	}
@@ -57,14 +57,17 @@ class Shop_Item_Property_Group_Model extends Property_Model
 	{
 		is_null($shop_group_id) && $shop_group_id = Core_Array::getGet('shop_group_id');
 
-		$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group')->getByShopItemPropertyIdAndGroupId($this->Shop_Item_Property->id, $shop_group_id);
+		$oShop_Item_Property = $this->Shop_Item_Property;
+
+		$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group')->getByShopItemPropertyIdAndGroupId($oShop_Item_Property->id, $shop_group_id);
 
 		if (is_null($oShop_Item_Property_For_Group))
 		{
 			$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group');
 			$oShop_Item_Property_For_Group->shop_group_id = $shop_group_id;
-			$oShop_Item_Property_For_Group->shop_id = Core_Array::getGet('shop_id');
-			$this->Shop_Item_Property->add($oShop_Item_Property_For_Group);
+			$oShop_Item_Property_For_Group->shop_id = $oShop_Item_Property->shop_id;
+
+			$oShop_Item_Property->add($oShop_Item_Property_For_Group);
 		}
 
 		return $this;
@@ -81,10 +84,8 @@ class Shop_Item_Property_Group_Model extends Property_Model
 
 		$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group')->getByShopItemPropertyIdAndGroupId($this->Shop_Item_Property->id, $shop_group_id);
 
-		if (!is_null($oShop_Item_Property_For_Group))
-		{
-			$oShop_Item_Property_For_Group->delete();
-		}
+		!is_null($oShop_Item_Property_For_Group)
+			&& $oShop_Item_Property_For_Group->delete();
 
 		return $this;
 	}

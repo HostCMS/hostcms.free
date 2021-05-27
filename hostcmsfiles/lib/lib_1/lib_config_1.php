@@ -11,12 +11,12 @@ $Informationsystem_Controller_Show
 if (!is_null(Core_Array::getGet('vote')))
 {
 	$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-	$entity_id = intval(Core_Array::getGet('id'));
+	$entity_id = Core_Array::getGet('id', 0, 'int');
 
 	if ($entity_id && !is_null($oSiteuser))
 	{
-		$entity_type = strval(Core_Array::getGet('entity_type'));
-		$vote = intval(Core_Array::getGet('vote'));
+		$entity_type = Core_Array::getGet('entity_type', '', 'str');
+		$vote = Core_Array::getGet('vote', 0, 'int');
 
 		$oObject = Vote_Controller::instance()->getVotedObject($entity_type, $entity_id);
 

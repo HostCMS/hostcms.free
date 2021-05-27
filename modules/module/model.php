@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Model extends Core_Entity
 {
@@ -205,14 +205,9 @@ class Module_Model extends Core_Entity
 	{
 		$path = $this->getConfigFilePath();
 
-		if (is_file($path))
-		{
-			return Core_File::read($path);
-		}
-		else
-		{
-			return NULL;
-		}
+		return is_file($path)
+			? Core_File::read($path)
+			: NULL;
 	}
 
 	/**
@@ -316,7 +311,7 @@ class Module_Model extends Core_Entity
 			$this->Notifications->deleteAll(FALSE);
 			$this->Notification_Subscribers->deleteAll(FALSE);
 		}
-		
+
 		$this->uninstall();
 
 		return parent::delete($primaryKey);

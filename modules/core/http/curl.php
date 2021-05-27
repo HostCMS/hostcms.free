@@ -193,6 +193,7 @@ class Core_Http_Curl extends Core_Http
 
 		// Close PHP cURL handle
 		@curl_close($curl);
+		unset($curl); // PHP-8: curl_close no longer closes the resource 
 
 		//$aTmp = explode("\r\n\r\n", $datastr, 2);
 

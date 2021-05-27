@@ -88,6 +88,7 @@ return array(
 	'fixed-navbar' => 'Заголовок',
 	'fixed-sideBar' => 'Меню',
 	'fixed-breadcrumbs' => 'Навігацію',
+	'fixed-tables' => 'Таблиці',
 	'fixed-header' => 'Усе',
 
 	'backend-sound' => 'Звук в центрі адміністрування',
@@ -99,6 +100,7 @@ return array(
 	'events' => 'Справи',
 	'bookmarks' => 'Закладки',
 	'sound' => 'Звук',
+	'phone' => 'Телефонія',
 	'placeholderGlobalSearch' => 'Пошук',
 
 	'none' => 'Відсутній',

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -361,6 +361,31 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	}
 
 	/**
+	 * Определение цены товара в соответствии с $this->count и специальными ценами
+	 *
+	 * @param float $price price
+	 * @param boolean $bCache cache mode status
+	 * @return float
+	 */
+	public function getSpecialprice($price, Shop_Item_Model $oShop_Item, $bCache = TRUE)
+	{
+		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
+		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll($bCache);
+		foreach ($aShop_Specialprices as $oShop_Specialprice)
+		{
+			if ($this->count >= $oShop_Specialprice->min_quantity && ($this->count <= $oShop_Specialprice->max_quantity || $oShop_Specialprice->max_quantity == 0))
+			{
+				$price = $oShop_Specialprice->percent != 0
+					? $price * $oShop_Specialprice->percent / 100
+					: $oShop_Specialprice->price;
+				break;
+			}
+		}
+		
+		return $price;
+	}
+
+	/**
 	 * Определение цены товара для заданного пользователя $this->siteuser
 	 *
 	 * @param Shop_Item_Model $oShop_Item товар
@@ -380,20 +405,11 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			throw new Core_Exception('Shop_Item_Controller::getPrices Shop_Item id is NULL.');
 		}
 
+		// Базовая цена товара
 		$price = $this->getPrice($oShop_Item);
 
-		// Цены в зависимости от количества самого товара в корзине (а не всей корзины)
-		$aShop_Specialprices = $oShop_Item->Shop_Specialprices->findAll($bCache);
-		foreach ($aShop_Specialprices as $oShop_Specialprice)
-		{
-			if ($this->count >= $oShop_Specialprice->min_quantity && ($this->count <= $oShop_Specialprice->max_quantity || $oShop_Specialprice->max_quantity == 0))
-			{
-				$price = $oShop_Specialprice->percent != 0
-					? $price * $oShop_Specialprice->percent / 100
-					: $oShop_Specialprice->price;
-				break;
-			}
-		}
+		// Цены в зависимости от количества самого товара в корзине
+		$price = $this->getSpecialprice($price, $oShop_Item, $bCache);
 
 		return $this->calculatePrice($price, $oShop_Item, $bRound);
 	}

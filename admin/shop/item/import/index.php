@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -154,7 +154,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 				$sFileName = $sTmpPath = tempnam(CMS_FOLDER . TMP_DIR, 'CSV');
 
-				Core_File::write($sTmpPath, $Core_Http->getBody());
+				Core_File::write($sTmpPath, $Core_Http->getDecompressedBody());
 			}
 			else
 			{
@@ -173,7 +173,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 				Core_Event::notify('Shop_Item_Import.oBeforeImportCSV', NULL, array($sFileName));
 
 				// Обработка CSV-файла
-				$sTmpFileName = 'import_' . date('U') . '.csv';
+				$sTmpFileName = 'import_' . time() . '.csv';
 				$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . $sTmpFileName;
 
 				try {
@@ -235,20 +235,21 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 						if ($iFieldCount)
 						{
-							$iValuesCount = count($oShop_Item_Import_Csv_Controller->aCaptions);
+							//$iValuesCount = count($oShop_Item_Import_Csv_Controller->aCaptions);
 
 							// Генерируем массив для выпадающего списка с цветными элементами
 							$aOptions = array();
-							for ($j = 0; $j < $iValuesCount; $j++)
+							$aAllCaptions = array();
+
+							//for ($j = 0; $j < $iValuesCount; $j++)
+							foreach ($oShop_Item_Import_Csv_Controller->aEntities as $optionValue => $aTmpOptions)
 							{
-								$aOptions[$oShop_Item_Import_Csv_Controller->aEntities[$j]] = array(
-									'value' => $oShop_Item_Import_Csv_Controller->aCaptions[$j],
-									'attr' => array('style' => 'background-color: ' . (
-										!empty($oShop_Item_Import_Csv_Controller->aColors[$j])
-											? $oShop_Item_Import_Csv_Controller->aColors[$j]
-											: '#000')
-									)
+								$aOptions[$optionValue] = array(
+									'value' => $aTmpOptions['caption'],
+									'attr' => $aTmpOptions['attr']
 								);
+
+								$aAllCaptions[] = $aTmpOptions['caption'];
 							}
 
 							$oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
@@ -259,38 +260,38 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 
 								$oCurrentRow
 									->add(Admin_Form_Entity::factory('Span')
-										//->caption('')
 										->value($aCsvLine[$i])
 										->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 									);
 
-								$isset_selected = FALSE;
+								$aAlreadySelected = FALSE;
+								$selected = NULL;
 
 								// Генерируем выпадающий список с цветными элементами
-								for ($j = 0; $j < $iValuesCount; $j++)
+								//for ($j = 0; $j < $iValuesCount; $j++)
+								foreach ($oShop_Item_Import_Csv_Controller->aEntities as $optionValue => $aTmpOptions)
 								{
 									$aCsvLine[$i] = trim($aCsvLine[$i]);
 
-									$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
+									//$sCaption = $oShop_Item_Import_Csv_Controller->aCaptions[$j];
+									$sCaption = trim($aTmpOptions['caption']);
 
-									if (!$isset_selected
+									if (!$aAlreadySelected
 									&& (mb_strtolower($aCsvLine[$i]) == mb_strtolower($sCaption)
 									|| (strlen($sCaption) > 0
 										&& strlen($aCsvLine[$i]) > 0
-										&&
-										(strpos($aCsvLine[$i], $sCaption) !== FALSE
-										|| strpos($sCaption, $aCsvLine[$i]) !== FALSE)
+										&& (strpos($aCsvLine[$i], $sCaption) !== FALSE || strpos($sCaption, $aCsvLine[$i]) !== FALSE)
 										// Чтобы не было срабатывания "Город" -> "Городской телефон"
 										// Если есть целиком подходящее поле
-										&& !array_search($aCsvLine[$i], $oShop_Item_Import_Csv_Controller->aCaptions))
+										&& !array_search($aCsvLine[$i], $aAllCaptions))
 									))
 									{
-										$selected = $oShop_Item_Import_Csv_Controller->aEntities[$j];
+										$selected = $optionValue;
 
 										// Для исключения двойного указания selected для одного списка
-										$isset_selected = TRUE;
+										$aAlreadySelected = TRUE;
 									}
-									elseif (!$isset_selected)
+									elseif (!$aAlreadySelected)
 									{
 										$selected = -1;
 									}
@@ -352,7 +353,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 				Core_Event::notify('Shop_Item_Import.oBeforeImportCML', NULL, array($sFileName));
 
 				// Обработка CommerceML-файла
-				$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.cml';
+				$sTmpFileFullpath = CMS_FOLDER . TMP_DIR . 'file_' . time() . '.cml';
 
 				try {
 					Core_File::upload($sFileName, $sTmpFileFullpath);
@@ -448,9 +449,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->imagesPath(Core_Array::getPost('import_price_load_files_path'))
 				->importAction(Core_Array::getPost('import_price_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
-				->deleteImage(Core_Array::getPost('import_price_action_delete_image'))
-				->deletePropertyValues(Core_Array::getPost('delete_property_values'))
-			;
+				->deleteImage(Core_Array::getPost('import_price_action_delete_image') == 1)
+				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1);
 
 			if (Core_Array::getPost('firstlineheader', 0))
 			{

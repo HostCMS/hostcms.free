@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Session
 {
@@ -60,6 +60,21 @@ abstract class Core_Session
 	}
 
 	/**
+	 * Cookie Lifetime, default 31536000
+	 * @return int
+	 */
+	static protected $_cookieLifetime = 31536000;
+
+	/**
+	 * Set Cookie Lifetime
+	 * @param int
+	 */
+	static public function cookieLifetime($lifetime)
+	{
+		self::$_cookieLifetime = $lifetime;
+	}
+
+	/**
 	 * Start session
 	 * @return boolean
 	 */
@@ -78,13 +93,10 @@ abstract class Core_Session
 
 			self::_setSessionHandler();
 
-			//$expires = self::getMaxLifeTime();
-			$expires = 31536000;
-
 			if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 			{
-				ini_set('session.cookie_lifetime', $expires);
-				//ini_set('session.gc_maxlifetime', $expires);
+				ini_set('session.cookie_lifetime', self::$_cookieLifetime);
+				//ini_set('session.gc_maxlifetime', self::$_cookieLifetime);
 			}
 
 			list($domain) = explode(':', strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')));
@@ -99,7 +111,7 @@ abstract class Core_Session
 					? '.' . $domain
 					: '';
 
-				session_set_cookie_params($expires, '/', $domain, FALSE, TRUE);
+				session_set_cookie_params(self::$_cookieLifetime, '/', $domain, FALSE, TRUE);
 			}
 
 			// При повторном запуске $_SESSION уже будет
@@ -162,13 +174,13 @@ abstract class Core_Session
 	}
 
 	/**
-     * Is the current request has sent the session ID.
+	 * Is the current request has sent the session ID.
 	 * @return boolean|NULL
 	 */
 	static protected $_hasSessionId = NULL;
 
 	/**
-     * The is the current request has sent the session ID.
+	 * The is the current request has sent the session ID.
 	 * @return boolean
 	 */
 	static public function hasSessionId()
@@ -347,7 +359,7 @@ abstract class Core_Session
 		// Для уже запущенной сесии обновляем время жизни
 		if (self::isStarted())
 		{
-			self::$_handler->sessionMaxlifetime($maxlifetime, $overwrite = FALSE);
+			self::$_handler->sessionMaxlifetime($maxlifetime, $overwrite);
 		}
 
 		return TRUE;

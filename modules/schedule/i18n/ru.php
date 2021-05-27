@@ -1,12 +1,5 @@
 <?php
-/**
- * Schedule.
- *
- * @package HostCMS
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Планировщик задач',
 	'menu' => 'Планировщик задач',
@@ -21,11 +14,17 @@ return array(
 	'action' => 'Действие',
 	'entity_id' => 'Идентификатор сущности',
 	'completed' => 'Активность задачи',
-	'interval' => '<acronym title="Интервал выполнения в секундах">Интервал</acronym>',
+	'interval' => '<acronym title="Интервал выполнения">Интервал</acronym>',
 	'site_id' => 'Идентификатор сайта',
 	'id' => 'Идентификатор задачи',
 	'edit_success' => "Данные о задаче успешно добавлены!",
 	'markDeleted_success' => "Данные о задаче успешно удалены!",
 	'undelete_success' => 'Элемент восстановлен!',
-	'log_message' => 'В модуле "%1$s" для элемента %2$s выполнено действие %3$s',
+	'log_message_begin' => 'Планировщик: В модуле "%1$s" для элемента %2$s запущено действие %3$s',
+	'log_message_end' => 'Планировщик: В модуле "%1$s" для элемента %2$s выполнено действие %3$s',
+	'log_message_disabled' => 'Планировщик: Ошибка, модуль "%1$s" отключен!',
+	'seconds' => 'секунд',
+	'minutes' => 'минут',
+	'hours' => 'часов',
+	'days' => 'дней',
 );

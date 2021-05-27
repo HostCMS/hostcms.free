@@ -128,6 +128,8 @@ return array(
 	'schedule-searchUnindexItem' => 'Зняти товар з індексації',
 	'schedule-recountShop' => 'Перерахунок груп і товарів',
 	'schedule-rebuildFastfilter' => 'Перебудувати швидкий фільтр',
+	'schedule-unsetApplyPurchaseDiscounts' => 'Не застосовувати знижки від суми замовлення і карти до товарів зі знижками',
+	'schedule-setApplyPurchaseDiscounts' => 'Застосовувати знижки від суми замовлення і карти до товарів без знижок',
 	'order_admin_subject' => 'Тема листа про замовлення куратору магазину',
 	'order_user_subject' => 'Тема листа про замовлення користувачеві',
 	'confirm_admin_subject' => 'Тема листа підтвердження оплати куратору магазину',
@@ -179,7 +181,7 @@ return array(
 	'default_shop_measure_id' => 'Одиниця виміру за замовчуванням',
 	'filter' => 'Швидкий фільтр',
 	'set_price_recount_sets' => 'Установка цін при перерахунку комплекту',
-	'max_bonus' => '<acronym title="Скільки максимум відсотків від суми чека може бути оплачено бонусами">Списувати бонус, %</acronym>',
+	'max_bonus' => "<acronym title=\"Скільки максимум відсотків від суми чека може бути оплачено бонусами\">Списувати бонус, %</acronym>",
 	'filter_header' => 'Фільтр',
 	'filter_mode' => 'Режим URL',
 	'filter_mode0' => 'Назва',
@@ -192,4 +194,12 @@ return array(
 	'certificate_subject' => 'Тема листа',
 	'certificate_text' => 'Текст листа',
 	'certificate_template_coupon_id' => 'ID купона',
+
+	'option_itemEditWarehouseLimit' => 'Кількість складів, що виводяться при редагуванні товару, якщо складів більше, то блок не виводиться',
+	'option_smallImagePrefix' => 'Префікс при іменуванні малих зображень',
+	'option_itemLargeImage' => 'Шаблон іменування великого зображення товару',
+	'option_itemSmallImage' => 'Шаблон іменування малого зображення товару',
+	'option_groupLargeImage' => 'Шаблон іменування великого зображення групи',
+	'option_groupSmallImage' => 'Шаблон іменування малого зображення групи',
+	'option_shop_item_card_xsl' => 'XSL-шаблон цінників'
 );

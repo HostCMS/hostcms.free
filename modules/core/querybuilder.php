@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder
 {
@@ -45,8 +45,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function select()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Select', $args);
+		return Core_QueryBuilder::factory('Select', func_get_args());
 	}
 
 	/**
@@ -58,8 +57,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function insert()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Insert', $args);
+		return Core_QueryBuilder::factory('Insert', func_get_args());
 	}
 
 	/**
@@ -71,8 +69,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function replace()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Replace', $args);
+		return Core_QueryBuilder::factory('Replace', func_get_args());
 	}
 
 	/**
@@ -84,8 +81,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function update()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Update', $args);
+		return Core_QueryBuilder::factory('Update', func_get_args());
 	}
 
 	/**
@@ -97,8 +93,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function delete()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Delete', $args);
+		return Core_QueryBuilder::factory('Delete', func_get_args());
 	}
 
 	/**
@@ -110,8 +105,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function rename()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Rename', $args);
+		return Core_QueryBuilder::factory('Rename', func_get_args());
 	}
 
 	/**
@@ -123,8 +117,7 @@ abstract class Core_QueryBuilder
 	 */
 	static public function drop()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Drop', $args);
+		return Core_QueryBuilder::factory('Drop', func_get_args());
 	}
 
 	/**
@@ -136,8 +129,19 @@ abstract class Core_QueryBuilder
 	 */
 	static public function truncate()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Truncate', $args);
+		return Core_QueryBuilder::factory('Truncate', func_get_args());
+	}
+
+	/**
+	 * Create and return a OPTIMIZE Database Abstraction Layer
+	 * <code>
+	 * $oCore_QueryBuilder_Optimize = Core_QueryBuilder::optimize();
+	 * </code>
+	 * @return Core_QueryBuilder_Optimize
+	 */
+	static public function optimize()
+	{
+		return Core_QueryBuilder::factory('Optimize', func_get_args());
 	}
 
 	/**
@@ -149,27 +153,26 @@ abstract class Core_QueryBuilder
 	 */
 	static public function lock()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Lock', $args);
+		return Core_QueryBuilder::factory('Lock', func_get_args());
 	}
 
 	/**
 	 * Create and return an Expression Database Abstraction Layer
 	 * @return Core_QueryBuilder_Expression
+	 * @see raw()
 	 */
 	static public function expression()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Expression', $args);
+		return Core_QueryBuilder::factory('Expression', func_get_args());
 	}
-	
+
 	/**
 	 * Create and return an Expression Database Abstraction Layer
 	 * @return Core_QueryBuilder_Expression
+	 * @see expression()
 	 */
 	static public function raw()
 	{
-		$args = func_get_args();
-		return Core_QueryBuilder::factory('Expression', $args);
+		return Core_QueryBuilder::factory('Expression', func_get_args());
 	}
 }

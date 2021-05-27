@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Statement
 {
@@ -100,9 +100,20 @@ abstract class Core_QueryBuilder_Statement
 	 */
 	protected function _quoteColumns(array $array)
 	{
-		foreach ($array as $key => $value)
+		foreach ($array as $key => $column)
 		{
-			$array[$key] = $this->_dataBase->quoteColumnName($value);
+			if (is_array($column) && count($column) == 2 && $this->_isObjectSelect($column[0]))
+			{
+				$array[$key] = '(' . $column[0]->build() . ') AS ' . $this->_dataBase->quoteTableName($column[1]);
+			}
+			elseif ($this->_isObjectSelect($column))
+			{
+				$array[$key] = '(' . $column->build() . ')';
+			}
+			else
+			{
+				$array[$key] = $this->_dataBase->quoteColumnName($column);
+			}
 		}
 
 		return array_unique($array);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Str
 {
@@ -160,7 +160,7 @@ class Core_Str
 	 */
 	static public function cutSentences($text, $maxLen = 255)
 	{
-		$lenght = mb_strlen(strval($text));
+		$lenght = mb_strlen(self::toStr($text));
 		$maxLen = intval($maxLen);
 
 		if ($lenght > $maxLen)
@@ -239,6 +239,12 @@ class Core_Str
 
 						return $oData->translations[0]->text;
 					}
+					else
+					{
+						Core_Log::instance()->clear()
+							->status(Core_Log::$MESSAGE)
+							->write('Core_Str::translate error: ' . $data);
+					}
 				}
 			}
 			catch (Exception $e){}
@@ -283,7 +289,7 @@ class Core_Str
 	 */
 	static public function transliteration($string)
 	{
-		$string = mb_strtolower(trim(strval($string)));
+		$string = mb_strtolower(trim(self::toStr($string)));
 
 		$aConfig = Core::$config->get('core_str') + array(
 			'spaceSeparator' => '-',
@@ -589,8 +595,8 @@ class Core_Str
 	 */
 	static public function stripTags($source, $allowedTags = '', $aDisabledAttributes = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavaible', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragdrop', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterupdate', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmoveout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload'))
 	{
-		$source = strval($source);
-		$allowedTags = strval($allowedTags);
+		$source = self::toStr($source);
+		$allowedTags = self::toStr($allowedTags);
 
 		if (empty($aDisabledAttributes))
 		{
@@ -603,7 +609,8 @@ class Core_Str
 			$result = preg_replace_callback('/<(.*?)>/iu', 'Core_Str::_stripTagsCallback', strip_tags($source, $allowedTags));
 		}
 
-		return $result;
+		// preg_replace_callback may returns NULL
+		return strval($result);
 	}
 
 	/**
@@ -917,12 +924,9 @@ class Core_Str
 
 		foreach ($rgb as $key => $iColor)
 		{
-			$k = $iColor - floor((255 - $iColor) * $opacity);
+			$k = $iColor - floor($iColor * $opacity);
 			$rgb[$key] = $k > 0 ? $k : 0;
 		}
-
-		//$rgb = array_map('dechex', $rgb);
-		//return '#' . implode('', $rgb);
 
 		return sprintf('#%02x%02x%02x', $rgb[0], $rgb[1], $rgb[2]);
 	}
@@ -935,7 +939,7 @@ class Core_Str
 	 * @param $genitive_plural Genitive plural case
 	 * @return string
 	 */
-	static public function declensionNumber($number = 0, $nominative, $genitive_singular, $genitive_plural)
+	static public function declensionNumber($number, $nominative, $genitive_singular, $genitive_plural)
 	{
 		$last_digit = $number % 10;
 		$last_two_digits = $number % 100;
@@ -997,7 +1001,7 @@ class Core_Str
 		if (function_exists('idn_to_utf8'))
 		{
 			// fix INTL_IDNA_VARIANT_2003 is deprecated
-			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<')
+			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<') && defined('INTL_IDNA_VARIANT_UTS46')
 				? idn_to_utf8($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46)
 				: idn_to_utf8($domain);
 		}
@@ -1141,7 +1145,7 @@ class Core_Str
 		if (function_exists('idn_to_ascii'))
 		{
 			// fix INTL_IDNA_VARIANT_2003 is deprecated
-			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<')
+			return version_compare(PHP_VERSION, '7.2.0', '>=') && version_compare(PHP_VERSION, '7.4.0', '<') && defined('INTL_IDNA_VARIANT_UTS46')
 				? idn_to_ascii($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46)
 				: idn_to_ascii($domain);
 		}
@@ -1358,5 +1362,120 @@ class Core_Str
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Convert string to requested character encoding
+	 * @param string $from_encoding The input charset.
+	 * @param string $to_encoding The output charset, e.g. 'UTF-8'
+	 * @param string|array $mValue
+	 * @return mixed
+	 */
+	static public function iconv($from_encoding, $to_encoding, $mValue)
+	{
+		if (is_array($mValue))
+		{
+			foreach ($mValue as $key => $value)
+			{
+				$mValue[$key] = self::iconv($from_encoding, $to_encoding, $value);
+			}
+		}
+		else
+		{
+			// Если кодировки не совпадают
+			if (strtoupper($to_encoding) != strtoupper($from_encoding))
+			{
+				// Перекодируем в указанную кодировку
+				$mValue = @iconv($from_encoding, $to_encoding . "//IGNORE//TRANSLIT", $mValue);
+			}
+		}
+
+		return $mValue;
+	}
+
+	/**
+	 * Convert $str to the string
+	 * @param mixed $str
+	 * @return string
+	 */
+	static public function toStr($mixed)
+	{
+		if (is_array($mixed))
+		{
+			return 'Array';
+		}
+		elseif (is_object($mixed) && !method_exists($mixed, '__toString'))
+		{
+			return 'Object';
+		}
+
+		return strval($mixed);
+	}
+
+	/**
+	 * Convert weight
+	 *
+	 * @param string $from, $to, $value
+	 * @param string $to
+	 * @param mixed $value
+	 * @return float
+	 */
+	static public function convertWeight($from, $to, $value)
+	{
+		switch ($from)
+		{
+			case 'г':
+			case 'g':
+			default:
+				$coeff = 1;
+			break;
+			case 'кг':
+			case 'kg':
+				$coeff = 1000;
+			break;
+			case 'ц':
+				$coeff = 100000;
+			break;
+			case 'т':
+			case 't':
+				$coeff = 1000000;
+			break;
+			case 'фунт':
+			case 'lb':
+				$coeff = 453.59;
+			break;
+		}
+
+		// Пересчет из $from в граммы
+		$value *= $coeff;
+
+		switch ($to)
+		{
+			case 'г':
+			case 'g':
+			default:
+				$coeff = 1;
+			break;
+			case 'кг':
+			case 'kg':
+				$coeff = 0.001;
+			break;
+			case 'ц':
+				$coeff = 0.00001;
+			break;
+			case 'т':
+			case 't':
+				$coeff = 0.000001;
+			break;
+			case 'фунт':
+			case 'lb':
+				$coeff = 0.0022046341409643;
+			break;
+		}
+
+		// Пересчет из граммов в $to
+		$value *= $coeff;
+
+		return sprintf("%.3f", $value);
 	}
 }

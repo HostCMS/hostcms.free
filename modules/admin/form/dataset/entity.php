@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -128,6 +128,17 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	}
 
 	/**
+	 * Set items count
+	 * @param int $count
+	 * @return self
+	 */
+	public function setCount($count)
+	{
+		$this->_count = $count;
+		return $this;
+	}
+
+	/**
 	 * Get items count
 	 * @return int
 	 */
@@ -223,7 +234,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 				if ($issetHaving)
 				{
-					$this->_entity->queryBuilder()->sqlCalcFoundRows();
+					$queryBuilder->sqlCalcFoundRows();
 				}
 			}
 
@@ -248,6 +259,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 					: $this->_getTotalCountByCount();
 			}
 		}
+
 		return $this->_objects;
 	}
 

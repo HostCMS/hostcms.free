@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Delivery',
@@ -42,5 +42,9 @@ return array(
 	'courier' => 'Courier',
 	'days_from' => 'Delivery days from',
 	'days_to' => 'to',
-	'guid' => 'GUID',	
+	'guid' => 'GUID',
+	'delivery_with_condition' => 'Delivery of "%s: %s"',
+	'conditions_for_delivery' => 'Delivery conditions for "%s"',
+	'empty_conditions_for_delivery' => 'There are no delivery terms',
+	'apply_button' => 'Apply',
 );

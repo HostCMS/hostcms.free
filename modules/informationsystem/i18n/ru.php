@@ -7,7 +7,7 @@
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Информационные системы',
@@ -151,4 +151,10 @@ return array(
 	'all_items_count' => 'Всего элементов: %s',
 
 	'create_small_image' => 'Создавать малое изображение из большого',
+
+	'option_smallImagePrefix' => 'Префикс при именовании малых изображений',
+	'option_itemLargeImage' => 'Шаблон именования большого изображения элемента',
+	'option_itemSmallImage' => 'Шаблон именования малого изображения элемента',
+	'option_groupLargeImage' => 'Шаблон именования большого изображения группы',
+	'option_groupSmallImage' => 'Шаблон именования малого изображения группы',
 );

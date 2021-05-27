@@ -88,6 +88,7 @@ return array(
 	'fixed-navbar' => 'Navbar',
 	'fixed-sideBar' => 'SideBar',
 	'fixed-breadcrumbs' => 'BreadCrumbs',
+	'fixed-tables' => 'Tables',
 	'fixed-header' => 'Header',
 
 	'backend-sound' => 'Backend sound',
@@ -99,6 +100,7 @@ return array(
 	'events' => 'Events',
 	'bookmarks' => 'Bookmarks',
 	'sound' => 'Sound',
+	'phone' => 'Telephony',	
 	'placeholderGlobalSearch' => 'Search',
 
 	'none' => 'None',

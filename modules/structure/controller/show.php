@@ -45,7 +45,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Show extends Core_Controller
 {
@@ -665,11 +665,19 @@ class Structure_Controller_Show extends Core_Controller
 	 * @param int $parent_id ID of parent group
 	 * @param object $parentObject
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onBeforeAddInformationsystemGroups
+	 * @hostcms-event Structure_Controller_Show.onAfterAddInformationsystemGroups
+	 * @hostcms-event Structure_Controller_Show.onAfterAddInformationsystemGroup
+	 * @hostcms-event Structure_Controller_Show.onBeforeAddInformationsystemItems
+	 * @hostcms-event Structure_Controller_Show.onAfterAddInformationsystemItems
+	 * @hostcms-event Structure_Controller_Show.onAfterAddInformationsystemItem
 	 */
 	protected function _addInformationsystemGroupsByParentId($parent_id, $parentObject, $level = 0)
 	{
 		if (isset($this->_aInformationsystem_Groups[$parent_id]))
 		{
+			Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemGroups', $this, array($parent_id));
+
 			foreach ($this->_aInformationsystem_Groups[$parent_id] as $oInformationsystem_Group)
 			{
 				$this->showInformationsystemGroupProperties && $oInformationsystem_Group->showXmlProperties($this->showInformationsystemGroupProperties);
@@ -693,15 +701,21 @@ class Structure_Controller_Show extends Core_Controller
 
 				$parentObject->addEntity($oInformationsystem_Group);
 
+				Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroup', $this, array($oInformationsystem_Group, $parentObject));
+
 				if (is_null($this->level) || $level < $this->level)
 				{
 					$this->_addInformationsystemGroupsByParentId($oInformationsystem_Group->id, $oInformationsystem_Group, $level + 1);
 				}
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemGroups', $this, array($parent_id));
 		}
 
 		if ($this->showInformationsystemItems && isset($this->_aInformationsystem_Items[$parent_id]))
 		{
+			Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItems', $this, array($parent_id));
+
 			foreach ($this->_aInformationsystem_Items[$parent_id] as $oInformationsystem_Item)
 			{
 				// Shortcut
@@ -729,7 +743,11 @@ class Structure_Controller_Show extends Core_Controller
 				$this->applyForbiddenTags($oInformationsystem_Item);
 
 				$parentObject->addEntity($oInformationsystem_Item);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItem', $this, array($oInformationsystem_Item, $parentObject));
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddInformationsystemItems', $this, array($parent_id));
 		}
 
 		return $this;
@@ -949,15 +967,23 @@ class Structure_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Add shop groups to object by parent group ID
+	 * Add shop groups to the object by parent group ID
 	 * @param int $parent_id parent group ID
 	 * @param object $parentObject
 	 * @return self
+	 * @hostcms-event Structure_Controller_Show.onBeforeAddShopGroups
+	 * @hostcms-event Structure_Controller_Show.onAfterAddShopGroups
+	 * @hostcms-event Structure_Controller_Show.onAfterAddShopGroup
+	 * @hostcms-event Structure_Controller_Show.onBeforeAddShopItems
+	 * @hostcms-event Structure_Controller_Show.onAfterAddShopItems
+	 * @hostcms-event Structure_Controller_Show.onAfterAddShopItem
 	 */
 	protected function _addShopGroupsByParentId($parent_id, $parentObject, $level = 0)
 	{
 		if (isset($this->_aShop_Groups[$parent_id]))
 		{
+			Core_Event::notify(get_class($this) . '.onBeforeAddShopGroups', $this, array($parent_id));
+
 			foreach ($this->_aShop_Groups[$parent_id] as $oShop_Group)
 			{
 				$this->showShopGroupProperties && $oShop_Group->showXmlProperties($this->showShopGroupProperties);
@@ -981,15 +1007,21 @@ class Structure_Controller_Show extends Core_Controller
 
 				$parentObject->addEntity($oShop_Group);
 
+				Core_Event::notify(get_class($this) . '.onAfterAddShopGroup', $this, array($oShop_Group, $parentObject));
+
 				if (is_null($this->level) || $level < $this->level)
 				{
 					$this->_addShopGroupsByParentId($oShop_Group->id, $oShop_Group, $level + 1);
 				}
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopGroups', $this, array($parent_id));
 		}
 
 		if ($this->showShopItems && isset($this->_aShop_Items[$parent_id]))
 		{
+			Core_Event::notify(get_class($this) . '.onBeforeAddShopItems', $this, array($parent_id));
+
 			foreach ($this->_aShop_Items[$parent_id] as $oShop_Item)
 			{
 				// Shortcut
@@ -1020,7 +1052,11 @@ class Structure_Controller_Show extends Core_Controller
 				$this->applyForbiddenTags($oShop_Item);
 
 				$parentObject->addEntity($oShop_Item);
+
+				Core_Event::notify(get_class($this) . '.onAfterAddShopItem', $this, array($oShop_Item, $parentObject));
 			}
+
+			Core_Event::notify(get_class($this) . '.onAfterAddShopItems', $this, array($parent_id));
 		}
 
 		return $this;
@@ -1049,7 +1085,8 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		// Panel
 		$oXslPanel = Core::factory('Core_Html_Entity_Div')
-			->class('hostcmsPanel');
+			->class('hostcmsPanel')
+			->style('display: none');
 
 		$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
 			->class('hostcmsSubPanel hostcmsXsl')

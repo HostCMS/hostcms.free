@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Properties',
@@ -83,7 +83,15 @@ return array(
 	'changeMultiple_success' => 'Multiple have been changed.',
 	'watermark_default_use_large_image' => 'Use watermark by default',
 	'watermark_default_use_small_image' => 'Use watermark by default for small images',
-	'move_success' => 'Additional property moved successfully.',
+	'move_success' => 'Additional property moved successfully',
 	'obligatory' => 'Obligatory',
-	'property_not_found' => 'Property not found',	
+	'property_not_found' => 'Property not found',
+	'merge_success' => 'Properties were merged',
+	'merge_error_type' => 'You cannot merge properties of different types!',
+
+	'move_title' => 'Transfer properties',
+	'move_dir_id' => 'Parent dir',
+
+	'option_recursive_properties' => 'Allow recursive properties',
+	'option_add_list_items' => 'Add values for list properties to XML',
 );

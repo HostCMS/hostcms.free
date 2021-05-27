@@ -6,7 +6,7 @@
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Оценка производительности',
@@ -58,4 +58,14 @@ return array(
 	'convert' => 'Преобразовать',
 	'convertedMsg' => 'Преобразованы таблицы: %s.',
 	'add_counter' => 'Автоматически добавить код отслеживания',
+
+	'option_database_table_name' => 'Название таблицы в базе данных',
+	'option_database_write_query_count' => 'Количество запросов на запись',
+	'option_database_read_query_count' => 'Количество запросов на чтение',
+	'option_database_change_query_count' => 'Количество запросов на изменение',
+	'option_sample_text' => 'Пример текста',
+	'option_files_count' => 'Количество файлов',
+	'option_math_count' => 'Количество вычислений',
+	'option_string_count' => 'Количество строк',
+	'option_benchmark_file_path' => 'Путь к файлу для скачивания',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_View
 {
@@ -24,7 +24,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
 
 		// Is filter necessary
-		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
+		$aAdmin_Form_Fields = $this->_Admin_Form_Controller->getAdminFormFields();
 		foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 		{
 			// Перекрытие параметров для данного поля
@@ -242,7 +242,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		$oAdmin_Language = $oAdmin_Form_Controller->getAdminLanguage();
 
-		$aAdmin_Form_Fields = $oAdmin_Form->Admin_Form_Fields->findAll();
+		$aAdmin_Form_Fields = $this->_Admin_Form_Controller->getAdminFormFields();
 		if (empty($aAdmin_Form_Fields))
 		{
 			throw new Core_Exception('Admin form does not have fields.');
@@ -321,13 +321,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 										if ($oAdmin_Form_Field_Changed->allow_filter && $oAdmin_Form_Field_Changed->view != 2 || $oAdmin_Form_Field_Changed->view == 1)
 										{
-											$Admin_Word_Value = $oAdmin_Form_Field
-												->Admin_Word
-												->getWordByLanguage($oAdmin_Language->id);
-
-											$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-												? $Admin_Word_Value->name
-												: NULL;
+											$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
 											if (!is_null($fieldName))
 											{
@@ -366,13 +360,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													{
 														if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
 														{
-															$Admin_Word_Value = $oAdmin_Form_Field
-																->Admin_Word
-																->getWordByLanguage($oAdmin_Language->id);
-
-															$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-																? $Admin_Word_Value->name
-																: NULL;
+															$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
 															if (!is_null($fieldName))
 															{
@@ -465,10 +453,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							$width = htmlspecialchars($oAdmin_Form_Field_Changed->width);
 							$class = htmlspecialchars($oAdmin_Form_Field_Changed->class);
 
-							$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage($oAdmin_Language->id);
+							$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
-							$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-								? htmlspecialchars($Admin_Word_Value->name)
+							$fieldName = $fieldName != ''
+								? htmlspecialchars($fieldName)
 								: '&mdash;';
 
 							$oAdmin_Form_Field_Changed->allow_sorting
@@ -598,6 +586,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			// Устанавливаем ограничения на источники
 			$oAdmin_Form_Controller->setDatasetConditions();
+			
+			// @TODO method_exists() remove after 6.9.8
+			method_exists($oAdmin_Form_Controller, 'setDatasetLimits')
+				&& $oAdmin_Form_Controller->setDatasetLimits();
 
 			$aDatasets = $oAdmin_Form_Controller->getDatasets();
 			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
@@ -612,11 +604,17 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 				if (!empty($aDataFromDataset))
 				{
+					$key_field_name = $oAdmin_Form->key_field;
+
 					foreach ($aDataFromDataset as $oEntity)
 					{
+						if (!isset($oEntity->$key_field_name))
+						{
+							throw new Core_Exception('Error! Key field missing in the Entity');
+						}
+
 						try
 						{
-							$key_field_name = $oAdmin_Form->key_field;
 							$entityKey = $oEntity->$key_field_name;
 
 							// Экранируем ' в имени индексного поля, т.к. дальше это значение пойдет в JS
@@ -674,7 +672,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								{
 									?><div style="position: relative"><?php
 								}
-								
+
 								// Backends
 								$aTmpFieldName = explode('.', $oAdmin_Form_Field_Changed->name);
 								$backendName = (isset($aTmpFieldName[1]) ? $aTmpFieldName[1] : $aTmpFieldName[0]) . 'Backend';
@@ -880,13 +878,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												}
 
 												// Получаем заголовок столбца на случай, если для IMG не было указано alt-а или title
-												$Admin_Word_Value = $oAdmin_Form_Field->Admin_Word->getWordByLanguage(
-													$oAdmin_Language->id
-												);
+												$fieldCaption = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
-												$fieldCaption = $Admin_Word_Value
-													? htmlspecialchars($Admin_Word_Value->name)
-													: "&mdash;";
+												$fieldCaption = $fieldCaption != ''
+													? htmlspecialchars($fieldCaption)
+													: '&mdash;';
 
 												if (empty($alt_array[$value]))
 												{
@@ -1037,8 +1033,6 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 								}
 
 								// Badges
-								//$badgesMethodName = $fieldName . 'Badge';
-								//if ($oAdmin_Form_Controller->isCallable($oEntity, $badgesMethodName))
 								if ($bBadge)
 								{
 									// Выполним функцию обратного вызова
@@ -1095,11 +1089,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 								$iActionsCount++;
 
-								$Admin_Word_Value = $o_Admin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
-
-								$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-									? htmlspecialchars($Admin_Word_Value->name)
-									: '';
+								$name = htmlspecialchars($o_Admin_Form_Action->getCaption($oAdmin_Language->id));
 
 								Core_Event::notify('Admin_Form_Controller.onBeforeGetAdminActionLoadHref', $oAdmin_Form_Controller, array($o_Admin_Form_Action, $escapedDatasetKey, $escapedEntityKey));
 
@@ -1211,11 +1201,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					{
 						$iGroupCount++;
 
-						$Admin_Word_Value = $o_Admin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
-
-						$text = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-							? $Admin_Word_Value->name
-							: '';
+						$text = htmlspecialchars($o_Admin_Form_Action->getCaption($oAdmin_Language->id));
 
 						$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name);
 						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name);

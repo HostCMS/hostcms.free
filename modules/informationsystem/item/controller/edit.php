@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -314,7 +314,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_large_image,
 
 							// onclick_delete_big_image - значение onclick для удаления большой картинки
-							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
+							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
 
 							'caption' => Core::_('Informationsystem_Item.image_large'),
 
@@ -338,7 +338,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
 
 							// onclick_delete_small_image - значение onclick для удаления малой картинки
-							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
+							'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
 
 							// load_small_image_caption - заголовок поля загрузки малого изображения
 							'caption' => Core::_('Informationsystem_Item.image_small'),
@@ -804,7 +804,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_large_image,
 
 						// onclick_delete_big_image - значение onclick для удаления большой картинки
-						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false",
+						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE",
 
 						'caption' => Core::_('Informationsystem_Group.image_large'),
 
@@ -829,7 +829,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						'place_watermark_checkbox_checked' => $oInformationsystem->watermark_default_use_small_image,
 
 						// onclick_delete_small_image - значение onclick для удаления малой картинки
-						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false",
+						'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE",
 
 						// load_small_image_caption - заголовок поля загрузки малого изображения
 						'caption' => Core::_('Informationsystem_Group.image_small'),
@@ -1340,8 +1340,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$param = array();
 
-		$large_image = '';
-		$small_image = '';
+		$large_image = $small_image = '';
 
 		$aCore_Config = Core::$mainConfig;
 
@@ -1416,9 +1415,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				// Для инфогруппы ранее задано изображение
 				if ($this->_object->image_large != '')
 				{
-					// Существует ли большое изображение
-					$param['large_image_isset'] = true;
-					$create_large_image = false;
+					$create_large_image = FALSE;
 				}
 				else // Для информационной группы ранее не задано большое изображение
 				{
@@ -1530,10 +1527,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 			// Позиция "водяного знака" по оси Y
 			$param['watermark_position_y'] = Core_Array::getPost('watermark_position_y_image');
 
-			// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), false - не наложить);
+			// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), FALSE - не наложить);
 			$param['large_image_watermark'] = !is_null(Core_Array::getPost('large_place_watermark_checkbox_image'));
 
-			// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), false - не наложить);
+			// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), FALSE - не наложить);
 			$param['small_image_watermark'] = !is_null(Core_Array::getPost('small_place_watermark_checkbox_small_image'));
 
 			// Сохранять пропорции изображения для большого изображения

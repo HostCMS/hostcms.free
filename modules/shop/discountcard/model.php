@@ -158,7 +158,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		$color = ($this->Shop_Discountcard_Level->color
 			? htmlspecialchars($this->Shop_Discountcard_Level->color)
-			: '#eee'
+			: '#aebec4'
 		);
 
 		return '<span class="label" style="background-color: ' . $color . '">' . htmlspecialchars($this->number) . '</span><br /><span class="small darkgray">Σ ' . htmlspecialchars($this->amount . ' ' . $this->Shop->Shop_Currency->name) . '</span>';
@@ -174,7 +174,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		$color = ($this->Shop_Discountcard_Level->color
 			? htmlspecialchars($this->Shop_Discountcard_Level->color)
-			: '#eee'
+			: '#aebec4'
 		);
 
 		return $this->shop_discountcard_level_id
@@ -209,6 +209,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	/**
 	 * Set Discountcard Level By Order's Amount
 	 * @return self
+	 * @hostcms-event shop_discountcard.onAfterCheckLevel
 	 */
 	public function checkLevel()
 	{
@@ -218,7 +219,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 		$shop_discountcard_level_id = 0;
 
-		foreach($aShop_Discountcard_Levels as $oShop_Discountcard_Level)
+		foreach ($aShop_Discountcard_Levels as $oShop_Discountcard_Level)
 		{
 			if ($this->amount >= $oShop_Discountcard_Level->amount)
 			{
@@ -231,6 +232,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		}
 
 		$this->shop_discountcard_level_id = $shop_discountcard_level_id;
+
+		Core_Event::notify($this->_modelName . '.onAfterCheckLevel', $this);
+
 		$this->save();
 
 		return $this;

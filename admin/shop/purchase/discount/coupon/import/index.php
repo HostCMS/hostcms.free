@@ -1,5 +1,14 @@
 <?php
+/**
+ * Online shop.
+ *
+ * @package HostCMS
+ * @version 6.x
+ * @author Hostmake LLC
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ */
 require_once('../../../../../../bootstrap.php');
+
 Core_Auth::authorization($sModule = 'shop');
 
 $oShop = Core_Entity::factory('Shop', Core_Array::getRequest('shop_id', 0));
@@ -15,15 +24,12 @@ $oAdmin_Form_Controller
 	->setUp()
 	->path('/admin/shop/purchase/discount/coupon/import/index.php');
 
-
 ob_start();
 
 $oAdmin_View = Admin_View::create();
 $oAdmin_View
 	->module(Core_Module::factory($sModule))
-	->pageTitle(Core::_('Shop_Purchase_Discount_Coupon.import'))
-	;
-
+	->pageTitle(Core::_('Shop_Purchase_Discount_Coupon.import'));
 
 // Первая крошка на список магазинов
 $oAdmin_Form_Entity_Breadcrumbs->add(
@@ -107,7 +113,7 @@ $oAdmin_Form_Entity_Form = Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)
 	->action($oAdmin_Form_Controller->getPath())
 	->enctype('multipart/form-data');
-	
+
 $oAdmin_View->addChild($oAdmin_Form_Entity_Breadcrumbs);
 
 $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
@@ -142,7 +148,7 @@ else
 	{
 		$iCounter = 0;
 		$sFileName = $_FILES['csv_file']['tmp_name'];
-		$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.csv';
+		$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_' . time() . '.csv';
 		try
 		{
 			Core_File::upload($sFileName, $sTmpFileName);
@@ -213,6 +219,10 @@ else
 								}
 							}
 
+							// Генерируем текст купона
+							$oShop_Purchase_Discount_Coupon->text == ''
+								&& $oShop_Purchase_Discount_Coupon->generateCode();
+
 							$oShop_Purchase_Discounts = $oShop->Shop_Purchase_Discounts;
 							$oShop_Purchase_Discounts
 								->queryBuilder()
@@ -262,8 +272,6 @@ ob_start();
 $oAdmin_View
 	->content($content)
 	->show();
-
-
 
 /*$oAdmin_Answer = Core_Skin::instance()->answer();
 $oAdmin_Answer

@@ -27,4 +27,6 @@ return array(
 	'downloaded5xx' => 'Завантажені з кодом 5xx',
 	'failed' => 'Не вдалося завантажити',
 	'excluded' => 'Виключені',
+	'option_topQueriesLimit' => 'Ліміт запитів',
+	'option_topPagesLimit' => 'Ліміт сторінок',
 );

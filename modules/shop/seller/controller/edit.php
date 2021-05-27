@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -243,15 +243,12 @@ class Shop_Seller_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Для инфогруппы ранее задано изображение
 				if ($this->_object->image_large != '')
 				{
-					// Существует ли большое изображение
-					$param['large_image_isset'] = true;
 					$create_large_image = false;
 				}
 				else // Для информационной группы ранее не задано большое изображение
 				{
 					$create_large_image = empty($large_image);
 				}
-
 
 				$file_name = $aSmallFileData['name'];
 

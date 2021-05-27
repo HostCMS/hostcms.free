@@ -96,6 +96,8 @@
 					}
 				});
 
+				path += jForm.data('tag');
+
 				if (parseInt(sortingOption.attr('value')))
 				{
 					path += '?sorting=' + sortingOption.val();
@@ -232,9 +234,9 @@
 		</xsl:variable>
 
 		<!-- дополнение пути для action, если выбрана метка -->
-	<xsl:variable name="form_tag_url"><xsl:if test="count(tag) = 1">tag/<xsl:value-of select="tag/urlencode"/>/</xsl:if></xsl:variable>
+		<xsl:variable name="form_tag_url"><xsl:if test="count(tag) = 1">tag/<xsl:value-of select="tag/urlencode"/>/</xsl:if></xsl:variable>
 
-		<form method="get" action="{$path}{$form_tag_url}">
+		<form method="get" action="{$path}" data-tag="{$form_tag_url}">
 			<div class="filter">
 				<div class="sorting">
 					<select name="sorting" onchange="$(this).parents('form:first').submit()">

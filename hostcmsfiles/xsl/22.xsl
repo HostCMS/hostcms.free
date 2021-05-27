@@ -87,7 +87,7 @@
 							
 							<div class="row">
 								<div class="caption">
-							&labelCaptchaId;<sup><font color="red">*</font></sup>
+									&labelCaptchaId;<sup><font color="red">*</font></sup>
 								</div>
 								<div class="field">
 									<input type="hidden" name="captcha_id" value="{/form/captcha_id}"/>

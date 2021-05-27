@@ -29,4 +29,5 @@ return array(
 	'XSL_root_dir' => 'XSL-шаблони',
 	'delete_success' => 'Елемент видалений!',
 	'undelete_success' => 'Елемент відновлено!',
+	'option_formatOutput' => 'Форматувати висновок'
 );

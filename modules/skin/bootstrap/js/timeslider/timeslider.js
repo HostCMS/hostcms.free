@@ -283,10 +283,15 @@ if (typeof jQuery === 'undefined') {
         var _this = this;
         window.setInterval(this.set_current_timestamp(), this.options['update_timestamp_interval']);
         window.setInterval(this.set_running_elements(), this.options['update_interval']);
-        $('body').mouseup(this.mouse_up_event());
-        $('body').mousemove(this.cursor_moving_event());
+        //$('body').mouseup(this.mouse_up_event());
+        //$('body').mousemove(this.cursor_moving_event());
+		$('body').on('mouseup touchend', this.mouse_up_event());
+        $('body').on('mousemove touchmove', this.cursor_moving_event());
+
         if (this.options.ruler_enable_move) {
-            this.$ruler.find('.bg-event').mousedown(this.ruler_mouse_down_event());
+			//this.$ruler.find('.bg-event').mousedown(this.ruler_mouse_down_event());
+
+			this.$ruler.find('.bg-event').on('mousedown touchstart', this.ruler_mouse_down_event());
         }
         if (typeof this.options.on_dblclick_ruler_callback == 'function') {
             this.$ruler.find('.bg-event').dblclick(function () {
@@ -425,6 +430,7 @@ if (typeof jQuery === 'undefined') {
             options['l_prompt'] = this.$prompts.find('#l-prompt-' + options['_id'] + '.prompt');
             options['t_element'] = this.$ruler.find('#t' + options['_id']);
             options['r_prompt'] = this.$prompts.find('#r-prompt-' + options['_id'] + '.prompt');
+
             this._edit_time_cell(options);
         }
     };
@@ -497,8 +503,14 @@ if (typeof jQuery === 'undefined') {
         }
 
         var get_selected_area = function(e) {
-            var width = parseFloat($(this).css('width'));
-            var pos_x = parseFloat(e.offsetX);
+
+			var bodyRect = document.body.getBoundingClientRect(),
+				elemRect = e.target.getBoundingClientRect(),
+				offset = parseInt(elemRect.left - bodyRect.left),
+				width = parseFloat($(this).css('width')),
+				pageX = e.type == 'touchstart' ? e.originalEvent.touches[0].pageX : e.originalEvent.pageX;
+				pos_x = pageX - offset;
+
             if (_this.options.timecell_enable_move && _this.options.timecell_enable_resize) {
                 if (pos_x <= 3) {
                     return 'left';
@@ -528,7 +540,8 @@ if (typeof jQuery === 'undefined') {
         };
 
         var time_cell_mousedown_event = function(e) {
-            if (e.which == 1) { // left mouse button event
+
+            if (e.type == 'touchstart' || e.which == 1) { // left mouse button event
                 _this.clicked_on = 'timecell';
                 var id = $(this).attr('p_id');
                 switch(get_selected_area.call(this, e)) {
@@ -575,6 +588,7 @@ if (typeof jQuery === 'undefined') {
         };
 
         var time_cell_mousemove_event = function(e) {
+
             if (! _this.is_mouse_down_left) {
                 var id = $(this).attr('p_id');
                 $(this).addClass('hover');
@@ -602,7 +616,7 @@ if (typeof jQuery === 'undefined') {
                     case 'right':
                         if ($(this).hasClass('current')) {
                             $(this).css('cursor', 'default');
-                            _this.$prompts.find('#l-prompt-' + id + '.prompt').fadeOut(150);
+							_this.$prompts.find('#l-prompt-' + id + '.prompt').fadeOut(150);
                             _this.$prompts.find('#r-prompt-' + id + '.prompt').fadeOut(150);
                         }
                         else {
@@ -631,6 +645,7 @@ if (typeof jQuery === 'undefined') {
         };
 
         var time_cell_mouseout_event = function(e) {
+
             if (! _this.is_mouse_down_left) {
                 var id = $(this).attr('p_id');
                 _this.$prompts.find('#l-prompt-' + id + '.prompt').fadeOut(150);
@@ -699,8 +714,10 @@ if (typeof jQuery === 'undefined') {
             // add events
             var t_element = this.$ruler.find('#t' + timecell['_id']);
             t_element
-                .mousedown(time_cell_mousedown_event)
-                .mousemove(time_cell_mousemove_event)
+                //.mousedown(time_cell_mousedown_event)
+				//.mousemove(time_cell_mousemove_event)
+				.on('mousedown touchstart', time_cell_mousedown_event)
+                .on('mousemove touchmove', time_cell_mousemove_event)
                 .mouseout(time_cell_mouseout_event);
             if (typeof this.options.on_dblclick_timecell_callback == 'function') {
                 t_element.dblclick(function() {
@@ -779,7 +796,9 @@ if (typeof jQuery === 'undefined') {
 
     TimeSlider.prototype.set_time_cells_position = function() {
         var _this = this;
+
         this.$ruler.children('.timecell').each(function () {
+
             var start_timestamp = parseInt($(this).attr('start_timestamp'));
             var left = (start_timestamp - _this.options.start_timestamp) * _this.px_per_ms;
             var width = (($(this).attr('stop_timestamp')
@@ -867,8 +886,11 @@ if (typeof jQuery === 'undefined') {
     };
 
     TimeSlider.prototype._edit_time_cell = function(options) {
+
         var has_start = options.start !== undefined && options.start !== null;
         var has_stop = options.stop !== undefined && options.stop !== null && options.element.attr('stop_timestamp');
+
+
         if (has_start) {
             var stop = null;
             if (options.stop !== undefined && options.stop) {
@@ -886,6 +908,7 @@ if (typeof jQuery === 'undefined') {
             options.t_element.css('width', width);
             options.l_prompt.css('left', left - 44);
         }
+
         if (has_stop) {
             var start = has_start ? options.start : parseInt(options.element.attr('start_timestamp'));
             var left = (start - this.options.start_timestamp) * this.px_per_ms;
@@ -900,13 +923,14 @@ if (typeof jQuery === 'undefined') {
     };
 
     TimeSlider.prototype.set_time_cell_position = function(diff_x) {
+
         var id = this.time_cell_selected.element.attr('id');
         var timecell = {
             element: this.time_cell_selected.element,
             t_element: this.time_cell_selected.t_element
         };
 
-        // move all time cell
+		// move all time cell
         if (this.time_cell_selected.l_prompt && this.time_cell_selected.r_prompt) {
             var new_start = parseInt(this.time_cell_selected.element.attr('start_timestamp')) + Math.round(diff_x / this.px_per_ms);
             var new_stop = parseInt(this.time_cell_selected.element.attr('stop_timestamp')) + Math.round(diff_x / this.px_per_ms);
@@ -914,16 +938,20 @@ if (typeof jQuery === 'undefined') {
             timecell['r_prompt'] = this.time_cell_selected.r_prompt;
             timecell['start'] = new_start;
             timecell['stop'] = new_stop;
+
             this._edit_time_cell(timecell);
+
             if (typeof this.options.on_move_timecell_callback == 'function') {
-                this.options.on_move_timecell_callback(id, new_start, new_stop);
+				this.options.on_move_timecell_callback(id, new_start, new_stop);
             }
+
         }
         // resize left border
         else if (this.time_cell_selected.l_prompt) {
             var new_start = parseInt(this.time_cell_selected.element.attr('start_timestamp')) + Math.round(diff_x / this.px_per_ms);
             timecell['l_prompt'] = this.time_cell_selected.l_prompt;
             timecell['start'] = new_start;
+
             this._edit_time_cell(timecell);
             if (typeof this.options.on_resize_timecell_callback == 'function') {
                 this.options.on_resize_timecell_callback(
@@ -939,6 +967,7 @@ if (typeof jQuery === 'undefined') {
             var new_stop = parseInt(this.time_cell_selected.element.attr('stop_timestamp')) + Math.round(diff_x / this.px_per_ms);
             timecell['r_prompt'] = this.time_cell_selected.r_prompt;
             timecell['stop'] = new_stop;
+
             this._edit_time_cell(timecell);
             if (typeof this.options.on_resize_timecell_callback == 'function') {
                 this.options.on_resize_timecell_callback(
@@ -954,16 +983,24 @@ if (typeof jQuery === 'undefined') {
     TimeSlider.prototype.get_cursor_x_position = function(e) {
         var posx = 0;
 
-        if (! e) {
+		if (!e) {
             e = window.event;
         }
 
-        if (e.pageX || e.pageY) {
-            posx = e.pageX;
-        }
-        else if (e.clientX || e.clientY) {
-            posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        }
+		if (e.type == 'touchstart' || e.type == 'touchmove')
+		{
+			posx = e.originalEvent.touches[0].pageX;
+		}
+		else
+		{
+			if (e.pageX || e.pageY) {
+				posx = e.pageX;
+			}
+			else if (e.clientX || e.clientY) {
+				posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+			}
+		}
+
         return posx;
     };
 
@@ -973,23 +1010,23 @@ if (typeof jQuery === 'undefined') {
 
         return function(e) {
 
-            var pos_x = _this.get_cursor_x_position(e);
+			var pos_x = _this.get_cursor_x_position(e);
 
 			var px_per_minute = _this.$ruler.width() / (_this.options.hours_per_ruler * 60);
 
             if (_this.is_mouse_down_left) {
+
                 switch (_this.clicked_on) {
                     case 'timecell':
-                        if (_this.time_cell_selected) {
-							//console.log('_this.time_cell_selected = ', _this.time_cell_selected);
-							/* console.log('px_per_minute = ', px_per_minute);
 
-							console.log('pos_x - _this.prev_cursor_x = ', pos_x - _this.prev_cursor_x); */
+                        if (_this.time_cell_selected) {
+
                             _this.set_time_cell_position(pos_x - _this.prev_cursor_x);
                         }
                         break;
 
                     case 'ruler':
+
                         _this.set_ruler_position(pos_x - _this.prev_cursor_x);
                         break;
                 }
@@ -1001,13 +1038,13 @@ if (typeof jQuery === 'undefined') {
     TimeSlider.prototype.mouse_up_event = function() {
         var _this = this;
         return function(e) {
-            if (e.which == 1) { // left mouse button event
+            if (e.type == 'touchend' || e.which == 1) { // left mouse button event
                 _this.is_mouse_down_left = false;
                 switch (_this.clicked_on) {
                     case 'timecell':
                         if (_this.time_cell_selected) {
                             if (! _this.time_cell_selected.hover) {
-                                _this.$prompts.find('#l-prompt-' + _this.time_cell_selected.element.attr('id') + '.prompt').fadeOut(150);
+								_this.$prompts.find('#l-prompt-' + _this.time_cell_selected.element.attr('id') + '.prompt').fadeOut(150);
                                 _this.$prompts.find('#r-prompt-' + _this.time_cell_selected.element.attr('id') + '.prompt').fadeOut(150);
                                 _this.time_cell_selected.t_element.removeClass('hover');
                             }
@@ -1036,16 +1073,28 @@ if (typeof jQuery === 'undefined') {
         }
     };
 
-    TimeSlider.prototype.ruler_mouse_down_event = function() {
+	TimeSlider.prototype.ruler_mouse_down_event = function() {
         var _this = this;
         return function(e) {
-            if (e.which == 1) { // left mouse button event
+
+			if (e.type == 'touchstart' || e.which == 1)
+			{
                 _this.clicked_on = 'ruler';
                 _this.is_mouse_down_left = true;
-                _this.prev_cursor_x = _this.get_cursor_x_position(e);
+				_this.prev_cursor_x = _this.get_cursor_x_position(e);
             }
         }
     };
+
+	/* TimeSlider.prototype.ruler_touchstart_event = function() {
+        var _this = this;
+        return function(e) {
+
+			_this.clicked_on = 'ruler';
+			_this.is_mouse_down_left = true;
+			_this.prev_cursor_x = _this.get_cursor_x_position(e);
+        }
+    }; */
 
 
     // TIMESLIDER PLUGIN DEFINITION

@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controller
 {
@@ -138,11 +138,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			$this->_object->getPrimaryKeyName()
 		);
 
-		$aRelations = $this->_object->getRelations();
-
-		foreach ($aRelations as $relation)
+		if (method_exists($this->_object, 'getRelations'))
 		{
-			$this->_keys[] = $relation['foreign_key'];
+			$aRelations = $this->_object->getRelations();
+			foreach ($aRelations as $relation)
+			{
+				$this->_keys[] = $relation['foreign_key'];
+			}
 		}
 
 		if (!empty($this->_keys))
@@ -406,9 +408,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		// Список закладок
 		// Основная закладка
 		$oAdmin_Form_Tab_EntityMain = Admin_Form_Entity::factory('Tab')
-			->caption(Core::_('admin_form.form_forms_tab_1'))
+			//->caption(Core::_('admin_form.form_forms_tab_1'))
 			->name('main')
-			->class($this->tabClass);
+			->class($this->tabClass)
+			->icon('fas fa-grip-horizontal')
+			->iconTitle(Core::_('admin_form.form_forms_tab_1'));
 
 		$this->addTab($oAdmin_Form_Tab_EntityMain);
 
@@ -416,9 +420,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		//{
 			// Дополнительные (ключи)
 			$oAdmin_Form_Tab_EntityAdditional = Admin_Form_Entity::factory('Tab')
-				->caption(Core::_('admin_form.form_forms_tab_2'))
+				//->caption(Core::_('admin_form.form_forms_tab_2'))
 				->name('additional')
-				->class($this->tabClass);
+				->class($this->tabClass)
+				->icon('fas fa-gear')
+				->iconTitle(Core::_('admin_form.form_forms_tab_2'));
 
 			// $oUser = Core_Auth::getCurrentUser();
 			// 6.8.7, вкладка возвращена, т.к. на ней бывают данные о GUID
@@ -441,6 +447,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				switch ($columnArray['datatype'])
 				{
 					case 'datetime':
+					case 'timestamp':
 						$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('DateTime');
 
 						/*$date = ($this->_object->$columnName == '0000-00-00 00:00:00')
@@ -500,9 +507,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					default:
 						$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Input');
 
-						$oAdmin_Form_Entity_For_Column
-							//->size(12) // изменить на расчет
-							->value($this->_object->$columnName);
+						$oAdmin_Form_Entity_For_Column->value($this->_object->$columnName);
 
 						if ($sTabName == 'main'
 							&& $this->_tabs[$sTabName]->getCountChildren() == 0)
@@ -572,7 +577,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				if (/*!is_null($this->_object->getPrimaryKey())
 					|| $sTabName == 'main'*/
 					!(is_null($this->_object->getPrimaryKey()) && $columnName == $primaryKeyName)
-					)
+				)
 				{
 					$this->_tabs[$sTabName]->add(
 						$oEntity_Row->add($oAdmin_Form_Entity_For_Column)
@@ -583,15 +588,23 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 						if (Core::moduleIsActive('user'))
 						{
 							$oCurrentUser = Core_Auth::getCurrentUser();
+							$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
+							$bShowUserSelect = FALSE;
 							if (!$oCurrentUser->only_access_my_own)
+							{
+								$bShowUserSelect = $this->_object->user_id && $this->_object instanceof Core_Entity
+									? $this->_object->User->checkSiteAccess($oSite)
+									: TRUE;
+							}
+
+							if ($bShowUserSelect)
 							{
 								$this->_tabs[$sTabName]->delete($oAdmin_Form_Entity_For_Column);
 
 								$placeholder = Core::_('User.select_user');
 								$language = Core_i18n::instance()->getLng();
 
-								$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 								$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
 
 								$oAdmin_Form_Entity_For_Column = Admin_Form_Entity::factory('Select')
@@ -626,26 +639,12 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 								$oAdmin_Form_Entity_For_Column
 									->type('hidden')
 									// ->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-lg-4'))
-									->disabled('disabled');
+									// ->disabled('disabled')
+									;
 
 								if ($this->_object->user_id)
 								{
 									$oUser = $this->_object->User;
-
-									/*$oUserLink = Admin_Form_Entity::factory('Link');
-									$oUserLink
-										->divAttr(array('class' => 'input-group-addon user-link'))
-										->a
-											->class('btn btn-labeled btn-sky')
-											->href($this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
-											->onclick($this->_Admin_Form_Controller->getAdminActionLoadAjax('/admin/user/index.php', 'edit', NULL, 0, $oUser->id, ''))
-											->value($oUser->login)
-											->target('_blank');
-									$oUserLink
-										->icon
-											->class('btn-label fa fa-user');
-
-									$oAdmin_Form_Entity_For_Column->add($oUserLink);*/
 
 									$oAdmin_Form_Entity_For_Column->add(
 										Admin_Form_Entity::factory('Code')
@@ -793,6 +792,81 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	}
 
 	/**
+	 * Correct Value by $columnArray
+	 * @param mixed $value
+	 * @param array $columnArray
+	 * @return mixed
+	 */
+	protected function _correctValue($value, $columnArray)
+	{
+		switch ($columnArray['datatype'])
+		{
+			case 'timestamp':
+			case 'datetime':
+				$value = $value != ''
+					? Core_Date::datetime2sql($value)
+					: '0000-00-00 00:00:00';
+			break;
+			case 'date':
+				$value = $value != ''
+					? Core_Date::date2sql($value)
+					: '0000-00-00';
+			break;
+			case 'tinytext':
+			case 'text':
+			case 'mediumtext':
+			case 'longtext':
+			case 'tinyblob':
+			case 'blob':
+			case 'mediumblob':
+			case 'longblob':
+				// Nothing to do
+			break;
+			case 'tinyint':
+			case 'tinyint unsigned':
+				// Только при длине 1 символ или пустом для MySql 8 && unsigned
+				if ($columnArray['max_length'] == 1 || $columnArray['max_length'] == '' && $columnArray['unsigned'] == 1)
+				{
+					// Checkbox
+					$value = is_null($value) ? 0 : $value;
+				}
+				elseif (!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
+				{
+					$value = intval($value);
+				}
+			break;
+			case 'smallint':
+			case 'smallint unsigned':
+			case 'mediumint':
+			case 'mediumint unsigned':
+			case 'int':
+			case 'int unsigned':
+			case 'integer unsigned':
+				(!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
+					&& $value = intval($value);
+			break;
+			case 'decimal':
+				if ($value != 0 && isset($columnArray['max_length']))
+				{
+					$aMaxLength = explode(',', $columnArray['max_length']);
+					if (count($aMaxLength) == 2)
+					{
+						$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
+
+						$value > $maxValue && $value = $maxValue;
+						$value < -$maxValue && $value = -$maxValue;
+					}
+				}
+			break;
+			default:
+				// Nothing to do
+			break;
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Processing of the form. Apply object fields.
 	 * @return self
 	 * @hostcms-event Admin_Form_Action_Controller_Type_Edit.onBeforeApplyObjectProperty
@@ -818,69 +892,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			{
 				$value = Core_Array::get($this->_formValues, $columnName);
 
-				switch ($columnArray['datatype'])
-				{
-					case 'datetime':
-						$value = $value != ''
-							? Core_Date::datetime2sql($value)
-							: '0000-00-00 00:00:00';
-					break;
-					case 'date':
-						$value = $value != ''
-							? Core_Date::date2sql($value)
-							: '0000-00-00';
-					break;
-					case 'tinytext':
-					case 'text':
-					case 'mediumtext':
-					case 'longtext':
-					case 'tinyblob':
-					case 'blob':
-					case 'mediumblob':
-					case 'longblob':
-						// Nothing to do
-					break;
-					case 'tinyint':
-					case 'tinyint unsigned':
-						// Только при длине 1 символ или пустом для MySql 8 && unsigned
-						if ($columnArray['max_length'] == 1 || $columnArray['max_length'] == '' && $columnArray['unsigned'] == 1)
-						{
-							// Checkbox
-							$value = is_null($value) ? 0 : $value;
-						}
-						elseif (!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
-						{
-							$value = intval($value);
-						}
-					break;
-					case 'smallint':
-					case 'smallint unsigned':
-					case 'mediumint':
-					case 'mediumint unsigned':
-					case 'int':
-					case 'int unsigned':
-					case 'integer unsigned':
-						(!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
-							&& $value = intval($value);
-					break;
-					case 'decimal':
-						if ($value != 0 && isset($columnArray['max_length']))
-						{
-							$aMaxLength = explode(',', $columnArray['max_length']);
-							if (count($aMaxLength) == 2)
-							{
-								$maxValue = str_repeat(9, $aMaxLength[0] - $aMaxLength[1]) . '.' . str_repeat(9, $aMaxLength[1]);
-
-								$value > $maxValue && $value = $maxValue;
-								$value < -$maxValue && $value = -$maxValue;
-							}
-						}
-					break;
-					default:
-						// Nothing to do
-					break;
-				}
-				$this->_object->$columnName = $value;
+				$this->_object->$columnName = $this->_correctValue($value, $columnArray);
 			}
 		}
 

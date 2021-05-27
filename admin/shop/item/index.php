@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -53,7 +53,7 @@ if (!is_null(Core_Array::getGet('loadBarcodesList')) && !is_null(Core_Array::get
 				->data('barcode', $sQuery)
 				->execute();
 
-			$aResponse = json_decode($Core_Http->getBody(), TRUE);
+			$aResponse = json_decode($Core_Http->getDecompressedBody(), TRUE);
 
 			if (count($aResponse))
 			{
@@ -823,6 +823,7 @@ if ($oShopGroup->id)
 	}
 }
 
+// Глобальный поиск
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
 $oAdmin_Form_Controller->addEntity(
@@ -1239,7 +1240,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $oAdmin_Form_Dataset

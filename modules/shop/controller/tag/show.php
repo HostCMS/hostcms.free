@@ -7,7 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * Доступные методы:
  *
- * - group($id) идентификатор группы или массив идентификаторов
+ * - tag_dirs(TRUE|FALSE) отображать разделы тегов, по умолчанию FALSE
+ * - tag_dir($tag_dir_id) идентификатор раздела меток, из которого выводить метки
+ * - group($id) идентификатор группы магазина или массив идентификаторов
  * - offset($offset) смещение, с которого выводить метки. По умолчанию 0
  * - limit($limit) количество выводимых меток
  *
@@ -28,7 +30,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Tag_Show extends Core_Controller
 {
@@ -37,6 +39,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	 * @var array
 	 */
 	protected $_allowedProperties = array(
+		'tag_dirs',
 		'group',
 		'tag_dir',
 		'offset',
@@ -50,6 +53,12 @@ class Shop_Controller_Tag_Show extends Core_Controller
 	 * @var Tag_Model
 	 */
 	protected $_tags = NULL;
+
+	/**
+	 * List of Tag_Dirs
+	 * @var array
+	 */
+	protected $_aTag_Dirs = array();
 
 	/**
 	 * Constructor.
@@ -106,7 +115,7 @@ class Shop_Controller_Tag_Show extends Core_Controller
 			->orderBy('tags.name', 'ASC');
 
 		$this->group = NULL;
-		$this->tag_dir = FALSE;
+		$this->tag_dirs = $this->tag_dir = FALSE;
 		$this->offset = 0;
 		$this->cache = TRUE;
 	}
@@ -143,6 +152,18 @@ class Shop_Controller_Tag_Show extends Core_Controller
 
 		$oShop = $this->getEntity();
 
+		if ($this->tag_dirs)
+		{
+			$aTag_Dirs = Core_Entity::factory('Tag_Dir')->findAll();
+
+			foreach ($aTag_Dirs as $oTag_Dir)
+			{
+				$this->_aTag_Dirs[$oTag_Dir->parent_id][] = $oTag_Dir;
+			}
+
+			$this->_addDirsByParentId(0, $this);
+		}
+
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('group')
@@ -156,15 +177,15 @@ class Shop_Controller_Tag_Show extends Core_Controller
 
 		if (!is_null($this->group))
 		{
-			$this->_tags->queryBuilder()
-				->where(
-					'shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group
-				);
+			$this->_tags
+				->queryBuilder()
+				->where('shop_items.shop_group_id', is_array($this->group) ? 'IN' : '=', $this->group);
 		}
 
 		if ($this->tag_dir !== FALSE)
 		{
-			$this->_tags->queryBuilder()
+			$this->_tags
+				->queryBuilder()
 				->where('tag_dir_id', is_array($this->tag_dir) ? 'IN' : '=', $this->tag_dir);
 		}
 
@@ -181,6 +202,26 @@ class Shop_Controller_Tag_Show extends Core_Controller
 		echo $content = $this->get();
 		$this->cache && Core::moduleIsActive('cache') && $oCore_Cache->set($cacheKey, $content, $cacheName);
 
+		return $this;
+	}
+
+	/**
+	 * Add dirs to the object by parent ID
+	 * @param int $parent_id parent group ID
+	 * @param object $parentObject object
+	 * @return self
+	 */
+	protected function _addDirsByParentId($parent_id, $parentObject)
+	{
+		if (isset($this->_aTag_Dirs[$parent_id]))
+		{
+			foreach ($this->_aTag_Dirs[$parent_id] as $oTag_Dir)
+			{
+				$parentObject->addEntity($oTag_Dir->clearEntities());
+
+				$this->_addDirsByParentId($oTag_Dir->id, $oTag_Dir);
+			}
+		}
 		return $this;
 	}
 }

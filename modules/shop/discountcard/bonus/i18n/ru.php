@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Бонусы дисконтной карты',
@@ -18,12 +18,15 @@ return array(
 	'amount' => 'Сумма',
 	'written_off' => 'Потрачено',
 	'shop_discountcard_id' => 'Идентификатор дисконтной карты',
+	'description' => 'Комментарий',
 	'id' => 'Идентификатор',
+	'shop_discountcard_bonus_type_id' => 'Тип зачисления',
 	'shop_order_id' => 'Идентификатор заказа',
 	'edit_success' => 'Информация о бонусе изменена успешно!',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'markDeleted_success' => 'Данные о бонусе успешно удалены!',
+	'apply_success' => 'Информация о бонусе изменена!',
 	'writeoff' => 'Списать',
 	'writeoff_title' => 'Списание бонусов по карте "%s"',
 	'available' => 'Доступно %s %s',

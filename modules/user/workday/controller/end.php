@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Workday_Controller_End extends Admin_Form_Action_Controller
 {
@@ -53,19 +53,19 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 			<script>
 			$(function() {
 				$('#workdayEndTime').wickedpicker({
-						now: '<?php echo $currentTime?>',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
-						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
-						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
-						hoverState: 'hover-state', //The hover state class to use, for custom CSS
-						title: '<?php echo Core::_('User_Worktime.time') ?>', //The Wickedpicker's title,
-						showSeconds: false, //Whether or not to show seconds,
-						timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
-						secondsInterval: 1, //Change interval for seconds, defaults to 1,
-						minutesInterval: 1, //Change interval for minutes, defaults to 1
-						clearable: false //Make the picker's input clearable (has clickable 'x')
-					});
+					now: '<?php echo $currentTime?>',
+					twentyFour: true,  //Display 24 hour format, defaults to false
+					upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+					downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+					close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+					hoverState: 'hover-state', //The hover state class to use, for custom CSS
+					title: '<?php echo Core::_('User_Worktime.time') ?>', //The Wickedpicker's title,
+					showSeconds: false, //Whether or not to show seconds,
+					timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+					secondsInterval: 1, //Change interval for seconds, defaults to 1,
+					minutesInterval: 1, //Change interval for minutes, defaults to 1
+					clearable: false //Make the picker's input clearable (has clickable 'x')
+				});
 			});
 			</script>
 			<?php
@@ -144,7 +144,8 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 					$(function() {
 						setTimeout(function() {
 							// Close modal window
-							$('.another-time-answer').parents('.modal').remove();
+							// $('.another-time-answer').parents('.modal').remove();
+							bootbox.hideAll();
 						}, 1500);
 
 						// Меняем статус дня

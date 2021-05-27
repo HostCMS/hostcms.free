@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Google extends Seo_Controller
 {
@@ -345,7 +345,7 @@ class Seo_Controller_Google extends Seo_Controller
 		$aReturn = array();
 
 		$limit = 500;
-		
+
 		$aQueries = $this->setQuery($host_id, 'query' , Core_Date::timestamp2sqldate(strtotime('-8 days')), Core_Date::timestamp2sqldate(time()), $limit);
 
 		foreach ($aQueries as $aTmp)
@@ -371,7 +371,7 @@ class Seo_Controller_Google extends Seo_Controller
 		$aReturn = array();
 
 		$limit = 500;
-		
+
 		$aQueries = $this->setQuery($host_id, 'page' , Core_Date::timestamp2sqldate(strtotime('-1 week')), Core_Date::timestamp2sqldate(time()), $limit);
 
 		foreach ($aQueries as $aTmp)

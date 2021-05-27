@@ -47,15 +47,15 @@ if ($Shop_Controller_Show->item == 0)
 				->name('filter')->value(1)
 		);
 
-		$sorting = intval(Core_Array::getGet('sorting'));
+		$sorting = Core_Array::getGet('sorting', 0, 'int');
 		$sorting && $Shop_Controller_Show->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('sorting')->value($sorting)
 		);
 
 		// Prices
-		$price_from = intval(Core_Array::getGet('price_from'));
-		$price_to = intval(Core_Array::getGet('price_to'));
+		$price_from = Core_Array::getGet('price_from', 0, 'int');
+		$price_to = Core_Array::getGet('price_to', 0, 'int');
 		if ($price_from || $price_to || $sorting == 1 || $sorting == 2)
 		{
 			// Получаем список валют магазина
@@ -147,7 +147,7 @@ if ($Shop_Controller_Show->item == 0)
 				{
 					$aTmpProperties[] = array($oProperty, array(
 						'from' => $oProperty->type == 11 ? floatval($sValue) : intval($sValue),
-						'to' => $oProperty->type == 11 ? floatval(Core_Array::get($tmpTo, $iKey)) : intval(Core_Array::get($tmpTo, $iKey))
+						'to' => $oProperty->type == 11 ? floatval(Core_Array::get($tmpTo, $iKey)) : Core_Array::get($tmpTo, $iKey, 0, 'int')
 					));
 				}
 				$havingCount++;
@@ -187,12 +187,12 @@ if ($Shop_Controller_Show->item == 0)
 				}
 				else
 				{
-					$from = trim(strval(Core_Array::get($propertyValue, 'from')));
+					$from = trim(Core_Array::get($propertyValue, 'from', '', 'str'));
 					$from && $Shop_Controller_Show->shopItems()->queryBuilder()
 						->where($tableName . '.value', '>=', $from)
 						->setAnd();
 
-					$to = trim(strval(Core_Array::get($propertyValue, 'to')));
+					$to = trim(Core_Array::get($propertyValue, 'to', '', 'str'));
 					$to && $Shop_Controller_Show->shopItems()->queryBuilder()
 						->where($tableName . '.value', '<=', $to);
 
@@ -235,8 +235,8 @@ if ($Shop_Controller_Show->item == 0)
 		$oShop_Item = Core_Entity::factory('Shop_Item');
 
 		$oShop_Item->active = Core_Array::get(Core_Page::instance()->libParams, 'addedItemActive', 0);
-		$oShop_Item->name = Core_Str::stripTags(strval(Core_Array::getPost('name')));
-		$oShop_Item->text = nl2br(Core_Str::stripTags(strval(Core_Array::getPost('text'))));
+		$oShop_Item->name = Core_Str::stripTags(Core_Array::getPost('name', '', 'str'));
+		$oShop_Item->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str')));
 		$oShop_Item->price = floatval(Core_Array::getPost('price', 0));
 		$oShop_Item->path = '';
 
@@ -290,25 +290,25 @@ if ($Shop_Controller_Show->item == 0)
 						case 0: // Int
 						case 3: // List
 						case 5: // Information system
-							$oProperty_Value->value(intval(Core_Array::getPost("property_{$oProperty->id}")));
+							$oProperty_Value->value(Core_Array::getPost("property_{$oProperty->id}", 0, 'int'));
 							$oProperty_Value->save();
 						break;
 						case 1: // String
 						case 4: // Textarea
 						case 6: // Wysiwyg
 							$oProperty_Value->value(Core_Str::stripTags(
-								strval(Core_Array::getPost("property_{$oProperty->id}"))
+								Core_Array::getPost("property_{$oProperty->id}", '', 'str')
 							));
 							$oProperty_Value->save();
 						break;
 						case 8: // Date
-							$date = strval(Core_Array::getPost("property_{$oProperty->id}"));
+							$date = Core_Array::getPost("property_{$oProperty->id}", '', 'str');
 							$date = Core_Date::date2sql($date);
 							$oProperty_Value->value($date);
 							$oProperty_Value->save();
 						break;
 						case 9: // Datetime
-							$datetime = strval(Core_Array::getPost("property_{$oProperty->id}"));
+							$datetime = Core_Array::getPost("property_{$oProperty->id}", '', 'str');
 							$datetime = Core_Date::datetime2sql($datetime);
 							$oProperty_Value->value($datetime);
 							$oProperty_Value->save();

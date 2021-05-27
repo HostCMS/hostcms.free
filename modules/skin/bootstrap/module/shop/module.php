@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -114,6 +114,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 				->queryBuilder()
 				->where('shops.id', '=', $iShopId);
 
+			$oUser->only_access_my_own
+				&& $oLast_Shop_Orders->queryBuilder()->where('shop_orders.user_id', '=', $oUser->id);
+
 			$aLast_Shop_Orders = $oLast_Shop_Orders->findAll(FALSE);
 
 			if (count($aLast_Shop_Orders) || $iShopId)
@@ -174,6 +177,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->queryBuilder()
 								->where('shops.id', '=', $iShopId);
 
+							$oUser->only_access_my_own
+								&& $oShop_Orders->queryBuilder()->where('shop_orders.user_id', '=', $oUser->id);
+
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
 
 							foreach ($aShop_Orders as $oShop_Order)
@@ -221,6 +227,9 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							$iShopId && $oShop_Orders
 								->queryBuilder()
 								->where('shops.id', '=', $iShopId);
+
+							$oUser->only_access_my_own
+								&& $oShop_Orders->queryBuilder()->where('shop_orders.user_id', '=', $oUser->id);
 
 							$aShop_Orders = $oShop_Orders->findAll(FALSE);
 

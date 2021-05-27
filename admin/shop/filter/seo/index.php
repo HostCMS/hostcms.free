@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -23,6 +23,8 @@ $shop_group_id = intval(Core_Array::getGet('shop_group_id', 0));
 
 $oShop = Core_Entity::factory('Shop')->find($shop_id);
 
+$shop_filter_seo_dir_id = Core_Array::getGet('shop_filter_seo_dir_id', 0);
+
 // Контроллер формы
 $oAdmin_Form_Controller = Admin_Form_Controller::create($oAdmin_Form);
 $oAdmin_Form_Controller
@@ -32,10 +34,10 @@ $oAdmin_Form_Controller
 	->title(Core::_('Shop_Filter_Seo.title'))
 	->pageTitle(Core::_('Shop_Filter_Seo.title'));
 
-$aAvailableProperties = array(0, 11, 1, 7);
+$aAvailableProperties = array(0, 11, 1, 7, 8, 9);
 Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 
-$aAvailablePropertyFilters = array(1,2,3,4,5,7);
+// $aAvailablePropertyFilters = array(1,2,3,4,5,6,7);
 
 if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 {
@@ -54,7 +56,8 @@ if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 	foreach ($aProperties as $oProperty)
 	{
 		in_array($oProperty->type, $aAvailableProperties)
-			&& in_array($oProperty->Shop_Item_Property->filter, $aAvailablePropertyFilters)
+			// && in_array($oProperty->Shop_Item_Property->filter, $aAvailablePropertyFilters)
+			&& $oProperty->Shop_Item_Property->filter // 0 - не показывать в фильтре
 			&& $aTmpProperties[$oProperty->id] = $oProperty->name;
 	}
 
@@ -65,7 +68,7 @@ if (Core_Array::getPost('load_properties') && Core_Array::getPost('shop_id'))
 		Admin_Form_Entity::factory('Select')
 			->options($aTmpProperties)
 			->name('modal_property_id')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 			->class('form-control property-select')
 			->onchange('$.getSeoFilterPropertyValues(this)')
 			->execute();
@@ -122,17 +125,38 @@ if (Core_Array::getPost('get_values') /*&& Core_Array::getPost('property_id')*/)
 				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox')
 					->value(1);
 			break;
+			case 8: // Date
+				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date');
+			break;
+			case 9: // Datetime
+				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
+			break;
 			default:
 				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
 		}
 
 		if (!is_null($oAdmin_Form_Entity))
 		{
+			$divAttr = $oProperty->Shop_Item_Property->filter == 6
+				? 'form-group col-xs-12 col-sm-4'
+				: 'form-group col-xs-12 col-sm-8';
+
 			$oAdmin_Form_Entity
 				->name('modal_property_value')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => $divAttr))
 				->controller($oAdmin_Form_Controller)
 				->execute();
+
+			// от-до
+			if ($oProperty->Shop_Item_Property->filter == 6)
+			{
+
+				$oAdmin_Form_Entity
+					->name('modal_property_value_to')
+					->divAttr(array('class' => $divAttr))
+					->controller($oAdmin_Form_Controller)
+					->execute();
+			}
 		}
 
 		$aJSON = array(
@@ -152,6 +176,7 @@ if (Core_Array::getPost('add_property') && Core_Array::getPost('property_id'))
 	);
 
 	$property_value = trim(strval(Core_Array::getPost('property_value')));
+	$property_value_to = trim(strval(Core_Array::getPost('property_value_to')));
 
 	$property_id = intval(Core_Array::getPost('property_id'));
 
@@ -186,6 +211,12 @@ if (Core_Array::getPost('add_property') && Core_Array::getPost('property_id'))
 				!$property_value
 					&& $bAddProperty = FALSE;
 			break;
+			case 8: // Date
+				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date');
+			break;
+			case 9: // Datetime
+				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime');
+			break;
 			default:
 				$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
 		}
@@ -205,6 +236,17 @@ if (Core_Array::getPost('add_property') && Core_Array::getPost('property_id'))
 				->controller($oAdmin_Form_Controller)
 				->execute();
 
+			// от-до
+			if ($oProperty->Shop_Item_Property->filter == 6)
+			{
+				$oAdmin_Form_Entity
+					->name('property_value_to[' . $oProperty->id . '][]')
+					->divAttr(array('class' => 'col-xs-12 col-sm-4'))
+					->value($property_value_to)
+					->controller($oAdmin_Form_Controller)
+					->execute();
+			}
+
 			$aJSON = array(
 				'status' => 'success',
 				'html' => ob_get_clean()
@@ -222,6 +264,16 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Admin_Form.add'))
+		->icon('fa fa-plus')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+)->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Shop_Filter_Seo_Dir.title'))
 		->icon('fa fa-plus')
 		->href(
 			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
@@ -321,6 +373,28 @@ $oAdmin_Form_Entity_Breadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
 	->href($oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams))
 	->onclick($oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), NULL, NULL, $additionalParams)));
 
+if ($shop_filter_seo_dir_id)
+{
+	$oShop_Filter_Seo_Dir = Core_Entity::factory('Shop_Filter_Seo_Dir', $shop_filter_seo_dir_id);
+
+	$aBreadcrumbs = array();
+
+	do
+	{
+		$aBreadcrumbs[] = Admin_Form_Entity::factory('Breadcrumb')
+			->name($oShop_Filter_Seo_Dir->name)
+			->href($oAdmin_Form_Controller->getAdminLoadHref($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir->id}"))
+			->onclick($oAdmin_Form_Controller->getAdminLoadAjax($sAdminFormAction, NULL, NULL, "shop_id={$shop_id}&shop_group_id={$shop_group_id}&shop_filter_seo_dir_id={$oShop_Filter_Seo_Dir->id}"));
+	} while ($oShop_Filter_Seo_Dir = $oShop_Filter_Seo_Dir->getParent());
+
+	$aBreadcrumbs = array_reverse($aBreadcrumbs);
+
+	foreach ($aBreadcrumbs as $oBreadcrumb)
+	{
+		$oAdmin_Form_Entity_Breadcrumbs->add($oBreadcrumb);
+	}
+}
+
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Breadcrumbs);
 
 // Действие редактирования
@@ -373,6 +447,13 @@ if ($oAdminFormActionDeleteCondition && $oAdmin_Form_Controller->getAction() == 
 	$oAdmin_Form_Controller->addAction($Shop_Filter_Seo_Property_Controller_Delete);
 }
 
+$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_Filter_Seo_Dir'));
+$oAdmin_Form_Dataset->changeField('active', 'type', 1);
+$oAdmin_Form_Dataset->changeField('shop_producer_id', 'type', 1);
+$oAdmin_Form_Dataset->addCondition(array('where' => array('shop_id', '=', $shop_id)));
+$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $shop_filter_seo_dir_id )));
+$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Filter_Seo')
@@ -380,7 +461,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Фильтр по группе
@@ -402,7 +483,8 @@ if (isset($oAdmin_Form_Controller->request['admin_form_filter_1556'])
 }
 
 $oAdmin_Form_Dataset
-	->addCondition(array('where' => array('shop_filter_seos.shop_id', '=', $oShop->id)));
+	->addCondition(array('where' => array('shop_filter_seos.shop_id', '=', $oShop->id)))
+	->addCondition(array('where' => array('shop_filter_seos.shop_filter_seo_dir_id', '=', $shop_filter_seo_dir_id)));
 
 // Список значений для фильтра и поля
 $oAdmin_Form_Dataset

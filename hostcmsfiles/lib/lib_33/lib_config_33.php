@@ -33,7 +33,7 @@ if (Core::moduleIsActive('helpdesk') && Core::moduleIsActive('siteuser'))
 	$aKeywords = array($oHelpdesk->name);
 
 	// Просмотр прикрепленного файла
-	if (($attachment_id = intval(Core_Array::getGet('get_attachment_id')))
+	if (($attachment_id = Core_Array::getGet('get_attachment_id', 0, 'int'))
 		&& Core_Entity::factory('Helpdesk_Ticket', $Helpdesk_Controller_Show->ticket)->siteuser_id == $oSiteuser->id
 		&& Core_Entity::factory('Helpdesk_Attachment', $attachment_id)->Helpdesk_Message->Helpdesk_Ticket->id = $Helpdesk_Controller_Show->ticket
 	)
@@ -88,12 +88,12 @@ if (Core::moduleIsActive('helpdesk') && Core::moduleIsActive('siteuser'))
 	// AJAX-установка оценки
 	if (Core_Array::getPost('ajaxGrade'))
 	{
-		$oHelpdesk_Message = Core_Entity::factory('Helpdesk_Message', intval(Core_Array::getPost('id')));
+		$oHelpdesk_Message = Core_Entity::factory('Helpdesk_Message', Core_Array::getPost('id', 0, 'int'));
 
 		if ($oHelpdesk_Message->Helpdesk_Ticket->helpdesk_id == $oHelpdesk->id
 			&& $oHelpdesk_Message->Helpdesk_Ticket->siteuser_id == $oSiteuser->id)
 		{
-			$grade = intval(Core_Array::getPost('value'));
+			$grade = Core_Array::getPost('value', 0, 'int');
 			if ($grade >= 0 && $grade <= 5)
 			{
 				$oHelpdesk_Message->grade = $grade;

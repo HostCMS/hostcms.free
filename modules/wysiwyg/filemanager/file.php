@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_File extends Core_Entity
 {
@@ -84,6 +84,15 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 	 * @return self
 	 */
 	protected function _loadColumns()
+	{
+		return $this;
+	}
+
+	/**
+	 * Set preload values from _preloadValues
+	 * @return Core_ORM
+	 */
+	protected function _setPreloadValues()
 	{
 		return $this;
 	}
@@ -273,7 +282,7 @@ class Wysiwyg_Filemanager_File extends Core_Entity
 					$maxWidth = 48;
 					$maxHeight = 48;
 
-					$picsize = Core_Image::getImageSize($filePath);
+					$picsize = Core_Image::instance()->getImageSize($filePath);
 
 					if ($picsize)
 					{

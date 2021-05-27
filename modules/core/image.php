@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Image
 {
@@ -64,51 +64,29 @@ abstract class Core_Image
 
 	/**
 	 * Implement exifImagetype function
-	 * @param string $filename file name
+	 * @param string $path
 	 * @return mixed
 	 */
-	static public function exifImagetype($filename)
+	static public function exifImagetype($path)
 	{
 		// Uploaded file doesn't have extension
-		if (is_uploaded_file($filename)
-			|| Core_File::isValidExtension($filename, Core_File::getResizeExtensions())
-			|| strpos($filename, CMS_FOLDER . TMP_DIR) === 0
-			|| in_array(Core_File::getExtension($filename), array('tmp', 'dat'))
+		if (is_uploaded_file($path)
+			|| Core_File::isValidExtension($path, Core_File::getResizeExtensions())
+			|| strpos($path, CMS_FOLDER . TMP_DIR) === 0
+			|| in_array(Core_File::getExtension($path), array('tmp', 'dat'))
 		)
 		{
 			if (function_exists('exif_imagetype'))
 			{
-				return @exif_imagetype($filename);
+				return @exif_imagetype($path);
 			}
 
-			if ((list($width, $height, $type, $attr) = @getimagesize($filename)) !== FALSE)
-			{
-				return $type;
-			}
+			$type = Core_Image::instance()->getImageType($path);
+
+			return $type ? $type : FALSE;
 		}
 
 		return FALSE;
-	}
-
-	/**
-	 * Get image size
-	 * @param string $path path
-	 * @return mixed
-	 */
-	static public function getImageSize($path)
-	{
-		if (is_file($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
-		{
-			$picsize = @getimagesize($path);
-			if ($picsize)
-			{
-				return array(
-					'width' => $picsize[0], 'height' => $picsize[1]
-				);
-			}
-		}
-
-		return NULL;
 	}
 
 	/**

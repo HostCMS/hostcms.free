@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сотрудники',
@@ -99,4 +99,7 @@ return array(
 	'from' => 'E-mail отправителя',
 	'sender_name' => 'Имя отправителя',
 	'title' => 'Заголовок',
+
+	'option_max_height' => 'Максимальная высота аватара',
+	'option_max_width' => 'Максимальная ширина аватара',
 );

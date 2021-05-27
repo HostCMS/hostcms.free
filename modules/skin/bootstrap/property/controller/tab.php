@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Property_Controller_Tab extends Property_Controller_Tab {
 
@@ -20,19 +20,19 @@ class Skin_Bootstrap_Property_Controller_Tab extends Property_Controller_Tab {
 		$oAdmin_Form_Entity
 			->add(
 				Admin_Form_Entity::factory('Div')
-					->class('input-group-addon no-padding add-remove-property')
+					->class('input-group-addon add-remove-property')
 					->add(
 						Admin_Form_Entity::factory('Div')
-						->class('no-padding-' . ($oProperty->type == 2 || $oProperty->type == 5 || $oProperty->type == 12 || $oProperty->type == 13 || $oProperty->type == 14 || $oProperty->type == 3 ? 'left' : 'right') . ' col-xs-12')
+						->class('btn-group')
 						->add(
 							Admin_Form_Entity::factory('Div')
-								->class('btn btn-palegreen')
+								->class('btn btn-palegreen btn-clone')
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-plus-circle close"></i>'))
 								->onclick("{$addFunction}('{$windowId}', '{$oProperty->id}'); event.stopPropagation();")
 						)
 						->add(
 							Admin_Form_Entity::factory('Div')
-								->class('btn btn-darkorange')
+								->class('btn btn-darkorange btn-delete')
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-minus-circle close"></i>'))
 								->onclick($deleteOnclick . '; event.stopPropagation();')
 						)

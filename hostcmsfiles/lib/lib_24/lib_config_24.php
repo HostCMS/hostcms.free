@@ -9,7 +9,7 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 
 	if (Core::moduleIsActive('siteuser'))
 	{
-		$email = strval(Core_Array::getPost('email', ''));
+		$email = Core_Array::getPost('email', '', 'str');
 
 		if (strlen($email) && Core_Valid::email($email))
 		{

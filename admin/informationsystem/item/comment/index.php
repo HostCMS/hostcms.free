@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -87,20 +87,23 @@ if (!is_null($oInformationsystem_Item->id) || $comment_parent_id)
 	);
 }
 
-$additionalParamsProperties = 'informationsystem_id=' . $informationsystem_id . '&informationsystem_group_id=' . $iInformationsystemGroupId;
+if ($oInformationsystem->id)
+{
+	$additionalParamsProperties = 'informationsystem_id=' . $oInformationsystem->id . '&informationsystem_group_id=' . $iInformationsystemGroupId;
 
-$oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
-		->img('/admin/images/page_gear.gif')
-		->icon('fa fa-gears')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
-		)
-);
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Informationsystem_Item.show_information_groups_link3'))
+			->img('/admin/images/page_gear.gif')
+			->icon('fa fa-gears')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/informationsystem/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+			)
+	);
+}
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -356,7 +359,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 );
 
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $bItem = !is_null($oInformationsystem_Item->id);

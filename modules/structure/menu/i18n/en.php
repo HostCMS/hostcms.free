@@ -6,7 +6,7 @@
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Website menus',
@@ -21,6 +21,7 @@ return array(
 	'add_title' => 'Add menu sections',
 	'edit_title' => 'Edit menu sections',
 	'name' => 'Name',
+	'color' => 'Color',	
 	'sorting' => 'Sort',
 	'site_id' => 'Site Id',
 	'copy_success' => 'Website menu information copied successfully.',

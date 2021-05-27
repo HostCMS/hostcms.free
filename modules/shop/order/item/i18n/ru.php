@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Товары заказа',
@@ -46,4 +46,6 @@ return array(
 	'splitOrder_success' => 'Заказ разделен успешно!',
 	'item_codes' => 'Маркировки товара "%s"',
 	'setCodes_success' => 'Маркировки изменены!',
+	'shop_order_item_status_id' => 'Статус товара',
+	'change_item_status' => 'Статус товара "%s" изменен на "%s"',
 );

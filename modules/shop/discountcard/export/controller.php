@@ -73,8 +73,8 @@ class Shop_Discountcard_Export_Controller
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			@set_time_limit(9000);
-			ini_set('max_execution_time', '9000');
+			@set_time_limit(1200);
+			ini_set('max_execution_time', '1200');
 		}
 
 		foreach ($this->_aCurrentData as $aData)
@@ -135,7 +135,7 @@ class Shop_Discountcard_Export_Controller
 	 */
 	protected function _printRow($aData)
 	{
-		echo Shop_Item_Import_Csv_Controller::CorrectToEncoding(implode(';', $aData) . "\n", 'Windows-1251');
+		echo Core_Str::iconv('UTF-8', 'Windows-1251', implode(';', $aData) . "\n");
 		return $this;
 	}
 }

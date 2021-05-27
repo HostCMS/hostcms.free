@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Установка цен',
@@ -42,4 +42,5 @@ return array(
 	'post_success' => 'Документ проведен успешно!',
 	'unpost_success' => 'Документ распроведен успешно!',
 	'convolution' => 'Свёртка базы',
+	'include_modifications' => 'Добавить модификации товара и установить цены',
 );

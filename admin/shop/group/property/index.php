@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -61,6 +61,28 @@ $oAdmin_Form_Entity_Menus->add(
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
+
+// Глобальный поиск
+$additionalParams = 'shop_id=' . $shop_id . '&shop_group_id=' . $shop_group_id;
+
+$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+
+$oAdmin_Form_Controller->addEntity(
+	Admin_Form_Entity::factory('Code')
+		->html('
+			<div class="row search-field margin-bottom-20">
+				<div class="col-xs-12">
+					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+					</form>
+				</div>
+			</div>
+		')
+);
+
+$sGlobalSearch = Core_DataBase::instance()->escapeLike($sGlobalSearch);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
@@ -260,8 +282,8 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 	);
 
 	$Admin_Form_Action_Controller_Type_Move
-		->title(Core::_('Informationsystem_Item.move_items_groups_title'))
-		->selectCaption(Core::_('Informationsystem_Item.move_items_groups_information_groups_id'))
+		->title(Core::_('Property.move_title'))
+		->selectCaption(Core::_('Property.move_dir_id'))
 		->value($property_dir_id);
 
 	$linkedObject = Core_Entity::factory('Shop_Group_Property_List', $shop_id);
@@ -290,6 +312,19 @@ if ($oAdminFormActionMove && $oAdmin_Form_Controller->getAction() == 'move')
 	$oAdmin_Form_Controller->addAction($Admin_Form_Action_Controller_Type_Move);
 }
 
+// Действие "Объединить"
+$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('merge');
+
+if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
+{
+	$oAdmin_Form_Action_Controller_Type_Merge = new Admin_Form_Action_Controller_Type_Merge($oAdminFormActionMerge);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAdmin_Form_Action_Controller_Type_Merge);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Property_Dir')
@@ -300,19 +335,28 @@ $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('property_dirs.*'))
 )->addCondition(
 	array('join' => array('shop_group_property_dirs', 'shop_group_property_dirs.property_dir_id', '=', 'property_dirs.id'))
-)->addCondition(
-	array('where' =>
-		array('parent_id', '=', $property_dir_id)
-	)
-)->addCondition(
-	array('where' =>
-		array('shop_group_property_dirs.shop_id', '=', $shop_id)
-	)
+)/*->addCondition(
+	array('where' => array('parent_id', '=', $property_dir_id))
+)*/->addCondition(
+	array('where' => array('shop_group_property_dirs.shop_id', '=', $shop_id))
 )
 ->changeField('name', 'type', 4)
 ->changeField('name', 'link', "/admin/shop/group/property/index.php?shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={id}")
-->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/group/property/index.php', additionalParams: 'shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false")
-;
+->changeField('name', 'onclick', "$.adminLoad({path: '/admin/shop/group/property/index.php', additionalParams: 'shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={id}', windowId: '{windowId}'}); return false");
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('property_dirs.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('property_dirs.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('parent_id', '=', $property_dir_id)));
+}
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(
@@ -326,7 +370,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Ограничение источника 1
@@ -334,20 +378,29 @@ $oAdmin_Form_Dataset->addCondition(
 	array('select' => array('properties.*'))
 )->addCondition(
 	array('join' => array('shop_group_properties', 'shop_group_properties.property_id', '=', 'properties.id'))
-)->addCondition(
-	array('where' =>
-		array('property_dir_id', '=', $property_dir_id)
-	)
-)->addCondition(
-	array('where' =>
-		array('shop_group_properties.shop_id', '=', $shop_id)
-	)
+)/*->addCondition(
+	array('where' => array('property_dir_id', '=', $property_dir_id))
+)*/->addCondition(
+	array('where' => array('shop_group_properties.shop_id', '=', $shop_id))
 );
+
+if (strlen($sGlobalSearch))
+{
+	$oAdmin_Form_Dataset
+		->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('properties.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+		->addCondition(array('close' => array()));
+}
+else
+{
+	$oAdmin_Form_Dataset->addCondition(array('where' => array('property_dir_id', '=', $property_dir_id)));
+}
 
 $oAdmin_Form_Dataset
 ->changeField('multiple', 'link', "/admin/shop/group/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={property_dir_id}")
-->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
-;
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/group/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

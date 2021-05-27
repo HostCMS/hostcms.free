@@ -181,8 +181,8 @@
 					</div>
 
 					<!-- Внешние параметры -->
-					<xsl:if test="count(properties/property)">
-						<xsl:apply-templates select="properties/property"/>
+					<xsl:if test="count(properties/property[type != 10])">
+						<xsl:apply-templates select="properties/property[type != 10]"/>
 					</xsl:if>
 
 					<xsl:if test="@id > 0 and count(maillist) > 0">
@@ -287,8 +287,113 @@
 		</fieldset>
 	</xsl:template>
 
+	<xsl:template name="property_values_show">
+		<xsl:param name="property" />
+		<xsl:param name="node" select="''"/>
+
+		<xsl:variable name="name"><xsl:choose>
+			<xsl:when test="string-length($node) &gt; 0">property_<xsl:value-of select="$property/@id" />_<xsl:value-of select="$node/@id" /></xsl:when>
+			<xsl:otherwise>property_<xsl:value-of select="$property/@id" />[]</xsl:otherwise>
+		</xsl:choose></xsl:variable>
+
+		<xsl:variable name="value"><xsl:choose>
+			<xsl:when test="string-length($node) &gt; 0">
+				<xsl:value-of select="$node/value" />
+			</xsl:when>
+			<xsl:otherwise></xsl:otherwise>
+		</xsl:choose></xsl:variable>
+
+		<!-- form-group или checkbox -->
+		<div class="row">
+			<div class="caption">
+				<xsl:choose>
+					<xsl:when test="string-length($node) &gt; 0 and position() = 1">
+						<xsl:value-of select="$property/name" />
+					</xsl:when>
+					<xsl:when test="string-length($node) = 0">
+						<xsl:value-of select="$property/name" />
+					</xsl:when>
+					<xsl:otherwise></xsl:otherwise>
+				</xsl:choose>
+			</div>
+			<div class="field">
+				<xsl:choose>
+					<!-- Отображаем поле ввода -->
+					<xsl:when test="$property/type = 0 or $property/type = 1">
+						<input type="text" name="{$name}" value="{$value}" class="property-row" />
+					</xsl:when>
+					<!-- Отображаем файл -->
+					<xsl:when test="$property/type = 2">
+							<label for="file-upload-{position()}" class="custom-file-upload">
+								<input id="file-upload-{position()}" class="property-row" type="file" name="{$name}"/>
+							</label>
+
+							<xsl:if test="string-length($node) &gt; 0 and $node/file != ''">
+								<a class="input-group-addon green-text" href="{/siteuser/dir}{$node/file}" target="_blank">
+									<i class="fa fa-fw fa-picture-o"></i>
+								</a>
+
+								<a class="input-group-addon red-text" href="?delete_property_value={$node/@id}" onclick="return confirm('Вы уверены, что хотите удалить?')">
+									<i class="fa fa-fw fa-trash"></i>
+								</a>
+							</xsl:if>
+					</xsl:when>
+					<!-- Отображаем список -->
+					<xsl:when test="$property/type = 3">
+						<select name="{$name}" class="property-row">
+							<option value="0">...</option>
+							<xsl:apply-templates select="$property/list/list_item"/>
+						</select>
+					</xsl:when>
+					<!-- Большое текстовое поле, Визуальный редактор -->
+					<xsl:when test="$property/type = 4 or $property/type = 6">
+						<textarea name="{$name}" class="property-row"><xsl:value-of select="$value" /></textarea>
+					</xsl:when>
+					<!-- Флажок -->
+					<xsl:when test="$property/type = 7">
+						<br/>
+						<input type="checkbox" name="{$name}" class="property-row">
+							<xsl:if test="$value = 1"><xsl:attribute name="checked">checked</xsl:attribute></xsl:if>
+						</input>
+					</xsl:when>
+				</xsl:choose>
+
+					<!-- <xsl:if test="$property/multiple = 1 and position() = last()">
+						<a class="input-group-addon gray-text" onclick="$.addPropertyRow(this, {$property/type})">
+							<i class="fa fa-fw fa-plus"></i>
+						</a>
+					</xsl:if> -->
+			</div>
+		</div>
+	</xsl:template>
+
 	<!-- Внешние свойства -->
 	<xsl:template match="properties/property">
+		<xsl:if test="type != 10">
+			<xsl:variable name="id" select="@id" />
+			<xsl:variable name="property" select="." />
+			<xsl:variable name="property_value" select="/siteuser/property_value[property_id = $id]" />
+
+			<xsl:choose>
+				<xsl:when test="count($property_value)">
+					<xsl:for-each select="$property_value">
+						<xsl:call-template name="property_values_show">
+							<xsl:with-param name="property" select="$property" />
+							<xsl:with-param name="node" select="." />
+						</xsl:call-template>
+					</xsl:for-each>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="property_values_show">
+						<xsl:with-param name="property" select="$property" />
+					</xsl:call-template>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:if>
+	</xsl:template>
+
+	<!-- Внешние свойства -->
+	<xsl:template match="properties/property" mode="123">
 
 		<xsl:if test="type != 10">
 

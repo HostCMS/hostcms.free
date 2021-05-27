@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Module
 {
@@ -34,11 +34,11 @@ abstract class Core_Module
 	/**
 	 * Get Module's Menu
 	 * @return array
-	 * @hostcms-event Core_Module.onBeforeGetMenu
+	 * @hostcms-event Core_Module.onBeforeGetMenu, e.g. Skin_Bootstrap_Module_Xxx_Module or Xxx_Module
 	 */
 	public function getMenu()
 	{
-		Core_Event::notify(get_class($this) . '.onBeforeGetMenu', $this);
+		Core_Event::notify(get_class($this) . '.onBeforeGetMenu', $this, array($this->menu));
 		return $this->menu;
 	}
 
@@ -470,6 +470,7 @@ abstract class Core_Module
 	 * @param array $aFields default ('caption', 'captionHTML')
 	 * @param array $aOptions
 	 * @return array
+	 * @hostcms-event Core_Module.onBeforeGetReports
 	 */
 	public function getReports($aFields = array('caption', 'captionHTML'), $aOptions = array())
 	{
@@ -503,5 +504,23 @@ abstract class Core_Module
 		return isset($this->_reports[$reportName])
 			? call_user_func($this->_reports[$reportName], $aFields, $aOptions)
 			: NULL;
+	}
+
+	/**
+	 * Module Options
+	 * @var array
+	 */
+	protected $_options = array();
+
+	/**
+	 * Get Module Options
+	 * @return array
+	 * @hostcms-event Core_Module.onBeforeGetOptions
+	 */
+	public function getOptions()
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeGetOptions', $this, array($this->_options));
+
+		return $this->_options;
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -108,16 +108,16 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				);
 
 				$bCreated = FALSE;
-				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+
+				//$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				$aAdmin_Form_Fields = $this->getAdminFormFields();
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
 					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)
 					{
 						$field = $oAdmin_Form_Field->name;
 
-						$value = isset($_POST['topFilter_' . $oAdmin_Form_Field->id])
-							? $_POST['topFilter_' . $oAdmin_Form_Field->id]
-							: NULL;
+						$value = Core_Array::getPost('topFilter_' . $oAdmin_Form_Field->id);
 
 						if (strlen($value))
 						{
@@ -169,7 +169,8 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 				// _filterId
 				$tabName = Core_Array::getPost('filterId');
 
-				$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				//$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+				$aAdmin_Form_Fields = $this->getAdminFormFields();
 				foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 				{
 					if ($oAdmin_Form_Field->allow_filter && $oAdmin_Form_Field->view != 2 || $oAdmin_Form_Field->view == 1)

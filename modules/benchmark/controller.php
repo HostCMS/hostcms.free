@@ -304,7 +304,9 @@ class Benchmark_Controller
 
 		$startTime = Core::getmicrotime();
 
-		@mail($oSite->getErrorEmail(), 'Performance test', self::$aConfig['sample_text']);
+		$email = $oSite->getErrorEmail();
+
+		@mail($email, 'Performance test', self::$aConfig['sample_text'], 'From: ' . Core_Mail::sanitizeHeader($email));
 
 		return abs(round(Core::getmicrotime() - $startTime, 4));
 	}

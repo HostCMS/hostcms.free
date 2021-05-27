@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-11-03';
+	public $date = '2021-05-25';
 
 	/**
 	 * Module name
@@ -40,6 +40,29 @@ class Informationsystem_Module extends Core_Module
 		1 => 'searchIndexGroup',
 		2 => 'searchUnindexItem',
 		3 => 'recountInformationsystem',
+	);
+
+	protected $_options = array(
+		'smallImagePrefix' => array(
+			'type' => 'string',
+			'default' => 'small_'
+		),
+		'itemLargeImage' => array(
+			'type' => 'string',
+			'default' => 'item_%d.%s'
+		),
+		'itemSmallImage' => array(
+			'type' => 'string',
+			'default' => 'small_item_%d.%s'
+		),
+		'groupLargeImage' => array(
+			'type' => 'string',
+			'default' => 'group_%d.%s'
+		),
+		'groupSmallImage' => array(
+			'type' => 'string',
+			'default' => 'small_group_%d.%s'
+		)
 	);
 
 	/**

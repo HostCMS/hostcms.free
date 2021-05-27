@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - instance($name = 'default') получить Core_Http указанного типа, например, curl или socket
  * - config($array) перезаписать конфигурационные данные, загруженные из файла
  * - getConfig() получить массив с конфигурационными данными
- * - additionalHeader($name, $value) установить дополнительный заголовок $name со значением $value
+ * - additionalHeader($name, $value) установить дополнительный заголовок $name со значением $value. Если $value установлен в NULL, то ранее добавленное значение будет удалено.
  * - addOption($name, $value) установить дополнительную опцию $name со значением $value, используется, например, для задания опций cUrl
  * - method('GET') метод HTTP запроса, по умолчанию GET
  * - timeout(10) таймаут соединения, по умолчанию 10
@@ -140,13 +140,21 @@ abstract class Core_Http
 
 	/**
 	 * Add additional headers
-	 * @param string $name Header name
+	 * @param string $name Header Name
 	 * @param string $value Value
 	 * @return self
 	 */
 	public function additionalHeader($name, $value)
 	{
-		$this->_additionalHeaders[$name] = $value;
+		if (!is_null($value))
+		{
+			$this->_additionalHeaders[$name] = $value;
+		}
+		elseif (isset($this->_additionalHeaders[$name]))
+		{
+			unset($this->_additionalHeaders[$name]);
+		}
+
 		return $this;
 	}
 

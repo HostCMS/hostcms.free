@@ -107,7 +107,10 @@ class Shop_Item_Digital_Model extends Core_Entity
 	 */
 	public function getFilePath()
 	{
-		return $this->setMarksDeleted(NULL)->Shop_Item->setMarksDeleted(NULL)->Shop->getPath() . '/eitems/item_catalog_' . $this->Shop_Item->id . '/';
+		// fix trouble with deleted Shop_Item
+		$oShop_Item = Core_Entity::factory('Shop_Item', $this->shop_item_id);
+		
+		return $oShop_Item->Shop->getPath() . '/eitems/item_catalog_' . $this->shop_item_id . '/';
 	}
 
 	/**

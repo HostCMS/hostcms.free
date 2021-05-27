@@ -17,8 +17,8 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 	// весовой коэффициент (расчет ведется в килограммах)
 	// По умолчанию вес в системе указан в граммах. При указани в килограммах - измените коэффициент на 1
 	private $_coefficient = 0.001;
-	
-	// Объем по умолчанию (в куб.м)	
+
+	// Объем по умолчанию (в куб.м)
 	private $_defaultVolume = 0.001;
 
 	// Дата планируемой отправки
@@ -78,7 +78,7 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 
 	public function __construct(Shop_Delivery_Model $oShop_Delivery_Model) {
 		 parent::__construct($oShop_Delivery_Model);
-		 
+
 		 $this->_dateExecute = date('Y-m-d');
 	}
 
@@ -149,14 +149,14 @@ class Shop_Delivery_Handler5 extends Shop_Delivery_Handler
 					{
 						$oCurrentDeliveryType = new StdClass();
 						$oCurrentDeliveryType->price = floatval($oResponse->result->price);
-						$oCurrentDeliveryType->description = $tariffDescription . " Минимальный срок доставки: {$oResponse->result->deliveryPeriodMin}, максимальный: {$oResponse->result->deliveryPeriodMax} дней";
+						$oCurrentDeliveryType->description = $tariffDescription . ": Минимальный срок доставки: {$oResponse->result->deliveryPeriodMin}, максимальный: {$oResponse->result->deliveryPeriodMax} дней";
 						$aRetObjs[] = $oCurrentDeliveryType;
 					}
 					else
 					{
 						foreach ($oResponse->error as $oError)
 						{
-							echo "СДЭК: " . $oError->text . "<br/>";
+							?><div class="alert alert-danger" role="alert"><?php echo "СДЭК: " . $tariffDescription . ', ' . $oError->text?></div><?php
 						}
 
 						$bError = TRUE;

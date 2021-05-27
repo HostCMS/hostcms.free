@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -305,6 +305,9 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 	{
 		parent::_applyObjectProperty();
 
+		$this->_object->default
+			&& $this->_object->changeDefaultStatus();
+
 		$param = array();
 
 		$large_image = '';
@@ -375,9 +378,6 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				&& Core_File::isValidExtension($aSmallFileData['name'],
 				$aCore_Config['availableExtension']))
 			{
-				// Существует ли большое изображение
-				$param['large_image_isset'] = $this->_object->image_large != '' ? TRUE : FALSE;
-
 				$file_name = $aSmallFileData['name'];
 
 				// Определяем расширение файла
@@ -392,7 +392,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			// Тип загружаемого файла является недопустимым для загрузки файла
 			else
 			{
-				$this->addMessage(	Core_Message::get(		Core::_('Core.extension_does_not_allow',
+				$this->addMessage(Core_Message::get(Core::_('Core.extension_does_not_allow',
 						Core_File::getExtension($aSmallFileData['name'])),
 						'error'
 					)

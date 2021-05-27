@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -768,26 +768,19 @@ class Template_Model extends Core_Entity
 				?>
 
 				<div class="hostcmsSection" id="hostcmsSection<?php echo $oTemplate_Section->id?>" style="border-color: <?php echo Core_Str::hex2rgba($oTemplate_Section->color, 0.8)?>">
-					<div class="hostcmsSectionPanel">
+					<div class="hostcmsSectionPanel" style="display: none">
 						<div class="draggable-indicator">
-							<svg width="16px" height="16px" viewBox="0 0 32 32">
-								<rect height="4" width="4" y="4" x="4" />
-								<rect height="4" width="4" y="12" x="4" />
-								<rect height="4" width="4" y="4" x="12"/>
-								<rect height="4" width="4" y="12" x="12"/>
-								<rect height="4" width="4" y="4" x="20"/>
-								<rect height="4" width="4" y="12" x="20"/>
-								<rect height="4" width="4" y="4" x="28"/>
-								<rect height="4" width="4" y="12" x="28"/>
-							</svg>
+							<svg width="16px" height="16px" viewBox="0 0 32 32"><rect height="4" width="4" y="4" x="4" /><rect height="4" width="4" y="12" x="4" /><rect height="4" width="4" y="4" x="12"/><rect height="4" width="4" y="12" x="12"/><rect height="4" width="4" y="4" x="20"/><rect height="4" width="4" y="12" x="20"/><rect height="4" width="4" y="4" x="28"/><rect height="4" width="4" y="12" x="28"/></svg>
 						</div>
-						<div><a href="<?php echo "{$sPathAddWidget}?{$sAdditionalAddWidget}"?>" onclick="<?php echo $sOnclickAddWidget ?>" alt="<?php echo $sTitleAddWidget ?>" title="<?php echo $sTitleAddWidget ?>"><i class="fa fa-fw fa-plus"></i></a></div>
+						<div><a href="<?php echo "{$sPathAddWidget}?{$sAdditionalAddWidget}"?>" onclick="<?php echo $sOnclickAddWidget ?>" alt="<?php echo $sTitleAddWidget?>" title="<?php echo $sTitleAddWidget?>"><i class="fa fa-fw fa-plus"></i></a></div>
 
 						<div><a href="<?php echo "{$sPath}?{$sAdditionalSectionSettings}"?>" onclick="<?php echo $sOnclickSectionSettings ?>" alt="<?php echo $sTitleSectionSettings ?>" title="<?php echo $sTitleSectionSettings ?>"><i class="fa fa-fw fa-cog"></i></a></div>
 					</div>
 				<?php
 			}
 
+			echo $oTemplate_Section->prefix;
+			
 			$oTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs;
 			$oTemplate_Section_Libs->queryBuilder()
 				//->where('template_section_libs.active', '=', 1)
@@ -800,6 +793,8 @@ class Template_Model extends Core_Entity
 			{
 				$oTemplate_Section_Lib->execute();
 			}
+
+			echo $oTemplate_Section->suffix;
 
 			if ($bUserAccess)
 			{

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Command
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Default extends Core_Command_Controller
 {
@@ -124,7 +124,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				{
 					$oCore_Response
 						->status(404)
-						->body('HostCMS: File not found.');
+						->body('HostCMS: File \'' . htmlspecialchars($this->_uri) . '\' not found.');
 
 					return $oCore_Response;
 				}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Module extends Core_Module
 {
@@ -23,13 +23,24 @@ class User_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-11-03';
+	public $date = '2021-05-25';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'user';
+
+	protected $_options = array(
+		'max_height' => array(
+			'type' => 'int',
+			'default' => 130
+		),
+		'max_width' => array(
+			'type' => 'int',
+			'default' => 130
+		)
+	);
 
 	/**
 	 * Get Module's Menu
@@ -48,10 +59,17 @@ class User_Module extends Core_Module
 				'submenu' => array(
 					array(
 						'sorting' => 10,
-						'ico' => 'fa fa-battery-3',
+						'ico' => 'fa fa-clock-o',
 						'name' => Core::_('User.timesheet_title'),
 						'href' => "/admin/user/timesheet/index.php",
 						'onclick' => "$.adminLoad({path: '/admin/user/timesheet/index.php'}); return false"
+					),
+					array(
+						'sorting' => 20,
+						'ico' => 'fa fa-history',
+						'name' => Core::_('User.session'),
+						'href' => "/admin/user/session/index.php",
+						'onclick' => "$.adminLoad({path: '/admin/user/session/index.php'}); return false"
 					)
 				)
 			)

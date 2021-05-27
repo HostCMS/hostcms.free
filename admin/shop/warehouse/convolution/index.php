@@ -55,8 +55,8 @@ if ($bStart)
 
 	if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 	{
-		set_time_limit(90000);
-		ini_set("max_execution_time", "90000");
+		set_time_limit(1200);
+		ini_set("max_execution_time", "1200");
 		ini_set("memory_limit", "512M");
 	}
 

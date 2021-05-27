@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -18,12 +18,6 @@ class Structure_Model extends Core_Entity
 	 * @var mixed
 	 */
 	protected $_modelName = 'structure';
-
-	/**
-	 * Backend property
-	 * @var string
-	 */
-	public $menu_name = NULL;
 
 	/**
 	 * List of preloaded values
@@ -571,6 +565,47 @@ class Structure_Model extends Core_Entity
 		$this->active = 1 - $this->active;
 		$this->save();
 		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function structure_menu_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		ob_start();
+
+		$path = $oAdmin_Form_Controller->getPath();
+
+		$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
+
+		$additionalParams = Core_Str::escapeJavascriptVariable(
+			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+		);
+
+		$aOptions = array();
+
+		$aStructure_Menus = Core_Entity::factory('Structure_Menu')->getAllBySite_id(CURRENT_SITE);
+		foreach ($aStructure_Menus as $oStructure_Menu)
+		{
+			$aOptions[$oStructure_Menu->id] = array(
+				'value' => $oStructure_Menu->name,
+				'color' => $oStructure_Menu->color ? $oStructure_Menu->color : '#aebec4'
+			);
+		}
+
+		Core::factory('Core_Html_Entity_Span')
+			->class('padding-left-10')
+			->add(
+				$oCore_Html_Entity_Dropdownlist
+					->value($this->structure_menu_id)
+					->options($aOptions)
+					->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+					->data('change-context', 'true')
+				)
+			->execute();
+
+		return ob_get_clean();
 	}
 
 	/**

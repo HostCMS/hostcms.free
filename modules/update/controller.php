@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Controller extends Core_Servant_Properties
 {
@@ -162,7 +162,6 @@ class Update_Controller extends Core_Servant_Properties
 		{
 			$oModule->loadModule();
 
-			//$oCore_Module = Core_Module::getModule($oModule->path);
 			$oCore_Module = $oModule->Core_Module;
 
 			if ($oCore_Module)
@@ -345,6 +344,7 @@ class Update_Controller extends Core_Servant_Properties
 				$oUpdate_Module_Entity->setTableColums(array(
 					'id' => array(),
 					'name' => array(),
+					'beta' => array(),
 					'path' => array(),
 					'number' => array(),
 					'description' => array(),
@@ -353,6 +353,8 @@ class Update_Controller extends Core_Servant_Properties
 
 				$oUpdate_Module_Entity->id = $id;
 				$oUpdate_Module_Entity->name = (string)$value->number;
+				// Исключить property_exists() с 6.9.9
+				property_exists($oUpdate_Module_Entity, 'beta') && $oUpdate_Module_Entity->beta = (int)$value->beta;
 				$oUpdate_Module_Entity->number = (string)$value->number;
 				$oUpdate_Module_Entity->path = (string)$value->path;
 				$oUpdate_Module_Entity->description = '<div><strong>' . Core::_('Update.module', htmlspecialchars((string)$value->name)) . '</strong></div>' . (string)$value->description;

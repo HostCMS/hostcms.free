@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Module extends Core_Module
 {
@@ -23,13 +23,52 @@ class Benchmark_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-11-03';
+	public $date = '2021-05-25';
 
 	/**
 	 * Module name
 	 * @var string
 	 */
 	protected $_moduleName = 'benchmark';
+
+	protected $_options = array(
+		'database_table_name' => array(
+			'type' => 'string',
+			'default' => 'performance_test'
+		),
+		'database_write_query_count' => array(
+			'type' => 'int',
+			'default' => 10000
+		),
+		'database_read_query_count' => array(
+			'type' => 'int',
+			'default' => 10000
+		),
+		'database_change_query_count' => array(
+			'type' => 'int',
+			'default' => 10000
+		),
+		'sample_text' => array(
+			'type' => 'string',
+			'default' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+		),
+		'files_count' => array(
+			'type' => 'int',
+			'default' => 1000
+		),
+		'math_count' => array(
+			'type' => 'int',
+			'default' => 100000
+		),
+		'string_count' => array(
+			'type' => 'int',
+			'default' => 1000
+		),
+		'benchmark_file_path' => array(
+			'type' => 'string',
+			'default' => 'http://www.hostcms.ru/download/benchmark/1mb'
+		)
+	);
 
 	/**
 	 * Get Module's Menu

@@ -18,12 +18,12 @@ $Informationsystem_Controller_Show->addEntity(
 )->addEntity(
 	Core::factory('Core_Xml_Entity')
 		->name('show_comments')->value(
-			intval(Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1))
+			Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1, 'int')
 		)
 )->addEntity(
 	Core::factory('Core_Xml_Entity')
 		->name('show_add_comments')->value(
-			intval(Core_Array::get(Core_Page::instance()->libParams, 'showAddComment', 2))
+			Core_Array::get(Core_Page::instance()->libParams, 'showAddComment', 2, 'int')
 		)
 );
 
@@ -40,6 +40,8 @@ else
 	if (Core_Array::getPost('add_comment') && Core_Array::get(Core_Page::instance()->libParams, 'showAddComment') != 0)
 	{
 		$Informationsystem_Controller_Show->cache(FALSE);
+
+		$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
 
 		$oLastComment = Core_Entity::factory('Comment')->getLastCommentByIp(
 			Core_Array::get($_SERVER, 'REMOTE_ADDR')
@@ -62,14 +64,14 @@ else
 		$oComment = Core_Entity::factory('Comment');
 
 		$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
-		$oComment->parent_id = intval(Core_Array::getPost('parent_id', 0));
+		$oComment->parent_id = Core_Array::getPost('parent_id', 0, 'int');
 		$oComment->active = Core_Array::get(Core_Page::instance()->libParams, 'addedCommentActive', 1) == 1 ? 1 : 0;
-		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author'));
-		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email'));
-		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone'));
-		$oComment->grade = intval(Core_Array::getPost('grade', 0));
-		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
-		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags));
+		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author', '', 'str'));
+		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
+		$oComment->phone = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
+		$oComment->grade = Core_Array::getPost('grade', 0, 'int');
+		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject', '', 'str'));
+		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text', '', 'str'), $allowable_tags));
 		$oComment->siteuser_id = $siteuser_id;
 
 		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $Informationsystem_Controller_Show->item);
@@ -80,8 +82,6 @@ else
 
 		if (is_null($oLastComment) || time() > Core_Date::sql2timestamp($oLastComment->datetime) + ADD_COMMENT_DELAY)
 		{
-			$oInformationsystem = $Informationsystem_Controller_Show->getEntity();
-
 			if ($oInformationsystem->use_captcha == 0 || $siteuser_id > 0 || Core_Captcha::valid(Core_Array::getPost('captcha_id'), Core_Array::getPost('captcha')))
 			{
 				// Antispam
@@ -169,6 +169,84 @@ else
 
 			$oComment->text = Core_Str::br2nl($oComment->text);
 			$Informationsystem_Controller_Show->addEntity($oComment);
+		}
+
+		// Дополнительные свойства
+		$oInformationsystem_Comment_Property_List = Core_Entity::factory('Informationsystem_Comment_Property_List', $oInformationsystem->id);
+
+		$aProperties = $oInformationsystem_Comment_Property_List->Properties->findAll();
+		foreach ($aProperties as $oProperty)
+		{
+			// Поле не скрытое
+			if ($oProperty->type != 10)
+			{
+				$sFieldName = "property_{$oProperty->id}";
+
+				$value = $oProperty->type == 2
+					? Core_Array::getFiles($sFieldName)
+					: Core_Array::getPost($sFieldName);
+
+				$oProperty_Value = $oProperty->createNewValue($oComment->id);
+
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+					case 3: // List
+					case 5: // Information system
+						$oProperty_Value->value(intval($value));
+						$oProperty_Value->save();
+					break;
+					case 1: // String
+					case 4: // Textarea
+					case 6: // Wysiwyg
+						$oProperty_Value->value(Core_Str::stripTags(strval($value)));
+						$oProperty_Value->save();
+					break;
+					case 8: // Date
+						$date = strval($value);
+						$date = Core_Date::date2sql($date);
+						$oProperty_Value->value($date);
+						$oProperty_Value->save();
+					break;
+					case 9: // Datetime
+						$datetime = strval($value);
+						$datetime = Core_Date::datetime2sql($datetime);
+						$oProperty_Value->value($datetime);
+						$oProperty_Value->save();
+					break;
+					case 2: // File
+						$aFileData = $value;
+
+						if (!is_null($aFileData))
+						{
+							if (Core_File::isValidExtension($aFileData['name'], array('JPG', 'JPEG', 'GIF', 'PNG')))
+							{
+								$oProperty_Value->setDir($oComment->getPath());
+								$oProperty_Value->save();
+								$oProperty_Value->file = 'property_' . $oProperty_Value->id . '.' . Core_File::getExtension($aFileData['name']);
+								$oProperty_Value->file_name = Core_Str::stripTags($aFileData['name']);
+
+								try
+								{
+									$oComment->createDir();
+
+									// Resize image
+									Core_Image::instance()->resizeImage($aFileData['tmp_name'], $oProperty_Value->Property->image_large_max_width, $oProperty_Value->Property->image_large_max_height, $oProperty_Value->getLargeFilePath());
+
+									$oProperty_Value->save();
+								}
+								catch (Exception $e) {
+									Core_Message::show($e->getMessage(), 'error');
+								};
+							}
+						}
+					break;
+					case 7: // Checkbox
+						$oProperty_Value->value(is_null($value) ? 0 : 1);
+						$oProperty_Value->save();
+					break;
+				}
+			}
 		}
 
 		// Результат добавления комментария

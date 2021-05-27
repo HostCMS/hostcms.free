@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Report_Controller
 {
@@ -150,7 +150,9 @@ class Shop_Report_Controller
 				'shop_order_items.shop_order_id', '=', 't1.id', array(
 					array('AND' => array('shop_order_items.deleted', '=', 0)
 				)
-			));
+			))
+			->where('shop_order_items.type', '!=', 2) // Не учитывать пополнение лицевого счета
+			;
 
 		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
 
@@ -212,7 +214,9 @@ class Shop_Report_Controller
 				'shop_order_items.shop_order_id', '=', 't1.id', array(
 					array('AND' => array('shop_order_items.deleted', '=', 0)
 				)
-			));
+			))
+			->where('shop_order_items.type', '!=', 2) // Не учитывать пополнение лицевого счета
+			;
 
 		self::$_shop_id && $oInnerQB->where('shops.id', '=', self::$_shop_id);
 
@@ -586,55 +590,59 @@ class Shop_Report_Controller
 
 			foreach ($aShop_Order_Items as $aShop_Order_Item)
 			{
-				$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order_Item['datetime']));
-
-				$tax = Shop_Controller::instance()->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
-
-				$fAmount = self::$_allow_delivery || $aShop_Order_Item['type'] != 1
-					? Shop_Controller::instance()->round(Shop_Controller::instance()->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
-					: 0;
-
-				// Доставка - не товар!
-				$aShop_Order_Item['type'] != 1
-					&& $aTotalOrderItems[$sDate] += 1;
-
-				!isset($aOrderedAmount[$sDate]) && $aOrderedAmount[$sDate] = 0;
-				$aOrderedAmount[$sDate] += $oShop_Controller->round($fAmount);
-
-				list($yAxisName, $color) = self::_getYAxisName($aShop_Order_Item);
-
-				!isset($byParams[$yAxisName])
-					&& $byParams[$yAxisName] = 0;
-
-				!is_null($color) && !isset($yAxisColor[$yAxisName])
-					&& $yAxisColor[$yAxisName] = $color;
-
-				// Ось X
-				if (in_array(self::$_order_parameter_x, array('orders_amount', 'paid_amount', 'avg_amount')))
+				// Статус товара не отказной
+				if (!$aShop_Order_Item['shop_order_item_status_id'] || !Core_Entity::factory('Shop_Order_Item_Status', $aShop_Order_Item['shop_order_item_status_id'])->canceled)
 				{
-					switch (self::$_order_parameter_x)
+					$sDate = date($groupDate, Core_Date::sql2timestamp($aShop_Order_Item['datetime']));
+
+					$tax = Shop_Controller::instance()->round($aShop_Order_Item['price'] * $aShop_Order_Item['rate'] / 100);
+
+					$fAmount = self::$_allow_delivery || $aShop_Order_Item['type'] != 1
+						? Shop_Controller::instance()->round(Shop_Controller::instance()->round($aShop_Order_Item['price'] + $tax) * $aShop_Order_Item['quantity'])
+						: 0;
+
+					// Учитываем только товары, не доставки, не скидки, не пополнения
+					$aShop_Order_Item['type'] == 0
+						&& $aTotalOrderItems[$sDate] += 1;
+
+					!isset($aOrderedAmount[$sDate]) && $aOrderedAmount[$sDate] = 0;
+					$aOrderedAmount[$sDate] += $oShop_Controller->round($fAmount);
+
+					list($yAxisName, $color) = self::_getYAxisName($aShop_Order_Item);
+
+					!isset($byParams[$yAxisName])
+						&& $byParams[$yAxisName] = 0;
+
+					!is_null($color) && !isset($yAxisColor[$yAxisName])
+						&& $yAxisColor[$yAxisName] = $color;
+
+					// Ось X
+					if (in_array(self::$_order_parameter_x, array('orders_amount', 'paid_amount', 'avg_amount')))
 					{
-						case 'orders_amount':
-							$byParams[$yAxisName] += $oShop_Controller->round($fAmount);
-						break;
-						case 'paid_amount':
-						case 'avg_amount':
-							$aShop_Order_Item['paid']
-								&& $byParams[$yAxisName] += $oShop_Controller->round($fAmount);
-						break;
-					}
+						switch (self::$_order_parameter_x)
+						{
+							case 'orders_amount':
+								$byParams[$yAxisName] += $oShop_Controller->round($fAmount);
+							break;
+							case 'paid_amount':
+							case 'avg_amount':
+								$aShop_Order_Item['paid']
+									&& $byParams[$yAxisName] += $oShop_Controller->round($fAmount);
+							break;
+						}
 
-					!isset($byParamSegments[$yAxisName])
-						&& $byParamSegments[$yAxisName] = array();
+						!isset($byParamSegments[$yAxisName])
+							&& $byParamSegments[$yAxisName] = array();
 
-					$segmentName = self::_getSegmentName($aShop_Order_Item);
+						$segmentName = self::_getSegmentName($aShop_Order_Item);
 
-					if (!is_null($segmentName))
-					{
-						!isset($byParamSegments[$yAxisName][$segmentName])
-							&& $byParamSegments[$yAxisName][$segmentName] = 0;
+						if (!is_null($segmentName))
+						{
+							!isset($byParamSegments[$yAxisName][$segmentName])
+								&& $byParamSegments[$yAxisName][$segmentName] = 0;
 
-						$byParamSegments[$yAxisName][$segmentName]++;
+							$byParamSegments[$yAxisName][$segmentName]++;
+						}
 					}
 				}
 			}
@@ -1948,7 +1956,7 @@ class Shop_Report_Controller
 		$byParams = self::$_byParams;
 		arsort($byParams);
 
-		$byParams = array_slice($byParams, 0, self::$_popular_limit);
+		$byParams = array_slice($byParams, 0, self::$_popular_limit, TRUE);
 
 		$byParamSegments = self::$_byParamSegments;
 		?>
@@ -2106,16 +2114,16 @@ class Shop_Report_Controller
 					</ul>
 					<div class="tab-content tabs-flat">
 						<div id="all_items" class="tab-pane active">
-							<?php self::_getPriorityContent(array_slice($aPopularItems, 0, self::$_popular_limit))?>
+							<?php self::_getPriorityContent(array_slice($aPopularItems, 0, self::$_popular_limit, TRUE))?>
 						</div>
 						<div id="low_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aLowPopularItems, 0, self::$_popular_limit))?>
+							<?php self::_getPriorityContent(array_slice($aLowPopularItems, 0, self::$_popular_limit, TRUE))?>
 						</div>
 						<div id="medium_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aMediumPopularItems, 0, self::$_popular_limit))?>
+							<?php self::_getPriorityContent(array_slice($aMediumPopularItems, 0, self::$_popular_limit, TRUE))?>
 						</div>
 						<div id="high_importance" class="tab-pane">
-							<?php self::_getPriorityContent(array_slice($aHighPopularItems, 0, self::$_popular_limit))?>
+							<?php self::_getPriorityContent(array_slice($aHighPopularItems, 0, self::$_popular_limit, TRUE))?>
 						</div>
 					</div>
 				</div>

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Group_Controller
 {
@@ -103,6 +103,8 @@ class Shop_Filter_Group_Controller
 					->where('shop_groups.active', '=', 1)
 					->where('shop_groups.shortcut_id', '=', 0)
 					->where('shop_groups.deleted', '=', 0)
+					->clearOrderBy()
+					->orderBy('shop_groups.id', 'ASC')
 					->limit($limit)
 					->offset($offset);
 
@@ -112,9 +114,15 @@ class Shop_Filter_Group_Controller
 
 				foreach ($aRows as $aRow)
 				{
+					// Если у группы нет подгрупп, то создаем пустой массив, чтобы при заполнении упомянуть саму группу в своих же потомках
+					if (!isset($this->_tree[$aRow['id']]))
+					{
+						$this->_tree[$aRow['id']] = array();
+					}
+
 					$this->_tree[$aRow['parent_id']][] = $aRow['id'];
 				}
-			} while(count($aRow) == $limit);
+			} while(count($aRows) == $limit);
 		}
 
 		return $this;

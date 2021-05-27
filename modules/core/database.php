@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_DataBase
 {
@@ -49,8 +49,9 @@ abstract class Core_DataBase
 	 * 5 - ALTER
 	 * 6 - DROP
 	 * 7 - TRUNCATE
-	 * 8 - LOCK
+	 * 8 - OPTIMIZE
 	 * 9 - SHOW
+	 * 10 - LOCK
 	 * 99 - OTHER
 	 */
 	protected $_queryType = NULL;
@@ -61,7 +62,7 @@ abstract class Core_DataBase
 	protected $_asObject = FALSE;
 
 	protected $_columnQuoteCharacter = '`';
-	
+
 	protected $_tableQuoteCharacter = '`';
 
 	/**
@@ -102,7 +103,7 @@ abstract class Core_DataBase
 	abstract public function escape($unescapedString);
 
 	/**
-	 * Get list of tables in a database
+	 * Get list of tables in the database
 	 *
 	 * @param mixed $selectionCondition Selection condition
 	 * @return array
@@ -110,11 +111,28 @@ abstract class Core_DataBase
 	abstract public function getTables($selectionCondition = NULL);
 
 	/**
-	 * Get list of columns in a table
+	 * Get tables schema in the database
+	 *
+	 * @param mixed $selectionCondition Selection condition
+	 * @return array
+	 */
+	abstract public function getTablesSchema($selectionCondition = NULL);
+
+	/**
+	 * Fetch query result
+	 * @param $result resource
+	 * @param boolean $bCache use cache
+	 * @return array
+	 */
+	abstract protected function _fetch($result, $bCache = TRUE);
+
+	/**
+	 * Get list of columns in the table
 	 *
 	 * @param string $tableName Table name
 	 * @param mixed $selectionCondition Selection condition
 	 * @return array
+	 * @see getFullColumns()
 	 */
 	public function getColumns($tableName, $selectionCondition = NULL)
 	{
@@ -152,7 +170,7 @@ abstract class Core_DataBase
 	}
 
 	/**
-	 * Get list of columns in a table
+	 * Get list of columns in the table
 	 *
 	 * @param string $tableName Table name
 	 * @param mixed $selectionCondition Selection condition
@@ -169,25 +187,35 @@ abstract class Core_DataBase
 			$query .= ' LIKE ' . $this->quote($selectionCondition);
 		}
 
+		$this->query($query);
+
+		return $this->_fetch($this->getResult(), FALSE);
+	}
+
+	/**
+	 * Get list of indexes in the table
+	 *
+	 * @param string $tableName Table name
+	 * @param mixed $selectionCondition Selection condition
+	 * @return array
+	 */
+	public function getIndexes($tableName, $selectionCondition = NULL)
+	{
+		$this->connect();
+
+		$query = "SHOW INDEXES FROM " . $this->quoteColumnName($tableName);
+
+		if (!is_null($selectionCondition))
+		{
+			$query .= ' WHERE `Key_name` LIKE ' . $this->quote($selectionCondition);
+		}
+
 		$result = $this->query($query)->asAssoc()->result();
 
 		$return = array();
 		foreach ($result as $row)
 		{
-			$column = $this->getColumnType($row['Type']);
-
-			// [Field][Type][Collation][Null][Key][Default][Extra][Privileges][Comment]
-			$column['name'] = $row['Field'];
-			$column['columntype'] = $row['Type'];
-			$column['collation'] = $row['Collation'];
-			$column['null'] = ($row['Null'] == 'YES');
-			$column['key'] = $row['Key'];
-			$column['default'] = $row['Default'];
-			$column['extra'] = $row['Extra'];
-			$column['privileges'] = $row['Privileges'];
-			$column['comment'] = $row['Comment'];
-
-			$return[$column['name']] = $column;
+			$return[$row['Key_name']][] = $row;
 		}
 
 		return $return;
@@ -682,12 +710,9 @@ abstract class Core_DataBase
 		// http://www.faqs.org/docs/ppbook/x2632.htm
 		$columnType = strtolower($columnType);
 
-		$type = NULL;
-		$fixed = NULL;
-		$binary = NULL;
+		$type = $fixed = $binary = $min = $max = NULL;
 		$unsigned = (strpos($columnType, 'unsigned') !== FALSE);
 		$zerofill = (strpos($columnType, 'zerofill') !== FALSE);
-		$min = $max = NULL;
 
 		list($switch_type, $max_length) = $this->getColumnTypeAndLength($columnType);
 
@@ -819,6 +844,10 @@ abstract class Core_DataBase
 		return $this->_lastQuery;
 	}
 
+	/**
+	 * Array of replacements for LIKE
+	 * @var array
+	 */
 	protected $_likeReplacements = array(
 		'%' => '\%',
 		'_' => '\_',
@@ -833,5 +862,43 @@ abstract class Core_DataBase
 	public function escapeLike($value)
 	{
 		return strtr($value, $this->_likeReplacements);
+	}
+
+	/**
+	 * Cache for getCollations()
+	 * @var NULL|array
+	 */
+	protected $_collations = NULL;
+
+	/**
+	 * Get Collations
+	 * @return array array[Charset] => array of collations
+	 */
+	public function getCollations()
+	{
+		if (is_null($this->_collations))
+		{
+			$query = 'SHOW COLLATION';
+
+			$result = $this->query($query)->asAssoc()->result();
+
+			$this->_collations = array();
+			foreach ($result as $row)
+			{
+				$this->_collations[$row['Charset']][] = $row['Collation'];
+			}
+			$this->free();
+
+			// Sort Charsets
+			ksort($this->_collations);
+
+			// Sort Collations
+			foreach (array_keys($this->_collations) as $charset)
+			{
+				sort($this->_collations[$charset]);
+			}
+		}
+
+		return $this->_collations;
 	}
 }

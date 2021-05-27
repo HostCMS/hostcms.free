@@ -60,7 +60,7 @@ return array(
 
 	'structure_name' => 'Вузол структури',
 
-	
+
 	'watermark_file' => 'Зображення для водяного знака',
 	'watermark_default_use_large_image' => 'Використовувати водяний знак',
 	'watermark_default_use_small_image' => 'Використовувати водяний знак для малих зображень',
@@ -140,4 +140,10 @@ return array(
 	'all_items_count' => 'Всього елементів: %s',
 
 	'create_small_image' => 'Створювати мале зображення з великого',
+
+	'option_smallImagePrefix' => 'Префікс при іменуванні малих зображень',
+	'option_itemLargeImage' => 'Шаблон іменування великого зображення елементу',
+	'option_itemSmallImage' => 'Шаблон іменування малого зображення елементу',
+	'option_groupLargeImage' => 'Шаблон іменування великого зображення групи',
+	'option_groupSmallImage' => 'Шаблон іменування малого зображення групи',
 );

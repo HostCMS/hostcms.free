@@ -22,7 +22,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 {
@@ -34,13 +34,13 @@ class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 
 	/**
 	 * DataBase Query Type
-	 * 8 - LOCK
+	 * 10 - LOCK
 	 */
-	protected $_queryType = 8;
+	protected $_queryType = 10;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param array $args list of arguments
 	 * <code>
 	 * $oCore_QueryBuilder_Lock = Core_QueryBuilder::lock('tableName1', 'READ')
@@ -87,9 +87,9 @@ class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 		foreach ($tables as $tableName => $type)
 		{
 			$tableName = $this->_dataBase->quoteTableName($tableName);
-			
+
 			$type = strtoupper($type);
-			
+
 			if (!in_array($type, array('READ', 'READ LOCAL', 'WRITE', 'LOW_PRIORITY WRITE')))
 			{
 				throw new Core_Exception("Argument should be READ, READ LOCAL, WRITE or LOW_PRIORITY WRITE.");
@@ -110,10 +110,10 @@ class Core_QueryBuilder_Lock extends Core_QueryBuilder_Statement
 	{
 		return 'LOCK TABLES ' . $this->_buildLock($this->_table);
 	}
-	
+
 	/**
 	 * UNLOCK TABLES
-	 * 
+	 *
 	 * @return Core_DataBase
 	 */
 	public function unlock()

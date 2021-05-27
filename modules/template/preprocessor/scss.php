@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Preprocessor_Scss extends Template_Preprocessor
 {
@@ -20,7 +20,7 @@ class Template_Preprocessor_Scss extends Template_Preprocessor
 	{
 		require_once(CMS_FOLDER . '/modules/vendor/scssphp/scss.inc.php');
 
-		$this->_preprocessor = new Leafo\ScssPhp\Compiler();
+		$this->_preprocessor = new ScssPhp\ScssPhp\Compiler();
 		$this->_preprocessor->setImportPaths(CMS_FOLDER);
 	}
 

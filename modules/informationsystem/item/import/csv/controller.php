@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properties
 {
@@ -645,7 +645,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 								// Создаем массив параметров для загрузки картинок элементу
 								$aPicturesParam = array();
-								$aPicturesParam['large_image_isset'] = TRUE;
 								$aPicturesParam['large_image_source'] = $sSourceFile;
 								$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -739,6 +738,8 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 									// Файл временный, подлежит удалению
 									Core_File::delete($sSourceFile);
 								}
+
+								$this->_oCurrentGroup->id && $this->_oCurrentGroup->save();
 							}
 						break;
 						// Малая картинка группы
@@ -836,8 +837,12 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 								{
 									$this->_oCurrentGroup->image_small = $sTargetFileName;
 
-									$this->_oCurrentGroup->id && $this->_oCurrentGroup->setSmallImageSizes() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
+									$this->_oCurrentGroup->id
+										// && $this->_oCurrentGroup->setSmallImageSizes()
+										&& $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 								}
+
+								$this->_oCurrentGroup->id && $this->_oCurrentGroup->save();
 
 								if (strpos(basename($sSourceFile), "CMS") === 0)
 								{
@@ -1117,7 +1122,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 											// Создаем массив параметров для загрузки картинок элементу
 											$aPicturesParam = array();
-											$aPicturesParam['large_image_isset'] = TRUE;
 											$aPicturesParam['large_image_source'] = $sSourceFile;
 											$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 											$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -1478,7 +1482,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 						// Создаем массив параметров для загрузки картинок элементу
 						$aPicturesParam = array();
-						$aPicturesParam['large_image_isset'] = TRUE;
 						$aPicturesParam['large_image_source'] = $sSourceFile;
 						$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 						$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -1769,7 +1772,6 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 								// Создаем массив параметров для загрузки картинок элементу
 								$aPicturesParam = array();
-								$aPicturesParam['large_image_isset'] = TRUE;
 								$aPicturesParam['large_image_source'] = $sSourceFile;
 								$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -1970,7 +1972,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 
 					$sSourceFileBaseName = basename($sSourceFile, '');
 
-					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://");
+					$bHttp = strpos(strtolower($sSourceFile), "http://") === 0 || strpos(strtolower($sSourceFile), "https://") === 0;
 
 					if (Core_File::isValidExtension( $sSourceFile, Core::$mainConfig['availableExtension']) || $bHttp)
 					{
@@ -2105,8 +2107,9 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	{
 		if (is_null($this->_aTags))
 		{
-			$aTags = Core_Entity::factory('Tag')->findAll(FALSE);
+			$this->_aTags = array();
 
+			$aTags = Core_Entity::factory('Tag')->findAll(FALSE);
 			foreach ($aTags as $oTag)
 			{
 				$this->_aTags[$oTag->id] = $oTag->name;
@@ -2154,7 +2157,7 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 		setlocale(LC_ALL, SITE_LOCAL);
 		setlocale(LC_NUMERIC, 'POSIX');
 
-		return self::CorrectToEncoding($aCsvLine, 'UTF-8', $this->encoding);
+		return Core_Str::iconv($this->encoding, 'UTF-8', $aCsvLine);
 	}
 
 	/**
@@ -2215,26 +2218,10 @@ class Informationsystem_Item_Import_Csv_Controller extends Core_Servant_Properti
 	 * @param string $encodeTo detination encoding
 	 * @param string $encodeFrom source encoding
 	 * @return array
+	 * @deprecated 6.9.7
 	 */
 	public static function CorrectToEncoding($sLine, $encodeTo, $encodeFrom = 'UTF-8')
 	{
-		if (is_array($sLine))
-		{
-			foreach ($sLine as $key => $value)
-			{
-				$sLine[$key] = self::CorrectToEncoding($value, $encodeTo, $encodeFrom);
-			}
-		}
-		else
-		{
-			// Если кодировки не совпадают
-			if (strtoupper($encodeTo) != strtoupper($encodeFrom))
-			{
-				// Перекодируем в указанную кодировку
-				$sLine = @iconv($encodeFrom, $encodeTo . "//IGNORE//TRANSLIT", $sLine);
-			}
-		}
-
-		return $sLine;
+		return Core_Str::iconv($encodeFrom, $encodeTo, $sLine);
 	}
 }

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Payment_System_Handler
 {
@@ -248,6 +248,20 @@ abstract class Shop_Payment_System_Handler
 
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterExecute', $this);
 
+		if (Core_Event::getLastReturn() !== 'final')
+		{
+			$this->userExecute();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Клиентская логика обработки платежа
+	 * @return self
+	 */
+	public function userExecute()
+	{
 		return $this;
 	}
 
@@ -485,22 +499,6 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
-	 * Количество заказов за сегодня
-	 */
-	/*public function ordersToday()
-	{
-		$oShop_Order = $this->getShopOrder();
-		$date = date('Y-m-d');
-
-		$oShop_Orders = $oShop_Order->Shop->Shop_Orders;
-		$oShop_Orders->queryBuilder()
-			->where('datetime', '>', "{$date} 00:00:00")
-			->where('datetime', '<', "{$date} 23:59:59");
-
-		return $oShop_Orders->getCount(FALSE);
-	}*/
-
-	/**
 	 * Создание нового заказа на основе данных, указанных в orderParams
 	 * @hostcms-event Shop_Payment_System_Handler.onBeforeProcessOrder
 	 * @hostcms-event Shop_Payment_System_Handler.onAfterProcessOrder
@@ -585,6 +583,15 @@ abstract class Shop_Payment_System_Handler
 						? $oShop_Cart->marking
 						: $oShop_Item->marking;
 
+					// Статус товаров по умолчанию.
+					if ($oShop->shop_order_status_id
+						&& $oShop->shop_order_status_id == $this->_shopOrder->shop_order_status_id
+						&& $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id
+					)
+					{
+						$oShop_Order_Item->shop_order_item_status_id = $this->_shopOrder->Shop_Order_Status->shop_order_item_status_id;
+					}
+
 					$this->_shopOrder->add($oShop_Order_Item);
 
 					// Save coupon
@@ -600,6 +607,8 @@ abstract class Shop_Payment_System_Handler
 					$Shop_Cart_Controller
 						->shop_item_id($oShop_Cart->shop_item_id)
 						->delete();
+
+					$oShop_Item->clearCache();
 				}
 			}
 			else
@@ -912,9 +921,11 @@ abstract class Shop_Payment_System_Handler
 	 * @param Shop_Delivery_Model $oShop_Delivery
 	 * @return string
 	 */
-	protected function _getDeliveryName(Shop_Delivery_Model $oShop_Delivery)
+	protected function _getDeliveryName(Shop_Delivery_Model $oShop_Delivery, $shop_delivery_condition_name = NULL)
 	{
-		return Core::_('Shop_Delivery.delivery', $oShop_Delivery->name);
+		return is_null($shop_delivery_condition_name)
+			? Core::_('Shop_Delivery.delivery', $oShop_Delivery->name)
+			: Core::_('Shop_Delivery.delivery_with_condition', $oShop_Delivery->name, $shop_delivery_condition_name);
 	}
 
 	/**
@@ -946,6 +957,8 @@ abstract class Shop_Payment_System_Handler
 				$marking = !is_null($oShop_Delivery_Condition->marking)
 					? $oShop_Delivery_Condition->marking
 					: '';
+
+				$shop_delivery_condition_name = NULL;
 			}
 			// Доставка рассчитывалась кодом
 			else
@@ -956,15 +969,15 @@ abstract class Shop_Payment_System_Handler
 				$rate = intval(Core_Array::get($this->_orderParams, 'shop_delivery_rate', 0));
 				$marking = '';
 
-				$shop_delivery_name = strval(Core_Array::get($this->_orderParams, 'shop_delivery_name', 0));
+				$shop_delivery_condition_name = strval(Core_Array::get($this->_orderParams, 'shop_delivery_name', 0));
 
 				$this->_shopOrder->delivery_information = trim(
-					$this->_shopOrder->delivery_information . "\n" . $shop_delivery_name
+					$this->_shopOrder->delivery_information . "\n" . $shop_delivery_condition_name
 				);
 			}
 
 			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
-			$oShop_Order_Item->name = $this->_getDeliveryName($oShop_Delivery);
+			$oShop_Order_Item->name = $this->_getDeliveryName($oShop_Delivery, $shop_delivery_condition_name);
 			$oShop_Order_Item->quantity = 1;
 			$oShop_Order_Item->rate = $rate;
 			$oShop_Order_Item->price = $price;
@@ -1095,7 +1108,7 @@ abstract class Shop_Payment_System_Handler
 				$this->_shopOrder->clearEntities()
 					->showXmlCurrency(TRUE)
 					->showXmlCountry(TRUE)
-					->showXmlItems(TRUE)
+					->showXmlItems('not canceled')
 					->showXmlDelivery(TRUE)
 					->showXmlPaymentSystem(TRUE)
 					->showXmlOrderStatus(TRUE)
@@ -1372,9 +1385,19 @@ abstract class Shop_Payment_System_Handler
 	/**
 	 * Get array of admin emails
 	 * @return array
+	 * @hostcms-event Shop_Payment_System_Handler.onGetAdminEmails
 	 */
 	public function getAdminEmails()
 	{
+		Core_Event::notify('Shop_Payment_System_Handler.onGetAdminEmails', $this);
+
+		$lastReturn = Core_Event::getLastReturn();
+		
+		if (is_array($lastReturn))
+		{	
+			return $lastReturn;
+		}
+	
 		$oShop = $this->_shopOrder->Shop;
 
 		return trim($oShop->email) != ''
@@ -1568,14 +1591,19 @@ abstract class Shop_Payment_System_Handler
 
 			if (Core::moduleIsActive('siteuser') && $oShopOrder->siteuser_id)
 			{
-				$oSiteuser_Email = Core_Entity::factory('Siteuser_Email');
-				$oSiteuser_Email->siteuser_id = $oShopOrder->siteuser_id;
-				$oSiteuser_Email->subject = $user_subject;
-				$oSiteuser_Email->email = $to;
-				$oSiteuser_Email->from = $from;
-				$oSiteuser_Email->type = $this->_siteuserMailContentType == 'text/html' ? 1 : 0;
-				$oSiteuser_Email->text = $sInvoice;
-				$oSiteuser_Email->save();
+				$aConfig = Core_Config::instance()->get('siteuser_config', array());
+
+				if (!isset($aConfig['save_emails']) || $aConfig['save_emails'])
+				{
+					$oSiteuser_Email = Core_Entity::factory('Siteuser_Email');
+					$oSiteuser_Email->siteuser_id = $oShopOrder->siteuser_id;
+					$oSiteuser_Email->subject = $user_subject;
+					$oSiteuser_Email->email = $to;
+					$oSiteuser_Email->from = $from;
+					$oSiteuser_Email->type = $this->_siteuserMailContentType == 'text/html' ? 1 : 0;
+					$oSiteuser_Email->text = $sInvoice;
+					$oSiteuser_Email->save();
+				}
 			}
 		}
 

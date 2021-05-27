@@ -49,7 +49,9 @@ class Shop_Order_Controller_Print extends Printlayout_Controller_Print
 
 	protected function _print()
 	{
-		$this->_oPrintlayout_Controller->execute()->downloadFile();
+		$this->_oPrintlayout_Controller
+			->execute()
+			->downloadFile();
 
 		exit();
 	}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Ipaddress
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Controller
 {
@@ -60,7 +60,7 @@ class Ipaddress_Controller
 			$aIpaddresses = NULL;
 		}
 
-		$bNeedsUpdate = is_null($aIpaddresses);
+		$bNeedsUpdate = !is_array($aIpaddresses);
 
 		if ($bNeedsUpdate)
 		{
@@ -88,7 +88,8 @@ class Ipaddress_Controller
 			}
 		}
 
-		$bCache && $bNeedsUpdate && $oCore_Cache->set('deny_access', $aIpaddresses, $this->_cacheName);
+		$bCache && $bNeedsUpdate
+			&& $oCore_Cache->set('deny_access', $aIpaddresses, $this->_cacheName);
 
 		return $bBlocked;
 	}

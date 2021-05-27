@@ -1,13 +1,5 @@
 <?php
-/**
- * Updates.
- *
- * @package HostCMS
- * @subpackage Update
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'menu' => 'Updates',
 	'main_menu' => 'Updates',
@@ -36,6 +28,7 @@ return array(
 	'server_return_empty_answer' => 'Server returned an empty response. Outgoing connections using fsockopen() may be forbidden on the hosting server. Please contact your hosting provider or server administrator.',
 	'support_available' => 'Support available until %s.',
 	'support_has_expired' => 'Support has expired at %s. <a href="http://%s/users/" target="_blank">Extend technical support</a>. Up to %s',
+	'support_unavailable' => 'Support is not available',
 	'msg_update_required' => 'Update %s required',
 	'msg_installing_package' => 'Installing package %s',
 	'msg_unpack_package' => 'Unpacking file %s',

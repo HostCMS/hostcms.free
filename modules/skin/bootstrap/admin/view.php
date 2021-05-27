@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_View extends Admin_View
 {
@@ -151,7 +151,7 @@ class Skin_Bootstrap_Admin_View extends Admin_View
 					? Core_Array::get($aMenu[0], 'ico', 'fa-barcode')
 					: 'fa-barcode';
 
-				?><h5 class="row-title before-pink"><i class="fa <?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
+				?><h5 class="row-title before-pink"><i class="<?php echo htmlspecialchars($ico)?>"></i><?php echo htmlspecialchars(html_entity_decode($this->pageTitle, ENT_COMPAT, 'UTF-8'))?></h5><?php
 			}
 			?>
 			<div id="id_message"><?php /*echo $this->message*/?></div>

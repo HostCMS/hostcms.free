@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discount card bonuses',
@@ -27,4 +27,7 @@ return array(
 	'writeoff' => 'Writeoff',
 	'writeoff_title' => 'Writeoff bonuses by card "%s"',
 	'available' => 'Available %s %s',
+	'description' => 'Description',
+	'shop_discountcard_bonus_type_id' => 'Bonus type',
+	'apply_success' => 'Bonus info changed!',
 );

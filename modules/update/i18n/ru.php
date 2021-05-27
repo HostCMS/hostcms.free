@@ -1,13 +1,5 @@
 <?php
-/**
- * Updates.
- *
- * @package HostCMS
- * @subpackage Update
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'menu' => 'Обновления',
 	'main_menu' => 'Обновления',
@@ -35,7 +27,8 @@ return array(
 	'update_files_error' => 'Ошибка распаковки tar.gz файла.',
 	'server_return_empty_answer' => 'Сервер вернул пустой ответ, наиболее вероятно на хостинге запрещены исходящие соединения с использованием fsockopen(). Обратитесь к хостинг-провайдеру или администратору сервера.',
 	'support_available' => 'Период технической поддержки доступен до %s г.',
-	'support_has_expired' => 'Период технической поддержки истек %s г. <a href="http://%s/users/" target="_blank">Продлить поддержку</a>. Данные на %s',
+	'support_has_expired' => 'Период технической поддержки истек10 %s г. <a href="http://%s/users/" target="_blank">Продлить поддержку</a>. Данные на %s',
+	'support_unavailable' => 'Техническая поддержка недоступна',
 	'msg_update_required' => 'Запрошено обновление %s',
 	'msg_installing_package' => 'Установка пакета обновлений %s',
 	'msg_unpack_package' => 'Распаковка файла %s',

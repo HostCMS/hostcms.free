@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Model extends Core_Entity
 {
@@ -59,6 +59,7 @@ class Site_Model extends Core_Entity
 		'affiliate_plan' => array(),
 		'advertisement' => array(),
 		'advertisement_group' => array(),
+		'benchmark' => array(),
 		'cloud' => array(),
 		'company_department_action_access' => array(),
 		'company_department_module' => array(),
@@ -146,8 +147,6 @@ class Site_Model extends Core_Entity
 		'max_size_load_image' => 70,
 		'max_size_load_image_big' => 300,
 		'send_attendance_report' => 1,
-		'chmod' => '0755',
-		'files_chmod' => '0644',
 		'date_format' => '%d.%m.%Y',
 		'date_time_format' => '%d.%m.%Y %H:%M:%S',
 		'error' => 'E_ALL',
@@ -225,6 +224,11 @@ class Site_Model extends Core_Entity
 		{
 			$this->Advertisements->deleteAll(FALSE);
 			$this->Advertisement_Groups->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('benchmark'))
+		{
+			$this->Benchmarks->deleteAll(FALSE);
 		}
 
 		if (Core::moduleIsActive('cdn'))
@@ -1765,8 +1769,6 @@ class Site_Model extends Core_Entity
 				'error_email' => $this->error_email,
 				'lng' => $this->lng,
 				'send_attendance_report' => $this->send_attendance_report,
-				'chmod' => $this->chmod,
-				'files_chmod' => $this->files_chmod,
 				'date_format' => $this->date_format,
 				'date_time_format' => $this->date_time_format,
 				'error' => $this->error,
@@ -1824,8 +1826,6 @@ class Site_Model extends Core_Entity
 				$this->error_email = Core_Array::get($aBackup, 'error_email');
 				$this->lng = Core_Array::get($aBackup, 'lng');
 				$this->send_attendance_report = Core_Array::get($aBackup, 'send_attendance_report');
-				$this->chmod = Core_Array::get($aBackup, 'chmod');
-				$this->files_chmod = Core_Array::get($aBackup, 'files_chmod');
 				$this->date_format = Core_Array::get($aBackup, 'date_format');
 				$this->date_time_format = Core_Array::get($aBackup, 'date_time_format');
 				$this->error = Core_Array::get($aBackup, 'error');

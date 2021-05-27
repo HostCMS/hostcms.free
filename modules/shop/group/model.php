@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -872,19 +872,26 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function checkDuplicatePath()
 	{
-		$oShop = $this->Shop;
-
-		// Search the same item or group
-		$oSameShopGroup = $oShop->Shop_Groups->getByParentIdAndPath($this->parent_id, $this->path);
-		if (!is_null($oSameShopGroup) && $oSameShopGroup->id != $this->id)
+		if (strlen($this->path))
 		{
-			$this->path = Core_Guid::get();
-		}
+			$oShop = $this->Shop;
 
-		$oSameShopItems = $oShop->Shop_Items;
-		$oSameShopItems->queryBuilder()->where('modification_id', '=', 0);
-		$oSameShopItem = $oSameShopItems->getByGroupIdAndPath($this->parent_id, $this->path);
-		if (!is_null($oSameShopItem))
+			// Search the same item or group
+			$oSameShopGroup = $oShop->Shop_Groups->getByParentIdAndPath($this->parent_id, $this->path);
+			if (!is_null($oSameShopGroup) && $oSameShopGroup->id != $this->id)
+			{
+				$this->path = Core_Guid::get();
+			}
+
+			$oSameShopItems = $oShop->Shop_Items;
+			$oSameShopItems->queryBuilder()->where('modification_id', '=', 0);
+			$oSameShopItem = $oSameShopItems->getByGroupIdAndPath($this->parent_id, $this->path);
+			if (!is_null($oSameShopItem))
+			{
+				$this->path = Core_Guid::get();
+			}
+		}
+		else
 		{
 			$this->path = Core_Guid::get();
 		}
@@ -918,10 +925,6 @@ class Shop_Group_Model extends Core_Entity
 		{
 			$this->path = $this->id;
 		}
-		else
-		{
-			$this->path = Core_Guid::get();
-		}
 
 		return $this;
 	}
@@ -933,7 +936,7 @@ class Shop_Group_Model extends Core_Entity
 	 */
 	public function save()
 	{
-		if (is_null($this->path))
+		if (is_null($this->path) || $this->path === '')
 		{
 			$this->makePath();
 		}
@@ -1021,7 +1024,7 @@ class Shop_Group_Model extends Core_Entity
 			$newObject->saveSmallImageFile($this->getSmallFilePath(), $this->image_small);
 		}
 
-		$aChildrenGroups = $this->Shop_Groups->findAll();
+		$aChildrenGroups = $this->Shop_Groups->findAll(FALSE);
 		foreach ($aChildrenGroups as $oChildrenGroup)
 		{
 			$oChild = $oChildrenGroup->copy();
@@ -1029,7 +1032,7 @@ class Shop_Group_Model extends Core_Entity
 			$oChild->save();
 		}
 
-		$aShop_Items = $this->Shop_Items->findAll();
+		$aShop_Items = $this->Shop_Items->findAll(FALSE);
 		foreach ($aShop_Items as $oShop_Item)
 		{
 			$newObject->add($oShop_Item->incCountByCreate(FALSE)->copy());
@@ -1076,6 +1079,12 @@ class Shop_Group_Model extends Core_Entity
 			$oNewShop_Item_Property_For_Group = clone $oShop_Item_Property_For_Group;
 			$oNewShop_Item_Property_For_Group->shop_group_id = $newObject->id;
 			$oNewShop_Item_Property_For_Group->save();
+		}
+
+		$aShop_Tab_Groups = $this->Shop_Tab_Groups->findAll(FALSE);
+		foreach ($aShop_Tab_Groups as $oShop_Tab_Group)
+		{
+			$newObject->add(clone $oShop_Tab_Group);
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));

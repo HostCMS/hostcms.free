@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -52,6 +52,7 @@ class Shop_Model extends Core_Entity
 		'shop_affiliate_plan' => array(),
 		'shop_cart' => array(),
 		'shop_favorite' => array(),
+		'shop_compare' => array(),
 		'shop_delivery' => array(),
 		'shop_bonus' => array(),
 		'shop_discount' => array(),
@@ -78,8 +79,10 @@ class Shop_Model extends Core_Entity
 		'deal' => array(),
 		'shop_discountcard' => array(),
 		'shop_discountcard_level' => array(),
+		'shop_discountcard_bonus_type' => array(),
 		'shop_price_setting' => array(),
 		'shop_filter_seo' => array(),
+		'shop_filter_seo_dir' => array(),
 		'shop_tab_dir' => array(),
 		'shop_tab' => array(),
 		'shop_comment_property' => array(),
@@ -139,8 +142,8 @@ class Shop_Model extends Core_Entity
 		'shop_currency' => array(),
 		'shop_order_status' => array(),
 		'shop_codetype' => array(),
-		'shop_measure' => array(),
-		'default_shop_measure' => array('model' => 'Shop_Measure', 'foreign_key' => 'default_shop_measure_id'),
+		'shop_measure' => array(), // weight
+		'default_shop_measure' => array('model' => 'Shop_Measure', 'foreign_key' => 'default_shop_measure_id'), // item's default measure
 		'user' => array(),
 		'siteuser_group' => array(),
 		'shop_company' => array(), // old relation
@@ -339,6 +342,7 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Affiliate_Plans->deleteAll(FALSE);
 		$this->Shop_Carts->deleteAll(FALSE);
 		$this->Shop_Favorites->deleteAll(FALSE);
+		$this->Shop_Compares->deleteAll(FALSE);
 		$this->Shop_Deliveries->deleteAll(FALSE);
 		$this->Shop_Bonuses->deleteAll(FALSE);
 		$this->Shop_Discounts->deleteAll(FALSE);
@@ -356,7 +360,9 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Item_Delivery_Options->deleteAll(FALSE);
 		$this->Shop_Discountcards->deleteAll(FALSE);
 		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
+		$this->Shop_Discountcard_Bonus_Types->deleteAll(FALSE);
 		$this->Shop_Price_Settings->deleteAll(FALSE);
+		$this->Shop_Filter_Seos_Dirs->deleteAll(FALSE);
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
 		$this->Shop_Tab_Dirs->deleteAll(FALSE);
 		$this->Shop_Tabs->deleteAll(FALSE);
@@ -644,6 +650,22 @@ class Shop_Model extends Core_Entity
 			);
 		}
 
+		$aShop_Discountcard_Levels = $this->Shop_Discountcard_Levels->findAll(FALSE);
+		foreach ($aShop_Discountcard_Levels as $oShop_Discountcard_Level)
+		{
+			$newObject->add(
+				$oShop_Discountcard_Level->copy()
+			);
+		}
+
+		$aShop_Discountcard_Bonus_Types = $this->Shop_Discountcard_Bonus_Types->findAll(FALSE);
+		foreach ($aShop_Discountcard_Bonus_Types as $oShop_Discountcard_Bonus_Type)
+		{
+			$newObject->add(
+				$oShop_Discountcard_Bonus_Type->copy()
+			);
+		}
+
 		// Копирование скидок на товары
 		$aShop_Discounts = $this->Shop_Discounts->findAll();
 		foreach ($aShop_Discounts as $oShop_Discount)
@@ -714,8 +736,8 @@ class Shop_Model extends Core_Entity
 
 		if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 		{
-			Core::isFunctionEnable('set_time_limit') && @set_time_limit(90000);
-			@ini_set('max_execution_time', '90000');
+			Core::isFunctionEnable('set_time_limit') && @set_time_limit(1200);
+			@ini_set('max_execution_time', '1200');
 		}
 
 		Core_Event::notify($this->_modelName . '.onBeforeRecount', $this);

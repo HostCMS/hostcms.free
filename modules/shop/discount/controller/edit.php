@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -50,19 +50,19 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$this->getField('description')->rows(7)->wysiwyg(Core::moduleIsActive('wysiwyg'));
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
-		
+
 		$oMainTab->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oMainRow3);
 		$oMainTab->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-4')), $oMainRow3);
 		$oMainTab->move($this->getField('start_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
 		$oMainTab->move($this->getField('end_time')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2')), $oMainRow3);
-		
+
 		$oDaysBlock
 			->add(Admin_Form_Entity::factory('Div')
 				->class('header bordered-palegreen')
 				->value(Core::_("Shop_Discount.days"))
 			)
 			->add($oDaysBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-		
+
 		$oMainTab->move($this->getField('day1')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2')), $oDaysBlockRow1);
 		$oMainTab->move($this->getField('day2')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2')), $oDaysBlockRow1);
 		$oMainTab->move($this->getField('day3')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2')), $oDaysBlockRow1);
@@ -70,29 +70,38 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab->move($this->getField('day5')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-3')), $oDaysBlockRow1);
 		$oMainTab->move($this->getField('day6')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2'))->class('colored-danger'), $oDaysBlockRow1);
 		$oMainTab->move($this->getField('day7')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2'))->class('colored-danger'), $oDaysBlockRow1);
-		
+
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
 		$oMainTab->move($this->getField('public')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
 
 		$oMainTab->move($this->getField('url')->divAttr(array('class' => 'form-group col-xs-12'))->placeholder('https://'), $oMainRow6);
 
-		$oMainTab->delete($this->getField('type'));
+		$oMainTab
+			->delete($this->getField('value'))
+			->delete($this->getField('type'));
 
-		$oTypeSelectField = Admin_Form_Entity::factory('Select');
-
-		$oTypeSelectField
-			->name('type')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2'))
-			->caption(Core::_('Shop_Discount.type'))
-			->options(array(
-				Core::_('Shop_Discount.form_edit_affiliate_values_type_percent'),
-				Core::_('Shop_Discount.form_edit_affiliate_values_type_summ'))
+		$oMainRow1->add(Admin_Form_Entity::factory('Div')
+			->class('col-xs-12 col-sm-4 col-md-3 col-lg-2 form-group input-group select-group')
+			->add(Admin_Form_Entity::factory('Code')
+				->html('<div class="caption">' . Core::_('Shop_Discount.value') . '</div>')
 			)
-			->value($this->_object->type);
-
-		$oMainRow1->add($oTypeSelectField);
-		$oMainTab->move($this->getField('value')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3 col-lg-2')), $oMainRow1);
+			->add(Admin_Form_Entity::factory('Input')
+				->name('value')
+				->value($this->_object->value)
+				->divAttr(array('class' => ''))
+				->class('form-control semi-bold')
+			)
+			->add(Admin_Form_Entity::factory('Select')
+				->name('type')
+				->divAttr(array('class' => ''))
+				->options(array(
+					'%',
+					$this->_object->Shop->Shop_Currency->name
+				))
+				->value($this->_object->type)
+				->class('form-control input-group-addon')
+			)
+		);
 
 		$oMainTab->move($this->getField('coupon')
 			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-3 col-lg-3'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
@@ -108,6 +117,31 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			: Core::_('Shop_Discount.item_discount_add_form_title');
 
 		$this->title($title);
+
+		return $this;
+	}
+
+	/**
+	 * Processing of the form. Apply object fields.
+	 * @return self
+	 * @hostcms-event Shop_Discount_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 */
+	protected function _applyObjectProperty()
+	{
+		parent::_applyObjectProperty();
+
+		// Скидка не может быть больше 100%
+		if ($this->_object->type == 0 && $this->_object->value > 100)
+		{
+			$this->_object->value = 0;
+			$this->_object->save();
+
+			$this->addMessage(
+				Core_Message::get(Core::_('Shop_Discount.percent_error'), 'error')
+			);
+		}
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
 		return $this;
 	}

@@ -85,7 +85,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 	$isModerator = $oForum_Category->isModerator($oSiteuser);
 	if ($isModerator)
 	{
-		$forum_topic_id = intval(Core_Array::getGet('visible_topic_id', 0));
+		$forum_topic_id = Core_Array::getGet('visible_topic_id', 0, 'int');
 		if ($forum_topic_id)
 		{
 			$oForum_Topic = Core_Entity::factory('Forum_Topic', $forum_topic_id);
@@ -93,7 +93,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 			$oForum_Topic->save();
 		}
 
-		$forum_topic_id = intval(Core_Array::getGet('notice_topic_id', 0));
+		$forum_topic_id = Core_Array::getGet('notice_topic_id', 0, 'int');
 		if ($forum_topic_id)
 		{
 			$oForum_Topic = Core_Entity::factory('Forum_Topic', $forum_topic_id);
@@ -101,7 +101,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 			$oForum_Topic->save();
 		}
 
-		$forum_topic_id = intval(Core_Array::getGet('close_topic_id', 0));
+		$forum_topic_id = Core_Array::getGet('close_topic_id', 0, 'int');
 		if ($forum_topic_id)
 		{
 			$oForum_Topic = Core_Entity::factory('Forum_Topic', $forum_topic_id);
@@ -109,7 +109,7 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 			$oForum_Topic->save();
 		}
 
-		$forum_topic_id = intval(Core_Array::getGet('delete_topic_id', 0));
+		$forum_topic_id = Core_Array::getGet('delete_topic_id', 0, 'int');
 		if ($forum_topic_id)
 		{
 			$oForum_Topic = Core_Entity::factory('Forum_Topic', $forum_topic_id);
@@ -124,8 +124,8 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 		&& ($oForum_Category = $oForum_Topic->Forum_Category)
 		&& ($oForum_Category->id == $Forum_Controller_Show->category)))
 	{
-		$topic_subject = Core_Str::removeEmoji(Core_Str::stripTags(strval(Core_Array::getPost('topic_subject'))));
-		$topic_text = Core_Str::removeEmoji(strval(Core_Array::getPost('topic_text')));
+		$topic_subject = Core_Str::removeEmoji(Core_Str::stripTags(Core_Array::getPost('topic_subject', '', 'str')));
+		$topic_text = Core_Str::removeEmoji(Core_Array::getPost('topic_text', '', 'str'));
 
 		$status = 0;
 
@@ -187,15 +187,15 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 					$Forum_Controller_Show->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_announcement')
-							->value(intval(Core_Array::getPost('announcement')))
+							->value(Core_Array::getPost('announcement', 0, 'int'))
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_closed')
-							->value(intval(Core_Array::getPost('closed')))
+							->value(Core_Array::getPost('closed', 0, 'int'))
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_visible')
-							->value(intval(Core_Array::getPost('visible')))
+							->value(Core_Array::getPost('visible', 0, 'int'))
 					);
 				}
 			break;
@@ -230,15 +230,15 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 					$Forum_Controller_Show->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_announcement')
-							->value(intval(Core_Array::getPost('announcement')))
+							->value(Core_Array::getPost('announcement', 0, 'int'))
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_closed')
-							->value(intval(Core_Array::getPost('closed')))
+							->value(Core_Array::getPost('closed', 0, 'int'))
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')
 							->name('error_topic_visible')
-							->value(intval(Core_Array::getPost('visible')))
+							->value(Core_Array::getPost('visible', 0, 'int'))
 					);
 				}
 			break;
@@ -269,9 +269,9 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 
 						if ($oForum_Category->isModerator($oSiteuser))
 						{
-							$oForum_Topic->visible = intval(Core_Array::getPost('visible', 0));
-							$oForum_Topic->announcement = intval(Core_Array::getPost('announcement', 0));
-							$oForum_Topic->closed = intval(Core_Array::getPost('closed', 0));
+							$oForum_Topic->visible = Core_Array::getPost('visible', 0, 'int');
+							$oForum_Topic->announcement = Core_Array::getPost('announcement', 0, 'int');
+							$oForum_Topic->closed = Core_Array::getPost('closed', 0, 'int');
 						}
 						else
 						{
@@ -405,9 +405,9 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 						$oForum_Topic_Original = clone $oForum_Topic;
 						if ($oForum_Category->isModerator($oSiteuser))
 						{
-							$oForum_Topic->visible = intval(Core_Array::getPost('visible', 0));
-							$oForum_Topic->announcement = intval(Core_Array::getPost('announcement', 0));
-							$oForum_Topic->closed = intval(Core_Array::getPost('closed', 0));
+							$oForum_Topic->visible = Core_Array::getPost('visible', 0, 'int');
+							$oForum_Topic->announcement = Core_Array::getPost('announcement', 0, 'int');
+							$oForum_Topic->closed = Core_Array::getPost('closed', 0, 'int');
 							$oForum_Topic->save();
 
 							// Событийная индексация
@@ -484,8 +484,8 @@ elseif ($Forum_Controller_Show->category && !$Forum_Controller_Show->topic)
 							}
 						}
 
-						$page_count = intval(Core_Array::getPost('current_page')) > 1
-							? 'page-' . intval(Core_Array::getPost('current_page')) . '/'
+						$page_count = Core_Array::getPost('current_page', 0, 'int') > 1
+							? 'page-' . Core_Array::getPost('current_page', 0, 'int') . '/'
 							: '';
 
 						$path = '/' . $oForum->Structure->path . '/'  . $Forum_Controller_Show->category . '/' . $page_count;
@@ -532,7 +532,7 @@ elseif ($Forum_Controller_Show->topic)
 {
 	$xslName = Core_Array::get(Core_Page::instance()->libParams, 'topicMessagesXsl');
 
-	if (($forum_topic_post_id = intval(Core_Array::getGet('del_post_id', 0)))
+	if (($forum_topic_post_id = Core_Array::getGet('del_post_id', 0, 'int'))
 		&& ($oForum_Topic_Post = Core_Entity::factory('Forum_Topic_Post', $forum_topic_post_id))
 		&& ($oForum_Topic = $oForum_Topic_Post->Forum_Topic)
 		&& ($oForum_Topic->id == $Forum_Controller_Show->topic)
@@ -627,8 +627,8 @@ elseif ($Forum_Controller_Show->topic)
 		&& ($oForum_Topic->id == $Forum_Controller_Show->topic))
 	)
 	{
-		$post_title = Core_Str::removeEmoji(strval(Core_Array::getPost('post_title')));
-		$post_text = Core_Str::removeEmoji(strval(Core_Array::getPost('post_text')));
+		$post_title = Core_Str::removeEmoji(Core_Array::getPost('post_title', '', 'str'));
+		$post_text = Core_Str::removeEmoji(Core_Array::getPost('post_text', '', 'str'));
 
 		$status = 0;
 
@@ -954,8 +954,8 @@ elseif ($Forum_Controller_Show->topic)
 							}
 						}
 
-						$page_count = Core_Array::getPost('current_page')
-							? 'page-' . intval(Core_Array::getPost('current_page')) . '/'
+						$page_count = Core_Array::getPost('current_page', 0, 'int')
+							? 'page-' . Core_Array::getPost('current_page', 0, 'int') . '/'
 							: '';
 
 						// Редактирование выполнено

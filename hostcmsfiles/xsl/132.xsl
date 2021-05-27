@@ -31,11 +31,13 @@
 			</xsl:choose>
 		</xsl:variable>
 		
-	<span><xsl:text> → </xsl:text></span>
+		<span><xsl:text> → </xsl:text></span>
+		
+		<xsl:variable name="child" select="*[@id][link/node() or url/node()][name(.) != 'shop_discount']" />
 		
 		<!-- Показывать ссылку? -->
 		<xsl:choose>
-			<xsl:when test="(show = 1 or active/node() and active = 1) and count(*[@id][link/node() or url/node()]) &gt; 0">
+			<xsl:when test="(show = 1 or active/node() and active = 1) and count($child) &gt; 0">
 				<a href="{$link}">
 					<xsl:value-of select="name"/>
 				</a>
@@ -44,8 +46,8 @@
 				<xsl:value-of select="name"/>
 			</xsl:otherwise>
 		</xsl:choose>
-		
-		<xsl:apply-templates select="*[@id][link/node() or url/node()]" />
+
+		<xsl:apply-templates select="$child" />
 		
 	</xsl:template>
 </xsl:stylesheet>

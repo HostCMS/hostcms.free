@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -119,10 +119,6 @@ class User_Model extends Core_Entity
 	protected $_forbiddenTags = array(
 		'deleted',
 		'user_id',
-		/*'~email',
-		'~icq',
-		'~site',
-		'~position'*/
 	);
 
 	/**
@@ -137,6 +133,7 @@ class User_Model extends Core_Entity
 		{
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
+			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
 
@@ -182,7 +179,7 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Check if user has access to site
+	 * Check if user has access to site based by company_departments and company_department_post_users
 	 * @param Site_Model $oSite site
 	 * @return boolean
 	 */
@@ -255,7 +252,7 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Check user access to object
+	 * Check user access to the object
 	 * @param Core_Entity $oObject object
 	 * @return boolean
 	 */
@@ -365,25 +362,6 @@ class User_Model extends Core_Entity
 	{
 		return '/' . $this->getHref() . rawurlencode($this->image);
 	}
-
-	/**
-	 * Specify image file for user
-	 * @param string $fileSourcePath source file
-	 * @param string $fileName target file name
-	 * @return self
-	 */
-	/*public function saveImageFile($fileSourcePath, $fileName)
-	{
-		$this->createDir();
-
-		$fileExtension = Core_File::getExtension($fileName);
-
-		$this->image = 'avatar.' . $fileExtension;
-		$this->save();
-
-		Core_File::upload($fileSourcePath, $this->getImageFilePath());
-		return $this;
-	}*/
 
 	/**
 	 * Create files directory
@@ -1069,6 +1047,7 @@ class User_Model extends Core_Entity
 				return TRUE;
 			}
 		}
+
 		return FALSE;
 	}
 
@@ -1113,102 +1092,6 @@ class User_Model extends Core_Entity
 		return FALSE;
 	}
 
-	/**
-	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в отдел
-	 * @param $oDepartment отдел
-	 * @return boolean
-	 */
-	/* public function hasEditEmployeeInDepartment($oDepartment)
-	{
-		if ($this->superuser)
-		{
-			return TRUE;
-		}
-
-		$bReturn = FALSE;
-
-		return $bReturn;
-	} */
-
-	/**
-	 * Может ли сотрудник добавлять/редактировать информацию о должностях сотрудников в любом отделе компании
-	 * @param $oCompany компания
-	 * @return boolean
-	 */
-	/* public function hasEditEmployeeInCompany($oCompany)
-	{
-		if ($this->superuser)
-		{
-			return TRUE;
-		}
-
-		$bReturn = FALSE;
-
-		return $bReturn;
-	} */
-
-
-	/**
-	 * Может ли сотрудник изменять организационную структуру отдела - добавлять,
-	 * редактировать, удалять подотделы, менять их подчиненность
-	 * @param $oDepartment отдел
-	 * @return boolean
-	 */
-	/* public function hasEditDepartmentStructure($oDepartment)
-	{
-		if ($this->superuser)
-		{
-			return TRUE;
-		}
-
-		$bReturn = FALSE;
-
-		return $bReturn;
-	} */
-
-	/**
-	 * Может ли сотрудник изменять организационную структуру компании (любого ее отдела) - добавлять, редактировать,
-	 * удалять отделы, менять их подчиненность
-	 * @param $oCompany компания
-	 * @return boolean
-	 */
-/* 	public function hasEditCompanyStructure($oCompany)
-	{
-		if ($this->superuser)
-		{
-			return TRUE;
-		}
-
-		$bReturn = FALSE;
-
-		return $bReturn;
-	} */
-
-	/**
-	 * Есть ли отдел, организационную структуру которого сотрудник может менять
-	 * @param $iCompanyId идентификатор компании
-	 * @return boolean
-	 */
-	/* public function hasExistEditableDepartment($oCompany)
-	{
-		if ($this->hasEditCompanyStructure($oCompany))
-		{
-			return TRUE;
-		}
-
-		$aCompany_Departments = $oCompany->Company_Departments->findAll();
-
-		foreach($aCompany_Departments as $oCompany_Department)
-		{
-			if ($this->hasEditDepartmentStructure($oCompany_Department))
-			{
-				return TRUE;
-			}
-		}
-
-		return FALSE;
-	} */
-
 	public function getEmail()
 	{
 		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
@@ -1219,6 +1102,7 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Get avatar with name
+	 * @return string
 	 */
 	public function getAvatarWithName()
 	{

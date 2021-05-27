@@ -59,8 +59,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function nameBackend()
 	{
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#eee' ) . '"></i> '
-				. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1404">' . htmlspecialchars($this->name) . '</span>';
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1404">' . htmlspecialchars($this->name) . '</span>';
 	}
 
 	/**

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Entity_Date {
 
@@ -21,7 +21,13 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 		parent::__construct();
 
 		$this->size('auto')
-			->class('form-control hasDatetimepicker');
+			->class('form-control hasDatetimepicker')
+			->options(array(
+				'locale' => Core_I18n::instance()->getLng(),
+				'format' => Core::$mainConfig['datePickerFormat'],
+				'showTodayButton' => true,
+				'showClear' => true
+			));
 	}
 
 	/**
@@ -31,9 +37,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$this->value = $this->value == '0000-00-00' || $this->value == ''
-			? ''
-			: Core_Date::sql2date($this->value);
+		$this->value = $this->_convertDatetime($this->value);
 
 		$aAttr = $this->getAttrsString();
 
@@ -48,10 +52,11 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 			}
 		}
 
-		$sCurrentLng = Core_I18n::instance()->getLng();
-
 		?><div <?php echo implode(' ', $aDivAttr)?>><?php
-		?><span class="caption"><?php echo $this->caption?></span><?php
+		if (strlen($this->caption))
+		{
+			?><span class="caption"><?php echo $this->caption?></span><?php
+		}
 		?><div id="div_<?php echo $this->id?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
 			<span class="input-group-addon">
@@ -64,7 +69,8 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 
 		<script>
 		(function($) {
-			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #div_<?php echo Core_Str::escapeJavascriptVariable($this->id)?>').datetimepicker({locale: '<?php echo Core_Str::escapeJavascriptVariable($sCurrentLng)?>', format: '<?php echo Core_Str::escapeJavascriptVariable(Core::$mainConfig['datePickerFormat'])?>', showTodayButton: true, showClear: true});
+			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> #div_<?php echo Core_Str::escapeJavascriptVariable($this->id)?>')
+				.datetimepicker({<?php echo Core_Array::array2jsObject($this->options)?>});
 		})(jQuery);
 		</script><?php
 

@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Information systems import
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'!download' => '-- Not upload --',
 	'group_id' => 'Section IS',
@@ -43,5 +34,5 @@ return array(
 	'item_additional_group' => "Shortcute's GUID",
 	'item_guid' => "GUID identifier",
 	'group_active' => "Group activity",
-	'siteuser_id' => "Siteuser ID",
+	'siteuser_id' => "Client ID",
 );

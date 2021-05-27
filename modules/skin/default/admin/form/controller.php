@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 {
@@ -351,6 +351,7 @@ class Skin_Default_Admin_Form_Controller extends Admin_Form_Controller
 
 		// Устанавливаем ограничения на источники
 		$this->setDatasetConditions();
+		$this->setDatasetLimits();
 
 		foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 		{

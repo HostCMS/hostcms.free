@@ -255,7 +255,7 @@ if (Core::moduleIsActive('siteuser'))
 	if (Core_Array::getPost('apply'))
 	{
 		$oSiteuser = $oSiteuser->Site->Siteusers->getByLoginAndPassword(
-			strval(Core_Array::getPost('login')), strval(Core_Array::getPost('password'))
+			Core_Array::getPost('login', '', 'str'), Core_Array::getPost('password', '', 'str')
 		);
 
 		if (!is_null($oSiteuser))
@@ -273,7 +273,7 @@ if (Core::moduleIsActive('siteuser'))
 
 				// Location
 				!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
-					strval(Core_Array::getPost('location'))
+					Core_Array::getPost('location', '', 'str')
 				);
 			}
 			else
@@ -298,7 +298,7 @@ if (Core::moduleIsActive('siteuser'))
 	{
 		$oSiteuser_OpenID_Controller = Siteuser_OpenID_Controller::instance();
 
-		$iSiteuser_Identity_Provider = intval(Core_Array::getPost('identity_provider'));
+		$iSiteuser_Identity_Provider = Core_Array::getPost('identity_provider', 0, 'int');
 
 		$oSiteuser_Identity_Provider = Core_Entity::factory('Siteuser_Identity_Provider')->find($iSiteuser_Identity_Provider);
 
@@ -472,7 +472,7 @@ if (Core::moduleIsActive('siteuser'))
 	// Подтверждение регистрации пользователем
 	if (Core_Array::getGet('accept'))
 	{
-		$oSiteuser = Core_Entity::factory('Siteuser')->getByGuid(strval(Core_Array::getGet('accept')));
+		$oSiteuser = Core_Entity::factory('Siteuser')->getByGuid(Core_Array::getGet('accept', '', 'str'));
 
 		if (!is_null($oSiteuser))
 		{
@@ -487,7 +487,7 @@ if (Core::moduleIsActive('siteuser'))
 	// Отмена регистрации пользователем
 	if (Core_Array::getGet('cancel'))
 	{
-		$oSiteuser = Core_Entity::factory('Siteuser')->getByGuid(strval(Core_Array::getGet('cancel')));
+		$oSiteuser = Core_Entity::factory('Siteuser')->getByGuid(Core_Array::getGet('cancel', '', 'str'));
 
 		if (!is_null($oSiteuser))
 		{

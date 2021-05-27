@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller
 {
@@ -26,13 +26,51 @@ class Schedule_Controller
 
 		$oModule = $oSchedule->Module;
 
-		// log
-		Core_Log::instance()
-			->status(Core_Log::$MESSAGE)
-			->write(Core::_('Schedule.log_message', $oModule->name, $oSchedule->entity_id, $oSchedule->action));
+		if ($oModule->active)
+		{
+			// Запускаем обработку
+			$oCore_Module = $oModule->loadModule()->Core_Module;
 
-		// Запускаем обработку
-		$oModule->Core_Module->callSchedule($oSchedule->action, $oSchedule->entity_id);
+			if (!is_null($oCore_Module))
+			{
+				$aScheduleActions = $oCore_Module->getScheduleActions();
+
+				$sAction = isset($aScheduleActions[$oSchedule->action])
+					? $aScheduleActions[$oSchedule->action]
+					: 'code: ' . $oSchedule->action;
+
+				// Log Begin
+				Core_Log::instance()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Schedule.log_message_begin', $oModule->name, $oSchedule->entity_id, $sAction));
+
+				try {
+					$oCore_Module->callSchedule($oSchedule->action, $oSchedule->entity_id);
+				}
+				catch (Exception $e)
+				{
+					Core_Message::show($e->getMessage(), 'error');
+				}
+
+				// Log End
+				Core_Log::instance()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Schedule.log_message_end', $oModule->name, $oSchedule->entity_id, $sAction));
+			}
+			else
+			{
+				Core_Log::instance()
+					->status(Core_Log::$ERROR)
+					->write(sprintf('Schedule_Controller: Core_Module is NULL, module: %s', $oModule->path));
+			}
+		}
+		else
+		{
+			// Log Module was disabled
+			Core_Log::instance()
+				->status(Core_Log::$MESSAGE)
+				->write(Core::_('Schedule.log_message_disabled', $oModule->name));
+		}
 	}
 
 	/**

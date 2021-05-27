@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 {
@@ -330,13 +330,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 						->type('checkbox')
 						->name("large_preserve_aspect_ratio_{$this->largeImage['name']}")
 						->id("large_preserve_aspect_ratio_{$this->largeImage['name']}")
-						->value(1);
-
-				if ($this->largeImage['preserve_aspect_ratio_checkbox_checked'])
-				{
-					$Core_Html_Entity_Checkbox
-						->checked('checked');
-				}
+						->value(1)
+						->checked($this->largeImage['preserve_aspect_ratio_checkbox_checked']);
 
 				$oLargeWatermark_Table
 					->add(
@@ -362,13 +357,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 						->type('checkbox')
 						->name("large_place_watermark_checkbox_{$this->largeImage['name']}")
 						->id("large_place_watermark_checkbox_{$this->largeImage['name']}")
-						->value(1);
-
-				if ($this->largeImage['place_watermark_checkbox_checked'])
-				{
-					$Core_Html_Entity_Checkbox
-						->checked('checked');
-				}
+						->value(1)
+						->checked($this->largeImage['place_watermark_checkbox_checked']);
 
 				$oLargeWatermark_Table
 					->add(
@@ -589,13 +579,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->type('checkbox')
 							->name("create_small_image_from_large_{$this->smallImage['name']}")
 							->id("create_small_image_from_large_{$this->smallImage['name']}")
-							->value(1);
-
-					if ($this->smallImage['create_small_image_from_large_checked'])
-					{
-						$Core_Html_Entity_Checkbox
-							->checked('checked');
-					}
+							->value(1)
+							->checked($this->smallImage['create_small_image_from_large_checked']);
 
 					$oSmallWatermark_Table
 						->add(
@@ -621,13 +606,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->type('checkbox')
 							->name("small_preserve_aspect_ratio_{$this->smallImage['name']}")
 							->id("small_preserve_aspect_ratio_{$this->smallImage['name']}")
-							->value(1);
-
-					if ($this->smallImage['preserve_aspect_ratio_checkbox_checked'])
-					{
-						$Core_Html_Entity_Checkbox
-							->checked('checked');
-					}
+							->value(1)
+							->checked($this->smallImage['preserve_aspect_ratio_checkbox_checked']);
 
 					$oSmallWatermark_Table
 						->add(
@@ -653,13 +633,8 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->type('checkbox')
 							->name("small_place_watermark_checkbox_{$this->smallImage['name']}")
 							->id("small_place_watermark_checkbox_{$this->smallImage['name']}")
-							->value(1);
-
-					if ($this->smallImage['place_watermark_checkbox_checked'])
-					{
-						$Core_Html_Entity_Checkbox
-							->checked('checked');
-					}
+							->value(1)
+							->checked($this->smallImage['place_watermark_checkbox_checked']);
 
 					$oSmallWatermark_Table
 						->add(

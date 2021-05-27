@@ -10,12 +10,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action_Controller_Type_Load_Select_Options
 {
 	/**
-	 * Get Shop_Item option name
+	 * Get Informationsystem_Item option name
 	 * @param Informationsystem_Item_Model $oInformationsystem_Item
 	 * @hostcms-event Informationsystem_Controller_Load_Select_Options.onGetOptionName
 	 */
@@ -25,12 +25,9 @@ class Informationsystem_Controller_Load_Select_Options extends Admin_Form_Action
 
 		$eventResult = Core_Event::getLastReturn();
 
-		if (!is_null($eventResult))
-		{
-			return $eventResult;
-		}
-
-		return $oInformationsystem_Item->name;
+		return !is_null($eventResult)
+			? $eventResult
+			: $oInformationsystem_Item->name;
 	}
 
 	/**

@@ -102,11 +102,11 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	}
 
 	/**
-	 * Get discount by coupon text
-	 * @param string $couponText text
-	 * @return self|NULL
+	 * Get All Discounts By Coupon Text
+	 * @param string $couponText coupon code
+	 * @return array
 	 */
-	public function getByCouponText($couponText)
+	public function getAllByCouponText($couponText)
 	{
 		$sDatetime = Core_Date::timestamp2sql(time());
 
@@ -124,13 +124,25 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			->where('shop_purchase_discount_coupons.count', '>', 0)
 			->setOr()
 			->where('shop_purchase_discount_coupons.count', '=', -1)
-			->close()
-			;
+			->close();
 
 		// Чтобы получить новый объект с заполненным shop_purchase_discount_coupon_id используем FALSE
-		$aObjects = $this->findAll(FALSE);
+		return $this->findAll(FALSE);
+	}
 
-		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+	/**
+	 * Get Discounts By Coupon Text
+	 * @param string $couponText coupon code
+	 * @return self|NULL
+	 */
+	public function getByCouponText($couponText)
+	{
+		// Чтобы получить новый объект с заполненным shop_purchase_discount_coupon_id используем FALSE
+		$aObjects = $this->getAllByCouponText($couponText);
+
+		return isset($aObjects[0])
+			? $aObjects[0]
+			: NULL;
 	}
 
 	/**

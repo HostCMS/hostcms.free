@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Array
 {
@@ -30,11 +30,73 @@ class Core_Array
 	 * @param array $array array
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
 	 * @return mixed
 	 */
-	static public function get($array, $key, $defaultValue = NULL)
+	static public function get($array, $key, $defaultValue = NULL, $filter = NULL)
 	{
-		return is_array($array) && array_key_exists($key, $array) ? $array[$key] : $defaultValue;
+		return self::_filter(
+			is_array($array) && array_key_exists($key, $array)
+				? $array[$key]
+				: $defaultValue,
+			$filter
+		);
+	}
+
+	/**
+	 * Filter Value
+	 * @param mixed $value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @return mixed
+	 */
+	static protected function _filter($value, $filter)
+	{
+		if (!is_null($filter))
+		{
+			switch ($filter)
+			{
+				case 'str':
+				case 'string':
+				case 'strval':
+					$value = is_scalar($value)
+						? strval($value)
+						: '';
+				break;
+				case 'trim':
+					$value = is_scalar($value)
+						? trim($value)
+						: '';
+				break;
+				case 'int':
+				case 'integer':
+				case 'intval':
+					$value = is_scalar($value)
+						? intval($value)
+						: 0;
+				break;
+				case 'float':
+				case 'floatval':
+					$value = is_scalar($value)
+						? floatval($value)
+						: 0.0;
+				break;
+				case 'bool':
+				case 'boolean':
+				case 'boolval':
+					$value = is_scalar($value)
+						? (function_exists('boolval')
+							? boolval($value)
+							: (bool)$value
+						)
+						: FALSE;
+				break;
+				default:
+					throw new Core_Exception('Core_Array wrong \'%name\' filter name', array('%name' => $filter));
+
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -57,6 +119,7 @@ class Core_Array
 	 * Get value for $key in array $_REQUEST. If value does not exist will return defaultValue.
 	 * @param $key key
 	 * @param $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
 	 * $value = Core_Array::getRequest('foo');
@@ -67,15 +130,16 @@ class Core_Array
 	 * </code>
 	 * @return mixed
 	 */
-	static public function getRequest($key, $defaultValue = NULL)
+	static public function getRequest($key, $defaultValue = NULL, $filter = NULL)
 	{
-		return self::get($_REQUEST, $key, $defaultValue);
+		return self::get($_REQUEST, $key, $defaultValue, $filter);
 	}
 
 	/**
 	 * Get value for $key in array $_POST. If value does not exist will return defaultValue.
 	 * @param $key key
 	 * @param $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
 	 * <code>
 	 * // Return value for 'foo' or NULL if $key does not exist
 	 * $value = Core_Array::getPost('foo');
@@ -86,9 +150,9 @@ class Core_Array
 	 * </code>
 	 * @return mixed
 	 */
-	static public function getPost($key, $defaultValue = NULL)
+	static public function getPost($key, $defaultValue = NULL, $filter = NULL)
 	{
-		return self::get($_POST, $key, $defaultValue);
+		return self::get($_POST, $key, $defaultValue, $filter);
 	}
 
 	/**
@@ -105,11 +169,12 @@ class Core_Array
 	 *
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
 	 * @return mixed
 	 */
-	static public function getGet($key, $defaultValue = NULL)
+	static public function getGet($key, $defaultValue = NULL, $filter = NULL)
 	{
-		return self::get($_GET, $key, $defaultValue);
+		return self::get($_GET, $key, $defaultValue, $filter);
 	}
 
 	/**
@@ -126,12 +191,13 @@ class Core_Array
 	 *
 	 * @param string $key key
 	 * @param mixed $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
 	 * @return mixed
 	 */
-	static public function getSession($key, $defaultValue = NULL)
+	static public function getSession($key, $defaultValue = NULL, $filter = NULL)
 	{
 		return isset($_SESSION)
-			? self::get($_SESSION, $key, $defaultValue)
+			? self::get($_SESSION, $key, $defaultValue, $filter)
 			: $defaultValue;
 	}
 
@@ -269,41 +335,41 @@ class Core_Array
 	}
 
 	/**
-	 * Combine arrays
+	 * Combine Arrays
 	 * @param array $aArray
-	 * @param int $iIndex index
+	 * @param int $_iIndex index
 	 * <code>
 	 * <?php
 	 * $arrays = array(
-	 * 		array('aaa', 'bbb', 'ccc'),
-	 * 		array(111, 222, 333)
+	 * 		0 => array('aaa', 'bbb', 'ccc'),
+	 * 		22 => array(111, 222, 333)
 	 * 	);
-	 * $aReturn = Core_Array::combine($array);
+	 * $aReturn = Core_Array::combine($arrays);
 	 *
 	 * print_r($aReturn);
 	 * ?>
 	 * </code>
 	 * @return array
 	 */
-	static public function combine($aArray, $iIndex = 0)
+	static public function combine($aArray, $_iIndex = 0)
 	{
 		static $aKeys;
 		static $iCount;
 		static $aTmp = array();
 		static $aReturn = array();
 
-		if (!$iIndex)
+		if (!$_iIndex)
 		{
 			$aKeys = array_keys($aArray);
 			$iCount = count($aArray);
 		}
 
-		if ($iIndex < $iCount)
+		if ($_iIndex < $iCount)
 		{
-			foreach ($aArray[$aKeys[$iIndex]] as $sValue)
+			foreach ($aArray[$aKeys[$_iIndex]] as $xxx => $sValue)
 			{
-				array_push($aTmp, $sValue);
-				self::combine($aArray, $iIndex + 1);
+				$aTmp[$aKeys[$_iIndex]] = $sValue;
+				self::combine($aArray, $_iIndex + 1);
 				array_pop($aTmp);
 			}
 		}
@@ -318,6 +384,7 @@ class Core_Array
 	 * Join multi-level array elements with a string
 	 * @param string $glue
 	 * @param array $array The array of strings to implode.
+	 * @return string
 	 */
 	static public function implode($glue, array $array)
 	{
@@ -330,5 +397,39 @@ class Core_Array
 		}
 
 		return implode($glue, $aReturn);
+	}
+
+	/**
+	 * Convert array to the literal notation for the JS-object, e.g. array('foo' => 'bar', 'baz' => true) to string 'foo': 'bar', 'baz': true
+	 * @param array $array The array of strings to implode.
+	 * @return string
+	 */
+	static public function array2jsObject(array $array)
+	{
+		$aReturn = array();
+
+		foreach ($array as $key => $value)
+		{
+			if ($value === TRUE)
+			{
+				$value = 'true';
+			}
+			elseif ($value === FALSE)
+			{
+				$value = 'false';
+			}
+			elseif (is_null($value))
+			{
+				$value = 'null';
+			}
+			else
+			{
+				$value = "'" . Core_Str::escapeJavascriptVariable($value) . "'";
+			}
+
+			$aReturn[] = "'" . Core_Str::escapeJavascriptVariable($key) . "': " . $value;
+		}
+
+		return implode(', ', $aReturn);
 	}
 }

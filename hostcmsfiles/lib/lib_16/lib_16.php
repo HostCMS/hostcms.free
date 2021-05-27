@@ -29,7 +29,7 @@ if (Core::moduleIsActive('poll'))
 			}
 			else
 			{
-				$aPollResponsesId[] = intval(Core_Array::getPost('poll_response'));
+				$aPollResponsesId[] = Core_Array::getPost('poll_response', 0, 'int');
 			}
 
 			/* Если был хотя бы один вариант ответа */

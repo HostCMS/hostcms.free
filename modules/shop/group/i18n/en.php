@@ -24,7 +24,7 @@ return array(
 	'seo_description' => 'Description',
 	'seo_keywords' => 'Keywords',
 	'guid' => '<acronym title="Product group identifier for CommerceML format, e.g. ID00006831">CommerceML product group identifier</acronym>',
-	'siteuser_id' => 'Website user',
+	'siteuser_id' => 'Client',
 	'groups_add_form_title' => "Add products group information",
 	'groups_edit_form_title' => "Edit products group information",
 	'tab_yandex_market' => 'Export/Import',

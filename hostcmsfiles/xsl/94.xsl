@@ -13,18 +13,18 @@
 			<xsl:when test="advertisement_group/node()">
 				<xsl:apply-templates select="advertisement_group/advertisement" />
 			</xsl:when>
-			<xsl:otherwise>
+			<xsl:when test="advertisement/node()">
 				<xsl:apply-templates select="advertisement" />
-			</xsl:otherwise>
+			</xsl:when>
 		</xsl:choose>
 	</xsl:template>
 
 	<xsl:template match="advertisement">
 		<!-- Check banner's height -->
-	<xsl:variable name="height"><xsl:if test="height != 0">height: <xsl:value-of select="height"/>px;</xsl:if></xsl:variable>
+		<xsl:variable name="height"><xsl:if test="height != 0">height: <xsl:value-of select="height"/>px;</xsl:if></xsl:variable>
 
 		<!-- Check banner's width -->
-	<xsl:variable name="width"><xsl:if test="width != 0">width: <xsl:value-of select="width"/>px;</xsl:if></xsl:variable>
+		<xsl:variable name="width"><xsl:if test="width != 0">width: <xsl:value-of select="width"/>px;</xsl:if></xsl:variable>
 
 		<!-- Check banner's type -->
 		<xsl:choose>

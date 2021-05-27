@@ -30,7 +30,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Controller_Show extends Core_Controller
 {
@@ -340,7 +340,7 @@ class Shop_Producer_Controller_Show extends Core_Controller
 							$oCore_Response->header('Location', '/');
 						}
 					}
-					return ;
+					return $this;
 				}
 			}
 		}

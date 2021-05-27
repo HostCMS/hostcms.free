@@ -39,7 +39,8 @@ $xslName = Core_Array::get(Core_Page::instance()->libParams, 'orderXsl');
 
 if (Core_Array::getGet('action') == 'cancel')
 {
-	$guid = strval(Core_Array::getGet('guid'));
+	$guid = Core_Array::getGet('guid', '', 'str');
+
 	$oShop_Order = $oShop->Shop_Orders->getByGuid($guid);
 
 	if ($oShop_Order)
@@ -70,8 +71,8 @@ if (Core_Array::getGet('action') == 'cancel')
 // Изменить платежную систему для заказа
 elseif(Core_Array::getPost('change_payment_system'))
 {
-	$shop_order_id = intval(Core_Array::getPost('shop_order_id'));
-	$shop_payment_system_id = intval(Core_Array::getPost('shop_payment_system_id'));
+	$shop_order_id = Core_Array::getPost('shop_order_id', 0, 'int');
+	$shop_payment_system_id = Core_Array::getPost('shop_payment_system_id', 0, 'int');
 
 	$oShop_Order = $oShop->Shop_Orders->getById($shop_order_id);
 

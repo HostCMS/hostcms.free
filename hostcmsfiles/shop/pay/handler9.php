@@ -282,14 +282,18 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 			$discount = $amount = 0;
 			foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
 			{
-				if ($oShop_Order_Item->price < 0)
+				// Товар в заказе не имеет статус отмененного
+				if (!method_exists($oShop_Order_Item, 'isCanceled') || !$oShop_Order_Item->isCanceled())
 				{
-					$discount -= $oShop_Order_Item->getAmount();
-					unset($aShop_Order_Items[$key]);
-				}
-				elseif ($oShop_Order_Item->type == 0)
-				{
-					$amount += $oShop_Order_Item->getAmount();
+					if ($oShop_Order_Item->price < 0)
+					{
+						$discount -= $oShop_Order_Item->getAmount();
+						unset($aShop_Order_Items[$key]);
+					}
+					elseif ($oShop_Order_Item->type == 0)
+					{
+						$amount += $oShop_Order_Item->getAmount();
+					}
 				}
 			}
 
@@ -303,14 +307,18 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 
 				}*/
 
-				$receipt['items'][] = array(
-					'name' => mb_substr($oShop_Order_Item->name, 0, 128),
-					'quantity' => $oShop_Order_Item->quantity,
-					'tax' => Core_Array::get($this->robokassa_vat, $oShop_Order_Item->rate, $this->default_vat),
-					'sum' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->type == 0 ? 1 - $discount : 1), 2, '.', ''),
-					'payment_method' => $this->payment_method,
-					'payment_object' => $this->payment_object
-				);
+				// Товар в заказе не имеет статус отмененного
+				if (!method_exists($oShop_Order_Item, 'isCanceled') || !$oShop_Order_Item->isCanceled())
+				{
+					$receipt['items'][] = array(
+						'name' => mb_substr($oShop_Order_Item->name, 0, 128),
+						'quantity' => $oShop_Order_Item->quantity,
+						'tax' => Core_Array::get($this->robokassa_vat, $oShop_Order_Item->rate, $this->default_vat),
+						'sum' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->type == 0 ? 1 - $discount : 1), 2, '.', ''),
+						'payment_method' => $this->payment_method,
+						'payment_object' => $this->payment_object
+					);
+				}
 			}
 
 			$sReceiptJson = json_encode($receipt);
@@ -321,18 +329,45 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		?>
 		<h1>Оплата через систему ROBOKASSA</h1>
 
-		<p>
-		<a href="http://www.robokassa.ru/" target="_blank">
-		<img src="http://www.robokassa.ru/Images/logo.gif" border="0" alt="Система электронных платежей">
-		</a>
-		</p>
+		<div>
+			<a href="http://www.robokassa.ru/" target="_blank">
+				<svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-23 363.8 600 66" enable-background="new -23 363.8 600 66" xml:space="preserve" width="200">
+				<path fill="#0071CE" d="M29.6,386c0-13.1-6.6-21.9-19.8-21.9H-9.9c-13.1,0-13.1,7.5-13.1,13.1v52.5h13.1v-17.6H3.3l8.7,17.6h17.6
+					l-12.3-20.6C24.7,405.3,29.6,395.2,29.6,386z M-9.9,399.1v-21.9H9.8c1.8,0,6.6,2.6,6.6,8.7s-4.8,13.1-10.9,13.1H-9.9z"></path>
+				<path fill="#0071CE" d="M191.5,364.1h-21.9c-11.9,0-17.6,8.7-17.6,32.9c0,24.2,5.7,32.8,17.6,32.8h21.9c11.9,0,17.6-9.2,17.6-32.8
+					C209.1,373.2,203.4,364.1,191.5,364.1z M187.2,416.7h-13.1c-11.9,0-11.9-39.4,0-39.4h13.1C199,377.2,199,416.7,187.2,416.7z"></path>
+				<path fill="#0071CE" d="M73.3,364.1H51.4c-11.9,0-17.6,8.7-17.6,32.9c0,24.2,5.7,32.8,17.6,32.8h21.9c11.9,0,17.6-9.2,17.6-32.8
+					C90.8,373.2,85.2,364.1,73.3,364.1z M69,416.7H55.8c-11.9,0-11.9-39.4,0-39.4H69C80.7,377.2,80.7,416.7,69,416.7z"></path>
+				<path fill="#0071CE" d="M147.8,383.8c0-15.3-8.7-19.8-19.8-19.8h-19.8c-13.1,0-13.1,3-13.1,8.7v48.1c0,5.7,0.4,8.7,13.1,8.7h19.8
+					c10.9,0,19.8-4.4,19.8-19.7c0-5.3-1.8-9.7-5.3-13.1C146,393.4,147.8,389,147.8,383.8z M128.1,377.2c3.5,0,6.6,3,6.6,6.6
+					s-3,6.6-6.6,6.6h-19.8v-13.1h19.8V377.2z M128.1,416.7h-19.8v-13.1h19.8c3.5,0,6.6,3,6.6,6.6S131.6,416.7,128.1,416.7z"></path>
+				<path fill="#EB0029" d="M270.4,370.6c0-3-3-6.6-6.6-6.6s-6.6,3-6.6,6.6c0,0-4.4,19.8-16.6,19.8c-7.5,0-9.7,0-9.7,0v-19.8
+					c0-3.5-3-6.6-6.6-6.6s-6.6,3-6.6,6.6v52.5c0,3.5,3,6.6,6.6,6.6s6.6-3,6.6-6.6v-19.7c0,0,0,0,8.7,0c13.1,0,17.6,18.8,17.6,18.8
+					c0,4.4,3,7.5,6.6,7.5s6.6-3.5,6.6-6.6c0-12.7-13.1-26.3-13.1-26.3S270.4,386.4,270.4,370.6z"></path>
+				<path fill="#EB0029" d="M506.9,390.4c0-4-4.4-26.3-21.9-26.3c-8.7,0-4.4,0-13.1,0c-17.6,0-21.9,22.4-21.9,26.3s0,1.6,0,1.6v31.2
+					c0,3.5,3,6.6,6.6,6.6s6.6-3,6.6-6.6v-10.9H494v10.9c0,3.5,3,6.6,6.6,6.6c3.6,0,6.6-3,6.6-6.6v-23.5
+					C507.2,399.7,506.9,394.3,506.9,390.4z M493.7,399.1h-30.7v-8.7c0,0,0-13.1,6.6-13.1c6.6,0,10.9,0,17.6,0s6.6,13.1,6.6,13.1v8.7
+					H493.7z"></path>
+				<path fill="#EB0029" d="M331.8,390.4c0-4-4.4-26.3-21.9-26.3c-8.7,0-4.4,0-13.1,0c-17.6,0-21.9,22.4-21.9,26.3s0,3.6,0,3.6v29.2
+					c0,3.5,3,6.6,6.6,6.6c3.6,0,6.6-3,6.6-6.6v-10.9h30.7v10.9c0,3.5,3,6.6,6.6,6.6s6.6-3,6.6-6.6c0,0,0-22.7,0-23.2
+					C332.1,399.5,331.8,390.5,331.8,390.4z M318.6,399.1h-30.7v-8.7c0,0,0-13.1,6.6-13.1c6.6,0,10.9,0,17.6,0c6.6,0,6.6,13.1,6.6,13.1
+					v8.7H318.6z"></path>
+				<path fill="#EB0029" d="M353.6,377.2c4.4,0,21.9,0,21.9,0c7.5,0,13.1-5.7,13.1-13.1h-39.4c-7.5,0-13.1,10.1-13.1,17.6v4.4
+					c0,7.5,5.7,17.6,13.1,17.6c0,0,18,0,21.9,0s4.4,4.4,4.4,4.4v4.4c0,0,0,4.4-4.4,4.4s-26.3,0-26.3,0c-10.9,0-10.1,13.1,0,13.1h30.7
+					c7.5,0,13.1-10.1,13.1-17.6V408c0-7.5-5.7-17.6-13.1-17.6c0,0-17.6,0-21.9,0c-4.4,0-4.4-4.4-4.4-4.4v-4.4
+					C349.2,381.7,349.2,377.2,353.6,377.2z"></path>
+				<path fill="#EB0029" d="M410.6,377.2c4.4,0,21.9,0,21.9,0c7.5,0,13.1-5.7,13.1-13.1h-39.4c-7.5,0-13.1,10.1-13.1,17.6v4.4
+					c0,7.5,5.7,17.6,13.1,17.6c0,0,18,0,21.9,0s4.4,4.4,4.4,4.4v4.4c0,0,0,4.4-4.4,4.4c-4.4,0-26.3,0-26.3,0c-10.9,0-10.1,13.1,0,13.1
+					h30.7c7.5,0,13.1-10.1,13.1-17.6V408c0-7.5-5.7-17.6-13.1-17.6c0,0-17.6,0-21.9,0c-4.4,0-4.4-4.4-4.4-4.4v-4.4
+					C406.2,381.7,406.2,377.2,410.6,377.2z"></path>
+				</svg>
+			</a>
+		</div>
 		<p>Сумма к оплате составляет <strong><?php echo $this->_shopOrder->sum()?></strong></p>
 
 		<p>Для оплаты нажмите кнопку "Оплатить".</p>
 
-		<p style="color: rgb(112, 112, 112);">
-		Внимание! Нажимая &laquo;Оплатить&raquo; Вы подтверждаете передачу контактных данных на сервер ROBOKASSA для оплаты.
-		</p>
+		<p style="color: rgb(112, 112, 112);">Внимание! Нажимая &laquo;Оплатить&raquo;, вы подтверждаете передачу контактных данных на сервер ROBOKASSA для оплаты и печати чека.</p>
 
 		<?php
 		$SignatureValue = md5(

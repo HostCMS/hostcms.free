@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -27,6 +27,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		'exportItemShortcuts',
 		'exportOrders',
 		'producer',
+		'seller',
 		'shopId',
 		'startOrderDate',
 		'endOrderDate',
@@ -205,7 +206,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			'"' . Core::_('Shop_Exchange.item_additional_group') . '"',
 			'"' . Core::_('Shop_Exchange.item_barcode') . '"',
 			'"' . Core::_('Shop_Exchange.item_sets_guid') . '"',
+			'"' . Core::_('Shop_Exchange.item_tabs') . '"',
 			'"' . Core::_('Shop_Exchange.siteuser_id') . '"',
+			'"' . Core::_('Shop_Exchange.item_yandex_market_sales_notes') . '"',
 		);
 		Core_Event::notify(get_class($this) . '.onGetItemTitles', $this, array($return));
 
@@ -350,12 +353,13 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			? 'ID00000000'
 			: $oShop_Group->guid;
 
-		if ($oShop_Group)
+		// У товара нет необходимости дублировать данные о группе
+		/*if ($oShop_Group)
 		{
 			$aGroupData[3] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_title));
 			$aGroupData[4] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_description));
 			$aGroupData[5] = sprintf('"%s"', $this->prepareString($oShop_Group->seo_keywords));
-		}
+		}*/
 
 		$result = array_merge($aGroupData,
 			$this->getItemBasicData($oShopItem),
@@ -436,13 +440,22 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		if ($oShopItem->type == 3)
 		{
 			$aShop_Item_Sets = $oShopItem->Shop_Item_Sets->findAll(FALSE);
-
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
 				$aTmpSets[] = $oShop_Item_Set->Shop_Item->guid;
 			}
 			unset($aShop_Item_Sets);
 		}
+
+		// Вкладки
+		$aTmpTabs = array();
+
+		$aShop_Tab_Items = $oShopItem->Shop_Tab_Items->findAll(FALSE);
+		foreach ($aShop_Tab_Items as $oShop_Tab_Item)
+		{
+			$aTmpTabs[] = $oShop_Tab_Item->Shop_Tab->name;
+		}
+		unset($aShop_Item_Tabs);
 
 		$result = array(
 			sprintf('"%s"', $this->prepareString($oShopItem->guid)),
@@ -504,7 +517,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			sprintf('"%s"', implode(',', $aTmpShortcuts)),
 			sprintf('"%s"', implode(',', $aTmpBarcodes)),
 			sprintf('"%s"', implode(',', $aTmpSets)),
-			sprintf('"%s"', $oShopItem->siteuser_id)
+			sprintf('"%s"', implode(',', $aTmpTabs)),
+			sprintf('"%s"', $oShopItem->siteuser_id),
+			sprintf('"%s"', $oShopItem->yandex_market_sales_notes)
 		);
 
 		Core_Event::notify(get_class($this) . '.onAfterItemBasicData', $this, array($result, $oShopItem));
@@ -796,6 +811,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 				$this->producer
 					&& $oShopItems->queryBuilder()->where('shop_producer_id', '=', $this->producer);
+
+				$this->seller
+					&& $oShopItems->queryBuilder()->where('shop_seller_id', '=', $this->seller);
 
 				if ($iShopGroupId != 0)
 				{
@@ -1310,7 +1328,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 	 */
 	protected function _printRow($aData)
 	{
-		echo Shop_Item_Import_Csv_Controller::CorrectToEncoding(implode($this->separator, $aData) . "\n", $this->encoding);
+		echo Core_Str::iconv('UTF-8', $this->encoding, implode($this->separator, $aData) . "\n");
 		return $this;
 	}
 }

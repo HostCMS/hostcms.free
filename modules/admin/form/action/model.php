@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Model extends Core_Entity
 {
@@ -173,5 +173,18 @@ class Admin_Form_Action_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
+	}
+	
+	/**
+	 * Get caption of the action
+	 * @return string|NULL
+	 */
+	public function getCaption($admin_language_id)
+	{
+		$oAdmin_Word = $this->Admin_Word->getWordByLanguage($admin_language_id);
+
+		return !is_null($oAdmin_Word)
+			? $oAdmin_Word->name
+			: NULL;
 	}
 }

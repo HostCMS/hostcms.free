@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -19,24 +19,29 @@ class Shop_Item_Discount_Controller_Delete extends Admin_Form_Action_Controller
 	 */
 	public function execute($operation = NULL)
 	{
-		$oShop_Item = Core_Entity::factory('Shop_Item', Core_Array::getGet('shop_item_id', 0));
-
-		switch (get_class($this->_object))
+		$shop_item_id = Core_Array::getGet('shop_item_id', 0, 'int');
+		
+		if ($shop_item_id && $this->_object->id)
 		{
-			case 'Shop_Bonus_Model':
-				$oEntity = $oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($this->_object->id);
-			break;
-			case 'Shop_Discount_Model':
-				$oEntity = $oShop_Item->Shop_Item_Discounts->getByShop_discount_id($this->_object->id);
-			break;
-			default:
-				$oEntity = NULL;
-		}
+			$oShop_Item = Core_Entity::factory('Shop_Item', $shop_item_id);
 
-		if (!is_null($oEntity))
-		{
-			$oEntity->delete();
-			$oShop_Item->clearCache();
+			switch (get_class($this->_object))
+			{
+				case 'Shop_Bonus_Model':
+					$oEntity = $oShop_Item->Shop_Item_Bonuses->getByShop_bonus_id($this->_object->id);
+				break;
+				case 'Shop_Discount_Model':
+					$oEntity = $oShop_Item->Shop_Item_Discounts->getByShop_discount_id($this->_object->id);
+				break;
+				default:
+					$oEntity = NULL;
+			}
+
+			if (!is_null($oEntity))
+			{
+				$oEntity->delete();
+				$oShop_Item->clearCache();
+			}
 		}
 	}
 }

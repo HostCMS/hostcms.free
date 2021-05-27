@@ -35,4 +35,8 @@ return array(
 	'days_from' => 'Днів доставки від',
 	'days_to' => 'до',
 	'guid' => 'GUID',
+	'delivery_with_condition' => 'Доставка "%s: %s"',
+	'conditions_for_delivery' => 'Умови доставки для "%s"',
+	'empty_conditions_for_delivery' => 'Умови доставки відсутні',
+	'apply_button' => 'Застосувати',
 );

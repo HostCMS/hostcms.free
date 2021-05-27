@@ -8,7 +8,7 @@
  * @author Hostmake LLC
  * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
- 
+
 require_once ('bootstrap.php');
 
 $captchaId = Core_Array::getGet('id', Core_Array::getGet('get_captcha'));

@@ -7,7 +7,7 @@
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Ошибка открытия файла для записи %s, проверьте права доступа к директории.',
@@ -108,32 +108,32 @@ return array(
 	'deleteNote' => 'Удалить заметку',
 
 	'key_not_found' => 'Не найден лицензионный ключ!',
-	'getting_key' => '<div style="overflow: auto; height: 500px; z-index: 9999; background-color: rgba(255, 255, 255, .4); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4)">
+	'getting_key' => '<div style="margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 
-	<h2>Получение номера лицензии и PIN-кода <a href="http://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
+	<h2>Получение номера лицензии и PIN-кода <a href="https://www.hostcms.ru/documentation/introduction/licenses/licenses/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
 
-	<p>После установки системы управления необходимо зарегистрироваться на нашем сайте в разделе «<a href="http://www.hostcms.ru/users/" target="_blank">Личный кабинет</a>»</p>
+	<p>После установки системы управления необходимо зарегистрироваться на нашем сайте в разделе «<a href="https://www.hostcms.ru/users/" target="_blank">Личный кабинет</a>»</p>
 	<p>После подтверждения регистрации пользователя и входа в личный кабинет, в разделе «Лицензии» доступен список выданных лицензий:</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="screen" />
+	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="img-responsive" />
 	</p>
 
 	<p>Коммерческие пользователи могут узнать свой номер лицензии и PIN-код из таблицы в разделе «Лицензии» личного кабинета, пользователи HostCMS.Халява могут добавить новую лицензию.</p>
 	<p>Узнав номер лицензии и PIN-код можно вернуться в <a href="/admin/" target="_blank">центр администрирования</a> и ввести эти данные в разделе «Система» → «Сайты» → пункт меню «Настройки» → «Регистрационные данные».</p>
 
-	<h2>Получение ключа <a href="http://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
+	<h2>Получение ключа <a href="https://www.hostcms.ru/documentation/introduction/key/key/" target="_blank"><i class="fa fa-external-link"></i></a></h2>
 
 	<p>Далее можно получать ключи в <a href="/admin/" target="_blank">центре администрирования</a> системы управления, перейдя в раздел «Система» → «Сайты», выбрать глобус для соответствующего сайта в столбце «Домены»:</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-2.png" class="screen" />
+	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-2.png" class="img-responsive" />
 	</p>
 
 	<p>При нажатии на пиктограмму «Ключ» система запросит ключ для выбранного домена по вашей лицензии и внесет его в список ключей сайта.</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-3.png" class="screen" /></p>
+	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-3.png" class="img-responsive" /></p>
 
 	<h2>Вход в центр администрирования</h2>
 	<p>Перейдите в <a href="/admin/" target="_blank">центр администрирования</a>, далее действуйте по инструкции.</p>

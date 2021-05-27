@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Group_Model extends Core_Entity
 {
@@ -180,17 +180,24 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function checkDuplicatePath()
 	{
-		$oInformationsystem = $this->InformationSystem;
-
-		// Search the same item or group
-		$oSameInformationsystemGroup = $oInformationsystem->Informationsystem_Groups->getByParentIdAndPath($this->parent_id, $this->path);
-		if (!is_null($oSameInformationsystemGroup) && $oSameInformationsystemGroup->id != $this->id)
+		if (strlen($this->path))
 		{
-			$this->path = Core_Guid::get();
-		}
+			$oInformationsystem = $this->InformationSystem;
 
-		$oSameInformationsystemItem = $oInformationsystem->Informationsystem_Items->getByGroupIdAndPath($this->parent_id, $this->path);
-		if (!is_null($oSameInformationsystemItem))
+			// Search the same item or group
+			$oSameInformationsystemGroup = $oInformationsystem->Informationsystem_Groups->getByParentIdAndPath($this->parent_id, $this->path);
+			if (!is_null($oSameInformationsystemGroup) && $oSameInformationsystemGroup->id != $this->id)
+			{
+				$this->path = Core_Guid::get();
+			}
+
+			$oSameInformationsystemItem = $oInformationsystem->Informationsystem_Items->getByGroupIdAndPath($this->parent_id, $this->path);
+			if (!is_null($oSameInformationsystemItem))
+			{
+				$this->path = Core_Guid::get();
+			}
+		}
+		else
 		{
 			$this->path = Core_Guid::get();
 		}
@@ -223,10 +230,6 @@ class Informationsystem_Group_Model extends Core_Entity
 		elseif ($this->id)
 		{
 			$this->path = $this->id;
-		}
-		else
-		{
-			$this->path = Core_Guid::get();
 		}
 
 		return $this;
@@ -262,7 +265,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	 */
 	public function save()
 	{
-		if (is_null($this->path))
+		if (is_null($this->path) || $this->path === '')
 		{
 			$this->makePath();
 		}
@@ -1114,6 +1117,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 	/**
 	 * Get IDs of child groups
+	 * @param boolean $bCache cache mode
 	 * @return array
 	 *
 	 * <code>
@@ -1130,15 +1134,15 @@ class Informationsystem_Group_Model extends Core_Entity
 	 *	}
 	 * </code>
 	 */
-	public function getGroupChildrenId()
+	public function getGroupChildrenId($bCache = TRUE)
 	{
 		//$aGroupIDs = array($this->id);
 		$aGroupIDs = array();
 
-		$aInformationsystem_Groups = $this->findAll();
+		$aInformationsystem_Groups = $this->findAll($bCache);
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
-			$aGroupIDs = array_merge($aGroupIDs, array($oInformationsystem_Group->id), $oInformationsystem_Group->Informationsystem_Groups->getGroupChildrenId());
+			$aGroupIDs = array_merge($aGroupIDs, array($oInformationsystem_Group->id), $oInformationsystem_Group->Informationsystem_Groups->getGroupChildrenId($bCache));
 		}
 
 		return $aGroupIDs;
@@ -1332,7 +1336,7 @@ class Informationsystem_Group_Model extends Core_Entity
 	/**
 	 * Create shortcut and move into group $group_id
 	 * @param int $group_id group id
-	 * @return Shop_Group_Model Shortcut
+	 * @return Informationsystem_Group_Model Shortcut
 	 */
 	public function shortcut($group_id = NULL)
 	{
@@ -1342,8 +1346,7 @@ class Informationsystem_Group_Model extends Core_Entity
 
 		$oInformationsystem_GroupShortcut = Core_Entity::factory('Informationsystem_Group');
 		$oInformationsystem_GroupShortcut->informationsystem_id = $object->informationsystem_id;
-		$oInformationsystem_GroupShortcut->parent_id =
-			is_null($group_id)
+		$oInformationsystem_GroupShortcut->parent_id = is_null($group_id)
 			? $object->parent_id
 			: $group_id;
 		$oInformationsystem_GroupShortcut->shortcut_id = $object->id;

@@ -1,13 +1,5 @@
 <?php
-/**
- * Comments.
- *
- * @package HostCMS
- * @subpackage Comment
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'title' => 'Comments',
 	'model_name' => 'Comments',
@@ -30,7 +22,7 @@ return array(
 	'ip' => 'IP',
 	'datetime' => 'Date and time',
 	'grade' => 'Estimation',
-	'siteuser_id' => 'Siteuser Id',
+	'siteuser_id' => 'Client',
 	'edit_success' => 'Comment modified successfully!',
 	'copy_success' => 'Comment copied successfully!',
 	'markDeleted_success' => 'Comment deleted successfully!',
@@ -39,4 +31,6 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'ban' => 'Ban',
 	'ban_comment' => 'Blocked for comment: %s',
+	'option_gradeStep' => 'Grade Step',
+	'option_gradeLimit' => 'Grade limit',
 );

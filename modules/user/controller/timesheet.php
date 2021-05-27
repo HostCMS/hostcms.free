@@ -295,8 +295,18 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				{
 				?>
 				<div id="company-<?php echo $iCompanyId?>" class="tab-pane <?php echo $sActiveClassName?>">
-					<div class="admin-table-wrap table-scrollable">
-						<table class="table table-hover deals-aggregate-user-info">
+					<div class="!admin-table-wrap table-scrollable" style="position:relative">
+						<div class="permissions-table-head">
+							<table class="table table-hover deals-aggregate-user-info deal-template-access" style="white-space: nowrap;">
+							<thead>
+								<?php
+								echo $header;
+								?>
+							</thead>
+							</table>
+						</div>
+
+						<table id="table-company-<?php echo $iCompanyId?>" class="table table-hover deals-aggregate-user-info">
 							<thead>
 								<?php
 								echo $header;
@@ -319,6 +329,9 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				}
 				?>
 			</div>
+			<script>				
+				setTableWithFixedHeaderAndLeftColumn();
+			</script>
 			<?php
 		}
 		else
@@ -738,7 +751,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 
 			if (!isset($aDepartment['departments']))
 			{
-				return;
+				return NULL;
 			}
 
 			$bShowTimesheetCurrentUser = TRUE;

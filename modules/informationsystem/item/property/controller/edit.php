@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -69,46 +69,33 @@ class Informationsystem_Item_Property_Controller_Edit extends Property_Controlle
 			case 'property':
 				$Informationsystem_Item_Property = $this->_object->Informationsystem_Item_Property;
 
-				if (Core_Array::getPost('add_value'))
+				if (Core_Array::getPost('add_value') && $this->_object->type != 2)
 				{
-					$offset = 0;
-					$limit = 100;
+					$tableName = Property_Controller_Value::factory($this->_object->type)->getTableName();
 
-					do {
-						$oInformationsystem_Items = $Informationsystem_Item_Property->Informationsystem->Informationsystem_Items;
+					$defaultValue = $this->_object->default_value;
 
-						$oInformationsystem_Items
-							->queryBuilder()
-							->clearOrderBy()
-							->orderBy('id', 'ASC')
-							->offset($offset)->limit($limit);
-
-						$aInformationsystem_Items = $oInformationsystem_Items->findAll(FALSE);
-
-						foreach ($aInformationsystem_Items as $oInformationsystem_Item)
-						{
-							$aProperty_Values = $this->_object->getValues($oInformationsystem_Item->id, FALSE);
-
-							if (!count($aProperty_Values))
-							{
-								$oProperty_Value = $this->_object->createNewValue($oInformationsystem_Item->id);
-
-								switch ($this->_object->type)
-								{
-									case 2: // Файл
-									break;
-									default:
-										$oProperty_Value->value($this->_object->default_value);
-								}
-
-								$oProperty_Value->save();
-							}
-						}
-
-						$offset += $limit;
+					switch ($tableName)
+					{
+						case 'property_value_ints':
+							$defaultValue = intval($defaultValue);
+						break;
+						case 'property_value_floats':
+							$defaultValue = floatval($defaultValue);
+						break;
 					}
 
-					while (count($aInformationsystem_Items));
+					Core_QueryBuilder::insert($tableName)
+						->columns('property_id', 'entity_id', 'value')
+						->select(
+							Core_QueryBuilder::select(intval($this->_object->id), 'informationsystem_items.id', Core_QueryBuilder::raw(Core_DataBase::instance()->quote($defaultValue)))
+								->from('informationsystem_items')
+								->leftJoin($tableName, $tableName . '.entity_id', '=', 'informationsystem_items.id')
+								->where($tableName . '.entity_id', 'IS', NULL)
+								->where('informationsystem_items.informationsystem_id', '=', $Informationsystem_Item_Property->informationsystem_id)
+								->where('informationsystem_items.deleted', '=', 0)
+						)
+						->execute();
 				}
 			break;
 			case 'property_dir':

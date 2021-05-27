@@ -17,6 +17,7 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 	'markDeleted_success' => "Дані про дисконтну картку успішно видалені!",
 	'levels' => 'Рівні',
+	'types' => 'Типи зарахувань',
 	'shop_order_item_name' => 'Дисконтна картка %s',
 	'export' => 'Експорт',
 	'import' => 'Імпорт',

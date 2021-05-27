@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'User transactions',
 	'transaction_siteuser_title' => 'User transactions "%s" of shop "%s"',
@@ -17,7 +9,7 @@ return array(
 	'transaction_edit_form' => 'Edit transaction',
 	'id' => 'ID',
 	'shop_id' => 'Shop id',
-	'siteuser_id' => 'Site user id',
+	'siteuser_id' => 'Client id',
 	'description' => 'Description',
 	'active' => 'Active',
 	'datetime' => 'Transaction time',
@@ -33,5 +25,5 @@ return array(
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'markDeleted_success' => 'Transaction deleted successfully!',
-	'paid_by_personal_account' => 'Paid by personal account',	
+	'paid_by_personal_account' => 'Paid by personal account',
 );

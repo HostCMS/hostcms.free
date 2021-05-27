@@ -6,7 +6,7 @@
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Меню сайта',
@@ -21,6 +21,7 @@ return array(
 	'add_title' => 'Добавление меню',
 	'edit_title' => 'Редактирование меню "%s"',
 	'name' => 'Название',
+	'color' => 'Цвет',
 	'sorting' => 'Порядок сортировки',
 	'site_id' => 'Идентификатор сайта',
 	'copy_success' => 'Информация о меню сайта скопирована.',

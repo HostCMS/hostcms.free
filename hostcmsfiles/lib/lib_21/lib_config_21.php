@@ -12,7 +12,7 @@ if (Core::moduleIsActive('advertisement') && $id)
 
 	$location = $oAdvertisement_Controller->getLocation($id);
 
-	$advertisement_id = intval(Core_Array::getGet('banner_id'));
+	$advertisement_id = Core_Array::getGet('banner_id', 0, 'int');
 
 	if (!$location && $advertisement_id)
 	{

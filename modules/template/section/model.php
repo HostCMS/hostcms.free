@@ -127,4 +127,14 @@ class Template_Section_Model extends Core_Entity{
 			->value($count < 100 ? $count : '∞')
 			->title($count)
 			->execute();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1615">' . htmlspecialchars($this->name) . '</span>';
 	}}

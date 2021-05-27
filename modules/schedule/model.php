@@ -101,13 +101,100 @@ class Schedule_Model extends Core_Entity
 	}
 
 	/**
+	 * Get interval
+	 * @return array
+	 */
+	public function getInterval()
+	{
+		$aReturn = array(
+			'value' => $this->interval,
+			'type' => 0
+		);
+
+		if ($this->interval == 0)
+		{
+			return $aReturn;
+		}
+
+		// Days
+		if ($this->interval % 86400 == 0)
+		{
+			$aReturn['value'] = $this->interval / 86400;
+			$aReturn['type'] = 3;
+		}
+		// Hours
+		elseif ($this->interval % 3600 == 0)
+		{
+			$aReturn['value'] = $this->interval / 3600;
+			$aReturn['type'] = 2;
+		}
+		// Minutes
+		elseif ($this->interval % 60 == 0)
+		{
+			$aReturn['value'] = $this->interval / 60;
+			$aReturn['type'] = 1;
+		}
+		// Seconds
+		else
+		{
+			$aReturn['value'] = $this->interval;
+			$aReturn['type'] = 0;
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Convert interval by type
+	 * @param int $type type of interval
+	 * @return self
+	 */
+	public function convertInterval($type)
+	{
+		$this->interval < 0 && $this->interval = 0;
+
+		switch ($type)
+		{
+			case 1: // Минуты
+				$this->interval = $this->interval * 60;
+			break;
+			case 2: // Часы
+				$this->interval = $this->interval * 60 * 60;
+			break;
+			case 3: // Дни
+				$this->interval = $this->interval * 60 * 60 * 24;
+			break;
+		}
+
+		return $this->save();
+	}
+
+	/**
 	 * Backend callback method
 	 * @return string
 	 */
 	public function intervalBackend()
 	{
+		$aInterval =  $this->getInterval();
+
+		switch ($aInterval['type'])
+		{
+			case 0: // Секунды
+				$type = Core::_('Core.shortTitleSeconds');
+			break;
+			case 1: // Минуты
+				$type = Core::_('Core.shortTitleMinutes');
+			break;
+			case 2: // Часы
+				$type = Core::_('Core.shortTitleHours');
+			break;
+			case 3: // Дни
+				$type = Core::_('Core.shortTitleDays');
+			break;
+		}
+
 		return $this->interval
-			? $this->interval
+			? $aInterval['value'] . ' ' . $type
 			: '';
 	}
 }

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -78,7 +78,10 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					->setOr()
 					->having('shop_items.id', 'LIKE', $sQueryLike)
 				->havingClose()
-				->limit(15);
+				->limit(15)
+				->clearOrderBy()
+				->orderBy(Core_QueryBuilder::raw('IF(shop_items.modification_id = 0, 0, 1)'), 'ASC')
+				->orderBy('shop_items.name', 'ASC');
 
 			$aShop_Items = $oShop_Items->findAll(FALSE);
 			foreach ($aShop_Items as $oShop_Item)
@@ -91,24 +94,32 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					)
 					: 0;
 
-				$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price * $fCurrencyCoefficient, $oShop_Item);
+				$price = $oShop_Item_Controller->getSpecialprice($oShop_Item->price, $oShop_Item, FALSE);
+
+				$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($price * $fCurrencyCoefficient, $oShop_Item);
 
 				$measureName = $oShop_Item->shop_measure_id
 					? htmlspecialchars($oShop_Item->Shop_Measure->name)
 					: '';
 
 				$aPrices = array();
-				$aPrices[] = array('id' => 0, 'price' => $oShop_Item->price);
+				$aPrices[] = array(
+					'id' => 0,
+					'price' => $price
+				);
 
 				foreach ($aAllPricesIDs as $shop_price_id)
 				{
 					$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
 
-					$price = !is_null($oShop_Item_Price)
+					$fTmp = !is_null($oShop_Item_Price)
 						? $oShop_Item_Price->value
-						: $oShop_Item->price;
+						: $price;
 
-					$aPrices[] = array('id' => $shop_price_id, 'price' => $price);
+					$aPrices[] = array(
+						'id' => $shop_price_id,
+						'price' => $fTmp
+					);
 				}
 
 				$aWarehouses = array();
@@ -116,16 +127,6 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 				//$rest = $oShop_Item->getRest();
 				$rest = 0;
 
-				/*$aShop_Warehouse_Items = $oShop_Item->Shop_Warehouse_Items->findAll(FALSE);
-				foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
-				{
-					$rest += $oShop_Warehouse_Item->count;
-
-					$aWarehouses[] = array(
-						'id' => $oShop_Warehouse_Item->shop_warehouse_id,
-						'count' => $oShop_Warehouse_Item->count
-					);
-				}*/
 				$aShop_Warehouses = $oShop_Item->Shop->Shop_Warehouses->findAll(FALSE);
 				foreach ($aShop_Warehouses as $oShop_Warehouse)
 				{
@@ -259,14 +260,24 @@ $oAdmin_Form_Entity_Menus->add(
 		->icon('fa fa-book')
 		->add(
 			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Order_Status.shop_orders_status'))
-				->icon('fa fa-shopping-cart')
-				->img('/admin/images/order_status.gif')
+				->name(Core::_('Shop_Order_Status.model_name'))
+				->icon('fa fa-circle')
 				->href(
 					$oAdmin_Form_Controller->getAdminLoadHref($sOrderStatusFormPath = '/admin/shop/order/status/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
 				)
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderStatusFormPath, NULL, NULL, $sAdditionalParam)
+				)
+		)
+		->add(
+			Admin_Form_Entity::factory('Menu')
+				->name(Core::_('Shop_Order_Item_Status.model_name'))
+				->icon('fa fa-circle-o')
+				->href(
+					$oAdmin_Form_Controller->getAdminLoadHref($sOrderItemStatusFormPath = '/admin/shop/order/item/status/index.php', NULL, NULL, $sAdditionalParam = "&shop_dir_id=" . intval(Core_Array::getGet('shop_dir_id', 0)))
+				)
+				->onclick(
+					$oAdmin_Form_Controller->getAdminLoadAjax($sOrderItemStatusFormPath, NULL, NULL, $sAdditionalParam)
 				)
 		)
 		->add(

@@ -7,7 +7,7 @@
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Поисковая оптимизация',
@@ -36,4 +36,6 @@ return array(
 	'downloaded5xx' => 'Загруженные с кодом 5xx',
 	'failed' => 'Не удалось загрузить',
 	'excluded' => 'Исключенные',
+	'option_topQueriesLimit' => 'Лимит запросов',
+	'option_topPagesLimit' => 'Лимит страниц',
 );

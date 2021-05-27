@@ -63,12 +63,12 @@ $oAdmin_Form_Dataset
 		array('select' => array('user_sessions.*', array('sessions.id', 'dataSession')))
 	)
 	->addCondition(
-		array('leftJoin' => array('sessions', 'sessions.id', '=', 'user_sessions.session_id'))
+		array('leftJoin' => array('sessions', 'sessions.id', '=', 'user_sessions.id'))
 	);
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Добавляем источник данных контроллеру формы

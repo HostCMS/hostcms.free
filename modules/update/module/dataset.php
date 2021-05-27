@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Module_Dataset extends Admin_Form_Dataset
 {
@@ -110,7 +110,7 @@ class Update_Module_Dataset extends Admin_Form_Dataset
 
 			if ($oModule)
 			{
-				$oModule->Core_Module->version = $this->_objects[$primaryKey]->number;
+				$oModule->loadModule()->Core_Module->version = $this->_objects[$primaryKey]->number;
 			}
 
 			//unset($this->_objects[$primaryKey]);

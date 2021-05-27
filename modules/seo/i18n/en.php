@@ -7,7 +7,7 @@
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Seo',
@@ -36,4 +36,6 @@ return array(
 	'downloaded5xx' => 'Downloaded 5xx',
 	'failed' => 'Failed',
 	'excluded' => 'Excluded',
+	'option_topQueriesLimit' => 'Query limit',
+	'option_topPagesLimit' => 'Page limit',
 );

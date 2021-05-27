@@ -18,7 +18,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Show extends Core_Controller
 {
@@ -188,7 +188,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->value(intval($this->total))
 		);
 
-		// Показывать дополнительные свойства информационного элемента
+		// Показывать дополнительные свойства заказа
 		if ($this->itemsProperties && $this->ordersPropertiesList)
 		{
 			$oShop_Order_Property_List = Core_Entity::factory('Shop_Order_Property_List', $oShop->id);
@@ -220,7 +220,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 
 			Core_Event::notify(get_class($this) . '.onBeforeAddOrdersPropertiesList', $this, array($Shop_Order_Properties));
 
-			$this->_addordersPropertiesList(0, $Shop_Order_Properties);
+			$this->_addOrdersPropertiesList(0, $Shop_Order_Properties);
 		}
 
 		// Paymentsystems
@@ -250,7 +250,8 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->showXmlPaymentSystem(TRUE)
 				->showXmlOrderStatus(TRUE);
 
-			$this->itemsProperties && $oShop_Order->showXmlProperties($this->itemsProperties);
+			$this->itemsProperties
+				&& $oShop_Order->showXmlProperties($this->itemsProperties);
 
 			$this->addEntity($oShop_Order);
 		}
@@ -264,14 +265,14 @@ class Shop_Order_Controller_Show extends Core_Controller
 	 * @param object $parentObject object
 	 * @return self
 	 */
-	protected function _addordersPropertiesList($parent_id, $parentObject)
+	protected function _addOrdersPropertiesList($parent_id, $parentObject)
 	{
 		if (isset($this->_aOrder_Property_Dirs[$parent_id]))
 		{
 			foreach ($this->_aOrder_Property_Dirs[$parent_id] as $oProperty_Dir)
 			{
 				$parentObject->addEntity($oProperty_Dir);
-				$this->_addordersPropertiesList($oProperty_Dir->id, $oProperty_Dir);
+				$this->_addOrdersPropertiesList($oProperty_Dir->id, $oProperty_Dir);
 			}
 		}
 
@@ -286,8 +287,8 @@ class Shop_Order_Controller_Show extends Core_Controller
 	/**
 	 * Parse URL and set controller properties
 	 * @return self
-	 * @hostcms-event Shop_Controller_Show.onBeforeParseUrl
-	 * @hostcms-event Shop_Controller_Show.onAfterParseUrl
+	 * @hostcms-event Shop_Order_Controller_Show.onBeforeParseUrl
+	 * @hostcms-event Shop_Order_Controller_Show.onAfterParseUrl
 	 */
 	public function parseUrl()
 	{

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -100,15 +100,15 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 
 		$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
-		foreach ($aShopOrderItems as $oShop_OrderItem)
+		foreach ($aShopOrderItems as $oShop_Order_Item)
 		{
-			$sShopTaxRate = $oShop_OrderItem->rate;
+			$sShopTaxRate = $oShop_Order_Item->rate;
 
 			$fShopTaxValue = $sShopTaxRate
-				? $oShop_OrderItem->getTax() * $oShop_OrderItem->quantity
+				? $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity
 				: 0;
 
-			$sItemAmount = $oShop_OrderItem->getAmount();
+			$sItemAmount = $oShop_Order_Item->getAmount();
 
 			$fShopTaxValueSum += $fShopTaxValue;
 			$fShopOrderItemSum += $sItemAmount;
@@ -369,6 +369,9 @@ else
 			<?php echo Core::_("Shop_Order.table_description")?>
 		</td>
 		<td class="td_header">
+			<?php echo Core::_("Shop_Order.table_item_status")?>
+		</td>
+		<td class="td_header">
 			<?php echo Core::_("Shop_Order.table_mark")?>
 		</td>
 		<td class="td_header">
@@ -402,15 +405,20 @@ else
 
 	if (count($aShopOrderItems))
 	{
-		foreach ($aShopOrderItems as $oShop_OrderItem)
+		foreach ($aShopOrderItems as $oShop_Order_Item)
 		{
-			$sShopTaxRate = $oShop_OrderItem->rate;
+			$sShopTaxRate = $oShop_Order_Item->rate;
 
 			$fShopTaxValue = $sShopTaxRate
-				? $oShop_OrderItem->getTax() * $oShop_OrderItem->quantity
+				? $oShop_Order_Item->getTax() * $oShop_Order_Item->quantity
 				: 0;
 
-			$fItemAmount = $oShop_OrderItem->getAmount();
+			// Не установлен статус у товара или статус НЕ отмененный
+			$bNotCanceled = !$oShop_Order_Item->shop_order_item_status_id || !$oShop_Order_Item->Shop_Order_Item_Status->canceled;
+
+			$fItemAmount = $bNotCanceled
+				? $oShop_Order_Item->getAmount()
+				: 0;
 
 			$fShopTaxValueSum += $fShopTaxValue;
 			$fShopOrderItemSum += $fItemAmount;
@@ -421,22 +429,30 @@ else
 			<?php echo $i++?>
 			</td>
 			<td class="td_main_2">
-			<?php echo htmlspecialchars($oShop_OrderItem->name)?>
+			<?php echo htmlspecialchars($oShop_Order_Item->name)?>
 			</td>
 			<td class="td_main_2">
-			<?php echo htmlspecialchars($oShop_OrderItem->marking)?>
+				<?php
+				if ($oShop_Order_Item->shop_order_item_status_id)
+				{
+					echo htmlspecialchars($oShop_Order_Item->Shop_Order_Item_Status->name);
+				}
+				?>
 			</td>
 			<td class="td_main_2">
-			<?php echo htmlspecialchars($oShop_OrderItem->Shop_Item->Shop_Measure->name)?>
+			<?php echo htmlspecialchars($oShop_Order_Item->marking)?>
+			</td>
+			<td class="td_main_2">
+			<?php echo htmlspecialchars($oShop_Order_Item->Shop_Item->Shop_Measure->name)?>
 			</td>
 			<td style="text-align: center"  class="td_main_2">
-			<?php echo htmlspecialchars($oShop_OrderItem->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars($oShop_OrderItem->getCellName())?>
+			<?php echo htmlspecialchars($oShop_Order_Item->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars($oShop_Order_Item->getCellName())?>
 			</td>
 			<td class="td_main_2">
-			<?php echo number_format(Shop_Controller::instance()->round($oShop_OrderItem->price), 2, '.', '')?>
+			<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
 			</td>
 			<td style="text-align: center" class="td_main_2">
-			<?php echo $oShop_OrderItem->quantity?>
+			<?php echo $oShop_Order_Item->quantity?>
 			</td>
 			<td style="text-align: center" class="td_main_2">
 			<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
@@ -445,7 +461,7 @@ else
 			<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
 			</td>
 			<td class="td_main_2" style="border-right: 1px solid black; white-space: nowrap">
-			<?php echo number_format($fItemAmount, 2, '.', '')?>
+			<?php echo $bNotCanceled ? number_format($fItemAmount, 2, '.', '') : '-'?>
 			</td>
 			</tr><?php
 		}

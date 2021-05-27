@@ -61,7 +61,9 @@ if (Core_Array::getRequest('_', FALSE)
 				Core_Array::get(Core_Page::instance()->libParams, 'littleCartXsl')
 			)
 		)
-		->couponText(isset($_SESSION) ? Core_Array::get($_SESSION, 'coupon_text') : NULL)
+		->couponText(
+			Core_Array::get(Core_Array::getSession('hostcmsOrder', array()), 'coupon_text')
+		)
 		->show();
 
 	echo json_encode(ob_get_clean());
@@ -71,7 +73,7 @@ if (Core_Array::getRequest('_', FALSE)
 // Быстрый заказ в 1 клик
 if (!is_null(Core_Array::getRequest('oneStepCheckout')))
 {
-	$shop_item_id = intval(Core_Array::getRequest('shop_item_id'));
+	$shop_item_id = Core_Array::getRequest('shop_item_id', 0, 'int');
 
 	$Shop_Cart_Controller_Onestep = new Shop_Cart_Controller_Onestep($oShop);
 
@@ -177,7 +179,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location = Core_Entity::factory('Shop_Country_Location');
 		$oShop_Country_Location
 			->queryBuilder()
-			->where('shop_country_id', '=', intval(Core_Array::getGet('shop_country_id')));
+			->where('shop_country_id', '=', Core_Array::getGet('shop_country_id', 0, 'int'));
 		$aObjects = $oShop_Country_Location->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_id'))
@@ -185,7 +187,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City = Core_Entity::factory('Shop_Country_Location_City');
 		$oShop_Country_Location_City
 			->queryBuilder()
-			->where('shop_country_location_id', '=', intval(Core_Array::getGet('shop_country_location_id')));
+			->where('shop_country_location_id', '=', Core_Array::getGet('shop_country_location_id', 0, 'int'));
 		$aObjects = $oShop_Country_Location_City->getAllByActive(1);
 	}
 	elseif (Core_Array::getGet('shop_country_location_city_id'))
@@ -193,7 +195,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 		$oShop_Country_Location_City_Area = Core_Entity::factory('Shop_Country_Location_City_Area');
 		$oShop_Country_Location_City_Area
 			->queryBuilder()
-			->where('shop_country_location_city_id', '=', intval(Core_Array::getGet('shop_country_location_city_id')));
+			->where('shop_country_location_city_id', '=', Core_Array::getGet('shop_country_location_city_id', 0, 'int'));
 		$aObjects = $oShop_Country_Location_City_Area->getAllByActive(1);
 	}
 
@@ -209,7 +211,7 @@ if (!is_null(Core_Array::getGet('ajaxLoad')))
 // Удаляение товара из корзины
 if (Core_Array::getGet('delete'))
 {
-	$shop_item_id = intval(Core_Array::getGet('delete'));
+	$shop_item_id = Core_Array::getGet('delete', 0, 'int');
 
 	if ($shop_item_id)
 	{

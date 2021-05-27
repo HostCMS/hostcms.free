@@ -10,6 +10,9 @@ if (!Core::moduleIsActive('siteuser'))
 	return ;
 }
 
+/* Максимальное количество представителей или компаний у клиента */
+$max_representatives = 3;
+
 $xsl_letter = Core_Array::get(Core_Page::instance()->libParams, 'xslRestorePasswordMailXsl');
 $xslUserRegistration = Core_Array::get(Core_Page::instance()->libParams, 'userRegistrationXsl');
 
@@ -62,17 +65,17 @@ function addPropertyValue($oSiteuser, $oProperty, $oProperty_Value, $value)
 		case 1: // String
 		case 4: // Textarea
 		case 6: // Wysiwyg
-			$oProperty_Value->value(Core_Str::stripTags(strval($value)));
+			$oProperty_Value->value(Core_Str::stripTags(Core_Str::toStr($value)));
 			$oProperty_Value->save();
 		break;
 		case 8: // Date
-			$date = strval($value);
+			$date = Core_Str::toStr($value);
 			$date = Core_Date::date2sql($date);
 			$oProperty_Value->value($date);
 			$oProperty_Value->save();
 		break;
 		case 9: // Datetime
-			$datetime = strval($value);
+			$datetime = Core_Str::toStr($value);
 			$datetime = Core_Date::datetime2sql($datetime);
 			$oProperty_Value->value($datetime);
 			$oProperty_Value->save();
@@ -173,11 +176,11 @@ function applyDirectoryValues($objectId, $oObject, $relationName)
 
 		if (!is_null($directoryValue))
 		{
-			$oEntity->value = strval($directoryValue);
+			$oEntity->value = Core_Str::toStr($directoryValue);
 			$oEntity->public = $bPublic;
 
 			$fieldName != 'undefined'
-				&& $oEntity->$fieldName = intval(Core_Array::getPost("{$prefix}_{$objectId}_directory_{$type}_type{$oEntity->id}"));
+				&& $oEntity->$fieldName = Core_Array::getPost("{$prefix}_{$objectId}_directory_{$type}_type{$oEntity->id}", 0, 'int');
 
 			$oEntity->save();
 		}
@@ -194,11 +197,11 @@ function applyDirectoryValues($objectId, $oObject, $relationName)
 			if (strlen($value))
 			{
 				$oEntity = Core_Entity::factory($relationName);
-				$oEntity->value = strval($value);
+				$oEntity->value = Core_Str::toStr($value);
 				$oEntity->public = is_null(Core_Array::get($aNewPublic, $key)) ? 0 : 1;
 
 				$fieldName != 'undefined'
-					&& $oEntity->$fieldName = intval(Core_Array::get($aNewTypes, $key));
+					&& $oEntity->$fieldName = Core_Array::get($aNewTypes, $key, 0, 'int');
 
 				$oObject->add($oEntity);
 			}
@@ -252,7 +255,7 @@ function uploadImage($oObject, $aFileData)
 $delete_property_value = Core_Array::getGet('delete_property_value');
 if (!is_null($delete_property_value) && !$bNewUser)
 {
-	$aProperty_Values = $oSiteuser->getPropertyValues();
+	$aProperty_Values = $oSiteuser->getPropertyValues(FALSE);
 
 	foreach ($aProperty_Values as $oProperty_Value)
 	{
@@ -268,6 +271,7 @@ if (!is_null($delete_property_value) && !$bNewUser)
 					->deleteLargeFile()
 					->deleteSmallFile();
 			}
+			$oProperty_Value->delete();
 		}
 	}
 }
@@ -275,9 +279,9 @@ if (!is_null($delete_property_value) && !$bNewUser)
 // Обновление данных или регистрация нового пользователя
 if (!is_null(Core_Array::getPost('apply')))
 {
-	$login = trim(strval(Core_Array::getPost('login')));
-	$password = strval(Core_Array::getPost('password'));
-	$email = trim(strval(Core_Array::getPost('email')));
+	$login = trim(Core_Array::getPost('login', '', 'str'));
+	$password = Core_Array::getPost('password', '', 'str');
+	$email = trim(Core_Array::getPost('email', '', 'str'));
 
 	// Replace '/' to '-'
 	$login = str_replace('/', '-', $login);
@@ -285,18 +289,6 @@ if (!is_null(Core_Array::getPost('apply')))
 	$oSiteuser->login = $login;
 	strlen($password) > 0 && $oSiteuser->password = Core_Hash::instance()->hash($password);
 	$oSiteuser->email = $email;
-	// $oSiteuser->name = Core_Str::stripTags(strval(Core_Array::getPost('name')));
-	// $oSiteuser->surname = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
-	// $oSiteuser->patronymic = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
-	// $oSiteuser->company = Core_Str::stripTags(strval(Core_Array::getPost('company')));
-	// $oSiteuser->phone = Core_Str::stripTags(strval(Core_Array::getPost('phone')));
-	// $oSiteuser->fax = Core_Str::stripTags(strval(Core_Array::getPost('fax')));
-	// $oSiteuser->website = Core_Str::stripTags(strval(Core_Array::getPost('website')));
-	// $oSiteuser->icq = Core_Str::stripTags(strval(Core_Array::getPost('icq')));
-	// $oSiteuser->country = Core_Str::stripTags(strval(Core_Array::getPost('country')));
-	// $oSiteuser->postcode = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
-	// $oSiteuser->city = Core_Str::stripTags(strval(Core_Array::getPost('city')));
-	// $oSiteuser->address = Core_Str::stripTags(strval(Core_Array::getPost('address')));
 
 	// Проверка корректности email
 	if (Core_Valid::email($email))
@@ -459,7 +451,7 @@ if (!is_null(Core_Array::getPost('apply')))
 								{
 									if (!is_null(Core_Array::getPost("company_name{$oSiteuser_Company->id}")))
 									{
-										$oSiteuser_Company->name = strval(Core_Array::getPost("company_name{$oSiteuser_Company->id}"));
+										$oSiteuser_Company->name = Core_Array::getPost("company_name{$oSiteuser_Company->id}", '', 'str');
 										$oSiteuser_Company->save();
 
 										$aFileData = Core_Array::getFiles("company_image{$oSiteuser_Company->id}", array());
@@ -476,10 +468,10 @@ if (!is_null(Core_Array::getPost('apply')))
 											$oSiteuser_Company->add($aDirectory_Addresses[0]);
 										}
 
-										$aDirectory_Addresses[0]->postcode = strval(Core_Array::getPost("company_postcode{$oSiteuser_Company->id}"));
-										$aDirectory_Addresses[0]->country = strval(Core_Array::getPost("company_country{$oSiteuser_Company->id}"));
-										$aDirectory_Addresses[0]->city = strval(Core_Array::getPost("company_city{$oSiteuser_Company->id}"));
-										$aDirectory_Addresses[0]->value = strval(Core_Array::getPost("company_address{$oSiteuser_Company->id}"));
+										$aDirectory_Addresses[0]->postcode = Core_Array::getPost("company_postcode{$oSiteuser_Company->id}", '', 'str');
+										$aDirectory_Addresses[0]->country = Core_Array::getPost("company_country{$oSiteuser_Company->id}", '', 'str');
+										$aDirectory_Addresses[0]->city = Core_Array::getPost("company_city{$oSiteuser_Company->id}", '', 'str');
+										$aDirectory_Addresses[0]->value = Core_Array::getPost("company_address{$oSiteuser_Company->id}", '', 'str');
 										$aDirectory_Addresses[0]->save();
 									}
 
@@ -496,13 +488,13 @@ if (!is_null(Core_Array::getPost('apply')))
 								{
 									if (!is_null(Core_Array::getPost("person_name{$oSiteuser_Person->id}")))
 									{
-										$oSiteuser_Person->name = strval(Core_Array::getPost("person_name{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->surname = strval(Core_Array::getPost("person_surname{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->patronymic = strval(Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->postcode = strval(Core_Array::getPost("person_postcode{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->country = strval(Core_Array::getPost("person_country{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->city = strval(Core_Array::getPost("person_city{$oSiteuser_Person->id}"));
-										$oSiteuser_Person->address = strval(Core_Array::getPost("person_address{$oSiteuser_Person->id}"));
+										$oSiteuser_Person->name = Core_Array::getPost("person_name{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->surname = Core_Array::getPost("person_surname{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->patronymic = Core_Array::getPost("person_patronymic{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->postcode = Core_Array::getPost("person_postcode{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->country = Core_Array::getPost("person_country{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->city = Core_Array::getPost("person_city{$oSiteuser_Person->id}", '', 'str');
+										$oSiteuser_Person->address = Core_Array::getPost("person_address{$oSiteuser_Person->id}", '', 'str');
 										$oSiteuser_Person->save();
 
 										$aFileData = Core_Array::getFiles("person_image{$oSiteuser_Person->id}", array());
@@ -532,44 +524,48 @@ if (!is_null(Core_Array::getPost('apply')))
 
 									foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
 									{
-										if (strlen($sSiteuserCompanyName))
+										// Проверка на количество компаний у клиента
+										if ($oSiteuser->Siteuser_Companies->getCount(FALSE) < $max_representatives)
 										{
-											$oSiteuser_Company = Core_Entity::factory('Siteuser_Company');
-											$oSiteuser_Company->name = strval($sSiteuserCompanyName);
-											$oSiteuser_Company->siteuser_id = $oSiteuser->id;
-											$oSiteuser_Company->save();
-
-											$aFileData = Core_Array::getFiles("company_image", array());
-
-											if (isset($aFileData['name'][$key]))
+											if (strlen($sSiteuserCompanyName))
 											{
-												$aTmpFile = array(
-													"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
-													"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
-													"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
-													"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
-													"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
-												);
+												$oSiteuser_Company = Core_Entity::factory('Siteuser_Company');
+												$oSiteuser_Company->name = Core_Str::toStr($sSiteuserCompanyName);
+												$oSiteuser_Company->siteuser_id = $oSiteuser->id;
+												$oSiteuser_Company->save();
 
-												uploadImage($oSiteuser_Company, $aTmpFile);
+												$aFileData = Core_Array::getFiles("company_image", array());
+
+												if (isset($aFileData['name'][$key]))
+												{
+													$aTmpFile = array(
+														"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
+														"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
+														"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
+														"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
+														"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
+													);
+
+													uploadImage($oSiteuser_Company, $aTmpFile);
+												}
+
+												$value = Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str');
+												if ($value != '')
+												{
+													$oDirectory_Address = Core_Entity::factory('Directory_Address');
+													$oDirectory_Address->country = Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str');
+													$oDirectory_Address->postcode = Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str');
+													$oDirectory_Address->city = Core_Array::get($aSiteuserCompanyCity, $key, '', 'str');
+													$oDirectory_Address->value = $value;
+													$oSiteuser_Company->add($oDirectory_Address);
+												}
+
+												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Phone');
+												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Email');
+												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Social');
+												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Messenger');
+												applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Website');
 											}
-
-											$value = strval(Core_Array::get($aSiteuserCompanyAddress, $key));
-											if ($value != '')
-											{
-												$oDirectory_Address = Core_Entity::factory('Directory_Address');
-												$oDirectory_Address->country = strval(Core_Array::get($aSiteuserCompanyCountry, $key));
-												$oDirectory_Address->postcode = strval(Core_Array::get($aSiteuserCompanyPostcode, $key));
-												$oDirectory_Address->city = strval(Core_Array::get($aSiteuserCompanyCity, $key));
-												$oDirectory_Address->value = $value;
-												$oSiteuser_Company->add($oDirectory_Address);
-											}
-
-											applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Phone');
-											applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Email');
-											applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Social');
-											applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Messenger');
-											applyDirectoryValues(0, $oSiteuser_Company, 'Directory_Website');
 										}
 									}
 								}
@@ -593,40 +589,44 @@ if (!is_null(Core_Array::getPost('apply')))
 
 									foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
 									{
-										if (strlen($sSiteuserPersonName))
+										// Проверка на количество представителей у клиента
+										if ($oSiteuser->Siteuser_People->getCount(FALSE) < $max_representatives)
 										{
-											$oSiteuser_Person = Core_Entity::factory('Siteuser_Person');
-											$oSiteuser_Person->name = strval($sSiteuserPersonName);
-											$oSiteuser_Person->siteuser_id = $oSiteuser->id;
-
-											$oSiteuser_Person->surname = strval(Core_Array::get($aSiteuserPeopleSurnames, $key));
-											$oSiteuser_Person->patronymic = strval(Core_Array::get($aSiteuserPeoplePatronymics, $key));
-											$oSiteuser_Person->postcode = strval(Core_Array::get($aSiteuserPeoplePostcodes, $key));
-											$oSiteuser_Person->country = strval(Core_Array::get($aSiteuserPeopleCountries, $key));
-											$oSiteuser_Person->city = strval(Core_Array::get($aSiteuserPeopleCities, $key));
-											$oSiteuser_Person->address = strval(Core_Array::get($aSiteuserPeopleAddresses, $key));
-											$oSiteuser_Person->save();
-
-											$aFileData = Core_Array::getFiles("person_image", array());
-
-											if (isset($aFileData['name'][$key]))
+											if (strlen($sSiteuserPersonName))
 											{
-												$aTmpFile = array(
-													"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
-													"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
-													"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
-													"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
-													"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
-												);
+												$oSiteuser_Person = Core_Entity::factory('Siteuser_Person');
+												$oSiteuser_Person->name = Core_Str::toStr($sSiteuserPersonName);
+												$oSiteuser_Person->siteuser_id = $oSiteuser->id;
 
-												uploadImage($oSiteuser_Person, $aTmpFile);
+												$oSiteuser_Person->surname = Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str');
+												$oSiteuser_Person->patronymic = Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str');
+												$oSiteuser_Person->postcode = Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str');
+												$oSiteuser_Person->country = Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str');
+												$oSiteuser_Person->city = Core_Array::get($aSiteuserPeopleCities, $key, '', 'str');
+												$oSiteuser_Person->address = Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str');
+												$oSiteuser_Person->save();
+
+												$aFileData = Core_Array::getFiles("person_image", array());
+
+												if (isset($aFileData['name'][$key]))
+												{
+													$aTmpFile = array(
+														"name" => isset($aFileData['name']) ? Core_Array::get($aFileData['name'], $key) : NULL,
+														"type" => isset($aFileData['type']) ? Core_Array::get($aFileData['type'], $key) : NULL,
+														"tmp_name" => isset($aFileData['tmp_name']) ? Core_Array::get($aFileData['tmp_name'], $key) : NULL,
+														"error" => isset($aFileData['error']) ? Core_Array::get($aFileData['error'], $key) : NULL,
+														"size" => isset($aFileData['size']) ? Core_Array::get($aFileData['size'], $key) : NULL
+													);
+
+													uploadImage($oSiteuser_Person, $aTmpFile);
+												}
+
+												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Phone');
+												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Email');
+												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Social');
+												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Messenger');
+												applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Website');
 											}
-
-											applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Phone');
-											applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Email');
-											applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Social');
-											applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Messenger');
-											applyDirectoryValues(0, $oSiteuser_Person, 'Directory_Website');
 										}
 									}
 								}
@@ -641,7 +641,7 @@ if (!is_null(Core_Array::getPost('apply')))
 
 										// Перенаправляем на страницу, с которой он пришел
 										!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(
-											strval(Core_Array::getPost('location'))
+											Core_Array::getPost('location', '', 'str')
 										);
 									}
 

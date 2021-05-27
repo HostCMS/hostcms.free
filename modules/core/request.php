@@ -4,7 +4,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 /**
  * Incoming Http Request helper.
- * Вспомогательный класс для работы с данными и заголовоками входящего http-запроса
+ * Вспомогательный класс для работы с данными и заголовками входящего http-запроса
  *
  * @package HostCMS
  * @subpackage Core

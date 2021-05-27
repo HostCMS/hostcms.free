@@ -138,7 +138,7 @@ foreach ($aProperties as $oProperty)
 	// Если тип свойства - "Список" и модуль списков активен
 	if ($oProperty->type == 3 && Core::moduleIsActive('list'))
 	{
-		$pattern = sprintf("%s {P%s}", $oProperty->name, $oProperty->id);
+		//$pattern = sprintf("%s {P%s}", $oProperty->name, $oProperty->id);
 		// $aNamePattern[] = $pattern;
 
 		$selectName = "property{$oProperty->id}list[]";
@@ -150,7 +150,7 @@ foreach ($aProperties as $oProperty)
 				->name("property_{$oProperty->id}")
 				->caption(Core::_('Shop_Item.create_modification_property_enable', $oProperty->name, $oProperty->id))
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-				->onchange("$.addModificationPattern('{$pattern}', '{$selectName}')")
+				->onchange("$.toggleModificationPattern(this, '{$oProperty->id}', '" . Core_Str::escapeJavascriptVariable($oProperty->name) . "', '{$selectName}')")
 		);
 
 		$oRow2->add(
@@ -236,12 +236,19 @@ $oMainRow2->add(
 			Admin_Form_Entity::factory('Code')
 				->html('<i class="fa fa-times-circle no-margin" onclick="$.clearMarkingPattern(\'marking\', \'' . $markingPattern . '\')"></i>')
 		)
+		->value(
+			isset($_COOKIE['marking']) ? strval($_COOKIE['marking']) : $markingPattern
+		)
+		->onchange("$.addModificationValue(this, 'marking')")
 )->add(
 	Admin_Form_Entity::factory('Input')
 		->name('delimiter')
 		->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 		->caption(Core::_('Shop_Item.create_modification_delimiter'))
-		->value(' ')
+		->value(
+			isset($_COOKIE['delimiter']) ? strval($_COOKIE['delimiter']) : ' '
+		)
+		->onchange("$.addModificationValue(this, 'delimiter')")
 );
 
 $oMainRow3->add(

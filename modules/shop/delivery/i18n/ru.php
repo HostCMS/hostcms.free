@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Типы доставки',
@@ -25,6 +25,7 @@ return array(
 	'id' => "Идентификатор",
 	'shop_id' => "Идентификатор магазина",
 	'delivery' => 'Доставка "%s"',
+	'delivery_with_condition' => 'Доставка "%s: %s"',
 	'edit_success' => "Тип доставки успешно добавлен!",
 	'edit_error' => "Ошибка! Тип доставки не добавлен!",
 	'apply_success' => "Информация успешно изменена",
@@ -43,4 +44,7 @@ return array(
 	'days_from' => 'Дней доставки от',
 	'days_to' => 'до',
 	'guid' => 'GUID',
+	'conditions_for_delivery' => 'Условия доставки для "%s"',
+	'empty_conditions_for_delivery' => 'Условия доставки отсутствуют',
+	'apply_button' => 'Применить',
 );

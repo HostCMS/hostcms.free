@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -429,10 +429,8 @@ class Shop_Item_Model extends Core_Entity
 	public function getPrices($bCache = TRUE)
 	{
 		$this->setShop_Item_Controller();
-		// Prices
-		$aPrices = $this->_Shop_Item_Controller->getPrices($this, TRUE, $bCache);
 
-		return $aPrices;
+		return $this->_Shop_Item_Controller->getPrices($this, TRUE, $bCache);
 	}
 
 	/**
@@ -817,16 +815,23 @@ class Shop_Item_Model extends Core_Entity
 
 		if (!$this->modification_id)
 		{
-			// Search the same item or group
-			$oSameShopItem = $oShop->Shop_Items->getByGroupIdAndPath($this->shop_group_id, $this->path);
-
-			if (!is_null($oSameShopItem) && $oSameShopItem->id != $this->id)
+			if (strlen($this->path))
 			{
-				$this->path = Core_Guid::get();
-			}
+				// Search the same item or group
+				$oSameShopItem = $oShop->Shop_Items->getByGroupIdAndPath($this->shop_group_id, $this->path);
 
-			$oSameShopGroup = $oShop->Shop_Groups->getByParentIdAndPath($this->shop_group_id, $this->path);
-			if (!is_null($oSameShopGroup))
+				if (!is_null($oSameShopItem) && $oSameShopItem->id != $this->id)
+				{
+					$this->path = Core_Guid::get();
+				}
+
+				$oSameShopGroup = $oShop->Shop_Groups->getByParentIdAndPath($this->shop_group_id, $this->path);
+				if (!is_null($oSameShopGroup))
+				{
+					$this->path = Core_Guid::get();
+				}
+			}
+			else
 			{
 				$this->path = Core_Guid::get();
 			}
@@ -877,10 +882,6 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$this->path = $this->id;
 		}
-		else
-		{
-			$this->path = Core_Guid::get();
-		}
 
 		Core_Event::notify($this->_modelName . '.onAfterMakePath', $this);
 
@@ -896,7 +897,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		if (!$this->shortcut_id)
 		{
-			if (is_null($this->path))
+			if (is_null($this->path) || $this->path === '')
 			{
 				$this->makePath();
 			}
@@ -968,7 +969,7 @@ class Shop_Item_Model extends Core_Entity
 			catch (Exception $e) {}
 		}
 
-		$aShop_Warehouse_Items = $this->Shop_Warehouse_Items->findAll();
+		$aShop_Warehouse_Items = $this->Shop_Warehouse_Items->findAll(FALSE);
 		foreach ($aShop_Warehouse_Items as $oShop_Warehouse_Item)
 		{
 			if ($oShop_Warehouse_Item->count != '0.00')
@@ -1016,21 +1017,21 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		// Получаем список цен для копируемого товара
-		$aShop_Item_Prices = $this->Shop_Item_Prices->findAll();
+		$aShop_Item_Prices = $this->Shop_Item_Prices->findAll(FALSE);
 		foreach ($aShop_Item_Prices as $oShop_Item_Price)
 		{
 			$newObject->add(clone $oShop_Item_Price);
 		}
 
 		// Получаем список специальных цен для копируемого товара
-		$aShop_Specialprices = $this->Shop_Specialprices->findAll();
+		$aShop_Specialprices = $this->Shop_Specialprices->findAll(FALSE);
 		foreach ($aShop_Specialprices as $oShop_Specialprice)
 		{
 			$newObject->add(clone $oShop_Specialprice);
 		}
 
 		// Список модификаций товара
-		$aModifications = $this->Modifications->findAll();
+		$aModifications = $this->Modifications->findAll(FALSE);
 		foreach ($aModifications as $oModification)
 		{
 			$oNewModification = $oModification->copy();
@@ -1038,7 +1039,7 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		// Список сопутствующих товаров копируемому товару
-		$aShop_Item_Associateds = $this->Shop_Item_Associateds->findAll();
+		$aShop_Item_Associateds = $this->Shop_Item_Associateds->findAll(FALSE);
 		foreach ($aShop_Item_Associateds as $oShop_Item_Associated)
 		{
 			$newObject->add(clone $oShop_Item_Associated);
@@ -1046,11 +1047,17 @@ class Shop_Item_Model extends Core_Entity
 
 		if (Core::moduleIsActive('tag'))
 		{
-			$aTags = $this->Tags->findAll();
+			$aTags = $this->Tags->findAll(FALSE);
 			foreach ($aTags as $oTag)
 			{
 				$newObject->add($oTag);
 			}
+		}
+
+		$aShop_Tab_Items = $this->Shop_Tab_Items->findAll(FALSE);
+		foreach ($aShop_Tab_Items as $oShop_Tab_Item)
+		{
+			$newObject->add(clone $oShop_Tab_Item);
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
@@ -1854,19 +1861,19 @@ class Shop_Item_Model extends Core_Entity
 	}
 
 	/**
-	 * Show tabs data in XML
+	 * Show comments rating data in XML
 	 * @var boolean
 	 */
-	protected $_showXmlTabs = FALSE;
+	protected $_showXmlCommentsRating = FALSE;
 
 	/**
-	 * Add tabs XML to item
-	 * @param boolean $showXmlTabs mode
+	 * Add Comments Rating XML to item
+	 * @param boolean $showXmlComments mode
 	 * @return self
 	 */
-	public function showXmlTabs($showXmlTabs = TRUE)
+	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
 	{
-		$this->_showXmlTabs = $showXmlTabs;
+		$this->_showXmlCommentsRating = $showXmlCommentsRating;
 		return $this;
 	}
 
@@ -1884,6 +1891,23 @@ class Shop_Item_Model extends Core_Entity
 	public function commentsActivity($commentsActivity = 'active')
 	{
 		$this->_commentsActivity = $commentsActivity;
+		return $this;
+	}
+
+	/**
+	 * Show tabs data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlTabs = FALSE;
+
+	/**
+	 * Add tabs XML to item
+	 * @param boolean $showXmlTabs mode
+	 * @return self
+	 */
+	public function showXmlTabs($showXmlTabs = TRUE)
+	{
+		$this->_showXmlTabs = $showXmlTabs;
 		return $this;
 	}
 
@@ -2345,9 +2369,9 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		$this->shop_seller_id && !isset($this->_forbiddenTags['shop_seller']) && $this->addEntity($this->Shop_Seller);
-		$this->shop_producer_id && !isset($this->_forbiddenTags['shop_producer']) && $this->addEntity($this->Shop_Producer);
-		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure);
+		$this->shop_seller_id && !isset($this->_forbiddenTags['shop_seller']) && $this->addEntity($this->Shop_Seller->clearEntities());
+		$this->shop_producer_id && !isset($this->_forbiddenTags['shop_producer']) && $this->addEntity($this->Shop_Producer->clearEntities());
+		$this->shop_measure_id && !isset($this->_forbiddenTags['shop_measure']) && $this->addEntity($this->Shop_Measure->clearEntities());
 
 		// Barcodes
 		$this->_showXmlBarcodes && $this->addEntities($this->Shop_Item_Barcodes->findAll());
@@ -2427,7 +2451,7 @@ class Shop_Item_Model extends Core_Entity
 				foreach ($aShop_Items_Modifications as $oShop_Items_Modification)
 				{
 					$oTmp_Shop_Items_Modification = clone $oShop_Items_Modification;
-					
+
 					$oTmp_Shop_Items_Modification
 						->id($oShop_Items_Modification->id)
 						->clearEntities();
@@ -2502,6 +2526,7 @@ class Shop_Item_Model extends Core_Entity
 
 						$oShop_Item_Associated
 							->showXmlComments($this->_showXmlComments)
+							->showXmlCommentsRating($this->_showXmlCommentsRating)
 							->showXmlAssociatedItems(FALSE)
 							->showXmlModifications(FALSE)
 							->showXmlSets(FALSE)
@@ -2521,12 +2546,11 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		if ($this->_showXmlComments && Core::moduleIsActive('comment'))
+		if (($this->_showXmlComments || $this->_showXmlCommentsRating) && Core::moduleIsActive('comment'))
 		{
 			$this->_aComments = array();
 
-			$gradeSum = 0;
-			$gradeCount = 0;
+			$gradeSum = $gradeCount = 0;
 
 			$oComments = $this->Comments;
 			$oComments->queryBuilder()
@@ -2548,7 +2572,9 @@ class Shop_Item_Model extends Core_Entity
 					$gradeSum += $oComment->grade;
 					$gradeCount++;
 				}
-				$this->_aComments[$oComment->parent_id][] = $oComment;
+
+				$this->_showXmlComments
+					&& $this->_aComments[$oComment->parent_id][] = $oComment;
 			}
 
 			// Средняя оценка
@@ -2592,7 +2618,8 @@ class Shop_Item_Model extends Core_Entity
 					->value($avgGrade)
 			);
 
-			$this->_addComments(0, $this);
+			$this->_showXmlComments
+				&& $this->_addComments(0, $this);
 
 			$this->_aComments = array();
 		}
@@ -2870,26 +2897,45 @@ class Shop_Item_Model extends Core_Entity
 	 */
 	public function adminPriceBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		// Divisible
-		$this->type == 2 && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-warning white')
-			->style('padding-left: 2px;')
-			->value('<i class="fa fa-puzzle-piece fa-fw"></i>')
-			->execute();
-
-		// Set
-		$this->type == 3 && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-sky white')
-			->style('padding-left: 1px;')
-			->value('<i class="fa fa-archive fa-fw"></i>')
-			->execute();
-
-		// Certificate
-		$this->type == 4 && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-ico badge-maroon white')
-			->style('padding-left: 1px;')
-			->value('<i class="fa fa-certificate fa-fw"></i>')
-			->execute();
+		switch ($this->type)
+		{
+			case 1:
+				// Digital
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-ico badge-danger white')
+					->style('padding-left: 1px;')
+					->value('<i class="fa fa-table fa-fw"></i>')
+					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic'))
+					->execute();
+			break;
+			case 2:
+				// Divisible
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-ico badge-warning white')
+					->style('padding-left: 2px;')
+					->value('<i class="fa fa-puzzle-piece fa-fw"></i>')
+					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_divisible'))
+					->execute();
+			break;
+			case 3:
+				// Set
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-ico badge-sky white')
+					->style('padding-left: 1px;')
+					->value('<i class="fa fa-archive fa-fw"></i>')
+					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_set'))
+					->execute();
+			break;
+			case 4:
+				// Certificate
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-ico badge-maroon white')
+					->style('padding-left: 1px;')
+					->value('<i class="fa fa-certificate fa-fw"></i>')
+					->title(Core::_('Shop_Item.item_type_selection_group_buttons_name_certificate'))
+					->execute();
+			break;
+		}
 	}
 
 	/**
@@ -3070,7 +3116,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$aShop_Item_Sets = $this->Shop_Item_Sets->findAll(FALSE);
 
-			$Shop_Item_Controller = new Shop_Item_Controller();
+			$oShop_Item_Controller = new Shop_Item_Controller();
 
 			foreach ($aShop_Item_Sets as $oShop_Item_Set)
 			{
@@ -3088,7 +3134,9 @@ class Shop_Item_Model extends Core_Entity
 						)
 						: 0;
 
-					$aPrice = $Shop_Item_Controller->calculatePriceInItemCurrency($oTmp_Shop_Item->price, $oTmp_Shop_Item);
+					$price = $oShop_Item_Controller->getSpecialprice($oTmp_Shop_Item->price, $oTmp_Shop_Item, FALSE);
+
+					$aPrice = $oShop_Item_Controller->calculatePriceInItemCurrency($price, $oTmp_Shop_Item);
 
 					$amount += $aPrice['price_discount'] * $fCurrencyCoefficient * $oShop_Item_Set->count;
 				}

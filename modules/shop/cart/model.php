@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -90,21 +90,38 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		if (is_null($this->Shop_Item->id))
+		$object = $this->Shop_Item->shortcut_id
+			? $this->Shop_Item->Shop_Item
+			: $this->Shop_Item;
+
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+
+		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
+		if (!$object->active)
 		{
-			return htmlspecialchars($this->name);
+			$oCore_Html_Entity_Div->class('inactive');
+		}
+
+		if (is_null($object->id))
+		{
+			$oCore_Html_Entity_Div->value(htmlspecialchars($this->name));
 		}
 		else
 		{
-			$sShopItemPath = '/admin/shop/item/index.php';
-			$iShopItemId = $this->Shop_Item->id;
-
-			return sprintf(
-				'<a href="%s" target="_blank">%s <i class="fa fa-external-link"></i></a>',
-				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
-				htmlspecialchars($this->name)
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_A')
+					->href(
+						htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/item/index.php', 'edit', NULL, 1, $object->id))
+					)
+					->target('_blank')
+					->value(htmlspecialchars($this->name))
+					->add(
+						Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+					)
 			);
 		}
+
+		$oCore_Html_Entity_Div->execute();
 	}
 
 	/**

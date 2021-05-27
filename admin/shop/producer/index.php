@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -278,10 +278,10 @@ $oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 
 if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
 {
-	$oShopProducerControllerMerge = new Admin_Form_Action_Controller_Type_Merge($oAdminFormActionMerge);
+	$oAdmin_Form_Action_Controller_Type_Merge = new Admin_Form_Action_Controller_Type_Merge($oAdminFormActionMerge);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
-	$oAdmin_Form_Controller->addAction($oShopProducerControllerMerge);
+	$oAdmin_Form_Controller->addAction($oAdmin_Form_Action_Controller_Type_Merge);
 }
 
 // Действие "Перенести"
@@ -335,7 +335,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(Core_Entity::factory('Shop_
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $oAdmin_Form_Dataset->changeField('name', 'type', 1);
