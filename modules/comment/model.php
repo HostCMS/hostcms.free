@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -323,9 +323,18 @@ class Comment_Model extends Core_Entity
 		return isset($aComments[0]) ? $aComments[0] : NULL;
 	}
 
+	/**
+	 * Get item href without trailing slash
+	 * @return string
+	 */
 	protected function _getHref()
 	{
-		return UPLOADDIR . 'comments/' . Core_File::getNestingDirPath($this->id, SITE_NESTING_LEVEL) . '/comment_' . $this->id . '/';
+		$oEntity = $this->getRelatedEntity();
+
+		$uploaddir = $oEntity ? $oEntity->Site->uploaddir : 'upload/';
+		$nestingLevel = $oEntity ? $oEntity->Site->nesting_level : 3;
+
+		return $uploaddir . 'comments/' . Core_File::getNestingDirPath($this->id, $nestingLevel) . '/comment_' . $this->id . '/';
 	}
 
 	/**
@@ -502,10 +511,9 @@ class Comment_Model extends Core_Entity
 	}
 
 	/**
-	 * Prepare Property Value
-	 * @param Property_Value_Model $oProperty_Value
+	 * Get Related Entuty
 	 */
-	protected function _preparePropertyValue($oProperty_Value)
+	public function getRelatedEntity()
 	{
 		if ($this->Comment_Informationsystem_Item->id)
 		{
@@ -515,20 +523,38 @@ class Comment_Model extends Core_Entity
 		{
 			$oEntity = $this->Shop_Item->Shop;
 		}
-
-		switch ($oProperty_Value->Property->type)
+		else
 		{
-			case 2:
-				$oProperty_Value
-					->setHref($this->getHref())
-					->setDir($this->getPath());
-			break;
-			case 8:
-				$oProperty_Value->dateFormat($oEntity->format_date);
-			break;
-			case 9:
-				$oProperty_Value->dateTimeFormat($oEntity->format_datetime);
-			break;
+			$oEntity = NULL;
+		}
+
+		return $oEntity;
+	}
+
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		$oEntity = $this->getRelatedEntity();
+
+		if ($oEntity)
+		{
+			switch ($oProperty_Value->Property->type)
+			{
+				case 2:
+					$oProperty_Value
+						->setHref($this->getHref())
+						->setDir($this->getPath());
+				break;
+				case 8:
+					$oProperty_Value->dateFormat($oEntity->format_date);
+				break;
+				case 9:
+					$oProperty_Value->dateTimeFormat($oEntity->format_datetime);
+				break;
+			}
 		}
 	}
 
@@ -541,6 +567,9 @@ class Comment_Model extends Core_Entity
 		$this->clearXmlTags()
 			->addXmlTag('date', strftime($this->_dateFormat, Core_Date::sql2timestamp($this->datetime)))
 			->addXmlTag('datetime', strftime($this->_dateTimeFormat, Core_Date::sql2timestamp($this->datetime)));
+
+		!isset($this->_forbiddenTags['dir'])
+			&& $this->addXmlTag('dir', $this->getHref());
 
 		if ($this->siteuser_id && Core::moduleIsActive('siteuser'))
 		{

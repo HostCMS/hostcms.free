@@ -6,7 +6,7 @@
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Benchmark',
@@ -58,4 +58,14 @@ return array(
 	'tableCharsets' => 'Table Charsets',
 	'severalCharsetsMsg' => 'The database contains tables with different charsets!',
 	'changeStorageCharsetTitle' => 'Setting charset',
+
+	'option_database_table_name' => 'Name of the table in the database',
+	'option_database_write_query_count' => 'Number of write requests',
+	'option_database_read_query_count' => 'Number of read requests',
+	'option_database_change_query_count' => 'Number of change requests',
+	'option_sample_text' => 'Sample text',
+	'option_files_count' => 'Number of files',
+	'option_math_count' => 'Number of calculations',
+	'option_string_count' => 'Number of rows',
+	'option_benchmark_file_path' => 'Path to download file',
 );

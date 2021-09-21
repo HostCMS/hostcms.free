@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -35,6 +35,7 @@ $oAdmin_Form_Controller
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+// Глобальный поиск
 $additionalParams = 'document_dir_id=' . $oDocumentDir->id;
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
@@ -244,7 +245,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Ограничение источника 1 по родительской группе

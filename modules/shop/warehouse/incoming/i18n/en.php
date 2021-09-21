@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Incoming',
@@ -18,6 +18,7 @@ return array(
 	'posted' => 'Posted',
 	'user_id' => 'Responsible',
 	'shop_warehouse_id' => 'Warehouse',
+	'siteuser_id' => 'Supplier',	
 	'form_edit' => 'Edit incoming "%s"',
 	'form_add' => "Add incoming information",
 	'apply_success' => "Information has been successfully changed",

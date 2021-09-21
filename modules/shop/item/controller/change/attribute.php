@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 {
@@ -39,9 +39,14 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name
 	 * @return self
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onBeforeExecute
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onBeforeAddButton
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onAfterExecute
 	 */
 	public function execute($operation = NULL)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeExecute', $this, array($operation));
+
 		if (is_null($operation))
 		{
 			// Original windowId
@@ -79,7 +84,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oAdmin_Form_Entity_Select_Currencies = Admin_Form_Entity::factory('Select')
 				->name('shop_currency_id')
 				->id('shopCurrencyId')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->options($aCurrencies)
 				->caption(Core::_('Shop_Item.shop_currency_select_caption'))
 				->controller($window_Admin_Form_Controller);
@@ -98,9 +103,24 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oAdmin_Form_Entity_Select_Measures = Admin_Form_Entity::factory('Select')
 				->name('shop_measure_id')
 				->id('shopMeasureId')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->options($aMeasures)
 				->caption(Core::_('Shop_Item.shop_measure_id'))
+				->controller($window_Admin_Form_Controller);
+
+			$aTaxes = array(' … ');
+			$aShop_Taxes = Core_Entity::factory('Shop_Tax')->findAll(FALSE);
+			foreach ($aShop_Taxes as $oShop_Tax)
+			{
+				$aTaxes[$oShop_Tax->id] = $oShop_Tax->name;
+			}
+
+			$oAdmin_Form_Entity_Select_Tax = Admin_Form_Entity::factory('Select')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->name('shop_tax_id')
+				->id('shopTaxId')
+				->options($aTaxes)
+				->caption(Core::_('Shop_Item.shop_tax_id'))
 				->controller($window_Admin_Form_Controller);
 
 			$aProducers = array(' … ');
@@ -113,7 +133,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oAdmin_Form_Entity_Select_Producers = Admin_Form_Entity::factory('Select')
 				->name('shop_producer_id')
 				->id('shopProducerId')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->options($aProducers)
 				->caption(Core::_('Shop_Item.shop_producer_id'))
 				->controller($window_Admin_Form_Controller);
@@ -128,7 +148,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oAdmin_Form_Entity_Select_Sellers = Admin_Form_Entity::factory('Select')
 				->name('shop_seller_id')
 				->id('shopSellerId')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->options($aSellers)
 				->caption(Core::_('Shop_Item.shop_seller_id'))
 				->controller($window_Admin_Form_Controller);
@@ -146,13 +166,13 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oAdmin_Form_Entity_Select_Siteuser_Groups = Admin_Form_Entity::factory('Select')
 				->name('siteuser_group_id')
 				->id('siteuserGroupId')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->options(array(Core::_('Shop.allgroupsaccess')) + $aSiteuser_Groups)
 				->caption(Core::_('Shop_Item.siteuser_group_id'))
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Select_Active = Admin_Form_Entity::factory('Select')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->name('active')
 				->caption(Core::_('Shop_Item.active'))
 				->options(
@@ -165,7 +185,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Select_Indexing = Admin_Form_Entity::factory('Select')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->name('indexing')
 				->caption(Core::_('Shop_Item.indexing'))
 				->options(
@@ -178,7 +198,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Select_Yandex = Admin_Form_Entity::factory('Select')
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
 				->name('yandex_market')
 				->options(
 					array(
@@ -191,7 +211,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Select_Order_Discount = Admin_Form_Entity::factory('Select')
-				->divAttr(array('class' => 'form-group col-xs-12'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 				->name('apply_purchase_discount')
 				->options(
 					array(
@@ -222,19 +242,92 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->controller($window_Admin_Form_Controller);
 
 			$oCore_Html_Entity_Form
-				->add($oAdmin_Form_Entity_Select_Currencies)
-				->add($oAdmin_Form_Entity_Select_Measures)
-				->add($oAdmin_Form_Entity_Select_Producers)
-				->add($oAdmin_Form_Entity_Select_Sellers)
-				->add($oAdmin_Form_Entity_Select_Siteuser_Groups)
-				->add($oAdmin_Form_Entity_Select_Active)
-				->add($oAdmin_Form_Entity_Select_Indexing)
-				->add($oAdmin_Form_Entity_Select_Yandex)
-				->add($oAdmin_Form_Entity_Select_Order_Discount)
-				->add($oAdmin_Form_Entity_Input_Min_Quantity)
-				->add($oAdmin_Form_Entity_Input_Max_Quantity)
-				->add($oAdmin_Form_Entity_Input_Quantity_Step)
-				;
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Select_Currencies)
+						->add($oAdmin_Form_Entity_Select_Measures)
+						->add($oAdmin_Form_Entity_Select_Tax)
+				)
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Select_Producers)
+						->add($oAdmin_Form_Entity_Select_Sellers)
+						->add($oAdmin_Form_Entity_Select_Siteuser_Groups)
+				)
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Select_Active)
+						->add($oAdmin_Form_Entity_Select_Indexing)
+						->add($oAdmin_Form_Entity_Select_Yandex)
+				)
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Select_Order_Discount)
+				);
+
+			if (Core::moduleIsActive('tag'))
+			{
+				$oAdmin_Form_Entity_Select_Tags = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Item.items_catalog_tags'))
+					->options(array())
+					->name('tags[]')
+					->class('shop-item-tags')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group col-xs-12'));
+
+				$tagsHtml = '
+					<script>
+						$(function(){
+							$(".shop-item-tags").select2({
+								language: "' . Core_i18n::instance()->getLng() . '",
+								minimumInputLength: 1,
+								placeholder: "' . Core::_('Shop_Item.type_tag') . '",
+								tags: true,
+								allowClear: true,
+								multiple: true,
+								ajax: {
+									url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+									dataType: "json",
+									type: "GET",
+									processResults: function (data) {
+										var aResults = [];
+										$.each(data, function (index, item) {
+											aResults.push({
+												"id": item.id,
+												"text": item.text
+											});
+										});
+										return {
+											results: aResults
+										};
+									}
+								},
+							});
+						})</script>
+					';
+
+				$oCore_Html_Entity_Form
+					->add(
+						Admin_Form_Entity::factory('Div')
+							->class('row')
+							->add($oAdmin_Form_Entity_Select_Tags)
+							->add(Admin_Form_Entity::factory('Code')->html($tagsHtml))
+					);
+			}
+
+			$oCore_Html_Entity_Form
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Input_Min_Quantity)
+						->add($oAdmin_Form_Entity_Input_Max_Quantity)
+						->add($oAdmin_Form_Entity_Input_Quantity_Step)
+				);
 
 			// Идентификаторы переносимых указываем скрытыми полями в форме, чтобы не превысить лимит GET
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
@@ -260,6 +353,8 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				}
 			}
 
+			Core_Event::notify(get_class($this) . '.onBeforeAddButton', $this, array($oCore_Html_Entity_Form, $oCore_Html_Entity_Div));
+
 			$oAdmin_Form_Entity_Button = Admin_Form_Entity::factory('Button')
 				->name('apply')
 				->type('submit')
@@ -275,8 +370,12 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$oCore_Html_Entity_Form
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12')
-						->add($oAdmin_Form_Entity_Button)
+						->class('row')
+						->add(
+							Admin_Form_Entity::factory('Div')
+								->class('form-group col-xs-12')
+								->add($oAdmin_Form_Entity_Button)
+						)
 				);
 
 			$oCore_Html_Entity_Div->execute();
@@ -306,11 +405,22 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			}
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($operation));
+
 		return $this;
 	}
 
+	/**
+	 * Apply attrubites for items in group
+	 * @param Shop_Group_Model $oShop_Group
+	 * @return self
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onBeforeApplyGroup
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onAfterApplyGroup
+	 */
 	protected function _applyGroup(Shop_Group_Model $oShop_Group)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeApplyGroup', $this, array($oShop_Group));
+
 		$aShop_Items = $oShop_Group->Shop_Items->findAll(FALSE);
 		foreach ($aShop_Items as $oShop_Item)
 		{
@@ -323,14 +433,26 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$this->_applyGroup($oTmp_Shop_Group);
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterApplyGroup', $this, array($oShop_Group));
+
 		return $this;
 	}
 
+	/**
+	 * Apply attrubites for item
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onBeforeApplyItem
+	 * @hostcms-event Shop_Item_Controller_Change_Attribute.onAfterApplyItem
+	 */
 	protected function _applyItem(Shop_Item_Model $oShop_Item)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeApplyItem', $this, array($oShop_Item));
+
 		Core_Array::getPost('shop_currency_id') && $oShop_Item->shop_currency_id = intval(Core_Array::getPost('shop_currency_id'));
 		Core_Array::getPost('shop_producer_id') && $oShop_Item->shop_producer_id = intval(Core_Array::getPost('shop_producer_id'));
 		Core_Array::getPost('shop_seller_id') && $oShop_Item->shop_seller_id = intval(Core_Array::getPost('shop_seller_id'));
+		Core_Array::getPost('shop_tax_id') && $oShop_Item->shop_tax_id = intval(Core_Array::getPost('shop_tax_id'));
 		Core_Array::getPost('shop_measure_id') && $oShop_Item->shop_measure_id = intval(Core_Array::getPost('shop_measure_id'));
 		Core_Array::getPost('siteuser_group_id') && $oShop_Item->siteuser_group_id = intval(Core_Array::getPost('siteuser_group_id'));
 
@@ -345,6 +467,39 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 		$oShop_Item->save();
 
+		if (Core::moduleIsActive('tag'))
+		{
+			$aRecievedTags = Core_Array::getPost('tags', array());
+			!is_array($aRecievedTags) && $aRecievedTags = array();
+
+			$aTmp = array();
+
+			$aTags = $oShop_Item->Tags->findAll(FALSE);
+			foreach ($aTags as $oTag)
+			{
+				$aTmp[] = $oTag->name;
+			}
+
+			foreach ($aRecievedTags as $tag_name)
+			{
+				$tag_name = trim($tag_name);
+
+				if ($tag_name != '' && !in_array($tag_name, $aTmp))
+				{
+					$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+
+					if (is_null($oTag))
+					{
+						$oTag = Core_Entity::factory('Tag');
+						$oTag->name = $oTag->path = $tag_name;
+						$oTag->save();
+					}
+
+					$oShop_Item->add($oTag);
+				}
+			}
+		}
+
 		$oShop_Item->clearCache();
 
 		// Fast filter
@@ -355,11 +510,22 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->fill($oShop_Item);
 		}
 
+		Core_Event::notify(get_class($this) . '.onAfterApplyItem', $this, array($oShop_Item));
+
 		return $this;
 	}
 
+	/**
+	 * Shop filter controller object
+	 * @var mixed
+	 */
 	protected $_Shop_Filter_Controller = NULL;
 
+	/**
+	 * Get shop filter controller
+	 * @param Shop_Model $oShop
+	 * @return Shop_Filter_Controller|NULL
+	 */
 	protected function _getShop_Filter_Controller(Shop_Model $oShop)
 	{
 		if (is_null($this->_Shop_Filter_Controller))

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 {
@@ -202,7 +202,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 
 					if ($link != '')
 					{
-						$tinyMCELinkListArray[] = '{title: \'' . Core_Str::escapeJavascriptVariable($oStructure->menu_name) . '\', value: \'' . Core_Str::escapeJavascriptVariable($link) . '\'}';
+						$tinyMCELinkListArray[] = '{title: \'' . Core_Str::escapeJavascriptVariable($oStructure->dataTitle) . '\', value: \'' . Core_Str::escapeJavascriptVariable($link) . '\'}';
 					}
 				}
 
@@ -279,11 +279,11 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		$oStructures->queryBuilder()
 			->clearOrderBy()
 			->orderBy('structures.sorting', 'ASC');
-		
+
 		$aChildren = $oStructures->getAllByparent_id($iParentId);
 		foreach ($aChildren as $oStructure)
 		{
-			$oStructure->menu_name = str_repeat('  ', $iLevel) . $oStructure->name;
+			$oStructure->dataTitle = str_repeat('  ', $iLevel) . $oStructure->name;
 			$aReturn[$oStructure->id] = $oStructure;
 			$aReturn += $this->_fillStructureList($iSiteId, $oStructure->id, $iLevel + 1);
 		}

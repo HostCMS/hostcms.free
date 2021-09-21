@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -41,6 +41,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopPriceBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
+			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemBlock = Admin_Form_Entity::factory('Div')->class('well with-header'))
 			;
 
@@ -187,6 +188,12 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 			$aAllPricesIDs[] = $oShop_Price->id;
 		}
+
+		$oMainRow5->add(Admin_Form_Entity::factory('Checkbox')
+			->name('include_modifications')
+			->caption(Core::_('Shop_Price_Setting.include_modifications'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-6'))
+		);
 
 		$oShopItemBlock
 			->add($oHeaderDiv = Admin_Form_Entity::factory('Div')
@@ -457,6 +464,9 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$bNeedsRePost = FALSE;
 
+		$bIncludeModifications = !is_null(Core_Array::getPost('include_modifications'));
+		$aExistModificationsIds = $aTmpShop_Price_Setting_Items = array();
+
 		// Существующие товары
 		$aShop_Price_Setting_Items = $this->_object->Shop_Price_Setting_Items->findAll(FALSE);
 		foreach ($aShop_Price_Setting_Items as $oShop_Price_Setting_Item)
@@ -482,6 +492,15 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				$oShop_Price_Setting_Item->old_price = $old_price;
 				$oShop_Price_Setting_Item->new_price = $price;
 				$oShop_Price_Setting_Item->save();
+
+				// Сохраняем данные о модификации
+				if ($bIncludeModifications)
+				{
+					$oShop_Price_Setting_Item->Shop_Item->modification_id
+						&& $aExistModificationsIds[] = $oShop_Price_Setting_Item->shop_item_id;
+
+					$aTmpShop_Price_Setting_Items[] = $oShop_Price_Setting_Item;
+				}
 			}
 		}
 
@@ -521,29 +540,48 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 							->old_price($old_price)
 							->new_price($value)
 							->save();
+
+						// Сохраняем данные о модификации
+						if ($bIncludeModifications)
+						{
+							$oShop_Price_Setting_Item->Shop_Item->modification_id
+								&& $aExistModificationsIds[] = $oShop_Price_Setting_Item->shop_item_id;
+
+							$aTmpShop_Price_Setting_Items[] = $oShop_Price_Setting_Item;
+						}
 					}
 				}
 			}
 		}
 
-		// Проводим документ
-		/*Core_Array::getPost('posted')
-			? $this->_object->post()
-			: $this->_object->unpost();*/
+		// Модификациям установка тех же цен
+		if ($bIncludeModifications)
+		{
+			foreach ($aTmpShop_Price_Setting_Items as $oShop_Price_Setting_Item)
+			{
+				$oShop_Item = $oShop_Price_Setting_Item->Shop_Item;
 
-		/*if (Core_Array::getPost('posted') && !$this->posted)
-		{
-			$this->_object->post();
+				if (!$oShop_Item->modification_id)
+				{
+					$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+
+					foreach ($aModifications as $oModification)
+					{
+						if (!in_array($oModification->id, $aExistModificationsIds))
+						{
+							$oNew_Shop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+							$oNew_Shop_Price_Setting_Item
+								->shop_price_setting_id($this->_object->id)
+								->shop_price_id($oShop_Price_Setting_Item->shop_price_id)
+								->shop_item_id($oModification->id)
+								->old_price($oModification->price)
+								->new_price($oShop_Price_Setting_Item->new_price)
+								->save();
+						}
+					}
+				}
+			}
 		}
-		elseif (!Core_Array::getPost('posted') && $this->posted)
-		{
-			$this->_object->unpost();
-		}
-		elseif ($bNeedsRePost)
-		{
-			$this->_object->unpost();
-			$this->_object->post();
-		}*/
 
 		($bNeedsRePost || !Core_Array::getPost('posted')) && $this->_object->unpost();
 		Core_Array::getPost('posted') && $this->_object->post();

@@ -50,4 +50,14 @@ return array(
 	'convert' => 'Перетворити',
 	'convertedMsg' => 'Перетворені таблиці: %s.',
 	'add_counter' => 'Автоматично додати код відстеження',
+
+	'option_database_table_name' => 'Назва таблиці в базі даних',
+	'option_database_write_query_count' => 'Кількість запитів на запис',
+	'option_database_read_query_count' => 'Кількість запитів на читання',
+	'option_database_change_query_count' => 'Кількість запитів на зміну',
+	'option_sample_text' => 'Приклад тексту',
+	'option_files_count' => 'Кількість файлів',
+	'option_math_count' => 'Кількість обчислень',
+	'option_string_count' => 'Кількість рядків',
+	'option_benchmark_file_path' => 'Шлях до файлу для скачування',
 );

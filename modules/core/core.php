@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core
 {
@@ -118,13 +118,26 @@ class Core
 			// Service Unavailable
 			Core_Response::sendHttpStatusCode(503);
 
-			echo $e->getMessage();
+			$file503 = CMS_FOLDER . self::$mainConfig['errorDocument503'];
+
+			if (is_file($file503))
+			{
+				include($file503);
+			}
+			else
+			{
+				echo $e->getMessage();
+			}
+
 			die();
 		}
 
 		// Constants init
 		$oConstants = Core_Entity::factory('Constant');
-		$oConstants->queryBuilder()->where('active', '=', 1);
+		$oConstants
+			->queryBuilder()
+			->where('active', '=', 1);
+
 		$aConstants = $oConstants->findAll();
 		foreach ($aConstants as $oConstant)
 		{
@@ -134,6 +147,12 @@ class Core
 		!defined('TMP_DIR') && define('TMP_DIR', 'hostcmsfiles/tmp/');
 		!defined('DEFAULT_LNG') && define('DEFAULT_LNG', 'ru');
 		!defined('BACKUP_DIR') && define('BACKUP_DIR', CMS_FOLDER . 'hostcmsfiles' . DIRECTORY_SEPARATOR . 'backup' . DIRECTORY_SEPARATOR);
+
+		// Права доступа к директории
+		define('CHMOD', self::$mainConfig['dirMode']);
+
+		// Права доступа к файлу
+		define('CHMOD_FILE', self::$mainConfig['fileMode']);
 
 		// Если есть ID сессии и сессия еще не запущена - то стартуем ее
 		// Запускается здесь для получения языка из сессии.
@@ -177,6 +196,12 @@ class Core
 			'switchSelectToAutocomplete' => 100,
 			'autocompleteItems' => 10,
 			'cms_folders' => NULL,
+			'dirMode' => 0755,
+			'fileMode' => 0644,
+			'errorDocument503' => 'hostcmsfiles/503.htm',
+			'compressionJsDirectory' => 'hostcmsfiles/js/',
+			'compressionCssDirectory' => 'hostcmsfiles/css/',
+			'sitemapDirectory' => 'hostcmsfiles/sitemap/',
 			'session' => array(
 				'driver' => 'database',
 				'class' => 'Core_Session_Database',
@@ -328,7 +353,7 @@ class Core
 			: 'Undefined error';
 
 		$aStack = array();
-		
+
 		$aDebugTrace = Core::debugBacktrace();
 		foreach ($aDebugTrace as $aTrace)
 		{
@@ -377,7 +402,7 @@ class Core
 		{
 			$debug_backtrace = debug_backtrace();
 			array_shift($debug_backtrace);
-			
+
 			foreach ($debug_backtrace as $history)
 			{
 				if (isset($history['file']) && isset($history['line']))
@@ -395,7 +420,7 @@ class Core
 
 		return $aDebugTrace;
 	}
-	
+
 	/**
 	 * Cut CMS_FOLDER from $path
 	 * @param string $path path
@@ -461,7 +486,7 @@ class Core
 	static public function _shutdown()
 	{
 		// Явно закрываем сессию до закрытия соединения с БД в деструкторе
-		Core_Session::close();
+		class_exists('Core_Session') && Core_Session::close();
 
 		$lastError = error_get_last();
 		if ($lastError && in_array($lastError['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE)))
@@ -651,10 +676,10 @@ class Core
 		define('ERROR_EMAIL', $oSite->getErrorEmail());
 
 		// Права доступа к директории
-		define('CHMOD', octdec($oSite->chmod));
+		//define('CHMOD', octdec($oSite->chmod));
 
 		// Права доступа к файлу
-		define('CHMOD_FILE', octdec($oSite->files_chmod));
+		//define('CHMOD_FILE', octdec($oSite->files_chmod));
 
 		// Формат вывода даты
 		define('DATE_FORMAT', $oSite->date_format);

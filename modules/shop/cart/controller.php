@@ -33,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller extends Core_Servant_Properties
 {
@@ -186,9 +186,13 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 	 * Get all goods in the cart
 	 * @param Shop_Model $oShop shop
 	 * @return array
+	 * @hostcms-event Shop_Cart_Controller.onBeforeGetAll
+	 * @hostcms-event Shop_Cart_Controller.onAfterGetAll
 	 */
 	public function getAll(Shop_Model $oShop)
 	{
+		Core_Event::notify(get_class($this) . '.onBeforeGetAll', $this);
+
 		// Проверяем наличие данных о пользователе
 		$aShop_Cart = $this->siteuser_id
 			? $this->_getAllFromDb($oShop)
@@ -256,7 +260,11 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 		$this->totalDiscountPrices = $aDiscountPrices;
 
-		return $aShop_Cart;
+		Core_Event::notify(get_class($this) . '.onAfterGetAll', $this, array($aShop_Cart));
+
+		$eventResult = Core_Event::getLastReturn();
+
+		return !is_null($eventResult) ? $eventResult : $aShop_Cart;
 	}
 
 	/**

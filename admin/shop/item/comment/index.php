@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -69,8 +69,8 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 if (!is_null($oShop_Item->id) || $comment_parent_id)
 {
 	// Элементы меню
-	$oAdmin_Form_Entity_Menus->add(		
-		Admin_Form_Entity::factory('Menu')			
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
 			->name(Core::_('Shop.items_catalog_add_form_comment_link'))
 			->icon('fa fa-plus')
 			->img('/admin/images/comment_add.gif')
@@ -79,24 +79,27 @@ if (!is_null($oShop_Item->id) || $comment_parent_id)
 			)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-			)			
+			)
 	);
 }
 
-$additionalParamsProperties = 'shop_id=' . $shop_id . '&shop_group_id=' . $iShopGroupId;
+if ($oShop->id)
+{
+	$additionalParamsProperties = 'shop_id=' . $oShop->id . '&shop_group_id=' . $iShopGroupId;
 
-$oAdmin_Form_Entity_Menus->add(
-	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Item.property_header'))
-		->img('/admin/images/page_gear.gif')
-		->icon('fa fa-gears')
-		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
-		)
-		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
-		)
-);
+	$oAdmin_Form_Entity_Menus->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Item.property_header'))
+			->img('/admin/images/page_gear.gif')
+			->icon('fa fa-gears')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/comment/property/index.php', NULL, NULL, $additionalParamsProperties)
+			)
+	);
+}
 
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
@@ -332,7 +335,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 $bItem = !is_null($oShop_Item->id);

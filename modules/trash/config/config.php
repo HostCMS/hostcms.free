@@ -1,5 +1,5 @@
 <?php
 
-return array (
-	'maxExactCount' => 100000
+return array(
+	'maxExactCount' => 100000,
 );

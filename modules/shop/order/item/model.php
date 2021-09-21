@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Model extends Core_Entity
 {
@@ -54,6 +54,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		'shop_order' => array(),
 		'shop_item' => array(),
 		'shop_warehouse' => array(),
+		'shop_order_item_status' => array(),
 		'user' => array()
 	);
 
@@ -92,14 +93,25 @@ class Shop_Order_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Check shop_order_item was canceled
+	 */
+	public function isCanceled()
+	{
+		return $this->shop_order_item_status_id && $this->Shop_Order_Item_Status->canceled;
+	}
+
+	/**
 	 * Get order sum with currency name
 	 * @return string
 	 */
-	public function sum()
+	public function sumBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars(
-			sprintf("%.2f %s", $this->getAmount(), $this->Shop_Order->Shop_Currency->name)
-		);
+		if (!$this->shop_order_item_status_id || !$this->Shop_Order_Item_Status->canceled)
+		{
+			return htmlspecialchars(
+				sprintf("%.2f %s", $this->getAmount(), $this->Shop_Order->Shop_Currency->name)
+			);
+		}
 	}
 
 	/**
@@ -124,6 +136,40 @@ class Shop_Order_Item_Model extends Core_Entity
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
 				htmlspecialchars($this->name)
 			);
+		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_order_item_status_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		// Только у типа "Товар"
+		if ($this->type == 0)
+		{
+			ob_start();
+
+			$path = $oAdmin_Form_Controller->getPath();
+
+			$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
+
+			$additionalParams = Core_Str::escapeJavascriptVariable(
+				str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+			);
+
+			Core::factory('Core_Html_Entity_Span')
+				->class('padding-left-10')
+				->add(
+					$oCore_Html_Entity_Dropdownlist
+						->value($this->shop_order_item_status_id)
+						->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions())
+						->onchange("$.adminLoad({path: '{$path}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).find('li[selected]').prop('id') }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+						->data('change-context', 'true')
+					)
+				->execute();
+
+			return ob_get_clean();
 		}
 	}
 
@@ -170,6 +216,27 @@ class Shop_Order_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Mark entity as deleted
+	 * @return Core_Entity
+	 */
+	public function markDeleted()
+	{
+		$oShop_Order = $this->Shop_Order;
+
+		$this->deleteReservedItems();
+
+		$return = parent::markDeleted();
+
+		if ($oShop_Order->posted)
+		{
+			$oShop_Order->posted = 0;
+			$oShop_Order->post();
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
@@ -188,7 +255,18 @@ class Shop_Order_Item_Model extends Core_Entity
 
 		$this->Shop_Order_Item_Digitals->deleteAll(FALSE);
 		$this->Shop_Order_Item_Codes->deleteAll(FALSE);
-		
+
+		$this->deleteReservedItems();
+
+		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Delete reserved items for order
+	 * @return self
+	 */
+	public function deleteReservedItems()
+	{
 		if ($this->shop_item_id)
 		{
 			$aShop_Item_Reserveds = $this->Shop_Order->Shop_Item_Reserveds->getAllByshop_item_id($this->shop_item_id);
@@ -198,7 +276,7 @@ class Shop_Order_Item_Model extends Core_Entity
 			}
 		}
 
-		return parent::delete($primaryKey);
+		return $this;
 	}
 
 	/**
@@ -342,6 +420,8 @@ class Shop_Order_Item_Model extends Core_Entity
 			}
 		}
 
+		$this->shop_order_item_status_id && $this->addEntity($this->Shop_Order_Item_Status->clearEntities());
+
 		return $this;
 	}
 
@@ -403,6 +483,26 @@ class Shop_Order_Item_Model extends Core_Entity
 
 			$this->save();
 		}
+
+		return $this;
+	}
+
+	/**
+	 * Push change item status history
+	 * @return self
+	 */
+	public function historyPushChangeItemStatus()
+	{
+		$oShop_Order_Item_Status = $this->shop_order_item_status_id
+			? $this->Shop_Order_Item_Status
+			: NULL;
+
+		$oShop_Order_History = Core_Entity::factory('Shop_Order_History');
+		$oShop_Order_History->shop_order_id = $this->shop_order_id;
+		$oShop_Order_History->shop_order_status_id = $this->Shop_Order->shop_order_status_id;
+		$oShop_Order_History->text = Core::_('Shop_Order_Item.change_item_status', $this->name, $oShop_Order_Item_Status ? $oShop_Order_Item_Status->name : Core::_('Shop_Order.notStatus'), FALSE);
+		$oShop_Order_History->color = $oShop_Order_Item_Status ? $this->Shop_Order_Item_Status->color : '#aebec4';
+		$oShop_Order_History->save();
 
 		return $this;
 	}

@@ -69,7 +69,7 @@ if (Core::moduleIsActive('siteuser'))
 			// Пользователь авторизован
 			if (!is_null($oCurrentSiteuser) && $oSiteuser->id != $oCurrentSiteuser->id)
 			{
-				$type = intval(Core_Array::getGet('type'));
+				$type = Core_Array::getGet('type', 0, 'int');
 
 				if ($type == 0 || !is_null(Core_Entity::factory('Siteuser_Relationship_Type')->find($type)->id))
 				{

@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Informationsystem.
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'category_name' => 'Group Name',
 	'category_guid_id' => 'GUID GROUP ID',
@@ -40,5 +31,5 @@ return array(
 	'item_large_image' => 'Item Large Image',
 	'item_small_image' => 'Item Small Image',
 	'item_shortcuts' => 'Shortcuts',
-	'item_siteuser_id' => 'Siteuser ID',
+	'item_siteuser_id' => 'Client ID',
 );

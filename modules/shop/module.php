@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-11-03';
+	public $date = '2021-05-25';
 
 	/**
 	 * Module name
@@ -41,6 +41,39 @@ class Shop_Module extends Core_Module
 		2 => 'searchUnindexItem',
 		3 => 'recountShop',
 		4 => 'rebuildFastfilter',
+		5 => 'unsetApplyPurchaseDiscounts',
+		6 => 'setApplyPurchaseDiscounts',
+	);
+
+	protected $_options = array(
+		'itemEditWarehouseLimit' => array(
+			'type' => 'int',
+			'default' => 20
+		),
+		'smallImagePrefix' => array(
+			'type' => 'string',
+			'default' => 'small_'
+		),
+		'itemLargeImage' => array(
+			'type' => 'string',
+			'default' => 'item_%d.%s'
+		),
+		'itemSmallImage' => array(
+			'type' => 'string',
+			'default' => 'small_item_%d.%s'
+		),
+		'groupLargeImage' => array(
+			'type' => 'string',
+			'default' => 'group_%d.%s'
+		),
+		'groupSmallImage' => array(
+			'type' => 'string',
+			'default' => 'small_group_%d.%s'
+		),
+		'shop_item_card_xsl' => array(
+			'type' => 'string',
+			'default' => 'ЦенникиТоваров'
+		),
 	);
 
 	/**
@@ -74,7 +107,7 @@ class Shop_Module extends Core_Module
 	{
 		/**
 		 * $_SESSION['search_block'] - номер блока индексации
-		 * $_SESSION['last_limit'] - количество проиндексирвоанных последним блоком
+		 * $_SESSION['last_limit'] - количество проиндексированных последним блоком
 		 */
 		if (!isset($_SESSION['search_block']))
 		{
@@ -485,10 +518,14 @@ class Shop_Module extends Core_Module
 						$oShop_Item
 							->showXmlComments(TRUE)
 							->showXmlProperties($showXmlProperties)
-							->showXmlSpecialprices(TRUE);
+							->showXmlSpecialprices(TRUE)
+							->showXmlCommentsRating(TRUE);
 
 						$oShop_Item->shop_group_id
 							&& $oSearch_Page->addEntity($oShop_Item->Shop_Group);
+
+						$oShop_Item->Shop->shop_currency_id
+							&& $oSearch_Page->addEntity($oShop_Item->Shop->Shop_Currency);
 
 						Core_Event::notify(get_class($this) . '.searchCallback', $this, array($oSearch_Page, $oShop_Item));
 
@@ -590,10 +627,20 @@ class Shop_Module extends Core_Module
 				break;
 				// Recount shop
 				case 3:
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
 					Core_Entity::factory('Shop', $entityId)->recount();
 				break;
 				// Rebuild fastfilter
 				case 4:
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
 					$oShop = Core_Entity::factory('Shop', $entityId);
 
 					// Groups
@@ -631,6 +678,61 @@ class Shop_Module extends Core_Module
 						$position += $limit;
 					}
 					while(count($aShop_Items));
+				break;
+				case 5:
+					// Не применять скидки от суммы заказа и карты к товарам со скидками
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
+					$dayFieldName = 'day' . date('N');
+					$time = time();
+					$sDatetime = Core_Date::timestamp2sql(time());
+
+					Core_QueryBuilder::update('shop_items')
+						->set('apply_purchase_discount', 0)
+						->join('shop_item_discounts', 'shop_item_discounts.shop_item_id', '=', 'shop_items.id')
+						->join('shop_discounts', 'shop_item_discounts.shop_discount_id', '=', 'shop_discounts.id')
+						->where('shop_items.shop_id', '=', $entityId)
+						->where('shop_items.deleted', '=', 0)
+						->where('shop_discounts.active', '=', 1)
+						->where('shop_discounts.deleted', '=', 0)
+						->where('shop_discounts.start_datetime', '<=', $sDatetime)
+						->where('shop_discounts.end_datetime', '>=', $sDatetime)
+						->where('shop_discounts.start_time', '<=', date('H:i:s', $time))
+						->where('shop_discounts.end_time', '>=', date('H:i:s', $time))
+						->where('shop_discounts.' . $dayFieldName, '=', 1)
+						->execute();
+				break;
+				case 6:
+					// Применять скидки от суммы заказа и карты к товарам без скидкок
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
+					$dayFieldName = 'day' . date('N');
+					$time = time();
+					$sDatetime = Core_Date::timestamp2sql(time());
+
+					Core_QueryBuilder::update('shop_items')
+						->set('apply_purchase_discount', 1)
+						->leftJoin('shop_item_discounts', 'shop_item_discounts.shop_item_id', '=', 'shop_items.id')
+						->leftJoin('shop_discounts', 'shop_item_discounts.shop_discount_id', '=', 'shop_discounts.id',
+						array(
+							array('AND' => array('shop_discounts.active', '=', 1)),
+							array('AND' => array('shop_discounts.deleted', '=', 0)),
+							array('AND' => array('shop_discounts.start_datetime', '<=', $sDatetime)),
+							array('AND' => array('shop_discounts.end_datetime', '>=', $sDatetime)),
+							array('AND' => array('shop_discounts.start_time', '<=', date('H:i:s', $time))),
+							array('AND' => array('shop_discounts.end_time', '>=', date('H:i:s', $time))),
+							array('AND' => array('shop_discounts.' . $dayFieldName, '=', 1))
+						))
+						->where('shop_items.shop_id', '=', $entityId)
+						->where('shop_items.deleted', '=', 0)
+						->where('shop_discounts.id', 'IS', NULL)
+						->execute();
 				break;
 			}
 		}

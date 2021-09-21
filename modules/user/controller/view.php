@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_View extends Admin_Form_Action_Controller
 {
@@ -113,18 +113,18 @@ class User_Controller_View extends Admin_Form_Action_Controller
 									<!-- <div class="stats-value pink">284</div>-->
 									<!-- <div class="stats-title">FOLLOWING</div>-->
 
-									<?php									
+									<?php
 									$aCompanies = Core_Entity::factory('Company')->findAll();
-									
+
 									foreach ($aCompanies as $oCompany)
 									{
-										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);	
-									
+										$aCompany_Department_Post_Users = $this->_object->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
+
 										foreach ($aCompany_Department_Post_Users as $oCompany_Department_Post_User)
 										{
 											if (count($aCompanies))
 											{
-											?>											
+											?>
 												<div class="h5">
 													<?php echo htmlspecialchars($oCompany->name)?>
 												</div>
@@ -135,7 +135,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 											<div class="gray"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></div>
 											<?php
 										}
-									}									
+									}
 									?>
 								</div>
 							</div>
@@ -182,7 +182,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												{
 												?>
 													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts">
+														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
 															<div class="profile-badge orange">
 																<i class="fa fa-phone orange"></i>
 																<span><?php echo Core::_("User.view_phones")?></span>
@@ -214,7 +214,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												{
 												?>
 													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts">
+														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
 															<div class="profile-badge palegreen">
 																<i class="fa fa-envelope-o palegreen"></i>
 																<span><?php echo Core::_("User.view_emails")?></span>
@@ -249,7 +249,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												{
 												?>
 													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts">
+														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
 															<div class="profile-badge azure">
 																<i class="fa fa-share-alt azure"></i>
 																<span><?php echo Core::_("User.view_socials")?></span>
@@ -281,7 +281,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												{
 												?>
 													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts">
+														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
 															<div class="profile-badge yellow">
 																<i class="fa fa-comments-o yellow"></i>
 																<span><?php echo Core::_("User.view_messengers")?></span>
@@ -316,7 +316,7 @@ class User_Controller_View extends Admin_Form_Action_Controller
 												{
 												?>
 													<div class="col-xs-12 col-md-6">
-														<div class="profile-contacts">
+														<div class="profile-contacts no-padding-left no-padding-top no-padding-right">
 															<div class="profile-badge magenta">
 																<i class="fa fa-globe magenta"></i>
 																<span><?php echo Core::_("User.view_websites")?></span>

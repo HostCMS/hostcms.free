@@ -5,7 +5,7 @@ $oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->lib
 $Shop_Controller_Show = new Shop_Controller_Show($oShop);
 
 /* Количество */
-$on_page = intval(Core_Array::getGet('on_page'));
+$on_page = Core_Array::getGet('on_page', 0, 'int');
 if ($on_page > 0 && $on_page < 150)
 {
 	$limit = $on_page;
@@ -21,42 +21,30 @@ else
 }
 
 $Shop_Controller_Show
-	//->warehouseMode('in-stock')
+	// Выводить свойства товаров
+	->itemsProperties(TRUE)
+	->commentsProperties(TRUE)
+	// ->seoFilters(TRUE)
+	// Выводить специальные цены
+	->specialprices(TRUE)
+	// Выводить модификации на уровне с товаром
+	//->modificationsList(TRUE)
+	//->modificationsGroup(TRUE)
+	// Режим вывода групп
+	//->groupsMode('none')
+	// Выводить доп. св-ва групп
+	//->groupsProperties(TRUE)
+	// Фильтровать по ярлыкам
+	//->filterShortcuts(TRUE)
+	// Только доступные элементы списков в фильтре
+	//->itemsPropertiesListJustAvailable(TRUE)
+	// ->barcodes(TRUE)
+	// ->warehouseMode('in-stock')
 	->limit($limit)
 	->parseUrl();
 
 // Выводить товары из подгрупп
 $Shop_Controller_Show->subgroups(TRUE);
-
-// Обработка скачивания файла электронного товара
-$guid = Core_Array::getGet('download_file');
-if (strlen($guid))
-{
-	$oShop_Order_Item_Digital = Core_Entity::factory('Shop_Order_Item_Digital')->getByGuid($guid);
-
-	if (!is_null($oShop_Order_Item_Digital) && $oShop_Order_Item_Digital->Shop_Order_Item->Shop_Order->shop_id == $oShop->id)
-	{
-		$iDay = 7;
-
-		// Проверяем, доступна ли ссылка (Ссылка доступна в течение недели после оплаты)
-		if (Core_Date::sql2timestamp($oShop_Order_Item_Digital->Shop_Order_Item->Shop_Order->payment_datetime) > time() - 24 * 60 * 60 * $iDay)
-		{
-			$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;
-			if ($oShop_Item_Digital->filename != '')
-			{
-				Core_File::download($oShop_Item_Digital->getFullFilePath(), $oShop_Item_Digital->filename);
-				exit();
-			}
-		}
-		else
-		{
-			Core_Message::show(Core::_('Shop_Order_Item_Digital.time_is_up', $iDay));
-		}
-	}
-
-	Core_Page::instance()->response->status(404)->sendHeaders()->showBody();
-	exit();
-}
 
 // Быстрый фильтр
 if (Core_Array::getRequest('fast_filter'))
@@ -65,9 +53,7 @@ if (Core_Array::getRequest('fast_filter'))
 
 	if ($oShop->filter)
 	{
-		$Shop_Controller_Show
-			->modificationsList(TRUE)
-			->modificationsGroup(TRUE);
+		$Shop_Controller_Show->modificationsList(TRUE);
 
 		// В корне выводим из всех групп
 		if ($Shop_Controller_Show->group == 0)
@@ -94,7 +80,8 @@ if (Core_Array::getRequest('fast_filter'))
 		$aFilterProperties = $Shop_Controller_Show->getFilterProperties();
 		foreach ($aFilterProperties as $propertyId => $aTmpProperties)
 		{
-			if (isset($aTmpProperties[0]) && $aTmpProperties[0][0]->type == 7)
+			// Checkboxes or select like checkbox
+			if (isset($aTmpProperties[0]) && ($aTmpProperties[0][0]->type == 7 || $aTmpProperties[0][0]->type == 3))
 			{
 				$Shop_Controller_Show->removeFilter('property', $propertyId);
 			}
@@ -108,7 +95,7 @@ if (Core_Array::getRequest('fast_filter'))
 
 		if (Core_Array::getPost('producer_id'))
 		{
-			$iProducerId = intval(Core_Array::getPost('producer_id'));
+			$iProducerId = Core_Array::getPost('producer_id', 0, 'int');
 			$Shop_Controller_Show->producer($iProducerId);
 		}
 
@@ -126,6 +113,7 @@ if (Core_Array::getRequest('fast_filter'))
 			->clearOrderBy();
 
 		$aJson['count'] = $Shop_Controller_Show->getCount();
+		// $aJson['query'] = Core_Database::instance()->getLastQuery();
 	}
 
 	Core::showJson($aJson);
@@ -134,7 +122,7 @@ if (Core_Array::getRequest('fast_filter'))
 // Сравнение товаров
 if (Core_Array::getRequest('compare'))
 {
-	$shop_item_id = intval(Core_Array::getRequest('compare'));
+	$shop_item_id = Core_Array::getRequest('compare', 0, 'int');
 
 	if (Core_Entity::factory('Shop_Item', $shop_item_id)->shop_id == $oShop->id)
 	{
@@ -172,7 +160,7 @@ if (Core_Array::getRequest('compare'))
 // Избранное
 if (Core_Array::getRequest('favorite'))
 {
-	$shop_item_id = intval(Core_Array::getRequest('favorite'));
+	$shop_item_id = Core_Array::getRequest('favorite', 0, 'int');
 
 	if (Core_Entity::factory('Shop_Item', $shop_item_id)->shop_id == $oShop->id)
 	{
@@ -210,24 +198,54 @@ if (Core_Array::getRequest('favorite'))
 	exit();
 }
 
+// Обработка скачивания файла электронного товара
+$guid = Core_Array::getGet('download_file');
+if (strlen($guid))
+{
+	$oShop_Order_Item_Digital = Core_Entity::factory('Shop_Order_Item_Digital')->getByGuid($guid);
+
+	if (!is_null($oShop_Order_Item_Digital) && $oShop_Order_Item_Digital->Shop_Order_Item->Shop_Order->shop_id == $oShop->id)
+	{
+		$iDay = 7;
+
+		// Проверяем, доступна ли ссылка (Ссылка доступна в течение недели после оплаты)
+		if (Core_Date::sql2timestamp($oShop_Order_Item_Digital->Shop_Order_Item->Shop_Order->payment_datetime) > time() - 24 * 60 * 60 * $iDay)
+		{
+			$oShop_Item_Digital = $oShop_Order_Item_Digital->Shop_Item_Digital;
+			if ($oShop_Item_Digital->filename != '')
+			{
+				Core_File::download($oShop_Item_Digital->getFullFilePath(), $oShop_Item_Digital->filename);
+				exit();
+			}
+		}
+		else
+		{
+			Core_Message::show(Core::_('Shop_Order_Item_Digital.time_is_up', $iDay));
+		}
+	}
+
+	Core_Page::instance()->response->status(404)->sendHeaders()->showBody();
+	exit();
+}
+
+
 // Viewed items
 if ($Shop_Controller_Show->item && $Shop_Controller_Show->viewed)
 {
 	// Core_Session::start();
 	// Core_Session::setMaxLifeTime(28800, TRUE);
-
 	$Shop_Controller_Show->addIntoViewed();
 }
 
 if (!is_null(Core_Array::getGet('vote')))
 {
 	$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
-	$entity_id = intval(Core_Array::getGet('id'));
+	$entity_id = Core_Array::getGet('id', 0, 'int');
 
 	if ($entity_id && !is_null($oSiteuser))
 	{
-		$entity_type = strval(Core_Array::getGet('entity_type'));
-		$vote = intval(Core_Array::getGet('vote'));
+		$entity_type = Core_Array::getGet('entity_type', '', 'str');
+		$vote = Core_Array::getGet('vote', 0, 'int');
 
 		$oObject = Vote_Controller::instance()->getVotedObject($entity_type, $entity_id);
 

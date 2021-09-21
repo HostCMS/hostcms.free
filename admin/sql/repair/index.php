@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -29,17 +29,15 @@ $oAdmin_Form_Controller
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');
 
-$sSqlPath = '/admin/sql/index.php';
-
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs->add(
 	Admin_Form_Entity::factory('Breadcrumb')
 		->name(Core::_('Sql.title'))
 		->href(
-			$oAdmin_Form_Controller->getAdminLoadHref($sSqlPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/index.php', NULL, NULL, '')
 		)
 		->onclick(
-			$oAdmin_Form_Controller->getAdminLoadAjax($sSqlPath, NULL, NULL, '')
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/index.php', NULL, NULL, '')
 	)
 )->add(
 	Admin_Form_Entity::factory('Breadcrumb')

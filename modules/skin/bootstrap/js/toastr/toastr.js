@@ -256,6 +256,16 @@
 					audioElement.setAttribute("src", "/modules/skin/bootstrap/sound/alert.mp3");
 
 					var promise = audioElement.play();
+					
+					if (promise !== undefined) 
+					{
+						promise.then(_ => {
+						// Autoplay started!
+						}).catch(error => {
+						// Autoplay was prevented.
+						// Show a "Play" button so that user can start playback.
+						});
+					}
                 }
 
                 if (options.debug && console) {

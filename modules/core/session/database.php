@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -93,7 +93,7 @@ class Core_Session_Database extends Core_Session
 	{
 		if ($this->_lock($id))
 		{
-			$queryBuilder = Core_QueryBuilder::select('value')
+			$queryBuilder = Core_QueryBuilder::select('time', 'value', 'maxlifetime')
 				->from('sessions')
 				->where('id', '=', $id)
 				->limit(1);
@@ -101,19 +101,28 @@ class Core_Session_Database extends Core_Session
 			$row = $queryBuilder->execute()->asAssoc()->current();
 
 			$this->_read = TRUE;
-
 			self::$_started = TRUE;
 
 			if ($row)
 			{
-				// Update last change time
-				Core_QueryBuilder::update('sessions')
-					//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
-					->columns(array('time' => time()))
-					->where('id', '=', $id)
-					->execute();
+				// Session's still available
+				if ($row['time'] + $row['maxlifetime'] > time())
+				{
+					// Update last change time
+					Core_QueryBuilder::update('sessions')
+						//->columns(array('time' => 'UNIX_TIMESTAMP(NOW())'))
+						->columns(array('time' => time()))
+						->where('id', '=', $id)
+						->execute();
 
-				return base64_decode($row['value']);
+					return base64_decode($row['value']);
+				}
+				else
+				{
+					Core_QueryBuilder::delete('sessions')
+						->where('id', '=', $id)
+						->execute();
+				}
 			}
 		}
 
@@ -191,8 +200,8 @@ class Core_Session_Database extends Core_Session
 	public function sessionMaxlifetime($maxlifetime, $overwrite = FALSE)
 	{
 		$oCore_QueryBuilder = Core_QueryBuilder::update('sessions')
-				->set('maxlifetime', $maxlifetime)
-				->where('id', '=', session_id());
+			->set('maxlifetime', $maxlifetime)
+			->where('id', '=', session_id());
 
 		!$overwrite
 			&& $oCore_QueryBuilder->where('maxlifetime', '<', $maxlifetime);

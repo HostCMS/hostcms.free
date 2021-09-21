@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Заказы магазина',
@@ -77,6 +77,7 @@ return array(
 	'order_card_site_user' => "Пользователь",
 	'order_card_site_user_id' => "код",
 	'table_description' => "Наименование",
+	'table_item_status' => "Статус",
 	'table_mark' => "Артикул",
 	'table_mesures' => "Ед. изм.",
 	'table_warehouse' => "Склад",
@@ -101,7 +102,6 @@ return array(
 	'changeStatusPosted_success' => 'Статус отправки успешно изменен',
 	'edit_success' => "Информация о заказе успешно добавлена!",
 	'order_card_system_info' => 'Информация о заказе',
-	'show_order_status_link' => 'Справочник статусов заказа',
 	'changeStatusCanceled_success' => 'Статус отмены заказа изменен',
 	'apply_success' => "Информация успешно изменена.",
 	'confirm_admin_subject' => 'Подтверждение оплаты, заказ N %1$s от %3$s в магазине "%2$s"',

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Processor_Observer
 {
@@ -43,7 +43,8 @@ class Xsl_Processor_Observer
 		if (Core::checkPanel() && Core_Array::getSession('HOSTCMS_SHOW_XML'))
 		{
 			$oXslPanel = Core::factory('Core_Html_Entity_Div')
-				->class('hostcmsPanel');
+				->class('hostcmsPanel')
+				->style('display: none');
 
 			$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
 				->class('hostcmsSubPanel hostcmsXsl')
@@ -79,6 +80,7 @@ class Xsl_Processor_Observer
 
 			ob_start();
 			Core::factory('Core_Html_Entity_Textarea')
+					->readonly('readonly')
 					->value($object->formatXml($object->getXml()))
 					//->onclick('$(this).select()')
 					->execute();

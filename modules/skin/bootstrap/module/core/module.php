@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -783,7 +783,8 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 											->type('submit')
 											->value(Core::_('admin_form.apply'))
 											->onclick(
-												'$(\'.modal-license\').hide(); '
+												// '$(\'.modal-license\').hide(); '
+												'bootbox.hideAll(); '
 												. $oAdmin_Form_Controller->getAdminSendForm('accountInfo', 'apply')
 											)
 										)

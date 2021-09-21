@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Set prices',
@@ -42,4 +42,5 @@ return array(
 	'post_success' => 'Document posted successfully!',
 	'unpost_success' => 'Document unposted successfully!',
 	'convolution' => 'Convolution',
+	'include_modifications' => 'Add product modifications and set prices',
 );

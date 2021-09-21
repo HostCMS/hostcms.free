@@ -55,34 +55,15 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: '#aebec4';
 
 				$this->getField('color')
-					->class('form-control colorpicker minicolors-input')
+					->colorpicker(TRUE)
 					->value($sColorValue);
-
-				$oScript = Admin_Form_Entity::factory('Script')
-					->value("$('.colorpicker').each(function () {
-						$(this).minicolors({
-							control: $(this).attr('data-control') || 'hue',
-							defaultValue: $(this).attr('data-defaultValue') || '',
-							inline: $(this).attr('data-inline') === 'true',
-							letterCase: $(this).attr('data-letterCase') || 'lowercase',
-							opacity: $(this).attr('data-opacity'),
-							position: $(this).attr('data-position') || 'bottom left',
-							change: function (hex, opacity) {
-								if (!hex) return;
-								if (opacity) hex += ', ' + opacity;
-							},
-							theme: 'bootstrap'
-						});
-					});"
-				);
 
 				$oMainTab
 					->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 					->move($this->getField('caption')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
 					->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
 					->move($this->getField('icon')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
-					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2)
-					->add($oScript);
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
 				// Удаляем группу
 				$oAdditionalTab->delete($this->getField('shop_tab_dir_id'));

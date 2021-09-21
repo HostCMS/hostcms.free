@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap extends Core_Skin
 {
@@ -56,6 +56,10 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
+			
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery.ui.touch-punch.min.js')
+			
+			
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
@@ -212,6 +216,9 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						?><div class="navbar-account">
 							<ul class="account-area">
+								<?php
+								/*
+								?>
 								<li id="phone">
 									<a href="#" title="<?php echo Core::_('Admin.phone')?>" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-phone"></i>
@@ -321,6 +328,9 @@ class Skin_Bootstrap extends Core_Skin
 									});
 									</script>
 								</li>
+								<?php
+								*/
+								?>
 								<li id="bookmarks">
 									<a href="#" title="<?php echo Core::_('Admin.bookmarks')?>" data-toggle="dropdown" class="dropdown-toggle">
 										<i class="icon fa fa-star-o"></i>
@@ -557,7 +567,6 @@ class Skin_Bootstrap extends Core_Skin
 									</a>
 									<!--Tasks Dropdown-->
 									<div id="sitesListBox" class="pull-right dropdown-menu dropdown-arrow dropdown-notifications"></div>
-
 									<script>
 										var sitesListBox = document.getElementById('sitesListBox');
 										sitesListBox.onclick = function(event){
@@ -663,9 +672,9 @@ class Skin_Bootstrap extends Core_Skin
 														<div class="status"></div>
 													</div>
 													<div class="last-chat-time"></div>
-													<div class="back">
-														<i class="fa fa-arrow-circle-left"></i>
-													</div>
+												</div>
+												<div class="back">
+													<i class="fa fa-arrow-circle-left"></i>
 												</div>
 											</div>
 											<div id="messages-none" class="hidden margin-left-10 margin-top-10"><?php echo Core::_('User.chat_messages_none')?></div>
@@ -716,7 +725,7 @@ class Skin_Bootstrap extends Core_Skin
 										<div class="avatar avatar-user" title="<?php echo Core::_('Admin.profile')?>">
 											<img src="<?php echo $oUser->getAvatar()?>">
 										</div>
-										<section class="hidden-xs">
+										<section class="hidden-sm">
 											<h2>
 												<span class="profile">
 													<span>
@@ -849,6 +858,10 @@ class Skin_Bootstrap extends Core_Skin
 								<label>
 									<input type="checkbox" id="checkbox_fixedheader">
 									<span class="text"><?php echo Core::_('Admin.fixed-header')?></span>
+								</label>
+								<label>
+									<input type="checkbox" id="checkbox_fixedtables">
+									<span class="text"><?php echo Core::_('Admin.fixed-tables')?></span>
 								</label>
 							</div>
 							<!-- Settings -->
@@ -1098,7 +1111,7 @@ class Skin_Bootstrap extends Core_Skin
 								);
 								?><li>
 									<a href="<?php echo htmlspecialchars($aTmpMenu['href'])?>" onclick="<?php echo htmlspecialchars($aTmpMenu['onclick'])?>" class="menu-icon">
-										<i class="menu-icon fa <?php echo $aTmpMenu['ico']?>"></i>
+										<i class="menu-icon <?php echo $aTmpMenu['ico']?>"></i>
 										<span class="menu-text"><?php echo $aTmpMenu['name']?></span>
 									</a>
 								</li>
@@ -1293,7 +1306,7 @@ class Skin_Bootstrap extends Core_Skin
 <div class="container">
 	<div class="row">
 		<div class="col-xs-12">
-			<p class="copy pull-left copyright">Copyright © 2005–2020 <?php echo Core::_('Admin.company')?></p>
+			<p class="copy pull-left copyright">Copyright © 2005–2021 <?php echo Core::_('Admin.company')?></p>
 			<p class="copy text-right contacts">
 				<?php echo Core::_('Admin.website')?> <a href="http://<?php echo Core::_('Admin.company-website')?>" target="_blank"><?php echo Core::_('Admin.company-website')?></a>
 				<br/>
@@ -1630,58 +1643,12 @@ class Skin_Bootstrap extends Core_Skin
 	}
 
 	/**
-	 * Change language
-	 */
-	public function changeLanguage()
-	{
-		?><form name="authorization" action="./index.php" method="post">
-			<div class="row">
-			<?php
-			$aInstallConfig = Core_Config::instance()->get('install_config');
-			$aLng = Core_Array::get($aInstallConfig, 'lng', array());
-
-			Admin_Form_Entity::factory('Select')
-				->name('lng_value')
-				->caption(Core::_('Install.changeLanguage'))
-				->options($aLng)
-				->value(isset($_SESSION['LNG_INSTALL']) ? $_SESSION['LNG_INSTALL'] : DEFAULT_LNG)
-				->divAttr(array('class' => 'form-group col-xs-12 col-md-6'))
-				->execute();
-			?>
-			</div>
-
-			<div class="row">
-				<div class="form-group col-xs-12 text-align-right">
-					 <button name="step_0" type="submit" class="btn btn-info">
-						<?php echo Core::_('Install.next')?> <i class="fa fa-arrow-right"></i>
-					</button>
-				</div>
-			</div>
-		</form>
-		<?php
-	}
-
-	/**
 	 * Show Front End panels
 	 */
 	public function frontend()
 	{
 		$iTimestamp = abs(Core::crc32(defined('CURRENT_VERSION') ? CURRENT_VERSION : '6.0'));
 
-		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/bootstrap-iso.css?<?php echo $iTimestamp?>" /><?php
-		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/frontend.css?<?php echo $iTimestamp?>" /><?php
-		?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/js/toastr/toastr.css?<?php echo $iTimestamp?>" /><?php
-		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/fontawesome/css/font-awesome.min.css?<?php echo $iTimestamp?>" /><?php
-		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
-		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
-		?><script src="/admin/wysiwyg/jquery.tinymce.min.js"></script><?php
-		?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js"></script><?php
-		?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js"></script><?php
-		?><script src="/modules/skin/bootstrap/js/toastr/toastr.js"></script><?php
-		?><script>var hQuery = $.noConflict(true);</script><?php
-		?><script src="/modules/skin/default/frontend/frontend.js"></script>
-
-		<?php
 		$oTemplate = Core_Page::instance()->template;
 		$aTemplates = array();
 		$bLess = FALSE;
@@ -1695,6 +1662,27 @@ class Skin_Bootstrap extends Core_Skin
 		} while ($oTemplate = $oTemplate->getParent());
 
 		$aTemplates = array_reverse($aTemplates);
+
+		if ($bLess)
+		{
+			?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/bootstrap-iso.css?<?php echo $iTimestamp?>" /><?php
+			?><link rel="stylesheet" type="text/css" href="/modules/skin/bootstrap/js/toastr/toastr.css?<?php echo $iTimestamp?>" /><?php
+		}
+
+		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/frontend.css?<?php echo $iTimestamp?>" /><?php
+		?><link rel="stylesheet" type="text/css" href="/modules/skin/default/frontend/fontawesome/css/font-awesome.min.css?<?php echo $iTimestamp?>" /><?php
+		?><script src="/modules/skin/default/frontend/jquery.min.js"></script><?php
+		?><script src="/modules/skin/default/frontend/jquery-ui.min.js"></script><?php
+		?><script src="/admin/wysiwyg/jquery.tinymce.min.js"></script><?php
+
+		if ($bLess)
+		{
+			?><script src="/modules/skin/bootstrap/js/colorpicker/jquery.minicolors.min.js"></script><?php
+			?><script src="/modules/skin/bootstrap/js/jquery.slimscroll.js"></script><?php
+			?><script src="/modules/skin/bootstrap/js/toastr/toastr.js"></script><?php
+		}
+		?><script>var hQuery = $.noConflict(true);</script><?php
+		?><script src="/modules/skin/default/frontend/frontend.js"></script><?php
 
 		if ($bLess)
 		{
@@ -1751,7 +1739,8 @@ class Skin_Bootstrap extends Core_Skin
 		}
 
 		$oHostcmsTopPanel = Core::factory('Core_Html_Entity_Div')
-			->class('hostcmsPanel hostcmsTopPanel');
+			->class('hostcmsPanel hostcmsTopPanel')
+			->style('display: none');
 
 		$oHostcmsSubPanel = Core::factory('Core_Html_Entity_Div')
 			->class('hostcmsSubPanel')
@@ -2214,6 +2203,23 @@ class Skin_Bootstrap extends Core_Skin
 				)
 		);
 
+		$aCoreConfig = Core_Config::instance()->get('core_wysiwyg');
+
+		$aConfig = array();
+
+		$aExcludeKeys = array(
+			'plugins',
+			'toolbar1',
+			'menubar',
+			'file_picker_callback',
+		);
+
+		foreach ($aCoreConfig as $key => $value)
+		{
+			!in_array($key, $aExcludeKeys)
+				&& $aConfig[] = $key . ": " . $value;
+		}
+
 		$oHostcmsTopPanel
 			->add(
 				Core::factory('Core_Html_Entity_Script')
@@ -2223,7 +2229,7 @@ class Skin_Bootstrap extends Core_Skin
 						'$("body").addClass("backendBody");' .
 						'$(".hostcmsPanel,.hostcmsSectionPanel,.hostcmsSectionWidgetPanel").draggable({containment: "document"});' .
 						'$.sortWidget();' .
-						'$("*[hostcms\\\\:id]").hostcmsEditable({path: "/edit-in-place.php"});' . PHP_EOL .
+						'$.hostcmsEditable({path: "/edit-in-place.php", wysiwygConfig: {' . implode(",\n", $aConfig) . '} });' . PHP_EOL .
 						'})(hQuery);'
 					)
 			);

@@ -28,6 +28,10 @@ class Skin_Default_Admin_Form_Entity_Input extends Admin_Form_Entity
 	 */
 	public function __construct()
 	{
+		$this->_allowedProperties += array(
+			'colorpicker',
+		);
+
 		// Combine
 		$this->_skipProperies = array_combine($this->_skipProperies, $this->_skipProperies);
 

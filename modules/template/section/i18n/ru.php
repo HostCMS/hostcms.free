@@ -6,7 +6,7 @@
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Секции макета сайта',
@@ -17,6 +17,8 @@ return array(
 	'name' => 'Название',
 	'alias' => 'Псевдоним',
 	'color' => 'Цвет границы секции',
+	'prefix' => 'Код перед секцией',
+	'suffix' => 'Код после секции',
 	'sorting' => 'Порядок сортировки',
 	'template_id' => 'Идентификатор макета',
 	'edit_success' => 'Данные успешно добавлены!',

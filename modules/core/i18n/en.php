@@ -7,7 +7,7 @@
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'error_file_write' => 'Error while opening file to write %s; check your access rights to folder.',
@@ -108,27 +108,27 @@ return array(
 	'deleteNote' => 'Delete note',
 
 	'key_not_found' => 'License Key Not Found!',
-	'getting_key' => '<div style="overflow: auto; height: 500px; z-index: 9999; background-color: rgba(255, 255, 255, .4); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4)">
+	'getting_key' => '<div style="margin-top: 20px; overflow: auto; z-index: 9999; background-color: rgba(255, 255, 255, .8); padding: 0 20px; text-shadow: 1px 1px 0 rgba(255, 255, 255, .4)">
 	<h2>Getting key</h2>
 
-	<p>After installing you should register new user on our site or use exist username and password to access your «<a href="http://www.hostcms.ru/users/" target="_blank">Personal account</a>»</p>
+	<p>After installing you should register new user on our site or use exist username and password to access your «<a href="https://www.hostcms.ru/users/" target="_blank">Personal account</a>»</p>
 	<p>When you have logged in, you will see a list of licenses at menu "My licenses":</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="screen" />
+	<img src="//www.hostcms.ru/images/documentation/guide/site/licenses-list.png" class="img-responsive" />
 	</p>
 
 	<p>You can enter given license number and PIN in the <a href="/admin/" target="_blank">administration center</a> HostCMS in the section "Websites" — "Settings" — "Registration data".</p>
 	<p>Afterwards you can get license key. In section "Websites" — "Domains" click on "key" in the column "License key":</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-2.png" class="screen" />
+	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-2.png" class="img-responsive" />
 	</p>
 
 	<p>Then click on key:</p>
 
 	<p align="center">
-	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-3.png" class="screen" />
+	<img src="//www.hostcms.ru/images/documentation/introduction/install/step-by-step/key/key-3.png" class="img-responsive" />
 	</p>
 
 	<h2>Administration Center</h2>

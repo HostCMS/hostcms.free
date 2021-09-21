@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Model extends Core_Entity
 {
@@ -247,7 +247,7 @@ class Tag_Model extends Core_Entity
 				: $oTag_Shop_Item->delete();
 		}
 
-		$oObject->delete();
+		$oObject->markDeleted();
 
 		return $this;
 	}

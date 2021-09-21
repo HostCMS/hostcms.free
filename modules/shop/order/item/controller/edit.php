@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -166,9 +166,20 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 		);
 
-		$oAdditionalTab->move($this->getField('shop_item_id'), $oMainTab);
+		// $oAdditionalTab->move($this->getField('shop_item_id'), $oMainTab);
+		// $oMainTab->move($this->getField('shop_item_id')->id('itemId')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
+		$this->getField('shop_item_id')->id('itemId');
 
-		$oMainTab->move($this->getField('shop_item_id')->id('itemId')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
+		$oAdditionalTab->delete($this->getField('shop_order_item_status_id'));
+
+		$oDropdownlistStatuses = Admin_Form_Entity::factory('Dropdownlist')
+			->options(Shop_Order_Item_Status_Controller_Edit::getDropdownlistOptions())
+			->name('shop_order_item_status_id')
+			->value($this->_object->shop_order_item_status_id)
+			->caption(Core::_('Shop_Order_Item.shop_order_item_status_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+
+		$oMainRow2->add($oDropdownlistStatuses);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			// &shop_order_id= может использоваться в хуках, когда цена товара зависит от опций заказа (страна, город и т.д.)
@@ -219,6 +230,15 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			}
 		}
 
+		if ($this->_object->id)
+		{
+			$bChangedStatus = $this->_object->shop_order_item_status_id != Core_Array::get($this->_formValues, 'shop_order_item_status_id', 0);
+		}
+		else
+		{
+			$bChangedStatus = FALSE;
+		}
+
 		parent::_applyObjectProperty();
 
 		// Reset `unloaded`
@@ -227,8 +247,23 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->save();
 
 		// Reserved
-		$this->_object->Shop_Order->Shop->reserve && !$this->_object->Shop_Order->paid
+		$this->_object->Shop_Order->Shop->reserve
+			&& !$this->_object->Shop_Order->paid && !$this->_object->Shop_Order->canceled && !$this->_object->Shop_Order->posted
 			&& $this->_object->Shop_Order->reserveItems();
+
+		// Reset 'posted'
+		if ($this->_object->Shop_Order->posted)
+		{
+			$this->_object->Shop_Order->posted = 0;
+			$this->_object->Shop_Order->post();
+		}
+
+		if ($bChangedStatus && $this->_object->shop_order_item_status_id)
+		{
+			$this->_object->historyPushChangeItemStatus();
+		}
+
+		$this->_object->Shop_Order->checkShopOrderItemStatuses();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 

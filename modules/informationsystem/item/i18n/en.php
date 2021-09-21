@@ -1,13 +1,5 @@
 <?php
-/**
- * Information systems.
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Information items',
 	'show_information_groups_title' => 'Information system "%s"',
@@ -38,7 +30,7 @@ return array(
 	'sorting' => 'Sort',
 	'ip' => 'IP',
 	'showed' => 'Displaying rate',
-	'siteuser_id' => 'User code',
+	'siteuser_id' => 'Client',
 	'image_large' => 'Large picture',
 	'image_small' => 'Small picture',
 	'path' => 'Name of item in URL',
@@ -137,5 +129,5 @@ return array(
 	'msg_download_complete' => "Import has finished!",
 	'information_items_copy_form_title' => 'Copy item',
 	'add_value'=>'Add the default property values ​​for the items with unset values',
-	'file_does_not_specified' => 'File not specified',	
+	'file_does_not_specified' => 'File not specified',
 );

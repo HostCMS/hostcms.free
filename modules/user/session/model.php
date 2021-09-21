@@ -73,7 +73,7 @@ class User_Session_Model extends Core_Entity
 	public function imgBackend()
 	{
 		!is_null($this->dataSession) && Core::factory('Core_Html_Entity_Span')
-			->value('<i class="fa fa-check palegreen" title="Session exists"></i>')
+			->value('<i class="fa fa-check-circle green" title="Session exists"></i>')
 			->execute();
 	}
 
@@ -140,9 +140,19 @@ class User_Session_Model extends Core_Entity
 	 */
  	public function browserBackend()
 	{
-		return !is_null($this->user_agent)
+		$browser = !is_null($this->user_agent)
 			? Core_Browser::getBrowser($this->user_agent)
 			: '—';
+			
+		if (!is_null($browser))
+		{
+			$ico = Core_Browser::getBrowserIco($browser);
+			
+			!is_null($ico)
+				&& $browser = '<i class="' . $ico . '"></i> ' . $browser;
+		}
+			
+		return $browser;
 	}
 
 	/**
@@ -150,7 +160,7 @@ class User_Session_Model extends Core_Entity
 	 */
  	public function destroy()
 	{
-		Core_Session::destroy($this->session_id);
+		Core_Session::destroy($this->id);
 		$this->delete();
 
 		return $this;

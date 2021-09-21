@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../../../bootstrap.php');
 
@@ -30,7 +30,6 @@ $oAdmin_Form_Controller
 	->path($sAdminFormAction)
 	->title(Core::_('Shop_Item.properties_item_for_groups_root_title'))
 	->pageTitle(Core::_('Shop_Item.properties_item_for_groups_root_title'));
-
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

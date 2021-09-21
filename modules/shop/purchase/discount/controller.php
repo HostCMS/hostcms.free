@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 {
@@ -39,7 +39,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 	public function __construct(Shop_Model $oShop)
 	{
 		parent::__construct();
-		
+
 		$this->_shop = $oShop;
 		$this->prices = array();
 		$this->dateTime = Core_Date::timestamp2sql(time());
@@ -94,14 +94,17 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 		$aPrices = $this->prices;
 		rsort($aPrices);
 
-		// Идентификатор скидки по купону
-		$shop_purchase_discount_id = 0;
+		// Идентификаторы скидок для переданного купона
+		$aShop_Purchase_Discount_IDs = array();
 
-		// Получаем данные о купоне
 		if (strlen($this->couponText))
 		{
-			$oShop_Purchase_Discounts_For_Coupon = $this->_shop->Shop_Purchase_Discounts->getByCouponText($this->couponText);
-			!is_null($oShop_Purchase_Discounts_For_Coupon) && $shop_purchase_discount_id = $oShop_Purchase_Discounts_For_Coupon->id;
+			// Все скидки, связанные с этим купоном
+			$aShop_Purchase_Discounts_For_Coupons = $this->_shop->Shop_Purchase_Discounts->getAllByCouponText($this->couponText);
+			foreach ($aShop_Purchase_Discounts_For_Coupons as $oShop_Purchase_Discounts_For_Coupon)
+			{
+				$aShop_Purchase_Discount_IDs[] = $oShop_Purchase_Discounts_For_Coupon->id;
+			}
 		}
 
 		// Извлекаем все активные скидки, доступные для текущей даты
@@ -133,11 +136,11 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 
 			$bCheckAmount = $amount >= $min_amount
 				&& ($amount < $max_amount || $max_amount == 0)
-				&& (!$oShop_Purchase_Discount->coupon || $oShop_Purchase_Discount->id == $shop_purchase_discount_id);
+				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
 
 			$bCheckQuantity = $quantity >= $oShop_Purchase_Discount->min_count
 				&& ($quantity < $oShop_Purchase_Discount->max_count || $oShop_Purchase_Discount->max_count == 0)
-				&& (!$oShop_Purchase_Discount->coupon || $oShop_Purchase_Discount->id == $shop_purchase_discount_id);
+				&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
 
 			$bCheckOrdersSum = FALSE;
 
@@ -156,7 +159,7 @@ class Shop_Purchase_Discount_Controller extends Core_Servant_Properties
 
 					$bCheckOrdersSum = $fSum >= $min_amount
 					&& ($fSum < $max_amount || $max_amount == 0)
-					&& (!$oShop_Purchase_Discount->coupon || $oShop_Purchase_Discount->id == $shop_purchase_discount_id);
+					&& (!$oShop_Purchase_Discount->coupon || in_array($oShop_Purchase_Discount->id, $aShop_Purchase_Discount_IDs));
 				}
 			}
 

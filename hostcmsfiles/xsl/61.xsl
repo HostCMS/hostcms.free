@@ -16,11 +16,17 @@
 		<li><span>&labelOrderConfirmation;</span></li>
 		</ul>
 		
+		<h1>&labelAddress;</h1>
+		
+		<!-- Выводим ошибку (error), если она была передана через внешний параметр -->
+		<xsl:if test="error != ''">
+			<div class="alert alert-danger alert-cart" role="alert">
+				<xsl:value-of disable-output-escaping="yes" select="error" />
+			</div>
+		</xsl:if>
+		
 		<form method="post" enctype="multipart/form-data">
-			<h1>&labelAddress;</h1>
-			
 			<div class="comment shop_address">
-				
 				<div class="row">
 					<div class="caption">&labelCountry;</div>
 					<div class="field">

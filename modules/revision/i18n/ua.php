@@ -8,4 +8,5 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 	'markDeleted_success' => 'Інформація про версію успішно видалена!',
 	'rollback_success' => 'Версія відновлена ​​успішно!',
+	'option_storeDays' => 'Час зберігання версій, дні'
 );

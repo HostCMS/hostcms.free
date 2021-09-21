@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -306,7 +306,7 @@ $oAdminFormActionApply = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 if ($oAdminFormActionApply && $oAdmin_Form_Controller->getAction() == 'apply')
 {
 	$oControllerApply = Admin_Form_Action_Controller::factory(
-		'Admin_Form_Action_Controller_Type_Apply', $oAdminFormActionApply
+		'Shop_Order_Item_Controller_Apply', $oAdminFormActionApply
 	);
 
 	// Добавляем типовой контроллер редактирования контроллеру формы

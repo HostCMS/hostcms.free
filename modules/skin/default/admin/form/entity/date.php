@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 {
@@ -18,10 +18,42 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 	 */
 	public function __construct()
 	{
+		$this->_allowedProperties += array(
+			'options',
+			'dateTimeFormat',
+		);
+
+		$this->_skipProperies[] = 'options';
+		$this->_skipProperies[] = 'dateTimeFormat';
+
 		parent::__construct();
 
 		$this->size(9)
-			->class('calendar_field');
+			->class('calendar_field')
+			->options(array(
+				'showOtherMonths' => true,
+				'selectOtherMonths' => true,
+				'changeMonth' => true,
+				'changeYear' => true
+			));
+	}
+
+	/**
+	 * Convert $this->velue
+	 * @return string
+	 */
+	protected function _convertDatetime($value)
+	{
+		if ($value == '0000-00-00 00:00:00' || $value == '')
+		{
+			return '';
+		}
+		elseif ($this->dateTimeFormat != '')
+		{
+			return date($this->dateTimeFormat, Core_Date::sql2timestamp($value));
+		}
+
+		return Core_Date::sql2datetime($value);
 	}
 
 	/**
@@ -29,9 +61,7 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 	 */
 	public function execute()
 	{
-		$this->value = $this->value == '0000-00-00' || $this->value == ''
-			? ''
-			: Core_Date::sql2date($this->value);
+		$this->value = $this->_convertDatetime($this->value);
 
 		$aAttr = $this->getAttrsString();
 
@@ -63,7 +93,7 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 		<script>
 		(function($) {
 			$("#<?php echo Core_Str::escapeJavascriptVariable($this->id)?>")
-				.datepicker({showOtherMonths: true, selectOtherMonths: true, changeMonth: true, changeYear: true});
+				.datepicker({<?php echo Core_Array::array2jsObject($this->options)?>});
 		})(jQuery);
 		</script><?php
 

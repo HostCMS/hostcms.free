@@ -9,10 +9,16 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Seo_Model extends Core_Entity
 {
+	/**
+	 * Backend property
+	 * @var int
+	 */
+	public $img = 1;
+
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -29,6 +35,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		'shop' => array(),
 		'shop_group' => array(),
 		'shop_producer' => array(),
+		'shop_filter_seo_dir' => array(),
 		'user' => array(),
 	);
 
@@ -143,13 +150,14 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	 */
 	public function conditionsBackend()
 	{
-		$aValues = array();
+		$aValues = $aValuesTo = array();
 
 		$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll(FALSE);
 
 		foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
 		{
 			$aValues[$oShop_Filter_Seo_Property->property_id][] = $oShop_Filter_Seo_Property->value;
+			$aValuesTo[$oShop_Filter_Seo_Property->property_id][] = $oShop_Filter_Seo_Property->value_to;
 		}
 
 		$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->shop_id);
@@ -157,7 +165,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		// Массив свойств товаров, разрешенных для группы $shop_group_id
 		$aProperties = $linkedObject->getPropertiesForGroup($this->shop_group_id);
 
-		$aAvailableProperties = array(0, 11, 1, 7);
+		$aAvailableProperties = array(0, 11, 1, 7, 8, 9);
 		Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 		?>
 		<div class="fill-form-text">
@@ -173,22 +181,14 @@ class Shop_Filter_Seo_Model extends Core_Entity
 						<?php
 							$aResult = array();
 
-							foreach ($aValues[$oProperty->id] as $value)
+							foreach ($aValues[$oProperty->id] as $key => $value)
 							{
-								switch ($oProperty->type)
-								{
-									case 3:
-										if (Core::moduleIsActive('list'))
-										{
-											$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
 
-											!is_null($oList_Item)
-												&& $aResult[] = $oList_Item->value;
-										}
-									break;
-									default:
-										$aResult[] = $value;
-								}
+								$aResult[] = $this->_printValue($value, $oProperty) . (
+									$oProperty->Shop_Item_Property->filter == 6 && isset($aValuesTo[$oProperty->id][$key])
+										? ' — ' . $this->_printValue($aValuesTo[$oProperty->id][$key], $oProperty)
+										: ''
+								);
 							}
 						?>
 						<span><?php echo htmlspecialchars(implode(', ', $aResult))?></span>
@@ -227,7 +227,12 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll(FALSE);
 		foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
 		{
-			$aValues[$oShop_Filter_Seo_Property->property_id][] = $oShop_Filter_Seo_Property->value;
+			$aValues[$oShop_Filter_Seo_Property->property_id][] = is_null($oShop_Filter_Seo_Property->value_to) || $oShop_Filter_Seo_Property->value_to == ''
+				? $this->_correctValue($oShop_Filter_Seo_Property->value, $oShop_Filter_Seo_Property->Property)
+				: array(
+					$this->_correctValue($oShop_Filter_Seo_Property->value, $oShop_Filter_Seo_Property->Property),
+					$this->_correctValue($oShop_Filter_Seo_Property->value_to, $oShop_Filter_Seo_Property->Property)
+				);
 		}
 
 		$linkedObject = Core_Entity::factory('Shop_Item_Property_List', $this->shop_id);
@@ -235,7 +240,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		// Массив свойств товаров, разрешенных для группы $shop_group_id
 		$aProperties = $linkedObject->getPropertiesForGroup($this->shop_group_id);
 
-		$aAvailableProperties = array(0, 11, 1, 7);
+		$aAvailableProperties = array(0, 11, 1, 7, 8, 9);
 		Core::moduleIsActive('list') && $aAvailableProperties[] = 3;
 
 		foreach ($aProperties as $oProperty)
@@ -244,16 +249,22 @@ class Shop_Filter_Seo_Model extends Core_Entity
 			{
 				if (isset($aValues[$oProperty->id]))
 				{
-					$url .= rawurlencode($oProperty->tag_name) . '/';
+					$url .= rawurlencode($oProperty->tag_name);
 
-					foreach ($aValues[$oProperty->id] as $value)
+					$bType6 = $oProperty->type != 3 && $oProperty->type != 7 && $oProperty->type != 1
+						&& count($aValues[$oProperty->id]) == 1
+						&& is_array($aValues[$oProperty->id][0]);
+
+					$url .=  $bType6 ? '-' : '/';
+
+					foreach ($aValues[$oProperty->id] as $mValue)
 					{
 						switch ($oProperty->type)
 						{
 							case 3: // List
-								if (Core::moduleIsActive('list'))
+								if (Core::moduleIsActive('list') && !is_array($mValue))
 								{
-									$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
+									$oList_Item = $oProperty->List->List_Items->getById($mValue, FALSE);
 
 									!is_null($oList_Item)
 										&& $url .= rawurlencode($this->Shop->filter_mode == 1 && $oList_Item->path != ''
@@ -266,7 +277,16 @@ class Shop_Filter_Seo_Model extends Core_Entity
 								// nothing to do
 							break;
 							default:
-								$url .= rawurlencode($value) . '/';
+								if (!is_array($mValue))
+								{
+									$url .= rawurlencode($mValue);
+								}
+								else
+								{
+									$url .= rawurlencode($mValue[0]) . '-' . rawurlencode($mValue[1]);
+								}
+
+								$url .= '/';
 						}
 					}
 				}
@@ -274,6 +294,65 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		}
 
 		return $url;
+	}
+
+	/**
+	 * Get printable value for backend
+	 * @param string $value
+	 * @param Property_Model $oProperty
+	 * @return string
+	 */
+	protected function _printValue($value, $oProperty)
+	{
+		switch ($oProperty->type)
+		{
+			case 3:
+				if (Core::moduleIsActive('list'))
+				{
+					$oList_Item = $oProperty->List->List_Items->getById($value, FALSE);
+
+					!is_null($oList_Item)
+						&& $value = $oList_Item->value;
+				}
+			break;
+			case 8: // Date
+				$value = $value == '0000-00-00 00:00:00'
+					? ''
+					: Core_Date::sql2date($value);
+			break;
+			case 9: // Datetime
+				$value = $value == '0000-00-00 00:00:00'
+					? ''
+					: Core_Date::sql2datetime($value);
+			break;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Correct value for getUrl()
+	 * @param string $value
+	 * @param Property_Model $oProperty
+	 * @return string
+	 */
+	protected function _correctValue($value, $oProperty)
+	{
+		switch ($oProperty->type)
+		{
+			case 8: // Date
+				$value = $value == '0000-00-00 00:00:00'
+					? ''
+					: Core_Date::sql2date($value);
+			break;
+			case 9: // Datetime
+				$value = $value == '0000-00-00 00:00:00'
+					? ''
+					: Core_Date::sql2datetime($value);
+			break;
+		}
+
+		return $value;
 	}
 
 	/**
@@ -315,10 +394,13 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		!isset($this->_forbiddenTags['url'])
 			&& $this->addXmlTag('url', $this->Shop->Structure->getPath() . $this->getUrl());
 
-		$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll();
-		foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
+		if (!isset($this->_forbiddenTags['shop_filter_seo_property']))
 		{
-			$this->addEntity($oShop_Filter_Seo_Property->clearXmlTags());
+			$aShop_Filter_Seo_Properties = $this->Shop_Filter_Seo_Properties->findAll();
+			foreach ($aShop_Filter_Seo_Properties as $oShop_Filter_Seo_Property)
+			{
+				$this->addEntity($oShop_Filter_Seo_Property->clearXmlTags());
+			}
 		}
 
 		return $this;

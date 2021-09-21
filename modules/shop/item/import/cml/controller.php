@@ -24,7 +24,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 {
@@ -166,6 +166,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$this->_oSimpleXMLElement = new SimpleXMLElement($str, defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0);
 
+		$aNamespaces = $this->_oSimpleXMLElement->getNamespaces(TRUE);
+		if (count($aNamespaces))
+		{
+			reset($aNamespaces);
+			$this->namespace = current($aNamespaces);
+		}
+
 		$this->sShopDefaultPriceName = 'РОЗНИЧНАЯ';
 		$this->sShopDefaultPriceGUID = '';
 		$this->itemDescription = 'text';
@@ -284,7 +291,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				// Создаем массив параметров для загрузки картинок элементу
 				$aPicturesParam = array();
-				$aPicturesParam['large_image_isset'] = TRUE;
 				$aPicturesParam['large_image_source'] = $sSourceFile;
 				$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 				$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -622,7 +628,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 					// Создаем массив параметров для загрузки картинок элементу
 					$aPicturesParam = array();
-					$aPicturesParam['large_image_isset'] = TRUE;
 					$aPicturesParam['large_image_source'] = $sSourceFile;
 					$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 					$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -874,7 +879,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 
 						$aPicturesParam = array();
-						$aPicturesParam['large_image_isset'] = TRUE;
 						$aPicturesParam['large_image_source'] = $sSourceFile;
 						$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 						$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -1214,13 +1218,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$oShop = Core_Entity::factory('Shop', $this->iShopId);
 
-		$aNamespaces = $this->_oSimpleXMLElement->getNamespaces(true);
-		if (count($aNamespaces))
-		{
-			reset($aNamespaces);
-			$this->namespace = current($aNamespaces);
-		}
-
 		$timeout = Core::getmicrotime();
 
 		// CML 2.x
@@ -1508,17 +1505,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						is_null($oShopItem->path) && $oShopItem->path = '';
 
 						$oShopItem->save()->clearCache();
-
-						// Fast filter
-						if ($oShop->filter)
-						{
-							$Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
-							$Shop_Filter_Controller->fill($oShopItem);
-						}
-
-						// Indexation
-						$this->searchIndexation
-							&& $oShopItem->index();
 					}
 					else
 					{
@@ -1611,7 +1597,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						}
 					}
 
-					// Производитель
+					// Производитель у товаров
 					if ($this->_checkUpdateField('shop_producer_id'))
 					{
 						if (isset($oXmlItem->ТорговаяМарка))
@@ -1623,6 +1609,17 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$this->_setProducer(strval($oXmlItem->Изготовитель->Наименование), $oShopItem);
 						}
 					}
+
+					// Fast filter
+					if ($oShop->filter)
+					{
+						$Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
+						$Shop_Filter_Controller->fill($oShopItem);
+					}
+
+					// Indexation
+					$this->searchIndexation
+						&& $oShopItem->index();
 
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopItem', $this, array($oShopItem, $oXmlItem));
 
@@ -1648,6 +1645,19 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				&& !isset($this->_oSimpleXMLElement->Каталог)
 			)
 			{
+				Core_Session::start();
+				$importPosition = Core_Array::getSession('importPosition', 0);
+
+				if ($importPosition > 0)
+				{
+					isset($_SESSION['_aShop_Warehouse_Inventory_Ids'])
+						&& $this->_aShop_Warehouse_Inventory_Ids = $_SESSION['_aShop_Warehouse_Inventory_Ids'];
+
+					isset($_SESSION['_Shop_Price_Setting_Id'])
+						&& $this->_Shop_Price_Setting_Id = $_SESSION['_Shop_Price_Setting_Id'];
+				}
+				Core_Session::close();
+
 				$classifier = $this->_oSimpleXMLElement->Классификатор;
 
 				// Импортируем дополнительные свойства товаров
@@ -1657,7 +1667,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					? $this->_oSimpleXMLElement->ПакетПредложений
 					: $this->_oSimpleXMLElement->ИзмененияПакетаПредложений;
 
-				// Обработка специальных цен
+				// Обработка специальных цен делается независимо от $importPosition
 				foreach ($this->xpath($packageOfProposals, 'ТипыЦен/ТипЦены') as $oPrice)
 				{
 					$oShopPrice = Core_Entity::factory('Shop', $this->iShopId)
@@ -1701,33 +1711,40 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 				}
 
-				// Обработка складов
-				foreach ($this->xpath($packageOfProposals, 'Склады/Склад') as $oWarehouse)
+				if ($importPosition == 0)
 				{
-					$sWarehouseGuid = strval($oWarehouse->Ид);
-
-					$oShopWarehouse = $oShop
-						->Shop_Warehouses
-						->getByGuid($sWarehouseGuid, FALSE);
-
-					if (is_null($oShopWarehouse))
+					// Обработка складов
+					foreach ($this->xpath($packageOfProposals, 'Склады/Склад') as $oWarehouse)
 					{
-						$oShopWarehouse = Core_Entity::factory('Shop_Warehouse');
-						$oShopWarehouse->shop_id = $oShop->id;
-						$oShopWarehouse->guid = $sWarehouseGuid;
-						$oShopWarehouse->name = strval($oWarehouse->Наименование);
-						$oShopWarehouse->address = strval($oWarehouse->Адрес->Представление);
-						$oShopWarehouse->save();
+						$sWarehouseGuid = strval($oWarehouse->Ид);
+
+						$oShopWarehouse = $oShop
+							->Shop_Warehouses
+							->getByGuid($sWarehouseGuid, FALSE);
+
+						if (is_null($oShopWarehouse))
+						{
+							$oShopWarehouse = Core_Entity::factory('Shop_Warehouse');
+							$oShopWarehouse->shop_id = $oShop->id;
+							$oShopWarehouse->guid = $sWarehouseGuid;
+							$oShopWarehouse->name = strval($oWarehouse->Наименование);
+							$oShopWarehouse->address = strval($oWarehouse->Адрес->Представление);
+							$oShopWarehouse->save();
+						}
+
+						/*foreach ($this->xpath($oWarehouse, 'Адрес/АдресноеПоле') as $oWarehouseAddressField)
+						{
+							//echo "Адресное поле: " . strval($oWarehouseAddressField->Тип) . " - " . strval($oWarehouseAddressField->Значение) . "<br/>";
+						}*/
 					}
-
-					/*foreach ($this->xpath($oWarehouse, 'Адрес/АдресноеПоле') as $oWarehouseAddressField)
-					{
-						//echo "Адресное поле: " . strval($oWarehouseAddressField->Тип) . " - " . strval($oWarehouseAddressField->Значение) . "<br/>";
-					}*/
 				}
 
+				$xPath = $importPosition == 0
+					? 'Предложения/Предложение'
+					: 'Предложения/Предложение[position() > ' . $importPosition . ']';
+
 				// Обработка предложений
-				foreach ($this->xpath($packageOfProposals, 'Предложения/Предложение') as $oProposal)
+				foreach ($this->xpath($packageOfProposals, $xPath) as $oProposal)
 				{
 					Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeOffer', $this, array($oProposal));
 
@@ -1773,6 +1790,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 					if (!is_null($oShopItem))
 					{
+						$this->_bNewShopItem = FALSE;
+
 						// Если передан GUID модификации
 						if (strlen($sGUIDmod))
 						{
@@ -1787,6 +1806,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 									->shop_id($this->iShopId)
 									->shop_group_id(0)
 									->save();
+
+								$this->_bNewShopItem = TRUE;
 							}
 
 							// Подменяем товар на модификацию
@@ -2096,6 +2117,19 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							}
 						}
 
+						// Производитель у товров и модификаций
+						if ($this->_checkUpdateField('shop_producer_id'))
+						{
+							if (isset($oProposal->ТорговаяМарка))
+							{
+								$this->_setProducer(strval($oProposal->ТорговаяМарка), $oShopItem);
+							}
+							elseif (isset($oProposal->Изготовитель))
+							{
+								$this->_setProducer(strval($oProposal->Изготовитель->Наименование), $oShopItem);
+							}
+						}
+
 						$oShopItem->save()->clearCache();
 
 						// Fast filter
@@ -2108,6 +2142,21 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 						$this->_aReturn['updateItemCount']++;
 
 						Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterOffersShopItem', $this, array($oShopItem, $oProposal));
+					}
+
+					$importPosition++;
+
+					// Прерываем этап импорта
+					if ($this->timeout && (Core::getmicrotime() - $timeout + 2 > $this->timeout))
+					{
+						Core_Session::start();
+						$_SESSION['importPosition'] = $importPosition;
+						$_SESSION['_aShop_Warehouse_Inventory_Ids'] = $this->_aShop_Warehouse_Inventory_Ids;
+						$_SESSION['_Shop_Price_Setting_Id'] = $this->_Shop_Price_Setting_Id;
+						Core_Session::close();
+
+						$this->_aReturn['status'] = 'progress';
+						return $this->_aReturn;
 					}
 				}
 			}
@@ -2286,7 +2335,6 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 								// Создаем массив параметров для загрузки картинок элементу
 								$aPicturesParam = array();
-								$aPicturesParam['large_image_isset'] = TRUE;
 								$aPicturesParam['large_image_source'] = $sSourceFile;
 								$aPicturesParam['large_image_name'] = $sSourceFileBaseName;
 								$aPicturesParam['large_image_target'] = $sDestinationFolder . $sTargetFileName;
@@ -2439,6 +2487,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		Core_Session::start();
 		$_SESSION['importPosition'] = 0;
+		$_SESSION['_aShop_Warehouse_Inventory_Ids'] = $_SESSION['_Shop_Price_Setting_Id'] = array();
 		Core_Session::close();
 
 		// Пересчет количества товаров в группах
@@ -2706,9 +2755,16 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 								if ($sValue == 'true')
 								{
 									$oShop_Order->markDeleted();
+
+									$this->debug && Core_Log::instance()->clear()
+										->status(Core_Log::$MESSAGE)
+										->write(sprintf('1С, заказ %s помечен на удаление', $sInvoice));
 								}
 							break;
 							case 'Статус заказа':
+								// Отрезаем "[4] " в начале имени статуса
+								$sValue = preg_replace('/^\[\d+\] /', '', $sValue);
+
 								if (!$oShop_Order->shop_order_status_id
 									|| $oShop_Order->Shop_Order_Status->name != $sValue)
 								{
@@ -2724,6 +2780,13 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 									$oShop_Order->shop_order_status_id = $oShop_Order_Status->id;
 									$oShop_Order->save();
+
+									$this->debug && Core_Log::instance()->clear()
+										->status(Core_Log::$MESSAGE)
+										->write(sprintf('1С, заказ %s, изменение статуса заказа на %s', $sInvoice, $sValue));
+
+									$oShop_Order->historyPushChangeStatus();
+									$oShop_Order->notifyBotsChangeStatus();
 								}
 							break;
 						}
@@ -2954,11 +3017,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		return Core_Entity::factory('Shop_Warehouse_Inventory', $this->_aShop_Warehouse_Inventory_Ids[$shop_warehouse_id]);
 	}
 
-	protected $_oShop_Price_Setting_Id = NULL;
+	protected $_Shop_Price_Setting_Id = NULL;
 
 	public function getPrices()
 	{
-		if (is_null($this->_oShop_Price_Setting_Id))
+		if (is_null($this->_Shop_Price_Setting_Id))
 		{
 			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting');
 			$oShop_Price_Setting->shop_id = $this->iShopId;
@@ -2970,10 +3033,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oShop_Price_Setting->number = $oShop_Price_Setting->id;
 			$oShop_Price_Setting->save();
 
-			$this->_oShop_Price_Setting_Id = $oShop_Price_Setting->id;
+			$this->_Shop_Price_Setting_Id = $oShop_Price_Setting->id;
 		}
 
-		return Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+		return Core_Entity::factory('Shop_Price_Setting', $this->_Shop_Price_Setting_Id);
 	}
 
 	public function postAll()
@@ -2984,9 +3047,9 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			$oShop_Warehouse_Inventory->post();
 		}
 
-		if (!is_null($this->_oShop_Price_Setting_Id))
+		if (!is_null($this->_Shop_Price_Setting_Id))
 		{
-			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_oShop_Price_Setting_Id);
+			$oShop_Price_Setting = Core_Entity::factory('Shop_Price_Setting', $this->_Shop_Price_Setting_Id);
 			$oShop_Price_Setting->post();
 		}
 	}

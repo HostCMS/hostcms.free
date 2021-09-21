@@ -52,6 +52,9 @@
 
 				Core_Page::instance()->object->producer
 					&& $Shop_Controller_Show->producer(Core_Page::instance()->object->producer);
+
+				!is_null(Core_Page::instance()->object->tag)
+					&& $Shop_Controller_Show->tag(Core_Page::instance()->object->tag);
 			}
 			else
 			{
@@ -91,7 +94,8 @@
 				->modificationsGroup(TRUE)
 				->addMinMaxPrice()
 				->addProducers()
-				->applyFilter()
+				->itemsPropertiesListJustAvailable(TRUE)
+				//->applyFilter()
 				->show();
 		}
 

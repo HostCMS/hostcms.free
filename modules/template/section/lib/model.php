@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Model extends Core_Entity
 {
@@ -137,7 +137,7 @@ class Template_Section_Lib_Model extends Core_Entity
 
 				$sTitleWidgetDelete = htmlspecialchars(Core::_('Template_Section_Lib.widget_delete', $this->Lib->name));
 
-				?><div class="hostcmsSectionWidgetPanel">
+				?><div class="hostcmsSectionWidgetPanel" style="display: none">
 					<div class="draggable-indicator">
 						<svg width="16px" height="16px" viewBox="0 0 32 32">
 							<rect height="4" width="4" y="4" x="4" />
@@ -169,7 +169,7 @@ class Template_Section_Lib_Model extends Core_Entity
 
 			if ($bUserAccess)
 			{
-				?><div class="drag-handle"><i class="fa fa-hand-grab-o fa-fw"></i></div><?php
+				?><div class="drag-handle" style="display: none"><i class="fa fa-hand-grab-o fa-fw"></i></div><?php
 			}
 
 			if ($bCreateDiv)

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -63,8 +63,16 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 	/**
 	 * 48 icons
+	 * @var array
 	 */
-	static protected $_icon = array('fa fa-address-book', 'fa fa-address-card', 'fa fa-barcode', 'fa fa-bars', 'fa fa-beer', 'fa fa-bell', 'fa fa-bicycle', 'fa fa-binoculars', 'fa fa-birthday-cake', 'fa fa-bolt', 'fa fa-book', 'fa fa-bookmark', 'fa fa-briefcase', 'fa fa-bullseye', 'fa fa-camera', 'fa fa-car', 'fa fa-certificate', 'fa fa-cloud', 'fa fa-code', 'fa fa-coffee', 'fa fa-cube', 'fa fa-dashboard', 'fa fa-database', 'fa fa-dot-circle-o', 'fa fa-flask', 'fa fa-futbol-o', 'fa fa-gift', 'fa fa-glass', 'fa fa-heart', 'fa fa-hourglass', 'fa fa-leaf', 'fa fa-location-arrow', 'fa fa-magic', 'fa fa-magnet', 'fa fa-paper-plane', 'fa fa-paw', 'fa fa-plane', 'fa fa-plug', 'fa fa-road', 'fa fa-rocket', 'fa fa-smile-o', 'fa fa-snowflake-o', 'fa fa-space-shuttle', 'fa fa-star', 'fa fa-thumbs-up', 'fa fa-tree', 'fa fa-trophy', 'fa fa-wrench');
+	static protected $_icon = array(
+		'fa fa-address-book', 'fa fa-address-card', 'fa fa-barcode', 'fa fa-bars', 'fa fa-beer', 'fa fa-bell', 'fa fa-bicycle', 'fa fa-binoculars',
+		'fa fa-birthday-cake', 'fa fa-bolt', 'fa fa-book', 'fa fa-bookmark', 'fa fa-briefcase', 'fa fa-bullseye', 'fa fa-camera', 'fa fa-car',
+		'fa fa-certificate', 'fa fa-cloud', 'fa fa-code', 'fa fa-coffee', 'fa fa-cube', 'fa fa-dashboard', 'fa fa-database', 'fa fa-dot-circle-o',
+		'fa fa-flask', 'fa fa-futbol-o', 'fa fa-gift', 'fa fa-glass', 'fa fa-heart', 'fa fa-hourglass', 'fa fa-leaf', 'fa fa-location-arrow',
+		'fa fa-magic', 'fa fa-magnet', 'fa fa-paper-plane', 'fa fa-paw', 'fa fa-plane', 'fa fa-plug', 'fa fa-road', 'fa fa-rocket',
+		'fa fa-smile-o', 'fa fa-snowflake-o', 'fa fa-space-shuttle', 'fa fa-star', 'fa fa-thumbs-up', 'fa fa-tree', 'fa fa-trophy', 'fa fa-wrench'
+	);
 
 	/**
 	 * Get Icon for object ID
@@ -158,6 +166,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->setAdditionalParam(implode('&', $aTmp));
 
 		$this->formSettings();
+
 		return $this;
 	}
 
@@ -243,6 +252,51 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function formSettings()
 	{
+		if ($this->_Admin_Form)
+		{
+			if (is_null($this->_Admin_Form->key_field))
+			{
+				throw new Core_Exception('Admin form does not exist.');
+			}
+
+			$this->_Admin_Language = Core_Entity::factory('Admin_Language')->getCurrent();
+
+			$oAdmin_Word = $this->_Admin_Form->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
+
+			if ($oAdmin_Word && strlen($oAdmin_Word->name))
+			{
+				$this->title = $this->pageTitle = $oAdmin_Word->name;
+			}
+
+			$oUserCurrent = Core_Auth::getCurrentUser();
+			$user_id = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
+
+			$this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($user_id);
+
+			// Данные поля сортировки и направления из настроек пользователя
+			if ($this->_oAdmin_Form_Setting)
+			{
+				$aFilter = $this->getFilterJson();
+
+				$this
+					->filterSettings(is_array($aFilter) ? $aFilter : array())
+					->limit($this->_oAdmin_Form_Setting->on_page)
+					->current($this->_oAdmin_Form_Setting->page_number)
+					->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id)
+					->sortingDirection($this->_oAdmin_Form_Setting->order_direction);
+			}
+			else
+			{
+				//$oAdmin_Form_Field = $this->_Admin_Form->Admin_Form_Fields->getByName($this->_Admin_Form->default_order_field);
+				$oAdmin_Form_Field = $this->getAdminFormFieldByName($this->_Admin_Form->default_order_field);
+
+				// Данные по умолчанию из настроек формы
+				$oAdmin_Form_Field && $this
+					->sortingFieldId($oAdmin_Form_Field->id)
+					->sortingDirection($this->_Admin_Form->default_order_direction);
+			}
+		}
+
 		$this->request = $_REQUEST;
 
 		$formSettings = Core_Array::get($this->request, 'hostcms', array())
@@ -304,12 +358,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			}
 			elseif ($bAdmin_Form_Setting_Already_Exists)
 			{
-				$this->sortingFieldId(intval($this->_oAdmin_Form_Setting->order_field_id));
+				$this->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id);
 			}
-
-			// Set sorting field
-			/*$this->sortingFieldId
-				&& $this->_sortingAdmin_Form_Field = $this->_Admin_Form->Admin_Form_Fields->getById($this->sortingFieldId);*/
 
 			if (!is_null($this->sortingDirection))
 			{
@@ -336,9 +386,94 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		// Добавляем замену для windowId
 		$this->_externalReplace['{windowId}'] = $this->getWindowId();
+
 		return $this;
 	}
 
+	/**
+	 * Admin_Form_Fields of Admin_Form
+	 * @var array|NULL
+	 */
+	protected $_Admin_Form_Fields = NULL;
+
+	/**
+	 * Load Admin_Form_Fields
+	 * @return self
+	 */
+	public function loadAdminFormFields()
+	{
+		if (is_null($this->_Admin_Form_Fields))
+		{
+			$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll(FALSE);
+
+			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+			{
+				$this->_Admin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set Admin_Form_Fields
+	 * @param array $aAdmin_Form_Fields
+	 * @return self
+	 */
+	public function setAdminFormFields(array $aAdmin_Form_Fields)
+	{
+		$this->_Admin_Form_Fields = $aAdmin_Form_Fields;
+
+		return $this;
+	}
+
+	/**
+	 * Get Admin_Form_Fields
+	 * @return array
+	 */
+	public function getAdminFormFields()
+	{
+		$this->loadAdminFormFields();
+
+		return $this->_Admin_Form_Fields;
+	}
+
+	/**
+	 * Get Admin_Form_Field by ID
+	 * @return object|NULL
+	 */
+	public function getAdminFormFieldById($id)
+	{
+		$this->loadAdminFormFields();
+
+		return isset($this->_Admin_Form_Fields[$id])
+			? $this->_Admin_Form_Fields[$id]
+			: NULL;
+	}
+
+	/**
+	 * Get Admin_Form_Field by Name
+	 * @return object|NULL
+	 */
+	public function getAdminFormFieldByName($name)
+	{
+		$this->loadAdminFormFields();
+
+		foreach ($this->_Admin_Form_Fields as $id => $oAdmin_Form_Field)
+		{
+			if ($oAdmin_Form_Field->name == $name)
+			{
+				return $oAdmin_Form_Field;
+			}
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Get current Admin_Language
+	 * @return Admin_Language_Model|NULL
+	 */
 	public function getAdminLanguage()
 	{
 		return $this->_Admin_Language;
@@ -373,24 +508,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		return $this->_path;
 	}
-
-	/**
-	 * Array of checked items
-	 * @var array
-	 */
-	//protected $_checked = array();
-
-	/**
-	 * Set checked items on the form
-	 * Выбранные элементы в форме
-	 * @param array $checked checked items
-	 * @return self
-	 */
-	/*public function checked(array $checked)
-	{
-		$this->checked = $checked;
-		return $this;
-	}*/
 
 	/**
 	 * Get checked items on the form
@@ -521,20 +638,20 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		// Set sorting field
 		if ($this->sortingFieldId)
 		{
-			$sortingAdmin_Form_Field = $this->_Admin_Form->Admin_Form_Fields->getById($this->sortingFieldId);
+			$sortingAdmin_Form_Field = $this->getAdminFormFieldById($this->sortingFieldId);
 		}
 		else
 		{
 			// Default sorting field
 			$sortingFieldName = $this->_Admin_Form->default_order_field;
-			$sortingAdmin_Form_Field = $this->_Admin_Form->Admin_Form_Fields->getByName($sortingFieldName);
+			$sortingAdmin_Form_Field = $this->getAdminFormFieldByName($sortingFieldName);
 
-			if (is_null($sortingAdmin_Form_Field))
+			/*if (is_null($sortingAdmin_Form_Field))
 			{
 				throw new Core_Exception("Default form sorting field '%sortingFieldName' does not exist.",
 					array ('%sortingFieldName' => $sortingFieldName)
 				);
-			}
+			}*/
 		}
 
 		return $sortingAdmin_Form_Field;
@@ -559,63 +676,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		$this->_Admin_Form = $oAdmin_Form;
 
-		//$this->_Admin_Form->_load();
-
-		if ($oAdmin_Form)
-		{
-			if (is_null($this->_Admin_Form->key_field))
-			{
-				throw new Core_Exception('Admin form does not exist.');
-			}
-
-			$this->_Admin_Language = Core_Entity::factory('Admin_Language')->getCurrent();
-
-			$oAdmin_Word = $this->_Admin_Form->Admin_Word->getWordByLanguage($this->_Admin_Language->id);
-
-			if ($oAdmin_Word && strlen($oAdmin_Word->name))
-			{
-				$this->title = $this->pageTitle = $oAdmin_Word->name;
-			}
-
-			// Default sorting field
-			/*$sortingFieldName = $this->_Admin_Form->default_order_field;
-			$this->_sortingAdmin_Form_Field = $this->_Admin_Form->Admin_Form_Fields->getByName($sortingFieldName);
-
-			if (is_null($this->_sortingAdmin_Form_Field))
-			{
-				throw new Core_Exception("Default form sorting field '%sortingFieldName' does not exist.",
-					array ('%sortingFieldName' => $sortingFieldName)
-				);
-			}*/
-
-			$oUserCurrent = Core_Auth::getCurrentUser();
-			$user_id = is_null($oUserCurrent) ? 0 : $oUserCurrent->id;
-
-			$this->_oAdmin_Form_Setting = $this->_Admin_Form->getSettingForUser($user_id);
-
-			// Данные поля сортировки и направления из настроек пользователя
-			if ($this->_oAdmin_Form_Setting)
-			{
-				$aFilter = $this->getFilterJson();
-
-				$this
-					->filterSettings(is_array($aFilter) ? $aFilter : array())
-					->limit($this->_oAdmin_Form_Setting->on_page)
-					->current($this->_oAdmin_Form_Setting->page_number)
-					->sortingFieldId($this->_oAdmin_Form_Setting->order_field_id)
-					->sortingDirection($this->_oAdmin_Form_Setting->order_direction);
-			}
-			else
-			{
-				// Данные по умолчанию из настроек формы
-				$this->sortingFieldId(
-					$this->_Admin_Form->Admin_Form_Fields
-						->getByName($this->_Admin_Form->default_order_field)->id
-				)
-				->sortingDirection($this->_Admin_Form->default_order_direction);
-			}
-		}
-
 		// Current path
 		$this->path($_SERVER['PHP_SELF']);
 	}
@@ -626,32 +686,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			? json_decode($this->_oAdmin_Form_Setting->filter, TRUE)
 			: array();
 	}
-
-	/**
-	 * Is showing operations necessary
-	 * @var boolean
-	 */
-	//protected $_showOperations = TRUE;
-
-	/**
-	 * Display operations of the form
-	 * @param boolean $showOperations mode
-	 * @return self
-	 */
-	/*public function showOperations($showOperations)
-	{
-		$this->showOperations = $showOperations;
-		return $this;
-	}*/
-
-	/**
-	 * Get display operations of the form
-	 * @return showOperations mode
-	 */
-	/*public function getShowOperations()
-	{
-		return $this->showOperations;
-	}*/
 
 	/**
 	 * List of filter handlers
@@ -692,28 +726,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Is showing list of action necessary
-	 * @var boolean
-	 */
-	//protected $_showBottomActions = TRUE;
-
-	/**
-	 * Display actions of the bottom of the form
-	 * @param boolean $showBottomActions mode
-	 * @return self
-	 */
-	/*public function showBottomActions($showBottomActions)
-	{
-		$this->_showBottomActions = $showBottomActions;
-		return $this;
-	}*/
-
-	/**
-	 * Page title <h1>
-	 */
-	//protected $_title = NULL;
-
-	/**
 	 * Set <h1> for form
 	 * @param string $title content
 	 * @return self
@@ -723,12 +735,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		$this->title = $title;
 		return $this;
 	}
-
-	/**
-	 * Page title <title>
-	 * @var string
-	 */
-	//protected $_pageTitle = NULL;
 
 	/**
 	 * Set page <title>
@@ -751,13 +757,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * Limits elements on page
-	 * @var int
-	 */
-	//protected $_limit = ON_PAGE;
-
-
-	/**
 	 * Set limit of elements on page
 	 * @param int $limit count
 	 * @return self
@@ -769,13 +768,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		return $this;
 	}
-
-	/**
-	 * Current page
-	 * @var int
-	 */
-	//protected $_current = 1; // счет с 1
-
 
 	/**
 	 * Set current page
@@ -1204,7 +1196,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 									}
 
 									// Проверка через user_id на право выполнения действия над объектом
-									$bAccessToObject = $oUser->checkObjectAccess($oObject);
+									$bAccessToObject = $oObject instanceof Core_Entity
+										? $oUser->checkObjectAccess($oObject)
+										: TRUE;
 
 									if (!$bAccessToObject)
 									{
@@ -1221,10 +1215,11 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 									if (isset($this->_actionHandlers[$actionName]))
 									{
-										$actionResult = $this->_actionHandlers[$actionName]
+										$this->_actionHandlers[$actionName]
 											->setDatasetId($datasetKey)
-											->setObject($oObject)
-											->execute($this->operation);
+											->setObject($oObject);
+
+										$actionResult = $this->_actionHandlers[$actionName]->execute($this->operation);
 
 										$this->addMessage(
 											$this->_actionHandlers[$actionName]->getMessage()
@@ -1343,19 +1338,13 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 			$aData = array();
 
-			$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+			$aAdmin_Form_Fields = $this->getAdminFormFields();
 			foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 			{
 				// 0 - Столбец и фильтр, 2 - Столбец
 				if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 				{
-					$Admin_Word_Value = $oAdmin_Form_Field
-						->Admin_Word
-						->getWordByLanguage($oAdmin_Language->id);
-
-					$fieldName = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-						? $Admin_Word_Value->name
-						: NULL;
+					$fieldName = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
 					$aData[] = $this->prepareString($fieldName);
 				}
@@ -1365,104 +1354,119 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 			$this->setDatasetConditions();
 			foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
-				$aEntities = $oAdmin_Form_Dataset->load();
+				$offset = 0;
+				$limit = 500;
 
-				foreach ($aEntities as $oEntity)
-				{
-					$aData = array();
-					foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
+				do {
+					$aEntities = $oAdmin_Form_Dataset
+						->setCount(0)
+						->limit($limit)
+						->offset($offset)
+						->loaded(FALSE)
+						->load();
+
+					foreach ($aEntities as $oEntity)
 					{
-						// 0 - Столбец и фильтр, 2 - Столбец
-						if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
+						$aData = array();
+						foreach ($aAdmin_Form_Fields as $oAdmin_Form_Field)
 						{
-							// Перекрытие параметров для данного поля
-							$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
-
-							$fieldName = $oAdmin_Form_Field_Changed->name;
-
-							if (isset($oEntity->$fieldName))
+							// 0 - Столбец и фильтр, 2 - Столбец
+							if ($oAdmin_Form_Field->view == 0 || $oAdmin_Form_Field->view == 2)
 							{
-								// значение свойства
-								$value = $oEntity->$fieldName;
-							}
-							elseif ($this->isCallable($oEntity, $fieldName))
-							{
-								// Выполним функцию обратного вызова
-								$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
-							}
-							else
-							{
-								$value = NULL;
-							}
+								// Перекрытие параметров для данного поля
+								$oAdmin_Form_Field_Changed = $this->changeField($oAdmin_Form_Dataset, $oAdmin_Form_Field);
 
-							$sFormat = $oAdmin_Form_Field_Changed->format;
+								$fieldName = $oAdmin_Form_Field_Changed->name;
 
-							switch ($oAdmin_Form_Field_Changed->type)
-							{
-								case 1: // Текст.
-								case 2: // Поле ввода.
-								case 4: // Ссылка.
-								case 7: // Картинка-ссылка.
-									if (!is_null($value))
-									{
-										$value = $this->applyFormat($value, $sFormat);
-									}
-								break;
-								case 3: // Checkbox.
-									$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
-								break;
-								case 5: // Дата-время.
-									if (!is_null($value))
-									{
-										$value = $value == '0000-00-00 00:00:00' || $value == ''
-											? ''
-											: Core_Date::sql2datetime($value);
-									}
-								break;
-								case 6: // Дата.
-									if (!is_null($value))
-									{
-										$value = $value == '0000-00-00 00:00:00' || $value == ''
-											? ''
-											: Core_Date::sql2date($value);
-									}
-								break;
-								case 8: // Выпадающий список
-									if (is_array($oAdmin_Form_Field_Changed->list))
-									{
-										$aValue = $oAdmin_Form_Field_Changed->list;
-									}
-									else
-									{
-										$aValue = array();
+								if (isset($oEntity->$fieldName))
+								{
+									// значение свойства
+									$value = $oEntity->$fieldName;
+								}
+								elseif ($this->isCallable($oEntity, $fieldName))
+								{
+									// Выполним функцию обратного вызова
+									$value = $oEntity->$fieldName($oAdmin_Form_Field_Changed, $this);
+								}
+								else
+								{
+									$value = NULL;
+								}
 
-										$aListExplode = explode("\n", $oAdmin_Form_Field_Changed->list);
-										foreach ($aListExplode as $str_value)
+								$sFormat = $oAdmin_Form_Field_Changed->format;
+
+								switch ($oAdmin_Form_Field_Changed->type)
+								{
+									case 1: // Текст.
+									case 2: // Поле ввода.
+									case 4: // Ссылка.
+									case 7: // Картинка-ссылка.
+										if (!is_null($value))
 										{
-											// Каждую строку разделяем по равно
-											$str_explode = explode('=', $str_value);
+											$value = $this->applyFormat($value, $sFormat);
+										}
+									break;
+									case 3: // Checkbox.
+										$value = $value == 1 ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
+									break;
+									case 5: // Дата-время.
+										if (!is_null($value))
+										{
+											$value = $value == '0000-00-00 00:00:00' || $value == ''
+												? ''
+												: Core_Date::sql2datetime($value);
+										}
+									break;
+									case 6: // Дата.
+										if (!is_null($value))
+										{
+											$value = $value == '0000-00-00 00:00:00' || $value == ''
+												? ''
+												: Core_Date::sql2date($value);
+										}
+									break;
+									case 8: // Выпадающий список
+										if (is_array($oAdmin_Form_Field_Changed->list))
+										{
+											$aValue = $oAdmin_Form_Field_Changed->list;
+										}
+										else
+										{
+											$aValue = array();
 
-											if (count($str_explode) > 1 && $str_explode[1] != '…')
+											$aListExplode = explode("\n", $oAdmin_Form_Field_Changed->list);
+											foreach ($aListExplode as $str_value)
 											{
-												// сохраняем в массив варинаты значений и ссылки для них
-												$aValue[trim($str_explode[0])] = trim($str_explode[1]);
+												// Каждую строку разделяем по равно
+												$str_explode = explode('=', $str_value);
+
+												if (count($str_explode) > 1 && $str_explode[1] != '…')
+												{
+													// сохраняем в массив варинаты значений и ссылки для них
+													$aValue[trim($str_explode[0])] = trim($str_explode[1]);
+												}
 											}
 										}
-									}
 
-									if (isset($aValue[$value]))
-									{
-										$value = $aValue[$value];
-									}
-								break;
+										if (isset($aValue[$value]))
+										{
+											$value = $aValue[$value];
+										}
+									break;
+								}
+
+								$aData[] = $value;
 							}
-
-							$aData[] = $value;
 						}
+
+						$this->_printRow($aData);
 					}
 
-					$this->_printRow($aData);
-				}
+					$offset += $limit;
+
+					Core_File::flush();
+
+				} while(count($aEntities) == $limit);
 			}
 			die();
 		}
@@ -1503,6 +1507,9 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
 		$path = Core_Str::escapeJavascriptVariable($this->getPath());
+
+		strlen($this->additionalParams)
+			&& $path .= '?' . Core_Str::escapeJavascriptVariable($this->additionalParams);
 
 		// Текущий пользователь
 		$oUser = Core_Auth::getCurrentUser();
@@ -1591,22 +1598,18 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	}
 
 	/**
-	 * ID of sorting field
-	 * @var int
-	 */
-	//protected $_sortingFieldId = NULL;
-
-	/**
 	 * Set sorting field by ID
 	 * @param int $sortingFieldId field ID
 	 * @return self
 	 */
 	public function sortingFieldId($sortingFieldId)
 	{
+		$sortingFieldId = preg_replace('/[^A-Za-z0-9_-]/', '', $sortingFieldId);
+
 		if (!is_null($sortingFieldId) && $this->_Admin_Form)
 		{
 			// Проверка принадлежности форме
-			$oAdmin_Form_Field = Core_Entity::factory('Admin_Form_Field')->find($sortingFieldId);
+			$oAdmin_Form_Field = $this->getAdminFormFieldById($sortingFieldId);
 
 			if ($oAdmin_Form_Field && $this->_Admin_Form->id == $oAdmin_Form_Field->admin_form_id)
 			{
@@ -1619,12 +1622,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		}
 		return $this;
 	}
-
-	/**
-	 * Sorting direction
-	 * @var int
-	 */
-	//protected $_sortingDirection = NULL;
 
 	/**
 	 * Set sorting direction
@@ -1739,7 +1736,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		{
 			$sortingFieldId = $this->sortingFieldId;
 		}
-		$sortingFieldId = intval($sortingFieldId);
+		//$sortingFieldId = intval($sortingFieldId);
 		$aData[] = "sortingFieldId: '{$sortingFieldId}'";
 
 		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
@@ -1847,7 +1844,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		{
 			$sortingFieldId = $this->sortingFieldId;
 		}
-		$sortingFieldId = intval($sortingFieldId);
+		//$sortingFieldId = intval($sortingFieldId);
 		$aData[] = "hostcms[sortingfield]={$sortingFieldId}";
 
 		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
@@ -1963,7 +1960,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		{
 			$sortingFieldId = $this->sortingFieldId;
 		}
-		$sortingFieldId = intval($sortingFieldId);
+		//$sortingFieldId = intval($sortingFieldId);
 		$aData[] = "sortingFieldId: '{$sortingFieldId}'";
 
 		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
@@ -2373,27 +2370,27 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	 */
 	public function setDatasetConditions()
 	{
-		$aAdmin_Form_Fields = $this->_Admin_Form->Admin_Form_Fields->findAll();
+		$aAdmin_Form_Fields = $this->getAdminFormFields();
 
-		$oAdmin_Form_Field_Order = Core_Entity::factory('Admin_Form_Field', $this->sortingFieldId);
+		$oAdmin_Form_Field_Sorting = $this->getAdminFormFieldById($this->sortingFieldId);
 
 		foreach ($this->_datasets as $datasetKey => $oAdmin_Form_Dataset)
 		{
 			$oEntity = $oAdmin_Form_Dataset->getEntity();
 
-			if ($oAdmin_Form_Field_Order->allow_sorting)
+			if ($oAdmin_Form_Field_Sorting && $oAdmin_Form_Field_Sorting->allow_sorting)
 			{
 				// Check field exists in the model
-				$fieldName = $this->getFieldName($oAdmin_Form_Field_Order->name);
+				$fieldName = $this->getFieldName($oAdmin_Form_Field_Sorting->name);
 				if (isset($oEntity->$fieldName) || method_exists($oEntity, $fieldName)
 					// Для сортировки должно существовать св-во модели
 					// || property_exists($oEntity, $fieldName)
 					|| $oAdmin_Form_Dataset->issetExternalField($fieldName)
-					|| strpos($oAdmin_Form_Field_Order->name, '.') !== FALSE
+					|| strpos($oAdmin_Form_Field_Sorting->name, '.') !== FALSE
 				)
 				{
 					$oAdmin_Form_Dataset->addCondition(array(
-							'orderBy' => array($oAdmin_Form_Field_Order->name, $this->sortingDirection
+							'orderBy' => array($oAdmin_Form_Field_Sorting->name, $this->sortingDirection
 								? 'DESC'
 								: 'ASC'
 							)
@@ -2458,10 +2455,14 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 										break;
 									}
 
-									$mFilterValue = $this->convertLike($mFilterValue);
+									$mLikeFilterValue = $this->convertLike($mFilterValue);
 
 									$oAdmin_Form_Dataset->addCondition(
-										array($sFilterType => array($oAdmin_Form_Field_Changed->name, 'LIKE', $mFilterValue))
+										array($sFilterType => array($oAdmin_Form_Field_Changed->name,
+											$mFilterValue !== $mLikeFilterValue
+												? 'LIKE'
+												: '=',
+											$mLikeFilterValue))
 									);
 								break;
 								case 3: // Checkbox.
@@ -2588,6 +2589,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			}
 		}
 
+		return $this;
+	}
+
+	/**
+	 * Set dataset limits
+	 * @return self
+	 */
+	public function setDatasetLimits()
+	{
 		// begin
 		$offset = $this->limit * ($this->current - 1);
 

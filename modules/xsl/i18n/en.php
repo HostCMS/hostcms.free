@@ -6,7 +6,7 @@
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'XSL templates',
@@ -37,4 +37,5 @@ return array(
 	'XSL_root_dir' => 'XSL templates',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'option_formatOutput' => 'Format output'
 );

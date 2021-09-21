@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -80,8 +80,7 @@ if ($oParentTemplate->id)
 	);
 }
 
-$template_id = intval(Core_Array::getGet('template_id', 0));
-$template_dir_id = intval(Core_Array::getGet('template_dir_id', 0));
+// Глобальный поиск
 $additionalParamsProperties = "template_dir_id={$template_dir_id}&template_id={$template_id}";
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
@@ -268,7 +267,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Ограничение источника 1 по родительской группе

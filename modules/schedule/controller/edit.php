@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -48,14 +48,34 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->class('form-control input-lg')
 			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
 
-		$this->getField('interval')
-			->class('input-lg form-control')
-			->divAttr(array('class' => 'form-group col-xs-12 col-md-4'));
-
 		$oMainTab
 			->move($this->getField('start_datetime'), $oMainRow1)
-			->move($this->getField('datetime'), $oMainRow1)
-			->move($this->getField('interval'), $oMainRow1);
+			->move($this->getField('datetime'), $oMainRow1);
+
+		$oMainTab->delete($this->getField('interval'));
+
+		$aInterval =  $this->_object->getInterval();
+
+		$oMainRow1
+			->add(Admin_Form_Entity::factory('Input')
+				->name('interval')
+				->caption(Core::_('Schedule.interval'))
+				->class('input-lg form-control')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2'))
+				->value($aInterval['value'])
+			)
+			->add(Admin_Form_Entity::factory('Select')
+				->name('type')
+				->class('form-control input-lg')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-2 margin-top-21'))
+				->options(array(
+					0 => Core::_('Schedule.seconds'),
+					1 => Core::_('Schedule.minutes'),
+					2 => Core::_('Schedule.hours'),
+					3 => Core::_('Schedule.days')
+				))
+				->value($aInterval['type'])
+			);
 
 		$oAdditionalTab->delete($this->getField('module_id'));
 
@@ -92,6 +112,21 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('description'), $oMainRow3);
 
 		return $this;
+	}
+
+	/**
+	 * Processing of the form. Apply object fields.
+	 * @hostcms-event Printlayout_Controller_Edit.onAfterRedeclaredApplyObjectProperty
+	 */
+	protected function _applyObjectProperty()
+	{
+		$this->_formValues['interval'] = intval(Core_Array::getPost('interval'));
+
+		parent::_applyObjectProperty();
+
+		$this->_object->convertInterval(Core_Array::getPost('type', 0));
+
+		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}
 
 	/**

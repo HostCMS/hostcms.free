@@ -1,17 +1,18 @@
 <?php
 
-$oShop = Core_Entity::factory('Shop', Core_Array::get(Core_Page::instance()->libParams, 'shopId'));
+$Shop_Compare_Controller_Show = Core_Page::instance()->object;
 
-$Shop_Controller_Show = new Shop_Controller_Show($oShop);
+$oShop = $Shop_Compare_Controller_Show->getEntity();
 
-$Shop_Controller_Show
-	->limit(0)
-	->group(FALSE)
+$Shop_Compare_Controller_Show = new Shop_Compare_Controller_Show(
+	$oShop
+);
+
+$xslName = Core_Array::get(Core_Page::instance()->libParams, 'xsl');
+
+$Shop_Compare_Controller_Show
 	->xsl(
-		Core_Entity::factory('Xsl')->getByName(
-			Core_Array::get(Core_Page::instance()->libParams, 'xsl')
-		)
+		Core_Entity::factory('Xsl')->getByName($xslName)
 	)
-	->cache(FALSE)
-	->itemsProperties(TRUE)
+	->limit(2)
 	->show();

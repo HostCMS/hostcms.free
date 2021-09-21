@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Favorite_Controller extends Core_Servant_Properties
 {
@@ -277,10 +277,19 @@ class Shop_Favorite_Controller extends Core_Servant_Properties
 		else
 		{
 			Core_Session::hasSessionId() && Core_Session::start();
+
 			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
-			if (isset($_SESSION['hostcmsFavorite'][$oShop_Item->shop_id][$this->shop_item_id]))
+
+			$oShop = $oShop_Item->Shop;
+
+			if (!is_null($oShop_Item->id))
 			{
-				unset($_SESSION['hostcmsFavorite'][$oShop_Item->shop_id][$this->shop_item_id]);
+				if (isset($_SESSION['hostcmsFavorite'][$oShop->id]) && in_array($this->shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id]))
+				{
+					unset($_SESSION['hostcmsFavorite'][$oShop->id][
+						array_search($this->shop_item_id, $_SESSION['hostcmsFavorite'][$oShop->id])
+					]);
+				}
 			}
 		}
 

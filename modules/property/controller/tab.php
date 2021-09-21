@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Tab extends Core_Servant_Properties
 {
@@ -137,13 +137,27 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		return $this;
 	}
 
+	protected $_property_values = array();
+
 	/**
 	* Show properties on tab
 	* @return self
 	*/
 	public function fillTab()
 	{
+		$aTmp_Property_Values = $this->_object->id
+			? $this->_object->getPropertyValues(FALSE)
+			: array();
+
+		$this->_property_values = array();
+		foreach ($aTmp_Property_Values as $oProperty_Value)
+		{
+			$this->_property_values[$oProperty_Value->property_id][] = $oProperty_Value;
+		}
+		unset($aTmp_Property_Values);
+
 		$this->_setPropertyDirs(0, $this->_tab);
+
 		return $this;
 	}
 
@@ -225,7 +239,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	* @hostcms-event Property_Controller_Tab.onSetPropertyType
 	* @hostcms-event Property_Controller_Tab.onBeforeAddSection
 	*/
-	protected function _setPropertyDirs($property_dir_id = 0, $parentObject)
+	protected function _setPropertyDirs($property_dir_id, $parentObject)
 	{
 		$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Section')
 			->caption($property_dir_id == 0
@@ -245,543 +259,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		foreach ($aProperties as $iPropertyCounter => $oProperty)
 		{
-			$aProperty_Values = $this->_object->id
-				? $oProperty->getValues($this->_object->id, FALSE)
-				: array();
-
-			$oAdmin_Form_Entity = NULL;
-
-			switch ($oProperty->type)
-			{
-				case 0: // Int
-				case 1: // String
-				case 2: // File
-				/*case 3: // List*/
-				case 4: // Textarea
-				case 6: // Wysiwyg
-				case 7: // Checkbox
-				case 8: // Date
-				case 9: // Datetime
-				case 10: // Hidden field
-				case 11: // Float
-
-					$width = 410;
-
-					Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
-
-					$aFormat = $oProperty->obligatory
-						? array('minlen' => array('value' => 1))
-						: array();
-
-					switch ($oProperty->type)
-					{
-						case 0: // Int
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-								->format($aFormat + array('lib' => array(
-									'value' => 'integer'
-								)));
-						break;
-						case 11: // Float
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-								->format($aFormat + array('lib' => array(
-									'value' => 'decimal'
-								)));
-						break;
-						case 1: // String
-						default:
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')->format($aFormat);
-						break;
-						case 10: // Hidden field
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
-						break;
-						case 2: // File
-							$largeImage = array(
-								'max_width' => $oProperty->image_large_max_width,
-								'max_height' => $oProperty->image_large_max_height,
-								'show_description' => TRUE,
-							);
-
-							$smallImage = array(
-								'caption' => Core::_('Property.small_file_caption', $oProperty->name),
-								'show' => !$oProperty->hide_small_image,
-								'max_width' => $oProperty->image_small_max_width,
-								'max_height' => $oProperty->image_small_max_height,
-								'show_description' => TRUE
-							);
-
-							if (method_exists($this->linkedObject, 'getWatermarkDefaultPositionX')
-								&& method_exists($this->linkedObject, 'getWatermarkDefaultPositionY'))
-							{
-								$largeImage['watermark_position_x'] = $this->linkedObject->getWatermarkDefaultPositionX();
-								$largeImage['watermark_position_y'] = $this->linkedObject->getWatermarkDefaultPositionY();
-							}
-
-							$largeImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_large_image;
-							$smallImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_small_image;
-
-							$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
-							$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
-
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
-								->style('width: 340px')
-								->largeImage($largeImage)
-								->smallImage($smallImage)
-								->crop(TRUE);
-
-							$width = 710;
-						break;
-
-						/*case 3: // List
-							// see below
-						break;*/
-
-						case 4: // Textarea
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')->format($aFormat);
-						break;
-
-						case 6: // Wysiwyg
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
-								->rows(8)
-								->wysiwyg(Core::moduleIsActive('wysiwyg'))
-								->template_id($this->template_id);
-						break;
-
-						case 7: // Checkbox
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
-							count($aProperty_Values) && $oAdmin_Form_Entity->postingUnchecked(TRUE);
-						break;
-
-						case 8: // Date
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date')->format($aFormat);
-						break;
-
-						case 9: // Datetime
-							$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime')->format($aFormat);
-						break;
-					}
-
-					Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
-
-					if ($oAdmin_Form_Entity)
-					{
-						$oAdmin_Form_Entity
-							->name("property_{$oProperty->id}[]")
-							->id("id_property_{$oProperty->id}_00{$iPropertyCounter}")
-							->caption(htmlspecialchars($oProperty->name))
-							->value(
-								$this->_correctPrintValue($oProperty, $oProperty->default_value)
-							)
-							->divAttr(array(
-								'class' => ($oProperty->type != 2 ? 'form-group' : '')
-									. (
-										($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
-										? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
-										: ' col-xs-12' // ' col-xs-12'
-									)
-									. ($oProperty->type == 7 ? ' margin-top-21' : '')
-							));
-
-						$oProperty->type == 7
-							&& $oAdmin_Form_Entity->checked($oProperty->default_value == 1);
-
-						//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
-
-							$oAdmin_Form_Entity_Section->add(
-								Admin_Form_Entity::factory('Div')
-									->class('row')
-									->id("property_{$oProperty->id}")
-									->add($oAdmin_Form_Entity)
-							);
-
-							$oProperty->multiple && $this->imgBox($oAdmin_Form_Entity, $oProperty);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $oProperty_Value)
-							{
-								$oNewAdmin_Form_Entity = clone $oAdmin_Form_Entity;
-
-								switch ($oProperty->type)
-								{
-									default:
-										$oNewAdmin_Form_Entity->value($oProperty_Value->value);
-									break;
-
-									case 2: // File
-										$sDirHref = $this->linkedObject->getDirHref($this->_object);
-
-										if ($oProperty_Value->file != '')
-										{
-											$oNewAdmin_Form_Entity->largeImage(
-												Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
-													'path' => $sDirHref . rawurlencode($oProperty_Value->file),
-													'originalName' => $oProperty_Value->file_name,
-													'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "large_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id)
-												))
-											);
-										}
-										// Description doesn't depend on loaded file
-										$oNewAdmin_Form_Entity->largeImage(
-											Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
-												'description' => $oProperty_Value->file_description
-											)
-										));
-
-										if ($oProperty_Value->file_small != '')
-										{
-											$oNewAdmin_Form_Entity->smallImage(
-												Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
-													'path' => $sDirHref . rawurlencode($oProperty_Value->file_small),
-													'originalName' => $oProperty_Value->file_small_name,
-													'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "small_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id),
-													'create_small_image_from_large_checked' => FALSE,
-												))
-											);
-										}
-
-										// Description doesn't depend on loaded file
-										$oNewAdmin_Form_Entity->smallImage(
-											Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
-												'description' => $oProperty_Value->file_small_description
-											)
-										));
-									break;
-									case 7: // Checkbox
-										$oNewAdmin_Form_Entity->checked($oProperty_Value->value == 1);
-									break;
-									case 8: // Date
-										$oNewAdmin_Form_Entity->value(
-											//Core_Date::sql2date($oProperty_Value->value)
-											$this->_correctPrintValue($oProperty, $oProperty_Value->value)
-										);
-									break;
-									case 9: // Datetime
-										$oNewAdmin_Form_Entity->value(
-											//Core_Date::sql2datetime($oProperty_Value->value)
-											$this->_correctPrintValue($oProperty, $oProperty_Value->value)
-										);
-									break;
-								}
-
-								$oNewAdmin_Form_Entity
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$oAdmin_Form_Entity_Section->add(
-									Admin_Form_Entity::factory('Div')
-										->class('row')
-										->id("property_{$oProperty->id}")
-										->add($oNewAdmin_Form_Entity)
-								);
-
-								// Визуальный редактор клонировать запрещено
-								$oProperty->multiple /*&& $oProperty->type != 6*/
-									&& $this->imgBox($oNewAdmin_Form_Entity, $oProperty, '$.cloneProperty', $this->getImgDeletePath());
-							}
-						}
-					}
-				break;
-
-				case 3: // List
-					if (Core::moduleIsActive('list'))
-					{
-						$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
-							->caption(htmlspecialchars($oProperty->name))
-							->name("property_{$oProperty->id}[]")
-							// ->value(NULL)
-							->value(
-								$this->_correctPrintValue($oProperty, $oProperty->default_value)
-							)
-							->divAttr(array('class' => 'form-group col-xs-12'));
-
-						// Перенесно в _fillList()
-						/*$oProperty->obligatory
-							&& $oAdmin_Form_Entity_ListItems->data('required', 1);*/
-
-						$oAdmin_Form_Entity_ListItemsInput = Admin_Form_Entity::factory('Input')
-							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
-							->id("id_property_{$oProperty->id}_00{$iPropertyCounter}") // id_property_ !!!
-							->name("input_property_{$oProperty->id}[]");
-
-						$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
-							->id($oAdmin_Form_Entity_ListItemsInput->id . '_mode')
-							->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
-							->options(array(
-								0 => Core::_('Admin_Form.autocomplete_mode0'),
-								1 => Core::_('Admin_Form.autocomplete_mode1'),
-								2 => Core::_('Admin_Form.autocomplete_mode2'),
-								3 => Core::_('Admin_Form.autocomplete_mode3')
-							))
-							->caption(Core::_('Admin_Form.autocomplete_mode'));
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_ListItems,$oAdmin_Form_Entity_Section, $oProperty));
-
-							$this->_fillList($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_ListItemsInput, $oAdmin_Form_Entity_Autocomplete_Select);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $key => $oProperty_Value)
-							{
-								$value = $oProperty_Value->value;
-
-								$oNewAdmin_Form_Entity_ListItems = clone $oAdmin_Form_Entity_ListItems;
-								$oNewAdmin_Form_Entity_ListItems
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->value($value);
-
-								$oNewAdmin_Form_Entity_ListItemsInput = clone $oAdmin_Form_Entity_ListItemsInput;
-								$oNewAdmin_Form_Entity_ListItemsInput
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")  // id_property_ !!!
-									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
-								$oNewAdmin_Form_Entity_Autocomplete_Select
-									->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode');  // id_property_ !!!
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$this->_fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_ListItems, $oNewAdmin_Form_Entity_ListItemsInput, $oNewAdmin_Form_Entity_Autocomplete_Select);
-							}
-						}
-					}
-				break;
-
-				case 5: // ИС
-					if (Core::moduleIsActive('informationsystem'))
-					{
-						// Директории
-						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
-							->filter(TRUE);
-
-						// Элементы
-						$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
-							->id("id_property_{$oProperty->id}")
-							->name("property_{$oProperty->id}[]")
-							->value(NULL)
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->filter(TRUE);
-
-						$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
-							->name("input_property_{$oProperty->id}[]");
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
-
-							$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $key => $oProperty_Value)
-							{
-								$value = $oProperty_Value->value;
-
-								$oNewAdmin_Form_Entity_Inf_Groups = clone $oAdmin_Form_Entity_InfGroups;
-								$oNewAdmin_Form_Entity_Inf_Groups
-									->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
-
-								$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
-								$oNewAdmin_Form_Entity_InfItems
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->value($value);
-
-								$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
-								$oNewAdmin_Form_Entity_InfItemsInput
-									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Inf_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Inf_Groups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
-							}
-						}
-					}
-				break;
-
-				case 13: // ИС, группа
-					if (Core::moduleIsActive('informationsystem'))
-					{
-						$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
-							->caption(htmlspecialchars($oProperty->name))
-							->id("id_property_{$oProperty->id}")
-							->name("property_{$oProperty->id}[]")
-							->value(NULL)
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->filter(TRUE);
-
-						$oAdmin_Form_Entity_InfGroupsInput = Admin_Form_Entity::factory('Input')
-							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
-							->name("input_property_{$oProperty->id}[]");
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
-
-							$this->_fillInformationSystemGroup($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfGroupsInput);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $key => $oProperty_Value)
-							{
-								$value = $oProperty_Value->value;
-
-								$oNewAdmin_Form_Entity_Inf_Groups = clone $oAdmin_Form_Entity_InfGroups;
-								$oNewAdmin_Form_Entity_Inf_Groups
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->value($value);
-
-								$oNewAdmin_Form_Entity_InfGroupsInput = clone $oAdmin_Form_Entity_InfGroupsInput;
-								$oNewAdmin_Form_Entity_InfGroupsInput
-									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Inf_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$this->_fillInformationSystemGroup($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Inf_Groups, $oNewAdmin_Form_Entity_InfGroupsInput);
-							}
-						}
-					}
-				break;
-
-				case 12: // Интернет-магазин
-					if (Core::moduleIsActive('shop'))
-					{
-						// Директории
-						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
-							->filter(TRUE);
-
-						// Элементы
-						$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
-							->id("id_property_{$oProperty->id}")
-							->name("property_{$oProperty->id}[]")
-							->value(NULL)
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->filter(TRUE);
-
-						$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
-							->name("input_property_{$oProperty->id}[]");
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Section, $oProperty));
-
-							$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $key => $oProperty_Value)
-							{
-								$value = $oProperty_Value->value;
-
-								$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
-								$oNewAdmin_Form_Entity_Shop_Groups
-									->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
-
-								$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
-								$oNewAdmin_Form_Entity_Shop_Items
-									->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->value($value);
-
-								$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
-								$oNewAdmin_Form_Entity_Shop_Items_Input
-									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
-							}
-						}
-					}
-				break;
-
-				case 14: // Интернет-магазин, группа
-					if (Core::moduleIsActive('shop'))
-					{
-						// Директории
-						$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
-							->caption(htmlspecialchars($oProperty->name))
-							->id("id_property_{$oProperty->id}")
-							->name("property_{$oProperty->id}[]")
-							->value(NULL)
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->filter(TRUE);
-
-						$oAdmin_Form_Entity_Shop_Groups_Input = Admin_Form_Entity::factory('Input')
-							->caption(htmlspecialchars($oProperty->name))
-							->divAttr(array('class' => 'form-group col-xs-12'))
-							->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
-							->name("input_property_{$oProperty->id}[]");
-
-						// Значений св-в нет для объекта
-						if (count($aProperty_Values) == 0)
-						{
-							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty));
-
-							$this->_fillShopGroup($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Groups_Input);
-						}
-						else
-						{
-							foreach ($aProperty_Values as $key => $oProperty_Value)
-							{
-								$value = $oProperty_Value->value;
-
-								$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
-								$oNewAdmin_Form_Entity_Shop_Groups
-									->id("id_group_{$oProperty->id}_{$oProperty_Value->id}") // id_ should be, see js!
-									->name("property_{$oProperty->id}_{$oProperty_Value->id}")
-									->value($value);
-
-								$oNewAdmin_Form_Entity_Shop_Groups_Input = clone $oAdmin_Form_Entity_Shop_Groups_Input;
-								$oNewAdmin_Form_Entity_Shop_Groups_Input
-									->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
-									->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
-
-								Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
-
-								$this->_fillShopGroup($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Groups_Input);
-							}
-						}
-					}
-				break;
-
-				default:
-					/*throw new Core_Exception(
-						Core::_('Property.type_does_not_exist'),
-							array('%d' => $oProperty->type)
-					);*/
-					Core_Event::notify('Property_Controller_Tab.onSetPropertyType', $this, array($oAdmin_Form_Entity_Section, $oProperty, $aProperty_Values));
-			}
+			$this->_addIntoSection($oAdmin_Form_Entity_Section, $oProperty);
 		}
 
 		// Property Dirs
@@ -797,9 +275,573 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			$this->_setPropertyDirs($oProperty_Dir->id, $property_dir_id == 0 ? $this->_tab : $oAdmin_Form_Entity_Section);
 		}
 
+		// Оставшиеся значения выводятся внизу
+		if ($property_dir_id == 0 && count($this->_property_values))
+		{
+			foreach ($this->_property_values as $property_id => $aProperty_Values)
+			{
+				$this->_addIntoSection($oAdmin_Form_Entity_Section, Core_Entity::factory('Property', $property_id));
+			}
+		}
+
 		Core_Event::notify('Property_Controller_Tab.onBeforeAddSection', $this, array($oAdmin_Form_Entity_Section, $property_dir_id));
 
 		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
+	}
+
+	protected function _addIntoSection($oAdmin_Form_Entity_Section, $oProperty)
+	{
+		/*$aProperty_Values = $this->_object->id
+			? $oProperty->getValues($this->_object->id, FALSE)
+			: array();*/
+
+		if (isset($this->_property_values[$oProperty->id]))
+		{
+			$aProperty_Values = $this->_property_values[$oProperty->id];
+			unset($this->_property_values[$oProperty->id]);
+		}
+		else
+		{
+			$aProperty_Values = array();
+		}
+
+		$oAdmin_Form_Entity = NULL;
+
+		$iPropertyCounter = 0;
+
+		switch ($oProperty->type)
+		{
+			case 0: // Int
+			case 1: // String
+			case 2: // File
+			/*case 3: // List*/
+			case 4: // Textarea
+			case 6: // Wysiwyg
+			case 7: // Checkbox
+			case 8: // Date
+			case 9: // Datetime
+			case 10: // Hidden field
+			case 11: // Float
+
+				$width = 410;
+
+				Core_Event::notify('Property_Controller_Tab.onBeforeCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
+
+				$aFormat = $oProperty->obligatory
+					? array('minlen' => array('value' => 1))
+					: array();
+
+				switch ($oProperty->type)
+				{
+					case 0: // Int
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+							->format($aFormat + array('lib' => array(
+								'value' => 'integer'
+							)));
+					break;
+					case 11: // Float
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+							->format($aFormat + array('lib' => array(
+								'value' => 'decimal'
+							)));
+					break;
+					case 1: // String
+					default:
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')->format($aFormat);
+					break;
+					case 10: // Hidden field
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input');
+					break;
+					case 2: // File
+						$largeImage = array(
+							'max_width' => $oProperty->image_large_max_width,
+							'max_height' => $oProperty->image_large_max_height,
+							'show_description' => TRUE,
+						);
+
+						$smallImage = array(
+							'caption' => Core::_('Property.small_file_caption', $oProperty->name),
+							'show' => !$oProperty->hide_small_image,
+							'max_width' => $oProperty->image_small_max_width,
+							'max_height' => $oProperty->image_small_max_height,
+							'show_description' => TRUE
+						);
+
+						if (method_exists($this->linkedObject, 'getWatermarkDefaultPositionX')
+							&& method_exists($this->linkedObject, 'getWatermarkDefaultPositionY'))
+						{
+							$largeImage['watermark_position_x'] = $this->linkedObject->getWatermarkDefaultPositionX();
+							$largeImage['watermark_position_y'] = $this->linkedObject->getWatermarkDefaultPositionY();
+						}
+
+						$largeImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_large_image;
+						$smallImage['place_watermark_checkbox_checked'] = $oProperty->watermark_default_use_small_image;
+
+						$largeImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio;
+						$smallImage['preserve_aspect_ratio_checkbox_checked'] = $oProperty->preserve_aspect_ratio_small;
+
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('File')
+							->style('width: 340px')
+							->largeImage($largeImage)
+							->smallImage($smallImage)
+							->crop(TRUE);
+
+						$width = 710;
+					break;
+
+					/*case 3: // List
+						// see below
+					break;*/
+
+					case 4: // Textarea
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')->format($aFormat);
+					break;
+
+					case 6: // Wysiwyg
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
+							->rows(8)
+							->wysiwyg(Core::moduleIsActive('wysiwyg'))
+							->template_id($this->template_id);
+					break;
+
+					case 7: // Checkbox
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
+						count($aProperty_Values) && $oAdmin_Form_Entity->postingUnchecked(TRUE);
+					break;
+
+					case 8: // Date
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Date')->format($aFormat);
+					break;
+
+					case 9: // Datetime
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Datetime')->format($aFormat);
+					break;
+				}
+
+				Core_Event::notify('Property_Controller_Tab.onAfterCreatePropertyValue', $this, array($oProperty, $oAdmin_Form_Entity));
+
+				if ($oAdmin_Form_Entity)
+				{
+					$oAdmin_Form_Entity
+						->name("property_{$oProperty->id}[]")
+						->id("id_property_{$oProperty->id}_00{$iPropertyCounter}")
+						->caption(htmlspecialchars($oProperty->name))
+						->value(
+							$this->_correctPrintValue($oProperty, $oProperty->default_value)
+						)
+						->divAttr(array(
+							'class' => ($oProperty->type != 2 ? 'form-group' : '')
+								. (
+									($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
+									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
+									: ' col-xs-12' // ' col-xs-12'
+								)
+								. ($oProperty->type == 7 ? ' margin-top-21' : '')
+						));
+
+					$oProperty->type == 7
+						&& $oAdmin_Form_Entity->checked($oProperty->default_value == 1);
+
+					//$oProperty->multiple && $oAdmin_Form_Entity->add($this->getImgAdd($oProperty));
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
+
+						$oAdmin_Form_Entity_Section->add(
+							Admin_Form_Entity::factory('Div')
+								->class('row')
+								->id("property_{$oProperty->id}")
+								->add($oAdmin_Form_Entity)
+						);
+
+						$oProperty->multiple && $this->imgBox($oAdmin_Form_Entity, $oProperty);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $oProperty_Value)
+						{
+							$oNewAdmin_Form_Entity = clone $oAdmin_Form_Entity;
+
+							switch ($oProperty->type)
+							{
+								default:
+									$oNewAdmin_Form_Entity->value($oProperty_Value->value);
+								break;
+
+								case 2: // File
+									$sDirHref = $this->linkedObject->getDirHref($this->_object);
+
+									if ($oProperty_Value->file != '')
+									{
+										$oNewAdmin_Form_Entity->largeImage(
+											Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
+												'path' => $sDirHref . rawurlencode($oProperty_Value->file),
+												'originalName' => $oProperty_Value->file_name,
+												'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "large_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id)
+											))
+										);
+									}
+									// Description doesn't depend on loaded file
+									$oNewAdmin_Form_Entity->largeImage(
+										Core_Array::union($oNewAdmin_Form_Entity->largeImage, array(
+											'description' => $oProperty_Value->file_description
+										)
+									));
+
+									if ($oProperty_Value->file_small != '')
+									{
+										$oNewAdmin_Form_Entity->smallImage(
+											Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
+												'path' => $sDirHref . rawurlencode($oProperty_Value->file_small),
+												'originalName' => $oProperty_Value->file_small_name,
+												'delete_onclick' => $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deletePropertyValue', "small_property_{$oProperty->id}_{$oProperty_Value->id}", $this->_datasetId, $this->_object->id),
+												'create_small_image_from_large_checked' => FALSE,
+											))
+										);
+									}
+
+									// Description doesn't depend on loaded file
+									$oNewAdmin_Form_Entity->smallImage(
+										Core_Array::union($oNewAdmin_Form_Entity->smallImage, array(
+											'description' => $oProperty_Value->file_small_description
+										)
+									));
+								break;
+								case 7: // Checkbox
+									$oNewAdmin_Form_Entity->checked($oProperty_Value->value == 1);
+								break;
+								case 8: // Date
+									$oNewAdmin_Form_Entity->value(
+										//Core_Date::sql2date($oProperty_Value->value)
+										$this->_correctPrintValue($oProperty, $oProperty_Value->value)
+									);
+								break;
+								case 9: // Datetime
+									$oNewAdmin_Form_Entity->value(
+										//Core_Date::sql2datetime($oProperty_Value->value)
+										$this->_correctPrintValue($oProperty, $oProperty_Value->value)
+									);
+								break;
+							}
+
+							$oNewAdmin_Form_Entity
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$oAdmin_Form_Entity_Section->add(
+								Admin_Form_Entity::factory('Div')
+									->class('row')
+									->id("property_{$oProperty->id}")
+									->add($oNewAdmin_Form_Entity)
+							);
+
+							// Визуальный редактор клонировать запрещено
+							$oProperty->multiple /*&& $oProperty->type != 6*/
+								&& $this->imgBox($oNewAdmin_Form_Entity, $oProperty, '$.cloneProperty', $this->getImgDeletePath());
+						}
+					}
+				}
+			break;
+
+			case 3: // List
+				if (Core::moduleIsActive('list'))
+				{
+					$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
+						->caption(htmlspecialchars($oProperty->name))
+						->name("property_{$oProperty->id}[]")
+						// ->value(NULL)
+						->value(
+							$this->_correctPrintValue($oProperty, $oProperty->default_value)
+						)
+						->divAttr(array('class' => 'form-group col-xs-12'));
+
+					// Перенесно в _fillList()
+					/*$oProperty->obligatory
+						&& $oAdmin_Form_Entity_ListItems->data('required', 1);*/
+
+					$oAdmin_Form_Entity_ListItemsInput = Admin_Form_Entity::factory('Input')
+						->caption(htmlspecialchars($oProperty->name))
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-8'))
+						->id("id_property_{$oProperty->id}_00{$iPropertyCounter}") // id_property_ !!!
+						->name("input_property_{$oProperty->id}[]");
+
+					$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
+						->id($oAdmin_Form_Entity_ListItemsInput->id . '_mode')
+						->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+						->options(array(
+							0 => Core::_('Admin_Form.autocomplete_mode0'),
+							1 => Core::_('Admin_Form.autocomplete_mode1'),
+							2 => Core::_('Admin_Form.autocomplete_mode2'),
+							3 => Core::_('Admin_Form.autocomplete_mode3')
+						))
+						->caption(Core::_('Admin_Form.autocomplete_mode'));
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_ListItems,$oAdmin_Form_Entity_Section, $oProperty));
+
+						$this->_fillList($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_ListItemsInput, $oAdmin_Form_Entity_Autocomplete_Select);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $key => $oProperty_Value)
+						{
+							$value = $oProperty_Value->value;
+
+							$oNewAdmin_Form_Entity_ListItems = clone $oAdmin_Form_Entity_ListItems;
+							$oNewAdmin_Form_Entity_ListItems
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->value($value);
+
+							$oNewAdmin_Form_Entity_ListItemsInput = clone $oAdmin_Form_Entity_ListItemsInput;
+							$oNewAdmin_Form_Entity_ListItemsInput
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")  // id_property_ !!!
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
+							$oNewAdmin_Form_Entity_Autocomplete_Select
+								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode');  // id_property_ !!!
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$this->_fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_ListItems, $oNewAdmin_Form_Entity_ListItemsInput, $oNewAdmin_Form_Entity_Autocomplete_Select);
+						}
+					}
+				}
+			break;
+
+			case 5: // ИС
+				if (Core::moduleIsActive('informationsystem'))
+				{
+					// Директории
+					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
+						->caption(htmlspecialchars($oProperty->name))
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->filter(TRUE);
+
+					// Элементы
+					$oAdmin_Form_Entity_InfItems = Admin_Form_Entity::factory('Select')
+						->id("id_property_{$oProperty->id}")
+						->name("property_{$oProperty->id}[]")
+						->value(NULL)
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->filter(TRUE);
+
+					$oAdmin_Form_Entity_InfItemsInput = Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
+						->name("input_property_{$oProperty->id}[]");
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
+
+						$this->_fillInformationSystem($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfItems, $oAdmin_Form_Entity_InfItemsInput);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $key => $oProperty_Value)
+						{
+							$value = $oProperty_Value->value;
+
+							$oNewAdmin_Form_Entity_Inf_Groups = clone $oAdmin_Form_Entity_InfGroups;
+							$oNewAdmin_Form_Entity_Inf_Groups
+								->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
+
+							$oNewAdmin_Form_Entity_InfItems = clone $oAdmin_Form_Entity_InfItems;
+							$oNewAdmin_Form_Entity_InfItems
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->value($value);
+
+							$oNewAdmin_Form_Entity_InfItemsInput = clone $oAdmin_Form_Entity_InfItemsInput;
+							$oNewAdmin_Form_Entity_InfItemsInput
+								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Inf_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$this->_fillInformationSystem($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Inf_Groups, $oNewAdmin_Form_Entity_InfItems, $oNewAdmin_Form_Entity_InfItemsInput);
+						}
+					}
+				}
+			break;
+
+			case 13: // ИС, группа
+				if (Core::moduleIsActive('informationsystem'))
+				{
+					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
+						->caption(htmlspecialchars($oProperty->name))
+						->id("id_property_{$oProperty->id}")
+						->name("property_{$oProperty->id}[]")
+						->value(NULL)
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->filter(TRUE);
+
+					$oAdmin_Form_Entity_InfGroupsInput = Admin_Form_Entity::factory('Input')
+						->caption(htmlspecialchars($oProperty->name))
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}")
+						->name("input_property_{$oProperty->id}[]");
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_Section, $oProperty));
+
+						$this->_fillInformationSystemGroup($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_InfGroups, $oAdmin_Form_Entity_InfGroupsInput);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $key => $oProperty_Value)
+						{
+							$value = $oProperty_Value->value;
+
+							$oNewAdmin_Form_Entity_Inf_Groups = clone $oAdmin_Form_Entity_InfGroups;
+							$oNewAdmin_Form_Entity_Inf_Groups
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->value($value);
+
+							$oNewAdmin_Form_Entity_InfGroupsInput = clone $oAdmin_Form_Entity_InfGroupsInput;
+							$oNewAdmin_Form_Entity_InfGroupsInput
+								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Inf_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$this->_fillInformationSystemGroup($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Inf_Groups, $oNewAdmin_Form_Entity_InfGroupsInput);
+						}
+					}
+				}
+			break;
+
+			case 12: // Интернет-магазин
+				if (Core::moduleIsActive('shop'))
+				{
+					// Директории
+					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
+						->caption(htmlspecialchars($oProperty->name))
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->filter(TRUE);
+
+					// Элементы
+					$oAdmin_Form_Entity_Shop_Items = Admin_Form_Entity::factory('Select')
+						->id("id_property_{$oProperty->id}")
+						->name("property_{$oProperty->id}[]")
+						->value(NULL)
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->filter(TRUE);
+
+					$oAdmin_Form_Entity_Shop_Items_Input = Admin_Form_Entity::factory('Input')
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->name("input_property_{$oProperty->id}[]");
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Section, $oProperty));
+
+						$this->_fillShop($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Items, $oAdmin_Form_Entity_Shop_Items_Input);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $key => $oProperty_Value)
+						{
+							$value = $oProperty_Value->value;
+
+							$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
+							$oNewAdmin_Form_Entity_Shop_Groups
+								->id("id_group_{$oProperty->id}_{$oProperty_Value->id}"); // id_ should be, see js!
+
+							$oNewAdmin_Form_Entity_Shop_Items = clone $oAdmin_Form_Entity_Shop_Items;
+							$oNewAdmin_Form_Entity_Shop_Items
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_ should be, see js!
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->value($value);
+
+							$oNewAdmin_Form_Entity_Shop_Items_Input = clone $oAdmin_Form_Entity_Shop_Items_Input;
+							$oNewAdmin_Form_Entity_Shop_Items_Input
+								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$this->_fillShop($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Items, $oNewAdmin_Form_Entity_Shop_Items_Input);
+						}
+					}
+				}
+			break;
+
+			case 14: // Интернет-магазин, группа
+				if (Core::moduleIsActive('shop'))
+				{
+					// Директории
+					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
+						->caption(htmlspecialchars($oProperty->name))
+						->id("id_property_{$oProperty->id}")
+						->name("property_{$oProperty->id}[]")
+						->value(NULL)
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->filter(TRUE);
+
+					$oAdmin_Form_Entity_Shop_Groups_Input = Admin_Form_Entity::factory('Input')
+						->caption(htmlspecialchars($oProperty->name))
+						->divAttr(array('class' => 'form-group col-xs-12'))
+						->id("input_property_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->name("input_property_{$oProperty->id}[]");
+
+					// Значений св-в нет для объекта
+					if (count($aProperty_Values) == 0)
+					{
+						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty));
+
+						$this->_fillShopGroup($oProperty->default_value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Shop_Groups_Input);
+					}
+					else
+					{
+						foreach ($aProperty_Values as $key => $oProperty_Value)
+						{
+							$value = $oProperty_Value->value;
+
+							$oNewAdmin_Form_Entity_Shop_Groups = clone $oAdmin_Form_Entity_Shop_Groups;
+							$oNewAdmin_Form_Entity_Shop_Groups
+								->id("id_group_{$oProperty->id}_{$oProperty_Value->id}") // id_ should be, see js!
+								->name("property_{$oProperty->id}_{$oProperty_Value->id}")
+								->value($value);
+
+							$oNewAdmin_Form_Entity_Shop_Groups_Input = clone $oAdmin_Form_Entity_Shop_Groups_Input;
+							$oNewAdmin_Form_Entity_Shop_Groups_Input
+								->id("input_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")
+								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_Shop_Groups, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
+
+							$this->_fillShopGroup($value, $oProperty, $oAdmin_Form_Entity_Section, $oNewAdmin_Form_Entity_Shop_Groups, $oNewAdmin_Form_Entity_Shop_Groups_Input);
+						}
+					}
+				}
+			break;
+
+			default:
+				/*throw new Core_Exception(
+					Core::_('Property.type_does_not_exist'),
+						array('%d' => $oProperty->type)
+				);*/
+				Core_Event::notify('Property_Controller_Tab.onSetPropertyType', $this, array($oAdmin_Form_Entity_Section, $oProperty, $aProperty_Values));
+		}
+
+		return $this;
 	}
 
 	protected function _fillList($value, $oProperty, $oAdmin_Form_Entity_Section, $oAdmin_Form_Entity_ListItemsSelect, $oAdmin_Form_Entity_ListItemsInput, $oAdmin_Form_Entity_Autocomplete_Select)
@@ -1598,6 +1640,17 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		return $this->linkedObject->Properties;
 	}
 
+	protected function _setValue($oProperty_Value, $value)
+	{
+		$value = $this->_correctValue($oProperty_Value->Property, $value);
+
+		$oProperty_Value
+			->setValue($value)
+			->save();
+
+		return $this;
+	}
+
 	/**
 	* Apply object property
 	* @hostcms-event Property_Controller_Tab.onBeforeApplyObjectProperty
@@ -1612,10 +1665,72 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
+		// Values already exist
+		$aProperty_Values = $this->_object->getPropertyValues(FALSE);
+
+		foreach ($aProperty_Values as $oProperty_Value)
+		{
+			$oProperty = $oProperty_Value->Property;
+
+			switch ($oProperty->type)
+			{
+				case 0: // Int
+				case 1: // String
+				case 3: // List
+				case 4: // Textarea
+				case 5: // ИС
+				case 6: // Wysiwyg
+				case 7: // Checkbox
+				case 8: // Date
+				case 9: // Datetime
+				case 10: // Hidden field
+				case 11: // Float
+				case 12: // Shop
+				case 13: // IS group
+				case 14: // Shop group
+					$value = Core_Array::getPost("property_{$oProperty->id}_{$oProperty_Value->id}");
+
+					// 000227947
+					if (!is_null($value))
+					{
+						$value === ''
+							? $oProperty_Value->delete()
+							: $this->_setValue($oProperty_Value, $value);
+					}
+				break;
+				case 2: // File
+					// Values already exist
+
+					$aLargeFile = Core_Array::getFiles("property_{$oProperty->id}_{$oProperty_Value->id}");
+					$aSmallFile = Core_Array::getFiles("small_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+					// ----
+					$description = Core_Array::getPost("description_property_{$oProperty->id}_{$oProperty_Value->id}");
+					if (!is_null($description))
+					{
+						$oProperty_Value->file_description = $description;
+						$oProperty_Value->save();
+					}
+
+					$description_small = Core_Array::getPost("description_small_property_{$oProperty->id}_{$oProperty_Value->id}");
+
+					if (!is_null($description_small))
+					{
+						$oProperty_Value->file_small_description = $description_small;
+						$oProperty_Value->save();
+					}
+					// ----
+
+					$this->_loadFiles($aLargeFile, $aSmallFile, $oProperty_Value, $oProperty, "property_{$oProperty->id}_{$oProperty_Value->id}");
+				break;
+			}
+		}
+
+		// New Values
 		foreach ($aProperties as $oProperty)
 		{
 			// Values already exist
-			$aProperty_Values = $oProperty->getValues($this->_object->id, FALSE);
+			//$aProperty_Values = $oProperty->getValues($this->_object->id, FALSE);
 
 			switch ($oProperty->type)
 			{
@@ -1634,22 +1749,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				case 13: // IS group
 				case 14: // Shop group
 
-					// Values already exist
-					foreach ($aProperty_Values as $oProperty_Value)
-					{
-						$value = Core_Array::getPost("property_{$oProperty->id}_{$oProperty_Value->id}");
-
-						// 000227947
-						if (!is_null($value))
-						{
-							$value = $this->_correctValue($oProperty, $value);
-
-							$oProperty_Value
-								->setValue($value)
-								->save();
-						}
-					}
-
 					// New values of property
 					$aNewValue = Core_Array::getPost("property_{$oProperty->id}", array());
 
@@ -1660,61 +1759,28 @@ class Property_Controller_Tab extends Core_Servant_Properties
 						$aNewValue = array(0);
 					}
 
-					// New values of property
 					if (is_array($aNewValue))
 					{
 						foreach ($aNewValue as $newValue)
 						{
 							if ($newValue !== '')
 							{
-								$oNewValue = $oProperty->createNewValue($this->_object->id);
+								$oNewProperty_Value = $oProperty->createNewValue($this->_object->id);
 
-								$newValue = $this->_correctValue($oProperty, $newValue);
-
-								$oNewValue
-									->setValue($newValue)
-									->save();
+								$this->_setValue($oNewProperty_Value, $newValue);
 
 								ob_start();
 								Core::factory('Core_Html_Entity_Script')
-									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewValue->id}')")
+									->value("$(\"#{$windowId} *[name='property_{$oProperty->id}\\[\\]']\").eq(0).attr('name', 'property_{$oProperty->id}_{$oNewProperty_Value->id}')")
 									->execute();
 
 								$this->_Admin_Form_Controller->addMessage(ob_get_clean());
 							}
 						}
 					}
-
 				break;
 
 				case 2: // File
-
-					// Values already exist
-					foreach ($aProperty_Values as $oFileValue)
-					{
-						$aLargeFile = Core_Array::getFiles("property_{$oProperty->id}_{$oFileValue->id}");
-						$aSmallFile = Core_Array::getFiles("small_property_{$oProperty->id}_{$oFileValue->id}");
-
-						// ----
-						$description = Core_Array::getPost("description_property_{$oProperty->id}_{$oFileValue->id}");
-						if (!is_null($description))
-						{
-							$oFileValue->file_description = $description;
-							$oFileValue->save();
-						}
-
-						$description_small = Core_Array::getPost("description_small_property_{$oProperty->id}_{$oFileValue->id}");
-
-						if (!is_null($description_small))
-						{
-							$oFileValue->file_small_description = $description_small;
-							$oFileValue->save();
-						}
-						// ----
-
-						$this->_loadFiles($aLargeFile, $aSmallFile, $oFileValue, $oProperty, "property_{$oProperty->id}_{$oFileValue->id}");
-					}
-
 					// New values of property
 					$aNewValueLarge = Core_Array::getFiles("property_{$oProperty->id}", array());
 					$aNewValueSmall = Core_Array::getFiles("small_property_{$oProperty->id}", array());
@@ -1920,8 +1986,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				// задано изображение
 				if ($oFileValue->file != '')
 				{
-					// Существует ли большое изображение
-					$param['large_image_isset'] = TRUE;
 					$create_large_image = FALSE;
 				}
 				else // ранее не было задано большое изображение

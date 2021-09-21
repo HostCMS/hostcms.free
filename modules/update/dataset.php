@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Dataset extends Admin_Form_Dataset
 {
@@ -96,6 +96,12 @@ class Update_Dataset extends Admin_Form_Dataset
 				Core_Date::sql2timestamp($expiration_of_support) > time()
 					? Core_Message::get(Core::_('Update.support_available', $f_expiration_of_support, $sDatetime))
 					: Core_Message::get(Core::_('Update.support_has_expired', $f_expiration_of_support, 'www.hostcms.ru', $sDatetime), 'error')
+			);
+		}
+		else
+		{
+			$this->_Admin_Form_Controller->addMessage(
+				Core_Message::get(Core::_('Update.support_unavailable'))
 			);
 		}
 

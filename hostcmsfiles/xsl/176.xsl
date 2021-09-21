@@ -5,15 +5,15 @@
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-
+	
 	<!-- МагазинКаталогТоваровНаГлавнойСпецПред -->
-
+	
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
-
+	
 	<xsl:template match="/">
 		<xsl:apply-templates select="/shop"/>
 	</xsl:template>
-
+	
 	<xsl:template match="/shop">
 		<!-- Есть товары -->
 		<xsl:if test="shop_item">
@@ -26,7 +26,7 @@
 			</div>
 		</xsl:if>
 	</xsl:template>
-
+	
 	<!-- Шаблон для товара -->
 	<xsl:template match="shop_item">
 		<div class="shop_item">
@@ -54,7 +54,7 @@
 							</a>
 						</p>
 						<div class="price">
-						<xsl:value-of select="format-number(price, '### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="currency"/><xsl:text> </xsl:text>
+					<span hostcms:id="{@id}" hostcms:field="price" hostcms:entity="shop_item"><xsl:value-of select="format-number(price, '### ##0,00', 'my')"/></span><xsl:text> </xsl:text><xsl:value-of disable-output-escaping="yes" select="currency"/><xsl:text> </xsl:text>
 							<!-- Ссылку на добавление в корзины выводим, если:
 							type = 0 - простой тип товара
 							type = 1 - электронный товар, при этом остаток на складе больше 0 или -1,
@@ -64,10 +64,10 @@
 									<img src="/images/add_to_cart.gif" alt="&labelAddIntoCart;" title="&labelAddIntoCart;" />
 								</a>
 							</xsl:if>
-
+							
 							<!-- Сравнение товаров -->
 							<xsl:variable name="shop_item_id" select="@id" />
-							<div class="compare" onclick="return $.addCompare('{/shop/url}', {@id}, this)">
+							<div class="compare" onclick="return $.addCompare('{/shop/url}compare/', {@id}, this)">
 								<xsl:if test="/shop/comparing/shop_item[@id = $shop_item_id]/node()">
 									<xsl:attribute name="class">compare current</xsl:attribute>
 								</xsl:if>

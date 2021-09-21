@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -831,9 +831,19 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get entity name
 	 * @return string
+	 * @hostcms-event modelname.onBeforeGetName
 	 */
 	public function getName()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetName', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		$nameColumn = $this->_nameColumn;
 		return htmlspecialchars($this->$nameColumn);
 	}
@@ -841,9 +851,19 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Get entity description
 	 * @return string
+	 * @hostcms-event modelname.onBeforeGetTrashDescription
 	 */
 	public function getTrashDescription()
 	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetTrashDescription', $this);
+
+		$eventResult = Core_Event::getLastReturn();
+
+		if (!is_null($eventResult))
+		{
+			return $eventResult;
+		}
+
 		$text = isset($this->description) && strlen($this->description)
 			? $this->description
 			: (

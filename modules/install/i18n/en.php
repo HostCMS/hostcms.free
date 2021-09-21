@@ -57,9 +57,9 @@ return array(
 	'step_7' => 'Step 7: Template Settings',
 	'step_8' => 'Step 8: Installation Complete',
 
-	'step_5_warning1' => 'License number and PIN-code can be found in your <a href="http://www.hostcms.ru/users/" target="_blank">account</a> on our website in the <a href="http://www.hostcms.ru/users/licence/" target="_blank">Licenses</a>.',
+	'step_5_warning1' => 'License number and PIN-code can be found in your <a href="https://www.hostcms.ru/users/" target="_blank">account</a> on our website in the <a href="https://www.hostcms.ru/users/licence/" target="_blank">Licenses</a>.',
 	'step_5_warning2' => 'You can not fill the license data at this step, just press Next.',
-	'step_5_warning3' => 'New user has an empty list of licenses, you can <a href="http://www.hostcms.ru/shop/" target="_blank">buy</a> <i class="fa fa-external-link"></i> or <a href="http://www.hostcms.ru/users/licence/add-free/" target="_blank">create your own license</a> <i class="fa fa-external-link"></i> for the edition HostCMS.Free. Just press the button +HostCMS.Free.',
+	'step_5_warning3' => 'New user has an empty list of licenses, you can <a href="https://www.hostcms.ru/shop/" target="_blank">buy</a> <i class="fa fa-external-link"></i> or <a href="https://www.hostcms.ru/users/licence/add-free/" target="_blank">create your own license</a> <i class="fa fa-external-link"></i> for the edition HostCMS.Free. Just press the button +HostCMS.Free.',
 	
 	'write_error' => 'Error while writing into file %s.',
 	'template_data_information' => 'Template settings.',

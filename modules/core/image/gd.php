@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Gd extends Core_Image
 {
@@ -51,7 +51,7 @@ class Core_Image_Gd extends Core_Image
 		if (($sourceX > $maxWidth || $sourceY > $maxHeight) /*&& $maxWidth != 0 && $maxHeight != 0*/)
 		{
 			//$ext = Core_File::getExtension($targetFile);
-			$iImagetype = Core_Image::instance()->exifImagetype($sourceFile);
+			$iImagetype = self::exifImagetype($sourceFile);
 
 			if ($iImagetype == IMAGETYPE_JPEG)
 			{
@@ -65,7 +65,7 @@ class Core_Image_Gd extends Core_Image
 			{
 				$sourceResource = imagecreatefromgif($sourceFile);
 			}
-			elseif(defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
+			elseif (defined('IMAGETYPE_WEBP') && $iImagetype == IMAGETYPE_WEBP && function_exists('imagecreatefromwebp'))
 			{
 				$sourceResource = imagecreatefromwebp($sourceFile);
 			}
@@ -268,14 +268,14 @@ class Core_Image_Gd extends Core_Image
 
 				if ($preserveAspectRatio)
 				{
-					imagegif ($targetResourceStep1, $targetFile);
+					imagegif($targetResourceStep1, $targetFile);
 				}
 				else
 				{
 					//imagecopy($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2);
 					imagecopyresampled($targetResourceStep2, $targetResourceStep1, 0, 0, $src_x, $src_y, $destX_step2, $destY_step2, $destX_step2, $destY_step2);
 
-					imagegif ($targetResourceStep2, $targetFile);
+					imagegif($targetResourceStep2, $targetFile);
 					imagedestroy($targetResourceStep2);
 				}
 				@chmod($targetFile, CHMOD_FILE);
@@ -424,7 +424,7 @@ class Core_Image_Gd extends Core_Image
 					imagecopyresampled($new_image, $sourceResource, 0, 0, 0, 0, $width, $height, $width, $height);
 
 					$new_image = self::_addWatermark($new_image, $watermarkResource, $watermarkX, $watermarkY);
-					$return = imagegif ($new_image, $target);
+					$return = imagegif($new_image, $target);
 					@chmod($target, CHMOD_FILE);
 
 					imagedestroy($new_image);
@@ -472,20 +472,24 @@ class Core_Image_Gd extends Core_Image
 		if (!is_null($watermarkX))
 		{
 			// Если передан атрибут в %-ах
-			if (preg_match("/^([0-9]*)%$/", $watermarkX, $regs) && $regs[1] > 0)
+			if (preg_match("/^([0-9]*)%$/", $watermarkX, $regs))
 			{
 				// Вычисляем позицию в %-х
-				$watermarkX = ($sourceResource_w - $watermarkResource_w) * ($regs[1] / 100);
+				$watermarkX = $regs[1] > 0
+					? ($sourceResource_w - $watermarkResource_w) * ($regs[1] / 100)
+					: 0;
 			}
 		}
 
 		if (!is_null($watermarkY))
 		{
 			// Если передан атрибут в %-ах
-			if (preg_match("/^([0-9]*)%$/", $watermarkY, $regs) && $regs[1] > 0)
+			if (preg_match("/^([0-9]*)%$/", $watermarkY, $regs))
 			{
 				// Вычисляем позицию в %-х
-				$watermarkY = ($sourceResource_h - $watermarkResource_h) * ($regs[1] / 100);
+				$watermarkY = $regs[1] > 0
+					? ($sourceResource_h - $watermarkResource_h) * ($regs[1] / 100)
+					: 0;
 			}
 		}
 
@@ -516,6 +520,43 @@ class Core_Image_Gd extends Core_Image
 		imagecolortransparent($image_target, $transparencyIndex);
 
 		return TRUE;
+	}
+
+	/**
+	 * Get image size
+	 * @param string $path path
+	 * @return mixed
+	 */
+	static public function getImageSize($path)
+	{
+		if (is_file($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
+		{
+			$picsize = @getimagesize($path);
+			if ($picsize)
+			{
+				return array(
+					'width' => $picsize[0], 'height' => $picsize[1]
+				);
+			}
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Get Image Type: 0 = UNKNOWN, 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF (orden de bytes intel), 8 = TIFF (orden de bytes motorola),
+	 * 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM, 17 = ICO, 18 = WEBP
+	 * @param string $path
+	 * @return mixed
+	 */
+	static public function getImageType($path)
+	{
+		if ((list($width, $height, $type, $attr) = @getimagesize($path)) !== FALSE)
+		{
+			return $type;
+		}
+
+		return 0;
 	}
 
 	/**

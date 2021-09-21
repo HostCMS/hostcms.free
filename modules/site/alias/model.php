@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Model extends Core_Entity
 {
@@ -118,10 +118,7 @@ class Site_Alias_Model extends Core_Entity
 	public function getKey()
 	{
 		// Проверяем наличие трех констант
-		if (!defined('HOSTCMS_USER_LOGIN')
-		|| !defined('HOSTCMS_CONTRACT_NUMBER')
-		|| !defined('HOSTCMS_PIN_CODE')
-		|| !defined('HOSTCMS_UPDATE_NUMBER'))
+		if (!defined('HOSTCMS_USER_LOGIN') || !defined('HOSTCMS_CONTRACT_NUMBER') || !defined('HOSTCMS_PIN_CODE') || !defined('HOSTCMS_UPDATE_NUMBER'))
 		{
 			throw new Core_Exception(Core::_('Site_Alias.constant_check_error'), array(), 0, FALSE);
 		}

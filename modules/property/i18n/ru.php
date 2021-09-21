@@ -6,7 +6,7 @@
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дополнительные свойства',
@@ -81,4 +81,12 @@ return array(
 	'watermark_default_use_small_image' => 'Использовать водяной знак для малых изображений',
 	'move_success' => 'Свойства перенесены',
 	'obligatory' => 'Обязательное для заполнения',
+	'merge_success' => 'Свойства объединены',
+	'merge_error_type' => 'Нельзя объединять свойства разных типов!',
+
+	'move_title' => 'Перенос свойств',
+	'move_dir_id' => 'Родительский раздел',
+
+	'option_recursive_properties' => 'Разрешить рекурсивные свойства',
+	'option_add_list_items' => 'Добавлять в XML значения для списочных свойств',
 );

@@ -35,8 +35,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Input extends Skin_Default_Admin_Form_Ent
 			}
 		}
 
-		?>
-		<div <?php echo implode(' ', $aDivAttr)?>><?php
+		?><div <?php echo implode(' ', $aDivAttr)?>><?php
 
 		if (strlen($this->caption))
 		{
@@ -57,6 +56,27 @@ class Skin_Bootstrap_Admin_Form_Entity_Input extends Skin_Default_Admin_Form_Ent
 		{
 			$this->executeChildren();
 			?></div><?php
+		}
+
+		if ($this->colorpicker)
+		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+			?><script>$('#<?php echo htmlspecialchars($windowId) . ' #' . $this->id?>').each(function () {
+				$(this).minicolors({
+					control: $(this).attr('data-control') || 'hue',
+					defaultValue: $(this).attr('data-defaultValue') || '',
+					inline: $(this).attr('data-inline') === 'true',
+					letterCase: $(this).attr('data-letterCase') || 'lowercase',
+					opacity: $(this).attr('data-opacity'),
+					position: $(this).attr('data-position') || 'bottom left',
+					change: function (hex, opacity) {
+						if (!hex) return;
+						if (opacity) hex += ', ' + opacity;
+					},
+					theme: 'bootstrap'
+				});
+			});</script><?php
 		}
 
 		?></div><?php

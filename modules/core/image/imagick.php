@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Image_Imagick extends Core_Image
 {
@@ -262,20 +262,24 @@ class Core_Image_Imagick extends Core_Image
 			if (!is_null($watermarkX))
 			{
 				// Если передан атрибут в %-ах
-				if (preg_match("/^([0-9]*)%$/", $watermarkX, $regs) && $regs[1] > 0)
+				if (preg_match("/^([0-9]*)%$/", $watermarkX, $regs))
 				{
 					// Вычисляем позицию в %-х
-					$watermarkX = ($sourceImage->getImageWidth() - $watermarkImage->getImageWidth()) * ($regs[1] / 100);
+					$watermarkX = $regs[1] > 0
+						? ($sourceImage->getImageWidth() - $watermarkImage->getImageWidth()) * ($regs[1] / 100)
+						: 0;
 				}
 			}
 
 			if (!is_null($watermarkY))
 			{
 				// Если передан атрибут в %-ах
-				if (preg_match("/^([0-9]*)%$/", $watermarkY, $regs) && $regs[1] > 0)
+				if (preg_match("/^([0-9]*)%$/", $watermarkY, $regs))
 				{
 					// Вычисляем позицию в %-х
-					$watermarkY = ($sourceImage->getImageHeight() - $watermarkImage->getImageHeight()) * ($regs[1] / 100);
+					$watermarkY = $regs[1] > 0
+						? ($sourceImage->getImageHeight() - $watermarkImage->getImageHeight()) * ($regs[1] / 100)
+						: 0;
 				}
 			}
 
@@ -303,6 +307,71 @@ class Core_Image_Imagick extends Core_Image
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Get image size
+	 * @param string $path path
+	 * @return mixed
+	 */
+	static public function getImageSize($path)
+	{
+		if (is_file($path) && is_readable($path) && filesize($path) > 12 && self::exifImagetype($path))
+		{
+			$oImagick = new Imagick($path);
+
+			return array(
+				'width' => $oImagick->getImageWidth(), 'height' => $oImagick->getImageHeight()
+			);
+		}
+
+		return NULL;
+	}
+
+	/**
+	 * Supported Image Formats
+	 * https://imagemagick.org/script/formats.php
+	 * @var array
+	 */
+	static protected $_aFormats = array(
+		'GIF' => 1,
+		'JPEG' => 2,
+		'PNG' => 3,
+		'PNG8' => 3,
+		'PNG00' => 3,
+		'PNG24' => 3,
+		'PNG32' => 3,
+		'PNG48' => 3,
+		'PNG64' => 3,
+		'PSD' => 5,
+		'BMP' => 6,
+		'BMP2' => 6,
+		'BMP3' => 6,
+		'TIFF' => 7,
+		'JP2' => 10,
+		'JPT' => 10,
+		'J2C' => 10,
+		'J2K' => 10,
+		'WBMP' => 15,
+		'XBM' => 16,
+		'ICO' => 17,
+		'WEBP' => 18
+	);
+
+	/**
+	 * Get Image Type: 0 = UNKNOWN, 1 = GIF, 2 = JPG, 3 = PNG, 4 = SWF, 5 = PSD, 6 = BMP, 7 = TIFF (orden de bytes intel), 8 = TIFF (orden de bytes motorola),
+	 * 9 = JPC, 10 = JP2, 11 = JPX, 12 = JB2, 13 = SWC, 14 = IFF, 15 = WBMP, 16 = XBM, 17 = ICO, 18 = WEBP
+	 * @param string $path
+	 * @return mixed
+	 */
+	static public function getImageType($path)
+	{
+		$oImagick = new Imagick($path);
+		$format = $oImagick->getImageFormat();
+
+		return isset(self::$_aFormats[$format])
+			? self::$_aFormats[$format]
+			: 0;
 	}
 
 	/**

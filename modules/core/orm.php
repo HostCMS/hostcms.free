@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -1268,10 +1268,6 @@ class Core_ORM
 
 				$this->_loadColumnCacheDefaultValues();
 			}
-
-			/*$this->_tableColumns = isset(self::$_columnCache[$this->_modelName])
-				? self::$_columnCache[$this->_modelName]
-				: self::$_columnCache[$this->_modelName] = $this->getDatabase()->getColumns($this->_tableName);*/
 		}
 
 		return $this;
@@ -2002,6 +1998,9 @@ class Core_ORM
 		// Set primary key as NULL
 		$this->_modelColumns[$this->_primaryKey] = NULL;
 
+		// Reset $this->_queryBuilder
+		$this->_queryBuilder = NULL;
+
 		// Mark all properies as changed
 		foreach ($this->_modelColumns as $key => $value)
 		{
@@ -2034,7 +2033,7 @@ class Core_ORM
 			return "Model '" . $this->_modelName . "',\nfields: " . implode(",\n", $return);
 		}
 
-		return;
+		return '';
 	}
 
 	/**

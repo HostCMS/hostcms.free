@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Tag
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tag_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Tag_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2020-11-03';
+	public $date = '2021-05-25';
 
 	/**
 	 * Module name

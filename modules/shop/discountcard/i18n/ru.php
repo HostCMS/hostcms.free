@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дисконтные карты',
@@ -25,6 +25,7 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'markDeleted_success' => "Данные о дисконтной карте успешно удалены!",
 	'levels' => 'Уровни',
+	'types' => 'Типы зачислений',
 	'shop_order_item_name' => 'Дисконтная карта %s',
 	'export' => 'Экспорт',
 	'import' => 'Импорт',

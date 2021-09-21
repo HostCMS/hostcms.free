@@ -13,7 +13,7 @@
 				<p>&labelChooseProduct;</p>
 			</xsl:when>
 			<xsl:otherwise>
-				<h1>&labelTitle;</h1>
+			<h1>&labelTitle;</h1>
 				<p>&labelOrder;</p>
 
 				<form action="{/shop/url}cart/" method="post">

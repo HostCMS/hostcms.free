@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Order items',
@@ -46,4 +46,6 @@ return array(
 	'splitOrder_success' => 'Order split successfully!',
 	'item_codes' => 'Item "%s" nomenclature code',
 	'setCodes_success' => 'Nomenclature codes changed successfully!',
+	'shop_order_item_status_id' => 'Shop order item status',
+	'change_item_status' => 'Shop order item status "%s" changed to "%s"',
 );

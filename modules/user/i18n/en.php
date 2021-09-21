@@ -6,7 +6,7 @@
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Staff',
@@ -92,11 +92,15 @@ return array(
 	'editUserDepartment_success' => 'User department post information changed successfully!',
 	'deleteUserFromDepartment_success' => 'User removed from department',
 	'session' => 'Sessions',
-	
+
 	'responsible' => 'Send to responsible',
 	'additional_receivers' => 'Additional recipients',
 	'theme' => 'Theme',
 	'text' => 'Text',
 	'from' => 'E-mail of the sender',
-	'sender_name' => 'Sender name',	
+	'sender_name' => 'Sender name',
+	'title' => 'Title',
+
+	'option_max_height' => 'Max avatar height',
+	'option_max_width' => 'Max avatar width',
 );

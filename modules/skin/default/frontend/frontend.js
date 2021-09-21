@@ -1,162 +1,6 @@
 //(function($){
 	// Функции для коллекции элементов
-	hQuery.fn.extend({
-		hostcmsEditable: function(settings){
-			settings = hQuery.extend({
-				save: function(item, settings){
-					var data = {
-						'id': item.attr('hostcms:id'),
-						'entity': item.attr('hostcms:entity'),
-						'field': item.attr('hostcms:field'),
-						'value': item.html()
-					};
-					data['_'] = Math.round(new Date().getTime());
-
-					hQuery.ajax({
-						// ajax loader
-						context: hQuery('<img>').addClass('img_line').prop('src', '/modules/skin/default/frontend/images/ajax-loader.gif').appendTo(item),
-						url: settings.path,
-						type: 'POST',
-						data: data,
-						dataType: 'json',
-						success: function(){this.remove();}
-					});
-				},
-				blur: function(jEditInPlace) {
-					var item = jEditInPlace.prevAll('.hostcmsEditable').eq(0);
-					item.html(jEditInPlace.val()).css('display', '');
-					jEditInPlace.remove();
-					settings.save(item, settings);
-				}
-			}, settings);
-
-			return this.each(function(index, object){
-				hQuery(object).on('click', function(){
-					var obj = hQuery(this), href = obj.attr('href');
-					if (href != undefined && !obj.data('timer')) {
-					   obj.data('timer', setTimeout(function(){window.location = href;}, 500));
-					}
-					else
-					{
-						obj.dblclick();
-					}
-					return false;
-				}).on('dblclick', function(){
-
-					var editingItem = hQuery(this);
-
-					clearTimeout(editingItem.data('timer'));
-					editingItem.data('timer', null);
-
-					var data = {
-						'id': editingItem.attr('hostcms:id'),
-						'entity': editingItem.attr('hostcms:entity'),
-						'field': editingItem.attr('hostcms:field'),
-						'loadValue': true
-					};
-					data['_'] = Math.round(new Date().getTime());
-
-					hQuery.ajax({
-						// ajax loader
-						context: editingItem,
-						url: settings.path,
-						type: 'POST',
-						data: data,
-						dataType: 'json',
-						success: function(result) {
-							var editingItem = hQuery(this);
-
-							if (result.status != 'Error')
-							{
-								var type = editingItem.attr('hostcms:type'), jEditInPlace;
-
-								switch(type)
-								{
-									case 'textarea':
-									case 'wysiwyg':
-										jEditInPlace = hQuery('<textarea>');
-									break;
-									case 'input':
-									default:
-										jEditInPlace = hQuery('<input>').prop('type', 'text');
-								}
-
-								if (type != 'wysiwyg')
-								{
-									jEditInPlace.on('blur', function(){
-										settings.blur(jEditInPlace)
-									});
-								}
-
-								jEditInPlace
-									.val(result.value/*editingItem.html()*/)
-									.prop('name', editingItem.parent().prop('id'))
-									.height(editingItem.height())
-									.width(editingItem.width())
-									//.css(editingItem.getStyleObject())
-									.insertAfter(editingItem)
-									.on('keydown', function(e){
-										if (e.keyCode == 13) {
-											e.preventDefault();
-											this.blur();
-										}
-										if (e.keyCode == 27) { // ESC
-											e.preventDefault();
-											var input = hQuery(this), editingItem = input.prev();
-											editingItem.css('display', '');
-											input.remove();
-										}
-									})/*.width('90%')*/
-									.focus();
-
-								if (type == 'wysiwyg')
-								{
-									setTimeout(function(){
-										var aCss = [];
-
-										hQuery("head > link[rel = stylesheet").each(function() {
-											var linkHref = hQuery(this).attr('href');
-											if (linkHref != 'undefined')
-											{
-												aCss.push(linkHref);
-											}
-										});
-
-										jEditInPlace.tinymce({
-											theme: "silver",
-											language: backendLng,
-											language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
-											init_instance_callback: function (editor) {
-												editor.on('blur', function (e) {
-													settings.blur(jEditInPlace);
-												});
-											},
-											toolbar_items_size: "small",
-											script_url: "/admin/wysiwyg/tinymce.min.js",
-											menubar: false,
-											plugins: [
-												'advlist autolink lists link image charmap print preview anchor',
-												'searchreplace visualblocks code fullscreen',
-												'insertdatetime media table paste help wordcount importcss'
-											],
-											toolbar: 'undo redo | styleselect formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
-											content_css: aCss
-										});
-									}, 300);
-								}
-
-								editingItem.css('display', 'none');
-							}
-							else
-							{
-								editingItem.removeClass('hostcmsEditable');
-							}
-						}
-					});
-				})
-				.addClass('hostcmsEditable');
-			});
-		},
+	/*hQuery.fn.extend({
 		// http://upshots.org/javascript/jquery-copy-style-copycss
 		getStyleObject: function() {
 			var dom = this.get(0);
@@ -191,9 +35,171 @@
 			};
 			return returns;
 		}
-	});
+	});*/
 
 	hQuery.extend({
+		hostcmsEditable: function(settings){
+			settings = hQuery.extend({
+				save: function(item, settings){
+					var data = {
+						'id': item.attr('hostcms:id'),
+						'entity': item.attr('hostcms:entity'),
+						'field': item.attr('hostcms:field'),
+						'value': item.html()
+					};
+					data['_'] = Math.round(new Date().getTime());
+
+					hQuery.ajax({
+						// ajax loader
+						context: hQuery('<img>').addClass('img_line').prop('src', '/modules/skin/default/frontend/images/ajax-loader.gif').appendTo(item),
+						url: settings.path,
+						type: 'POST',
+						data: data,
+						dataType: 'json',
+						success: function(){this.remove();}
+					});
+				},
+				blur: function(jEditInPlace) {
+					var item = jEditInPlace.prevAll('.hostcmsEditable').eq(0);
+					item.html(jEditInPlace.val()).css('display', '');
+					jEditInPlace.remove();
+					settings.save(item, settings);
+				}
+			}, settings);
+
+			hQuery('*[hostcms\\:id]').addClass('hostcmsEditable');
+
+			hQuery(document).on("click", "*[hostcms\\:id]", function(event) {
+				var $object = hQuery(this);
+
+				if (!event.isDefaultPrevented())
+				{
+					if (!$object.data('timer')) {
+						$object.data('timer', setTimeout(function(){
+							$object.data('timer', null);
+							var href = $object.attr('href');
+							if (href != undefined) {
+							   window.location = href;
+							}
+						}, 500));
+					}
+				}
+
+				event.preventDefault();
+			})
+			.on("dblclick", "*[hostcms\\:id]", function(event) {
+				var $object = hQuery(this);
+
+				clearTimeout($object.data('timer'));
+				$object.data('timer', null);
+
+				var data = {
+					'id': $object.attr('hostcms:id'),
+					'entity': $object.attr('hostcms:entity'),
+					'field': $object.attr('hostcms:field'),
+					'loadValue': true
+				};
+				data['_'] = Math.round(new Date().getTime());
+
+				hQuery.ajax({
+					// ajax loader
+					context: $object,
+					url: settings.path,
+					type: 'POST',
+					data: data,
+					dataType: 'json',
+					success: function(result) {
+						var $object = hQuery(this);
+
+						if (result.status != 'Error')
+						{
+							var type = $object.attr('hostcms:type'), jEditInPlace;
+
+							switch(type)
+							{
+								case 'textarea':
+								case 'wysiwyg':
+									jEditInPlace = hQuery('<textarea>');
+								break;
+								case 'input':
+								default:
+									jEditInPlace = hQuery('<input>').prop('type', 'text');
+							}
+
+							if (type != 'wysiwyg')
+							{
+								jEditInPlace.on('blur', function(){
+									settings.blur(jEditInPlace)
+								});
+							}
+
+							jEditInPlace
+								.val(result.value/*$object.html()*/)
+								.prop('name', $object.parent().prop('id'))
+								.height($object.height())
+								.width($object.width())
+								//.css($object.getStyleObject())
+								.insertAfter($object)
+								.on('keydown', function(e){
+									if (e.keyCode == 13) {
+										e.preventDefault();
+										this.blur();
+									}
+									if (e.keyCode == 27) { // ESC
+										e.preventDefault();
+										var input = hQuery(this), $object = input.prev();
+										$object.css('display', '');
+										input.remove();
+									}
+								})/*.width('90%')*/
+								.focus();
+
+							if (type == 'wysiwyg')
+							{
+								setTimeout(function(){
+									var aCss = [];
+
+									hQuery("head > link[rel = stylesheet").each(function() {
+										var linkHref = hQuery(this).attr('href');
+										if (linkHref != 'undefined')
+										{
+											aCss.push(linkHref);
+										}
+									});
+
+									jEditInPlace.tinymce(hQuery.extend({
+										// theme: "silver",
+										// toolbar_items_size: "small",
+										language: backendLng,
+										language_url: '/admin/wysiwyg/langs/' + backendLng + '.js',
+										init_instance_callback: function (editor) {
+											editor.on('blur', function (e) {
+												settings.blur(jEditInPlace);
+											});
+										},
+										script_url: "/admin/wysiwyg/tinymce.min.js",
+										menubar: false,
+										plugins: [
+											'advlist autolink lists link image charmap print preview anchor',
+											'searchreplace visualblocks code fullscreen',
+											'insertdatetime media table paste help wordcount importcss'
+										],
+										toolbar: 'undo redo | styleselect formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
+										content_css: aCss
+									}, settings.wysiwygConfig));
+								}, 300);
+							}
+
+							$object.css('display', 'none');
+						}
+						else
+						{
+							$object.removeClass('hostcmsEditable');
+						}
+					}
+				});
+			});
+		},
 		createWindow: function(settings) {
 			settings = hQuery.extend({
 				open: function( event, ui ) {
@@ -414,7 +420,7 @@
 					}
 					else
 					{
-						Notify(result, 'top-left', '5000', 'danger', 'fa-gear', true, false);
+						frontendNotify(result, 'top-left', '5000', 'danger', 'fa-gear', true, false);
 					}
 				}
 			});
@@ -422,8 +428,7 @@
 	});
 //})(hQuery);
 
-/*Show Notification*/
-function Notify(message, position, timeout, theme, icon, closable, sound) {
+function frontendNotify(message, position, timeout, theme, icon, closable, sound) {
 	toastr.options.positionClass = 'toast-' + position;
 	toastr.options.extendedTimeOut = 0; //1000;
 	toastr.options.timeOut = timeout;

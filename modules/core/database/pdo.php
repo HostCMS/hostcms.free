@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Database
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_DataBase_Pdo extends Core_DataBase
 {
@@ -397,7 +397,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		// Core_QueryBuilder_Expression
 		elseif (is_object($columnName))
 		{
-			// add brackets for subquery
+			// add brackets for subquery // see _isObjectSelect inside QB
 			return /*get_class($columnName) == 'Core_QueryBuilder_Select'
 				? '(' . $columnName->build() . ')'
 				: */$columnName->build();
@@ -535,7 +535,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 	}
 
 	/**
-	 * Get list of tables in a database
+	 * Get list of tables in the database
 	 *
 	 * @param mixed $selectionCondition Selection condition
 	 * @return array
@@ -557,6 +557,32 @@ class Core_DataBase_Pdo extends Core_DataBase
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Get tables schema in the database
+	 *
+	 * @param mixed $selectionCondition Selection condition
+	 * @return array
+	 */
+	public function getTablesSchema($selectionCondition = NULL)
+	{
+		$this->connect();
+
+		// MAX_DATA_LENGTH as max_data_length, DATA_FREE, AUTO_INCREMENT, CREATE_TIME, UPDATE_TIME, CHECK_TIME, CHECKSUM, CREATE_OPTIONS, TABLE_COMMENT
+
+		$query = 'SELECT TABLE_NAME as name, ENGINE as engine, VERSION as version, ROW_FORMAT as row_format, TABLE_ROWS as table_rows, AVG_ROW_LENGTH as avg_row_legth, DATA_LENGTH as data_length, INDEX_LENGTH as index_length, DATA_FREE as fragmented, TABLE_COLLATION as collation
+		FROM `INFORMATION_SCHEMA`.`TABLES`
+		WHERE `table_schema` = ' . $this->quote($this->_config['database']);
+
+		!is_null($selectionCondition)
+			&& $query .=  ' AND `TABLE_NAME` LIKE ' . $this->quote($selectionCondition);
+
+		$query .= 'ORDER BY `name` ASC';
+
+		$result = $this->_connection->query($query);
+
+		return $this->_fetch($result, FALSE);
 	}
 
 	/**
@@ -617,14 +643,26 @@ class Core_DataBase_Pdo extends Core_DataBase
 	 */
 	public function result($bCache = TRUE)
 	{
-		$return = array();
-
-		// Может быть изменен при запросах внутри моделей, например find() в конструкторе
-		$_asObject = $this->_asObject;
 		$result = $this->getResult();
+
+		return $this->_fetch($result, $bCache);
+	}
+
+	/**
+	 * Fetch query result
+	 * @param $result resource
+	 * @param boolean $bCache use cache
+	 * @return array
+	 */
+	protected function _fetch($result, $bCache = TRUE)
+	{
+		$return = array();
 
 		if ($result)
 		{
+			// Может быть изменен при запросах внутри моделей, например find() в конструкторе
+			$_asObject = $this->_asObject;
+
 			if ($this->_asObject === FALSE)
 			{
 				while ($row = $this->_currentAssoc($result))
@@ -703,7 +741,6 @@ class Core_DataBase_Pdo extends Core_DataBase
 	{
 		is_null($result) && $result = $this->_result;
 		$result->setFetchMode(PDO::FETCH_ASSOC);
-		//return $result->fetch(PDO::FETCH_ASSOC);
 		return $result->fetch();
 	}
 
@@ -721,7 +758,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		$result->setFetchMode(PDO::FETCH_CLASS/*|PDO::FETCH_PROPS_LATE*/, $object_name);
 		$return = $result->fetch();
 
-		if ($bCache && $return && $object_name != 'stdClass')
+		if ($bCache && $return && $return instanceof Core_ORM)
 		{
 			$Core_ObjectWatcher = Core_ObjectWatcher::instance();
 

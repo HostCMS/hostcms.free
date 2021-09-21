@@ -55,8 +55,8 @@ $Helpdesk_Controller_Show->ticketsForbiddenTags(array('datetime'));
 if (Core_Array::getPost('add_ticket'))
 {
 	$oHelpdesk_Ticket = Core_Entity::factory('Helpdesk_Ticket');
-	$oHelpdesk_Ticket->helpdesk_criticality_level_id = intval(Core_Array::getPost('criticality_level_id'));
-	$oHelpdesk_Ticket->helpdesk_category_id = intval(Core_Array::getPost('helpdesk_category_id'));
+	$oHelpdesk_Ticket->helpdesk_criticality_level_id = Core_Array::getPost('criticality_level_id', 0, 'int');
+	$oHelpdesk_Ticket->helpdesk_category_id = Core_Array::getPost('helpdesk_category_id', 0, 'int');
 	$oHelpdesk_Ticket->siteuser_id = $oSiteuser->id;
 	$oHelpdesk_Ticket->email = $oSiteuser->email;
 	$oHelpdesk_Ticket->helpdesk_account_id = $oHelpdesk->helpdesk_account_id;
@@ -77,9 +77,9 @@ if (Core_Array::getPost('add_ticket'))
 	$oHelpdesk_Message = Core_Entity::factory('Helpdesk_Message');
 	$oHelpdesk_Message->helpdesk_status_id = $oHelpdesk_Ticket->Helpdesk->helpdesk_status_new_id;
 	$oHelpdesk_Message->subject = Core_Str::removeEmoji(
-		Core_Str::stripTags(strval(Core_Array::getPost('subject')))
+		Core_Str::stripTags(Core_Array::getPost('subject', '', 'str'))
 	);
-	$oHelpdesk_Message->message = Core_Str::removeEmoji(strval(Core_Array::getPost('text')));
+	$oHelpdesk_Message->message = Core_Str::removeEmoji(Core_Array::getPost('text', '', 'str'));
 	$oHelpdesk_Message->datetime = $oHelpdesk_Ticket->datetime;
 	$oHelpdesk_Message->modification_datetime = $oHelpdesk_Ticket->datetime;
 	$oHelpdesk_Message->inbox = 1;
@@ -157,9 +157,9 @@ if ($Helpdesk_Controller_Show->ticket && Core_Array::getPost('send_message'))
 	{
 		$oHelpdesk_Message = Core_Entity::factory('Helpdesk_Message');
 		$oHelpdesk_Message->helpdesk_status_id = $oHelpdesk_Ticket->Helpdesk->helpdesk_status_new_id;
-		$oHelpdesk_Message->parent_id = intval(Core_Array::getPost('parent_id'));
-		$oHelpdesk_Message->subject = Core_Str::stripTags(strval(Core_Array::getPost('message_subject')));
-		$oHelpdesk_Message->message = strval(Core_Array::getPost('message_text'));
+		$oHelpdesk_Message->parent_id = Core_Array::getPost('parent_id', 0, 'int');
+		$oHelpdesk_Message->subject = Core_Str::stripTags(Core_Array::getPost('message_subject', '', 'str'));
+		$oHelpdesk_Message->message = Core_Array::getPost('message_text', '', 'str');
 		$oHelpdesk_Message->datetime = $oHelpdesk_Message->modification_datetime = Core_Date::timestamp2sql(time());
 		$oHelpdesk_Message->inbox = 1;
 		$oHelpdesk_Message->helpdesk_status_id = $oHelpdesk_Ticket->Helpdesk->helpdesk_status_new_id;

@@ -10,19 +10,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Apply extends Admin_Form_Action_Controller
 {
-	/**
-	 * Constructor.
-	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
-	 */
-	public function __construct(Admin_Form_Action_Model $oAdmin_Form_Action)
-	{
-		parent::__construct($oAdmin_Form_Action);
-	}
-
 	/**
 	 * Executes the business logic.
 	 * @param mixed $operation Operation name

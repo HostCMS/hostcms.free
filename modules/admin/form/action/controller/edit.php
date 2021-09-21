@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -76,7 +76,7 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 						. ' (' . htmlspecialchars($oAdmin_Language->shortname) . ')'
 					)
 					->value($name)
-					->class('form-control')
+					->class('form-control input-lg')
 					->format(
 						array(
 							'maxlen' => array('value' => 255),

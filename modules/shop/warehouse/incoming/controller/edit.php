@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -32,6 +32,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oSiteuserRow = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -44,6 +45,48 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 		// Дата документа меняется только если документа не проведен.
 		$this->_object->id && $this->_object->posted
 			&& $this->getField('datetime')->readonly('readonly');
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oAdditionalTab->delete($this->getField('siteuser_id'));
+
+			$oSiteuser = !is_null(Core_Array::getGet('siteuser_id'))
+				? Core_Entity::factory('Siteuser')->find(Core_Array::getGet('siteuser_id'))
+				: $this->_object->Siteuser;
+
+			$options = !is_null($oSiteuser->id)
+				? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+				: array(0);
+
+			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Warehouse_Incoming.siteuser_id'))
+				->id('object_siteuser_id')
+				->options($options)
+				->name('siteuser_id')
+				->class('siteuser-tag')
+				->style('width: 100%')
+				// ->divAttr(array('class' => 'form-group col-xs-12'));
+				->divAttr(array('class' => 'col-xs-12'));
+
+			$oSiteuserRow
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-6 col-sm-6 col-md-3 no-padding siteuser-select2')
+						->add($oSiteuserSelect)
+				);
+
+			// Show button
+			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
+
+			$icons = Siteuser_Controller_Edit::addSiteuserRepresentativeAvatars($oSiteuser);
+
+			$oSiteuserRow
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-6 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
+						->add(Admin_Form_Entity::factory('Code')->html($icons))
+				);
+		}
 
 		$oAdditionalTab->delete($this->getField('shop_warehouse_id'));
 
@@ -319,6 +362,7 @@ class Shop_Warehouse_Incoming_Controller_Edit extends Admin_Form_Action_Controll
 				&& $this->_object->backupRevision();
 		}
 
+		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
 		$this->addSkipColumn('posted');
 
 		$iOldWarehouse = intval($this->_object->shop_warehouse_id);

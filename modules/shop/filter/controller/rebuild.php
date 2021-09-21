@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 {
@@ -55,7 +55,7 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 
 				$bRedirect = TRUE;
 
-				$message = Core_Message::get(Core::_('Shop_Filter.rebuild_groups'));
+				$message = Core_Message::get(Core::_('Shop_Filter.rebuild_groups'), 'info');
 			}
 			else
 			{

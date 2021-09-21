@@ -6,7 +6,7 @@
  * @subpackage Revision
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Хранилище версий',
@@ -16,4 +16,5 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'markDeleted_success' => 'Информация о версии успешно удалена!',
 	'rollback_success' => 'Версия восстановлена успешно!',
+	'option_storeDays' => 'Время хранения версий, дни'
 );

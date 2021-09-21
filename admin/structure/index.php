@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -123,6 +123,7 @@ if ($oParentStructure->id)
 	);
 }
 
+// Глобальный поиск
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
 $oAdmin_Form_Controller->addEntity(
@@ -371,11 +372,8 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
-
-// Добавляем внешнее поле, доступное для сортировки и фильтрации
-$oAdmin_Form_Dataset->addExternalField('menu_name');
 
 if (strlen($sGlobalSearch))
 {
@@ -402,11 +400,6 @@ else
 
 // Ограничение источника 0 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
-	array('select' => array('structures.*', array('structure_menus.name', 'menu_name')))
-)->addCondition(
-	array('leftJoin' => array('structure_menus', 'structures.structure_menu_id', '=', 'structure_menus.id'))
-)
-->addCondition(
 	array('where' =>
 		array('structures.site_id', '=', CURRENT_SITE)
 	)
@@ -416,6 +409,18 @@ $oAdmin_Form_Dataset->addCondition(
 $oAdmin_Form_Controller->addDataset(
 	$oAdmin_Form_Dataset
 );
+
+// Список значений для фильтра и поля
+$aStructure_Menus = Core_Entity::factory('Structure_Menu')->getAllBySite_id(CURRENT_SITE);
+$aList = array();
+foreach ($aStructure_Menus as $oStructure_Menu)
+{
+	$aList[$oStructure_Menu->id] = $oStructure_Menu->name;
+}
+
+$oAdmin_Form_Dataset
+	->changeField('structure_menu_id', 'type', 8)
+	->changeField('structure_menu_id', 'list', $aList);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

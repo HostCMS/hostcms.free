@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Market
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Market_Controller extends Core_Servant_Properties
 {
@@ -50,8 +50,18 @@ class Market_Controller extends Core_Servant_Properties
 
 	/**
 	 * Categories
+	 * @var array
 	 */
-	protected $_categories = NULL;
+	protected $_categories = array();
+
+	/**
+	 * Get categories
+	 * @return array
+	 */
+	public function getCategories()
+	{
+		return $this->_categories;
+	}
 
 	/**
 	 * Register an existing instance as a singleton.
@@ -74,11 +84,10 @@ class Market_Controller extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		$this->_categories = $this->items = array();
+		$this->options = $this->items = array();
 		$this->page = 1;
 		$this->limit = 9;
 		$this->error = 0;
-		$this->options = array();
 	}
 
 	/**
@@ -229,6 +238,7 @@ class Market_Controller extends Core_Servant_Properties
 
 						$shop_group_id = intval($value->shop_group_id);
 
+						$oObject->category_id = $shop_group_id;
 						$oObject->category_name = isset($this->_aShop_Groups[$shop_group_id])
 							? $this->_aShop_Groups[$shop_group_id]->name
 							: '';
@@ -1003,8 +1013,8 @@ class Market_Controller extends Core_Servant_Properties
 			$aReturn = Update_Controller::instance()->parseUpdates();
 
 			$sDatetime = !is_null($aReturn['datetime'])
-			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
-			: '';
+				? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
+				: '';
 
 			throw new Core_Exception(
 				Core::_('Update.server_error_respond_' . $this->error, $sDatetime), array(), 0, FALSE

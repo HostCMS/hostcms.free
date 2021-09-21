@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -59,6 +59,7 @@ $oAdmin_Form_Entity_Menus->add(
 // Добавляем все меню контроллеру
 $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 
+// Глобальный поиск
 $additionalParams = 'xsl_dir_id=' . $xsl_dir_id;
 
 $sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
@@ -211,7 +212,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 if (strlen($sGlobalSearch))

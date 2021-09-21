@@ -1,13 +1,5 @@
 <?php
-/**
- * Information systems.
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Information groups',
 	'information_system_top_menu_groups' => 'Information group',
@@ -30,7 +22,7 @@ return array(
 	'path' => 'Path',
 	'indexing' => 'Index',
 	'active' => 'Active',
-	'siteuser_id' => 'Siteuser ID',
+	'siteuser_id' => 'Client',
 	'siteuser_group_id' => 'Access siteuser group',
 	'information_parent' => 'Like parent',
 

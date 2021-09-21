@@ -18,12 +18,12 @@ $Informationsystem_Controller_Show->addEntity(
 )->addEntity(
 	Core::factory('Core_Xml_Entity')
 		->name('show_comments')->value(
-			intval(Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1))
+			Core_Array::get(Core_Page::instance()->libParams, 'showComments', 1, 'int')
 		)
 )->addEntity(
 	Core::factory('Core_Xml_Entity')
 		->name('show_add_comments')->value(
-			intval(Core_Array::get(Core_Page::instance()->libParams, 'showAddComment', 2))
+			Core_Array::get(Core_Page::instance()->libParams, 'showAddComment', 2, 'int')
 		)
 );
 
@@ -212,11 +212,11 @@ else
 		$oComment = Core_Entity::factory('Comment');
 
 		$allowable_tags = '<b><strong><i><em><br><p><u><strike><ul><ol><li>';
-		$oComment->parent_id = intval(Core_Array::getPost('parent_id', 0));
+		$oComment->parent_id = Core_Array::getPost('parent_id', 0, 'int');
 		$oComment->active = Core_Array::get(Core_Page::instance()->libParams, 'addedCommentActive', 1) == 1 ? 1 : 0;
 		$oComment->author = Core_Str::stripTags(Core_Array::getPost('author'));
 		$oComment->email = Core_Str::stripTags(Core_Array::getPost('email'));
-		$oComment->grade = intval(Core_Array::getPost('grade', 0));
+		$oComment->grade = Core_Array::getPost('grade', 0, 'int');
 		$oComment->subject = Core_Str::stripTags(Core_Array::getPost('subject'));
 		$oComment->text = nl2br(Core_Str::stripTags(Core_Array::getPost('text'), $allowable_tags));
 		$oComment->siteuser_id = $siteuser_id;

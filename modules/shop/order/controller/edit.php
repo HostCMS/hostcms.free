@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -172,8 +172,8 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oAdditionalTab->move($this->getField('shop_id')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalTabRow1);
 		$oAdditionalTab->move($this->getField('guid')->divAttr(array('class' => 'form-group col-xs-12')), $oAdditionalTabRow2);
 
-		$oMainTab->move($this->getField('invoice')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow1);
-		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow1);
+		$oMainTab->move($this->getField('invoice')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow1);
+		$oMainTab->move($this->getField('datetime')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 col-md-3')), $oMainRow1);
 
 		$oAdditionalTab->delete($this->getField('siteuser_id'));
 
@@ -200,12 +200,21 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainRow1
 				->add(
 					Admin_Form_Entity::factory('Div')
-						->class('form-group col-xs-12 col-sm-4 col-md-3 no-padding')
+						->class('form-group col-xs-6 col-sm-6 col-md-3 no-padding siteuser-select2')
 						->add($oSiteuserSelect)
 				);
 
 			// Show button
 			Siteuser_Controller_Edit::addSiteuserSelect2($oSiteuserSelect, $oSiteuser, $this->_Admin_Form_Controller);
+
+			$icons = Siteuser_Controller_Edit::addSiteuserRepresentativeAvatars($oSiteuser);
+
+			$oMainRow1
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('form-group col-xs-6 col-sm-6 col-md-3 margin-top-21 siteuser-representative-list')
+						->add(Admin_Form_Entity::factory('Code')->html($icons))
+				);
 		}
 
 		$oDiv_Amount = Admin_Form_Entity::factory('Div')
@@ -352,7 +361,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('delivery_information')->divAttr(array('class' => 'form-group col-xs-12')), $oDescriptionTabRow3);
 
 		$itemTable = '
-			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+			<table class="table table-striped table-hover shop-item-table shop-order-items deals-aggregate-user-info">
 				<thead>
 					<tr>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_number') . '</th>
@@ -545,7 +554,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								{
 									var aPrices = [];
 
-									$('.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
+									$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
 										if ($(this).val() > 0)
 										{
 											var quantity = $(this).parents('td').prev().find('input[name ^= \'shop_order_item_quantity\']').val();
@@ -556,7 +565,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 										}
 									});
 
-									if ($('.shop-item-table > tbody tr:not(:last-child)').length >= parseInt(ui.item.discount_position)
+									if ($('.shop-item-table.shop-order-items > tbody tr:not(:last-child)').length >= parseInt(ui.item.discount_position)
 										&& typeof aPrices[ui.item.discount_position - 1] != 'undefined'
 									)
 									{
@@ -565,7 +574,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								}
 								else
 								{
-									$('.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
+									$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\']').each(function(i) {
 										if ($(this).val() != 'undefined')
 										{
 											var quantity = $(this).parents('td').prev().find('input[name ^= \'shop_order_item_quantity\']').val();
@@ -586,7 +595,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					if (ui.item.type == 'delivery')
 					{
-						$('.shop-item-table > tbody tr:last-child').prev('tr').find('select[name ^= \'shop_order_item_type\']').val(1);
+						$('.shop-item-table.shop-order-items > tbody tr:last-child').prev('tr').find('select[name ^= \'shop_order_item_type\']').val(1);
 
 						var jShopDelivery = $('select#shop_delivery_id');
 						jShopDelivery.val() == 0 && jShopDelivery.val(ui.item.id);
@@ -594,7 +603,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					ui.item.value = '';
 
-					recountTotal();
+					$.recountTotal();
 				});
 
 				$('.add-item-autocomplete').keypress(function (e, data, ui) {
@@ -605,7 +614,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$(this).val('');
 
-						recountTotal();
+						$.recountTotal();
 					}
 				});
 
@@ -613,27 +622,27 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					var position = 0;
 
-					$('.shop-item-table > tbody tr:not(:last-child) td.index').each(function() {
+					$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) td.index').each(function() {
 						position = position + 1;
 						$(this).text(position);
 					});
 
-					recountTotal();
+					$.recountTotal();
 				}
 
-				function recountTotal()
+				/*function recountTotal()
 				{
 					var quantity = 0,
 						amount = 0;
 
-					$('.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\']').each(function() {
+					$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\']').each(function() {
 						quantity += parseFloat($(this).val());
 					});
 
 					$('td.total_quantity').text(quantity);
 
 					// Amount
-					$('.shop-item-table > tbody tr:not(:last-child)').each(function() {
+					$('.shop-item-table.shop-order-items > tbody tr:not(:last-child)').each(function() {
 						var price = parseFloat($(this).find('input[name ^= \'shop_order_item_price\']').val()),
 							quantity = parseFloat($(this).find('input[name ^= \'shop_order_item_quantity\']').val()),
 							rate_value = parseInt($(this).find('input[name ^= \'shop_order_item_rate\']').val()),
@@ -650,22 +659,22 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					});
 
 					$('td.total_amount').text($.mathRound(amount, 2));
-				}
+				}*/
 
 				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id, image_small)
 				{
-					var position = $('.shop-item-table > tbody tr:not(:last-child)').length + 1;
+					var position = $('.shop-item-table.shop-order-items > tbody tr:not(:last-child)').length + 1;
 
-					$('.shop-item-table > tbody tr:last-child').before(
+					$('.shop-item-table.shop-order-items > tbody tr:last-child').before(
 						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><img class=\"backend-thumbnail\"  src=\"' + image_small + '\" /></td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 					);
 				}
 
-				$('body').on('change', '.shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\'], .shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\'], .shop-item-table > tbody tr:not(:last-child) input[name ^= \'shop_order_item_rate\']', function(){
-						recountTotal();
+				$('body').on('change', '.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\'], .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_price\'], .shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_rate\']', function(){
+						$.recountTotal();
 					});
 
-				recountTotal();
+				$.recountTotal();
 			");
 
 		$oItemsTabRow2->add($oCore_Html_Entity_Script);
@@ -744,7 +753,9 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$Shop_Delivery_Controller_Edit = new Shop_Delivery_Controller_Edit($this->_Admin_Form_Action);
 
-		$oShopDelivery = Core_Entity::factory('Shop_Delivery_Condition', $this->_object->shop_delivery_condition_id)->Shop_Delivery;
+		$oShop_Delivery = $this->_object->shop_delivery_condition_id
+			? Core_Entity::factory('Shop_Delivery_Condition', $this->_object->shop_delivery_condition_id)->Shop_Delivery
+			: $this->_object->Shop_Delivery;
 
 		$oAdditionalTab->delete($this->getField('shop_delivery_id'));
 
@@ -770,9 +781,11 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->caption(Core::_('Shop_Order.shop_delivery_condition_id'))
 				->id('shop_delivery_condition_id')
 				->options(
-					$oShopDelivery->Shop_Delivery_Conditions->getCount() <= 250
-						? $this->_fillDeliveryConditions($oShopDelivery->id)
-						: array($this->_object->shop_delivery_condition_id => $this->_object->Shop_Delivery_Condition->name)
+					$oShop_Delivery->type == 0
+						? ($oShop_Delivery->Shop_Delivery_Conditions->getCount() <= 250
+							? $this->_fillDeliveryConditions($oShop_Delivery->id)
+							: array($this->_object->shop_delivery_condition_id => $this->_object->Shop_Delivery_Condition->name))
+						: array(' … ')
 				)
 				->name('shop_delivery_condition_id')
 				->value($this->_object->shop_delivery_condition_id)
@@ -785,7 +798,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->a
 				->class('btn btn-default')
 				->onclick(
-					$this->_Admin_Form_Controller->getAdminSendForm('recalcDelivery')
+					'mainFormLocker.unlock(); ' . $this->_Admin_Form_Controller->getAdminSendForm('recalcDelivery')
 				)
 				->value(Core::_('Shop_Order.recalc_order_delivery_sum'));
 		$oRecalcDeliveryPriceLink
@@ -1079,7 +1092,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			ob_start();
 			?>
 				<div class="col-xs-12">
-					<table class="table table-hover deal-history-table">
+					<table class="table table-hover deal-history-table order-history-table">
 						<tbody>
 							<?php
 							$prevDate = NULL;
@@ -1159,7 +1172,10 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
-		$this->addSkipColumn('posted');
+		$this
+			->addSkipColumn('posted')
+			->addSkipColumn('paid')
+			->addSkipColumn('canceled');
 
 		$previousObject = clone $this->_object;
 
@@ -1190,21 +1206,17 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			&& Core_Array::get($this->_formValues, 'payment_datetime') == ''
 			&& $this->_formValues['payment_datetime'] = Core_Date::timestamp2sql(time());
 
+		//$bChangedPay = $bChangedCancel = $bChangedPosted = FALSE;
+
 		if ($this->_object->id)
 		{
-			// Change paid status
-			if ($this->_object->paid != Core_Array::get($this->_formValues, 'paid', 0))
-			{
-				$this->_object->paid == 0
-					? $this->_object->paid()
-					: $this->_object->cancelPaid();
-			}
-
-			// Change canceled status
-			if ($this->_object->canceled != Core_Array::get($this->_formValues, 'canceled', 0))
-			{
-				$this->_object->deleteReservedItems();
-			}
+			$bChangedPay = $this->_object->paid != Core_Array::get($this->_formValues, 'paid', 0);
+			$bChangedCancel = $this->_object->canceled != Core_Array::get($this->_formValues, 'canceled', 0);
+			$bChangedPosted = $this->_object->posted != Core_Array::get($this->_formValues, 'posted', 0);
+		}
+		else
+		{
+			$bChangedPay = $bChangedCancel = $bChangedPosted = TRUE;
 		}
 
 		//$this->_formValues['unloaded'] = 0;
@@ -1223,24 +1235,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		if ($this->_object->invoice == '')
 		{
-			// $this->_object->invoice = $this->_object->id;
-
-			if (strlen($this->_object->Shop->invoice_template))
-			{
-				$oCore_Templater = new Core_Templater();
-				$invoice = $oCore_Templater
-					->addObject('shop', $this->_object->Shop)
-					->addObject('this', $this->_object)
-					->addFunction('ordersToday', array($this->_object, 'ordersToday'))
-					->setTemplate($this->_object->Shop->invoice_template)
-					->execute();
-			}
-			else
-			{
-				$invoice = $this->_object->id;
-			}
-
-			$this->_object->invoice = $invoice;
+			$this->_object->createInvoice();
 			$this->_object->save();
 		}
 
@@ -1273,24 +1268,34 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
+		$bShopOrderItemChanged = FALSE;
+
 		// Существующие товары
 		$aShop_Order_Items = $this->_object->Shop_Order_Items->findAll(FALSE);
 		foreach ($aShop_Order_Items as $oShop_Order_Item)
 		{
 			if (isset($_POST['shop_order_item_name_' . $oShop_Order_Item->id]))
 			{
+				$quantity = Core_Array::getPost('shop_order_item_quantity_' . $oShop_Order_Item->id);
+				$shop_warehouse_id = intval(Core_Array::getPost('shop_order_item_warehouse_' . $oShop_Order_Item->id));
+
+				$oShop_Order_Item->quantity != $quantity || $oShop_Order_Item->shop_warehouse_id != $shop_warehouse_id
+					&& $bShopOrderItemChanged = TRUE;
+
 				$oShop_Order_Item->name = trim(Core_Array::getPost('shop_order_item_name_' . $oShop_Order_Item->id));
-				$oShop_Order_Item->quantity = Core_Array::getPost('shop_order_item_quantity_' . $oShop_Order_Item->id);
+				$oShop_Order_Item->quantity = $quantity;
 				$oShop_Order_Item->price = Core_Array::getPost('shop_order_item_price_' . $oShop_Order_Item->id);
 				$oShop_Order_Item->rate = Core_Array::getPost('shop_order_item_rate_' . $oShop_Order_Item->id);
 				$oShop_Order_Item->type = intval(Core_Array::getPost('shop_order_item_type_' . $oShop_Order_Item->id));
 				$oShop_Order_Item->marking = trim(Core_Array::getPost('shop_order_item_marking_' . $oShop_Order_Item->id));
-				$oShop_Order_Item->shop_warehouse_id = intval(Core_Array::getPost('shop_order_item_warehouse_' . $oShop_Order_Item->id));
+				$oShop_Order_Item->shop_warehouse_id = $shop_warehouse_id;
 				$oShop_Order_Item->save();
 			}
 			else
 			{
 				$oShop_Order_Item->markDeleted();
+
+				$bShopOrderItemChanged = TRUE;
 			}
 		}
 
@@ -1317,16 +1322,40 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop_Order_Item->marking = trim(Core_Array::get($aNew_Shop_Order_Items_Marking, $key));
 			$oShop_Order_Item->shop_warehouse_id = intval(Core_Array::get($aNew_Shop_Order_Items_Warehouse, $key));
 			$oShop_Order_Item->save();
+
+			$bShopOrderItemChanged = TRUE;
+		}
+
+		if ($bChangedPay)
+		{
+			$this->_object->paid == 0
+				? $this->_object->paid()
+				: $this->_object->cancelPaid();
+		}
+
+		if ($bChangedCancel)
+		{
+			$this->_object->canceled == 0
+				? $this->_object->cancel()
+				: $this->_object->uncancel();
 		}
 
 		// Reserved
-		$this->_object->Shop->reserve && !$this->_object->paid && !$this->_object->canceled
+		$this->_object->Shop->reserve
+			&& !$this->_object->paid && !$this->_object->canceled && !$this->_object->posted
 			&& $this->_object->reserveItems();
 
+		// Reset 'posted'
+		$bShopOrderItemChanged && $this->_object->posted
+			&& $this->_object->posted = 0 && $bChangedPosted = TRUE;
+
 		// В случае ручного изменения в форме, основное списание/начисление производится в Shop_Order_Model::_paidTransaction()
-		Core_Array::get($this->_formValues, 'posted')
-			? $this->_object->post()
-			: $this->_object->unpost();
+		if ($bChangedPosted)
+		{
+			Core_Array::get($this->_formValues, 'posted')
+				? $this->_object->post()
+				: $this->_object->unpost();
+		}
 
 		// История заказа
 		if ($previousObject->shop_order_status_id != $this->_object->shop_order_status_id)
@@ -1335,8 +1364,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$this->_object->notifyBotsChangeStatus();
 		}
 
-		$previousObject->canceled != $this->_object->canceled
-			&& $this->_object->historyPushCanceled();
+		$this->_object->checkShopOrderItemStatuses();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 
@@ -1345,26 +1373,27 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Fill delivery conditions list
-	 * @param int $iDeliveryId delivery ID
+	 * @param int $shop_delivery_id delivery ID
 	 * @return array
 	 */
-	protected function _fillDeliveryConditions($iDeliveryId)
+	protected function _fillDeliveryConditions($shop_delivery_id)
 	{
-		$oObject = Core_Entity::factory('Shop_Delivery_Condition');
+		$shop_delivery_id = intval($shop_delivery_id);
 
-		$iDeliveryId = intval($iDeliveryId);
+		$oShop_Delivery_Conditions = Core_Entity::factory('Shop_Delivery_Condition');
+		$oShop_Delivery_Conditions->queryBuilder()
+			// ->leftJoin('shop_deliveries', 'shop_delivery_conditions.shop_delivery_id', '=', 'shop_deliveries.id')
+			->where('shop_delivery_conditions.shop_delivery_id', '=', $shop_delivery_id)
+			// ->where('shop_deliveries.type', '=', 0)
+			->orderBy('id');
 
-		$oObject->queryBuilder()
-			->where("shop_delivery_id", "=", $iDeliveryId)
-			->orderBy("id");
-
-		$aObjects = $oObject->findAll();
+		$aShop_Delivery_Conditions = $oShop_Delivery_Conditions->findAll(FALSE);
 
 		$aReturn = array(" … ");
 
-		foreach ($aObjects as $oObject)
+		foreach ($aShop_Delivery_Conditions as $oShop_Delivery_Condition)
 		{
-			$aReturn[$oObject->id] = $oObject->name;
+			$aReturn[$oShop_Delivery_Condition->id] = $oShop_Delivery_Condition->name;
 		}
 
 		return $aReturn;

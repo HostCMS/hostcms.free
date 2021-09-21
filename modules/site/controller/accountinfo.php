@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -20,6 +20,9 @@ class Site_Controller_AccountInfo extends Admin_Form_Action_Controller_Type_Edit
 	 */
 	public function setObject($object)
 	{
+		$this
+			->addSkipColumn('user_id');
+
 		parent::setObject($object);
 
 		$oMainTab = Admin_Form_Entity::factory('Tab')

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sellers',
@@ -28,7 +28,7 @@ return array(
 	'tin' => "Taxpayer ID",
 	'id' => "Id",
 	'default' => "Default seller",
-	'siteuser_id' => 'Site user id',
+	'siteuser_id' => 'Client id',
 	'shop_id' => 'Store',
 	'edit_success' => "Seller information added successfully!",
 	'delete_success' => 'Item deleted successfully!',

@@ -221,7 +221,7 @@ class Shop_Seller_Controller_Show extends Core_Controller
 							$oCore_Response->header('Location', '/');
 						}
 					}
-					return ;
+					return $this;
 				}
 			}
 		}

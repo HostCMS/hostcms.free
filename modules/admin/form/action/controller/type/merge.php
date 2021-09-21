@@ -11,7 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Merge extends Admin_Form_Action_Controller
 {
@@ -54,6 +54,7 @@ class Admin_Form_Action_Controller_Type_Merge extends Admin_Form_Action_Controll
 		if (is_null($keyValue))
 		{
 			$this->_Core_Registry->set($this->_keyName, $this->_object->getPrimaryKey());
+			return NULL;
 		}
 		else
 		{
@@ -62,8 +63,8 @@ class Admin_Form_Action_Controller_Type_Merge extends Admin_Form_Action_Controll
 			$prevObject = new $className($keyValue);
 
 			$prevObject->merge($this->_object);
-		}
 
-		return $this;
+			return $this;
+		}
 	}
 }

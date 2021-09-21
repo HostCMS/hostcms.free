@@ -26,8 +26,7 @@ function isEmpty(str) {
 	});
 
 	$.extend({
-		widgetLoad: function(settings)
-		{
+		widgetLoad: function(settings) {
 			// add ajax '_'
 			var data = $.getData({});
 
@@ -48,16 +47,14 @@ function isEmpty(str) {
 				}
 			});
 		},
-		ajaxCallbackSkin: function(data, status, jqXHR)
-		{
+		ajaxCallbackSkin: function(data, status, jqXHR) {
 			if (typeof data.module != 'undefined' && data.module != null)
 			{
 				// Выделить текущий пункт левого бокового меню
 				$.currentMenu(data.module);
 			}
 		},
-		currentMenu: function(moduleName)
-		{
+		currentMenu: function(moduleName) {
 			$('#sidebar li').removeClass('active open');
 
 			/*$('#menu-' + moduleName).addClass('active')
@@ -76,8 +73,7 @@ function isEmpty(str) {
 
 			$('#sidebar li[class != open] ul.submenu').hide();
 		},
-		afterContentLoad: function(jWindow, data)
-		{
+		afterContentLoad: function(jWindow, data) {
 			data = typeof data !== 'undefined' ? data : {};
 
 			if (typeof data.title != 'undefined' && data.title != '' && jWindow.attr('id') != 'id_content')
@@ -88,15 +84,15 @@ function isEmpty(str) {
 					jSpanTitle.empty().html(data.error);
 				}
 			}
+
+			setResizableAdminTableTh();
 		},
-		windowSettings: function(settings)
-		{
+		windowSettings: function(settings) {
 			return jQuery.extend({
 				Closable: true
 			}, settings);
 		},
-		openWindow: function(settings)
-		{
+		openWindow: function(settings) {
 			settings = jQuery.windowSettings(
 				jQuery.requestSettings(settings)
 				//settings
@@ -145,8 +141,7 @@ function isEmpty(str) {
 
 			return jDivWin;
 		},
-		openWindowAddTaskbar: function(settings)
-		{
+		openWindowAddTaskbar: function(settings) {
 			return jQuery.adminLoad(settings);
 		},
 		ajaxCallbackModal: function(data, status, jqXHR) {
@@ -272,6 +267,35 @@ function isEmpty(str) {
 				},
 			});
 		},
+		recountTotal: function() {
+			var quantity = 0,
+				amount = 0;
+
+			$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\']').each(function() {
+				quantity += parseFloat($(this).val());
+			});
+
+			$('.shop-item-table.shop-order-items td.total_quantity').text(quantity);
+
+			// Amount
+			$('.shop-item-table.shop-order-items > tbody tr:not(:last-child)').each(function() {
+				var price = parseFloat($(this).find('input[name ^= \'shop_order_item_price\']').val()),
+					quantity = parseFloat($(this).find('input[name ^= \'shop_order_item_quantity\']').val()),
+					rate_value = parseInt($(this).find('input[name ^= \'shop_order_item_rate\']').val()),
+					sum = price * quantity,
+					rate = 0;
+
+				if (rate_value > 0)
+				{
+					rate = sum * rate_value / 100;
+					sum += rate;
+				}
+
+				amount += sum;
+			});
+
+			$('.shop-item-table.shop-order-items td.total_amount').text($.mathRound(amount, 2));
+		},
 		getSeoFilterPropertyValues: function(object)
 		{
 			$.ajax({
@@ -291,8 +315,10 @@ function isEmpty(str) {
 		{
 			var property_id = $('#conditionsModal select[name = "modal_property_id"]').val(),
 				jPropertyValue = $('#conditionsModal *[name = "modal_property_value"]'),
+				jPropertyValueTo = $('#conditionsModal *[name = "modal_property_value_to"]'),
 				type = jPropertyValue.attr('type'),
 				property_value = null;
+				property_value_to = null;
 
 				switch (type)
 				{
@@ -301,11 +327,12 @@ function isEmpty(str) {
 					break;
 					default:
 						property_value = jPropertyValue.val();
+						property_value_to = jPropertyValueTo.val();
 				}
 
 				$.ajax({
 					url: '/admin/shop/filter/seo/index.php',
-					data: { 'add_property': 1, 'property_id': property_id, 'property_value': property_value },
+					data: { 'add_property': 1, 'property_id': property_id, 'property_value': property_value, 'property_value_to': property_value_to },
 					dataType: 'json',
 					type: 'POST',
 					success: function(result){
@@ -376,45 +403,54 @@ function isEmpty(str) {
 				}, 50);
 			});
 		},
-		addModificationPattern: function(pattern, selectName) {
-			var jInput = $('input[name = name]'),
+		toggleModificationPattern: function(checkbox, propertyId, propertyName, selectName) {
+			var $checkbox = $(checkbox),
+				$targetInput = $('input[name = name]'),
 				jSelectOptions = $('select[name = "' + selectName + '"] option'),
 				delimiter = $('input[name = delimiter]').val() || ' ',
-				str = jInput.val(),
-				aPattern = pattern.split(delimiter),
-				use_property_name = +$('input[name = use_property_name]').is(':checked');
+				str = $targetInput.val(),
+				bUsePropertyName = $('input[name = use_property_name]').is(':checked'),
+				pattern = delimiter + (bUsePropertyName ? propertyName + ' ' : '') + '{P' + propertyId + '}';
 
-			if (!use_property_name && typeof aPattern[1] !== 'undefined')
+			if ($checkbox.is(':checked'))
 			{
-				pattern = aPattern[1];
+				if (str.indexOf(pattern) == -1)
+				{
+					$targetInput.val(str + pattern);
+					jSelectOptions.prop('selected', true);
+				}
 			}
-
-			pattern = delimiter + pattern;
-
-			if (str.indexOf(pattern) > 0)
+			else
 			{
-				jInput.val(str.replace(pattern, ''));
+				$targetInput.val(str.replace(pattern, ''));
 				jSelectOptions.prop('selected', false);
-			}
-			else if (str.indexOf(pattern) == -1)
-			{
-				jInput.val(str + pattern);
-				jSelectOptions.prop('selected', true);
 			}
 		},
 		clearMarkingPattern: function(selector, pattern) {
 			$('input[name = ' + selector + ']').val(pattern);
 		},
 		addModificationValue: function(object, name) {
-			var bChecked = +$(object).is(':checked');
+			var $object = $(object),
+				$type = $object.attr('type'),
+				value = null;
+
+			switch ($type)
+			{
+				case 'checkbox':
+					value = +$object.is(':checked');
+				break;
+				case 'text':
+					value = $object.val();
+				break;
+			}
 
 			if ($.cookie(name) !== null)
 			{
-				$.cookie(name, bChecked);
+				$.cookie(name, value);
 			}
 			else
 			{
-				$.cookie(name, bChecked, { expires: 365 }); // days
+				$.cookie(name, value, { expires: 365 }); // days
 			}
 		},
 		changeSiteuserEmailType: function(object, lng) {
@@ -1442,15 +1478,12 @@ function isEmpty(str) {
 			//	Добавляем новому .slimScrollBar данные от удаленного
 			jSlimScrollBar
 				.data(slimScrollBarData)
-				.on({
-					'mousedown': function (){
+				.on({'mousedown': function (){
 						$(this).data('isMousedown', true);
 					},
-
 					'mouseenter': function () {
 						$(this).css('width', '8px');
 					},
-
 					'mouseout': function () {
 						!$(this).data('isMousedown') &&	$(this).css('width', '5px');
 					}
@@ -1777,6 +1810,7 @@ function isEmpty(str) {
 			});
 		},
 		_kanbanStepMoveCallback: function(result){
+						
 			if (result.status == 'success')
 			{
 				if (result.update)
@@ -1796,11 +1830,13 @@ function isEmpty(str) {
 			}
 		},
 		_kanbanStepMoveLeadCallback: function(result){
+						
 			if (result.status == 'success')
 			{
 				if(result.last_step == 1)
 				{
-					var id = 'hostcms[checked][0][' + itemObject.id + ']',
+					var id = 'hostcms[checked][0][' + result.lead_id + ']', 					
+						/*id = 'hostcms[checked][0][' + result itemObject.id + ']',*/						
 						lead_status_id = result.lead_status_id
 						post = {};
 
@@ -1808,11 +1844,12 @@ function isEmpty(str) {
 					post['mode'] = 'edit';
 					post['lead_status_id'] = lead_status_id;
 
-					$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: windowId});
+					$.adminLoad({path: '/admin/lead/index.php', action: 'morphLead', operation: 'finish', post: post, additionalParams: '', windowId: result.window_id});
 				}
 				else if(result.type == 2)
 				{
-					$(itemObject).addClass('failed');
+					//$(itemObject).addClass('failed');
+					$('li#lead-' + result.lead_id).addClass('failed');
 				}
 			}
 		},
@@ -1822,7 +1859,7 @@ function isEmpty(str) {
 				container: null,
 				updateData: false,
 				windowId: 'id_content',
-				moveCallback: $._kanbanStepMoveCallback
+				moveCallback: $._kanbanStepMoveCallback				
 			}, options);
 
 			$(options.container + ' .connectedSortable').sortable({
@@ -1830,9 +1867,13 @@ function isEmpty(str) {
 				connectWith: options.container + ' .connectedSortable',
 				placeholder: 'placeholder',
 				handle: ".drag-handle",
-				helper: "clone",
+				helper: "clone",				
+				//helper: "original",				
+				tolerance: "pointer",
 				// revert: true,
-				// scroll: false,
+				scroll: false,
+				//containment:  'document',
+				//scroll: true,
 				receive: function (event, ui) {
 					var sender_id = $(ui.sender[0]).data('step-id'),
 						target_id = $(this).data('step-id'),
@@ -1862,20 +1903,49 @@ function isEmpty(str) {
 							$element.removeClass('error-drop');
 						}
 					}, 200);
-				},
-				start: function (event, ui) {
-					var $item = $(ui.item[0]);
+				},						
+				start: function (event, ui) {					
+					//console.log('start event', event);
+					//console.log('start ui', ui);										
+					
+					var $item = $(ui.item[0]), $ul = $item.parent();
+					
+					//var clone = $('<li>').html($item.html());
+					//var clone = $('<li class="222" style="">1111<li>');
+					
+					//$ul.append(clone);				
+					
+					//$(options.container + ' .connectedSortable').sortable("refresh").sortable("refreshPositions");
+					//$(options.container + ' .connectedSortable').trigger('sortover');
+										
+					//clone.attr('class', '222').attr('id', '111111111');
+					//$(ui.helper[0]).before(clone);
+					//$item.before(clone);
+					
+					//console.log('$ul.outerHeight(true)', $ul.outerHeight());
+					//console.log('$ul.outerHeight(true)', $ul.outerHeight());
+					
+					//$ul.outerHeight($ul.outerHeight() + 90);
 
 					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
 
 					$item.removeClass('cancel-' + $item.data('id'));
-
+					
+					/* var container = $(options.container);
+					
+					console.log('container',  container);
+					console.log('container.outerHeight()',  container.outerHeight()); */
+					
+					//container.outerHeight(container.outerHeight() + 120);
+					
+					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
+					
 					// Ghost
 					$(options.container + ' .connectedSortable').find('li:hidden')/*.not('.placeholder')*/
 						.addClass('ghost-item')
 						.addClass('cancel-' + $item.data('id'))
 						.css('opacity', .5)
-						.show();
+						.show();						
 				},
 				stop: function (event, ui) {
 					ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').addClass('hidden');
@@ -1899,9 +1969,9 @@ function isEmpty(str) {
 						.removeClass('ghost-item')
 						.css('opacity', 1);
 
-					$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
+					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
 				},
-				over: function (event, ui) {
+				over: function (event, ui) {										
 					var $element = $(event.target);
 
 					if ($element.hasClass('kanban-action-item'))
@@ -1919,7 +1989,7 @@ function isEmpty(str) {
 						$element.css('color', '#fff');
 					}
 
-					$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
+					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
 				},
 				sort: function (event, ui) {
 					// removes anything that starts with "cancel-"
@@ -1932,7 +2002,7 @@ function isEmpty(str) {
 
 					if (y > $(options.container).height() || x > $(options.container).width())
 					{
-						$(options.container + ' .connectedSortable').sortable("option", "scroll", false);
+						//$(options.container + ' .connectedSortable').sortable("option", "scroll", false);
 					}
 				}
 			}).disableSelection();
@@ -2013,9 +2083,7 @@ function isEmpty(str) {
 				// Click and hold action on nav buttons
 				//$nextNav.mousedown(function () {
 				$nextNav.on({
-
 					'mousedown touchstart': function() {
-
 						if ($.fn.horizon.defaults.interval)
 						{
 							clearInterval($.fn.horizon.defaults.interval);
@@ -2024,28 +2092,22 @@ function isEmpty(str) {
 						$.fn.horizon.defaults.interval = setInterval(function() { scrollLeft(); }, 50);
 					},
 					'mouseup touchend': function() {
-
 						clearInterval($.fn.horizon.defaults.interval);
 					}
 				});
 
 				$prevNav.on({
-
 					'mousedown touchstart': function() {
-
 						if ($.fn.horizon.defaults.interval)
 						{
 							clearInterval($.fn.horizon.defaults.interval);
 						}
-
 						$.fn.horizon.defaults.interval = setInterval(function() { scrollRight(); }, 50);
 					},
 					'mouseup touchend': function() {
-
 						clearInterval($.fn.horizon.defaults.interval);
 					}
 				});
-
 
 				// Keyboard buttons
 				$(window).on('keydown', function (e) {
@@ -2450,10 +2512,7 @@ function isEmpty(str) {
 						jTextarea = $(".send-message textarea"),
 						message = $.trim(jTextarea.val());
 
-
-					if (message == '')
-						return;
-
+					if (message == '') { return; }
 
 					data['message'] = message;
 					data['recipient-user-id'] = $(".messages-contact").data('recipientUserId');
@@ -3158,27 +3217,12 @@ function isEmpty(str) {
 			});
 
 			$(window).on({
-
 				'mouseup': function (event) {
-
 					$('.admin-table-wrap.table-draggable.mousedown')
 						.data({'curDown': false})
 						.removeClass('mousedown');
 				},
-				'resize': function(event) {
-
-					// Изменяем ширину модального окна
-					if ($('.modal-dialog').data('originalWidth'))
-					{
-						if ($(this).width() > $('.modal-dialog').data('originalWidth') + 30)
-						{
-							$('.modal-dialog').css({'width': $('.modal-dialog').data('originalWidth')});
-						}
-						else
-						{
-							$('.modal-dialog').css({'width': '95%'});
-						}
-					}
+				'resize': function(event) {				
 
 					var documentScrollTop = $(document).scrollTop(),
 						navbarHeight = $('body > div.navbar').outerHeight(),
@@ -4370,10 +4414,7 @@ function isEmpty(str) {
 						var eventName = $.trim($(this).find('input[name="event_name"]').val());
 
 						// Название дела не задано
-						if (!eventName.length)
-						{
-							return;
-						}
+						if (!eventName.length) { return; }
 
 						$('#sendForm i').toggleClass('fa-spinner fa-spin fa-check');
 
@@ -4565,11 +4606,6 @@ function isEmpty(str) {
 				}
 			});
 		},
-		deleteNewProperty: function(object)
-		{
-			//jQuery(object).closest('.item_div').remove();
-			jQuery(object).closest('[id ^= "property_"]').remove();
-		},
 		deleteProperty: function(object, settings)
 		{
 			//var jObject = jQuery(object).siblings('input,select:not([onchange]),textarea');
@@ -4608,6 +4644,20 @@ function isEmpty(str) {
 			});
 
 			jQuery.deleteNewProperty(object);
+		},
+		deleteNewProperty: function(object)
+		{
+			var propertyBlock = jQuery(object).closest('[id ^= "property_"]');
+
+			// Если осталось последнее свойство, то клонируем его перед удалением
+			if (!propertyBlock.siblings('#' + propertyBlock.prop('id')).size())
+			{
+				propertyBlock.find('.btn-clone').click();
+				//propertyBlock.find('.btn-delete').addClass('hide');
+				//propertyBlock.find('.btn-group').removeClass('btn-group');
+			}
+
+			propertyBlock.remove();
 		},
 		cloneProperty: function(windowId, index)
 		{
@@ -4652,44 +4702,87 @@ function isEmpty(str) {
 				.css('display', '');
 
 			// Change item_div ID
-			jNewObject.find("div[id^='file_']").each(function(index, object){
+			jNewObject
+				.find("div[id^='file_']")
+				.each(function(index, object){
 				jQuery(object).prop('id', jQuery(object).prop('id') + '_' + iRand);
 
 				// Удаляем скопированные элементы popover'а
 				jQuery(object).find("div[id ^= 'popover']").remove();
 			});
 
-			jNewObject.find("div[id *='_watermark_property_']").html(jNewObject.find("div[id *='_watermark_property_']").html());
-			jNewObject.find("div[id *='_watermark_small_property_']").html(jNewObject.find("div[id *='_watermark_small_property_']").html());
+			jNewObject
+				.find("div[id *='_watermark_property_']")
+				.html(jNewObject.find("div[id *='_watermark_property_']").html());
+
+			jNewObject
+				.find("div[id *='_watermark_small_property_']")
+				.html(jNewObject.find("div[id *='_watermark_small_property_']").html());
 
 			// Удаляем элементы просмотра и удаления загруженнного изображения
-			jNewObject.find("[id ^= 'preview_large_property_'], [id ^= 'delete_large_property_'], [id ^= 'preview_small_property_'], [id ^= 'delete_small_property_']").remove();
+			jNewObject
+				.find("[id ^= 'preview_large_property_'], [id ^= 'delete_large_property_'], [id ^= 'preview_small_property_'], [id ^= 'delete_small_property_']")
+				.remove();
 			// Удаляем скрипт просмотра загуженного изображения
-			jNewObject.find("input[id ^= 'property_" + index + "_'][type='file'] ~ script").remove();
+			jNewObject
+				.find("input[id ^= 'property_" + index + "_'][type='file'] ~ script")
+				.remove();
 
-			jNewObject.find("input[id^='field_id'],select:not([id$='_mode']),textarea").attr('name', 'property_' + index + '[]');
-			jNewObject.find("div[id^='file_small'] input[id^='small_field_id']").attr('name', 'small_property_' + index + '[]').val('');
-			jNewObject.find("input[id^='id_property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea").val('');
-			jNewObject.find("select[id$='_mode'] option:first").prop('selected', true).change();
+			jNewObject
+				.find("input[id^='field_id'],select:not([id$='_mode']),textarea")
+				.attr('name', 'property_' + index + '[]');
 
-			jNewObject.find("input[id^='create_small_image_from_large_small_property']").attr('checked', true);
+			jNewObject
+				.find("div[id^='file_small'] input[id^='small_field_id']")
+				.attr('name', 'small_property_' + index + '[]').val('');
+
+			jNewObject
+				.find("input[id^='id_property_'][type!=checkbox],input[id^='small_property_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea")
+				.val('');
+
+			jNewObject
+				.find("select[id$='_mode'] option:first")
+				.prop('selected', true)
+				.change();
+
+			jNewObject
+				.find("input[id^='create_small_image_from_large_small_property']")
+				.attr('checked', true);
 
 			// Change input name
 			jNewObject.find(':regex(name, ^\\S+_\\d+_\\d+$)').each(function(index, object){
 				var reg = /^(\S+)_(\d+)_(\d+)$/;
 				var arr = reg.exec(object.name);
-				jQuery(object).prop('name', arr[1] + '_' + arr[2] + '[]');
 				var inputId = jQuery(object).prop('id');
-				jNewObject.find("a[id='crop_" + inputId + "']").attr('onclick', "$.showCropModal('" + inputId + "', '', '')");
+
+				jQuery(object).prop('name', arr[1] + '_' + arr[2] + '[]');
+
+				jNewObject
+					.find("a[id='crop_" + inputId + "']")
+					.attr('onclick', "$.showCropModal('" + inputId + "', '', '')");
 			});
 
-			jNewObject.find("div.img_control div, a[id^='preview_'], a[id^='delete_'], div[role='application']").remove();
-			jNewObject.find("input[type='text'].description-large").attr('name', 'description_property_' + index + '[]');
-			jNewObject.find("input[type='text'].description-small").attr('name', 'description_small_property_' + index + '[]');
+			jNewObject
+				.find("div.img_control div, a[id^='preview_'], a[id^='delete_'], div[role='application']")
+				.remove();
+
+			jNewObject
+				.find("input[type='text'].description-large")
+				.attr('name', 'description_property_' + index + '[]');
+
+			jNewObject
+				.find("input[type='text'].description-small")
+				.attr('name', 'description_small_property_' + index + '[]');
 
 			jNewObject.find(".file-caption-wrapper")
 				.addClass('hidden')
 				.parents('.input-group').find('input:first-child').removeClass('hidden');
+
+			jNewObject
+				.find('.add-remove-property > div')
+				.addClass('btn-group')
+				.find('.btn-delete')
+				.removeClass('hide');
 
 			// For checking field
 			jNewObject.find(':input').blur();
@@ -4727,6 +4820,12 @@ function isEmpty(str) {
 				.attr('name', 'property_' + index + '[]')
 				.val();
 
+			jNewObject
+				.find('.add-remove-property > div')
+				.addClass('btn-group')
+				.find('.btn-delete')
+				.removeClass('hide');
+
 			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewProperty(this)");
 			jNewObject.insertAfter(jProperies.eq(-1));
 		},
@@ -4734,10 +4833,23 @@ function isEmpty(str) {
 			if (cloningElement)
 			{
 				var	originalRow = $(cloningElement).closest('.row'),
-					newRow = originalRow.clone();
+					newRow = originalRow.clone(),
+					checkboxElement = newRow.find('[name *= "_public"][type = "checkbox"]');
+
+				// Присутствует чекбокс, определяющий публичность значения свойства	и отсутствует скрытый input, связанный с данным чекбоксом
+				if (checkboxElement.length && !newRow.find('[name $= "_public_value[]"][type = "hidden"]').length)
+				{
+					newRow.append('<input name="' + checkboxElement.attr('name').split('_public')[0] + '_public_value[]" type="hidden" value="0" />');
+				}
 
 				newRow.find('input').each(function(){
+
 					$(this).val('');
+
+					if ($(this).attr('type') == "checkbox")
+					{
+						$(this).prop('checked', false);
+					}
 				});
 
 				newRow.find('select').each(function(){
@@ -4750,19 +4862,30 @@ function isEmpty(str) {
 				});
 
 				newRow.find('.btn-delete').removeClass('hide');
+				newRow.find('.add-remove-property').addClass('btn-group');
 				newRow.insertAfter(originalRow);
 
 				return newRow;
 			}
 		},
 		deleteFormRow: function(deleteElement){
+
 			if (deleteElement)
 			{
 				// Удаляемая строка, с элементами формы
 				var objectRow = $(deleteElement).closest('.row');
 
-				!objectRow.siblings('.row').size() && $.cloneFormRow(deleteElement).find('.btn-delete').addClass('hide');
+				!objectRow.siblings('.row').size() && $.cloneFormRow(deleteElement).find('.add-remove-property').removeClass('btn-group').find('.btn-delete').addClass('hide');
 				objectRow.remove();
+
+				/* if (!objectRow.siblings('.row').size())
+				{
+					objectRow.find('.btn-delete').addClass('hide');
+				}
+				else
+				{
+					objectRow.remove();
+				} */
 			}
 		},
 		cloneFile: function(windowId)
@@ -5536,15 +5659,20 @@ function isEmpty(str) {
 		},
 		appendInput: function(windowId, InputName, InputValue)
 		{
-			var windowId = $.getWindowId(windowId), obj = $('#' + windowId + ' .adminForm');
+			var windowId = $.getWindowId(windowId),
+				$adminForm = $('#' + windowId + ' .adminForm');
 
-			if (obj.length && obj.eq(0).find("input[name='" + InputName + "']").length === 0)
+			if ($adminForm.length)
 			{
-				obj.append(
-					$('<input>')
-					.attr('type', 'hidden')
-					.attr('name', InputName)
-					.val(InputValue));
+				var $input = $adminForm.eq(0).find("input[name='" + InputName + "']");
+
+				if ($input.length === 0)
+				{
+					$input = $('<input>').attr('type', 'hidden').attr('name', InputName);
+					$adminForm.append($input);
+				}
+
+				$input.val(InputValue);
 			}
 		},
 		toogleInputsActive: function(jForm, disableButtons)
@@ -5581,7 +5709,7 @@ function isEmpty(str) {
 				windowId: 'id_content'
 			}, settings);
 
-			var cbItem = jQuery("#"+settings.windowId+" #"+settings.objectId);
+			var cbItem = jQuery("#" + settings.windowId + " #" + settings.objectId);
 
 			if (cbItem.length > 0)
 			{
@@ -5852,8 +5980,7 @@ function isEmpty(str) {
 					// Call own event
 					$("#" + settings.windowId).trigger('adminLoadSuccess');
 					//}
-
-				}, setResizableAdminTableTh, readCookiesForInitiateSettings]
+				}, readCookiesForInitiateSettings]
 			});
 
 			return false;
@@ -6454,14 +6581,26 @@ function isEmpty(str) {
 			settings = $.extend({
 				minimumInputLength: 1,
 				allowClear: true,
+				templateResult: $.templateResultItemSiteusers,
+				escapeMarkup: function(m) { return m; },
+				templateSelection: $.templateSelectionItemSiteusers,
 				ajax: {
-					url: "/admin/siteuser/index.php?loadSiteusers&types[]=siteuser",
+					// url: "/admin/siteuser/index.php?loadSiteusers&types[]=siteuser",
+					url: "/admin/siteuser/index.php?loadSiteusers&types[]=siteuser&types[]=person&types[]=company",
 					dataType: "json",
 					type: "GET",
 					processResults: function (data) {
 						var aResults = [];
 						$.each(data, function (index, item) {
-							aResults.push(item);
+							// aResults.push(item);
+							var siteuser_id = item.type == 'siteuser'
+								? item.id
+								: item.siteuser_id;
+
+							aResults.push({
+								"id": siteuser_id,
+								"text": item.text
+							});
 						});
 						return {
 							results: aResults
@@ -6578,7 +6717,7 @@ function isEmpty(str) {
 			settings = jQuery.extend({
 				save: function(item, settings){
 
-					var data = jQuery.getData(settings), reg = /apply_check_(\d+)_(\S+)_fv_(\d+)/,
+					var data = jQuery.getData(settings), reg = /apply_check_(\d+)_(\S+)_fv_(\S+)/,
 					itemId = item.prop('id'), arr = reg.exec(itemId);
 
 					data['hostcms[checked]['+arr[1]+']['+arr[2]+']'] = 1;
@@ -6607,31 +6746,55 @@ function isEmpty(str) {
 
 						jQuery(this).data({'latestTap': new Date().getTime()});
 
-						if( !timeSince || timeSince > 600 )
+						if (!timeSince || timeSince > 600)
 						{
 							return;
 						}
 					}
 
-					var item = jQuery(this).css('display', 'none'),
-					jInput = jQuery('<input>').prop('type', 'text').on('blur', function() {
-						var input = jQuery(this), item = input.prev();
-						item.text(input.val()).css('display', '');
-						input.remove();
+					var $item = jQuery(this),
+						$editor;
+
+					if ($item.text().length > 50)
+					{
+						var $parent = $item.parent();
+
+						$editor = jQuery('<textarea>').css({
+							resize: 'vertical',
+							width: '95%',
+							height: $parent.outerHeight()
+						});
+					}
+					else
+					{
+						$editor = jQuery('<input>').prop('type', 'text').width('95%');
+					}
+
+					$item.css('display', 'none');
+
+					$editor.on('blur', function() {
+						var $editor = jQuery(this),
+							item = $editor.prev();
+
+						item.text($editor.val()).css('display', '');
+						$editor.remove();
 						settings.save(item, settings);
-					}).on('keydown', function(e){
-						if (e.keyCode == 13) {
+					})
+					.on('keydown', function(e) {
+						if (e.keyCode == 13) { // Enter
 							e.preventDefault();
 							this.blur();
 						}
 						if (e.keyCode == 27) { // ESC
 							e.preventDefault();
-							var input = jQuery(this), item = input.prev();
+							var $editor = jQuery(this),
+								item = $editor.prev();
 							item.css('display', '');
-							input.remove();
+							$editor.remove();
 						}
-					}).width('90%').prop('name', item.parent().prop('id'))
-					.insertAfter(item).focus().val(item.text());
+					})
+					.prop('name', $item.parent().prop('id'))
+					.insertAfter($item).focus().val($item.text());
 				});
 			});
 		},
@@ -6725,7 +6888,6 @@ function isEmpty(str) {
 			currentRequests[options.url] = jqXHR;
 		}
 	});
-
 })(jQuery);
 
 $(function(){
@@ -6736,8 +6898,31 @@ $(function(){
 		{
 			$('.navbar .navbar-inner .navbar-header .navbar-account .account-area').parent('.navbar-account.setting-open').removeClass('setting-open');
 		}
+		
+		changeDublicateTables();
 
+		//console.log('window resize');
+		// Настройка отображения заголовка окна 
+		// true - без анимации
+		navbarHeaderCustomization(true);
+
+		// Изменяем ширину модального окна
+		if ($('.modal-dialog').data('originalWidth'))
+		{
+			if ($(this).width() > $('.modal-dialog').data('originalWidth') + 30)
+			{
+				$('.modal-dialog').css({'width': $('.modal-dialog').data('originalWidth')});
+			}
+			else
+			{
+				$('.modal-dialog').css({'width': '95%'});
+			}
+		}
 	});
+
+	//console.log('загрузка страницы');
+	// Настройка отображения заголовка окна
+	navbarHeaderCustomization();
 
 	/* --- CHAT --- */
 	$('#chatbar').length && $.chatPrepare();
@@ -6933,21 +7118,16 @@ $(function(){
 
 					$.adminLoad({path: '/admin/deal/template/step/index.php', action: 'changeAccess', operation: '', additionalParams: 'deal_template_id=' + dealTemplateId + '&objectType=' + objectTypePermission + '&objectId=' + objectIdPermission + '&actionType=' + actionType + '&hostcms[checked][0][' + dealTemplateStepId + ']=1', windowId: 'id_content'});
 				},
-
 				'mousedown': function() {
-
 					$(this).removeClass('changed');
 				},
-
 				'mouseover': function() {
-
 					if ($(this).hasClass('changed'))
 					{
 						$(this).toggleClass('fa-circle-o fa-circle');
 					}
 				},
 				'mouseout': function() {
-
 					$(this).removeClass('changed');
 				}
 			},
@@ -7090,13 +7270,63 @@ $(function(){
 			}
 		})
 		.on('click', '.th-width-toggle', function(event) {
+			var $i = $(this)/*.toggleClass('fa-expand fa-compress')*/,
+				$th = $i.parent(),
+				$tr = $th.parent(),
+				columnNumber;
 
-			$(this).toggleClass('fa-expand fa-compress').parent().toggleClass('wide-th');
+			$tr.children('th').each(function(index, element){
+				if (element == $th.get(0))
+				{
+					columnNumber = index + 1;
+					return;
+				}
+			});
+
+			var $longestTd, $cloneTd, longestWidth, longestTdouterWidth;
+
+			$tr.closest('table').find('tr td:nth-child(' + columnNumber + ')').each(function(){
+				if (!$longestTd || $(this).text().length > $longestTd.text().length) {
+					$longestTd = $(this);
+				}
+			});
+
+			$cloneTd = $longestTd
+			   .clone()
+			   .removeClass()
+			   .css({display: 'inline', width: 'auto', visibility: 'hidden'})
+			   .appendTo('body');
+
+			// Ширина клона + padding от оригинала
+			longestTdouterWidth = $longestTd.outerWidth();
+
+			longestWidth = $cloneTd.width() + longestTdouterWidth - $longestTd.width() + 5;
+
+			// Не может быть меньше исходного размера при расширении
+			longestWidth < longestTdouterWidth && (longestWidth = longestTdouterWidth + 20);
+
+			$cloneTd.remove();
+
+			if (longestWidth < 50)
+			{
+				longestWidth = 50;
+			}
+			else if (longestWidth > 250)
+			{
+				longestWidth = 250;
+			}
+
+			if ($i.hasClass('fa-expand'))
+			{
+				$th.data('wide', longestWidth);
+			}
+			else
+			{
+				$th.removeData('wide');
+			}
 
 			setCursorAdminTableWrap();
-
-			// Исключаем из обработки уже расширенные столбцы
-			setResizableAdminTableTh(':not(.wide-th)');
+			setResizableAdminTableTh();
 		})
 		.on('mouseover', '.admin-table-wrap:not(.table-draggable)', function(event) {
 
@@ -7113,8 +7343,7 @@ $(function(){
 			}
 		})
 		.on('mousedown', '.admin-table-wrap.table-draggable', function(event) {
-
-			if (!(event.target.tagName == 'INPUT' || event.target.tagName == 'SELECT'))
+			if (!(event.target.tagName == 'INPUT' || event.target.tagName == 'SELECT' || event.target.tagName == 'TEXTAREA'))
 			{
 				$(this)
 					.addClass('mousedown')
@@ -7160,7 +7389,6 @@ $(function(){
 			editor.on('change', function() { mainFormLocker.lock() });
 		})
 		.on('shown.bs.dropdown', '.table-scrollable', function() {
-
 			var divWrap = $(this),
 				//heightDivWrap = divWrap.height(),
 				heightDivWrap = divWrap.get(0).clientHeight,
@@ -7204,7 +7432,7 @@ $(function(){
 				currentPageNumber = +$this.parents('.pagination').find('.active a').text(),
 				sOnclick, sHref;
 
-			if (!Number.isInteger(newPageNumber) || currentPageNumber == newPageNumber)
+			if (!newPageNumber || currentPageNumber == newPageNumber)
 			{
 				sOnclick = '';
 				sHref = 'javascript:void(0)';
@@ -7240,10 +7468,186 @@ $(function(){
 			{
 				$(this).parent('.page-selector').find('a').mousedown().click();
 			}
+		})
+		.on('click', 'input[type = "checkbox"][name $= "_public[]"]', function () {
+
+			$this = $(this);
+
+			$this
+				.closest('.row')
+				.find('input[type="hidden"]')
+				.val(+$this.prop('checked'));
+
+		})
+		.on('click', '.btn-group:has(ul[data-change-context]):not(.open)', function (){
+
+			$(this).data({
+				'margin': $(this).css('margin'),
+				'originalWidth': this.getBoundingClientRect().width,
+				'originalHeight': this.getBoundingClientRect().height
+			});
+		})
+		.on('show.bs.dropdown', '.btn-group:has(ul[data-change-context])', function (){
+			var $this = $(this),
+				left = $this.offset().left,
+				top = $this.offset().top;
+
+			if(!$this.hasClass('open'))
+			{
+				var newBtnGroupDiv = $('<div id="tmp-btn-group"></div>')
+					.css({
+						display: 'inline-block',
+						height: $this.data('originalHeight'),
+						width: $this.data('originalWidth'),
+						margin: $this.data('margin'),
+						'vertical-align': 'middle'
+					});
+
+				$this.after(newBtnGroupDiv);
+			}
+
+			$this.width($this.data('originalWidth'));
+
+			$('body').append($this.css({
+				position: 'absolute',
+				left: left,
+				top: top
+			}));
+		})
+		.on('shown.bs.dropdown', '.account-area li', function() {
+
+			var $this = $(this),
+				dropdownMenu = $this.children('.dropdown-menu'),
+				delta = $this.offset().left == 0 ? 0 : window.screen.width - $this.offset().left - dropdownMenu.outerWidth(true);
+
+			if (delta > 0)
+			{
+				return;
+			}
+
+			dropdownMenu
+				.css({left: delta, right: 'auto'})
+				.data('changePosition', true);
+		})
+		.on('hidden.bs.dropdown', '.account-area li', function() {
+
+			var dropdownMenu = $(this).children('.dropdown-menu');
+
+			dropdownMenu.data('changePosition') && dropdownMenu.css({left: '', right: ''});
+		})
+		.on('hide.bs.dropdown', '.btn-group:has(ul[data-change-context])', function (){
+
+			$('#tmp-btn-group').after($(this).css({
+				position: '',
+				left: '',
+				top: '',
+				width: ''
+			  }));
+
+			$('#tmp-btn-group').remove();
+		})
+		.on('touchend', '#leftNavbarArrow', function(event, withoutAnimation){
+
+			event.preventDefault();
+
+			var navbarAccount = $('.navbar .navbar-inner .navbar-header .navbar-account'),
+				accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
+				accountAreaLi = accountArea.children('li:not(:hidden)'),
+				accountAreaInvisibleLi = accountAreaLi.filter('.invisible'),
+				accountAreaRightLi = accountAreaLi.filter(':gt(' + (accountAreaLi.length - $(this).data('countElementsOffset') - 1) + ')'),
+				rightNavbarArrow,
+				rightNavbarArrowIsExist;
+				
+				//console.log("$(this).data('countElementsOffset')", $(this).data('countElementsOffset'));
+
+			/* accountAreaRightLi
+				.addClass('hide')
+				.prev()
+				.eq(0)
+				.addClass('invisible'); */
+				
+				navbarAccount.data('animationProcess', true);
+
+			accountAreaRightLi
+				.animate({
+					width: 'hide'
+				},
+				{
+					//duration: 400/accountAreaRightLi.length ^ 0,
+					duration: withoutAnimation ? 0 : 200,
+					specialEasing: {
+						width: 'linear',
+					},
+
+					complete: function(){
+
+						$(this).addClass('hide')
+
+						// Скрыли последний элемент набора
+						if (this == accountAreaRightLi.get(accountAreaRightLi.length - 1))
+						{
+							if (!(rightNavbarArrowIsExist = navbarAccount.find('#rightNavbarArrow').length))
+							{
+								navbarAccount.append('<div id="rightNavbarArrow"><a href="#"><i class="icon fa fa-chevron-right"></i></a></div>');
+							}
+
+							rightNavbarArrow = navbarAccount.find('#rightNavbarArrow');
+
+							rightNavbarArrowIsExist && rightNavbarArrow.hasClass('hide') && rightNavbarArrow.removeClass('hide');
+							
+							navbarAccount.data('animationProcess', false);
+						}						
+					}
+				})
+				.prev()
+				.eq(0)
+				.addClass('invisible');
+
+			accountAreaInvisibleLi.removeClass('invisible');
+
+			$(this).addClass('hide');
+		})
+		.on('touchend', '#rightNavbarArrow', function(event){
+
+			event.preventDefault();				
+
+			var accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
+				accountAreaHiddenLi = accountArea.find('.hide');
+				
+			//navbarAccount.data('animationProcess', true);
+
+			accountArea.find('.invisible').removeClass('invisible');
+			//accountArea.find('.hide').removeClass('hide');
+			accountAreaHiddenLi.removeClass('hide');
+
+			accountAreaHiddenLi
+				.animate({
+					width: 'show'
+				},
+				{
+					//duration: 400/accountAreaHiddenLi.length ^ 0,
+					duration: 200,
+					specialEasing: {
+						width: 'linear'
+					},
+					complete: function(){
+						// Отобразили последний скрытый элемент набора
+						if (this == accountAreaHiddenLi.get(accountAreaHiddenLi.length - 1))
+						{
+							// Настройка отображения заголовка окна
+							//console.log('#rightNavbarArrow');
+							
+							//navbarAccount.data('animationProcess', false);
+							navbarHeaderCustomization();
+						}
+					}
+				})
+
+			$(this).addClass('hide');
 		});
 
 	// Sticky actions
-	$(document).on("scroll", function () {
+	$(document).on("scroll", function() {
 		// to bottom
 		if ($(window).scrollTop() + $(window).height() == $(document).height()) {
 			$('.formButtons').removeClass('sticky-actions');
@@ -7255,11 +7659,135 @@ $(function(){
 		}
 	});
 
-	$("#sidebar-collapse").on('click', setResizableAdminTableTh);
-	$(".page-content").on('click', '.sidebar-toggler', setResizableAdminTableTh);
+	$("#sidebar-collapse").on('click', function() {
 
-	setResizableAdminTableTh();
+		//console.log('click #sidebar-collapse');
+		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
+		setResizableAdminTableTh();
+	});
+	$(".page-content").on('click', '.sidebar-toggler', function() {
+
+		//console.log('click .sidebar-toggler');
+		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
+		
+		setResizableAdminTableTh();
+		changeDublicateTables();
+	});
+
+	/* $(".account-area li").on('mouseup', function() {
+
+		console.log('mouseup $(this) = ', $(this));
+
+		if ($(this).hasClass('open'))
+		{
+			dropdownMenu = $(this).children('.dropdown-menu');
+			console.log('click dropdownMenu = ', dropdownMenu);
+		}
+	}) */
+
+	/* $('.btn-group').on('show.bs.dropdown', function () {
+		$('body').append($(this).css({
+			position: 'absolute',
+			left: $(this).offset().left,
+			top: $(this).offset().top
+		}));
+	}); */
+
+	/* $('.btn-group .dropdown').on('hidden.bs.dropdown', function () {
+	  $('.bs-example').append($('.dropdown').css({
+		position:false, left:false, top:false
+	  }).detach());
+	}); */
 });
+
+// Настройка отображения заголовка окна
+function navbarHeaderCustomization(withoutAnimation)
+{
+	var navbarAccount = $('.navbar .navbar-inner .navbar-header .navbar-account'),
+		accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
+		settingElement = accountArea.next('.setting'),
+		navbarHeaderWidth = navbarHeaderVisibleWidth = accountArea.width() + settingElement.width(),
+		windowWidth = $(window).width(),
+		accountAreaLi = accountArea.find('li:not(:hidden)'),
+		countElementsOffset = 0,
+		leftNavbarArrow = navbarAccount.find('#leftNavbarArrow'),
+		leftNavbarArrowIsExist = leftNavbarArrow.length,
+		leftNavbarArrowIsShown = leftNavbarArrowIsExist ? !leftNavbarArrow.hasClass('hide') : false,
+		rightNavbarArrow = navbarAccount.find('#rightNavbarArrow'),
+		//rightNavbarArrowIsExist = ,rightNavbarArrow.length
+		rightNavbarArrowIsShown = rightNavbarArrow.length ? !rightNavbarArrow.hasClass('hide') : false;
+		
+	if (navbarAccount.data('animationProcess'))	
+	{
+		return;
+	}
+
+	// Показана кнопка "Влево" или "Вправо"
+	// Сброс настроек
+	if (leftNavbarArrowIsShown || rightNavbarArrowIsShown)
+	{
+		accountArea
+			.find('.invisible, .hide')
+			.removeClass('invisible hide')
+			.css('display', '');
+
+		leftNavbarArrowIsShown && leftNavbarArrow.addClass('hide');
+		rightNavbarArrowIsShown && rightNavbarArrow.addClass('hide');
+	}
+
+	// Смещение вычисляем после(!) сброса настроек
+	//console.log('document.body.scrollWidth =', document.body.scrollWidth);
+	var offsetLeftAccountArea = accountArea.offset().left;
+	
+	//console.log('offsetLeftAccountArea =', offsetLeftAccountArea);
+
+	// Не помещается минимум 1 элемент
+	//if (navbarHeaderWidth - windowWidth >= accountAreaLi.eq(0).outerWidth(true) * 0.4 )
+	if (offsetLeftAccountArea < 0 &&  Math.abs(offsetLeftAccountArea) >= accountAreaLi.eq(0).outerWidth(true) * 0.4)
+	{
+		accountAreaLi.each(function(index){
+
+			var liWidth = $(this).outerWidth(true);
+
+			//navbarHeaderVisibleWidth -= liWidth;
+			offsetLeftAccountArea += liWidth;
+
+			$(this).addClass('invisible');
+
+			//if (navbarHeaderVisibleWidth <= windowWidth)
+			if (offsetLeftAccountArea > 0)
+			{
+				// Не помещается более 0.4 ширины крайнего слева видимого элемента, поэтому скрываем его
+				//if (windowWidth - navbarHeaderVisibleWidth < 0.6 * accountAreaLi.eq(countElementsOffset + 1).outerWidth(true))
+				if (offsetLeftAccountArea < 0.6 * accountAreaLi.eq(countElementsOffset + 1).outerWidth(true))
+				{
+					accountAreaLi
+						.eq(++countElementsOffset)
+						.addClass('invisible');
+				}
+
+				if (!(leftNavbarArrowIsExist = navbarAccount.find('#leftNavbarArrow').length))
+				{
+					navbarAccount.append('<div id="leftNavbarArrow"><a href="#"><i class="icon fa fa-chevron-left"></i></a></div>');
+					leftNavbarArrow = navbarAccount.find('#leftNavbarArrow');
+				}
+
+				leftNavbarArrowIsExist && leftNavbarArrow.hasClass('hide') && leftNavbarArrow.removeClass('hide');
+
+				leftNavbarArrow.data('countElementsOffset', countElementsOffset);
+
+				// Перед настройкой была показана кнопка "Вправо".
+				// Показываем ее снова эмуляцией нажатия кнопки "Влево"
+				//console.log('rightNavbarArrowIsShown', rightNavbarArrowIsShown);
+				rightNavbarArrowIsShown && leftNavbarArrow.trigger('touchend', [!!withoutAnimation]);
+
+				return false;
+			}
+
+			++countElementsOffset;
+		});
+	}
+}
 
 Number.isInteger = Number.isInteger || function(value) {
 	return typeof value === 'number' &&
@@ -7305,43 +7833,93 @@ function setCursorAdminTableWrap()
 }
 
 // Настройка возможности увеличения ширины "узких" столбцов, не имеющих фиксированнной ширины
-function setResizableAdminTableTh(sAdditionalSelector)
+function setResizableAdminTableTh()
 {
-	var $th = $('table.admin-table th:not([width]):not(.datetime):visible:not(.action-checkbox):not([class *= "filter-action-"])' + (typeof sAdditionalSelector == 'string' ? sAdditionalSelector : ''));
+	var $th = $('table.admin-table th:not([width]):not(.datetime):visible:not(.action-checkbox):not([class *= "filter-action-"])');
+
+	if (!$th.length) { return; }
+
+	if ($('#checkbox_fixedtables').is(':checked') || readCookie("tables-fixed") == "true")
+	{
+		$th
+			.find('i.th-width-toggle')
+			.remove();
+		$th
+			.width('')
+			.removeClass('resizable-th')
+			.find('i.th-width-toggle')
+			.remove();
+		return;
+	}
+
+	var scrollableWrap = $th.parents('.table-scrollable'),
+		// Величина горизонтальной прокрутки блока, содержащего таблицу, до изменения ширины столбца данной таблицы
+		wrapScrollLeft = scrollableWrap.scrollLeft();
 
 	// Минимальная и максимальная ширины столбца (с учетом внутренних отступов) при относительно малой ширине таблиц
-	const thMinOuterWidth = 90, thMaxOuterWidth = 130;
+	const thMinOuterWidth = 90, thMaxOuterWidth = 250;
 
-	$th
-		.width('')
-		.removeClass('wide-th resizable-th')
-		.find('i.th-width-toggle')
-		.remove();
+	$th.width('');
 
 	$th.each(
 		function() {
+			var $this = $(this);
 
-			var $th = $(this), $cloneTh, thContentRealWidth,
-				thLeftRightPaddings = $th.outerWidth() - $th.width(),
-				thMinContentWidth = thMinOuterWidth - thLeftRightPaddings, thMaxContentWidth = thMaxOuterWidth - thLeftRightPaddings;
-
-			if ( $th.width() < thMaxContentWidth )
+			if ($this.data('wide') > 0)
 			{
-				$cloneTh = $th
-				   .clone()
-				   .css({display: 'inline', width: 'auto', visibility: 'hidden'})
-				   .appendTo('body'),
+				$this
+					.find('i')
+					.removeClass('fa-expand')
+					.addClass('fa-compress');
 
-				thContentRealWidth = $cloneTh.width();
+				$this
+					.data('prev-width', $this.outerWidth())
+					.css('width', $this.data('wide'));
+			}
+			else
+			{
+				$this
+					.find('i')
+					.addClass('fa-expand')
+					.removeClass('fa-compress');
 
-				$cloneTh.remove();
+				var removeResizable = true,
+					$cloneTh, thContentRealWidth,
+					width = $this.width(),
+					thLeftRightPaddings = $this.outerWidth() - width,
+					thMinContentWidth = thMinOuterWidth - thLeftRightPaddings, thMaxContentWidth = thMaxOuterWidth - thLeftRightPaddings;
 
-				// Ширина ячейки меньше размеров содержимого или меньше минимальной ширины
-				if (thContentRealWidth > $th.width() || thMinContentWidth > $th.width())
+				if ( width < thMaxContentWidth )
 				{
-					$th.data({'width': thLeftRightPaddings + (thMinContentWidth > $th.width() ? thMinContentWidth : $th.width())});
+					$cloneTh = $this
+					   .clone()
+					   .css({display: 'inline', width: 'auto', visibility: 'hidden'})
+					   .appendTo('body'),
+					thContentRealWidth = $cloneTh.width();
 
-					$th
+					$cloneTh.remove();
+
+					// Ширина ячейки меньше размеров содержимого или меньше минимальной ширины
+					if (thContentRealWidth > width || thMinContentWidth > width)
+					{
+						$this.css('width', thLeftRightPaddings + (thMinContentWidth > width ? thMinContentWidth : width));
+						removeResizable = false;
+					}
+				}
+
+				if ($this.hasClass('resizable-th'))
+				{
+					if (removeResizable)
+					{
+						$this
+							.removeClass('resizable-th')
+							.find('i.th-width-toggle')
+							.remove();
+					}
+				}
+				else if (!removeResizable)
+				{
+					$this
 						.addClass('resizable-th')
 						.append('<i class="th-width-toggle fa fa-expand gray"></i>');
 				}
@@ -7349,51 +7927,19 @@ function setResizableAdminTableTh(sAdditionalSelector)
 		}
 	);
 
-	$th
+	/*$th
 		.filter('.resizable-th')
-		.each(
-			function() {
-
-				var $th = $(this);
-
-				$th.css({'width': $th.data('width')});
-			}
-	);
+		.each(function() {
+			var $th = $(this);
+			$th.css({'width': $th.data('width')});
+		});*/
 
 	setCursorAdminTableWrap();
-}
 
-function readCookiesForInitiateSettings()
-{
-	if (readCookie("navbar-fixed-top") == "true") {
-		$('#checkbox_fixednavbar').prop('checked', true);
-		$('.navbar').addClass('navbar-fixed-top');
-	}
-
-	if (readCookie("sidebar-fixed") == "true") {
-		$('#checkbox_fixedsidebar').prop('checked', true);
-		$('.page-sidebar').addClass('sidebar-fixed');
-
-		//Slim Scrolling for Sidebar Menu in fix state
-		if (!$(".page-sidebar").hasClass("menu-compact")) {
-			var position = (readCookie("rtl-support") || location.pathname == "/index-rtl-fa.html" || location.pathname == "/index-rtl-ar.html") ? 'right' : 'left';
-			$('.sidebar-menu').slimscroll({
-				height: 'auto',
-				position: position,
-				size: '3px',
-				color: themeprimary
-			});
-		}
-	}
-
-	if (readCookie("breadcrumbs-fixed") == "true") {
-		$('#checkbox_fixedbreadcrumbs').prop('checked', true);
-		$('.page-breadcrumbs').addClass('breadcrumbs-fixed');
-	}
-
-	if (readCookie("page-header-fixed") == "true") {
-		$('#checkbox_fixedheader').prop('checked', true);
-		$('.page-header').addClass('page-header-fixed');
+	// "Возвращаем" величину горизонтальной прокрутки блока после изменения ширины столбца
+	if (wrapScrollLeft)
+	{
+		scrollableWrap.scrollLeft(wrapScrollLeft)
 	}
 }
 
@@ -7473,38 +8019,12 @@ function calendarDayClick(oDate, jsEvent)
 	var contextMenu = $('body #calendarContextMenu').show(),
 		windowWidth = $(window).width(),
 		contextMenuWidth = contextMenu.outerWidth(),
-		positionLeft = (jsEvent.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : jsEvent.pageX;
+		eventCoordinates = jsEvent.type == 'touchend' ? {pageX: jsEvent.originalEvent.changedTouches[0].pageX, pageY: jsEvent.originalEvent.changedTouches[0].pageY + 10} : {pageX: jsEvent.pageX, pageY:jsEvent.pageY},
+		positionLeft = (eventCoordinates.pageX + contextMenuWidth > windowWidth) ? (windowWidth - contextMenuWidth) : eventCoordinates.pageX;
 
-	contextMenu.css({'top': jsEvent.pageY, left: positionLeft});
+	contextMenu.css({top: eventCoordinates.pageY, left: positionLeft});
 
 	$('ul.dropdown-info').data('timestamp', oDate.unix());
-	/*
-	 $("body").on("contextmenu", "table tr", function(e) {
-		$contextMenu.css({
-		  display: "block",
-		  left: e.pageX,
-		  top: e.pageY
-		});
-		return false;
-	  });
-	  */
-
-	 /*
-	var dH = $(window).height(),
-		wH = $('#id_content').outerHeight();
-	$.openWindow(
-		{
-			path: '/admin/calendar/index.php?addEntity',
-			addContentPadding: false,
-			width: $('#id_content').outerWidth() * 0.9, //0.8
-			height: (dH < wH ? dH : wH) * 0.9, //0.8
-			AppendTo: $('#id_content').parent().get(0),
-			positionOf: '#id_content',
-			Maximize: false,
-			dialogClass: 'hostcms6'
-		}
-	)
-	.addClass('modalwindow');*/
 }
 
 /*
@@ -7689,12 +8209,12 @@ function cancelAllDay(windowId)
 		$('#' + windowId + " input[name='all_day']").prop("checked", false);
 
 		// $('#' + windowId +  " input[name='duration']").parents(".form-group").removeClass("invisible");
-		$('#' + windowId +  " select[name='duration_type']").parents("div").removeClass("invisible");
+		$('#' + windowId + " select[name='duration_type']").parents("div").removeClass("invisible");
 
 		var formatDateTimePicker = "DD.MM.YYYY HH:mm:ss";
 
-		$('#' + windowId +  ' input[name="start"]').parent().data("DateTimePicker").format(formatDateTimePicker);
-		$('#' + windowId +  ' input[name="finish"]').parent().data("DateTimePicker").format(formatDateTimePicker);
+		$('#' + windowId + ' input[name="start"]').parent().data("DateTimePicker").format(formatDateTimePicker);
+		$('#' + windowId + ' input[name="finish"]').parent().data("DateTimePicker").format(formatDateTimePicker);
 	}
 }
 
@@ -7737,13 +8257,34 @@ function changeDuration(event)
 		stopTimeCell = startTimeCell + getDurationMilliseconds(event.data.windowId);
 
 	// Изменяем значение поля даты-времени завершения
-	$('#' + event.data.windowId + ' input[name="finish"]').parent().data("DateTimePicker").date(new Date(stopTimeCell));
+	//$('#' + event.data.windowId + ' input[name="finish"]').parent().data("DateTimePicker").date(new Date(stopTimeCell));
+	$('#' + event.data.windowId + ' input[name="deadline"]').parent().data("DateTimePicker").date(new Date(stopTimeCell));
 }
 
 // Получение продолжительности события в миллисекундах
 function getDurationMilliseconds(windowId)
 {
-	var duration = +$('#' + windowId + ' input[name="duration"]').val(), // продолжительность
+	var bAllDay = $('#' + windowId + " input[name='all_day']").prop("checked"),
+		duration = bAllDay ? 1 : +$('#' + windowId + ' input[name="duration"]').val(), // продолжительность
+		durationType = bAllDay ? 2 : +$('#' + windowId + ' select[name="duration_type"]').val(), // тип интервала продолжительности
+		durationMillisecondsCoeff = 1000 * 60; // минуты
+
+	switch (durationType)
+	{
+		case 1: // часы
+
+			durationMillisecondsCoeff *= 60;
+			break;
+
+		case 2: // дни
+
+			durationMillisecondsCoeff *= 60 * 24;
+			break;
+	}
+
+	return duration * durationMillisecondsCoeff - bAllDay;
+
+	/* var duration = +$('#' + windowId + ' input[name="duration"]').val(), // продолжительность
 		durationType = +$('#' + windowId + ' select[name="duration_type"]').val(), // тип интервала продолжительности
 		durationMillisecondsCoeff = 1000 * 60, // минуты
 		additionalForAllDay = $('#' + windowId + " input[name='all_day']").prop("checked") ? (60 * 1000) : 0;
@@ -7767,24 +8308,28 @@ function getDurationMilliseconds(windowId)
 		additionalForAllDay -= 1;
 	}
 
-	return duration * durationMillisecondsCoeff + additionalForAllDay;
+	return duration * durationMillisecondsCoeff + additionalForAllDay; */
 }
 
 function setStartAndDeadline(start, end, windowId)
 {
 	$('#' + windowId + ' input[name="start"]').parent().data("DateTimePicker").date(new Date(start));
 
-	var finishParent = $('#' + windowId + ' input[name="finish"]').parent().data("DateTimePicker");
+	var deadlineParent = $('#' + windowId + ' input[name="deadline"]').parent().data("DateTimePicker");
 
 	if (end)
 	{
-		finishParent.date(new Date(end));
+		deadlineParent.date(new Date(end));
 	}
-	else
+
+	var jTimeSlider = $("#" + windowId + " #ts");
+
+	// Не была нажата кнопка быстрой установки начала события, не перемещается ползунок, не прокручивается линейка при смещении ползунка к одному из ее концов
+	if (!($("#eventStartButtonsGroup").data("clickStartButton") || $("input[name='all_day']").data("clickAllDay")
+		|| jTimeSlider.data("moveTimeCell") || jTimeSlider.data("rulerRepeating")))
 	{
-		//finishParent.clear();
+		setEventStartButtons(start, windowId);
 	}
-	setEventStartButtons(start, windowId);
 }
 
 // Установка быстрых кнопок начала события
@@ -8382,3 +8927,369 @@ function cookie_encode(string){
 	return ns;
 }
 /* /jQuery Cookie plugin */
+
+// Изменение настроек таблиц с фиксированным левым столбцом и заголовком при изменении ширины окна
+function changeDublicateTables()
+{
+	var tabContent = $(".tab-content > [id ^= 'company-'][class ~='active']");
+
+	if (!tabContent.length)
+	{
+		return;
+	}
+
+	var originalTable = $("table[id ^= 'table-company-']", tabContent),
+		leftTable = $(".permissions-table-left table", tabContent),
+		leftTableTh = $('thead tr th', leftTable),
+		leftTopTable =  $('.permissions-table-top-left table', tabContent),
+		leftTopTableTh = $('thead tr th', leftTopTable),
+		tableHead = $(".permissions-table-head", tabContent),
+		tableThHead = $('th', tableHead),
+		widthLeftTable = 0;
+
+	if ($('[id ^= "table-company-"]', tabContent).outerWidth() - $('.table-scrollable', tabContent).innerWidth())
+	{
+		originalTable.addClass('cursor-grab');
+		tableHead.addClass('cursor-grab');
+	}
+	else
+	{
+		originalTable.removeClass('cursor-grab');
+		tableHead.removeClass('cursor-grab');
+	}
+
+	$("thead tr th", originalTable).each(function (index){
+
+		var thOuterWidth = $(this).outerWidth();
+
+		// Получаем ширину только первых двцх столбцов
+		if (index >= 2)
+		{
+			return false;
+		}
+
+		widthLeftTable += thOuterWidth;
+
+		leftTableTh.eq(index).outerWidth(thOuterWidth);
+		leftTopTableTh.eq(index).outerWidth(thOuterWidth);
+		tableThHead.eq(index).outerWidth(thOuterWidth);
+	});
+
+	leftTable.width(widthLeftTable + 1);
+	leftTopTable.width(widthLeftTable);
+	tableHead.outerWidth(originalTable.outerWidth());
+}
+
+
+function setTableWithFixedHeaderAndLeftColumn()
+{
+		$(document).one("ajaxSuccess", function (){
+
+		function settingFixedBlocks(tabContent)
+		{
+			var delta = $('.tab-content > [id ^= "company-"].active [id ^= "table-company-"]').outerWidth() - $('.tab-content > [id ^= "company-"].active .table-scrollable').innerWidth();
+
+			if ($('.tab-content > [id ^= "company-"].active [id ^= "table-company-"]').outerWidth() - $('.tab-content > [id ^= "company-"].active .table-scrollable').innerWidth())
+			{
+				$('.tab-content > [id ^= "company-"].active [id ^= "table-company-"]').addClass('cursor-grab');
+
+				$('.permissions-table-head').addClass('cursor-grab');
+			}
+
+			// Вкладка активна и до этого создание и настройка размеров дублирующих элементов не производилась
+			if (tabContent.hasClass('active') && !tabContent.data('fixedBlocksIsSet'))
+			{
+				// Исходная таблица
+				var originalTable = $("table[id ^= 'table-company-']", tabContent),
+					originalTableThead = $("thead", originalTable),
+
+					// Таблица, дублирующая заголовок исходной таблицы
+					//tableHead = $($(".permissions-table-head")[0]),
+					tableHead = $(".permissions-table-head", tabContent),
+					tableThHead = $('th', tableHead),
+
+					//originalTable = tableHead.next("table.deals-aggregate-user-info"),
+					//originalTable = $('#table-company-1'),
+
+					// Блок, содержащий таблицу, дублирующую 2 левых столбца исходной
+					leftBlock = $('<div class="permissions-table-left">'),
+					// Таблица, дублирующая левый столбец
+					leftTable = $("<table><thead><tr></tr></thead><tbody></tbody></table>"),
+
+					// Блок, содержащий таблицу, дублирующую 2 левых столбца заголовка
+					topLeftBlock = $('<div class="permissions-table-top-left">'),
+					// Таблица, дублирующая 2 левых столбца заголовка
+					leftTopTable = $("<table><thead><tr></tr></thead></table>"),
+
+					// Разность между величиной вертикальной прокрутки окна и положением заголовка таблицы
+					delta = $(window).scrollTop() - originalTableThead.offset().top;
+
+				if (delta >= 0)
+				{
+					tableHead.css({'top': delta, 'visibility': 'visible'});
+					topLeftBlock.css({'top': delta, 'visibility': 'visible'});
+				}
+
+				// Устанавливаем ширины столбцов таблицы, дублирующей заголовок
+				$("tr th", originalTableThead).each(function (index){
+					$(tableThHead[index]).outerWidth($(this).outerWidth());
+				});
+
+				tableHead.outerWidth(originalTable.outerWidth());
+
+				leftTable.addClass(originalTable.attr('class'));
+				leftBlock.append(leftTable);
+
+				leftTopTable.addClass(originalTable.attr('class'));
+				topLeftBlock.append(leftTopTable);
+
+				tabContent
+					.append(leftBlock)
+					.append(topLeftBlock);
+
+				// Создаем заголовки таблиц, дублирующих заголовок 2 левых столбцов заголовка исходной таблицы
+				// Копирование части заголовка исходной таблицы
+				$("thead tr th", originalTable).each(function (index){
+
+					var th;
+
+					if (index >= 2)
+					{
+						return false;
+					}
+
+					th = $(this).clone(false).outerWidth($(this).outerWidth()).addClass('invisible-fixed').css({'border-bottom': '1px solid #e9e9e9', 'height': $('thead', originalTable).outerHeight()});
+					$("thead tr", leftTable).append(th);
+
+					//th = $(this).clone(false).outerWidth($(this).outerWidth()).css('border-bottom', '2px solid #fff').outerHeight(tableHead.innerHeight());
+					th = $(this).clone(false).outerWidth($(this).outerWidth()).innerHeight(tableHead.innerHeight());
+					$("thead tr", leftTopTable).append(th);
+
+					index == 1 && $("thead tr", leftTable).append('<th class="no-padding">');
+				});
+
+				// Создаем тело таблицы, дублирующей 2 левых столбца исходной
+				$("tbody tr", originalTable).each(function (index){
+
+					var tr = $('<tr>'), td;
+
+					$("tbody", leftTable).append(tr);
+
+					// Строка с названием отдела
+					if ($(this).attr("id") && ~($(this).attr("id").indexOf('deals-aggregate-department-')))
+					{
+						td = $('td', this).clone(false).addClass('invisible-fixed permissions-table-left-department');
+
+						td.html('<div class="inner">' + td.html() + '</div>');
+
+						tr.append(td.attr('colspan', 3));
+					}
+					else // Строка с информацией о сотруднике
+					{
+						$('td', this).each(function (index){
+
+							if (index >= 2)
+							{
+								return false;
+							}
+
+							td = $(this).clone(false).addClass('invisible-fixed');
+
+							tr.append(td);
+
+							index == 1 && tr.append('<td class="no-padding">');
+						});
+					}
+				});
+
+				tabContent.data('fixedBlocksIsSet', true);
+			}
+		}
+
+		settingFixedBlocks($(".tab-content > [id ^= 'company-'][class ~='active']"));
+
+		var curYPos = 0;
+		var curXPos = 0;
+		var curDown = false;
+		var curScrollLeft = 0;
+
+		$('.tab-content > [id ^= "company-"] [id ^= "table-company-"]').on(
+			{
+				'mousedown': function() {
+
+					if ($(this).hasClass('cursor-grab'))
+					{
+						$(this).toggleClass("cursor-grab cursor-grabbing");
+						$('.permissions-table-head').toggleClass("cursor-grab cursor-grabbing");
+					}
+				},
+
+				'mouseup': function() {
+
+					if ($(this).hasClass('cursor-grabbing'))
+					{
+						$(this).toggleClass("cursor-grabbing cursor-grab");
+						$('.permissions-table-head').toggleClass("cursor-grab cursor-grabbing");
+					}
+				}
+			}
+		);
+
+		$('.permissions-table-head').on(
+			{
+				'mousedown': function() {
+
+					if ($(this).hasClass('cursor-grab'))
+					{
+						$(this).toggleClass("cursor-grab cursor-grabbing");
+						$('.tab-content > [id ^= "company-"] [id ^= "table-company-"]').toggleClass("cursor-grab cursor-grabbing");
+					}
+				},
+
+				'mouseup': function() {
+
+					if ($(this).hasClass('cursor-grabbing'))
+					{
+						$(this).toggleClass("cursor-grabbing cursor-grab");
+						$('.tab-content > [id ^= "company-"] [id ^= "table-company-"]').toggleClass("cursor-grab cursor-grabbing");
+					}
+				}
+			}
+		);
+
+		$('.tab-content > [id ^= "company-"] .table-scrollable').on({
+				'mousemove': function (event) {
+					if (curDown === true) {
+						$(this).scrollLeft(parseInt(curScrollLeft + (curXPos - event.pageX)));
+					}
+				},
+				'mousedown': function (event) {
+					curDown = true;
+					curYPos = event.pageY;
+					curXPos = event.pageX;
+					curScrollLeft = $(this).scrollLeft();
+					event.preventDefault();
+				},
+				'mouseup': function (event) {
+					curDown = false;
+				},
+				'mouseout': function (event) {
+					// Указатель находится вне области, занимаемой элементом
+					if (!$(this).find(event.relatedTarget).length && curDown)
+					{
+						curDown = false;
+
+						 $('.tab-content > [id ^= "company-"] [id ^= "table-company-"], .permissions-table-head')
+							.removeClass("cursor-grabbing cursor-grab")
+							.addClass("cursor-grab");
+					}
+				},
+				'scroll': function () {
+					// Двигаем элементы только на активной вкладке
+					if ($(this).parent().hasClass('active'))
+					{
+						var leftBlock = $('~ .permissions-table-left ', this),
+							scrollValue = $(this).scrollLeft();
+
+						if (scrollValue && leftBlock.css('visibility') != 'visible')
+						{
+							leftBlock.css('visibility', 'visible');
+
+							$('.invisible-fixed', leftBlock)
+								.removeClass('invisible-fixed')
+								.addClass('visible-fixed');
+						}
+						else if (!scrollValue)
+						{
+							leftBlock.css('visibility', 'hidden');
+
+							$('.visible-fixed', leftBlock)
+								.removeClass('visible-fixed')
+								.addClass('invisible-fixed');
+						}
+					}
+				}
+			}
+		);
+
+		$(window).on('scroll', function (){
+			var tabContent = $(".tab-content > [id ^= 'company-'][class ~='active']");
+
+			if (tabContent.length)
+			{
+				// Исходная таблица
+				var	originalTable = $("table[id ^= 'table-company-']", tabContent),
+					originalTableThead = $("thead", originalTable),
+					tableHead = $(".permissions-table-head", tabContent),
+					topLeftBlock = $('.permissions-table-top-left', tabContent),
+					delta = $(this).scrollTop() - originalTableThead.offset().top;
+
+				if (delta >= 0)
+				{
+					if (tableHead.css('visibility') != 'visible')
+					{
+						tableHead.css({'visibility': 'visible'});
+						topLeftBlock.css({'visibility': 'visible'});
+					}
+
+					tableHead.css({'top': delta});
+					topLeftBlock.css({ 'top': delta});
+				}
+				else if (tableHead.css('visibility') == 'visible')
+				{
+					tableHead.css('visibility', 'hidden');
+					topLeftBlock.css('visibility', 'hidden');
+				}
+			}
+		});
+
+		$('#agregate-user-info a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+			settingFixedBlocks($($(this).attr('href')));
+		});
+	});
+}
+
+//Slim Scrolling for Sidebar Menu in fix state
+function setSlimScrolling4SidebarMenu() {
+
+	if (!$('.page-sidebar').hasClass('menu-compact')) {
+		var position = (readCookie("rtl-support") || location.pathname == "/index-rtl-fa.html" || location.pathname == "/index-rtl-ar.html") ? 'right' : 'left';
+		//Slim Scrolling for Sidebar Menu in fix state
+		$('.sidebar-menu').slimscroll({
+			position: position,
+			size: '3px',
+			color: themeprimary,
+			//height: 'auto',
+			height: $(window).height() - 90,
+		});
+	}
+}
+
+function readCookiesForInitiateSettings() {
+	if (readCookie("navbar-fixed-top") == "true") {
+		$('#checkbox_fixednavbar').prop('checked', true);
+		$('.navbar').addClass('navbar-fixed-top');
+	}
+
+	if (readCookie("sidebar-fixed") == "true") {
+		$('#checkbox_fixedsidebar').prop('checked', true);
+		$('.page-sidebar').addClass('sidebar-fixed');
+		setSlimScrolling4SidebarMenu();
+	}
+
+	if (readCookie("breadcrumbs-fixed") == "true") {
+		$('#checkbox_fixedbreadcrumbs').prop('checked', true);
+		$('.page-breadcrumbs').addClass('breadcrumbs-fixed');
+	}
+
+	if (readCookie("page-header-fixed") == "true") {
+		$('#checkbox_fixedheader').prop('checked', true);
+		$('.page-header').addClass('page-header-fixed');
+	}
+
+	// HostCMS
+	if (readCookie("tables-fixed") == "true") {
+		$('#checkbox_fixedtables').prop('checked', true);
+	}
+}
+

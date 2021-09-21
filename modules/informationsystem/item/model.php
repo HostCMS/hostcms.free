@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -592,17 +592,24 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function checkDuplicatePath()
 	{
-		$oInformationsystem = $this->InformationSystem;
-
-		// Search the same item or group
-		$oSameInformationsystemItem = $oInformationsystem->Informationsystem_Items->getByGroupIdAndPath($this->informationsystem_group_id, $this->path);
-		if (!is_null($oSameInformationsystemItem) && $oSameInformationsystemItem->id != $this->id)
+		if (strlen($this->path))
 		{
-			$this->path = Core_Guid::get();
-		}
+			$oInformationsystem = $this->InformationSystem;
 
-		$oSameInformationsystemGroup = $oInformationsystem->Informationsystem_Groups->getByParentIdAndPath($this->informationsystem_group_id, $this->path);
-		if (!is_null($oSameInformationsystemGroup))
+			// Search the same item or group
+			$oSameInformationsystemItem = $oInformationsystem->Informationsystem_Items->getByGroupIdAndPath($this->informationsystem_group_id, $this->path);
+			if (!is_null($oSameInformationsystemItem) && $oSameInformationsystemItem->id != $this->id)
+			{
+				$this->path = Core_Guid::get();
+			}
+
+			$oSameInformationsystemGroup = $oInformationsystem->Informationsystem_Groups->getByParentIdAndPath($this->informationsystem_group_id, $this->path);
+			if (!is_null($oSameInformationsystemGroup))
+			{
+				$this->path = Core_Guid::get();
+			}
+		}
+		else
 		{
 			$this->path = Core_Guid::get();
 		}
@@ -637,10 +644,6 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			$this->path = $this->id;
 		}
-		else
-		{
-			$this->path = Core_Guid::get();
-		}
 
 		return $this;
 	}
@@ -652,7 +655,7 @@ class Informationsystem_Item_Model extends Core_Entity
 	 */
 	public function save()
 	{
-		if (is_null($this->path))
+		if (is_null($this->path) || $this->path === '')
 		{
 			$this->makePath();
 		}
@@ -1116,6 +1119,23 @@ class Informationsystem_Item_Model extends Core_Entity
 	}
 
 	/**
+	 * Show comments rating data in XML
+	 * @var boolean
+	 */
+	protected $_showXmlCommentsRating = FALSE;
+
+	/**
+	 * Add Comments Rating XML to item
+	 * @param boolean $showXmlComments mode
+	 * @return self
+	 */
+	public function showXmlCommentsRating($showXmlCommentsRating = TRUE)
+	{
+		$this->_showXmlCommentsRating = $showXmlCommentsRating;
+		return $this;
+	}
+
+	/**
 	 * What comments show in XML? (active|inactive|all)
 	 * @var string
 	 */
@@ -1398,12 +1418,11 @@ class Informationsystem_Item_Model extends Core_Entity
 			$this->addEntities($this->Tags->findAll());
 		}
 
-		if ($this->_showXmlComments && Core::moduleIsActive('comment'))
+		if (($this->_showXmlComments || $this->_showXmlCommentsRating) && Core::moduleIsActive('comment'))
 		{
 			$this->_aComments = array();
 
-			$gradeSum = 0;
-			$gradeCount = 0;
+			$gradeSum = $gradeCount = 0;
 
 			$oComments = $this->Comments;
 			$oComments->queryBuilder()
@@ -1425,7 +1444,9 @@ class Informationsystem_Item_Model extends Core_Entity
 					$gradeSum += $oComment->grade;
 					$gradeCount++;
 				}
-				$this->_aComments[$oComment->parent_id][] = $oComment;
+
+				$this->_showXmlComments
+					&& $this->_aComments[$oComment->parent_id][] = $oComment;
 			}
 
 			// Средняя оценка
@@ -1469,10 +1490,11 @@ class Informationsystem_Item_Model extends Core_Entity
 					->value($avgGrade)
 			);
 
-			$this->_addComments(0, $this);
-		}
+			$this->_showXmlComments
+				&& $this->_addComments(0, $this);
 
-		$this->_aComments = array();
+			$this->_aComments = array();
+		}
 
 		if ($this->_showXmlProperties)
 		{

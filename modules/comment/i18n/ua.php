@@ -22,7 +22,7 @@ return array(
 	'ip' => 'IP-адреса',
 	'datetime' => 'Дата і час',
 	'grade' => 'Оцінка',
-	'siteuser_id' => 'Код користувача',
+	'siteuser_id' => 'Клієнт',
 	'edit_success' => 'Коментар успішно додано',
 	'copy_success' => 'Коментар успішно скопійовано',
 	'markDeleted_success' => 'Коментар успішно видалено',
@@ -31,4 +31,6 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 	'ban' => 'Заблокувати',
 	'ban_comment' => 'Заблокований за коментар: %s',
+	'option_gradeStep' => 'Крок оцінки',
+	'option_gradeLimit' => 'Ліміт оцінки',
 );

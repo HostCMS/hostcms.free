@@ -38,4 +38,6 @@ return array(
 	'splitOrder_success' => 'Замовлення розділений успішно!',
 	'item_codes' => 'Маркування товару "%s"',
 	'setCodes_success' => 'Маркування змінені!',
+	'shop_order_item_status_id' => 'Статус товару',
+	'change_item_status' => 'Статус товару "%s" змінений на "%s"',
 );

@@ -6,10 +6,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Shop_Item_Controller_Apply
  *
  * @package HostCMS
- * @subpackage Admin
+ * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discounts',
@@ -50,4 +50,5 @@ return array(
 	'coupon' => "Apply with coupon",
 	'coupon_text' => "Coupon",
 	'public' => "Upload to Y.Market",
+	'percent_error' => "Discount cannot be more than 100%!",
 );

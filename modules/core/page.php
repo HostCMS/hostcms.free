@@ -80,7 +80,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Page extends Core_Servant_Properties
 {
@@ -397,7 +397,7 @@ class Core_Page extends Core_Servant_Properties
 
 		$return = $this->compress && Core::moduleIsActive('compression')
 			? $this->_getJsCompressed($mode)
-			: $this->_getJs();
+			: $this->_getJs($mode);
 
 		$this->js = array();
 
@@ -420,9 +420,10 @@ class Core_Page extends Core_Servant_Properties
 
 	/**
 	 * Get block of linked js
+	 * @param boolean $mode async|defer|TRUE|FALSE, default FALSE
 	 * @return string
 	 */
-	protected function _getJs()
+	protected function _getJs($mode = FALSE)
 	{
 		$sReturn = '';
 
@@ -432,7 +433,7 @@ class Core_Page extends Core_Servant_Properties
 				? filemtime($sPath)
 				: NULL;
 
-			$sReturn .= '<script' . $this->_getMode($aJs[1]) . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
+			$sReturn .= '<script' . $this->_getMode($aJs[1] === FALSE ? $mode : $aJs[1]) . ' src="' . $this->jsCDN . $aJs[0] . (!is_null($timestamp) ? '?' . $timestamp : '') . '"></script>' . "\n";
 		}
 
 		return $sReturn;

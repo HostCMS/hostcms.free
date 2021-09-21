@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 {
@@ -61,6 +61,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 				// Для каждого модуля получаем актуальные на данный момент уведомления
 				foreach ($aModules as $oModule)
 				{
+					$oModule->loadModule();
 					if (method_exists($oModule->Core_Module, 'callNotifications'))
 					{
 						$oModule->Core_Module->callNotifications();
@@ -123,7 +124,7 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 							$aNotificationDecorations = array();
 							if ($oNotification->module_id)
 							{
-								$oCore_Module = $oNotification->Module->Core_Module;
+								$oCore_Module = $oNotification->Module->loadModule()->Core_Module;
 
 								if (!is_null($oCore_Module))
 								{

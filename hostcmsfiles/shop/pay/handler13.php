@@ -18,6 +18,75 @@ class Shop_Payment_System_Handler13 extends Shop_Payment_System_Handler
 	// Код валюты в магазине HostCMS, которая была указана при регистрации магазина
 	private $_intellectmoney_currency = 1;
 
+	/* Отправлять данные для чеков (54-ФЗ) */
+	protected $sendCheck = 0;
+
+	/* Индивидуальный Номер Налогоплательщика, полученный в Федеральной налоговой службе */
+	protected $inn = 'inn_string';
+
+	/*
+	Система налогообложения.
+	Перечисление со значениями:
+		0 => Common - Общая;
+		1 => Simplified - Упрощенная доход, УСН доход;
+		2 => SimplifiedMinusOutlay - Упрощенная доход минус расход, УСН доход - расход;
+		3 => UnifiedImputedIncome - Единый налог на вмененный доход;
+		4 => UnifiedAgricultural - Единый сельскохозяйственный налог;
+		5 => Patent - Патентная система налогообложения;
+	*/
+	protected $sno = 0;
+
+	/*
+	Налог в ККТ по-умолчанию.
+	Перечисление со значениями:
+		1 => Vat20 - Ставка НДС 20%;
+		2 => Vat10 - Ставка НДС 10%;
+		3 => Vat120 - Ставка НДС расч. 20/120;
+		4 => Vat110 - Ставка НДС расч. 10/110;
+		5 => Vat0 - Ставка НДС 0%;
+		6 => None - НДС не облагается;
+	*/
+	protected $default_vat = 6;
+
+	/* Массив отношений ставки налога в заказе и названия налога (none, vat0, vat110 или vat120)*/
+	protected $vat = array(
+		0 => 6,
+		10 => 4,
+		20 => 3
+	);
+
+	/*
+	Признак способа расчёта.
+	Возможные значения параметра:
+		1 => Prepay - Предоплата 100%;
+		2 => PartialPrepay - Частичная предоплата;
+		3 => Advance - Аванс;
+		4 => Full - Полный расчёт;
+		5 => PartialAndCredit - Частичный расчёт и кредит;
+		6 => CreditTransfer - Передача в кредит;
+		7 => CreditPayment - Оплата кредита;
+	*/
+	protected $payment_method = 4;
+
+	/*
+	Признак предмета расчёта.
+	Возможные значения параметра:
+		1 => Product - Товар;
+		2 => Excisable - Подакцизный товар;
+		3 => Job - Работа;
+		4 => Service - Услуга;
+		5 => GamblingBet - Ставка азартной игры;
+		6 => GamblingGain - Выигрыш азартной игры;
+		7 => LotteryTicket - Лотерейный билет;
+		8 => LotteryWinnings - Выигрыш лотереи;
+		9 => Rid - Предоставление РИД;
+		10 => Payment - Платёж;
+		11 => AgentComission - Агентское вознаграждение;
+		12 => Composite - Составной предмет расчета;
+		13 => Other - Иной предмет расчета;
+	*/
+	protected $payment_object = 1;
+
 	/**
 	 * Метод, вызываемый в коде настроек ТДС через Shop_Payment_System_Handler::checkBeforeContent($oShop);
 	 */
@@ -142,6 +211,65 @@ class Shop_Payment_System_Handler13 extends Shop_Payment_System_Handler
 		$shop_path = $this->_shopOrder->Shop->Structure->getPath();
 		$handler_url = 'http://'.$site_alias.$shop_path.'cart/';
 
+		if ($this->sendCheck)
+		{
+			$aShop_Order_Items = $this->_shopOrder->Shop_Order_Items->findAll(FALSE);
+
+			// Расчет сумм скидок, чтобы потом вычесть из цены каждого товара
+			$discount = $amount = 0;
+			foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
+			{
+				if ($oShop_Order_Item->price < 0)
+				{
+					$discount -= $oShop_Order_Item->getAmount();
+					unset($aShop_Order_Items[$key]);
+				}
+				elseif ($oShop_Order_Item->type == 0)
+				{
+					$amount += $oShop_Order_Item->getAmount();
+				}
+			}
+
+			$discount = $amount != 0
+				? abs($discount) / $amount
+				: 0;
+
+			$aPositions = array();
+
+			foreach ($aShop_Order_Items as $oShop_Order_Item)
+			{
+				$aPositions[] = array(
+					'text' => mb_substr($oShop_Order_Item->name, 0, 128),
+					'quantity' => $oShop_Order_Item->quantity,
+					'tax' => Core_Array::get($this->vat, $oShop_Order_Item->rate, $this->default_vat),
+					'price' => number_format($oShop_Order_Item->getAmount() * ($oShop_Order_Item->type == 0 ? 1 - $discount : 1), 2, '.', ''),
+					'paymentMethodType' => $this->payment_method,
+					'paymentSubjectType' => $this->payment_object
+				);
+			}
+
+			$merchantReceipt = array(
+				'inn' => $this->inn,
+				'group' => "Main",
+				'content' => array(
+					'checkClose' => array(
+						'payments' => array(
+							array(
+								'type' => 2,
+								'amount' => $order_sum
+							)
+						),
+						'taxationSystem' => $this->sno
+					),
+					'type' => 1,
+					'positions' => $aPositions,
+					'customerContact' => $this->_shopOrder->email
+				)
+			);
+
+			$sMerchantReceiptJson = json_encode($merchantReceipt);
+		}
+
 		if(!is_null($oShop_Currency->id))
 		{
 			?>
@@ -158,6 +286,7 @@ class Shop_Payment_System_Handler13 extends Shop_Payment_System_Handler
 				<input id="failUrl" type="hidden" name="failUrl" value="<?php echo $handler_url."?orderId={$this->_shopOrder->invoice}&payment=fail"?>">
 				<input id="userName" type="hidden" name="userName" value="<?php echo implode(' ', array($this->_shopOrder->surname, $this->_shopOrder->name, $this->_shopOrder->patronymic))?>">
 				<input id="userEmail" type="hidden" name="userEmail" value="<?php echo $this->_shopOrder->email?>">
+				<?php if ($this->sendCheck){ ?> <input type="hidden" name="merchantReceipt" value="<?php echo htmlspecialchars($sMerchantReceiptJson)?>"><?php } ?>
 				<input name="submit" value="Перейти к оплате" type="submit"/>
 			</form>
 			<?php

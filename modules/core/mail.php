@@ -358,6 +358,16 @@ abstract class Core_Mail
 	}
 
 	/**
+	 * Sanitize Header Value
+	 * @param string $value
+	 * @return string
+	 */
+	static public function sanitizeHeader($value)
+	{
+		return str_replace(array("\r", "\n", "\0"), '', $value);
+	}
+
+	/**
 	 * List of headers
 	 * @var array
 	 */
@@ -371,7 +381,7 @@ abstract class Core_Mail
 	 */
 	public function header($name, $value)
 	{
-		$this->_headers[$name] = str_replace(array("\r", "\n", "\0"), '', $value);
+		$this->_headers[$name] = self::sanitizeHeader($value);
 		return $this;
 	}
 
@@ -561,9 +571,11 @@ abstract class Core_Mail
 		{
             return $_SERVER['SERVER_NAME'];
         }
-		elseif (gethostname() !== FALSE)
+
+		$gethostname = gethostname();
+		if ($gethostname !== FALSE)
 		{
-            return gethostname();
+            return $gethostname;
         }
 
         return 'localhost.localdomain';

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Module
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,23 +51,80 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->caption(Core::_('Module.tab_parameters'))
 			->name('parameters');
 
-		$oSettingsTab
-			->add($oSettingsRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-
 		// Добавляем вкладку выпадающий список
 		$this->addTabAfter($oSettingsTab, $oMainTab);
 
-		// Создаем текстовое поле "PHP-код с параметрами модуля"
-		$oParameters = Admin_Form_Entity::factory('Textarea');
+		$aConfig = Core_Config::instance()->get($this->_object->path . '_config', array());
 
-		$oParameters
-			->value($this->_object->loadConfigFile())
-			->rows(30)
-			->caption(Core::_('Module.modules_add_form_params'))
-			->name('parameters');
+		$oCore_Module = Core_Module::factory($this->_object->path);
+		$aModule_Options = $oCore_Module->getOptions();
 
-		// Добавляем на вкладку 'Настройки модуля' большое текстовое поле "PHP-код с параметрами модуля"
-		$oSettingsRow1->add($oParameters);
+		foreach ($aModule_Options as $option_name => $aOptions)
+		{
+			$oAdmin_Form_Entity = NULL;
+
+			$aFormat = array();
+
+			if (isset($aOptions['type']))
+			{
+				$oSettingsTab->add($oSettingsRow = Admin_Form_Entity::factory('Div')->class('row'));
+
+				switch ($aOptions['type'])
+				{
+					case 'int':
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+							->format($aFormat + array('lib' => array(
+								'value' => 'integer'
+							)));
+					break;
+					case 'string':
+					default:
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')->format($aFormat);
+					break;
+					case 'textarea':
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea');
+					break;
+					case 'float':
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+							->format($aFormat + array('lib' => array(
+								'value' => 'decimal'
+							)));
+					break;
+					case 'checkbox':
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
+					break;
+					case 'list':
+						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select');
+
+						if (isset($aOptions['options']))
+						{
+							$oAdmin_Form_Entity->options($aOptions['options']);
+						}
+					break;
+				}
+
+				if ($oAdmin_Form_Entity)
+				{
+					$oAdmin_Form_Entity
+						->caption(Core::_($this->_object->path . '.option_' . $option_name))
+						->name('option_' . $option_name)
+						->value(isset($aConfig[$option_name])
+							? $aConfig[$option_name]
+							: (isset($aOptions['default'])
+								? $aOptions['default']
+								: ''
+							)
+						);
+
+					$aOptions['type'] == 'checkbox'
+						&& $oAdmin_Form_Entity
+							->value(1)
+							->checked($aOptions['default'] == 1);
+
+					$oSettingsRow->add($oAdmin_Form_Entity);
+				}
+			}
+		}
 
 		$this->title($title);
 
@@ -86,11 +143,39 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($oldActive != $this->_object->active)
 		{
 			$this->_object->setupModule();
-			
+
 			$this->addMessage('<script>$.loadNavSidebarMenu({moduleName: \'' . Core_Str::escapeJavascriptVariable($this->_object->path) . '\'})</script>');
 		}
 
-		$this->_object->saveConfigFile(Core_Array::getPost('parameters'));
+		$oCore_Module = Core_Module::factory($this->_object->path);
+		$aModule_Options = $oCore_Module->getOptions();
+
+		if (count($aModule_Options))
+		{
+			$aConfig = Core_Config::instance()->get($this->_object->path . '_config', array());
+
+			foreach ($aModule_Options as $option_name => $aOptions)
+			{
+				$value = Core_Array::getPost('option_' . $option_name);
+
+				switch ($aOptions['type'])
+				{
+					case 'int':
+						$value = intval($value);
+					break;
+					case 'float':
+						$value = floatval($value);
+					break;
+					case 'checkbox':
+						$value = $value == 1;
+					break;
+				}
+
+				$aConfig[$option_name] = $value;
+			}
+
+			$aConfig = Core_Config::instance()->set($this->_object->path . '_config', $aConfig);
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

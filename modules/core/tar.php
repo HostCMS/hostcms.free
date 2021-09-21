@@ -1455,6 +1455,8 @@ class Core_Tar
 					$v_header['filename'] = $p_path.'/'.$v_header['filename'];
 				}
 
+				$v_header['filename'] = trim($v_header['filename']);
+
 				if (file_exists($v_header['filename'])) {
 					if ((@is_dir($v_header['filename']) && !is_link($v_header['filename']))
 					&& ($v_header['typeflag'] == '')) {
@@ -1479,7 +1481,7 @@ class Core_Tar
 				? $v_header['filename']
 				: dirname($v_header['filename'])), Core_Array::get($v_header, 'mode', CHMOD))) != 1)
 				{
-					$this->_error('Ошибка создания пути для '.$v_header['filename']);
+					$this->_error('Ошибка создания пути для ' . $v_header['filename']);
 					return false;
 				}
 

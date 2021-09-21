@@ -6,7 +6,7 @@
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Template Sections',
@@ -17,6 +17,8 @@ return array(
 	'name' => 'Name',
 	'alias' => 'Alias',
 	'color' => 'Section Border Color',
+	'prefix' => 'Code before section',
+	'suffix' => 'Code after section',	
 	'sorting' => 'Sort',
 	'template_id' => 'Template Id',
 	'edit_success' => 'Template Sections modified successfully!',

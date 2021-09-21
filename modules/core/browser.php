@@ -203,6 +203,37 @@ class Core_Browser
 
 		return $browser;
 	}
+	
+	/**
+	 * Get browser ICO
+	 * @param string $browser Browser name
+	 * @return string
+	 */
+	static public function getBrowserIco($browser)
+	{
+		if (strpos($browser, 'Chrome') !== FALSE)
+		{
+			$return = 'fab fa-chrome fa-fw green';
+		}
+		elseif (strpos($browser, 'Firefox') !== FALSE)
+		{
+			$return = 'fab fa-firefox-browser fa-fw warning';
+		}
+		elseif (strpos($browser, 'Yandex Browser') !== FALSE)
+		{
+			$return = 'fab fa-yandex fa-fw darkorange';
+		}
+		elseif (strpos($browser, 'Safari') !== FALSE)
+		{
+			$return = 'fab fa-safari fa-fw blue';
+		}
+		else
+		{
+			$return = NULL;
+		}
+		
+		return $return;
+	}
 
 	/**
 	 * Get OS name

@@ -76,7 +76,7 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				: array(0);
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
-				->caption(Core::_('Shop_Order.siteuser_id'))
+				->caption(Core::_('Comment.siteuser_id'))
 				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')

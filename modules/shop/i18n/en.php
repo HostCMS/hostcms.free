@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Online stores',
@@ -131,6 +131,8 @@ return array(
 	'schedule-searchUnindexItem' => 'Unindex shop item',
 	'schedule-recountShop' => 'Recount shop groups and items',
 	'schedule-rebuildFastfilter' => 'Rebuild fast filter',
+	'schedule-unsetApplyPurchaseDiscounts' => 'Do not apply discounts from order and card amount to products with discounts',
+	'schedule-setApplyPurchaseDiscounts' => 'Apply discounts from the order and card amount to goods without discounts',
 	'order_admin_subject' => 'New order email subject',
 	'order_user_subject' => 'New order customer\'s email subject',
 	'confirm_admin_subject' => 'Paid order email subject',
@@ -194,4 +196,12 @@ return array(
 	'certificate_subject' => 'Subject of the letter',
 	'certificate_text' => 'Letter text',
 	'certificate_template_coupon_id' => 'Coupon ID',
+
+	'option_itemEditWarehouseLimit' => 'The number of warehouses displayed when editing an item, if there are more warehouses, then the block is not displayed',
+	'option_smallImagePrefix' => 'Prefix of small images',
+	'option_itemLargeImage' => 'Item large image pattern',
+	'option_itemSmallImage' => 'Item small image pattern',
+	'option_groupLargeImage' => 'Group large image pattern',
+	'option_groupSmallImage' => 'Group small image pattern',
+	'option_shop_item_card_xsl' => 'XSL pricetag template'
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 {
@@ -51,10 +51,11 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 		{
 			if ($oShop_Order_Item->type == 0)
 			{
-				if ($oShop_Order_Item->Shop_Item->id)
-				{
-					$oShop_Item = $oShop_Order_Item->Shop_Item;
+				$oShop_Item = $oShop_Order_Item->Shop_Item;
 
+				// Товару заказа задана связь с товаров, при этому у товара заказа не задан статус, либо задан статус и он не отмененный
+				if ($oShop_Item->id && !$oShop_Order_Item->isCanceled())
+				{
 					$quantity += $oShop_Order_Item->quantity;
 
 					// Количество для скидок от суммы заказа рассчитывается отдельно
@@ -62,24 +63,18 @@ class Shop_Order_Item_Controller_Recount extends Admin_Form_Action_Controller
 						&& $quantityPurchaseDiscount += $oShop_Order_Item->quantity;
 
 					// Prices
-					$oShop_Item_Controller = new Shop_Item_Controller();
-
-					Core::moduleIsActive('siteuser') && $this->shopOrder->siteuser_id
-						&& $oShop_Item_Controller->siteuser($this->shopOrder->Siteuser);
-
-					$aPrices = $oShop_Item_Controller->getPrices($oShop_Item, $round);
-
-					$amount += $aPrices['price_discount'] * $oShop_Order_Item->quantity;
+					$price = $oShop_Order_Item->getPrice();
+					$amount += $price * $oShop_Order_Item->quantity;
 
 					// По каждой единице товара добавляем цену в массив, т.к. может быть N единиц одого товара
 					for ($i = 0; $i < $oShop_Order_Item->quantity; $i++)
 					{
-						$aDiscountPrices[] = $aPrices['price_discount'];
+						$aDiscountPrices[] = $price;
 					}
 
 					// Сумма для скидок от суммы заказа рассчитывается отдельно
 					$oShop_Item->apply_purchase_discount
-						&& $amountPurchaseDiscount += $aPrices['price_discount'] * $oShop_Order_Item->quantity;
+						&& $amountPurchaseDiscount += $price * $oShop_Order_Item->quantity;
 				}
 			}
 			// 3 - Скидка от суммы заказа

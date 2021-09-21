@@ -4,7 +4,7 @@ $oForum = Core_Entity::factory('Forum', Core_Array::get(Core_Page::instance()->l
 $Forum_Controller_Show = new Forum_Controller_Show($oForum);
 
 $Forum_Controller_Show
-	->myPostsOnPage(intval(Core_Array::get(Core_Page::instance()->libParams, 'itemsOnPage')))
+	->myPostsOnPage(Core_Array::get(Core_Page::instance()->libParams, 'itemsOnPage', 0, 'int'))
 	->parseUrl();
 
 if ($Forum_Controller_Show->rss)

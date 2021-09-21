@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Products',
 	'links_items' => 'Product',
@@ -72,7 +64,7 @@ return array(
 	//'warehouse_item_count' => "Quantity of products in stock \"%s\"",
 	'siteuser_group_id' => 'Access group',
 	'shop_users_group_parrent' => 'Like parent',
-	'siteuser_id' => 'Website user',
+	'siteuser_id' => 'Client',
 	'exec_typograph_for_text' => 'Use prepress service to text',
 	'use_trailing_punctuation_for_text' => '<acronym title="Optical text alignment function moves punctuation characters beyond the typing borders">Optical alignment</acronym>',
 	'shop_id' => 'Shop id',
@@ -156,7 +148,6 @@ return array(
 	'input_file_encoding0' => 'Windows-1251',
 	'input_file_encoding1' => 'UTF-8',
 	'import_price_list_parent_group' => "Parent group",
-	'import_price_list_producer' => "Producer",
 	'import_price_list_images_path' => "<acronym title=\"Path for external files, e.g. /upload_images/\">Path for external files</acronym>",
 	'import_price_list_action_items' => "<acronym title=\"Action for existing products\">Action for existing products</acronym>",
 	'import_price_action_items0' => "Delete existing products in all groups",
@@ -278,7 +269,7 @@ return array(
 	'item_length'=>'Length',
 	'item_width'=>'Width',
 	'item_height'=>'Height',
-	'apply_purchase_discount' => 'Use for purchase discount',
+	'apply_purchase_discount' => 'Use for purchase discount and discount cards',
 	'delivery' => 'Delivery',
 	'pickup' => 'Pickup',
 	'store' => 'Offline Store',

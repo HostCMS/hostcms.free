@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Оприходование товаров',
@@ -18,6 +18,7 @@ return array(
 	'posted' => 'Проведено',
 	'user_id' => 'Ответственный',
 	'shop_warehouse_id' => 'Склад',
+	'siteuser_id' => 'Поставщик',
 	'form_edit' => 'Редактирование оприходования "%s"',
 	'form_add' => 'Добавление оприходования',
 	'apply_success' => 'Информация успешно изменена',

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Menu_Model extends Core_Entity
 {
@@ -55,17 +55,23 @@ class Structure_Menu_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function nameBackend()
+	{
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_358">' . htmlspecialchars($this->name) . '</span>';
+	}
+
+	/**
 	 * Get all menus by site
 	 * @param int $site_id site ID
 	 * @return array
 	 */
 	public function getBySiteId($site_id)
 	{
-		$this->queryBuilder()
-			//->clear()
-			->where('site_id', '=', $site_id);
-
-		return $this->findAll();
+		return $this->getAllBySite_id($site_id);
 	}
 
 	/**

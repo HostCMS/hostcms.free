@@ -1,13 +1,5 @@
 <?php
-/**
- * Online shop.
- *
- * @package HostCMS
- * @subpackage Shop
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Online store orders',
 	'orders' => 'Orders',
@@ -24,7 +16,7 @@ return array(
 	'tab6' => 'Items',
 	'invoice' => "Order number",
 	'datetime' => "Order date",
-	'siteuser_id' => "User code",
+	'siteuser_id' => "Client ID",
 	'source_id' => "<acronym title=\"URL tag ID (UTM, OpenStat, etc.)\">URL tags ID</acronym>",
 	'order_currency' => "Currency",
 	'paid' => 'Paid',
@@ -33,7 +25,6 @@ return array(
 	'order_items_link' => "Pruducts",
 	'payment_datetime' => "Payment date",
 	'system_of_pay' => "Payment system",
-	'show_order_status_link' => 'Order statuses reference',
 	'print' => "Print",
 	'order_card' => "Order card %s from %s",
 	'company_id' => 'Responsible company',
@@ -77,6 +68,7 @@ return array(
 	'table_mark' => "Marking of goods",
 	'table_mesures' => "Measurement unit",
 	'table_price' => "Price",
+	'table_item_status' => "Status",
 	'table_amount' => "Amount",
 	'table_nds_tax' => "Tax",
 	'table_nds_value' => "Tax value",

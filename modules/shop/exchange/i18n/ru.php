@@ -76,6 +76,9 @@ return array(
 	'group_active' => "Активность группы",
 	'item_parent_associated' => "Артикул родительского товара для сопутствующего товара",
 	'item_associated_markings' => "Артикулы сопутствующих товаров",
+	'item_tabs' => "Вкладки товара",
+	'caprion_modifications' => "Модификации товара по свойствам",
+	'modification_by_property' => "Модификации по %s",
 
 	'siteuser_id' => "Идентификатор пользователя сайта",
 	'digital_item_name' => "Название электронного товара",

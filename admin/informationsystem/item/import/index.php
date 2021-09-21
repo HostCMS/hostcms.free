@@ -257,7 +257,7 @@ foreach ($aGroupProperties as $oGroupProperty)
 		$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oGroupProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#E6E6FA";
 		$aEntities[] = 'propdesc-' . $oGroupProperty->id;
-		
+
 		// Small Image
 		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oGroupProperty->name) .  " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#E6E6FA";
@@ -280,7 +280,7 @@ foreach ($aItemProperties as $oItemProperty)
 		$aLangConstNames[] = Core::_('Informationsystem_Item.import_file_description', $oItemProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#FFE4E1";
 		$aEntities[] = 'propdesc-' . $oItemProperty->id;
-		
+
 		// Small Image
 		$aLangConstNames[] = Core::_('Informationsystem_Item.import_small_images', $oItemProperty->name) . " [" . ($oPropertyDir->id ? $oPropertyDir->name : Core::_('Informationsystem_Item.root_folder')) . "]";
 		$aColors[] = "#FFE4E1";
@@ -315,7 +315,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 			Core_Event::notify('Informationsystem_Item_Import.oBeforeImportCSV', NULL, array($sFileName));
 
 			// Обработка CSV-файла
-			$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_'.date("U").'.csv';
+			$sTmpFileName = CMS_FOLDER . TMP_DIR . 'file_' . time() . '.csv';
 
 			try {
 				Core_File::upload($sFileName, $sTmpFileName);
@@ -762,7 +762,7 @@ Core_Skin::instance()
 	->answer()
 	->ajax(Core_Array::getRequest('_', FALSE))
 	//->content(iconv("UTF-8", "UTF-8//IGNORE//TRANSLIT", ob_get_clean()))
-	->module($sModule)	
+	->module($sModule)
 	->content(ob_get_clean())
 	->title(Core::_('Informationsystem_Item.import'))
 	->execute();

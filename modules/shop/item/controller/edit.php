@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -509,6 +509,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							  select: function( event, ui ) {
 								$('[name = modification_id]').val(ui.item.id);
 							  },
+							  change: function( event, ui ) {
+								if (ui.item === null)
+								{
+									$('[name = modification_id]').val(0);
+								}
+							  },
 							  open: function() {
 								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
 							  },
@@ -639,8 +645,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $oShop_Item->Shop_Item
 							: $oShop_Item;
 
-						$currencyName = $oShop_Item->Shop_Currency->name;
-
 						$onclick = $this->_Admin_Form_Controller->getAdminActionLoadAjax($this->_Admin_Form_Controller->getPath(), 'deleteSetItem', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "set_item_id={$oShop_Item_Set->id}");
 
 						$externalLink = '';
@@ -656,12 +660,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
 						}
 
-						$smallImage = '';
+						$smallImage = $oShop_Item->image_small
+							? '<img class="backend-thumbnail" src="' . htmlspecialchars($oShop_Item->getSmallFileHref()) . '" />'
+							: '';
 
-						if ($oShop_Item->image_small)
-						{
-							$smallImage = '<img class="backend-thumbnail" src="' . htmlspecialchars($oShop_Item->getSmallFileHref()) . '" />';
-						}
+						$oShop_Item_Controller = new Shop_Item_Controller();
+						$price = $oShop_Item_Controller->getSpecialprice($oShop_Item->price, $oShop_Item, FALSE);
 
 						$setTable .= '
 							<tr id="' . $oShop_Item_Set->id . '">
@@ -669,7 +673,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
 								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="set_count_' . $oShop_Item_Set->id . '" value="' . $oShop_Item_Set->count . '" /></td>
-								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . htmlspecialchars($currencyName) . '</td>
+								<td>' . htmlspecialchars($price) . ' ' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
 								<td><a class="delete-associated-item" onclick="' . $onclick . '"><i class="fa fa-times-circle darkorange"></i></a></td>
 							</tr>
 						';
@@ -731,14 +735,28 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oImageField
 					->name("image")
 					->id("image")
-					->largeImage(array('max_width' => $oShop->image_large_max_width, 'max_height' => $oShop->image_large_max_height, 'path' => $oLargeFilePath, 'show_params' => TRUE, 'watermark_position_x' => $oShop->watermark_default_position_x, 'watermark_position_y' => $oShop->watermark_default_position_y, 'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image, 'delete_onclick' =>
+					->largeImage(array(
+						'max_width' => $oShop->image_large_max_width,
+						'max_height' => $oShop->image_large_max_height,
+						'path' => $oLargeFilePath,
+						'show_params' => TRUE,
+						'watermark_position_x' => $oShop->watermark_default_position_x,
+						'watermark_position_y' => $oShop->watermark_default_position_y,
+						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_large_image,
+						'delete_onclick' =>
 							"$.adminLoad({path: '{$sFormPath}', additionalParams:
-							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio)
+							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE", 'caption' => Core::_('Shop_Item.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio
+						)
 					)
-					->smallImage(array('max_width' => $oShop->image_small_max_width, 'max_height' => $oShop->image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
-							$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
-							$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
-							'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Item.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small)
+					->smallImage(array(
+						'max_width' => $oShop->image_small_max_width,
+						'max_height' => $oShop->image_small_max_height,
+						'path' => $oSmallFilePath,
+						'create_small_image_from_large_checked' => $oShop->create_small_image && $this->_object->image_small == '',
+						'place_watermark_checkbox_checked' => $oShop->watermark_default_use_small_image,
+						'delete_onclick' =>
+							"$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE", 'caption' => Core::_('Shop_Item.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_small
+						)
 					)
 					->crop(TRUE);
 
@@ -864,10 +882,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oDefault_Shop_Seller = $this->_object->Shop->Shop_Sellers->getDefault();
 
-				$oShopSellerSelect = Admin_Form_Entity::factory('Select')
+				$oShop_SellerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Item.shop_seller_id'))
 					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
-					->options($this->_fillSellersList())
+					->options(self::fillSellersList($object->shop_id))
 					->name('shop_seller_id')
 					->value($this->_object->id
 						? $this->_object->shop_seller_id
@@ -875,7 +893,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					);
 
 				// Добавляем продавцов
-				$oMainRow10->add($oShopSellerSelect);
+				$oMainRow10->add($oShop_SellerSelect);
 
 				$oTabBlock
 					->add(Admin_Form_Entity::factory('Div')
@@ -1409,8 +1427,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							? $oShop_Item->Shop_Item
 							: $oShop_Item;
 
-						$currencyName = $oShop_Item->Shop_Currency->name;
-
 						$link = $this->_Admin_Form_Controller->getAdminActionLoadAjax(/*$this->_Admin_Form_Controller->getPath()*/'/admin/shop/item/index.php', 'deleteAssociated', NULL, $this->_object->modification_id == 0 ? 1 : 0, $oShop_Item->id, "associated_item_id={$oShop_Item_Associated->id}");
 
 						$associatedTable .= '
@@ -1418,7 +1434,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<td>' . htmlspecialchars($oShop_Item->name) . '</td>
 								<td>' . htmlspecialchars($oShop_Item->marking) . '</td>
 								<td width="25"><input class="set-item-count form-control" name="associated_count_' . $oShop_Item_Associated->id . '" value="' . $oShop_Item_Associated->count . '" /></td>
-								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . $currencyName . '</td>
+								<td>' . htmlspecialchars($oShop_Item->price) . ' ' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
 								<td><a class="delete-associated-item" onclick="' . $link . '"><i class="fa fa-times-circle darkorange"></i></a></td>
 							</tr>
 						';
@@ -1704,11 +1720,11 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->id("image")
 					->largeImage(array('max_width' => $oShop->group_image_large_max_width, 'max_height' => $oShop->group_image_large_max_height, 'path' => $oLargeFilePath, 'show_params' => TRUE, 'watermark_position_x' => $oShop->watermark_default_position_x, 'watermark_position_y' => $oShop->watermark_default_position_y, 'place_watermark_checkbox_checked' =>
 						$oShop->watermark_default_use_large_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
-						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group))
+						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteLargeImage', windowId: '{$windowId}'}); return FALSE", 'caption' => Core::_('Shop_Group.items_catalog_image'), 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group))
 					->smallImage(array('max_width' => $oShop->group_image_small_max_width, 'max_height' => $oShop->group_image_small_max_height, 'path' => $oSmallFilePath, 'create_small_image_from_large_checked' =>
 						$oShop->create_small_image && $this->_object->image_small == '', 'place_watermark_checkbox_checked' =>
 						$oShop->watermark_default_use_small_image, 'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams:
-						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return false", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small))
+						'hostcms[checked][{$this->_datasetId}][{$this->_object->id}]=1', action: 'deleteSmallImage', windowId: '{$windowId}'}); return FALSE", 'caption' => Core::_('Shop_Group.items_catalog_image_small'), 'show_params' => TRUE, 'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio_group_small))
 					->crop(TRUE);
 
 				// Добавляем поле картинки группы товаров
@@ -1950,6 +1966,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					'new_price' => $new_price,
 				);
 			}
+
+			$prev_modification_id = $this->_object->modification_id;
 		}
 
 		// UnIndex item
@@ -1969,6 +1987,12 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if ($this->_object->modification_id)
 				{
 					$this->_object->shop_group_id = 0;
+				}
+				// Перевод из модификации в товар
+				elseif ($prev_modification_id)
+				{
+					// Устанавливаем группу, указанную у бывшего родительским товара
+					$this->_object->shop_group_id = Core_Entity::factory('Shop_Item', $prev_modification_id)->shop_group_id;
 				}
 
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -2768,8 +2792,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				if ($this->_object->image_large != '')
 				{
 					// Существует ли большое изображение
-					$param['large_image_isset'] = true;
-					$create_large_image = false;
+					$create_large_image = FALSE;
 				}
 				else // Для информационной группы ранее не задано большое изображение
 				{
@@ -2880,10 +2903,10 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Позиция "водяного знака" по оси Y
 			$param['watermark_position_y'] = Core_Array::getPost('watermark_position_y_image');
 
-			// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), false - не наложить);
+			// Наложить "водяной знак" на большое изображение (true - наложить (по умолчанию), FALSE - не наложить);
 			$param['large_image_watermark'] = !is_null(Core_Array::getPost('large_place_watermark_checkbox_image'));
 
-			// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), false - не наложить);
+			// Наложить "водяной знак" на малое изображение (true - наложить (по умолчанию), FALSE - не наложить);
 			$param['small_image_watermark'] = !is_null(Core_Array::getPost('small_place_watermark_checkbox_small_image'));
 
 			// Сохранять пропорции изображения для большого изображения
@@ -3287,25 +3310,17 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 	/**
 	 * Fill sellers list
+	 * @param int $iShopId shop ID
 	 * @return array
 	 */
-	protected function _fillSellersList()
+	static public function fillSellersList($iShopId)
 	{
-		$oShopSeller = Core_Entity::factory('Shop_Seller');
+		$aReturn = array(' … ');
 
-		$iShopId = intval(Core_Array::getGet('shop_id', 0));
-
-		!$iShopId && $iShopId = Core_Entity::factory('Shop_Item', intval(Core_Array::getGet('shop_item_id', 0)))->Shop->id;
-
-		$oShopSeller->queryBuilder()
-			->where("shop_id", "=", $iShopId);
-
-		$aReturn = array(" … ");
-
-		$aShopSellers = $oShopSeller->findAll();
-		foreach ($aShopSellers as $oShopSeller)
+		$aShopSellers = Core_Entity::factory('Shop', $iShopId)->Shop_Sellers->findAll();
+		foreach ($aShopSellers as $oShop_Seller)
 		{
-			$aReturn[$oShopSeller->id] = $oShopSeller->name;
+			$aReturn[$oShop_Seller->id] = $oShop_Seller->name;
 		}
 
 		return $aReturn;

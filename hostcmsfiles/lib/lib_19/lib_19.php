@@ -32,8 +32,8 @@ if (!is_null(Core_Array::getPost('anonymousmaillist')))
 	// Register new siteuser
 	if (is_null($oSiteuser->id))
 	{
-		$login = strval(Core_Array::getPost('login'));
-		$email = strval(Core_Array::getPost('email'));
+		$login = Core_Array::getPost('login', '', 'str');
+		$email = Core_Array::getPost('email', '', 'str');
 
 		$oSiteuser->login = $login;
 		$oSiteuser->email = $email;

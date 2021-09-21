@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -68,31 +68,12 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 			: '#aebec4';
 
 		$this->getField('color')
-			->class('form-control colorpicker minicolors-input')
+			->colorpicker(TRUE)
 			->value($sColorValue);
-
-		$oScript = Admin_Form_Entity::factory('Script')
-			->value("$('.colorpicker').each(function () {
-				$(this).minicolors({
-					control: $(this).attr('data-control') || 'hue',
-					defaultValue: $(this).attr('data-defaultValue') || '',
-					inline: $(this).attr('data-inline') === 'true',
-					letterCase: $(this).attr('data-letterCase') || 'lowercase',
-					opacity: $(this).attr('data-opacity'),
-					position: $(this).attr('data-position') || 'bottom left',
-					change: function (hex, opacity) {
-						if (!hex) return;
-						if (opacity) hex += ', ' + opacity;
-					},
-					theme: 'bootstrap'
-				});
-			});"
-		);
 
 		$oMainTab
 			->move($this->getField('color')->set('data-control', 'hue')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('apply_max_discount')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
-			->add($oScript);
+			->move($this->getField('apply_max_discount')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Discountcard_Level.edit_title', $this->_object->name)

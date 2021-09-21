@@ -14,8 +14,8 @@ $xslRestorePasswordMailXsl = Core_Array::get(Core_Page::instance()->libParams, '
 
 if (!is_null(Core_Array::getPost('apply')))
 {
-	$login = strval(Core_Array::getPost('login'));
-	$email = strval(Core_Array::getPost('email'));
+	$login = Core_Array::getPost('login', '', 'str');
+	$email = Core_Array::getPost('email', '', 'str');
 	$oSiteuser = Core_Entity::factory('Site', CURRENT_SITE)->Siteusers->getByLoginAndEmail($login, $email);
 
 	if (!is_null($oSiteuser) && $oSiteuser->active)

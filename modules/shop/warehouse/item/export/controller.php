@@ -124,7 +124,7 @@ class Shop_Warehouse_Item_Export_Controller
 	 */
 	protected function _printRow($aData)
 	{
-		echo Shop_Item_Import_Csv_Controller::CorrectToEncoding(implode(';', $aData) . "\n", 'Windows-1251');
+		echo Core_Str::iconv('UTF-8', 'Windows-1251', implode(';', $aData) . "\n");
 		return $this;
 	}
 }

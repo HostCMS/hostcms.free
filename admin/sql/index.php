@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -31,33 +31,30 @@ $oAdmin_View
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
-$sOptimizePath = '/admin/sql/optimize/index.php';
-$sRepairPath = '/admin/sql/repair/index.php';
-
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Sql.table'))
+		->name(Core::_('Sql.database'))
 		->icon('fa fa-database')
 		->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.optimize_table'))
 				->icon('fa fa-database')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sOptimizePath, '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/optimize/index.php', '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sOptimizePath, '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/optimize/index.php', '', NULL)
 				)
 		)->add(
 			Admin_Form_Entity::factory('Menu')
 				->name(Core::_('Sql.repair_table'))
 				->icon('fa fa-wrench')
 				->href(
-					$oAdmin_Form_Controller->getAdminLoadHref($sRepairPath, '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/repair/index.php', '', NULL)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminLoadAjax($sRepairPath, '', NULL)
+					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/repair/index.php', '', NULL)
 				)
 		)
 		->add(
@@ -70,6 +67,17 @@ $oAdmin_Form_Entity_Menus->add(
 				->onclick(
 					$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/index.php', 'duplicate', NULL)
 				)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Sql.manage'))
+		->icon('fa fa-table')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/table/index.php', '', NULL)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/table/index.php', '', NULL)
 		)
 );
 
@@ -179,6 +187,10 @@ try
 		if (strlen(trim($sText)) > 0)
 		{
 			$startTime = Core::getmicrotime();
+
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write('Sql Query: ' . $sText);
 
 			$iCount = Sql_Controller::instance()->execute($sText);
 

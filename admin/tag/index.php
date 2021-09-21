@@ -33,35 +33,25 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Tag.main_menu'))
-		->icon('fa fa-tag')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Tag.menu_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/page_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
-				)
+		->icon('fa fa-plus')
+		->img('/admin/images/page_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
 )
 ->add(
-		Admin_Form_Entity::factory('Menu')
+	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Tag_Dir.menu_group'))
-		->icon('fa fa-folder-open')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Tag_Dir.menu_group_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/folder_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->icon('fa fa-plus')
+		->img('/admin/images/folder_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
 
@@ -269,7 +259,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Доступ только к своим
 $oUser = Core_Auth::getCurrentUser();
-$oUser->only_access_my_own
+!$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 // Ограничение источника 1 по родительской группе

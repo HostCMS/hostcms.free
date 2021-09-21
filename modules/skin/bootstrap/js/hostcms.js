@@ -15,14 +15,13 @@ function getThemeColorFromCss(style) {
 	return color;
 }
 
-//Handle RTL SUpport for Changer CheckBox
+//Handle RTL Support for Changer CheckBox
 $("#skin-changer li a").click(function () {
 	createCookie("current-skin", $(this).attr('rel'), 10);
 	window.location.reload();
 });
 
 //Checks Not to Do rtl-support for Arabic and Persian Demo Pages
-
 var rtlchanger = document.getElementById('rtl-changer');
 
 if (location.pathname != "/index-rtl-fa.html" && location.pathname != "/index-rtl-ar.html") {
@@ -196,17 +195,26 @@ function InitiateSideMenu() {
 	//Sidebar Menu Handle
 
 	//HostCMS: Fix i.menu-expand
-	$(".sidebar-menu i.menu-expand").on('click', function (e) {
+/* 	$(".sidebar-menu i.menu-expand").on('click touchend', function (e) {
 		e.stopImmediatePropagation();
 		e.preventDefault();
-
+				
 		$(this).closest('li').toggleClass('open');
-	});
+	}); */
 
-	$(".sidebar-menu").on('click', function (e) {
+	$(".sidebar-menu").on('click touchend', function (e) {
+				
 		var menuLink = $(e.target).closest("a");
+						
 		if (!menuLink || menuLink.length == 0)
 			return;
+			
+		// HostCMS: Fix submenu
+		if (menuLink.is('[href]') && !$(e.target).hasClass('menu-expand'))
+		{
+			e.stopImmediatePropagation();
+			return;
+		}	
 
 		if (!menuLink.hasClass("menu-dropdown")) {
 			if (b && menuLink.get(0).parentNode.parentNode == this) {
@@ -217,13 +225,7 @@ function InitiateSideMenu() {
 			}
 			return;
 		}
-
-		// HostCMS: Fix submenu
-		if (menuLink.is('[href]') && !$(e.target).hasClass('menu-expand'))
-		{
-			return false;
-		}
-
+		
 		var submenu = menuLink.next().get(0);
 		if (!$(submenu).is(":visible")) {
 			var c = $(submenu.parentNode).closest("ul");
@@ -332,7 +334,6 @@ function Notify(message, description, position, timeout, theme, icon, closable, 
 
 /*#region handle Settings*/
 function InitiateSettings() {
-	// HostCMS
 	readCookiesForInitiateSettings();
 
 	$('#checkbox_fixednavbar')
@@ -399,7 +400,6 @@ function InitiateSettings() {
 					.toggleClass('page-header-fixed');
 			}
 			setCookiesForFixedSettings();
-
 		});
 	$('#checkbox_fixedbreadcrumbs')
 		.change(function () {
@@ -431,7 +431,6 @@ function InitiateSettings() {
 					.toggleClass('page-header-fixed');
 			}
 			setCookiesForFixedSettings();
-
 		});
 
 	$('#checkbox_fixedheader')
@@ -439,7 +438,6 @@ function InitiateSettings() {
 
 			$('.page-header')
 				.toggleClass('page-header-fixed');
-
 
 			if (!($('#checkbox_fixedbreadcrumbs')
 				.is(":checked"))) {
@@ -463,8 +461,21 @@ function InitiateSettings() {
 				$('.navbar')
 					.toggleClass('navbar-fixed-top');
 			}
-
+			
 			setCookiesForFixedSettings();
+		});
+
+	$('#checkbox_fixedtables')
+		.change(function () {
+
+			if (($('#checkbox_fixedheader')
+				.is(":checked")) && !($(this)
+				.is(":checked"))) {
+				$('#checkbox_fixedheader')
+					.prop('checked', false);
+			}
+			setCookiesForFixedSettings();
+			setResizableAdminTableTh();
 		});
 }
 
@@ -473,18 +484,12 @@ function setCookiesForFixedSettings() {
 	createCookie("sidebar-fixed", $('#checkbox_fixedsidebar').is(':checked'), 100);
 	createCookie("breadcrumbs-fixed", $('#checkbox_fixedbreadcrumbs').is(':checked'), 100);
 	createCookie("page-header-fixed", $('#checkbox_fixedheader').is(':checked'), 100);
+	createCookie("tables-fixed", $('#checkbox_fixedtables').is(':checked'), 100);
 
-	var position = (readCookie("rtl-support") || location.pathname == "/index-rtl-fa.html" || location.pathname == "/index-rtl-ar.html") ? 'right' : 'left';
 	if ($('#checkbox_fixedsidebar').is(':checked')) {
-		if (!$('.page-sidebar').hasClass('menu-compact')) {
-			//Slim Scrolling for Sidebar Menu in fix state
-			$('.sidebar-menu').slimscroll({
-				position: position,
-				size: '3px',
-				color: themeprimary,
-				height: 'auto',
-			});
-		}
+
+		setSlimScrolling4SidebarMenu();
+
 	} else {
 		if ($(".sidebar-menu").closest("div").hasClass("slimScrollDiv")) {
 			$(".sidebar-menu").slimScroll({ destroy: true });

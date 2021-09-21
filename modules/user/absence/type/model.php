@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Absence_Type_Model extends Core_Entity
 {
@@ -41,7 +41,7 @@ class User_Absence_Type_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4' ) . '"></i> '
+		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1255">' . htmlspecialchars($this->name) . '</span>';
 	}
 	

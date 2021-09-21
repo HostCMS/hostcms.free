@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -56,6 +56,17 @@ $oAdmin_Form_Entity_Menus->add(
 			)
 			->onclick(
 				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/level/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+			)
+	)
+	->add(
+		Admin_Form_Entity::factory('Menu')
+			->name(Core::_('Shop_Discountcard.types'))
+			->icon('fa fa-circle icon-separator')
+			->href(
+				$oAdmin_Form_Controller->getAdminLoadHref('/admin/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
+			)
+			->onclick(
+				$oAdmin_Form_Controller->getAdminLoadAjax('/admin/shop/discountcard/bonus/type/index.php', NULL, NULL, "shop_id={$oShop->id}&shop_group_id={$oShopGroup->id}")
 			)
 	)
 	->add(
@@ -226,11 +237,11 @@ else
 	$oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 		Core_Entity::factory('Shop_Discountcard')
 	);
-	
+
 	// Доступ только к своим
 	$oUser = Core_Auth::getCurrentUser();
-	$oUser->only_access_my_own
-		&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));	
+	!$oUser->superuser && $oUser->only_access_my_own
+		&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
 	$oAdmin_Form_Dataset
 		->addCondition(
@@ -278,7 +289,7 @@ else
 			array('groupBy' => array('siteusers.id'))
 		);
 	}
-	
+
 	// Список значений для фильтра и поля
 	$aShop_Discountcard_Levels = $oShop->Shop_Discountcard_Levels->findAll();
 	$sList = "0=…\n";
@@ -290,7 +301,7 @@ else
 	$oAdmin_Form_Dataset
 		->changeField('shop_discountcard_level_id', 'type', 8)
 		->changeField('shop_discountcard_level_id', 'list', trim($sList));
-		
+
 	$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $oShopGroup->id);
 
 	$oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);

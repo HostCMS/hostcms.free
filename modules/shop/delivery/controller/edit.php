@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -39,12 +39,11 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+			// ->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+			// ->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
 
 		$oAdditionalTab->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -67,7 +66,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oImageField
-			->divAttr(array('class' => 'input-group col-xs-12 col-sm-6'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 no-padding-left'))
 			->name("image")
 			->id("image")
 			->largeImage(array(
@@ -94,8 +93,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 		$oMainRow4->add($oImageField);
-		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6);
+		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4);
+		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow4);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Delivery.type_of_delivery_edit_form_title', $this->_object->name)

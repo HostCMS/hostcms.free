@@ -54,6 +54,14 @@ if (!is_null($oSiteuser->id))
 			}
 		}
 	}
+
+	$Siteuser_Controller_Show->xsl(
+		Core_Entity::factory('Xsl')->getByName(
+			Core_Array::get(Core_Page::instance()->libParams, 'xsl')
+		)
+	)
+	->showMaillists(TRUE)
+	->show();
 }
 else
 {
@@ -64,11 +72,3 @@ else
 	<script type="text/javascript">setTimeout(function(){ location = '../' }, 3000);</script>
 	<?php
 }
-
-$Siteuser_Controller_Show->xsl(
-	Core_Entity::factory('Xsl')->getByName(
-		Core_Array::get(Core_Page::instance()->libParams, 'xsl')
-	)
-)
-->showMaillists(TRUE)
-->show();

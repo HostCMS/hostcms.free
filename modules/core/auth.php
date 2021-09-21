@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Auth
 {
@@ -24,6 +24,12 @@ class Core_Auth
 	 * @var User_Model
 	 */
 	static protected $_currentUser = NULL;
+
+	/**
+	 * Last Error
+	 * @var string
+	 */
+	static protected $_lastError = NULL;
 
 	/**
 	 * Check Blocked Ip. Break if IP blocked
@@ -97,7 +103,8 @@ class Core_Auth
 					Core_Message::show($e->getMessage(), 'error');
 				}
 
-				if (!self::logged())
+				// Авторизация не произошла по причине неправильных данных
+				if (!self::logged() && self::$_lastError == 'wrong data')
 				{
 					Core_Log::instance()->clear()
 						->status(Core_Log::$ERROR)
@@ -355,7 +362,7 @@ class Core_Auth
 								->set('time', time())
 								->set('user_agent', $userAgent)
 								->set('ip', $ip)
-								->where('session_id', '=', $sessionId)
+								->where('id', '=', $sessionId)
 								->execute();
 
 							// Returns the number of rows affected by the last SQL statement
@@ -364,7 +371,7 @@ class Core_Auth
 							{
 								Core_QueryBuilder::insert('user_sessions')
 									->ignore()
-									->columns('session_id', 'user_id', 'time', 'user_agent', 'ip')
+									->columns('id', 'user_id', 'time', 'user_agent', 'ip')
 									->values($sessionId, self::$_currentUser->id, time(), $userAgent, $ip)
 									->execute();
 							}
@@ -510,6 +517,8 @@ class Core_Auth
 				// если период запрета доступа в систему не истек
 				if ($delta_access_denied > $delta)
 				{
+					self::$_lastError = 'access temporarily unavailable';
+
 					throw new Core_Exception(
 						Core::_('Admin.authorization_error_access_temporarily_unavailable'),
 							array('%s' => round($delta_access_denied - $delta)), 0, $bShowDebugTrace = FALSE
@@ -520,6 +529,7 @@ class Core_Auth
 
 		if (strlen($login) > 255)
 		{
+			self::$_lastError = 'login too long';
 			return FALSE;
 		}
 
@@ -572,6 +582,8 @@ class Core_Auth
 			$oUser_Accessdenied->datetime = Core_Date::timestamp2sql(time());
 			$oUser_Accessdenied->ip = $sIp;
 			$oUser_Accessdenied->save();
+
+			self::$_lastError = 'wrong data';
 
 			return FALSE;
 		}

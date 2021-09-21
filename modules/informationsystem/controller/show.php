@@ -8,6 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - group($id) идентификатор информационной группы, если FALSE, то вывод информационных элементов осуществляется из всех групп
+ * - subgroups(TRUE|FALSE) отображать товары из подгрупп, доступно при указании в group() идентификатора родительской группы, по умолчанию FALSE
  * - groupsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств групп, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - groupsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств групп информационных элементов, по умолчанию TRUE
  * - propertiesForGroups(array()) устанавливает дополнительное ограничение на вывод значений дополнительных свойств групп для массива идентификаторов групп.
@@ -24,6 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - itemsForbiddenTags(array('description')) массив тегов информационных элементов, запрещенных к передаче в генерируемый XML
  * - addFilter() добавить условие отобра информационных элементов, может задавать условие отобра по значению свойства ->addFilter('property', 17, '=', 1)
  * - comments(TRUE|FALSE) показывать комментарии для выбранных информационных элементов, по умолчанию FALSE
+ * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных информационных элементов, по умолчанию FALSE
  * - votes(TRUE|FALSE) показывать рейтинг элемента, по умолчанию TRUE
  * - tags(TRUE|FALSE) выводить метки
  * - calculateCounts(TRUE|FALSE) вычислять общее количество информационных элементов и групп в корневой группе, по умолчанию FALSE
@@ -65,7 +67,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Show extends Core_Controller
 {
@@ -75,6 +77,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	protected $_allowedProperties = array(
 		'group',
+		'subgroups',
 		'groupsProperties',
 		'groupsPropertiesList',
 		'propertiesForGroups',
@@ -87,6 +90,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'commentsPropertiesList',
 		'itemsForbiddenTags',
 		'comments',
+		'commentsRating',
 		'votes',
 		'tags',
 		'calculateCounts',
@@ -266,7 +270,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$this->limit = 10;
 		$this->group = $this->offset = $this->page = 0;
 		$this->item = NULL;
-		$this->groupsProperties = $this->itemsProperties = $this->commentsProperties = $this->propertiesForGroups = $this->comments
+		$this->groupsProperties = $this->itemsProperties = $this->commentsProperties = $this->propertiesForGroups = $this->comments = $this->commentsRating
 			= $this->tags = $this->calculateCounts = $this->siteuserProperties = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
@@ -520,6 +524,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeRedeclaredShow
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddGroupsPropertiesList
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddItemsPropertiesList
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddCommentsPropertiesList
+	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddInformationsystemItems
 	 * @hostcms-event Informationsystem_Controller_Show.onBeforeAddShortcut
 	 */
 	public function show()
@@ -527,6 +533,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
 		$this->showPanel && Core::checkPanel() && $this->_showPanel();
+
+		$this->group === 0 && $this->subgroups
+			&& $this->group = FALSE;
 
 		$bTpl = $this->_mode == 'tpl';
 
@@ -596,7 +605,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_itemCondition();
 
 			// Group's conditions for information system item
-			$this->group !== FALSE && $this->_groupCondition();
+			$this->group !== FALSE && $this->applyGroupCondition();
 
 			!$this->item && $this->_setLimits();
 
@@ -769,8 +778,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		if ($this->limit > 0)
 		{
-			//Ярлык может ссылаться на элемент с истекшим или не наступившим сроком публикации
+			// Ярлык может ссылаться на элемент с истекшим или не наступившим сроком публикации
 			$iCurrentTimestamp = time();
+
+			Core_Event::notify(get_class($this) . '.onBeforeAddInformationsystemItems', $this, array($aInformationsystem_Items));
 
 			foreach ($aInformationsystem_Items as $oInformationsystem_Item)
 			{
@@ -836,6 +847,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 						// Comments
 						$oInformationsystem_Item
 							->showXmlComments($this->comments)
+							->showXmlCommentsRating($this->commentsRating)
 							->commentsActivity($this->commentsActivity);
 
 						// Properties for informationsystem's item entity
@@ -883,6 +895,33 @@ class Informationsystem_Controller_Show extends Core_Controller
 		// Clear
 		$this->_aInformationsystem_Groups = $this->_aItem_Property_Dirs = $this->_aItem_Properties
 			= $this->_aGroup_Properties = $this->_aGroup_Property_Dirs = $this->_cacheTags = array();
+
+		return $this;
+	}
+
+	/**
+	 * Apply Condition By Group, depends on $this->group, $this->subgroups
+	 * @param Core_QueryBuilder_Select $oQueryBuilder
+	 * @param string $fieldName
+	 * @return self
+	 */
+	public function applyFilterGroupCondition($oQueryBuilder, $fieldName)
+	{
+		if ($this->group !== FALSE)
+		{
+			if ($this->subgroups)
+			{
+				$oQueryBuilder->where($fieldName, 'IN',
+					!is_array($this->group)
+						? $this->getSubgroups($this->group)
+						: $this->group
+				);
+			}
+			else
+			{
+				$oQueryBuilder->where($fieldName, is_array($this->group) ? 'IN' : '=', $this->group);
+			}
+		}
 
 		return $this;
 	}
@@ -938,14 +977,25 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
+	 * Apply item's condition by informationsystem_group_id
+	 * @return self
+	 */
+	public function applyGroupCondition()
+	{
+		return $this->_groupCondition();
+	}
+
+	/**
 	 * Set item's condition by informationsystem_group_id
 	 * @return self
 	 */
 	protected function _groupCondition()
 	{
-		$this->_Informationsystem_Items
+		/*$this->_Informationsystem_Items
 			->queryBuilder()
-			->where('informationsystem_items.informationsystem_group_id', '=', intval($this->group));
+			->where('informationsystem_items.informationsystem_group_id', '=', intval($this->group));*/
+
+		$this->applyFilterGroupCondition($this->_Informationsystem_Items->queryBuilder(), 'informationsystem_items.informationsystem_group_id');
 
 		return $this;
 	}
@@ -1463,7 +1513,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 	}
 
 	/**
-	 * Add groups to object by parent ID
+	 * Add groups to the object by parent ID
 	 * @param int $parent_id parent group ID
 	 * @param object $parentObject object
 	 * @return self
@@ -1520,6 +1570,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$this->_addGroupsByParentId($oInformationsystem_Group->id, $oInformationsystem_Group);
 			}
 		}
+
 		return $this;
 	}
 
@@ -1608,7 +1659,8 @@ class Informationsystem_Controller_Show extends Core_Controller
 
 		// Panel
 		$oXslPanel = Core::factory('Core_Html_Entity_Div')
-			->class('hostcmsPanel');
+			->class('hostcmsPanel')
+			->style('display: none');
 
 		$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
 			->class('hostcmsSubPanel hostcmsXsl')
@@ -2181,5 +2233,71 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		$this->_aFilterProperties = $array;
 		return $this;
+	}
+
+	/**
+	 * Groups Tree For fillInformationsystemGroups()
+	 * @var NULL|array
+	 */
+	protected $_aGroupTree = NULL;
+
+	public function fillInformationsystemGroups($parent_id = 0)
+	{
+		$parent_id = intval($parent_id);
+
+		if (is_null($this->_aGroupTree))
+		{
+			$this->_aGroupTree = array();
+
+			$oInformationsystem = $this->getEntity();
+
+			$aTmp = Core_QueryBuilder::select('id', 'parent_id')
+				->from('informationsystem_groups')
+				->where('informationsystem_id', '=', $oInformationsystem->id)
+				->where('shortcut_id', '=', 0)
+				->where('deleted', '=', 0)
+				->execute()->asAssoc()->result();
+
+			foreach ($aTmp as $aGroup)
+			{
+				$this->_aGroupTree[$aGroup['parent_id']][] = $aGroup;
+			}
+		}
+
+		$aReturn = array();
+
+		if (isset($this->_aGroupTree[$parent_id]))
+		{
+			foreach ($this->_aGroupTree[$parent_id] as $childrenGroup)
+			{
+				$aReturn[] = $childrenGroup['id'];
+				$aReturn = array_merge($aReturn, $this->fillInformationsystemGroups($childrenGroup['id']));
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Array of subgroups
+	 * @var array
+	 */
+	protected $_subgroups = array();
+
+	/**
+	 * Get array of subgroups ID, inc. $group_id
+	 * @param int $group_id
+	 * @return array
+	 */
+	public function getSubgroups($group_id)
+	{
+		if (!isset($this->_subgroups[$group_id]))
+		{
+			$this->_subgroups[$group_id] = $this->fillInformationsystemGroups($group_id);
+			// Set first ID as current group
+			array_unshift($this->_subgroups[$group_id], $group_id);
+		}
+
+		return $this->_subgroups[$group_id];
 	}
 }

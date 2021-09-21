@@ -316,7 +316,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				!$bIncludeModifications
 					&& $oCore_QueryBuilder_Select->where('shop_items.modification_id', '=', 0);
 
-				$oUser->only_access_my_own
+				!$oUser->superuser && $oUser->only_access_my_own
 					&& $oCore_QueryBuilder_Select->where('shop_items.user_id', '=', $oUser->id);
 
 				$iProducerID
@@ -359,7 +359,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 						!$bIncludeModifications
 							&& $oCore_QueryBuilder_Select->where('shop_items.modification_id', '=', 0);
 
-						$oUser->only_access_my_own
+						!$oUser->superuser && $oUser->only_access_my_own
 							&& $oCore_QueryBuilder_Select->where('shop_items.user_id', '=', $oUser->id);
 
 						$iProducerID
@@ -396,7 +396,7 @@ if ($oAdmin_Form_Controller->getAction() == 'do_accept_new_price')
 				!$bIncludeModifications
 					&& $oCore_QueryBuilder_Update->where('shop_items.modification_id', '=', 0);
 
-				$oUser->only_access_my_own
+				!$oUser->superuser && $oUser->only_access_my_own
 					&& $oCore_QueryBuilder_Update->where('shop_items.user_id', '=', $oUser->id);
 
 				$iProducerID

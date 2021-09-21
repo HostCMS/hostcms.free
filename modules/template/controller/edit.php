@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -48,8 +48,9 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				case 'template':
 					$object->template_id = intval(Core_Array::getGet('template_id', 0));
 
-					!$object->template_id &&
-						$object->template_dir_id = intval(Core_Array::getGet('template_dir_id', 0));
+					$object->template_dir_id = $object->template_id
+						? 0
+						: intval(Core_Array::getGet('template_dir_id', 0));
 				break;
 				case 'template_dir':
 					$object->parent_id = intval(Core_Array::getGet('template_dir_id', 0));

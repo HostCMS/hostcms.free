@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -47,37 +47,15 @@ class Template_Section_Controller_Edit extends Admin_Form_Action_Controller_Type
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			;
-
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("
-				$('.colorpicker').each(function () {
-					$(this).minicolors({
-						control: $(this).attr('data-control') || 'hue',
-						defaultValue: $(this).attr('data-defaultValue') || '',
-						inline: $(this).attr('data-inline') === 'true',
-						letterCase: $(this).attr('data-letterCase') || 'lowercase',
-						// opacity: $(this).attr('data-opacity') || 'true',
-						position: $(this).attr('data-position') || 'bottom right',
-						change: function (hex, opacity) {
-							if (!hex) return;
-							if (opacity) hex += ', ' + opacity;
-							try {
-							} catch (e) { }
-						},
-						theme: 'bootstrap'
-					});
-				});
-			");
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oMainTab
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 			->move($this->getField('alias')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
-			->move($this->getField('color')->class('form-control colorpicker')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2);
-
-		$oMainRow2
-			->add($oCore_Html_Entity_Script);
+			->move($this->getField('color')->colorpicker(TRUE)->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
+			->move($this->getField('prefix')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3)
+			->move($this->getField('suffix')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 
 		return $this;
 	}

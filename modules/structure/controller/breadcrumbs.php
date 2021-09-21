@@ -27,7 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Breadcrumbs extends Core_Controller
 {
@@ -106,10 +106,10 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 	/**
 	 * Add breadcrumb
-	 * @param Core_Entity $oObject
+	 * @param mixed $oObject
 	 * @return self
 	 */
-	public function addBreadcrumb(Core_Entity $oObject)
+	public function addBreadcrumb($oObject)
 	{
 		$this->_breadcrumbs[] = $oObject;
 		return $this;
@@ -127,6 +127,15 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 	}
 
 	/**
+	 * Get breadcrumbs
+	 * @return array
+	 */
+	public function getBreadcrumbs()
+	{
+		return $this->_breadcrumbs;
+	}
+
+	/**
 	 * Show built data
 	 * @return self
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onBeforeRedeclaredShow
@@ -135,9 +144,12 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddShopItem
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddShopGroups
 	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddStructure
+	 * @hostcms-event Structure_Controller_Breadcrumbs.onAfterAddBreadcrumbs
 	 */
 	public function show()
 	{
+		$this->_breadcrumbs = array();
+
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
 		if (is_object(Core_Page::instance()->object))
@@ -217,8 +229,6 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 				->name('current_structure_id')
 				->value($this->current)
 		);
-
-		$this->_breadcrumbs = array();
 
 		if ($this->showInformationsystem)
 		{
@@ -390,7 +400,6 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			Core_Event::notify(get_class($this) . '.onAfterAddShopProducer', $this, array($oShop_Producer));
 		}
 
-
 		if ($this->showMessage && $this->message_topic_id)
 		{
 			$oMessage_Topic = Core_Entity::factory('Message_Topic', $this->message_topic_id);
@@ -525,18 +534,20 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 			Core_Event::notify(get_class($this) . '.onAfterAddStructure', $this, array($oStructure));
 		} while ($oStructure = $oStructure->getParent());
 
+		Core_Event::notify(get_class($this) . '.onAfterAddBreadcrumbs', $this);
+
 		$this->_breadcrumbs = array_reverse($this->_breadcrumbs);
 
 		$object = $this;
-		foreach ($this->_breadcrumbs as $oStructure)
+		foreach ($this->_breadcrumbs as $oEntity)
 		{
-			$this->applyForbiddenTags($oStructure);
+			$this->applyForbiddenTags($oEntity);
 
-			method_exists($oStructure, 'showXmlProperties')
-				&& $oStructure->showXmlProperties($this->showProperties);
+			method_exists($oEntity, 'showXmlProperties')
+				&& $oEntity->showXmlProperties($this->showProperties);
 
-			$object->addEntity($oStructure);
-			$object = $oStructure;
+			$object->addEntity($oEntity);
+			$object = $oEntity;
 		}
 
 		$oSite = $this->getEntity();
@@ -601,16 +612,16 @@ class Structure_Controller_Breadcrumbs extends Core_Controller
 
 	/**
 	 * Apply forbidden tags
-	 * @param Structure $oStructure
+	 * @param object $oEntity
 	 * @return self
 	 */
-	public function applyForbiddenTags($oStructure)
+	public function applyForbiddenTags($oEntity)
 	{
-		if (!is_null($this->forbiddenTags))
+		if (!is_null($this->forbiddenTags) && method_exists($oEntity, 'addForbiddenTag'))
 		{
 			foreach ($this->forbiddenTags as $forbiddenTag)
 			{
-				$oStructure->addForbiddenTag($forbiddenTag);
+				$oEntity->addForbiddenTag($forbiddenTag);
 			}
 		}
 

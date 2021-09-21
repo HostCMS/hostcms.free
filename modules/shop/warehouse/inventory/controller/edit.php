@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -350,9 +350,9 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		$aShop_Warehouse_Inventory_Items = $this->_object->Shop_Warehouse_Inventory_Items->findAll(FALSE);
 		foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
 		{
-			$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id);
+			$quantity = Core_Array::getPost('shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id, 0);
 
-			if ($quantity > 0)
+			if ($quantity >= 0)
 			{
 				$oShop_Warehouse_Inventory_Item->count != $quantity && $bNeedsRePost = TRUE;
 

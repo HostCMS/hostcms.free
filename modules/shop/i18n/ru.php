@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -132,6 +132,8 @@ return array(
 	'schedule-searchUnindexItem' => 'Снять товар с индексации',
 	'schedule-recountShop' => 'Пересчет групп и товаров',
 	'schedule-rebuildFastfilter' => 'Перестроить быстрый фильтр',
+	'schedule-unsetApplyPurchaseDiscounts' => 'Не применять скидки от суммы заказа и карты к товарам со скидками',
+	'schedule-setApplyPurchaseDiscounts' => 'Применять скидки от суммы заказа и карты к товарам без скидок',
 	'order_admin_subject' => 'Тема письма о поступившем заказе куратору магазина',
 	'order_user_subject' => 'Тема письма о поступившем заказе пользователю',
 	'confirm_admin_subject' => 'Тема письма подтверждения оплаты куратору магазина',
@@ -187,11 +189,19 @@ return array(
 	'filter_mode0' => 'Название',
 	'filter_mode1' => 'Путь',
 	'mail_header' => 'Письма',
-	'shop_codetype_id' => 'Маркировка по-умолчанию',
+	'shop_codetype_id' => 'Маркировка по умолчанию',
 	'report_top' => 'ТОП-',
 	'certificate_header' => 'Сертификаты',
 	'certificate_template' => 'Шаблон номера купона',
 	'certificate_subject' => 'Тема письма',
 	'certificate_text' => 'Текст письма',
 	'certificate_template_coupon_id' => 'ID купона',
+
+	'option_itemEditWarehouseLimit' => 'Количество складов, выводимых при редактировании товара, если складов больше, то блок не выводится',
+	'option_smallImagePrefix' => 'Префикс при именовании малых изображений',
+	'option_itemLargeImage' => 'Шаблон именования большого изображения товара',
+	'option_itemSmallImage' => 'Шаблон именования малого изображения товара',
+	'option_groupLargeImage' => 'Шаблон именования большого изображения группы',
+	'option_groupSmallImage' => 'Шаблон именования малого изображения группы',
+	'option_shop_item_card_xsl' => 'XSL-шаблон ценников'
 );

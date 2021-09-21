@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -459,6 +459,33 @@ class Property_Model extends Core_Entity
 		$this->save();
 
 		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
+	/**
+	 * Merge property with another one
+	 * @param Property_Model $oProperty
+	 * @return self
+	 */
+	public function merge(Property_Model $oProperty)
+	{
+		if ($this->type == $oProperty->type)
+		{
+			$oProperty_Controller_Value_Type = Property_Controller_Value::factory($this->type);
+			$tableName = $oProperty_Controller_Value_Type->getTableName();
+
+			Core_QueryBuilder::update($tableName)
+				->columns(array('property_id' => $this->id))
+				->where('property_id', '=', $oProperty->id)
+				->execute();
+
+			$oProperty->markDeleted();
+		}
+		else
+		{
+			throw new Core_Exception(Core::_('Property.merge_error_type'), array(), 0, FALSE);
+		}
 
 		return $this;
 	}

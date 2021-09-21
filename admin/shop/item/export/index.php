@@ -5,7 +5,7 @@
 * @package HostCMS
 * @version 6.x
 * @author Hostmake LLC
-* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -83,6 +83,7 @@ if (Core_Array::getPost('action') == 'export')
 						->encoding(Core_Array::getPost('import_price_encoding', "UTF-8"))
 						->parentGroup($shop_groups_parent_id)
 						->producer(Core_Array::getPost('shop_producer_id', 0))
+						->seller(Core_Array::getPost('shop_seller_id', 0))
 						->startItemDate(Core_Array::getPost('item_begin_date', ''))
 						->endItemDate(Core_Array::getPost('item_end_date', ''))
 						->execute();
@@ -312,32 +313,35 @@ $oMainTab->add(
 			->name('export_price_separator')
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-2 hidden-3'))
 			->caption(Core::_('Shop_Item.import_price_list_separator'))))
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Date')
-			->caption(Core::_('Shop_Item.start_order_date'))
-			->name('order_begin_date')
-			->value(Core_Date::timestamp2sql(strtotime("-2 months")))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-2 hidden-3', 'id' => 'order_begin_date'))
-	)->add(
-		Admin_Form_Entity::factory('Date')
-			->caption(Core::_('Shop_Item.stop_order_date'))
-			->name('order_end_date')
-			->value(Core_Date::timestamp2sql(time()))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-2 hidden-3','id'=>'order_end_date'))
-	)
 	->add(
-		Admin_Form_Entity::factory('Date')
-			->caption(Core::_('Shop_Item.start_order_date'))
-			->name('item_begin_date')
-			->value('')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3', 'id' => 'order_begin_date'))
-	)->add(
-		Admin_Form_Entity::factory('Date')
-			->caption(Core::_('Shop_Item.stop_order_date'))
-			->name('item_end_date')
-			->value('')
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3','id'=>'order_end_date'))
-	));
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Date')
+				->caption(Core::_('Shop_Item.start_order_date'))
+				->name('order_begin_date')
+				->value(Core_Date::timestamp2sql(strtotime("-2 months")))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-2 hidden-3', 'id' => 'order_begin_date')
+		)
+		)->add(
+			Admin_Form_Entity::factory('Date')
+				->caption(Core::_('Shop_Item.stop_order_date'))
+				->name('order_end_date')
+				->value(Core_Date::timestamp2sql(time()))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-0 hidden-2 hidden-3','id'=>'order_end_date'))
+		)
+		->add(
+			Admin_Form_Entity::factory('Date')
+				->caption(Core::_('Shop_Item.start_order_date'))
+				->name('item_begin_date')
+				->value('')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3', 'id' => 'order_begin_date'))
+		)->add(
+			Admin_Form_Entity::factory('Date')
+				->caption(Core::_('Shop_Item.stop_order_date'))
+				->name('item_end_date')
+				->value('')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 hidden-1 hidden-2 hidden-3','id'=>'order_end_date'))
+		)
+	);
 
 	class Shop_Item_Export_Csv_Property {
 
@@ -348,7 +352,7 @@ $oMainTab->add(
 			$this->_linkedObject = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 		}
 
-		public function setPropertyDirs($parent_id = 0, $parentObject)
+		public function setPropertyDirs($parent_id, $parentObject)
 		{
 			$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Section')
 				->caption($parent_id == 0
@@ -424,22 +428,37 @@ $oMainTab->add(
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-2 hidden-3'))
 				->caption(Core::_('Shop_Item.price_list_encoding')))
 		)
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Select')
-			->name("shop_groups_parent_id")
-			->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1', 'id' => 'shop_groups_parent_id'))
-			->caption(Core::_('Shop_Item.import_price_list_parent_group'))
-			->value($oShopGroup->id)
-			->filter(TRUE)
-		))
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Select')
-			->name("shop_producer_id")
-			->options(array(' … ') + Shop_Item_Controller_Edit::fillProducersList($oShop->id))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1', 'id' => 'shop_producer_id'))
-			->caption(Core::_('Shop_Item.import_price_list_producer'))
-			->value($oShopGroup->id)))
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Select')
+				->name("shop_groups_parent_id")
+				->options(array(' … ') + Shop_Item_Controller_Edit::fillShopGroup($oShop->id))
+				->divAttr(array('class' => 'form-group col-xs-12 hidden-1', 'id' => 'shop_groups_parent_id'))
+				->caption(Core::_('Shop_Item.import_price_list_parent_group'))
+				->value($oShopGroup->id)
+				->filter(TRUE)
+			)
+		)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Select')
+				->name("shop_producer_id")
+				->options(array(' … ') + Shop_Item_Controller_Edit::fillProducersList($oShop->id))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1', 'id' => 'shop_producer_id'))
+				->caption(Core::_('Shop_Item.shop_producer_id'))
+				->value($oShopGroup->id)
+		)
+	)
+	->add(
+		Admin_Form_Entity::factory('Div')->class('row')->add(
+			Admin_Form_Entity::factory('Select')
+				->name("shop_seller_id")
+				->options(array(' … ') + Shop_Item_Controller_Edit::fillSellersList($oShop->id))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-1', 'id' => 'shop_seller_id'))
+				->caption(Core::_('Shop_Item.shop_seller_id'))
+				->value($oShopGroup->id)
+		)
+	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Admin_Form_Entity::factory('Checkbox')
 			->name("export_external_properties_allow_items")

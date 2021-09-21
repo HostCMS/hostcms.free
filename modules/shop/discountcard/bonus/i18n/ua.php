@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Бонуси дисконтної карти',
@@ -27,4 +27,7 @@ return array(
 	'writeoff' => 'Списати',
 	'writeoff_title' => 'Списання бонусів по карті "%s"',
 	'available' => 'Доступно %s %s',
+	'description' => 'Коментар',
+	'shop_discountcard_bonus_type_id' => 'Тип зарахування',
+	'apply_success' => 'Інформація про бонус змінена!',
 );

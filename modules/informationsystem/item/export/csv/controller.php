@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -92,8 +92,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		$this->informationsystemId = $iInformationsystemId;
 		$this->exportItemExternalProperties = $bItemPropertiesExport;
 		$this->exportGroupExternalProperties = $bGroupPropertiesExport;
-		$this->_iItem_Properties_Count = 0;
-		$this->_iGroup_Properties_Count = 0;
+		$this->_iItem_Properties_Count = $this->_iGroup_Properties_Count = 0;
 
 		// Устанавливаем лимит времени выполнения в 1 час
 		(!defined('DENY_INI_SET') || !DENY_INI_SET)
@@ -232,16 +231,17 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			? 'ID00000000'
 			: $oInformationsystem_Item->Informationsystem_Group->guid;
 
-		if ($oInformationsystem_Item->Informationsystem_Group->id)
+		// У ИЭ нет необходимости дублировать данные о группе
+		/*if ($oInformationsystem_Item->Informationsystem_Group->id)
 		{
 			$aTmpArray[3] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_title));
 			$aTmpArray[4] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_description));
 			$aTmpArray[5] = sprintf('"%s"', $this->prepareString($oInformationsystem_Item->Informationsystem_Group->seo_keywords));
-		}
+		}*/
 
 		// Ярлыки
-		$aShortcuts = $oInformationsystem_Item->Informationsystem_Items->findAll(FALSE);
 		$aTmpShortcuts = array();
+		$aShortcuts = $oInformationsystem_Item->Informationsystem_Items->findAll(FALSE);
 		foreach ($aShortcuts as $oShortcut_Item)
 		{
 			$aTmpShortcuts[] = $oShortcut_Item->guid;
@@ -426,7 +426,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 		$oInformationsystem_Groups->queryBuilder()
 			->where('shortcut_id', '=', 0);
 
-		$aInformationsystemGroupsId = array_merge(array($this->parentGroup), $oInformationsystem_Groups->getGroupChildrenId());
+		$aInformationsystemGroupsId = array_merge(array($this->parentGroup), $oInformationsystem_Groups->getGroupChildrenId(FALSE));
 
 		foreach ($aInformationsystemGroupsId as $iInformationsystemGroupId)
 		{
@@ -469,7 +469,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 				// Выводим данные о дополнительных свойствах групп
 				foreach ($this->_aGroup_Properties as $oGroup_Property)
 				{
-					$aProperty_Values = $oGroup_Property->getValues($oInformationsystem_Group->id);
+					$aProperty_Values = $oGroup_Property->getValues($oInformationsystem_Group->id, FALSE);
 					$iProperty_Values_Count = count($aProperty_Values);
 
 					$aTmpArray[] = sprintf('"%s"', $this->prepareString($iProperty_Values_Count > 0 ? ($oGroup_Property->type != 2
@@ -508,7 +508,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 			}
 
 			$offset = 0;
-			$limit = 100;
+			$limit = 500;
 
 			do {
 				$oInformationsystem_Items
@@ -621,7 +621,7 @@ class Informationsystem_Item_Export_Csv_Controller extends Core_Servant_Properti
 	 */
 	protected function _printRow($aData)
 	{
-		echo Informationsystem_Item_Import_Csv_Controller::CorrectToEncoding(implode($this->separator, $aData)."\n", $this->encoding);
+		echo Core_Str::iconv('UTF-8', $this->encoding, implode($this->separator, $aData)."\n");
 		return $this;
 	}
 }

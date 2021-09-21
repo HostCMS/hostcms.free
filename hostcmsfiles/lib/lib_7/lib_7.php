@@ -19,12 +19,12 @@ if (isset($_REQUEST['payment'])
 	// Получаем ID заказа
 	if (isset($_REQUEST['order_id']))
 	{
-		$order_id = intval(Core_Array::getRequest('order_id'));
+		$order_id = Core_Array::getRequest('order_id', 0, 'int');
 	}
 	//от Яндекса
 	elseif(isset($_GET['orderNumber']))
 	{
-		$order_id = intval(Core_Array::getGet('orderNumber'));
+		$order_id = Core_Array::getGet('orderNumber', 0, 'int');
 	}
 	//от PayPal
 	elseif(isset($_REQUEST['invoice']))
@@ -35,16 +35,16 @@ if (isset($_REQUEST['payment'])
 	//от IntellectMoney
 	elseif(isset($_REQUEST['orderId']))
 	{
-		$order_id = intval(Core_Array::getGet('orderId'));
+		$order_id = Core_Array::getGet('orderId', 0, 'int');
 	}
 	//от Platron
 	elseif(isset($_REQUEST['pg_order_id']))
 	{
-		$order_id = intval(Core_Array::getRequest('pg_order_id'));
+		$order_id = Core_Array::getRequest('pg_order_id', 0, 'int');
 	}
 	else
 	{
-		$order_id = intval(Core_Array::getRequest('InvId'));
+		$order_id = Core_Array::getRequest('InvId', 0, 'int');
 	}
 
 	$oShop_Order = Core_Entity::factory('Shop_Order')->find($order_id);
@@ -108,7 +108,7 @@ if (Core_Array::getPost('oneStepCheckout'))
 
 	if (!is_null(Core_Array::getRequest('apply_bonuses')))
 	{
-		$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+		$_SESSION['hostcmsOrder']['bonuses'] = trim(Core_Array::getRequest('bonuses', '', 'str'));
 	}
 
 	// Оформление в один шаг
@@ -121,7 +121,7 @@ if (Core_Array::getPost('oneStepCheckout'))
 			->delete();
 	}
 
-	$shop_item_id = intval(Core_Array::getRequest('shop_item_id'));
+	$shop_item_id = Core_Array::getRequest('shop_item_id', 0, 'int');
 
 	if ($shop_item_id)
 	{
@@ -133,20 +133,20 @@ if (Core_Array::getPost('oneStepCheckout'))
 
 	$_SESSION['hostcmsOrder'] = array();
 
-	$_SESSION['hostcmsOrder']['shop_country_id'] = intval(Core_Array::getPost('shop_country_id', 0));
-	$_SESSION['hostcmsOrder']['shop_country_location_id'] = intval(Core_Array::getPost('shop_country_location_id', 0));
-	$_SESSION['hostcmsOrder']['shop_country_location_city_id'] = intval(Core_Array::getPost('shop_country_location_city_id', 0));
-	$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = intval(Core_Array::getPost('shop_country_location_city_area_id', 0));
-	$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
-	$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(strval(Core_Array::getPost('address')));
-	$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(strval(Core_Array::getPost('house')));
-	$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(strval(Core_Array::getPost('flat')));
-	$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
-	$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(strval(Core_Array::getPost('name')));
-	$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
-	$_SESSION['hostcmsOrder']['phone'] = Core_Str::stripTags(strval(Core_Array::getPost('phone')));
-	$_SESSION['hostcmsOrder']['email'] = Core_Str::stripTags(strval(Core_Array::getPost('email')));
-	$_SESSION['hostcmsOrder']['description'] = Core_Str::stripTags(strval(Core_Array::getPost('description')));
+	$_SESSION['hostcmsOrder']['shop_country_id'] = Core_Array::getPost('shop_country_id', 0, 'int');
+	$_SESSION['hostcmsOrder']['shop_country_location_id'] = Core_Array::getPost('shop_country_location_id', 0, 'int');
+	$_SESSION['hostcmsOrder']['shop_country_location_city_id'] = Core_Array::getPost('shop_country_location_city_id', 0, 'int');
+	$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = Core_Array::getPost('shop_country_location_city_area_id', 0, 'int');
+	$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(Core_Array::getPost('postcode', '', 'str'));
+	$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(Core_Array::getPost('address', '', 'str'));
+	$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(Core_Array::getPost('house', '', 'str'));
+	$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(Core_Array::getPost('flat', '', 'str'));
+	$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(Core_Array::getPost('surname', '', 'str'));
+	$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(Core_Array::getPost('name', '', 'str'));
+	$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(Core_Array::getPost('patronymic', '', 'str'));
+	$_SESSION['hostcmsOrder']['phone'] = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
+	$_SESSION['hostcmsOrder']['email'] = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
+	$_SESSION['hostcmsOrder']['description'] = Core_Str::stripTags(Core_Array::getPost('description', '', 'str'));
 
 	// Additional order properties
 	$_SESSION['hostcmsOrder']['properties'] = array();
@@ -169,7 +169,7 @@ if (Core_Array::getPost('oneStepCheckout'))
 		}
 	}
 
-	$shop_delivery_condition_id = strval(Core_Array::getPost('shop_delivery_condition_id', 0));
+	$shop_delivery_condition_id = Core_Array::getPost('shop_delivery_condition_id', 0, 'int');
 
 	if (is_numeric($shop_delivery_condition_id))
 	{
@@ -182,6 +182,32 @@ if (Core_Array::getPost('oneStepCheckout'))
 	$_POST['step'] = 4;
 }
 
+// Проверка антиспамом формы с данными
+if (Core_Array::getPost('step') == 2)
+{
+	// Antispam
+	if (Core::moduleIsActive('antispam'))
+	{
+		$Antispam_Controller = new Antispam_Controller();
+
+		foreach ($_POST as $tmpValue)
+		{
+			if (is_string($tmpValue))
+			{
+				$Antispam_Controller->addText($tmpValue);
+			}
+		}
+
+		$bAntispamAnswer = $Antispam_Controller->execute();
+
+		// Проверка не пройдена
+		if (!$bAntispamAnswer)
+		{
+			$_POST['step'] = 1;
+		}
+	}
+}
+
 switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 {
 	// Адрес доставки
@@ -191,10 +217,19 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 
 		if (!is_null(Core_Array::getRequest('apply_bonuses')))
 		{
-			$_SESSION['hostcmsOrder']['bonuses'] = trim(strval(Core_Array::getRequest('bonuses')));
+			$_SESSION['hostcmsOrder']['bonuses'] = trim(Core_Array::getRequest('bonuses', '', 'str'));
 		}
 
 		$Shop_Address_Controller_Show = new Shop_Address_Controller_Show($oShop);
+
+		if (isset($bAntispamAnswer) && !$bAntispamAnswer)
+		{
+			$Shop_Address_Controller_Show->addEntity(
+				Core::factory('Core_Xml_Entity')
+					->name('error')
+					->value('Ошибка, вам запрещено заполнение формы')
+			);
+		}
 
 		$Shop_Address_Controller_Show->xsl(
 				Core_Entity::factory('Xsl')->getByName(
@@ -205,24 +240,24 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 	break;
 	// Способ доставки
 	case 2:
-		$_SESSION['hostcmsOrder']['shop_country_id'] = intval(Core_Array::getPost('shop_country_id', 0));
-		$_SESSION['hostcmsOrder']['shop_country_location_id'] = intval(Core_Array::getPost('shop_country_location_id', 0));
-		$_SESSION['hostcmsOrder']['shop_country_location_city_id'] = intval(Core_Array::getPost('shop_country_location_city_id', 0));
-		$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = intval(Core_Array::getPost('shop_country_location_city_area_id', 0));
-		$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(strval(Core_Array::getPost('postcode')));
-		$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(strval(Core_Array::getPost('address')));
-		$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(strval(Core_Array::getPost('house')));
-		$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(strval(Core_Array::getPost('flat')));
-		$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(strval(Core_Array::getPost('surname')));
-		$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(strval(Core_Array::getPost('name')));
-		$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(strval(Core_Array::getPost('patronymic')));
-		$_SESSION['hostcmsOrder']['company'] = Core_Str::stripTags(strval(Core_Array::getPost('company')));
-		$_SESSION['hostcmsOrder']['phone'] = Core_Str::stripTags(strval(Core_Array::getPost('phone')));
-		$_SESSION['hostcmsOrder']['fax'] = Core_Str::stripTags(strval(Core_Array::getPost('fax')));
-		$_SESSION['hostcmsOrder']['email'] = Core_Str::stripTags(strval(Core_Array::getPost('email')));
-		$_SESSION['hostcmsOrder']['description'] = Core_Str::stripTags(strval(Core_Array::getPost('description')));
-		$_SESSION['hostcmsOrder']['tin'] = Core_Str::stripTags(strval(Core_Array::getPost('tin')));
-		$_SESSION['hostcmsOrder']['kpp'] = Core_Str::stripTags(strval(Core_Array::getPost('kpp')));
+		$_SESSION['hostcmsOrder']['shop_country_id'] = Core_Array::getPost('shop_country_id', 0, 'int');
+		$_SESSION['hostcmsOrder']['shop_country_location_id'] = Core_Array::getPost('shop_country_location_id', 0, 'int');
+		$_SESSION['hostcmsOrder']['shop_country_location_city_id'] = Core_Array::getPost('shop_country_location_city_id', 0, 'int');
+		$_SESSION['hostcmsOrder']['shop_country_location_city_area_id'] = Core_Array::getPost('shop_country_location_city_area_id', 0, 'int');
+		$_SESSION['hostcmsOrder']['postcode'] = Core_Str::stripTags(Core_Array::getPost('postcode', '', 'str'));
+		$_SESSION['hostcmsOrder']['address'] = Core_Str::stripTags(Core_Array::getPost('address', '', 'str'));
+		$_SESSION['hostcmsOrder']['house'] = Core_Str::stripTags(Core_Array::getPost('house', '', 'str'));
+		$_SESSION['hostcmsOrder']['flat'] = Core_Str::stripTags(Core_Array::getPost('flat', '', 'str'));
+		$_SESSION['hostcmsOrder']['surname'] = Core_Str::stripTags(Core_Array::getPost('surname', '', 'str'));
+		$_SESSION['hostcmsOrder']['name'] = Core_Str::stripTags(Core_Array::getPost('name', '', 'str'));
+		$_SESSION['hostcmsOrder']['patronymic'] = Core_Str::stripTags(Core_Array::getPost('patronymic', '', 'str'));
+		$_SESSION['hostcmsOrder']['company'] = Core_Str::stripTags(Core_Array::getPost('company', '', 'str'));
+		$_SESSION['hostcmsOrder']['phone'] = Core_Str::stripTags(Core_Array::getPost('phone', '', 'str'));
+		$_SESSION['hostcmsOrder']['fax'] = Core_Str::stripTags(Core_Array::getPost('fax', '', 'str'));
+		$_SESSION['hostcmsOrder']['email'] = Core_Str::stripTags(Core_Array::getPost('email', '', 'str'));
+		$_SESSION['hostcmsOrder']['description'] = Core_Str::stripTags(Core_Array::getPost('description', '', 'str'));
+		$_SESSION['hostcmsOrder']['tin'] = Core_Str::stripTags(Core_Array::getPost('tin', '', 'str'));
+		$_SESSION['hostcmsOrder']['kpp'] = Core_Str::stripTags(Core_Array::getPost('kpp', '', 'str'));
 
 		// Additional order properties
 		$_SESSION['hostcmsOrder']['properties'] = array();
@@ -302,7 +337,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 	case 3:
 		$Shop_Payment_System_Controller_Show = new Shop_Payment_System_Controller_Show($oShop);
 
-		$shop_delivery_condition_id = strval(Core_Array::getPost('shop_delivery_condition_id', 0));
+		$shop_delivery_condition_id = Core_Array::getPost('shop_delivery_condition_id', 0, 'int');
 
 		if (is_numeric($shop_delivery_condition_id))
 		{
@@ -351,7 +386,7 @@ switch (Core_Array::getPost('recount') ? 0 : Core_Array::getPost('step'))
 		{
 			$shop_payment_system_id
 				= $_SESSION['hostcmsOrder']['shop_payment_system_id']
-				= intval(Core_Array::getPost('shop_payment_system_id', 0));
+				= Core_Array::getPost('shop_payment_system_id', 0, 'int');
 
 			// Оплата бонусами с лицевого счета
 			$_SESSION['hostcmsOrder']['partial_payment_by_personal_account'] = Core_Array::getPost('partial_payment_by_personal_account', 0);

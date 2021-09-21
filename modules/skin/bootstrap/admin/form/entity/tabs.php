@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Entity_Tabs
 {
@@ -42,7 +42,12 @@ class Skin_Bootstrap_Admin_Form_Entity_Tabs extends Skin_Default_Admin_Form_Enti
 						
 						echo htmlspecialchars($oAdmin_Form_Tab_Entity->caption);
 						
-						if ($oAdmin_Form_Tab_Entity->badge !== '')
+						if (strlen($oAdmin_Form_Tab_Entity->icon))
+						{
+							echo '<i class="' . htmlspecialchars($oAdmin_Form_Tab_Entity->icon) . '" title="' . htmlspecialchars($oAdmin_Form_Tab_Entity->iconTitle) . '"></i>';
+						}
+						
+						if (!is_null($oAdmin_Form_Tab_Entity->badge))
 						{
 							$badgeColor = strlen($oAdmin_Form_Tab_Entity->badgeColor)
 								? $oAdmin_Form_Tab_Entity->badgeColor

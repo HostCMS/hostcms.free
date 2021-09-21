@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Model extends Core_Entity
 {
@@ -437,7 +437,7 @@ class Shop_Producer_Model extends Core_Entity
 			->where('shop_producer_id', '=', $oObject->id)
 			->execute();
 
-		$oObject->delete();
+		$oObject->markDeleted();
 
 		return $this;
 	}

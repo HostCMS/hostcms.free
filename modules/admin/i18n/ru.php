@@ -88,6 +88,7 @@ return array(
 	'fixed-navbar' => 'Заголовок',
 	'fixed-sideBar' => 'Меню',
 	'fixed-breadcrumbs' => 'Навигацию',
+	'fixed-tables' => 'Таблицы',
 	'fixed-header' => 'Всё',
 
 	'backend-sound' => 'Звук в центре администрирования',
