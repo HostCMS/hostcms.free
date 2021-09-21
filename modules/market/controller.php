@@ -499,7 +499,7 @@ class Market_Controller extends Core_Servant_Properties
 						->value(Core::_('market.install'))
 						->class('applyButton btn btn-blue')
 						->onclick(
-							$this->controller->getAdminSendForm('sendOptions')
+							$this->controller->getAdminSendForm(array('action' => 'sendOptions'))
 						)
 					)
 					->execute();
@@ -762,6 +762,10 @@ class Market_Controller extends Core_Servant_Properties
 		$sFilesDir = $this->tmpDir . DIRECTORY_SEPARATOR . 'files';
 		if (is_dir($sFilesDir))
 		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('Market, copy `files` directory'));
+							
 			Core_File::copyDir($sFilesDir, CMS_FOLDER);
 		}
 
@@ -794,6 +798,10 @@ class Market_Controller extends Core_Servant_Properties
 		$sSqlModuleFilename = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.sql';
 		if (is_file($sSqlModuleFilename))
 		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('Market, execute module.sql'));
+				
 			$sSqlCode = Core_File::read($sSqlModuleFilename);
 			Sql_Controller::instance()->execute($sSqlCode);
 		}
@@ -802,6 +810,10 @@ class Market_Controller extends Core_Servant_Properties
 		$sPhpModuleFilename = $this->tmpDir . DIRECTORY_SEPARATOR . 'module.php';
 		if (is_file($sPhpModuleFilename))
 		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('Market, execute module.php'));
+				
 			include($sPhpModuleFilename);
 		}
 
@@ -813,6 +825,10 @@ class Market_Controller extends Core_Servant_Properties
 			// Создаем модуль только при явном указании на это
 			if ($bCreateModule)
 			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(sprintf('Market, create module'));
+				
 				$oAdminModule = Core_Entity::factory('Module');
 				$oAdminModule
 					->name($this->_Module->name)
@@ -832,6 +848,10 @@ class Market_Controller extends Core_Servant_Properties
 				echo '<script>$.loadSiteList()</script>';
 			}
 		}
+
+		Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write(sprintf('Market, module installation is complete'));
 
 		clearstatcache();
 

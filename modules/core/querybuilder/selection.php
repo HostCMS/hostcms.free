@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Querybuilder
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 {
@@ -226,9 +226,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		/*
 		index_hint:
 			USE {INDEX|KEY}
-			  [FOR {JOIN|ORDER BY|GROUP BY}] ([index_list])
-		  | {IGNORE|FORCE} {INDEX|KEY}
-			  [FOR {JOIN|ORDER BY|GROUP BY}] (index_list)
+				[FOR {JOIN|ORDER BY|GROUP BY}] ([index_list])
+			| {IGNORE|FORCE} {INDEX|KEY}
+				[FOR {JOIN|ORDER BY|GROUP BY}] (index_list)
 		*/
 		$sql = array();
 
@@ -369,15 +369,17 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * http://dev.mysql.com/doc/refman/5.7/en/join.html
 	 * @param string $type join type
 	 * @param string $table table name
-	 * @param string $column column name
-	 * @param string $expression expression
-	 * @param string $value value
-	 * @param string $additionalConditions additional conditions
+	 * @param string|NULL $column column name
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
+	 * @param string|NULL $additionalConditions additional conditions
 	 * @return self
 	 */
-	protected function _join($type, $table, $column = NULL, $expression = NULL, $value = NULL, $additionalConditions = NULL)
+	protected function _join($type, $table, $column = NULL, $expression = NULL, $value = NULL, $additionalConditions = NULL, $mode = NULL)
 	{
-		$this->_join[] = array($type, $table, $column, $expression, $value, $additionalConditions);
+		$mode == 'first'
+			? array_unshift($this->_join, array($type, $table, $column, $expression, $value, $additionalConditions))
+			: $this->_join[] = array($type, $table, $column, $expression, $value, $additionalConditions);
 
 		return $this;
 	}
@@ -400,9 +402,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * </code>
 	 * @param string $table table name
 	 * @param string $column column name
-	 * @param string $expression expression
-	 * @param string $value value
-	 * @param string $additionalConditions additional conditions
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
+	 * @param string|NULL $additionalConditions additional conditions
 	 * @return self
 	 */
 	public function join($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
@@ -411,6 +413,23 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
+	 * Add INNER JOIN first
+	 *
+	 * @param string $table table name
+	 * @param string $column column name
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
+	 * @param string|NULL $additionalConditions additional conditions
+	 * @return self
+	 */
+	public function firstJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
+	{
+		return $this->_join('INNER JOIN', $table, $column, $expression, $value, $additionalConditions, 'first');
+	}
+
+	/**
+	 * LEFT OUTER JOIN
+	 *
 	 * <code>
 	 * // LEFT OUTER JOIN `join1` USING (`join_field2`)
 	 * $Core_QueryBuilder_Select->leftJoin('join1', 'join_field2');
@@ -420,9 +439,9 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	 * </code>
 	 * @param string $table table name
 	 * @param string $column column name
-	 * @param string $expression expression
-	 * @param string $value value
-	 * @param string $additionalConditions additional conditions
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
+	 * @param string|NULL $additionalConditions additional conditions
 	 * @return self
 	 */
 	public function leftJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
@@ -431,6 +450,22 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	}
 
 	/**
+	 * Add LEFT OUTER JOIN first
+	 *
+	 * @param string $table table name
+	 * @param string $column column name
+	 * @param string|NULL $expression expression
+	 * @param string|NULL $value value
+	 * @param string|NULL $additionalConditions additional conditions
+	 * @return self
+	 */
+	public function firstLeftJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
+	{
+		return $this->_join('LEFT OUTER JOIN', $table, $column, $expression, $value, $additionalConditions, 'first');
+	}
+
+	/**
+	 * RIGHT OUTER JOIN
 	 *
 	 * <code>
 	 * // RIGHT OUTER JOIN `join1` USING (`join_field2`)
@@ -449,6 +484,21 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 	public function rightJoin($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
 	{
 		return $this->_join('RIGHT OUTER JOIN', $table, $column, $expression, $value, $additionalConditions);
+	}
+	
+	/**
+	 * Add RIGHT OUTER JOIN first
+	 *
+	 * @param string $table table name
+	 * @param string $column column name
+	 * @param string $expression expression
+	 * @param string $value value
+	 * @param string $additionalConditions additional conditions
+	 * @return self
+	 */
+	public function rightJoinFirst($table, $column, $expression = NULL, $value = NULL, $additionalConditions = NULL)
+	{
+		return $this->_join('RIGHT OUTER JOIN', $table, $column, $expression, $value, $additionalConditions, 'first');
 	}
 
 	/**
@@ -571,6 +621,26 @@ abstract class Core_QueryBuilder_Selection extends Core_QueryBuilder_Statement
 		// Set operator as default
 		$this->setDefaultOperator();
 
+		return $this;
+	}
+
+	/**
+	 * Delete last WHERE condition
+	 * @return self
+	 */
+	public function deleteLastWhere()
+	{
+		array_pop($this->_where);
+		return $this;
+	}
+	
+	/**
+	 * Delete first WHERE condition
+	 * @return self
+	 */
+	public function deleteFirstWhere()
+	{
+		array_shift($this->_where);
 		return $this;
 	}
 

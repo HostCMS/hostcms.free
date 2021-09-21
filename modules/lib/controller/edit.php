@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -43,44 +43,18 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$this->_object->lib_dir_id = Core_Array::getGet('lib_dir_id');
 				}
 
-				// Настройки типовой дин. страницы
-				$oAdmin_Form_Tab_Entity_Lib_Config = Admin_Form_Entity::factory('Tab')
-					->caption(Core::_('Lib.lib_php_code_config'))
-					->name('tab_lib_php_code_config');
-
-				$this->addTabBefore($oAdmin_Form_Tab_Entity_Lib_Config, $oAdditionalTab);
-
-				$oAdmin_Form_Entity_Textarea_Lib_Config = Admin_Form_Entity::factory('Textarea');
-
-				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib_Config->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'application/x-httpd-php';
-
-				$oAdmin_Form_Entity_Textarea_Lib_Config
-					->value(
-						$this->_object->loadLibConfigFile()
-					)
-					->cols(140)
-					->rows(30)
-					->caption(Core::_('Lib.lib_form_module_config'))
-					->name('lib_php_code_config')
-					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
-					->syntaxHighlighterOptions($oTmpOptions);
-
-				$oAdmin_Form_Tab_Entity_Lib_Config->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
-
-				$oMainRow3->add($oAdmin_Form_Entity_Textarea_Lib_Config);
-
 				// Код типовой дин. страницы
 				$oAdmin_Form_Tab_Entity_Lib = Admin_Form_Entity::factory('Tab')
 					->caption(Core::_('Lib.lib_php_code'))
 					->name('tab_lib_php_code');
 
-				$this->addTabBefore($oAdmin_Form_Tab_Entity_Lib, $oAdditionalTab);
+				$this->addTabAfter($oAdmin_Form_Tab_Entity_Lib, $oMainTab);
 
 				$oAdmin_Form_Entity_Textarea_Lib = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'application/x-httpd-php';
+				// $oTmpOptions['mode'] = 'application/x-httpd-php';
+				$oTmpOptions['mode'] = 'ace/mode/php';
 
 				$oAdmin_Form_Entity_Textarea_Lib
 					->value(
@@ -96,6 +70,34 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oAdmin_Form_Tab_Entity_Lib->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oMainRow4->add($oAdmin_Form_Entity_Textarea_Lib);
+
+				// Настройки типовой дин. страницы
+				$oAdmin_Form_Tab_Entity_Lib_Config = Admin_Form_Entity::factory('Tab')
+					->caption(Core::_('Lib.lib_php_code_config'))
+					->name('tab_lib_php_code_config');
+
+				$this->addTabAfter($oAdmin_Form_Tab_Entity_Lib_Config, $oMainTab);
+
+				$oAdmin_Form_Entity_Textarea_Lib_Config = Admin_Form_Entity::factory('Textarea');
+
+				$oTmpOptions = $oAdmin_Form_Entity_Textarea_Lib_Config->syntaxHighlighterOptions;
+				// $oTmpOptions['mode'] = 'application/x-httpd-php';
+				$oTmpOptions['mode'] = 'ace/mode/php';
+
+				$oAdmin_Form_Entity_Textarea_Lib_Config
+					->value(
+						$this->_object->loadLibConfigFile()
+					)
+					->cols(140)
+					->rows(30)
+					->caption(Core::_('Lib.lib_form_module_config'))
+					->name('lib_php_code_config')
+					->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
+					->syntaxHighlighterOptions($oTmpOptions);
+
+				$oAdmin_Form_Tab_Entity_Lib_Config->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oMainRow3->add($oAdmin_Form_Entity_Textarea_Lib_Config);
 
 				// Селектор с группой
 				$oAdmin_Form_Entity_Select = Admin_Form_Entity::factory('Select');
@@ -154,14 +156,14 @@ class Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		$modelName = $this->_object->getModelName();
-		
+
 		// Backup revision
-		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		if (Core::moduleIsActive('revision') && $this->_object->id)
 		{
 			$modelName == 'lib'
 				&& $this->_object->backupRevision();
 		}
-		
+
 		parent::_applyObjectProperty();
 
 		switch ($modelName)

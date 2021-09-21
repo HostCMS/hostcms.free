@@ -73,7 +73,12 @@ class Core_Meta
 
 		$string = preg_replace_callback($pattern, array($this, '_callback'), $str);
 
-		return $string;
+		while (strstr($string, '  '))
+		{
+			$string = str_replace('  ', ' ', $string);
+		}
+
+		return trim($string);
 	}
 
 	/**

@@ -37,7 +37,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Date extends Skin_Default_Admin_Form_Enti
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		$this->value = $this->_convertDatetime($this->value);
+		$this->value = $this->_convertDate($this->value);
 
 		$aAttr = $this->getAttrsString();
 

@@ -17,6 +17,7 @@ return array(
 	'amount' => 'Накоплено, %s',
 	'shop_id' => 'Идентификатор магазина',
 	'siteuser_id' => 'Клиент',
+	'active' => 'Активность',
 	'shop_discountcard_level_id' => 'Уровень',
 	'add_title' => 'Добавление дисконтной карты',
 	'edit_title' => 'Редактирование дисконтной карты %s',
@@ -36,4 +37,5 @@ return array(
 	'backendWarning' => 'Для работы дисконтных карт необходим модуль "Клиенты", который входит в редакцию "Бизнес" и "Корпорация".',
 	'backendWrongWriteoffWarning' => 'Недостаточно бонусов для списания!',
 	'backendWriteoffSuccess' => 'Бонусы списаны успешно!',
+	'changeActive_success' => 'Информация успешно изменена'
 );

@@ -616,4 +616,21 @@ class Shop_Order_Item_Model extends Core_Entity
 			return ob_get_clean();
 		}
 	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_order_item.onBeforeGetRelatedSite
+	 * @hostcms-event shop_order_item.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Order->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }

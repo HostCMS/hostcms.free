@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Model extends Core_Entity
 {
@@ -175,7 +175,7 @@ class Schedule_Model extends Core_Entity
 	 */
 	public function intervalBackend()
 	{
-		$aInterval =  $this->getInterval();
+		$aInterval = $this->getInterval();
 
 		switch ($aInterval['type'])
 		{
@@ -196,5 +196,22 @@ class Schedule_Model extends Core_Entity
 		return $this->interval
 			? $aInterval['value'] . ' ' . $type
 			: '';
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event schedule.onBeforeGetRelatedSite
+	 * @hostcms-event schedule.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Back-end form fields',
@@ -58,8 +58,9 @@ return array(
 	'field_type_image_link' => 'Picture-link',
 	'field_type_image_list' => 'List',
 	'field_type_image_callback_function' => 'Calculated field (Function callback is used)',
-	
-	// Отображение	
+	'field_type_textarea' => 'Textarea',
+
+	// Отображение
 	'field_view0' => 'Column & Filter',
 	'field_view1' => 'Filter',
 	'field_view2' => 'Column',

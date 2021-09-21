@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Admin forms.
- *
- * @package HostCMS
- * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'model_name' => 'Back-end form actions',
 	'action_lng_name' => '<acronym title="Back-end form action name">Action name</acronym>',
@@ -41,6 +32,8 @@ return array(
 	'dataset' => '<acronym title="Dataset index available for action (-1 — action available for all datasets)">Dataset index</acronym>',
 	'single' => '<acronym title="Display action in actions list">Display in actions list</acronym>',
 	'group' => '<acronym title="Display action in group operations list">Display as group action</acronym>',
+	'modal' => '<acronym title="Display action in the modal window">Display in the modal window</acronym>',
+	'modalBadge' => 'Display in the modal window',
 
 	'admin_form_id' => 'Admin Form ID',
 	'id' => 'ID',

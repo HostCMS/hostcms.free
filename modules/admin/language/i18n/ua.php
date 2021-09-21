@@ -4,7 +4,7 @@ return array(
 	'model_name' => 'Мови центру адміністрування',
 	'show_forms_languages' => 'Список мов центру адміністрування',
 	'form_add_forms_add_language_title' => 'Додавання мови центру адміністрування',
-	'form_add_forms_edit_language_title' => 'Редагування мови центру адміністрування`	  "%s"',
+	'form_add_forms_edit_language_title' => 'Редагування мови центру адміністрування "%s"',
 
 	'show_form_fields_menu_admin_languages' => 'Мови',
 

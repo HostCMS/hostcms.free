@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Export_Controller
 {
@@ -38,6 +38,7 @@ class Shop_Discountcard_Export_Controller
 			'"' . Core::_('Shop_Discountcard_Export.number') . '"',
 			'"' . Core::_('Shop_Discountcard_Export.datetime') . '"',
 			'"' . Core::_('Shop_Discountcard_Export.login') . '"',
+			'"' . Core::_('Shop_Discountcard_Export.active') . '"',
 			'"' . Core::_('Shop_Discountcard_Export.amount') . '"',
 			'"' . Core::_('Shop_Discountcard_Export.level') . '"',
 			'"' . Core::_('Shop_Discountcard_Export.discount') . '"',
@@ -64,7 +65,7 @@ class Shop_Discountcard_Export_Controller
 		{
 			return FALSE;
 		}
-		
+
 		header("Pragma: public");
 		header("Content-Description: File Transfer");
 		header("Content-Type: application/force-download");
@@ -113,6 +114,7 @@ class Shop_Discountcard_Export_Controller
 					sprintf('"%s"', $this->_prepareString($oShop_Discountcard->number)),
 					sprintf('"%s"', $this->_prepareString(Core_Date::sql2datetime($oShop_Discountcard->datetime))),
 					sprintf('"%s"', $this->_prepareString($siteuserLogin)),
+					sprintf('"%s"', $this->_prepareString($oShop_Discountcard->active)),
 					sprintf('"%s"', $this->_prepareString($oShop_Discountcard->amount)),
 					sprintf('"%s"', $this->_prepareString($levelName)),
 					sprintf('"%s"', $this->_prepareString($discount)),

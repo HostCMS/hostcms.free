@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -29,6 +29,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		$oAdditionalTab = $this->getTab('additional');
 
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -114,10 +116,11 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 			->divAttr(array('class' => ''));
 
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
-			->value('$("#user_id").selectUser({
-						placeholder: "",
-						language: "' . Core_i18n::instance()->getLng() . '"
-					});'
+			->value('$("#' . $windowId . ' #user_id").selectUser({
+					placeholder: "",
+					language: "' . Core_i18n::instance()->getLng() . '",
+					dropdownParent: $("#' . $windowId . '")
+				});'
 			);
 
 		$oMainRow2
@@ -192,22 +195,23 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					<thead>
 						<tr>
 							<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.position') . '</th>
-							<th scope="col" colspan="3" class="regrade-bottom-writeoff">' . Core::_('Shop_Warehouse_Regrade.writeoff_item') . '</th>
-							<th scope="col" colspan="3" class="regrade-bottom-incoming">' . Core::_('Shop_Warehouse_Regrade.incoming_item') . '</th>
+							<th scope="col" colspan="4" class="regrade-bottom-writeoff">' . Core::_('Shop_Warehouse_Regrade.writeoff_item') . '</th>
+							<th scope="col" colspan="4" class="regrade-bottom-incoming">' . Core::_('Shop_Warehouse_Regrade.incoming_item') . '</th>
 							<th scope="col" rowspan="2">' . Core::_('Shop_Warehouse_Regrade.quantity') . '</th>
-							<th scope="col" rowspan="2">  </th>
+							<th scope="col" rowspan="2"> </th>
 						</tr>
 						<tr>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.currency') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.name') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.measure') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Regrade.price') . '</th>
+							<th scope="col">' . Core::_('Shop_Warehouse_Incoming.currency') . '</th>
 						</tr>
 					</thead>
-					<tbody>
-		';
+					<tbody>';
 
 		$index = 0;
 
@@ -247,13 +251,19 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 							<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars($oShop_Item_Writeoff->name) . '" /></td>
 							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name) . '</td>
 							<td><span class="writeoff-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
+							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name) . '</td>
 							<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars($oShop_Item_Incoming->name) . '" /></td>
 							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name) . '</td>
 							<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
+							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
-							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>
 					';
+				}
+				else
+				{
+					$oShop_Warehouse_Regrade_Item->delete();
 				}
 			}
 
@@ -322,6 +332,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 
 		$bNeedsRePost = FALSE;
 
+		$Shop_Item_Controller = new Shop_Item_Controller();
+
 		// Существующие товары
 		$aShop_Warehouse_Regrade_Items = $this->_object->Shop_Warehouse_Regrade_Items->findAll(FALSE);
 		foreach ($aShop_Warehouse_Regrade_Items as $oShop_Warehouse_Regrade_Item)
@@ -346,9 +358,12 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 				$writeoff_price = $oShop_Item_Writeoff->loadPrice($this->_object->shop_price_id);
 				$incoming_price = $oShop_Item_Incoming->loadPrice($this->_object->shop_price_id);
 
+				$aWriteoff_Prices = $Shop_Item_Controller->calculatePriceInItemCurrency($writeoff_price, $oShop_Item_Writeoff);
+				$aIncoming_Prices = $Shop_Item_Controller->calculatePriceInItemCurrency($incoming_price, $oShop_Item_Incoming);
+
 				$oShop_Warehouse_Regrade_Item->count = $quantity;
-				$oShop_Warehouse_Regrade_Item->writeoff_price = $writeoff_price;
-				$oShop_Warehouse_Regrade_Item->incoming_price = $incoming_price;
+				$oShop_Warehouse_Regrade_Item->writeoff_price = $aWriteoff_Prices['price_tax'];
+				$oShop_Warehouse_Regrade_Item->incoming_price = $aIncoming_Prices['price_tax'];
 				$oShop_Warehouse_Regrade_Item->save();
 			}
 		}
@@ -387,6 +402,9 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 					$writeoff_price = $oShop_Item_Writeoff->loadPrice($this->_object->shop_price_id);
 					$incoming_price = $oShop_Item_Incoming->loadPrice($this->_object->shop_price_id);
 
+					$aWriteoff_Prices = $Shop_Item_Controller->calculatePriceInItemCurrency($writeoff_price, $oShop_Item_Writeoff);
+					$aIncoming_Prices = $Shop_Item_Controller->calculatePriceInItemCurrency($incoming_price, $oShop_Item_Incoming);
+
 					$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
 						? $_POST['shop_item_quantity'][$key]
 						: 0;
@@ -397,8 +415,8 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 						->writeoff_shop_item_id($writeoff_shop_item_id)
 						->incoming_shop_item_id($incoming_shop_item_id)
 						->count($count)
-						->writeoff_price($writeoff_price)
-						->incoming_price($incoming_price)
+						->writeoff_price($aWriteoff_Prices['price_tax'])
+						->incoming_price($aIncoming_Prices['price_tax'])
 						->save();
 
 					$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Regrade_Item->id}');";
@@ -436,7 +454,6 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 		// if (Core::moduleIsActive('siteuser'))
 		// {
 			$aShop_Prices = $oShop->Shop_Prices->findAll();
-
 			foreach ($aShop_Prices as $oShop_Price)
 			{
 				$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';

@@ -168,6 +168,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			'"' . Core::_('Shop_Exchange.item_id') . '"',
 			'"' . Core::_('Shop_Exchange.item_marking') . '"',
 			'"' . Core::_('Shop_Exchange.item_parent_marking') . '"',
+			'"' . Core::_('Shop_Exchange.item_parent_guid') . '"',
 			'"' . Core::_('Shop_Exchange.item_name') . '"',
 			'"' . Core::_('Shop_Exchange.item_description') . '"',
 			'"' . Core::_('Shop_Exchange.item_text') . '"',
@@ -250,7 +251,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 			$oSite_Alias = $oShop->Site->getCurrentAlias();
 			$this->_shopUrl = $oSite_Alias
-				? ($oShop->Site->https ? 'https://' : 'http://') . $oSite_Alias->name .  $oShop->Structure->getPath()
+				? ($oShop->Site->https ? 'https://' : 'http://') . $oSite_Alias->name . $oShop->Structure->getPath()
 				: '';
 
 			// Заполняем склады
@@ -337,7 +338,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Full Shop Item Data
-	 * @param int $oShopItem
+	 * @param object $oShopItem
 	 * @return array
 	 * @hostcms-event Shop_Item_Export_Csv_Controller.onAfterGetItemData
 	 */
@@ -382,7 +383,7 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 
 	/**
 	 * Get Basic Item Data
-	 * @param int $oShopItem
+	 * @param object $oShopItem
 	 * @return array
 	 * @hostcms-event Shop_Item_Export_Csv_Controller.onAfterItemBasicData
 	 */
@@ -463,6 +464,9 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 			sprintf('"%s"', $this->prepareString($oShopItem->marking)),
 			sprintf('"%s"', $oShopItem->modification_id
 				? $this->prepareString($oShopItem->Modification->marking)
+				: ''),
+			sprintf('"%s"', $oShopItem->modification_id
+				? $this->prepareString($oShopItem->Modification->guid)
 				: ''),
 			sprintf('"%s"', $this->prepareString($oShopItem->name)),
 			sprintf('"%s"', $this->prepareString($oShopItem->description)),

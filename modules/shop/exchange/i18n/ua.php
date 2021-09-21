@@ -81,7 +81,7 @@ return array(
 	'item_yandex_market_sales_notes' => "Sales notes",
 
 	'item_tabs' => "Виберіть товару",
-	'caprion_modifications' => "Модифікації товару за властивостями",
+	'caption_modifications' => "Модифікації товару за властивостями",
 	'modification_by_property' => "Модифікації по% s",
 
 	'order_guid' => "GUID замовлення",

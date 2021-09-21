@@ -1,0 +1,285 @@
+<?php
+
+defined('HOSTCMS') || exit('HostCMS: access denied.');
+
+/**
+ * TPL.
+ *
+ * <code>
+ * $return = Tpl_Processor::instance()
+ *	->tpl('TplName')
+ *	->process();
+ *
+ * echo $return;
+ * </code>
+ *
+ * @package HostCMS
+ * @subpackage Tpl
+ * @version 6.x
+ * @author Hostmake LLC
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ */
+class Tpl_Processor
+{
+	/**
+	 * The singleton instances.
+	 * @var mixed
+	 */
+	static public $instance = NULL;
+
+	/**
+	 * List of children entities
+	 * @var array
+	 */
+	protected $_entities = array();
+
+	/**
+	 * Variables/objects to the TPL-template
+	 * @var array
+	 */
+	protected $_vars = array();
+
+	/**
+	 * @var Smarty
+	 */
+	protected $_smarty = NULL;
+
+	/**
+	 * Constructor.
+	 */
+	protected function __construct()
+	{
+		require_once(CMS_FOLDER . 'modules/tpl/smarty/Smarty.class.php');
+
+		$this->_smarty = new Smarty();
+
+		$this->_smarty
+			->setTemplateDir(CMS_FOLDER . 'hostcmsfiles/tpl')
+			->setCompileDir(CMS_FOLDER . TMP_DIR . 'smarty/templates_c')
+			->setCacheDir(CMS_FOLDER . TMP_DIR . 'smarty/cache');
+
+		$this->_smarty->registerPlugin('modifier', 'hideOutput', array(__CLASS__, 'hideOutput'));
+
+
+		$this->_smarty->registerPlugin('function', 'getTemplateVars', array(__CLASS__, 'getTemplateVars'));
+
+		$this->_smarty->loadPlugin('smarty_compiler_switch');
+		$this->_smarty->registerFilter('post', 'smarty_postfilter_switch');
+
+		// escape php-tags as entities
+		$this->_smarty->php_handling = Smarty::PHP_QUOTE;
+	}
+
+	/**
+	 * Set entities
+	 *
+	 * @param array $entities
+	 * @return self
+	 */
+	public function entities(array $entities)
+	{
+		$this->_entities = $entities;
+		return $this;
+	}
+
+	/**
+	 * Set vars
+	 *
+	 * @param array $vars
+	 * @return self
+	 */
+	public function vars(array $vars)
+	{
+		$this->_vars = $vars;
+		return $this;
+	}
+
+	/**
+	 * Execute processor
+	 * @return mixed
+	 * @hostcms-event Tpl_Processor.onBeforeProcess
+	 * @hostcms-event Tpl_Processor.onAfterProcess
+	 */
+	public function process()
+	{
+		Core_Event::notify('Tpl_Processor.onBeforeProcess', $this);
+
+		$this->_smarty
+			// clears assigned config variables
+			->clearConfig()
+			// clears the values of all assigned variables
+			->clearAllAssign();
+
+		// Config
+		$lng = Core::getLng();
+		$configPath = $this->_tpl->getLngConfigPath($lng);
+		if (is_file($configPath))
+		{
+			// load config variables and assign them
+			$this->_smarty->configLoad($configPath);
+		}
+
+		// Entities
+		foreach ($this->_entities as $oEntity)
+		{
+			if (isset($oEntity->name) && isset($oEntity->value))
+			{
+				$this->_smarty->assign($oEntity->name, $oEntity->value);
+			}
+		}
+
+		// Vars
+		foreach ($this->_vars as $key => $value)
+		{
+			$this->_smarty->assign($key, $value);
+		}
+
+		/*
+		//$this->_smarty->assign("xxx", '<h1>gdfgdfgdf</h1>');
+		$this->_smarty->assign("xxx", time(), true);
+
+		// загружаем конфигурационные переменные и присваиваем их шаблону
+		//$this->_smarty->config_load('my.conf');
+
+		//$this->_smarty->force_compile = true;
+		//$this->_smarty->debugging = true;
+		//$this->_smarty->caching = true;
+		//$this->_smarty->cache_lifetime = 120;
+
+		$this->_smarty->assign("Name", "Fred Irving Johnathan Bradley Peppergill", true);
+		$this->_smarty->assign("FirstName", array("John", "Mary", "James", "Henry"));
+		$this->_smarty->assign("LastName", array("Doe", "Smith", "Johnson", "Case"));
+		$this->_smarty->assign("Class", array(array("A", "B", "C", "D"), array("E", "F", "G", "H"), array("I", "J", "K", "L"),
+			array("M", "N", "O", "P")));
+
+		$this->_smarty->assign("contacts", array(array("phone" => "1", "fax" => "2", "cell" => "3"),
+			array("phone" => "555-4444", "fax" => "555-3333", "cell" => "760-1234")));
+
+		$this->_smarty->assign("option_values", array("NY", "NE", "KS", "IA", "OK", "TX"));
+		$this->_smarty->assign("option_output", array("New York", "Nebraska", "Kansas", "Iowa", "Oklahoma", "Texas"));
+		$this->_smarty->assign("option_selected", "NE");
+		*/
+
+		$this->_smarty->display($this->_tpl->getTplFilePath());
+
+		Core_Event::notify('Tpl_Processor.onAfterProcess', $this);
+	}
+
+	/**
+	 * Hide Function Output
+	 * e.g. {$object->xyz()|hideOutput}
+	 */
+	static public function hideOutput($str)
+	{
+		return '';
+	}
+
+	/**
+	 * getTemplateVars
+	 */
+	static public function getTemplateVars($params, $smarty)
+	{
+		$aVars = $smarty->getTemplateVars();
+		if (!isset($aVars['templateVars']))
+		{
+			$smarty->assign('templateVars', $aVars);
+		}
+	}
+
+	/**
+	 * Clear entire compile directory
+	 * @return self
+	 */
+	public function clearCompiledTemplate()
+	{
+		$this->_smarty->clearCompiledTemplate();
+		return $this;
+	}
+
+	/**
+	 * XSL
+	 * @var Xsl_Model
+	 */
+	protected $_tpl = NULL;
+
+	/**
+	 * Set XSL
+	 * @param Xsl_Model $oXsl XSL
+	 * @return self
+	 */
+	public function tpl(Tpl_Model $oTpl)
+	{
+		$this->_tpl = $oTpl;
+		return $this;
+	}
+
+	/**
+	 * Get TPL
+	 * @return Tpl_Model
+	 */
+	public function getTpl()
+	{
+		return $this->_tpl;
+	}
+
+	/**
+	 * Clear XSL
+	 * @return self
+	 */
+	public function clear()
+	{
+		$this->_tpl = $this->_xsl = NULL;
+		return $this;
+	}
+
+	/**
+	 * Register an existing instance as a singleton.
+	 * @return object
+	 */
+	static public function instance()
+	{
+		if (is_null(self::$instance))
+	 	{
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Format TPL variables
+	 * @return string
+	 */
+	public function format()
+	{
+		$aVars = $this->_smarty->getTemplateVars();
+		?>
+		<ul class="tpl-template-variables">
+			<?php
+			foreach ($aVars as $key => $variable)
+			{
+				?>
+				<li>
+					<span class="bold"><?php echo htmlspecialchars($key)?>: </span>
+					<?php
+						switch (gettype($variable))
+						{
+							case 'object':
+								$value = "(object) " . get_class($variable);
+							break;
+							case 'array':
+								$value = "(array), " . Core::_('Tpl.panel_tpl_array', count($variable));
+							break;
+							default:
+								$value = $variable;
+						}
+					?>
+					<span><?php echo htmlspecialchars($value)?></span>
+				</li>
+				<?php
+			}
+			?>
+		</ul>
+		<?php
+	}
+}

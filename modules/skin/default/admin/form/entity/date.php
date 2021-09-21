@@ -20,11 +20,11 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 	{
 		$this->_allowedProperties += array(
 			'options',
-			'dateTimeFormat',
+			'dateFormat',
 		);
 
 		$this->_skipProperies[] = 'options';
-		$this->_skipProperies[] = 'dateTimeFormat';
+		$this->_skipProperies[] = 'dateFormat';
 
 		parent::__construct();
 
@@ -42,18 +42,18 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 	 * Convert $this->velue
 	 * @return string
 	 */
-	protected function _convertDatetime($value)
+	protected function _convertDate($value)
 	{
-		if ($value == '0000-00-00 00:00:00' || $value == '')
+		if ($value == '0000-00-00' || $value == '')
 		{
 			return '';
 		}
-		elseif ($this->dateTimeFormat != '')
+		elseif ($this->dateFormat != '')
 		{
-			return date($this->dateTimeFormat, Core_Date::sql2timestamp($value));
+			return date($this->dateFormat, Core_Date::sql2timestamp($value));
 		}
 
-		return Core_Date::sql2datetime($value);
+		return Core_Date::sql2date($value);
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Skin_Default_Admin_Form_Entity_Date extends Admin_Form_Entity_Input
 	 */
 	public function execute()
 	{
-		$this->value = $this->_convertDatetime($this->value);
+		$this->value = $this->_convertDate($this->value);
 
 		$aAttr = $this->getAttrsString();
 

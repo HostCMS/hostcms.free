@@ -411,17 +411,39 @@ if ($iInformationsystemGroupId)
 }
 
 // Глобальный поиск
-$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+$iGlobalSearchMode = Core_Array::getGet('globalSearchMode', 0, 'int');
+
+ob_start();
+$globalSearchModeSelect = Admin_Form_Entity::factory('Select')
+	->name('globalSearchMode')
+	->divAttr(array('class' => 'col-xs-6 col-md-2'))
+	->class('form-control w-100')
+	->options(array(
+		0 => '...',
+		1 => Core::_('Informationsystem_Item.informationsystem_group_id'),
+		2 => Core::_('Informationsystem_Item.information_system_top_menu_items'),
+		3 => Core::_('Informationsystem_Item.shortcut')
+	))
+	->value($iGlobalSearchMode)
+	->execute();
+
+$modeContent = ob_get_clean();
 
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
 		->html('
 			<div class="row search-field margin-bottom-20">
 				<div class="col-xs-12">
-					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
-						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
-						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa fa-search fa-fw"></i></button>
+					<form class="form-inline" action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<div class="row">
+							' . $modeContent . '
+							<div class="col-xs-6 col-md-10">
+								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParamsItemProperties) . '"></i>
+								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParamsItemProperties) . '"><i class="fa fa-search fa-fw"></i></button>
+							</div>
+						</div>
 					</form>
 				</div>
 			</div>
@@ -729,20 +751,28 @@ $oAdmin_Form_Dataset->addCondition(
 
 if (strlen($sGlobalSearch))
 {
-	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('close' => array()));
+	if (!$iGlobalSearchMode || $iGlobalSearchMode == 1)
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('close' => array()));
+	}
+	else
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('whereRaw' => array('0 = 1')));
+	}
 }
 else
 {
@@ -775,20 +805,41 @@ $oAdmin_Form_Dataset
 
 if (strlen($sGlobalSearch))
 {
-	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('informationsystem_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('close' => array()));
+	if (!$iGlobalSearchMode || $iGlobalSearchMode != 1)
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('close' => array()));
+
+		// Товар
+		if ($iGlobalSearchMode == 2)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('where' => array('informationsystem_items.shortcut_id', '=', 0)));
+		}
+		// Ярлык
+		elseif ($iGlobalSearchMode == 3)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('where' => array('informationsystem_items.shortcut_id', '!=', 0)));
+		}
+	}
+	else
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('whereRaw' => array('0 = 1')));
+	}
 }
 else
 {

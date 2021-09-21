@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Table_Dataset extends Admin_Form_Dataset
 {
@@ -50,8 +50,6 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	{
 		if (is_null($this->_count))
 		{
-			//$this->_getItems();
-			//$this->_count = count($this->_objects);
 			$modelName = Core_Inflection::getSingular($this->_tableName);
 			$objects = $this->_newObject($modelName)
 				->setMarksDeleted(NULL);
@@ -75,19 +73,23 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
 	 * Load objects
 	 * @return array
 	 */
 	public function load()
 	{
-		//return array_slice($this->_objects, $this->_offset, $this->_limit);
-		$this->_getItems();
+		if (!is_array($this->_objects))
+		{
+			$this->_objects = array();
+
+			$aObjects = $this->_getItems();
+
+			foreach ($aObjects as $key => $oObject)
+			{
+				$this->_objects[$oObject->id] = $oObject;
+			}
+		}
+
 		return $this->_objects;
 	}
 
@@ -98,8 +100,6 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	 */
 	protected function _getItems($id = NULL)
 	{
-		$this->_objects = array();
-
 		$modelName = Core_Inflection::getSingular($this->_tableName);
 
 		if (class_exists($modelName . '_Model'))
@@ -123,13 +123,13 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 				->where('id', '=', $id);
 
 			$aObjects = $objects->findAll(FALSE);
-			foreach ($aObjects as $key => $oObject)
-			{
-				$this->_objects[$oObject->id] = $oObject;
-			}
+		}
+		else
+		{
+			$aObjects = array();
 		}
 
-		return $this;
+		return $aObjects;
 	}
 
 	/**
@@ -159,10 +159,12 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	 */
 	public function getObject($primaryKey)
 	{
-		$this->_getItems($primaryKey);
+		$aObjects = $this->_getItems($primaryKey);
+
 		$this->_count = NULL;
-		return isset($this->_objects[$primaryKey])
-			? $this->_objects[$primaryKey]
+
+		return isset($aObjects[0])
+			? $aObjects[0]
 			: NULL;
 	}
 
@@ -172,7 +174,7 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 	 */
 	public function clear()
 	{
-		$this->_objects = array();
+		$this->_objects = NULL;
 		return $this;
 	}
 
@@ -188,11 +190,8 @@ class Trash_Table_Dataset extends Admin_Form_Dataset
 			ini_set("max_execution_time", "240");
 		}
 
-		if (!count($this->_objects))
-		{
-			//$this->_limit = $this->_offset = NULL;
-			$this->_getItems();
-		}
+		!is_array($this->_objects) && $this->load();
+
 		return $this->_objects;
 	}
 }

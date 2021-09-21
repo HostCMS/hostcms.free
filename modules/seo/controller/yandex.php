@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Controller_Yandex extends Seo_Controller
 {
@@ -121,7 +121,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 
 		foreach ($aValues as $date => $aValue)
 		{
-			$oSeo_Indexed =  $this->_oSeo_Site->Seo_Indexeds->getByDate($date, FALSE);
+			$oSeo_Indexed = $this->_oSeo_Site->Seo_Indexeds->getByDate($date, FALSE);
 
 			if (is_null($oSeo_Indexed))
 			{
@@ -257,7 +257,7 @@ class Seo_Controller_Yandex extends Seo_Controller
 			$oSiteAlias = $this->_oSite->getCurrentAlias();
 			if ($oSiteAlias)
 			{
-				$host_url = $oIndexPage->https ? 'https://' : 'http://' . $oSiteAlias->name;
+				$host_url = ($oIndexPage->https ? 'https://' : 'http://') . $oSiteAlias->name;
 
 				$hostID = $this->addSite($host_url);
 				return $hostID;

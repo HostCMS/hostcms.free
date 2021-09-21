@@ -6,7 +6,7 @@
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Sites',
@@ -20,8 +20,6 @@ return array(
 	'max_size_load_image_big' => 'Maximum size of large image',
 	'admin_email' => '<acronym title="E-mail of website administrator">E-mail</acronym>',
 	'send_attendance_report' => '<acronym title="If you activate this parameter, a message containing website visiting statistics will be sent to the e-mail address of administrator on a daily basis">Send daily report on website visiting statistics</acronym>',
-	'files_chmod' => '<acronym title="Access mode to files after their creating, e.g. 0644">File mode</acronym>',
-	'chmod' => '<acronym title="Access mode to folders after their creation, e.g. 0755">Directory mode</acronym>',
 	'date_format' => '<acronym title="Date format. E.g., «d.m.Y.»">Date format</acronym>',
 	'date_time_format' => '<acronym title="Date and time format. E.g., «d.m.Y H:i:s.»">Date and time format</acronym>',
 	'error' => '<acronym title="Errors output mode. E.g., «E_ERROR» or «E_ALL»">Errors output mode</acronym>',
@@ -42,7 +40,6 @@ return array(
 	'id' => 'ID',
 	'site_add_site_form_title' => 'Add website information',
 	'site_edit_site_form_title' => 'Edit website information',
-	'site_chmod' => 'Access mode',
 	'site_dates' => 'Formats',
 	'site_errors' => 'Errors',
 	'site_robots_txt' => 'robots.txt',

@@ -257,7 +257,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		$aProperties = $oProperties->findAll();
 
-		foreach ($aProperties as $iPropertyCounter => $oProperty)
+		foreach ($aProperties as $oProperty)
 		{
 			$this->_addIntoSection($oAdmin_Form_Entity_Section, $oProperty);
 		}
@@ -514,13 +514,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 								break;
 								case 8: // Date
 									$oNewAdmin_Form_Entity->value(
-										//Core_Date::sql2date($oProperty_Value->value)
 										$this->_correctPrintValue($oProperty, $oProperty_Value->value)
 									);
 								break;
 								case 9: // Datetime
 									$oNewAdmin_Form_Entity->value(
-										//Core_Date::sql2datetime($oProperty_Value->value)
 										$this->_correctPrintValue($oProperty, $oProperty_Value->value)
 									);
 								break;
@@ -553,7 +551,6 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					$oAdmin_Form_Entity_ListItems = Admin_Form_Entity::factory('Select')
 						->caption(htmlspecialchars($oProperty->name))
 						->name("property_{$oProperty->id}[]")
-						// ->value(NULL)
 						->value(
 							$this->_correctPrintValue($oProperty, $oProperty->default_value)
 						)
@@ -601,12 +598,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							$oNewAdmin_Form_Entity_ListItemsInput = clone $oAdmin_Form_Entity_ListItemsInput;
 							$oNewAdmin_Form_Entity_ListItemsInput
-								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}")  // id_property_ !!!
+								->id("id_property_{$oProperty->id}_{$oProperty_Value->id}_{$key}") // id_property_ !!!
 								->name("input_property_{$oProperty->id}_{$oProperty_Value->id}");
 
 							$oNewAdmin_Form_Entity_Autocomplete_Select = clone $oAdmin_Form_Entity_Autocomplete_Select;
 							$oNewAdmin_Form_Entity_Autocomplete_Select
-								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode');  // id_property_ !!!
+								->id($oNewAdmin_Form_Entity_ListItemsInput->id . '_mode'); // id_property_ !!!
 
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity_ListItems, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
@@ -619,11 +616,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 5: // ИС
 				if (Core::moduleIsActive('informationsystem'))
 				{
-					// Директории
+					// Группы
 					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
 						->caption(htmlspecialchars($oProperty->name))
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->name("group_property_{$oProperty->id}[]")
 						->filter(TRUE);
 
 					// Элементы
@@ -678,6 +676,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 13: // ИС, группа
 				if (Core::moduleIsActive('informationsystem'))
 				{
+					// Группы
 					$oAdmin_Form_Entity_InfGroups = Admin_Form_Entity::factory('Select')
 						->caption(htmlspecialchars($oProperty->name))
 						->id("id_property_{$oProperty->id}")
@@ -727,11 +726,12 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 12: // Интернет-магазин
 				if (Core::moduleIsActive('shop'))
 				{
-					// Директории
+					// Группы
 					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
 						->caption(htmlspecialchars($oProperty->name))
 						->divAttr(array('class' => 'form-group col-xs-12'))
 						->id("id_group_{$oProperty->id}_00{$iPropertyCounter}") // id_ should be, see js!
+						->name("group_property_{$oProperty->id}[]")
 						->filter(TRUE);
 
 					// Элементы
@@ -786,7 +786,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 			case 14: // Интернет-магазин, группа
 				if (Core::moduleIsActive('shop'))
 				{
-					// Директории
+					// Группы
 					$oAdmin_Form_Entity_Shop_Groups = Admin_Form_Entity::factory('Select')
 						->caption(htmlspecialchars($oProperty->name))
 						->id("id_property_{$oProperty->id}")
@@ -902,25 +902,25 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('input[id ^= id_property_{$oProperty->id}]').autocomplete({
+				$('#{$windowId} input[id ^= id_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
-							jTopParentDiv = jInput.parents('[id ^= property]');
+							jTopParentDiv = jInput.parents('div[id ^= property]');
 
 						$.ajax({
-							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}&mode=' + $('#' + jInput.attr('id') + '_mode').val(),
+							url: '/admin/list/item/index.php?autocomplete=1&show_parents=1&list_id={$oList->id}&mode=' + $('#{$windowId} #' + jInput.attr('id') + '_mode').val(),
 							dataType: 'json',
 							data: {
 								queryString: request.term
 							},
-							success: function( data ) {
-								response( data );
+							success: function(data) {
+								response(data);
 							}
 						});
 					},
 					minLength: 1,
 					create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
 								.append($('<a>').text(item.label))
@@ -1021,10 +1021,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
-							jTopParentDiv = jInput.parents('[id ^= property]');
+							jTopParentDiv = jInput.parents('div[id ^= property]');
 
 						$.ajax({
 							url: '/admin/informationsystem/item/index.php?autocomplete=1&show_group=1&informationsystem_id={$oInformationsystem->id}',
@@ -1032,14 +1032,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							data: {
 								queryString: request.term
 							},
-							success: function( data ) {
-								response( data );
+							success: function(data) {
+								response(data);
 							}
 						});
 					},
 					minLength: 1,
 					create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
 								.append($('<a>').text(item.label))
@@ -1048,9 +1048,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$(this).prev('.ui-helper-hidden-accessible').remove();
 					},
-					select: function( event, ui ) {
+					select: function(event, ui) {
 						var jInput = $(this),
-							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jTopParentDiv = jInput.parents('div[id ^= property]'),
 							jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 							jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
@@ -1206,10 +1206,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 					source: function(request, response) {
 						var jInput = $(this.element),
-							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jTopParentDiv = jInput.parents('div[id ^= property]'),
 							jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 							selectedVal = $(':selected', jInfGroupDiv).val();
 
@@ -1219,14 +1219,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							data: {
 								queryString: request.term
 							},
-							success: function( data ) {
-								response( data );
+							success: function(data) {
+								response(data);
 							}
 						});
 					},
 					minLength: 1,
 					create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
 								.append($('<a>').text(item.label))
@@ -1235,9 +1235,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 						$(this).prev('.ui-helper-hidden-accessible').remove();
 					},
-					select: function( event, ui ) {
+					select: function(event, ui) {
 						var jInput = $(this),
-							jTopParentDiv = jInput.parents('[id ^= property]'),
+							jTopParentDiv = jInput.parents('div[id ^= property]'),
 							jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 							jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
@@ -1385,10 +1385,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
+						jTopParentDiv = jInput.parents('div[id ^= property]'),
 						jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
@@ -1398,14 +1398,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					data: {
 						queryString: request.term
 					},
-					success: function( data ) {
-						response( data );
+					success: function(data) {
+						response(data);
 					}
 					});
 				},
 				minLength: 1,
 				create: function() {
-					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+					$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 						return $('<li></li>')
 							.data('item.autocomplete', item)
 							.append($('<a>').text(item.label))
@@ -1414,9 +1414,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 					$(this).prev('.ui-helper-hidden-accessible').remove();
 				},
-				select: function( event, ui ) {
+				select: function(event, ui) {
 					var jInput = $(this),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
+						jTopParentDiv = jInput.parents('div[id ^= property]'),
 						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
@@ -1567,10 +1567,10 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		// autocomplete should be added always
 		$oDiv_Group->add(
 			Core::factory('Core_Html_Entity_Script')->value("
-				$('input[id ^= input_property_{$oProperty->id}]').autocomplete({
+				$('#{$windowId} input[id ^= input_property_{$oProperty->id}]').autocomplete({
 				source: function(request, response) {
 					var jInput = $(this.element),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
+						jTopParentDiv = jInput.parents('div[id ^= property]'),
 						jInfGroupDiv = jTopParentDiv.find('[id ^= id_group_]'),
 						selectedVal = $(':selected', jInfGroupDiv).val();
 
@@ -1580,14 +1580,14 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					data: {
 						queryString: request.term
 					},
-					success: function( data ) {
-						response( data );
+					success: function(data) {
+						response(data);
 					}
 					});
 				},
 				minLength: 1,
 				create: function() {
-					$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+					$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 						return $('<li></li>')
 							.data('item.autocomplete', item)
 							.append($('<a>').text(item.label))
@@ -1596,9 +1596,9 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 					$(this).prev('.ui-helper-hidden-accessible').remove();
 				},
-				select: function( event, ui ) {
+				select: function(event, ui) {
 					var jInput = $(this),
-						jTopParentDiv = jInput.parents('[id ^= property]'),
+						jTopParentDiv = jInput.parents('div[id ^= property]'),
 						jInfItemDiv = jTopParentDiv.find('select[name ^= property_]');
 
 						jInfItemDiv.empty().append($('<option>', { value: ui.item.id, text: ui.item.label }).attr('selected', 'selected'));
@@ -1632,7 +1632,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 	/**
 	* Get property list
-	* @return array
+	* @return object
 	*/
 	protected function _getProperties()
 	{

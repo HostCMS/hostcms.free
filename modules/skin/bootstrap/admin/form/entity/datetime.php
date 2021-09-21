@@ -59,9 +59,10 @@ class Skin_Bootstrap_Admin_Form_Entity_DateTime extends Skin_Default_Admin_Form_
 		{
 			?><span class="caption"><?php echo $this->caption?></span><?php
 		}
+
 		?><div id="div_<?php echo htmlspecialchars($this->id)?>" class="input-group">
 			<input <?php echo implode(' ', $aAttr) ?>/>
-			<span class="input-group-addon">
+			<span class="input-group-addon<?php echo $this->disabled == 'disabled' ? ' disabled'  : ''; ?>">
 				<span class="fa fa-calendar"></span>
 			</span>
 			<?php

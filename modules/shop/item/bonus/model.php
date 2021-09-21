@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Bonus_Model extends Core_Entity
 {
@@ -64,11 +64,25 @@ class Shop_Item_Bonus_Model extends Core_Entity
 
 		$aShop_Bonuses = $this->findAll();
 
-		if (isset($aShop_Bonuses[0]))
-		{
-			return $aShop_Bonuses[0];
-		}
+		return isset($aShop_Bonuses[0])
+			? $aShop_Bonuses[0]
+			: NULL;
+	}
 
-		return NULL;
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_item_bonus.onBeforeGetRelatedSite
+	 * @hostcms-event shop_item_bonus.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Bonus->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

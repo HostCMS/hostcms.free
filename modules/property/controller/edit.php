@@ -144,7 +144,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
-		$oSelect_Dirs = Admin_Form_Entity::factory('Select');
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -171,7 +170,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 				->add($oMainRow12 = Admin_Form_Entity::factory('Div')->class('row'))
-				->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'));
+				->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'))
+				->add($oMainRow14 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$title = $this->_object->id
 					? Core::_('Property.edit_title', $this->_object->name)
@@ -208,18 +208,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				// Удаляем стандартный <input>
 				$oAdditionalTab->delete($this->getField('property_dir_id'));
-
-				// Селектор с группой
-				/*$oSelect_Dirs
-					->options(
-						array(' … ') + self::fillPropertyDir($this->linkedObject)
-					)
-					->name('property_dir_id')
-					->value($this->_object->property_dir_id)
-					->caption(Core::_('Property_Dir.parent_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
-
-				$oMainRow2->add($oSelect_Dirs);*/
 
 				$aResult = $this->propertyDirShow($this->linkedObject, 'property_dir_id');
 				foreach ($aResult as $resultItem)
@@ -271,48 +259,45 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 						$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 							->value("
-								$('[name = list_name]').autocomplete({
-									  source: function(request, response) {
-
+								$('#{$windowId} [name = list_name]').autocomplete({
+									source: function(request, response) {
 										$.ajax({
-										  url: '/admin/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
-										  dataType: 'json',
-										  data: {
-											queryString: request.term
-										  },
-										  success: function( data ) {
-											response( data );
-										  }
+											url: '/admin/list/index.php?autocomplete=1&show_list=1&site_id={$oSite->id}',
+											dataType: 'json',
+											data: {
+												queryString: request.term
+											},
+											success: function(data) {
+												response(data);
+											}
 										});
-									  },
-									  minLength: 1,
-									  create: function() {
-										$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+									},
+									minLength: 1,
+									create: function() {
+										$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 											return $('<li></li>')
 												.data('item.autocomplete', item)
 												.append($('<a>').text(item.label))
 												.appendTo(ul);
 										}
-
-										 $(this).prev('.ui-helper-hidden-accessible').remove();
-									  },
-									  select: function( event, ui ) {
-										$('[name = list_id]').val(ui.item.id);
-									  },
-									  open: function() {
+										$(this).prev('.ui-helper-hidden-accessible').remove();
+									},
+									select: function(event, ui) {
+										$('#{$windowId} [name = list_id]').val(ui.item.id);
+									},
+									open: function() {
 										$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-									  },
-									  close: function() {
+									},
+									close: function() {
 										$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-									  }
+									}
 								});
 							");
 
 						$oMainRow3
 							->add($oListInput)
 							->add($oListInputHidden)
-							->add($oCore_Html_Entity_Script)
-							;
+							->add($oCore_Html_Entity_Script);
 					}
 				}
 
@@ -409,7 +394,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->move($this->getField('tag_name'), $oMainRow11)
 					->move($this->getField('sorting'), $oMainRow11)
 					->move($this->getField('multiple'), $oMainRow12)
-					->move($this->getField('obligatory'), $oMainRow13);
+					->move($this->getField('obligatory'), $oMainRow13)
+					->move($this->getField('indexing'), $oMainRow14);
 
 				$oFormatTab
 					->add($oMainRow13 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -481,17 +467,6 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->move($this->getField('name'), $oMainRow1);
 
-				/*$oSelect_Dirs
-					->options(
-						array(' … ') + self::fillPropertyDir($this->linkedObject, 0, array($this->_object->id))
-					)
-					->name('parent_id')
-					->value($this->_object->parent_id)
-					->caption(Core::_('Property_Dir.parent_id'))
-					->divAttr(array('class' => 'form-group col-xs-12'));
-
-				$oMainRow2->add($oSelect_Dirs);*/
-
 				$aResult = $this->propertyDirShow($this->linkedObject, 'parent_id');
 				foreach ($aResult as $resultItem)
 				{
@@ -535,6 +510,8 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$class = 'form-group col-xs-12';
 		}
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		if ($iCountDirs < Core::$mainConfig['switchSelectToAutocomplete'])
 		{
 			$oPropertyDirSelect = Admin_Form_Entity::factory('Select');
@@ -567,39 +544,38 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 				->value("
-					$('[name = property_dir_name]').autocomplete({
-						  source: function(request, response) {
+					$('#{$windowId} [name = property_dir_name]').autocomplete({
+						source: function(request, response) {
 							$.ajax({
-							  url: '/admin/property/index.php?autocomplete=1&show_dir=1&linkedObjectName=" . $linkedObject->getModelName() . "&linkedObjectId=" . $linkedObject->getPrimaryKey() . "',
-							  dataType: 'json',
-							  data: {
-								queryString: request.term
-							  },
-							  success: function( data ) {
-								response( data );
-							  }
+								url: '/admin/property/index.php?autocomplete=1&show_dir=1&linkedObjectName=" . $linkedObject->getModelName() . "&linkedObjectId=" . $linkedObject->getPrimaryKey() . "',
+								dataType: 'json',
+								data: {
+									queryString: request.term
+								},
+								success: function(data) {
+									response(data);
+								}
 							});
-						  },
-						  minLength: 1,
-						  create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+						},
+						minLength: 1,
+						create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 								return $('<li></li>')
 									.data('item.autocomplete', item)
 									.append($('<a>').text(item.label))
 									.appendTo(ul);
 							}
-
-							 $(this).prev('.ui-helper-hidden-accessible').remove();
-						  },
-						  select: function( event, ui ) {
-							$('[name = {$fieldName}]').val(ui.item.id);
-						  },
-						  open: function() {
+							$(this).prev('.ui-helper-hidden-accessible').remove();
+						},
+						select: function(event, ui) {
+							$('#{$windowId} [name = {$fieldName}]').val(ui.item.id);
+						},
+						open: function() {
 							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-						  },
-						  close: function() {
+						},
+						close: function() {
 							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-						  }
+						}
 					});
 				");
 
@@ -656,11 +632,13 @@ class Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			case 'property':
 				if ($bNewProperty && trim($this->_object->tag_name) == '')
 				{
-					 $this->_object->tag_name = Core_Str::transliteration(
-						Core::$mainConfig['translate']
-							? Core_Str::translate($this->_object->name)
-							: $this->_object->name
-						);
+					Core::$mainConfig['translate'] && $sTranslated = Core_Str::translate($this->_object->name);
+
+					$this->_object->tag_name = Core::$mainConfig['translate'] && strlen($sTranslated)
+						? $sTranslated
+						: $this->_object->name;
+					
+					$this->_object->tag_name = Core_Str::transliteration($this->_object->tag_name);
 				}
 
 				switch ($this->_object->type)

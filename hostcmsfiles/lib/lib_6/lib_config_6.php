@@ -28,23 +28,28 @@ $Shop_Controller_Show
 	// Выводить специальные цены
 	->specialprices(TRUE)
 	// Выводить модификации на уровне с товаром
-	//->modificationsList(TRUE)
+	->modificationsList(TRUE)
 	//->modificationsGroup(TRUE)
 	// Режим вывода групп
 	//->groupsMode('none')
 	// Выводить доп. св-ва групп
 	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
-	//->filterShortcuts(TRUE)
+	->filterShortcuts(TRUE)
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
 	// ->barcodes(TRUE)
 	// ->warehouseMode('in-stock')
+	// Выводить товары из подгрупп
+	->subgroups(TRUE)
 	->limit($limit)
 	->parseUrl();
 
-// Выводить товары из подгрупп
-$Shop_Controller_Show->subgroups(TRUE);
+// При фильтрации модификации выводятся на уровне товаров
+if (count($Shop_Controller_Show->getFilterProperties()) || count($Shop_Controller_Show->getFilterPrices()) || $Shop_Controller_Show->producer)
+{
+	$Shop_Controller_Show->modificationsList(TRUE)->modificationsGroup(TRUE);
+}
 
 // Быстрый фильтр
 if (Core_Array::getRequest('fast_filter'))
@@ -56,63 +61,9 @@ if (Core_Array::getRequest('fast_filter'))
 		$Shop_Controller_Show->modificationsList(TRUE);
 
 		// В корне выводим из всех групп
-		if ($Shop_Controller_Show->group == 0)
-		{
-			$Shop_Controller_Show->group(FALSE);
-		}
+		$Shop_Controller_Show->group == 0 && $Shop_Controller_Show->group(FALSE);
 
-		// Запрещаем выбор модификаций при выключенном modificationsList
-		!$Shop_Controller_Show->modificationsList && $Shop_Controller_Show->forbidSelectModifications();
-
-		foreach ($_POST as $key => $value)
-		{
-			if (strpos($key, 'property_') === 0)
-			{
-				$Shop_Controller_Show->removeFilter('property', substr($key, 9));
-			}
-			elseif (strpos($key, 'price_') === 0)
-			{
-				$Shop_Controller_Show->removeFilter('price');
-			}
-		}
-
-		// Remove all checkboxes
-		$aFilterProperties = $Shop_Controller_Show->getFilterProperties();
-		foreach ($aFilterProperties as $propertyId => $aTmpProperties)
-		{
-			// Checkboxes or select like checkbox
-			if (isset($aTmpProperties[0]) && ($aTmpProperties[0][0]->type == 7 || $aTmpProperties[0][0]->type == 3))
-			{
-				$Shop_Controller_Show->removeFilter('property', $propertyId);
-			}
-		}
-
-		// Prices
-		$Shop_Controller_Show->setFilterPricesConditions($_POST);
-
-		// Additional properties
-		$Shop_Controller_Show->setFilterPropertiesConditions($_POST);
-
-		if (Core_Array::getPost('producer_id'))
-		{
-			$iProducerId = Core_Array::getPost('producer_id', 0, 'int');
-			$Shop_Controller_Show->producer($iProducerId);
-		}
-
-		$Shop_Controller_Show->applyItemCondition();
-
-		$Shop_Controller_Show->group !== FALSE && $Shop_Controller_Show->applyGroupCondition();
-
-		$Shop_Controller_Show->applyFilter();
-
-		$Shop_Controller_Show
-			->shopItems()
-			->queryBuilder()
-			->where('shortcut_id', '=', 0)
-			->clearGroupBy()
-			->clearOrderBy();
-
-		$aJson['count'] = $Shop_Controller_Show->getCount();
+		$aJson['count'] = $Shop_Controller_Show->getFastFilteredCount();
 		// $aJson['query'] = Core_Database::instance()->getLastQuery();
 	}
 

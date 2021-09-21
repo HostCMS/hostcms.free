@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -522,6 +522,8 @@ if (count($aSearchable))
 
 if (count($aSeo_Sites))
 {
+	$windowId = $oAdmin_Form_Controller->getWindowId();
+	
 ?><script type="text/javascript">
 	$(function(){
 	var aScripts = [
@@ -827,7 +829,7 @@ if (count($aSeo_Sites))
 		};
 
 		// Links
-		var placeholderSeoLinks = $("#seo-links-chart");
+		var placeholderSeoLinks = $("#<?php echo $windowId?> #seo-links-chart");
 
 		placeholderSeoLinks.bind("plotselected", function (event, ranges) {
 			plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, $.extend(true, {}, options, {
@@ -838,13 +840,13 @@ if (count($aSeo_Sites))
 			}));
 		});
 
-		$('#seo-links #setOriginalZoom').on('click', function(){
+		$('#<?php echo $windowId?> #seo-links #setOriginalZoom').on('click', function(){
 			plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
 		});
 
 		var plotSeoLinks = $.plot(placeholderSeoLinks, dataLinks, options);
 
-		$("#seo-links #clearSelection").click(function () {
+		$("#<?php echo $windowId?> #seo-links #clearSelection").click(function () {
 			plotSeoLinks.clearSelection();
 		});
 
@@ -853,7 +855,7 @@ if (count($aSeo_Sites))
 		if (count($aRatings))
 		{
 			?>
-			var placeholderSeoRatings = $("#seo-ratings-chart");
+			var placeholderSeoRatings = $("#<?php echo $windowId?> #seo-ratings-chart");
 
 			placeholderSeoRatings.bind("plotselected", function (event, ranges) {
 				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, $.extend(true, {}, options, {
@@ -864,13 +866,13 @@ if (count($aSeo_Sites))
 				}));
 			});
 
-			$('#seo-ratings #setOriginalZoom').on('click', function(){
+			$('#<?php echo $windowId?> #seo-ratings #setOriginalZoom').on('click', function(){
 				plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
 			});
 
 			var plotSeoRatings = $.plot(placeholderSeoRatings, dataRatings, options);
 
-			$("#seo-ratings #clearSelection").click(function () {
+			$("#<?php echo $windowId?> #seo-ratings #clearSelection").click(function () {
 				plotSeoRatings.clearSelection();
 			});
 			<?php
@@ -882,7 +884,7 @@ if (count($aSeo_Sites))
 		if (count($aSearchable))
 		{
 			?>
-			var placeholderSeoIndexed = $("#seo-indexed-chart");
+			var placeholderSeoIndexed = $("#<?php echo $windowId?> #seo-indexed-chart");
 
 			placeholderSeoIndexed.bind("plotselected", function (event, ranges) {
 				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, $.extend(true, {}, options, {
@@ -893,13 +895,13 @@ if (count($aSeo_Sites))
 				}));
 			});
 
-			$('#seo-indexed #setOriginalZoom').on('click', function(){
+			$('#<?php echo $windowId?> #seo-indexed #setOriginalZoom').on('click', function(){
 				plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
 			});
 
 			var plotSeoIndexed = $.plot(placeholderSeoIndexed, dataIndexed, options);
 
-			$("#seo-indexed #clearSelection").click(function () {
+			$("#<?php echo $windowId?> #seo-indexed #clearSelection").click(function () {
 				plotSeoIndexed.clearSelection();
 			});
 			<?php

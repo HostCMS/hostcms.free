@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -35,6 +35,7 @@ return array(
 	'menu' => 'Формы центра администрирования',
 	'form_forms_tab_1' => 'Основные',
 	'form_forms_tab_2' => 'Дополнительные',
+	'form_forms_tab_3' => 'Пользовательские поля',
 
 	'show_form_fields_menu_admin_forms' => 'Список форм',
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -147,14 +147,15 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 					7 => Core::_('Admin_Form_Field.field_type_image_link'),
 					8 => Core::_('Admin_Form_Field.field_type_image_list'),
 					9 => Core::_('Admin_Form_Field.field_type_text_as_is'),
-					10 => Core::_('Admin_Form_Field.field_type_image_callback_function')
+					10 => Core::_('Admin_Form_Field.field_type_image_callback_function'),
+					11 => Core::_('Admin_Form_Field.field_type_textarea')
 				)
 			)
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Admin_Form_Field.type'))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
-			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10])");
+			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [1,2,3,4,5,6,7,8,9,10,11])");
 
 		$oMainTab->delete($this->getField('type'));
 
@@ -188,19 +189,19 @@ class Admin_Form_Field_Controller_Edit extends Admin_Form_Action_Controller_Type
 		$oMainTab->move($this->getField('editable')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow7);
 
 		$this->getField('image')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-8 hidden-9 hidden-10 hidden-11'))
 			->rows(3);
 
 		$this->getField('link')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11'))
 			->rows(2);
 
 		$this->getField('onclick')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-5 hidden-6 hidden-8 hidden-9 hidden-11'))
 			->rows(2);
 
 		$this->getField('list')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7 hidden-9 hidden-10 hidden-11'))
 			->rows(3);
 
 		$oMainTab

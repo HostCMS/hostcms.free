@@ -9,10 +9,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Benchmark
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Benchmark_Url_Model extends Core_Entity
 {
+	/**
+	 * Belongs to relations
+	 * @var array
+	 */
+	protected $_belongsTo = array(
+		'structure' => array()
+	);
+
 	/**
 	 * Model name
 	 * @var mixed
@@ -62,14 +70,6 @@ class Benchmark_Url_Model extends Core_Entity
 	public $connect_server_avr = 0;
 
 	/**
-	 * Belongs to relations
-	 * @var array
-	 */
-	protected $_belongsTo = array(
-		'structure' => array()
-	);
-
-	/**
 	 * Constructor.
 	 * @param int $id entity ID
 	 */
@@ -82,5 +82,22 @@ class Benchmark_Url_Model extends Core_Entity
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR');
 		}
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event benchmark_url.onBeforeGetRelatedSite
+	 * @hostcms-event benchmark_url.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Structure->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

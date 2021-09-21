@@ -154,4 +154,21 @@ class Shop_Compare_Model extends Core_Entity
 
 		return $this;
 	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_compare.onBeforeGetRelatedSite
+	 * @hostcms-event shop_compare.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }

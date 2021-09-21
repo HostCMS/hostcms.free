@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Controller_Show extends Core_Controller
 {
@@ -63,7 +63,8 @@ class Shop_Discountcard_Controller_Show extends Core_Controller
 			$oShop_Discountcards = $oSiteuser->Shop_Discountcards;
 			$oShop_Discountcards
 				->queryBuilder()
-				->where('shop_discountcards.shop_id', '=', $oShop->id);
+				->where('shop_discountcards.shop_id', '=', $oShop->id)
+				->where('shop_discountcards.active', '=', 1);
 
 			$aShop_Discountcards = $oShop_Discountcards->findAll(FALSE);
 
@@ -80,6 +81,7 @@ class Shop_Discountcard_Controller_Show extends Core_Controller
 
 					$oShop_Discountcard_Bonuses = $oShop_Discountcard->Shop_Discountcard_Bonuses;
 					$oShop_Discountcard_Bonuses->queryBuilder()
+						->where('shop_discountcard_bonuses.active', '=', 1)
 						//->where('shop_discountcard_bonuses.datetime', '<=', $datetime)
 						->where('shop_discountcard_bonuses.expired', '>=', $datetime)
 						->where('shop_discountcard_bonuses.written_off', '<', Core_QueryBuilder::expression('shop_discountcard_bonuses.amount'))

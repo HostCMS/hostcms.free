@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Model extends Core_Entity
 {
@@ -767,5 +767,40 @@ class Informationsystem_Model extends Core_Entity
 	public function pathBackend()
 	{
 		$this->structure_id && $this->Structure->pathBackend();
+	}
+
+	/**
+	 * The position of watermark on the X axis
+	 * @return string
+	 */
+	public function getWatermarkDefaultPositionX()
+	{
+		return $this->watermark_default_position_x;
+	}
+
+	/**
+	 * The position of watermark on the Y axis
+	 * @return string
+	 */
+	public function getWatermarkDefaultPositionY()
+	{
+		return $this->watermark_default_position_y;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event informationsystem.onBeforeGetRelatedSite
+	 * @hostcms-event informationsystem.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

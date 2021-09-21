@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 {
@@ -160,7 +160,7 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 				->onclick(
 					//'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					'bootbox.hideAll(); '
-					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					. $this->_Admin_Form_Controller->getAdminSendForm(array('operation' => 'apply'))
 				)
 				->controller($this->_Admin_Form_Controller);
 
@@ -253,12 +253,12 @@ class Shop_Item_Controller_Apply_Discount extends Admin_Form_Action_Controller
 			}
 
 			$oShop_Item->clearCache();
-			
+
 			// Fast filter
 			if ($oShop_Item->Shop->filter)
 			{
-				$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
-				$Shop_Filter_Controller->fill($oShop_Item);
+				$oShop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
+				$oShop_Filter_Controller->fill($oShop_Item);
 			}
 		}
 

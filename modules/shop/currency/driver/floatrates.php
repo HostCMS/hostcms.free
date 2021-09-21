@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 {
@@ -61,7 +61,7 @@ class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 				{
 					$exchangeRate = 1 / $aExchangeRate[$oDefaultCurrency->code];
 
-					//  USD-to-USD
+					// USD-to-USD
 					$aExchangeRate['USD'] = 1;
 				}
 				else

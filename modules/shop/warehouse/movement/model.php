@@ -419,25 +419,23 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		);
 
 		$position = 1;
-		$total_quantity = $total_amount = 0;
-
-		$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll();
+		$total_quantity = 0;
 
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+		$Shop_Item_Controller = new Shop_Item_Controller();
+
+		$aShop_Warehouse_Movement_Items = $this->Shop_Warehouse_Movement_Items->findAll(FALSE);
 
 		foreach ($aShop_Warehouse_Movement_Items as $oShop_Warehouse_Movement_Item)
 		{
 			$oShop_Item = $oShop_Warehouse_Movement_Item->Shop_Item;
 
-			$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+			$price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+			is_null($price) && $price = $oShop_Item->price;
 
-			is_null($old_price)
-				&& $old_price = $oShop_Item->price;
-
-			$amount = Shop_Controller::instance()->round($oShop_Warehouse_Movement_Item->count * $old_price);
+			$aPrices = $Shop_Item_Controller->calculatePriceInItemCurrency($price, $oShop_Item);
 
 			$aBarcodes = array();
-
 			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
 			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
 			{
@@ -445,15 +443,14 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			}
 
 			$node = new stdClass();
-
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
 			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
 			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->name);
-			$node->price = $old_price;
+			$node->price = $aPrices['price_tax'];
 			$node->quantity = $oShop_Warehouse_Movement_Item->count;
-			$node->amount = $amount;
+			$node->amount = Shop_Controller::instance()->round($node->quantity * $node->price);
 			$node->barcodes = implode(', ', $aBarcodes);
 
 			$aReplace['Items'][] = $node;
@@ -461,12 +458,9 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 			$aReplace['total_count']++;
 
 			$total_quantity += $oShop_Warehouse_Movement_Item->count;
-			$total_amount += $amount;
 		}
 
 		$aReplace['quantity'] = $total_quantity;
-		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
-		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -474,5 +468,22 @@ class Shop_Warehouse_Movement_Model extends Core_Entity
 		return !is_null($eventResult)
 			? $eventResult
 			: $aReplace;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_warehouse_movement.onBeforeGetRelatedSite
+	 * @hostcms-event shop_warehouse_movement.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Source_Shop_Warehouse->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -77,7 +77,7 @@ class Shop_Order_Item_Status_Controller_Edit extends Admin_Form_Action_Controlle
 			->name('shop_order_status_id')
 			->value($this->_object->shop_order_status_id)
 			->caption(Core::_('Shop_Order_Item_Status.shop_order_status_id'))
-			->divAttr(array('class' => 'form-group col-md-3 col-sm-4 col-xs-6'));
+			->divAttr(array('class' => 'form-group col-sm-4 col-xs-6'));
 
 		$oMainRow4->add($oDropdownlistStatuses);
 

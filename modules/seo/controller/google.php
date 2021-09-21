@@ -158,7 +158,7 @@ class Seo_Controller_Google extends Seo_Controller
 			$oSiteAlias = $this->_oSite->getCurrentAlias();
 			if ($oSiteAlias)
 			{
-				$host_url = $oIndexPage->https ? 'https://' : 'http://' . $oSiteAlias->name . '/';
+				$host_url = ($oIndexPage->https ? 'https://' : 'http://') . $oSiteAlias->name . '/';
 
 				$hostID = $this->addSite($host_url);
 				return $hostID;

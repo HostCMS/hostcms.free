@@ -346,5 +346,9 @@ return array(
 	'certificate_discount' => 'Discount',
 	'certificate_item_header' => 'Certificate',
 	'item_type_selection_group_buttons_name_certificate' => "Certificate",
-	'create_modification_use_property_name' => 'Use property name',	
+	'create_modification_use_property_name' => 'Use property name',
+
+	'delete_unsent_modifications_by_properties' => 'Delete unsent modifications created by property',
+	'shortcut' => 'Shortcut',
+	'include_modifications' => 'Include modifications',
 );

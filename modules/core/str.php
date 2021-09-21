@@ -293,7 +293,7 @@ class Core_Str
 
 		$aConfig = Core::$config->get('core_str') + array(
 			'spaceSeparator' => '-',
-			// ISO 9
+			// ISO 9, Транслитерация по системе Б с использованием буквосочетаний
 			'transliteration' => array(
 				'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
 				'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'j', 'к' => 'k', 'л' => 'l', 'м' => 'm',

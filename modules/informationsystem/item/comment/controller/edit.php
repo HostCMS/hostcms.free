@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -27,6 +27,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 			? Core_Entity::factory('Informationsystem', $object->Comment_Informationsystem_Item->Informationsystem_Item->informationsystem_id)
 			: $object->Comment_Informationsystem_Item->Informationsystem_Item->Informationsystem;
 
+		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
 		$template_id = $oInformationsystem->Structure->template_id
@@ -37,7 +38,7 @@ class Informationsystem_Item_Comment_Controller_Edit extends Comment_Controller_
 			->caption(Core::_('Admin_Form.tabProperties'))
 			->name('Property');
 
-		$this->addTabBefore($oPropertyTab, $oAdditionalTab);
+		$this->addTabAfter($oPropertyTab, $oMainTab);
 
 		// Properties
 		Property_Controller_Tab::factory($this->_Admin_Form_Controller)

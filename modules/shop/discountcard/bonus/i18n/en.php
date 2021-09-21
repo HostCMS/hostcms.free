@@ -30,4 +30,6 @@ return array(
 	'description' => 'Description',
 	'shop_discountcard_bonus_type_id' => 'Bonus type',
 	'apply_success' => 'Bonus info changed!',
+	'active' => 'Active',
+	'changeActive_success' => 'Information changed successfully'
 );

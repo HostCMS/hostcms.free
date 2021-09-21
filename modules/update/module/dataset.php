@@ -41,17 +41,13 @@ class Update_Module_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
 	 * Load objects
 	 * @return array
 	 */
 	public function load()
 	{
+		!is_array($this->_objects) && $this->_getUpdates();
+
 		return array_slice($this->_objects, $this->_offset, $this->_limit);
 	}
 

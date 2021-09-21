@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -32,7 +32,7 @@ $sStructurePath = '/admin/structure/index.php';
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
 // Элементы меню
-$oAdmin_Form_Entity_Menus->add(	
+$oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property.menu'))
 		->icon('fa fa-plus')
@@ -43,8 +43,8 @@ $oAdmin_Form_Entity_Menus->add(
 		->onclick(
 			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 		)
-		
-)->add(	
+
+)->add(
 	Admin_Form_Entity::factory('Menu')
 		->name(Core::_('Property_Dir.menu'))
 		->icon('fa fa-plus')
@@ -277,6 +277,8 @@ $oAdmin_Form_Dataset->addCondition(
 $oAdmin_Form_Dataset
 ->changeField('multiple', 'link', "/admin/structure/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
 ->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+->changeField('indexing', 'link', "/admin/structure/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}")
+->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/structure/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false")
 ;
 
 // Добавляем источник данных контроллеру формы

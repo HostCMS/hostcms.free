@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller
 {
@@ -86,17 +86,13 @@ class Informationsystem_Controller
 
 	static public function showItemButton()
 	{
-		$html = '
-			<script>
+		$html = '<script>
 				var lastFocusedItem;
-
 				$(function(){
-
 					$("textarea[name^=\'seo_item_\']").on("focus", function() {
-					  lastFocusedItem = $(document.activeElement);
+						lastFocusedItem = $(document.activeElement);
 					});
 				});
-
 			</script>
 			<div class="btn-group pull-right">
 				<a class="btn btn-sm btn-default"><i class="fa fa-plus"></i></a>

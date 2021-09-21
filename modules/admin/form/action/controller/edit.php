@@ -45,7 +45,8 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		// Название и описание для всех языков
 		$aAdmin_Languages = Core_Entity::factory('Admin_Language')->findAll();
@@ -126,6 +127,8 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainTab->move($this->getField('single'), $oMainRow3);
 		$oMainTab->move($this->getField('group'), $oMainRow4);
+		$oMainTab->move($this->getField('modal'), $oMainRow5);
+		
 
 		$this->getField('sorting')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
@@ -134,11 +137,11 @@ class Admin_Form_Action_Controller_Edit extends Admin_Form_Action_Controller_Typ
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
 
 		$oMainTab
-			->move($this->getField('sorting'), $oMainRow5)
-			->move($this->getField('dataset'), $oMainRow5);
+			->move($this->getField('sorting'), $oMainRow6)
+			->move($this->getField('dataset'), $oMainRow6);
 
 		$oMainTab
-			->move($this->getField('confirm'), $oMainRow6);
+			->move($this->getField('confirm'), $oMainRow7);
 
 		$oAdmin_Word_Value = $this->_object->Admin_Word->getWordByLanguage(CURRENT_LANGUAGE_ID);
 		$form_name = $oAdmin_Word_Value ? $oAdmin_Word_Value->name : '';

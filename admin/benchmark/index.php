@@ -469,6 +469,14 @@ function benchmarkShow($oAdmin_Form_Controller)
 					&& strtolower($aRow['Engine']) != $sNewStorageEngine)
 				{
 					try {
+						// Change ROW_FORMAT from FIXED to DYNAMIC
+						if (isset($aRow['Create_options']) && strpos($aRow['Create_options'], '=FIXED') !== FALSE)
+						{
+							$oCore_DataBase
+								->setQueryType(5)
+								->query("ALTER TABLE " . $oCore_DataBase->quoteColumnName($aRow['Name']) . " ROW_FORMAT=DYNAMIC");
+						}
+
 						$oCore_DataBase
 							->setQueryType(5)
 							->query("ALTER TABLE " . $oCore_DataBase->quoteColumnName($aRow['Name']) . " ENGINE={$sEngine}");
@@ -618,6 +626,8 @@ function benchmarkShow($oAdmin_Form_Controller)
 
 	asort($aTableEngines);
 	asort($aTableCharsets);
+
+	$windowId = $oAdmin_Form_Controller->getWindowId();
 	?>
 	<div class="row">
 		<div class="col-xs-12 col-md-6">
@@ -661,7 +671,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 								$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 
 									var data = [<?php echo implode(",\n", $aData)?>];
-									var placeholder = $("#dashboard-pie-chart-sources");
+									var placeholder = $("#<?php echo $windowId?> #dashboard-pie-chart-sources");
 									placeholder.unbind();
 
 									$.plot(placeholder, data, {
@@ -758,7 +768,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 									->value(Core::_('Benchmark.convert'))
 									->class('btn btn-default')
 									->onclick(
-										$oAdmin_Form_Controller->getAdminSendForm('convertTables')
+										$oAdmin_Form_Controller->getAdminSendForm(array('action' => 'convertTables'))
 									)
 									->execute();
 								?>
@@ -811,7 +821,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 								$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 
 									var data = [<?php echo implode(",\n", $aData)?>];
-									var placeholder = $("#dashboard-pie-chart-charsets");
+									var placeholder = $("#<?php echo $windowId?> #dashboard-pie-chart-charsets");
 									placeholder.unbind();
 
 									$.plot(placeholder, data, {
@@ -907,7 +917,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 									->value(Core::_('Benchmark.convert'))
 									->class('btn btn-default')
 									->onclick(
-										$oAdmin_Form_Controller->getAdminSendForm('convertCharsets')
+										$oAdmin_Form_Controller->getAdminSendForm(array('action' => 'convertCharsets'))
 									)
 									->execute();
 								?>

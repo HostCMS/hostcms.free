@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Entity extends Core_Entity
 {
@@ -99,18 +99,14 @@ class Trash_Entity extends Core_Entity
 			$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
 
 			$totalCount = $Trash_Table_Dataset->getCount();
+
 			$limit = 100;
 
 			while ($totalCount > 0)
 			{
-				$aTrash_Table_Items = $Trash_Table_Dataset
-					->limit($limit)
-					->clear()
-					->getObjects();
-
-				foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+				if (!$this->chunkDelete($limit))
 				{
-					$oTrash_Table_Item->delete();
+					break;
 				}
 
 				$totalCount -= $limit;
@@ -118,6 +114,28 @@ class Trash_Entity extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Delete object from database by chunk
+	 * @param int $limit
+	 * @return int
+	 */
+	public function chunkDelete($limit)
+	{
+		$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
+
+		$aTrash_Table_Items = $Trash_Table_Dataset
+			->limit($limit)
+			->clear()
+			->getObjects();
+
+		foreach ($aTrash_Table_Items as $oTrash_Table_Item)
+		{
+			$oTrash_Table_Item->delete();
+		}
+
+		return count($aTrash_Table_Items);
 	}
 
 	/**

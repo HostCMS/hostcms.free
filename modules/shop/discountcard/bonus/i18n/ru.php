@@ -16,6 +16,7 @@ return array(
 	'datetime' => 'Дата начисления',
 	'expired' => 'Дата сгорания',
 	'amount' => 'Сумма',
+	'active' => 'Активность',
 	'written_off' => 'Потрачено',
 	'shop_discountcard_id' => 'Идентификатор дисконтной карты',
 	'description' => 'Комментарий',
@@ -30,4 +31,5 @@ return array(
 	'writeoff' => 'Списать',
 	'writeoff_title' => 'Списание бонусов по карте "%s"',
 	'available' => 'Доступно %s %s',
+	'changeActive_success' => 'Информация успешно изменена'
 );

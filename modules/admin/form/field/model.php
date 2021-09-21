@@ -134,8 +134,8 @@ class Admin_Form_Field_Model extends Core_Entity
 			break;
 		}
 
-		$badge && Core::factory('Core_Html_Entity_Span')
-			->class('badge badge-hostcms badge-square gray pull-right')
+		Core::factory('Core_Html_Entity_Span')
+			->class('badge badge-hostcms badge-square darkgray pull-right')
 			->title(Core::_('Admin_Form_Field.field_view' . $this->view))
 			->value($badge)
 			->execute();

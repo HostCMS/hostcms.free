@@ -475,20 +475,23 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 								</div>
 							</li>
 							<?php
-							$mb_overload = ini_get('mbstring.func_overload');
-							if ($mb_overload)
+							if (PHP_VERSION_ID < 80000)
 							{
-								?><li class="ticket-item">
-									<div class="row">
-										<div class="ticket-user">
-											<span class="user-name"><?php echo Core::_('Admin.index_tech_date_mb_overload')?></span>
-											<span class="user-company"><?php echo htmlspecialchars($mb_overload)?></span>
+								$mb_overload = ini_get('mbstring.func_overload');
+								if ($mb_overload)
+								{
+									?><li class="ticket-item">
+										<div class="row">
+											<div class="ticket-user">
+												<span class="user-name"><?php echo Core::_('Admin.index_tech_date_mb_overload')?></span>
+												<span class="user-company"><?php echo htmlspecialchars($mb_overload)?></span>
+											</div>
+											<div class="ticket-state bg-darkorange">
+												<i class="fa fa-times"></i>
+											</div>
 										</div>
-										<div class="ticket-state bg-darkorange">
-											<i class="fa fa-times"></i>
-										</div>
-									</div>
-								</li><?php
+									</li><?php
+								}
 							}
 							?>
 							<li class="ticket-item">
@@ -785,7 +788,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 											->onclick(
 												// '$(\'.modal-license\').hide(); '
 												'bootbox.hideAll(); '
-												. $oAdmin_Form_Controller->getAdminSendForm('accountInfo', 'apply')
+												. $oAdmin_Form_Controller->getAdminSendForm(array('action' => 'accountInfo', 'operation' => 'apply'))
 											)
 										)
 								)

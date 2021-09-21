@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Value_Int_Model extends Core_Entity
 {
@@ -162,6 +162,11 @@ class Property_Value_Int_Model extends Core_Entity
 					$oList_Item->icon != ''
 						&& $this->addXmlTag('icon', $oList_Item->icon);
 
+					$oList_Item->color != ''
+						&& $this->addXmlTag('color', $oList_Item->color);
+
+					$this->addXmlTag('list_item_id', $oList_Item->id);
+
 					$oParentListItem = $oList_Item->getParent();
 					$oParentObject = $this;
 
@@ -201,23 +206,26 @@ class Property_Value_Int_Model extends Core_Entity
 
 					$oInformationsystem_Item->shortcut_id && $oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 
-					$oNew_Informationsystem_Item = clone $oInformationsystem_Item;
-
-					$oNew_Informationsystem_Item
-						->id($oInformationsystem_Item->id)
-						->clearEntities()
-						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
-
-					Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
-
-					$oLastReturn = Core_Event::getLastReturn();
-
-					if (!is_null($oLastReturn))
+					if ($oInformationsystem_Item->id)
 					{
-						$oNew_Informationsystem_Item = $oLastReturn;
-					}
+						$oNew_Informationsystem_Item = clone $oInformationsystem_Item;
 
-					$this->addEntity($oNew_Informationsystem_Item);
+						$oNew_Informationsystem_Item
+							->id($oInformationsystem_Item->id)
+							->clearEntities()
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemItem', $this, array($oInformationsystem_Item));
+
+						$oLastReturn = Core_Event::getLastReturn();
+
+						if (!is_null($oLastReturn))
+						{
+							$oNew_Informationsystem_Item = $oLastReturn;
+						}
+
+						$this->addEntity($oNew_Informationsystem_Item);
+					}
 				}
 			}
 		}
@@ -248,23 +256,26 @@ class Property_Value_Int_Model extends Core_Entity
 
 					$oInformationsystem_Group->shortcut_id && $oInformationsystem_Group = $oInformationsystem_Group->Informationsystem_Group;
 
-					$oNew_Informationsystem_Group = clone $oInformationsystem_Group;
-
-					$oNew_Informationsystem_Group
-						->id($oInformationsystem_Group->id)
-						->clearEntities()
-						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
-
-					Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oInformationsystem_Group));
-
-					$oLastReturn = Core_Event::getLastReturn();
-
-					if (!is_null($oLastReturn))
+					if ($oInformationsystem_Group->id)
 					{
-						$oNew_Informationsystem_Group = $oLastReturn;
-					}
+						$oNew_Informationsystem_Group = clone $oInformationsystem_Group;
 
-					$this->addEntity($oNew_Informationsystem_Group);
+						$oNew_Informationsystem_Group
+							->id($oInformationsystem_Group->id)
+							->clearEntities()
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+						Core_Event::notify($this->_modelName . '.onBeforeAddInformationsystemGroup', $this, array($oInformationsystem_Group));
+
+						$oLastReturn = Core_Event::getLastReturn();
+
+						if (!is_null($oLastReturn))
+						{
+							$oNew_Informationsystem_Group = $oLastReturn;
+						}
+
+						$this->addEntity($oNew_Informationsystem_Group);
+					}
 				}
 			}
 		}
@@ -304,26 +315,28 @@ class Property_Value_Int_Model extends Core_Entity
 						}
 					}
 
-
 					$oShop_Item->shortcut_id && $oShop_Item = $oShop_Item->Shop_Item;
 
-					$oNew_Shop_Item = clone $oShop_Item;
-
-					$oNew_Shop_Item
-						->id($oShop_Item->id)
-						->clearEntities()
-						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
-
-					Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Item));
-
-					$oLastReturn = Core_Event::getLastReturn();
-
-					if (!is_null($oLastReturn))
+					if ($oShop_Item->id)
 					{
-						$oNew_Shop_Item = $oLastReturn;
-					}
+						$oNew_Shop_Item = clone $oShop_Item;
 
-					$this->addEntity($oNew_Shop_Item);
+						$oNew_Shop_Item
+							->id($oShop_Item->id)
+							->clearEntities()
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+						Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Item));
+
+						$oLastReturn = Core_Event::getLastReturn();
+
+						if (!is_null($oLastReturn))
+						{
+							$oNew_Shop_Item = $oLastReturn;
+						}
+
+						$this->addEntity($oNew_Shop_Item);
+					}
 				}
 			}
 		}
@@ -356,23 +369,26 @@ class Property_Value_Int_Model extends Core_Entity
 
 					$oShop_Group->shortcut_id && $oShop_Group = $oShop_Group->Shop_Group;
 
-					$oNew_Shop_Group = clone $oShop_Group;
-
-					$oNew_Shop_Group
-						->id($oShop_Group->id)
-						->clearEntities()
-						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
-
-					Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Group));
-
-					$oLastReturn = Core_Event::getLastReturn();
-
-					if (!is_null($oLastReturn))
+					if ($oShop_Group->id)
 					{
-						$oNew_Shop_Group = $oLastReturn;
-					}
+						$oNew_Shop_Group = clone $oShop_Group;
 
-					$this->addEntity($oNew_Shop_Group);
+						$oNew_Shop_Group
+							->id($oShop_Group->id)
+							->clearEntities()
+							->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
+
+						Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Group));
+
+						$oLastReturn = Core_Event::getLastReturn();
+
+						if (!is_null($oLastReturn))
+						{
+							$oNew_Shop_Group = $oLastReturn;
+						}
+
+						$this->addEntity($oNew_Shop_Group);
+					}
 				}
 			}
 		}

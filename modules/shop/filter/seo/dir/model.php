@@ -124,4 +124,21 @@ class Shop_Filter_Seo_Dir_Model extends Core_Entity
 
 		return parent::delete($primaryKey);
 	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_filter_seo_dir.onBeforeGetRelatedSite
+	 * @hostcms-event shop_filter_seo_dir.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }

@@ -387,9 +387,8 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		);
 
 		$position = 1;
-		$total_amount = 0;
 
-		$aShop_Warehouse_Writeoff_Items = $this->Shop_Warehouse_Writeoff_Items->findAll();
+		$aShop_Warehouse_Writeoff_Items = $this->Shop_Warehouse_Writeoff_Items->findAll(FALSE);
 
 		foreach ($aShop_Warehouse_Writeoff_Items as $oShop_Warehouse_Writeoff_Item)
 		{
@@ -398,7 +397,6 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 			$amount = Shop_Controller::instance()->round($oShop_Warehouse_Writeoff_Item->count * $oShop_Warehouse_Writeoff_Item->price);
 
 			$aBarcodes = array();
-
 			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
 			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
 			{
@@ -406,7 +404,6 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 			}
 
 			$node = new stdClass();
-
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
@@ -420,12 +417,7 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 			$aReplace['Items'][] = $node;
 
 			$aReplace['total_count']++;
-
-			$total_amount += $amount;
 		}
-
-		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
-		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -433,5 +425,22 @@ class Shop_Warehouse_Writeoff_Model extends Core_Entity
 		return !is_null($eventResult)
 			? $eventResult
 			: $aReplace;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_warehouse_writeoff.onBeforeGetRelatedSite
+	 * @hostcms-event shop_warehouse_writeoff.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Warehouse->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -161,19 +161,19 @@ class Shop_Item_Property_Controller_Edit extends Property_Controller_Edit
 				// Fast filter
 				if ($this->linkedObject->filter)
 				{
-					$Shop_Filter_Controller = new Shop_Filter_Controller($this->linkedObject);
+					$oShop_Filter_Controller = new Shop_Filter_Controller($this->linkedObject);
 
 					$filter = intval(Core_Array::get($this->_formValues, 'filter'));
 
 					if ($filter)
 					{
-						!$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
-							&& $Shop_Filter_Controller->addProperty($this->_object);
+						!$oShop_Filter_Controller->checkPropertyExist($this->_object->id)
+							&& $oShop_Filter_Controller->addProperty($this->_object);
 					}
 					else
 					{
-						$Shop_Filter_Controller->checkPropertyExist($this->_object->id)
-							&& $Shop_Filter_Controller->removeProperty($this->_object);
+						$oShop_Filter_Controller->checkPropertyExist($this->_object->id)
+							&& $oShop_Filter_Controller->removeProperty($this->_object);
 					}
 				}
 

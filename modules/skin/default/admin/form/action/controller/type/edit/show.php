@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_Form_Action_Controller_Type_Edit_Show
 {
@@ -76,7 +76,7 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 				->class('saveButton')
 				->value(Core::_('admin_form.save'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'save')
+					$this->Admin_Form_Controller->getAdminSendForm(array('operation' => 'save'))
 				);
 
 			$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
@@ -85,7 +85,7 @@ class Skin_Default_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_For
 				->type('submit')
 				->value(Core::_('admin_form.apply'))
 				->onclick(
-					$this->Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					$this->Admin_Form_Controller->getAdminSendForm(array('operation' => 'apply'))
 				);
 
 			$oAdmin_Form_Entity_Buttons

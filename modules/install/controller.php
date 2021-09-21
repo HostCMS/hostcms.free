@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Install
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Install_Controller
 {
@@ -154,11 +154,11 @@ class Install_Controller
 	 * @param string $fileName - имя большого файла изображения
 	 * @param string $smallFileName - имя малого файла изображения
 	 */
-	public function moveInformationsystemItemImage($targetInformationsystemItemId, $sourceInformationsystemId, $sourceInformationsystemItemId, $fileName = NULL, $smallFileName = NULL)
+	public function moveInformationsystemItemImage($targetInformationsystemItemId, $sourceInformationsystemId, $sourceInformationsystemItemId, $fileName = NULL, $smallFileName = NULL, $level = 3)
 	{
 		$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $targetInformationsystemItemId);
 
-		$sDir = $this->getTemplatePath() . "tmp/upload/information_system_{$sourceInformationsystemId}/" . Core_File::getNestingDirPath($sourceInformationsystemItemId, 3) . "/item_{$sourceInformationsystemItemId}/";
+		$sDir = $this->getTemplatePath() . "tmp/upload/information_system_{$sourceInformationsystemId}/" . Core_File::getNestingDirPath($sourceInformationsystemItemId, $level) . "/item_{$sourceInformationsystemItemId}/";
 
 		if (is_null($fileName))
 		{
@@ -245,11 +245,11 @@ class Install_Controller
 	 * @param string $fileName - имя большого файла изображения
 	 * @param string $smallFileName - имя малого файла изображения
 	 */
-	public function moveInformationsystemGroupImage($targetInformationsystemGroupId, $sourceInformationsystemId, $sourceInformationsystemGroupId, $fileName = NULL, $smallFileName = NULL)
+	public function moveInformationsystemGroupImage($targetInformationsystemGroupId, $sourceInformationsystemId, $sourceInformationsystemGroupId, $fileName = NULL, $smallFileName = NULL, $level = 3)
 	{
 		$oInformationsystem_Group = Core_Entity::factory('Informationsystem_Group', $targetInformationsystemGroupId);
 
-		$sDir = $this->getTemplatePath() . "tmp/upload/information_system_{$sourceInformationsystemId}/" . Core_File::getNestingDirPath($sourceInformationsystemGroupId, 3) . "/group_{$sourceInformationsystemGroupId}/";
+		$sDir = $this->getTemplatePath() . "tmp/upload/information_system_{$sourceInformationsystemId}/" . Core_File::getNestingDirPath($sourceInformationsystemGroupId, $level) . "/group_{$sourceInformationsystemGroupId}/";
 
 		if (is_null($fileName))
 		{
@@ -324,7 +324,7 @@ class Install_Controller
 	 * @param $copyInformationsystemItemId - Идентификатор копируемого ИЭ
 	 * @param $copyInformationsystemPropertyValueId - Идентификатор значения доп. свойства типа "Файл" копируемого ИЭ
 	 */
-	public function moveInformationsystemItemPropertyImage($informationsystemItemId, $informationsystemItemPropertyId, $copyInformationsystemId, $copyInformationsystemItemId, $copyInformationsystemPropertyValueId)
+	public function moveInformationsystemItemPropertyImage($informationsystemItemId, $informationsystemItemPropertyId, $copyInformationsystemId, $copyInformationsystemItemId, $copyInformationsystemPropertyValueId, $level = 3)
 	{
 		$informationsystemItemId = intval($informationsystemItemId);
 		$informationsystemItemPropertyId = intval($informationsystemItemPropertyId);
@@ -336,7 +336,7 @@ class Install_Controller
 
 		$item_dir = $oInformationsystem_Item->getItemPath();
 
-		$information_item_property_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemItemId, 3) . "/item_{$copyInformationsystemItemId}/information_items_property_{$copyInformationsystemPropertyValueId}";
+		$information_item_property_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemItemId, $level) . "/item_{$copyInformationsystemItemId}/information_items_property_{$copyInformationsystemPropertyValueId}";
 
 		$ext = $this->getFileExtension($information_item_property_image_from);
 
@@ -359,7 +359,7 @@ class Install_Controller
 			$oValue->file_name = $oValue->file = basename($information_item_property_image_to);
 		}
 
-		$information_item_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemItemId, 3) . "/item_{$copyInformationsystemItemId}/small_information_items_property_{$copyInformationsystemPropertyValueId}";
+		$information_item_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemItemId, $level) . "/item_{$copyInformationsystemItemId}/small_information_items_property_{$copyInformationsystemPropertyValueId}";
 
 		$ext = $this->getFileExtension($information_item_property_small_image_from);
 
@@ -389,7 +389,7 @@ class Install_Controller
 	 * @param $copyInformationsystemGroupId - Идентификатор копируемой ИГ
 	 * @param $copyInformationsystemPropertyValueId - Идентификатор значения доп. свойства типа "Файл" копируемой ИГ
 	 */
-	public function moveInformationsystemGroupPropertyImage($informationsystemGroupId, $informationsystemGroupPropertyId, $copyInformationsystemId, $copyInformationsystemGroupId, $copyInformationsystemPropertyValueId)
+	public function moveInformationsystemGroupPropertyImage($informationsystemGroupId, $informationsystemGroupPropertyId, $copyInformationsystemId, $copyInformationsystemGroupId, $copyInformationsystemPropertyValueId, $level = 3)
 	{
 		$informationsystemGroupId = intval($informationsystemGroupId);
 		$informationsystemGroupPropertyId = intval($informationsystemGroupPropertyId);
@@ -401,7 +401,7 @@ class Install_Controller
 
 		$group_dir = $oInformationsystem_Group->getGroupPath();
 
-		$information_group_property_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemGroupId, 3) . "/group_{$copyInformationsystemGroupId}/information_groups_property_{$copyInformationsystemPropertyValueId}";
+		$information_group_property_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemGroupId, $level) . "/group_{$copyInformationsystemGroupId}/information_groups_property_{$copyInformationsystemPropertyValueId}";
 
 		$ext = $this->getFileExtension($information_group_property_image_from);
 
@@ -425,7 +425,7 @@ class Install_Controller
 			$oValue->file_name = $oValue->file = basename($information_group_property_image_to);
 		}
 
-		$information_group_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemGroupId, 3) . "/item_{$copyInformationsystemGroupId}/small_information_groups_property_{$copyInformationsystemPropertyValueId}";
+		$information_group_property_small_image_from = $this->getTemplatePath() . "tmp/upload/information_system_{$copyInformationsystemId}/" . Core_File::getNestingDirPath($copyInformationsystemGroupId, $level) . "/item_{$copyInformationsystemGroupId}/small_information_groups_property_{$copyInformationsystemPropertyValueId}";
 
 		$ext = $this->getFileExtension($information_group_property_small_image_from);
 
@@ -455,11 +455,11 @@ class Install_Controller
 	 * @param string $fileName - имя большого файла изображения
 	 * @param string $smallFileName - имя малого файла изображения
 	 */
-	public function moveShopItemImage($targetShopItemId, $sourceShopId, $sourceShopItemId, $fileName = NULL, $smallFileName = NULL)
+	public function moveShopItemImage($targetShopItemId, $sourceShopId, $sourceShopItemId, $fileName = NULL, $smallFileName = NULL, $level = 3)
 	{
 		$oShop_Item = Core_Entity::factory('Shop_Item', $targetShopItemId);
 
-		$sDir = $this->getTemplatePath() . "tmp/upload/shop_{$sourceShopId}/" . Core_File::getNestingDirPath($sourceShopItemId, 3) . "/item_{$sourceShopItemId}/";
+		$sDir = $this->getTemplatePath() . "tmp/upload/shop_{$sourceShopId}/" . Core_File::getNestingDirPath($sourceShopItemId, $level) . "/item_{$sourceShopItemId}/";
 
 		if (is_null($fileName))
 		{
@@ -546,11 +546,11 @@ class Install_Controller
 	 * @param string $fileName - имя большого файла изображения
 	 * @param string $smallFileName - имя малого файла изображения
 	 */
-	public function moveShopGroupImage($shopGroupId, $copyShopId, $copyGroupId, $fileName = NULL, $smallFileName = NULL)
+	public function moveShopGroupImage($shopGroupId, $copyShopId, $copyGroupId, $fileName = NULL, $smallFileName = NULL, $level = 3)
 	{
 		$oShop_Group = Core_Entity::factory('Shop_Group', $shopGroupId);
 
-		$sDir = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyGroupId, 3) . "/group_{$copyGroupId}/";
+		$sDir = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyGroupId, $level) . "/group_{$copyGroupId}/";
 
 		if (is_null($fileName))
 		{
@@ -639,12 +639,12 @@ class Install_Controller
 	 * @param $copyShopItemId - идентификатор копируемого товара
 	 * @param $copyShopItemPropertyId - идентификатор доп. свойства типа "Файл" копируемого товара
 	 */
-	public function moveShopItemPropertyImage($shopItemId, $shopItemPropertyId, $copyShopId, $copyShopItemId, $copyShopItemPropertyId)
+	public function moveShopItemPropertyImage($shopItemId, $shopItemPropertyId, $copyShopId, $copyShopItemId, $copyShopItemPropertyId, $level = 3)
 	{
 		$oShop_Item = Core_Entity::factory('Shop_Item', $shopItemId);
 		$item_dir = $oShop_Item->getItemPath();
 
-		$shop_item_property_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopItemId, 3) . "/item_{$copyShopItemId}/shop_property_file_{$copyShopItemId}_{$copyShopItemPropertyId}";
+		$shop_item_property_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopItemId, $level) . "/item_{$copyShopItemId}/shop_property_file_{$copyShopItemId}_{$copyShopItemPropertyId}";
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($shop_item_property_image_from);
@@ -668,7 +668,7 @@ class Install_Controller
 			$oValue->file_name = $oValue->file = basename($shop_item_property_image_to);
 		}
 
-		$shop_item_property_small_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopItemId, 3) . "/item_{$copyShopItemId}/small_shop_property_file_{$copyShopItemId}_{$copyShopItemPropertyId}";
+		$shop_item_property_small_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopItemId, $level) . "/item_{$copyShopItemId}/small_shop_property_file_{$copyShopItemId}_{$copyShopItemPropertyId}";
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($shop_item_property_small_image_from);
@@ -701,12 +701,12 @@ class Install_Controller
 	 * @param $copyShopGroupId - идентификатор копируемой группы товара
 	 * @param $copyShopGroupPropertyId - идентификатор доп. свойства типа "Файл" копируемой группы
 	 */
-	public function moveShopGroupPropertyImage($shopGroupId, $shopGroupPropertyId, $copyShopId, $copyShopGroupId, $copyShopGroupPropertyId)
+	public function moveShopGroupPropertyImage($shopGroupId, $shopGroupPropertyId, $copyShopId, $copyShopGroupId, $copyShopGroupPropertyId, $level = 3)
 	{
 		$oShop_Group = Core_Entity::factory('Shop_Group', $shopGroupId);
 		$group_dir = $oShop_Group->getGroupPath();
 
-		$shop_group_property_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopGroupId, 3) . "/group_{$copyShopGroupId}/shop_property_file_{$copyShopGroupId}_{$copyShopGroupPropertyId}";
+		$shop_group_property_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopGroupId, $level) . "/group_{$copyShopGroupId}/shop_property_file_{$copyShopGroupId}_{$copyShopGroupPropertyId}";
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($shop_group_property_image_from);
@@ -730,7 +730,7 @@ class Install_Controller
 			$oValue->file_name = $oValue->file = basename($shop_group_property_image_to);
 		}
 
-		$shop_group_property_small_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopGroupId, 3) . "/group_{$copyShopGroupId}/small_shop_property_file_{$copyShopGroupId}_{$copyShopGroupPropertyId}";
+		$shop_group_property_small_image_from = $this->getTemplatePath() . "tmp/upload/shop_{$copyShopId}/" . Core_File::getNestingDirPath($copyShopGroupId, $level) . "/group_{$copyShopGroupId}/small_shop_property_file_{$copyShopGroupId}_{$copyShopGroupPropertyId}";
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($shop_group_property_small_image_from);
@@ -764,7 +764,7 @@ class Install_Controller
 	 * @param $copyStructurePropertyValueId - Идентификатор значения доп. свойства, значение которого копируется
 	 */
 
-	public function MoveStructureItemPropertyImage($structureId, $structurePropertyImageId, $copySiteId, $copyStructureId, $copyStructurePropertyValueId)
+	public function MoveStructureItemPropertyImage($structureId, $structurePropertyImageId, $copySiteId, $copyStructureId, $copyStructurePropertyValueId, $level = 3)
 	{
 		$structureId = intval($structureId);
 		$structurePropertyImageId = intval($structurePropertyImageId);
@@ -775,7 +775,7 @@ class Install_Controller
 		$oStructure = Core_Entity::factory('Structure', $structureId);
 		$structure_dir = $oStructure->getDirPath();
 
-		$structure_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, 3) . '/structure_' . $copyStructureId . '/structure_property_image_' . $copyStructurePropertyValueId;
+		$structure_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, $level) . '/structure_' . $copyStructureId . '/structure_property_image_' . $copyStructurePropertyValueId;
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($structure_file_path_from);
@@ -799,7 +799,7 @@ class Install_Controller
 			$oValue->file_name = $oValue->file = basename($structure_file_path_to);
 		}
 
-		$structure_small_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, 3) . '/structure_' . $copyStructureId . '/small_structure_property_image_' . $copyStructurePropertyValueId;
+		$structure_small_file_path_from = $this->GetTemplatePath() . "tmp/upload/structure_{$copySiteId}/" . Core_File::getNestingDirPath($copyStructureId, $level) . '/structure_' . $copyStructureId . '/small_structure_property_image_' . $copyStructurePropertyValueId;
 
 		// Получаем расширение файла
 		$ext = $this->getFileExtension($structure_small_file_path_from);

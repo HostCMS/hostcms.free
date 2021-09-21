@@ -42,8 +42,6 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
-			//$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			//$this->_preloadValues['expired'] = Core_Date::timestamp2sql(strtotime('+1 week', time()));
 		}
 	}
 
@@ -68,11 +66,13 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$color = 'default';
 		}
-		elseif($this->datetime <= $datetime && $this->expired >= $datetime && $value) // Бонус доступен и НЕ потрачен
+		// Бонус доступен и НЕ потрачен
+		elseif($this->datetime <= $datetime && $this->expired >= $datetime && floatval($value))
 		{
 			$color = 'palegreen';
 		}
-		else // Бонус доступен и потрачен
+		// Бонус доступен и потрачен
+		else
 		{
 			$color = 'pink';
 		}
@@ -127,5 +127,31 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 
 			return '<a href="/admin/shop/order/index.php?hostcms[action]=edit&hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '" onclick="$.adminLoad({path: \'/admin/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $oShop_Order->id . ']=1&shop_id=' . $oShop_Order->Shop->id . '\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oShop_Order->invoice) . '</a>';
 		}
+	}
+
+	/**
+	 * Change active
+	 */
+	public function changeActive()
+	{
+		$this->active = 1 - $this->active;
+		return $this->save();
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_discountcard_bonus.onBeforeGetRelatedSite
+	 * @hostcms-event shop_discountcard_bonus.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Discountcard->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -146,12 +146,10 @@ class Shop_Filter_Controller
 			? $aConfig['storageEngine']
 			: 'MyISAM';
 
-		$query = "
-			CREATE TABLE IF NOT EXISTS `" . $this->getTableName() .  "` (
-			  {$sColumns}
-			  , {$sIndexes}
-			) ENGINE={$sEngine} DEFAULT CHARSET=utf8 AUTO_INCREMENT=0;
-		";
+		$query = "CREATE TABLE IF NOT EXISTS `" . $this->getTableName() . "` (" .
+			"\n{$sColumns}," .
+			"\n{$sIndexes}" .
+			"\n) ENGINE={$sEngine} DEFAULT CHARSET=utf8 AUTO_INCREMENT=0";
 
 		$oCore_DataBase->query($query);
 
@@ -169,7 +167,7 @@ class Shop_Filter_Controller
 	 */
 	public function dropTable()
 	{
-		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() .  "`");
+		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() . "`");
 
 		return $this;
 	}
@@ -192,7 +190,7 @@ class Shop_Filter_Controller
 			$aIndexes = Core_DataBase::instance()->getIndexes($sTableName);
 
 			// A table can contain a maximum of 64 secondary indexes.
-			if (count($aIndexes) - 1 < 64)
+			if (count($aIndexes) < 64)
 			{
 				Core_DataBase::instance()->setQueryType(5)->query("ALTER TABLE `{$sTableName}` ADD INDEX {$aPropertySql['index']}");
 			}
@@ -275,11 +273,11 @@ class Shop_Filter_Controller
 	}
 
 	/**
-	 * Fill table rows
-	 * @param object $oProperty Property_Model object
+	 * Remove table rows
+	 * @param Shop_Item_Model $oShop_Item
 	 * @return self
 	 */
-	public function fill(Shop_Item_Model $oShop_Item)
+	public function remove(Shop_Item_Model $oShop_Item)
 	{
 		$tableName = $this->getTableName();
 
@@ -288,7 +286,24 @@ class Shop_Filter_Controller
 			->where('shop_item_id', '=', $oShop_Item->id)
 			->execute();
 
-		if ($oShop_Item->active)
+		return $this;
+	}
+
+	/**
+	 * Fill table rows
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	public function fill(Shop_Item_Model $oShop_Item)
+	{
+		$tableName = $this->getTableName();
+
+		// Remove All Rows For Item
+		$this->remove($oShop_Item);
+
+		if ($oShop_Item->active
+			&& (!$oShop_Item->modification_id || $oShop_Item->Modification->active)
+		)
 		{
 			/*Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)

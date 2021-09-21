@@ -135,7 +135,7 @@ return array(
 	'send_mail' => "Отправить письмо о заказе",
 	'most_ordered' => "Популярные товары за %s дней (в единицах)",
 	'popular_brands' => "Популярные бренды за %s дней (в единицах)",
-	'popover_title' => "Заказ № %s",
+	'popover_title' => 'Заказ №%1$s от %2$s',
 	'notification_new_order' => 'Новый заказ №%s',
 	'notification_paid_order' => 'Оплачен заказ №%s',
 	'notification_new_order_description' => '%1$s на сумму %2$s',

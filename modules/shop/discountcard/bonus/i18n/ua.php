@@ -30,4 +30,6 @@ return array(
 	'description' => 'Коментар',
 	'shop_discountcard_bonus_type_id' => 'Тип зарахування',
 	'apply_success' => 'Інформація про бонус змінена!',
+	'active' => 'Активність',
+	'changeActive_success' => 'Інформація успішно змінена'
 );

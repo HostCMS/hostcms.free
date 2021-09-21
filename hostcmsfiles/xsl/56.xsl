@@ -46,7 +46,7 @@
 			<xsl:if test="shop_item/node()">
 			<span><xsl:text> → </xsl:text></span>
 				<a href="{shop_item/url}">
-					<xsl:value-of disable-output-escaping="yes" select="shop_item/name"/>
+					<xsl:value-of select="shop_item/name"/>
 				</a>
 			</xsl:if>
 			

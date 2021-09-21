@@ -73,7 +73,11 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 	{
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
-		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
+		$sAdmin_View = $this->_Admin_Form_Controller->getWindowId() == 'id_content'
+			? $this->_Admin_Form_Controller->Admin_View
+			: Admin_View::getClassName('Admin_Internal_View');
+
+		$oAdmin_View = Admin_View::create($sAdmin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
@@ -189,13 +193,13 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 		?><div class="DTTTFooter">
 			<div class="row">
-				<div class="col-xs-12 <?php echo $sShowNavigation ? 'col-sm-6 col-md-8' : ''?>">
+				<div class="col-xs-12 <?php echo $sShowNavigation ? 'col-sm-6 col-md-7 col-lg-8' : ''?>">
 					<?php $this->bottomActions()?>
 				</div>
 				<?php
 				if ($sShowNavigation)
 				{
-					?><div class="col-xs-12 col-sm-6 col-md-4">
+					?><div class="col-xs-12 col-sm-6 col-md-5 col-lg-4">
 						<?php $oAdmin_Form_Controller->pageNavigation()?>
 					</div><?php
 				}
@@ -586,10 +590,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 			// Устанавливаем ограничения на источники
 			$oAdmin_Form_Controller->setDatasetConditions();
-			
-			// @TODO method_exists() remove after 6.9.8
-			method_exists($oAdmin_Form_Controller, 'setDatasetLimits')
-				&& $oAdmin_Form_Controller->setDatasetLimits();
+
+			$oAdmin_Form_Controller->setDatasetLimits();
 
 			$aDatasets = $oAdmin_Form_Controller->getDatasets();
 			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
@@ -1004,6 +1006,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													?>&nbsp;<?php
 												}
 											break;
+											case 11: // Текстовое поле
+												if (!is_null($value))
+												{
+													?><textarea name="<?php echo $element_name?>" id="<?php echo $element_name?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" onkeydown="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>'); $('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight()" class="form-control"><?php echo $value?></textarea><?php
+												}
+											break;
 											default: // Тип не определен.
 												?>&nbsp;<?php
 											break;
@@ -1102,7 +1110,10 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 								$mReturn = Core_Event::getLastReturn();
 								$onclick = is_null($mReturn)
-									? $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, NULL, $datasetKey, $entityKey)
+									? ($o_Admin_Form_Action->modal
+										? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, 'modal', $datasetKey, $entityKey)
+										: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, NULL, $datasetKey, $entityKey)
+									)
 									: $mReturn;
 
 								// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо

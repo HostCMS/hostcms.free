@@ -6,7 +6,7 @@
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Structure',
@@ -45,7 +45,7 @@ return array(
 	'seo_keywords' => 'Keywords',
 	'url' => '<acronym title="Website section can be an external link">Link to another file</acronym>',
 	'sorting' => 'Sort',
-	'path' => '<acronym title="Part of path from the parent structure,  e.g. about-company">Path</acronym>',
+	'path' => '<acronym title="Part of path from the parent structure, e.g. about-company">Path</acronym>',
 	'type' => 'Section type',
 	'static_page' => 'Page',
 	'typical_dynamic_page' => 'Sample dynamic page',

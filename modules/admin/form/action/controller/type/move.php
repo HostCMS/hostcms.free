@@ -146,38 +146,37 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 					->value("
 						$('[name = destinationName]').autocomplete({
-							  source: function(request, response) {
+							source: function(request, response) {
 								$.ajax({
-								  url: '{$this->autocompletePath}&entity_id={$this->autocompleteEntityId}&exclude={$exclude}&mode=' + $('select#inputMode').val(),
-								  dataType: 'json',
-								  data: {
-									queryString: request.term
-								  },
-								  success: function( data ) {
-									response( data );
-								  }
+									url: '{$this->autocompletePath}&entity_id={$this->autocompleteEntityId}&exclude={$exclude}&mode=' + $('select#inputMode').val(),
+									dataType: 'json',
+									data: {
+										queryString: request.term
+									},
+									success: function(data) {
+										response(data);
+									}
 								});
-							  },
-							  minLength: 1,
-							  create: function() {
-								$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							},
+							minLength: 1,
+							create: function() {
+								$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 									return $('<li></li>')
 										.data('item.autocomplete', item)
 										.append($('<a>').text(item.label))
 										.appendTo(ul);
 								}
-
-								 $(this).prev('.ui-helper-hidden-accessible').remove();
-							  },
-							  select: function( event, ui ) {
+								$(this).prev('.ui-helper-hidden-accessible').remove();
+							},
+							select: function(event, ui) {
 								$('[name = destinationId]').val(ui.item.id);
-							  },
-							  open: function() {
+							},
+							open: function() {
 								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-							  },
-							  close: function() {
+							},
+							close: function() {
 								$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-							  }
+							}
 						});
 					");
 
@@ -199,7 +198,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 				foreach ($checkedItems as $key => $value)
 				{
 					$oCore_Html_Entity_Form->add(
-						 Core::factory('Core_Html_Entity_Input')
+						Core::factory('Core_Html_Entity_Input')
 							->name('hostcms[checked][' . $datasetKey . '][' . $key . ']')
 							->value(1)
 							->type('hidden')
@@ -216,7 +215,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 				->onclick(
 					//'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					'bootbox.hideAll(); '
-					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					. $this->_Admin_Form_Controller->getAdminSendForm(array('operation' => 'apply'))
 				)
 				->controller($this->_Admin_Form_Controller);
 

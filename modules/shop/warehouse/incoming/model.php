@@ -383,7 +383,6 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 		);
 
 		$position = 1;
-		$total_amount = 0;
 
 		$aShop_Warehouse_Incoming_Items = $this->Shop_Warehouse_Incoming_Items->findAll();
 
@@ -416,12 +415,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 			$aReplace['Items'][] = $node;
 
 			$aReplace['total_count']++;
-
-			$total_amount += $amount;
 		}
-
-		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
-		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -429,5 +423,22 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 		return !is_null($eventResult)
 			? $eventResult
 			: $aReplace;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_warehouse_incoming.onBeforeGetRelatedSite
+	 * @hostcms-event shop_warehouse_incoming.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Warehouse->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

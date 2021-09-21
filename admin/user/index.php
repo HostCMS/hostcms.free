@@ -419,7 +419,8 @@ if (Core_Auth::logged())
 				$(function() {
 					 setTimeout(function() {
 						// Close modal window
-						$('.another-time-answer').parents('.modal').remove();
+						// $('.another-time-answer').parents('.modal').remove();
+						bootbox.hideAll();
 
 						var month = +$('[name="month"]').val(),
 							year = +$('[name="year"]').val();

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,10 +28,6 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->addSkipColumn('favicon');
 
 		parent::setObject($object);
-
-		$oSiteTabAccessRights = Admin_Form_Entity::factory('Tab')
-			->caption(Core::_('Site.site_chmod'))
-			->name('AccessRights');
 
 		$oSiteTabFormats = Admin_Form_Entity::factory('Tab')
 			->caption(Core::_('Site.site_dates'))
@@ -61,8 +57,8 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab->delete($this->getField('csp'));
 
-		$this->addTabAfter($oSiteTabAccessRights, $oMainTab)
-			->addTabAfter($oSiteTabFormats, $oSiteTabAccessRights)
+		$this
+			->addTabAfter($oSiteTabFormats, $oMainTab)
 			->addTabAfter($oSiteTabErrors, $oSiteTabFormats)
 			->addTabAfter($oSiteTabRobots, $oSiteTabErrors)
 			->addTabAfter($oSiteTabCsp, $oSiteTabRobots)
@@ -92,9 +88,6 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oSiteTabAccessRights
-			->add($oSiteTabAccessRightsRow1 = Admin_Form_Entity::factory('Div')->class('row'));
-
 		$oSiteTabFormats
 			->add($oSiteTabFormatsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabFormatsRow2 = Admin_Form_Entity::factory('Div')->class('row'));
@@ -117,10 +110,12 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oSiteTabCacheRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabCacheRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabCacheRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+			
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		/* $oMainRow1 */
 		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
-		$oMainTab->move($this->getField('https')->onchange('$("input[name = set_https]").parents(".form-group").toggleClass("hidden");')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
+		$oMainTab->move($this->getField('https')->onchange('$("#' . $windowId . ' input[name = set_https]").parents(".form-group").toggleClass("hidden");')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
 
 		$oSetHttps = Admin_Form_Entity::factory('Checkbox')
 			->name('set_https')
@@ -219,8 +214,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		/* $oMainRow7 */
 		$sFormPath = $this->_Admin_Form_Controller->getPath();
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
-
+		
 		$oFavicon = Admin_Form_Entity::factory('File');
 		$oFavicon
 			->type('file')
@@ -244,12 +238,6 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 
 		$oMainRow7->add($oFavicon);
-
-		/* $oSiteTabAccessRightsRow1 */
-		$this->getField('chmod')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-		$oMainTab->move($this->getField('chmod'), $oSiteTabAccessRightsRow1);
-		$this->getField('files_chmod')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
-		$oMainTab->move($this->getField('files_chmod'), $oSiteTabAccessRightsRow1);
 
 		/* $oSiteTabFormatsRow1 */
 		$this->getField('date_format')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -423,16 +411,16 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						switch (aChunks[2])
 						{
 							case 'none':
-								$('input[name *= ' + $(object).data('parent') + ']').not(object).prop('disabled', function(i, v) { return !v; });
+								$('#{$windowId} input[name *= ' + $(object).data('parent') + ']').not(object).prop('disabled', function(i, v) { return !v; });
 							break;
 							case 'all':
-								$('input[name *= ' + $(object).data('parent') + ']:not([name *= -data], [name *= -blob])').not(object).prop('disabled', function(i, v) { return !v; });
+								$('#{$windowId} input[name *= ' + $(object).data('parent') + ']:not([name *= -data], #{$windowId} [name *= -blob])').not(object).prop('disabled', function(i, v) { return !v; });
 							break;
 						}
 					}
 
-					var selector = $('input[name *= -none], input[name *= -all]'),
-						checkedSelector = $('input[name *= -none]:checked, input[name *= -all]:checked');
+					var selector = $('#{$windowId} input[name *= -none], #{$windowId} input[name *= -all]'),
+						checkedSelector = $('#{$windowId} input[name *= -none]:checked, #{$windowId} input[name *= -all]:checked');
 
 					selector.on('click', function(){
 						disableInputs(this);

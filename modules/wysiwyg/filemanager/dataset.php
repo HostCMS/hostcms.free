@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Wysiwyg
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 {
@@ -74,7 +74,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	public function getCount()
 	{
-		if (!$this->_count)
+		if (is_null($this->_count))
 		{
 			/*is_null($this->_objects) && */$this->_loadFiles();
 			$this->_count = count($this->_objects);
@@ -84,17 +84,12 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array|NULL
-	 */
-	protected $_objects = NULL;
-
-	/**
 	 * Load objects
 	 * @return array
 	 */
 	public function load()
 	{
+		//!is_array($this->_objects) && $this->_loadFiles();
 		return is_array($this->_objects)
 			? array_slice($this->_objects, $this->_offset, $this->_limit)
 			: array();
@@ -106,6 +101,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 	 */
 	protected function _loadFiles()
 	{
+//echo 777; echo "=", var_dump($this->_objects);
 		$this->_objects = array();
 
 		// Default sorting field
@@ -129,6 +125,18 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		{
 			if ($dh = opendir($this->_path))
 			{
+				$aConditions = array();
+				foreach ($this->_conditions as $condition)
+				{
+					foreach ($condition as $operator => $args)
+					{
+						if ($operator == 'where')
+						{
+							$aConditions[] = $args;
+						}
+					}
+				}
+										
 				// Читаем файлы и каталоги из данного каталога
 				while (($file = readdir($dh)) !== FALSE)
 				{
@@ -158,29 +166,29 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 							$Wysiwyg_Filemanager_File->hash = sha1($Wysiwyg_Filemanager_File->name);
 
 							$bAdd = TRUE;
-							foreach ($this->_conditions as $condition)
+							foreach ($aConditions as $args)
 							{
-								foreach ($condition as $operator => $args)
+								if ($args[0] == 'name')
 								{
-									if ($operator == 'where' && $args[0] == 'name')
+									$value = $Wysiwyg_Filemanager_File->{$args[0]};
+
+									if ($args[1] == '=' || $args[1] == 'LIKE')
 									{
-										$value = $Wysiwyg_Filemanager_File->{$args[0]};
-
-										if ($args[1] == 'LIKE')
+										if (strpos($args[2], '%') === FALSE && strpos($args[2], '_') === FALSE)
 										{
-											if (strpos($args[2], '%') === FALSE && strpos($args[2], '_') === FALSE)
-											{
-												$value !== $args[2]
-													&& $bAdd = FALSE;
-											}
-											else
-											{
-												$pattern = preg_quote($args[2], '/');
-												$pattern = str_replace(array('%', '_'), array('.*?', '.'), $pattern);
+											$value !== $args[2]
+												&& $bAdd = FALSE;
+										}
+										else
+										{
+											$pattern = preg_quote($args[2], '/');
+											$pattern = preg_replace('/([^\\\])(_)/', '\1.', $pattern);
+											$pattern = preg_replace('/([^\\\])(%)/', '\1.*?', $pattern);
+											$pattern = str_replace(array('\\\\%', '\\\\_'), array('%', '_'), $pattern);
+											//$pattern = str_replace(array('%', '_'), array('.*?', '.'), $pattern);
 
-												!preg_match('/^' . $pattern . '$/', $value)
-													&& $bAdd = FALSE;
-											}
+											!preg_match('/^' . $pattern . '$/', $value)
+												&& $bAdd = FALSE;
 										}
 									}
 								}
@@ -234,7 +242,7 @@ class Wysiwyg_Filemanager_Dataset extends Admin_Form_Dataset
 		}
 		else
 		{
-			is_null($this->_objects) && $this->_loadFiles();
+			!is_array($this->_objects) && $this->_loadFiles();
 
 			if (isset($this->_objects[$primaryKey]))
 			{

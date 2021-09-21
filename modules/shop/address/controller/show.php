@@ -14,7 +14,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Address_Controller_Show extends Core_Controller
 {
@@ -125,7 +125,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 			Core_Entity::factory('Shop_Country')->getAllByActive(1, FALSE)
 		);
 
-		if (!is_null($this->_Siteuser) && strlen($this->_Siteuser->country))
+		/*if (!is_null($this->_Siteuser) && strlen($this->_Siteuser->country))
 		{
 			$oCurrent_Shop_Country = Core_Entity::factory('Shop_Country')->getByName($this->_Siteuser->country);
 			if (!is_null($oCurrent_Shop_Country))
@@ -173,7 +173,7 @@ class Shop_Address_Controller_Show extends Core_Controller
 					);
 				}
 			}
-		}
+		}*/
 
 		return parent::show();
 	}

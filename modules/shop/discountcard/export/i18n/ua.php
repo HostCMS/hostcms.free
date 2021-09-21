@@ -7,4 +7,5 @@ return array(
 	'amount' => 'Накопичена сума',
 	'level' => 'Рівень',
 	'discount' => 'Знижка, %',
+	'active' => 'Активність',
 );

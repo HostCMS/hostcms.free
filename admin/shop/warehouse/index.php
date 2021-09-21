@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -47,32 +47,19 @@ if (!is_null(Core_Array::getPost('load_prices')))
 	$shop_price_id = intval(Core_Array::getPost('shop_price_id'));
 	$aItems = Core_Array::getPost('items');
 
+	$Shop_Item_Controller = new Shop_Item_Controller();
+
 	foreach ($aItems as $shop_item_id)
 	{
 		$oShop_Item = Core_Entity::factory('Shop_Item')->getById($shop_item_id);
 
 		if (!is_null($oShop_Item))
 		{
-			/*if ($shop_price_id)
-			{
-				$price = '0.00';
-
-				$oShop_Item_Price = $oShop_Item->Shop_Item_Prices->getByShop_price_id($shop_price_id);
-
-				if (!is_null($oShop_Item_Price))
-				{
-					$price = $oShop_Item_Price->value;
-				}
-			}
-			else
-			{
-				$price = $oShop_Item->price;
-			}*/
-
 			$price = $oShop_Item->loadPrice($shop_price_id);
+			$aPrices = $Shop_Item_Controller->calculatePriceInItemCurrency($price, $oShop_Item);
 
 			$aJSON[$oShop_Item->id] = array(
-				'price' => $price
+				'price' => $aPrices['price_tax']
 			);
 		}
 

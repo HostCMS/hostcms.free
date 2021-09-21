@@ -9,7 +9,7 @@ return array(
 	'description' => 'Description',
 	'code' => 'Code',
 	'sorting' => 'Sorting',
-	'edit_success'  => 'Nomenclature code information added successfully!',
+	'edit_success' => 'Nomenclature code information added successfully!',
 	'markDeleted_success' => 'Nomenclature code information deleted successfully!',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',

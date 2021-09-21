@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 {
@@ -68,7 +68,7 @@ class Shop_Currency_Driver_Cbrf extends Shop_Currency_Driver
 				{
 					$exchangeRate = 1 / $aExchangeRate[$oDefaultCurrency->code];
 
-					//  RUB-to-RUB
+					// RUB-to-RUB
 					$aExchangeRate['RUB'] = $aExchangeRate['RUR'] = 1;
 				}
 				else

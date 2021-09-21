@@ -30,8 +30,10 @@ class Shop_Item_Set_Controller_Delete extends Admin_Form_Action_Controller
 				$oShop_Item_Set->delete();
 			}
 
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			$this->_Admin_Form_Controller->addMessage(
-				"<script>$('.set-item-table tr#{$set_item_id}').remove();</script>"
+				"<script>$('#{$windowId} .set-item-table tr#{$set_item_id}').remove();</script>"
 			);
 		}
 

@@ -35,6 +35,8 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -122,10 +124,11 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 			->divAttr(array('class' => ''));
 
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
-			->value('$("#user_id").selectUser({
-						placeholder: "",
-						language: "' . Core_i18n::instance()->getLng() . '"
-					});'
+			->value('$("#' . $windowId . ' #user_id").selectUser({
+					placeholder: "",
+					language: "' . Core_i18n::instance()->getLng() . '",
+					dropdownParent: $("#' . $windowId . '")
+				});'
 			);
 
 		$oMainRow3
@@ -235,7 +238,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		}
 
 		$itemTable .= '
-						<th rowspan="2" scope="col">  </th>
+						<th rowspan="2" scope="col"> </th>
 					</tr>
 					<tr>
 						<th class="toggle-shop-price-0 ' . $hiddenPrice0 . '">' . Core::_('Shop_Price_Setting.old') . '</th>
@@ -291,7 +294,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 						. $oShop->Structure->getPath()
 						. $oShop_Item->getPath();
 
-					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+					$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa fa-external-link"></i></a>';
 				}
 
 				$itemTable .= '
@@ -371,13 +374,14 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("$('.add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
-				$('.shop-item-table > tbody').append(
+			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
+				$('#{$windowId} .shop-item-table > tbody').append(
 					$('<tr id=\"shop-item-' + ui.item.id + '\" data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td>' + ui.item.currency + '</td></tr>')
 				);
 
 				var aExistItems = [];
-				$.each($('input[name ^= shop_price_]:checked'), function (index, item) {
+
+				$.each($('#{$windowId} input[name ^= shop_price_]:checked'), function (index, item) {
 					aExistItems.push(parseInt($(this).prop('id')));
 				});
 
@@ -394,25 +398,25 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 								? 'disabled'
 								: '';
 
-						$('.shop-item-table > tbody tr:last-child').append($('<td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' old-price-' + shop_price_id + ' ' + hidden + '\">' + old_price + '</td><td class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><span class=\"percent-diff-' + shop_price_id + '\"></span></td><td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><input data-shop-price-id=\"' + shop_price_id + '\" class=\"set-item-new-price form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_new_price[' + ui.item.id + '][' + shop_price_id + ']\" value=\"\" ' + disabled + ' /></td>'));
+						$('#{$windowId} .shop-item-table > tbody tr:last-child').append($('<td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' old-price-' + shop_price_id + ' ' + hidden + '\">' + old_price + '</td><td class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><span class=\"percent-diff-' + shop_price_id + '\"></span></td><td width=\"80\" class=\"toggle-shop-price-' + shop_price_id + ' ' + hidden + '\"><input data-shop-price-id=\"' + shop_price_id + '\" class=\"set-item-new-price form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_new_price[' + ui.item.id + '][' + shop_price_id + ']\" value=\"\" ' + disabled + ' /></td>'));
 					});
 				}
 
-				$('.shop-item-table > tbody tr:last-child').append($('<td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td>'));
+				$('#{$windowId} .shop-item-table > tbody tr:last-child').append($('<td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td>'));
 
 				ui.item.value = '';
 
 				$.prepareShopPrices();
 
-				$('.shop-item-table tr:last-child').find('.set-item-new-price').focus();
-				$.focusAutocomplete($('.set-item-new-price'));
-			  });
+				$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-new-price').focus();
+				$.focusAutocomplete($('#{$windowId} .set-item-new-price'));
+			});
 
-			$.changeShopPrices($('.set-item-new-price'));
+			$.changeShopPrices($('#{$windowId} .set-item-new-price'));
 
 			$.prepareShopPrices();
 
-			$.focusAutocomplete($('.set-item-new-price'));
+			$.focusAutocomplete($('#{$windowId} .set-item-new-price'));
 		");
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);

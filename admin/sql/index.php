@@ -100,7 +100,7 @@ $formSettings = Core_Array::getPost('hostcms', array())
 
 if ($formSettings['action'] == 'duplicate')
 {
-	$iCount = 0;
+	$iCountQueries = 0;
 
 	$oCore_DataBase = Core_DataBase::instance();
 
@@ -147,7 +147,7 @@ if ($formSettings['action'] == 'duplicate')
 				$oCore_DataBase->setQueryType(5)
 					->query("ALTER TABLE {$sTableName} DROP INDEX " . $oCore_DataBase->quoteColumnName($sIndexName));
 
-				$iCount++;
+				$iCountQueries++;
 			}
 		}
 		catch (Exception $e)
@@ -156,7 +156,7 @@ if ($formSettings['action'] == 'duplicate')
 		}
 	}
 
-	if ($iCount == 0)
+	if ($iCountQueries == 0)
 	{
 		Core_Message::show(Core::_('Sql.no_duplicate'), 'info');
 	}
@@ -164,7 +164,8 @@ if ($formSettings['action'] == 'duplicate')
 
 $sText = Core_Array::getPost('text');
 
-$iCount = 0;
+$iCountQueries = 0;
+
 try
 {
 	// Текущий пользователь
@@ -192,7 +193,7 @@ try
 				->status(Core_Log::$MESSAGE)
 				->write('Sql Query: ' . $sText);
 
-			$iCount = Sql_Controller::instance()->execute($sText);
+			$iCountQueries = Sql_Controller::instance()->execute($sText);
 
 			$fTime = Core::getmicrotime() - $startTime;
 
@@ -200,15 +201,16 @@ try
 
 			$iColumnCount = Core_DataBase::instance()->getColumnCount();
 
-			$iCount
-				&& Core_Message::show(Core::_('Sql.success_message', $iCount));
+			$iCountQueries == 1
+				? Core_Message::show(Core::_('Sql.success_message_with_affected', $iCountQueries, $iAffectedRows))
+				: Core_Message::show(Core::_('Sql.success_message', $iCountQueries));
 
 			// It was Select Query
 			if ($iColumnCount)
 			{
 				$iLimit = 30;
 
-				if ($iAffectedRows && $iCount == 1)
+				if ($iAffectedRows && $iCountQueries == 1)
 				{
 					$oTable = Core::factory('Core_Html_Entity_Table')
 						->class('admin-table table table-bordered table-hover table-striped sql-table')
@@ -277,22 +279,29 @@ catch (Exception $e)
 	Core_Message::show($e->getMessage(), 'error');
 }
 
-Core_Message::show(Core::_('sql.warning'));
+Core_Message::show(Core::_('sql.warning'), 'warning');
+
+$oTextarea_Sql = Admin_Form_Entity::factory('Textarea')
+	->name('text')
+	->caption(Core::_('sql.text'))
+	->rows(25)
+	->divAttr(array('class' => 'form-group col-xs-12'))
+	->value(
+		($iCountQueries == 0 || mb_strlen($sText) < 10240)
+			? $sText
+			: NULL
+	);
+
+$aTmpOptions = $oTextarea_Sql->syntaxHighlighterOptions;
+$aTmpOptions['mode'] = 'ace/mode/sql';
+
+$oTextarea_Sql
+	->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
+	->syntaxHighlighterOptions($aTmpOptions);
 
 $oMainTab = Admin_Form_Entity::factory('Tab')->name('main');
 $oMainTab
-	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
-		Admin_Form_Entity::factory('Textarea')
-			->name('text')
-			->caption(Core::_('sql.text'))
-			->rows(15)
-			->divAttr(array('class' => 'form-group col-xs-12'))
-			->value(
-			($iCount == 0 || mb_strlen($sText) < 10240)
-				? $sText
-				: NULL
-			)
-	))
+	->add(Admin_Form_Entity::factory('Div')->class('row')->add($oTextarea_Sql))
 	->add(Admin_Form_Entity::factory('Div')->class('row')->add(
 		Admin_Form_Entity::factory('File')
 			->name('file')
@@ -300,8 +309,31 @@ $oMainTab
 			->largeImage(array('show_params' => FALSE))
 			->smallImage(array('show' => FALSE))
 			->divAttr(array('class' => 'form-group col-xs-12'))
-	))
-;
+	));
+
+$aTables = Core_DataBase::instance()->getTables();
+
+$oMainTab
+	->add(
+		Admin_Form_Entity::factory('Script')
+			->value("var langTools = ace.require('ace/ext/language_tools');
+			var sqlTables = [" . implode(',', array_map(function($string) { return "'" . addslashes($string) . "'"; }, $aTables)) . "];
+
+			// create a completer object with a required callback function:
+			var sqlTablesCompleter = {
+				getCompletions: function(editor, session, pos, prefix, callback) {
+					callback(null, sqlTables.map(function(table) {
+						return {
+							value: table,
+							meta: 'Table'
+						};
+					}));
+				}
+			};
+			// bind to langTools
+			langTools.addCompleter(sqlTablesCompleter);"
+		)
+	);
 
 Admin_Form_Entity::factory('Form')
 	->controller($oAdmin_Form_Controller)

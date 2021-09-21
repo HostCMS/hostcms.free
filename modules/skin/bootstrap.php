@@ -41,25 +41,27 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/toastr/toastr.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootbox/bootbox.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.form.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/css/css.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/htmlmixed/htmlmixed.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/javascript/javascript.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/clike/clike.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/php/php.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/xml/xml.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/mode/smarty/smarty.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/selection/active-line.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/search.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/search/searchcursor.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/dialog/dialog.js')
+
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ace.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/theme-github.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-html.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-php.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-css.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-less.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-scss.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-xml.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-sql.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/mode-smarty.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-language_tools.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/ace/ext-searchbox-hostcms.js')
+
 			->addJs('/modules/skin/' . $this->_skinName . '/js/star-rating.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/typeahead-bs2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery-ui.min.js')
-			
+
 			->addJs('/modules/skin/' . $this->_skinName . '/js/ui/jquery.ui.touch-punch.min.js')
-			
-			
+
+
 			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery.mousewheel.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/select2.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/select2/i18n/' . $lng . '.js')
@@ -69,6 +71,7 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/wickedpicker/wickedpicker.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
+
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
 			;
@@ -84,8 +87,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/animate.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/dataTables.bootstrap.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-datetimepicker.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.css')
-			->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/dialog/dialog.css')
+			// ->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/lib/codemirror.css')
+			// ->addCss('/modules/skin/' . $this->_skinName . '/js/codemirror/addon/dialog/dialog.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/star-rating.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/bootstrap-hostcms.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/js/dropzone/dropzone.css')
@@ -906,24 +909,24 @@ class Skin_Bootstrap extends Core_Skin
 								.addClass('fa-spin');
 
 							$.ajax({
-							  url: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oSearchModule->id?>&type=1&autocomplete=1',
-							  dataType: 'json',
-							  data: {
+								url: '/admin/index.php?ajaxWidgetLoad&moduleId=<?php echo $oSearchModule->id?>&type=1&autocomplete=1',
+								dataType: 'json',
+								data: {
 								queryString: request.term
-							  },
-							  success: function( data ) {
-								$('.sidebar-header-wrapper i.searchicon')
-									.removeClass('fa-spinner')
-									.removeClass('fa-spin')
-									.addClass('fa-search');
+								},
+								success: function(data) {
+									$('.sidebar-header-wrapper i.searchicon')
+										.removeClass('fa-spinner')
+										.removeClass('fa-spin')
+										.addClass('fa-search');
 
-								response( data );
-							  }
+									response(data);
+								}
 							});
 						},
 						minLength: 1,
 						create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 								return $('<li></li>')
 									.data('item.autocomplete', item)
 									.append($('<i>').addClass(item.icon))
@@ -938,7 +941,7 @@ class Skin_Bootstrap extends Core_Skin
 
 							$(this).prev('.ui-helper-hidden-accessible').remove();
 						},
-						select: function( event, ui ) {
+						select: function(event, ui) {
 							var myClick = new Function(ui.item.onclick);
 							myClick();
 						},
@@ -1226,25 +1229,27 @@ class Skin_Bootstrap extends Core_Skin
 			// Reset message
 			Core_Skin::instance()->answer()->message('');
 		}
+
+		$bDeviceTracking = !isset($_SERVER['HTTP_CF_IPCOUNTRY']) && Core_Array::getCookie('hostcms_device_tracking', 'on') == 'on';
 		?>
 
 		<div class="loginbox">
 			<form class="form-horizontal" action="/admin/index.php" method="post">
 				<div class="loginbox-textbox">
 					<span class="input-icon">
-						<input type="text" name="login" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_login')?>" />
+						<input type="text" name="login" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_login')?>" required="required" />
 						<i class="fa fa-user"></i>
 					</span>
 				</div>
 				<div class="loginbox-textbox">
 					<span class="input-icon">
-						<input type="password" name="password" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_password')?>" />
+						<input type="password" name="password" class="form-control" placeholder="<?php echo Core::_('Admin.authorization_form_password')?>" required="required" />
 						<i class="fa fa-lock"></i>
 					</span>
 				</div>
 				<div class="loginbox-forgot">
 					<label>
-						<input type="checkbox"<?php echo !isset($_SERVER['HTTP_CF_IPCOUNTRY']) ? ' checked="checked"' : ''?> name="ip" /><span class="text"><?php echo Core::_('Admin.authorization_form_ip')?></span>
+						<input type="checkbox"<?php echo $bDeviceTracking ? ' checked="checked"' : ''?> name="ip" /><span class="text"><?php echo Core::_('Admin.authorization_form_ip')?></span>
 					</label>
 				</div>
 				<div class="loginbox-submit">
@@ -1547,6 +1552,18 @@ class Skin_Bootstrap extends Core_Skin
 				?>
 			</div>
 
+			<div class="row partners">
+				<div class="col-xs-12">
+					<div class="well no-padding">
+						<?php
+						$siteId = abs(crc32((defined('HOSTCMS_CONTRACT_NUMBER') ? HOSTCMS_CONTRACT_NUMBER : time()) . CURRENT_SITE));
+						$sLicense = defined('HOSTCMS_CONTRACT_NUMBER') ? md5(HOSTCMS_CONTRACT_NUMBER) : '';
+						?>
+						<iframe width="100%" height="150" src="/info.php?siteId=<?php echo $siteId?>&license=<?php echo $sLicense?>" frameborder="0" scrolling="no" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+					</div>
+				</div>
+			</div>
+
 			<div class="row">
 				<?php
 				// Other modules
@@ -1621,24 +1638,27 @@ class Skin_Bootstrap extends Core_Skin
 	 * @see Core_Message::show()
 	 * @return string
 	 */
-	public function getMessage($message, $type = 'message')
+	public function getMessage($message, $type = 'success')
 	{
 		switch ($type)
 		{
 			case 'error':
-				$class = 'alert alert-danger fade in';
+				$class = 'alert-danger';
+			break;
+			case 'message':
+				$class = 'alert-gray';
 			break;
 			case 'warning':
-				$class = 'alert alert-warning fade in';
+				$class = 'alert-warning';
 			break;
 			case 'info':
-				$class = 'alert alert-info fade in';
+				$class = 'alert-info';
 			break;
 			default:
-				$class = 'alert alert-success fade in';
+				$class = 'alert-success';
 		}
-		$return = '<div class="' . $class . '">
-		<button type="button" class="close" data-dismiss="alert">&times;</button>' . $message . '</div>';
+
+		$return = '<div class="alert ' . $class . ' fade in"><button type="button" class="close" data-dismiss="alert">&times;</button>' . $message . '</div>';
 		return $return;
 	}
 

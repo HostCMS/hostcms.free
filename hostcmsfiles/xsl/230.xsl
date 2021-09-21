@@ -85,13 +85,15 @@
 					{
 						if (typeof jObject.attr('name') !== 'undefined' && jObject.attr('name').indexOf('_from') !== -1)
 						{
-							path += tag_name + '-' + jObject.val() + '-' + jObject.next().val() + '/';
+							path += encodeURIComponent(tag_name + '-' + jObject.val() + '-' + jObject.next().val()) + '/';
 						}
 						else
 						{
-							path += typeof jObject.data('value') !== 'undefined'
-								? jObject.data('value') + '/'
-								: value + '/';
+							path += encodeURIComponent(
+								typeof jObject.data('value') !== 'undefined'
+									? jObject.data('value')
+									: value
+							) + '/';
 						}
 					}
 				});

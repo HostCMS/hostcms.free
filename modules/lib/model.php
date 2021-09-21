@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Model extends Core_Entity
 {
@@ -336,6 +336,57 @@ class Lib_Model extends Core_Entity
 
 		$oSearch_Page->title = $this->name;
 
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
+			{
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
+			}
+		}
+
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->site_id = 0; // Lib не принадлежит сайту
 		$oSearch_Page->datetime = date('Y-m-d H:i:s');
@@ -410,6 +461,6 @@ class Lib_Model extends Core_Entity
 	 */
 	public function exportBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, $this->id, 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa fa-upload"></i></a>';
+		return '<a target="_blank" href="' . $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'exportLibs', NULL, 1, intval($this->id), 'lib_dir_id=' . Core_Array::getGet('lib_dir_id')) . '"><i class="fa fa-upload"></i></a>';
 	}
 }

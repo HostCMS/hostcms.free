@@ -41,7 +41,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Controller_Show extends Core_Controller
 {
@@ -272,7 +272,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 				$this->append('aShop_Carts', $oShop_Cart);
 			}
 		}
-		
+
 		$this->tax = $Shop_Cart_Controller->totalTax;
 		$this->weight = $Shop_Cart_Controller->totalWeight;
 		$this->amount = $Shop_Cart_Controller->totalAmount;
@@ -374,7 +374,10 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		if ($this->applyDiscountCards && Core::moduleIsActive('siteuser') && $this->_oSiteuser)
 		{
 			$oShop_Discountcard = $this->_oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+			if (!is_null($oShop_Discountcard)
+				&& $oShop_Discountcard->active
+				&& $oShop_Discountcard->shop_discountcard_level_id
+			)
 			{
 				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
 

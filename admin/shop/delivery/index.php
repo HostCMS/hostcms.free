@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -43,19 +43,14 @@ $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 // Элементы меню
 $oAdmin_Form_Entity_Menus->add(
 	Admin_Form_Entity::factory('Menu')
-		->name(Core::_('Shop_Delivery.show_type_of_delivery_link'))
-		->icon('fa fa-truck')
-		->add(
-			Admin_Form_Entity::factory('Menu')
-				->name(Core::_('Shop_Delivery.show_type_of_delivery_link_add'))
-				->icon('fa fa-plus')
-				->img('/admin/images/type_of_delivery_add.gif')
-				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
-				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
-				)
+		->name(Core::_('Admin_Form.add'))
+		->icon('fa fa-plus')
+		->img('/admin/images/payment_add.gif')
+		->href(
+			$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 );
 
@@ -238,8 +233,8 @@ $oAdmin_Form_Dataset->addCondition
 )
 	->changeField('conditions', 'link', "/admin/shop/delivery/condition/index.php?delivery_id={id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}")
 	->changeField('conditions', 'onclick', "$.adminLoad({path: '/admin/shop/delivery/condition/index.php',additionalParams: 'delivery_id={id}&shop_id={$shop_id}&shop_group_id={$shop_group_id}', windowId: '{windowId}'}); return false");
-	
-$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $shop_group_id);	
+
+$oAdmin_Form_Controller->addExternalReplace('{shop_group_id}', $shop_group_id);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

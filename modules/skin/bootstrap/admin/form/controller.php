@@ -289,12 +289,14 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 	 */
 	public function showChangeViews()
 	{
-		if (count($this->viewList) > 1)
+		$viewList = $this->viewList;
+		if (count($viewList) > 1)
 		{
-			$this->view == '' && $this->view = reset($this->viewList);
+			($this->view == '' || !isset($viewList[$this->view]))
+				&& $this->view = key($viewList);
 
 			?><div class="btn-group btn-view-selector pull-left"><?php
-			foreach ($this->viewList as $viewName => $className)
+			foreach ($viewList as $viewName => $className)
 			{
 				$onclick = $this->getAdminLoadAjax($this->getPath(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, $viewName);
 
@@ -527,7 +529,7 @@ class Skin_Bootstrap_Admin_Form_Controller extends Admin_Form_Controller
 								<div class="page-selector input-group input-group-xs hide">
 									<input type="text" class="form-control input-xs">
 									<span class="input-group-btn">
-										<a href="' . $sHref . '" onclick="' . $sOnclick .  '" class="btn btn-xs btn-default icon-only"><i class="fa fa-caret-right success circular"></i></a>
+										<a href="' . $sHref . '" onclick="' . $sOnclick . '" class="btn btn-xs btn-default icon-only"><i class="fa fa-caret-right success circular"></i></a>
 									</span>
 								</div>
 						')

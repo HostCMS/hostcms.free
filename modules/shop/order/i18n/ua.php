@@ -125,7 +125,7 @@ return array(
 	'send_mail' => "Надіслати лист про замовлення",
 	'most_ordered' => "Популярні товари за %s днів (в одиницях)",
 	'popular_brands' => "Популярні бренди за %s днів (в одиницях)",
-	'popover_title' => "Замовлення № %s",
+	'popover_title' => 'Замовлення №%1$s від %2$s',
 	'notification_new_order' => 'Нове замовлення №%s',
 	'notification_paid_order' => 'Оплачено замовлення №%s',
 	'notification_new_order_description' => '%1$s на суму %2$s',

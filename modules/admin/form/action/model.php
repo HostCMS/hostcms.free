@@ -187,4 +187,22 @@ class Admin_Form_Action_Model extends Core_Entity
 			? $oAdmin_Word->name
 			: NULL;
 	}
+	
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->modal)
+		{
+			Core::factory('Core_Html_Entity_Span')
+				->class('badge badge-hostcms badge-square darkgray pull-right')
+				->title(Core::_('Admin_Form_Action.modalBadge'))
+				->value('<i class="fa fa-window-restore fa-fw"></i>')
+				->execute();
+		}
+	}
 }

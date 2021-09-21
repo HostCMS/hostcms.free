@@ -37,8 +37,10 @@ class Shop_Price_Setting_Item_Controller_Delete extends Admin_Form_Action_Contro
 				$aShop_Price_Setting_Items[0]->delete();
 			}
 
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			$this->_Admin_Form_Controller->addMessage(
-				"<script>$('.shop-item-table tr#shop-item-{$shop_item_id}').remove();</script>"
+				"<script>$('#{$windowId} .shop-item-table tr#shop-item-{$shop_item_id}').remove();</script>"
 			);
 		}
 

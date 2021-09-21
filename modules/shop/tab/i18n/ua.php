@@ -24,4 +24,7 @@ return array(
 	'undelete_success' => 'Елемент відновлено!',
 	'add_shortcode_dir' => 'Розділ',
 	'shop_tab_dir_id' => 'Розділ',
+
+	'shop_tab_producer' => 'Виробники',
+	'select_producer' => 'Оберіть виробника',
 );

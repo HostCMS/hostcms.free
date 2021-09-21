@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -35,6 +35,7 @@ return array(
 	'menu' => 'Back-end Forms',
 	'form_forms_tab_1' => 'Main',
 	'form_forms_tab_2' => 'Parameters',
+	'form_forms_tab_3' => 'User fields',
 
 	'show_form_fields_menu_admin_forms' => 'Forms',
 
@@ -148,6 +149,6 @@ return array(
 
 	'male' => 'Male',
 	'female' => 'Female',
-	
-	'filter_enter_title' => 'Enter filter name',	
+
+	'filter_enter_title' => 'Enter filter name',
 );

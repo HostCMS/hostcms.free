@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Revision
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Dataset extends Admin_Form_Dataset
 {
@@ -49,21 +49,6 @@ class Revision_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
-	 * Get Objects
-	 * @return array
-	 */
-	public function getObjects()
-	{
-		return $this->_objects;
-	}
-
-	/**
 	 * Get new object
 	 * @return object
 	 */
@@ -78,6 +63,8 @@ class Revision_Dataset extends Admin_Form_Dataset
 	 */
 	public function load()
 	{
+		!is_array($this->_objects) && $this->fillTables();
+
 		return array_slice($this->_objects, $this->_offset, $this->_limit);
 	}
 
@@ -159,7 +146,8 @@ class Revision_Dataset extends Admin_Form_Dataset
 	 */
 	public function getObject($primaryKey)
 	{
-		!count($this->_objects) && $this->fillTables();
+		!is_array($this->_objects) && $this->fillTables();
+
 		return isset($this->_objects[$primaryKey])
 			? $this->_objects[$primaryKey]
 			: $this->_newObject();

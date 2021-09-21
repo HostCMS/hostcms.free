@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -191,12 +191,12 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->ico(
 				array(
 					0 => 'fa-file-o',
-					2 => 'fa-list-ul',
-					1 => 'fa-file-text-o',
+					2 => 'fa-list-alt',
+					1 => 'fa-file-code',
 					3 => 'fa-link'
 				)
 			)
-			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3])");
+			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3]); window.dispatchEvent(new Event('resize'));");
 
 		// Статичный документ
 		$oAdditionalTab->delete($this->getField('document_id'));
@@ -276,11 +276,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->href(
-						$this->_object->document_id
-							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, $oDocument->id, 'document_dir_id=' . intval($oDocument->document_dir_id))
+						$oDocument->id
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/document/index.php', 'edit', NULL, 1, intval($oDocument->id), 'document_dir_id=' . intval($oDocument->document_dir_id))
 							: ''
 					)
-					->class('document-edit input-group-addon bg-blue bordered-blue' . ($this->_object->document_id ? '' : ' hidden'))
+					->class('document-edit input-group-addon bg-blue bordered-blue' . ($oDocument->id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -396,11 +396,11 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				Admin_Form_Entity::factory('A')
 					->target('_blank')
 					->href(
-						$this->_object->lib_id
-							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $oLib->id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+						$oLib->id
+							? $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, intval($oLib->id), 'lib_dir_id=' . intval($oLib->lib_dir_id))
 							: ''
 					)
-					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($this->_object->lib_id ? '' : ' hidden'))
+					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($oLib->id ? '' : ' hidden'))
 					->value('<i class="fa fa-pencil"></i>')
 			);
 
@@ -424,7 +424,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oTextarea_Structure_Source = Admin_Form_Entity::factory('Textarea');
 
 		$oTmpOptions = $oTextarea_Structure_Source->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = 'application/x-httpd-php';
+		// $oTmpOptions['mode'] = 'application/x-httpd-php';
+		$oTmpOptions['mode'] = 'ace/mode/php';
 
 		$oTextarea_Structure_Source
 			->name('structure_source')
@@ -435,7 +436,13 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->syntaxHighlighterOptions($oTmpOptions)
 			->rows(30);
 
-		$oTextarea_StructureConfig_Source = Admin_Form_Entity::factory('Textarea')
+		$oTextarea_StructureConfig_Source = Admin_Form_Entity::factory('Textarea');
+
+		$oTmpOptions = $oTextarea_StructureConfig_Source->syntaxHighlighterOptions;
+		// $oTmpOptions['mode'] = 'application/x-httpd-php';
+		$oTmpOptions['mode'] = 'ace/mode/php';
+
+		$oTextarea_StructureConfig_Source
 			->name('structure_config_source')
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-2 hidden-3'))
 			->caption(Core::_('Structure.structure_config_source'))
@@ -538,7 +545,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	protected function _applyObjectProperty()
 	{
 		// Backup structure revision
-		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		if (Core::moduleIsActive('revision') && $this->_object->id)
 		{
 			$this->_object->backupRevision();
 		}
@@ -570,7 +577,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oDocument = $this->_object->Document;
 
 				// Backup document revision
-				if (Core::moduleIsActive('revision')  && $this->_object->id)
+				if (Core::moduleIsActive('revision') && $this->_object->id)
 				{
 					$oDocument->backupRevision();
 				}

@@ -21,6 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - importAction($int) действие с существующими товарами: 1 - обновить существующие товары, 2 - не обновлять существующие товары, 3 - удалить содержимое магазина до импорта. По умолчанию 1
  * - searchIndexation(TRUE|FALSE) индексировать импортируемые данные, по умолчанию FALSE
  * - deletePropertyValues(TRUE|FALSE|array()) удалять существующие значения дополнительных свойств перед импортом новых, по умолчанию TRUE
+ * - deleteUnsentModificationsByProperties(TRUE|FALSE) удалять непереданные модификации, созданные по дополнительным свойствам, по умолчанию FALSE
  * - deleteImage(TRUE|FALSE) удалять основные изображения
  *
  * @package HostCMS
@@ -231,6 +232,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		'importAction',
 		'searchIndexation',
 		'deletePropertyValues',
+		'deleteUnsentModificationsByProperties',
 		'deleteImage'
 	);
 
@@ -501,7 +503,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		//$this->_aCreatedItemIDs = array();
 
 		$this->deletePropertyValues = TRUE;
-		$this->searchIndexation = FALSE;
+		$this->searchIndexation = $this->deleteUnsentModificationsByProperties = FALSE;
 
 		$oShop = Core_Entity::factory('Shop', $iCurrentShopId);
 
@@ -512,7 +514,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			),
 
 			// groups
-			'caprion-shop_groups' => array(
+			'caption-shop_groups' => array(
 				'caption' => Core::_('Shop_Group.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -587,7 +589,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		if (count($aGroupProperties))
 		{
 			// Общий заголовок
-			$this->aEntities['caprion-group-properties'] = array(
+			$this->aEntities['caption-group-properties'] = array(
 				'caption' => Core::_('Shop_Group.properties'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			);
@@ -613,7 +615,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		$this->aEntities = array_merge($this->aEntities, array(
 			// items
-			'caprion-shop_items' => array(
+			'caption-shop_items' => array(
 				'caption' => Core::_('Shop_Item.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -847,7 +849,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$aItemProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties->findAll(FALSE);
 		if (count($aItemProperties))
 		{
-			$this->aEntities['caprion-item-properties'] = array(
+			$this->aEntities['caption-item-properties'] = array(
 				'caption' => Core::_('Shop_Item.shops_add_form_link_properties'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			);
@@ -875,7 +877,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$aShop_Prices = $oShop->Shop_Prices->findAll(FALSE);
 		if (count($aShop_Prices))
 		{
-			$this->aEntities['caprion-shop_prices'] = array(
+			$this->aEntities['caption-shop_prices'] = array(
 				'caption' => Core::_('Shop_Price.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			);
@@ -894,7 +896,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$aShop_Warehouses = $oShop->Shop_Warehouses->findAll(FALSE);
 		if (count($aShop_Warehouses))
 		{
-			$this->aEntities['caprion-warehouses'] = array(
+			$this->aEntities['caption-warehouses'] = array(
 				'caption' => Core::_('Shop_Warehouse.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			);
@@ -913,8 +915,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		$aItemListProperties = Core_Entity::factory('Shop_Item_Property_List', $oShop->id)->Properties->getAllByType(3, FALSE);
 		if (count($aItemListProperties))
 		{
-			$this->aEntities['caprion-modifications'] = array(
-				'caption' => Core::_('Shop_Exchange.caprion_modifications'),
+			$this->aEntities['caption-modifications'] = array(
+				'caption' => Core::_('Shop_Exchange.caption_modifications'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			);
 
@@ -929,7 +931,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 		$this->aEntities = array_merge($this->aEntities, array(
 			// producer
-			'caprion-shop_producer' => array(
+			'caption-shop_producer' => array(
 				'caption' => Core::_('Shop_Producer.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -943,7 +945,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			),
 
 			// seller
-			'caprion-shop_seller' => array(
+			'caption-shop_seller' => array(
 				'caption' => Core::_('Shop_Seller.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -957,7 +959,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			),
 
 			// measure
-			'caprion-shop_measure' => array(
+			'caption-shop_measure' => array(
 				'caption' => Core::_('Shop_Measure.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -971,7 +973,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			),
 
 			// order
-			'caprion-shop_orders' => array(
+			'caption-shop_orders' => array(
 				'caption' => Core::_('Shop_Order.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -1093,7 +1095,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			),
 
 			// order items
-			'caprion-shop_order_items' => array(
+			'caption-shop_order_items' => array(
 				'caption' => Core::_('Shop_Order_Item.model_name'),
 				'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 			),
@@ -1164,7 +1166,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				// Заголовок выводим, если есть или элементы, или группы
 				if (isset($this->_aPropertiesTree[$oProperty_Dir->id]) || isset($this->_aPropertyDirsTree[$oProperty_Dir->id]))
 				{
-					$this->aEntities['caprion-group-dir-' . $oProperty_Dir->id] = array(
+					$this->aEntities['caption-group-dir-' . $oProperty_Dir->id] = array(
 						'caption' => str_repeat('  ', $level + 1) . $oProperty_Dir->name,
 						'attr' => array('disabled' => 'disabled', 'class' => 'semi-bold')
 					);
@@ -1357,6 +1359,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			{
 				continue;
 			}
+
+			$bGroupFound = FALSE;
 
 			foreach ($aCsvLine as $iKey => $sData)
 			{
@@ -1650,6 +1654,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								if (!is_null($oTmpObject))
 								{
 									$this->_oCurrentGroup = $oTmpObject;
+
+									$bGroupFound = TRUE;
 								}
 							}
 						break;
@@ -1740,6 +1746,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								}
 							}
 
+							$bGroupFound = TRUE;
+
 							!$this->_oCurrentItem->modification_id
 								&& $this->_oCurrentItem->shop_group_id = $this->_oCurrentGroup->id;
 
@@ -1766,6 +1774,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								$this->_oCurrentGroup->path = $sData;
 								$this->_oCurrentGroup->id && $this->_oCurrentGroup->save() && $this->_incUpdatedGroups($this->_oCurrentGroup->id);
 							}
+
+							$bGroupFound = TRUE;
 						break;
 						// Порядок сортировки группы товаров
 						case 'group_sorting':
@@ -2084,6 +2094,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								$this->_oCurrentGroup->guid = $sData;
 								$this->_oCurrentGroup->id && $this->_doSaveGroup($this->_oCurrentGroup);
 							}
+
+							$bGroupFound = TRUE;
 						break;
 						// GUID родительской группы товаров
 						case 'group_parent_cml_id':
@@ -2123,49 +2135,37 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// идентификатор производителя
 						case 'producer_id':
-							$oTmpObject = Core_Entity::factory('Shop_Producer')->find($sData);
-							if (!is_null($oTmpObject->id))
-							{
-								$this->_oCurrentItem->shop_producer_id = $oTmpObject->id;
-							}
+							$oTmpObject = $this->_oCurrentShop->Shop_Producers->getByid($sData, FALSE);
+
+							$oTmpObject
+								&& $this->_oCurrentItem->shop_producer_id = $oTmpObject->id;
 						break;
-						// Передано название производителя
+						// название производителя
 						case 'producer_name':
-							$oTmpObject = $this->_oCurrentShop->Shop_Producers;
-							$oTmpObject->queryBuilder()->where('name', '=', $sData);
-							$oTmpObject = $oTmpObject->findAll(FALSE);
-							if (count($oTmpObject))
-							{
-								$this->_oCurrentItem->shop_producer_id = $oTmpObject[0]->id;
-							}
-							else
-							{
-								$this->_oCurrentItem->shop_producer_id = Core_Entity::factory('Shop_Producer')
+							$oTmpObject = $this->_oCurrentShop->Shop_Producers->getByname($sData, FALSE);
+
+							$this->_oCurrentItem->shop_producer_id = $oTmpObject
+								? $oTmpObject->id
+								: Core_Entity::factory('Shop_Producer')
 									->name($sData)
 									->path(Core_Str::transliteration($sData))
 									->shop_id($this->_oCurrentShop->id)
 									->save()
 									->id;
-							}
 						break;
 						// идентификатор продавца
 						case 'seller_id':
-							$oTmpObject = $this->_oCurrentShop->Shop_Sellers;
-							$oTmpObject->queryBuilder()->where('id', '=', $sData);
-							$oTmpObject = $oTmpObject->findAll(FALSE);
-							if (count($oTmpObject))
-							{
-								$this->_oCurrentItem->shop_seller_id = $oTmpObject[0]->id;
-							}
-						break;
-						// Передано название продавца
-						case 'seller_name':
-							$oTmpObject = $this->_oCurrentShop->Shop_Sellers;
-							$oTmpObject->queryBuilder()->where('name', '=', $sData);
-							$oTmpObject = $oTmpObject->findAll(FALSE);
+							$oTmpObject = $this->_oCurrentShop->Shop_Sellers->getByid($sData, FALSE);
 
-							$this->_oCurrentItem->shop_seller_id = count($oTmpObject)
-								? $oTmpObject[0]->id
+							$oTmpObject
+								&& $this->_oCurrentItem->shop_seller_id = $oTmpObject->id;
+						break;
+						// название продавца
+						case 'seller_name':
+							$oTmpObject = $this->_oCurrentShop->Shop_Sellers->getByname($sData, FALSE);
+
+							$this->_oCurrentItem->shop_seller_id = $oTmpObject
+								? $oTmpObject->id
 								: Core_Entity::factory('Shop_Seller')
 									->name($sData)
 									->path(Core_Str::transliteration($sData))
@@ -2185,7 +2185,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 								$this->_oCurrentItem->shop_measure_id = $oTmpObject->id;
 							}
 						break;
-						// Передано название единицы измерения
+						// название единицы измерения
 						case 'mesure_name':
 							$oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sData);
 
@@ -2304,16 +2304,23 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						break;
 						// дата добавления товара
 						case 'item_datetime':
-							if (preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData))
-							{
-								$this->_oCurrentItem->datetime = $sData;
-							}
-							else
-							{
-								$this->_oCurrentItem->datetime = Core_Date::datetime2sql($sData);
-							}
+							$this->_oCurrentItem->datetime = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData)
+								? $sData
+								: Core_Date::datetime2sql($sData);
 						break;
-						// Передано описание товара
+						case 'item_end_datetime':
+							// дата завершения публикации, проверяем ее на соответствие стандарту времени MySQL
+							$this->_oCurrentItem->end_datetime = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData)
+								? $sData
+								: Core_Date::datetime2sql($sData);
+						break;
+						case 'item_start_datetime':
+							// дата завершения публикации, проверяем ее на соответствие стандарту времени MySQL
+							$this->_oCurrentItem->start_datetime = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData)
+								? $sData
+								: Core_Date::datetime2sql($sData);
+						break;
+						// описание товара
 						case 'item_description':
 							$this->_oCurrentItem->description = $sData;
 						break;
@@ -2556,18 +2563,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 							$this->_oCurrentShopEItem->count = $sData;
 							$this->_oCurrentItem->type = 1;
 						break;
-						case 'item_end_datetime':
-							// дата завершения публикации, проверяем ее на соответствие стандарту времени MySQL
-							$this->_oCurrentItem->end_datetime = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData)
-								? $sData
-								: Core_Date::datetime2sql($sData);
-						break;
-						case 'item_start_datetime':
-							// дата завершения публикации, проверяем ее на соответствие стандарту времени MySQL
-							$this->_oCurrentItem->start_datetime = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sData)
-								? $sData
-								: Core_Date::datetime2sql($sData);
-						break;
 						case 'item_type':
 							$this->_oCurrentItem->type = $sData;
 						break;
@@ -2702,7 +2697,9 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			}
 
 			// New Shop_Item
-			if (!$this->_oCurrentItem->id)
+			$bNewItem = !$this->_oCurrentItem->id;
+
+			if ($bNewItem)
 			{
 				is_null($this->_oCurrentItem->path)
 					&& $this->_oCurrentItem->path = '';
@@ -2716,12 +2713,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				!$this->_oCurrentItem->shop_currency_id
 					&& $this->_oCurrentItem->shop_currency_id = $this->_oCurrentShop->shop_currency_id;
 			}
-			
-			if (!$this->_oCurrentItem->modification_id && $this->_oCurrentGroup->id)
-			{
-				$this->_oCurrentItem->shop_group_id = intval($this->_oCurrentGroup->id);
-				$this->_oCurrentItem->save();
-			}
 
 			$this->_oCurrentItem->id
 				&& $this->_oCurrentItem->id == $this->_oCurrentItem->modification_id
@@ -2732,6 +2723,18 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$this->_oCurrentShop->add($this->_oCurrentOrder);
 			}
 
+			$this->_oCurrentItem->shop_id = $this->_oCurrentShop->id;
+
+			// После установки shop_id
+			if (!$this->_oCurrentItem->modification_id && $this->_oCurrentGroup->id)
+			{
+				// Если группа явно не была указана в CSV, то для существующих товаров её нельзя обновлять
+				// в случае, если с передачей внешней группы обновляются цены по артикулу
+				($bNewItem || $bGroupFound)
+					&& $this->_oCurrentItem->shop_group_id = intval($this->_oCurrentGroup->id);
+				//$this->_oCurrentItem->save();
+			}
+
 			if ($this->_oCurrentItem->id && $this->importAction == 2)
 			{
 				// если сказано - оставить без изменений, затираем все изменения
@@ -2740,9 +2743,6 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				$this->_sSmallImageFile = '';
 				$this->deleteImage = 0;
 			}
-
-			// Обязательно после обработки тегов, т.к. иначе ORM сохранит товар косвенно.
-			$this->_oCurrentItem->shop_id = $this->_oCurrentShop->id;
 
 			if ($this->_oCurrentItem->id
 				//&& $this->importAction == 1
@@ -3289,24 +3289,12 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				{
 					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
 
-					$iShop_Item_Property_Id = $oProperty->Shop_Item_Property->id;
-
 					$group_id = $this->_oCurrentItem->modification_id == 0
 						? $this->_oCurrentItem->shop_group_id
 						: $this->_oCurrentItem->Modification->shop_group_id;
 
-					// Проверяем доступность дополнительного свойства для группы товаров
-					if (is_null(Core_Entity::factory('Shop', $this->_oCurrentShop->id)
-						->Shop_Item_Property_For_Groups
-						->getByShopItemPropertyIdAndGroupId($iShop_Item_Property_Id, $group_id)))
-					{
-						// Свойство не доступно текущей группе, делаем его доступным
-						$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group');
-						$oShop_Item_Property_For_Group->shop_group_id = intval($group_id);
-						$oShop_Item_Property_For_Group->shop_item_property_id = $iShop_Item_Property_Id;
-						$oShop_Item_Property_For_Group->shop_id = $this->_oCurrentShop->id;
-						$oShop_Item_Property_For_Group->save();
-					}
+					// Разрешаем свойство для группы
+					$this->_allowPropertyForGroup($oProperty, $group_id);
 
 					foreach ($aPropertyValue as $key => $sPropertyValue)
 					{
@@ -3323,20 +3311,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				// Отдельный импорт малых изображений, когда большие не были проимпортированы
 				foreach ($this->_aExternalPropertiesSmall as $iPropertyID => $aPropertyValue)
 				{
-					// Проверяем доступность дополнительного свойства для группы товаров
-					if (Core_Entity::factory('Shop', $this->_oCurrentShop->id)
-						->Shop_Item_Property_For_Groups
-						->getByShopItemPropertyIdAndGroupId($iPropertyID, $this->_oCurrentGroup->id))
-					{
-						// Свойство не доступно текущей группе, делаем его доступным
-						Core_Entity::factory('Shop_Item_Property_For_Group')
-							->shop_group_id($this->_oCurrentGroup->id)
-							->shop_item_property_id($iPropertyID)
-							->shop_id($this->_oCurrentShop->id)
-							->save();
-					}
-
 					$oProperty = Core_Entity::factory('Property')->find($iPropertyID);
+
+					// Разрешаем свойство для группы
+					$this->_allowPropertyForGroup($oProperty, $this->_oCurrentGroup->id);
 
 					foreach ($aPropertyValue as $sPropertyValue)
 					{
@@ -3452,58 +3430,43 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					}
 				}
 
-				foreach ($this->_aExternalPrices as $iPriceID => $sPriceValue)
-				{
-					$oShop_Item_Price = $iPriceID
-						? $this->_oCurrentItem->Shop_Item_Prices->getByPriceId($iPriceID, FALSE)
-						: NULL;
+				// Устанавливаем цены из $this->_aExternalPrices
+				$this->_setPrices($this->_oCurrentItem);
 
-					$old_price = !is_null($oShop_Item_Price)
-						? $oShop_Item_Price->value
-						: $this->_oCurrentItem->price;
-
-					$newPrice = Shop_Controller::instance()->convertPrice($sPriceValue);
-
-					if ($old_price != $newPrice)
-					{
-						$oShop_Price_Setting = $this->_getPrices();
-
-						$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-						$oShop_Price_Setting_Item->shop_price_id = $iPriceID;
-						$oShop_Price_Setting_Item->shop_item_id = $this->_oCurrentItem->id;
-						$oShop_Price_Setting_Item->old_price = $old_price;
-						$oShop_Price_Setting_Item->new_price = $newPrice;
-						$oShop_Price_Setting->add($oShop_Price_Setting_Item);
-
-						/*if (is_null($oShop_Item_Price))
-						{
-							$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
-							$oShop_Item_Price->shop_item_id = $this->_oCurrentItem->id;
-							$oShop_Item_Price->shop_price_id = $iPriceID;
-						}
-
-						$oShop_Item_Price->value($sPriceValue);
-						$oShop_Item_Price->save();*/
-					}
-				}
-
+				// Модификации по свойствам
 				if (count($this->_aModificationsByProperties))
 				{
-					$aToCombine = array();
+					$aToCombine = $aAffectedModifications = array();
+
 					foreach ($this->_aModificationsByProperties as $iPropertyID => $sPropertyValue)
 					{
 						$oProperty = Core_Entity::factory('Property', $iPropertyID);
 
-						$aPropertyValueExplode = explode(',', trim($sPropertyValue));
-						$aPropertyValueExplode = array_map('trim', $aPropertyValueExplode);
-
-						foreach ($aPropertyValueExplode as $tmpValue)
+						// Свойство списочного типа
+						if ($oProperty->type == 3)
 						{
-							$oList_Item = $oProperty->List->List_Items->getByValue($tmpValue);
+							// Разрешаем свойство для группы
+							$this->_allowPropertyForGroup($oProperty, $this->_oCurrentItem->shop_group_id);
 
-							if (!is_null($oList_Item))
+							$aPropertyValueExplode = explode(',', trim($sPropertyValue));
+							$aPropertyValueExplode = array_map('trim', $aPropertyValueExplode);
+
+							foreach ($aPropertyValueExplode as $tmpValue)
 							{
-								$aToCombine[$iPropertyID][] = $oList_Item->id;
+								if ($tmpValue !== '')
+								{
+									$oList_Item = $oProperty->List->List_Items->getByValue($tmpValue, FALSE);
+
+									if (is_null($oList_Item))
+									{
+										$oList_Item = Core_Entity::factory('List_Item');
+										$oList_Item->list_id = $oProperty->list_id;
+										$oList_Item->value = $tmpValue;
+										$oList_Item->save();
+									}
+
+									$aToCombine[$iPropertyID][] = $oList_Item->id;
+								}
 							}
 						}
 					}
@@ -3511,15 +3474,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					if (count($aToCombine))
 					{
 						$aCombined = Core_Array::combine($aToCombine);
-
 						if (count($aCombined))
 						{
 							$havingCount = count($aCombined[0]);
 
 							foreach ($aCombined as $aCombinedValues)
 							{
-								$oModif = $this->_oCurrentItem->Modifications;
-								$oModif->queryBuilder()
+								$oModifications = $this->_oCurrentItem->Modifications;
+								$oModifications->queryBuilder()
 									->select('shop_items.*')
 									->leftJoin('shop_item_properties', 'shop_items.shop_id', '=', 'shop_item_properties.shop_id')
 									->leftJoin('property_value_ints', 'shop_items.id', '=', 'property_value_ints.entity_id',
@@ -3531,24 +3493,24 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 								foreach ($aCombinedValues as $propertyId => $propertyValue)
 								{
-									$oModif->queryBuilder()
+									$oModifications->queryBuilder()
 										->where('shop_item_properties.property_id', '=', $propertyId)
 										->where('property_value_ints.value', '=', $propertyValue)
 										->setOr();
 								}
 
-								$oModif->queryBuilder()
+								$oModifications->queryBuilder()
 									->close()
 									->groupBy('shop_items.id');
 
 								$havingCount > 1
-									&& $oModif->queryBuilder()
+									&& $oModifications->queryBuilder()
 										->having(Core_Querybuilder::expression('COUNT(DISTINCT `shop_item_properties`.`property_id`)'), '=', $havingCount);
 
-								$aModif = $oModif->findAll(FALSE);
+								$aModifications = $oModifications->findAll(FALSE);
 
 								// Создаем модификацию товара с заданными значениями
-								if (!count($aModif))
+								if (!count($aModifications))
 								{
 									$oNew_Modification = Core_Entity::factory('Shop_Item');
 									$oNew_Modification->name = $this->_oCurrentItem->name;
@@ -3572,7 +3534,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 										$oNew_Modification->marking .= '-' . $oList_Item->value;
 										$oNew_Modification->name .= ', ' . $oProperty->name .' ' . $oList_Item->value;
-										
+
 										$sorting += $oList_Item->sorting;
 									}
 
@@ -3581,18 +3543,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 									$this->_incInsertedItems($oNew_Modification->id);
 
-									// Розничная цена для новой модификации
-									if ($this->_oCurrentItem->price)
-									{
-										$oShop_Price_Setting = $this->_getPrices();
-
-										$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-										$oShop_Price_Setting_Item->shop_price_id = 0;
-										$oShop_Price_Setting_Item->shop_item_id = $oNew_Modification->id;
-										$oShop_Price_Setting_Item->old_price = 0;
-										$oShop_Price_Setting_Item->new_price = $this->_oCurrentItem->price;
-										$oShop_Price_Setting->add($oShop_Price_Setting_Item);
-									}
+									// Цены для создаваемых модификаций
+									$this->_setPrices($oNew_Modification);
 
 									// Свойства для заданной модификации
 									foreach ($aCombinedValues as $propertyId => $propertyValue)
@@ -3603,8 +3555,45 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 										$oProperty_Value->value($propertyValue);
 										$oProperty_Value->save();
 									}
+
+									// Fast filter
+									if ($this->_oCurrentShop->filter)
+									{
+										$oShop_Filter_Controller = new Shop_Filter_Controller($this->_oCurrentShop);
+										$oShop_Filter_Controller->fill($oNew_Modification);
+									}
+
+									$this->deleteUnsentModificationsByProperties
+										&& $aAffectedModifications[] = $oNew_Modification->id;
+								}
+								elseif ($this->deleteUnsentModificationsByProperties)
+								{
+									foreach ($aModifications as $oModification)
+									{
+										$aAffectedModifications[] = $oModification->id;
+									}
 								}
 							}
+						}
+					}
+
+					// Удалять модификации, не затронутые при создании по дополнительным свойствам
+					if ($this->deleteUnsentModificationsByProperties)
+					{
+						$oModifications = $this->_oCurrentItem->Modifications;
+
+						count($aAffectedModifications) && $oModifications->queryBuilder()
+							->where('shop_items.id', 'NOT IN', $aAffectedModifications);
+
+						$aModifications = $oModifications->findAll(FALSE);
+
+						foreach ($aModifications as $oModification)
+						{
+							// Indexation
+							$this->searchIndexation
+								&& $oModification->unindex();
+
+							$oModification->markDeleted();
 						}
 					}
 				}
@@ -3621,8 +3610,8 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					// Fast filter
 					if ($this->_oCurrentShop->filter)
 					{
-						$Shop_Filter_Controller = new Shop_Filter_Controller($this->_oCurrentShop);
-						$Shop_Filter_Controller->fill($this->_oCurrentItem);
+						$oShop_Filter_Controller = new Shop_Filter_Controller($this->_oCurrentShop);
+						$oShop_Filter_Controller->fill($this->_oCurrentItem);
 					}
 				}
 
@@ -3650,6 +3639,77 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		Core_Event::notify('Shop_Item_Import_Csv_Controller.onAfterImport', $this, array($this->_oCurrentShop, $iCurrentSeekPosition));
 
 		return $iCurrentSeekPosition;
+	}
+
+	/**
+	 * Allow Property For Group
+	 * @param Property_Model $oProperty
+	 * @param int $shop_group_id
+	 * @return self
+	 */
+	protected function _allowPropertyForGroup(Property_Model $oProperty, $shop_group_id)
+	{
+		$iShop_Item_Property_Id = $oProperty->Shop_Item_Property->id;
+
+		$shop_group_id = intval($shop_group_id);
+
+		// Проверяем доступность дополнительного свойства для группы товаров
+		if (is_null($this->_oCurrentShop->Shop_Item_Property_For_Groups->getByShopItemPropertyIdAndGroupId($iShop_Item_Property_Id, $shop_group_id)))
+		{
+			// Свойство не доступно текущей группе, делаем его доступным
+			$oShop_Item_Property_For_Group = Core_Entity::factory('Shop_Item_Property_For_Group');
+			$oShop_Item_Property_For_Group->shop_group_id = $shop_group_id;
+			$oShop_Item_Property_For_Group->shop_item_property_id = $iShop_Item_Property_Id;
+			$oShop_Item_Property_For_Group->shop_id = $this->_oCurrentShop->id;
+			$oShop_Item_Property_For_Group->save();
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Set Prices by $this->_aExternalPrices
+	 * @param Shop_Item_Model $oShop_Item
+	 * @return self
+	 */
+	protected function _setPrices(Shop_Item_Model $oShop_Item)
+	{
+		foreach ($this->_aExternalPrices as $iPriceID => $sPriceValue)
+		{
+			$oShop_Item_Price = $iPriceID
+				? $oShop_Item->Shop_Item_Prices->getByPriceId($iPriceID, FALSE)
+				: NULL;
+
+			$old_price = !is_null($oShop_Item_Price)
+				? $oShop_Item_Price->value
+				: $oShop_Item->price;
+
+			$newPrice = Shop_Controller::instance()->convertPrice($sPriceValue);
+
+			if ($old_price != $newPrice)
+			{
+				$oShop_Price_Setting = $this->_getPriceSetting();
+
+				$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
+				$oShop_Price_Setting_Item->shop_price_id = $iPriceID;
+				$oShop_Price_Setting_Item->shop_item_id = $oShop_Item->id;
+				$oShop_Price_Setting_Item->old_price = $old_price;
+				$oShop_Price_Setting_Item->new_price = $newPrice;
+				$oShop_Price_Setting->add($oShop_Price_Setting_Item);
+
+				/*if (is_null($oShop_Item_Price))
+				{
+					$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
+					$oShop_Item_Price->shop_item_id = $oShop_Item->id;
+					$oShop_Item_Price->shop_price_id = $iPriceID;
+				}
+
+				$oShop_Item_Price->value($sPriceValue);
+				$oShop_Item_Price->save();*/
+			}
+		}
+
+		return $this;
 	}
 
 	protected function _clearWhileLoop()
@@ -3729,17 +3789,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			case 3:
 				if (Core::moduleIsActive('list'))
 				{
-					$oListItem = Core_Entity::factory('List_Item');
-					$oListItem
-						->queryBuilder()
-						->where('list_id', '=', $oProperty->list_id)
-						->where('value', '=', $sPropertyValue)
-					;
-					$oListItem = $oListItem->findAll(FALSE);
+					$oList_Item = $oProperty->List->List_Items->getByValue($sPropertyValue, FALSE);
 
-					if (count($oListItem))
+					if ($oList_Item)
 					{
-						$changedValue = $oListItem[0]->id;
+						$changedValue = $oList_Item->id;
 					}
 					else
 					{
@@ -3780,14 +3834,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					: 0;
 			break;
 			case 8:
-				$changedValue = !preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue)
-					? Core_Date::datetime2sql($sPropertyValue)
-					: $sPropertyValue;
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue)
+					? $sPropertyValue
+					: Core_Date::datetime2sql($sPropertyValue);
 			break;
 			case 9:
-				$changedValue = !preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue)
-					? Core_Date::datetime2sql($sPropertyValue)
-					: $sPropertyValue;
+				$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue)
+					? $sPropertyValue
+					: Core_Date::datetime2sql($sPropertyValue);
 			break;
 			case 11: // Float
 				$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
@@ -4368,17 +4422,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 				case 3:
 					if (Core::moduleIsActive('list'))
 					{
-						$oListItem = Core_Entity::factory('List_Item');
-						$oListItem
-							->queryBuilder()
-							->where('list_id', '=', $oProperty->list_id)
-							->where('value', '=', $sPropertyValue)
-						;
-						$oListItem = $oListItem->findAll(FALSE);
+						$oList_Item = $oProperty->List->List_Items->getByValue($sPropertyValue, FALSE);
 
-						if (count($oListItem))
+						if ($oList_Item)
 						{
-							$changedValue = $oListItem[0]->id;
+							$changedValue = $oList_Item->id;
 						}
 						else
 						{
@@ -4415,14 +4463,14 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 						: 0;
 				break;
 				case 8:
-					$changedValue = !preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue)
-						? Core_Date::datetime2sql($sPropertyValue)
-						: $sPropertyValue;
+					$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/", $sPropertyValue)
+						? $sPropertyValue
+						: Core_Date::datetime2sql($sPropertyValue);
 				break;
 				case 9:
-					$changedValue = !preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue)
-						? Core_Date::datetime2sql($sPropertyValue)
-						: $sPropertyValue;
+					$changedValue = preg_match("/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2})/", $sPropertyValue)
+						? $sPropertyValue
+						: Core_Date::datetime2sql($sPropertyValue);
 				break;
 				case 11: // Float
 					$changedValue = Shop_Controller::convertDecimal($sPropertyValue);
@@ -4685,7 +4733,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	protected $_oShop_Price_Setting_Count = NULL;
 	protected $_oShop_Price_Setting_Previous_Ids = array();
 
-	protected function _getPrices()
+	protected function _getPriceSetting()
 	{
 		if (is_null($this->_oShop_Price_Setting_Count)
 			|| $this->_oShop_Price_Setting_Count >= $this->entriesLimit)

@@ -51,12 +51,6 @@ class Sql_Table_Field_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
 	 * Load objects
 	 * @return array
 	 */

@@ -104,7 +104,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		);
 
 		$oMainTab->move($this->getField('coupon')
-			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-3 col-lg-3'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
+			->divAttr(array('class' => 'form-group margin-top-21 col-xs-12 col-sm-6 col-md-4 col-lg-3'))->onclick("$.toggleCoupon(this)"), $oMainRow1);
 
 		$hidden = !$this->_object->coupon
 			? ' hidden'

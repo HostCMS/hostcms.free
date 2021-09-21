@@ -54,12 +54,10 @@ class Shop_Filter_Group_Controller
 			? $aConfig['storageEngine']
 			: 'MyISAM';
 
-		$query = "
-			CREATE TABLE IF NOT EXISTS `" . $this->getTableName() .  "` (
-			  {$sColumns}
-			  , {$sIndexes}
-			) ENGINE={$sEngine} DEFAULT CHARSET=utf8;
-		";
+		$query = "CREATE TABLE IF NOT EXISTS `" . $this->getTableName() . "` (" .
+			"\n{$sColumns}," .
+			"\n{$sIndexes}" .
+			"\n) ENGINE={$sEngine} DEFAULT CHARSET=utf8";
 
 		$oCore_DataBase->query($query);
 
@@ -81,7 +79,7 @@ class Shop_Filter_Group_Controller
 	 */
 	public function dropTable()
 	{
-		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() .  "`");
+		Core_DataBase::instance()->query("DROP TABLE IF EXISTS `" . $this->getTableName() . "`");
 
 		return $this;
 	}

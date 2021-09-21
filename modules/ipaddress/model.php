@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Ipaddress
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Model extends Core_Entity
 {
@@ -91,7 +91,7 @@ class Ipaddress_Model extends Core_Entity
 	 */
 	protected function _checkDuplicate()
 	{
-		$oIpaddressDublicate = Core_Entity::factory('Ipaddress')->getByIp($this->ip);
+		$oIpaddressDublicate = Core_Entity::factory('Ipaddress')->getByIp($this->ip, FALSE);
 
 		if (!is_null($oIpaddressDublicate) && $oIpaddressDublicate->id != $this->id)
 		{

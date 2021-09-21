@@ -40,7 +40,9 @@ $oAdmin_Form_Controller
 	->pageTitle($sFormTitle);
 
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
-$siteuser_id && $oAdmin_Form_Controller->Admin_View('Admin_Internal_View');
+$siteuser_id && $oAdmin_Form_Controller->Admin_View(
+	Admin_View::getClassName('Admin_Internal_View')
+);
 
 // Shop Order Print Forms
 $shop_print_form_id = intval(Core_Array::getGet('shop_print_form_id'));
@@ -101,6 +103,8 @@ if (Core_Array::getPost('recalcFormula'))
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
 
+$windowId = $oAdmin_Form_Controller->getWindowId();
+
 if ($siteuser_id)
 {
 	$aTmp = array();
@@ -139,10 +143,10 @@ if ($siteuser_id)
 			</div>
 			<script>
 				$(function (){
-					$(".select-shop").on("click", function(){
+					$("#' . $windowId . ' .select-shop").on("click", function(){
 						mainFormLocker.unlock();
 
-						var shop_id = parseInt($("#shop_id").val());
+						var shop_id = parseInt($("#' . $windowId . ' #shop_id").val());
 
 						if (shop_id)
 						{
@@ -154,7 +158,7 @@ if ($siteuser_id)
 
 							eval(path);
 
-							$(".modal").modal("hide");
+							$("#' . $windowId . ' .modal").modal("hide");
 						}
 					});
 				});
@@ -163,7 +167,7 @@ if ($siteuser_id)
 	);
 
 	$href = '#';
-	$onclick = "$('.modal').modal('show');";
+	$onclick = "$('#{$windowId} .modal').modal('show');";
 }
 else
 {
@@ -199,7 +203,7 @@ $oAdmin_Form_Controller->addEntity($oAdmin_Form_Entity_Menus);
 if (!$siteuser_id)
 {
 	$additionalParams = "shop_id={$shop_id}&shop_group_id={$shop_group_id}";
-	
+
 	$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
 
 	$oAdmin_Form_Controller->addEntity(
@@ -613,6 +617,36 @@ $oAdmin_Form_Controller
 
 $oAdmin_Form_Controller->addFilter('siteuser_id', array($oAdmin_Form_Controller, '_filterCallbackSiteuser'));
 $oAdmin_Form_Controller->addFilter('user_id', array($oAdmin_Form_Controller, '_filterCallbackUser'));
+
+// Список значений типов доставки для фильтра
+$aShop_Deliveries = $oShop->Shop_Deliveries->findAll(FALSE);
+$aList = array();
+foreach ($aShop_Deliveries as $oShop_Delivery)
+{
+	$aList[$oShop_Delivery->id] = array('value' => $oShop_Delivery->name);
+	!$oShop_Delivery->active && $aList[$oShop_Delivery->id]['attr'] = array(
+		'class' => 'darkgray line-through'
+	);
+}
+
+$oAdmin_Form_Dataset
+	->changeField('shop_delivery_id', 'type', 8)
+	->changeField('shop_delivery_id', 'list', $aList);
+
+// Список значений платежных систем для фильтра
+$aShop_Payment_Systems = $oShop->Shop_Payment_Systems->findAll(FALSE);
+$aList = array();
+foreach ($aShop_Payment_Systems as $oShop_Payment_System)
+{
+	$aList[$oShop_Payment_System->id] = array('value' => $oShop_Payment_System->name);
+	!$oShop_Payment_System->active && $aList[$oShop_Payment_System->id]['attr'] = array(
+		'class' => 'darkgray line-through'
+	);
+}
+
+$oAdmin_Form_Dataset
+	->changeField('shop_payment_system_id', 'type', 8)
+	->changeField('shop_payment_system_id', 'list', $aList);
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

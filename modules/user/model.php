@@ -83,8 +83,8 @@ class User_Model extends Core_Entity
 		'notification_user' => array(),
 		'notification_subscriber' => array(),
 		'notification' => array('through' => 'notification_user'),
-		'deal'  => array(),
-		'deal_template_step_access_user'  => array(),
+		'deal' => array(),
+		'deal_template_step_access_user' => array(),
 		'deal_attachment' => array(),
 		'user_note' => array(),
 		'user_setting' => array(),
@@ -263,7 +263,7 @@ class User_Model extends Core_Entity
 			return FALSE;
 		}
 
-		if ($this->superuser == 1 || $this->only_access_my_own == 0)
+		if ($this->superuser || !$this->only_access_my_own)
 		{
 			return TRUE;
 		}
@@ -287,7 +287,7 @@ class User_Model extends Core_Entity
 	{
 		$oSite = Core_Entity::factory('Site');
 
-		if ($this->superuser == 0)
+		if (!$this->superuser)
 		{
 			$oSite->queryBuilder()
 				->select('sites.*')
@@ -687,19 +687,22 @@ class User_Model extends Core_Entity
 	 */
 	public function smallAvatar()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
-			->class('avatar-user')
-			->title($this->getFullName());
+		if ($this->id)
+		{
+			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+				->class('avatar-user')
+				->title($this->getFullName());
 
-		$oCore_Html_Entity_Div
-			->add(
-				Core::factory('Core_Html_Entity_Img')
-					->src($this->getAvatar())
-					->width(30)
-					->height(30)
-			);
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_Img')
+						->src($this->getAvatar())
+						->width(30)
+						->height(30)
+				);
 
-		$oCore_Html_Entity_Div->execute();
+			$oCore_Html_Entity_Div->execute();
+		}
 	}
 
 	/**
@@ -1102,18 +1105,25 @@ class User_Model extends Core_Entity
 
 	/**
 	 * Get avatar with name
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getAvatarWithName()
 	{
-		$link = $this->only_access_my_own
-			? '<span>' . htmlspecialchars($this->getFullName()) . '</span>'
-			: '<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>';
+		if ($this->id)
+		{
+			$oCurrentUser = Core_Auth::getCurrentUser();
 
-		return '<div class="contracrot">
-			<div class="user-image"><img class="contracrot-ico" src="' . $this->getAvatar() . '"></div>
-			<div class="user-name">' . $link . '</div>
-		</div>';
+			$link = $oCurrentUser && !$oCurrentUser->only_access_my_own
+				? '<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
+				: '<span>' . htmlspecialchars($this->getFullName()) . '</span>';
+
+			return '<div class="contracrot">
+				<div class="user-image"><img class="contracrot-ico" src="' . $this->getAvatar() . '"></div>
+				<div class="user-name">' . $link . '</div>
+			</div>';
+		}
+
+		return NULL;
 	}
 
 	/**

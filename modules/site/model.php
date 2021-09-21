@@ -115,6 +115,7 @@ class Site_Model extends Core_Entity
 		'lead_need' => array(),
 		'lead_maturity' => array(),
 		'lead_status' => array(),
+		'field' => array(),
 	);
 
 	/**
@@ -352,6 +353,11 @@ class Site_Model extends Core_Entity
 			$this->Lead_Needs->deleteAll(FALSE);
 			$this->Lead_Maturities->deleteAll(FALSE);
 			$this->Lead_Statuses->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('field'))
+		{
+			$this->Fields->deleteAll(FALSE);
 		}
 
 		$this->Site_Aliases->deleteAll(FALSE);
@@ -1853,5 +1859,22 @@ class Site_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event site.onBeforeGetRelatedSite
+	 * @hostcms-event site.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

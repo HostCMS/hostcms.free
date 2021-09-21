@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -151,7 +151,6 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 							$aOrdered[date('Y-m-d', $iTmp)] = 0;
 						}
 
-						// Arrays with default values
 						$aPaidAmount = $aPaid = $aOrderedAmount = $aOrdered;
 
 						$limit = 1000;
@@ -167,7 +166,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 								->where('shops.site_id', '=', CURRENT_SITE)
 								->where('shops.deleted', '=', 0)
 								->where('shop_orders.datetime', '>=', date('Y-m-d 00:00:00', $iBeginTimestamp))
-								//->where('shop_orders.datetime', '<=', $sEndTimestamp)
+								->where('shop_orders.canceled', '=', 0)
 								->offset($offset)
 								->limit($limit)
 								->clearOrderBy()
@@ -205,7 +204,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 							$offset += $limit;
 						}
-						while (count($aShop_Orders));
+						while (count($aShop_Orders) == $limit);
 
 						$offset = 0;
 
@@ -255,7 +254,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 							$offset += $limit;
 						}
-						while (count($aShop_Orders));
+						while (count($aShop_Orders) == $limit);
 
 						?><div class="dashboard-box">
 							<div class="box-header">

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -59,19 +59,21 @@ class Seo_Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			try {
 				$oSeo_Driver_Controller = Seo_Controller::instance($oSeo_Driver->driver);
 
-				$aSeoDriverTokens[$oSeo_Driver->id] =  $oSeo_Driver_Controller->getTokenUrl();
+				$aSeoDriverTokens[$oSeo_Driver->id] = $oSeo_Driver_Controller->getTokenUrl();
 				$aSeoDriverTokensJS[] ='"' . $oSeo_Driver->id . '": \'' . Core_Str::escapeJavascriptVariable($oSeo_Driver_Controller->getTokenUrl()) . '\'';
 				$aSeoDriverOptions[$oSeo_Driver->id] = $oSeo_Driver->name;
 			}
 			catch (Exception $e){}
 		}
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oSelect_Drivers = Admin_Form_Entity::factory('Select')
 			->options($aSeoDriverOptions)
 			->name('seo_driver_id')
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'))
 			->value($this->_object->seo_driver_id)
-			->onchange("$('#getToken').attr('href', seoTokens[this.value])")
+			->onchange("$('#{$windowId} #getToken').attr('href', seoTokens[this.value])")
 			->caption(Core::_('Seo_Site.seo_driver_id'));
 
 		$oMainRow1

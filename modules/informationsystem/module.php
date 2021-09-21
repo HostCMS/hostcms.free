@@ -23,7 +23,7 @@ class Informationsystem_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-05-25';
+	public $date = '2021-08-23';
 
 	/**
 	 * Module name
@@ -228,6 +228,7 @@ class Informationsystem_Module extends Core_Module
 			->where('structures.indexing', '=', 1)
 			->where('informationsystem_items.indexing', '=', 1)
 			->where('informationsystem_items.active', '=', 1)
+			->where('informationsystem_items.closed', '=', 0)
 			->where('informationsystem_items.shortcut_id', '=', 0)
 			->where('informationsystem_items.deleted', '=', 0)
 			->open()

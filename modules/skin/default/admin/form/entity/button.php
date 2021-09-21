@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Button extends Admin_Form_Entity_Input
 {
@@ -29,7 +29,7 @@ class Skin_Default_Admin_Form_Entity_Button extends Admin_Form_Entity_Input
 	{
 		if (!is_null($this->onclick) && is_object($this->_Admin_Form_Controller))
 		{
-			$this->onclick = 'var $form = $(this).parents("form"); $.toogleInputsActive($form, true); setTimeout(function(){ $.toogleInputsActive($form, false) }, 1000); ' .  $this->onclick;
+			$this->onclick = 'var $form = $(this).parents("form"); $.toogleInputsActive($form, true); setTimeout(function(){ $.toogleInputsActive($form, false) }, 1000); ' . $this->onclick;
 		}
 
 		$aAttr = $this->getAttrsString();

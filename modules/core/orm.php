@@ -434,8 +434,11 @@ class Core_ORM
 		}
 
 		$this->queryBuilder()
-			->from($this->_tableName)
+			//->from($this->_tableName)
 			->asAssoc();
+
+		!count($this->queryBuilder()->getFrom())
+			&& $this->queryBuilder()->from($this->_tableName);
 
 		$Core_DataBase = $this->queryBuilder()->execute();
 
@@ -489,8 +492,11 @@ class Core_ORM
 		Core_Event::notify($this->_modelName . '.onBeforeFindAll', $this);
 
 		$oSelect = $this->queryBuilder()
-			->from($this->_tableName)
+			//->from($this->_tableName)
 			->asObject(get_class($this));
+
+		!count($this->queryBuilder()->getFrom())
+			&& $this->queryBuilder()->from($this->_tableName);
 
 		// Sets ORDER BY
 		if (!empty($this->_sorting)
@@ -599,6 +605,9 @@ class Core_ORM
 	 */
 	public function getCount($bCache = TRUE, $fieldName = '*', $distinct = FALSE)
 	{
+		!count($this->queryBuilder()->getFrom())
+			&& $this->queryBuilder()->from($this->_tableName);
+			
 		$aRow = $this->queryBuilder()
 			->clearSelect()
 			->clearLimit()
@@ -608,7 +617,7 @@ class Core_ORM
 					: Core_QueryBuilder::expression('COUNT(' . ($distinct ? 'DISTINCT ' : '') . $this->getDatabase()->quoteColumnName($fieldName) . ')')
 				, 'count')
 			)
-			->from($this->_tableName)
+			//->from($this->_tableName)
 			->execute()
 			->asAssoc()
 			->current($bCache);
@@ -695,7 +704,7 @@ class Core_ORM
 			}
 			// One-to-many or Many-to-many relation
 			elseif (($modelNamePlural = Core_Inflection::getPlural($modelName))
-			&& isset($this->_relations[$modelNamePlural]))
+				&& isset($this->_relations[$modelNamePlural]))
 			{
 				$relation = $modelNamePlural;
 			}
@@ -1153,7 +1162,7 @@ class Core_ORM
 	{
 		if (is_null($this->_queryBuilder))
 		{
-			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*');
+			$this->_queryBuilder = Core_QueryBuilder::select($this->_tableName . '.*')->from($this->_tableName);
 
 			self::$_databaseDriver != 'default'
 				&& $this->_queryBuilder->setDataBase($this->getDatabase());
@@ -1672,7 +1681,7 @@ class Core_ORM
 	 * Get changed columns with values
 	 * @return array
 	 */
-	protected function _getChangedData()
+	public function getChangedData()
 	{
 		$data = array();
 
@@ -1702,14 +1711,23 @@ class Core_ORM
 			switch ($aField['type'])
 			{
 				case 'int':
-					if (!is_numeric($value))
+					if ($value === '')
 					{
-						$value = intval($value);
+						$value = !is_null($aField['default'])
+							? $aField['default']
+							: ($aField['null'] ? NULL : 0);
 					}
-
-					if ($value < $aField['min'] || $value > $aField['max'])
+					else
 					{
-						$value = ($value < $aField['min']) ? $aField['min'] : $aField['max'];
+						if (!is_numeric($value))
+						{
+							$value = intval($value);
+						}
+
+						if ($value < $aField['min'] || $value > $aField['max'])
+						{
+							$value = ($value < $aField['min']) ? $aField['min'] : $aField['max'];
+						}
 					}
 				break;
 				case 'decimal':
@@ -1719,7 +1737,56 @@ class Core_ORM
 					// Remove everything except numbers and dot
 					$value = preg_replace('/[^0-9\.\-]/', '', $value);
 
-					$value == '' && $value = 0;
+					if ($value == '')
+					{
+						$value = $aField['null'] ? NULL : 0;
+					}
+					else
+					{
+						if (!is_null($aField['max_length']))
+						{
+							$aValue = preg_match('/([-]?)([0-9]+)(?:[.]([0-9]+))?/', trim($value, '.'), $matches);
+							
+							// Remove first item
+							array_shift($matches);
+							
+							// Remove sign
+							$sign = array_shift($matches);
+							
+							if (isset($matches[0]))
+							{
+								// number of significant digits. The range of P is 1 to 65.
+								// D is the scale that that represents the number of digits after the decimal point
+								$aDigits = explode(',', $aField['max_length']);
+								
+								$beforePoint = $aDigits[0] - (isset($aDigits[1]) ? $aDigits[1] : 0);
+								
+								if (strlen($matches[0]) <= $beforePoint)
+								{
+									if (isset($aDigits[1])
+										&& isset($matches[1]) && strlen($matches[1]) > $aDigits[1])
+									{
+										$matches[1] = substr($matches[1], 0, $aDigits[1]);
+										
+										if ($matches[1] == '')
+										{
+											unset($matches[1]);
+										}
+										
+										$value = $sign . implode('.', $matches);
+									}
+								}
+								else
+								{
+									$value = 0;
+								}
+							}
+							else
+							{
+								$value = 0;
+							}
+						}
+					}
 				break;
 				case 'float':
 					// Convert "," to "."
@@ -1728,7 +1795,14 @@ class Core_ORM
 					// Remove everything except numbers and dot
 					$value = preg_replace('/[^0-9\.\-]/', '', $value);
 
-					$value = floatval($value);
+					if ($value == '')
+					{
+						$value = $aField['null'] ? NULL : 0;
+					}
+					else
+					{
+						$value = floatval($value);
+					}
 				break;
 				case 'string':
 					$strlen = mb_strlen($value);
@@ -1849,7 +1923,7 @@ class Core_ORM
 
 			Core_Event::notify($this->_modelName . '.onBeforeCreate', $this);
 
-			$data = $this->_getChangedData();
+			$data = $this->getChangedData();
 
 			$bPKexists = array_key_exists($this->_primaryKey, $data);
 
@@ -1906,7 +1980,7 @@ class Core_ORM
 
 			Core_Event::notify($this->_modelName . '.onBeforeUpdate', $this);
 
-			$data = $this->_getChangedData();
+			$data = $this->getChangedData();
 
 			$oQuery_Builder = Core_QueryBuilder::update($this->_tableName);
 

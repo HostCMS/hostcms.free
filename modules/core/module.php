@@ -107,7 +107,7 @@ abstract class Core_Module
 						'onclick' => '',								//-- событие нажатия на поле
 						'list' => '',									//--
 					),
-					'field2' =>  array(
+					'field2' => array(
 						'name' => array(								//-- название поля в админке
 							1 => 'Наименование кампании',				//-- по-русски - 1=идентификатор языка
 							2 => 'Campaign name'						//-- по-английски - 2=идентификатор языка
@@ -310,7 +310,7 @@ abstract class Core_Module
 	/**
 	 * Add Admin Form
 	 *
-	 * @param string $name
+	 * @param array $name
 	 * @param array $aForm Array of attributes
 	 * @return Admin_Form_Model
 	 */
@@ -522,5 +522,46 @@ abstract class Core_Module
 		Core_Event::notify(get_class($this) . '.onBeforeGetOptions', $this, array($this->_options));
 
 		return $this->_options;
+	}
+
+	/**
+	 * Set Module Options
+	 * @return array
+	 * @hostcms-event Core_Module.onBeforeSetOptions
+	 */
+	public function setOptions($data)
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeSetOptions', $this, array($this->_options));
+
+		$aModule_Options = $this->getOptions();
+
+		if (count($aModule_Options))
+		{
+			$aConfig = Core_Config::instance()->get($this->_moduleName . '_config', array());
+
+			foreach ($aModule_Options as $option_name => $aOptions)
+			{
+				$value = Core_Array::get($data, 'option_' . $option_name);
+
+				switch ($aOptions['type'])
+				{
+					case 'int':
+						$value = intval($value);
+					break;
+					case 'float':
+						$value = floatval($value);
+					break;
+					case 'checkbox':
+						$value = $value == 1;
+					break;
+				}
+
+				$aConfig[$option_name] = $value;
+			}
+
+			Core_Config::instance()->set($this->_moduleName . '_config', $aConfig);
+		}
+
+		return $this;
 	}
 }

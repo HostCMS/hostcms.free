@@ -1019,7 +1019,8 @@ class Shop_Order_Model extends Core_Entity
 
 				if (isset($aShop_Discountcards[0]))
 				{
-					$this->_oShop_Discountcard = $aShop_Discountcards[0];
+					$aShop_Discountcards[0]->active
+						&& $this->_oShop_Discountcard = $aShop_Discountcards[0];
 				}
 				else
 				{
@@ -1165,7 +1166,8 @@ class Shop_Order_Model extends Core_Entity
 
 				if (isset($aShop_Discountcards[0]))
 				{
-					$this->_oShop_Discountcard = $aShop_Discountcards[0];
+					$aShop_Discountcards[0]->active
+						&& $this->_oShop_Discountcard = $aShop_Discountcards[0];
 				}
 			}
 
@@ -1381,6 +1383,7 @@ class Shop_Order_Model extends Core_Entity
 					$oShop_Purchase_Discount_Coupon->start_datetime = Core_Date::timestamp2sql(time());
 					$oShop_Purchase_Discount_Coupon->end_datetime = $oShop_Item_Certificate->Shop_Purchase_Discount->end_datetime;
 					$oShop_Purchase_Discount_Coupon->text = '';
+					$oShop_Purchase_Discount_Coupon->count = $oShop_Order_Item->quantity;
 					$oShop_Purchase_Discount_Coupon->save();
 
 					if (strlen($oShop->certificate_template))
@@ -1434,7 +1437,7 @@ class Shop_Order_Model extends Core_Entity
 			in_array($oShop_Order_Item->type, array(3, 4, 5))
 				? $fTotalDiscount += $fAmount
 				: $fTotalAmount += $fAmount;
-				
+
 			$oShop_Item->clearCache();
 		}
 
@@ -2283,6 +2286,26 @@ class Shop_Order_Model extends Core_Entity
 					}
 				}
 
+				if ($oShop_Order_Item->rate > 0)
+				{
+					$oShop_Tax = $oShop_Item && $oShop_Item->shop_tax_id
+						? $oShop_Item->Shop_Tax
+						: NULL;
+
+					$taxName = $oShop_Tax ? $oShop_Tax->name : 'НДС';
+
+					$oTaxRates = $oCurrentItemXml->addChild('СтавкиНалогов');
+					$oTaxRate = $oTaxRates->addChild('СтавкаНалога');
+					$oTaxRate->addChild('Наименование', $taxName);
+					$oTaxRate->addChild('Ставка', $oShop_Order_Item->rate);
+
+					$oTaxes = $oCurrentItemXml->addChild('Налоги');
+					$oTax = $oTaxes->addChild('Налог');
+					$oTax->addChild('Наименование', $taxName);
+					$oTax->addChild('УчтеноВСумме', 'true');
+					$oTax->addChild('Сумма', $oShop_Order_Item->getTax());
+				}
+
 				if ($oShop_Order_Item->shop_warehouse_id)
 				{
 					$oWarehouses = $oCurrentItemXml->addChild('Склады');
@@ -2306,6 +2329,9 @@ class Shop_Order_Model extends Core_Entity
 				$oCurrentItemXml = $oDiscountXml->addChild('Скидка');
 				$oCurrentItemXml->addChild('Наименование', $oShop_Order_Item->name);
 				$oCurrentItemXml->addChild('Сумма', -1 * $oShop_Order_Item->getPrice() * $oShop_Order_Item->quantity);
+				// https://v8.1c.ru/upload/integraciya/realizovannye-resheniya/commerceml_2_10_2.pdf страница 43
+				// Сумма	СуммаТип	[0..1]
+				// Общая сумма по документу. Налоги, скидки и дополнительные расходы включаются в данную сумму в зависимости от установок "УчтеноВСумме", поэтому true
 				$oCurrentItemXml->addChild('УчтеноВСумме', 'true');
 			}
 		}
@@ -2491,7 +2517,7 @@ class Shop_Order_Model extends Core_Entity
 							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="6">
 								<?php echo Core::_("Shop_Order.table_nds")?>
 							</td>
-							<td width="80%" align="right"  style="border-bottom: 1px solid #e9e9e9" colspan="3">
+							<td width="80%" align="right" style="border-bottom: 1px solid #e9e9e9" colspan="3">
 								<?php echo sprintf("%.2f", $fShopTaxValueSum) . " " . htmlspecialchars($this->Shop->Shop_Currency->name)?>
 							</td>
 						</tr>
@@ -2527,7 +2553,7 @@ class Shop_Order_Model extends Core_Entity
 		// Fix popover for form in tab
 		$windowId == 'shop-orders' && $windowId = 'id_content';
 
-		?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice))?>" data-content="<?php echo htmlspecialchars($this->orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
+		?><a id="popover-hover" href="#<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_0_<?php echo $this->id?>').toggleHighlight();<?php echo $onclick?>" data-container="#<?php echo $windowId?>" data-titleclass="bordered-lightgray" data-toggle="popover-hover" data-placement="left" data-title="<?php echo htmlspecialchars(Core::_('Shop_Order.popover_title', $this->invoice, Core_Date::sql2datetime($this->datetime)))?>" data-content="<?php echo htmlspecialchars($this->orderPopover())?>"><i class="fa fa-list" title=""></i></a><?php
 	}
 
 	/**
@@ -2637,7 +2663,10 @@ class Shop_Order_Model extends Core_Entity
 				$oSiteuser = $this->Siteuser;
 
 				$oShop_Discountcard = $oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-				if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+				if (!is_null($oShop_Discountcard)
+					&& $oShop_Discountcard->active
+					&& $oShop_Discountcard->shop_discountcard_level_id
+				)
 				{
 					$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
 
@@ -2909,17 +2938,22 @@ class Shop_Order_Model extends Core_Entity
 		$aReplace['tax'] = Shop_Controller::instance()->round($total_tax);
 		$aReplace['amount'] = Shop_Controller::instance()->round($total_amount);
 		$aReplace['amount_tax_included'] = Shop_Controller::instance()->round($this->getAmount());
-		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount_tax_included']));
+
+		$lng = $this->Shop->Site->lng;
+
+		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
+			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount_tax_included'], $this->Shop_Currency->code))
+			: $aReplace['amount_tax_included'] . ' ' . $this->Shop_Currency->code;
 
 		$aReplace['delivery_name'] = $this->shop_delivery_id ? Core_Str::ucfirst($this->Shop_Delivery->name) : '';
 
 		$aReplace['payment_name'] = $this->shop_payment_system_id ? Core_Str::ucfirst($this->Shop_Payment_System->name) : '';
 		$aReplace['payment_status'] = $this->paid ? Core::_('Admin_Form.yes') : Core::_('Admin_Form.no');
-		$aReplace['payment_date'] =  $this->paid ? Core_Date::sql2date($this->payment_datetime) : '';
-		$aReplace['payment_datetime'] =  $this->paid ? Core_Date::sql2datetime($this->payment_datetime) : '';
+		$aReplace['payment_date'] = $this->paid ? Core_Date::sql2date($this->payment_datetime) : '';
+		$aReplace['payment_datetime'] = $this->paid ? Core_Date::sql2datetime($this->payment_datetime) : '';
 
-		$aReplace['status_date'] =  $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2date($this->status_datetime) : '';
-		$aReplace['status_datetime'] =  $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2datetime($this->status_datetime) : '';
+		$aReplace['status_date'] = $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2date($this->status_datetime) : '';
+		$aReplace['status_datetime'] = $this->status_datetime != '0000-00-00 00:00:00' ? Core_Date::sql2datetime($this->status_datetime) : '';
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -3338,5 +3372,22 @@ class Shop_Order_Model extends Core_Entity
 		}
 
 		return implode("\n<br />", $aReturn);
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_order.onBeforeGetRelatedSite
+	 * @hostcms-event shop_order.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

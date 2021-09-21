@@ -36,4 +36,6 @@ return array(
 	'backendWarning' => 'To use discount cards you need the "Clients" module, which is part of the "Business" and "Corporation" editions.',
 	'backendWrongWriteoffWarning' => 'Not enough bonuses to write off!',
 	'backendWriteoffSuccess' => 'Bonuses debited successfull!',
+	'active' => 'Active',
+	'changeActive_success' => 'Information changed successfully'
 );

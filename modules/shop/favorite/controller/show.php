@@ -109,7 +109,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 
 	public function parseUrl()
 	{
-		$oShop = $this->getEntity();
+		// $oShop = $this->getEntity();
 
 		$Core_Router_Route = new Core_Router_Route($this->pattern);
 		$this->patternParams = $matches = $Core_Router_Route->applyPattern(Core::$url['path']);

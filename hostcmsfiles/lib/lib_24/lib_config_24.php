@@ -96,7 +96,7 @@ if (!is_null(Core_Array::getPost('stealthSubscribe')))
 	}
 	else
 	{
-		$aReturn['error'] = 'Модуль "Пользователи сайта" отсутствует!';
+		$aReturn['error'] = 'Модуль "Клиенты" отсутствует!';
 	}
 
 	Core::showJson($aReturn);

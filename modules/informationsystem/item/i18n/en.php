@@ -130,4 +130,6 @@ return array(
 	'information_items_copy_form_title' => 'Copy item',
 	'add_value'=>'Add the default property values ​​for the items with unset values',
 	'file_does_not_specified' => 'File not specified',
+
+	'shortcut' => 'Shortcut',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Message
 {
@@ -26,7 +26,7 @@ class Core_Message
 	 * @param $message Message text
 	 * @param $type Message type
 	 */
-	static public function show($message, $type = 'message')
+	static public function show($message, $type = 'success')
 	{
 		echo self::get($message, $type);
 	}
@@ -43,7 +43,7 @@ class Core_Message
 	 * @see Core_Message::show()
 	 * @return string
 	 */
-	static public function get($message, $type = 'message')
+	static public function get($message, $type = 'success')
 	{
 		$args = func_get_args();
 

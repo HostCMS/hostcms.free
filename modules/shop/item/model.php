@@ -415,8 +415,9 @@ class Shop_Item_Model extends Core_Entity
 				$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 				$oSiteuser && $this->_Shop_Item_Controller->siteuser($oSiteuser);
 			}
-			$this->_Shop_Item_Controller->count($this->_cartQuantity);
 		}
+
+		$this->_Shop_Item_Controller->count($this->_cartQuantity);
 
 		return $this;
 	}
@@ -592,8 +593,8 @@ class Shop_Item_Model extends Core_Entity
 			// Fast filter
 			if ($this->Shop->filter)
 			{
-				$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
-				$Shop_Filter_Controller->fill($this);
+				$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+				$oShop_Filter_Controller->fill($this);
 			}
 
 			Core_Event::notify($this->_modelName . '.onAfterAdminPrice', $this);
@@ -1096,8 +1097,8 @@ class Shop_Item_Model extends Core_Entity
 		// Fast filter
 		if ($this->Shop->filter)
 		{
-			$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
-			$Shop_Filter_Controller->fill($this);
+			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
+			$oShop_Filter_Controller->fill($this);
 		}
 
 		$iShopGroupId && $oShop_Group->incCountItems();
@@ -1130,6 +1131,15 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop);
 			$oShop_Filter_Controller->fill($this);
+
+			// Fast filter for modifications
+			$aModifications = $this->Modifications->findAll(FALSE);
+			foreach ($aModifications as $oModification)
+			{
+				$this->active
+					? $oShop_Filter_Controller->fill($oModification)
+					: $oShop_Filter_Controller->remove($oModification);
+			}
 		}
 
 		Core_Event::notify($this->_modelName . '.onAfterChangeActive', $this);
@@ -1339,7 +1349,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		// комментарии к товару
+		// Комментарии к товару
 		if (Core::moduleIsActive('comment'))
 		{
 			$aComments = $this->Comments->getAllByActive(1, FALSE);
@@ -1368,48 +1378,102 @@ class Shop_Item_Model extends Core_Entity
 		$aPropertyValues = $this->getPropertyValues(FALSE);
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
-			// List
-			if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+			if ($oPropertyValue->Property->indexing)
 			{
-				if ($oPropertyValue->value != 0)
+				// List
+				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 				{
-					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
-				}
-			}
-			// Informationsystem
-			elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-			{
-				if ($oPropertyValue->value != 0)
-				{
-					$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-					if ($oInformationsystem_Item->id)
+					if ($oPropertyValue->value != 0)
 					{
-						$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						$oList_Item = $oPropertyValue->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 					}
 				}
-			}
-			// Shop
-			elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
-			{
-				if ($oPropertyValue->value != 0)
+				// Informationsystem
+				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
 				{
-					$oShop_Item = $oPropertyValue->Shop_Item;
-					if ($oShop_Item->id)
+					if ($oPropertyValue->value != 0)
 					{
-						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
 					}
 				}
+				// Shop
+				elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oPropertyValue->value != 0)
+					{
+						$oShop_Item = $oPropertyValue->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oPropertyValue->Property->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+				}
+				// Other type
+				elseif ($oPropertyValue->Property->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				}
 			}
-			// Wysiwyg
-			elseif ($oPropertyValue->Property->type == 6)
+		}
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
 			{
-				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
-			}
-			// Other type
-			elseif ($oPropertyValue->Property->type != 2)
-			{
-				$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
 			}
 		}
 
@@ -1486,10 +1550,8 @@ class Shop_Item_Model extends Core_Entity
 				Core::factory('Core_Html_Entity_I')
 					->class('fa fa-lightbulb-o ' . ($iCount ? 'fa-active' : 'fa-inactive'))
 			)
-			->href($oAdmin_Form_Controller->getAdminActionLoadHref(
-				"/admin/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, $this->id))
-			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax(
-				"/admin/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, $this->id))
+			->href($oAdmin_Form_Controller->getAdminActionLoadHref("/admin/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, intval($this->id)))
+			->onclick($oAdmin_Form_Controller->getAdminActionLoadAjax("/admin/shop/item/associated/index.php", 'adminChangeAssociated', NULL, 1, intval($this->id)))
 			->execute();
 
 		return ob_get_clean();
@@ -1752,7 +1814,18 @@ class Shop_Item_Model extends Core_Entity
 			? $this->Shop_Item
 			: $this;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			->class('d-flex align-items-center');
+
+		if (is_null(Core_Array::getGet('shop_item_id')) && $object->modification_id)
+		{
+			$oCore_Html_Entity_Div
+				->add(
+					Core::factory('Core_Html_Entity_I')->class('fa fa-code-fork margin-right-5 order-first')
+				);
+		}
+
+		$oCore_Html_Entity_Div->value(
 			htmlspecialchars($object->name)
 		);
 
@@ -1762,7 +1835,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_Span')
-					->class('label label-sm darkgray bordered-1 bordered-gray')
+					->class('label label-sm darkgray bordered-1 bordered-gray margin-left-5')
 					->value($oShop_Item_Barcode->value)
 			);
 		}
@@ -1793,7 +1866,7 @@ class Shop_Item_Model extends Core_Entity
 						->href($href)
 						->target('_blank')
 						->add(
-							Core::factory('Core_Html_Entity_I')->class('fa fa-external-link')
+							Core::factory('Core_Html_Entity_I')->class('fa fa-external-link margin-left-5')
 						)
 				);
 			}
@@ -1802,7 +1875,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black margin-left-5')
 				);
 		}
 
@@ -2309,6 +2382,7 @@ class Shop_Item_Model extends Core_Entity
 										->id($oModification->id)
 										->showXmlProperties($this->_showXmlProperties)
 										->showXmlAssociatedItems($this->_showXmlAssociatedItems)
+										->cartQuantity(1)
 								);
 							}
 						}
@@ -2471,7 +2545,8 @@ class Shop_Item_Model extends Core_Entity
 						->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 						->showXmlBonuses($this->_showXmlBonuses)
 						->showXmlSiteuser($this->_showXmlSiteuser)
-						->showXmlProperties($this->_showXmlProperties);
+						->showXmlProperties($this->_showXmlProperties)
+						->cartQuantity(1);
 
 					Core_Event::notify($this->_modelName . '.onBeforeAddModification', $this, array(
 						$oTmp_Shop_Items_Modification
@@ -2534,7 +2609,8 @@ class Shop_Item_Model extends Core_Entity
 							->showXmlTags($this->_showXmlTags)
 							->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 							->showXmlSiteuser($this->_showXmlSiteuser)
-							->showXmlProperties($this->_showXmlProperties);
+							->showXmlProperties($this->_showXmlProperties)
+							->cartQuantity(1);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddAssociatedEntity', $this, array($oShop_Item_Associated));
 
@@ -2626,16 +2702,25 @@ class Shop_Item_Model extends Core_Entity
 
 		if ($this->_showXmlTabs)
 		{
-			$oShop_Tab = Core_Entity::factory('Shop_Tab');
-			$oShop_Tab
+			$oShop_Tab_Groups = Core_Entity::factory('Shop_Tab');
+			$oShop_Tab_Groups
 				->queryBuilder()
 				->join('shop_tab_groups', 'shop_tabs.id', '=', 'shop_tab_groups.shop_tab_id')
 				->where('shop_tab_groups.shop_id', '=', $this->shop_id)
 				->where('shop_tab_groups.shop_group_id', '=', $this->shop_group_id);
 
-			$aShop_Tabs = $oShop_Tab->findAll();
+			$aShop_Tab_Groups = $oShop_Tab_Groups->findAll();
 
-			$aShop_Tabs = array_unique(array_merge($aShop_Tabs, $this->Shop_Tabs->findAll()));
+			$oShop_Tab_Producers = Core_Entity::factory('Shop_Tab');
+			$oShop_Tab_Producers
+				->queryBuilder()
+				->join('shop_tab_producers', 'shop_tabs.id', '=', 'shop_tab_producers.shop_tab_id')
+				->where('shop_tab_producers.shop_id', '=', $this->shop_id)
+				->where('shop_tab_producers.shop_producer_id', '=', $this->shop_producer_id);
+
+			$aShop_Tab_Producers = $oShop_Tab_Producers->findAll();
+
+			$aShop_Tabs = array_unique(array_merge($aShop_Tab_Groups, $aShop_Tab_Producers, $this->Shop_Tabs->findAll()));
 
 			if (count($aShop_Tabs))
 			{
@@ -3244,5 +3329,58 @@ class Shop_Item_Model extends Core_Entity
 		}
 
 		return $price;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_item.onBeforeGetRelatedSite
+	 * @hostcms-event shop_item.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
+
+	/**
+	 * Check activity of item and parent groups
+	 * @return bool
+	 */
+	public function isActive()
+	{
+		if ($this->modification_id && !$this->Modification->active)
+		{
+			return FALSE;
+		}
+
+		if (!$this->active)
+		{
+			return FALSE;
+		}
+
+		$oTmpItem = $this->modification_id
+			? $this->Modification
+			: $this;
+
+		if ($oTmpItem->shop_group_id)
+		{
+			$oTmpGroup = $oTmpItem->Shop_Group;
+
+			// Все директории от текущей до родителя.
+			do {
+				if (!$oTmpGroup->active)
+				{
+					return FALSE;
+				}
+			} while ($oTmpGroup = $oTmpGroup->getParent());
+		}
+
+		return TRUE;
 	}
 }

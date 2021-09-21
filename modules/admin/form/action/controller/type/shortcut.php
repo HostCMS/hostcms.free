@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -95,7 +95,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					->class('form-control')
 					->name('destinationName')
 					->controller($window_Admin_Form_Controller);
-					
+
 				$oAdmin_Form_Entity_Autocomplete_Select = Admin_Form_Entity::factory('Select')
 					->name('inputMode')
 					->id('inputMode')
@@ -106,7 +106,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 						2 => Core::_('Admin_Form.autocomplete_mode2'),
 						3 => Core::_('Admin_Form.autocomplete_mode3')
 					))
-					->caption(Core::_('Admin_Form.autocomplete_mode'));					
+					->caption(Core::_('Admin_Form.autocomplete_mode'));
 
 				$oInputHidden = Admin_Form_Entity::factory('Input')
 					->divAttr(array('class' => 'form-group col-xs-12 hidden'))
@@ -134,39 +134,37 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 					->value("
 						$('[name = destinationName]').autocomplete({
-							  source: function(request, response) {
-
+							source: function(request, response) {
 								$.ajax({
-								  url: '{$path}&entity_id={$entity_id}&mode=' + $('select#inputMode').val(),
-								  dataType: 'json',
-								  data: {
-									queryString: request.term
-								  },
-								  success: function( data ) {
-									response( data );
-								  }
+									url: '{$path}&entity_id={$entity_id}&mode=' + $('select#inputMode').val(),
+									dataType: 'json',
+									data: {
+										queryString: request.term
+									},
+									success: function(data) {
+										response(data);
+									}
 								});
-							  },
-							  minLength: 1,
-							  create: function() {
-								$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							},
+							minLength: 1,
+							create: function() {
+								$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 									return $('<li></li>')
 										.data('item.autocomplete', item)
 										.append($('<a>').text(item.label))
 										.appendTo(ul);
 								}
-
-								 $(this).prev('.ui-helper-hidden-accessible').remove();
-							  },
-							  select: function( event, ui ) {
+								$(this).prev('.ui-helper-hidden-accessible').remove();
+							},
+							select: function(event, ui) {
 								$('[name = destinationId]').val(ui.item.id);
-							  },
-							  open: function() {
+							},
+							open: function() {
 								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-							  },
-							  close: function() {
+							},
+							close: function() {
 								$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-							  }
+							}
 						});
 					");
 
@@ -206,7 +204,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 				->onclick(
 					//'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					'bootbox.hideAll(); '
-					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					. $this->_Admin_Form_Controller->getAdminSendForm(array('operation' => 'apply'))
 				)
 				->controller($this->_Admin_Form_Controller);
 

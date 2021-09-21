@@ -150,6 +150,39 @@ if (!is_null(Core_Array::getGet('items')) && !is_null(Core_Array::getGet('term')
 	Core::showJson($aJSON);
 }
 
+if (!is_null(Core_Array::getGet('producers')) && !is_null(Core_Array::getGet('term')))
+{
+	$aJSON = array();
+
+	$sQuery = trim(Core_DataBase::instance()->escapeLike(Core_Str::stripTags(strval(Core_Array::getGet('term')))));
+
+	$sQueryLike = '%' . str_replace(' ', '%', $sQuery) . '%';
+
+	$iShopId = intval(Core_Array::getGet('shop_id'));
+	$oShop = Core_Entity::factory('Shop', $iShopId);
+
+	if (strlen($sQuery))
+	{
+		$oShop_Producers = $oShop->Shop_Producers;
+		$oShop_Producers->queryBuilder()
+			->where('shop_producers.name', 'LIKE', $sQueryLike)
+			->where('shop_producers.active', '=', 1)
+			->limit(Core::$mainConfig['autocompleteItems']);
+
+		$aShop_Producers = $oShop_Producers->findAll(FALSE);
+
+		foreach ($aShop_Producers as $oShop_Producer)
+		{
+			$aJSON[] = array(
+				'id' => $oShop_Producer->id,
+				'text' => $oShop_Producer->name . ' [' . $oShop_Producer->id . ']',
+			);
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (!is_null(Core_Array::getGet('autocomplete'))
 	&& !is_null(Core_Array::getGet('show_move_groups'))
 	&& !is_null(Core_Array::getGet('queryString'))
@@ -435,16 +468,10 @@ $oMenu->add(
 				->icon('fa fa-plus')
 				->img('/admin/images/page_add.gif')
 				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref
-					(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
-					)
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax
-					(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0
-					)
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 1, 0)
 				)
 		)
 		->add(
@@ -564,16 +591,10 @@ $oMenu->add(
 				->icon('fa fa-plus')
 				->img('/admin/images/folder_add.gif')
 				->href(
-					$oAdmin_Form_Controller->getAdminActionLoadHref
-					(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
+					$oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)
 				->onclick(
-					$oAdmin_Form_Controller->getAdminActionLoadAjax
-					(
-						$oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0
-					)
+					$oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 				)
 		)
 		->add(
@@ -824,17 +845,40 @@ if ($oShopGroup->id)
 }
 
 // Глобальный поиск
-$sGlobalSearch = trim(strval(Core_Array::getGet('globalSearch')));
+$sGlobalSearch = Core_Array::getGet('globalSearch', '', 'trim');
+$iGlobalSearchMode = Core_Array::getGet('globalSearchMode', 0, 'int');
+
+ob_start();
+$globalSearchModeSelect = Admin_Form_Entity::factory('Select')
+	->name('globalSearchMode')
+	->divAttr(array('class' => 'col-xs-6 col-md-2'))
+	->class('form-control w-100')
+	->options(array(
+		0 => '...',
+		1 => Core::_('Shop_Item.shop_group_id'),
+		2 => Core::_('Shop_Item.links_items'),
+		3 => Core::_('Shop_Item.show_groups_modification'),
+		4 => Core::_('Shop_Item.shortcut')
+	))
+	->value($iGlobalSearchMode)
+	->execute();
+
+$modeContent = ob_get_clean();
 
 $oAdmin_Form_Controller->addEntity(
 	Admin_Form_Entity::factory('Code')
 		->html('
 			<div class="row search-field margin-bottom-20">
 				<div class="col-xs-12">
-					<form action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
-						<input type="text" name="globalSearch" class="form-control" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
-						<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
-						<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+					<form class="form-inline" action="' . $oAdmin_Form_Controller->getPath() . '" method="GET">
+						<div class="row">
+							' . $modeContent . '
+							<div class="col-xs-6 col-md-10">
+								<input type="text" name="globalSearch" class="form-control w-100" placeholder="' . Core::_('Admin.placeholderGlobalSearch') . '" value="' . htmlspecialchars($sGlobalSearch) . '" />
+								<i class="fa fa-times-circle no-margin" onclick="' . $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), '', '', $additionalParams) . '"></i>
+								<button type="submit" class="btn btn-default global-search-button" onclick="' . $oAdmin_Form_Controller->getAdminSendForm('', '', $additionalParams) . '"><i class="fa fa-search fa-fw"></i></button>
+							</div>
+						</div>
 					</form>
 				</div>
 			</div>
@@ -1212,20 +1256,28 @@ $oAdmin_Form_Dataset
 
 if (strlen($sGlobalSearch))
 {
-	$oAdmin_Form_Dataset
-		->addCondition(array('open' => array()))
-			->addCondition(array('where' => array('shop_groups.id', '=', $sGlobalSearch)))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('shop_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('shop_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('shop_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
-			->addCondition(array('setOr' => array()))
-			->addCondition(array('where' => array('shop_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('close' => array()));
+	if (!$iGlobalSearchMode || $iGlobalSearchMode == 1)
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('open' => array()))
+				->addCondition(array('where' => array('shop_groups.id', '=', $sGlobalSearch)))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+				->addCondition(array('setOr' => array()))
+				->addCondition(array('where' => array('shop_groups.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('close' => array()));
+	}
+	else
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('whereRaw' => array('0 = 1')));
+	}
 }
 else
 {
@@ -1255,29 +1307,57 @@ $oAdmin_Form_Dataset
 
 if (strlen($sGlobalSearch))
 {
-	$oAdmin_Form_Dataset
-		->addCondition(
-			array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
-		)
-		->addCondition(array('open' => array()))
-		->addCondition(array('where' => array('shop_items.id', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.guid', '=', $sGlobalSearch)))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_item_barcodes.value', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('setOr' => array()))
-		->addCondition(array('where' => array('shop_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
-		->addCondition(array('close' => array()));
+	if (!$iGlobalSearchMode || $iGlobalSearchMode != 1)
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(
+				array('leftJoin' => array('shop_item_barcodes', 'shop_items.id', '=', 'shop_item_barcodes.shop_item_id'))
+			)
+			->addCondition(array('open' => array()))
+			->addCondition(array('where' => array('shop_items.id', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.marking', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_item_barcodes.value', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.seo_description', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('shop_items.seo_keywords', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('close' => array()));
+
+		// Товар
+		if ($iGlobalSearchMode == 2)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('where' => array('shop_items.modification_id', '=', 0)))
+				->addCondition(array('where' => array('shop_items.shortcut_id', '=', 0)));
+		}
+		// Модификация
+		elseif ($iGlobalSearchMode == 3)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('where' => array('shop_items.modification_id', '!=', 0)));
+		}
+		// Ярлык
+		elseif ($iGlobalSearchMode == 4)
+		{
+			$oAdmin_Form_Dataset
+				->addCondition(array('where' => array('shop_items.shortcut_id', '!=', 0)));
+		}
+	}
+	else
+	{
+		$oAdmin_Form_Dataset
+			->addCondition(array('whereRaw' => array('0 = 1')));
+	}
 }
 else
 {
