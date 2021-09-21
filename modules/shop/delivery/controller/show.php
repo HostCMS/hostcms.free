@@ -296,7 +296,10 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 		if ($this->applyDiscountCards && Core::moduleIsActive('siteuser') && $this->_oSiteuser)
 		{
 			$oShop_Discountcard = $this->_oSiteuser->Shop_Discountcards->getByShop_id($oShop->id);
-			if (!is_null($oShop_Discountcard) && $oShop_Discountcard->shop_discountcard_level_id)
+			if (!is_null($oShop_Discountcard)
+				&& $oShop_Discountcard->active
+				&& $oShop_Discountcard->shop_discountcard_level_id
+			)
 			{
 				$oShop_Discountcard_Level = $oShop_Discountcard->Shop_Discountcard_Level;
 

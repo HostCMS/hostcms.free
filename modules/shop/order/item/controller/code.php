@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Code extends Admin_Form_Action_Controller
 {
@@ -58,12 +58,14 @@ class Shop_Order_Item_Controller_Code extends Admin_Form_Action_Controller
 		$count = $this->_object->Shop_Order_Item_Codes->getCount(FALSE);
 
 		ob_start();
+		
+		$windowId = $this->_Admin_Form_Controller->getWindowId()
 
 		Core::factory('Core_Html_Entity_Script')
 			->value('$(function() {
 				$("#codes-' . $this->_object->id . '").modal("hide");
 
-				$("#code-badge' . $this->_object->id . '").text("' . $count . '");
+				$("#' . $windowId . ' #code-badge' . $this->_object->id . '").text("' . $count . '");
 			})')
 			->execute();
 

@@ -32,7 +32,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Controller_Rss_Show extends Core_Controller
 {
@@ -414,7 +414,8 @@ class Informationsystem_Controller_Rss_Show extends Core_Controller
 			if ($this->turbo)
 			{
 				$attributes['turbo'] = 'true';
-
+			
+				// https://yandex.ru/dev/turbo/doc/rss/elements/header.html
 				$turboContent = PHP_EOL . '<header>' . PHP_EOL;
 
 				if ($oInformationsystem_Item->image_large)

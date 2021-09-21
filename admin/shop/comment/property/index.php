@@ -409,7 +409,9 @@ else
 
 $oAdmin_Form_Dataset
 ->changeField('multiple', 'link', "/admin/shop/comment/property/index.php?hostcms[action]=changeMultiple&hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={property_dir_id}")
-->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/comment/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false");
+->changeField('multiple', 'onclick', "$.adminLoad({path: '/admin/shop/comment/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeMultiple', windowId: '{windowId}'}); return false")
+->changeField('indexing', 'link', "/admin/shop/comment/property/index.php?hostcms[action]=changeIndexing&hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id . "&property_dir_id={property_dir_id}")
+->changeField('indexing', 'onclick', "$.adminLoad({path: '/admin/shop/comment/property/index.php', additionalParams: 'hostcms[checked][{dataset_key}][{id}]=1&shop_id=" . $shop_id . "&shop_group_id=" . $shop_group_id ."&property_dir_id={property_dir_id}', action: 'changeIndexing', windowId: '{windowId}'}); return false");
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

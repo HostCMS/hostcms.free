@@ -81,7 +81,7 @@ return array(
 	'item_parent_associated' => "Associated Goods, Parent Goods Marking",
 	'item_associated_markings' => "Associated Goods's margings",
 	'item_tabs' => "Tabs of Goods",
-	'caprion_modifications' => "Modifications by Properties",
+	'caption_modifications' => "Modifications by Properties",
 	'modification_by_property' => "Modifications by %s",
 
 	'order_guid' => "Order GUID",

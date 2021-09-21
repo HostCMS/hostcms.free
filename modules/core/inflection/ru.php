@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_Ru extends Core_Inflection
 {
@@ -164,23 +164,60 @@ class Core_Inflection_Ru extends Core_Inflection
 		return $word;
 	}
 
+	static protected $_aUnits = array(
+		array(), //array('копейка', 'копейки', 'копеек', 1),
+		array(), //array('рубль', 'рубля', 'рублей', 0),
+		array('тысяча', 'тысячи', 'тысяч', 1),
+		array('миллион', 'миллиона', 'миллионов', 0),
+		array('миллиард', 'милиарда', 'миллиардов', 0),
+		array('триллион', 'триллиона', 'триллионов', 0),
+		array('квадриллион', 'квадриллиона', 'квадриллионов', 0),
+		array('квинтиллион', 'квинтиллиона', 'квинтиллионов', 0),
+		array('секстиллион', 'секстиллиона', 'секстиллионов', 0),
+	);
+
+	public function currencyInWords($float, $currencyCode)
+	{
+		switch ($currencyCode)
+		{
+			case 'USD':
+				$aUnits = self::$_aUnits;
+				$aUnits[0] = array('цент', 'цента', 'центов', 1);
+				$aUnits[1] = array('доллар', 'доллара', 'долларов', 0);
+				return self::numberInWords($float, $aUnits);
+			break;
+			case 'EUR':
+				$aUnits = self::$_aUnits;
+				$aUnits[0] = array('цент', 'цента', 'центов', 1);
+				$aUnits[1] = array('евро', 'евро', 'евро', 0);
+				return self::numberInWords($float, $aUnits);
+			break;
+			case 'RUB':
+			case 'RUR':
+			case 'BYN':
+				$aUnits = self::$_aUnits;
+				$aUnits[0] = array('копейка', 'копейки', 'копеек', 1);
+				$aUnits[1] = array('рубль', 'рубля', 'рублей', 0);
+				return self::numberInWords($float, $aUnits);
+			break;
+			case 'UAH':
+				$aUnits = self::$_aUnits;
+				$aUnits[0] = array('копейка', 'копейки', 'копеек', 1);
+				$aUnits[1] = array('гривна', 'гривны', 'гривен', 0);
+				return self::numberInWords($float, $aUnits);
+			break;
+			default:
+				return $float . ' ' . $currencyCode;
+		}
+	}
+
 	/**
 	 * Number to str
 	 * @param float $float
 	 */
 	public function numberInWords($float, $aUnits = NULL)
 	{
-		is_null($aUnits) && $aUnits = array(
-			array('копейка', 'копейки', 'копеек', 1),
-			array('рубль', 'рубля', 'рублей', 0),
-			array('тысяча', 'тысячи', 'тысяч', 1),
-			array('миллион', 'миллиона', 'миллионов', 0),
-			array('миллиард', 'милиарда', 'миллиардов', 0),
-			array('триллион', 'триллиона', 'триллионов', 0),
-			array('квадриллион', 'квадриллиона', 'квадриллионов', 0),
-			array('квинтиллион', 'квинтиллиона', 'квинтиллионов', 0),
-			array('секстиллион', 'секстиллиона', 'секстиллионов', 0),
-		);
+		is_null($aUnits) && $aUnits = self::$_aUnits;
 
 		$float = floatval($float);
 
@@ -236,10 +273,12 @@ class Core_Inflection_Ru extends Core_Inflection
 
 				$uk++; // в 0 - копейка, смещаем на 1
 
-				$gender = $aUnits[$uk][3];
+				$gender = isset($aUnits[$uk][3]) ? $aUnits[$uk][3] : 0;
 				list($iHundreds, $iTens, $i3) = array_map('intval', str_split($value, 1));
 
-				$uk > 1 && array_unshift($out, $this->_morph($value, $aUnits[$uk]));
+				$uk > 1
+					&& isset($aUnits[$uk]) && count($aUnits[$uk]) == 4
+					&& array_unshift($out, $this->_morph($value, $aUnits[$uk]));
 
 				array_unshift($out, $iTens > 1
 					? $tens[$iTens] . ' ' . $ten[$gender][$i3] // 20-99
@@ -254,8 +293,16 @@ class Core_Inflection_Ru extends Core_Inflection
 			$out[] = $ten[0][0];
 		}
 
-		$out[] = $this->_morph(intval($iInteger), $aUnits[1]);
-		$out[] = $fractional . ' ' . $this->_morph(intval($fractional), $aUnits[0]);
+		isset($aUnits[1]) && count($aUnits[1]) == 4
+			&& $out[] = $this->_morph(intval($iInteger), $aUnits[1]);
+
+		if (intval($fractional))
+		{
+			isset($aUnits[0]) && count($aUnits[0]) == 4
+				&& $fractional .= ' ' . $this->_morph(intval($fractional), $aUnits[0]);
+				
+			$out[] = $fractional;
+		}
 
 		return trim(preg_replace('/ {2,}/', ' ', implode(' ',$out)));
 	}

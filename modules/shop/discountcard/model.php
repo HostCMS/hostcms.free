@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Model extends Core_Entity
 {
@@ -241,6 +241,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Change active
+	 */
+	public function changeActive()
+	{
+		$this->active = 1 - $this->active;
+		return $this->save();
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return self
@@ -329,6 +338,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		$oShop_Discountcard_Bonuses->queryBuilder()
 			->where('shop_discountcard_bonuses.datetime', '<=', $datetime)
 			->where('shop_discountcard_bonuses.expired', '>=', $datetime)
+			->where('shop_discountcard_bonuses.active', '=', 1)
 			->where('shop_discountcard_bonuses.written_off', '<', Core_QueryBuilder::expression('shop_discountcard_bonuses.amount'))
 			->clearOrderBy()
 			->orderBy('shop_discountcard_bonuses.id');
@@ -375,5 +385,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				->value($bonusesAmount)
 		)
 		->execute();
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_discountcard.onBeforeGetRelatedSite
+	 * @hostcms-event shop_discountcard.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

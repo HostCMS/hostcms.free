@@ -39,7 +39,9 @@ $oAdmin_Form_Controller
 	->pageTitle($sFormTitle);
 
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
-$siteuser_id && $oAdmin_Form_Controller->Admin_View('Admin_Internal_View');
+$siteuser_id && $oAdmin_Form_Controller->Admin_View(
+	Admin_View::getClassName('Admin_Internal_View')
+);
 
 if (Core_Array::getPost('load_modal') && Core_Array::getPost('shop_order_item_id'))
 {

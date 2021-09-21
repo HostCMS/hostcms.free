@@ -30,6 +30,8 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		parent::setObject($object);
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
@@ -48,7 +50,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		);
 		$oMainTab->move($this->getField('rate')
 				->id('itemRate')
-				->divAttr(array('class' => 'form-group col-xs-5 col-sm-1')),
+				->divAttr(array('class' => 'form-group col-xs-5 col-sm-2')),
 			$oMainRow1
 		);
 
@@ -103,39 +105,38 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 			$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
 			->value("
-				$('[name = warehouse_name]').autocomplete({
-					  source: function(request, response) {
+				$('#{$windowId} [name = warehouse_name]').autocomplete({
+					source: function(request, response) {
 						$.ajax({
-						  url: '/admin/shop/order/item/index.php?autocomplete=1&show_warehouse=1&shop_id={$this->_object->Shop_Item->shop_id}',
-						  dataType: 'json',
-						  data: {
-							queryString: request.term
-						  },
-						  success: function( data ) {
-							response( data );
-						  }
+							url: '/admin/shop/order/item/index.php?autocomplete=1&show_warehouse=1&shop_id={$this->_object->Shop_Item->shop_id}',
+							dataType: 'json',
+							data: {
+								queryString: request.term
+							},
+							success: function(data) {
+								response(data);
+							}
 						});
-					  },
-					  minLength: 1,
-					  create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+					},
+					minLength: 1,
+					create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
 								.append($('<a>').text(item.label))
 								.appendTo(ul);
 						}
-
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					  },
-					  select: function( event, ui ) {
-						$('[name = shop_warehouse_id]').val(ui.item.id);
-					  },
-					  open: function() {
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function(event, ui) {
+						$('#{$windowId} [name = shop_warehouse_id]').val(ui.item.id);
+					},
+					open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					  },
-					  close: function() {
+					},
+					close: function() {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					  }
+					}
 				});
 			");
 
@@ -183,13 +184,12 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			// &shop_order_id= может использоваться в хуках, когда цена товара зависит от опций заказа (страна, город и т.д.)
-			->value("$('#itemInput').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
-				$('#itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
-				$('#itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
-				$('#itemRate').val(typeof ui.item.rate !== 'undefined' ? ui.item.rate : 0);
-				$('#itemMarking').val(typeof ui.item.marking !== 'undefined' ? ui.item.marking : 0);
-			  } );"
-			);
+			->value("$('#{$windowId} #itemInput').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
+				$('#{$windowId} #itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
+				$('#{$windowId} #itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
+				$('#{$windowId} #itemRate').val(typeof ui.item.rate !== 'undefined' ? ui.item.rate : 0);
+				$('#{$windowId} #itemMarking').val(typeof ui.item.marking !== 'undefined' ? ui.item.marking : 0);
+			});");
 
 		$oMainTab->add($oCore_Html_Entity_Script);
 

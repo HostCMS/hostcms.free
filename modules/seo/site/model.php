@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Seo
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Seo_Site_Model extends Core_Entity
 {
@@ -18,12 +18,12 @@ class Seo_Site_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_modelName = 'seo_site';
-	
+
 	/**
 	 * Column consist item's name
 	 * @var string
 	 */
-	protected $_nameColumn = 'site_id';	
+	protected $_nameColumn = 'site_id';
 
 	/**
 	 * Belongs to relations
@@ -115,5 +115,22 @@ class Seo_Site_Model extends Core_Entity
 		$this->Seo_Queries->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event seo_site.onBeforeGetRelatedSite
+	 * @hostcms-event seo_site.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -780,7 +780,7 @@ class Template_Model extends Core_Entity
 			}
 
 			echo $oTemplate_Section->prefix;
-			
+
 			$oTemplate_Section_Libs = $oTemplate_Section->Template_Section_Libs;
 			$oTemplate_Section_Libs->queryBuilder()
 				//->where('template_section_libs.active', '=', 1)
@@ -1051,5 +1051,22 @@ class Template_Model extends Core_Entity
 		}
 
 		return $this->_i18n[$lng];
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event template.onBeforeGetRelatedSite
+	 * @hostcms-event template.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

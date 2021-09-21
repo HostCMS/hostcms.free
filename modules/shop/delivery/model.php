@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Model extends Core_Entity
 {
@@ -408,21 +408,47 @@ class Shop_Delivery_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		switch ($this->method)
+		{
+			case 1:
+				?><span class="label label-blue margin-left-5"><?php echo Core::_('Shop_Delivery.post');?></span><?php
+			break;
+			case 2:
+				?><span class="label label-green margin-left-5"><?php echo Core::_('Shop_Delivery.courier');?></span><?php
+			break;
+			default:
+				?><span class="label label-default margin-left-5"><?php echo Core::_('Shop_Delivery.pickup');?></span><?php
+		}
+
 		$aShop_Payment_Systems = $this->Shop_Payment_Systems->findAll(FALSE);
 
 		if (count($aShop_Payment_Systems))
 		{
-			$aTmp = array();
 			foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 			{
-				$aTmp[] = $oShop_Payment_System->name;
+				?><span class="label label-gray margin-left-5 small"><i class="fa fa-usd"></i> <?php echo htmlspecialchars($oShop_Payment_System->name)?></span><?php
 			}
-
-			?><span class="margin-left-5 small darkgray"><?php echo htmlspecialchars(implode(', ', $aTmp))?></span><?php
 		}
 		else
 		{
-			?><span class="margin-left-5 small darkorange"><?php echo Core::_('Shop_Delivery.payment_systems_not_specified')?></span><?php
+			?><span class="label label-orange margin-left-5"><?php echo Core::_('Shop_Delivery.payment_systems_not_specified')?></span><?php
 		}
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_delivery.onBeforeGetRelatedSite
+	 * @hostcms-event shop_delivery.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

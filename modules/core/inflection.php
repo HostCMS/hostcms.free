@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Inflection
 {
@@ -30,21 +30,41 @@ abstract class Core_Inflection
 	 * @var array
 	 */
 	static protected $_drivers = array();
-
+	
 	/**
 	 * Get driver instance
-	 * @param string $lng driver name
+	 * @param string $lng language
 	 * @return mixed
 	 */
 	static public function instance($lng = 'en')
 	{
 		if (!isset(self::$_drivers[$lng]))
 		{
-			$className = __CLASS__ . '_' . ucfirst($lng);
+			$className = self::getClassName($lng);
 			self::$_drivers[$lng] = new $className();
 		}
 
 		return self::$_drivers[$lng];
+	}
+	
+	/**
+	 * Get class name
+	 * @param string $lng language
+	 * @return string, e.g. Core_Inflection_En
+	 */
+	static public function getClassName($lng)
+	{
+		return __CLASS__ . '_' . ucfirst($lng);
+	}
+
+	/**
+	 * Check if driver available
+	 * @param string $lng language
+	 * @return boolean
+	 */
+	static public function available($lng = 'en')
+	{
+		return class_exists(self::getClassName($lng));
 	}
 
 	/**
@@ -85,18 +105,6 @@ abstract class Core_Inflection
 			: $last;
 	}
 
-	/**
-	 * Get plural form of word
-	 * @param string $word word
-	 * @param int $count
-	 * @param string $lng driver
-	 * @return string
-	 */
-	/*static public function numberInWords($number, $aUnits = NULL)
-	{
-		return self::instance($lng)->numberInWords($number, $aUnits);
-	}*/
-	
 	/**
 	 * Get singular form of word
 	 * @param string $word word
@@ -192,4 +200,6 @@ abstract class Core_Inflection
 	{
 		return self::instance($lng)->numberInWords($float);
 	}
+	
+	abstract public function currencyInWords($float, $currencyCode);
 }

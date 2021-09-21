@@ -189,7 +189,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 		{
 			$oLarge_Input_Group_Div->add(Core::factory('Core_Html_Entity_Script')
 					->value('$(function(){
-						$("#' . $windowId . ' input#' . $this->largeImage['id'] .'").on("change", function(){
+						$("#' . $windowId . ' input#' . $this->largeImage['id'] . '").on("change", function(){
 							$.showCropButton($(this), "' . $this->largeImage['id'] . '", "' . $windowId . '");
 						});
 					})')
@@ -446,7 +446,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 								content: \'<img src="' . htmlspecialchars($this->largeImage['path']) . $prefixRand . 'rnd=' . rand() .'" style="max-width:200px" />\',
 								html: true,
 								placement: \'top\',
-								container: $(\'#file_large_' . $iAdmin_Form_Count . '\'),
+								container: $(\'#' . $windowId . ' #file_large_' . $iAdmin_Form_Count . '\'),
 								trigger: "hover"
 							});
 						});'
@@ -738,7 +738,7 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 									content: \'<img src="' . $this->smallImage['path'] . $prefixRand . 'rnd=' . rand() . '" style="max-width:200px" />\',
 									html: true,
 									placement: \'top\',
-									container: $(\'#file_small_' . $iAdmin_Form_Count . '\'),
+									container: $(\'#' . $windowId . ' #file_small_' . $iAdmin_Form_Count . '\'),
 									trigger: "hover"
 								});
 							});'

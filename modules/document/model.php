@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Document
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Model extends Core_Entity
 {
@@ -147,10 +147,62 @@ class Document_Model extends Core_Entity
 		}
 
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
+		
+		$oSearch_Page->title = $this->name;
+		
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
+			{
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
+			}
+		}
+		
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->datetime = $this->datetime;
-
-		$oSearch_Page->title = $this->name;
 		$oSearch_Page->site_id = $this->site_id;
 		$oSearch_Page->module = 6;
 		$oSearch_Page->module_id = $this->id;
@@ -407,5 +459,22 @@ class Document_Model extends Core_Entity
 		}
 
 		return parent::delete($primaryKey);
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event document.onBeforeGetRelatedSite
+	 * @hostcms-event document.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

@@ -57,6 +57,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oTabBlock = Admin_Form_Entity::factory('Div')->id('shop_tabs')->class('well with-header'))
 					;
 
 				$oAdditionalTab = $this->getTab('additional');
@@ -195,6 +196,56 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				// Добавляем группу товаров
 				$oMainRow2->add($oGroupSelect);
 
+				$oTabBlock
+					->add(Admin_Form_Entity::factory('Div')
+							->class('header bordered-warning')
+							->value(Core::_('Shop_Item.shop_tab_header'))
+						)
+					->add($oTabRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+				$oAdditionalItemsSelect = Admin_Form_Entity::factory('Select')
+					->options($this->_fillShopTabs())
+					->name('shop_tab_id[]')
+					->class('shop-tabs')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group col-xs-12'));
+
+				$this->addField($oAdditionalItemsSelect);
+				$oTabRow1->add($oAdditionalItemsSelect);
+
+				$html = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shop-tabs").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 1,
+						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				});</script>';
+
+				$oTabRow1->add(Admin_Form_Entity::factory('Code')->html($html));
+
 				$oMainTab
 					->move($this->getField('path')->divAttr(array('class' => 'form-group col-xs-12 col-sm-8')), $oMainRow3)
 					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
@@ -307,6 +358,38 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$this->_object->default
 			&& $this->_object->changeDefaultStatus();
+
+		// Вкладки
+		$aShopTabIds = Core_Array::getPost('shop_tab_id', array());
+		!is_array($aShopTabIds) && $aShopTabIds = array();
+
+		$aTmp = array();
+
+		$aShop_Tabs = $this->_object->Shop_Tabs->findAll(FALSE);
+		foreach ($aShop_Tabs as $oShop_Tab)
+		{
+			if (!in_array($oShop_Tab->id, $aShopTabIds))
+			{
+				$oShop_Tab_Producer = $oShop_Tab->Shop_Tab_Producers->getByShop_producer_id($this->_object->id);
+				!is_null($oShop_Tab_Producer)
+					&& $oShop_Tab_Producer->delete();
+			}
+			else
+			{
+				$aTmp[] = $oShop_Tab->id;
+			}
+		}
+
+		// Новые вкладки
+		$aNewShopTabIds = array_diff($aShopTabIds, $aTmp);
+		foreach ($aNewShopTabIds as $iNewShopTabId)
+		{
+			$oShop_Tab_Producer = Core_Entity::factory('Shop_Tab_Producer');
+			$oShop_Tab_Producer->shop_id = $this->_object->shop_id;
+			$oShop_Tab_Producer->shop_producer_id = $this->_object->id;
+			$oShop_Tab_Producer->shop_tab_id = $iNewShopTabId;
+			$oShop_Tab_Producer->save();
+		}
 
 		$param = array();
 
@@ -487,5 +570,29 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$this->_object->save();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/**
+	 * Fill shortcut groups list
+	 * @return array
+	 */
+	protected function _fillShopTabs()
+	{
+		$aReturn = array();
+
+		$aShop_Tabs = $this->_object->Shop_Tabs->findAll(FALSE);
+		foreach ($aShop_Tabs as $oShop_Tab)
+		{
+			$sParents = $oShop_Tab->shop_tab_dir_id
+				? $oShop_Tab->Shop_Tab_Dir->pathWithSeparator() . ' → '
+				: '';
+
+			$aReturn[$oShop_Tab->id] = array(
+				'value' => $sParents . $oShop_Tab->name . ' [' . $oShop_Tab->id . ']',
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturn;
 	}
 }

@@ -18,4 +18,7 @@ return array(
 	'undelete_success' => 'Item restored successfully!',
 	'empty_trash' => 'Empty Trash',
 	'option_maxExactCount' => 'Estimated number of elements in the table, after which the module will not determine the exact number of deleted elements',
+
+	'deleted_elements' => 'Deleted items: %s',
+	'deleted_complete' => 'Deleted all items',
 );

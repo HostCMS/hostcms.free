@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Templater extends Core_Meta
 {
@@ -139,7 +139,7 @@ class Core_Templater extends Core_Meta
 		$sData .= '</div>
 			</div>
 			<script>$(function(){
-				$("#'. $divId  .' a[data-content]").on("click", function(){
+				$("#' . $divId . ' a[data-content]").on("click", function(){
 					var oInput = $(this).parents(".input-group").find("input#' . htmlspecialchars($oInput->id) . '");
 					oInput.val(oInput.val() + $(this).data("content"));
 				});

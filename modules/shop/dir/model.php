@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Dir_Model extends Core_Entity
 {
@@ -86,7 +86,7 @@ class Shop_Dir_Model extends Core_Entity
 		{
 			$newObject->add($oShop->copy());
 		}
-		
+
 		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
 
 		return $newObject;
@@ -108,7 +108,7 @@ class Shop_Dir_Model extends Core_Entity
 		$this->id = $primaryKey;
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
-		
+
 		$this->Shops->deleteAll(FALSE);
 		$this->Shop_Dirs->deleteAll(FALSE);
 
@@ -116,18 +116,30 @@ class Shop_Dir_Model extends Core_Entity
 	}
 
 	/**
-	 * Get parent comment
+	 * Get parent shop dir
 	 * @return Shop_Dir_Model|NULL
 	 */
 	public function getParent()
 	{
-		if ($this->parent_id)
-		{
-			return Core_Entity::factory('Shop_Dir', $this->parent_id);
-		}
-		else
-		{
-			return NULL;
-		}
+		return $this->parent_id
+			? Core_Entity::factory('Shop_Dir', $this->parent_id)
+			: NULL;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_dir.onBeforeGetRelatedSite
+	 * @hostcms-event shop_dir.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

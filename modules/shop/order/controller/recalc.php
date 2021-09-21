@@ -32,13 +32,13 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 
 		if (!is_null($oShop_Delivery))
 		{
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			switch ($oShop_Delivery->type)
 			{
 				case 0:
 				default:
 					$this->_object->recalcDelivery();
-
-					$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 					Core::factory('Admin_Form_Entity_Code')
 						->html('
@@ -141,7 +141,7 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 					</div>
 					<script>
 						$(function(){
-							$('#conditionsModal' + <?php echo $oShop_Delivery->id?>).modal('show');
+							$('#conditionsModal<?php echo $oShop_Delivery->id?>').modal('show');
 
 							$('.conditions-button').on('click', function(){
 								var $input = $('input[name=shop_delivery_condition_price]:checked');
@@ -154,10 +154,10 @@ class Shop_Order_Controller_Recalc extends Admin_Form_Action_Controller
 									success: function(answer){
 										if (answer.status == 'success')
 										{
-											$('#conditionsModal' + <?php echo $oShop_Delivery->id?>).modal('hide');
-											$('#id_message').append('<div class="alert alert-success fade in"><button type="button" class="close" data-dismiss="alert">&times;</button>' + answer.message + '</div>');
+											$('#conditionsModal<?php echo $oShop_Delivery->id?>').modal('hide');
+											$('#<?php echo $windowId?> #id_message').append('<div class="alert alert-success fade in"><button type="button" class="close" data-dismiss="alert">&times;</button>' + answer.message + '</div>');
 
-											var $deliveryTr = $('.shop-item-table.shop-order-items tr#' + answer.shop_order_item_id);
+											var $deliveryTr = $('#<?php echo $windowId?> .shop-item-table.shop-order-items tr#' + answer.shop_order_item_id);
 
 											$deliveryTr.find('input[name=shop_order_item_name_' + answer.shop_order_item_id + ']').val($input.data('name'));
 											$deliveryTr.find('input[name=shop_order_item_quantity_' + answer.shop_order_item_id + ']').val('1.00');

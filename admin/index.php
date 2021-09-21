@@ -1,6 +1,6 @@
 <?php
 /**
- * Administration center.
+ * Back end
  *
  * @package HostCMS
  * @version 6.x
@@ -70,9 +70,14 @@ $oAdmin_Answer = Core_Skin::instance()->answer();
 
 if (!is_null(Core_Array::getPost('submit')))
 {
+	$bDeviceTracking = isset($_POST['ip']);
+
+	$_COOKIE['hostcms_device_tracking'] = $bDeviceTracking ? 'on' : 'off';
+	setcookie('hostcms_device_tracking', $_COOKIE['hostcms_device_tracking'], time() + 31536000, '/');
+
 	try {
 		$authResult = Core_Auth::login(
-			Core_Array::getPost('login'), Core_Array::getPost('password'), isset($_POST['ip'])
+			Core_Array::getPost('login'), Core_Array::getPost('password'), $bDeviceTracking
 		);
 
 		Core_Auth::setCurrentSite();

@@ -30,6 +30,8 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -115,10 +117,11 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			->divAttr(array('class' => ''));
 
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
-			->value('$("#user_id").selectUser({
-						placeholder: "",
-						language: "' . Core_i18n::instance()->getLng() . '"
-					});'
+			->value('$("#' . $windowId . ' #user_id").selectUser({
+					placeholder: "",
+					language: "' . Core_i18n::instance()->getLng() . '",
+					dropdownParent: $("#' . $windowId . '")
+				});'
 			);
 
 		$oMainRow2
@@ -139,31 +142,29 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			->add($oShopItemRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oShopItemRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$itemTable = '
-			<div class="table-scrollable">
-				<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
-					<thead>
-						<tr>
-							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.position') . '</th>
-							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.name') . '</th>
-							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.measure') . '</th>
-							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.price') . '</th>
-							<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.currency') . '</th>
-							<th colspan="3" class="border-bottom-success" scope="col">' . Core::_('Shop_Warehouse_Inventory.quantity') . '</th>
-							<th colspan="3" scope="col">' . Core::_('Shop_Warehouse_Inventory.sum') . '</th>
-							<th rowspan="2" scope="col">  </th>
-						</tr>
-						<tr>
-							<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
-							<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
-							<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
-							<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
-							<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
-							<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
-						</tr>
-					</thead>
-					<tbody>
-		';
+		$itemTable = '<div class="table-scrollable">
+			<table class="table table-striped table-hover shop-item-table deals-aggregate-user-info">
+			<thead>
+				<tr>
+					<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.position') . '</th>
+					<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.name') . '</th>
+					<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.measure') . '</th>
+					<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.price') . '</th>
+					<th rowspan="2" scope="col">' . Core::_('Shop_Warehouse_Inventory.currency') . '</th>
+					<th colspan="3" class="border-bottom-success" scope="col">' . Core::_('Shop_Warehouse_Inventory.quantity') . '</th>
+					<th colspan="3" scope="col">' . Core::_('Shop_Warehouse_Inventory.sum') . '</th>
+					<th rowspan="2" scope="col"> </th>
+				</tr>
+				<tr>
+					<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
+					<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
+					<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
+					<th>' . Core::_('Shop_Warehouse_Inventory.calc') . '</th>
+					<th>' . Core::_('Shop_Warehouse_Inventory.fact') . '</th>
+					<th>' . Core::_('Shop_Warehouse_Inventory.diff') . '</th>
+				</tr>
+			</thead>
+			<tbody>';
 
 		$oSiteAlias = $oShop->Site->getCurrentAlias();
 		$sShopUrl = $oSiteAlias
@@ -171,6 +172,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 			: NULL;
 
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+		$Shop_Item_Controller = new Shop_Item_Controller();
 
 		$index = 0;
 
@@ -199,36 +201,32 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_inventory_item_id={$oShop_Warehouse_Inventory_Item->id}");
 
-					$externalLink = $sShopUrl
-						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) .  '"><i class="fa fa-external-link"></i></a>'
-						: '';
-
 					// Цены
-					$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
-
-					is_null($old_price)
-						&& $old_price = $oShop_Item->price;
+					$price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->_object->datetime);
+					is_null($price) && $price = $oShop_Item->price;
 
 					// Фактическое наличие
 					$rest = $this->_object->Shop_Warehouse->getRest($oShop_Item->id, $this->_object->datetime);
 					is_null($rest) && $rest = 0;
 
-					$itemTable .= '
-						<tr id="' . $oShop_Warehouse_Inventory_Item->id . '" data-item-id="' . $oShop_Item->id . '">
-							<td class="index">' . ++$index . '</td>
-							<td>' . htmlspecialchars($oShop_Item->name) . $externalLink . '</td>
-							<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
-							<td><span class="price">' . $old_price . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
-							<td class="calc-warehouse-count">' . $rest . '</td>
-							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
-							<td class="diff-warehouse-count"></td>
-							<td><span class="calc-warehouse-sum"></span></td>
-							<td><span class="warehouse-inv-sum"></span></td>
-							<td><span class="diff-warehouse-sum"></span></td>
-							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
-						</tr>
-					';
+					$aPrices = $Shop_Item_Controller->calculatePriceInItemCurrency($price, $oShop_Item);
+
+					$itemTable .= '<tr id="' . $oShop_Warehouse_Inventory_Item->id . '" data-item-id="' . $oShop_Item->id . '">
+						<td class="index">' . ++$index . '</td>
+						<td>' . htmlspecialchars($oShop_Item->name) . ($sShopUrl
+							? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
+							: '') . '</td>
+						<td>' . htmlspecialchars($oShop_Item->Shop_Measure->name) . '</td>
+						<td><span class="price">' . $aPrices['price_tax'] . '</span></td>
+						<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
+						<td class="calc-warehouse-count">' . $rest . '</td>
+						<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Inventory_Item->id . '" value="' . $oShop_Warehouse_Inventory_Item->count . '" /></td>
+						<td class="diff-warehouse-count"></td>
+						<td><span class="calc-warehouse-sum"></span></td>
+						<td><span class="warehouse-inv-sum"></span></td>
+						<td><span class="diff-warehouse-sum"></span></td>
+						<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+					</tr>';
 				}
 			}
 
@@ -259,8 +257,8 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("$('.add-shop-item').autocompleteShopItem({ shop_id: {$oShop->id}, shop_currency_id: 0, datetime: '{$this->_object->datetime}' }, function(event, ui) {
-					var warehouseId = $('select.select-warehouse').val(),
+			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: {$oShop->id}, price_mode: 'item', shop_currency_id: 0, datetime: '{$this->_object->datetime}' }, function(event, ui) {
+					var warehouseId = $('#{$windowId} select.select-warehouse').val(),
 						foundRest = ui.item.aWarehouses.find(x => x.id === warehouseId);
 
 					if (typeof foundRest == 'undefined')
@@ -270,29 +268,29 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 
 					var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td><span class=\"calc-warehouse-count\">' + foundRest.count + '</span></td><td width=\"80\"><input class=\"set-item-count form-control\" name=\"shop_item_quantity[]\" value=\"\"/></td><td class=\"diff-warehouse-count\"></td><td><span class=\"calc-warehouse-sum\"></span></td><td><span class=\"warehouse-inv-sum\"></span></td><td><span class=\"diff-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
 
-					$('.shop-item-table > tbody').append(
+					$('#{$windowId} .shop-item-table > tbody').append(
 						newRow
 					);
 
 					ui.item.value = '';
-					$.changeWarehouseCounts($('.set-item-count'), 0);
-					$('.set-item-count').change();
-					$('.shop-item-table tr:last-child').find('.set-item-count').focus();
-					$.focusAutocomplete($('.set-item-count'));
+					$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 0);
+					$('#{$windowId} .set-item-count').change();
+					$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
+					$.focusAutocomplete($('#{$windowId} .set-item-count'));
 
 					$.recountIndexes(newRow);
 				});
 
-				$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				$.each($('#{$windowId} .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
 					var jInput = $(this).find('.set-item-count');
 
 					$.changeWarehouseCounts(jInput, 0);
 					jInput.change();
 				});
 
-				$.focusAutocomplete($('.set-item-count'));
+				$.focusAutocomplete($('#{$windowId} .set-item-count'));
 
-				$('select.select-warehouse').change(function() {
+				$('#{$windowId} select.select-warehouse').change(function() {
 					$.updateWarehouseCounts($(this).val());
 				});
 			");

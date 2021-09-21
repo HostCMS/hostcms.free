@@ -1000,19 +1000,19 @@ div.fm_preview {
 .admin-tags {
     /*background-color: #FFF;*/
 	background: none repeat scroll 0 0 #FFF;
-    border-radius: 5px;	
+    border-radius: 5px;
     border: 2px solid #75736E ;
 	border-bottom-color: #F1F0EE;
 	border-right-color: #F1F0EE;
-	
+
     color: #777777;
     display: inline-block;
     padding: 4px 6px;
     vertical-align: middle;
-    width: 100%;	
-	-moz-box-sizing: padding-box;    
-	
-	
+    width: 100%;
+	-moz-box-sizing: padding-box;
+
+
 }
 
 /*
@@ -1059,10 +1059,10 @@ div.fm_preview {
     border: 0 none;
     cursor: pointer;
 	font-family: sans-serif;
-	font-weight: bold;	
+	font-weight: bold;
 	margin: 0;
     padding: 0;
-	
+
 }
 
 .admin-tags .admin-tag .close {
@@ -1120,7 +1120,7 @@ div.fm_preview {
     line-height: 1.42857;
     padding: 3px 20px;
 	text-decoration: none;
-    white-space: nowrap;	
+    white-space: nowrap;
 }
 
 .admin-tags .dropdown-menu li a:hover, .admin-tags .dropdown-menu li a:focus, .admin-tags .dropdown-menu li a:active, .admin-tags .dropdown-menu li.active a, .admin-tags .dropdown-menu li.active a:hover, .admin-tags .dropdown-menu .dropdown-submenu:hover > a, .admin-tags.nav-tabs .dropdown-menu li > a:focus {
@@ -1150,7 +1150,11 @@ div.fm_preview {
 .installed{cursor:default;background-color:#F3AE00}
 /* /Market */
 
-.hostcms6 .CodeMirror {
+/*.hostcms6 .CodeMirror {
+	border: 1px solid #ddd;
+}*/
+
+.hostcms6 .ace_editor {
 	border: 1px solid #ddd;
 }
 

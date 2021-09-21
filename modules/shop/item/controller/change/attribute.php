@@ -49,7 +49,6 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 		if (is_null($operation))
 		{
-			// Original windowId
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 			$newWindowId = 'Change_Attribute_' . time();
@@ -283,7 +282,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				$tagsHtml = '
 					<script>
 						$(function(){
-							$(".shop-item-tags").select2({
+							$("#' . $windowId . ' .shop-item-tags").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Item.type_tag') . '",
@@ -329,6 +328,19 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 						->add($oAdmin_Form_Entity_Input_Quantity_Step)
 				);
 
+			$oAdmin_Form_Entity_Modification_Checkbox = Admin_Form_Entity::factory('Checkbox')
+				->name("include_modifications")
+				->class('form-control')
+				->caption(Core::_('Shop_Item.include_modifications'))
+				->divAttr(array('class' => 'form-group col-xs-12'));
+
+			$oCore_Html_Entity_Form
+				->add(
+					Admin_Form_Entity::factory('Div')
+						->class('row')
+						->add($oAdmin_Form_Entity_Modification_Checkbox)
+				);
+
 			// Идентификаторы переносимых указываем скрытыми полями в форме, чтобы не превысить лимит GET
 			$aChecked = $this->_Admin_Form_Controller->getChecked();
 
@@ -363,7 +375,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->onclick(
 					//'$("#' . $newWindowId . '").parents(".modal").remove(); '
 					'bootbox.hideAll(); '
-					. $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'apply')
+					. $this->_Admin_Form_Controller->getAdminSendForm(array('operation' => 'apply'))
 				)
 				->controller($this->_Admin_Form_Controller);
 
@@ -384,7 +396,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			Core::factory('Core_Html_Entity_Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 480, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 520, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -398,6 +410,15 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			{
 				case 'Shop_Item_Model':
 					$this->_applyItem($this->_object);
+
+					if (!is_null(Core_Array::getPost('include_modifications')))
+					{
+						$aModifications = $this->_object->Modifications->findAll(FALSE);
+						foreach ($aModifications as $oModification)
+						{
+							$this->_applyItem($oModification);
+						}
+					}
 				break;
 				case 'Shop_Group_Model':
 					$this->_applyGroup($this->_object);
@@ -425,6 +446,15 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 		foreach ($aShop_Items as $oShop_Item)
 		{
 			$this->_applyItem($oShop_Item);
+
+			if (!is_null(Core_Array::getPost('include_modifications')))
+			{
+				$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					$this->_applyItem($oModification);
+				}
+			}
 		}
 
 		$aShop_Groups = $oShop_Group->Shop_Groups->findAll(FALSE);
@@ -505,9 +535,17 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 		// Fast filter
 		if ($oShop_Item->Shop->filter)
 		{
-			$this
-				->_getShop_Filter_Controller($oShop_Item->Shop)
-				->fill($oShop_Item);
+			$oShop_Filter_Controller = $this->_getShop_Filter_Controller($oShop_Item->Shop);
+			$oShop_Filter_Controller->fill($oShop_Item);
+
+			// Fast filter for modifications
+			$aModifications = $oShop_Item->Modifications->findAll(FALSE);
+			foreach ($aModifications as $oModification)
+			{
+				$oShop_Item->active
+					? $oShop_Filter_Controller->fill($oModification)
+					: $oShop_Filter_Controller->remove($oModification);
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterApplyItem', $this, array($oShop_Item));

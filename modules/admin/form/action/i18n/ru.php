@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Admin forms.
- *
- * @package HostCMS
- * @subpackage Admin
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
 return array(
 	'model_name' => 'Действия формы центра администрирования',
 	'action_lng_name' => 'Название действия',
@@ -40,6 +31,8 @@ return array(
 	'dataset' => '<acronym title="Индекс набора данных, которым доступно действие (-1 — действие для всех наборов данных)">Индекс набора данных</acronym>',
 	'single' => '<acronym title="Отображать действие в правом блоке со списком действий">Отображать в списке действий</acronym>',
 	'group' => '<acronym title="Отображать действие в списке групповых операций">Групповая операция</acronym>',
+	'modal' => '<acronym title="Отображать действие в модальном окне">Открывать в модальном окне</acronym>',
+	'modalBadge' => 'Открывать в модальном окне',
 
 	'admin_form_id' => 'Идентификатор формы центра администрирования',
 	'id' => 'Идентификатор поля формы',

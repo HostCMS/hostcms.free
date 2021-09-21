@@ -329,7 +329,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 		?>
 		<h1>Оплата через систему ROBOKASSA</h1>
 
-		<div>
+		<div class="margin-bottom-10">
 			<a href="http://www.robokassa.ru/" target="_blank">
 				<svg version="1.1" id="Слой_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="-23 363.8 600 66" enable-background="new -23 363.8 600 66" xml:space="preserve" width="200">
 				<path fill="#0071CE" d="M29.6,386c0-13.1-6.6-21.9-19.8-21.9H-9.9c-13.1,0-13.1,7.5-13.1,13.1v52.5h13.1v-17.6H3.3l8.7,17.6h17.6
@@ -386,7 +386,7 @@ class Shop_Payment_System_Handler9 extends Shop_Payment_System_Handler
 			<input type="hidden" name="Culture" value="<?php echo $this->_culture?>">
 			<?php if ($this->sendCheck){ ?> <input type="hidden" name="Receipt" value="<?php echo htmlspecialchars($sReceiptJson)?>"><?php } ?>
 			<?php if (!$this->_mode){ ?> <input type="hidden" name="IsTest" value="1"><?php } ?>
-			<input type="submit" value="Оплатить">
+			<input type="submit" value="Оплатить" class="btn btn-primary">
 		</form>
 		<?php
 

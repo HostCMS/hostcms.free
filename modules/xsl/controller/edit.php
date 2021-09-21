@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Xsl
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -64,7 +64,8 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oTextarea_Xsl = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oTextarea_Xsl->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'xml';
+				// $oTmpOptions['mode'] = 'xml';
+				$oTmpOptions['mode'] = 'ace/mode/xml';
 
 				$xslContent = $object->id
 					? $this->_object->loadXslFile()
@@ -138,7 +139,8 @@ class Xsl_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
 
 					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
-					$oTmpOptions['mode'] = 'xml';
+					// $oTmpOptions['mode'] = 'xml';
+					$oTmpOptions['mode'] = 'ace/mode/xml';
 
 					$oTextarea_Lng
 						->value(

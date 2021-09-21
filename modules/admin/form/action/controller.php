@@ -15,7 +15,7 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 {
 	/**
 	 * Form Action
-	 * @var Admin_Form_Action
+	 * @var Admin_Form_Action_Model
 	 */
 	protected $_Admin_Form_Action = NULL;
 
@@ -95,7 +95,7 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 		$this->_children[] = $oAdmin_Form_Entity;
 		return $this;
 	}
-	
+
 	/**
 	 * Get Children
 	 * @return array
@@ -136,7 +136,7 @@ abstract class Admin_Form_Action_Controller extends Core_Servant_Properties
 		$this->_content .= $content;
 		return $this;
 	}
-	
+
 	/**
 	 * Clear content
 	 * @return self

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Model extends Core_Entity
 {
@@ -103,6 +103,57 @@ class Shop_Seller_Model extends Core_Entity
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->description . ' ' . htmlspecialchars($this->address) . ' ' . htmlspecialchars($this->phone) . ' ' . htmlspecialchars($this->fax) . ' ' . htmlspecialchars($this->path);
 
 		$oSearch_Page->title = $this->name;
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
+			{
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
+			}
+		}
 
 		$oSiteAlias = $this->Shop->Site->getCurrentAlias();
 		if ($oSiteAlias)
@@ -423,5 +474,22 @@ class Shop_Seller_Model extends Core_Entity
 			->addXmlTag('dir', Core_Page::instance()->shopCDN . $this->getSellerHref());
 
 		return $this;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_seller.onBeforeGetRelatedSite
+	 * @hostcms-event shop_seller.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

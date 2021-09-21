@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -29,6 +29,8 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 		$oAdditionalTab = $this->getTab('additional');
 
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -118,10 +120,11 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			->divAttr(array('class' => ''));
 
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
-			->value('$("#user_id").selectUser({
-						placeholder: "",
-						language: "' . Core_i18n::instance()->getLng() . '"
-					});'
+			->value('$("#' . $windowId . ' #user_id").selectUser({
+					placeholder: "",
+					language: "' . Core_i18n::instance()->getLng() . '",
+					dropdownParent: $("#' . $windowId . '")
+				});'
 			);
 
 		$oMainRow2
@@ -188,7 +191,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 							<th scope="col">' . Core::_('Shop_Warehouse_Writeoff.currency') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Writeoff.quantity') . '</th>
 							<th scope="col">' . Core::_('Shop_Warehouse_Writeoff.sum') . '</th>
-							<th scope="col">  </th>
+							<th scope="col"> </th>
 						</tr>
 					</thead>
 					<tbody>
@@ -227,7 +230,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteShopItem', NULL, 0, $oShop_Item->id, "shop_warehouse_writeoff_item_id={$oShop_Warehouse_Writeoff_Item->id}");
 
 					$externalLink = $sShopUrl
-						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) .  '"><i class="fa fa-external-link"></i></a>'
+						? '<a class="margin-left-5" target="_blank" href="' . htmlspecialchars($sShopUrl . $oShop_Item->getPath()) . '"><i class="fa fa-external-link"></i></a>'
 						: '';
 
 					$sum = $oShop_Warehouse_Writeoff_Item->count * $oShop_Warehouse_Writeoff_Item->price;
@@ -241,7 +244,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 							<td>' . htmlspecialchars($oShop_Item->Shop_Currency->name) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Writeoff_Item->id . '" value="' . $oShop_Warehouse_Writeoff_Item->count . '" /></td>
 							<td><span class="calc-warehouse-sum">' . $sum . '</span></td>
-							<td><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
+							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Writeoff.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>
 					';
 				}
@@ -274,30 +277,30 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 		);
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-			->value("$('.add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
-				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('.index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
+			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', price_mode: 'item', shop_currency_id: 0 }, function(event, ui) {
+				var newRow = $('<tr data-item-id=\"' + ui.item.id + '\"><td class=\"index\">' + $('#{$windowId} .index_value').val() + '</td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td><span class=\"price\">' + ui.item.price_with_tax + '</span><input type=\"hidden\" name=\"shop_item_price[]\" value=\"0.00\"/></td><td>' + $.escapeHtml(ui.item.currency) + '</td><td width=\"80\"><input class=\"set-item-count form-control\" onsubmit=\"$(\'.add-shop-item\').focus();return false;\" name=\"shop_item_quantity[]\" value=\"\"/></td><td><span class=\"calc-warehouse-sum\"></span></td><td><a class=\"delete-associated-item\" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>');
 
-				$('.shop-item-table > tbody').append(
+				$('#{$windowId} .shop-item-table > tbody').append(
 					newRow
 				);
 				ui.item.value = '';
-				$.changeWarehouseCounts($('.set-item-count'), 2);
-				$('.set-item-count').change();
-				$('.shop-item-table tr:last-child').find('.set-item-count').focus();
-				$.focusAutocomplete($('.set-item-count'));
+				$.changeWarehouseCounts($('#{$windowId} .set-item-count'), 2);
+				$('#{$windowId} .set-item-count').change();
+				$('#{$windowId} .shop-item-table tr:last-child').find('.set-item-count').focus();
+				$.focusAutocomplete($('#{$windowId} .set-item-count'));
 
 				$.recountIndexes(newRow);
-			  });
+			});
 
-				$.each($('.shop-item-table > tbody tr[data-item-id]'), function (index, item) {
-					var jInput = $(this).find('.set-item-count');
+			$.each($('#{$windowId} .shop-item-table > tbody tr[data-item-id]'), function (index, item) {
+				var jInput = $(this).find('.set-item-count');
 
-					$.changeWarehouseCounts(jInput, 2);
-					jInput.change();
-				});
+				$.changeWarehouseCounts(jInput, 2);
+				jInput.change();
+			});
 
-			  $.focusAutocomplete($('.set-item-count'));
-			  ");
+			$.focusAutocomplete($('#{$windowId} .set-item-count'));"
+		);
 
 		$oShopItemRow2->add($oCore_Html_Entity_Script);
 
@@ -348,6 +351,8 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 
 		$bNeedsRePost = FALSE;
 
+		$Shop_Item_Controller = new Shop_Item_Controller();
+
 		// Существующие товары
 		$aShop_Warehouse_Writeoff_Items = $this->_object->Shop_Warehouse_Writeoff_Items->findAll(FALSE);
 		foreach ($aShop_Warehouse_Writeoff_Items as $oShop_Warehouse_Writeoff_Item)
@@ -365,9 +370,10 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 				$oShop_Warehouse_Writeoff_Item->count != $quantity && $bNeedsRePost = TRUE;
 
 				$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
+				$aPrices = $Shop_Item_Controller->calculatePriceInItemCurrency($price, $oShop_Item);
 
 				$oShop_Warehouse_Writeoff_Item->count = $quantity;
-				$oShop_Warehouse_Writeoff_Item->price = $price;
+				$oShop_Warehouse_Writeoff_Item->price = $aPrices['price_tax'];
 				$oShop_Warehouse_Writeoff_Item->save();
 			}
 		}
@@ -392,6 +398,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					: $oShop_Item;
 
 				$price = $oShop_Item->loadPrice($this->_object->shop_price_id);
+				$aPrices = $Shop_Item_Controller->calculatePriceInItemCurrency($price, $oShop_Item);
 
 				$count = isset($_POST['shop_item_quantity'][$key]) && is_numeric($_POST['shop_item_quantity'][$key])
 					? $_POST['shop_item_quantity'][$key]
@@ -402,7 +409,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 					->shop_warehouse_writeoff_id($this->_object->id)
 					->shop_item_id($oShop_Item->id)
 					->count($count)
-					->price($price)
+					->price($aPrices['price_tax'])
 					->save();
 
 				$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).attr('name', 'shop_item_quantity_{$oShop_Warehouse_Writeoff_Item->id}');";

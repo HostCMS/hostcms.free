@@ -367,12 +367,14 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	 */
 	public function getPrintlayoutReplaces()
 	{
+		$oShop = $this->Shop_Warehouse->Shop;
+
 		$aReplace = array(
 			// Core_Meta
 			'this' => $this,
 			'company' => $this->Shop_Warehouse->shop_company_id ? $this->Shop_Warehouse->Shop_Company : $this->Shop_Warehouse->Shop->Shop_Company,
 			'shop_warehouse' => $this->Shop_Warehouse,
-			'shop' => $this->Shop_Warehouse->Shop,
+			'shop' => $oShop,
 			'user' => $this->User,
 			'total_count' => 0,
 			'Items' => array(),
@@ -384,6 +386,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		$aShop_Warehouse_Inventory_Items = $this->Shop_Warehouse_Inventory_Items->findAll();
 
 		$Shop_Price_Entry_Controller = new Shop_Price_Entry_Controller();
+		$Shop_Item_Controller = new Shop_Item_Controller();
 
 		foreach ($aShop_Warehouse_Inventory_Items as $oShop_Warehouse_Inventory_Item)
 		{
@@ -392,17 +395,12 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 			$rest = $this->Shop_Warehouse->getRest($oShop_Item->id, $this->datetime);
 			is_null($rest) && $rest = 0;
 
-			$old_price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+			$price = $Shop_Price_Entry_Controller->getPrice(0, $oShop_Item->id, $this->datetime);
+			is_null($price) && $price = $oShop_Item->price;
 
-			is_null($old_price)
-				&& $old_price = $oShop_Item->price;
-
-			$fact_amount = Shop_Controller::instance()->round($rest * $old_price);
-
-			$inv_amount = Shop_Controller::instance()->round($oShop_Warehouse_Inventory_Item->count * $old_price);
+			$aPrices = $Shop_Item_Controller->calculatePrice($price, $oShop_Item);
 
 			$aBarcodes = array();
-
 			$aShop_Item_Barcodes = $oShop_Item->Shop_Item_Barcodes->findAll(FALSE);
 			foreach ($aShop_Item_Barcodes as $oShop_Item_Barcode)
 			{
@@ -410,22 +408,21 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 			}
 
 			$node = new stdClass();
-
 			$node->position = $position++;
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
 			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
-			$node->price = $old_price;
+			$node->price = $aPrices['price_tax'];
 			$node->quantity = $rest;
-			$node->amount = $fact_amount;
+			$node->amount = Shop_Controller::instance()->round($node->quantity * $node->price);
 			$node->inv_quantity = $oShop_Warehouse_Inventory_Item->count;
-			$node->inv_amount = $inv_amount;
+			$node->inv_amount = Shop_Controller::instance()->round($node->inv_quantity * $node->price);
 			$node->barcodes = implode(', ', $aBarcodes);
 
 			$aReplace['Items'][] = $node;
 
-			$inv_amount_total += $inv_amount;
-			$amount_total += $rest;
+			$amount_total += $node->amount;
+			$inv_amount_total += $node->inv_amount;
 
 			$aReplace['total_count']++;
 		}
@@ -433,8 +430,15 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		$aReplace['amount'] = Shop_Controller::instance()->round($amount_total);
 		$aReplace['inv_amount'] = Shop_Controller::instance()->round($inv_amount_total);
 
-		$aReplace['amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['amount']));
-		$aReplace['inv_amount_in_words'] = Core_Str::ucfirst(Core_Inflection::instance('ru')->numberInWords($aReplace['inv_amount']));
+		$lng = $oShop->Site->lng;
+
+		$aReplace['amount_in_words'] = Core_Inflection::available($lng)
+			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['amount'], $oShop->Shop_Currency->code))
+			: $aReplace['amount'] . ' ' . $oShop->Shop_Currency->code;
+
+		$aReplace['inv_amount_in_words'] = Core_Inflection::available($lng)
+			? Core_Str::ucfirst(Core_Inflection::instance($lng)->currencyInWords($aReplace['inv_amount'], $oShop->Shop_Currency->code))
+			: $aReplace['inv_amount'] . ' ' . $oShop->Shop_Currency->code;
 
 		Core_Event::notify($this->_modelName . '.onAfterGetPrintlayoutReplaces', $this, array($aReplace));
 		$eventResult = Core_Event::getLastReturn();
@@ -442,5 +446,22 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 		return !is_null($eventResult)
 			? $eventResult
 			: $aReplace;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_warehouse_inventory.onBeforeGetRelatedSite
+	 * @hostcms-event shop_warehouse_inventory.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Warehouse->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

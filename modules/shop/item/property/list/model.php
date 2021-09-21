@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Property_List_Model extends Shop_Model
 {
@@ -192,24 +192,6 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	}
 
 	/**
-	 * The position of watermark on the X axis
-	 * @return string
-	 */
-	public function getWatermarkDefaultPositionX()
-	{
-		return $this->watermark_default_position_x;
-	}
-
-	/**
-	 * The position of watermark on the Y axis
-	 * @return string
-	 */
-	public function getWatermarkDefaultPositionY()
-	{
-		return $this->watermark_default_position_y;
-	}
-
-	/**
 	 * Check if watermark should be laid on large image
 	 * @return int
 	 */
@@ -226,22 +208,4 @@ class Shop_Item_Property_List_Model extends Shop_Model
 	{
 		return $this->watermark_default_use_small_image;
 	}
-
-	/**
-	 * Preserve aspect ratio of large image
-	 * @return int
-	 */
-	/*public function preserveAspectRatioOfLargeImage()
-	{
-		return $this->preserve_aspect_ratio;
-	}*/
-
-	/**
-	 * Preserve aspect ratio of small image
-	 * @return int
-	 */
-	/*public function preserveAspectRatioOfSmallImage()
-	{
-		return $this->preserve_aspect_ratio_small;
-	}*/
 }

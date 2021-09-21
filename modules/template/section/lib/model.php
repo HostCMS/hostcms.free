@@ -130,7 +130,7 @@ class Template_Section_Lib_Model extends Core_Entity
 				$sTitleWidgetActive = htmlspecialchars(Core::_('Template_Section_Lib.widget_active', $this->Lib->name));
 
 				$widgetActiveIcon = 'fa-lightbulb-o';
-				$this->active && $widgetActiveIcon .=  ' active';
+				$this->active && $widgetActiveIcon .= ' active';
 
 				// Удаление виджета
 				$sDeleteUrl = "hQuery.deleteWidget({path: '/template-section-lib.php?template_section_lib_id={$this->id}&delete=1{$sSettings}', goal: hQuery('#hostcmsSection{$oTemplate_Section->id}')}); return false";
@@ -198,5 +198,22 @@ class Template_Section_Lib_Model extends Core_Entity
 		{
 			return htmlspecialchars($oLib->name);
 		}
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event template_section_lib.onBeforeGetRelatedSite
+	 * @hostcms-event template_section_lib.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Template_Section->Template->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

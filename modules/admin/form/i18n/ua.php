@@ -26,6 +26,7 @@ return array(
 	'menu' => 'Форми центру адміністрування',
 	'form_forms_tab_1' => 'Основні',
 	'form_forms_tab_2' => 'Додаткові',
+	'form_forms_tab_3' => 'Призначені для користувача поля',
 
 	'show_form_fields_menu_admin_forms' => 'Список форм',
 

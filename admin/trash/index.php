@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -26,9 +26,31 @@ $oAdmin_Form_Controller
 	->title(Core::_('Trash.title'))
 	->pageTitle(Core::_('Trash.title'));
 
+// Действие "Удалить"
+$oAdminFormActionDelete = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('delete');
+
+if ($oAdminFormActionDelete && $oAdmin_Form_Controller->getAction() == 'delete')
+{
+	$oTrash_Controller_Delete = Admin_Form_Action_Controller::factory(
+		'Trash_Controller_Delete', $oAdminFormActionDelete
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oTrash_Controller_Delete);
+}
+
 if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 {
 	ob_start();
+
+	$iDelay = 1;
+	$iMaxTime = (!defined('DENY_INI_SET') || !DENY_INI_SET)
+		? ini_get('max_execution_time')
+		: 25;
+
+	$timeout = Core::getmicrotime();
 
 	$oAdmin_Form_Dataset = new Trash_Dataset();
 
@@ -37,14 +59,44 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 		->fillTables()
 		->getObjects();
 
+	$iCount = 0;
 	foreach ($aTables as $oTrash_Entity)
 	{
-		$oTrash_Entity->delete();
+		do {
+			$iDeleted = $oTrash_Entity->chunkDelete(100);
+			$iCount += $iDeleted;
+
+			if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
+			{
+				break 2;
+			}
+
+		} while ($iDeleted);
 	}
 
-	Core_Log::instance()->clear()
-		->status(Core_Log::$SUCCESS)
-		->write('All items have been completely deleted from Trash');
+	$bRedirect = $iCount > 0;
+
+	if ($bRedirect)
+	{
+		Core_Message::show(Core::_('Trash.deleted_elements', $iCount));
+
+		?>
+		<script type="text/javascript">
+		function set_location()
+		{
+			<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAll', NULL, 0, 0)?>
+		}
+		setTimeout ('set_location()', <?php echo $iDelay * 1000?>);
+		</script><?php
+	}
+	else
+	{
+		Core_Message::show(Core::_('Trash.deleted_complete'));
+
+		Core_Log::instance()->clear()
+			->status(Core_Log::$SUCCESS)
+			->write('All items have been completely deleted from Trash');
+	}
 
 	$oAdmin_Form_Controller
 		->clearChecked()

@@ -302,14 +302,14 @@ class Sql_Table_Field_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 			$query .= ' ' . $sField;
 
-			$query .= ' ' .  preg_replace('/[^A-Z]/', '', $this->_formValues['type_name']);
+			$query .= ' ' . preg_replace('/[^A-Z]/', '', $this->_formValues['type_name']);
 
 			if (trim($this->_formValues['type_length']) != ''
 				&& !in_array($aType['datatype'], array('double', 'real', 'serial', 'date', 'datetime', 'year', 'tinyblob', 'blob', 'mediumblob', 'longblob', 'enum', 'set', 'point', 'multipoint', 'multilinestring', 'multipolygon', 'ge3ometrycollection', 'json'))
 				&& $aType['type'] != 'bool'
 			)
 			{
-				$query .= '(' .  preg_replace('/[^0-9,]/', '', $this->_formValues['type_length']) . ')';
+				$query .= '(' . preg_replace('/[^0-9,]/', '', $this->_formValues['type_length']) . ')';
 			}
 
 			// Attr

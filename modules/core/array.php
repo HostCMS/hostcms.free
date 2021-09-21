@@ -148,6 +148,10 @@ class Core_Array
 	 * // Return value for 'foo' or 'bar' if $key does not exist
 	 * $value = Core_Array::getPost('foo', 'bar');
 	 * </code>
+	 * <code>
+	 * // Return value for 'foo' or 'bar' if $key does not exist
+	 * $value = Core_Array::getPost('foo', 'bar', 'trim');
+	 * </code>
 	 * @return mixed
 	 */
 	static public function getPost($key, $defaultValue = NULL, $filter = NULL)
@@ -175,6 +179,28 @@ class Core_Array
 	static public function getGet($key, $defaultValue = NULL, $filter = NULL)
 	{
 		return self::get($_GET, $key, $defaultValue, $filter);
+	}
+	
+	/**
+	 * Get value for $key in array $_COOKIE. If value does not exist will return defaultValue.
+	 *
+	 * <code>
+	 * // Return value for 'foo' or NULL if $key does not exist
+	 * $value = Core_Array::getCookie('foo');
+	 * </code>
+	 * <code>
+	 * // Return value for 'foo' or 'bar' if $key does not exist
+	 * $value = Core_Array::getCookie('foo', 'bar');
+	 * </code>
+	 *
+	 * @param string $key key
+	 * @param mixed $defaultValue default value
+	 * @param mixed $filter filter, e.g. 'str'|'string'|'strval', 'int'|'integer'|'intval', 'float'|'floatval', 'bool'|'boolean'|'boolval', 'trim'
+	 * @return mixed
+	 */
+	static public function getCookie($key, $defaultValue = NULL, $filter = NULL)
+	{
+		return self::get($_COOKIE, $key, $defaultValue, $filter);
 	}
 
 	/**
@@ -362,6 +388,8 @@ class Core_Array
 		{
 			$aKeys = array_keys($aArray);
 			$iCount = count($aArray);
+			// Явно очищаем массивы, назвисимо от static
+			$aReturn = $aTmp = array();
 		}
 
 		if ($_iIndex < $iCount)

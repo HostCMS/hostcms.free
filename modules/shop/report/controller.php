@@ -1242,8 +1242,8 @@ class Shop_Report_Controller
 
 								for ($date = self::$_startDatetime; $date <= $end_date1; $date = date('Y-m-d', strtotime($date. ' + 7 days')))
 								{
-									$week =  date('W', strtotime($date));
-									$year =  date('Y', strtotime($date));
+									$week = date('W', strtotime($date));
+									$year = date('Y', strtotime($date));
 
 									$from = date("Y-m-d", strtotime("{$year}-W{$week}+1"));
 									$from < self::$_startDatetime && $from = self::$_startDatetime;

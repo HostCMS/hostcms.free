@@ -154,7 +154,7 @@ class Structure_Controller_Show extends Core_Controller
 			{
 				$this->addCacheSignature('siteuser_id=' . $oSiteuser->id);
 
-				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+				$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll(FALSE);
 				foreach ($aSiteuser_Groups as $oSiteuser_Group)
 				{
 					$aSiteuserGroups[] = $oSiteuser_Group->id;
@@ -301,7 +301,7 @@ class Structure_Controller_Show extends Core_Controller
 		{
 			$oStructure_Property_List = Core_Entity::factory('Structure_Property_List', $oSite->id);
 
-			$aProperties = $oStructure_Property_List->Properties->findAll();
+			$aProperties = $oStructure_Property_List->Properties->findAll(FALSE);
 			foreach ($aProperties as $oProperty)
 			{
 				$this->_aProperties[$oProperty->property_dir_id][] = $oProperty;
@@ -310,7 +310,7 @@ class Structure_Controller_Show extends Core_Controller
 				$oProperty->loadAllValues();
 			}
 
-			$aProperty_Dirs = $oStructure_Property_List->Property_Dirs->findAll();
+			$aProperty_Dirs = $oStructure_Property_List->Property_Dirs->findAll(FALSE);
 			foreach ($aProperty_Dirs as $oProperty_Dir)
 			{
 				$oProperty_Dir->clearEntities();
@@ -383,7 +383,7 @@ class Structure_Controller_Show extends Core_Controller
 	{
 		$oSite = $this->getEntity();
 
-		$aShops = $oSite->Shops->findAll();
+		$aShops = $oSite->Shops->findAll(FALSE);
 		foreach ($aShops as $oShop)
 		{
 			$oShop->structure_id && $this->_Shops[$oShop->structure_id] = $oShop;
@@ -548,54 +548,31 @@ class Structure_Controller_Show extends Core_Controller
 		$aInformationsystem_Groups = $oInformationsystem_Groups->findAll();
 		foreach ($aInformationsystem_Groups as $oInformationsystem_Group)
 		{
-			// Shortcut
-			if ($oInformationsystem_Group->shortcut_id
-				&& $oInformationsystem_Group->shortcut_id != $oInformationsystem_Group->parent_id)
-			{
-				$oShortcut_Group = $oInformationsystem_Group;
-				$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
-
-				$oInformationsystem_Group = clone $oOriginal_Informationsystem_Group;
-
-				$oInformationsystem_Group
-					->id($oOriginal_Informationsystem_Group->id)
-					->parent_id($oShortcut_Group->parent_id)
-					->shortcut_id($oShortcut_Group->id)
-					/*->addForbiddenTag('parent_id')
-					->addForbiddenTag('shortcut_id')
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('shortcut_id')
-							->value($oShortcut_Group->id)
-					)
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('parent_id')
-							->value($oShortcut_Group->parent_id)
-					)*/;
-			}
-
 			$this->_aInformationsystem_Groups[$oInformationsystem_Group->parent_id][] = $oInformationsystem_Group;
 		}
 
 		// Informationsystem's items
+		$this->_aInformationsystem_Items = array();
+
 		if ($this->showInformationsystemItems)
 		{
 			$oInformationsystem_Items = $oInformationsystem->Informationsystem_Items;
 			$oInformationsystem_Items->queryBuilder()
 				->select('informationsystem_items.*')
 				->open()
-				->where('informationsystem_items.start_datetime', '<', $dateTime)
-				->setOr()
-				->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
+					->where('informationsystem_items.start_datetime', '<', $dateTime)
+					->setOr()
+					->where('informationsystem_items.start_datetime', '=', '0000-00-00 00:00:00')
 				->close()
 				->setAnd()
 				->open()
-				->where('informationsystem_items.end_datetime', '>', $dateTime)
-				->setOr()
-				->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
+					->where('informationsystem_items.end_datetime', '>', $dateTime)
+					->setOr()
+					->where('informationsystem_items.end_datetime', '=', '0000-00-00 00:00:00')
 				->close()
 				->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+				->where('informationsystem_items.active', '=', 1)
+				->where('informationsystem_items.closed', '=', 0)
 				->clearOrderBy();
 
 			switch ($oInformationsystem->items_sorting_direction)
@@ -630,8 +607,6 @@ class Structure_Controller_Show extends Core_Controller
 						->orderBy('informationsystem_items.datetime', $items_sorting_direction)
 						->orderBy('informationsystem_items.sorting', $items_sorting_direction);
 			}
-
-			$this->_aInformationsystem_Items = array();
 
 			Core_Event::notify(get_class($this) . '.onBeforeFindInformationsystemItems', $this, array($oInformationsystem_Items, $parentObject, $oInformationsystem));
 
@@ -680,7 +655,39 @@ class Structure_Controller_Show extends Core_Controller
 
 			foreach ($this->_aInformationsystem_Groups[$parent_id] as $oInformationsystem_Group)
 			{
-				$this->showInformationsystemGroupProperties && $oInformationsystem_Group->showXmlProperties($this->showInformationsystemGroupProperties);
+				// Shortcut
+				if ($oInformationsystem_Group->shortcut_id
+					&& $oInformationsystem_Group->shortcut_id != $oInformationsystem_Group->parent_id)
+				{
+					$oShortcut_Group = $oInformationsystem_Group;
+					$oOriginal_Informationsystem_Group = $oInformationsystem_Group->Shortcut;
+
+					$oInformationsystem_Group = clone $oOriginal_Informationsystem_Group;
+
+					$oInformationsystem_Group
+						->id($oOriginal_Informationsystem_Group->id)
+						->parent_id($oShortcut_Group->parent_id)
+						->shortcut_id($oShortcut_Group->id)
+						/*->addForbiddenTag('parent_id')
+						->addForbiddenTag('shortcut_id')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('shortcut_id')
+								->value($oShortcut_Group->id)
+						)
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('parent_id')
+								->value($oShortcut_Group->parent_id)
+						)*/;
+				}
+				else
+				{
+					$oOriginal_Informationsystem_Group = $oInformationsystem_Group;
+				}
+
+				$this->showInformationsystemGroupProperties
+					&& $oInformationsystem_Group->showXmlProperties($this->showInformationsystemGroupProperties);
 
 				$oInformationsystem_Group
 					->clearEntities()
@@ -689,7 +696,7 @@ class Structure_Controller_Show extends Core_Controller
 						Core::factory('Core_Xml_Entity')
 							->name('link')
 							->value(
-								$oInformationsystem_Group->Informationsystem->Structure->getPath() . $oInformationsystem_Group->getPath()
+								$oInformationsystem_Group->Informationsystem->Structure->getPath() . $oOriginal_Informationsystem_Group->getPath()
 							)
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')
@@ -835,41 +842,14 @@ class Structure_Controller_Show extends Core_Controller
 		$aShop_Groups = $oShop_Groups->findAll();
 		foreach ($aShop_Groups as $oShop_Group)
 		{
-			// Shortcut
-			if ($oShop_Group->shortcut_id
-				&& $oShop_Group->shortcut_id != $oShop_Group->parent_id)
-			{
-				$oShortcut_Group = $oShop_Group;
-				$oOriginal_Shop_Group = $oShop_Group->Shortcut;
-
-				$oShop_Group = clone $oOriginal_Shop_Group;
-
-				$oShop_Group
-					->id($oOriginal_Shop_Group->id)
-					->parent_id($oShortcut_Group->parent_id)
-					->shortcut_id($oShortcut_Group->id)
-					/*->addForbiddenTag('parent_id')
-					->addForbiddenTag('shortcut_id')
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('shortcut_id')
-							->value($oShortcut_Group->id)
-					)
-					->addEntity(
-						Core::factory('Core_Xml_Entity')
-							->name('parent_id')
-							->value($oShortcut_Group->parent_id)
-					)*/;
-			}
-
 			$this->_aShop_Groups[$oShop_Group->parent_id][] = $oShop_Group;
 		}
 
 		// Shop's items
+		$this->_aShop_Items = array();
+
 		if ($this->showShopItems)
 		{
-			$this->_aShop_Items = array();
-
 			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
 			$oCore_QueryBuilder_Select
 				->from('shop_items')
@@ -888,17 +868,18 @@ class Structure_Controller_Show extends Core_Controller
 					->select('shop_items.*')
 					->where('shop_items.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->onStep))
 					->open()
-					->where('shop_items.start_datetime', '<', $dateTime)
-					->setOr()
-					->where('shop_items.start_datetime', '=', '0000-00-00 00:00:00')
+						->where('shop_items.start_datetime', '<', $dateTime)
+						->setOr()
+						->where('shop_items.start_datetime', '=', '0000-00-00 00:00:00')
 					->close()
 					->setAnd()
 					->open()
-					->where('shop_items.end_datetime', '>', $dateTime)
-					->setOr()
-					->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
+						->where('shop_items.end_datetime', '>', $dateTime)
+						->setOr()
+						->where('shop_items.end_datetime', '=', '0000-00-00 00:00:00')
 					->close()
 					->where('shop_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+					->where('shop_items.active', '=', 1)
 					->where('shop_items.modification_id', '=', 0)
 					->clearOrderBy();
 
@@ -986,7 +967,39 @@ class Structure_Controller_Show extends Core_Controller
 
 			foreach ($this->_aShop_Groups[$parent_id] as $oShop_Group)
 			{
-				$this->showShopGroupProperties && $oShop_Group->showXmlProperties($this->showShopGroupProperties);
+				// Shortcut
+				if ($oShop_Group->shortcut_id
+					&& $oShop_Group->shortcut_id != $oShop_Group->parent_id)
+				{
+					$oShortcut_Group = $oShop_Group;
+					$oOriginal_Shop_Group = $oShop_Group->Shortcut;
+
+					$oShop_Group = clone $oOriginal_Shop_Group;
+
+					$oShop_Group
+						->id($oOriginal_Shop_Group->id)
+						->parent_id($oShortcut_Group->parent_id)
+						->shortcut_id($oShortcut_Group->id)
+						/*->addForbiddenTag('parent_id')
+						->addForbiddenTag('shortcut_id')
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('shortcut_id')
+								->value($oShortcut_Group->id)
+						)
+						->addEntity(
+							Core::factory('Core_Xml_Entity')
+								->name('parent_id')
+								->value($oShortcut_Group->parent_id)
+						)*/;
+				}
+				else
+				{
+					$oOriginal_Shop_Group = $oShop_Group;
+				}
+
+				$this->showShopGroupProperties
+					&& $oShop_Group->showXmlProperties($this->showShopGroupProperties);
 
 				$oShop_Group
 					// ->clearEntities()
@@ -995,7 +1008,7 @@ class Structure_Controller_Show extends Core_Controller
 						Core::factory('Core_Xml_Entity')
 							->name('link')
 							->value(
-								$oShop_Group->Shop->Structure->getPath() . $oShop_Group->getPath()
+								$oShop_Group->Shop->Structure->getPath() . $oOriginal_Shop_Group->getPath()
 							)
 					)->addEntity(
 						Core::factory('Core_Xml_Entity')

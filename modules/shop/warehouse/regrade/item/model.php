@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Item_Model extends Core_Entity
 {
@@ -36,4 +36,21 @@ class Shop_Warehouse_Regrade_Item_Model extends Core_Entity
 		'incoming' => array('model' => 'Shop_Item', 'foreign_key' => 'incoming_shop_item_id'),
 		'writeoff' => array('model' => 'Shop_Item', 'foreign_key' => 'writeoff_shop_item_id')
 	);
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_warehouse_regrade_item.onBeforeGetRelatedSite
+	 * @hostcms-event shop_warehouse_regrade_item.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop_Warehouse_Regrade->Shop_Warehouse->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }

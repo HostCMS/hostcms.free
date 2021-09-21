@@ -131,4 +131,6 @@ return array(
 	'information_items_copy_form_title' => 'Копіювати елемент',
 	'add_value' => 'Додати відсутні значення властивості за замовчуванням у елементів',
 	'file_does_not_specified' => 'Файл не вказано',
+
+	'shortcut' => 'Ярлик ',
 );

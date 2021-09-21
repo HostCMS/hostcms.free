@@ -65,21 +65,26 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 		$iAdmin_Form_Count = $oCore_Registry->get('Admin_Form_Count', 0);
 		$oCore_Registry->set('Admin_Form_Count', $iAdmin_Form_Count + 1);
 
+		$aConfig = Core_Config::instance()->get('core_syntaxhighlighter', array()) + array(
+			'mode' => 'ace/mode/php',
+			'theme' => 'ace/theme/chrome',
+			'showPrintMargin' => false,
+			'autoScrollEditorIntoView' => true,
+			'wrap' => true
+		);
+
 		$this->id = $this->name = 'field_id_' . $iAdmin_Form_Count;
 		$this->style('width: 100%')
 			->rows(3)
 			->syntaxHighlighterOptions(
-				array(
-					'mode' => 'css',
-					'lineNumbers' => 'true',
-					'styleActiveLine' => 'true',
-					'lineWrapping' => 'true',
-					'autoCloseTags' => 'true',
-
-					'tabSize' => 2, // из-за indentUnit равного 2-м
-					'indentWithTabs' => 'true',
-					'smartIndent' => 'false',
-				)
+				$aConfig
+				/*array(
+					'mode' => 'ace/mode/php',
+					'theme' => 'ace/theme/github',
+					'showPrintMargin' => false,
+					'autoScrollEditorIntoView' => true,
+					'wrap' => true
+				)*/
 			);
 
 		$this->class .= ' form-control';
@@ -241,15 +246,33 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$aTmp[] = "'" . Core_Str::escapeJavascriptVariable($key) . "': '" . Core_Str::escapeJavascriptVariable($value) . "'";
 			}
 
-			$sHeight = ($this->rows * 15) . 'px';
+			// $sHeight = ($this->rows * 15) . 'px';
 
 			$Core_Html_Entity_Script = new Core_Html_Entity_Script();
 			$Core_Html_Entity_Script
-				->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('" . Core_Str::escapeJavascriptVariable($this->id) . "'), {
+				/*->value("$(function() { var editor = CodeMirror.fromTextArea(document.getElementById('" . Core_Str::escapeJavascriptVariable($this->id) . "'), {
 					" . implode(",\n", $aTmp) . "
 				});
 				editor.setSize(null, '{$sHeight}');
-				});")
+				});")*/
+				->value("
+					$(function() {
+						var textarea = document.getElementById('" . Core_Str::escapeJavascriptVariable($this->id) . "'),
+							div = document.createElement('div'),
+							jTextarea = $(textarea);
+
+						$(div).insertAfter(jTextarea.hide()).text(jTextarea.val());
+
+						var editor = ace.edit(div, {
+							" . implode(",\n", $aTmp) . "
+						});
+
+						editor.setOptions({
+							maxLines: '" . $this->rows . "',
+							minLines: '" . $this->rows . "'
+						});
+					});
+				")
 				->execute();
 		}
 		else

@@ -50,12 +50,6 @@ class Sql_Table_Index_Dataset extends Admin_Form_Dataset
 		return $this->_count;
 	}
 
-	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
 	protected function _getIndexes($name = NULL)
 	{
 		$aReturn = array();

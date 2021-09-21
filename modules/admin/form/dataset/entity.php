@@ -188,21 +188,6 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
-	 * Get objects
-	 * @return array
-	 */
-	public function getObjects()
-	{
-		return $this->_objects;
-	}
-
-	/**
 	 * Get entity
 	 * @return object
 	 */

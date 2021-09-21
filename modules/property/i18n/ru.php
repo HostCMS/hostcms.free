@@ -89,4 +89,8 @@ return array(
 
 	'option_recursive_properties' => 'Разрешить рекурсивные свойства',
 	'option_add_list_items' => 'Добавлять в XML значения для списочных свойств',
+
+	'indexing' => 'Индексировать',
+	'changeIndexing_success' => 'Статус индексирования свойства успешно изменен.',
+	'changeIndexing_error' => 'Ошибка при изменении статуса индексирования свойства.',
 );

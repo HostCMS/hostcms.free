@@ -114,15 +114,14 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $this->_object->Shop->Structure->template_id
 			: 0;
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		switch ($modelName)
 		{
 			case 'shop_item':
 				$title = $this->_object->id
 					? Core::_('Shop_Item.items_catalog_edit_form_title', $this->_object->name)
 					: Core::_('Shop_Item.items_catalog_add_form_title');
-
-				$oAdditionalTab
-					->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('image_small_height')
 					->divAttr(array('style' => 'display: none'));
@@ -203,7 +202,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_("Admin_Form.tabProperties"))
 					->name('Property');
 
-				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
+				$this->addTabAfter($oPropertyTab, $oShopItemTabAssociated);
 
 				// Properties
 				Shop_Item_Property_Controller_Tab::factory($this->_Admin_Form_Controller)
@@ -348,43 +347,40 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow3->add($oAdditionalGroupsSelect);
 
-				$html2 = '
-					<script>
-						$(function(){
-							$(".shortcut-group-tags").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 2,
-								placeholder: "' . Core::_('Shop_Item.select_group') . '",
-								tags: true,
-								allowClear: true,
-								multiple: true,
-								ajax: {
-									url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
-									dataType: "json",
-									type: "GET",
-									processResults: function (data) {
-										var aResults = [];
-										$.each(data, function (index, item) {
-											aResults.push({
-												"id": item.id,
-												"text": item.text
-											});
-										});
-										return {
-											results: aResults
-										};
-									}
-								},
-							});
-						})</script>
-					';
+				$html2 = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shortcut-group-tags").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 2,
+						placeholder: "' . Core::_('Shop_Item.select_group') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				})</script>';
 
 				$oMainRow3->add(Admin_Form_Entity::factory('Code')->html($html2));
 
 				// Удаляем тип товара
 				$oMainTab->delete($this->getField('type'));
-
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				$oRadioType = Admin_Form_Entity::factory('Radiogroup')
 					->name('type')
@@ -392,13 +388,15 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_('Shop_Item.type'))
 					->value($this->_object->type)
 					->divAttr(array('class' => 'form-group col-xs-12 col-lg-10'))
-					->radio(array(
-						0 => Core::_('Shop_Item.item_type_selection_group_buttons_name_simple'),
-						2 => Core::_('Shop_Item.item_type_selection_group_buttons_name_divisible'),
-						1 => Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic'),
-						3 => Core::_('Shop_Item.item_type_selection_group_buttons_name_set'),
-						4 => Core::_('Shop_Item.item_type_selection_group_buttons_name_certificate')
-					))
+					->radio(
+						array(
+							0 => Core::_('Shop_Item.item_type_selection_group_buttons_name_simple'),
+							2 => Core::_('Shop_Item.item_type_selection_group_buttons_name_divisible'),
+							1 => Core::_('Shop_Item.item_type_selection_group_buttons_name_electronic'),
+							3 => Core::_('Shop_Item.item_type_selection_group_buttons_name_set'),
+							4 => Core::_('Shop_Item.item_type_selection_group_buttons_name_certificate')
+						)
+					)
 					->ico(
 						array(
 							0 => 'fa-file-text-o',
@@ -481,46 +479,45 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
 					->value("
-						$('[name = modification_name]').autocomplete({
-							  source: function(request, response) {
-
+						$('#{$windowId} [name = modification_name]').autocomplete({
+							source: function(request, response) {
 								$.ajax({
-								  url: '/admin/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
-								  dataType: 'json',
-								  data: {
-									queryString: request.term
-								  },
-								  success: function( data ) {
-									response( data );
-								  }
+									url: '/admin/shop/item/index.php?autocomplete=1&show_modification=1&shop_item_id={$this->_object->id}',
+									dataType: 'json',
+									data: {
+										queryString: request.term
+									},
+									success: function(data) {
+										response(data);
+									}
 								});
-							  },
-							  minLength: 1,
-							  create: function() {
-								$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+							},
+							minLength: 1,
+							create: function() {
+								$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 									return $('<li></li>')
 										.data('item.autocomplete', item)
 										.append($('<a>').text(item.label))
 										.appendTo(ul);
 								}
 
-								 $(this).prev('.ui-helper-hidden-accessible').remove();
-							  },
-							  select: function( event, ui ) {
-								$('[name = modification_id]').val(ui.item.id);
-							  },
-							  change: function( event, ui ) {
+								$(this).prev('.ui-helper-hidden-accessible').remove();
+							},
+							select: function(event, ui) {
+								$('#{$windowId} [name = modification_id]').val(ui.item.id);
+							},
+							change: function(event, ui) {
 								if (ui.item === null)
 								{
-									$('[name = modification_id]').val(0);
+									$('#{$windowId} [name = modification_id]').val(0);
 								}
-							  },
-							  open: function() {
+							},
+							open: function() {
 								$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-							  },
-							  close: function() {
+							},
+							close: function() {
 								$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-							  }
+							}
 						});
 					");
 
@@ -618,20 +615,18 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oSetRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oSetRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
-				$setTable = '
-					<table class="table table-striped table-hover set-item-table">
-						<thead>
-							<tr>
-								<th></th>
-								<th scope="col">' . Core::_('Shop_Item.name') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
-								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
-								<th scope="col">  </th>
-							</tr>
-						</thead>
-						<tbody>
-				';
+				$setTable = '<table class="table table-striped table-hover set-item-table">
+					<thead>
+						<tr>
+							<th></th>
+							<th scope="col">' . Core::_('Shop_Item.name') . '</th>
+							<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
+							<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
+							<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
+							<th scope="col"> </th>
+						</tr>
+					</thead>
+					<tbody>';
 
 				$aShop_Item_Sets = $this->_object->Shop_Item_Sets->findAll(FALSE);
 
@@ -657,7 +652,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								. $oShop->Structure->getPath()
 								. $oShop_Item->getPath();
 
-							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl .  '"><i class="fa fa-external-link"></i></a>';
+							$externalLink = '<a class="margin-left-5" target="_blank" href="' . $sItemUrl . '"><i class="fa fa-external-link"></i></a>';
 						}
 
 						$smallImage = $oShop_Item->image_small
@@ -701,13 +696,15 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->value("$('.add-set-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0 }, function(event, ui) {
-						$('.set-item-table > tbody').append(
-							$('<tr><td><img class=\"backend-thumbnail\"  src=\"' + ui.item.image_small + '\" /></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+					->value("$('#{$windowId} .add-set-item').autocompleteShopItem({
+							shop_id: '{$this->_object->shop_id}',
+							shop_currency_id: 0
+						}, function(event, ui) {
+							$('#{$windowId} .set-item-table > tbody').append(
+								$('<tr><td><img class=\"backend-thumbnail\" src=\"' + ui.item.image_small + '\" /></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'set_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"set_count[]\" value=\"1.00\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 						);
-
 						ui.item.value = '';
-					  } );");
+					});");
 
 				$oSetRow2->add($oCore_Html_Entity_Script);
 
@@ -913,36 +910,35 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->addField($oAdditionalItemsSelect);
 				$oTabRow1->add($oAdditionalItemsSelect);
 
-				$html = '
-					<script>
-						$(function(){
-							$(".shop-tabs").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 1,
-								placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
-								tags: true,
-								allowClear: true,
-								multiple: true,
-								ajax: {
-									url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
-									dataType: "json",
-									type: "GET",
-									processResults: function (data) {
-										var aResults = [];
-										$.each(data, function (index, item) {
-											aResults.push({
-												"id": item.id,
-												"text": item.text
-											});
-										});
-										return {
-											results: aResults
-										};
-									}
-								},
-							});
-						})</script>
-					';
+				$html = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shop-tabs").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 1,
+						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				});</script>';
 
 				$oTabRow1->add(Admin_Form_Entity::factory('Code')->html($html));
 
@@ -951,7 +947,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add(Admin_Form_Entity::factory('Div')
 							->class('header bordered-palegreen')
 							->value(Core::_('Shop_Item.price_header'))
-						)
+					)
 					->add($oPriceRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$this->getField('price')
@@ -987,7 +983,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Добавляем налоги
 				$oPriceRow1->add($oShopTaxSelect);
 
-				//Checkbox применения цен для модификаций
+				// Checkbox применения цен для модификаций
 				if ($this->_object->Modifications->getCount())
 				{
 					$oModificationPrice = Admin_Form_Entity::factory('Checkbox')
@@ -1212,7 +1208,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									? 'hidden'
 									: '';
 
-								$aPrices = self::fillPricesList($oShop);
+								$aPrices = $this->fillPricesList($oShop);
 
 								$aCells = $this->_getCells($oWarehouse);
 								?>
@@ -1307,36 +1303,35 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oMainRow9->add($oAdditionalTagsSelect);
 
-					$html = '
-						<script>
-							$(function(){
-								$(".shop-item-tags").select2({
-									language: "' . Core_i18n::instance()->getLng() . '",
-									minimumInputLength: 1,
-									placeholder: "' . Core::_('Shop_Item.type_tag') . '",
-									tags: true,
-									allowClear: true,
-									multiple: true,
-									ajax: {
-										url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
-										dataType: "json",
-										type: "GET",
-										processResults: function (data) {
-											var aResults = [];
-											$.each(data, function (index, item) {
-												aResults.push({
-													"id": item.id,
-													"text": item.text
-												});
-											});
-											return {
-												results: aResults
-											};
-										}
-									},
-								});
-							})</script>
-						';
+					$html = '<script>
+					$(function(){
+						$("#' . $windowId . ' .shop-item-tags").select2({
+							dropdownParent: $("#' . $windowId . '"),
+							language: "' . Core_i18n::instance()->getLng() . '",
+							minimumInputLength: 1,
+							placeholder: "' . Core::_('Shop_Item.type_tag') . '",
+							tags: true,
+							allowClear: true,
+							multiple: true,
+							ajax: {
+								url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+								dataType: "json",
+								type: "GET",
+								processResults: function (data) {
+									var aResults = [];
+									$.each(data, function (index, item) {
+										aResults.push({
+											"id": item.id,
+											"text": item.text
+										});
+									});
+									return {
+										results: aResults
+									};
+								}
+							}
+						});
+					});</script>';
 
 					$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 				}
@@ -1356,48 +1351,47 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow9->add($oAdditionalBarcodesSelect);
 
-				$html = '
-					<script>
-						$(function(){
-							$(".shop-item-barcodes").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 1,
-								placeholder: "' . Core::_('Shop_Item.type_barcode') . '",
-								tags: true,
-								allowClear: true,
-								multiple: true,
-								ajax: {
-									url: "/admin/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
-									dataType: "json",
-									type: "GET",
-									processResults: function (data) {
-										var aResults = [];
-										$.each(data, function (index, item) {
-											aResults.push({
-												"id": item.id,
-												"text": item.text,
-												"name": item.name
-											});
-										});
-										return {
-											results: aResults
-										};
-									}
-								},
-							});
+				$html = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shop-item-barcodes").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 1,
+						placeholder: "' . Core::_('Shop_Item.type_barcode') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/item/index.php?loadBarcodesList&shop_item_id=' . $this->_object->id . '",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text,
+										"name": item.name
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
 
-							$(".shop-item-barcodes").on("select2:select", function (e) {
-								var data = e.params.data,
-									jInputName = $("#' . $windowId . ' input[name=\'name\']");
+					$("#' . $windowId . ' .shop-item-barcodes").on("select2:select", function (e) {
+						var data = e.params.data,
+							jInputName = $("#' . $windowId . ' input[name=\'name\']");
 
-								!jInputName.val() && jInputName
-									.val(data.name)
-									.focus()
-									.fadeOut(500)
-									.fadeIn(500);
-							});
-						})</script>
-					';
+						!jInputName.val() && jInputName
+							.val(data.name)
+							.focus()
+							.fadeOut(500)
+							.fadeIn(500);
+					});
+				});</script>';
 
 				$oMainRow9->add(Admin_Form_Entity::factory('Code')->html($html));
 
@@ -1411,7 +1405,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 								<th scope="col">' . Core::_('Shop_Item.marking') . '</th>
 								<th scope="col">' . Core::_('Shop_Item.quantity') . '</th>
 								<th scope="col">' . Core::_('Shop_Item.associated_item_price') . '</th>
-								<th scope="col">  </th>
+								<th scope="col"> </th>
 							</tr>
 						</thead>
 						<tbody>
@@ -1467,18 +1461,16 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				);
 
 				$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-					->value("$('.add-associated-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0}, function(event, ui) {
+					->value("$('#{$windowId} .add-associated-item').autocompleteShopItem({ shop_id: '{$this->_object->shop_id}', shop_currency_id: 0}, function(event, ui) {
 						$('<input type=\'hidden\' name=\'associated_item_id[]\'/>')
 							.val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0)
-							.insertAfter($('.associated-item-table'));
+							.insertAfter($('#{$windowId} .associated-item-table'));
 
-						$('.associated-item-table > tbody').append(
+						$('#{$windowId} .associated-item-table > tbody').append(
 							$('<tr><td>' + $.escapeHtml(ui.item.label) + '</td><td>' + $.escapeHtml(ui.item.marking) + '</td><td><input class=\"set-item-count form-control\" name=\"associated_count[]\" value=\"1\"/></td><td>' + ui.item.price_with_tax + ' ' + ui.item.currency + '</td><td><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 						);
-
 						ui.item.value = '';
-					  } );"
-					);
+					});");
 
 				$oShopItemTabAssociated->add($oCore_Html_Entity_Script);
 
@@ -1594,7 +1586,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_("Admin_Form.tabProperties"))
 					->name('Property');
 
-				$this->addTabBefore($oPropertyTab, $oAdditionalTab);
+				$this->addTabAfter($oPropertyTab, $oMainTab);
 
 				// Properties
 				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
@@ -1665,36 +1657,35 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainRow1->add($oAdditionalGroupsSelect);
 
-				$html2 = '
-					<script>
-						$(function(){
-							$(".shortcut-group-tags").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 2,
-								placeholder: "' . Core::_('Shop_Item.select_group') . '",
-								tags: true,
-								allowClear: true,
-								multiple: true,
-								ajax: {
-									url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
-									dataType: "json",
-									type: "GET",
-									processResults: function (data) {
-										var aResults = [];
-										$.each(data, function (index, item) {
-											aResults.push({
-												"id": item.id,
-												"text": item.text
-											});
-										});
-										return {
-											results: aResults
-										};
-									}
-								},
-							});
-						})</script>
-					';
+				$html2 = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shortcut-group-tags").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 2,
+						placeholder: "' . Core::_('Shop_Item.select_group') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/item/index.php?shortcuts&shop_id=' . $this->_object->shop_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				});</script>';
 
 				$oMainRow3->add(Admin_Form_Entity::factory('Code')->html($html2));
 
@@ -1711,8 +1702,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: '';
 
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
-
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				$oImageField
 					->style("width: 400px;")
@@ -1811,36 +1800,35 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$this->addField($oAdditionalItemsSelect);
 				$oTabRow1->add($oAdditionalItemsSelect);
 
-				$html = '
-					<script>
-						$(function(){
-							$(".shop-tabs").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
-								minimumInputLength: 1,
-								placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
-								tags: true,
-								allowClear: true,
-								multiple: true,
-								ajax: {
-									url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
-									dataType: "json",
-									type: "GET",
-									processResults: function (data) {
-										var aResults = [];
-										$.each(data, function (index, item) {
-											aResults.push({
-												"id": item.id,
-												"text": item.text
-											});
-										});
-										return {
-											results: aResults
-										};
-									}
-								},
-							});
-						})</script>
-					';
+				$html = '<script>
+				$(function(){
+					$("#' . $windowId . ' .shop-tabs").select2({
+						dropdownParent: $("#' . $windowId . '"),
+						language: "' . Core_i18n::instance()->getLng() . '",
+						minimumInputLength: 1,
+						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
+						tags: true,
+						allowClear: true,
+						multiple: true,
+						ajax: {
+							url: "/admin/shop/tab/index.php?autocomplete&shop_id=' . $this->_object->shop_id .'",
+							dataType: "json",
+							type: "GET",
+							processResults: function (data) {
+								var aResults = [];
+								$.each(data, function (index, item) {
+									aResults.push({
+										"id": item.id,
+										"text": item.text
+									});
+								});
+								return {
+									results: aResults
+								};
+							}
+						}
+					});
+				});</script>';
 
 				$oTabRow1->add(Admin_Form_Entity::factory('Code')->html($html));
 
@@ -1981,6 +1969,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$aConfig = $this->_getConfig();
 
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 		switch ($modelName)
 		{
 			case 'shop_item':
@@ -1994,8 +1984,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Устанавливаем группу, указанную у бывшего родительским товара
 					$this->_object->shop_group_id = Core_Entity::factory('Shop_Item', $prev_modification_id)->shop_group_id;
 				}
-
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				// Проверяем подключен ли модуль типографики.
 				if (Core::moduleIsActive('typograph'))
@@ -2142,7 +2130,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 					else
 					{
-						 $aTmp[] = $oShop_Tab->id;
+						$aTmp[] = $oShop_Tab->id;
 					}
 				}
 
@@ -2595,8 +2583,17 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Fast filter
 				if ($oShop->filter)
 				{
-					$Shop_Filter_Controller = new Shop_Filter_Controller($oShop);
-					$Shop_Filter_Controller->fill($this->_object);
+					$oShop_Filter_Controller = new Shop_Filter_Controller($oShop);
+					$oShop_Filter_Controller->fill($this->_object);
+
+					// Fast filter for modifications
+					$aModifications = $this->_object->Modifications->findAll(FALSE);
+					foreach ($aModifications as $oModification)
+					{
+						$this->_object->active
+							? $oShop_Filter_Controller->fill($oModification)
+							: $oShop_Filter_Controller->remove($oModification);
+					}
 				}
 			break;
 			case 'shop_group':
@@ -2680,7 +2677,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					}
 					else
 					{
-						 $aTmp[] = $oShop_Tab->id;
+						$aTmp[] = $oShop_Tab->id;
 					}
 				}
 
@@ -2981,8 +2978,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oSiteAlias = $oShop->Site->getCurrentAlias();
 		if ($oSiteAlias)
 		{
-			$windowId = $this->_Admin_Form_Controller->getWindowId();
-
 			$sUrl = ($oShop->Structure->https ? 'https://' : 'http://')
 				. $oSiteAlias->name
 				. $oShop->Structure->getPath()
@@ -3118,7 +3113,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	/**
 	 * Показ списка групп или поле ввода с autocomplete для большого количества групп
 	 * @param string $fieldName имя поля группы
-	 * @return array  массив элементов, для доабвления в строку
+	 * @return array массив элементов, для доабвления в строку
 	 */
 	public function shopGroupShow($fieldName)
 	{
@@ -3169,44 +3164,43 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->value($this->_object->$fieldName)
 				->type('hidden');
 
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
-				->value("
-					$('[name = shop_group_name]').autocomplete({
-						  source: function(request, response) {
-
-							$.ajax({
-							  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
-							  dataType: 'json',
-							  data: {
+				->value("$('#{$windowId} [name = shop_group_name]').autocomplete({
+					source: function(request, response) {
+						$.ajax({
+							url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+							dataType: 'json',
+							data: {
 								queryString: request.term
-							  },
-							  success: function( data ) {
-								response( data );
-							  }
-							});
-						  },
-						  minLength: 1,
-						  create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
-								return $('<li></li>')
-									.data('item.autocomplete', item)
-									.append($('<a>').text(item.label))
-									.appendTo(ul);
+							},
+							success: function(data) {
+								response(data);
 							}
-
-							 $(this).prev('.ui-helper-hidden-accessible').remove();
-						  },
-						  select: function( event, ui ) {
-							$('[name = {$fieldName}]').val(ui.item.id);
-						  },
-						  open: function() {
-							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-						  },
-						  close: function() {
-							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-						  }
-					});
-				");
+						});
+					},
+					minLength: 1,
+					create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+							return $('<li></li>')
+								.data('item.autocomplete', item)
+								.append($('<a>').text(item.label))
+								.appendTo(ul);
+						}
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function(event, ui) {
+						$('#{$windowId} [name = {$fieldName}]').val(ui.item.id);
+					},
+					open: function() {
+						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
+					},
+					close: function() {
+						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
+					}
+				});
+			");
 
 			$return = array($oShopGroupInput, $oShopGroupInputHidden, $oCore_Html_Entity_Script);
 		}

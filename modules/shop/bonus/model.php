@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Bonus_Model extends Core_Entity
 {
@@ -183,7 +183,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$text = Core::_('Shop_Bonus.accrual_days') . ': ' . $this->accrual_days;
 		}
 
-		?><span class="margin-left-5 label <?php echo $class?> pull-right"><?php echo $text  . ', ' . Core::_('Shop_Bonus.expire_days') . ': ' . $this->expire_days?></span><?php
+		?><span class="margin-left-5 label <?php echo $class?> pull-right"><?php echo $text . ', ' . Core::_('Shop_Bonus.expire_days') . ': ' . $this->expire_days?></span><?php
 	}
 
 
@@ -196,5 +196,22 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		echo $this->min_amount > 0
 			? $this->min_amount
 			: '—';
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_bonus.onBeforeGetRelatedSite
+	 * @hostcms-event shop_bonus.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

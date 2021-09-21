@@ -405,6 +405,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		// Получение списка полей объекта
 		$aColumns = $this->_object->getTableColumns();
 
+		$modelName = $this->_object->getModelName();
+		$primaryKeyName = $this->_object->getPrimaryKeyName();
+
 		// Список закладок
 		// Основная закладка
 		$oAdmin_Form_Tab_EntityMain = Admin_Form_Entity::factory('Tab')
@@ -433,8 +436,24 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			$this->addTab($oAdmin_Form_Tab_EntityAdditional);
 		//}
 
-		$modelName = $this->_object->getModelName();
-		$primaryKeyName = $this->_object->getPrimaryKeyName();
+		// Fields
+		$oAdmin_Form_Tab_EntityFields = Admin_Form_Entity::factory('Tab')
+			//->caption(Core::_('admin_form.form_forms_tab_1'))
+			->name('user_fields')
+			->class($this->tabClass)
+			->icon('fas fa-user-cog')
+			->iconTitle(Core::_('admin_form.form_forms_tab_3'));
+
+		$this->addTabBefore($oAdmin_Form_Tab_EntityFields, $oAdmin_Form_Tab_EntityAdditional);
+
+		Field_Controller_Tab::factory($this->_Admin_Form_Controller)
+			->setObject($this->_object)
+			->setDatasetId($this->getDatasetId())
+			->setTab($oAdmin_Form_Tab_EntityFields)
+			// ->template_id($template_id)
+			->fillTab();
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		foreach ($aColumns as $columnName => $columnArray)
 		{
@@ -614,9 +633,10 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 									->value($this->_object->$columnName);
 
 								$oScript = Admin_Form_Entity::factory('Script')
-									->value("$('#responsible_user').selectUser({
+									->value("$('#{$windowId} #responsible_user').selectUser({
 											language: '" . $language . "',
-											placeholder: '" . $placeholder . "'
+											placeholder: '" . $placeholder . "',
+											dropdownParent: $('#" . $windowId . "')
 										})
 										.val('" . $this->_object->$columnName . "')
 										.trigger('change.select2')
@@ -698,7 +718,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		switch ($operation)
 		{
 			case NULL: // Показ формы
-
 				if (!$this->_prepeared)
 				{
 					$this->_prepareForm();
@@ -714,35 +733,8 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				$this->_return = $this->_showEditForm();
 
 			break;
-			case 'save':
-			case 'saveModal':
-				$primaryKeyName = $this->_object->getPrimaryKeyName();
-
-				// Значение первичного ключа до сохранения
-				$prevPrimaryKeyValue = $this->_object->$primaryKeyName;
-
-				$this->_applyObjectProperty();
-
-				ob_start();
-				$modelName = $this->_object->getModelName();
-				$actionName = $this->_Admin_Form_Controller->getAction();
-
-				Core_Message::show(Core::_("{$modelName}.{$actionName}_success"));
-
-				if (is_null($prevPrimaryKeyValue))
-				{
-					$windowId = $this->_Admin_Form_Controller->getWindowId();
-					?><script><?php
-					?>$.appendInput('<?php echo Core_Str::escapeJavascriptVariable($windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($primaryKeyName)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
-					?></script><?php
-				}
-
-				$this->addMessage(ob_get_clean());
-				$this->_return = TRUE;
-			break;
 			case 'modal':
 				// $windowId = $this->_Admin_Form_Controller->getWindowId();
-
 				//$newWindowId = 'Modal_' . time();
 
 				ob_start();
@@ -766,17 +758,56 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 				$this->_return = TRUE;
 			break;
+			case 'save':
+			case 'saveModal':
+				$primaryKeyName = $this->_object->getPrimaryKeyName();
+
+				// Значение первичного ключа до сохранения
+				$prevPrimaryKeyValue = $this->_object->$primaryKeyName;
+
+				$this->_applyObjectProperty();
+
+				$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId'));
+
+				ob_start();
+				$modelName = $this->_object->getModelName();
+				$actionName = $this->_Admin_Form_Controller->getAction();
+
+				// При модальном показе $parentWindowId будет название окна родителя
+				$parentWindowId == ''
+					&& Core_Message::show(Core::_("{$modelName}.{$actionName}_success"));
+
+				if (is_null($prevPrimaryKeyValue))
+				{
+					$windowId = $this->_Admin_Form_Controller->getWindowId();
+					$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+
+					?><script><?php
+					?>$.appendInput('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($primaryKeyName)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
+					?>$.addHostcmsChecked('<?php echo Core_Str::escapeJavascriptVariable($modalWindowId ? $modalWindowId : $windowId)?>', '<?php echo Core_Str::escapeJavascriptVariable($this->getDatasetId())?>', '<?php echo Core_Str::escapeJavascriptVariable($this->_object->$primaryKeyName)?>');<?php
+					?></script><?php
+				}
+				$this->addMessage(ob_get_clean());
+
+				// $this->_return = TRUE;
+				$this->_return = $parentWindowId == '';
+			break;
 			case 'applyModal':
 				$this->_applyObjectProperty();
 
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
+				//$windowId = $this->_Admin_Form_Controller->getWindowId();
+				$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+				$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('parentWindowId'));
 
-				$this->_return = TRUE;
+				$this->addContent('<script>$(\'#' . $modalWindowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
+
+				// При модальном показе $parentWindowId будет название окна родителя
+				$this->_return = $parentWindowId == '';
+				//$this->_return = TRUE;
 			break;
 			case 'markDeleted':
 				$windowId = $this->_Admin_Form_Controller->getWindowId();
-				$this->addContent('<script>$(\'#' . $windowId . '\').parents(\'.bootbox\').modal(\'hide\');</script>');
+				$this->addContent("<script>$('#{$windowId}').parents('.bootbox').modal('hide');</script>");
 
 				$this->_return = TRUE;
 			break;
@@ -846,6 +877,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					&& $value = intval($value);
 			break;
 			case 'decimal':
+				$value = str_replace(',', '.', $value);
+
+				// Remove everything except numbers and dot
+				$value = preg_replace('/[^0-9\.\-]/', '', $value);
+
+				$value == '' && $value = 0;
+
 				if ($value != 0 && isset($columnArray['max_length']))
 				{
 					$aMaxLength = explode(',', $columnArray['max_length']);
@@ -897,6 +935,11 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		}
 
 		$this->_object->save();
+
+		// Fields
+		Field_Controller_Tab::factory($this->_Admin_Form_Controller)
+			->setObject($this->_object)
+			->applyObjectProperty();
 
 		$message = ob_get_clean();
 
@@ -955,9 +998,13 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		ob_start();
 
-		$sAdmin_View = !is_null($this->_Admin_Form_Controller)
-			? $this->_Admin_Form_Controller->Admin_View
-			: NULL;
+		$sAdmin_View = NULL;
+		if (!is_null($this->_Admin_Form_Controller))
+		{
+			$sAdmin_View = $this->_Admin_Form_Controller->getWindowId() == 'id_content'
+				? $this->_Admin_Form_Controller->Admin_View
+				: Admin_View::getClassName('Admin_Internal_View');
+		}
 
 		$oAdmin_View = Admin_View::create($sAdmin_View);
 		$oAdmin_View
@@ -982,6 +1029,98 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 	 */
 	protected function _addButtons()
 	{
-		return TRUE;
+		$sOperaion = $this->_Admin_Form_Controller->getOperation();
+		$sOperaionSufix = $sOperaion == 'modal'
+			? 'Modal'
+			: '';
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		$parentWindowId = Core_Array::getRequest('parentWindowId');
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', $parentWindowId);
+
+		// Кнопки
+		$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
+
+		// Сохранить
+		$oAdmin_Form_Entity_Button_Save = Admin_Form_Entity::factory('Button')
+			->name('save')
+			->id('action-button-save')
+			->class('btn btn-blue')
+			->value(Core::_('Admin_Form.save'))
+			->onclick(
+				$this->_Admin_Form_Controller
+					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+					->getAdminSendForm(array('operation' => 'save' . $sOperaionSufix))
+			);
+
+		// Применить
+		$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
+			->name('apply')
+			->id('action-button-apply')
+			->class('btn btn-palegreen')
+			->type('submit')
+			->value(Core::_('Admin_Form.apply'))
+			->onclick(
+				// После применения загрузка новой таблицы осуществляется в родительское окно
+				$this->_Admin_Form_Controller
+					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+					->getAdminSendForm(array('operation' => 'apply' . $sOperaionSufix))
+			);
+
+		$oAdmin_Form_Entity_Buttons
+			->add($oAdmin_Form_Entity_Button_Save)
+			->add($oAdmin_Form_Entity_Button_Apply);
+
+		$aChecked = $this->_Admin_Form_Controller->getChecked();
+		$aFirst = reset($aChecked);
+
+		// Удалить
+		if (is_array($aFirst) && key($aFirst))
+		{
+			$onclick = $this->_Admin_Form_Controller
+				->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+				->getAdminSendForm(array('action' => 'markDeleted', 'operation' => 'markDeleted'));
+
+			if ($sOperaion == 'modal')
+			{
+				$modalWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getGet('modalWindowId'));
+				$modalWindowId != ''
+					&& $onclick = "$('#{$modalWindowId}').parents('.bootbox').modal('hide'); " . $onclick;
+			}
+
+			$oAdmin_Form_Entity_Button_Delete = Admin_Form_Entity::factory('A')
+				->id('action-button-delete')
+				->class('btn btn-darkorange pull-right')
+				->onclick("res = confirm('" . Core::_('Admin_Form.confirm_dialog', Core::_('Admin_Form.delete')) . "'); if (res) {" . $onclick . " } else { return false }")
+				->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<i class="fa fa-trash no-margin-right"></i>')
+				);
+
+			$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Delete);
+		}
+
+		// Возвращаем оригинальный windowId
+		$this->_Admin_Form_Controller->windowId($windowId);
+
+		// Back
+		if ($sOperaion != 'modal')
+		{
+			$path = $this->_Admin_Form_Controller->getPath();
+
+			$oAdmin_Form_Entity_Button_Back = Admin_Form_Entity::factory('A')
+				->id('action-button-back')
+				->class('btn btn-default pull-right margin-right-5')
+				->onclick($this->_Admin_Form_Controller->getAdminLoadAjax($path))
+				->add(
+					Admin_Form_Entity::factory('Code')
+						->html('<i class="fa fa-arrow-circle-left no-margin-right darkgray"></i>')
+				);
+
+			$oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Back);
+		}
+
+		return $oAdmin_Form_Entity_Buttons;
 	}
 }

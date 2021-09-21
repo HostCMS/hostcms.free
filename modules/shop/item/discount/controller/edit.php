@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -162,8 +162,8 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 						// Fast filter
 						if ($oShop_Item->Shop->filter)
 						{
-							$Shop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
-							$Shop_Filter_Controller->fill($oShop_Item);
+							$oShop_Filter_Controller = new Shop_Filter_Controller($oShop_Item->Shop);
+							$oShop_Filter_Controller->fill($oShop_Item);
 						}
 					}
 				}
@@ -198,8 +198,8 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 						// Fast filter
 						if ($oModification->Shop->filter)
 						{
-							$Shop_Filter_Controller = new Shop_Filter_Controller($oModification->Shop);
-							$Shop_Filter_Controller->fill($oModification);
+							$oShop_Filter_Controller = new Shop_Filter_Controller($oModification->Shop);
+							$oShop_Filter_Controller->fill($oModification);
 						}
 					}
 				}

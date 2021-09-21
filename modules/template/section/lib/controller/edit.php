@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -105,7 +105,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 					->target('_blank')
 					->href(
 						$this->_object->lib_id
-							? $this->_object->lib_id . $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $oLib->id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
+							? $this->_object->lib_id . $this->_Admin_Form_Controller->getAdminActionLoadHref('/admin/lib/index.php', 'edit', NULL, 1, $this->_object->lib_id, 'lib_dir_id=' . intval($oLib->lib_dir_id))
 							: ''
 					)
 					->class('lib-edit input-group-addon bg-blue bordered-blue' . ($this->_object->lib_id ? '' : ' hidden'))

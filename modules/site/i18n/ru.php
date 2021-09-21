@@ -6,7 +6,7 @@
  * @subpackage Site
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сайты',
@@ -20,8 +20,6 @@ return array(
 	'max_size_load_image_big' => 'Максимальный размер большого изображения',
 	'admin_email' => '<acronym title="Электронный адрес администратора сайта">E-mail</acronym>',
 	'send_attendance_report' => '<acronym title="При выборе данного параметра на электронный ящик администратора сайта ежедневно будет приходить письмо, содержащее статистику посещаемости сайта">Отправлять ежедневный отчет о посещаемости</acronym>',
-	'files_chmod' => '<acronym title="Права доступа к файлам после их создания, например 0644">Права доступа к файлам</acronym>',
-	'chmod' => '<acronym title="Права доступа к директориям после их создания, например 0755">Права доступа к директориям</acronym>',
 	'date_format' => '<acronym title="Формат даты. Например «d.m.Y.»">Формат даты</acronym>',
 	'date_time_format' => '<acronym title="Формат даты и времени. Например «d.m.Y H:i:s.»">Формат даты и времени</acronym>',
 	'error' => '<acronym title="Режим вывода ошибок. Например «E_ERROR» или «E_ALL»">Режим вывода ошибок</acronym>',
@@ -42,7 +40,6 @@ return array(
 	'id' => 'Идентификатор',
 	'site_add_site_form_title' => 'Добавление информации о сайте',
 	'site_edit_site_form_title' => 'Редактирование информации о сайте "%s"',
-	'site_chmod' => 'Права доступа',
 	'site_dates' => 'Форматы',
 	'site_errors' => 'Ошибки',
 	'site_robots_txt' => 'robots.txt',

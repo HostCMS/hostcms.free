@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -21,10 +21,22 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	{
 		$aLngs = array();
 
-		$aAdmin_Languages = Core_Entity::factory('Admin_Language')->getAllByActive(1);
+		/*$aAdmin_Languages = Core_Entity::factory('Admin_Language')->getAllByActive(1);
 		foreach ($aAdmin_Languages as $oAdmin_Language)
 		{
 			$aLngs[] = $oAdmin_Language->shortname;
+		}*/
+		$aTmp = Core_QueryBuilder::select('lng')
+			->from('sites')
+			->groupBy('lng')
+			->execute()->asAssoc()->result();
+
+		foreach ($aTmp as $aRow)
+		{
+			if ($aRow['lng'] != '')
+			{
+				$aLngs[] = $aRow['lng'];
+			}
 		}
 
 		return $aLngs;
@@ -156,7 +168,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oTemplate_Textarea = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oTemplate_Textarea->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'application/x-httpd-php';
+				// $oTmpOptions['mode'] = 'application/x-httpd-php';
+				$oTmpOptions['mode'] = 'ace/mode/php';
 
 				$oTemplate_Textarea
 					->value(
@@ -177,9 +190,6 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oLessCss_Textarea = Admin_Form_Entity::factory('Textarea');
 
-				$oTmpOptions = $oLessCss_Textarea->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'css';
-
 				switch($this->_object->type)
 				{
 					// LESS
@@ -187,17 +197,27 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						$styleValue = is_file($this->_object->getTemplateLessFilePath())
 							? $this->_object->loadTemplateLessFile()
 							: $this->_object->loadTemplateCssFile();
+
+						$mode = 'ace/mode/less';
 					break;
 					// SCSS
 					case 2:
 						$styleValue = version_compare(PHP_VERSION, '5.6') >= 0 && is_file($this->_object->getTemplateScssFilePath())
 							? $this->_object->loadTemplateScssFile()
 							: $this->_object->loadTemplateCssFile();
+
+						$mode = 'ace/mode/scss';
 					break;
 					// CSS
 					default:
 						$styleValue = $this->_object->loadTemplateCssFile();
+
+						$mode = 'ace/mode/css';
 				}
+
+				$oTmpOptions = $oLessCss_Textarea->syntaxHighlighterOptions;
+				// $oTmpOptions['mode'] = 'css';
+				$oTmpOptions['mode'] = $mode;
 
 				$oLessCss_Textarea
 					->value($styleValue)
@@ -231,7 +251,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oJs_Textarea = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oJs_Textarea->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'text/javascript';
+				// $oTmpOptions['mode'] = 'text/javascript';
+				$oTmpOptions['mode'] = 'ace/mode/javascript';
 
 				$oJs_Textarea
 					->value(
@@ -259,7 +280,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oTextarea_Manifest = Admin_Form_Entity::factory('Textarea');
 
 					$oTmpOptions = $oTextarea_Manifest->syntaxHighlighterOptions;
-					$oTmpOptions['mode'] = 'xml';
+					// $oTmpOptions['mode'] = 'xml';
+					$oTmpOptions['mode'] = 'ace/mode/xml';
 
 					$manifest = $this->_object->loadManifestFile();
 
@@ -287,7 +309,7 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oTextarea_Lng = Admin_Form_Entity::factory('Textarea');
 
 					$oTmpOptions = $oTextarea_Lng->syntaxHighlighterOptions;
-					$oTmpOptions['mode'] = 'php';
+					$oTmpOptions['mode'] = 'ace/mode/php';
 
 					$lng = $this->_object->loadLngFile($sLng);
 

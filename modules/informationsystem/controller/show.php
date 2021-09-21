@@ -36,6 +36,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - limit($limit) количество выводимых элементов
  * - page(2) текущая страница, по умолчанию 0, счет ведется с 0
  * - part($int) номер отображаемой части информационного элемента
+ * - parts(TRUE|FALSE) использовать разделение текста на части через pagebreak, по умолчанию TRUE
  * - pattern($pattern) шаблон разбора данных в URI, см. __construct()
  * - tag($path) путь тега, с использованием которого ведется отбор информационных элементов
  * - cache(TRUE|FALSE) использовать кэширование, по умолчанию TRUE
@@ -100,6 +101,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'limit',
 		'page',
 		'part',
+		'parts',
 		'total',
 		'pattern',
 		'patternExpressions',
@@ -274,7 +276,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			= $this->tags = $this->calculateCounts = $this->siteuserProperties = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
-			= $this->votes = $this->showPanel = $this->calculateTotal = TRUE;
+			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = TRUE;
 
 		$this->groupsMode = 'tree';
 		$this->part = 1;
@@ -591,12 +593,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 		if (!$this->item)
 		{
 			$this->applyFilter();
-
-			/*$this->addEntity(
-				Core::factory('Core_Xml_Entity')
-					->name('filter_path')
-					->value($this->_filterPath)
-			);*/
 		}
 
 		// До вывода свойств групп
@@ -604,10 +600,17 @@ class Informationsystem_Controller_Show extends Core_Controller
 		{
 			$this->_itemCondition();
 
-			// Group's conditions for information system item
-			$this->group !== FALSE && $this->applyGroupCondition();
+			if (!$this->item)
+			{
+				// Group's conditions for information system item
+				$this->group !== FALSE && $this->applyGroupCondition();
 
-			!$this->item && $this->_setLimits();
+				$this->_setLimits();
+
+				$this->_Informationsystem_Items
+					->queryBuilder()
+					->where('informationsystem_items.closed', '=', 0);
+			}
 
 			$aInformationsystem_Items = $this->_Informationsystem_Items->findAll();
 
@@ -866,7 +869,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 							->showXmlSiteuserProperties($this->siteuserProperties);
 
 						// <!-- pagebreak -->
-						if ($this->part || $this->item)
+						if ($this->parts && ($this->part || $this->item))
 						{
 							$oInformationsystem_Item->showXmlPart($this->part);
 						}
@@ -991,10 +994,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 	 */
 	protected function _groupCondition()
 	{
-		/*$this->_Informationsystem_Items
-			->queryBuilder()
-			->where('informationsystem_items.informationsystem_group_id', '=', intval($this->group));*/
-
 		$this->applyFilterGroupCondition($this->_Informationsystem_Items->queryBuilder(), 'informationsystem_items.informationsystem_group_id');
 
 		return $this;
@@ -1052,7 +1051,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 			}
 		}
 
-		isset($matches['part']) && $this->part($matches['part']);
+		isset($matches['part'])
+			&& $this->parts
+			&& $this->part($matches['part']);
 
 		if (isset($matches['tag']) && $matches['tag'] != '' && Core::moduleIsActive('tag'))
 		{

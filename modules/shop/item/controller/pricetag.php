@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 {
@@ -246,11 +246,11 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 
 		// Данные
 		$dataArray = $this->_sheet->rangeToArray(
-			$sourceDimension,	// The worksheet range that we want to retrieve
-			NULL,        	    // Value that should be returned for empty cells
-			TRUE,        		// Should formulas be calculated (the equivalent of getCalculatedValue() for each cell)
-			TRUE,        		// Should values be formatted (the equivalent of getFormattedValue() for each cell)
-			TRUE         		// Should the array be indexed by cell row and cell column
+			$sourceDimension, // The worksheet range that we want to retrieve
+			NULL, // Value that should be returned for empty cells
+			TRUE, // Should formulas be calculated (the equivalent of getCalculatedValue() for each cell)
+			TRUE, // Should values be formatted (the equivalent of getFormattedValue() for each cell)
+			TRUE // Should the array be indexed by cell row and cell column
 		);
 
 		$this->_newSheet->fromArray($dataArray, NULL, $destinationPoint);
@@ -347,7 +347,7 @@ class Shop_Item_Controller_Pricetag extends Core_Servant_Properties
 				{
 					if (!is_null($oShop_Item_Barcode))
 					{
-						//  Add the In-Memory image to a worksheet
+						// Add the In-Memory image to a worksheet
 						$newContentDrawing = new \PhpOffice\PhpSpreadsheet\Worksheet\ContentDrawing();
 						$newContentDrawing->setName($destinationPoint . $drawing->getName());
 						$newContentDrawing->setCoordinates($newCoordinate);

@@ -576,7 +576,7 @@ class Core_DataBase_Pdo extends Core_DataBase
 		WHERE `table_schema` = ' . $this->quote($this->_config['database']);
 
 		!is_null($selectionCondition)
-			&& $query .=  ' AND `TABLE_NAME` LIKE ' . $this->quote($selectionCondition);
+			&& $query .= ' AND `TABLE_NAME` LIKE ' . $this->quote($selectionCondition);
 
 		$query .= 'ORDER BY `name` ASC';
 

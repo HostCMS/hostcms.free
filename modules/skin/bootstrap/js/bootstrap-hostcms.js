@@ -1285,7 +1285,7 @@ function isEmpty(str) {
 			{
 				$.ajax({
 					url: '/admin/dms/document/type/index.php',
-					data: { 'load_fields': 1, 'dms_document_id': dms_document_id, 'dms_document_type_id': dms_document_type_id, 'windowId': windowId },
+					data: { 'load_fields': 1, 'dms_document_id': dms_document_id, 'dms_document_type_id': dms_document_type_id, 'hostcms[window]': windowId },
 					dataType: 'json',
 					type: 'POST',
 					success: function(answer){
@@ -1810,7 +1810,7 @@ function isEmpty(str) {
 			});
 		},
 		_kanbanStepMoveCallback: function(result){
-						
+
 			if (result.status == 'success')
 			{
 				if (result.update)
@@ -1830,13 +1830,13 @@ function isEmpty(str) {
 			}
 		},
 		_kanbanStepMoveLeadCallback: function(result){
-						
+
 			if (result.status == 'success')
 			{
 				if(result.last_step == 1)
 				{
-					var id = 'hostcms[checked][0][' + result.lead_id + ']', 					
-						/*id = 'hostcms[checked][0][' + result itemObject.id + ']',*/						
+					var id = 'hostcms[checked][0][' + result.lead_id + ']',
+						/*id = 'hostcms[checked][0][' + result itemObject.id + ']',*/
 						lead_status_id = result.lead_status_id
 						post = {};
 
@@ -1859,7 +1859,7 @@ function isEmpty(str) {
 				container: null,
 				updateData: false,
 				windowId: 'id_content',
-				moveCallback: $._kanbanStepMoveCallback				
+				moveCallback: $._kanbanStepMoveCallback
 			}, options);
 
 			$(options.container + ' .connectedSortable').sortable({
@@ -1867,8 +1867,8 @@ function isEmpty(str) {
 				connectWith: options.container + ' .connectedSortable',
 				placeholder: 'placeholder',
 				handle: ".drag-handle",
-				helper: "clone",				
-				//helper: "original",				
+				helper: "clone",
+				//helper: "original",
 				tolerance: "pointer",
 				// revert: true,
 				scroll: false,
@@ -1903,49 +1903,35 @@ function isEmpty(str) {
 							$element.removeClass('error-drop');
 						}
 					}, 200);
-				},						
-				start: function (event, ui) {					
-					//console.log('start event', event);
-					//console.log('start ui', ui);										
+				},
+				start: function (event, ui) {
 					
 					var $item = $(ui.item[0]), $ul = $item.parent();
-					
+
 					//var clone = $('<li>').html($item.html());
 					//var clone = $('<li class="222" style="">1111<li>');
-					
-					//$ul.append(clone);				
-					
+
+					//$ul.append(clone);
+
 					//$(options.container + ' .connectedSortable').sortable("refresh").sortable("refreshPositions");
 					//$(options.container + ' .connectedSortable').trigger('sortover');
-										
+
 					//clone.attr('class', '222').attr('id', '111111111');
 					//$(ui.helper[0]).before(clone);
 					//$item.before(clone);
-					
-					//console.log('$ul.outerHeight(true)', $ul.outerHeight());
-					//console.log('$ul.outerHeight(true)', $ul.outerHeight());
 					
 					//$ul.outerHeight($ul.outerHeight() + 90);
 
 					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
 
 					$item.removeClass('cancel-' + $item.data('id'));
-					
-					/* var container = $(options.container);
-					
-					console.log('container',  container);
-					console.log('container.outerHeight()',  container.outerHeight()); */
-					
-					//container.outerHeight(container.outerHeight() + 120);
-					
-					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
-					
+
 					// Ghost
 					$(options.container + ' .connectedSortable').find('li:hidden')/*.not('.placeholder')*/
 						.addClass('ghost-item')
 						.addClass('cancel-' + $item.data('id'))
 						.css('opacity', .5)
-						.show();						
+						.show();
 				},
 				stop: function (event, ui) {
 					ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').addClass('hidden');
@@ -1971,7 +1957,7 @@ function isEmpty(str) {
 
 					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
 				},
-				over: function (event, ui) {										
+				over: function (event, ui) {
 					var $element = $(event.target);
 
 					if ($element.hasClass('kanban-action-item'))
@@ -2242,9 +2228,9 @@ function isEmpty(str) {
 			});
 		},
 		modalWindow: function(settings)
-		{
-			mainFormLocker.disable();
-
+		{			
+			mainFormLocker.unlock();
+			
 			var settings = jQuery.extend({
 					title: '',
 					message: '',
@@ -2254,7 +2240,11 @@ function isEmpty(str) {
 					message: settings.message,
 					title: $.escapeHtml(settings.title),
 					className: settings.className,
-					onEscape: function() {}
+					onEscape: function(){
+						// Запрет повторного закрытия диалогового окна
+						arguments[0].stopImmediatePropagation();
+					},
+					//onEscape: true
 				}),
 				modalBody = dialog.find('.modal-body'),
 				content = dialog.find('.modal-body .bootbox-body div');
@@ -2265,15 +2255,25 @@ function isEmpty(str) {
 
 			// before remove:
 			settings.onHide && dialog.on('hide.bs.modal', settings.onHide);
+			
+			
 			// after remove:
 			dialog.on('hidden.bs.modal', function(){
-				mainFormLocker.enable();
+				//mainFormLocker.enable();
 
 				if($(".modal").hasClass('in')){
 					$('body').addClass('modal-open');
 				}
 
 				$('html').css('overflow', '');
+			});						
+			
+			dialog.on('hide.bs.modal', function(event){
+			
+				// Call own event
+				var triggerReturn = $('body').triggerHandler('beforeHideModal');
+				
+				triggerReturn == 'break' && event.preventDefault();
 			});
 
 			//if (typeof settings.width != 'undefined')
@@ -3222,7 +3222,7 @@ function isEmpty(str) {
 						.data({'curDown': false})
 						.removeClass('mousedown');
 				},
-				'resize': function(event) {				
+				'resize': function(event) {
 
 					var documentScrollTop = $(document).scrollTop(),
 						navbarHeight = $('body > div.navbar').outerHeight(),
@@ -4837,18 +4837,19 @@ function isEmpty(str) {
 					checkboxElement = newRow.find('[name *= "_public"][type = "checkbox"]');
 
 				// Присутствует чекбокс, определяющий публичность значения свойства	и отсутствует скрытый input, связанный с данным чекбоксом
-				if (checkboxElement.length && !newRow.find('[name $= "_public_value[]"][type = "hidden"]').length)
+				/*if (checkboxElement.length && !newRow.find('[name $= "_public_value[]"][type = "hidden"]').length)
 				{
 					newRow.append('<input name="' + checkboxElement.attr('name').split('_public')[0] + '_public_value[]" type="hidden" value="0" />');
-				}
+				}*/
 
 				newRow.find('input').each(function(){
-
-					$(this).val('');
-
 					if ($(this).attr('type') == "checkbox")
 					{
 						$(this).prop('checked', false);
+					}
+					else
+					{
+						$(this).val('');
 					}
 				});
 
@@ -4898,7 +4899,208 @@ function isEmpty(str) {
 
 			jNewObject.insertAfter(jProperies.eq(-1));
 		},
-		// Показ сотрудников в списке select2
+		cloneField: function(windowId, index)
+		{
+			var jFields = jQuery('#' + windowId + ' #field_' + index),
+				jSourceField = jFields.eq(0);
+
+			var html = jSourceField[0].outerHTML, // clone with parent
+				iRand = Math.floor(Math.random() * 999999);
+
+			html = html
+				.replace(/(id_field(?:_[\d]+)+)/g, 'id_field_clone' + iRand);
+
+			// var jNewObject = jSourceProperty.clone();
+			var jNewObject = jQuery(jQuery.parseHTML(html, document, true));
+
+			// Clear autocomplete value
+			jNewObject.find("input.ui-autocomplete-input")
+				.attr('value', '')
+				.val('');
+
+			jNewObject.insertAfter(jFields.eq(-1));
+
+			jNewObject.find("textarea")
+				.removeAttr('wysiwyg')
+				.css('display', '');
+
+			// Change item_div ID
+			jNewObject
+				.find("div[id^='file_']")
+				.each(function(index, object){
+				jQuery(object).prop('id', jQuery(object).prop('id') + '_' + iRand);
+
+				// Удаляем скопированные элементы popover'а
+				jQuery(object).find("div[id ^= 'popover']").remove();
+			});
+
+			// jNewObject
+			// 	.find("div[id *='_watermark_property_']")
+			// 	.html(jNewObject.find("div[id *='_watermark_property_']").html());
+
+			// jNewObject
+			// 	.find("div[id *='_watermark_small_property_']")
+			// 	.html(jNewObject.find("div[id *='_watermark_small_property_']").html());
+
+			// Удаляем элементы просмотра и удаления загруженнного изображения
+			jNewObject
+				.find("[id ^= 'preview_large_field_'], [id ^= 'delete_large_field_'], [id ^= 'preview_small_field_'], [id ^= 'delete_small_field_']")
+				.remove();
+			// Удаляем скрипт просмотра загуженного изображения
+			jNewObject
+				.find("input[id ^= 'field_" + index + "_'][type='file'] ~ script")
+				.remove();
+
+			jNewObject
+				.find("input[id^='field_id'],select:not([id$='_mode']),textarea")
+				.attr('name', 'field_' + index + '[]');
+
+			jNewObject
+				.find("input[id^='id_field_'][type!=checkbox],input[id^='small_field_'][type!=checkbox],input[class*='description'][type!=checkbox],select,textarea")
+				.val('');
+
+			jNewObject
+				.find("select[id$='_mode'] option:first")
+				.prop('selected', true)
+				.change();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				var inputId = jQuery(object).prop('id');
+
+				jQuery(object).prop('name', arr[1] + '_' + arr[2] + '[]');
+
+				jNewObject
+					.find("a[id='crop_" + inputId + "']")
+					.attr('onclick', "$.showCropModal('" + inputId + "', '', '')");
+			});
+
+			jNewObject
+				.find("div.img_control div, a[id^='preview_'], a[id^='delete_'], div[role='application']")
+				.remove();
+
+			jNewObject
+				.find("input[type='text'].description-large")
+				.attr('name', 'description_field_' + index + '[]');
+
+			jNewObject
+				.find("input[type='text'].description-small")
+				.attr('name', 'description_small_field_' + index + '[]');
+
+			jNewObject.find(".file-caption-wrapper")
+				.addClass('hidden')
+				.parents('.input-group').find('input:first-child').removeClass('hidden');
+
+			jNewObject
+				.find('.add-remove-property > div')
+				.addClass('btn-group')
+				.find('.btn-delete')
+				.removeClass('hide');
+
+			// For checking field
+			jNewObject.find(':input').blur();
+		},
+		cloneFieldInfSys: function(windowId, index)
+		{
+			var jFields = jQuery('#' + windowId + ' #field_' + index),
+				html = jFields[0].outerHTML,
+				iRand = Math.floor(Math.random() * 999999); // clone with parent
+
+			html = html
+				.replace(/oSelectFilter(\d+)/g, 'oSelectFilter$1clone' + iRand)
+				.replace(/(id_group_[\d_]*)/g, 'id_group_clone' + iRand)
+				.replace(/(id_field_[\d_]*)/g, 'id_field_clone' + iRand)
+				.replace(/(input_field_[\d_]*)/g, 'input_field_clone' + iRand);
+
+			//jNewObject = jProperies.eq(0).clone(),
+			var jNewObject = jQuery(jQuery.parseHTML(html, document, true)),
+				//iNewId = index + 'group' + Math.floor(Math.random() * 999999),
+				jDir = jNewObject.find("select[onchange]"),
+				jItem = jNewObject.find("select:not([onchange])");
+
+			// Свойство - инфоэлемент
+			if (jDir.length)
+			{
+				jDir.val(jFields.eq(0).find("select[onchange]").val());
+				jItem.val(jFields.eq(0).find("select:not([onchange])"));
+			}
+			else // свойство - группа
+			{
+				jItem.val(0);
+			}
+
+			jItem
+				.attr('name', 'field_' + index + '[]')
+				.val();
+
+			jNewObject
+				.find('.add-remove-property > div')
+				.addClass('btn-group')
+				.find('.btn-delete')
+				.removeClass('hide');
+
+			jNewObject.find("img#delete").attr('onclick', "jQuery.deleteNewField(this)");
+			jNewObject.insertAfter(jFields.eq(-1));
+		},
+		deleteField: function(object, settings)
+		{
+			//var jObject = jQuery(object).siblings('input,select:not([onchange]),textarea');
+			var jObject = jQuery(object).parents('div.input-group');
+
+			jObject = jObject.find('input:not([id^="filter_"]),select:not([onchange]),textarea');
+
+			// For files
+			if (jObject.length === 0)
+			{
+				jObject = jQuery(object).siblings('div,label').children('input');
+			}
+
+			mainFieldChecker.removeField(jObject)
+
+			var field_name = jObject.eq(0).attr('name');
+
+			settings = jQuery.extend({
+				operation: typeof settings.prefix !== 'undefined' ? settings.prefix + field_name : field_name
+			}, settings);
+
+			settings = jQuery.requestSettings(settings);
+
+			var data = jQuery.getData(settings),
+				path = settings.path;
+
+			data['hostcms[checked][1][' + settings.fieldId + ']'] = 1;
+			data['fieldValueId'] = settings.fieldValueId;
+			data['field_dir_id'] = settings.fieldDirId;
+			data['model'] = settings.model;
+
+			jQuery.ajax({
+				context: jQuery('#'+settings.windowId),
+				url: path,
+				type: 'POST',
+				data: data,
+				dataType: 'json',
+				success: jQuery.ajaxCallback
+			});
+
+			jQuery.deleteNewField(object);
+		},
+		deleteNewField: function(object)
+		{
+			var fieldBlock = jQuery(object).closest('[id ^= "field_"]');
+
+			// Если осталось последнее свойство, то клонируем его перед удалением
+			if (!fieldBlock.siblings('#' + fieldBlock.prop('id')).size())
+			{
+				fieldBlock.find('.btn-clone').click();
+				//propertyBlock.find('.btn-delete').addClass('hide');
+				//propertyBlock.find('.btn-group').removeClass('btn-group');
+			}
+
+			fieldBlock.remove();
+		},
+		// Показ сотрудников в списке select2 (выпадающий)
 		templateResultItemResponsibleEmployees: function (data, item){
 
 			var arraySelectItemParts = data.text.split("%%%"),
@@ -4913,8 +5115,8 @@ function isEmpty(str) {
 				if (myArray)
 				{
 					// Объект select, на базе которого создан данный select2
-					var selectControlElement = $("#" + myArray[1]),
-						templateResultOptions = selectControlElement.data("templateResultOptions");
+					//var templateResultOptions = $("#" + myArray[1]).data("templateResultOptions");
+					var templateResultOptions = $(data.element).closest("#" + myArray[1]).data("templateResultOptions");
 
 					// Убираем из списка создателя дела, чтобы исключить возможность его удаления
 					if (templateResultOptions && ~templateResultOptions.excludedItems.indexOf(+data.id))
@@ -4971,7 +5173,8 @@ function isEmpty(str) {
 			if (myArray)
 			{
 				// Объект select, на базе которого создан данный select2
-				var selectControlElement = $("#" + myArray[1]),
+				//var selectControlElement = $("#" + myArray[1]),
+				var selectControlElement = $(data.element).closest("#" + myArray[1]),
 					templateSelectionOptions = selectControlElement.data("templateSelectionOptions"),
 					selectionSingle = selectControlElement.next('.select2-container').find('.select2-selection--single');
 
@@ -5148,12 +5351,12 @@ function isEmpty(str) {
 						$.each(result['users'], function(i, oUser){
 							$('.deal-step-users-list .row:last-child').append(
 								'<div class="col-xs-12 col-sm-3">\
-									<div class="databox databox-graded">\
+									<div class="databox databox-graded" style="overflow: hidden;">\
 										<div class="databox-left no-padding">\
 											<img src="' + $.escapeHtml(oUser['avatar']) + '" style="width:65px; height:65px;">\
 										</div>\
 										<div class="databox-right bg-whitesmoke">\
-											<div class="databox-stat orange radius-bordered" style="right: 0; left: 7px">\
+											<div class="orange radius-bordered" style="right: 0; left: 7px">\
 												<div class="databox-text black semi-bold"><a class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
 												<div class="databox-text darkgray">' + $.escapeHtml(oUser['post']) + '</div>\
 											</div>\
@@ -5593,9 +5796,11 @@ function isEmpty(str) {
 					<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" placeholder="' + placeholder + '" /><input type="hidden" name="writeoff_item[]" value="" /></td>\
 					<td><span class="writeoff-measure"></span></td>\
 					<td><span class="writeoff-price"></span></td>\
+					<td><span class="writeoff-currency"></span></td>\
 					<td><input class="incoming-item-autocomplete form-control" data-type="incoming" placeholder="' + placeholder + '"/><input type="hidden" name="incoming_item[]" value="" /></td>\
 					<td><span class="incoming-measure"></span></td>\
 					<td><span class="incoming-price"></span></td>\
+					<td><span class="incoming-currency"></span></td>\
 					<td width="80"><input class="set-item-count form-control" name="shop_item_quantity[]" value=""/></td>\
 					<td><a class="delete-associated-item" onclick=\"var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next)\"><i class="fa fa-times-circle darkorange"></i></a></td>\
 				</tr>'
@@ -5609,6 +5814,7 @@ function isEmpty(str) {
 
 				parentTr.find('.' + type + '-measure').text(ui.item.measure);
 				parentTr.find('.' + type + '-price').text(ui.item.price_with_tax);
+				parentTr.find('.' + type + '-currency').text(ui.item.currency);
 
 				$(this).next('input').val(ui.item.id);
 
@@ -5675,18 +5881,25 @@ function isEmpty(str) {
 				$input.val(InputValue);
 			}
 		},
+		addHostcmsChecked: function(windowId, datasetId, value)
+		{
+			var windowId = $.getWindowId(windowId),
+				$adminForm = $('#' + windowId + ' .adminForm');
+
+			if ($adminForm.length)
+			{
+				var action = $adminForm.attr('action');
+				action += (action.indexOf('?') >= 0 ? '&' : '?') + 'hostcms[checked][' + parseInt(datasetId) + '][' + parseInt(value) + ']=1';
+				$adminForm.attr('action', action);
+			}
+		},
 		toogleInputsActive: function(jForm, disableButtons)
 		{
 			jForm.find('.formButtons input').attr('disabled', disableButtons);
 		},
 		getWindowId: function(WindowId)
 		{
-			if (typeof WindowId == 'undefined' || WindowId == '')
-			{
-				WindowId = 'id_content';
-			}
-
-			return WindowId;
+			return !WindowId ? 'id_content' : WindowId;
 		},
 		filterKeyDown: function(e) {
 			if (e.keyCode == 13) {
@@ -5778,10 +5991,13 @@ function isEmpty(str) {
 			settings = jQuery.requestSettings(settings);
 
 			var path = settings.path,
-				modalId = 'Modal_' + Date.now(),
+				windowId = settings.windowId,
+				modalWindowId = 'Modal_' + Date.now(),
 				data = jQuery.getData(
-					jQuery.extend({}, settings, {windowId: modalId})
+					jQuery.extend({}, settings, {windowId: modalWindowId})
 				);
+
+			settings.additionalParams += '&modalWindowId=' + encodeURIComponent(modalWindowId);
 
 			if (settings.additionalParams != ' ' && settings.additionalParams != '')
 			{
@@ -5800,33 +6016,15 @@ function isEmpty(str) {
 				success: [function(returnedData) {
 					$.loadingScreen('hide');
 
-					/*var context = $(this),
-						modalDiv = $('<div>').attr('id', modalId).html(returnedData.form_html);
-
-					context.append(modalDiv);*/
-
 					settings = jQuery.extend({
 						title: returnedData.title,
-						message: '<div id="' + modalId + '"><div id="id_message"></div>' + returnedData.form_html + '</div>',
-						//windowId: modalId,
+						message: '<div id="' + modalWindowId + '"><div id="id_message"></div>' + returnedData.form_html + '</div>',
+						//windowId: modalWindowId,
 						width: '80%',
 						error: returnedData.error
 					}, settings);
 
 					$.modalWindow(settings);
-
-					/*modalDiv.HostCMSWindow({
-						//autoOpen: true,
-						//destroyOnClose: false,
-						title: returnedData.title,
-						//AppendTo: context,
-						width: '80%',
-						// // height: 140,
-						//addContentPadding: true,
-						//modal: false,
-						//Maximize: false,
-						//inimize: false
-					});*/
 				}]
 			});
 
@@ -5853,7 +6051,7 @@ function isEmpty(str) {
 			}
 
 			// Элементы списка
-			var jChekedItems = jQuery("#"+settings.windowId+" :input[type='checkbox'][id^='check_']:checked"),
+			var jChekedItems = jQuery("#" + settings.windowId + " :input[type='checkbox'][id^='check_']:checked"),
 				iChekedItemsCount = jChekedItems.length,
 				jItemsValue, iItemsValueCount, sValue;
 
@@ -5870,7 +6068,7 @@ function isEmpty(str) {
 				var element_id = jChekedItem.attr('id');
 
 				// Ищем значения записей, ID поля должно начинаться с ID checkbox-а
-				jItemsValue = jQuery("#"+settings.windowId+" :input[id^='apply_"+element_id+"_fv_']"),
+				jItemsValue = jQuery("#"+settings.windowId + " :input[id^='apply_"+element_id+"_fv_']"),
 				iItemsValueCount = jItemsValue.length;
 
 				for (var jValueItem, k = 0; k < iItemsValueCount; k++)
@@ -5899,7 +6097,7 @@ function isEmpty(str) {
 				jFiltersItem = jFiltersItems.eq(i);
 
 				// Если значение фильтра до 255 символов
-				if (jFiltersItem.val().length < 256)
+				if (jFiltersItem.val() && jFiltersItem.val().length < 256)
 				{
 					// Дописываем к передаваемым данным
 					data[jFiltersItem.attr('name')] = jFiltersItem.val();
@@ -5913,7 +6111,7 @@ function isEmpty(str) {
 
 			data['hostcms[filterId]'] = filterId;
 
-			var jTopFiltersItems = jQuery("#"+settings.windowId+" #filter-" + filterId + " :input[name^='topFilter_']"),
+			var jTopFiltersItems = jQuery("#"+settings.windowId + " #filter-" + filterId + " :input[name^='topFilter_']"),
 				iTopFiltersItemsCount = jTopFiltersItems.length;
 
 			for (var jFiltersItem, i=0; i < iTopFiltersItemsCount; i++)
@@ -6007,8 +6205,15 @@ function isEmpty(str) {
 			}
 
 			// CodeMirror
-			jQuery("#"+settings.windowId+" .CodeMirror").each(function(){
+			/*jQuery("#"+settings.windowId+" .CodeMirror").each(function(){
 				this.CodeMirror.save();
+			});*/
+
+			jQuery("#" + settings.windowId + " .ace_editor").each(function(){
+				var editor = ace.edit(this),
+					code = editor.getSession().getValue();
+
+				$(this).prev('textarea').val(code);
 			});
 
 			var FormNode = jQuery(settings.buttonObject).closest('form'),
@@ -6022,7 +6227,7 @@ function isEmpty(str) {
 			}
 
 			// Очистим поле для сообщений
-			jQuery("#"+settings.windowId+" #id_message").empty();
+			jQuery("#" + settings.windowId + " #id_message").empty();
 
 			// Отображаем экран загрузки
 			$.loadingScreen('show');
@@ -6031,7 +6236,7 @@ function isEmpty(str) {
 
 			FormNode.ajaxSubmit({
 				data: data,
-				context: jQuery('#'+settings.windowId),
+				context: jQuery('#' + settings.windowId),
 				url: path,
 				//type: 'POST',
 				dataType: 'json',
@@ -6225,9 +6430,10 @@ function isEmpty(str) {
 		{
 			$.loadingScreen('hide');
 
-			var jTopParentDiv = jQuery(this).parents('[id ^= property]'),
+			var $this = jQuery(this),
+				jTopParentDiv = $this.parents('div[id ^= property],div[id ^= field]'),
 				jInput = jTopParentDiv.find('[id ^= input_]'),
-				jSelectTopParentDiv = jQuery(this).parents('div[class ^= form-group]'),
+				jSelectTopParentDiv = $this.parents('div[class ^= form-group]'),
 				jInputTopParentDiv = jInput.parents('div[class ^= form-group]');
 
 			if ('mode' in data)
@@ -6237,7 +6443,7 @@ function isEmpty(str) {
 					jInputTopParentDiv.addClass('hidden');
 					jSelectTopParentDiv.removeClass('hidden');
 
-					jQuery(this).empty().appendOptions(data['values']);
+					$this.empty().appendOptions(data['values']);
 				}
 				else if(data['mode'] == 'input')
 				{
@@ -6247,8 +6453,14 @@ function isEmpty(str) {
 			}
 			else
 			{
-				jQuery(this).empty().appendOptions(data);
+				$this.empty().appendOptions(data);
 			}
+
+			var setOptionId = $this.data('setOptionId');
+			setOptionId && $this.val(setOptionId).removeData('setOptionId');
+
+			// Call change
+			$this.change();
 		},
 		loadDivContentAjaxCallback: function(data, status, jqXHR)
 		{
@@ -6279,7 +6491,8 @@ function isEmpty(str) {
 			jQuery("#" + windowId + " .admin_table_filter input").val('');
 			jQuery("#" + windowId + " .admin_table_filter select").prop('selectedIndex', 0);
 
-			jQuery("#" + windowId + " .admin_table_filter select.select2-hidden-accessible").html('').select2({data: [{id: '', text: ''}]}).select2();
+			//jQuery("#" + windowId + " .admin_table_filter select.select2-hidden-accessible").html('').select2({data: [{id: '', text: ''}]}).select2();
+			jQuery("#" + windowId + " .admin_table_filter select.select2-hidden-accessible").val(null).trigger('change');
 
 			jQuery("#" + windowId + " .search-field input[name = globalSearch]").val('');
 		},
@@ -6478,7 +6691,7 @@ function isEmpty(str) {
 
 						typeof array[key].disabled !== 'undefined'
 							&& array[key].disabled
-							&& oSelectOption.attr('disabled', 'disabled');
+							&& $option.attr('disabled', 'disabled');
 
 						$select.append($option);
 					}
@@ -6559,7 +6772,9 @@ function isEmpty(str) {
 			}, settings);
 
 			return this.each(function(){
-				jQuery(this).select2(settings);
+				jQuery(this)
+					.attr('data-select2-id', uuidv4())
+					.select2(settings);
 			});
 		},
 		selectUser: function(settings)
@@ -6573,7 +6788,9 @@ function isEmpty(str) {
 			}, settings);
 
 			return this.each(function(){
-				jQuery(this).select2(settings);
+				jQuery(this)
+					.attr('data-select2-id', uuidv4())
+					.select2(settings);
 			});
 		},
 		selectSiteuser: function(settings)
@@ -6592,15 +6809,7 @@ function isEmpty(str) {
 					processResults: function (data) {
 						var aResults = [];
 						$.each(data, function (index, item) {
-							// aResults.push(item);
-							var siteuser_id = item.type == 'siteuser'
-								? item.id
-								: item.siteuser_id;
-
-							aResults.push({
-								"id": siteuser_id,
-								"text": item.text
-							});
+							aResults.push(item);
 						});
 						return {
 							results: aResults
@@ -6610,7 +6819,9 @@ function isEmpty(str) {
 			}, settings);
 
 			return this.each(function(){
-				jQuery(this).select2(settings);
+				jQuery(this)
+					.attr('data-select2-id', uuidv4())
+					.select2(settings);
 			});
 		},
 		autocompleteShopItem: function(options, selectOption)
@@ -6643,11 +6854,18 @@ function isEmpty(str) {
 								color = 'darkorange';
 							}
 
+							var image_small = typeof item.image_small !== 'undefined'
+									? item.image_small
+									: '',
+								count = typeof item.count !== 'undefined'
+									? item.count
+									: '';
+
 							return $('<li class="autocomplete-suggestion"></li>')
 								.data('item.autocomplete', item)
-								.append($('<div class="image"><img class="backend-thumbnail" src="' + item.image_small + '"></div>'))
+								.append($('<div class="image">' + (image_small.length ? '<img class="backend-thumbnail" src="' + image_small + '">' : '') + '</div>'))
 								.append($('<div class="name"><a>' + $.escapeHtml(item.label) + '</a></div>'))
-								.append($('<div class="count"><span class="label label-' + color + ' white">' + item.count + '</span></div>'))
+								.append($('<div class="count">' + (count.length ? '<span class="label label-' + color + ' white">' + item.count + '</span>' : '') + '</div>'))
 								.append($('<div class="price">').text(item.price_with_tax + ' ' + item.currency))
 								.append($('<div class="marking">').text(item.marking))
 								.appendTo(ul);
@@ -6676,7 +6894,7 @@ function isEmpty(str) {
 				});
 			});
 		},
-		refreshEditor: function()
+		/*refreshEditor: function()
 		{
 			return this.each(function(){
 				//this.disabled = !this.disabled;
@@ -6684,7 +6902,7 @@ function isEmpty(str) {
 					this.CodeMirror.refresh();
 				});
 			});
-		},
+		},*/
 		HostCMSWindow: function(settings)
 		{
 			var object = $(this), oModalDialog;
@@ -6898,11 +7116,10 @@ $(function(){
 		{
 			$('.navbar .navbar-inner .navbar-header .navbar-account .account-area').parent('.navbar-account.setting-open').removeClass('setting-open');
 		}
-		
-		changeDublicateTables();
 
-		//console.log('window resize');
-		// Настройка отображения заголовка окна 
+		changeDublicateTables();
+		
+		// Настройка отображения заголовка окна
 		// true - без анимации
 		navbarHeaderCustomization(true);
 
@@ -6919,8 +7136,7 @@ $(function(){
 			}
 		}
 	});
-
-	//console.log('загрузка страницы');
+	
 	// Настройка отображения заголовка окна
 	navbarHeaderCustomization();
 
@@ -6959,9 +7175,9 @@ $(function(){
 		.on('show.bs.popover', '[id ^= \'file_\'][id *= \'_settings_\']', function () {
 			$(this).find("i.fa").toggleClass("fa-times fa-cog");
 		})
-		.on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+		/*.on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
 			$(e.target.getAttribute('href')).refreshEditor();
-		})
+		})*/
 		.on('touchend', '.page-sidebar.menu-compact .sidebar-menu .submenu > li', function(e) {
 			$(this).find('a').click();
 		})
@@ -7557,15 +7773,7 @@ $(function(){
 				accountAreaRightLi = accountAreaLi.filter(':gt(' + (accountAreaLi.length - $(this).data('countElementsOffset') - 1) + ')'),
 				rightNavbarArrow,
 				rightNavbarArrowIsExist;
-				
-				//console.log("$(this).data('countElementsOffset')", $(this).data('countElementsOffset'));
 
-			/* accountAreaRightLi
-				.addClass('hide')
-				.prev()
-				.eq(0)
-				.addClass('invisible'); */
-				
 				navbarAccount.data('animationProcess', true);
 
 			accountAreaRightLi
@@ -7594,9 +7802,9 @@ $(function(){
 							rightNavbarArrow = navbarAccount.find('#rightNavbarArrow');
 
 							rightNavbarArrowIsExist && rightNavbarArrow.hasClass('hide') && rightNavbarArrow.removeClass('hide');
-							
+
 							navbarAccount.data('animationProcess', false);
-						}						
+						}
 					}
 				})
 				.prev()
@@ -7609,11 +7817,11 @@ $(function(){
 		})
 		.on('touchend', '#rightNavbarArrow', function(event){
 
-			event.preventDefault();				
+			event.preventDefault();
 
 			var accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
 				accountAreaHiddenLi = accountArea.find('.hide');
-				
+
 			//navbarAccount.data('animationProcess', true);
 
 			accountArea.find('.invisible').removeClass('invisible');
@@ -7635,9 +7843,6 @@ $(function(){
 						if (this == accountAreaHiddenLi.get(accountAreaHiddenLi.length - 1))
 						{
 							// Настройка отображения заголовка окна
-							//console.log('#rightNavbarArrow');
-							
-							//navbarAccount.data('animationProcess', false);
 							navbarHeaderCustomization();
 						}
 					}
@@ -7661,50 +7866,30 @@ $(function(){
 
 	$("#sidebar-collapse").on('click', function() {
 
-		//console.log('click #sidebar-collapse');
 		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
 		setResizableAdminTableTh();
 	});
 	$(".page-content").on('click', '.sidebar-toggler', function() {
-
-		//console.log('click .sidebar-toggler');
-		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
 		
+		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
+
 		setResizableAdminTableTh();
 		changeDublicateTables();
 	});
 
-	/* $(".account-area li").on('mouseup', function() {
-
-		console.log('mouseup $(this) = ', $(this));
-
-		if ($(this).hasClass('open'))
-		{
-			dropdownMenu = $(this).children('.dropdown-menu');
-			console.log('click dropdownMenu = ', dropdownMenu);
-		}
-	}) */
-
-	/* $('.btn-group').on('show.bs.dropdown', function () {
-		$('body').append($(this).css({
-			position: 'absolute',
-			left: $(this).offset().left,
-			top: $(this).offset().top
-		}));
-	}); */
-
-	/* $('.btn-group .dropdown').on('hidden.bs.dropdown', function () {
-	  $('.bs-example').append($('.dropdown').css({
-		position:false, left:false, top:false
-	  }).detach());
-	}); */
 });
 
 // Настройка отображения заголовка окна
 function navbarHeaderCustomization(withoutAnimation)
 {
-	var navbarAccount = $('.navbar .navbar-inner .navbar-header .navbar-account'),
-		accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
+	var navbarAccount = $('.navbar .navbar-inner .navbar-header .navbar-account');
+
+	if (!navbarAccount.length || navbarAccount.data('animationProcess'))
+	{
+		return;
+	}
+
+	var	accountArea = $('.navbar .navbar-inner .navbar-header .account-area'),
 		settingElement = accountArea.next('.setting'),
 		navbarHeaderWidth = navbarHeaderVisibleWidth = accountArea.width() + settingElement.width(),
 		windowWidth = $(window).width(),
@@ -7716,11 +7901,6 @@ function navbarHeaderCustomization(withoutAnimation)
 		rightNavbarArrow = navbarAccount.find('#rightNavbarArrow'),
 		//rightNavbarArrowIsExist = ,rightNavbarArrow.length
 		rightNavbarArrowIsShown = rightNavbarArrow.length ? !rightNavbarArrow.hasClass('hide') : false;
-		
-	if (navbarAccount.data('animationProcess'))	
-	{
-		return;
-	}
 
 	// Показана кнопка "Влево" или "Вправо"
 	// Сброс настроек
@@ -7735,11 +7915,8 @@ function navbarHeaderCustomization(withoutAnimation)
 		rightNavbarArrowIsShown && rightNavbarArrow.addClass('hide');
 	}
 
-	// Смещение вычисляем после(!) сброса настроек
-	//console.log('document.body.scrollWidth =', document.body.scrollWidth);
+	// Смещение вычисляем после(!) сброса настроек	
 	var offsetLeftAccountArea = accountArea.offset().left;
-	
-	//console.log('offsetLeftAccountArea =', offsetLeftAccountArea);
 
 	// Не помещается минимум 1 элемент
 	//if (navbarHeaderWidth - windowWidth >= accountAreaLi.eq(0).outerWidth(true) * 0.4 )
@@ -7777,8 +7954,7 @@ function navbarHeaderCustomization(withoutAnimation)
 				leftNavbarArrow.data('countElementsOffset', countElementsOffset);
 
 				// Перед настройкой была показана кнопка "Вправо".
-				// Показываем ее снова эмуляцией нажатия кнопки "Влево"
-				//console.log('rightNavbarArrowIsShown', rightNavbarArrowIsShown);
+				// Показываем ее снова эмуляцией нажатия кнопки "Влево"				
 				rightNavbarArrowIsShown && leftNavbarArrow.trigger('touchend', [!!withoutAnimation]);
 
 				return false;
@@ -8385,6 +8561,7 @@ function formLocker()
 	this._enabled = true;
 
 	this.lock = function(event) {
+		
 		if (!this._delay && this._enabled)
 		{
 			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
@@ -8392,10 +8569,10 @@ function formLocker()
 
 			if (!this._locked && $.inArray(keycode, aKeycodes) == -1)
 			{
-				$('body').on('beforeAdminLoad beforeAjaxCallback', $.proxy(this._confirm, this));
+				$('body').on('beforeAdminLoad beforeAjaxCallback beforeHideModal', $.proxy(this._confirm, this));
 
 				$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
-
+				
 				this._locked = true;
 			}
 		}
@@ -8403,7 +8580,9 @@ function formLocker()
 		return this;
 	}
 
-	this._confirm = function() {
+	this._confirm = function(event) {
+		//$(this).off('hide.bs.modal');
+		
 		if (!confirm(i18n['lock_message']))
 		{
 			return 'break';
@@ -8412,11 +8591,13 @@ function formLocker()
 	}
 
 	this.unlock = function() {
+		
 		this._locked = false;
 
 		$('body')
 			.unbind('beforeAdminLoad')
-			.unbind('beforeAjaxCallback');
+			.unbind('beforeAjaxCallback')
+			.unbind('beforeHideModal');
 
 		$('h5.row-title > i.edit-lock').remove();
 
@@ -8441,6 +8622,7 @@ function formLocker()
 	}
 
 	this.restoreStatus = function() {
+		
 		this._previousLocked ? this.lock() : this.unlock();
 		this._previousLocked = false;
 		return this;
@@ -8452,6 +8634,7 @@ function formLocker()
 	}
 
 	this.disable = function() {
+		
 		this._enabled = false;
 		return this;
 	}
@@ -8502,8 +8685,7 @@ $.getMultiContent = function(arr, path) {
 			{
 				for (var i=0; i < arguments.length; i++) {
 					//contentType = arguments[i][2].getResponseHeader('Content-Type');
-					//if (contentType.indexOf('javascript') != -1)
-					//console.log(arguments[i]);
+					//if (contentType.indexOf('javascript') != -1)					
 					$.globalEval(arguments[i][0]);
 				}
 			}
@@ -9293,3 +9475,9 @@ function readCookiesForInitiateSettings() {
 	}
 }
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}

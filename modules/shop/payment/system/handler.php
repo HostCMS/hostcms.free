@@ -229,7 +229,7 @@ abstract class Shop_Payment_System_Handler
 			$_SESSION['last_order_id'] = $this->_shopOrder->id;
 
 			// Уведомление о событии создания заказа
-			$this->_createNotification();
+			$this->createNotification();
 		}
 		else
 		{
@@ -674,9 +674,10 @@ abstract class Shop_Payment_System_Handler
 	}
 
 	/**
-	 * Create notification
+	 * Create Notifications
+	 * @return self
 	 */
-	protected function _createNotification()
+	public function createNotification()
 	{
 		$oModule = Core::$modulesList['shop'];
 
@@ -731,14 +732,6 @@ abstract class Shop_Payment_System_Handler
 		}
 
 		return $this;
-	}
-
-	/**
-	 * Backward Compatibility
-	 */
-	protected function _applyBonuses()
-	{
-		return $this->applyBonuses();
 	}
 
 	/**
@@ -1392,12 +1385,12 @@ abstract class Shop_Payment_System_Handler
 		Core_Event::notify('Shop_Payment_System_Handler.onGetAdminEmails', $this);
 
 		$lastReturn = Core_Event::getLastReturn();
-		
+
 		if (is_array($lastReturn))
-		{	
+		{
 			return $lastReturn;
 		}
-	
+
 		$oShop = $this->_shopOrder->Shop;
 
 		return trim($oShop->email) != ''
@@ -1416,72 +1409,75 @@ abstract class Shop_Payment_System_Handler
 	{
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeSendAdminEmail', $this, array($oCore_Mail));
 
-		$oShopOrder = $this->_shopOrder;
-		$oShop = $oShopOrder->Shop;
-
-		// В адрес "ОТ КОГО" для администратора указывается адрес магазина,
-		// а в Reply-To указывается email пользователя
-		$from = !is_null($this->_from)
-			? $this->_from
-			: $this->_getEmailFrom();
-
-		$replyTo = Core_Valid::email($oShopOrder->email)
-			? $oShopOrder->email
-			: $from;
-
-		$this->xsl($this->_xslAdminMail);
-		$sInvoice = $this->_processXml();
-		$sInvoice = str_replace(">", ">\n", $sInvoice);
-
-		// Тема письма администратору
-		$date_str = Core_Date::sql2datetime($oShopOrder->datetime);
-		$admin_subject = !is_null($this->_adminMailSubject)
-			? $this->_adminMailSubject
-			: sprintf($oShop->order_admin_subject, $oShopOrder->invoice, $oShop->name, $date_str);
-
-		$senderName = !is_null($this->_senderName)
-			? $this->_senderName
-			: $oShop->name;
-
-		$oCore_Mail
-			->from($from)
-			->senderName($senderName)
-			->header('Reply-To', $replyTo)
-			->subject($admin_subject)
-			->message($sInvoice)
-			->contentType($this->_adminMailContentType)
-			->header('X-HostCMS-Reason', 'Order')
-			->header('Precedence', 'bulk')
-			->messageId();
-
-		// Attach order property files
-		$aProperty_Values = $oShopOrder->getPropertyValues(FALSE);
-		foreach ($aProperty_Values as $oProperty_Value)
+		if ($this->_xslAdminMail)
 		{
-			if ($oProperty_Value->Property->type == 2)
-			{
-				$sPath = $oProperty_Value->getLargeFilePath();
+			$oShopOrder = $this->_shopOrder;
+			$oShop = $oShopOrder->Shop;
 
-				if (is_file($sPath))
+			// В адрес "ОТ КОГО" для администратора указывается адрес магазина,
+			// а в Reply-To указывается email пользователя
+			$from = !is_null($this->_from)
+				? $this->_from
+				: $this->_getEmailFrom();
+
+			$replyTo = Core_Valid::email($oShopOrder->email)
+				? $oShopOrder->email
+				: $from;
+
+			$this->xsl($this->_xslAdminMail);
+			$sInvoice = $this->_processXml();
+			$sInvoice = str_replace(">", ">\n", $sInvoice);
+
+			// Тема письма администратору
+			$date_str = Core_Date::sql2datetime($oShopOrder->datetime);
+			$admin_subject = !is_null($this->_adminMailSubject)
+				? $this->_adminMailSubject
+				: sprintf($oShop->order_admin_subject, $oShopOrder->invoice, $oShop->name, $date_str);
+
+			$senderName = !is_null($this->_senderName)
+				? $this->_senderName
+				: $oShop->name;
+
+			$oCore_Mail
+				->from($from)
+				->senderName($senderName)
+				->header('Reply-To', $replyTo)
+				->subject($admin_subject)
+				->message($sInvoice)
+				->contentType($this->_adminMailContentType)
+				->header('X-HostCMS-Reason', 'Order')
+				->header('Precedence', 'bulk')
+				->messageId();
+
+			// Attach order property files
+			$aProperty_Values = $oShopOrder->getPropertyValues(FALSE);
+			foreach ($aProperty_Values as $oProperty_Value)
+			{
+				if ($oProperty_Value->Property->type == 2)
 				{
-					$oCore_Mail->attach(array(
-						'filepath' => $sPath,
-						'filename' => $oProperty_Value->file_name
-					));
+					$sPath = $oProperty_Value->getLargeFilePath();
+
+					if (is_file($sPath))
+					{
+						$oCore_Mail->attach(array(
+							'filepath' => $sPath,
+							'filename' => $oProperty_Value->file_name
+						));
+					}
 				}
 			}
-		}
 
-		$aEmails = array_map('trim', $this->getAdminEmails());
-		foreach ($aEmails as $key => $sEmail)
-		{
-			// Delay 0.350s for second mail and others
-			$key > 0 && usleep(350000);
-
-			$sEmail = trim($sEmail);
-			if (Core_Valid::email($sEmail))
+			$aEmails = array_map('trim', $this->getAdminEmails());
+			foreach ($aEmails as $key => $sEmail)
 			{
-				$oCore_Mail->to($sEmail)->send();
+				// Delay 0.350s for second mail and others
+				$key > 0 && usleep(350000);
+
+				$sEmail = trim($sEmail);
+				if (Core_Valid::email($sEmail))
+				{
+					$oCore_Mail->to($sEmail)->send();
+				}
 			}
 		}
 
@@ -1545,64 +1541,67 @@ abstract class Shop_Payment_System_Handler
 	{
 		Core_Event::notify('Shop_Payment_System_Handler.onBeforeSendSiteuserEmail', $this, array($oCore_Mail));
 
-		$oShopOrder = $this->_shopOrder;
-		$oShop = $oShopOrder->Shop;
-
-		$to = $oShopOrder->email;
-
-		if (Core_Valid::email($to))
+		if ($this->_xslSiteuserMail)
 		{
-			// Адрес "ОТ КОГО" для пользователя
-			$from = !is_null($this->_from)
-				? $this->_from
-				: $this->_getEmailFrom();
+			$oShopOrder = $this->_shopOrder;
+			$oShop = $oShopOrder->Shop;
 
-			$this->xsl($this->_xslSiteuserMail);
-			$sInvoice = $this->_processXml();
-			$sInvoice = str_replace(">", ">\n", $sInvoice);
+			$to = $oShopOrder->email;
 
-			$date_str = Core_Date::sql2datetime($oShopOrder->datetime);
-			// Тема письма пользователю
-			$user_subject = !is_null($this->_siteuserMailSubject)
-				? $this->_siteuserMailSubject
-				: sprintf($oShop->order_user_subject, $oShopOrder->invoice, $oShop->name, $date_str);
-
-			$senderName = !is_null($this->_senderName)
-				? $this->_senderName
-				: $oShop->name;
-
-			// Attach digitals items
-			if ($this->_shopOrder->paid == 1 && $this->_shopOrder->Shop->attach_digital_items == 1)
+			if (Core_Valid::email($to))
 			{
-				$this->_attachDigitalItems($oCore_Mail);
-			}
+				// Адрес "ОТ КОГО" для пользователя
+				$from = !is_null($this->_from)
+					? $this->_from
+					: $this->_getEmailFrom();
 
-			$oCore_Mail
-				->from($from)
-				->senderName($senderName)
-				->to($to)
-				->subject($user_subject)
-				->message($sInvoice)
-				->contentType($this->_siteuserMailContentType)
-				->header('X-HostCMS-Reason', 'OrderConfirm')
-				->header('Precedence', 'bulk')
-				->messageId()
-				->send();
+				$this->xsl($this->_xslSiteuserMail);
+				$sInvoice = $this->_processXml();
+				$sInvoice = str_replace(">", ">\n", $sInvoice);
 
-			if (Core::moduleIsActive('siteuser') && $oShopOrder->siteuser_id)
-			{
-				$aConfig = Core_Config::instance()->get('siteuser_config', array());
+				$date_str = Core_Date::sql2datetime($oShopOrder->datetime);
+				// Тема письма пользователю
+				$user_subject = !is_null($this->_siteuserMailSubject)
+					? $this->_siteuserMailSubject
+					: sprintf($oShop->order_user_subject, $oShopOrder->invoice, $oShop->name, $date_str);
 
-				if (!isset($aConfig['save_emails']) || $aConfig['save_emails'])
+				$senderName = !is_null($this->_senderName)
+					? $this->_senderName
+					: $oShop->name;
+
+				// Attach digitals items
+				if ($this->_shopOrder->paid == 1 && $this->_shopOrder->Shop->attach_digital_items == 1)
 				{
-					$oSiteuser_Email = Core_Entity::factory('Siteuser_Email');
-					$oSiteuser_Email->siteuser_id = $oShopOrder->siteuser_id;
-					$oSiteuser_Email->subject = $user_subject;
-					$oSiteuser_Email->email = $to;
-					$oSiteuser_Email->from = $from;
-					$oSiteuser_Email->type = $this->_siteuserMailContentType == 'text/html' ? 1 : 0;
-					$oSiteuser_Email->text = $sInvoice;
-					$oSiteuser_Email->save();
+					$this->_attachDigitalItems($oCore_Mail);
+				}
+
+				$oCore_Mail
+					->from($from)
+					->senderName($senderName)
+					->to($to)
+					->subject($user_subject)
+					->message($sInvoice)
+					->contentType($this->_siteuserMailContentType)
+					->header('X-HostCMS-Reason', 'OrderConfirm')
+					->header('Precedence', 'bulk')
+					->messageId()
+					->send();
+
+				if (Core::moduleIsActive('siteuser') && $oShopOrder->siteuser_id)
+				{
+					$aConfig = Core_Config::instance()->get('siteuser_config', array());
+
+					if (!isset($aConfig['save_emails']) || $aConfig['save_emails'])
+					{
+						$oSiteuser_Email = Core_Entity::factory('Siteuser_Email');
+						$oSiteuser_Email->siteuser_id = $oShopOrder->siteuser_id;
+						$oSiteuser_Email->subject = $user_subject;
+						$oSiteuser_Email->email = $to;
+						$oSiteuser_Email->from = $from;
+						$oSiteuser_Email->type = $this->_siteuserMailContentType == 'text/html' ? 1 : 0;
+						$oSiteuser_Email->text = $sInvoice;
+						$oSiteuser_Email->save();
+					}
 				}
 			}
 		}
@@ -1706,5 +1705,23 @@ abstract class Shop_Payment_System_Handler
 		Core_Event::notify('Shop_Payment_System_Handler.onAfterChangedOrder', $this, array($mode));
 
 		return $this;
+	}
+
+	/**
+	 * Backward compatibility, see createNotifications()
+	 * @return self
+	 */
+	protected function _createNotification()
+	{
+		return $this->createNotification();
+	}
+
+	/**
+	 * Backward compatibility, see applyBonuses()
+	 * @return self
+	 */
+	protected function _applyBonuses()
+	{
+		return $this->applyBonuses();
 	}
 }

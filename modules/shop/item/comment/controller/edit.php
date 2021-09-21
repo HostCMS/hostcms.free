@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 {
@@ -28,6 +28,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 			? Core_Entity::factory('Shop', $object->Comment_Shop_Item->Shop_Item->shop_id)
 			: $object->Comment_Shop_Item->Shop_Item->Shop;
 
+		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
 		$template_id = $oShop->Structure->template_id
@@ -38,7 +39,7 @@ class Shop_Item_Comment_Controller_Edit extends Comment_Controller_Edit
 			->caption(Core::_('Admin_Form.tabProperties'))
 			->name('Property');
 
-		$this->addTabBefore($oPropertyTab, $oAdditionalTab);
+		$this->addTabAfter($oPropertyTab, $oMainTab);
 
 		// Properties
 		Property_Controller_Tab::factory($this->_Admin_Form_Controller)

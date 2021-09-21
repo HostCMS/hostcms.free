@@ -294,8 +294,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$(function(){
 					$('#timepicker_{$day}_start').wickedpicker({
 						now: '{$from}',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						twentyFour: true, //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
 						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
 						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
 						hoverState: 'hover-state', //The hover state class to use, for custom CSS
@@ -309,8 +309,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$('#timepicker_{$day}_end').wickedpicker({
 						now: '{$to}',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						twentyFour: true, //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
 						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
 						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
 						hoverState: 'hover-state', //The hover state class to use, for custom CSS
@@ -324,8 +324,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$('#timepicker_break_{$day}_start').wickedpicker({
 						now: '{$break_from}',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						twentyFour: true, //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
 						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
 						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
 						hoverState: 'hover-state', //The hover state class to use, for custom CSS
@@ -339,8 +339,8 @@ class User_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$('#timepicker_break_{$day}_end').wickedpicker({
 						now: '{$break_to}',
-						twentyFour: true,  //Display 24 hour format, defaults to false
-						upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+						twentyFour: true, //Display 24 hour format, defaults to false
+						upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
 						downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
 						close: 'wickedpicker__close', //The close class selector to use, for custom CSS
 						hoverState: 'hover-state', //The hover state class to use, for custom CSS

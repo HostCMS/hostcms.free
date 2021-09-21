@@ -28,8 +28,10 @@ class Shop_Filter_Seo_Property_Controller_Delete extends Admin_Form_Action_Contr
 			!is_null($oShop_Filter_Seo_Property)
 				&& $oShop_Filter_Seo_Property->delete();
 
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			$this->_Admin_Form_Controller->addMessage(
-				"<script>$('.filter-conditions div#{$shop_filter_seo_property_id}').parents('.dd').remove(); $.loadNestable();</script>"
+				"<script>$('#{$windowId} .filter-conditions div#{$shop_filter_seo_property_id}').parents('.dd').remove(); $.loadNestable();</script>"
 			);
 		}
 

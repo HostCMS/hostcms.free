@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip
 {
@@ -39,7 +39,7 @@ class Core_Zip
 
 	/**
 	 * Get Zip Class
-	 * @return boolean
+	 * @return object
 	 */
 	static public function getZipClass()
 	{
@@ -145,7 +145,7 @@ class Core_Zip
 
 		//$this->_Zip = new ZipArchive();
 		$this->_Zip = self::getZipClass();
-		$result = $this->_Zip->open($this->_outputPath, ZIPARCHIVE::CREATE);
+		$result = $this->_Zip->open($this->_outputPath, class_exists('ZipArchive') ? ZipArchive::CREATE : NULL);
 
 		if ($result === TRUE)
 		{

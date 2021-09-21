@@ -368,12 +368,15 @@ class Core_Entity extends Core_ORM
 		{
 			Core_Event::notify($this->_modelName . '.onBeforeMarkDeleted', $this);
 
-			// Delete from ObjectWatcher
-			Core_ObjectWatcher::instance()->delete($this);
+			if ($this->getPrimaryKey())
+			{
+				// Delete from ObjectWatcher
+				Core_ObjectWatcher::instance()->delete($this);
 
-			$marksDeletedFieldName = $this->_marksDeleted;
-			$this->$marksDeletedFieldName = 1;
-			$this->save();
+				$marksDeletedFieldName = $this->_marksDeleted;
+				$this->$marksDeletedFieldName = 1;
+				$this->save();
+			}
 
 			Core_Event::notify($this->_modelName . '.onAfterMarkDeleted', $this);
 		}
@@ -447,18 +450,36 @@ class Core_Entity extends Core_ORM
 				->where('model', '=', $this->getModelName())
 				->where('entity_id', '=', $primaryKey)
 				->execute();
+		}
 
-			/*
-			$oRevisions = Core_Entity::factory('Revision');
-			$oRevisions->queryBuilder()
-				->where('model', '=', $this->getModelName())
-				->where('entity_id', '=', $primaryKey);
+		// Delete Fields
+		if (Core::moduleIsActive('field'))
+		{
+			$aFieldsIds = array();
 
-			$aRevisions = $oRevisions->findAll(FALSE);
-			foreach ($aRevisions as $oRevision)
+			$aFields = Field_Controller::getFields($this->getModelName());
+
+			foreach ($aFields as $oField)
 			{
-				$oRevision->delete();
-			}*/
+				$aFieldsIds[] = $oField->id;
+			}
+
+			$fieldDir = CMS_FOLDER . Field_Controller::getPath($this);
+
+			$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $primaryKey);
+			foreach ($aField_Values as $oField_Value)
+			{
+				$oField_Value->Field->type == 2 && $oField_Value->setDir($fieldDir);
+				$oField_Value->delete();
+			}
+
+			if (is_dir($fieldDir))
+			{
+				try {
+					Core_File::deleteDir($fieldDir);
+				}
+				catch (Exception $e) {}
+			}
 		}
 
 		return parent::delete($primaryKey);
@@ -506,6 +527,7 @@ class Core_Entity extends Core_ORM
 
 			$this->queryBuilder()
 				// in $this->clear() // ->clear() // clear if find by PK
+				->from($this->_tableName)
 				->where($this->_tableName . '.' . $this->_primaryKey, '=', $primaryKey);
 		}
 
@@ -586,6 +608,40 @@ class Core_Entity extends Core_ORM
 		return $this;
 	}
 
+	static protected $_cacheFieldIDs = array();
+
+	/**
+	 * Get visible field's IDs
+	 * @return array
+	 */
+	public function getFieldIDs()
+	{
+		if (!isset(self::$_cacheFieldIDs[$this->_modelName]))
+		{
+			$aFields = Field_Controller::getFields($this->_modelName);
+
+			self::$_cacheFieldIDs[$this->_modelName] = array();
+			foreach ($aFields as $oField)
+			{
+				$oField->visible
+					&& self::$_cacheFieldIDs[$this->_modelName][] = $oField->id;
+			}
+		}
+
+		return self::$_cacheFieldIDs[$this->_modelName];
+	}
+
+	/**
+	 * Get field's values
+	 * @return array
+	 */
+	public function getFields()
+	{
+		return Core::moduleIsActive('field')
+			? Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->getPrimaryKey())
+			: array();
+	}
+
 	/**
 	 * Get XML for entity and children entities
 	 * @return string
@@ -603,7 +659,7 @@ class Core_Entity extends Core_ORM
 		// Primary key as tag property
 		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
 		{
-			$xml .= " {$this->_primaryKey}=\"" . Core_Str::xml($this->_modelColumns[$this->_primaryKey]) . "\"";
+			$xml .= " {$this->_primaryKey}=\"" . Core_Str::xml($this->getPrimaryKey()) . "\"";
 		}
 
 		$xml .= ">\n";
@@ -663,6 +719,12 @@ class Core_Entity extends Core_ORM
 			}
 		}
 
+		$aField_Values = $this->getFields();
+		foreach ($aField_Values as $oField_Value)
+		{
+			$xml .= $oField_Value->getXml();
+		}
+
 		$xml .= "</" . $this->_tagName . ">\n";
 
 		$this->_clearEntitiesAfterGetXml && $this->clearEntities();
@@ -690,7 +752,7 @@ class Core_Entity extends Core_ORM
 		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
 		{
 			$properttName = $attributePrefix . $this->_primaryKey;
-			$oRetrun->$properttName = $this->_modelColumns[$this->_primaryKey];
+			$oRetrun->$properttName = $this->getPrimaryKey();
 		}
 
 		$bAllowedTagsIsEmpty = count($this->_allowedTags) == 0;
@@ -931,6 +993,25 @@ class Core_Entity extends Core_ORM
 		Core_Event::notify($this->_modelName . '.onAfterCopy', $newObject, array($this));
 
 		return $newObject;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event modelname.onBeforeGetRelatedSite
+	 * @hostcms-event modelname.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = isset($this->site_id) && isset($this->_relations['site'])
+			? $this->Site
+			: NULL;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 
 	/**

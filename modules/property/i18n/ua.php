@@ -81,4 +81,8 @@ return array(
 
 	'option_recursive_properties' => 'Дозволити рекурсивні властивості',
 	'option_add_list_items' => 'Додавати в XML значення для облікових властивостей',
+
+	'indexing' => 'індексувати',
+	'changeIndexing_success' => 'Статус індексування властивості успішно змінений.',
+	'changeIndexing_error' => 'Помилка при зміні статусу індексування властивості.',
 );

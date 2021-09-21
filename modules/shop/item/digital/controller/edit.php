@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,7 +67,7 @@ class Shop_Item_Digital_Controller_Edit extends Admin_Form_Action_Controller_Typ
 
 		$oMainRow3->add($oImageField);
 
-		$oMainTab->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow3);
+		$oMainTab->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-md-2')), $oMainRow3);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Item_Digital.eitems_edit_title', $this->_object->name)

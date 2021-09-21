@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Model extends Core_Entity
 {
@@ -296,6 +296,17 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 				);
 		}
 
+		if ($this->coupon)
+		{
+			$count = $this->Shop_Purchase_Discount_Coupons->getCountByShop_purchase_discount_id($this->id);
+
+			$count && $oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-warning badge-square')
+					->value($count)
+			);
+		}
+
 		$oCore_Html_Entity_Div->execute();
 	}
 
@@ -323,5 +334,22 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		return $this->max_amount == 0
 			? '—'
 			: $this->max_amount;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_purchase_discount.onBeforeGetRelatedSite
+	 * @hostcms-event shop_purchase_discount.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

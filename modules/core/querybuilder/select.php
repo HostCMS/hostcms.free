@@ -46,21 +46,21 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * HIGH_PRIORITY
-	 * @var mixed
+	 * @var bool
 	 */
-	protected $_highPriority = NULL;
+	protected $_highPriority = FALSE;
 
 	/**
 	 * STRAIGHT_JOIN
-	 * @var mixed
+	 * @var bool
 	 */
-	protected $_straightJoin = NULL;
+	protected $_straightJoin = FALSE;
 
 	/**
 	 * SQL_CALC_FOUND_ROWS
-	 * @var mixed
+	 * @var bool
 	 */
-	protected $_sqlCalcFoundRows = NULL;
+	protected $_sqlCalcFoundRows = FALSE;
 
 	/**
 	 * SELECT
@@ -146,7 +146,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * // SELECT `id`, `tablename`.`name` AS `aliasName`
 	 * $Core_QueryBuilder_Select->columns('id', array('tablename.name', 'aliasName'));
 	 * </code>
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function columns()
 	{
@@ -178,7 +178,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Clear SELECT list
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearSelect()
 	{
@@ -192,12 +192,23 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * <code>
 	 * $oCore_QueryBuilder_Select = Core_QueryBuilder::select()->highPriority();
 	 * </code>
-	 * @return Core_QueryBuilder_Select
+	 * @param boolean $value
+	 * @return self
 	 */
-	public function highPriority()
+	public function highPriority($value = TRUE)
 	{
-		$this->_highPriority = TRUE;
+		$this->_highPriority = $value;
 		return $this;
+	}
+
+	/**
+	 * Check if HIGH_PRIORITY was set
+	 *
+	 * @return boolean
+	 */
+	public function isHighPriority()
+	{
+		return $this->_highPriority == TRUE;
 	}
 
 	/**
@@ -206,12 +217,23 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * <code>
 	 * $oCore_QueryBuilder_Select = Core_QueryBuilder::select()->straightJoin();
 	 * </code>
-	 * @return Core_QueryBuilder_Select
+	 * @param boolean $value
+	 * @return self
 	 */
-	public function straightJoin()
+	public function straightJoin($value = TRUE)
 	{
-		$this->_straightJoin = TRUE;
+		$this->_straightJoin = $value;
 		return $this;
+	}
+
+	/**
+	 * Check if STRAIGHT_JOIN was set
+	 *
+	 * @return boolean
+	 */
+	public function isStraightJoin()
+	{
+		return $this->_straightJoin == TRUE;
 	}
 
 	/**
@@ -221,11 +243,11 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * $oCore_QueryBuilder_Select = Core_QueryBuilder::select()->sqlCalcFoundRows();
 	 * </code>
 	 * @param boolean $value
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function sqlCalcFoundRows($value = TRUE)
 	{
-		$this->_sqlCalcFoundRows = $value ? TRUE : NULL;
+		$this->_sqlCalcFoundRows = $value;
 		return $this;
 	}
 
@@ -233,7 +255,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * Set DISTINCT and add columns for select
 	 *
 	 * @see columns()
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function selectDistinct()
 	{
@@ -250,7 +272,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * $oCore_QueryBuilder_Select = Core_QueryBuilder::select()->distinct();
 	 * </code>
 	 * @param boolean $distinct DISTINCT option
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function distinct($distinct = TRUE)
 	{
@@ -268,19 +290,27 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * // FROM `tableName` AS `tableNameAlias`
 	 * $oCore_QueryBuilder_Select = $Core_QueryBuilder_Select->from(array('tableName', 'tableNameAlias'));
 	 * </code>
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	*/
 	public function from()
 	{
 		$args = func_get_args();
 		$this->_from = array_merge($this->_from, $args);
-
 		return $this;
 	}
 
 	/**
+	 * Get FROM
+	 * @return array
+	 */
+	public function getFrom()
+	{
+		return $this->_from;
+	}
+
+	/**
 	 * Clear FROM
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearFrom()
 	{
@@ -290,7 +320,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Open bracket in HAVING
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function havingOpen()
 	{
@@ -305,7 +335,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Close bracket in HAVING
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function havingClose()
 	{
@@ -338,7 +368,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * @param string $column column
 	 * @param string $expression expression
 	 * @param string $value value
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function having($column, $expression, $value)
 	{
@@ -349,6 +379,26 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 		// Set operator as default
 		$this->setDefaultOperator();
 
+		return $this;
+	}
+
+	/**
+	 * Delete last HAVING condition
+	 * @return self
+	 */
+	public function deleteLastHaving()
+	{
+		array_pop($this->_having);
+		return $this;
+	}
+
+	/**
+	 * Delete first HAVING condition
+	 * @return self
+	 */
+	public function deleteFirstHaving()
+	{
+		array_shift($this->_having);
 		return $this;
 	}
 
@@ -389,7 +439,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Clear HAVING list
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearHaving()
 	{
@@ -405,7 +455,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * $Core_QueryBuilder_Select->groupBy('field1')->groupBy('COUNT(id)');
 	 * </code>
 	 * @param string $column column
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function groupBy()
 	{
@@ -418,7 +468,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	/**
 	 * GROUP BY
 	 * @param string $column column
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 * @see groupBy()
 	 */
 	public function group($column)
@@ -437,7 +487,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Clear GROUP BY list
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clearGroupBy()
 	{
@@ -459,7 +509,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * 	->union($select1);
 	 * </code>
 	 * @param Core_QueryBuilder_Select $object
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function union(Core_QueryBuilder_Select $object)
 	{
@@ -481,7 +531,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * 	->unionAll($select1);
 	 * </code>
 	 * @param Core_QueryBuilder_Select $object
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function unionAll(Core_QueryBuilder_Select $object)
 	{
@@ -536,7 +586,7 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	 * Set UNION offset
 	 *
 	 * @param int $offset offset
-	 * @return Core_QueryBuilder_Selection
+	 * @return selfion
 	 */
 	public function unionOffset($offset)
 	{
@@ -574,17 +624,17 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 			$query[] = 'DISTINCT';
 		}
 
-		if (!is_null($this->_highPriority))
+		if ($this->_highPriority)
 		{
 			$query[] = 'HIGH_PRIORITY';
 		}
 
-		if (!is_null($this->_straightJoin))
+		if ($this->_straightJoin)
 		{
 			$query[] = 'STRAIGHT_JOIN';
 		}
 
-		if (!is_null($this->_sqlCalcFoundRows))
+		if ($this->_sqlCalcFoundRows)
 		{
 			$query[] = 'SQL_CALC_FOUND_ROWS';
 		}
@@ -715,14 +765,13 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 
 	/**
 	 * Clear
-	 * @return Core_QueryBuilder_Select
+	 * @return self
 	 */
 	public function clear()
 	{
-		$this->_distinct = $this->_unbuffered = FALSE;
+		$this->_distinct = $this->_unbuffered = $this->_highPriority = $this->_straightJoin = $this->_sqlCalcFoundRows = FALSE;
 
-		$this->_unionLimit = $this->_unionOffset = $this->_highPriority = $this->_straightJoin
-			= $this->_sqlCalcFoundRows = NULL;
+		$this->_unionLimit = $this->_unionOffset = NULL;
 
 		$this->_select = $this->_from
 			= $this->_join = $this->_groupBy

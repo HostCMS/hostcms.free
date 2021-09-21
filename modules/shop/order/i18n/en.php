@@ -129,7 +129,7 @@ return array(
 	'send_mail' => "Send order e-mail",
 	'most_ordered' => "Popular shop items (items)",
 	'popular_brands' => "Popular brands (items)",
-	'popover_title' => "Order # %s",
+	'popover_title' => 'Order #%1$s of %2$s',
 	'notification_new_order' => 'New order №%s',
 	'notification_paid_order' => 'Paid order №%s',
 	'notification_new_order_description' => '%1$s on %2$s',

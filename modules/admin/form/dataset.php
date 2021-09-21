@@ -62,7 +62,13 @@ abstract class Admin_Form_Dataset
 	 * Array of orders
 	 */
 	protected $_orders = array();
-	
+
+	/**
+	 * Dataset objects list
+	 * @var NULL|array
+	 */
+	protected $_objects = NULL;
+
 	/**
 	 * Get count of finded objects
 	 * @return int
@@ -80,6 +86,15 @@ abstract class Admin_Form_Dataset
 	 * @return object
 	 */
 	abstract public function getEntity();
+
+	/**
+	 * Get objects
+	 * @return array
+	 */
+	public function getObjects()
+	{
+		return $this->_objects;
+	}
 
 	/**
 	 * Set controller
@@ -135,7 +150,7 @@ abstract class Admin_Form_Dataset
 		$this->_conditions[] = $condition;
 		return $this;
 	}
-	
+
 	/**
 	 * Add orderBy
 	 * @param string $column column
@@ -206,7 +221,7 @@ abstract class Admin_Form_Dataset
 	static public function _sortAsc($m, $n)
 	{
 		$sortField = $m->getSortField();
-		
+
 		$first = $m->$sortField;
 		$second = $n->$sortField;
 
@@ -215,7 +230,7 @@ abstract class Admin_Form_Dataset
 			$first = Core_Date::sql2timestamp($first);
 			$second = Core_Date::sql2timestamp($second);
 		}
-		
+
 		if ($first == $second)
 		{
 			return 0;
@@ -233,7 +248,7 @@ abstract class Admin_Form_Dataset
 	static public function _sortDesc($m, $n)
 	{
 		$sortField = $m->getSortField();
-		
+
 		$first = $m->$sortField;
 		$second = $n->$sortField;
 
@@ -242,7 +257,7 @@ abstract class Admin_Form_Dataset
 			$first = Core_Date::sql2timestamp($first);
 			$second = Core_Date::sql2timestamp($second);
 		}
-		
+
 		if ($first == $second)
 		{
 			return 0;

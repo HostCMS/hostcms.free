@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -67,6 +67,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
+		
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
 		{
@@ -570,7 +572,8 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$html = '
 						<script>
 							$(function(){
-								$(".shop-notification-subscribers").select2({
+								$("#' . $windowId . ' .shop-notification-subscribers").select2({
+									dropdownParent: $("#' . $windowId . '"),
 									language: "' . Core_i18n::instance()->getLng() . '",
 									placeholder: "' . Core::_('Shop.type_subscriber') . '",
 									allowClear: true,
@@ -723,7 +726,6 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					: '';
 
 				$sFormPath = $this->_Admin_Form_Controller->getPath();
-				$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 				$oShopTabWatermarkRow1->add(Admin_Form_Entity::factory('File')
 					->type("file")
@@ -884,11 +886,11 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// Fast filter
 			if ($this->_object->filter)
 			{
-				$Shop_Filter_Controller = new Shop_Filter_Controller($this->_object);
-				$Shop_Filter_Controller->createTable();
+				$oShop_Filter_Controller = new Shop_Filter_Controller($this->_object);
+				$oShop_Filter_Controller->createTable();
 
-				$Shop_Filter_Group_Controller = new Shop_Filter_Group_Controller($this->_object);
-				$Shop_Filter_Group_Controller->createTable();
+				$oShop_Filter_Group_Controller = new Shop_Filter_Group_Controller($this->_object);
+				$oShop_Filter_Group_Controller->createTable();
 			}
 
 			if (Core::moduleIsActive('notification'))

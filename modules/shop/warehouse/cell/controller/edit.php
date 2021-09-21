@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -30,6 +30,8 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -85,40 +87,38 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			->value("
-				$('[name = parent_name]').autocomplete({
-					  source: function(request, response) {
-
+				$('#{$windowId} [name = parent_name]').autocomplete({
+					source: function(request, response) {
 						$.ajax({
-						  url: '/admin/shop/warehouse/cell/index.php?autocomplete=1&show_parents=1&shop_warehouse_id={$this->_object->shop_warehouse_id}',
-						  dataType: 'json',
-						  data: {
-							queryString: request.term
-						  },
-						  success: function( data ) {
-							response( data );
-						  }
+							url: '/admin/shop/warehouse/cell/index.php?autocomplete=1&show_parents=1&shop_warehouse_id={$this->_object->shop_warehouse_id}',
+							dataType: 'json',
+							data: {
+								queryString: request.term
+							},
+							success: function(data) {
+								response(data);
+							}
 						});
-					  },
-					  minLength: 1,
-					  create: function() {
-						$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+					},
+					minLength: 1,
+					create: function() {
+						$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 							return $('<li></li>')
 								.data('item.autocomplete', item)
 								.append($('<a>').text(item.label))
 								.appendTo(ul);
 						}
-
-						 $(this).prev('.ui-helper-hidden-accessible').remove();
-					  },
-					  select: function( event, ui ) {
-						$('[name = parent_id]').val(ui.item.id);
-					  },
-					  open: function() {
+						$(this).prev('.ui-helper-hidden-accessible').remove();
+					},
+					select: function(event, ui) {
+						$('#{$windowId} [name = parent_id]').val(ui.item.id);
+					},
+					open: function() {
 						$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-					  },
-					  close: function() {
+					},
+					close: function() {
 						$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-					  }
+					}
 				});
 			");
 

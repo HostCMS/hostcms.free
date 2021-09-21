@@ -37,7 +37,7 @@ class Shop_Codetype_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->move($this->getField('name')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow1)
 			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2)
 			->move($this->getField('code')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow3);
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 col-md-3')), $oMainRow3);
 
 		return $this;
 	}

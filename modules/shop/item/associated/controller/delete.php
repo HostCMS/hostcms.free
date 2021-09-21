@@ -28,8 +28,10 @@ class Shop_Item_Associated_Controller_Delete extends Admin_Form_Action_Controlle
 			!is_null($oShop_Item_Associated)
 				&& $oShop_Item_Associated->delete();
 
+			$windowId = $this->_Admin_Form_Controller->getWindowId();
+
 			$this->_Admin_Form_Controller->addMessage(
-				"<script>$('.associated-item-table tr#{$associated_item_id}').remove();</script>"
+				"<script>$('#{$windowId} .associated-item-table tr#{$associated_item_id}').remove();</script>"
 			);
 		}
 

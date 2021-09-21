@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Absence_Model extends Core_Entity
 {
@@ -83,8 +83,8 @@ class User_Absence_Model extends Core_Entity
 
 	/**
 	 * Check user access to admin form action
-	 * @param User_Model $oUser user object
 	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
 	 * @return bool
 	 */
 	public function checkBackendAccess($actionName, $oUser)

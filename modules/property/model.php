@@ -114,6 +114,7 @@ class Property_Model extends Core_Entity
 		'hide_small_image' => 0,
 		'sorting' => 0,
 		'multiple' => 1,
+		'indexing' => 1,
 		'preserve_aspect_ratio' => 1,
 		'preserve_aspect_ratio_small' => 1
 	);
@@ -240,7 +241,9 @@ class Property_Model extends Core_Entity
 
 		$aObjects = $this->findAll(FALSE);
 
-		return isset($aObjects[0]) ? $aObjects[0] : NULL;
+		return isset($aObjects[0])
+			? $aObjects[0]
+			: NULL;
 	}
 
 	/**
@@ -320,10 +323,10 @@ class Property_Model extends Core_Entity
 			// Fast filter
 			if ($this->Shop_Item_Property->Shop->filter && $this->Shop_Item_Property->filter)
 			{
-				$Shop_Filter_Controller = new Shop_Filter_Controller($this->Shop_Item_Property->Shop);
+				$oShop_Filter_Controller = new Shop_Filter_Controller($this->Shop_Item_Property->Shop);
 
-				$Shop_Filter_Controller->checkPropertyExist($this->id)
-					&& $Shop_Filter_Controller->removeProperty($this);
+				$oShop_Filter_Controller->checkPropertyExist($this->id)
+					&& $oShop_Filter_Controller->removeProperty($this);
 			}
 		}
 		elseif (Core::moduleIsActive('shop') && !is_null($this->Shop_Group_Property->id))
@@ -632,6 +635,8 @@ class Property_Model extends Core_Entity
 				elseif (is_object($this->_limitListItems))
 				{
 					$oList_Items->queryBuilder()
+						->select('list_items.*')
+						->from('list_items')
 						->from(array($this->_limitListItems, 'prop_tmp'))
 						->where('list_items.id', '=', Core_QueryBuilder::expression('`prop_tmp`.`value`'));
 				}
@@ -697,6 +702,24 @@ class Property_Model extends Core_Entity
 	}
 
 	/**
+	 * Change indexing status
+	 * @return self
+	 * @hostcms-event property.onBeforeChangeIndexing
+	 * @hostcms-event property.onAfterChangeIndexing
+	 */
+	public function changeIndexing()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeChangeIndexing', $this);
+
+		$this->indexing = 1 - $this->indexing;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterChangeIndexing', $this);
+
+		return $this;
+	}
+
+	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -715,7 +738,7 @@ class Property_Model extends Core_Entity
 		if ($this->obligatory)
 		{
 			Core::factory('Core_Html_Entity_Span')
-				->value('<i class="fa fa-asterisk fa-fw gray"></i>')
+				->value('<i class="fa fa-asterisk darkorange fa-small"></i>')
 				->execute();
 		}
 	}

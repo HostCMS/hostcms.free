@@ -141,4 +141,7 @@ return array(
 	'information_items_copy_form_title' => 'Копировать элемент',
 	'add_value' => 'Добавить отсутствующие значения свойства по умолчанию у элементов',
 	'file_does_not_specified' => 'Файл не указан',
+	'shortcut' => 'Ярлык',
+
+	'closed' => 'Закрыт'
 );

@@ -268,7 +268,7 @@ class Structure_Model extends Core_Entity
 						: $this->name
 				);
 			} catch (Exception $e) {
-				$path = NULL;
+				$path = '';
 			}
 
 			$this->path = strlen($path) ? $path : $this->id;
@@ -425,21 +425,19 @@ class Structure_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
 
-			if (!$this->active)
-			{
-				$oCore_Html_Entity_Div->style("text-decoration: line-through");
-			}
-
-			$oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_A')
-					->href(($this->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
-					->target("_blank")
-					->value(htmlspecialchars(urldecode($sPath)))
-			);
-
 			$oCore_Html_Entity_Div
 				->class('hostcms-linkbox')
-				->execute();
+				->add(
+					Core::factory('Core_Html_Entity_A')
+						->href(($this->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
+						->target("_blank")
+						->value(htmlspecialchars(urldecode($sPath)))
+				);
+
+			!$this->active
+				&& $oCore_Html_Entity_Div->class($oCore_Html_Entity_Div->class . ' line-through');
+
+			$oCore_Html_Entity_Div->execute();
 		}
 		else
 		{
@@ -863,38 +861,92 @@ class Structure_Model extends Core_Entity
 		$aPropertyValues = $this->getPropertyValues(FALSE);
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
-			// List
-			if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+			if ($oPropertyValue->Property->indexing)
 			{
-				if ($oPropertyValue->value != 0)
+				// List
+				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 				{
-					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
-				}
-			}
-			// Informationsystem
-			elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-			{
-				if ($oPropertyValue->value != 0)
-				{
-					$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-					if ($oInformationsystem_Item->id)
+					if ($oPropertyValue->value != 0)
 					{
-						$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ';
+						$oList_Item = $oPropertyValue->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 					}
 				}
+				// Informationsystem
+				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oPropertyValue->value != 0)
+					{
+						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ';
+						}
+					}
+				}
+				// Other type
+				elseif ($oPropertyValue->Property->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				}
 			}
-			// Other type
-			elseif ($oPropertyValue->Property->type != 2)
+		}
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
 			{
-				$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
 			}
 		}
 
 		$oSiteAlias = $this->Site->getCurrentAlias();
 		if ($oSiteAlias)
 		{
-			$oSearch_Page->url = 'http://' . $oSiteAlias->name . $this->getPath();
+			$oSearch_Page->url = ($this->https ? 'https://' : 'http://') . $oSiteAlias->name . $this->getPath();
 		}
 		else
 		{
@@ -1121,5 +1173,51 @@ class Structure_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event structure.onBeforeGetRelatedSite
+	 * @hostcms-event structure.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function typeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		switch($this->type)
+		{
+			case 0:
+				$icon = 'fa fa-file-o';
+			break;
+			case 1:
+				$icon = 'fa fa-file-code';
+			break;
+			case 2:
+				$icon = 'fa fa-list-alt';
+			break;
+			case 3:
+				$icon = 'fa fa-link';
+			break;
+			default:
+				$icon = '—';
+		}
+
+		return '<i class="' . $icon . '">';
 	}
 }

@@ -362,7 +362,7 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Discountcard_Levels->deleteAll(FALSE);
 		$this->Shop_Discountcard_Bonus_Types->deleteAll(FALSE);
 		$this->Shop_Price_Settings->deleteAll(FALSE);
-		$this->Shop_Filter_Seos_Dirs->deleteAll(FALSE);
+		$this->Shop_Filter_Seo_Dirs->deleteAll(FALSE);
 		$this->Shop_Filter_Seos->deleteAll(FALSE);
 		$this->Shop_Tab_Dirs->deleteAll(FALSE);
 		$this->Shop_Tabs->deleteAll(FALSE);
@@ -1017,6 +1017,7 @@ class Shop_Model extends Core_Entity
 		$this->size_measure !== '' && $this->addEntity(
 			Core::factory('Core_Xml_Entity')
 				->name('size_measure')
+				->addAttribute('id', $this->size_measure)
 				->addEntity(
 					Core::factory('Core_Xml_Entity')
 						->name('name')
@@ -1118,8 +1119,8 @@ class Shop_Model extends Core_Entity
 			$href = $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id, '');
 			$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $this->id, '');
 
-			$Shop_Filter_Controller = new Shop_Filter_Controller($this);
-			$sTableName = $Shop_Filter_Controller->getTableName();
+			$oShop_Filter_Controller = new Shop_Filter_Controller($this);
+			$sTableName = $oShop_Filter_Controller->getTableName();
 
 			$oQB = Core_QueryBuilder::select(array('COUNT(*)', 'count'))
 				->from($sTableName);
@@ -1145,6 +1146,24 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
+	 * The position of watermark on the X axis
+	 * @return string
+	 */
+	public function getWatermarkDefaultPositionX()
+	{
+		return $this->watermark_default_position_x;
+	}
+
+	/**
+	 * The position of watermark on the Y axis
+	 * @return string
+	 */
+	public function getWatermarkDefaultPositionY()
+	{
+		return $this->watermark_default_position_y;
+	}
+
+	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
@@ -1155,5 +1174,22 @@ class Shop_Model extends Core_Entity
 		$this->Shop_Currency->id == 0 && Core::factory('Core_Html_Entity_I')
 			->class('fa fa-exclamation-triangle darkorange')
 			->execute();
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop.onBeforeGetRelatedSite
+	 * @hostcms-event shop.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

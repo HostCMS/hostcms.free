@@ -41,17 +41,13 @@ class Update_Dataset extends Admin_Form_Dataset
 	}
 
 	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-
-	/**
 	 * Load objects
 	 * @return array
 	 */
 	public function load()
 	{
+		!is_array($this->_objects) && $this->_getUpdates();
+
 		return array_slice($this->_objects, $this->_offset, $this->_limit);
 	}
 
@@ -73,7 +69,7 @@ class Update_Dataset extends Admin_Form_Dataset
 		$sDatetime = !is_null($aReturn['datetime'])
 			? strftime(DATE_TIME_FORMAT, strtotime($aReturn['datetime']))
 			: '';
-		
+
 		if ($error > 0 && $error != 5)
 		{
 			$this->_Admin_Form_Controller->addMessage(
@@ -84,7 +80,7 @@ class Update_Dataset extends Admin_Form_Dataset
 		elseif (count($this->_objects) == 0)
 		{
 			$this->_Admin_Form_Controller->addMessage(
-				Core_Message::show(Core::_('Update.isLastUpdate', $sDatetime), 'message')
+				Core_Message::show(Core::_('Update.isLastUpdate', $sDatetime))
 			);
 		}
 

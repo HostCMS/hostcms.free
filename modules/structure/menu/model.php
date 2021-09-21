@@ -98,4 +98,21 @@ class Structure_Menu_Model extends Core_Entity
 
 		return parent::delete($primaryKey);
 	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event structure_menu.onBeforeGetRelatedSite
+	 * @hostcms-event structure_menu.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }

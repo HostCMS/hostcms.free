@@ -49,10 +49,10 @@ class Core_Tar
 	* If the compress argument is set the tar will be read or created as a
 	* gzip or bz2 compressed TAR file.
 	*
-	* @param	string  $p_tarname  The name of the tar archive to create
-	* @param	string  $p_compress can be null, 'gz' or 'bz2'. This
+	* @param	string $p_tarname The name of the tar archive to create
+	* @param	string $p_compress can be null, 'gz' or 'bz2'. This
 	* parameter indicates if gzip or bz2 compression
-	* is required.  For compatibility reason the
+	* is required. For compatibility reason the
 	* boolean value 'true' means 'gz'.
 	* @access public
 	*/
@@ -123,10 +123,10 @@ class Core_Tar
 	* sub-directories are also added.
 	* See also createModify() method for more details.
 	*
-	* @param array  $p_filelist An array of filenames and directory names, or a
-	*						   single string with names separated by a single
-	*						   blank space.
-	* @return				   true on success, false on error.
+	* @param array $p_filelist An array of filenames and directory names, or a
+	*						single string with names separated by a single
+	*						blank space.
+	* @return				true on success, false on error.
 	* @see createModify()
 	* @access public
 	*/
@@ -143,10 +143,10 @@ class Core_Tar
 	* even if a file with the same name is already archived.
 	* See also createModify() method for more details.
 	*
-	* @param array  $p_filelist An array of filenames and directory names, or a
-	*						   single string with names separated by a single
-	*						   blank space.
-	* @return				   true on success, false on error.
+	* @param array $p_filelist An array of filenames and directory names, or a
+	*						single string with names separated by a single
+	*						blank space.
+	* @return				true on success, false on error.
 	* @see createModify()
 	* @access public
 	*/
@@ -186,16 +186,16 @@ class Core_Tar
 	* for extraction in a different path than the origin files are.
 	* See also addModify() method for file adding properties.
 	*
-	* @param array  $p_filelist	 An array of filenames and directory names,
-	*							   or a single string with names separated by
-	*							   a single blank space.
-	* @param string $p_add_dir	  A string which contains a path to be added
-	*							   to the memorized path of each element in
-	*							   the list.
-	* @param string $p_remove_dir   A string which contains a path to be
-	*							   removed FROM the memorized path of each
-	*							   element in the list, when relevant.
-	* @return boolean			   true on success, false on error.
+	* @param array $p_filelist	 An array of filenames and directory names,
+	*							or a single string with names separated by
+	*							a single blank space.
+	* @param string $p_add_dir	 A string which contains a path to be added
+	*							to the memorized path of each element in
+	*							the list.
+	* @param string $p_remove_dirA string which contains a path to be
+	*							removed FROM the memorized path of each
+	*							element in the list, when relevant.
+	* @return boolean			true on success, false on error.
 	* @access public
 	* @see addModify()
 	*/
@@ -266,17 +266,17 @@ class Core_Tar
 	* If a file/dir is not readable the file/dir is ignored. However an
 	* error text is send to PEAR error.
 	*
-	* @param array	  $p_filelist	 An array of filenames and directory
-	*								   names, or a single string with names
-	*								   separated by a single blank space.
-	* @param string	 $p_add_dir	  A string which contains a path to be
-	*								   added to the memorized path of each
-	*								   element in the list.
-	* @param string	 $p_remove_dir   A string which contains a path to be
-	*								   removed FROM the memorized path of
-	*								   each element in the list, when
-	*								   relevant.
-	* @return						   true on success, false on error.
+	* @param array	 $p_filelist	 An array of filenames and directory
+	*								 names, or a single string with names
+	*								 separated by a single blank space.
+	* @param string	 $p_add_dir	 A string which contains a path to be
+	*								 added to the memorized path of each
+	*								 element in the list.
+	* @param string	 $p_remove_dir A string which contains a path to be
+	*								 removed FROM the memorized path of
+	*								 each element in the list, when
+	*								 relevant.
+	* @return						 true on success, false on error.
 	* @access public
 	*/
 	public function addModify($p_filelist, $p_add_dir, $p_remove_dir='')
@@ -309,11 +309,11 @@ class Core_Tar
 	* is created.
 	*
 	* @param string	 $p_filename	 A string which contains the full
-	*								   filename path that will be associated
-	*								   with the string.
-	* @param string	 $p_string	   The content of the file added in
-	*								   the archive.
-	* @return						   true on success, false on error.
+	*								 filename path that will be associated
+	*								 with the string.
+	* @param string	 $p_string	 The content of the file added in
+	*								 the archive.
+	* @return						 true on success, false on error.
 	* @access public
 	*/
 	public function addString($p_filename, $p_string)
@@ -365,11 +365,11 @@ class Core_Tar
 	* need to be manually cleaned.
 	*
 	* @param string $p_path		 The path of the directory WHERE the
-	*							   files/dir need to by extracted.
-	* @param string $p_remove_path  Part of the memorized path that can be
-	*							   removed if present at the beginning of
-	*							   the file/dir path.
-	* @return boolean			   true on success, false on error.
+	*							 files/dir need to by extracted.
+	* @param string $p_remove_path Part of the memorized path that can be
+	*							 removed if present at the beginning of
+	*							 the file/dir path.
+	* @return boolean			 true on success, false on error.
 	* @access public
 	* @see extractList()
 	*/
@@ -391,7 +391,7 @@ class Core_Tar
 	* This method extract FROM the archive one file identified by $p_filename.
 	* The return value is a string with the file content, or NULL on error.
 	* @param string $p_filename	 The path of the file to extract in a string.
-	* @return					   a string with the file content or NULL.
+	* @return					 a string with the file content or NULL.
 	* @access public
 	*/
 	public function extractInString($p_filename)
@@ -412,15 +412,15 @@ class Core_Tar
 	* in the directory indicated by the optional $p_path parameter.
 	* If indicated the $p_remove_path can be used in the same way as it is
 	* used in extractModify() method.
-	* @param array  $p_filelist	 An array of filenames and directory names,
-	*							   or a single string with names separated
-	*							   by a single blank space.
+	* @param array $p_filelist	 An array of filenames and directory names,
+	*							 or a single string with names separated
+	*							 by a single blank space.
 	* @param string $p_path		 The path of the directory WHERE the
-	*							   files/dir need to by extracted.
-	* @param string $p_remove_path  Part of the memorized path that can be
-	*							   removed if present at the beginning of
-	*							   the file/dir path.
-	* @return					   true on success, false on error.
+	*							 files/dir need to by extracted.
+	* @param string $p_remove_path Part of the memorized path that can be
+	*							 removed if present at the beginning of
+	*							 the file/dir path.
+	* @return					 true on success, false on error.
 	* @access public
 	*/
 	public function extractList($p_filelist, $p_path='', $p_remove_path='')
@@ -1300,7 +1300,7 @@ class Core_Tar
 	* This method extract FROM the archive one file identified by $p_filename.
 	* The return value is a string with the file content, or NULL on error.
 	* @param string $p_filename	 The path of the file to extract in a string.
-	* @return					   a string with the file content or NULL.
+	* @return					 a string with the file content or NULL.
 	* @access private
 	*/
 	protected function _extractInString($p_filename)
@@ -1463,7 +1463,7 @@ class Core_Tar
 						$this->_error("Файл {$v_header['filename']} уже существует и является директорией");
 						return false;
 					}
-					if (   ($this->_isArchive($v_header['filename']))
+					if (($this->_isArchive($v_header['filename']))
 					&& ($v_header['typeflag'] == "5")) {
 						$this->_error('Директория '.$v_header['filename'].' уже существует и является файлом');
 						return false;
@@ -1618,7 +1618,7 @@ class Core_Tar
 				@gzclose($v_temp_tar);
 			}
 			elseif ($this->_compress_type == 'bz2') {
-				$v_buffered_lines   = array();
+				$v_buffered_lines = array();
 				$v_buffered_lines[] = @bzread($v_temp_tar, 512);
 
 				// ----- Read the following blocks but not the last one
@@ -1639,7 +1639,7 @@ class Core_Tar
 
 		} else {
 			// ----- For not compressed tar, just add files before the last
-			//	   512 bytes block
+			// 512 bytes block
 			if (!$this->_openReadWrite())
 			return false;
 
@@ -1745,7 +1745,7 @@ class Core_Tar
 					// ----- Ignore it and ignore the $i-1
 					$i--;
 				}
-				else if (   ($v_list[$i] == '')
+				else if (($v_list[$i] == '')
 				&& ($i!=(sizeof($v_list)-1))
 				&& ($i!=0)) {
 					// ----- Ignore only the double '//' in path,
@@ -1771,7 +1771,7 @@ class Core_Tar
 		if (substr(PHP_OS, 0, 3) == 'WIN')
 		{
 			// ----- Look for potential disk letter
-			if (   ($p_remove_disk_letter)
+			if (($p_remove_disk_letter)
 			&& (($v_position = strpos($p_path, ':')) != false)) {
 				$p_path = substr($p_path, $v_position+1);
 			}

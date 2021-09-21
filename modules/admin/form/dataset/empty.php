@@ -9,16 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 {
-	/**
-	 * Dataset objects list
-	 * @var array
-	 */
-	protected $_objects = array();
-	
 	/**
 	 * Get items count
 	 * @return int
@@ -26,15 +20,6 @@ class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 	public function getCount()
 	{
 		return 0;
-	}
-
-	/**
-	 * Get objects
-	 * @return array
-	 */
-	public function getObjects()
-	{
-		return $this->_objects;
 	}
 
 	/**
@@ -54,7 +39,7 @@ class Admin_Form_Dataset_Empty extends Admin_Form_Dataset
 	{
 		return $this->_objects;
 	}
-	
+
 	/**
 	 * Get object
 	 * @param int $primaryKey ID

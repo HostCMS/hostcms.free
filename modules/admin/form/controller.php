@@ -313,6 +313,18 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 				'checked' => array()
 			);
 
+		// При передаче нескольких выбранных значений нулевого элемента в таком датасете быть не может
+		if (is_array($formSettings['checked']))
+		{
+			foreach ($formSettings['checked'] as $dataset => $checked)
+			{
+				if (count($checked) > 1 && isset($checked[0]))
+				{
+					unset($formSettings['checked'][$dataset][0]);
+				}
+			}
+		}
+
 		$this
 			->limit($formSettings['limit'] !== '' ? $formSettings['limit'] : NULL)
 			->current($formSettings['current'] !== '' ? $formSettings['current'] : NULL)
@@ -1074,6 +1086,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 
 		!is_null($this->module)
 			&& Core_Array::get($this->request, '_module', TRUE)
+			&& $this->windowId == 'id_content'
 			&& $oAdmin_Answer->module($this->module->getModuleName());
 
 		$oAdmin_Answer
@@ -1592,9 +1605,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	*/
 	public function applyFormat($str, $format)
 	{
-		return !empty($format)
-			? sprintf($format, $str)
-			: $str;
+		return !empty($format) ? sprintf($format, $str) : $str;
 	}
 
 	/**
@@ -1630,126 +1641,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function sortingDirection($sortingDirection)
 	{
-		if (!is_null($sortingDirection))
-		{
-			$this->sortingDirection = intval($sortingDirection);
-		}
+		!is_null($sortingDirection)
+			&& $this->sortingDirection = intval($sortingDirection);
 
 		return $this;
-	}
-
-	/**
-	 * Backend callback method
-	 * @param string $path path
-	 * @param string $action action
-	 * @param string $operation operation
-	 * @param string $datasetKey dataset key
-	 * @param string $datasetValue dataset value
-	 * @param string $additionalParams additional params
-	 * @param string $limit limit
-	 * @param string $current current
-	 * @param int $sortingFieldId sorting field ID
-	 * @param string $sortingDirection sorting direction
-	 * @return string
-	 */
-	public function getAdminActionLoadAjax($path, $action, $operation, $datasetKey, $datasetValue,
-		$additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
-	{
-		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
-		$datasetKey = Core_Str::escapeJavascriptVariable($this->jQueryEscape($datasetKey));
-		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($datasetValue));
-
-		return "$('#{$windowId} #row_{$datasetKey}_{$datasetValue}').toggleHighlight(); "
-			. "$.adminCheckObject({objectId: 'check_{$datasetKey}_{$datasetValue}', windowId: '{$windowId}'}); "
-			. $this->getAdminLoadAjax($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection, $view);
-	}
-
-	/**
-	 * Получение кода вызова adminLoad для события onclick
-	 * @param string $path path
-	 * @param string $action action
-	 * @param string $operation operation
-	 * @param string $additionalParams additional params
-	 * @param string $limit limit
-	 * @param mixed $current current
-	 * @param int $sortingFieldId sorting field ID
-	 * @param mixed $sortingDirection sorting direction
-	 * @param string $view view mode
-	 * @return string
-	*/
-	public function getAdminLoadAjax($path, $action = NULL, $operation = NULL, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
-	{
-		/*if ($path)
-		{
-			// Нельзя, т.к. при изменении у предыдущего параметра URL-а, то действия сломаются
-			//$this->AAction = str_replace("'", "\'", $AAction);
-		}
-		else
-		{
-			$path = '';
-		}*/
-
-		$path = Core_Str::escapeJavascriptVariable($path);
-		$action = Core_Str::escapeJavascriptVariable(htmlspecialchars($action));
-		$operation = Core_Str::escapeJavascriptVariable(htmlspecialchars($operation));
-		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
-
-		$aData = array();
-
-		$aData[] = "path: '{$path}'";
-
-		/*if (is_null($action))
-		{
-			$action = $this->action;
-		}*/
-		$aData[] = "action: '{$action}'";
-
-		/*if (is_null($operation))
-		{
-			$operation = $this->operation;
-		}*/
-		$aData[] = "operation: '{$operation}'";
-
-		is_null($additionalParams) && $additionalParams = $this->additionalParams;
-
-		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $additionalParams)
-		);
-		$aData[] = "additionalParams: '{$additionalParams}'";
-
-		/*if (is_null($limit))
-		{
-			$limit = $this->limit;
-		}*/
-		$limit = intval($limit);
-		$limit && $aData[] = "limit: '{$limit}'";
-
-		if (is_null($current))
-		{
-			$current = $this->current;
-		}
-		$current = intval($current);
-		$aData[] = "current: '{$current}'";
-
-		if (is_null($sortingFieldId))
-		{
-			$sortingFieldId = $this->sortingFieldId;
-		}
-		//$sortingFieldId = intval($sortingFieldId);
-		$aData[] = "sortingFieldId: '{$sortingFieldId}'";
-
-		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
-		$sortingDirection = intval($sortingDirection);
-		$aData[] = "sortingDirection: '{$sortingDirection}'";
-
-		is_null($view) && $view = $this->view;
-		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
-		$aData[] = "view: '{$view}'";
-
-		$aData[] = "windowId: '{$windowId}'";
-
-		return "$.adminLoad({" . implode(',', $aData) . "}); return false";
 	}
 
 	public function showSettings()
@@ -1776,30 +1671,282 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Backend callback method
-	 * Для действия из списка элементов
-	 * @param string $path path
-	 * @param string $action action
-	 * @param string $operation operation
-	 * @param string $datasetKey dataset key
-	 * @param string $datasetValue dataset value
-	 * @param string $additionalParams additional params
-	 * @param string $limit limit
-	 * @param string $current current
-	 * @param int $sortingFieldId sorting field ID
-	 * @param string $sortingDirection sorting direction
+	 * @param array $options
 	 * @return string
 	 */
-	public function getAdminActionLoadHref($path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
+	public function getAdminActionModalLoad($options)
 	{
-		is_null($additionalParams) && $additionalParams .= $this->additionalParams;
+		$args = func_get_args();
 
-		$datasetKey = Core_Str::escapeJavascriptVariable($datasetKey);
-		$datasetValue = Core_Str::escapeJavascriptVariable($datasetValue);
+		if (!is_array($args[0]))
+		{
+			// $path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
 
-		$additionalParams .= '&hostcms[checked][' . $datasetKey . '][' . $datasetValue . ']=1';
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			isset($args[3]) && $options['datasetKey'] = $args[3];
+			isset($args[4]) && $options['datasetValue'] = $args[4];
+			$options['additionalParams'] = isset($args[5]) ? $args[5] : NULL;
+			isset($args[6]) && $options['limit'] = $args[6];
+			isset($args[7]) && $options['current'] = $args[7];
+			isset($args[8]) && $options['sortingFieldId'] = $args[8];
+			isset($args[9]) && $options['sortingDirection'] = $args[9];
+			isset($args[10]) && $options['view'] = $args[10];
+		}
 
-		return $this->getAdminLoadHref($path, $action, $operation, $additionalParams, $limit, $current, $sortingFieldId, $sortingDirection, $view);
+		if (!isset($options['datasetKey']) || !isset($options['datasetValue']))
+		{
+			throw new Core_Exception("getAdminActionModalLoad() needs at least 'datasetKey' and 'datasetValue' options");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
+		$datasetKey = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetKey']));
+		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue']));
+
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
+		// remove parentWindowId=...
+		$options['additionalParams'] = preg_replace('/&parentWindowId=[A-Za-z0-9_-]*/', '', $options['additionalParams']);
+
+		$options['additionalParams'] .= '&hostcms[checked][' . $datasetKey . '][' . $datasetValue . ']=1';
+		$options['additionalParams'] .= '&parentWindowId=' . $windowId;
+
+		return $this->getModalLoad($options);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param array $options
+	 * @return string
+	 */
+	public function getAdminActionLoadAjax($options)
+	{
+		$args = func_get_args();
+
+		if (!is_array($args[0]))
+		{
+			// $path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
+
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			isset($args[3]) && $options['datasetKey'] = $args[3];
+			isset($args[4]) && $options['datasetValue'] = $args[4];
+			$options['additionalParams'] = isset($args[5]) ? $args[5] : NULL;
+			isset($args[6]) && $options['limit'] = $args[6];
+			isset($args[7]) && $options['current'] = $args[7];
+			isset($args[8]) && $options['sortingFieldId'] = $args[8];
+			isset($args[9]) && $options['sortingDirection'] = $args[9];
+			isset($args[10]) && $options['view'] = $args[10];
+		}
+
+		if (!isset($options['datasetKey']) || !isset($options['datasetValue']))
+		{
+			throw new Core_Exception("getAdminActionLoadAjax() needs at least 'datasetKey' and 'datasetValue' options");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
+		$datasetKey = intval($options['datasetKey']);
+		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue']));
+
+		return "$('#{$windowId} #row_{$datasetKey}_{$datasetValue}').toggleHighlight(); "
+			. "$.adminCheckObject({objectId: 'check_{$datasetKey}_{$datasetValue}', windowId: '{$windowId}'}); "
+			. $this->getAdminLoadAjax($options);
+	}
+
+	/**
+	 * Backend callback method
+	 * @param array $options
+	 * @return string
+	 */
+	public function getAdminActionLoadHref($options)
+	{
+		$args = func_get_args();
+
+		if (!is_array($args[0]))
+		{
+			// $path, $action, $operation, $datasetKey, $datasetValue, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
+
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			isset($args[3]) && $options['datasetKey'] = $args[3];
+			isset($args[4]) && $options['datasetValue'] = $args[4];
+			$options['additionalParams'] = isset($args[5]) ? $args[5] : NULL;
+			isset($args[6]) && $options['limit'] = $args[6];
+			isset($args[7]) && $options['current'] = $args[7];
+			isset($args[8]) && $options['sortingFieldId'] = $args[8];
+			isset($args[9]) && $options['sortingDirection'] = $args[9];
+			isset($args[10]) && $options['view'] = $args[10];
+		}
+
+		if (!isset($options['datasetKey']) || !isset($options['datasetValue']))
+		{
+			throw new Core_Exception("getAdminActionLoadHref() needs at least 'datasetKey' and 'datasetValue' options");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
+		$datasetKey = intval($options['datasetKey']);
+		$datasetValue = Core_Str::escapeJavascriptVariable($options['datasetValue']);
+		$options['additionalParams'] .= '&hostcms[checked][' . $datasetKey . '][' . $datasetValue . ']=1';
+
+		return $this->getAdminLoadHref($options);
+	}
+
+	/**
+	 * Получение кода вызова adminLoad для события onclick
+	 * @param array $options
+	 * @return string
+	*/
+	public function getAdminLoadAjax($options)
+	{
+		$args = func_get_args();
+
+		if (!is_array($args[0]))
+		{
+			// $path, $action = NULL, $operation = NULL, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
+
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			$options['additionalParams'] = isset($args[3]) ? $args[3] : NULL;
+			isset($args[4]) && $options['limit'] = $args[4];
+			isset($args[5]) && $options['current'] = $args[5];
+			isset($args[6]) && $options['sortingFieldId'] = $args[6];
+			isset($args[7]) && $options['sortingDirection'] = $args[7];
+			isset($args[8]) && $options['view'] = $args[8];
+		}
+
+		if (!isset($options['path']))
+		{
+			throw new Core_Exception("getAdminLoadAjax() needs at least 'path' option");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
+		$aData = $this->_prepareAjaxRequest($options);
+
+		$path = Core_Str::escapeJavascriptVariable($options['path']);
+		$aData[] = "path: '{$path}'";
+
+		return "$.adminLoad({" . implode(',', $aData) . "}); return false";
+	}
+
+	/**
+	 * Получение кода вызова modalLoad для события onclick
+	 * @param array $options
+	 * @return string
+	*/
+	public function getModalLoad($options)
+	{
+		$args = func_get_args();
+
+		if (!is_array($args[0]))
+		{
+			// $path, $action = NULL, $operation = NULL, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
+
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			$options['additionalParams'] = isset($args[3]) ? $args[3] : NULL;
+			isset($args[4]) && $options['limit'] = $args[4];
+			isset($args[5]) && $options['current'] = $args[5];
+			isset($args[6]) && $options['sortingFieldId'] = $args[6];
+			isset($args[7]) && $options['sortingDirection'] = $args[7];
+			isset($args[8]) && $options['view'] = $args[8];
+		}
+
+		if (!isset($options['path']))
+		{
+			throw new Core_Exception("getModalLoad() needs at least 'path' option");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
+		$aData = $this->_prepareAjaxRequest($options);
+
+		$path = Core_Str::escapeJavascriptVariable($options['path']);
+		$aData[] = "path: '{$path}'";
+
+		isset($options['onHide']) && $aData[] = "onHide: " . $options['onHide'];
+
+		return "$.modalLoad({" . implode(',', $aData) . "}); return false";
+	}
+
+	/**
+	 * Подготовка массива опций для AJAX-запроса
+	 * @param array $options
+	 * @return array
+	*/
+	protected function _prepareAjaxRequest($options)
+	{
+		$aData = array();
+
+		if (isset($options['action']) && !is_null($options['action']))
+		{
+			$action = Core_Str::escapeJavascriptVariable(htmlspecialchars($options['action']));
+			$aData[] = "action: '{$action}'";
+		}
+
+		if (isset($options['operation']) && !is_null($options['operation']))
+		{
+			$operation = Core_Str::escapeJavascriptVariable(htmlspecialchars($options['operation']));
+			$aData[] = "operation: '{$operation}'";
+		}
+
+		$additionalParams = Core_Str::escapeJavascriptVariable(
+			str_replace(array('"'), array('&quot;'), Core_Array::get($options, 'additionalParams'))
+		);
+		$aData[] = "additionalParams: '{$additionalParams}'";
+
+		//is_null($limit) && $limit = $this->limit;
+		if (isset($options['limit']) && !is_null($options['limit']))
+		{
+			$limit = intval($options['limit']);
+			$limit && $aData[] = "limit: '{$limit}'";
+		}
+
+		$current = Core_Array::get($options, 'current');
+		is_null($current) && $current = $this->current;
+		$current = intval($current);
+		$aData[] = "current: '{$current}'";
+
+		$sortingFieldId = Core_Array::get($options, 'sortingFieldId');
+		is_null($sortingFieldId) && $sortingFieldId = $this->sortingFieldId;
+		//$sortingFieldId = intval($sortingFieldId);
+		$aData[] = "sortingFieldId: '{$sortingFieldId}'";
+
+		$sortingDirection = Core_Array::get($options, 'sortingDirection');
+		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
+		$sortingDirection = intval($sortingDirection);
+		$aData[] = "sortingDirection: '{$sortingDirection}'";
+
+		$view = Core_Array::get($options, 'view');
+		is_null($view) && $view = $this->view;
+		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
+		$aData[] = "view: '{$view}'";
+
+		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
+		$aData[] = "windowId: '{$windowId}'";
+
+		return $aData;
 	}
 
 	/**
@@ -1815,38 +1962,65 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	* @param string $view view mode
 	* @return string
 	*/
-	public function getAdminLoadHref($path, $action = NULL, $operation = NULL, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL)
+	public function getAdminLoadHref($options)
 	{
+		$args = func_get_args();
+
+		if (!is_array($args[0]))
+		{
+			// $path, $action = NULL, $operation = NULL, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $view = NULL
+			$options = array();
+
+			$options['path'] = $args[0];
+			isset($args[1]) && $options['action'] = $args[1];
+			isset($args[2]) && $options['operation'] = $args[2];
+			$options['additionalParams'] = isset($args[3]) ? $args[3] : NULL;
+			isset($args[4]) && $options['limit'] = $args[4];
+			isset($args[5]) && $options['current'] = $args[5];
+			isset($args[6]) && $options['sortingFieldId'] = $args[6];
+			isset($args[7]) && $options['sortingDirection'] = $args[7];
+			isset($args[8]) && $options['view'] = $args[8];
+		}
+
+		if (!isset($options['path']))
+		{
+			throw new Core_Exception("getAdminLoadHref() needs at least 'path' option");
+		}
+
+		$options += array('additionalParams' => NULL);
+
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
 		$aData = array();
 
-		$action = rawurlencode($action);
-		$aData[] = "hostcms[action]={$action}";
-
-		$operation = rawurlencode($operation);
-		$aData[] = "hostcms[operation]={$operation}";
-
-		/*if (is_null($limit))
+		if (isset($options['action']) && !is_null($options['action']))
 		{
-			$limit = $this->limit;
-		}*/
-		$limit = intval($limit);
-		$limit && $aData[] = "hostcms[limit]={$limit}";
-
-		if (is_null($current))
-		{
-			$current = $this->current;
+			$aData[] = "hostcms[action]=" . rawurlencode($options['action']);
 		}
+
+		if (isset($options['operation']) && !is_null($options['operation']))
+		{
+			$aData[] = "hostcms[operation]=" . rawurlencode($options['operation']);
+		}
+
+		// is_null($limit) && $limit = $this->limit;
+		if (isset($options['limit']) && !is_null($options['limit']))
+		{
+			$limit = intval($options['limit']);
+			$limit && $aData[] = "hostcms[limit]={$limit}";
+		}
+
+		$current = Core_Array::get($options, 'current');
+		is_null($current) && $current = $this->current;
 		$current = intval($current);
 		$aData[] = "hostcms[current]={$current}";
 
-		if (is_null($sortingFieldId))
-		{
-			$sortingFieldId = $this->sortingFieldId;
-		}
+		$sortingFieldId = Core_Array::get($options, 'sortingFieldId');
+		is_null($sortingFieldId) && $sortingFieldId = $this->sortingFieldId;
 		//$sortingFieldId = intval($sortingFieldId);
 		$aData[] = "hostcms[sortingfield]={$sortingFieldId}";
 
+		$sortingDirection = Core_Array::get($options, 'sortingDirection');
 		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
 		$sortingDirection = intval($sortingDirection);
 		$aData[] = "hostcms[sortingdirection]={$sortingDirection}";
@@ -1854,13 +2028,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$windowId = rawurlencode($this->getWindowId());
 		strlen($windowId) && $aData[] = "hostcms[window]={$windowId}";
 
+		$view = Core_Array::get($options, 'view');
 		is_null($view) && $view = $this->view;
-		$view = rawurlencode($view);
-		$aData[] = "hostcms[view]={$view}";
+		$aData[] = "hostcms[view]=" . rawurlencode($view);
 
 		$aData[] = "hostcms[filterId]=" . rawurlencode($this->filterId);
-
-		is_null($additionalParams) && $additionalParams = $this->additionalParams;
 
 		// Filter values for paginations and etc.
 		foreach ($_REQUEST as $key => $value)
@@ -1875,104 +2047,64 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			}
 		}
 
-		//$additionalParams = str_replace(array("'", '"'), array("\'", '&quot;'), $additionalParams);
-		if ($additionalParams)
+		//$options['additionalParams'] = str_replace(array("'", '"'), array("\'", '&quot;'), $options['additionalParams']);
+		if ($options['additionalParams'])
 		{
 			// Уже содержит перечень параметров, которые должны быть экранированы
-			//$additionalParams = rawurlencode($additionalParams);
-			$aData[] = $additionalParams;
+			//$options['additionalParams'] = rawurlencode($options['additionalParams']);
+			$aData[] = $options['additionalParams'];
 		}
 
-		return $path . '?' . implode('&', $aData);
+		return $options['path'] . '?' . implode('&', $aData);
 	}
 
 	/**
 	* Получение кода вызова adminLoad для события onclick
-	* @param string $action action name
-	* @param string $operation operation name
-	* @param string $additionalParams additional params
-	* @param int $limit count of items on page
-	* @param int $current current page number
-	* @param int $sortingFieldId ID of sorting field
-	* @param int $sortingDirection sorting direction
+	* @param array $options
 	* @return string
 	*/
-	public function getAdminSendForm($action = NULL, $operation = NULL, $additionalParams = NULL,
-		$limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $buttonObject = 'this', $view = NULL)
+	public function getAdminSendForm($options)
 	{
-		$aData = array();
+		$args = func_get_args();
 
-		$aData[] = "buttonObject: {$buttonObject}";
-
-		// add
-		if (is_null($action))
+		if (!is_array($args[0]))
 		{
-			$action = $this->action;
+			// $action = NULL, $operation = NULL, $additionalParams = NULL, $limit = NULL, $current = NULL, $sortingFieldId = NULL, $sortingDirection = NULL, $buttonObject = 'this', $view = NULL
+			$options = array();
+
+			isset($args[0]) && $options['action'] = $args[0];
+			isset($args[1]) && $options['operation'] = $args[1];
+			$options['additionalParams'] = isset($args[2]) ? $args[2] : NULL;
+			isset($args[3]) && $options['limit'] = $args[3];
+			isset($args[4]) && $options['current'] = $args[4];
+			isset($args[5]) && $options['sortingFieldId'] = $args[5];
+			isset($args[6]) && $options['sortingDirection'] = $args[6];
+			isset($args[7]) && $options['buttonObject'] = $args[7];
+			isset($args[8]) && $options['view'] = $args[8];
 		}
-		$action = Core_Str::escapeJavascriptVariable(htmlspecialchars($action));
-		$aData[] = "action: '{$action}'";
 
-		/*if (is_null($operation))
-		{
-			$operation = $this->operation;
-		}*/
-		$operation = Core_Str::escapeJavascriptVariable(htmlspecialchars($operation));
-		$aData[] = "operation: '{$operation}'";
+		$options += array('additionalParams' => NULL, 'buttonObject' => NULL, 'action' => NULL);
 
-		is_null($additionalParams) && $additionalParams = $this->additionalParams;
+		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+		is_null($options['buttonObject']) && $options['buttonObject'] = 'this';
+		is_null($options['action']) && $options['action'] = $this->action;
 
-		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $additionalParams)
-		);
 		// Выбранные элементы для действия
-
 		if (is_array($this->checked))
 		{
 			foreach ($this->checked as $datasetKey => $checkedItems)
 			{
 				foreach ($checkedItems as $checkedItemId => $v1)
 				{
-					$datasetKey = intval($datasetKey);
-					$checkedItemId = htmlspecialchars($checkedItemId);
-
-					$additionalParams .= empty($additionalParams) ? '' : '&';
-					$additionalParams .= 'hostcms[checked][' . $datasetKey . '][' . $checkedItemId . ']=1';
+					$options['additionalParams'] .= empty($options['additionalParams']) ? '' : '&';
+					$options['additionalParams'] .= 'hostcms[checked][' . intval($datasetKey) . '][' . htmlspecialchars($checkedItemId) . ']=1';
 				}
 			}
 		}
-		$aData[] = "additionalParams: '{$additionalParams}'";
 
-		/*if (is_null($limit))
-		{
-			$limit = $this->limit;
-		}*/
-		$limit && $limit = intval($limit);
-		$aData[] = "limit: '{$limit}'";
+		$aData = $this->_prepareAjaxRequest($options);
 
-		if (is_null($current))
-		{
-			$current = $this->current;
-		}
-		$current = intval($current);
-		$aData[] = "current: '{$current}'";
-
-		if (is_null($sortingFieldId))
-		{
-			$sortingFieldId = $this->sortingFieldId;
-		}
-		//$sortingFieldId = intval($sortingFieldId);
-		$aData[] = "sortingFieldId: '{$sortingFieldId}'";
-
-		is_null($sortingDirection) && $sortingDirection = $this->sortingDirection;
-		$sortingDirection = intval($sortingDirection);
-		$aData[] = "sortingDirection: '{$sortingDirection}'";
-
-		is_null($view) && $view = $this->view;
-		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
-		$aData[] = "view: '{$view}'";
-
-		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
-		$aData[] = "windowId: '{$windowId}'";
+		$aData[] = "buttonObject: {$options['buttonObject']}";
 
 		return "$.adminSendForm({" . implode(',', $aData) . "}); return false";
 	}
@@ -2015,6 +2147,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$sCurrentLng = Core_I18n::instance()->getLng();
 
+		$windowId = $this->getWindowId();
+
 		?><div class="row">
 			<div class="date <?php echo $divClass?>">
 				<input name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" type="text"/>
@@ -2025,8 +2159,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['dateTimePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script><?php
 	}
@@ -2043,6 +2177,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$sCurrentLng = Core_I18n::instance()->getLng();
 
+		$windowId = $this->getWindowId();
+
 		?><div class="row">
 			<div class="date <?php echo $divClass?>">
 				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo $date_from?>" class="form-control input-sm" />
@@ -2053,9 +2189,9 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 
-			$('#<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>to_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>', showTodayButton: true, showClear: true}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script>
 		<?php
@@ -2070,6 +2206,8 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$sCurrentLng = Core_I18n::instance()->getLng();
 
+		$windowId = $this->getWindowId();
+
 		?><div class="row">
 			<div class="date <?php echo $divClass?>">
 				<input type="text" name="<?php echo $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" id="<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>" value="<?php echo htmlspecialchars($date_from)?>" class="form-control input-sm" />
@@ -2077,7 +2215,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		</div>
 		<script>
 		(function($) {
-			$('#<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'}).on('dp.show', datetimepickerOnShow);
+			$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix?>from_<?php echo $oAdmin_Form_Field->id?>').datetimepicker({locale: '<?php echo $sCurrentLng?>', format: '<?php echo Core::$mainConfig['datePickerFormat']?>'}).on('dp.show', datetimepickerOnShow);
 		})(jQuery);
 		</script>
 		<?php
@@ -2142,10 +2280,12 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			->value($iUserId)
 			->execute();
 
+		$windowId = $this->getWindowId();
 		?><script>
-		$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
+		$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectUser({
 				language: '<?php echo $language?>',
-				placeholder: '<?php echo $placeholder?>'
+				placeholder: '<?php echo $placeholder?>',
+				dropdownParent: $('#<?php echo $windowId?>')
 			})
 			.val('<?php echo $iUserId?>')
 			.trigger('change.select2')
@@ -2172,16 +2312,19 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			$sOptions = !is_null($oSiteuser)
 				? '<option value=' . $oSiteuser->id . ' selected="selected">' . htmlspecialchars($oSiteuser->login) . ' [' . $oSiteuser->id . ']</option>'
 				: '<option></option>';
+
+			$windowId = $this->getWindowId();
 			?>
 			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
 				<?php echo $sOptions?>
 			</select>
 			<script>
-				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({
+				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectSiteuser({
 					language: '<?php echo $language?>',
-					placeholder: '<?php echo $placeholder?>'
+					placeholder: '<?php echo $placeholder?>',
+					dropdownParent: $('#<?php echo $windowId?>')
 				});
-				$(".select2-container").css('width', '100%');
+				$("#<?php echo $windowId?> .select2-container").css('width', '100%');
 			</script>
 			<?php
 		}
@@ -2241,15 +2384,18 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 					? '<option value=' . $oSiteuser->id . ' selected="selected">' . htmlspecialchars($oSiteuser->login) . ' [' . $oSiteuser->id . ']</option>'
 					: '<option></option>';
 			}*/
+
+			$windowId = $this->getWindowId();
 			?>
 			<select id="<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>" name="<?php echo $filterPrefix . $oAdmin_Form_Field->id?>">
 				<?php echo $sOptions?>
 			</select>
 			<script>
-				$('#<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
+				$('#<?php echo $windowId?> #<?php echo $tabName . $filterPrefix . $oAdmin_Form_Field->id?>').selectPersonCompany({
 					url: '/admin/siteuser/index.php?loadSiteusers&types[]=person&types[]=company',
 					language: '<?php echo $language?>',
-					placeholder: '<?php echo $placeholder?>'
+					placeholder: '<?php echo $placeholder?>',
+					dropdownParent: $('#<?php echo $windowId?>')
 				});
 			</script>
 			<?php

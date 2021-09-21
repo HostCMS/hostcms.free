@@ -71,6 +71,7 @@ try
 			// Показывать модификации в карте сайта
 			->showModifications(Core_Array::get(Core_Page::instance()->libParams, 'showModifications', 1))
 			// Показывать метки магазина
+			->showShopFilter(TRUE)
 			->showShopTags(TRUE);
 	}
 

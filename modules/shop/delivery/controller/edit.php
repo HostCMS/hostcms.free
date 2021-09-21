@@ -162,7 +162,8 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oTextarea = Admin_Form_Entity::factory('Textarea');
 
 		$oTmpOptions = $oTextarea->syntaxHighlighterOptions;
-		$oTmpOptions['mode'] = 'application/x-httpd-php';
+		// $oTmpOptions['mode'] = 'application/x-httpd-php';
+		$oTmpOptions['mode'] = 'ace/mode/php';
 
 		$oTextarea->caption(Core::_('Shop_Delivery.handler'))
 			->name('code')

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Inflection
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -278,5 +278,10 @@ class Core_Inflection_En extends Core_Inflection
 	protected function numberInWords($float)
 	{
 		return 'numberInWords is undefined';
+	}
+	
+	public function currencyInWords($float, $currencyCode)
+	{
+		return 'currencyInWords is undefined';
 	}
 }

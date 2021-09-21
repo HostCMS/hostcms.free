@@ -365,7 +365,6 @@ elseif ($sType == 'sale' && $sMode == 'import' && !is_null($sFileName = Core_Arr
 	{
 		$oShop_Item_Import_Cml_Controller = new Shop_Item_Import_Cml_Controller($sFullFileName);
 		$oShop_Item_Import_Cml_Controller->iShopId = $oShop->id;
-		$oShop_Item_Import_Cml_Controller->itemDescription = 'text';
 		$oShop_Item_Import_Cml_Controller->debug = $bDebug;
 		$oShop_Item_Import_Cml_Controller->importOrders();
 

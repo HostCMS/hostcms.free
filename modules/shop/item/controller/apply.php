@@ -164,8 +164,19 @@ class Shop_Item_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 
 			$bChanged && $this->_object->save()->clearCache();
 
-			$oShop->filter
-				&& $oShop_Filter_Controller->fill($this->_object);
+			if ($oShop->filter)
+			{
+				$oShop_Filter_Controller->fill($this->_object);
+
+				// Fast filter for modifications
+				$aModifications = $this->_object->Modifications->findAll(FALSE);
+				foreach ($aModifications as $oModification)
+				{
+					$this->_object->active
+						? $oShop_Filter_Controller->fill($oModification)
+						: $oShop_Filter_Controller->remove($oModification);
+				}
+			}
 
 			$this->_itemsCount++;
 

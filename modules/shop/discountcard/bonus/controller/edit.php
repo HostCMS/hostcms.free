@@ -63,7 +63,9 @@ class Shop_Discountcard_Bonus_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainRow3->add($oDropdownlistStatuses);
 
-		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4);
+		$oMainTab
+			->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow4)
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 margin-top-21')), $oMainRow3);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Discountcard_Bonus.edit_title')

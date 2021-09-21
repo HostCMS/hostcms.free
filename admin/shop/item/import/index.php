@@ -327,6 +327,7 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_price_action_delete_image')->value(isset($_POST['import_price_action_delete_image']) ? 1 : 0))
 								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('delete_property_values')->value(isset($_POST['delete_property_values']) ? 1 : 0))
+								->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('delete_unsent_modifications_by_properties')->value(isset($_POST['delete_unsent_modifications_by_properties']) ? 1 : 0))
 							);
 
 							$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -450,7 +451,8 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 				->importAction(Core_Array::getPost('import_price_action_items'))
 				->searchIndexation(Core_Array::getPost('search_event_indexation'))
 				->deleteImage(Core_Array::getPost('import_price_action_delete_image') == 1)
-				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1);
+				->deletePropertyValues(Core_Array::getPost('delete_property_values') == 1)
+				->deleteUnsentModificationsByProperties(Core_Array::getPost('delete_unsent_modifications_by_properties') == 1);
 
 			if (Core_Array::getPost('firstlineheader', 0))
 			{
@@ -609,7 +611,7 @@ else
 					'Windows-1251' => Core::_('Shop_Item.input_file_encoding0'),
 					'UTF-8' => Core::_('Shop_Item.input_file_encoding1')
 				))
-				->divAttr(array('class' => 'form-group col-xs-12 col-sm-2 hidden-1'))
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3 col-lg-2 hidden-1'))
 				->caption(Core::_('Shop_Item.price_list_encoding'))
 			)
 		)
@@ -699,6 +701,12 @@ else
 			->caption(Core::_('Shop_Item.delete_property_values'))
 			->divAttr(array('class' => 'form-group col-xs-12 hidden-1'))
 			->value(1))
+		)
+		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
+			->name("delete_unsent_modifications_by_properties")
+			->class('form-control colored-danger times')
+			->caption(Core::_('Shop_Item.delete_unsent_modifications_by_properties'))
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-1')))
 		)
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Checkbox')
 			->name("search_event_indexation")

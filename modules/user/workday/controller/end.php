@@ -45,7 +45,7 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 				</div>
 				<div class="row">
 					<div class="col-xs-12">
-						<button type="button" class="btn btn-success" onclick="<?php echo $this->_Admin_Form_Controller->getAdminSendForm(NULL, 'sendRequest')?>"><?php echo Core::_('User_Workday.send_request')?></button>
+						<button type="button" class="btn btn-success" onclick="<?php echo $this->_Admin_Form_Controller->getAdminSendForm(array('operation' => 'sendRequest'))?>"><?php echo Core::_('User_Workday.send_request')?></button>
 					</div>
 				</div>
 			</form>
@@ -54,8 +54,8 @@ class User_Workday_Controller_End extends Admin_Form_Action_Controller
 			$(function() {
 				$('#workdayEndTime').wickedpicker({
 					now: '<?php echo $currentTime?>',
-					twentyFour: true,  //Display 24 hour format, defaults to false
-					upArrow: 'wickedpicker__controls__control-up',  //The up arrow class selector to use, for custom CSS
+					twentyFour: true, //Display 24 hour format, defaults to false
+					upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
 					downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
 					close: 'wickedpicker__close', //The close class selector to use, for custom CSS
 					hoverState: 'hover-state', //The hover state class to use, for custom CSS

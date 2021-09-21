@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -23,6 +23,8 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$object->shop_id = Core_Array::getGet('shop_id');
 
 		$modelName = $object->getModelName();
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
 		{
@@ -48,6 +50,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 					;
 
 				$sColorValue = ($this->_object->id && $this->getField('color')->value)
@@ -107,7 +110,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$html = '
 					<script>
 						$(function(){
-							$(".shop-tab-groups").select2({
+							$("#' . $windowId . ' .shop-tab-groups").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Item.select_group') . '",
@@ -152,7 +155,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$html2 = '
 					<script>
 						$(function(){
-							$(".shop-tab-items").select2({
+							$("#' . $windowId . ' .shop-tab-items").select2({
 								language: "' . Core_i18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Tab.select_item') . '",
@@ -181,6 +184,52 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					';
 
 				$oMainRow6->add(Admin_Form_Entity::factory('Code')->html($html2));
+
+				$oAdditionalProducersSelect = Admin_Form_Entity::factory('Select')
+					->caption(Core::_('Shop_Tab.shop_tab_producer'))
+					->options($this->_fillShopTabProducers())
+					->name('shop_tab_producer_id[]')
+					->class('shop-tab-producers')
+					->style('width: 100%')
+					->multiple('multiple')
+					->divAttr(array('class' => 'form-group col-xs-12'));
+
+				$this->addField($oAdditionalProducersSelect);
+				$oMainRow7->add($oAdditionalProducersSelect);
+
+				$html3 = '
+					<script>
+						$(function(){
+							$("#' . $windowId . ' .shop-tab-producers").select2({
+								language: "' . Core_i18n::instance()->getLng() . '",
+								minimumInputLength: 1,
+								placeholder: "' . Core::_('Shop_Tab.select_producer') . '",
+								tags: true,
+								allowClear: true,
+								multiple: true,
+								ajax: {
+									url: "/admin/shop/item/index.php?producers&shop_id=' . $this->_object->shop_id .'",
+									dataType: "json",
+									type: "GET",
+									processResults: function (data) {
+										var aResults = [];
+										$.each(data, function (index, item) {
+											aResults.push({
+												"id": item.id,
+												"text": item.text
+											});
+										});
+										return {
+											results: aResults
+										};
+									}
+								},
+							});
+						})</script>
+					';
+
+				$oMainRow7->add(Admin_Form_Entity::factory('Code')->html($html3));
+
 			break;
 
 			case 'shop_tab_dir':
@@ -352,6 +401,31 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$oShop_Tab_Item->shop_tab_id = $this->_object->id;
 					$oShop_Tab_Item->save();
 				}
+
+				// Производители
+				$aShopTabProducerIds = Core_Array::getPost('shop_tab_producer_id', array());
+				!is_array($aShopTabProducerIds) && $aShopTabProducerIds = array();
+
+				$aTmp = array();
+
+				$aShop_Tab_Producers = $this->_object->Shop_Tab_Producers->findAll(FALSE);
+				foreach ($aShop_Tab_Producers as $oShop_Tab_Producer)
+				{
+					!in_array($oShop_Tab_Producer->shop_producer_id, $aShopTabProducerIds)
+						? $oShop_Tab_Producer->delete()
+						: $aTmp[] = $oShop_Tab_Producer->shop_producer_id;
+				}
+
+				// Новые производители
+				$aNewShopTabProducerIDs = array_diff($aShopTabProducerIds, $aTmp);
+				foreach ($aNewShopTabProducerIDs as $iNewShopTabProducerId)
+				{
+					$oShop_Tab_Producer = Core_Entity::factory('Shop_Tab_Producer');
+					$oShop_Tab_Producer->shop_id = $this->_object->shop_id;
+					$oShop_Tab_Producer->shop_producer_id = $iNewShopTabProducerId;
+					$oShop_Tab_Producer->shop_tab_id = $this->_object->id;
+					$oShop_Tab_Producer->save();
+				}
 			break;
 		}
 
@@ -420,6 +494,31 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				$aReturn[$oShop_Item->id] = array(
 					'value' => $oShop_Item->name . ' [' . $oShop_Item->id . ']',
+					'attr' => array('selected' => 'selected')
+				);
+			}
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Fill shortcut groups list
+	 * @return array
+	 */
+	protected function _fillShopTabProducers()
+	{
+		$aReturn = array();
+
+		$aShop_Tab_Producers = $this->_object->Shop_Tab_Producers->findAll(FALSE);
+		foreach ($aShop_Tab_Producers as $oShop_Tab_Producer)
+		{
+			$oShop_Producer = $oShop_Tab_Producer->Shop_Producer;
+
+			if (!is_null($oShop_Producer->id))
+			{
+				$aReturn[$oShop_Producer->id] = array(
+					'value' => $oShop_Producer->name . ' [' . $oShop_Producer->id . ']',
 					'attr' => array('selected' => 'selected')
 				);
 			}

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shortcode
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -60,7 +60,8 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oPhp_Textarea = Admin_Form_Entity::factory('Textarea');
 
 				$oTmpOptions = $oPhp_Textarea->syntaxHighlighterOptions;
-				$oTmpOptions['mode'] = 'application/x-httpd-php';
+				// $oTmpOptions['mode'] = 'application/x-httpd-php';
+				$oTmpOptions['mode'] = 'ace/mode/php';
 
 				$oPhp_Textarea
 					->value($this->_object->php)
@@ -204,7 +205,7 @@ class Shortcode_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$modelName = $this->_object->getModelName();
 
 		// Backup revision
-		if (Core::moduleIsActive('revision')  && $this->_object->id)
+		if (Core::moduleIsActive('revision') && $this->_object->id)
 		{
 			$modelName == 'shortcode'
 				&& $this->_object->backupRevision();

@@ -23,7 +23,7 @@ class Xsl_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-05-25';
+	public $date = '2021-08-23';
 
 	/**
 	 * Module name

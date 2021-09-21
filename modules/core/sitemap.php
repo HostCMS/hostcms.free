@@ -335,8 +335,8 @@ class Core_Sitemap extends Core_Servant_Properties
 				->where('informationsystem_groups.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
 				->where('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 				->where('informationsystem_groups.active', '=', 1)
-				->where('informationsystem_groups.shortcut_id', '=', 0)
-				->where('informationsystem_groups.indexing', '=', 1);
+				->where('informationsystem_groups.indexing', '=', 1)
+				->where('informationsystem_groups.shortcut_id', '=', 0);
 
 			Core_Event::notify('Core_Sitemap.onBeforeSelectInformationsystemGroups', $this, array($oInformationsystem_Groups));
 
@@ -387,7 +387,16 @@ class Core_Sitemap extends Core_Servant_Properties
 						'informationsystem_items.shortcut_id',
 						'informationsystem_items.path'
 					)
+					->leftJoin('informationsystem_groups', 'informationsystem_groups.id', '=', 'informationsystem_items.informationsystem_group_id')
 					->where('informationsystem_items.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
+					// Активность группы или группа корневая
+					->open()
+						->where('informationsystem_groups.active', '=', 1)
+						->where('informationsystem_groups.deleted', '=', 0)
+						->where('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+						->setOr()
+						->where('informationsystem_groups.id', 'IS', NULL)
+					->close()
 					->open()
 						->where('informationsystem_items.start_datetime', '<', $dateTime)
 						->setOr()
@@ -401,8 +410,9 @@ class Core_Sitemap extends Core_Servant_Properties
 					->close()
 					->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 					->where('informationsystem_items.active', '=', 1)
-					->where('informationsystem_items.shortcut_id', '=', 0)
-					->where('informationsystem_items.indexing', '=', 1);
+					->where('informationsystem_items.indexing', '=', 1)
+					->where('informationsystem_items.closed', '=', 0)
+					->where('informationsystem_items.shortcut_id', '=', 0);
 
 				Core_Event::notify('Core_Sitemap.onBeforeSelectInformationsystemItems', $this, array($oInformationsystem_Items));
 
@@ -457,16 +467,18 @@ class Core_Sitemap extends Core_Servant_Properties
 					->where('tags.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
 					->join('tag_informationsystem_items', 'tag_informationsystem_items.tag_id', '=', 'tags.id')
 					->join('informationsystem_items', 'tag_informationsystem_items.informationsystem_item_id', '=', 'informationsystem_items.id')
-					->leftJoin('informationsystem_groups', 'informationsystem_items.informationsystem_group_id', '=', 'informationsystem_groups.id',
-						array(
-							array('AND' => array('informationsystem_groups.deleted', '=', 0)),
-							array('AND' => array('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups))
-						)
-					)
+					->leftJoin('informationsystem_groups', 'informationsystem_groups.id', '=', 'informationsystem_items.informationsystem_group_id')
+					// Активность группы или группа корневая
+					->open()
+						->where('informationsystem_groups.active', '=', 1)
+						->where('informationsystem_groups.deleted', '=', 0)
+						->where('informationsystem_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+						->setOr()
+						->where('informationsystem_groups.id', 'IS', NULL)
+					->close()
 					->where('informationsystem_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 					->where('informationsystem_items.informationsystem_id', '=', $oInformationsystem->id)
 					->where('informationsystem_items.deleted', '=', 0)
-					//->where('tags.deleted', '=', 0)
 					->groupBy('tag_informationsystem_items.tag_id')
 					->having('count', '>', 0);
 
@@ -598,8 +610,17 @@ class Core_Sitemap extends Core_Servant_Properties
 						'shop_items.shortcut_id',
 						'shop_items.modification_id',
 						'shop_items.path'
-						)
+					)
+					->leftJoin('shop_groups', 'shop_groups.id', '=', 'shop_items.shop_group_id')
 					->where('shop_items.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
+					// Активность группы или группа корневая
+					->open()
+						->where('shop_groups.active', '=', 1)
+						->where('shop_groups.deleted', '=', 0)
+						->where('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+						->setOr()
+						->where('shop_groups.id', 'IS', NULL)
+					->close()
 					->open()
 						->where('shop_items.start_datetime', '<', $dateTime)
 						->setOr()
@@ -613,8 +634,8 @@ class Core_Sitemap extends Core_Servant_Properties
 					->close()
 					->where('shop_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 					->where('shop_items.active', '=', 1)
-					->where('shop_items.shortcut_id', '=', 0)
-					->where('shop_items.indexing', '=', 1);
+					->where('shop_items.indexing', '=', 1)
+					->where('shop_items.shortcut_id', '=', 0);
 
 				// Modifications
 				!$this->showModifications
@@ -673,16 +694,18 @@ class Core_Sitemap extends Core_Servant_Properties
 					->where('tags.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
 					->join('tag_shop_items', 'tag_shop_items.tag_id', '=', 'tags.id')
 					->join('shop_items', 'tag_shop_items.shop_item_id', '=', 'shop_items.id')
-					->leftJoin('shop_groups', 'shop_items.shop_group_id', '=', 'shop_groups.id',
-						array(
-							array('AND' => array('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)),
-							array('AND' => array('shop_groups.deleted', '=', 0)),
-						)
-					)
+					->leftJoin('shop_groups', 'shop_groups.id', '=', 'shop_items.shop_group_id')
+					// Активность группы или группа корневая
+					->open()
+						->where('shop_groups.active', '=', 1)
+						->where('shop_groups.deleted', '=', 0)
+						->where('shop_groups.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
+						->setOr()
+						->where('shop_groups.id', 'IS', NULL)
+					->close()
 					->where('shop_items.siteuser_group_id', 'IN', $this->_aSiteuserGroups)
 					->where('shop_items.shop_id', '=', $oShop->id)
 					->where('shop_items.deleted', '=', 0)
-					//->where('tags.deleted', '=', 0)
 					->groupBy('tag_shop_items.tag_id')
 					->having('count', '>', 0);
 
@@ -714,24 +737,45 @@ class Core_Sitemap extends Core_Servant_Properties
 
 		if ($this->showShopFilter)
 		{
-			$aShop_Filter_Seos = $oShop->Shop_Filter_Seos->getAllByActive(1, FALSE);
-			foreach ($aShop_Filter_Seos as $oShop_Filter_Seo)
-			{
-				$loc = $path . $oShop_Filter_Seo->getUrl();
-				$changefreq = $oStructure->changefreq;
-				$priority = $oStructure->priority;
-				$entity = $oShop_Filter_Seo;
+			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(array('MAX(id)', 'max_id'));
+			$oCore_QueryBuilder_Select
+				->from('shop_filter_seos')
+				->where('shop_filter_seos.shop_id', '=', $oShop->id)
+				->where('shop_filter_seos.deleted', '=', 0);
+			$aRow = $oCore_QueryBuilder_Select->execute()->asAssoc()->current();
+			$maxId = $aRow['max_id'];
 
-				Core_Event::notify('Core_Sitemap.onBeforeAddShopFilter', $this, array($loc, $changefreq, $priority, $entity));
+			$iFrom = 0;
 
-				$lastReturn = Core_Event::getLastReturn();
-				if (is_array($lastReturn) && count($lastReturn) == 4)
+			do {
+				$oShop_Filter_Seos = $oShop->Shop_Filter_Seos;
+				$oShop_Filter_Seos->queryBuilder()
+					->where('shop_filter_seos.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
+					->where('shop_filter_seos.active', '=', 1);
+
+				$aShop_Filter_Seos = $oShop_Filter_Seos->findAll(FALSE);
+
+				foreach ($aShop_Filter_Seos as $oShop_Filter_Seo)
 				{
-					list($loc, $changefreq, $priority, $entity) = $lastReturn;
+					$loc = $path . $oShop_Filter_Seo->getUrl();
+					$changefreq = $oStructure->changefreq;
+					$priority = $oStructure->priority;
+					$entity = $oShop_Filter_Seo;
+
+					Core_Event::notify('Core_Sitemap.onBeforeAddShopFilter', $this, array($loc, $changefreq, $priority, $entity));
+
+					$lastReturn = Core_Event::getLastReturn();
+					if (is_array($lastReturn) && count($lastReturn) == 4)
+					{
+						list($loc, $changefreq, $priority, $entity) = $lastReturn;
+					}
+
+					$this->addNode($loc, $changefreq, $priority, $entity);
 				}
-					
-				$this->addNode($loc, $changefreq, $priority, $entity);
+
+				$iFrom += $this->limit;
 			}
+			while ($iFrom < $maxId);
 		}
 
 		return $this;

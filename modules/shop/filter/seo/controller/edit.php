@@ -514,7 +514,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	/**
 	 * Показ списка групп или поле ввода с autocomplete для большого количества групп
 	 * @param string $fieldName имя поля группы
-	 * @return array  массив элементов, для доабвления в строку
+	 * @return array массив элементов, для доабвления в строку
 	 */
 	public function shopGroupShow($fieldName)
 	{
@@ -559,39 +559,38 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 				->value("
 					$('[name = shop_group_name]').autocomplete({
-						  source: function(request, response) {
-
+						source: function(request, response) {
 							$.ajax({
-							  url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
-							  dataType: 'json',
-							  data: {
-								queryString: request.term
-							  },
-							  success: function( data ) {
-								response( data );
-							  }
+								url: '/admin/shop/item/index.php?autocomplete=1&show_group=1&shop_id={$this->_object->shop_id}',
+								dataType: 'json',
+								data: {
+									queryString: request.term
+								},
+								success: function(data) {
+									response(data);
+								}
 							});
-						  },
-						  minLength: 1,
-						  create: function() {
-							$(this).data('ui-autocomplete')._renderItem = function( ul, item ) {
+						},
+						minLength: 1,
+						create: function() {
+							$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
 								return $('<li></li>')
 									.data('item.autocomplete', item)
 									.append($('<a>').text(item.label))
 									.appendTo(ul);
 							}
 
-							 $(this).prev('.ui-helper-hidden-accessible').remove();
-						  },
-						  select: function( event, ui ) {
+							$(this).prev('.ui-helper-hidden-accessible').remove();
+						},
+						select: function(event, ui) {
 							$('[name = {$fieldName}]').val(ui.item.id);
-						  },
-						  open: function() {
+						},
+						open: function() {
 							$(this).removeClass('ui-corner-all').addClass('ui-corner-top');
-						  },
-						  close: function() {
+						},
+						close: function() {
 							$(this).removeClass('ui-corner-top').addClass('ui-corner-all');
-						  }
+						}
 					});
 				");
 

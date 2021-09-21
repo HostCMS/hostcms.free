@@ -655,12 +655,12 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 		if (Core_Array::get($_SERVER, 'REQUEST_URI') == '/' && !((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~1835217467)) && strlen($sContent) < 204800)
 		{
 			$search = array(
+				"'<!--.*?-->'siu", // <!-- delete first!
 				"'<script[^>]*?>.*?</script\s*?>'siu",
 				"'<noscript[^>]*?>.*?</noscript\s*?>'siu",
 				"'<style[^>]*?>.*?</style\s*?>'siu",
 				"'<select[^>]*?>.*?</select\s*?>'siu",
-				"'<head[^>]*?>.*?</head\s*?>'siu",
-				"'<!--.*?-->'siu"
+				"'<head[^>]*?>.*?</head\s*?>'siu"
 			);
 
 			$sTmpContent = preg_replace($search, ' ', str_replace(array("\r", "\n"), ' ', $sContent));

@@ -24,4 +24,7 @@ return array(
 	'undelete_success' => 'Element restored!',
 	'add_shortcode_dir' => 'Dir',
 	'shop_tab_dir_id' => 'Dir',
+
+	'shop_tab_producer' => 'Producers',
+	'select_producer' => 'Select producer',
 );

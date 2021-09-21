@@ -725,48 +725,102 @@ class Shop_Group_Model extends Core_Entity
 		$aPropertyValues = $this->getPropertyValues();
 		foreach ($aPropertyValues as $oPropertyValue)
 		{
-			// List
-			if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
+			if ($oPropertyValue->Property->indexing)
 			{
-				if ($oPropertyValue->value != 0)
+				// List
+				if ($oPropertyValue->Property->type == 3 && Core::moduleIsActive('list'))
 				{
-					$oList_Item = $oPropertyValue->List_Item;
-					$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
-				}
-			}
-			// Informationsystem
-			elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
-			{
-				if ($oPropertyValue->value != 0)
-				{
-					$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
-					if ($oInformationsystem_Item->id)
+					if ($oPropertyValue->value != 0)
 					{
-						$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						$oList_Item = $oPropertyValue->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
 					}
 				}
-			}
-			// Shop
-			elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
-			{
-				if ($oPropertyValue->value != 0)
+				// Informationsystem
+				elseif ($oPropertyValue->Property->type == 5 && Core::moduleIsActive('informationsystem'))
 				{
-					$oShop_Item = $oPropertyValue->Shop_Item;
-					if ($oShop_Item->id)
+					if ($oPropertyValue->value != 0)
 					{
-						$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						$oInformationsystem_Item = $oPropertyValue->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
 					}
 				}
+				// Shop
+				elseif ($oPropertyValue->Property->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oPropertyValue->value != 0)
+					{
+						$oShop_Item = $oPropertyValue->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oPropertyValue->Property->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
+				}
+				// Other type
+				elseif ($oPropertyValue->Property->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				}
 			}
-			// Wysiwyg
-			elseif ($oPropertyValue->Property->type == 6)
+		}
+
+		if (Core::moduleIsActive('field'))
+		{
+			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
+			foreach ($aField_Values as $oField_Value)
 			{
-				$oSearch_Page->text .= htmlspecialchars(strip_tags($oPropertyValue->value)) . ' ';
-			}
-			// Other type
-			elseif ($oPropertyValue->Property->type != 2)
-			{
-				$oSearch_Page->text .= htmlspecialchars($oPropertyValue->value) . ' ';
+				// List
+				if ($oField_Value->Field->type == 3 && Core::moduleIsActive('list'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oList_Item = $oField_Value->List_Item;
+						$oList_Item->id && $oSearch_Page->text .= htmlspecialchars($oList_Item->value) . ' ' . htmlspecialchars($oList_Item->description) . ' ';
+					}
+				}
+				// Informationsystem
+				elseif ($oField_Value->Field->type == 5 && Core::moduleIsActive('informationsystem'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oInformationsystem_Item = $oField_Value->Informationsystem_Item;
+						if ($oInformationsystem_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oInformationsystem_Item->name) . ' ' . $oInformationsystem_Item->description . ' ' . $oInformationsystem_Item->text . ' ';
+						}
+					}
+				}
+				// Shop
+				elseif ($oField_Value->Field->type == 12 && Core::moduleIsActive('shop'))
+				{
+					if ($oField_Value->value != 0)
+					{
+						$oShop_Item = $oField_Value->Shop_Item;
+						if ($oShop_Item->id)
+						{
+							$oSearch_Page->text .= htmlspecialchars($oShop_Item->name) . ' ' . $oShop_Item->description . ' ' . $oShop_Item->text . ' ';
+						}
+					}
+				}
+				// Wysiwyg
+				elseif ($oField_Value->Field->type == 6)
+				{
+					$oSearch_Page->text .= htmlspecialchars(strip_tags($oField_Value->value)) . ' ';
+				}
+				// Other type
+				elseif ($oField_Value->Field->type != 2)
+				{
+					$oSearch_Page->text .= htmlspecialchars($oField_Value->value) . ' ';
+				}
 			}
 		}
 
@@ -821,10 +875,8 @@ class Shop_Group_Model extends Core_Entity
 
 		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
 
-		if ($object->active == 0)
-		{
-			$oCore_Html_Entity_Div->style("text-decoration: line-through");
-		}
+		!$object->active
+			&& $oCore_Html_Entity_Div->class('line-through');
 
 		$oCore_Html_Entity_Div->add(
 			Core::factory('Core_Html_Entity_A')
@@ -1448,5 +1500,22 @@ class Shop_Group_Model extends Core_Entity
 		$oShop_GroupShortcut->indexing = 0;
 
 		return $oShop_GroupShortcut->save()->clearCache();
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_group.onBeforeGetRelatedSite
+	 * @hostcms-event shop_group.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

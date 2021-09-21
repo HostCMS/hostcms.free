@@ -12,9 +12,10 @@ $Shop_Controller_YandexMarket
 	// ->outlets(TRUE)
 	->parseUrl()
 	// ->additionalImages(array('images'))
-	->priceMode('shop')
+	->model('ADV')
 	->groupModifications(FALSE)
-	->modifications(TRUE)
+	//->modifications(TRUE)
+	//->deliveryOptions(TRUE)
 	// ->itemsForbiddenProperties(array(7431, 7493))
 	->show();
 

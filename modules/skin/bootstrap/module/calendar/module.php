@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 {
@@ -110,7 +110,7 @@ class Skin_Bootstrap_Module_Calendar_Module extends Calendar_Module
 					$iCurrentTimestamp = time();
 
 					$oEvent->datetime = Core_Date::timestamp2sql($iCurrentTimestamp);
-					$oEvent->start =  Core_Date::timestamp2sql($iCurrentTimestamp);
+					$oEvent->start = Core_Date::timestamp2sql($iCurrentTimestamp);
 
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 

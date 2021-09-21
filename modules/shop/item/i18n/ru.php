@@ -340,6 +340,7 @@ return array(
 	'remove' => 'Убрать',
 	'set' => 'Установить',
 	'delete_property_values' => 'Удалять существующие значения дополнительных свойств',
+	'delete_unsent_modifications_by_properties' => 'Удалять непереданные модификации, созданные по свойству',
 	'continue_import' => "Если Ваш браузер не поддерживает автоматическое перенаправление - нажмите <b><a href=\"%s\" onclick=\"%s\">здесь</a></b>",
 	'seo_filter' => 'SEO-фильтр',
 	'apply_to' => 'Применить к цене',
@@ -353,4 +354,6 @@ return array(
 	'shop_tab_header' => 'Вкладки',
 	'certificate_discount' => 'Скидка',
 	'create_modification_use_property_name' => 'Использовать название свойства',
+	'shortcut' => 'Ярлык',
+	'include_modifications' => 'Учитывать модификации',
 );

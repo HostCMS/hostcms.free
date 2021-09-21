@@ -147,6 +147,8 @@ $oCore_Html_Entity_Form_File = Core::factory('Core_Html_Entity_Form')
 	->class('margin-top-40 margin-bottom-20')
 	// Load file
 	->add($oMainTabs);
+	
+$windowId = $oAdmin_Form_Controller->getWindowId();	
 
 $oMainTab
 	->add(
@@ -161,7 +163,7 @@ $oMainTab
 	->add(Admin_Form_Entity::factory('Code')->html('
 		<script type="text/javascript">
 			$(function() {
-				$("#dropzone").dropzone({
+				$("#' . $windowId . ' #dropzone").dropzone({
 					url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) .'",
 					parallelUploads: ' . $aConfig['parallelUploads'] . ',
 					maxFilesize: ' . $aConfig['maxFilesize'] . ',

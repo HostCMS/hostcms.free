@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Zip_Pclzip
 {
@@ -133,7 +133,7 @@ class Core_Zip_Pclzip
 	/**
 	 * Extract file from archive by given file name
 	 *
-	 * @param  string $filename Filename for the file in zip archive
+	 * @param string $filename Filename for the file in zip archive
 	 * @return string $contents File string contents
 	 */
 	public function getFromName($filename)
@@ -180,7 +180,7 @@ class Core_Zip_Pclzip
 	 /**
 	 * Delete file from archive by given file name
 	 *
-	 * @param  string $filename Filename for the file in zip archive
+	 * @param string $filename Filename for the file in zip archive
 	 * @return boolean
 	 */
 	public function deleteName($filename)
@@ -198,7 +198,7 @@ class Core_Zip_Pclzip
 	 */
 	public function addEmptyDir($filename)
 	{
-        $this->_oPclZip->add($filename);
+		$this->_oPclZip->add($filename);
 		return TRUE;
 	}
 }

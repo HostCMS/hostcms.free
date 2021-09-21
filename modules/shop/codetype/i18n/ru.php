@@ -10,7 +10,7 @@ return array(
 	'description' => 'Описание',
 	'code' => 'Код',
 	'sorting' => 'Порядок сортировки',
-	'edit_success'  => 'Информация о маркировке изменена!',
+	'edit_success' => 'Информация о маркировке изменена!',
 	'markDeleted_success' => 'Маркировка успешено удалена!',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',

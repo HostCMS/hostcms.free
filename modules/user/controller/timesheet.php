@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {
@@ -166,7 +166,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 												<a class="btn btn-palegreen dropdown-toggle" data-toggle="dropdown" href="javascript:void(0);" aria-expanded="false"><i class="fa fa-angle-down"></i></a>
 												<ul class="dropdown-menu dropdown-palegreen">
 													<li>
-														<a class="add-absence-button" data-action="add_absence"  href="javascript:void(0);"><i class="fa fa-fw fa-plus"></i><?php echo Core::_('Admin_Form.add')?></a>
+														<a class="add-absence-button" data-action="add_absence" href="javascript:void(0);"><i class="fa fa-fw fa-plus"></i><?php echo Core::_('Admin_Form.add')?></a>
 													</li>
 													<li>
 														<a href="/admin/user/absence/index.php" onclick="<?php echo $oAdmin_Form_Controller->getAdminLoadAjax('/admin/user/absence/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')?>"><i class="fa fa-fw fa-list"></i><?php echo Core::_('User_Absence.absence_list')?></a>

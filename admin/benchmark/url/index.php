@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -645,8 +645,8 @@ $(function(){
 	$.getMultiContent(aScripts, '/modules/skin/bootstrap/js/charts/flot/').done(function() {
 		// all scripts loaded
 
-		var placeholderPerDay = $("#benchmark-month-chart"),
-		placeholderPerHour = $("#benchmark-day-chart");
+		var placeholderPerDay = $("#<?php echo $sWindowId?> #benchmark-month-chart"),
+		placeholderPerHour = $("#<?php echo $sWindowId?> #benchmark-day-chart");
 
 		placeholderPerDay.bind("plotselected", function (event, ranges) {
 			plotPerDay = $.plot(placeholderPerDay, dataPerDay, $.extend(true, {}, optionsForDayGraph, {
@@ -666,11 +666,11 @@ $(function(){
 			}));
 		});
 
-		$('#benchmark_month #setOriginalZoom').on('click', function(){
+		$('#<?php echo $sWindowId?> #benchmark_month #setOriginalZoom').on('click', function(){
 			plotPerDay = $.plot(placeholderPerDay, dataPerDay, optionsForDayGraph);
 		});
 
-		$('#benchmark_day #setOriginalZoom').on('click', function(){
+		$('#<?php echo $sWindowId?> #benchmark_day #setOriginalZoom').on('click', function(){
 			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
 		});
 
@@ -678,16 +678,16 @@ $(function(){
 			plotPerHour = $.plot(placeholderPerHour, dataPerHour, optionsForHourGraph);
 
 
-		$("#benchmark_month #clearSelection").click(function () {
+		$("#<?php echo $sWindowId?> #benchmark_month #clearSelection").click(function () {
 			plotPerDay.clearSelection();
 		});
 
-		$("#benchmark_day #clearSelection").click(function () {
+		$("#<?php echo $sWindowId?> #benchmark_day #clearSelection").click(function () {
 			plotPerHour.clearSelection();
 		});
 
 		// Вызываем однократно обработчик нажатия кнопки, для правильной отрисовки графика
-		$('.page-content').one('shown.bs.tab', 'a[data-toggle="tab"]', function(e){
+		$('#<?php echo $sWindowId?> .page-content').one('shown.bs.tab', 'a[data-toggle="tab"]', function(e){
 			$('#<?php echo $sWindowId ?> ' + $(e.target).attr('href') + ' #setOriginalZoom').click();
 		});
 	});

@@ -9,9 +9,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Template_Section_Model extends Core_Entity{
+class Template_Section_Model extends Core_Entity
+{
 	/**
 	 * Backend property
 	 * @var int
@@ -137,4 +138,22 @@ class Template_Section_Model extends Core_Entity{
 	{
 		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
 			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1615">' . htmlspecialchars($this->name) . '</span>';
-	}}
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event template_section.onBeforeGetRelatedSite
+	 * @hostcms-event template_section.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Template->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
+}

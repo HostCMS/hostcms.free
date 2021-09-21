@@ -307,12 +307,6 @@ else
 	$Shop_Controller_Show->group(FALSE)->forbidSelectModifications();
 }*/
 
-// При фильтрации модификации выводятся на уровне товаров
-if (count($Shop_Controller_Show->getFilterProperties()) || count($Shop_Controller_Show->getFilterPrices()))
-{
-	$Shop_Controller_Show->modificationsList(TRUE);
-}
-
 $Shop_Controller_Show
 	->xsl(
 		Core_Entity::factory('Xsl')->getByName($xslName)

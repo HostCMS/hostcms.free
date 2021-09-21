@@ -348,4 +348,8 @@ return array(
 	'certificate_item_header' => 'Сертифікат',
 	'item_type_selection_group_buttons_name_certificate' => "Сертифікат",
 	'create_modification_use_property_name' => 'Використовувати назву властивості',
+
+	'delete_unsent_modifications_by_properties' => 'Видаляти непередані модифікації, створені по властивості',
+	'shortcut' => 'Ярлик',
+	'include_modifications' => 'Враховувати модифікації',
 );

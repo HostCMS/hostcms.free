@@ -46,82 +46,108 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-6'));
 		$oMainTab->move($this->getField('sorting'), $oMainRow1);
 
-		// Объект вкладки 'Настройки модуля'
-		$oSettingsTab = Admin_Form_Entity::factory('Tab')
-			->caption(Core::_('Module.tab_parameters'))
-			->name('parameters');
-
-		// Добавляем вкладку выпадающий список
-		$this->addTabAfter($oSettingsTab, $oMainTab);
-
-		$aConfig = Core_Config::instance()->get($this->_object->path . '_config', array());
-
-		$oCore_Module = Core_Module::factory($this->_object->path);
-		$aModule_Options = $oCore_Module->getOptions();
-
-		foreach ($aModule_Options as $option_name => $aOptions)
+		if ($this->_object->id)
 		{
-			$oAdmin_Form_Entity = NULL;
+			// Объект вкладки 'Настройки модуля'
+			$oSettingsTab = Admin_Form_Entity::factory('Tab')
+				->caption(Core::_('Module.tab_parameters'))
+				->name('parameters');
 
-			$aFormat = array();
+			// Добавляем вкладку
+			$this->addTabAfter($oSettingsTab, $oMainTab);
 
-			if (isset($aOptions['type']))
+			$aConfig = Core_Config::instance()->get($this->_object->path . '_config', array());
+
+			$oCore_Module = Core_Module::factory($this->_object->path);
+
+			if ($oCore_Module)
 			{
-				$oSettingsTab->add($oSettingsRow = Admin_Form_Entity::factory('Div')->class('row'));
+				$aModule_Options = $oCore_Module->getOptions();
 
-				switch ($aOptions['type'])
+				foreach ($aModule_Options as $option_name => $aOptions)
 				{
-					case 'int':
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-							->format($aFormat + array('lib' => array(
-								'value' => 'integer'
-							)));
-					break;
-					case 'string':
-					default:
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')->format($aFormat);
-					break;
-					case 'textarea':
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea');
-					break;
-					case 'float':
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
-							->format($aFormat + array('lib' => array(
-								'value' => 'decimal'
-							)));
-					break;
-					case 'checkbox':
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
-					break;
-					case 'list':
-						$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select');
+					$oAdmin_Form_Entity = NULL;
 
-						if (isset($aOptions['options']))
+					$aFormat = array();
+
+					if (isset($aOptions['type']))
+					{
+						$aOptions += array('default' => NULL);
+
+						$oSettingsTab->add($oSettingsRow = Admin_Form_Entity::factory('Div')->class('row'));
+
+						$value = isset($aOptions['value'])
+							? $aOptions['value']
+							: Core_Array::get($aConfig, $option_name, $aOptions['default']);
+
+						switch ($aOptions['type'])
 						{
-							$oAdmin_Form_Entity->options($aOptions['options']);
+							case 'int':
+							case 'integer':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+									->format($aFormat + array('lib' => array(
+										'value' => 'integer'
+									)))
+									->value($value);
+							break;
+							case 'string':
+							case 'input':
+							default:
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+									->format($aFormat)
+									->value($value);
+							break;
+							case 'password':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Password')
+									->format($aFormat)
+									->value($value);
+							break;
+							case 'textarea':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Textarea')
+									->value($value);
+							break;
+							case 'float':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Input')
+									->format($aFormat + array('lib' => array(
+										'value' => 'decimal'
+									)))
+									->value($value);
+							break;
+							case 'checkbox':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Checkbox');
+								$oAdmin_Form_Entity
+									->value(1)
+									->checked($value);
+							break;
+							case 'list':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Select')
+									->value($value);
+
+								if (isset($aOptions['options']))
+								{
+									$oAdmin_Form_Entity->options($aOptions['options']);
+								}
+							break;
+							case 'separator':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Separator');
+							break;
+							case 'code':
+								$oAdmin_Form_Entity = Admin_Form_Entity::factory('Code');
+							break;
 						}
-					break;
-				}
 
-				if ($oAdmin_Form_Entity)
-				{
-					$oAdmin_Form_Entity
-						->caption(Core::_($this->_object->path . '.option_' . $option_name))
-						->name('option_' . $option_name)
-						->value(isset($aConfig[$option_name])
-							? $aConfig[$option_name]
-							: (isset($aOptions['default'])
-								? $aOptions['default']
-								: ''
-							)
-						);
+						if ($oAdmin_Form_Entity)
+						{
+							isset($oAdmin_Form_Entity->caption) && $oAdmin_Form_Entity
+								->caption(isset($aOptions['caption'])
+									? $aOptions['caption']
+									: Core::_($this->_object->path . '.option_' . $option_name)
+								)
+								->name('option_' . $option_name);
 
-					$aOptions['type'] == 'checkbox'
-						&& $oAdmin_Form_Entity
-							->value(1)
-							->checked($aOptions['default'] == 1);
-
-					$oSettingsRow->add($oAdmin_Form_Entity);
+							$oSettingsRow->add($oAdmin_Form_Entity);
+						}
+					}
 				}
 			}
 		}
@@ -148,33 +174,10 @@ class Module_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$oCore_Module = Core_Module::factory($this->_object->path);
-		$aModule_Options = $oCore_Module->getOptions();
 
-		if (count($aModule_Options))
+		if ($oCore_Module)
 		{
-			$aConfig = Core_Config::instance()->get($this->_object->path . '_config', array());
-
-			foreach ($aModule_Options as $option_name => $aOptions)
-			{
-				$value = Core_Array::getPost('option_' . $option_name);
-
-				switch ($aOptions['type'])
-				{
-					case 'int':
-						$value = intval($value);
-					break;
-					case 'float':
-						$value = floatval($value);
-					break;
-					case 'checkbox':
-						$value = $value == 1;
-					break;
-				}
-
-				$aConfig[$option_name] = $value;
-			}
-
-			$aConfig = Core_Config::instance()->set($this->_object->path . '_config', $aConfig);
+			$oCore_Module->setOptions($_POST);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

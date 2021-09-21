@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Schedule
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -54,7 +54,7 @@ class Schedule_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oMainTab->delete($this->getField('interval'));
 
-		$aInterval =  $this->_object->getInterval();
+		$aInterval = $this->_object->getInterval();
 
 		$oMainRow1
 			->add(Admin_Form_Entity::factory('Input')

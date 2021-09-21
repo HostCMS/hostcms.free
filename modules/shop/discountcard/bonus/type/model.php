@@ -145,4 +145,21 @@ class Shop_Discountcard_Bonus_Type_Model extends Core_Entity
 
 		return parent::delete($primaryKey);
 	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event shop_discountcard_bonus_type.onBeforeGetRelatedSite
+	 * @hostcms-event shop_discountcard_bonus_type.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->Shop->Site;
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
+	}
 }
