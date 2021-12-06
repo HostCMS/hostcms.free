@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -402,6 +402,14 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		$this->_loadKeys();
 
+		$aChecked = $this->_Admin_Form_Controller->getChecked();
+
+		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
+
+		$this->_Admin_Form_Entity_Form
+			->data('adminFormId', $oAdmin_Form ? $oAdmin_Form->id : '')
+			->data('datasetId', is_array($aChecked) ? key($aChecked) : '');
+
 		// Получение списка полей объекта
 		$aColumns = $this->_object->getTableColumns();
 
@@ -437,21 +445,24 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		//}
 
 		// Fields
-		$oAdmin_Form_Tab_EntityFields = Admin_Form_Entity::factory('Tab')
-			//->caption(Core::_('admin_form.form_forms_tab_1'))
-			->name('user_fields')
-			->class($this->tabClass)
-			->icon('fas fa-user-cog')
-			->iconTitle(Core::_('admin_form.form_forms_tab_3'));
+		if (Core::moduleIsActive('field'))
+		{
+			$oAdmin_Form_Tab_EntityFields = Admin_Form_Entity::factory('Tab')
+				//->caption(Core::_('admin_form.form_forms_tab_1'))
+				->name('user_fields')
+				->class($this->tabClass)
+				->icon('fas fa-user-cog')
+				->iconTitle(Core::_('admin_form.form_forms_tab_3'));
 
-		$this->addTabBefore($oAdmin_Form_Tab_EntityFields, $oAdmin_Form_Tab_EntityAdditional);
+			$this->addTabBefore($oAdmin_Form_Tab_EntityFields, $oAdmin_Form_Tab_EntityAdditional);
 
-		Field_Controller_Tab::factory($this->_Admin_Form_Controller)
-			->setObject($this->_object)
-			->setDatasetId($this->getDatasetId())
-			->setTab($oAdmin_Form_Tab_EntityFields)
-			// ->template_id($template_id)
-			->fillTab();
+			Field_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->setDatasetId($this->getDatasetId())
+				->setTab($oAdmin_Form_Tab_EntityFields)
+				// ->template_id($template_id)
+				->fillTab();
+		}
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
@@ -731,7 +742,6 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					->pageTitle($this->title);
 
 				$this->_return = $this->_showEditForm();
-
 			break;
 			case 'modal':
 				// $windowId = $this->_Admin_Form_Controller->getWindowId();
@@ -746,6 +756,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 					// Событие onAfterRedeclaredPrepareForm вызывается в двух местах
 					Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterRedeclaredPrepareForm', $this, array($this->_object, $this->_Admin_Form_Controller));
 				}
+
+				$this->_Admin_Form_Controller
+					->title($this->title);
 
 				$oAdmin_Form_Action_Controller_Type_Edit_Show = Admin_Form_Action_Controller_Type_Edit_Show::create($this->_Admin_Form_Entity_Form)
 					->Admin_Form_Controller($this->_Admin_Form_Controller)
@@ -934,18 +947,45 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			}
 		}
 
+		// Autosave
+		$this->_deleteAutosave();
+
 		$this->_object->save();
 
 		// Fields
-		Field_Controller_Tab::factory($this->_Admin_Form_Controller)
-			->setObject($this->_object)
-			->applyObjectProperty();
+		if (Core::moduleIsActive('field'))
+		{
+			// Fields
+			Field_Controller_Tab::factory($this->_Admin_Form_Controller)
+				->setObject($this->_object)
+				->applyObjectProperty();
+		}
 
 		$message = ob_get_clean();
 
 		!empty($message) && $this->addMessage($message);
 
 		Core_Event::notify('Admin_Form_Action_Controller_Type_Edit.onAfterApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+
+		return $this;
+	}
+
+	/**
+	 * Delete autosave
+	 * @return self
+	 */
+	protected function _deleteAutosave()
+	{
+		$aChecked = $this->_Admin_Form_Controller->getChecked();
+		$datasetId = is_array($aChecked) ? key($aChecked) : '';
+
+		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
+
+		if ($datasetId != '')
+		{
+			$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave')->getObject($oAdmin_Form->id, $datasetId, intval($this->_object->getPrimaryKey()));
+			!is_null($oAdmin_Form_Autosave) && $oAdmin_Form_Autosave->delete();
+		}
 
 		return $this;
 	}

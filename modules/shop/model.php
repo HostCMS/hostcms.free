@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -466,6 +466,8 @@ class Shop_Model extends Core_Entity
 	public function copy()
 	{
 		$newObject = parent::copy();
+		$newObject->filter = 0;
+		$newObject->save();
 
 		try
 		{

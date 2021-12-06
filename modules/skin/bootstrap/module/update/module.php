@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Update_Module extends Update_Module
 {
@@ -31,7 +31,66 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 		{
 			$aUpdates = Update_Controller::instance()->parseUpdates();
 
+			$iUpdateCounts = count($aUpdates['entities']);
+
 			$error = $aUpdates['error'];
+
+			$oModule = Core_Entity::factory('Module')->getByPath('update');
+
+			$aUsers = Core_Entity::factory('User')->getAllBySuperuser(1, FALSE);
+
+			if (!$error && $iUpdateCounts)
+			{
+				$oUpdate = end($aUpdates['entities']);
+
+				$oNotification = Core_Entity::factory('Notification')->getNotification($oModule->id, 0, $oUpdate->id);
+
+				if (is_null($oNotification))
+				{
+					$oNotification = Core_Entity::factory('Notification')
+						->title(Core::_('Update.add_system_notification', $oUpdate->name))
+						->description(Core::_('Update.system_notification_description', $oUpdate->name))
+						->datetime(Core_Date::timestamp2sql(time()))
+						->module_id($oModule->id)
+						->type(0) // 0 - Системное обновление
+						->entity_id($oUpdate->id)
+						->save();
+
+					// Связываем уведомление с сотрудниками
+					foreach ($aUsers as $oUser)
+					{
+						$oUser->add($oNotification);
+					}
+				}
+			}
+
+			$aModuleUpdates = Update_Controller::instance()->parseModules();
+
+			if (count($aModuleUpdates))
+			{
+				foreach ($aModuleUpdates as $oModuleUpdate)
+				{
+					$oNotificationModule = Core_Entity::factory('Notification')->getNotification($oModule->id, 1, $oModuleUpdate->id);
+
+					if (is_null($oNotificationModule))
+					{
+						$oNotificationModule = Core_Entity::factory('Notification')
+							->title(Core::_('Update.add_module_notification', $oModuleUpdate->name))
+							->description(Core::_('Update.module_notification_description', $oModuleUpdate->number))
+							->datetime(Core_Date::timestamp2sql(time()))
+							->module_id($oModule->id)
+							->type(1) // 1 - Обновление модуля
+							->entity_id($oModuleUpdate->id)
+							->save();
+
+						// Связываем уведомление с сотрудниками
+						foreach ($aUsers as $oUser)
+						{
+							$oUser->add($oNotification);
+						}
+					}
+				}
+			}
 
 			?><!-- Update -->
 			<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
@@ -44,7 +103,6 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 					<div class="databox-right">
 						<span class="databox-number themethirdcolor">
 							<?php
-							$iUpdateCounts = count($aUpdates['entities']);
 							if (!$error && $iUpdateCounts)
 							{
 								echo $iUpdateCounts;

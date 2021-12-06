@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Lib
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,12 +51,13 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 				3 => Core::_('Lib_Property.lib_property_type_3'),
 				4 => Core::_('Lib_Property.lib_property_type_4'),
 				5 => Core::_('Lib_Property.lib_property_type_5'),
-				7 => Core::_('Lib_Property.lib_property_type_7')
+				7 => Core::_('Lib_Property.lib_property_type_7'),
+				8 => Core::_('Lib_Property.lib_property_type_8')
 			))
 			->name('type')
 			->value($this->_object->type)
 			->caption(Core::_('Lib_Property.type'))
-			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3,4,5,7])");
+			->onchange("radiogroupOnChange('{$windowId}', $(this).val(), [0,1,2,3,4,5,7,8])");
 
 		// Получаем основную вкладку
 		$oMainTab = $this->getTab('main');
@@ -72,17 +73,21 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 			;
 
 		$this->getField('sql_request')
-			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7'));
+			->divAttr(array('class' => 'form-group col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7 hidden-8'));
 		$this->getField('sql_caption_field')
-			->divAttr(array('class' => 'form-group col-md-6 col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7'));
+			->divAttr(array('class' => 'form-group col-md-6 col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7 hidden-8'));
 		$this->getField('sql_value_field')
-			->divAttr(array('class' => 'form-group col-md-6 col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7'));
+			->divAttr(array('class' => 'form-group col-md-6 col-xs-12 hidden-0 hidden-1 hidden-2 hidden-3 hidden-5 hidden-7 hidden-8'));
+
+		$this->getField('change_filename')
+			->divAttr(array('class' => 'form-group col-md-6 margin-top-21 hidden-0 hidden-1 hidden-2 hidden-3 hidden-4 hidden-5 hidden-6 hidden-7'));
 
 		$oMainTab
 			->move($this->getField('name'), $oMainRow1)
 			->move($this->getField('description'), $oMainRow2)
 			->move($this->getField('varible_name')->divAttr(array('class' => 'form-group col-md-6 col-xs-12')), $oMainRow3)
-			->move($this->getField('default_value')->divAttr(array('class' => 'form-group col-md-6 col-xs-12')), $oMainRow5)
+			->move($this->getField('default_value')->divAttr(array('class' => 'form-group col-md-6 col-xs-12 hidden-8')), $oMainRow5)
+			->move($this->getField('change_filename'), $oMainRow5)
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-md-3 col-xs-12')), $oMainRow5)
 			->move($this->getField('multivalue')->divAttr(array('class' => 'margin-top-21 form-group col-md-3 col-xs-12')), $oMainRow5)
 			->move($this->getField('sql_request'), $oMainRow6)
@@ -96,7 +101,7 @@ class Lib_Property_Controller_Edit extends Admin_Form_Action_Controller_Type_Edi
 
 		$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
 		$oAdmin_Form_Entity_Code->html(
-			"<script>radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1,2,3,4,5,7])</script>"
+			"<script>radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1,2,3,4,5,7,8])</script>"
 		);
 
 		$oMainTab->add($oAdmin_Form_Entity_Code);

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -177,13 +177,13 @@ class Property_Model extends Core_Entity
 		{
 			$this->_aAllValues = array();
 
-			$aPropertyValues = Property_Controller_Value::factory($this->type)
+			$aProperty_Values = Property_Controller_Value::factory($this->type)
 				->setProperty($this)
 				->getPropertyValueObject()->findAll();
 
-			foreach ($aPropertyValues as $oPropertyValue)
+			foreach ($aProperty_Values as $oProperty_Value)
 			{
-				$this->_aAllValues[$oPropertyValue->entity_id][] = $oPropertyValue;
+				$this->_aAllValues[$oProperty_Value->entity_id][] = $oProperty_Value;
 			}
 		}
 

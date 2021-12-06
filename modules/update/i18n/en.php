@@ -32,6 +32,12 @@ return array(
 	'msg_update_required' => 'Update %s required',
 	'msg_installing_package' => 'Installing package %s',
 	'msg_unpack_package' => 'Unpacking file %s',
+	'msg_execute_sql' => 'Executing SQL Queries',
+	'msg_execute_file' => 'Executing instructions from a file',
 	'module' => 'Module "%s"',
-	'update' => 'Update',	
+	'update' => 'Update',
+	'add_system_notification' => 'Update %s',
+	'system_notification_description' => 'Update %s available',
+	'add_module_notification' => 'Module update %s',
+	'system_notification_description' => 'New version %s available',
 );

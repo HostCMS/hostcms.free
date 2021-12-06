@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -28,8 +28,6 @@ class Skin_Bootstrap_Admin_Form_Action_Controller_Type_Edit_Show extends Admin_F
 	 */
 	public function showEditForm()
 	{
-		$children = $this->children;
-
 		ob_start();
 
 		$aMenus = array_filter($this->children, array(__CLASS__, '_justMenus'));

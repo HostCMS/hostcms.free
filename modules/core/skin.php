@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Skin
 {
@@ -252,7 +252,7 @@ abstract class Core_Skin
 	 */
 	protected function _getTimestamp()
 	{
-		$currentVersion = defined('CURRENT_VERSION') ? CURRENT_VERSION : '6.0';
+		$currentVersion = Core::getVersion();
 		return abs(Core::crc32($currentVersion . $currentVersion));
 	}
 
@@ -312,7 +312,7 @@ abstract class Core_Skin
 			->queryBuilder()
 			->where('active', '=', 1);
 
-		if ($oUser->superuser == 0)
+		if (!$oUser->superuser)
 		{
 			$oModule->queryBuilder()
 				->select('modules.*')

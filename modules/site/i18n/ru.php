@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -112,4 +112,5 @@ return array(
 	'hosts' => 'Разделенные пробелами, * для поддоменов, можно указать только схему, например, https:',
 
 	'protect' => 'Защита от атак',
+	'sender_name' => 'Имя отправителя',
 );

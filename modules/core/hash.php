@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Hash
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Hash
 {
@@ -62,7 +62,7 @@ abstract class Core_Hash
 	 */
 	static public function instance()
 	{
-		$aConfig = Core::$config->get('core_hash');
+		$aConfig = Core::$config->get('core_hash', array());
 
 		$hashName = Core_Array::get($aConfig, 'hash');
 		$salt = Core_Array::get($aConfig, 'salt');

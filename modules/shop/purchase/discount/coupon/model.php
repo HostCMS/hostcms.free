@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -18,7 +18,7 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	 * @var array
 	 */
 	protected $_preloadValues = array(
-		'count' => -1,
+		'count' => 1,
 		'active' => 1
 	);
 
@@ -53,7 +53,7 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 
 			$this->_preloadValues['start_datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['end_datetime'] = '2030-12-31 23:59:59';
+			$this->_preloadValues['end_datetime'] = Core_Date::timestamp2sql(strtotime('+1 month'));
 		}
 	}
 

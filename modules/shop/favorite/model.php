@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -55,13 +55,22 @@ class Shop_Favorite_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param boolean $showXmlProperties
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
+
 		return $this;
 	}
 
@@ -153,7 +162,7 @@ class Shop_Favorite_Model extends Core_Entity
 		$oShop_Item = $this->Shop_Item
 			->clearEntities()
 			->showXmlWarehousesItems(TRUE)
-			->showXmlProperties($this->_showXmlProperties)
+			->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 			->showXmlModifications($this->_showXmlModifications)
 			->showXmlSpecialprices($this->_showXmlSpecialprices)
 			->showXmlCommentsRating($this->_showXmlCommentsRating);
@@ -163,7 +172,7 @@ class Shop_Favorite_Model extends Core_Entity
 		{
 			$oModification = Core_Entity::factory('Shop_Item')->find($this->Shop_Item->modification_id);
 			!is_null($oModification->id) && $oShop_Item->addEntity(
-				$oModification->showXmlProperties($this->_showXmlProperties)
+				$oModification->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 			);
 		}
 

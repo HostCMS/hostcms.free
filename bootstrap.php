@@ -5,11 +5,10 @@
  * @package HostCMS
  * @version 6.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 define('CMS_FOLDER', dirname(__FILE__) . DIRECTORY_SEPARATOR);
 define('HOSTCMS', TRUE);
-//define('USE_HOSTCMS_5', TRUE);
 
 // ini_set("memory_limit", "32M");
 // ini_set("max_execution_time", "120");
@@ -39,12 +38,6 @@ if (!defined('DENY_INI_SET') || !DENY_INI_SET)
 
 //function_exists('date_default_timezone_set') && date_default_timezone_set(date_default_timezone_get());
 
-$config_path = CMS_FOLDER . 'hostcmsfiles/config_db.php';
-if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5 && is_file($config_path))
-{
-	require_once($config_path);
-}
-
 require_once(CMS_FOLDER . 'modules/core/core.php');
 
 Core::init();
@@ -62,11 +55,6 @@ if (Core_Auth::logged())
 	Core_Event::attach('Core_Cache.onAfterGet', array('Core_Cache_Observer', 'onAfterGet'));
 	Core_Event::attach('Core_Cache.onBeforeSet', array('Core_Cache_Observer', 'onBeforeSet'));
 	Core_Event::attach('Core_Cache.onAfterSet', array('Core_Cache_Observer', 'onAfterSet'));
-}
-
-if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-{
-	require_once(CMS_FOLDER . 'modules/hostcms5/Kernel/Kernel.php');
 }
 
 // Robokassa SMS observers

@@ -3,7 +3,7 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -923,16 +923,14 @@ if ($oShopDir->id)
 
 // Крошка на список товаров и групп товаров магазина
 $oBreadcrumbs->add(
-Admin_Form_Entity::factory('Breadcrumb')
-	->name($oShop->name)
-	->href($oAdmin_Form_Controller->getAdminLoadHref
-	(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}"
-	))
-	->onclick($oAdmin_Form_Controller->getAdminLoadAjax
-	(
-		$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}"
-	))
+	Admin_Form_Entity::factory('Breadcrumb')
+		->name($oShop->name)
+		->href($oAdmin_Form_Controller->getAdminLoadHref(
+			$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}"
+		))
+		->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
+			$oAdmin_Form_Controller->getPath(), NULL, NULL, "shop_id={$oShop->id}"
+		))
 );
 
 // Крошки по группам товаров
@@ -976,7 +974,38 @@ if ($oEditAction)
 	$oEditController = Admin_Form_Action_Controller::factory(
 		'Shop_Item_Controller_Edit', $oEditAction
 	);
+
+	if (strlen($sGlobalSearch))
+	{
+		$iShopItemId = 0;
+
+		$aChecked = $oAdmin_Form_Controller->getChecked();
+
+		if (isset($aChecked[1]) && count($aChecked[1]) == 1)
+		{
+			$iShopItemId = key($aChecked[1]);
+
+			$oShop_Item = $oShop->Shop_Items->getById($iShopItemId);
+
+			if (!is_null($oShop_Item) && $oShop_Item->modification_id)
+			{
+				$oShopItemParent = $oShop_Item->Modification;
+
+				$oBreadcrumbs->add(Admin_Form_Entity::factory('Breadcrumb')
+					->name(Core::_("Shop_Item.item_modification_title", $oShopItemParent->name, FALSE))
+					->href($oAdmin_Form_Controller->getAdminLoadHref(
+						'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"
+					))
+					->onclick($oAdmin_Form_Controller->getAdminLoadAjax(
+						'/admin/shop/item/modification/index.php', NULL, NULL, "shop_item_id={$oShopItemParent->id}"
+					))
+				);
+			}
+		}
+	}
+
 	$oEditController->addEntity($oBreadcrumbs);
+
 	$oAdmin_Form_Controller->addAction($oEditController);
 }
 
@@ -1236,6 +1265,20 @@ if ($oAdminFormActionDeleteSet && $oAdmin_Form_Controller->getAction() == 'delet
 	);
 
 	$oAdmin_Form_Controller->addAction($Shop_Item_Set_Controller_Delete);
+}
+
+$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('rollback');
+
+if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
+{
+	$oControllerRollback = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Rollback', $oAdminFormActionRollback
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
 // Источник данных 0

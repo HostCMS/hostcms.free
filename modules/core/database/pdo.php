@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Database
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -583,6 +583,28 @@ class Core_DataBase_Pdo extends Core_DataBase
 		$result = $this->_connection->query($query);
 
 		return $this->_fetch($result, FALSE);
+	}
+
+	/**
+	 * Get the process list indicates the operations currently being performed
+	 *
+	 * @return array
+	 */
+	public function getProcesslist()
+	{
+		$this->connect();
+
+		$query = 'SELECT * FROM `INFORMATION_SCHEMA`.`PROCESSLIST` WHERE `state` != "" AND `db` = ' . $this->quote($this->_config['database']);
+
+		$result = $this->_connection->query($query);
+
+		$return = array();
+		while ($row = $result->fetch(PDO::FETCH_ASSOC))
+		{
+			$return[] = $row;
+		}
+
+		return $return;
 	}
 
 	/**

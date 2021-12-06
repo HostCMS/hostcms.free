@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -45,6 +45,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			->add($oMainRow7 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow8 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow9 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRowTags = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow10 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow11 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
@@ -185,6 +186,54 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 
 		$oMainRow9->add($oSeparatorSelect);
 
+
+		// Tags
+		if (Core::moduleIsActive('tag'))
+		{
+			$oAdditionalTagsSelect = Admin_Form_Entity::factory('Select')
+				->caption(Core::_('Shop_Warehouse.tags'))
+				->options($this->_fillTagsList($this->_object))
+				->name('tags[]')
+				->class('shop-warehouse-tags')
+				->style('width: 100%')
+				->multiple('multiple')
+				->divAttr(array('class' => 'form-group col-xs-12'));
+
+			$oMainRowTags->add($oAdditionalTagsSelect);
+
+			$html = '<script>
+			$(function(){
+				$("#' . $windowId . ' .shop-warehouse-tags").select2({
+					dropdownParent: $("#' . $windowId . '"),
+					language: "' . Core_i18n::instance()->getLng() . '",
+					minimumInputLength: 1,
+					placeholder: "' . Core::_('Shop_Warehouse.type_tag') . '",
+					tags: true,
+					allowClear: true,
+					multiple: true,
+					ajax: {
+						url: "/admin/tag/index.php?hostcms[action]=loadTagsList&hostcms[checked][0][0]=1",
+						dataType: "json",
+						type: "GET",
+						processResults: function (data) {
+							var aResults = [];
+							$.each(data, function (index, item) {
+								aResults.push({
+									"id": item.id,
+									"text": item.text
+								});
+							});
+							return {
+								results: aResults
+							};
+						}
+					}
+				});
+			});</script>';
+
+			$oMainRowTags->add(Admin_Form_Entity::factory('Code')->html($html));
+		}
+
 		$oMainTab
 			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9)
 			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow10)
@@ -222,39 +271,58 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			$this->_object->changeDefaultStatus();
 		}
 
-		//Установка количества товара на складе
+		// Установка количества товара на складе
 		if (Core_Array::getPost('warehouse_default_count'))
 		{
-			$offset = 0;
-			$limit = 100;
+			$oCore_QueryBuilder_Select = Core_QueryBuilder::select(
+					intval($this->_object->id),
+					'shop_items.id',
+					0,
+					intval($this->_object->user_id)
+				)
+				->from('shop_items')
+				->where('shop_items.shop_id', '=', $this->_object->shop_id)
+				->where('shop_items.deleted', '=', 0)
+				->where('shop_items.shortcut_id', '=', 0);
 
-			do {
-				$oShop_Items = $this->_object->Shop->Shop_Items;
+			Core_QueryBuilder::insert('shop_warehouse_items')
+				->columns('shop_warehouse_id', 'shop_item_id', 'count', 'user_id')
+				->select($oCore_QueryBuilder_Select)
+				->execute();
+		}
 
-				$oShop_Items
-					->queryBuilder()
-					->where('shop_items.shortcut_id', '=', 0)
-					->offset($offset)->limit($limit);
+		// Обработка меток
+		if (Core::moduleIsActive('tag'))
+		{
+			$aRecievedTags = Core_Array::getPost('tags', array());
+			!is_array($aRecievedTags) && $aRecievedTags = array();
 
-				$aShop_Items = $oShop_Items->findAll(FALSE);
-
-				foreach ($aShop_Items as $oShop_Item)
-				{
-					if (is_null($oShop_Item->Shop_Warehouse_Items->getByShop_warehouse_id($this->_object->id, FALSE)))
-					{
-						$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item');
-						$oShop_Warehouse_Item->shop_warehouse_id = $this->_object->id;
-						$oShop_Warehouse_Item->count = 0;
-						$oShop_Item->add($oShop_Warehouse_Item);
-					}
-				}
-
-				$offset += $limit;
-			}
-			while (count($aShop_Items));
+			$this->_object->applyTagsArray($aRecievedTags);
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
+	}
+
+	/**
+	 * Fill tags list
+	 * @param Shop_Warehouse_Model $oShop_Warehouse item
+	 * @return array
+	 */
+	protected function _fillTagsList($oShop_Warehouse)
+	{
+		$aReturn = array();
+
+		$aTags = $oShop_Warehouse->Tags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			$aReturn[$oTag->name] = array(
+				'value' => $oTag->name,
+				'attr' => array('selected' => 'selected')
+			);
+		}
+
+		return $aReturn;
 	}
 
 	/**

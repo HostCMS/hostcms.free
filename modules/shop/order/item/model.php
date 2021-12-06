@@ -13,7 +13,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -53,6 +53,7 @@ class Shop_Order_Item_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'shop_order' => array(),
 		'shop_item' => array(),
+		'shop_measure' => array(),
 		'shop_warehouse' => array(),
 		'shop_order_item_status' => array(),
 		'user' => array()
@@ -116,6 +117,18 @@ class Shop_Order_Item_Model extends Core_Entity
 
 	/**
 	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_measure_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->shop_measure_id)
+		{
+			return htmlspecialchars($this->Shop_Measure->name);
+		}
+	}
+
+	/**
+	 * Backend callback method
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
@@ -136,6 +149,41 @@ class Shop_Order_Item_Model extends Core_Entity
 				htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId)),
 				htmlspecialchars($this->name)
 			);
+		}
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function imgBackend()
+	{
+		if ($this->shop_item_id)
+		{
+			$oShop_Item = Core_Entity::factory('Shop_Item')->find($this->shop_item_id);
+
+			if (!is_null($oShop_Item))
+			{
+				if ($oShop_Item->shortcut_id)
+				{
+					return '<i class="fa fa-link"></i>';
+				}
+				elseif (strlen($oShop_Item->image_small) || strlen($oShop_Item->image_large))
+				{
+					$srcImg = htmlspecialchars(strlen($oShop_Item->image_small)
+						? $oShop_Item->getSmallFileHref()
+						: $oShop_Item->getLargeFileHref()
+					);
+
+					$dataContent = '<img class="backend-preview" src="' . $srcImg . '" />';
+
+					return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
+				}
+				else
+				{
+					return '<i class="fa fa-file-text-o"></i>';
+				}
+			}
 		}
 	}
 
@@ -181,38 +229,41 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function shop_warehouse_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
-		);
-
-		$aOptions = array('...');
-
-		$aShop_Warehouses = $this->Shop_Order->Shop->Shop_Warehouses->findAll(FALSE);
-		foreach ($aShop_Warehouses as $oShop_Warehouse)
+		if ($this->type == 0)
 		{
-			$name = $oShop_Warehouse->name;
+			$additionalParams = Core_Str::escapeJavascriptVariable(
+				str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
+			);
 
-			if ($this->shop_item_id)
+			$aOptions = array('...');
+
+			$aShop_Warehouses = $this->Shop_Order->Shop->Shop_Warehouses->findAll(FALSE);
+			foreach ($aShop_Warehouses as $oShop_Warehouse)
 			{
-				$oShop_Warehouse_Cell_Items = $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($oShop_Warehouse->id);
+				$name = $oShop_Warehouse->name;
 
-				if ($oShop_Warehouse_Cell_Items)
+				if ($this->shop_item_id)
 				{
-					$name .= ' (' . $oShop_Warehouse_Cell_Items->Shop_Warehouse_Cell->nameWithSeparator() . ')';
+					$oShop_Warehouse_Cell_Items = $this->Shop_Item->Shop_Warehouse_Cell_Items->getByshop_warehouse_id($oShop_Warehouse->id);
+
+					if ($oShop_Warehouse_Cell_Items)
+					{
+						$name .= ' (' . $oShop_Warehouse_Cell_Items->Shop_Warehouse_Cell->nameWithSeparator() . ')';
+					}
 				}
+
+				$aOptions[$oShop_Warehouse->id] = htmlspecialchars($name);
 			}
 
-			$aOptions[$oShop_Warehouse->id] = htmlspecialchars($name);
+			Admin_Form_Entity::factory('Select')
+				->divAttr(array('class' => ''))
+				->options($aOptions)
+				->class('form-control')
+				->name('shop_order_item_warehouse_' . $this->id)
+				->value($this->shop_warehouse_id)
+				->onchange("$.adminLoad({path: '{$oAdmin_Form_Controller->getPath()}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).val() }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+				->execute();
 		}
-
-		Admin_Form_Entity::factory('Select')
-			->divAttr(array('class' => ''))
-			->options($aOptions)
-			->class('form-control')
-			->name('shop_order_item_warehouse_' . $this->id)
-			->value($this->shop_warehouse_id)
-			->onchange("$.adminLoad({path: '{$oAdmin_Form_Controller->getPath()}', additionalParams: '{$additionalParams}', action: 'apply', post: { 'hostcms[checked][0][{$this->id}]': 0, apply_check_0_{$this->id}_fv_{$oAdmin_Form_Field->id}: $(this).val() }, windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
-			->execute();
 	}
 
 	/**
@@ -333,15 +384,23 @@ class Shop_Order_Item_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = is_array($showXmlProperties)
 			? array_combine($showXmlProperties, $showXmlProperties)
 			: $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
 
 		return $this;
 	}
@@ -388,14 +447,15 @@ class Shop_Order_Item_Model extends Core_Entity
 			{
 				$oShop_Item
 					->clearEntities()
-					->showXmlProperties($this->_showXmlProperties);
+					->cartQuantity($this->quantity)
+					->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues);
 
 				// Parent item for modification
 				if ($oShop_Item->modification_id)
 				{
 					$oModification = Core_Entity::factory('Shop_Item')->find($oShop_Item->modification_id);
 					!is_null($oModification->id) && $oShop_Item->addEntity(
-						$oModification->showXmlProperties($this->_showXmlProperties)
+						$oModification->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 					);
 				}
 
@@ -593,16 +653,22 @@ class Shop_Order_Item_Model extends Core_Entity
 									.on('focus', function () {
 										$(this).select();
 									});
+
+
+									$(this).on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) });
+
 								});
 
-								jModal.on('hidden.bs.modal', function (e) {
-									jModal.remove();
-								});
+								jModal.on('hide.bs.modal', function (e) {
 
-								// Close modal
-								$(window).on('keyup', function (e) {
-									if (e.keyCode == 27) {
-										jModal.modal('hide');
+									var triggerReturn = $('body').triggerHandler('beforeHideModal');
+
+									if (triggerReturn == 'break')
+									{
+										e.preventDefault();
+									}
+									else
+									{
 										jModal.remove();
 									}
 								});

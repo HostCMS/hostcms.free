@@ -3,7 +3,7 @@
  * Bot.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -88,42 +88,13 @@ if (Core_Array::getPost('show_settings'))
 											->value($oBot_Module->delay_type)
 											->controller($oAdmin_Form_Controller)
 											->divAttr(array('class' => 'delay-type'))
+											->data('change-context', 'true')
 											->execute();
-											
+
 										$settingsModalId = 'settingsModal' . $oBot_Module->id;
 
 										Admin_Form_Entity::factory('Script')
-											->value("$('#{$settingsModalId} .delay-type, #{$settingsModalId} .minutes-type')
-											.on('show.bs.dropdown', function() {
-
-													var \$this = $(this), tmpBlockParent = \$this.parent(), tmpBlockClassName = 'tmp-' +  \$this.attr('class').split(' ')[0],  tmpBlockHeight = \$this.outerHeight(), tmpBlockWidth = \$this.outerWidth(), originalBlockLeft = \$this.offset().left, originalBlockTop = \$this.offset().top;
-													
-													\$this.after($('<div id=\"' + tmpBlockClassName  + '\"></div>').addClass(\$this.attr('class').split(' ')[0]).css({height: tmpBlockHeight, width: tmpBlockWidth}));
-
-													$('body').append(\$this.css({
-														position: 'absolute',
-														left: originalBlockLeft,
-														top: originalBlockTop,
-														'z-index': 1500
-													  }).addClass('form-group').detach());
-
-													//tmpBlockParent.prepend($('<div id=\"' + tmpBlockClassName  + '\"></div>').css({height: tmpBlockHeight, width: tmpBlockWidth}));
-												})
-												.on('hidden.bs.dropdown', function() {
-													
-													var \$this = $(this), tmpBlockClassName = 'tmp-' +  \$this.attr('class').split(' ')[0];
-													
-													//$('#settingsModal" . $oBot_Module->id . " .bot-module-type').prepend(\$this.css({
-													$('#settingsModal" . $oBot_Module->id . " .bot-module-type #' + tmpBlockClassName).after(\$this.css({
-														position: '',
-														left: '',
-														top: '',
-														'z-index': ''
-													}).removeClass('form-group').detach());
-													
-													$('#settingsModal" . $oBot_Module->id . " .bot-module-type #' + tmpBlockClassName).remove();
-												});
-											")
+											->value("$('#{$settingsModalId} :hidden').on('change', function(e) { mainFormLocker.lock(e) });")
 											->controller($oAdmin_Form_Controller)
 											->execute();
 
@@ -132,7 +103,7 @@ if (Core_Array::getPost('show_settings'))
 												: '';
 										?>
 										<div class="minutes-block <?php echo $bHideMinutes?>">
-											<div class="col-xs-12 no-padding-left no-padding-right">
+											<!--<div class="col-xs-12 no-padding-left no-padding-right">-->
 												<input type="text" name="minutes" class="form-control flat" size="2" value="<?php echo Core_Array::get($aDuration, 'value', '')?>"/>
 												<?php
 												$aMinuteTypes = array(
@@ -159,9 +130,10 @@ if (Core_Array::getPost('show_settings'))
 													->value(Core_Array::get($aDuration, 'type', 0))
 													->controller($oAdmin_Form_Controller)
 													->divAttr(array('class' => 'minutes-type'))
+													->data('change-context', 'true')
 													->execute();
 												?>
-											</div>
+											<!--</div>-->
 										</div>
 									</div>
 								</div>
@@ -322,7 +294,7 @@ if (Core_Array::getPost('show_settings'))
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-success" onclick="$.saveBotModuleSettings(<?php echo $oBot_Module->id?>, <?php echo $oBot_Module->module_id?>, <?php echo $oBot_Module->entity_id?>, <?php echo $oBot_Module->type?>)"><?php echo Core::_('Bot_Module.save_settings')?></button>
+						<button type="button" class="btn btn-success" onclick="mainFormLocker.unlock(); $.saveBotModuleSettings(<?php echo $oBot_Module->id?>, <?php echo $oBot_Module->module_id?>, <?php echo $oBot_Module->entity_id?>, <?php echo $oBot_Module->type?>)"><?php echo Core::_('Bot_Module.save_settings')?></button>
 					</div>
 				</div>
 			</div>
@@ -347,7 +319,13 @@ if (Core_Array::getPost('show_settings'))
 						}
 					});
 
-					$('#settingsModal<?php echo $oBot_Module->id?> :input').on('click', function() { mainFormLocker.unlock() });
+
+					$('#settingsModal<?php echo $oBot_Module->id?>').on('hide.bs.modal', function(e){
+
+						$('.open [data-toggle="dropdown"]').dropdown('toggle');
+					});
+
+					//$('#settingsModal<?php echo $oBot_Module->id?> :input').on('click', function() { mainFormLocker.unlock() });
 				});
 			</script>
 		</div>

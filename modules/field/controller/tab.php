@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -455,7 +455,7 @@ class Field_Controller_Tab
 							$this->_correctPrintValue($oField, $oField->default_value)
 						)
 						->divAttr(array(
-							'class' => ($oField->type != 2 ? 'form-group' : '')
+							'class' => ($oField->type != 2 ? 'form-group' : 'input-group')
 								. (
 									($oField->type == 7 || $oField->type == 8 || $oField->type == 9)
 									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
@@ -924,9 +924,9 @@ class Field_Controller_Tab
 			->class($input_group)
 			->add($oAdmin_Form_Entity_ListItemsSelect)
 			->add($oAdmin_Form_Entity_ListItemsInput)
-			->add($oAdmin_Form_Entity_Autocomplete_Select);			
-			
-		$windowId = $this->_Admin_Form_Controller->getWindowId();	
+			->add($oAdmin_Form_Entity_Autocomplete_Select);
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// autocomplete should be added always
 		$oDiv_Group->add(
@@ -1008,7 +1008,7 @@ class Field_Controller_Tab
 
 		$bIsNullValue = is_null($value);
 		$bIsNullValue && $value = $oField->default_value;
-		
+
 		$oInformationsystem = $oField->Informationsystem;
 
 		$aOptions = Informationsystem_Item_Controller_Edit::fillInformationsystemGroup($oField->informationsystem_id, 0);
@@ -1044,7 +1044,7 @@ class Field_Controller_Tab
 			->class('input-group')
 			->add($oAdmin_Form_Entity_InfGroups)
 			->add($oAdmin_Form_Entity_InfGroupsInput);
-			
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// autocomplete should be added always
@@ -1231,7 +1231,7 @@ class Field_Controller_Tab
 			->add($oAdmin_Form_Entity_InfGroups)
 			->add($oAdmin_Form_Entity_InfItemsSelect)
 			->add($oAdmin_Form_Entity_InfItemsInput);
-			
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// autocomplete should be added always
@@ -1374,7 +1374,7 @@ class Field_Controller_Tab
 
 		$bIsNullValue = is_null($value);
 		$bIsNullValue && $value = $oField->default_value;
-		
+
 		$oShop = $oField->Shop;
 
 		$aOptions = Shop_Item_Controller_Edit::fillShopGroup($oField->shop_id, 0);
@@ -1410,8 +1410,8 @@ class Field_Controller_Tab
 			->class('input-group')
 			->add($oAdmin_Form_Entity_Shop_Groups)
 			->add($oAdmin_Form_Entity_Shop_Groups_Input);
-			
-		$windowId = $this->_Admin_Form_Controller->getWindowId();	
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// autocomplete should be added always
 		$oDiv_Group->add(

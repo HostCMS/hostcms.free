@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -418,6 +418,7 @@ abstract class Shop_Payment_System_Handler
 						case 1: // String
 						case 4: // Textarea
 						case 6: // Wysiwyg
+						case 10: // Hidden
 							$oProperty_Value->value(strval($value));
 							$oProperty_Value->save();
 						break;
@@ -547,6 +548,7 @@ abstract class Shop_Payment_System_Handler
 
 					$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 					$oShop_Order_Item->quantity = $oShop_Cart->quantity;
+					$oShop_Order_Item->shop_measure_id = $oShop_Item->shop_measure_id;
 					$oShop_Order_Item->shop_item_id = $oShop_Cart->shop_item_id;
 					$oShop_Order_Item->shop_warehouse_id = intval($oShop_Cart->shop_warehouse_id);
 
@@ -779,14 +781,25 @@ abstract class Shop_Payment_System_Handler
 					// На текущем этапе будут списаны все необходимые бонусы
 					if ($available_bonuses - $writtenOff <= $delta)
 					{
-						$oShop_Discountcard_Bonus->written_off += ($available_bonuses - $writtenOff);
+						$written_off = $available_bonuses - $writtenOff;
+
+						$oShop_Discountcard_Bonus->written_off += $written_off;
 						$oShop_Discountcard_Bonus->save();
+
+						// Вносим списание
+						$this->_addShopDiscountcardBonusTransaction($oShop_Discountcard_Bonus->id, $written_off);
+
 						break;
 					}
 					else
 					{
-						$oShop_Discountcard_Bonus->written_off += $delta;
+						$written_off = $delta;
+
+						$oShop_Discountcard_Bonus->written_off += $written_off;
 						$oShop_Discountcard_Bonus->save();
+
+						// Вносим списание
+						$this->_addShopDiscountcardBonusTransaction($oShop_Discountcard_Bonus->id, $written_off);
 					}
 
 					$writtenOff += $delta;
@@ -803,6 +816,20 @@ abstract class Shop_Payment_System_Handler
 				$this->_shopOrder->add($oShop_Order_Item);
 			}
 		}
+
+		return $this;
+	}
+
+	/**
+	 *
+	 */
+	protected function _addShopDiscountcardBonusTransaction($shop_discountcard_bonus_id, $amount)
+	{
+		$oShop_Discountcard_Bonus_Transaction = Core_Entity::factory('Shop_Discountcard_Bonus_Transaction');
+		$oShop_Discountcard_Bonus_Transaction->shop_order_id = $this->_shopOrder->id;
+		$oShop_Discountcard_Bonus_Transaction->shop_discountcard_bonus_id = $shop_discountcard_bonus_id;
+		$oShop_Discountcard_Bonus_Transaction->amount = $amount;
+		$oShop_Discountcard_Bonus_Transaction->save();
 
 		return $this;
 	}
@@ -962,7 +989,7 @@ abstract class Shop_Payment_System_Handler
 				$rate = intval(Core_Array::get($this->_orderParams, 'shop_delivery_rate', 0));
 				$marking = '';
 
-				$shop_delivery_condition_name = strval(Core_Array::get($this->_orderParams, 'shop_delivery_name', 0));
+				$shop_delivery_condition_name = strval(Core_Array::get($this->_orderParams, 'shop_delivery_name'));
 
 				$this->_shopOrder->delivery_information = trim(
 					$this->_shopOrder->delivery_information . "\n" . $shop_delivery_condition_name
@@ -1436,7 +1463,10 @@ abstract class Shop_Payment_System_Handler
 
 			$senderName = !is_null($this->_senderName)
 				? $this->_senderName
-				: $oShop->name;
+				: ($oShop->Site->sender_name != ''
+					? $oShop->Site->sender_name
+					: $oShop->name
+				);
 
 			$oCore_Mail
 				->from($from)
@@ -1567,7 +1597,10 @@ abstract class Shop_Payment_System_Handler
 
 				$senderName = !is_null($this->_senderName)
 					? $this->_senderName
-					: $oShop->name;
+					: ($oShop->Site->sender_name != ''
+						? $oShop->Site->sender_name
+						: $oShop->name
+					);
 
 				// Attach digitals items
 				if ($this->_shopOrder->paid == 1 && $this->_shopOrder->Shop->attach_digital_items == 1)

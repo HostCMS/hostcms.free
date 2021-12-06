@@ -27,5 +27,11 @@ return array(
 	'empty_properties' => 'No additional properties available',
 	'changeActive_success' => "Information has been successfully changed",
 	'active' => 'Active',
-	'copy_success' => "Filter copied successfully!",	
+	'copy_success' => "Filter copied successfully!",
+	'indexing' => "Indexing",
+	'changeIndexing_success' => 'Indexing status changed.',
+	'copy_success' => "Filter copied successfully!",
+	'price_from' => "Price from",
+	'price_to' => "Price to",
+	'prices' => '<span class = "field-name"> Price </span> <span>%s to %s </span>'
 );

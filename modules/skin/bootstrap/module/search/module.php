@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Search_Module extends Search_Module
 {
@@ -55,7 +55,7 @@ class Skin_Bootstrap_Module_Search_Module extends Search_Module
 					$sQuery = trim(Core_Str::stripTags(strval(Core_Array::getGet('queryString'))));
 					$oSite = Core_Entity::factory('Site', CURRENT_SITE);
 
-					$aConfig = Core::$config->get('search_config') + array(
+					$aConfig = Core::$config->get('search_config', array()) + array(
 						'modules' => array()
 					);
 

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -309,7 +309,6 @@ class Field_Value_File_Model extends Core_Entity
 
 			$this->addEntity($oFile_Entity)->addEntity($oFile_Small_Entity);
 
-			/*
 			if ($this->file != '')
 			{
 				$this->addXmlTag('file_path', $this->_href . rawurlencode($this->file));
@@ -318,7 +317,7 @@ class Field_Value_File_Model extends Core_Entity
 			if ($this->file_small != '')
 			{
 				$this->addXmlTag('file_small_path', $this->_href . rawurlencode($this->file_small));
-			}*/
+			}
 		}
 
 		$this

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -35,6 +35,12 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 	 * @var string
 	 */
 	protected $_nameColumn = 'number';
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	const TYPE = 0;
 
@@ -116,11 +122,7 @@ class Shop_Warehouse_Inventory_Model extends Core_Entity
 
 		$this->Shop_Warehouse_Inventory_Items->deleteAll(FALSE);
 
-		$aShop_Warehouse_Entries = Core_Entity::factory('Shop_Warehouse_Entry')->getByDocument($this->id, self::TYPE);
-		foreach ($aShop_Warehouse_Entries as $oShop_Warehouse_Entry)
-		{
-			$oShop_Warehouse_Entry->delete();
-		}
+		Core_Entity::factory('Shop_Warehouse_Entry')->deleteByDocument($this->id, self::TYPE);
 
 		if (Core::moduleIsActive('revision'))
 		{

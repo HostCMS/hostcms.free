@@ -26,4 +26,5 @@ return array(
 	'text' => 'Зміст документа',
 	'template_id' => 'Макет',
 	'datetime' => 'Дата',
+	'rollback_success' => 'Версія відновлена успішно!',
 );

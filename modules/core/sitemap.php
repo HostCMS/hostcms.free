@@ -25,7 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -751,7 +751,8 @@ class Core_Sitemap extends Core_Servant_Properties
 				$oShop_Filter_Seos = $oShop->Shop_Filter_Seos;
 				$oShop_Filter_Seos->queryBuilder()
 					->where('shop_filter_seos.id', 'BETWEEN', array($iFrom + 1, $iFrom + $this->limit))
-					->where('shop_filter_seos.active', '=', 1);
+					->where('shop_filter_seos.active', '=', 1)
+					->where('shop_filter_seos.indexing', '=', 1);
 
 				$aShop_Filter_Seos = $oShop_Filter_Seos->findAll(FALSE);
 

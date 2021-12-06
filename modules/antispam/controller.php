@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Antispam
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Antispam_Controller extends Core_Servant_Properties
 {
@@ -31,7 +31,7 @@ class Antispam_Controller extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		$this->ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+		$this->ip = Core::getClientIp();
 		$this->userAgent = Core_Array::get($_SERVER, 'HTTP_USER_AGENT');
 
 		$this->log = TRUE;
@@ -87,7 +87,13 @@ class Antispam_Controller extends Core_Servant_Properties
 	 */
 	public function addText($text)
 	{
-		$this->text .= ' ' . htmlspecialchars(strval($text));
+		$text = strval($text);
+
+		if ($text != '')
+		{
+			$this->text .= ' ' . htmlspecialchars($text);
+		}
+
 		return $this;
 	}
 

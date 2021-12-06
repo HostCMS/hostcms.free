@@ -61,7 +61,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -568,18 +568,17 @@ class Core_ORM
 	/**
 	 * Delete all object
 	 * @param boolean $bCache use cache
+	 * @param int $limit default 100
 	 * <code>
 	 * Core_ORM::factory('Book')->Comments->deleteAll();
 	 * </code>
 	 * @return Core_ORM
 	 */
-	public function deleteAll($bCache = TRUE)
+	public function deleteAll($bCache = TRUE, $limit = 100)
 	{
-		$limit = 100;
-
 		$this->queryBuilder()
-			->limit($limit)
-			->offset(0);
+			->offset(0)
+			->limit($limit);
 
 		do {
 			$aObjects = $this->findAll($bCache);
@@ -607,7 +606,7 @@ class Core_ORM
 	{
 		!count($this->queryBuilder()->getFrom())
 			&& $this->queryBuilder()->from($this->_tableName);
-			
+
 		$aRow = $this->queryBuilder()
 			->clearSelect()
 			->clearLimit()
@@ -1073,7 +1072,7 @@ class Core_ORM
 
 			if (is_null(self::$config))
 			{
-				self::$config = Core::$config->get('core_orm') + array(
+				self::$config = Core::$config->get('core_orm', array()) + array(
 					'cache' => 'memory',
 					'columnCache' => 'memory',
 					'relationCache' => 'memory'
@@ -1746,33 +1745,33 @@ class Core_ORM
 						if (!is_null($aField['max_length']))
 						{
 							$aValue = preg_match('/([-]?)([0-9]+)(?:[.]([0-9]+))?/', trim($value, '.'), $matches);
-							
+
 							// Remove first item
 							array_shift($matches);
-							
+
 							// Remove sign
 							$sign = array_shift($matches);
-							
+
 							if (isset($matches[0]))
 							{
 								// number of significant digits. The range of P is 1 to 65.
 								// D is the scale that that represents the number of digits after the decimal point
 								$aDigits = explode(',', $aField['max_length']);
-								
+
 								$beforePoint = $aDigits[0] - (isset($aDigits[1]) ? $aDigits[1] : 0);
-								
+
 								if (strlen($matches[0]) <= $beforePoint)
 								{
 									if (isset($aDigits[1])
 										&& isset($matches[1]) && strlen($matches[1]) > $aDigits[1])
 									{
 										$matches[1] = substr($matches[1], 0, $aDigits[1]);
-										
+
 										if ($matches[1] == '')
 										{
 											unset($matches[1]);
 										}
-										
+
 										$value = $sign . implode('.', $matches);
 									}
 								}

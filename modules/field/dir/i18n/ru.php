@@ -16,4 +16,5 @@ return array(
 	'model_name' => 'Раздел пользовательских полей',
 	'apply_success' => 'Информация изменена',
 	'markDeleted_success' => 'Раздел удален',
+	'sorting' => 'Сортировка',
 );

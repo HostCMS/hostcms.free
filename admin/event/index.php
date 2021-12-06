@@ -3,7 +3,7 @@
  * Events.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -68,8 +68,10 @@ if ($bShow_subs && $parent_id)
 		->view('event');
 }
 
+$windowId = $oAdmin_Form_Controller->getWindowId();
+
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
-$siteuser_id && $oAdmin_Form_Controller->Admin_View(
+$siteuser_id && $windowId != 'id_content' && $oAdmin_Form_Controller->Admin_View(
 	Admin_View::getClassName('Admin_Internal_View')
 );
 
@@ -107,7 +109,6 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 }
 
 $oCurrentUser = Core_Auth::getCurrentUser();
-$windowId = $oAdmin_Form_Controller->getWindowId();
 
 $additionalParams = Core_Str::escapeJavascriptVariable(
 	str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
@@ -128,7 +129,7 @@ $oAdmin_Form_Entity_Menus->add(
 				: $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 		->onclick(
-			$bShow_subs // &show_subs=1&hideMenu=1&parent_id={$parent_id}
+			$bShow_subs || $siteuser_id // &show_subs=1&hideMenu=1&parent_id={$parent_id}
 				// ? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
 				? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), 'edit', 'modal', 0, 0, $additionalParams)
 				: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
@@ -448,6 +449,8 @@ if ($siteuser_id)
 	->addCondition(
 		array('close' => array())
 	);
+
+	$oAdmin_Form_Dataset->changeAction('edit', 'modal', 1);
 }
 
 // Список значений для фильтра и поля

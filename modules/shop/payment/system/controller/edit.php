@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -49,6 +49,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'))
 		;
 
 		// Магазин, которому принадлежит данный тип доставки
@@ -57,7 +58,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oShopField = Admin_Form_Entity::factory('Select')
 			->name('shop_id')
 			->caption(Core::_('Shop_Payment_System.shop_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 			->options(
 				$this->_fillShops()
 			)
@@ -72,14 +73,42 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 		$oCurrencyField = Admin_Form_Entity::factory('Select')
 			->name('shop_currency_id')
 			->caption(Core::_('Shop_Payment_System.shop_currency_id'))
-			->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
 			->options($Shop_Controller_Edit->fillCurrencies())
 			->value($this->_object->shop_currency_id);
 
 		$oMainRow1->add($oCurrencyField);
 
-		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow1);
-		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow2);
+		$oMainTab->delete($this->getField('type'));
+
+		$oTypeField = Admin_Form_Entity::factory('Select')
+			->name('type')
+			->caption(Core::_('Shop_Payment_System.type'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+			->options(array(
+				0 => Core::_('Shop_Payment_System.type0'),
+				1 => Core::_('Shop_Payment_System.type1'),
+				2 => Core::_('Shop_Payment_System.type2'),
+				3 => Core::_('Shop_Payment_System.type3')
+			))
+			->value($this->_object->type);
+
+		$oMainRow1->add($oTypeField);
+
+		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow1);
+
+		$oAdditionalTab->delete($this->getField('shop_order_status_id'));
+
+		$oDropdownlistStatuses = Admin_Form_Entity::factory('Dropdownlist')
+			->options(Shop_Order_Status_Controller_Edit::getDropdownlistOptions())
+			->name('shop_order_status_id')
+			->value($this->_object->shop_order_status_id)
+			->caption(Core::_('Shop_Payment_System.shop_order_status_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+
+		$oMainRow2->add($oDropdownlistStatuses);
+
+		$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
 
 		// Добавляем новое поле типа файл
 		$oImageField = Admin_Form_Entity::factory('File');
@@ -107,17 +136,14 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 				'caption' => Core::_('Shop_Delivery.image'),
 				'preserve_aspect_ratio_checkbox_checked' => $oShop->preserve_aspect_ratio
 			))
-			->smallImage
-			(
-				array(
-					'show' => FALSE
-				)
-			);
+			->smallImage(array(
+				'show' => FALSE
+			));
 
-		$oMainRow3->add($oImageField);
+		$oMainRow4->add($oImageField);
 
 
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4);
+		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow5);
 
 		$Admin_Form_Entity_Textarea = Admin_Form_Entity::factory('Textarea');
 
@@ -136,7 +162,7 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
 			->syntaxHighlighterOptions($oTmpOptions);
 
-		$oMainRow5->add($Admin_Form_Entity_Textarea);
+		$oMainRow6->add($Admin_Form_Entity_Textarea);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Payment_System.system_of_pay_edit_form_title', $this->_object->name)
@@ -173,6 +199,12 @@ class Shop_Payment_System_Controller_Edit extends Admin_Form_Action_Controller_T
 	 */
 	protected function _applyObjectProperty()
 	{
+		// Backup revision
+		if (Core::moduleIsActive('revision') && $this->_object->id)
+		{
+			$this->_object->backupRevision();
+		}
+
 		parent::_applyObjectProperty();
 
 		$oShop = $this->_object->Shop;

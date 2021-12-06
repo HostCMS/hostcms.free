@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -476,13 +476,10 @@ class Company_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$Company_Department_Post_Users = $this->Company_Department_Post_Users;
-		$Company_Department_Post_Users->queryBuilder()
-			->groupBy('user_id');
-
-		$count = count($Company_Department_Post_Users->findAll());
+		$count = $this->Company_Department_Post_Users->getCount(FALSE, 'user_id', TRUE);
 		$count && Core::factory('Core_Html_Entity_Span')
 			->class('badge badge-hostcms badge-square')
+			->title(Core::_('Company_Department.caption_block_users'))
 			->value('<i class="fa fa-user"></i> ' . $count)
 			->execute();
 
@@ -491,6 +488,7 @@ class Company_Model extends Core_Entity
 		!is_null($oCompany_Site) &&
 			Core::factory('Core_Html_Entity_Span')
 				->value('<i class="fa fa-check-circle-o palegreen"></i>')
+				->title(Core::_('Company.sites'))
 				->execute();
 	}
 
@@ -708,5 +706,32 @@ class Company_Model extends Core_Entity
 			&& $oCompanyXml->addChild('КПП', $this->kpp);
 
 		return $this;
+	}
+
+
+	/**
+	 * Check user access to admin form action
+	 * @param string $actionName admin form action name
+	 * @param User_Model $oUser user object
+	 * @return bool
+	 */
+	public function checkBackendAccess($actionName, $oUser)
+	{
+		$aUser_Sites = $oUser->getSites();
+
+		$aSites = $this->Sites->findAll();
+
+		foreach ($aSites as $oSite)
+		{
+			foreach ($aUser_Sites as $oUser_Site)
+			{
+				if ($oSite->id == $oUser_Site->id)
+				{
+					return TRUE;
+				}
+			}
+		}
+
+		return FALSE;
 	}
 }

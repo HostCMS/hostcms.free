@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -677,7 +677,7 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	{
 		parent::__construct();
 
-		$this->limit = ON_PAGE;
+		$this->limit(ON_PAGE);
 		$this->current = 1; // счет с 1
 
 		$this->showOperations = TRUE;
@@ -776,7 +776,8 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	public function limit($limit)
 	{
 		$limit = intval($limit);
-		$limit && $this->limit = $limit;
+		$limit > 0 && $limit <= 1000
+			&& $this->limit = $limit;
 
 		return $this;
 	}
@@ -1615,10 +1616,10 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 */
 	public function sortingFieldId($sortingFieldId)
 	{
-		$sortingFieldId = preg_replace('/[^A-Za-z0-9_-]/', '', $sortingFieldId);
-
 		if (!is_null($sortingFieldId) && $this->_Admin_Form)
 		{
+			$sortingFieldId = preg_replace('/[^A-Za-z0-9_-]/', '', $sortingFieldId);
+
 			// Проверка принадлежности форме
 			$oAdmin_Form_Field = $this->getAdminFormFieldById($sortingFieldId);
 
@@ -1671,7 +1672,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Backend callback method
-	 * @param array $options
+	 * @param array $options array('path', 'action', 'operation', 'datasetKey', 'datasetValue', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	 * @return string
 	 */
 	public function getAdminActionModalLoad($options)
@@ -1703,7 +1704,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$options += array('additionalParams' => NULL);
 
-		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
+		$windowId = Core_Str::escapeJavascriptVariable(isset($options['window'])
+			? $options['window']
+			: $this->getWindowId()
+		);
 		$datasetKey = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetKey']));
 		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue']));
 
@@ -1720,7 +1724,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Backend callback method
-	 * @param array $options
+	 * @param array $options array('path', 'action', 'operation', 'datasetKey', 'datasetValue', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	 * @return string
 	 */
 	public function getAdminActionLoadAjax($options)
@@ -1752,7 +1756,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 		$options += array('additionalParams' => NULL);
 
-		$windowId = Core_Str::escapeJavascriptVariable($this->getWindowId());
+		$windowId = Core_Str::escapeJavascriptVariable(isset($options['window'])
+			? $options['window']
+			: $this->getWindowId()
+		);
 		$datasetKey = intval($options['datasetKey']);
 		$datasetValue = Core_Str::escapeJavascriptVariable($this->jQueryEscape($options['datasetValue']));
 
@@ -1763,7 +1770,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Backend callback method
-	 * @param array $options
+	 * @param array $options array('path', 'action', 'operation', 'datasetKey', 'datasetValue', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	 * @return string
 	 */
 	public function getAdminActionLoadHref($options)
@@ -1806,7 +1813,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Получение кода вызова adminLoad для события onclick
-	 * @param array $options
+	 * @param array $options array('path', 'action', 'operation', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	 * @return string
 	*/
 	public function getAdminLoadAjax($options)
@@ -1848,7 +1855,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	 * Получение кода вызова modalLoad для события onclick
-	 * @param array $options
+	 * @param array $options array('path', 'action', 'operation', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window', 'onHide')
 	 * @return string
 	*/
 	public function getModalLoad($options)
@@ -1885,14 +1892,15 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$path = Core_Str::escapeJavascriptVariable($options['path']);
 		$aData[] = "path: '{$path}'";
 
-		isset($options['onHide']) && $aData[] = "onHide: " . $options['onHide'];
+		isset($options['onHide'])
+			&& $aData[] = "onHide: " . $options['onHide'];
 
 		return "$.modalLoad({" . implode(',', $aData) . "}); return false";
 	}
 
 	/**
 	 * Подготовка массива опций для AJAX-запроса
-	 * @param array $options
+	 * @param array $options array('action', 'operation', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	 * @return array
 	*/
 	protected function _prepareAjaxRequest($options)
@@ -1912,7 +1920,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		}
 
 		$additionalParams = Core_Str::escapeJavascriptVariable(
-			str_replace(array('"'), array('&quot;'), Core_Array::get($options, 'additionalParams'))
+			str_replace(array('"'), array('&quot;'), Core_Array::get($options, 'additionalParams', ''))
 		);
 		$aData[] = "additionalParams: '{$additionalParams}'";
 
@@ -1943,7 +1951,10 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
 		$aData[] = "view: '{$view}'";
 
-		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars($this->getWindowId()));
+		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars(isset($options['window'])
+			? $options['window']
+			: $this->getWindowId()
+		));
 		$aData[] = "windowId: '{$windowId}'";
 
 		return $aData;
@@ -1951,15 +1962,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 
 	/**
 	* Получение кода вызова adminLoad для href
-	* @param string $path path
-	* @param string $action action name
-	* @param string $operation operation name
-	* @param string $additionalParams additional params
-	* @param int $limit count of items on page
-	* @param int $current current page number
-	* @param int $sortingFieldId ID of sorting field
-	* @param int $sortingDirection sorting direction
-	* @param string $view view mode
+	* @param array $options array('action', 'operation', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
 	* @return string
 	*/
 	public function getAdminLoadHref($options)
@@ -1980,6 +1983,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 			isset($args[6]) && $options['sortingFieldId'] = $args[6];
 			isset($args[7]) && $options['sortingDirection'] = $args[7];
 			isset($args[8]) && $options['view'] = $args[8];
+			// 'window' see
 		}
 
 		if (!isset($options['path']))
@@ -2025,14 +2029,18 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$sortingDirection = intval($sortingDirection);
 		$aData[] = "hostcms[sortingdirection]={$sortingDirection}";
 
-		$windowId = rawurlencode($this->getWindowId());
+		$windowId = rawurlencode(isset($options['window'])
+			? $options['window']
+			: $this->getWindowId()
+		);
 		strlen($windowId) && $aData[] = "hostcms[window]={$windowId}";
 
 		$view = Core_Array::get($options, 'view');
 		is_null($view) && $view = $this->view;
 		$aData[] = "hostcms[view]=" . rawurlencode($view);
 
-		$aData[] = "hostcms[filterId]=" . rawurlencode($this->filterId);
+		!is_null($this->filterId)
+			&& $aData[] = "hostcms[filterId]=" . rawurlencode($this->filterId);
 
 		// Filter values for paginations and etc.
 		foreach ($_REQUEST as $key => $value)
@@ -2086,6 +2094,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$options += array('additionalParams' => NULL, 'buttonObject' => NULL, 'action' => NULL);
 
 		is_null($options['additionalParams']) && $options['additionalParams'] = $this->additionalParams;
+
 		is_null($options['buttonObject']) && $options['buttonObject'] = 'this';
 		is_null($options['action']) && $options['action'] = $this->action;
 
@@ -2225,8 +2234,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	{
 		$value = strval($value);
 
-		$oSelect = Admin_Form_Entity::factory('Select');
-		$oSelect
+		$oSelect = Admin_Form_Entity::factory('Select')
 			->name($filterPrefix . $oAdmin_Form_Field->id)
 			->id($tabName . $filterPrefix . $oAdmin_Form_Field->id)
 			->class('no-padding-left no-padding-right')
@@ -2858,7 +2866,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 	}
 
 	/**
-	 * Apply external changes for filter
+	 * Apply external changes for fields
 	 * @param Admin_Form_Dataset $oAdmin_Form_Dataset dataset
 	 * @param Admin_Form_Field $oAdmin_Form_Field field
 	 * @return object
@@ -2872,7 +2880,7 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		{
 			$aChanged = $aChangedFields + (
 				$oAdmin_Form_Field instanceof stdClass
-					? (array) $oAdmin_Form_Field
+					? (array)$oAdmin_Form_Field
 					: $oAdmin_Form_Field->toArray()
 			);
 			$oAdmin_Form_Field_Changed = (object)$aChanged;
@@ -2883,5 +2891,33 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		}
 
 		return $oAdmin_Form_Field_Changed;
+	}
+
+	/**
+	 * Apply external changes for actions
+	 * @param Admin_Form_Dataset $oAdmin_Form_Dataset dataset
+	 * @param Admin_Form_Action $oAdmin_Form_Action actions
+	 * @return object
+	 */
+	public function changeAction($oAdmin_Form_Dataset, $oAdmin_Form_Action)
+	{
+		// Проверяем, установлено ли пользователем перекрытие параметров для данного поля.
+		$aChangedActions = $oAdmin_Form_Dataset->getActionChanges($oAdmin_Form_Action->name);
+
+		if ($aChangedActions)
+		{
+			$aChanged = $aChangedActions + (
+				$oAdmin_Form_Action instanceof stdClass
+					? (array)$oAdmin_Form_Action
+					: $oAdmin_Form_Action->toArray()
+			);
+			$oAdmin_Form_Action_Changed = (object)$aChanged;
+		}
+		else
+		{
+			$oAdmin_Form_Action_Changed = $oAdmin_Form_Action;
+		}
+
+		return $oAdmin_Form_Action_Changed;
 	}
 }

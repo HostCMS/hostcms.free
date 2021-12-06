@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -38,6 +38,8 @@ class Shop_Warehouse_Model extends Core_Entity
 		'shop_warehouse_movement_destination' => array('model' => 'Shop_Warehouse_Movement', 'foreign_key' => 'destination_shop_warehouse_id'),
 		'shop_warehouse_cell' => array(),
 		'shop_warehouse_cell_item' => array(),
+		'tag' => array('through' => 'tag_shop_warehouse'),
+		'tag_shop_warehouse' => array(),
 	);
 
 	/**
@@ -187,6 +189,12 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->Shop_Warehouse_Cells->deleteAll(FALSE);
 		$this->Shop_Warehouse_Cell_Items->deleteAll(FALSE);
 
+		if (Core::moduleIsActive('tag'))
+		{
+			// Удаляем метки
+			$this->Tag_Shop_Warehouses->deleteAll(FALSE);
+		}
+
 		return parent::delete($primaryKey);
 	}
 
@@ -213,6 +221,15 @@ class Shop_Warehouse_Model extends Core_Entity
 		$this->shop_warehouse_type_id && Core::factory('Core_Html_Entity_Code')
 			->value('<span class="badge badge-square badge-max-width margin-left-5" title="' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '" style="background-color: ' . htmlspecialchars($this->Shop_Warehouse_Type->color) . '">' . htmlspecialchars($this->Shop_Warehouse_Type->name) . '</span>')
 			->execute();
+
+		$aTags = $this->Tags->findAll(FALSE);
+
+		foreach ($aTags as $oTag)
+		{
+			Core::factory('Core_Html_Entity_Code')
+				->value('<span class="badge badge-square badge-max-width badge-lightgray margin-left-5" title="' . htmlspecialchars($oTag->name) . '"><i class="fa fa-tag"></i> ' . htmlspecialchars($oTag->name) . '</span>')
+				->execute();
+		}
 	}
 
 	/**
@@ -388,6 +405,93 @@ class Shop_Warehouse_Model extends Core_Entity
 
 		$oShop_Warehouse_Incoming->number = $oShop_Warehouse_Incoming->id;
 		return $oShop_Warehouse_Incoming->save();
+	}
+
+	/**
+	 * Apply tags for item
+	 * @param string $sTags string of tags, separated by comma
+	 * @return self
+	 */
+	public function applyTags($sTags)
+	{
+		$aTags = explode(',', $sTags);
+
+		return $this->applyTagsArray($aTags);
+	}
+
+	/**
+	 * Apply array tags for item
+	 * @param array $aTags array of tags
+	 * @return self
+	 */
+	public function applyTagsArray(array $aTags)
+	{
+		// Удаляем связь метками
+		$this->Tag_Shop_Warehouses->deleteAll(FALSE);
+
+		foreach ($aTags as $tag_name)
+		{
+			$tag_name = trim($tag_name);
+
+			if ($tag_name != '')
+			{
+				$oTag = Core_Entity::factory('Tag')->getByName($tag_name, FALSE);
+
+				if (is_null($oTag))
+				{
+					$oTag = Core_Entity::factory('Tag');
+					$oTag->name = $oTag->path = $tag_name;
+					$oTag->save();
+				}
+				$this->add($oTag);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Get XML for entity and children entities
+	 * @return string
+	 * @hostcms-event shop_warehouse.onBeforeRedeclaredGetXml
+	 */
+	public function getXml()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetXml', $this);
+
+		$this->_prepareData();
+
+		return parent::getXml();
+	}
+
+	/**
+	 * Get stdObject for entity and children entities
+	 * @return stdObject
+	 * @hostcms-event shop_warehouse.onBeforeRedeclaredGetStdObject
+	 */
+	public function getStdObject($attributePrefix = '_')
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredGetStdObject', $this);
+
+		$this->_prepareData();
+
+		return parent::getStdObject($attributePrefix);
+	}
+
+	/**
+	 * Prepare entity and children entities
+	 * @return self
+	 */
+	protected function _prepareData()
+	{
+		$this->clearXmlTags();
+
+		if (Core::moduleIsActive('tag'))
+		{
+			$this->addEntities($this->Tags->findAll(FALSE));
+		}
+
+		return $this;
 	}
 
 	/**

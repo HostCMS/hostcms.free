@@ -1,8 +1,8 @@
 <?php
 
 return array(
-	'menu' => 'SQL queries',
-	'title' => 'SQL queries',
+	'menu' => 'Database',
+	'title' => 'Database',
 	'warning' => 'Attention! SQL queries can damage CMS! <br>
 	It\'s recommended to create a reserve copy before executing queries.',
 	'text' => 'Query text',
@@ -23,4 +23,5 @@ return array(
 	'no_duplicate' => 'Duplicate indexes not found',
 	'manage' => 'Manage',
 	'manage_title' => 'Manage database',
+	'processlist' => 'Process List',
 );

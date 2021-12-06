@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -144,7 +144,7 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 								$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
 							?>
 							<li id="event-<?php echo $oEntity->id?>" data-id="<?php echo $oEntity->id?>">
-								<div class="well bordered-left">
+								<div class="well bordered-left with-footer">
 									<div class="drag-handle"></div>
 									<div class="row">
 										<div class="col-xs-12 col-sm-6">
@@ -171,20 +171,14 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 									<?php
 									if (strlen($oEntity->description))
 									{
-									?>
-									<div class="row">
-										<div class="col-xs-12 well-description">
-											<span><?php echo htmlspecialchars($oEntity->description)?></span>
-										</div>
-									</div>
-									<?php
+										?><div class="row">
+											<div class="col-xs-12 well-description">
+												<span><?php echo htmlspecialchars($oEntity->description)?></span>
+											</div>
+										</div><?php
 									}
 									?>
-									<div class="row">
-										<div class="col-xs-12">
-										<?php echo $oEntity->relatedBackend(NULL, $oAdmin_Form_Controller)?>
-										</div>
-									</div>
+									
 									<div class="row">
 										<div class="col-xs-12 well-description">
 											<div class="event-date">
@@ -228,6 +222,9 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 									<?php
 									}
 									?>
+									<div class="footer">
+										<?php echo $oEntity->relatedBackend(NULL, $oAdmin_Form_Controller)?>
+									</div>
 									<div class="edit-entity" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1', windowId: 'id_content'});"><i class="fa fa-pencil"></i></div>
 								</div>
 							</li>

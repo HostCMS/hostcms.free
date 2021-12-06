@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -134,9 +134,11 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 			? 'div'
 			: 'textarea';
 
+		$this->_format();
+
 		?><<?php echo $tagName?> <?php echo implode(' ', $aAttr) ?>><?php echo htmlspecialchars($this->value)?></<?php echo $tagName?>><?php
 
-		$this->_format();
+		// $this->_format();
 
 		if (count($this->_children))
 		{
@@ -173,7 +175,7 @@ class Skin_Default_Admin_Form_Entity_Textarea extends Admin_Form_Entity
 				$this->_init['script_url'] = "'/admin/wysiwyg/tinymce.min.js'";
 				$this->_init['language'] = '"' . $lng . '"';
 				$this->_init['language_url'] = '"/admin/wysiwyg/langs/' . $lng . '.js"';
-				$this->_init['elements'] = '"' . $this->id . '"';
+				//$this->_init['elements'] = '"' . $this->id . '"';
 
 				$this->_init['init_instance_callback'] = 'function(editor) { $(\'body\').trigger(\'afterTinyMceInit\', [editor]);}';
 

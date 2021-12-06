@@ -320,10 +320,53 @@ if (!is_null(Core_Array::getPost('apply')))
 							if (Core::moduleIsActive('antispam'))
 							{
 								$Antispam_Controller = new Antispam_Controller();
-								$bAntispamAnswer = $Antispam_Controller
+								$Antispam_Controller
 									->addText($oSiteuser->login)
-									->addText($oSiteuser->email)
-									->execute();
+									->addText($oSiteuser->email);
+									
+								if (!is_null(Core_Array::getPost("company_name")))
+								{
+									$aSiteuserCompanies = Core_Array::getPost("company_name");
+									$aSiteuserCompanyAddress = Core_Array::getPost("company_address");
+									$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
+									$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
+									$aSiteuserCompanyCity = Core_Array::getPost("company_city");
+
+									foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
+									{
+										$Antispam_Controller
+											->addText($sSiteuserCompanyName)
+											->addText(Core_Array::get($aSiteuserCompanyAddress, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserCompanyCountry, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserCompanyPostcode, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserCompanyCity, $key, '', 'str'));
+									}
+								}
+
+								if (!is_null(Core_Array::getPost("person_name")))
+								{
+									$aSiteuserPeopleNames = Core_Array::getPost("person_name");
+									$aSiteuserPeopleSurnames = Core_Array::getPost("person_surname");
+									$aSiteuserPeoplePatronymics = Core_Array::getPost("person_patronymic");
+									$aSiteuserPeoplePostcodes = Core_Array::getPost("person_postcode");
+									$aSiteuserPeopleCountries = Core_Array::getPost("person_country");
+									$aSiteuserPeopleCities = Core_Array::getPost("person_city");
+									$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
+
+									foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
+									{
+										$Antispam_Controller
+											->addText($sSiteuserPersonName)
+											->addText(Core_Array::get($aSiteuserPeopleSurnames, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserPeoplePatronymics, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserPeoplePostcodes, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserPeopleCountries, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserPeopleCities, $key, '', 'str'))
+											->addText(Core_Array::get($aSiteuserPeopleAddresses, $key, '', 'str'));
+									}
+								}
+								
+								$bAntispamAnswer = $Antispam_Controller->execute();
 
 								// Check e-mail
 								if ($bAntispamAnswer)
@@ -516,11 +559,11 @@ if (!is_null(Core_Array::getPost('apply')))
 									$aSiteuserCompanyCountry = Core_Array::getPost("company_country");
 									$aSiteuserCompanyPostcode = Core_Array::getPost("company_postcode");
 									$aSiteuserCompanyCity = Core_Array::getPost("company_city");
-									$aSiteuserCompanyPhone = Core_Array::getPost("company_0_phone");
-									$aSiteuserCompanyEmail = Core_Array::getPost("company_0_email");
-									$aSiteuserCompanySocial = Core_Array::getPost("company_0_social");
-									$aSiteuserCompanyMessenger = Core_Array::getPost("company_0_messenger");
-									$aSiteuserCompanyWebsite = Core_Array::getPost("company_0_website");
+									//$aSiteuserCompanyPhone = Core_Array::getPost("company_0_phone");
+									//$aSiteuserCompanyEmail = Core_Array::getPost("company_0_email");
+									//$aSiteuserCompanySocial = Core_Array::getPost("company_0_social");
+									//$aSiteuserCompanyMessenger = Core_Array::getPost("company_0_messenger");
+									//$aSiteuserCompanyWebsite = Core_Array::getPost("company_0_website");
 
 									foreach ($aSiteuserCompanies as $key => $sSiteuserCompanyName)
 									{
@@ -581,11 +624,11 @@ if (!is_null(Core_Array::getPost('apply')))
 									$aSiteuserPeopleCities = Core_Array::getPost("person_city");
 									$aSiteuserPeopleAddresses = Core_Array::getPost("person_address");
 
-									$aSiteuserPeoplePhone = Core_Array::getPost("person_0_phone");
-									$aSiteuserPeopleEmail = Core_Array::getPost("person_0_email");
-									$aSiteuserPeopleSocial = Core_Array::getPost("person_0_social");
-									$aSiteuserPeopleMessenger = Core_Array::getPost("person_0_messenger");
-									$aSiteuserPeopleWebsite = Core_Array::getPost("person_0_website");
+									//$aSiteuserPeoplePhone = Core_Array::getPost("person_0_phone");
+									//$aSiteuserPeopleEmail = Core_Array::getPost("person_0_email");
+									//$aSiteuserPeopleSocial = Core_Array::getPost("person_0_social");
+									//$aSiteuserPeopleMessenger = Core_Array::getPost("person_0_messenger");
+									//$aSiteuserPeopleWebsite = Core_Array::getPost("person_0_website");
 
 									foreach ($aSiteuserPeopleNames as $key => $sSiteuserPersonName)
 									{

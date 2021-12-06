@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -48,7 +48,7 @@ abstract class Core_Image
 
 		if (!isset(self::$instance[$name]))
 		{
-			self::$_config = $aConfig = Core::$config->get('core_image');
+			self::$_config = $aConfig = Core::$config->get('core_image', array());
 
 			if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 			{

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Document
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -84,6 +84,8 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$oTextarea_Document->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($oTextarea_Document->value)
 					);
@@ -92,13 +94,15 @@ class Document_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->name("use_typograph")
 						->caption(Core::_('Document.use_typograph'))
 						->value(1)
-						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'));
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+						->checked($aTypographConfig['typograph']);
 
 					$oUseTrailingPunctuation = Admin_Form_Entity::factory('Checkbox')
 						->name("use_trailing_punctuation")
 						->caption(Core::_('Document.use_trailing_punctuation'))
 						->value(1)
-						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'));
+						->divAttr(array('class' => 'form-group col-sm-12 col-md-6'))
+						->checked($aTypographConfig['trailing_punctuation']);
 
 					$oMainTab
 						->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));

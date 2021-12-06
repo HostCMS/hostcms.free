@@ -1,13 +1,5 @@
 <?php
-/**
- * Information systems.
- *
- * @package HostCMS
- * @subpackage Informationsystem
- * @version 6.x
- * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
- */
+
 return array(
 	'model_name' => 'Информационные элементы',
 	'show_information_groups_title' => 'Информационная система "%s"',
@@ -61,7 +53,7 @@ return array(
 	'seo_description' => 'Описание (Description)',
 	'seo_keywords' => 'Ключевые слова (Keywords)',
 
-	'tags' => '<acronym title="Метки (теги) информационного элемента, разделяются запятой, например процессоры, AMD, Athlon64">Метки (теги)</acronym>',
+	'tags' => '<acronym title="Метки (теги) информационного элемента, разделяются запятой, например процессоры, AMD, Intel">Метки (теги)</acronym>',
 	'type_tag' => 'Введите тэг ...',
 
 	'error_information_group_URL_item' => 'В группе уже существует информационный элемент с таким названием в URL!',

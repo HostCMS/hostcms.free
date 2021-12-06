@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Update
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -210,7 +210,7 @@ class Update_Controller extends Core_Servant_Properties
 			'&update_id=' . $this->update_id .
 			'&install_beta_update=' . rawurlencode($this->install_beta);
 
-		$Core_Http = Core_Http::instance()
+		$Core_Http = Core_Http::instance('curl')
 			->timeout(15)
 			->method('POST');
 
@@ -244,7 +244,7 @@ class Update_Controller extends Core_Servant_Properties
 		}
 		else
 		{
-			throw new Core_Exception('Wrong server answer!', array(), 0, FALSE);
+			throw new Core_Exception('Wrong server answer, code "%code"!', array('%code' => Core_Array::get($aHeaders, 'status', 'undefined')), 0, FALSE);
 		}
 
 		return $this;
@@ -353,8 +353,7 @@ class Update_Controller extends Core_Servant_Properties
 
 				$oUpdate_Module_Entity->id = $id;
 				$oUpdate_Module_Entity->name = (string)$value->number;
-				// Исключить property_exists() с 6.9.9
-				property_exists($oUpdate_Module_Entity, 'beta') && $oUpdate_Module_Entity->beta = (int)$value->beta;
+				$oUpdate_Module_Entity->beta = (int)$value->beta;
 				$oUpdate_Module_Entity->number = (string)$value->number;
 				$oUpdate_Module_Entity->path = (string)$value->path;
 				$oUpdate_Module_Entity->description = '<div><strong>' . Core::_('Update.module', htmlspecialchars((string)$value->name)) . '</strong></div>' . (string)$value->description;

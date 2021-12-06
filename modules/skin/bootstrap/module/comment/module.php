@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 {
@@ -124,7 +124,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 
 		// Права доступа пользователя к комментариям
 		$oUser = Core_Auth::getCurrentUser();
-		if ($oUser->superuser == 0 && $oUser->only_access_my_own == 1)
+		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			$oComments
 				->queryBuilder()
@@ -277,7 +277,7 @@ class Skin_Bootstrap_Module_Comment_Module extends Comment_Module
 			->limit(5);
 
 		// Права доступа пользователя к комментариям
-		if ($oUser->superuser == 0 && $oUser->only_access_my_own == 1)
+		if (!$oUser->superuser && $oUser->only_access_my_own)
 		{
 			$oComments
 				->queryBuilder()

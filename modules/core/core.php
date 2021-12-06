@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -211,7 +211,7 @@ class Core
 				'X-XSS-Protection' => '1;mode=block',
 			),
 			'backendSessionLifetime' => 14400,
-			'backendContentSecurityPolicy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
+			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
 		);
 	}
 
@@ -717,10 +717,10 @@ class Core
 	static public function httpsUses()
 	{
 		return Core_Array::get($_SERVER, 'SERVER_PORT') == 443 || Core_Array::get($_SERVER, 'HTTP_PORT') == 443
-			|| strtolower(Core_Array::get($_SERVER, 'HTTPS')) == 'on' || Core_Array::get($_SERVER, 'HTTPS') == '1'
-			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO')) == 'https'
-			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_SCHEME')) == 'https'
-			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_HTTPS')) == 'on' || Core_Array::get($_SERVER, 'HTTP_X_HTTPS') == '1';
+			|| strtolower(Core_Array::get($_SERVER, 'HTTPS', '')) == 'on' || Core_Array::get($_SERVER, 'HTTPS') == '1'
+			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_PROTO', '')) == 'https'
+			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_SCHEME', '')) == 'https'
+			|| strtolower(Core_Array::get($_SERVER, 'HTTP_X_HTTPS', '')) == 'on' || Core_Array::get($_SERVER, 'HTTP_X_HTTPS') == '1';
 	}
 
 	/**
@@ -787,9 +787,11 @@ class Core
 		/*	11111111111111111111111111111111 10000011110111001110111110110111
 			XOR
 			11111111111111111111111111111111 00000000000000000000000000000000 */
+		//var_dump($int); die();
+
 		if ($int > 2147483647 || $int < -2147483648)
 		{
-			$int = $int ^ 18446744069414584320;
+			$int = $int ^ -4294967296;
 		}
 
 		return $int;
@@ -890,7 +892,16 @@ class Core
 	 */
 	static public function xPoweredBy()
 	{
-		return 'HostCMS ' . self::crc32(CMS_FOLDER) . ' ' . self::crc32(Core_Array::get(self::$config->get('core_hostcms'), 'hostcms')) . ' ' . self::crc32(CURRENT_VERSION);
+		return 'HostCMS ' . self::crc32(CMS_FOLDER) . ' ' . self::crc32(Core_Array::get(self::$config->get('core_hostcms'), 'hostcms')) . ' ' . self::crc32(self::getVersion());
+	}
+
+	/**
+	 * Get HostCMS Version
+	 * @return string
+	 */
+	static public function getVersion()
+	{
+		return defined('CURRENT_VERSION') ? CURRENT_VERSION : '7.0';
 	}
 
 	/**
@@ -954,5 +965,25 @@ class Core
 		echo json_encode($content);
 
 		exit();
+	}
+	
+	/**
+	 * Get Real Client Ip
+	 * @return string
+	 */
+	static public function getClientIp()
+	{
+		// CF-Connecting-IP provides the client IP address, connecting to Cloudflare, to the origin web server.
+		// This header will only be sent on the traffic from Cloudflare's edge to your origin webserver.
+		if (isset($_SERVER['HTTP_CF_CONNECTING_IP']))
+		{
+			return $_SERVER['HTTP_CF_CONNECTING_IP'];
+		}
+		elseif (isset($_SERVER['HTTP_DDG_CONNECTING_IP']))
+		{
+			return $_SERVER['HTTP_DDG_CONNECTING_IP'];
+		}
+		
+		return Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
 	}
 }

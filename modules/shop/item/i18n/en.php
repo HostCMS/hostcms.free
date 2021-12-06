@@ -328,8 +328,8 @@ return array(
 	'change_attributes_items_title' => 'Change attributes',
 	'shop_currency_select_caption' => 'Currency',
 	'change_attributes_success' => 'Attributes has been successfully changed!',
-	'remove' => 'Remove',
-	'set' => 'Set',
+	'remove' => '× Remove',
+	'set' => '✓ Set',
 	'continue_import' => "If your browser does not support automatic redirection, please click <b><a href=\"%s\" onclick=\"%s\">here</a></b>",
 	'seo_filter' => 'SEO filter',
 	'apply_to' => 'Apply to price',
@@ -351,4 +351,7 @@ return array(
 	'delete_unsent_modifications_by_properties' => 'Delete unsent modifications created by property',
 	'shortcut' => 'Shortcut',
 	'include_modifications' => 'Include modifications',
+	'attribute_item_tab' => 'Items',
+	'attribute_group_tab' => 'Groups',
+	'include_subgroups' => 'Include subgroups',
 );

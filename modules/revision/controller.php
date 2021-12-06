@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Revision
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -25,6 +25,23 @@ class Revision_Controller
 		Core_QueryBuilder::delete('revisions')
 			->where('datetime', '<', Core_Date::timestamp2sql(strtotime('-' . $aConfig['storeDays'] . ' days')))
 			->execute();
+	}
+
+	/**
+	 * Get revision
+	 * @param object $oModel model for revision
+	 * @return array
+	 */
+	static public function getRevisions($oModel)
+	{
+		$oRevisions = Core_Entity::factory('Revision');
+		$oRevisions->queryBuilder()
+			->where('revisions.model', '=', $oModel->getModelName())
+			->where('revisions.entity_id', '=', $oModel->getPrimaryKey())
+			->clearOrderBy()
+			->orderBy('revisions.datetime', 'DESC');
+
+		return $oRevisions->findAll(FALSE);
 	}
 
 	/**

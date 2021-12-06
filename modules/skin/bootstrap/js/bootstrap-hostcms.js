@@ -267,6 +267,130 @@ function isEmpty(str) {
 				},
 			});
 		},
+		showAutosave: function($form)
+		{
+			var admin_form_id = $form.data('adminformid');
+
+			if (admin_form_id)
+			{
+				var dataset = $form.data('datasetid'),
+					entity_id = $('input[name = id]', $form).val();
+				
+				$.ajax({
+					url: '/admin/admin_form/index.php',
+					data: { 'show_autosave': 1, 'admin_form_id': admin_form_id, 'dataset': dataset, 'entity_id': entity_id },
+					dataType: 'json',
+					type: 'POST',
+					success: function(answer){
+						if (answer.id)
+						{
+							var $id_message = $form.parents('.widget').prev();
+
+							if ($id_message.length)
+							{
+								$id_message.after(answer.text);
+							}
+							else
+							{
+								$form.parents('.bootbox-body').find('#id_message').eq(0).after(answer.text);
+							}
+
+							setTimeout(function(){
+								$('.admin-form-autosave').fadeIn(150);
+								$('.admin-form-autosave a').on('click', function(){
+									$.loadAutosave(answer.id, answer.json);
+								});
+							}, 500);
+						}
+					}
+				});
+			}
+		},
+		loadAutosave: function(id, json)
+		{
+			var obj = jQuery.parseJSON(json);
+
+			$.each(obj, function(key, aValue) {
+				var $field = $('*[name="' + aValue['name'] + '"]'),
+					$type = $field.getInputType();
+
+				// console.log(aValue['name'], $type);
+
+				if (typeof $type !== 'undefined')
+				{
+					switch ($type)
+					{
+						case 'textarea':
+							$field.text(aValue['value']);
+
+							// Ace editor
+							var editor_textarea = document.getElementById($field.attr('id')),
+								editor_div = editor_textarea !== null ? editor_textarea.nextSibling : '';
+
+							if (editor_div != '' && $(editor_div).hasClass('ace_editor'))
+							{
+								var editor = ace.edit(editor_div);
+								editor.getSession().setValue($field.text());
+							}
+						break;
+						case 'checkbox':
+							$field.prop('checked', !!aValue['value']);
+						break;
+						case 'radio':
+							return;
+						case 'hidden':
+							$field.val(aValue['value']);
+
+							// checkbox
+							$field.parent().find('input[name="' + aValue['name'] + '"][type="checkbox"]').prop('checked', !!+aValue['value']);
+						break;
+						case 'ul':
+							// dropdown
+							$field.next().val(aValue['value']);
+							var $li = $field.find('li[id=' + aValue['value'] + ']');
+							$._changeDropdown($li);
+						break;
+						default:
+							$field.val(aValue['value']);
+					}
+				}
+			});
+
+			// Удаление сохранения из базы
+			$.ajax({
+				url: '/admin/admin_form/index.php',
+				data: { 'delete_autosave': 1, 'admin_form_autosave_id': id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(){}
+			});
+
+			$('.admin-form-autosave').fadeOut(150);
+		},
+		_changeDropdown: function($li){
+			var $a = $li.find('a'),
+				dropdownMenu = $li.parent('.dropdown-menu'),
+				containerCurrentChoice = dropdownMenu.prev('[data-toggle="dropdown"]');
+
+			//  Не задан атрибут (current-selection), запрещающий выбирать выбранный элемент списка или он задан и запрещает выбор
+			//  при этом выбрали уже выбранный элемент
+			if ((!dropdownMenu.attr('current-selection') || dropdownMenu.attr('current-selection') != 'enable') && $li.attr('selected'))
+			{
+				return;
+			}
+
+			// Меняем значение связанного с элементом скрытого input'а
+			dropdownMenu.next('input[type="hidden"]').val($li.attr('id')).trigger('change');
+
+			containerCurrentChoice.css('color', $a.css('color'));
+			containerCurrentChoice.html($a.html() + '<i class="fa fa-angle-down icon-separator-left"></i>');
+
+			dropdownMenu.find('li[selected][id != ' + $li.prop('id') + ']').removeAttr('selected');
+			$li.attr('selected', 'selected');
+
+			// вызываем у родителя onchange()
+			dropdownMenu.trigger('change');
+		},
 		recountTotal: function() {
 			var quantity = 0,
 				amount = 0;
@@ -389,6 +513,7 @@ function isEmpty(str) {
 			{
 				setTimeout(function (e) {
 					object.style.height = (object.contentWindow.document.documentElement.scrollHeight) + 'px';
+					object.style.width = (object.contentWindow.document.documentElement.scrollWidth) + 'px';
 				}, 100);
 			}
 
@@ -887,39 +1012,30 @@ function isEmpty(str) {
 					title: name,
 					message: message,
 					backdrop: true,
-					size: 'small'
+					size: 'small',
+					onEscape: true
 				});
 
-				dialog.modal('show');
+				dialog.init(function(){
 
-				// Centered modal
-				/*dialog.find('.modal-content').css({
-					'margin-top': function (){
-						var w = $(window).height(),
-							b = $(".modal-dialog").height(),
-							h = (w - b) / 2;
+					dialog.find('.modal-dialog').css('visibility', 'hidden');
+				})
 
-						console.log(w, b, h);
-						console.log($(this).height());
+				dialog.on("shown.bs.modal", function(){
 
-						return h + "px";
-					}
-				});*/
+					$(this)
+						.find('.modal-dialog')
+						.css({
+							'visibility': 'visible',
+							'margin-top': function () {
 
-				$("body").on("shown.bs.modal", ".modal", function() {
-					$(this).find('div.modal-dialog').css({
-						'margin-top': function () {
-							var modal_height = $('.modal-dialog').first().height();
-							var window_height = $(window).height();
-							return ((window_height/2) - (modal_height/2));
-						}
-					});
-				});
+								//console.log('$(this)', $(this));
 
-				dialog.on('keyup', function (e) {
-					if (e.keyCode == 27) {
-						dialog.modal("hide");
-					}
+								var modal_height = $(this).height();
+								var window_height = $(window).height();
+								return ((window_height/2) - (modal_height/2));
+							},
+						});
 				});
 			}
 		},
@@ -936,9 +1052,28 @@ function isEmpty(str) {
 					$('body').append(result.html);
 					$('#actionsModal' + dms_workflow_template_step_id).modal('show');
 
-					$('#actionsModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
+					$('#actionsModal' + dms_workflow_template_step_id)
+						.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) })
+						.on('hide.bs.modal', function (e) {
+
+							var triggerReturn = $('body').triggerHandler('beforeHideModal');
+
+							triggerReturn == 'break' &&	e.preventDefault();
+
+							/* else
+							{
+								jModal.remove();
+							} */
+						})
+						.on('hidden.bs.modal', function () {
+							$(this).remove();
+						});;
+
+					/* $('#actionsModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
 						$(this).remove();
-					});
+					}); */
+
+
 				}
 			});
 		},
@@ -1204,9 +1339,17 @@ function isEmpty(str) {
 					$('body').append(result.html);
 					$('#routesModal' + dms_workflow_template_step_id).modal('show');
 
-					$('#routesModal' + dms_workflow_template_step_id).on('hidden.bs.modal', function () {
-						$(this).remove();
-					});
+					$('#routesModal' + dms_workflow_template_step_id)
+						.on('hidden.bs.modal', function () {
+							$(this).remove();
+						})
+						.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e); })
+						.on('hide.bs.modal', function (e) {
+
+							var triggerReturn = $('body').triggerHandler('beforeHideModal');
+
+							triggerReturn == 'break' &&	e.preventDefault();
+						});
 				}
 			});
 		},
@@ -1219,6 +1362,13 @@ function isEmpty(str) {
 			$jClone.find('select').val(0);
 
 			$('.routes-form').append($jClone);
+		},
+		deleteModalDmsStateRow: function()
+		{
+			event.target && $(event.target)
+				.parents('.routes-form')
+				.find('.row:last-child:not(:first-child)')
+				.remove();
 		},
 		applyRoutes: function(dms_workflow_template_id, dms_workflow_template_step_id)
 		{
@@ -1825,7 +1975,8 @@ function isEmpty(str) {
 			}
 			else if (result.status == 'error' && result.error_text)
 			{
-				alert(result.error_text);
+				// alert(result.error_text);
+				Notify('<span>' + $.escapeHtml(result.error_text) + '</span>', '', 'bottom-left', '7000', 'danger', 'fa-check', true, false)
 				$('ul#entity-list-' + result.target_id).addClass('error-drop');
 			}
 		},
@@ -1905,7 +2056,7 @@ function isEmpty(str) {
 					}, 200);
 				},
 				start: function (event, ui) {
-					
+
 					var $item = $(ui.item[0]), $ul = $item.parent();
 
 					//var clone = $('<li>').html($item.html());
@@ -1919,7 +2070,7 @@ function isEmpty(str) {
 					//clone.attr('class', '222').attr('id', '111111111');
 					//$(ui.helper[0]).before(clone);
 					//$item.before(clone);
-					
+
 					//$ul.outerHeight($ul.outerHeight() + 90);
 
 					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
@@ -2228,9 +2379,9 @@ function isEmpty(str) {
 			});
 		},
 		modalWindow: function(settings)
-		{			
+		{
 			mainFormLocker.unlock();
-			
+
 			var settings = jQuery.extend({
 					title: '',
 					message: '',
@@ -2243,20 +2394,20 @@ function isEmpty(str) {
 					onEscape: function(){
 						// Запрет повторного закрытия диалогового окна
 						arguments[0].stopImmediatePropagation();
-					},
+					}
 					//onEscape: true
 				}),
 				modalBody = dialog.find('.modal-body'),
 				content = dialog.find('.modal-body .bootbox-body div');
 
 			dialog.on('shown.bs.modal', function () {
+
 				$('html').css('overflow', 'hidden');
 			});
 
 			// before remove:
 			settings.onHide && dialog.on('hide.bs.modal', settings.onHide);
-			
-			
+
 			// after remove:
 			dialog.on('hidden.bs.modal', function(){
 				//mainFormLocker.enable();
@@ -2266,14 +2417,16 @@ function isEmpty(str) {
 				}
 
 				$('html').css('overflow', '');
-			});						
-			
+			});
+
 			dialog.on('hide.bs.modal', function(event){
-			
+
 				// Call own event
 				var triggerReturn = $('body').triggerHandler('beforeHideModal');
-				
+
 				triggerReturn == 'break' && event.preventDefault();
+
+				//$('.open [data-toggle="dropdown"]').dropdown('toggle');
 			});
 
 			//if (typeof settings.width != 'undefined')
@@ -2281,6 +2434,8 @@ function isEmpty(str) {
 			var oContentBlock = settings.AppendTo ? $(settings.AppendTo) : $(window),
 				widthContentBlock = oContentBlock.width() - 50,
 				widthModalDialog = settings.width && settings.width < widthContentBlock ? settings.width : widthContentBlock;
+
+			//console.log('modalWindow');
 
 			dialog
 				.find('.modal-dialog')
@@ -4466,10 +4621,8 @@ function isEmpty(str) {
 		},
 		// Обработчики событий календаря
 		calendarPrepare: function (){
-
 			$(document)
 				.on('shown.bs.popover', 'a.fc-event',  function() {
-
 					$('.popover .calendar-event-description').slimscroll({
 						height: '75px',
 						//height: 'auto',
@@ -4479,7 +4632,6 @@ function isEmpty(str) {
 				})
 				// Удаление события календаря
 				.on('click', '.popover #deleteCalendarEvent', function () {
-
 					var eventId = $(this).data('eventId'),
 						moduleId = $(this).data('moduleId') ;
 
@@ -4786,6 +4938,12 @@ function isEmpty(str) {
 
 			// For checking field
 			jNewObject.find(':input').blur();
+
+			if ($('.section-' + index).hasClass('ui-sortable'))
+			{
+				console.log($('.section-' + index));
+				$('.section-' + index).sortable('refresh');
+			}
 		},
 		clonePropertyInfSys: function(windowId, index)
 		{
@@ -6040,6 +6198,8 @@ function isEmpty(str) {
 				return false;
 			}
 
+			mainFormAutosave.clear();
+
 			settings = jQuery.requestSettings(settings);
 
 			var path = settings.path,
@@ -6191,6 +6351,8 @@ function isEmpty(str) {
 			{
 				return false;
 			}
+
+			mainFormAutosave.clear();
 
 			settings = jQuery.requestSettings(settings);
 
@@ -7110,33 +7272,29 @@ function isEmpty(str) {
 
 $(function(){
 	$(window).on('resize', function(event) {
+
+		var $this = $(this);
 		// Если ширина окна менее 570px, скрываем чекбоксы с настройками фиксации элеметов системы
 		// и показываем пиктограммы, появляющиеся в верхней части окна по умолчанию
-		if ($(this).innerWidth() < 570)
+		if ($this.innerWidth() < 570)
 		{
 			$('.navbar .navbar-inner .navbar-header .navbar-account .account-area').parent('.navbar-account.setting-open').removeClass('setting-open');
 		}
 
 		changeDublicateTables();
-		
+
 		// Настройка отображения заголовка окна
 		// true - без анимации
 		navbarHeaderCustomization(true);
 
 		// Изменяем ширину модального окна
-		if ($('.modal-dialog').data('originalWidth'))
-		{
-			if ($(this).width() > $('.modal-dialog').data('originalWidth') + 30)
-			{
-				$('.modal-dialog').css({'width': $('.modal-dialog').data('originalWidth')});
-			}
-			else
-			{
-				$('.modal-dialog').css({'width': '95%'});
-			}
-		}
+		$('.modal-dialog').each(function() {
+
+			var modalDialog = $(this);
+			modalDialog.data('originalWidth') && modalDialog.css({'width': ($this.width() > modalDialog.data('originalWidth') + 30) ? modalDialog.data('originalWidth') : '95%'});
+		});
 	});
-	
+
 	// Настройка отображения заголовка окна
 	navbarHeaderCustomization();
 
@@ -7150,14 +7308,32 @@ $(function(){
 		});
 	});
 
+	// Добавлено для работы с несколькими модальными окнами
+	$(document)
+		.on('show.bs.modal', '.modal', function() {
+
+			var zIndex = 1040 + (10 * $('.modal:visible').length);
+			$(this).css('z-index', zIndex);
+			setTimeout(function() {
+				$('.modal-backdrop')
+					.not('.modal-stack')
+					.css('z-index', zIndex - 1)
+					.addClass('modal-stack');
+			}, 0);
+		})
+		.on('hidden.bs.modal', '.modal', function() {
+
+			$('.modal:visible').length && $(document.body).addClass('modal-open');
+		});
+
 	//$('.page-content')
 	$('body')
 		.on('click', '[id ^= \'file_\'][id *= \'_settings_\']', function() {
-			$(this)
-			.popover({
+			$(this).popover({
 				placement: 'left',
-				content:  $(this).nextAll('div[id *= "_watermark_"]').show(),
+				content: $(this).nextAll('div[id *= "_watermark_"]').show(),
 				container: $(this).parents('div[id ^= "file_large_"], div[id ^= "file_small_"]'),
+				template: '<div class="popover popover-filesettings" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>',
 				html: true,
 				trigger: 'manual'
 			})
@@ -7172,6 +7348,9 @@ $(function(){
 			}
 			$(this).find("i.fa").toggleClass("fa-times fa-cog");
 		})
+		/* .on('show.bs.popover', '[data-toggle="popover"]', function(event) {
+			console.log('show.bs.popover $(this).data()', $(this).data());
+		}) */
 		.on('show.bs.popover', '[id ^= \'file_\'][id *= \'_settings_\']', function () {
 			$(this).find("i.fa").toggleClass("fa-times fa-cog");
 		})
@@ -7189,7 +7368,8 @@ $(function(){
 		})
 		// Выбор элемента dropdownlist
 		.on('click', '.form-element.dropdown-menu li', function (){
-			var $li = $(this),
+			$._changeDropdown($(this));
+			/*var $li = $(this),
 				$a = $li.find('a'),
 				dropdownMenu = $li.parent('.dropdown-menu'),
 				containerCurrentChoice = dropdownMenu.prev('[data-toggle="dropdown"]');
@@ -7202,7 +7382,7 @@ $(function(){
 			}
 
 			// Меняем значение связанного с элементом скрытого input'а
-			dropdownMenu.next('input[type="hidden"]').val($li.attr('id'));
+			dropdownMenu.next('input[type="hidden"]').val($li.attr('id')).trigger('change');
 
 			containerCurrentChoice.css('color', $a.css('color'));
 			containerCurrentChoice.html($a.html() + '<i class="fa fa-angle-down icon-separator-left"></i>');
@@ -7211,7 +7391,7 @@ $(function(){
 			$li.attr('selected', 'selected');
 
 			// вызываем у родителя onchange()
-			dropdownMenu.trigger('change');
+			dropdownMenu.trigger('change');*/
 		})
 		.on("keyup", ".bootbox.modal", function(event) {
 
@@ -7603,6 +7783,7 @@ $(function(){
 		// For TinyMCE init
 		.on('afterTinyMceInit', function(event, editor) {
 			editor.on('change', function() { mainFormLocker.lock() });
+			editor.on('input', function(e) { mainFormAutosave.changed($('form[id ^= "formEdit"]'), e) });
 		})
 		.on('shown.bs.dropdown', '.table-scrollable', function() {
 			var divWrap = $(this),
@@ -7695,40 +7876,33 @@ $(function(){
 				.val(+$this.prop('checked'));
 
 		})
-		.on('click', '.btn-group:has(ul[data-change-context]):not(.open)', function (){
+		.on('show.bs.dropdown', function (e){
 
-			$(this).data({
-				'margin': $(this).css('margin'),
-				'originalWidth': this.getBoundingClientRect().width,
-				'originalHeight': this.getBoundingClientRect().height
-			});
-		})
-		.on('show.bs.dropdown', '.btn-group:has(ul[data-change-context])', function (){
-			var $this = $(this),
+			var $this = $(e.target), left, top;
+
+			if ($this.has('ul[data-change-context]').length)
+			{
 				left = $this.offset().left,
 				top = $this.offset().top;
 
-			if(!$this.hasClass('open'))
-			{
-				var newBtnGroupDiv = $('<div id="tmp-btn-group"></div>')
-					.css({
-						display: 'inline-block',
-						height: $this.data('originalHeight'),
-						width: $this.data('originalWidth'),
-						margin: $this.data('margin'),
-						'vertical-align': 'middle'
-					});
+				$this.after(
+					$('<div id="tmp-dropdown-div"></div>')
+						.css({
+							display: 'inline-block',
+							height: $this.get(0).getBoundingClientRect().height,
+							width: $this.get(0).getBoundingClientRect().width,
+							margin: $this.css('margin'),
+							'vertical-align': 'middle'
+						})
+				);
 
-				$this.after(newBtnGroupDiv);
+				$('body').append($this.css({
+					position: 'absolute',
+					left: left,
+					top: top,
+					'z-index': 9999
+				}));
 			}
-
-			$this.width($this.data('originalWidth'));
-
-			$('body').append($this.css({
-				position: 'absolute',
-				left: left,
-				top: top
-			}));
 		})
 		.on('shown.bs.dropdown', '.account-area li', function() {
 
@@ -7751,16 +7925,23 @@ $(function(){
 
 			dropdownMenu.data('changePosition') && dropdownMenu.css({left: '', right: ''});
 		})
-		.on('hide.bs.dropdown', '.btn-group:has(ul[data-change-context])', function (){
+		.on('hide.bs.dropdown',  function (e){
 
-			$('#tmp-btn-group').after($(this).css({
-				position: '',
-				left: '',
-				top: '',
-				width: ''
-			  }));
+			var $this = $(e.target);
 
-			$('#tmp-btn-group').remove();
+			if ($this.has('ul[data-change-context]').length)
+			{
+				$('#tmp-dropdown-div').after($this.css({
+					position: '',
+					left: '',
+					top: '',
+					width: '',
+					'z-index': ''
+				  }))
+				  .remove();
+
+				//$('#tmp-dropdown-div').remove();
+			}
 		})
 		.on('touchend', '#leftNavbarArrow', function(event, withoutAnimation){
 
@@ -7870,7 +8051,7 @@ $(function(){
 		setResizableAdminTableTh();
 	});
 	$(".page-content").on('click', '.sidebar-toggler', function() {
-		
+
 		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
 
 		setResizableAdminTableTh();
@@ -7915,7 +8096,7 @@ function navbarHeaderCustomization(withoutAnimation)
 		rightNavbarArrowIsShown && rightNavbarArrow.addClass('hide');
 	}
 
-	// Смещение вычисляем после(!) сброса настроек	
+	// Смещение вычисляем после(!) сброса настроек
 	var offsetLeftAccountArea = accountArea.offset().left;
 
 	// Не помещается минимум 1 элемент
@@ -7954,7 +8135,7 @@ function navbarHeaderCustomization(withoutAnimation)
 				leftNavbarArrow.data('countElementsOffset', countElementsOffset);
 
 				// Перед настройкой была показана кнопка "Вправо".
-				// Показываем ее снова эмуляцией нажатия кнопки "Влево"				
+				// Показываем ее снова эмуляцией нажатия кнопки "Влево"
 				rightNavbarArrowIsShown && leftNavbarArrow.trigger('touchend', [!!withoutAnimation]);
 
 				return false;
@@ -8553,6 +8734,84 @@ function setEventStartButtons(start, windowId)
 	}
 }
 
+function formAutosave()
+{
+	this._timer = 0;
+
+	this.changed = function($form, event, windowId) {
+		var $bVisible = $('#' + windowId + ' .admin-form-autosave').is(':visible');
+
+		if (!$bVisible)
+		{
+			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
+			aKeycodes = [13, 16, 17, 18, 19, 20, 27, 33, 34, 35, 36, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 144, 145];
+
+			if ($.inArray(keycode, aKeycodes) == -1)
+			{
+				if (this._timer)
+				{
+					clearTimeout(this._timer);
+				}
+
+				this._timer = setTimeout(this.save, 5000, $form);
+			}
+		}
+	}
+
+	this.save = function($form) {
+		var admin_form_id = $form.data('adminformid'),
+			dataset = $form.data('datasetid'),
+			entity_id = $('input[name = id]', $form).val();
+
+		// Ace editor
+		$(".ace_editor", $form).each(function(){
+			var editor = ace.edit(this),
+				code = editor.getSession().getValue();
+
+			$(this).prev('textarea').val(code);
+		});
+
+		var json = JSON.stringify($form.serializeArray());
+
+		$.ajax({
+			url: '/admin/admin_form/index.php',
+			data: { 'autosave': 1, 'admin_form_id': admin_form_id, 'dataset': dataset, 'entity_id': entity_id, 'json': json },
+			dataType: 'json',
+			type: 'POST',
+			success: function(answer){
+				var date = new Date();
+
+				$('h5.row-title').find('.autosave-icon').remove();
+				$('h5.row-title').append('<i title="' + i18n['autosave_icon_title'] + date.toLocaleString() + '" class="fas fa-save autosave-icon azure"></i>');
+				$('h5.row-title').find('.autosave-icon').fadeOut(300).fadeIn(300);
+			}
+		});
+	}
+
+	this.clear = function(){
+		if (this._timer)
+		{
+			clearTimeout(this._timer);
+		}
+
+		this._timer = 0;
+
+		$('h5.row-title').find('.autosave-icon').remove();
+
+		return this;
+	}
+}
+mainFormAutosave = new formAutosave();
+
+$.fn.getInputType = function () {
+	if (this[0])
+	{
+		return this[0].tagName.toString().toLowerCase() === "input" ?
+			$(this[0]).prop("type").toLowerCase() :
+			this[0].tagName.toLowerCase();
+	}
+};
+
 function formLocker()
 {
 	this._locked = false;
@@ -8561,7 +8820,7 @@ function formLocker()
 	this._enabled = true;
 
 	this.lock = function(event) {
-		
+
 		if (!this._delay && this._enabled)
 		{
 			var keycode = typeof event !== 'undefined' && event.originalEvent instanceof KeyboardEvent && (event.keyCode || event.which),
@@ -8572,7 +8831,7 @@ function formLocker()
 				$('body').on('beforeAdminLoad beforeAjaxCallback beforeHideModal', $.proxy(this._confirm, this));
 
 				$('h5.row-title').append('<i class="fa fa-lock edit-lock"></i>');
-				
+
 				this._locked = true;
 			}
 		}
@@ -8582,7 +8841,7 @@ function formLocker()
 
 	this._confirm = function(event) {
 		//$(this).off('hide.bs.modal');
-		
+
 		if (!confirm(i18n['lock_message']))
 		{
 			return 'break';
@@ -8591,7 +8850,7 @@ function formLocker()
 	}
 
 	this.unlock = function() {
-		
+
 		this._locked = false;
 
 		$('body')
@@ -8622,7 +8881,7 @@ function formLocker()
 	}
 
 	this.restoreStatus = function() {
-		
+
 		this._previousLocked ? this.lock() : this.unlock();
 		this._previousLocked = false;
 		return this;
@@ -8634,7 +8893,7 @@ function formLocker()
 	}
 
 	this.disable = function() {
-		
+
 		this._enabled = false;
 		return this;
 	}
@@ -8685,7 +8944,7 @@ $.getMultiContent = function(arr, path) {
 			{
 				for (var i=0; i < arguments.length; i++) {
 					//contentType = arguments[i][2].getResponseHeader('Content-Type');
-					//if (contentType.indexOf('javascript') != -1)					
+					//if (contentType.indexOf('javascript') != -1)
 					$.globalEval(arguments[i][0]);
 				}
 			}
@@ -8893,7 +9152,10 @@ function fieldChecker()
 		}
 
 		// Insert message into the message div
-		$object.nextAll("#" + fieldId + '_error').html(message);
+		setTimeout(function() {
+			//$object.nextAll("#" + fieldId + '_error').html(message);
+			$("#" + fieldId + '_error', $form).html(message);
+		}, 50);
 
 		// Устанавливаем флаг несоответствия
 		if (typeof this._formFields[formId] == 'undefined')
@@ -9159,13 +9421,14 @@ function changeDublicateTables()
 
 	leftTable.width(widthLeftTable + 1);
 	leftTopTable.width(widthLeftTable);
+	//alert('changeDublicateTables originalTable.outerWidth()=' + originalTable.outerWidth());
 	tableHead.outerWidth(originalTable.outerWidth());
 }
 
 
 function setTableWithFixedHeaderAndLeftColumn()
 {
-		$(document).one("ajaxSuccess", function (){
+	$(document).one("ajaxSuccess", function (){
 
 		function settingFixedBlocks(tabContent)
 		{
@@ -9217,7 +9480,9 @@ function setTableWithFixedHeaderAndLeftColumn()
 					$(tableThHead[index]).outerWidth($(this).outerWidth());
 				});
 
-				tableHead.outerWidth(originalTable.outerWidth());
+				//alert('settingFixedBlocks originalTable.outerWidth()' + originalTable.outerWidth());
+
+				//tableHead.outerWidth(originalTable.outerWidth());
 
 				leftTable.addClass(originalTable.attr('class'));
 				leftBlock.append(leftTable);
@@ -9285,6 +9550,8 @@ function setTableWithFixedHeaderAndLeftColumn()
 				});
 
 				tabContent.data('fixedBlocksIsSet', true);
+
+				tableHead.outerWidth(originalTable.outerWidth());
 			}
 		}
 
@@ -9426,8 +9693,10 @@ function setTableWithFixedHeaderAndLeftColumn()
 		});
 
 		$('#agregate-user-info a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+
 			settingFixedBlocks($($(this).attr('href')));
 		});
+
 	});
 }
 

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -42,18 +42,35 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 		$oShop_Order = $this->_object->Shop_Order;
 		$oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id')));
 
-		$oMainTab->move($this->getField('quantity')->divAttr(array('class' => 'form-group col-sm-3 col-xs-12')), $oMainRow1);
 		$oMainTab->move($this->getField('price')
 				->id('itemPrice')
-				->divAttr(array('class' => 'form-group col-sm-3 col-xs-5')),
+				->divAttr(array('class' => 'form-group col-sm-2 col-xs-5')),
 			$oMainRow1
 		);
+		$oMainTab->move($this->getField('quantity')->divAttr(array('class' => 'form-group col-sm-2 col-xs-12')), $oMainRow1);
+
+		$oAdditionalTab->delete($this->getField('shop_measure_id'));
+
+		$oShop_Controller_Edit = new Shop_Controller_Edit($this->_Admin_Form_Action);
+
+		// Добавляем единицы измерения
+		$oMeasuresField = Admin_Form_Entity::factory('Select')
+			->id('itemMeasure')
+			->name('shop_measure_id')
+			->caption(Core::_('Shop_Item.shop_measure_id'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
+			->options(
+				$oShop_Controller_Edit->fillMeasures()
+			)
+			->value($this->_object->shop_measure_id);
+
+		$oMainRow1->add($oMeasuresField);
+
 		$oMainTab->move($this->getField('rate')
 				->id('itemRate')
 				->divAttr(array('class' => 'form-group col-xs-5 col-sm-2')),
 			$oMainRow1
 		);
-
 		$oMainRow1->add(Admin_Form_Entity::factory('Span')
 			->value('%')
 			->style("font-size: 200%")
@@ -65,7 +82,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$this->getField('name')->id('itemInput')->format(array('minlen' => array('value' => 0)));
 
-		$oMainTab->moveAfter($this->getField('rate'), $this->getField('price'));
+		$oMainTab->moveAfter($this->getField('rate'), $oMeasuresField);
 
 		$oMainTab->move($this->getField('marking')->id('itemMarking')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow2);
 
@@ -184,9 +201,10 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
 			// &shop_order_id= может использоваться в хуках, когда цена товара зависит от опций заказа (страна, город и т.д.)
-			->value("$('#{$windowId} #itemInput').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
+			->value("$('#{$windowId} #itemInput').autocompleteShopItem({ shop_id: '{$oShop_Order->shop_id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
 				$('#{$windowId} #itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
 				$('#{$windowId} #itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
+				$('#{$windowId} #itemMeasure').val(typeof ui.item.measure_id !== 'undefined' ? ui.item.measure_id : 0);
 				$('#{$windowId} #itemRate').val(typeof ui.item.rate !== 'undefined' ? ui.item.rate : 0);
 				$('#{$windowId} #itemMarking').val(typeof ui.item.marking !== 'undefined' ? ui.item.marking : 0);
 			});");

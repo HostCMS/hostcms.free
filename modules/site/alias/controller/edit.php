@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,9 +28,18 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		parent::setObject($object);
 
-		$this->title($this->_object->id
-			? Core::_('Site_Alias.site_edit_domen_form_title', $this->_object->name)
-			: Core::_('Site_Alias.site_add_domen_form_title'));
+		$oMainTab = $this->getTab('main');
+
+		$oMainTab
+			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$oMainTab
+			->move($this->getField('name'), $oMainRow1)
+			->move($this->getField('current'), $oMainRow2)
+			->move($this->getField('redirect'), $oMainRow3);
 
 		if (!$this->_object->id)
 		{
@@ -38,7 +47,20 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			{
 				$this->getField('current')->checked(TRUE);
 			}
+
+			$oGetKey = Admin_Form_Entity::factory('Checkbox')
+				->name('get_key')
+				->divAttr(array('class' => 'form-group col-xs-12'))
+				->caption(Core::_('Site_Alias.get_key'))
+				->value(1)
+				->checked(TRUE);
+
+			$oMainRow4->add($oGetKey);
 		}
+
+		$this->title($this->_object->id
+			? Core::_('Site_Alias.site_edit_domen_form_title', $this->_object->name)
+			: Core::_('Site_Alias.site_add_domen_form_title'));
 
 		return $this;
 	}
@@ -63,6 +85,12 @@ class Site_Alias_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if (!is_null(Core_Array::getPost('current')))
 		{
 			$this->_object->setCurrent();
+		}
+
+		if (!is_null(Core_Array::getPost('get_key')))
+		{
+			$this->_object->getKey();
+			Core_Message::show(Core::_('Site_Alias.getKey_success'), 'info');
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Lib
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Свойства типовой динамической страницы',
@@ -31,6 +31,7 @@ return array(
 	'lib_property_type_4' => 'SQL-запрос',
 	'lib_property_type_5' => 'Большое текстовое поле',
 	'lib_property_type_7' => 'TPL-шаблон',
+	'lib_property_type_8' => 'Файл',
 	'value' => 'Значение',
 	'multivalue' => 'Множественные значения',
 	'copy_from' => ' [Копия от %s]' ,
@@ -43,4 +44,5 @@ return array(
 	'copy_success' => 'Свойства типовой динамической страницы скопировано.',
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'change_filename' => 'Изменять названия загружаемых файлов',
 );

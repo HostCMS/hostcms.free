@@ -28,4 +28,10 @@ return array(
 	'changeActive_success' => "Інформація успішно змінена",
 	'active' => "Активність",
 	'copy_success' => "Фільтр успішно скопійований!",
+	'indexing' => "Индексировать",
+	'changeIndexing_success' => 'Статус индекс изменен.',
+	'copy_success' => "Фильтр успешно скопирован!",
+	'price_from' => "Цена от",
+	'price_to' => "Цена до",
+	'prices' => '<span class = "field-name"> Цена </span> <span> от %s до %s</span>'
 );

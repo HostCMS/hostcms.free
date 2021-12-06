@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -253,14 +253,14 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				{
 					$oSiteuser = $this->_object->Siteuser;
 
-					$options = !is_null($oSiteuser->id)
-						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
-						: array(0);
-
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
 						->id('object_siteuser_id')
-						->options($options)
+						->options(
+							!is_null($oSiteuser->id)
+								? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+								: array(0)
+						)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
@@ -361,7 +361,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->format(array('maxlen' => array('value' => 255)));
 
 				$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if ($oSiteAlias && $this->_object->id && $oInformationsystem->structure_id)
 				{
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
@@ -370,12 +370,9 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
-					if ($this->_object->id)
-					{
-						$pathLink
-							->target('_blank')
-							->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
-					}
+					$pathLink
+						->target('_blank')
+						->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
 				}
 
 				$oMainTab->move($this->getField('path'), $oMainRow8);
@@ -448,6 +445,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$this->getField('description')->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($this->getField('description')->value)
 					);
@@ -465,7 +464,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->name("use_trailing_punctuation_description")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation'))
 						->value(1)
-						->checked($oInformationsystem->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oDescriptionRow2
@@ -481,9 +480,10 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				$oMainTab->move($this->getField('text'), $oDescriptionRow3);
 
-				//$oMainTab->move($this->getField('text'), $oInformationsystemTabDescription);
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$this->getField('text')->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($this->getField('text')->value)
 					);
@@ -501,7 +501,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->name("use_trailing_punctuation_text")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation_for_text'))
 						->value(1)
-						->checked($oInformationsystem->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-5 col-lg-4'));
 
 					$oDescriptionRow4
@@ -730,6 +730,8 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+					
 					$this->getField('description')->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($this->getField('description')->value)
 					);
@@ -747,7 +749,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 						->name("use_trailing_punctuation_description")
 						->caption(Core::_('Informationsystem_Item.use_trailing_punctuation'))
 						->value(1)
-						->checked($oInformationsystem->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oInformationsystemGroupDescriptionTabRow2
@@ -844,7 +846,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 					->format(array('maxlen' => array('value' => 255)));
 
 				$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if ($oSiteAlias && $this->_object->id && $oInformationsystem->structure_id)
 				{
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
@@ -853,12 +855,9 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
-					if ($this->_object->id)
-					{
-						$pathLink
-							->target('_blank')
-							->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
-					}
+					$pathLink
+						->target('_blank')
+						->href(($oInformationsystem->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oInformationsystem->Structure->getPath() . $this->_object->getPath());
 				}
 
 				$oMainTab->move($this->getField('path'), $oMainRow5);
@@ -902,14 +901,14 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 				{
 					$oSiteuser = $this->_object->Siteuser;
 
-					$options = !is_null($oSiteuser->id)
-						? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
-						: array(0);
-
 					$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 						->caption(Core::_('Informationsystem_Group.siteuser_id'))
 						->id('object_siteuser_id')
-						->options($options)
+						->options(
+							!is_null($oSiteuser->id)
+								? array($oSiteuser->id => $oSiteuser->login . ' [' . $oSiteuser->id . ']')
+								: array(0)
+						)
 						->name('siteuser_id')
 						->class('siteuser-tag')
 						->style('width: 100%')
@@ -1638,7 +1637,7 @@ class Informationsystem_Item_Controller_Edit extends Admin_Form_Action_Controlle
 		}
 
 		$oSiteAlias = $oInformationsystem->Site->getCurrentAlias();
-		if ($oSiteAlias)
+		if ($oSiteAlias && $oInformationsystem->structure_id)
 		{
 			$windowId = $this->_Admin_Form_Controller->getWindowId();
 

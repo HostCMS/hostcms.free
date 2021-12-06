@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -1197,12 +1197,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShop_Payment_System_Handler->shopOrder($this->_object)
 					->shopOrderBeforeAction(clone $this->_object);
 			}
-			// HostCMS v. 5
-			elseif (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-			{
-				$shop = new shop();
-				$order_row = $shop->GetOrder($this->_object->id);
-			}
 		}
 
 		// Payment datetime
@@ -1288,9 +1282,18 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		// Новые товары
 		foreach ($aNew_Shop_Order_Items_Name as $key => $name)
 		{
+			$shop_item_id = Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Id, $key);
+
+			$oShop_Item = $this->_object->Shop->Shop_Items->getById($shop_item_id, FALSE);
+
+			$shop_mesure_id = !is_null($oShop_Item) && $oShop_Item->shop_measure_id
+				? $oShop_Item->shop_measure_id
+				: 0;
+
 			$oShop_Order_Item = Core_Entity::factory('Shop_Order_Item');
 			$oShop_Order_Item->shop_order_id = $this->_object->id;
-			$oShop_Order_Item->shop_item_id = Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Id, $key);
+			$oShop_Order_Item->shop_item_id = $shop_item_id;
+			$oShop_Order_Item->shop_measure_id = $shop_mesure_id;
 			$oShop_Order_Item->name = trim($name);
 			$oShop_Order_Item->quantity = Core_Array::get($aNew_Shop_Order_Items_Quantity, $key);
 			$oShop_Order_Item->price = Core_Array::get($aNew_Shop_Order_Items_Price, $key);
@@ -1348,17 +1351,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			if ($oShop_Payment_System_Handler)
 			{
 				$oShop_Payment_System_Handler->changedOrder('edit');
-			}
-			// HostCMS v. 5
-			elseif (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-			{
-				// Вызываем обработчик платежной системы для события смены статуса HostCMS v. 5
-				$shop->ExecSystemsOfPayChangeStatus($order_row['shop_system_of_pay_id'], array(
-					'shop_order_id' => $this->_object->id,
-					'action' => 'edit',
-					// Предыдущие данные о заказе до редактирования
-					'prev_order_row' => $order_row
-				));
 			}
 		}
 

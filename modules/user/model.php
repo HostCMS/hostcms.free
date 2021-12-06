@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -41,6 +41,7 @@ class User_Model extends Core_Entity
 	 */
 	protected $_hasMany = array(
 		'admin_form_setting' => array(),
+		'admin_form_autosave' => array(),
 		'company_post' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
@@ -91,7 +92,7 @@ class User_Model extends Core_Entity
 		'user_message' => array(),
 		'siteuser_user' => array(),
 		'calendar_caldav_user' => array(),
-		'deal_step_user' => array(),
+		'dealdeal_step_user' => array(),
 		'user_bookmark' => array(),
 		'restapi_token' => array(),
 		'user_worktime' => array(),
@@ -263,21 +264,55 @@ class User_Model extends Core_Entity
 			return FALSE;
 		}
 
-		if ($this->superuser || !$this->only_access_my_own)
+		if ($this->superuser /*|| !$this->only_access_my_own*/)
 		{
 			return TRUE;
 		}
 
-		$aTableColumns = $oObject->getTableColumns();
-
-		// Объект имеет поле user_id
-		if (isset($aTableColumns['user_id']))
+		// Доступ только к своим
+		if ($this->only_access_my_own)
 		{
-			return ($oObject->user_id == 0 || $oObject->user_id == $this->id);
+			$aTableColumns = $oObject->getTableColumns();
+
+			// Объект имеет поле user_id
+			if (isset($aTableColumns['user_id']))
+			{
+				return ($oObject->user_id == 0 || $oObject->user_id == $this->id);
+			}
+		}
+		// Проверка на право доступа пользователя к сайту, которому принадлежит элемент
+		else
+		{
+			$oRelatedSite = $oObject->getRelatedSite();
+
+			if ($oRelatedSite)
+			{
+				$aSites = $this->getSites();
+
+				foreach ($aSites as $oSites)
+				{
+					if ($oRelatedSite->id == $oSites->id)
+					{
+						return TRUE;
+					}
+				}
+				
+				return FALSE;
+			}
+			else
+			{
+				return TRUE;
+			}
 		}
 
 		return FALSE;
 	}
+
+	/**
+	 * Cache getSites()
+	 * @var array|NULL
+	 */
+	protected $_cacheGetSites = NULL;
 
 	/**
 	 * Get allowed sites for User
@@ -285,21 +320,26 @@ class User_Model extends Core_Entity
 	 */
 	public function getSites()
 	{
-		$oSite = Core_Entity::factory('Site');
-
-		if (!$this->superuser)
+		if (is_null($this->_cacheGetSites))
 		{
-			$oSite->queryBuilder()
-				->select('sites.*')
-				->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
-				->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
-				->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
-				->where('company_department_post_users.user_id', '=', $this->id)
-				->where('company_departments.deleted', '=', 0)
-				->groupBy('sites.id');
+			$oSite = Core_Entity::factory('Site');
+
+			if (!$this->superuser)
+			{
+				$oSite->queryBuilder()
+					->select('sites.*')
+					->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
+					->join('company_departments', 'company_department_modules.company_department_id', '=', 'company_departments.id')
+					->join('company_department_post_users', 'company_department_post_users.company_department_id', '=', 'company_department_modules.company_department_id')
+					->where('company_department_post_users.user_id', '=', $this->id)
+					->where('company_departments.deleted', '=', 0)
+					->groupBy('sites.id');
+			}
+			
+			$this->_cacheGetSites = $oSite->findAll();
 		}
 
-		return $oSite->findAll();
+		return $this->_cacheGetSites;
 	}
 
 	/**
@@ -452,6 +492,7 @@ class User_Model extends Core_Entity
 		$this->User_Notes->deleteAll(FALSE);
 		$this->User_Settings->deleteAll(FALSE);
 		$this->Admin_Form_Settings->deleteAll(FALSE);
+		$this->Admin_Form_Autosaves->deleteAll(FALSE);
 
 		// Helpdesks
 		if (Core::moduleIsActive('helpdesk'))
@@ -1009,7 +1050,6 @@ class User_Model extends Core_Entity
 			}
 			else
 			{
-
 				$aHeadOfDepartmentsIDs = array();
 				foreach ($aCompany_Departments as $oCompany_Department)
 				{
@@ -1055,46 +1095,9 @@ class User_Model extends Core_Entity
 	}
 
 	/**
-	 * Может ли авторизованный сотрудник менять права доступа к сделке для определенного сотрудника
-	 * @param $oUser сотрудник
-	 * @return boolean
+	 * Get user's email
+	 * @return string|NULL
 	 */
-	public function hasAccessChangeDealPermissions4User($oUser)
-	{
-		// Администратор может менять права для всех
-		if ($this->superuser)
-		{
-			return TRUE;
-		}
-
-		// Проверяем доступ авторизованного сотрудника к форме "Этапы сделки" и действию "Изменить доступ" этой формы
-		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
-
-		// У авторизованного сотрудника есть доступ к модулю "Сделки"
-		if ($this->checkModuleAccess(array('deal'), $oSite))
-		{
-			$oAdminFormDealTemplateStep = Core_Entity::factory('Admin_Form', 228);
-
-			$bHasChangeAccess = FALSE;
-
-			// Доступные для сотрудника действия формы "Этапы сделок"
-			$aAllowed_Admin_Form_Actions = $oAdminFormDealTemplateStep->Admin_Form_Actions->getAllowedActionsForUser($this);
-
-			foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
-			{
-				if ($oAdmin_Form_Action->name == 'changeAccess')
-				{
-					$bHasChangeAccess = TRUE;
-					break;
-				}
-			}
-
-			return $bHasChangeAccess && $this->isHeadOfEmployee($oUser);
-		}
-
-		return FALSE;
-	}
-
 	public function getEmail()
 	{
 		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);

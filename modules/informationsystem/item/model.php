@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -24,6 +24,12 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * @var int
 	 */
 	public $reviews = 1;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * One-to-many or many-to-many relations
@@ -118,7 +124,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+			$this->_preloadValues['ip'] = Core::getClientIp();
 			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
@@ -195,9 +201,10 @@ class Informationsystem_Item_Model extends Core_Entity
 	 * Значения всех свойств товара
 	 * @param boolean $bCache cache mode status
 	 * @param array $aPropertiesId array of properties' IDs
+	 * @param boolean $bSorting sort results, default FALSE
 	 * @return array Property_Value
 	 */
-	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array())
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array(), $bSorting = FALSE)
 	{
 		if ($bCache && !is_null($this->_propertyValues))
 		{
@@ -217,7 +224,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 		}
 
-		$aProperty_Values = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache);
+		$aProperty_Values = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache, $bSorting);
 
 		// setHref()
 		foreach ($aProperty_Values as $oProperty_Value)
@@ -1291,15 +1298,23 @@ class Informationsystem_Item_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = is_array($showXmlProperties)
 			? array_combine($showXmlProperties, $showXmlProperties)
 			: $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
 
 		return $this;
 	}
@@ -1473,7 +1488,7 @@ class Informationsystem_Item_Model extends Core_Entity
 
 		if ($this->_showXmlSiteuser && $this->siteuser_id && Core::moduleIsActive('siteuser'))
 		{
-			$this->Siteuser->showXmlProperties($this->_showXmlSiteuserProperties);
+			$this->Siteuser->showXmlProperties($this->_showXmlSiteuserProperties, $this->_xmlSortPropertiesValues);
 			$this->addEntity($this->Siteuser);
 		}
 
@@ -1564,7 +1579,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			if (is_array($this->_showXmlProperties))
 			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
 
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
@@ -1573,7 +1588,7 @@ class Informationsystem_Item_Model extends Core_Entity
 			}
 			else
 			{
-				$aProperty_Values = $this->getPropertyValues();
+				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
 				// Add all values
 				//$this->addEntities($aProperty_Values);
 			}
@@ -1627,7 +1642,7 @@ class Informationsystem_Item_Model extends Core_Entity
 				$parentObject->addEntity(
 					$oComment
 						->clearEntities()
-						->showXmlProperties($this->_showXmlCommentProperties)
+						->showXmlProperties($this->_showXmlCommentProperties, $this->_xmlSortPropertiesValues)
 						->showXmlSiteuserProperties($this->_showXmlSiteuserProperties)
 						->showXmlVotes($this->_showXmlVotes)
 						->dateFormat($this->InformationSystem->format_date)
@@ -1824,15 +1839,17 @@ class Informationsystem_Item_Model extends Core_Entity
 		}
 		elseif (strlen($this->image_small))
 		{
-			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
+			$srcImg = htmlspecialchars($this->getSmallFileHref());
+			$dataContent = '<img class="backend-preview" src="' . $srcImg . '"/>';
 
-			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
+			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
 		}
 		elseif (strlen($this->image_large))
 		{
-			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+			$srcImg = htmlspecialchars($this->getLargeFileHref());
+			$dataContent = '<img class="backend-preview" src="' . $srcImg . '" />';
 
-			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
 		}
 		else
 		{

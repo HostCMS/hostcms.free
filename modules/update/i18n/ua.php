@@ -32,6 +32,12 @@ return array(
 	'msg_update_required' => 'Запрошені оновлення %s',
 	'msg_installing_package' => 'Установка пакету оновлень %s',
 	'msg_unpack_package' => 'Розпакування файлу %s',
+	'msg_execute_sql' => 'Виконання SQL-запитів',
+	'msg_execute_file' => 'Виконання інструкцій із файлу',
 	'module' => 'Модуль "%s"',
 	'update' => 'Оновлення',
+	'add_system_notification' => 'Оновлення %s',
+	'system_notification_description' => 'Доступно оновлення %s',
+	'add_module_notification' => 'Оновлення модуля %s',
+	'system_notification_description' => 'Доступна нова версія %s',
 );

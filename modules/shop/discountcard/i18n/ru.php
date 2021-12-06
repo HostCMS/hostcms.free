@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -37,5 +37,6 @@ return array(
 	'backendWarning' => 'Для работы дисконтных карт необходим модуль "Клиенты", который входит в редакцию "Бизнес" и "Корпорация".',
 	'backendWrongWriteoffWarning' => 'Недостаточно бонусов для списания!',
 	'backendWriteoffSuccess' => 'Бонусы списаны успешно!',
-	'changeActive_success' => 'Информация успешно изменена'
+	'changeActive_success' => 'Информация успешно изменена',
+	'card_already_exist' => 'У пользователя уже есть дисконтная карта'
 );

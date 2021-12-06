@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -198,6 +198,24 @@ class Template_Section_Lib_Model extends Core_Entity
 		{
 			return htmlspecialchars($oLib->name);
 		}
+	}
+
+	/**
+	 * Get template section lib file href
+	 * @return string
+	 */
+	public function getLibFileHref()
+	{
+		return $this->Template_Section->Template->Site->uploaddir . 'libs/lib_' . intval($this->lib_id) . '/widget_' . intval($this->id) . '/';
+	}
+
+	/**
+	 * Get template section lib file path
+	 * @return string
+	 */
+	public function getLibFilePath()
+	{
+		return CMS_FOLDER . $this->getLibFileHref();
 	}
 
 	/**

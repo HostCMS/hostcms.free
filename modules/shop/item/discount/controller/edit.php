@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -92,7 +92,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		);
 
 		$title = $this->_object->id
-			? Core::_('Shop_Discount.item_discount_edit_form_title')
+			? Core::_('Shop_Discount.item_discount_edit_form_title', $this->_object->name)
 			: Core::_('Shop_Discount.item_discount_add_form_title');
 
 		$this->title($title);
@@ -213,6 +213,7 @@ class Shop_Item_Discount_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		}
 
 		//parent::_applyObjectProperty();
+		parent::_deleteAutosave();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 

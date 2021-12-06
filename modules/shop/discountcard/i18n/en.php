@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -37,5 +37,6 @@ return array(
 	'backendWrongWriteoffWarning' => 'Not enough bonuses to write off!',
 	'backendWriteoffSuccess' => 'Bonuses debited successfull!',
 	'active' => 'Active',
-	'changeActive_success' => 'Information changed successfully'
+	'changeActive_success' => 'Information changed successfully',
+	'card_already_exist' => 'User already has a discountcard'
 );

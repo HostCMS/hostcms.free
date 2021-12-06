@@ -7,12 +7,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
+
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -28,6 +34,7 @@ class Shop_Payment_System_Model extends Core_Entity
 	protected $_belongsTo = array(
 		'shop' => array(),
 		'shop_currency' => array(),
+		'shop_order_status' => array(),
 		'user' => array()
 	);
 
@@ -61,6 +68,96 @@ class Shop_Payment_System_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
+	}
+
+	/**
+	 * Backend badge
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		switch ($this->type)
+		{
+			case 0:
+			default:
+				$color = 'palegreen';
+			break;
+			case 1:
+				$color = 'azure';
+			break;
+			case 2:
+				$color = 'warning';
+			break;
+			case 3:
+				$color = 'pink';
+			break;
+		}
+
+		$name = Core::_('Shop_Payment_System.type' . $this->type);
+
+		Core::factory('Core_Html_Entity_Span')
+			->class("badge badge-square badge-{$color}")
+			->title($name)
+			->value($name)
+			->execute();
+	}
+
+	/**
+	 * Backup revision
+	 * @return self
+	 */
+	public function backupRevision()
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$aBackup = array(
+				'shop_currency_id' => $this->shop_currency_id,
+				'shop_id' => $this->shop_id,
+				'name' => $this->name,
+				'sorting' => $this->sorting,
+				'description' => $this->description,
+				'active' => $this->active,
+				'type' => $this->type,
+				'handler' => $this->loadPaymentSystemFile()
+			);
+
+			Revision_Controller::backup($this, $aBackup);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Rollback Revision
+	 * @param int $revision_id Revision ID
+	 * @return self
+	 */
+	public function rollbackRevision($revision_id)
+	{
+		if (Core::moduleIsActive('revision'))
+		{
+			$oRevision = Core_Entity::factory('Revision', $revision_id);
+
+			$aBackup = json_decode($oRevision->value, TRUE);
+
+			if (is_array($aBackup))
+			{
+				$this->shop_currency_id = Core_Array::get($aBackup, 'shop_currency_id');
+				$this->shop_id = Core_Array::get($aBackup, 'shop_id');
+				$this->name = Core_Array::get($aBackup, 'name');
+				$this->sorting = Core_Array::get($aBackup, 'sorting');
+				$this->description = Core_Array::get($aBackup, 'description');
+				$this->active = Core_Array::get($aBackup, 'active');
+				$this->type = Core_Array::get($aBackup, 'type');
+				$this->save();
+
+				$this->savePaymentSystemFile(Core_Array::get($aBackup, 'handler'));
+			}
+		}
+
+		return $this;
 	}
 
 	/**

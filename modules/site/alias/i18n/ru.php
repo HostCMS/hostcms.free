@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Домены',
@@ -16,7 +16,7 @@ return array(
 	'setCurrent_error' => 'Ошибка указания текущего домена',
 	'site_delete_domens_message' => 'Домены успешно удалены!',
 	'server_error_respond_data' => 'Ошибка обработки данных.',
-	'getKey_success' => 'Ключ успешно получен.',
+	'getKey_success' => 'Ключ успешно получен!',
 	'constant_check_error' => 'Не обнаружено необходимых констант, заполните поля формы Сайты &#8594; Настройки &#8594; Регистрационные данные',
 	'server_error_respond_0' => 'Неизвестная ошибка!',
 	'server_error_respond_1' => 'Изменилась конфигурация сервера, получение ключа невозможно. Обратитесь к администратору.',
@@ -48,4 +48,7 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'redirect' => '<acronym title="Использовать 301 редирект на основной домен">Редирект</acronym>',
 	'setRedirect_success' => 'Информация сохранена',
+	'get_key' => 'Получить ключ',
+	'select_site' => 'Сайт',
+	'move_success' => 'Домен успешно перенесен!',
 );

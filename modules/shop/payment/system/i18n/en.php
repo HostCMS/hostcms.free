@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Payment systems',
@@ -33,4 +33,10 @@ return array(
 	'file_error' => 'File record error %s. Please set the required directory access rights!',
 	'attention' => 'Attention! The class name depends on the payment system\s ID, e.g. the payment system 17 should has name<br/><b>class Shop_Payment_System_Handler17 extends Shop_Payment_System_Handler</b>',
 	'id' => 'ID',
+	'type' => 'Type',
+	'type0' => 'Cash',
+	'type1' => 'Online',
+	'type2' => 'Bank',
+	'type3' => 'Account',
+	'shop_order_status_id' => 'Payment order status',
 );

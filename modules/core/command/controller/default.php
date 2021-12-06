@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Command
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -30,6 +30,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	 * @return Core_Response
 	 * @hostcms-event Core_Command_Controller_Default.onBeforeShowAction
 	 * @hostcms-event Core_Command_Controller_Default.onAfterShowAction
+	 * @hostcms-event Core_Command_Controller_Default.onBeforeContentCreation
 	 * @hostcms-event Core_Command_Controller_Default.onBeforeSetTemplate
 	 */
 	public function showAction()
@@ -467,7 +468,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			Counter_Controller::instance()
 				->site($oSite)
 				->page('http://' . strtolower(Core_Array::get($_SERVER, 'HTTP_HOST')) . Core_Array::get($_SERVER, 'REQUEST_URI'))
-				->ip(Core_Array::get($_SERVER, 'REMOTE_ADDR'))
+				->ip(Core::getClientIp())
 				->userAgent(Core_Array::get($_SERVER, 'HTTP_USER_AGENT'))
 				->counterId(0)
 				->buildCounter();
@@ -495,6 +496,8 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			$oCore_Page->error404();
 		}
 
+		Core_Event::notify(get_class($this) . '.onBeforeContentCreation', $this, array($oCore_Page, $oCore_Response));
+
 		// isn't document
 		if ($oStructure->type != 0)
 		{
@@ -514,12 +517,6 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			{
 				$oCore_Page->libParams
 					= $oStructure->Lib->getDat($oStructure->id);
-
-				// Совместимость с HostCMS 5
-				if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-				{
-					$this->_setLibParams();
-				}
 
 				$LibConfig = $oStructure->Lib->getLibConfigFilePath();
 
@@ -572,7 +569,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 				->header('Cache-control', "{$sCacheControlType}, max-age={$max_age}");
 		}
 
-		Core_Event::notify(get_class($this) . '.onBeforeSetTemplate', $this);
+		Core_Event::notify(get_class($this) . '.onBeforeSetTemplate', $this, array($oCore_Page, $oCore_Response));
 
 		// Template might be changed at lib config
 		$oTemplate = $oCore_Page->template;
@@ -593,7 +590,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 			);
 		}
 
-		!defined('CURRENT_VERSION') && define('CURRENT_VERSION', '6.0');
+		!defined('CURRENT_VERSION') && define('CURRENT_VERSION', '7.0');
 
 		$bIsUtf8 = strtoupper($oSite->coding) == 'UTF-8';
 
@@ -816,7 +813,7 @@ class Core_Command_Controller_Default extends Core_Command_Controller
 	protected function _iconv($out_charset, $content)
 	{
 		// Delete BOM (EF BB BF)
-		//$sContent = str_replace(chr(0xEF) . chr(0xBB) . chr(0xBF), '', $sContent);
+		//$sContent = Core_Str::removeBOM($sContent);
 		return @iconv('UTF-8', $out_charset . '//IGNORE//TRANSLIT', $content);
 	}
 }

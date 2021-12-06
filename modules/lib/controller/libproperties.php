@@ -8,9 +8,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Lib
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -32,17 +32,16 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	}
 
 	/**
-	 * Constructor.
-	 * @param Admin_Form_Action_Model $oAdmin_Form_Action action
+	 * Get lib properties JSON
+	 * @param Core_Entity $oObject object
+	 * @return string
 	 */
-	public function __construct(Admin_Form_Action_Model $oAdmin_Form_Action)
-	{
-		parent::__construct($oAdmin_Form_Action);
-	}
-
-	static public function getJson(Lib_Model $oLib)
+	static public function getJson(Core_Entity $oObject)
 	{
 		$LA = array();
+		$aOptions = json_decode($oObject->options, TRUE);
+
+		$oLib = $oObject->Lib;
 
 		$aLib_Properties = $oLib->Lib_Properties->findAll();
 
@@ -50,13 +49,38 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 		{
 			$propertyName = 'lib_property_' . $oLib_Property->id;
 
-			$propertyValue = Core_Array::getPost($propertyName);
+			if ($oLib_Property->type != 8)
+			{
+				$propertyValue = Core_Array::getPost($propertyName);
+			}
+			else
+			{
+				$aTmp = Core_Array::getFiles($propertyName);
+
+				if (isset($aTmp['name']))
+				{
+					$propertyValue = array();
+
+					foreach ($aTmp['name'] as $key => $sName)
+					{
+						$propertyValue[] = array(
+							'name' => $sName,
+							'tmp_name' => $aTmp['tmp_name'][$key],
+							'size' => $aTmp['size'][$key]
+						);
+					}
+				}
+				else
+				{
+					$propertyValue = $aTmp;
+				}
+			}
 
 			if ($oLib_Property->multivalue)
 			{
 				$aPropertyValues = is_array($propertyValue)
 					? $propertyValue
-					: array('');
+					: array(NULL);
 			}
 			else
 			{
@@ -64,6 +88,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					? array() // Delete wrong value
 					: array($propertyValue);
 			}
+
+			$aNewValues = $oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]) && is_array($aOptions[$oLib_Property->varible_name])
+				? $aOptions[$oLib_Property->varible_name]
+				: array();
 
 			foreach ($aPropertyValues as $key => $propertyValue)
 			{
@@ -90,14 +118,76 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							? $propertyValue
 							: array();
 					break;*/
+					case 8:
+						if (is_array($propertyValue) && isset($propertyValue['name']))
+						{
+							$aFile = $propertyValue;
+
+							$propertyValue = NULL;
+
+							if (intval($aFile['size']) > 0)
+							{
+								if (Core_File::isValidExtension($aFile['name'], Core::$mainConfig['availableExtension']))
+								{
+									$param = array();
+
+									$ext = Core_File::getExtension($aFile['name']);
+
+									$imageName = $oLib_Property->change_filename
+										? strtolower(Core_Guid::get()) . '.' . $ext
+										: $aFile['name'];
+
+									// Путь к файлу-источнику большого изображения;
+									$param['large_image_source'] = $aFile['tmp_name'];
+									// Оригинальное имя файла большого изображения
+									$param['large_image_name'] = $aFile['name'];
+
+									// Путь к создаваемому файлу большого изображения;
+									$param['large_image_target'] = !empty($imageName)
+										? $oObject->getLibFilePath() . $imageName
+										: '';
+
+									// Использовать большое изображение для создания малого
+									$param['create_small_image_from_large'] = FALSE;
+
+									// Значение максимальной ширины большого изображения
+									// $param['large_image_max_width'] = Core_Array::getPost('large_max_width_image', 0);
+
+									// Значение максимальной высоты большого изображения
+									// $param['large_image_max_height'] = Core_Array::getPost('large_max_height_image', 0);
+
+									// Сохранять пропорции изображения для большого изображения
+									// $param['large_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('large_preserve_aspect_ratio_image'));
+
+									// $oObject->createDir();
+
+									$result = Core_File::adminUpload($param);
+
+									if ($result['large_image'])
+									{
+										$propertyValue = '/' . $oObject->getLibFileHref() . $imageName;
+									}
+								}
+							}
+						}
+						else
+						{
+							$propertyValue = NULL;
+						}
+					break;
 				}
 
-				$aPropertyValues[$key] = $propertyValue;
+				!is_null($propertyValue)
+					&& $aNewValues[] = $propertyValue;
 			}
 
 			$LA[$oLib_Property->varible_name] = $oLib_Property->multivalue
-				? $aPropertyValues
-				: $aPropertyValues[0];
+				/*? ($oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]) && is_array($aOptions[$oLib_Property->varible_name])
+					? array_merge($aOptions[$oLib_Property->varible_name], $aPropertyValues)
+					: $aPropertyValues
+				)*/
+				? $aNewValues
+				: Core_Array::get($aNewValues, 0);
 		}
 
 		return json_encode($LA);
@@ -109,7 +199,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 	 * @return self
 	 * @hostcms-event Lib_Controller_Libproperties.onGetOptionsList
 	 */
-	public function getOptionsList(array $LA)
+	public function getOptionsList(array $LA, Core_Entity $oObject)
 	{
 		$oLib = Core_Entity::factory('Lib', $this->_libId);
 
@@ -518,8 +608,88 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						);
 					}
 				break;
+				// Файл
+				case 8:
+					foreach ($value as $key => $valueItem)
+					{
+						switch ($oObject->getModelName())
+						{
+							case 'structure':
+							default:
+								$path = '/admin/structure/index.php';
+							break;
+							case 'template_section_lib':
+								$path = '/admin/template/section/lib/index.php';
+							break;
+						}
+
+						if ($valueItem != '')
+						{
+							$oDivInputs->add(
+								Admin_Form_Entity::factory('File')
+									->controller($this->_Admin_Form_Controller)
+									->type('file')
+									->name($sFieldName)
+									->largeImage(
+										array(
+											// 'path' => '/' . $oObject->getLibFileHref() . $valueItem,
+											'path' => $valueItem,
+											'show_params' => FALSE,
+											'originalName' => basename($valueItem),
+											'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
+											// 'delete_href' => '',
+											// 'show_description' => TRUE,
+											// 'description' => $oDeal_Attachment->description
+										)
+									)
+									->smallImage(
+										array('show' => FALSE)
+									)
+									// ->divAttr(array('id' => "file_{$oDeal_Attachment->id}", 'class' => 'input-group col-xs-12'))
+									// ->execute();
+							);
+						}
+					}
+
+					/*if ($oLib_Property->multivalue)
+					{
+						$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
+						$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
+							<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
+							</div>
+							</div>');
+					}*/
+
+					$oLib_Property->multivalue && $oDivInputs->add($oDivOpen);
+
+					$oDivInputs->add(
+						Admin_Form_Entity::factory('File')
+							->controller($this->_Admin_Form_Controller)
+							->type('file')
+							->name($sFieldName)
+							->largeImage(
+								array(
+									'show_params' => FALSE,
+									'show_description' => FALSE
+								)
+							)
+							->smallImage(
+								array('show' => FALSE)
+							)
+							// ->divAttr(array('id' => 'file', 'class' => 'row col-xs-12 add-deal-attachment'))
+							// ->add($oAdmin_Form_Entity_Code)
+							// ->execute();
+					);
+
+					if ($oLib_Property->multivalue)
+					{
+						$oDivInputs
+							->add($this->imgBox())
+							->add($oDivClose);
+					}
+				break;
 				default:
-					Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivInputs, $value)); 
+					Core_Event::notify('Lib_Controller_Libproperties.onGetOptionsList', $this, array($oLib_Property, $oDivInputs, $value));
 			}
 
 			$oDivRow->execute();
@@ -538,10 +708,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 		ob_start();
 			Admin_Form_Entity::factory('Div')
-				->class('input-group-addon no-padding add-remove-property margin-top-20')
+				->class('input-group-addon no-padding1 add-remove-property margin-top-20')
 				->add(
 					Admin_Form_Entity::factory('Div')
-					->class('no-padding-right col-lg-12')
+					->class('no-padding-left col-lg-12')
 					->add(
 						Admin_Form_Entity::factory('Div')
 							->class('btn btn-palegreen')

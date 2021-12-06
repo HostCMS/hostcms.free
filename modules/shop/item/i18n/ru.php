@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -337,8 +337,8 @@ return array(
 	'change_attributes_items_title' => 'Изменить атрибуты',
 	'shop_currency_select_caption' => 'Валюта',
 	'change_attributes_success' => 'Атрибуты изменены успешно!',
-	'remove' => 'Убрать',
-	'set' => 'Установить',
+	'remove' => '× Убрать',
+	'set' => '✓ Установить',
 	'delete_property_values' => 'Удалять существующие значения дополнительных свойств',
 	'delete_unsent_modifications_by_properties' => 'Удалять непереданные модификации, созданные по свойству',
 	'continue_import' => "Если Ваш браузер не поддерживает автоматическое перенаправление - нажмите <b><a href=\"%s\" onclick=\"%s\">здесь</a></b>",
@@ -356,4 +356,7 @@ return array(
 	'create_modification_use_property_name' => 'Использовать название свойства',
 	'shortcut' => 'Ярлык',
 	'include_modifications' => 'Учитывать модификации',
+	'attribute_item_tab' => 'Товары',
+	'attribute_group_tab' => 'Группы',
+	'include_subgroups' => 'Учитывать подгруппы',
 );

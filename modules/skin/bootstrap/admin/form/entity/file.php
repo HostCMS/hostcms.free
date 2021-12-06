@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -202,7 +202,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 				? '?'
 				: '&';
 
-			$originalName = $this->largeImage['originalName'] != '' ? $this->largeImage['originalName'] : basename($this->largeImage['path']);
+			$originalName = $this->largeImage['originalName'] != ''
+				? $this->largeImage['originalName']
+				: basename(rawurldecode($this->largeImage['path']));
 
 			$oLarge_Input_Group_Div->add(
 				Admin_Form_Entity::factory('Code')
@@ -519,7 +521,9 @@ class Skin_Bootstrap_Admin_Form_Entity_File extends Skin_Default_Admin_Form_Enti
 					? '?'
 					: '&';
 
-				$originalName = $this->smallImage['originalName'] != '' ? $this->smallImage['originalName'] : basename($this->smallImage['path']);
+				$originalName = $this->smallImage['originalName'] != ''
+					? $this->smallImage['originalName']
+					: basename(rawurldecode($this->smallImage['path']));
 
 				$oSmall_Input_Group_Div->add(
 					Admin_Form_Entity::factory('Code')

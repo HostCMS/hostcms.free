@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -18,6 +18,12 @@ class Xsl_Model extends Core_Entity
 	 * @var int
 	 */
 	public $img = 1;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * Belongs to relations

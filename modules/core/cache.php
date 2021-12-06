@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Cache
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Cache
 {
@@ -141,7 +141,7 @@ abstract class Core_Cache
 
 		if (!isset(self::$instance[$name]))
 		{
-			$aConfig = Core::$config->get('core_cache');
+			$aConfig = Core::$config->get('core_cache', array());
 
 			if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 			{

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -59,28 +59,85 @@ class Field_Model extends Core_Entity
 		}
 	}
 
-	public function typeBackend()
+	/**
+	 * Get all values for entity
+	 * @param int $entityId entity id
+	 * @param boolean $bCache cache mode
+	 * @return array|NULL
+	 */
+	public function getValues($entityId, $bCache = TRUE)
 	{
-		return Core::_('Field.type' . $this->type);
+		if (is_null($this->type))
+		{
+			return array();
+		}
+
+		// Кэшировать и данные со значениями всех св-в были загружены
+		if ($bCache && !is_null($this->_aAllValues))
+		{
+			return isset($this->_aAllValues[$entityId])
+				? $this->_aAllValues[$entityId]
+				: array();
+		}
+
+		return Field_Controller_Value::factory($this->type)
+			->setField($this)
+			->getValues($entityId, $bCache);
 	}
 
 	/**
-	 * Move field to another group
-	 * @param int $iFieldDirId target group id
-	 * @return Core_Entity
-	 * @hostcms-event field.onBeforeMove
-	 * @hostcms-event field.onAfterMove
+	 * List of values for field
+	 * @var array
 	 */
-	public function move($iFieldDirId)
+	protected $_aAllValues = NULL;
+
+	/**
+	 * Load all values for field
+	 * @return self
+	 */
+	public function loadAllValues()
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iFieldDirId));
+		if (is_null($this->_aAllValues))
+		{
+			$this->_aAllValues = array();
 
-		$this->field_dir_id = $iFieldDirId;
-		$this->save();
+			$aField_Values = Field_Controller_Value::factory($this->type)
+				->setField($this)
+				->getFieldValueObject()->findAll();
 
-		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+			foreach ($aField_Values as $oField_Value)
+			{
+				$this->_aAllValues[$oField_Value->entity_id][] = $oField_Value;
+			}
+		}
 
 		return $this;
+	}
+
+	/**
+	 * Получить значение свойства объекта по идентификатору $valueId в таблице значений
+	 * @param $valueId идентифитор в таблице значений
+	 * @return mixed object or NULL
+	 */
+	public function getValueById($valueId)
+	{
+		return Field_Controller_Value::factory($this->type)
+			->setField($this)
+			->getValueById($valueId);
+	}
+
+	/**
+	 * Получить значение свойства объекта по значению в таблице значений
+	 * @param string $value значение
+	 * @param string $condition condition
+	 * @param boolean $bCache use cache
+	 * @return mixed array of objects or NULL
+	 */
+	public function getValuesByValue($value, $condition = '=', $bCache = TRUE)
+	{
+		return Field_Controller_Value::factory($this->type)
+			->setField($this)
+			->getValuesByValue($value, $condition, $bCache);
 	}
 
 	/**
@@ -138,16 +195,28 @@ class Field_Model extends Core_Entity
 		}
 	}
 
-	/**
-	 * Получить значение свойства объекта по идентификатору $valueId в таблице значений
-	 * @param $valueId идентифитор в таблице значений
-	 * @return mixed object or NULL
-	 */
-	public function getValueById($valueId)
+	public function typeBackend()
 	{
-		return Field_Controller_Value::factory($this->type)
-			->setField($this)
-			->getValueById($valueId);
+		return Core::_('Field.type' . $this->type);
+	}
+
+	/**
+	 * Move field to another group
+	 * @param int $iFieldDirId target group id
+	 * @return Core_Entity
+	 * @hostcms-event field.onBeforeMove
+	 * @hostcms-event field.onAfterMove
+	 */
+	public function move($iFieldDirId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iFieldDirId));
+
+		$this->field_dir_id = $iFieldDirId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
 	}
 
 	/**

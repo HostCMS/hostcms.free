@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Shop_Currency_Driver
 {
@@ -48,7 +48,7 @@ abstract class Shop_Currency_Driver
 
 		if (!isset(self::$instance[$name]))
 		{
-			$aConfig = Core::$config->get('shop_currency_config');
+			$aConfig = Core::$config->get('shop_currency_config', array());
 
 			if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 			{

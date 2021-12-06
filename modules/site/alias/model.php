@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -125,7 +125,7 @@ class Site_Alias_Model extends Core_Entity
 		// Если не объявлена константа HOSTCMS_UPDATE_SERVER
 		elseif (defined('HOSTCMS_UPDATE_SERVER'))
 		{
-			$oSite = $this->site;
+			$oSite = $this->Site;
 
 			$login = HOSTCMS_USER_LOGIN;
 			$contract = md5(HOSTCMS_CONTRACT_NUMBER);
@@ -213,6 +213,26 @@ class Site_Alias_Model extends Core_Entity
 		return $this;
 	}
 
+
+	/**
+	 * Move domen to another site
+	 * @param int $iSiteId target site id
+	 * @return self
+	 * @hostcms-event site_alias.onBeforeMove
+	 * @hostcms-event site_alias.onAfterMove
+	 */
+	public function move($iSiteId)
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeMove', $this, array($iSiteId));
+
+		$this->site_id = $iSiteId;
+		$this->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterMove', $this);
+
+		return $this;
+	}
+
 	/**
 	 * Get alias by name
 	 * @param string $name
@@ -259,7 +279,7 @@ class Site_Alias_Model extends Core_Entity
 		}
 
 		// Удаляем все переданные *. если они были
-		$newAliasName = $this->ReplaceMask($aliasName);
+		$newAliasName = $this->replaceMask($aliasName);
 
 		// Если в переданном алиасе небыло *.
 		if (strpos($aliasName, '*.') === FALSE)

@@ -16,4 +16,5 @@ return array(
 	'model_name' => 'Custom fields section',
 	'apply_success' => 'Information changed',
 	'markDeleted_success' => 'Section deleted',
+	'sorting' => 'Sorting',
 );

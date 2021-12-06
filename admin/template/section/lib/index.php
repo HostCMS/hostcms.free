@@ -3,9 +3,9 @@
  * Templates.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -186,6 +186,21 @@ if ($oAdminFormActionLoadLibList && $oAdmin_Form_Controller->getAction() == 'loa
 	$oTemplate_Section_Lib_Controller_Libproperties->libId($lib_id);
 
 	$oAdmin_Form_Controller->addAction($oTemplate_Section_Lib_Controller_Libproperties);
+}
+
+// Действие "Удаление файла"
+$oAdminFormActionDeleteLibFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteLibFile');
+
+if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'deleteLibFile')
+{
+	$oLib_Controller_Delete_File = Admin_Form_Action_Controller::factory(
+		'Lib_Controller_Delete_File', $oAdminFormActionDeleteLibFile
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oLib_Controller_Delete_File);
 }
 
 // Источник данных 1

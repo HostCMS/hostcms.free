@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -112,13 +112,40 @@ class Shop_Discountcard_Controller_Edit extends Admin_Form_Action_Controller_Typ
 	}
 
 	/**
+	 * Executes the business logic.
+	 * @param mixed $operation Operation name
+	 * @return mixed
+	 */
+	public function execute($operation = NULL)
+	{
+		if (!is_null($operation) && $operation != '')
+		{
+			$siteuser_id = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
+
+			if ($siteuser_id)
+			{
+				$oSiteuser = Core_Entity::factory('Siteuser')->getById($siteuser_id);
+
+				if (!is_null($oSiteuser) && $oSiteuser->Shop_Discountcards->getCount(FALSE))
+				{
+					Core_Message::show(Core::_('Shop_Discountcard.card_already_exist'), 'error');
+
+					return TRUE;
+				}
+			}
+		}
+
+		return parent::execute($operation);
+	}
+
+	/**
 	 * Processing of the form. Apply object fields.
 	 * @return self
 	 * @hostcms-event Shop_Discountcard_Controller_Edit.onAfterRedeclaredApplyObjectProperty
 	 */
 	protected function _applyObjectProperty()
 	{
-		$this->_formValues['siteuser_id'] = intval(Core_Array::get($this->_formValues, 'siteuser_id'));
+		$this->_formValues['siteuser_id'] = Core_Array::get($this->_formValues, 'siteuser_id', 0, 'int');
 
 		$bSiteuser = $this->_object->siteuser_id == 0;
 

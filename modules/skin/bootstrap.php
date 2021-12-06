@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -30,7 +30,7 @@ class Skin_Bootstrap extends Core_Skin
 
 		$this
 			->addJs('/modules/skin/' . $this->_skinName . '/js/skins.js')
-			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery-2.0.3.min.js')
+			->addJs('/modules/skin/' . $this->_skinName . '/js/jquery-2.2.4.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/bootstrap-hostcms.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/datetime/moment.js')
@@ -203,7 +203,7 @@ class Skin_Bootstrap extends Core_Skin
 						<a href="/admin/" <?php echo isset($_SESSION['valid_user'])
 							? 'onclick="' . "$.adminLoad({path: '/admin/index.php'}); return false" . '"'
 							: ''?> class="navbar-brand"><?php
-							$sLogoTitle = Core_Auth::logged() ? ' v. ' . htmlspecialchars(CURRENT_VERSION) : '';
+							$sLogoTitle = Core_Auth::logged() ? ' v. ' . htmlspecialchars(Core::getVersion()) : '';
 							?><img src="/modules/skin/bootstrap/img/logo-white.png" alt="(^) HostCMS" title="HostCMS <?php echo $sLogoTitle?>" /></a>
 					</div>
 					<!-- /Navbar Barnd -->
@@ -1552,17 +1552,22 @@ class Skin_Bootstrap extends Core_Skin
 				?>
 			</div>
 
+			<?php
+			if (!defined('PARTNERS_SECTION') || PARTNERS_SECTION || !((~Core::convert64b32(Core_Array::get(Core::$config->get('core_hostcms'), 'hostcms'))) & (~1835217467)))
+			{
+				$siteId = abs(crc32((defined('HOSTCMS_CONTRACT_NUMBER') ? HOSTCMS_CONTRACT_NUMBER : time()) . CURRENT_SITE));
+				$sLicense = defined('HOSTCMS_CONTRACT_NUMBER') ? md5(HOSTCMS_CONTRACT_NUMBER) : '';
+			?>
 			<div class="row partners">
 				<div class="col-xs-12">
 					<div class="well no-padding">
-						<?php
-						$siteId = abs(crc32((defined('HOSTCMS_CONTRACT_NUMBER') ? HOSTCMS_CONTRACT_NUMBER : time()) . CURRENT_SITE));
-						$sLicense = defined('HOSTCMS_CONTRACT_NUMBER') ? md5(HOSTCMS_CONTRACT_NUMBER) : '';
-						?>
-						<iframe width="100%" height="150" src="/info.php?siteId=<?php echo $siteId?>&license=<?php echo $sLicense?>" frameborder="0" scrolling="no" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+						<iframe width="100%" height="150" src="https://www.hostcms.ru/landing/backend/?siteId=<?php echo $siteId?>&license=<?php echo $sLicense?>&cache=<?php echo time()?>" frameborder="0" scrolling="no" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
 					</div>
 				</div>
 			</div>
+			<?php
+			}
+			?>
 
 			<div class="row">
 				<?php
@@ -1667,7 +1672,7 @@ class Skin_Bootstrap extends Core_Skin
 	 */
 	public function frontend()
 	{
-		$iTimestamp = abs(Core::crc32(defined('CURRENT_VERSION') ? CURRENT_VERSION : '6.0'));
+		$iTimestamp = abs(Core::crc32(Core::getVersion()));
 
 		$oTemplate = Core_Page::instance()->template;
 		$aTemplates = array();

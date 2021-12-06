@@ -8,6 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * Доступные методы:
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
  * - itemsForbiddenTags(array('description')) массив тегов товаров, запрещенных к передаче в генерируемый XML
  * - warehousesItems(TRUE|FALSE) выводить остаток на каждом складе для товара, по умолчанию TRUE
@@ -39,7 +40,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -53,6 +54,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 		'couponText',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'sortPropertiesValues',
 		'itemsForbiddenTags',
 		'warehousesItems',
 		'taxes',
@@ -140,7 +142,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 			= $this->calculateCounts = $this->associatedItems = FALSE;
 
 		$this->itemsPropertiesList = $this->warehousesItems
-			= $this->applyDiscounts = $this->applyDiscountCards = TRUE;
+			= $this->applyDiscounts = $this->applyDiscountCards = $this->sortPropertiesValues = TRUE;
 
 		$this->itemsForbiddenTags = array();
 
@@ -261,7 +263,7 @@ class Shop_Cart_Controller_Show extends Core_Controller
 					$oShop_Cart
 						->clearEntities()
 						->showXmlWarehousesItems($this->warehousesItems)
-						->showXmlProperties($this->itemsProperties)
+						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
 						->showXmlSpecialprices($this->specialprices)
 						->showXmlAssociatedItems($this->associatedItems)
 						->setItemsForbiddenTags($this->itemsForbiddenTags)

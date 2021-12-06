@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Database
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -117,6 +117,13 @@ abstract class Core_DataBase
 	 * @return array
 	 */
 	abstract public function getTablesSchema($selectionCondition = NULL);
+
+	/**
+	 * Get the process list indicates the operations currently being performed
+	 *
+	 * @return array
+	 */
+	abstract public function getProcesslist();
 
 	/**
 	 * Fetch query result
@@ -434,7 +441,7 @@ abstract class Core_DataBase
 			'username' => '',
 			'password' => '',
 			'database' => NULL,
-			'charset' => 'UTF8',
+			'charset' => 'utf8',
 			'storageEngine' => 'MyISAM',
 			'newlink' => FALSE,
 			'attr' => array(),
@@ -501,7 +508,7 @@ abstract class Core_DataBase
 
 		if (!isset(self::$instance[$name]))
 		{
-			$aConfig = Core::$config->get('core_database');
+			$aConfig = Core::$config->get('core_database', array());
 
 			if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 			{

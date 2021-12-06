@@ -27,5 +27,10 @@ return array(
 	'empty_properties' => 'Отсутствуют доступные дополнительные свойства',
 	'changeActive_success' => "Информация успешно изменена",
 	'active' => "Активность",
+	'indexing' => "Индексировать",
+	'changeIndexing_success' => 'Статус индексирования изменен.',
 	'copy_success' => "Фильтр успешно скопирован!",
+	'price_from' => "Цена от",
+	'price_to' => "Цена до",
+	'prices' => '<span class="field-name">Цена</span> <span>от %s до %s</span>'
 );

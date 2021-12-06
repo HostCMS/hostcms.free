@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_Entity_Buttons {
 	/**
@@ -23,17 +23,27 @@ class Skin_Bootstrap_Admin_Form_Entity_Buttons extends Skin_Default_Admin_Form_E
 
 		?><script>
 		$(document).ready(function() {
-			var jForm = $('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> form[id ^= "formEdit"]');
+			var $form = $('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> form[id ^= "formEdit"]');
 
 			// Указываем таймаут для узлов структуры (подгрузка xsl)
 			setTimeout(function() {
-				jForm.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) });
-				jForm.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormLocker.lock(e) });
+				$form.on('keyup change paste', ':input', function(e) { mainFormLocker.lock(e) });
+				//$form.find(':hidden').on('keyup change paste', function(e) { mainFormLocker.lock(e) });
+				//$form.find('input[type="hidden"]').on('change', function(e) { mainFormLocker.lock(e) });
+				$form.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormLocker.lock(e) });
+				
+				if ($form.data('adminformid'))
+				{
+					$form.on('keyup change paste', ':input', function(e) { mainFormAutosave.changed($form, e, '<?php echo $windowId?>') });
+					$form.find('input.hasDatetimepicker').parent().on('dp.change', function(e) { mainFormAutosave.changed($form, e, '<?php echo $windowId?>') });
+				}
+
+				$form.find('input[type="hidden"]').on('change', function(e) { mainFormLocker.lock(e) });
 			}, 5000);
 
 			$('#<?php echo Core_Str::escapeJavascriptVariable($windowId)?> .formButtons :input').on('click', function(e) { mainFormLocker.unlock() });
 
-			jForm.on('keyup change paste blur', ':input[data-required]', function(e) { mainFieldChecker.check($(this)) });
+			$form.on('keyup change paste blur', ':input[data-required]', function(e) { mainFieldChecker.check($(this)) });
 		});
 		</script><?php
 	}

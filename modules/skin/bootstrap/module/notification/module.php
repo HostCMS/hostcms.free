@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -150,19 +150,21 @@ class Skin_Bootstrap_Module_Notification_Module extends Notification_Module
 								$aJson['unreadNotifications'][] = $aNotification;
 							}
 						}
-						
+
 						if (count($aNotifications))
 						{
 							break;
 						}
-						
+
 						sleep(2);
-						
+
 						$current++;
-						
+
 					} while ($current < $steps);
 
-					$aJson['lastNotificationId'] = count($aJson['newNotifications']) ? intval($aJson['newNotifications'][count($aJson['newNotifications'])-1]['id']) : $iLastNotificationId;
+					$aJson['lastNotificationId'] = count($aJson['newNotifications'])
+						? intval($aJson['newNotifications'][count($aJson['newNotifications']) - 1]['id'])
+						: $iLastNotificationId;
 
 					// Данные о продолжительности рабочего дня
 					$aJson['workdayDuration'] = $oCurrent_User->getWorkdayDuration(Core_Date::timestamp2sqldate(time()));

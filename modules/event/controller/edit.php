@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -546,6 +546,9 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				{
 					$oUser = $oEvent_User->User;
 
+					$oEventCreator = $this->_object->getCreator();
+					$bCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
+
 					if ($oUser->id)
 					{
 						$aCompany_Department_Post_Users = $oUser->Company_Department_Post_Users->findAll();
@@ -564,7 +567,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 											</div>
 											<div class="databox-right padding-top-20 bg-whitesmoke">
 												<div class="databox-stat orange radius-bordered">
-													<div class="databox-text black semi-bold"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . '</a></div>
+													<div class="databox-text black semi-bold"><a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $oUser->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $oUser->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($oUser->getFullName()) . ($bCreator ? '<i title="' . Core::_('Event.creator') . '" class="fa fa-star gold"></i>' : '') . '</a></div>
 													<div class="databox-text darkgray">' . htmlspecialchars($sUserPost) . '</div>
 												</div>
 											</div>
@@ -628,8 +631,7 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			);
 
 			// Файлы
-			$aEvent_Attachments = $this->_object->Event_Attachments->findAll();
-
+			$aEvent_Attachments = $this->_object->Event_Attachments->findAll(FALSE);
 			foreach ($aEvent_Attachments as $oEvent_Attachment)
 			{
 				$textSize = $oEvent_Attachment->getTextSize();
@@ -2034,8 +2036,13 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		$oEventCreator = $this->_object->getCreator();
 
+		if (!$bAddEvent && is_null($oEventCreator))
+		{
+			throw new Core_Exception('Error, the event has no creator!', array(), 0, FALSE);
+		}
+
 		// Запрещаем редактировать дело не его создателю
-		if (!$bAddEvent && !is_null($oEventCreator) && $oEventCreator->id != $oCurrentUser->id)
+		if (!$bAddEvent /*&& !is_null($oEventCreator)*/ && $oEventCreator->id != $oCurrentUser->id)
 		{
 			$this->_object->completed = strval(Core_Array::get($this->_formValues, 'completed'));
 			$this->_object->result = strval(Core_Array::get($this->_formValues, 'result'));
@@ -2072,7 +2079,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oEventStatus->final &&	$this->_formValues['completed']	= 1;
 		}
 
-		$startEvent = $this->_formValues['start'];
+		// В режиме просмотра поля не будет
+		$startEvent = Core_Array::get($this->_formValues, 'start');
 
 		// Задано время начала события
 		if (!empty($startEvent))
@@ -2411,6 +2419,8 @@ class Event_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		if ($("#id_content .timeline-crm").length && typeof _windowSettings != \'undefined\') {
 			$.adminLoad({ path: \'/admin/crm/project/entity/index.php\', additionalParams: \'crm_project_id=' . $this->_object->crm_project_id . '\', windowId: \'id_content\' });
 		}</script>';
+
+// var_dump($operation);
 
 		switch ($operation)
 		{

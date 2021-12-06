@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -25,7 +25,7 @@ class Shop_Currency_Driver_Floatrates extends Shop_Currency_Driver
 			->url($url)
 			->port(80)
 			->timeout(10)
-			->additionalHeader('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:26.0) Gecko/20100101 Firefox/59.0')
+			->additionalHeader('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0')
 			->execute();
 
 		$xml = $Core_Http->getDecompressedBody();

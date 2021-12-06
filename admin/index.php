@@ -3,7 +3,7 @@
  * Back end
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -12,17 +12,18 @@ require_once ('../bootstrap.php');
 Core_Auth::systemInit();
 Core_Auth::setCurrentSite();
 
-// Check IP addresses
-$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
-$aIp = array($sRemoteAddr);
-$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
-if (!is_null($HTTP_X_FORWARDED_FOR) && $sRemoteAddr != $HTTP_X_FORWARDED_FOR)
-{
-	$aIp[] = $HTTP_X_FORWARDED_FOR;
-}
-
 if (Core::moduleIsActive('ipaddress'))
 {
+	// Check IP addresses
+	$ip = Core::getClientIp();
+
+	$aIp = array($ip);
+	$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
+	if (!is_null($HTTP_X_FORWARDED_FOR) && $ip != $HTTP_X_FORWARDED_FOR)
+	{
+		$aIp[] = $HTTP_X_FORWARDED_FOR;
+	}
+
 	$oIpaddress_Controller = new Ipaddress_Controller();
 
 	$bBlocked = $oIpaddress_Controller->isBackendBlocked($aIp);

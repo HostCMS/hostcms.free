@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Comment
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -147,7 +147,7 @@ class Comment_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR');
+			$this->_preloadValues['ip'] = Core::getClientIp();
 		}
 
 		//!is_null($this->id) && $this->_setShortText();
@@ -398,13 +398,22 @@ class Comment_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param boolean $showXmlProperties
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
+
 		return $this;
 	}
 
@@ -464,9 +473,10 @@ class Comment_Model extends Core_Entity
 	 * Значения всех свойств товара
 	 * @param boolean $bCache cache mode status
 	 * @param array $aPropertiesId array of properties' IDs
+	 * @param boolean $bSorting sort results, default FALSE
 	 * @return array Property_Value
 	 */
-	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array())
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array(), $bSorting = FALSE)
 	{
 		if ($bCache && !is_null($this->_propertyValues))
 		{
@@ -497,7 +507,7 @@ class Comment_Model extends Core_Entity
 			}
 		}
 
-		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache);
+		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache, $bSorting);
 
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
@@ -575,7 +585,7 @@ class Comment_Model extends Core_Entity
 		{
 			$this->addEntity($this->Siteuser
 				->clearEntities()
-				->showXmlProperties($this->_showXmlSiteuserProperties)
+				->showXmlProperties($this->_showXmlSiteuserProperties, $this->_xmlSortPropertiesValues)
 			);
 		}
 
@@ -583,7 +593,7 @@ class Comment_Model extends Core_Entity
 		{
 			if (is_array($this->_showXmlProperties))
 			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
 
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
@@ -592,7 +602,7 @@ class Comment_Model extends Core_Entity
 			}
 			else
 			{
-				$aProperty_Values = $this->getPropertyValues();
+				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
 				// Add all values
 				//$this->addEntities($aProperty_Values);
 			}

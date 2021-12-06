@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО 'Хостмэйк' (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Warehouses',
@@ -52,4 +52,6 @@ return array(
 	'separator' => 'Cell separator',
 	'space_separator' => 'Space',
 	'convolution' => 'Convolution',
+	'tags' => 'Tags',
+	'type_tag' => 'Specify tags',
 );

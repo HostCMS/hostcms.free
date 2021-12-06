@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -21,6 +21,7 @@ class Shop_Order_Status_Model extends Core_Entity
 		'shop' => array(),
 		'shop_order_status' => array('foreign_key' => 'parent_id'),
 		'shop_order_history' => array(),
+		'shop_payment_system' => array(),
 	);
 
 	/**
@@ -195,6 +196,11 @@ class Shop_Order_Status_Model extends Core_Entity
 		$this->Shop_Order_Statuses->deleteAll(FALSE);
 
 		Core_QueryBuilder::update('shop_orders')
+			->set('shop_order_status_id', 0)
+			->where('shop_order_status_id', '=', $this->id)
+			->execute();
+
+		Core_QueryBuilder::update('shop_payment_systems')
 			->set('shop_order_status_id', 0)
 			->where('shop_order_status_id', '=', $this->id)
 			->execute();

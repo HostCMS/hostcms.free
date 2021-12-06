@@ -20,9 +20,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 {
@@ -35,7 +35,7 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		'options', // array
 		'caption',
 		'value', // идет в selected
-		'format', // array, массив условий форматирования
+		'format' // array, массив условий форматирования
 	);
 
 	/**
@@ -112,7 +112,7 @@ class Skin_Default_Admin_Form_Entity_Dropdownlist extends Admin_Form_Entity
 		?><div class="input-group"><?php
 		}
 
-		//var_dump($this->_allowedProperties);
+		$this->_oCore_Html_Entity_Dropdownlist->_data = $this->_data;
 
 		$this->_oCore_Html_Entity_Dropdownlist
 			->value($this->value)

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -137,7 +137,7 @@ class Template_Section_Model extends Core_Entity
 	public function nameBackend()
 	{
 		return '<i class="fa fa-circle" style="margin-right: 5px; color: ' . ($this->color ? htmlspecialchars($this->color) : '#aebec4') . '"></i> '
-			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1615">' . htmlspecialchars($this->name) . '</span>';
+			. '<span class="editable" id="apply_check_0_' . $this->id . '_fv_1125">' . htmlspecialchars($this->name) . '</span>';
 	}
 
 	/**

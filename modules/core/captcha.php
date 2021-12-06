@@ -7,11 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Kruglov Sergei
  * @author Hostmake LLC
  * @copyright © 2006, 2007, 2008, 2011 Kruglov Sergei, http://www.captcha.ru
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Captcha
 {
@@ -73,7 +73,7 @@ class Core_Captcha
 	{
 		if (is_null(self::$_config))
 		{
-			self::$_config = Core::$config->get('core_captcha') + array(
+			self::$_config = Core::$config->get('core_captcha', array()) + array(
 				'allowedCharacters' => '23456789abcdeghkmnpqsuvxyz',
 				//'color' => array(mt_rand(0, 100), mt_rand(0, 100), mt_rand(0, 100)),
 				'backgroundColor' => array(mt_rand(230, 255), mt_rand(230, 255), mt_rand(230, 255)),

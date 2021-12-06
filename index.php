@@ -3,7 +3,7 @@
  * HostCMS frontend.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -138,11 +138,7 @@ Core_Router::add('sitemap.xml', '/sitemap.xml')
 	->controller('Core_Command_Controller_Sitemap');
 
 Core_Router::add('default', '()')
-	->controller(
-		defined('USE_HOSTCMS_5') && USE_HOSTCMS_5
-			? 'Core_Command_Controller_Hostcms5_Default'
-			: 'Core_Command_Controller_Default'
-	);
+	->controller('Core_Command_Controller_Default');
 
 // Site is closed, after Core_Router::add('default', '()')!
 if ($oSite->active == 0 && !Core_Auth::logged())

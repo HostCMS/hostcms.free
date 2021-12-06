@@ -17,6 +17,7 @@ $Shop_Controller_YandexMarket
 	//->modifications(TRUE)
 	//->deliveryOptions(TRUE)
 	// ->itemsForbiddenProperties(array(7431, 7493))
+	// ->additionalTagNames(array('expiry' => 8365))
 	->show();
 
 exit();

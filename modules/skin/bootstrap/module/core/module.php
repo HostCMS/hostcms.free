@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -291,7 +291,7 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 								<div class="row">
 									<div class="ticket-user">
 										<span class="user-name"><?php echo Core::_('Admin.index_tech_date_hostcms')?></span>
-										<span class="user-company"><?php echo CURRENT_VERSION ?></span>
+										<span class="user-company"><?php echo Core::getVersion()?></span>
 									</div>
 									<div class="ticket-state bg-palegreen">
 										<i class="fa fa-check"></i>

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Printlayout
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -18,6 +18,12 @@ class Printlayout_Model extends Core_Entity
 	 * @var string
 	 */
 	public $img = 1;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * Backend property

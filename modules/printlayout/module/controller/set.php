@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS 6
  * @subpackage Printlayout
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -126,8 +126,8 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 					: 400;
 
 				Core::factory('Core_Html_Entity_Script')
-					->value("$(function() {						
-						$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 500, height: {$iHeight}, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					->value("$(function() {
+						$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 500, height: {$iHeight}, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 					->execute();
 
 				$this->addMessage(ob_get_clean());

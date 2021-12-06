@@ -3,7 +3,7 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -389,6 +389,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('where' => array('properties.id', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('properties.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('properties.guid', '=', $sGlobalSearch)))
 		->addCondition(array('close' => array()));
 }
 else

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -102,6 +102,17 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	}
 
 	/**
+	 * Switch indexing mode
+	 * @return self
+	 */
+	public function changeIndexing()
+	{
+		$this->indexing = 1 - $this->indexing;
+		$this->save();
+		return $this;
+	}
+
+	/**
 	 * Backend callback method
 	 * @return string
 	 */
@@ -178,6 +189,13 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		?>
 		<div class="fill-form-text">
 			<?php
+
+			if ($this->price_to > 0)
+			{
+				echo Core::_('Shop_Filter_Seo.prices', floatval($this->price_from), floatval($this->price_to));
+			}
+
+			// Условия
 			foreach ($aProperties as $oProperty)
 			{
 				if (in_array($oProperty->type, $aAvailableProperties))
@@ -228,6 +246,11 @@ class Shop_Filter_Seo_Model extends Core_Entity
 					? $this->Shop_Producer->name
 					: $this->Shop_Producer->path
 				) . '/';
+		}
+
+		if ($this->price_to > 0)
+		{
+			$url .= 'price-' . floatval($this->price_from) . '-' . floatval($this->price_to) . '/';
 		}
 
 		$aValues = array();
@@ -436,7 +459,7 @@ class Shop_Filter_Seo_Model extends Core_Entity
 		$oSearch_Page->text = htmlspecialchars($this->seo_title) . ' ' . htmlspecialchars($this->seo_description) . ' ' . htmlspecialchars($this->seo_keywords) . ' ' . $this->text;
 
 		$oSearch_Page->title = $this->h1;
-		
+
 		if (Core::moduleIsActive('field'))
 		{
 			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
@@ -523,7 +546,9 @@ class Shop_Filter_Seo_Model extends Core_Entity
 	 */
 	public function index()
 	{
-		if (Core::moduleIsActive('search') && $this->active)
+		if (Core::moduleIsActive('search')
+			&& $this->indexing && $this->active
+		)
 		{
 			Search_Controller::indexingSearchPages(array($this->indexing()));
 		}

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -461,7 +461,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 							$fieldName = $fieldName != ''
 								? htmlspecialchars($fieldName)
-								: '&mdash;';
+								: '—';
 
 							$oAdmin_Form_Field_Changed->allow_sorting
 								&& is_object($oSortingField)
@@ -515,9 +515,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					{
 							$iSingleActionCount = 0;
 
-							foreach ($aAllowed_Admin_Form_Actions as $o_Admin_Form_Action)
+							foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 							{
-								$o_Admin_Form_Action->single && $iSingleActionCount++;
+								$oAdmin_Form_Action->single && $iSingleActionCount++;
 							}
 
 						?><th class="filter-action-<?php echo $iSingleActionCount?>">&nbsp;</th><?php
@@ -565,7 +565,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 					else
 					{
 						// Фильтр не разрешен.
-						?><div style="color: #CEC3A3; text-align: center">&mdash;</div><?php
+						?><div style="color: #CEC3A3; text-align: center">—</div><?php
 					}
 					?></td><?php
 				}
@@ -597,7 +597,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 			foreach ($aDatasets as $datasetKey => $oAdmin_Form_Dataset)
 			{
 				// Добавляем внешнюю замену по датасету
-				$oAdmin_Form_Controller->AddExternalReplace('{dataset_key}', $datasetKey);
+				$oAdmin_Form_Controller->addExternalReplace('{dataset_key}', $datasetKey);
 
 				$quotedDatasetKey = htmlspecialchars($datasetKey);
 				$escapedDatasetKey = Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->jQueryEscape($datasetKey));
@@ -883,8 +883,8 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												$fieldCaption = $oAdmin_Form_Field->getCaption($oAdmin_Language->id);
 
 												$fieldCaption = $fieldCaption != ''
-													? htmlspecialchars($fieldCaption)
-													: '&mdash;';
+													? $fieldCaption
+													: '—';
 
 												if (empty($alt_array[$value]))
 												{
@@ -940,12 +940,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 												/*elseif (!empty($link) && !isset($value_array[$value]))
 												{
 													// Картинки для такого значения не найдено, но есть ссылка
-													?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?> ">&mdash;</a><?php
+													?><a href="<?php echo $link?>" onclick="$('#' + $.getWindowId('<?php echo $windowId?>') + ' #row_<?php echo $escapedDatasetKey?>_<?php echo $escapedEntityKey?>').toggleHighlight();<?php echo $onclick?> ">—</a><?php
 												}*/
 												else
 												{
 													// Картинки для такого значения не найдено
-													?>&mdash;<?php
+													?>—<?php
 												}
 
 												if (!empty($link) && !is_null($src))
@@ -955,12 +955,12 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 											break;
 											case 8: // Выпадающий список
-												/*
-												Разделяем варианты значений на строки, т.к. они приходят к нам в виде:
-												0 = /images/off.gif
-												1 = /images/on.gif
-												*/
-												?><select name="<?php echo $element_name?>" id="<?php echo $element_name?>" onchange="$.setCheckbox('<?php echo $windowId?>', '<?php echo $sCheckSelector?>')"><?php
+												$oSelect = Admin_Form_Entity::factory('Select')
+													->name($element_name)
+													->id($element_name)
+													->divAttr(array())
+													->value($value)
+													->onchange("$.setCheckbox('{$windowId}', '{$sCheckSelector}')");
 
 												if (is_array($oAdmin_Form_Field_Changed->list))
 												{
@@ -976,7 +976,7 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 														// Каждую строку разделяем по равно
 														$str_explode = explode('=', $str_value);
 
-														if (count($str_explode) > 1 /* && $str_explode[1] != '…'*/)
+														if (count($str_explode) > 1 /*&& $str_explode[1] != '…'*/)
 														{
 															// сохраняем в массив варинаты значений и ссылки для них
 															$aValue[trim($str_explode[0])] = trim($str_explode[1]);
@@ -984,17 +984,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 													}
 												}
 
-												foreach ($aValue as $optionValue => $optionName)
-												{
-													$selected = $value == $optionValue
-														? ' selected = "selected" '
-														: '';
-
-													?><option value="<?php echo htmlspecialchars($optionValue)?>"<?php echo $selected?>><?php echo htmlspecialchars($optionName)?></option><?php
-												}
-												?>
-												</select>
-												<?php
+												$oSelect
+													->options($aValue)
+													->execute();
 											break;
 											case 9: // Текст "AS IS"
 												if (mb_strlen($value) != 0)
@@ -1073,60 +1065,83 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 							!is_array($aActions)
 								&& $aActions = $aAllowed_Admin_Form_Actions;
 
-							foreach ($aActions as $key => $o_Admin_Form_Action)
+							foreach ($aActions as $key => $oAdmin_Form_Action)
 							{
+								// Перекрытие параметров для данного поля
+								$oAdmin_Form_Action_Changed = $oAdmin_Form_Controller->changeAction($oAdmin_Form_Dataset, $oAdmin_Form_Action);
+
 								// Отображаем действие, только если разрешено.
-								if (!$o_Admin_Form_Action->single)
+								if (!$oAdmin_Form_Action_Changed->single)
 								{
 									continue;
 								}
 
 								// Проверяем, привязано ли действие к определенному dataset'у.
-								if ($o_Admin_Form_Action->dataset != -1
-									&& $o_Admin_Form_Action->dataset != $datasetKey)
+								if ($oAdmin_Form_Action_Changed->dataset != -1
+									&& $oAdmin_Form_Action_Changed->dataset != $datasetKey)
 								{
 									continue;
 								}
 
 								// Если у модели есть метод checkBackendAccess(), то проверяем права на это действие, совершаемое текущим пользователем
 								if (method_exists($oEntity, 'checkBackendAccess')
-									&& !$oEntity->checkBackendAccess($o_Admin_Form_Action->name, $oUser))
+									&& !$oEntity->checkBackendAccess($oAdmin_Form_Action_Changed->name, $oUser))
+								{
+									continue;
+								}
+
+								// Проверка через user_id на право выполнения действия над объектом
+								if (($oEntity instanceof Core_Entity) && !$oUser->checkObjectAccess($oEntity))
 								{
 									continue;
 								}
 
 								$iActionsCount++;
 
-								$name = htmlspecialchars($o_Admin_Form_Action->getCaption($oAdmin_Language->id));
+								$name = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
 
-								Core_Event::notify('Admin_Form_Controller.onBeforeGetAdminActionLoadHref', $oAdmin_Form_Controller, array($o_Admin_Form_Action, $escapedDatasetKey, $escapedEntityKey));
+								Core_Event::notify('Admin_Form_Controller.onBeforeGetAdminActionLoadHref', $oAdmin_Form_Controller, array($oAdmin_Form_Action_Changed, $escapedDatasetKey, $escapedEntityKey));
 
 								$mReturn = Core_Event::getLastReturn();
 								$href = is_null($mReturn)
-									? $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, NULL, $escapedDatasetKey, $escapedEntityKey)
+									// array('path', 'action', 'operation', 'datasetKey', 'datasetValue', 'additionalParams', 'limit', 'current', 'sortingFieldId', 'sortingDirection', 'view', 'window')
+									? $oAdmin_Form_Controller->getAdminActionLoadHref(array(
+										'path' => $oAdmin_Form_Controller->getPath(),
+										'action' => $oAdmin_Form_Action_Changed->name,
+										'datasetKey' => $escapedDatasetKey,
+										'datasetValue' => $escapedEntityKey,
+										'window' => 'id_content'
+									))
 									: $mReturn;
 
-								Core_Event::notify('Admin_Form_Controller.onBeforeGetAdminActionLoadAjax', $oAdmin_Form_Controller, array($o_Admin_Form_Action, $escapedDatasetKey, $escapedEntityKey));
+								Core_Event::notify('Admin_Form_Controller.onBeforeGetAdminActionLoadAjax', $oAdmin_Form_Controller, array($oAdmin_Form_Action_Changed, $escapedDatasetKey, $escapedEntityKey));
 
 								$mReturn = Core_Event::getLastReturn();
 								$onclick = is_null($mReturn)
-									? ($o_Admin_Form_Action->modal
-										? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, 'modal', $datasetKey, $entityKey)
-										: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name, NULL, $datasetKey, $entityKey)
+									? ($oAdmin_Form_Action_Changed->modal
+										? $oAdmin_Form_Controller->getAdminActionModalLoad(array(
+											'path' => $oAdmin_Form_Controller->getPath(), 'action' => $oAdmin_Form_Action_Changed->name,
+											'operation' => 'modal',
+											'datasetKey' => $datasetKey, 'datasetValue' => $entityKey
+										))
+										: $oAdmin_Form_Controller->getAdminActionLoadAjax(array(
+											'path' => $oAdmin_Form_Controller->getPath(), 'action' => $oAdmin_Form_Action_Changed->name,
+											'datasetKey' => $datasetKey, 'datasetValue' => $entityKey
+										))
 									)
 									: $mReturn;
 
 								// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
-								if ($o_Admin_Form_Action->confirm)
+								if ($oAdmin_Form_Action_Changed->confirm)
 								{
 									$onclick = "res = confirm('" .
 										htmlspecialchars(Core::_('Admin_Form.confirm_dialog', $name)) .
 										"'); if (!res) { $('#{$windowId} #row_{$escapedDatasetKey}_{$escapedEntityKey}').toggleHighlight(); } else {{$onclick}} return res;";
 								}
 
-								$sActionsFullView .= '<a class="btn btn-xs btn-' . htmlspecialchars($o_Admin_Form_Action->color) .' " title="' . $name . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i></a>';
+								$sActionsFullView .= '<a class="btn btn-xs btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) .' " title="' . $name . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . '"></i></a>';
 
-								$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . $name . '</a></li>';
+								$sActionsShortView .= '<li><a title="' . $name . '" href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action_Changed->icon) . ' btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action_Changed->color) . '"></i>' . $name . '</a></li>';
 							}
 
 							if ($iActionsCount)
@@ -1206,19 +1221,19 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 
 				$iGroupCount = 0;
 
-				foreach ($aAllowed_Admin_Form_Actions as $o_Admin_Form_Action)
+				foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 				{
-					if ($o_Admin_Form_Action->group)
+					if ($oAdmin_Form_Action->group)
 					{
 						$iGroupCount++;
 
-						$text = htmlspecialchars($o_Admin_Form_Action->getCaption($oAdmin_Language->id));
+						$text = htmlspecialchars($oAdmin_Form_Action->getCaption($oAdmin_Language->id));
 
-						$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name);
-						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $o_Admin_Form_Action->name);
+						$href = $oAdmin_Form_Controller->getAdminLoadHref($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
+						$onclick = $oAdmin_Form_Controller->getAdminLoadAjax($oAdmin_Form_Controller->getPath(), $oAdmin_Form_Action->name);
 
 						// Нужно подтверждение для действия
-						if ($o_Admin_Form_Action->confirm)
+						if ($oAdmin_Form_Action->confirm)
 						{
 							$onclick = "res = confirm('" . Core::_('Admin_Form.confirm_dialog', htmlspecialchars($text)) . "'); if (res) { {$onclick} } else {return false}";
 
@@ -1233,9 +1248,9 @@ class Skin_Bootstrap_Admin_Form_Controller_List extends Admin_Form_Controller_Vi
 						// надписями и при отключении картинок текст дублируется
 						/* alt="<?php echo htmlspecialchars($text)?>"*/
 
-						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($o_Admin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($o_Admin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
+						$sActionsFullView .= '<li><a title="' . htmlspecialchars($text) . '" href="' . $href . '" onclick="mainFormLocker.unlock(); ' . $onclick .'"><i class="' . htmlspecialchars($oAdmin_Form_Action->icon) . ' btn-sm btn-' . htmlspecialchars($oAdmin_Form_Action->color) . '"></i>' . htmlspecialchars($text) . '</a></li>';
 
-						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($o_Admin_Form_Action->color) . '" ><i class="btn-label ' . htmlspecialchars($o_Admin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
+						$sActionsShortView .= '<a href="' . htmlspecialchars($href) . '" onclick="mainFormLocker.unlock(); ' . $onclick . '" class="btn-labeled btn btn-'. htmlspecialchars($oAdmin_Form_Action->color) . '" ><i class="btn-label ' . htmlspecialchars($oAdmin_Form_Action->icon) . '"></i>' . htmlspecialchars($text) . '</a>';
 					}
 				}
 

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -291,7 +291,7 @@ class Core_Str
 	{
 		$string = mb_strtolower(trim(self::toStr($string)));
 
-		$aConfig = Core::$config->get('core_str') + array(
+		$aConfig = Core::$config->get('core_str', array()) + array(
 			'spaceSeparator' => '-',
 			// ISO 9, Транслитерация по системе Б с использованием буквосочетаний
 			'transliteration' => array(
@@ -424,7 +424,7 @@ class Core_Str
 	 */
 	static public function getHashes($text, $param = array())
 	{
-		$aConfig = Core::$config->get('core_str') + array(
+		$aConfig = Core::$config->get('core_str', array()) + array(
 			'stopWords' => '/ (и|в|во|не|что|он|на|я|с|со|как|а|то|все|всё|она|так|его|но|да|ты|к|у|же|вы|за|бы|по|только|её|ее|мне|было|вот|от|меня|ещё|еще|нет|о|из|то|ему|теперь|когда|даже|ну|вдруг|ли|если|уже|или|ни|быть|был|него|до|вас|нибудь|опять|уж|вам|сказал|ведь|там|потом|себя|ничего|ей|может|они|тут|где|есть|надо|ней|для|мы|тебя|их|чем|была|сам|чтоб|без|будто|человек|чего|раз|тоже|себе|под|будет|ж|тогда|кто|этот|говорил|того|потому|этого|какой|совсем|ним|здесь|этом|один|почти|мой|тем|чтобы|нее|кажется|сейчас|были|куда|зачем|сказать|всех|никогда|сегодня|можно|при|наконец|два|об|другой|хоть|после|над|больше|тот|через|эти|нас|про|всего|них|какая|много|разве|сказала|три|эту|моя|впрочем|хорошо|свою|этой|перед|иногда|лучше|чуть|том|нельзя|такой|им|более|всегда|конечно|всю|между) /u',
 			// 0xC2A0 (C2 A0) - NO-BREAK SPACE, http://www.utf8-chartable.de/
 			'separators' => array("\"", "&", "|", "_", "#", "$", "/", "\\", "@", "<", ">", ".", ",", ";", "*", ":", "?", "!", "'", "-", "=", "{", "}", "(", ")", "«", "»", "…", chr(0xC2).chr(0xA0)),
@@ -620,11 +620,13 @@ class Core_Str
 	 */
 	static public function escapeJavascriptVariable($str)
 	{
-		return str_replace(
-			array("\\", "'", "\r", "\n", "script"),
-			array("\\\\", "\'", '\r', '\n', "scr'+'ipt"),
-			$str
-		);
+		return !is_null($str)
+			? str_replace(
+				array("\\", "'", "\r", "\n", "script"),
+				array("\\\\", "\'", '\r', '\n', "scr'+'ipt"),
+				$str
+			)
+			: '';
 	}
 
 	/**
@@ -1477,5 +1479,21 @@ class Core_Str
 		$value *= $coeff;
 
 		return sprintf("%.3f", $value);
+	}
+
+	/**
+	 * Remove BOM
+	 *
+	 * @param string $str
+	 * @return string
+	 */
+	static public function removeBOM($str)
+	{
+		if (substr($str, 0, 3) === "\xEF\xBB\xBF")
+		{
+			$str = substr($str, 3);
+		}
+
+		return $str;
 	}
 }

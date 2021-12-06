@@ -467,7 +467,7 @@ form.adminForm label{
 	font-weight: normal;
 }
 
-form.adminForm .popover{
+form.adminForm .popover-filesettings{
 	max-width:370px;
 }
 
@@ -1410,7 +1410,7 @@ input[type="file"].form-control{
 input[type="file"].form-control + .input-group-addon{
 	border-left-width: 1px;
 }*/
-input[type="file"].form-control + .input-group-addon{
+input[type="file"].form-control:not(.widget-file-input) + .input-group-addon{
 	border-left: 1px solid #ccc;
 }
 
@@ -1820,7 +1820,7 @@ body.body-blank .page-breadcrumbs, body.body-blank .page-header {display:none}
 
 .typograph_result span, .typograph_result nobr{background-color:#FFD79D}
 
-div.wrongTime {color: #AAA}
+div.wrongTime, span.wrongTime {color: #AAA}
 div.inactive, .line-through {text-decoration: line-through}
 .thin { font-weight: 300 }
 .semi-bold {font-weight: 600}
@@ -4149,6 +4149,15 @@ table.deals-aggregate-info tr th:not(:first-child) { text-align: right }
 	padding-left: 0;
     width: 100%;
 }
+.kanban-board .kanban-list .well.with-footer {
+	padding-bottom: 30px;
+}
+.kanban-board .kanban-list .well.with-footer .footer {
+	padding: 0;
+	border-top: none;
+	border-radius: 0;
+}
+
 .kanban-board .placeholder { background-color: #eee; border: 1px dashed #ccc; height: 198px; margin-bottom: 5px; }
 .kanban-board .drag-handle { width: 5px; height: 100%; position: absolute; top: 0; left: -5px; z-index: 1; }
 .kanban-board .drag-handle:hover { cursor: move; }
@@ -5538,6 +5547,9 @@ li.autocomplete-suggestion a { display: inline !important; padding: 0; }
 li.autocomplete-suggestion span { display: inline-block !important; width: 100% !important; }
 li.autocomplete-suggestion .name { /*width: 50%;*/ font-weight: 600; }
 /* li.autocomplete-suggestion .price { width: 25%; } */
+li.autocomplete-suggestion:nth-child(2n) { background-color: #f5f5f5; }
+li.autocomplete-suggestion:hover { background-color:  #f7feff }
+
 
 .tickets-container .tickets-list .ticket-item .ticket-time {
 	white-space: nowrap;
@@ -5812,6 +5824,7 @@ i.shop-order-item-codes:hover { cursor: pointer; }
 .dms-workflow-template-actions .control-label { font-weight: inherit; }
 .dd-item .delete-associated-item:hover, .dd-item .edit-modal:hover { cursor: pointer; }
 .dms-workflow-template-actions .dd, .dms-workflow-template-actions-modal .dd { max-width: 100% !important; }
+.dms-workflow-template-actions-modal { margin-bottom: 80px !important; }
 
 .dms-workflow-template-users .select2-container .select2-search--inline { float: none !important; }
 .dms-workflow-template-users .select2-container .select2-search__field { width: 100% !important; }
@@ -5827,10 +5840,10 @@ i.shop-order-item-codes:hover { cursor: pointer; }
   padding: 0 !important;
 }
 .dms-workflow-document-modal .modal-dialog {
-  width: 100%;
-  height: 100%;
+  width: 70%;
+  /* height: 100%;
   margin: 0;
-  padding: 0 20px;
+  padding: 0 20px; */
 }
 .dms-workflow-document-modal .modal-content {
   height: auto;
@@ -5974,13 +5987,15 @@ table.dms-workflow-execution-view tr td { text-align: left !important; }
 
 .minutes-type {
 	display: inline-block;
-	margin-left: 5px;
+	/* margin-left: 5px; */
 }
 .bot-module-type {
 	display: flex;
 	align-items: center;
 }
 .minutes-block { margin-left: 10px;  }
+
+.minutes-block input[name="minutes"] { margin-right: 5px; }
 .minutes-block .flat {
 	width: initial;
 	height: initial;
@@ -6118,6 +6133,60 @@ a#register-button, a.more-info-link /* , .more-info-link:hover */ {
 	max-height: 150px;
 }
 
+.timeline.timeline-revisions::before {
+	display: none;
+}
+.timeline.timeline-revisions .form-group { margin-bottom: 0; }
+.timeline.timeline-revisions > li.timeline-node {
+	margin: 0 auto 10px;
+	z-index: 0;
+}
+.timeline.timeline-revisions > li {
+	margin-bottom: 0;
+}
+.timeline.timeline-revisions .radio {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	z-index: 1;
+}
+.timeline.timeline-revisions .radio label {
+	display: flex;
+	align-items: center;
+}
+.timeline.timeline-revisions .radio .text {
+	flex: 1 25%;
+}
+.timeline.timeline-revisions .radio .value {
+	flex: 1 10%;
+}
+.timeline.timeline-revisions .radio .date {
+	flex: 1 25%;
+}
+.timeline.timeline-revisions .radio .contracrot {
+	flex: 1 40%;
+}
+
+@media (max-width: 567px)
+{
+	.timeline.timeline-revisions .radio label {
+		flex-wrap: wrap;
+	}
+	.timeline.timeline-revisions .radio .text {
+		flex: 1 33.33%;
+	}
+	.timeline.timeline-revisions .radio .value {
+		flex: 1 33.33%;
+	}
+	.timeline.timeline-revisions .radio .date {
+		flex: 1 33.33%;
+	}
+	.timeline.timeline-revisions .radio .contracrot {
+		flex: 1 100%;
+		margin-left: 25px;
+		margin-top: 5px;
+	}
+}
+
 @media (max-width: 1256.98px) {
 	.partners .well {
 		max-height: 300px;
@@ -6156,3 +6225,38 @@ a#register-button, a.more-info-link /* , .more-info-link:hover */ {
 .no-bordered-left { border-left-style: none; }
 
 /* /Bootstrap-4 */
+
+.admin-form-autosave {
+	/* position: sticky; */
+	/* top: 0px; */
+	/* z-index: 1000; */
+	text-align: center;
+	display: none;
+}
+.admin-form-autosave a {
+	color: #fff;
+	text-decoration: underline;
+}
+.autosave-icon {
+	font-size: 14px !important;
+	margin-right: 0;
+	margin-left: 5px;
+}
+.ui-sortable .placeholder { background-color: #f2f2f2; border: 1px dashed #ccc; height: 50px; margin-bottom: 5px; }
+.ui-sortable .row:hover { cursor: move; }
+
+#start-workflow-button {
+	color: #8ecc4c;
+}
+#start-workflow-button:hover {
+	cursor: pointer;
+	text-decoration: underline dashed #8ecc4c;
+}
+#start-workflow-button i {
+	margin-right: 5px;
+}
+
+input[type="text"] + .input-group-btn > select {
+
+	border-left: none;
+}

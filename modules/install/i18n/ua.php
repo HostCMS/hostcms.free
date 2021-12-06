@@ -104,6 +104,7 @@ return array(
 	'database_pass' => 'Пароль для бази даних',
 	'database_mysql' => 'Назва бази даних',
 	'database_storage_engine' => 'Тип таблиць',
+	'database_charset' => 'Кодування',
 	'database_driver' => 'Драйвер MySQL',
 	'create_database' => 'Створити базу даних',
 	'create_database_flag' => 'Не встановлюйте цей прапорець, якщо база даних вже створена!',

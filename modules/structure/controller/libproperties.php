@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -45,7 +45,7 @@ class Structure_Controller_Libproperties extends Lib_Controller_Libproperties
 				)
 				: array();
 
-			$this->getOptionsList($LA);
+			$this->getOptionsList($LA, $this->_object);
 		}
 
 		$aJson = array(

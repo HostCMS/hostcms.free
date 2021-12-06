@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -45,6 +45,7 @@ return array(
 	'event_siteusers' => 'Участники',
 	'description' => 'Описание',
 	'result' => 'Результат',
+	'creator' => 'Создатель дела',
 	'busy' => 'Занят',
 	'attachment' => 'Файл',
 	'eventStartButtonTitleToday' => 'Сегодня',

@@ -7,12 +7,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Price_Setting_Model extends Core_Entity
 {
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
+
 	/**
 	 * Belongs to relations
 	 * @var array
@@ -112,13 +118,12 @@ class Shop_Price_Setting_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
-		$this->Shop_Price_Setting_Items->deleteAll(FALSE);
+		//$this->Shop_Price_Setting_Items->deleteAll(FALSE);
+		Core_QueryBuilder::delete('shop_price_setting_items')
+			->where('shop_price_setting_id', '=', $this->id)
+			->execute();
 
-		$aShop_Price_Entries = Core_Entity::factory('Shop_Price_Entry')->getByDocument($this->id, 0);
-		foreach ($aShop_Price_Entries as $oShop_Price_Entry)
-		{
-			$oShop_Price_Entry->delete();
-		}
+		Core_Entity::factory('Shop_Price_Entry')->deleteByDocument($this->id, 0);
 
 		if (Core::moduleIsActive('revision'))
 		{

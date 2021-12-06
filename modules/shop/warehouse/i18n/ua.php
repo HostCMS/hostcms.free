@@ -44,4 +44,6 @@ return array(
 	'separator' => 'Роздільник осередки',
 	'space_separator' => 'Пропуск',
 	'convolution' => 'Згортка бази',
+	'tags' => 'Мітки',
+	'type_tag' => 'Вкажіть мітки',
 );

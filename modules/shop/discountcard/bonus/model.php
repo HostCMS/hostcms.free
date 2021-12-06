@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -22,6 +22,14 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		'shop_discountcard' => array(),
 		'shop_discountcard_bonus_type' => array(),
 		'user' => array()
+	);
+
+	/**
+	 * One-to-many or many-to-many relations
+	 * @var array
+	 */
+	protected $_hasMany = array(
+		'shop_discountcard_bonus_transaction' => array()
 	);
 
 	/**
@@ -136,6 +144,28 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		$this->active = 1 - $this->active;
 		return $this->save();
+	}
+
+	/**
+	 * Delete object from database
+	 * @param mixed $primaryKey primary key for deleting object
+	 * @return self
+	 * @hostcms-event shop_discountcard_bonus.onBeforeRedeclaredDelete
+	 */
+	public function delete($primaryKey = NULL)
+	{
+		if (is_null($primaryKey))
+		{
+			$primaryKey = $this->getPrimaryKey();
+		}
+
+		$this->id = $primaryKey;
+
+		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
+
+		$this->Shop_Discountcard_Bonus_Transactions->deleteAll(FALSE);
+
+		return parent::delete($primaryKey);
 	}
 
 	/**

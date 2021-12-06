@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -274,6 +274,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$oDescriptionField->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($oDescriptionField->value)
 					);
@@ -290,7 +292,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oOpticalAlignDescriptionCheckBox = Admin_Form_Entity::factory('Checkbox')
 						->value(1)
-						->checked($oShop->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->name("use_trailing_punctuation_for_description")
 						->caption(Core::_("Shop_Item.use_trailing_punctuation_for_text"))
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -309,6 +311,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$oTextField->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($oTextField->value)
 					);
@@ -325,7 +329,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 					$oOpticalAlignCheckBox = Admin_Form_Entity::factory('Checkbox')
 						->value(1)
-						->checked($oShop->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->name("use_trailing_punctuation_for_text")
 						->caption(Core::_("Shop_Item.use_trailing_punctuation_for_text"))
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
@@ -1208,7 +1212,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 									? 'hidden'
 									: '';
 
-								$aPrices = $this->fillPricesList($oShop);
+								$aPrices = self::fillPricesList($oShop);
 
 								$aCells = $this->_getCells($oWarehouse);
 								?>
@@ -1265,7 +1269,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->divAttr(array('class' => 'form-group col-xs-12'));
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if ($oSiteAlias && $object->id && $oShop->structure_id)
 				{
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
@@ -1274,12 +1278,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
-					if ($object->id)
-					{
-						$pathLink
-							->target('_blank')
-							->href(($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath() . $this->_object->getPath());
-					}
+					$pathLink
+						->target('_blank')
+						->href(($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath() . $this->_object->getPath());
 				}
 
 				$oMainTab
@@ -1502,7 +1503,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->add(
 						Core::factory('Core_Html_Entity_Span')
 							->class('input-group-addon dimension_patch')
-							->value(Core::_('Shop.size_measure_'.$oShop->size_measure))
+							->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
 					);
 				$oMainTab->move($this->getField('height'), $oMainRow11);
 
@@ -1586,7 +1587,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->caption(Core::_("Admin_Form.tabProperties"))
 					->name('Property');
 
-				$this->addTabAfter($oPropertyTab, $oMainTab);
+				$this->addTabAfter($oPropertyTab, $oShopTabSeoTemplates);
 
 				// Properties
 				Property_Controller_Tab::factory($this->_Admin_Form_Controller)
@@ -1836,7 +1837,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					->id('path');
 
 				$oSiteAlias = $oShop->Site->getCurrentAlias();
-				if ($oSiteAlias)
+				if ($oSiteAlias && $this->_object->id && $oShop->structure_id)
 				{
 					$this->getField('path')->add(
 						$pathLink = Admin_Form_Entity::factory('A')
@@ -1845,12 +1846,9 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->value('<i class="fa fa-external-link"></i>')
 					);
 
-					if ($this->_object->id)
-					{
-						$pathLink
-							->target('_blank')
-							->href(($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath() . $this->_object->getPath());
-					}
+					$pathLink
+						->target('_blank')
+						->href(($oShop->Structure->https ? 'https://' : 'http://') . $oSiteAlias->name . $oShop->Structure->getPath() . $this->_object->getPath());
 				}
 
 				$oMainTab->move($this->getField('path'), $oMainRow3);
@@ -1866,6 +1864,8 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				if (Core::moduleIsActive('typograph'))
 				{
+					$aTypographConfig = Typograph_Controller::instance()->getConfig();
+
 					$oDescriptionField->value(
 						Typograph_Controller::instance()->eraseOpticalAlignment($oDescriptionField->value)
 					);
@@ -1884,7 +1884,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						->caption(Core::_("Shop_Group.use_trailing_punctuation_for_text"))
 						->name("use_trailing_punctuation_for_text")
 						->value(1)
-						->checked($oShop->typograph_default_items == 1)
+						->checked($aTypographConfig['trailing_punctuation'])
 						->divAttr(array('class' => 'form-group col-xs-12 col-sm-6'));
 
 					$oShopGroupDescriptionTabRow2->add($oOpticalAlignmentField);
@@ -1991,15 +1991,13 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Проверяем, нужно ли применять типографику к описанию
 					if (Core_Array::getPost('exec_typograph_for_description', 0))
 					{
-						$this->_object->description = Typograph_Controller::instance()->process
-						($this->_object->description, Core_Array::getPost('use_trailing_punctuation_for_description', 0));
+						$this->_object->description = Typograph_Controller::instance()->process($this->_object->description, Core_Array::getPost('use_trailing_punctuation_for_description', 0));
 					}
 
 					// Проверяем, нужно ли применять типографику к тексту
 					if (Core_Array::getPost('exec_typograph_for_text', 0))
 					{
-						$this->_object->text = Typograph_Controller::instance()->process
-						($this->_object->text, Core_Array::getPost('use_trailing_punctuation_for_text', 0));
+						$this->_object->text = Typograph_Controller::instance()->process($this->_object->text, Core_Array::getPost('use_trailing_punctuation_for_text', 0));
 					}
 				}
 
@@ -2604,8 +2602,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					// Проверяем, нужно ли применять типографику к описанию информационной группы.
 					if (Core_Array::getPost('exec_typograph_for_description', 0))
 					{
-						$this->_object->description =
-						Typograph_Controller::instance()->process($this->_object->description, Core_Array::getPost('use_trailing_punctuation_for_text', 0));
+						$this->_object->description = Typograph_Controller::instance()->process($this->_object->description, Core_Array::getPost('use_trailing_punctuation_for_text', 0));
 					}
 				}
 
@@ -2733,7 +2730,6 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				// Удаление файла большого изображения
 				if ($this->_object->image_large)
 				{
-					// !! дописать метод
 					$this->_object->deleteLargeImage();
 				}
 
@@ -2976,7 +2972,7 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}
 
 		$oSiteAlias = $oShop->Site->getCurrentAlias();
-		if ($oSiteAlias)
+		if ($oSiteAlias && $oShop->structure_id)
 		{
 			$sUrl = ($oShop->Structure->https ? 'https://' : 'http://')
 				. $oSiteAlias->name
@@ -3524,19 +3520,15 @@ class Shop_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	 * Fill prices list
 	 * @return array
 	 */
-	public function fillPricesList(Shop_Model $oShop)
+	static public function fillPricesList(Shop_Model $oShop)
 	{
-		$aReturn = array(Core::_('Shop_Warehouse_Incoming.basic'));
+		$aReturn = array(Core::_('Shop_Item.retail_price'));
 
-		// if (Core::moduleIsActive('siteuser'))
-		// {
-			$aShop_Prices = $oShop->Shop_Prices->findAll();
-
-			foreach ($aShop_Prices as $oShop_Price)
-			{
-				$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
-			}
-		// }
+		$aShop_Prices = $oShop->Shop_Prices->findAll();
+		foreach ($aShop_Prices as $oShop_Price)
+		{
+			$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
+		}
 
 		return $aReturn;
 	}

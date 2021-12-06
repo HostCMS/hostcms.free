@@ -7,12 +7,18 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
+
 	/**
 	 * Model name
 	 * @var mixed
@@ -117,47 +123,66 @@ class Structure_Model extends Core_Entity
 	protected $_propertyValues = NULL;
 
 	/**
-	 * Values of all properties of element
-	 * @param boolean $bCache cache mode
+	 * Values of all properties of structure node
+	 * Значения всех свойств узла структуры
+	 * @param boolean $bCache cache mode status
+	 * @param array $aPropertiesId array of properties' IDs
+	 * @param boolean $bSorting sort results, default FALSE
 	 * @return array Property_Value
 	 */
-	public function getPropertyValues($bCache = TRUE)
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array(), $bSorting = FALSE)
 	{
 		if ($bCache && !is_null($this->_propertyValues))
 		{
 			return $this->_propertyValues;
 		}
 
-		// Need cache
-		$aProperties = Core_Entity::factory('Structure_Property_List', $this->site_id)
-			->Properties
-			->findAll();
-
-		$aReturn = array();
-
-		foreach ($aProperties as $oProperty)
+		if (!is_array($aPropertiesId) || !count($aPropertiesId))
 		{
-			$aProperty_Values = $oProperty->getValues($this->id, $bCache);
+			$aProperties = Core_Entity::factory('Structure_Property_List', $this->site_id)
+				->Properties
+				->findAll();
 
-			foreach ($aProperty_Values as $oProperty_Value)
+			$aPropertiesId = array();
+			foreach ($aProperties as $oProperty)
 			{
-				if ($oProperty->type == 2)
-				{
-					$oProperty_Value
-						->setHref('/' . $this->getDirHref())
-						->setDir($this->getDirPath());
-				}
-
-				$aReturn[] = $oProperty_Value;
+				$aPropertiesId[] = $oProperty->id;
 			}
 		}
 
-		if ($bCache)
+		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache, $bSorting);
+
+		// setHref()
+		foreach ($aReturn as $oProperty_Value)
 		{
-			$this->_propertyValues = $aReturn;
+			$this->_preparePropertyValue($oProperty_Value);
 		}
 
+		$bCache && $this->_propertyValues = $aReturn;
+
 		return $aReturn;
+	}
+
+	/**
+	 * Prepare Property Value
+	 * @param Property_Value_Model $oProperty_Value
+	 */
+	protected function _preparePropertyValue($oProperty_Value)
+	{
+		switch ($oProperty_Value->Property->type)
+		{
+			case 2:
+				$oProperty_Value
+					->setHref('/' . $this->getDirHref())
+					->setDir($this->getDirPath());
+			break;
+			case 8:
+				$oProperty_Value->dateFormat($this->Site->date_format);
+			break;
+			case 9:
+				$oProperty_Value->dateTimeFormat($this->Site->date_time_format);
+			break;
+		}
 	}
 
 	/**
@@ -175,6 +200,24 @@ class Structure_Model extends Core_Entity
 		}
 
 		return $this;
+	}
+
+	/**
+	 * Get structure's lib file href
+	 * @return string
+	 */
+	public function getLibFileHref()
+	{
+		return $this->Site->uploaddir . 'libs/lib_' . intval($this->lib_id) . '/structure_' . intval($this->id) . '/';
+	}
+
+	/**
+	 * Get structure's lib file path
+	 * @return string
+	 */
+	public function getLibFilePath()
+	{
+		return CMS_FOLDER . $this->getLibFileHref();
 	}
 
 	/**
@@ -719,13 +762,22 @@ class Structure_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param boolean $showXmlProperties
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
+
 		return $this;
 	}
 
@@ -772,7 +824,7 @@ class Structure_Model extends Core_Entity
 
 		if ($this->_showXmlProperties)
 		{
-			$this->addEntities($this->getPropertyValues());
+			$this->addEntities($this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues));
 		}
 
 		return $this;

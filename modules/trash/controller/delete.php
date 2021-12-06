@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Trash
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -30,10 +30,16 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 		$timeout = Core::getmicrotime();
 
 		$iCount = 0;
+		
+		$offset = Core_Array::getGet('offset', 0, 'int');
+		$limit = 100;
 
 		do {
-			$iDeleted = $this->_object->chunkDelete(100);
+			$iDeleted = $this->_object->chunkDelete($offset, $limit);
+			
 			$iCount += $iDeleted;
+			
+			$offset += ($limit - $iDeleted);
 
 			if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
 			{
@@ -52,9 +58,17 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 			<script type="text/javascript">
 			function set_location()
 			{
-				<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'delete', NULL, 0, $this->_object->id)?>
+				<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax(
+					array(
+						'path' => $oAdmin_Form_Controller->getPath(),
+						'action' => 'delete',
+						'datasetKey' => 0,
+						'datasetValue' => $this->_object->id,
+						'additionalParams' => 'offset=' . $offset
+					)
+				)?>
 			}
-			setTimeout ('set_location()', <?php echo $iDelay * 1000?>);
+			setTimeout('set_location()', <?php echo $iDelay * 1000?>);
 			</script><?php
 		}
 		else

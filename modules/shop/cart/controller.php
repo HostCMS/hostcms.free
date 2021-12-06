@@ -31,7 +31,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -219,10 +219,6 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 
 				$this->totalQuantity += $oShop_Cart->quantity;
 
-				// Количество для скидок от суммы заказа рассчитывается отдельно
-				$oShop_Item->apply_purchase_discount && !$bSkipItem
-					&& $this->totalQuantityForPurchaseDiscount += $oShop_Cart->quantity;
-
 				// Prices
 				if (Core::moduleIsActive('siteuser') && $this->siteuser_id)
 				{
@@ -244,9 +240,27 @@ class Shop_Cart_Controller extends Core_Servant_Properties
 					}
 				}
 
-				// Сумма для скидок от суммы заказа рассчитывается отдельно
-				$oShop_Item->apply_purchase_discount && !$bSkipItem
-					&& $this->totalAmountForPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+				if ($oShop_Item->apply_purchase_discount && !$bSkipItem)
+				{
+					$bApplyPurchaseDiscount = TRUE;
+					foreach ($aPrices['discounts'] as $oShop_Discount)
+					{
+						if ($oShop_Discount->not_apply_purchase_discount)
+						{
+							$bApplyPurchaseDiscount = FALSE;
+							break;
+						}
+					}
+
+					if ($bApplyPurchaseDiscount)
+					{
+						// Сумма для скидок от суммы заказа рассчитывается отдельно
+						$this->totalAmountForPurchaseDiscount += $aPrices['price_discount'] * $oShop_Cart->quantity;
+
+						// Количество для скидок от суммы заказа рассчитывается отдельно
+						$this->totalQuantityForPurchaseDiscount += $oShop_Cart->quantity;
+					}
+				}
 
 				$this->totalTax += $aPrices['tax'] * $oShop_Cart->quantity;
 

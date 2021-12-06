@@ -11,6 +11,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - parentId($parentId) идентификатор родительского узла, по умолчанию 0
  * - level($level) выводить узлы структуры только до уровня вложенности $level
  * - showProperties(TRUE|FALSE) выводить значения дополнительных свойств усзлов структуры, по умолчанию FALSE
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - showInformationsystemGroups(TRUE|FALSE) выводить связанные с узлом структуры группы информационной системы, по умолчанию FALSE
  * - showInformationsystemItems(TRUE|FALSE) выводить связанные с узлом структуры информационные элементы, по умолчанию FALSE
  * - showShopGroups(TRUE|FALSE) выводить связанные с узлом структуры группы магазина, по умолчанию FALSE
@@ -43,7 +44,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -58,6 +59,7 @@ class Structure_Controller_Show extends Core_Controller
 		'parentId',
 		'level',
 		'showProperties',
+		'sortPropertiesValues',
 		'showInformationsystemGroups',
 		'showInformationsystemItems',
 		'showShopGroups',
@@ -132,7 +134,7 @@ class Structure_Controller_Show extends Core_Controller
 
 		$this->showProperties = $this->showInformationsystemGroups = $this->showInformationsystemItems = $this->showShopGroups = $this->showShopItems = $this->showInformationsystemGroupProperties = $this->showInformationsystemItemProperties = $this->showShopGroupProperties = $this->showShopItemProperties = $this->showShopItemAssociated = FALSE;
 
-		$this->showPanel = $this->cache = TRUE;
+		$this->showPanel = $this->cache = $this->sortPropertiesValues = TRUE;
 
 		$this->currentStructureId = Core_Page::instance()->structure->id;
 
@@ -414,7 +416,7 @@ class Structure_Controller_Show extends Core_Controller
 				$this->_aTags[] = 'structure_' . $oStructure->id;
 
 				// Properties for structure entity
-				$oStructure->showXmlProperties($this->showProperties);
+				$oStructure->showXmlProperties($this->showProperties, $this->sortPropertiesValues);
 
 				if (is_null($this->level) || $level < $this->level)
 				{

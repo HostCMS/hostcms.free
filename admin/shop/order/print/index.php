@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -24,26 +24,11 @@ $oShopOrder = Core_Entity::factory('Shop_Order', Core_Array::getGet('shop_order_
 
 if (CURRENT_SITE == $oShopOrder->Shop->site_id)
 {
-	// HostCMS v. 5
-	if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-	{
-		$handler_path = CMS_FOLDER . "hostcmsfiles/shop/pay/handler" . $oShopOrder->shop_payment_system_id . '.php';
+	$oShop_Payment_System_Handler = Shop_Payment_System_Handler::factory($oShopOrder->Shop_Payment_System);
 
-		if (file_exists($handler_path))
-		{
-			include($handler_path);
-			$handler = new system_of_pay_handler();
-			$handler->PrintOrder($oShopOrder->id);
-		}
-	}
-	else
-	{
-		$oShop_Payment_System_Handler = Shop_Payment_System_Handler::factory($oShopOrder->Shop_Payment_System);
-
-		$oShop_Payment_System_Handler
-			->shopOrder($oShopOrder)
-			->printInvoice();
-	}
+	$oShop_Payment_System_Handler
+		->shopOrder($oShopOrder)
+		->printInvoice();
 }
 
 /*$oAdmin_Answer = Core_Skin::instance()->answer();

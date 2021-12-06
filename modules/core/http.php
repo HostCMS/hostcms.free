@@ -48,9 +48,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Http
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Http
 {
@@ -81,7 +81,7 @@ abstract class Core_Http
 			throw new Core_Exception('Wrong argument type (expected String)');
 		}
 
-		$aConfig = Core::$config->get('core_http');
+		$aConfig = Core::$config->get('core_http', array());
 
 		if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 		{

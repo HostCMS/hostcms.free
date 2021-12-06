@@ -3,7 +3,7 @@
  * Structure.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -363,6 +363,35 @@ if ($oAdminFormActiondeletePropertyValue && $oAdmin_Form_Controller->getAction()
 	);
 
 	$oAdmin_Form_Controller->addAction($oStructureControllerdeletePropertyValue);
+}
+
+$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('rollback');
+
+if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
+{
+	$oControllerRollback = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Rollback', $oAdminFormActionRollback
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerRollback);
+}
+
+// Действие "Удаление файла"
+$oAdminFormActionDeleteLibFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteLibFile');
+
+if ($oAdminFormActionDeleteLibFile && $oAdmin_Form_Controller->getAction() == 'deleteLibFile')
+{
+	$oLib_Controller_Delete_File = Admin_Form_Action_Controller::factory(
+		'Lib_Controller_Delete_File', $oAdminFormActionDeleteLibFile
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oLib_Controller_Delete_File);
 }
 
 // Источник данных 0

@@ -34,6 +34,7 @@ return array(
 	'event_siteusers' => 'Учасники',
 	'description' => 'Опис',
 	'result' => 'Результат',
+	'creator' => 'Творець справи',
 	'busy' => 'Зайнятий',
 	'attachment' => 'Файл',
 	'eventStartButtonTitleToday' => 'Сьогодні',

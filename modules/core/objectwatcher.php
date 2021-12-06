@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ObjectWatcher
 {
@@ -53,7 +53,7 @@ class Core_ObjectWatcher
 		{
 			self::$_instance = new Core_ObjectWatcher();
 
-			self::$config = Core::$config->get('core_objectwatcher') + array(
+			self::$config = Core::$config->get('core_objectwatcher', array()) + array(
 				'maxObjects' => 512
 			);
 

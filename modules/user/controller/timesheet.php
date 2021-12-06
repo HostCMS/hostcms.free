@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage User
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -295,7 +295,8 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				{
 				?>
 				<div id="company-<?php echo $iCompanyId?>" class="tab-pane <?php echo $sActiveClassName?>">
-					<div class="!admin-table-wrap table-scrollable" style="position:relative">
+					<div class="admin-table-wrap table-scrollable" style="position:relative">
+
 						<div class="permissions-table-head">
 							<table class="table table-hover deals-aggregate-user-info deal-template-access" style="white-space: nowrap;">
 							<thead>
