@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Session_Database extends Core_Session
 {
@@ -98,7 +98,10 @@ class Core_Session_Database extends Core_Session
 				->where('id', '=', $id)
 				->limit(1);
 
-			$row = $queryBuilder->execute()->asAssoc()->current();
+			$oDataBase = $queryBuilder->execute();
+			$row = $oDataBase->asAssoc()->current();
+
+			$oDataBase->free();
 
 			$this->_read = TRUE;
 			self::$_started = TRUE;
@@ -252,14 +255,15 @@ class Core_Session_Database extends Core_Session
 		while (!connection_aborted())
 		{
 			$oDataBase = $this->_dataBase->setQueryType(0)
-				->query('SELECT GET_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ', '
-				. intval($this->_getLockTimeout) . ') AS `lock`');
+				->query('SELECT GET_LOCK(' . $this->_dataBase->quote($this->_getLockName($id)) . ', ' . intval($this->_getLockTimeout) . ') AS `lock`');
 
 			$row = $oDataBase->asAssoc()->current();
 
+			$oDataBase->free();
+
 			if (!is_array($row))
 			{
-				$this->_error('HostCMS session lock error: Get row failure.');
+				self::_error('HostCMS session lock error: Get row failure.');
 			}
 
 			if (isset($row['lock']) && $row['lock'] == 1)
@@ -271,7 +275,7 @@ class Core_Session_Database extends Core_Session
 
 			if ($iTime > $this->_lockTimeout)
 			{
-				$this->_error('HostCMS session lock error: Timeout.');
+				self::_error('HostCMS session lock error: Timeout.');
 				return FALSE;
 			}
 
@@ -292,11 +296,21 @@ class Core_Session_Database extends Core_Session
 
 		$row = $oDataBase->asAssoc()->current();
 
+		$oDataBase->free();
+
 		if (!is_array($row))
 		{
-			$this->_error('HostCMS session unlock error: Get row failure');
+			self::_error('HostCMS session unlock error: Get row failure');
 		}
 
 		return TRUE;
+	}
+	
+	/**
+	 * Delete all sessions from database
+	 */
+	static public function flushAll()
+	{
+		Core_QueryBuilder::truncate('sessions')->execute();
 	}
 }

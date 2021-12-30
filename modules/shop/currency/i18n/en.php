@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Currencies',
@@ -32,4 +32,11 @@ return array(
 	'update_currency' => 'Update exchange rates',
 	'update_success'=>'Exchange rates was updated successfully',
 	'date'=>'Exchange rate date',
+	'sign' => 'Sign',
+	'sign_position' => 'Sign position',
+	'decimal_separator' => 'Decimal separator',
+	'thousands_separator' => 'Thousands Separator',
+	'hide_zeros' => 'Do not show non-significant zeros',
+	'after_number' => 'After amount',
+	'before_number' => 'Before amount',
 );

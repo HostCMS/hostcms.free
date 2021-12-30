@@ -20,7 +20,7 @@
 	<!-- Шаблон для магазина -->
 	<xsl:template match="shop">
 		<li>
-			<strong><xsl:value-of select="transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/name" disable-output-escaping="yes"/></strong><xsl:text> —  &labelShop; "</xsl:text><xsl:value-of select="name"/><xsl:text>". </xsl:text>
+			<strong><xsl:value-of select="transaction_amount"/><xsl:text> </xsl:text><xsl:value-of select="shop_currency/sign" disable-output-escaping="yes"/></strong><xsl:text> —  &labelShop; "</xsl:text><xsl:value-of select="name"/><xsl:text>". </xsl:text>
 			<a href="pay/{@id}/">&labelReplenish;</a>, <a href="shop-{@id}/">&labelHistory;</a>.
 		</li>
 	</xsl:template>

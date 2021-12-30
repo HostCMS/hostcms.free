@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Item_Model extends Core_Entity
 {
@@ -253,7 +253,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->Shop_Item->shortcut_id)
 			: $this->Shop_Item;
 
-		return htmlspecialchars($oShop_Item->Shop_Currency->name);
+		return htmlspecialchars($oShop_Item->Shop_Currency->sign);
 	}
 
 	/**

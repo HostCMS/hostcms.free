@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Module
 {
@@ -565,5 +565,21 @@ abstract class Core_Module
 		return $this;
 	}
 	
+	/**
+	 * Module's webhooks
+	 * @var array
+	 */
+	protected $_webhooks = array();
 
+	/**
+	 * Get Module Webhooks
+	 * @return array
+	 * @hostcms-event Core_Module.onBeforeGetWebhooks
+	 */
+	public function getWebhooks()
+	{
+		Core_Event::notify(get_class($this) . '.onBeforeGetWebhooks', $this, array($this->_webhooks));
+
+		return $this->_webhooks;
+	}
 }

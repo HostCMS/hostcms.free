@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Show extends Core_Controller
 {
@@ -121,6 +121,8 @@ class Shop_Delivery_Controller_Show extends Core_Controller
 			Core::factory('Core_Xml_Entity')
 				->name('total_amount')
 				->value($this->totalAmount)
+				->addAttribute('formatted', $oShop->Shop_Currency->format($this->totalAmount))
+				->addAttribute('formattedWithCurrency', $oShop->Shop_Currency->formatWithCurrency($this->totalAmount))
 		);
 
 		Core_Session::start();

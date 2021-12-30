@@ -197,7 +197,7 @@
 					&labelTotal;
 				</td>
 				<td style="white-space: nowrap; text-align: right">
-					<xsl:value-of select="format-number(amount,'### ##0,00', 'my')"/>&#160;<xsl:value-of select="shop_currency/name" disable-output-escaping="yes"/>
+					<xsl:value-of select="format-number(amount,'### ##0,00', 'my')"/>&#160;<xsl:value-of select="shop_currency/sign" disable-output-escaping="yes"/>
 				</td>
 			</tr>
 		</table>
@@ -221,13 +221,13 @@
 			<td align="right" width="90px" style="white-space: nowrap">
 				<xsl:value-of select="format-number(price,'### ##0,00', 'my')"/>
 				<!-- If show currency -->
-				<xsl:if test="../shop_currency/name != ''"><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/name" disable-output-escaping="yes"/></xsl:if>
+				<xsl:if test="../shop_currency/sign != ''"><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/sign" disable-output-escaping="yes"/></xsl:if>
 			</td>
 			<td width="60px" style="white-space: nowrap">
 				<b>x&#xA0;</b><xsl:text> </xsl:text><xsl:value-of select="quantity"/><xsl:text> </xsl:text><xsl:value-of select="shop_item/shop_measure/name"/></td>
 			<td width="15px" align="center">=</td>
 			<td width="90px" align="right">
-				<xsl:value-of select="format-number(price * quantity,'### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/name" disable-output-escaping="yes"/>
+				<xsl:value-of select="format-number(price * quantity,'### ##0,00', 'my')"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/sign" disable-output-escaping="yes"/>
 			</td>
 		</tr>
 	</xsl:template>

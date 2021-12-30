@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Admin_Form_Controller extends Core_Servant_Properties
 {
@@ -18,12 +18,6 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 	 * @var boolean
 	 */
 	protected $_skin = TRUE;
-
-	/**
-	 * Use AJAX
-	 * @var boolean
-	 */
-	//protected $_ajax = FALSE;
 
 	/**
 	 * Dataset array
@@ -480,6 +474,22 @@ abstract class Admin_Form_Controller extends Core_Servant_Properties
 		}
 
 		return NULL;
+	}
+
+	/**
+	 * Delete Admin_Form_Field by ID
+	 * @return self
+	 */
+	public function deleteAdminFormFieldById($id)
+	{
+		$this->loadAdminFormFields();
+
+		if (isset($this->_Admin_Form_Fields[$id]))
+		{
+			unset($this->_Admin_Form_Fields[$id]);
+		}
+
+		return $this;
 	}
 
 	/**
@@ -1947,9 +1957,12 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		$aData[] = "sortingDirection: '{$sortingDirection}'";
 
 		$view = Core_Array::get($options, 'view');
-		is_null($view) && $view = $this->view;
-		$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
-		$aData[] = "view: '{$view}'";
+		//is_null($view) && $view = $this->view;
+		if (strlen($view))
+		{
+			$view = Core_Str::escapeJavascriptVariable(htmlspecialchars($view));
+			$aData[] = "view: '{$view}'";
+		}
 
 		$windowId = Core_Str::escapeJavascriptVariable(htmlspecialchars(isset($options['window'])
 			? $options['window']
@@ -2036,8 +2049,11 @@ var _windowSettings={<?php echo implode(',', $aTmp)?>}
 		strlen($windowId) && $aData[] = "hostcms[window]={$windowId}";
 
 		$view = Core_Array::get($options, 'view');
-		is_null($view) && $view = $this->view;
-		$aData[] = "hostcms[view]=" . rawurlencode($view);
+		//is_null($view) && $view = $this->view;
+		if (strlen($view))
+		{
+			$aData[] = "hostcms[view]=" . rawurlencode($view);
+		}
 
 		!is_null($this->filterId)
 			&& $aData[] = "hostcms[filterId]=" . rawurlencode($this->filterId);

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Module extends Core_Module
 {
@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-12-03';
+	public $date = '2021-12-29';
 
 	/**
 	 * Module name
@@ -849,4 +849,11 @@ class Shop_Module extends Core_Module
 		'popularProducers' => array('Shop_Report_Controller', 'popularProducers')
 	);
 
+	/**
+	 * Module's webhooks
+	 * @var array
+	 */
+	protected $_webhooks = array(
+		'onShopOrderPaid', 'onShopOrderCancelPaid', 'onShopOrderCanceled', 'onShopOrderUncanceled', 'onShopOrderChangeStatus'
+	);
 }

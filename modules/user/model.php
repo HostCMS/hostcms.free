@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Model extends Core_Entity
 {
@@ -87,6 +87,7 @@ class User_Model extends Core_Entity
 		'deal' => array(),
 		'deal_template_step_access_user' => array(),
 		'deal_attachment' => array(),
+		'deal_step_user' => array(),
 		'user_note' => array(),
 		'user_setting' => array(),
 		'user_message' => array(),
@@ -296,7 +297,7 @@ class User_Model extends Core_Entity
 						return TRUE;
 					}
 				}
-				
+
 				return FALSE;
 			}
 			else
@@ -335,7 +336,7 @@ class User_Model extends Core_Entity
 					->where('company_departments.deleted', '=', 0)
 					->groupBy('sites.id');
 			}
-			
+
 			$this->_cacheGetSites = $oSite->findAll();
 		}
 
@@ -753,6 +754,15 @@ class User_Model extends Core_Entity
 	 */
 	public function loginBadge()
 	{
+		echo '&nbsp;' . $this->getOnlineStatus();
+	}
+
+	/**
+	 * Get span with online status
+	 * @return string
+	 */
+	public function getOnlineStatus()
+	{
 		$isOnline = $this->isOnline();
 
 		$sStatus = $isOnline
@@ -765,7 +775,7 @@ class User_Model extends Core_Entity
 			? Core::_('User.' . $lng, Core_Date::sql2datetime($this->last_activity))
 			: '';
 
-		echo '&nbsp;<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>';
+		return '<span title="' . htmlspecialchars($sStatusTitle) . '" class="' . htmlspecialchars($sStatus) . '"></span>';
 	}
 
 	/**
@@ -1135,5 +1145,83 @@ class User_Model extends Core_Entity
 	public function showAvatarWithName()
 	{
 		echo $this->getAvatarWithName();
+	}
+
+	/**
+	 * Return html profile block for popup
+	 */
+	public function getProfilePopupBlock()
+	{
+		ob_start();
+		?>
+		<div class="siteuser-popup-wrapper">
+			<img class="avatar" src="<?php echo $this->getAvatar()?>"/>
+			<div class="siteuser-popup-name">
+				<div class="semi-bold"><?php echo htmlspecialchars($this->getFullName())?></div>
+
+				<?php
+				$aCompanies = Core_Entity::factory('Company')->findAll();
+
+				if (isset($aCompanies[0]))
+				{
+					$oCompany = $aCompanies[0];
+
+					$aCompany_Department_Post_Users = $this->Company_Department_Post_Users->getAllByCompany_id($oCompany->id);
+
+					if (isset($aCompany_Department_Post_Users[0]))
+					{
+						$oCompany_Department_Post_User = $aCompany_Department_Post_Users[0];
+
+						?>
+						<div><div><span class="small2"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Department->name)?></span> <span class="popup-type"><?php echo htmlspecialchars($oCompany_Department_Post_User->Company_Post->name)?></span></div></div>
+						<?php
+					}
+				}
+				?>
+			</div>
+		</div>
+		<?php
+		$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
+
+		if (count($aDirectory_Phones))
+		{
+			?><div><?php
+			foreach ($aDirectory_Phones as $oDirectory_Phone)
+			{
+				if (strlen(Core_Str::sanitizePhoneNumber(trim($oDirectory_Phone->value))))
+				{
+					$oDirectory_Phone_Type = Core_Entity::factory('Directory_Phone_Type')->find($oDirectory_Phone->directory_phone_type_id);
+
+					$sPhoneType = !is_null($oDirectory_Phone_Type->id)
+						? htmlspecialchars($oDirectory_Phone_Type->name) . ": "
+						: '';
+
+					?><div><span class="popup-type"><i class="fa fa-phone fa-fw palegreen"></i> <?php echo $sPhoneType?></span><span><?php echo htmlspecialchars($oDirectory_Phone->value)?></span></div><?php
+				}
+			}
+			?></div><?php
+		}
+
+		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
+
+		if (count($aDirectory_Emails))
+		{
+			?><div class="margin-top-5"><?php
+			foreach ($aDirectory_Emails as $oDirectory_Email)
+			{
+				if (strlen(trim($oDirectory_Email->value)))
+				{
+					$oDirectory_Email_Type = Core_Entity::factory('Directory_Email_Type')->find($oDirectory_Email->directory_email_type_id);
+
+					$sEmailType = !is_null($oDirectory_Email_Type->id)
+						? htmlspecialchars($oDirectory_Email_Type->name) . ": "
+						: '';
+
+						?><div><span class="popup-type"><i class="fa fa-envelope-o fa-fw warning"></i> <?php echo $sEmailType?></span><span><a href="mailto:<?php echo htmlspecialchars($oDirectory_Email->value)?>"><?php echo htmlspecialchars($oDirectory_Email->value)?></a></span></div><?php
+				}
+			}
+		}
+
+		return ob_get_clean();
 	}
 }

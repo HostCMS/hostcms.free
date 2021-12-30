@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Notification
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Notification_Module extends Core_Module{
 	/**
@@ -22,7 +22,7 @@ class Notification_Module extends Core_Module{
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-12-03';
+	public $date = '2021-12-29';
 
 
 	/**

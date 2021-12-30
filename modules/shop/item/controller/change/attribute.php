@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 {
@@ -100,15 +100,10 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 			$window_Admin_Form_Controller->window($newWindowId);
 
 			$aCurrencies = array(' … ');
-			$oShop_Currencies = Core_Entity::factory('Shop_Currency');
-			$oShop_Currencies->queryBuilder()
-				->orderBy('sorting')
-				->orderBy('name');
-
-			$aShop_Currencies = $oShop_Currencies->findAll(FALSE);
+			$aShop_Currencies = Core_Entity::factory('Shop_Currency')->findAll(FALSE);
 			foreach ($aShop_Currencies as $oShop_Currency)
 			{
-				$aCurrencies[$oShop_Currency->id] = $oShop_Currency->name;
+				$aCurrencies[$oShop_Currency->id] = $oShop_Currency->sign;
 			}
 
 			$oAdmin_Form_Entity_Select_Currencies = Admin_Form_Entity::factory('Select')

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller
 {
@@ -372,5 +372,66 @@ class Shop_Controller
 		';
 
 		return $html;
+	}
+
+	/**
+	 * Get currencies for list
+	 * @return array
+	 */
+	static public function fillCurrencies()
+	{
+		$oShop_Currencies = Core_Entity::factory('Shop_Currency');
+
+		$oShop_Currencies->queryBuilder()
+			->orderBy('sorting')
+			->orderBy('name');
+
+		//$aReturn = array(' … ');
+		$aReturn = array();
+
+		$aShop_Currencies = $oShop_Currencies->findAll();
+		foreach ($aShop_Currencies as $oShop_Currency)
+		{
+			$aReturn[$oShop_Currency->id] = $oShop_Currency->sign;
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get shops for list
+	 * @param int $iSiteId site ID
+	 * @return array
+	 */
+	static public function fillShops($iSiteId)
+	{
+		$iSiteId = intval($iSiteId);
+
+		$aReturn = array();
+
+		$aObjects = Core_Entity::factory('Site', $iSiteId)->Shops->findAll();
+		foreach ($aObjects as $oObject)
+		{
+			$aReturn[$oObject->id] = $oObject->name;
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Get measures for list
+	 * @return array
+	 */
+	static public function fillMeasures()
+	{
+		$aReturn = array(' … ');
+
+		$aShop_Measures = Core_Entity::factory('Shop_Measure')->findAll();
+		foreach ($aShop_Measures as $oShop_Measure)
+		{
+			$aReturn[$oShop_Measure->id] = $oShop_Measure->name;
+		}
+
+		return $aReturn;
 	}
 }

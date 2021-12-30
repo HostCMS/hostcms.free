@@ -7,15 +7,15 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Controller_Tab_Email extends Directory_Controller_Tab
 {
 	protected $_directoryTypeName = 'Directory_Email_Type';
 
-	protected $_titleHeaderColor = 'darkorange';
+	protected $_titleHeaderColor = 'warning';
 
 	protected $_faTitleIcon = 'fa fa-envelope-o';
 

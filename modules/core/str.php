@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Str
 {
@@ -725,7 +725,9 @@ class Core_Str
 	 */
 	static public function ltrimUri($uri)
 	{
-		$uri !== '' && substr($uri, 0, 1) == '/' && $uri = substr($uri, 1);
+		$uri !== ''
+			&& substr($uri, 0, 1) == '/'
+			&& $uri = substr($uri, 1);
 
 		return $uri;
 	}
@@ -737,7 +739,9 @@ class Core_Str
 	 */
 	static public function rtrimUri($uri)
 	{
-		$uri !== '' && substr($uri, -1, 1) == '/' && $uri = substr($uri, 0, -1);
+		$uri !== ''
+			&& substr($uri, -1, 1) == '/'
+			&& $uri = substr($uri, 0, -1);
 
 		return $uri;
 	}
@@ -844,6 +848,67 @@ class Core_Str
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Convert HEX color to RGB or HSL
+	 * @param string $hex HEX color, e.g. #B781AF or #FF0
+	 * @param float|NULL opacity between 0 and 1, e.g. 0.85
+	 * @return string
+	 */
+	static public function hex2hsl($hex)
+	{
+		$hex = ltrim($hex, '#');
+
+		if (strlen($hex) == 3)
+		{
+			$hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+		}
+
+		$r = hexdec($hex[0] . $hex[1]);
+		$g = hexdec($hex[2] . $hex[3]);
+		$b = hexdec($hex[4] . $hex[5]);
+
+		$r = $r / 255;
+		$g = $g / 255;
+		$b = $b / 255;
+
+		$maxC = max($r, $g, $b);
+		$minC = min($r, $g, $b);
+
+		$l = ($maxC + $minC) / 2;
+
+		if ($maxC == $minC)
+		{
+			$s = $h = 0;
+		}
+		else
+		{
+			$s = $l < .5
+				? ($maxC - $minC) / ($maxC + $minC)
+				: ($maxC - $minC) / (2 - $maxC - $minC);
+
+			$r == $maxC
+				&& $h = ($g - $b) / ($maxC - $minC);
+
+			$g == $maxC
+				&& $h = 2 + ($b - $r) / ($maxC - $minC);
+
+			$b == $maxC
+				&& $h = 4 + ($r - $g) / ($maxC - $minC);
+
+			$h = $h / 6;
+		}
+
+		$h = round(255 * $h);
+		$s = round(255 * $s);
+		$l = round(255 * $l);
+
+		return array(
+			'hue' => intval($h),
+			'saturation' => intval($s),
+			'lightness' => intval($l)
+		);
 	}
 
 	/**
@@ -1495,5 +1560,44 @@ class Core_Str
 		}
 
 		return $str;
+	}
+
+	/**
+	 * Decimal separator.
+	 *
+	 * @var NULL|string
+	 */
+	protected static $_decimalSeparator = NULL;
+
+	/**
+	 * Get Decimal Separator By Locale
+	 * @return string
+	 */
+	public static function getDecimalSeparator()
+	{
+		if (is_null(self::$_decimalSeparator))
+		{
+			$localeconv = localeconv();
+
+			self::$_decimalSeparator = $localeconv['decimal_point'] != ''
+				? $localeconv['decimal_point']
+				: $localeconv['mon_decimal_point'];
+
+			// Default is dot
+			self::$_decimalSeparator == ''
+				&& self::$_decimalSeparator = '.';
+		}
+
+		return self::$_decimalSeparator;
+	}
+
+	/**
+	 * Hide last zeros, e.g. '.00', (locale dependent)
+	 * @var string
+	 * @return string
+	 */
+	public static function hideZeros($str)
+	{
+		return str_replace(self::getDecimalSeparator() . '00', '', $str);
 	}
 }

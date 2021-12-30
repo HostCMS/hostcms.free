@@ -127,4 +127,9 @@ return array(
 	'tabEvents' => 'Events',
 
 	'crm_project_id' => 'Project',
+
+	'event_deadline' => 'Expired',
+	'event_today' => 'Today',
+	'event_empty' => 'Coming soon',
+	'more' => 'more',
 );

@@ -6,7 +6,7 @@
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки',
@@ -53,5 +53,7 @@ return array(
 	'percent_error' => "Скидка не может быть более 100%!",
 	'siteuser_groups' => "Группа доступа",
 	'all' => 'Все',
-	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа'
+	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа',
+	'guid' => '<acronym title="Идентификатор товара для формата CommerceML, например ID00029527">Идентификатор товара CommerceML</acronym>',
+	'tab_export' => 'Экспорт/Импорт',
 );

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 {
@@ -75,15 +75,13 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	 */
 	protected function _getFoundRows()
 	{
-		$row = Core_QueryBuilder::select(array('FOUND_ROWS()', 'count'))->execute()->asAssoc()->current();
-
 		// Warning
 		if (Core_Array::getRequest('debug'))
 		{
 			echo '<p><b>Query FOUND_ROWS</b>.</p>';
 		}
 
-		return $row['count'];
+		return Core_QueryBuilder::select()->getFoundRows();
 	}
 
 	/*protected function _applyRestrictAccess($queryBuilder)
@@ -117,6 +115,8 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 		$Core_DataBase = $queryBuilder->execute();
 
 		$row = $Core_DataBase->current();
+		
+		$Core_DataBase->free();
 
 		// Warning
 		if (Core_Array::getRequest('debug'))
@@ -170,14 +170,15 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 
 				//$this->_applyRestrictAccess($queryBuilder);
 
-				$queryBuilder->execute();
+				$oCore_DataBase = $queryBuilder->execute();
+				$oCore_DataBase->free();
 
 				// Warning
 				if (Core_Array::getRequest('debug'))
 				{
 					echo '<p><b>Query</b>: sqlCalcFoundRows before FOUND_ROWS()</p>';
 				}
-
+				
 				$this->_count = $this->_getFoundRows();
 			}
 

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Controller_Yandexmarket_Observer
 {
@@ -56,129 +56,141 @@ class Shop_Controller_Yandexmarket_Observer
 		// https://yandex.ru/dev/market/partner-dsbs/doc/dg/reference/put-campaigns-id-orders-id-status.html
 
 		$oShop_Order = $object->getShopOrder();
-		$shop_id = $oShop_Order->shop_id;
 
-		$orderId = intval($oShop_Order->system_information);
+		preg_match('/\d+/', $oShop_Order->system_information, $matches);
 
-		$campaignId = is_array(self::$campaignId)
-			? Core_Array::get(self::$campaignId, $shop_id, 'unknown')
-			: self::$campaignId;
-
-		$token = is_array(self::$token)
-			? Core_Array::get(self::$token, $shop_id, 'unknown')
-			: self::$token;
-
-		$clientId = is_array(self::$clientId)
-			? Core_Array::get(self::$clientId, $shop_id, 'unknown')
-			: self::$clientId;
-
-		// Может быть задан:
-		// - просто числом 1
-		// - просто массивом array('DELIVERY' => ..)
-		// - массивом для каждого магазина array(1 => 7)
-		// - массивом массивов для каждого магазина array(1 => array('DELIVERY' => ..))
-		$deliveryStatusId = is_array(self::$deliveryStatusId) && isset(self::$deliveryStatusId[$shop_id])
-			? self::$deliveryStatusId[$shop_id]
-			: self::$deliveryStatusId;
-
-		if (!is_array($deliveryStatusId))
+		if (isset($matches[0]))
 		{
-			$deliveryStatusId = array('DELIVERY' => $deliveryStatusId);
-		}
+			$orderId = $matches[0];
 
-		$cancelStatusId = is_array(self::$cancelStatusId) && isset(self::$cancelStatusId[$shop_id])
-			? self::$cancelStatusId[$shop_id]
-			: self::$cancelStatusId;
+			$shop_id = $oShop_Order->shop_id;
 
-		if (!$oShop_Order->paid
-			&& $oShop_Order->canceled
-			&& $args[0] == 'cancelPaid'
-			&& strlen($orderId)
-		)
-		{
-			$substatus = is_array($cancelStatusId)
-				? array_search($oShop_Order->shop_order_status_id, $cancelStatusId)
-				: FALSE;
+			$campaignId = is_array(self::$campaignId)
+				? Core_Array::get(self::$campaignId, $shop_id, 'unknown')
+				: self::$campaignId;
 
-			$sJson = json_encode(
-				array(
-					'order' => array(
-						'status' => 'CANCELLED',
-						'substatus' => $substatus ? $substatus : 'SHOP_FAILED'
-					)
-				)
-			);
+			$token = is_array(self::$token)
+				? Core_Array::get(self::$token, $shop_id, 'unknown')
+				: self::$token;
 
-			try
+			$clientId = is_array(self::$clientId)
+				? Core_Array::get(self::$clientId, $shop_id, 'unknown')
+				: self::$clientId;
+
+			// Может быть задан:
+			// - просто числом 1
+			// - просто массивом array('DELIVERY' => ..)
+			// - массивом для каждого магазина array(1 => 7)
+			// - массивом массивов для каждого магазина array(1 => array('DELIVERY' => ..))
+			$deliveryStatusId = is_array(self::$deliveryStatusId) && isset(self::$deliveryStatusId[$shop_id])
+				? self::$deliveryStatusId[$shop_id]
+				: self::$deliveryStatusId;
+
+			if (!is_array($deliveryStatusId))
 			{
-				$Core_Http = Core_Http::instance('curl')
-					->clear()
-					->method('PUT')
-					->url("https://api.partner.market.yandex.ru/v2/campaigns/" . $campaignId . "/orders/{$orderId}/status")
-					->additionalHeader('Authorization', 'OAuth oauth_token="' . $token . '" , oauth_client_id="' . $clientId . '"')
-					->additionalHeader('Content-Type', 'application/json')
-					->rawData($sJson)
-					->execute();
-
-				$aHeaders = $Core_Http->parseHeaders();
-				$sStatus = Core_Array::get($aHeaders, 'status');
-				$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
-
-				if ($iStatusCode != 200)
-				{
-					Core_Log::instance()->clear()
-						->status(Core_Log::$ERROR)
-						->write('Shop_Controller_Yandexmarket_Observer. Error request ' . $Core_Http->getUrl() . '; answer: ' . $Core_Http->getDecompressedBody());
-				}
+				$deliveryStatusId = array('DELIVERY' => $deliveryStatusId);
 			}
-			catch (Exception $e){}
-		}
 
-		// Смена статуса
-		if (!$oShop_Order->paid
-			&& !$oShop_Order->canceled
-			&& in_array($args[0], array('apply', 'edit'))
-		)
-		{
-			foreach ($deliveryStatusId as $deliveryStatus => $shop_order_status_id)
+			$cancelStatusId = is_array(self::$cancelStatusId) && isset(self::$cancelStatusId[$shop_id])
+				? self::$cancelStatusId[$shop_id]
+				: self::$cancelStatusId;
+
+			if (!$oShop_Order->paid
+				&& $oShop_Order->canceled
+				&& $args[0] == 'cancelPaid'
+				&& strlen($orderId)
+			)
 			{
-				if ($oShop_Order->shop_order_status_id == $shop_order_status_id)
-				{
-					$sJson = json_encode(
-						array(
-							'order' => array(
-								'status' => $deliveryStatus
-							)
+				$substatus = is_array($cancelStatusId)
+					? array_search($oShop_Order->shop_order_status_id, $cancelStatusId)
+					: FALSE;
+
+				$sJson = json_encode(
+					array(
+						'order' => array(
+							'status' => 'CANCELLED',
+							'substatus' => $substatus ? $substatus : 'SHOP_FAILED'
 						)
-					);
+					)
+				);
 
-					try
+				try
+				{
+					$Core_Http = Core_Http::instance('curl')
+						->clear()
+						->method('PUT')
+						->url("https://api.partner.market.yandex.ru/v2/campaigns/{$campaignId}/orders/{$orderId}/status")
+						->additionalHeader('Authorization', 'OAuth oauth_token="' . $token . '" , oauth_client_id="' . $clientId . '"')
+						->additionalHeader('Content-Type', 'application/json')
+						->rawData($sJson)
+						->execute();
+
+					$aHeaders = $Core_Http->parseHeaders();
+					$sStatus = Core_Array::get($aHeaders, 'status');
+					$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
+
+					if ($iStatusCode != 200)
 					{
-						$Core_Http = Core_Http::instance('curl')
-							->clear()
-							->method('PUT')
-							->url("https://api.partner.market.yandex.ru/v2/campaigns/" . $campaignId . "/orders/{$orderId}/status")
-							->additionalHeader('Authorization', 'OAuth oauth_token="' . $token . '" , oauth_client_id="' . $clientId . '"')
-							->additionalHeader('Content-Type', 'application/json')
-							->rawData($sJson)
-							->execute();
-
-						$aHeaders = $Core_Http->parseHeaders();
-						$sStatus = Core_Array::get($aHeaders, 'status');
-						$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
-
-						if ($iStatusCode != 200)
-						{
-							Core_Log::instance()->clear()
-								->status(Core_Log::$ERROR)
-								->write('Shop_Controller_Yandexmarket_Observer. Error request ' . $Core_Http->getUrl() . '; answer: ' . $Core_Http->getDecompressedBody());
-						}
+						Core_Log::instance()->clear()
+							->status(Core_Log::$ERROR)
+							->write('Shop_Controller_Yandexmarket_Observer. Error request ' . $Core_Http->getUrl() . '; answer: ' . $Core_Http->getDecompressedBody());
 					}
-					catch (Exception $e){}
+				}
+				catch (Exception $e){}
+			}
 
-					break;
+			// Смена статуса
+			if (!$oShop_Order->paid
+				&& !$oShop_Order->canceled
+				&& in_array($args[0], array('apply', 'edit'))
+			)
+			{
+				foreach ($deliveryStatusId as $deliveryStatus => $shop_order_status_id)
+				{
+					if ($oShop_Order->shop_order_status_id == $shop_order_status_id)
+					{
+						$sJson = json_encode(
+							array(
+								'order' => array(
+									'status' => $deliveryStatus
+								)
+							)
+						);
+
+						try
+						{
+							$Core_Http = Core_Http::instance('curl')
+								->clear()
+								->method('PUT')
+								->url("https://api.partner.market.yandex.ru/v2/campaigns/{$campaignId}/orders/{$orderId}/status")
+								->additionalHeader('Authorization', 'OAuth oauth_token="' . $token . '" , oauth_client_id="' . $clientId . '"')
+								->additionalHeader('Content-Type', 'application/json')
+								->rawData($sJson)
+								->execute();
+
+							$aHeaders = $Core_Http->parseHeaders();
+							$sStatus = Core_Array::get($aHeaders, 'status');
+							$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
+
+							if ($iStatusCode != 200)
+							{
+								Core_Log::instance()->clear()
+									->status(Core_Log::$ERROR)
+									->write('Shop_Controller_Yandexmarket_Observer. Error request ' . $Core_Http->getUrl() . '; answer: ' . $Core_Http->getDecompressedBody());
+							}
+						}
+						catch (Exception $e){}
+
+						break;
+					}
 				}
 			}
+		}
+		else
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$ERROR)
+				->write('Shop_Controller_Yandexmarket_Observer. Order ID not found, check system_information field.');
 		}
 	}
 }

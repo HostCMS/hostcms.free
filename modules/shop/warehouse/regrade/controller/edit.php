@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -251,11 +251,11 @@ class Shop_Warehouse_Regrade_Controller_Edit extends Admin_Form_Action_Controlle
 							<td><input class="writeoff-item-autocomplete form-control" data-type="writeoff" value="' . htmlspecialchars($oShop_Item_Writeoff->name) . '" /></td>
 							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Measure->name) . '</td>
 							<td><span class="writeoff-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->writeoff_price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->name) . '</td>
+							<td>' . htmlspecialchars($oShop_Item_Writeoff->Shop_Currency->sign) . '</td>
 							<td><input class="incoming-item-autocomplete form-control" data-type="incoming" value="' . htmlspecialchars($oShop_Item_Incoming->name) . '" /></td>
 							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Measure->name) . '</td>
 							<td><span class="incoming-price">' . htmlspecialchars($oShop_Warehouse_Regrade_Item->incoming_price) . '</span></td>
-							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Currency->name) . '</td>
+							<td>' . htmlspecialchars($oShop_Item_Incoming->Shop_Currency->sign) . '</td>
 							<td width="80"><input class="set-item-count form-control" name="shop_item_quantity_' . $oShop_Warehouse_Regrade_Item->id . '" value="' . $oShop_Warehouse_Regrade_Item->count . '" /></td>
 							<td><a class="delete-associated-item" onclick="mainFormLocker.unlock(); res = confirm(\'' . Core::_('Shop_Warehouse_Regrade.delete_dialog') . '\'); if (res) { var next = $(this).parents(\'tr\').next(); $(this).parents(\'tr\').remove(); $.recountIndexes(next); ' . $onclick . ' } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 						</tr>

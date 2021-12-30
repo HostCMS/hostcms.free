@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -75,6 +75,42 @@ $siteuser_id && $windowId != 'id_content' && $oAdmin_Form_Controller->Admin_View
 	Admin_View::getClassName('Admin_Internal_View')
 );
 
+if (!is_null(Core_Array::getPost('showPopover')))
+{
+	$aJSON = array(
+		'html' => ''
+	);
+
+	$oCurrentUser = Core_Auth::getCurrentUser();
+
+	$company_id = Core_Array::getPost('company_id', 0, 'int');
+	$person_id = Core_Array::getPost('person_id', 0, 'int');
+	$user_id = Core_Array::getPost('user_id', 0, 'int');
+
+	if ($user_id)
+	{
+		$oUser = Core_Entity::factory('User')->getById($user_id);
+
+		if (!is_null($oUser))
+		{
+			$aJSON['html'] = $oUser->getProfilePopupBlock();
+		}
+	}
+	else
+	{
+		$oEntity = $company_id
+			? Core_Entity::factory('Siteuser_Company')->getById($company_id)
+			: Core_Entity::factory('Siteuser_Person')->getById($person_id);
+
+		if (!is_null($oEntity) && $oCurrentUser->checkObjectAccess($oEntity))
+		{
+			$aJSON['html'] = $oEntity->getProfilePopupBlock();
+		}
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array::getPost('sender_id')))
 {
 	$aJSON = array(
@@ -83,26 +119,60 @@ if (Core_Array::getPost('id') && (Core_Array::getPost('target_id') || Core_Array
 
 	$iEventId = intval(Core_Array::getPost('id'));
 	$iTargetStatusId = intval(Core_Array::getPost('target_id'));
+	$iSenderStatusId = intval(Core_Array::getPost('sender_id'));
 
-	$oEvent_Status = Core_Entity::factory('Event_Status')->find($iTargetStatusId);
-	if (!is_null($oEvent_Status->id))
+	$oEvents = Core_Entity::factory('Event');
+
+	$iSenderStatusId == -1
+		&& $oEvents->setMarksDeleted(NULL);
+
+	$oEvent = $oEvents->getById($iEventId);
+
+	if (!is_null($oEvent))
 	{
-		$oEvent = Core_Entity::factory('Event')->find($iEventId);
-
-		if (!is_null($oEvent->id))
+		if ($iTargetStatusId >= 0)
 		{
-			$previousStatusId = $oEvent->event_status_id;
-
-			$oEvent->event_status_id = $oEvent_Status->id;
-			$oEvent->save();
-
-			if ($previousStatusId != $oEvent->event_status_id)
+			$oEvent_Status = Core_Entity::factory('Event_Status')->find($iTargetStatusId);
+			if ($iTargetStatusId == 0 || !is_null($oEvent_Status->id))
 			{
-				$oEvent->notifyBotsChangeStatus();
-			}
+				$previousStatusId = $oEvent->event_status_id;
 
-			$aJSON['status'] = 'success';
+				// При отмене удаленного явно возвращаем в 0
+				$oEvent->deleted = 0;
+				$oEvent->event_status_id = $iTargetStatusId;
+				$oEvent->save();
+
+				if ($previousStatusId != $oEvent->event_status_id)
+				{
+					$oEvent->notifyBotsChangeStatus();
+				}
+
+				$aJSON['status'] = 'success';
+
+				if (intval(Core_Array::getPost('update_data')))
+				{
+					$aTargetData = $oEvent->updateKanban($iTargetStatusId);
+
+					$aJSON['update'][$iTargetStatusId] = $aTargetData;
+
+					$aSenderData = $oEvent->updateKanban($iSenderStatusId);
+
+					$aJSON['update'][$iSenderStatusId] = $aSenderData;
+				}
+			}
 		}
+		elseif ($iTargetStatusId == -1)
+		{
+			$oEvent->markDeleted();
+		}
+		else
+		{
+			$aJSON['status'] = 'errorEventStatusId';
+		}
+	}
+	else
+	{
+		$aJSON['status'] = 'errorEvent';
 	}
 
 	Core::showJson($aJSON);
@@ -129,8 +199,7 @@ $oAdmin_Form_Entity_Menus->add(
 				: $oAdmin_Form_Controller->getAdminActionLoadHref($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
 		->onclick(
-			$bShow_subs || $siteuser_id // &show_subs=1&hideMenu=1&parent_id={$parent_id}
-				// ? "$.modalLoad({path: '{$oAdmin_Form_Controller->getPath()}', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][0]=1&{$additionalParams}', windowId: '{$windowId}'}); return false"
+			$bShow_subs || $siteuser_id
 				? $oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), 'edit', 'modal', 0, 0, $additionalParams)
 				: $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0)
 		)
@@ -148,10 +217,10 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->icon('fa fa-bars')
 					->img('/admin/images/add.gif')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref($sEventGroupsFormPath = '/admin/event/type/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/type/index.php'))
 					)
 					->onclick(
-						$oAdmin_Form_Controller->getAdminLoadAjax($sEventGroupsFormPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
 					)
 			)
 			->add(
@@ -160,10 +229,10 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->icon('fa fa-folder-o')
 					->img('/admin/images/add.gif')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref($sEventGroupsFormPath = '/admin/event/group/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/group/index.php'))
 					)
 					->onclick(
-						$oAdmin_Form_Controller->getAdminLoadAjax($sEventGroupsFormPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
 					)
 			)
 			->add(
@@ -172,10 +241,10 @@ if (!$siteuser_id && is_null(Core_Array::getGet('hideMenu')))
 					->icon('fa fa-circle')
 					->img('/admin/images/add.gif')
 					->href(
-						$oAdmin_Form_Controller->getAdminLoadHref($sEventStatusesFormPath = '/admin/event/status/index.php', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadHref(array('path' => $sPath = '/admin/event/status/index.php'))
 					)
 					->onclick(
-						$oAdmin_Form_Controller->getAdminLoadAjax($sEventStatusesFormPath, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'list')
+						$oAdmin_Form_Controller->getAdminLoadAjax(array('path' => $sPath))
 					)
 			)
 	);
@@ -464,35 +533,7 @@ foreach ($aEvent_Groups as $oEvent_Group)
 $oAdmin_Form_Dataset->changeField('event_group_id', 'list', $aList);
 
 !Core::moduleIsActive('siteuser')
-	&& $oAdmin_Form_Dataset->changeField('counterparty', 'class', 'hidden');
-
-function correctDateTime($sDateTime, $oAdmin_Form_Field)
-{
-	if (strlen($sDateTime))
-	{
-		$aDateTime = explode(' ', trim($sDateTime, '*'));
-
-		// Дата
-		if (isset($aDateTime[0]))
-		{
-			$aDate = explode('.', $aDateTime[0]);
-
-			foreach ($aDate as $key => $value)
-			{
-				// Добавляем ведущий ноль элементам даты
-				strlen($value) == 1 && $aDate[$key] = '0' . $value;
-			}
-
-			count($aDate) > 1 && $aDateTime[0] = implode('-', array_reverse($aDate));
-		}
-
-		return '*' . implode(' ', $aDateTime) . '*';
-	}
-}
-
-$oAdmin_Form_Controller
-	->addFilterCallback('start', 'correctDateTime')
-	->addFilterCallback('deadline', 'correctDateTime');
+	&& $oAdmin_Form_Controller->deleteAdminFormFieldById(1497);
 
 $oAdmin_Form_Controller->addFilter('dataCounterparty', array($oAdmin_Form_Controller, '_filterCallbackCounterparty'));
 
@@ -525,6 +566,88 @@ function dataCounterparty($value, $oAdmin_Form_Field)
 }
 
 $oAdmin_Form_Controller->addFilterCallback('dataCounterparty', 'dataCounterparty');
+
+$aEvent_Types = Core_Entity::factory('Event_Type')->findAll(FALSE);
+$aList = array();
+foreach ($aEvent_Types as $oEvent_Type)
+{
+	$aList[$oEvent_Type->id] = array('value' => $oEvent_Type->name);
+}
+
+$oAdmin_Form_Dataset
+	->changeField('event_type_id', 'type', 8)
+	->changeField('event_type_id', 'list', $aList);
+
+$aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll(FALSE);
+$aList = array();
+foreach ($aEvent_Statuses as $oEvent_Status)
+{
+	$aList[$oEvent_Status->id] = array('value' => $oEvent_Status->name);
+}
+
+$oAdmin_Form_Dataset
+	->changeField('event_status_id', 'type', 8)
+	->changeField('event_status_id', 'list', $aList);
+
+Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_Form_Controller) {
+	$windowId = $oAdmin_Form_Controller->getWindowId();
+	?>
+	<script>
+		$('[data-popover="hover"]').on('mouseenter', function(event) {
+			var $this = $(this);
+
+			if (!$this.data("bs.popover"))
+			{
+				$this.popover({
+					placement:'top',
+					trigger:'manual',
+					html:true,
+					content: function() {
+						var content = '';
+
+						$.ajax({
+							url: '/admin/event/index.php',
+							data: { showPopover: 1, person_id: $(this).data('person-id'), company_id: $(this).data('company-id'), user_id: $(this).data('user-id') },
+							dataType: 'json',
+							type: 'POST',
+							async: false,
+							success: function(response) {
+								content = response.html;
+							}
+						});
+
+						return content;
+					},
+					container: "#<?php echo $windowId?>"
+				});
+
+				$this.attr('data-popoverAttached', true);
+
+				$this.on('hide.bs.popover', function(e) {
+					$this.attr('data-popoverAttached')
+						? $this.removeAttr('data-popoverAttached')
+						: e.preventDefault();
+				})
+				.on('show.bs.popover', function(e) {
+					!$this.attr('data-popoverAttached') && e.preventDefault();
+				})
+				.on('shown.bs.popover', function(e) {
+					$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+						!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+					});
+				})
+				.on('mouseleave', function(e) {
+					!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+					&& $this.attr('data-popoverAttached')
+					&& $this.popover('destroy');
+				});
+
+				$this.popover('show');
+			}
+		});
+	</script>
+	<?php
+});
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

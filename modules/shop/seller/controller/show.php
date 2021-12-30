@@ -26,9 +26,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Seller_Controller_Show extends Core_Controller
 {
@@ -131,8 +131,7 @@ class Shop_Seller_Controller_Show extends Core_Controller
 
 			if (!$this->seller)
 			{
-				$row = Core_QueryBuilder::select(array('FOUND_ROWS()', 'count'))->execute()->asAssoc()->current();
-				$this->total = $row['count'];
+				$this->total = Core_QueryBuilder::select()->getFoundRows();
 
 				$this->addEntity(
 					Core::factory('Core_Xml_Entity')
@@ -177,7 +176,7 @@ class Shop_Seller_Controller_Show extends Core_Controller
 				->offset($this->limit * $this->page);
 		}
 
-		$path = isset($matches['path'])
+		$path = isset($matches['path']) && $matches['path'] != '/'
 			? Core_Str::rtrimUri($matches['path'])
 			: NULL;
 

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Cache
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Core_Cache
 {
@@ -35,7 +35,7 @@ abstract class Core_Cache
 	 * @var int
 	 */
 	protected $_cleaningFrequency = 5000;
-	
+
 	/**
 	 * Typical cache parameters
 	 */
@@ -254,17 +254,17 @@ abstract class Core_Cache
 				$oCache_Tag->hash = $actualKey;
 				$oCache_Tag->expire = Core_Date::timestamp2sql($expire);
 				$oCache_Tag->save();
-				
+
 				!$bClear
 					&& $bClear = rand(0, $this->_cleaningFrequency * 0.8) == 0;
 			}
-			
+
 			if ($bClear)
 			{
 				$iLimit = intval($this->_cleaningFrequency);
-				
+
 				$cleaningDate = Core_Date::timestamp2sql(time());
-				
+
 				Core_DataBase::instance()->setQueryType(3)
 					->query("DELETE LOW_PRIORITY QUICK FROM `cache_tags` WHERE `expire` < '{$cleaningDate}' LIMIT {$iLimit}");
 			}
@@ -296,10 +296,12 @@ abstract class Core_Cache
 	{
 		$limit = 1000;
 
+		$crc32 = Core::crc32($tag);
+
 		do {
 			$oCache_Tags = Core_Entity::factory('Cache_Tag');
 			$oCache_Tags->queryBuilder()
-				->where('tag', '=', Core::crc32($tag))
+				->where('tag', '=', $crc32)
 				->limit($limit);
 
 			$aCache_Tags = $oCache_Tags->findAll(FALSE);

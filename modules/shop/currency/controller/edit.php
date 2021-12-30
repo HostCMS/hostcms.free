@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -27,15 +27,35 @@ class Shop_Currency_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+			->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oMainTab
 			->move($this->getField('name'), $oMainRow1)
 			->move($this->getField('exchange_rate')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
 			->move($this->getField('date')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow2)
 			->move($this->getField('default')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow2)
-			->move($this->getField('code')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3)
-			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow3);
+			->move($this->getField('sign')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow3);
+
+		$oMainTab->delete($this->getField('sign_position'));
+
+		$oMainRow3->add(Admin_Form_Entity::factory('Select')
+			->name('sign_position')
+			->caption(Core::_('Shop_Currency.sign_position'))
+			->divAttr(array('class' => 'form-group col-xs-12 col-sm-2'))
+			->options(array(
+				0 => Core::_('Shop_Currency.after_number'),
+				1 => Core::_('Shop_Currency.before_number')
+			))
+			->value($this->_object->sign_position)
+		);
+
+		$oMainTab
+			->move($this->getField('decimal_separator')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow3)
+			->move($this->getField('thousands_separator')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow3)
+			->move($this->getField('hide_zeros')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow3)
+			->move($this->getField('code')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow4)
+			->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-2')), $oMainRow4);
 
 		$title = $this->_object->id
 			? Core::_('Shop_Currency.currency_edit_form_title', $this->_object->name)

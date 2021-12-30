@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Observer_Robokassa
 {
@@ -116,7 +116,7 @@ class Shop_Observer_Robokassa
 			$iTotalSum = sprintf("%.2f", $fShopOrderItemSum);
 
 			// Отправка куратору
-			$sAdminMessageText = sprintf($aConfig['admin_process_order_message'], $oShop_Order->id, $iTotalSum, $oShop->Shop_Currency->name);
+			$sAdminMessageText = sprintf($aConfig['admin_process_order_message'], $oShop_Order->id, $iTotalSum, $oShop->Shop_Currency->sign);
 
 			// Подпись
 			$sAdminSignature = md5("{$aConfig['login']}:{$aConfig['admin_phone']}:{$sAdminMessageText}:{$aConfig['pass1']}");
@@ -126,7 +126,7 @@ class Shop_Observer_Robokassa
 			self::_sendSMS($urlAdminSend);
 
 			// Отправка пользователю
-			$sUserMessageText = sprintf($aConfig['user_process_order_message'], $oShop_Order->id, $iTotalSum, $oShop->Shop_Currency->name);
+			$sUserMessageText = sprintf($aConfig['user_process_order_message'], $oShop_Order->id, $iTotalSum, $oShop->Shop_Currency->sign);
 
 			// Подпись
 			$sUserSignature = md5("{$aConfig['login']}:{$oShop_Order->phone}:{$sUserMessageText}:{$aConfig['pass1']}");

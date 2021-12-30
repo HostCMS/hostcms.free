@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Crm
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Project_Model extends Core_Entity
 {
@@ -76,7 +76,8 @@ class Crm_Project_Model extends Core_Entity
 			$countEvents = $this->Events->getCount();
 
 			Core::factory('Core_Html_Entity_Span')
-				->class('label label-palegreen label-crm-project')
+				->class('label-crm-project')
+				->style('border-color: #53a93f; color: #53a93f; background-color: ' . Core_Str::hex2lighter('#53a93f', 0.88))
 				->value('<i class="fa fa-tasks"></i> ' . $countEvents)
 				->title(Core::_('Crm_Project.events_count', $countEvents))
 				->execute();
@@ -87,7 +88,8 @@ class Crm_Project_Model extends Core_Entity
 			$countDeals = $this->Deals->getCount();
 
 			Core::factory('Core_Html_Entity_Span')
-				->class('label label-azure label-crm-project')
+				->class('label-crm-project')
+				->style('border-color: #2dc3e8; color: #2dc3e8; background-color: ' . Core_Str::hex2lighter('#2dc3e8', 0.88))
 				->value('<i class="fa fa-handshake-o"></i> ' . $countDeals)
 				->title(Core::_('Crm_Project.deals_count', $countDeals))
 				->execute();
@@ -96,7 +98,8 @@ class Crm_Project_Model extends Core_Entity
 		$countNotes = $this->Crm_Project_Notes->getCount();
 
 		$countNotes && Core::factory('Core_Html_Entity_Span')
-			->class('label label-warning label-crm-project')
+			->class('label-crm-project')
+			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
 			->value('<i class="fa fa-comment-o"></i> ' . $countNotes)
 			->title(Core::_('Crm_Project.notes_count', $countNotes))
 			->execute();
@@ -109,7 +112,7 @@ class Crm_Project_Model extends Core_Entity
  	public function datetimeBackend()
 	{
 		return $this->datetime != '0000-00-00 00:00:00'
-			? Core_Date::timestamp2string(Core_Date::sql2timestamp($this->datetime))
+			? '<span class="small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->datetime)) . '</span>'
 			: '—';
 	}
 
@@ -119,11 +122,35 @@ class Crm_Project_Model extends Core_Entity
 	 */
  	public function deadlineBackend()
 	{
-		$class = !$this->completed ? $this->getDeadlineClass() : '';
+		/*$class = !$this->completed ? $this->getDeadlineClass() : '';
 
 		return $this->deadline != '0000-00-00 00:00:00'
 			? '<span class="' . $class . '">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
-			: '—';
+			: '—';*/
+
+		if ($this->deadline != '0000-00-00 00:00:00')
+		{
+			if ($this->completed)
+			{
+				$class = 'darkgray';
+			}
+			elseif (Core_Date::sql2timestamp($this->deadline) < time())
+			{
+				$class = 'badge badge-orange';
+			}
+			elseif (Core_Date::timestamp2sqldate(Core_Date::sql2timestamp($this->deadline)) == Core_Date::timestamp2sqldate(time()))
+			{
+				$class = 'badge badge-palegreen';
+			}
+			else
+			{
+				$class = 'badge badge-lightgray';
+			}
+		}
+
+		return $this->deadline != '0000-00-00 00:00:00'
+			? '<span class="' . $class . ' small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline)) . '</span>'
+			: '';
 	}
 
 	/**
@@ -210,6 +237,17 @@ class Crm_Project_Model extends Core_Entity
 		}
 
 		return parent::delete($primaryKey);
+	}
+
+	public function showKanbanLine($oAdmin_Form_Controller)
+	{
+		$color = strlen($this->color)
+			? htmlspecialchars($this->color)
+			: '#aebec4';
+
+		?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa fa-folder-o margin-right-5"></i><a style="color: inherit;" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($this->name)?></a></span><?php
+
+		return $this;
 	}
 
 	/**

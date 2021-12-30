@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Model extends Core_Entity
 {
@@ -24,12 +24,6 @@ class Shop_Model extends Core_Entity
 	 * @var int
 	 */
 	public $img = 1;
-
-	/**
-	 * Backend property
-	 * @var string
-	 */
-	public $shop_currency_name = '';
 
 	/**
 	 * Backend property
@@ -1166,12 +1160,23 @@ class Shop_Model extends Core_Entity
 	}
 
 	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function shop_currency_idBackend()
+	{
+		return $this->shop_currency_id
+			? htmlspecialchars($this->Shop_Currency->sign)
+			: '';
+	}
+
+	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
 	 * @param Admin_Form_Controller $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function shop_currency_nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	public function shop_currency_idBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$this->Shop_Currency->id == 0 && Core::factory('Core_Html_Entity_I')
 			->class('fa fa-exclamation-triangle darkorange')

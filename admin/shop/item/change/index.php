@@ -3,9 +3,9 @@
 * Online shop.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -121,9 +121,9 @@ $oMainTab
 			->value('0.00')
 			->divAttr(array('class' => 'form-group col-xs-3 col-sm-2')))
 		->add(Admin_Form_Entity::factory('Span')
-			->value($oShop->Shop_Currency->name)
+			->value($oShop->Shop_Currency->sign)
 			->divAttr(array('class' => 'form-group col-xs-2', 'style' => 'margin-top: 35px')))
-			)
+	)
 	->add(Admin_Form_Entity::factory('Div')->class('row')
 		->add(Admin_Form_Entity::factory('Radiogroup')
 			->radio(array(1 => Core::_('Shop_Item.multiply_price_to_digit')))

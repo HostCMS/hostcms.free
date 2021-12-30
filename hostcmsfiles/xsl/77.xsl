@@ -168,7 +168,7 @@
 																												<td width="68" valign="middle" align="center">
 																													<div>
 																														<span style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;line-height:14px; color:#333;">
-																															Цена, <xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes" />
+																															Цена, <xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes" />
 																														</span>
 																													</div>
 																												</td>
@@ -182,7 +182,7 @@
 																												<td width="68" valign="middle" align="center">
 																													<div>
 																														<span style="font-family: Arial, Helvetica, sans-serif; font-size: 12px;line-height:14px; color:#333;">
-																															Сумма, <xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes" />
+																															Сумма, <xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes" />
 																														</span>
 																													</div>
 																												</td>
@@ -221,7 +221,7 @@
 																										</td>
 																										<td style="min-width: 100px;" align="right">
 																											<div>
-																												<span style="font-family: Arial, Helvetica, sans-serif; font-size: 20px;line-height:24px; color:#333;"><b><xsl:value-of select="format-number(shop_order/total_amount, '### ##0,00', 'my')" /><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name" disable-output-escaping="yes" /></b></span>
+																												<span style="font-family: Arial, Helvetica, sans-serif; font-size: 20px;line-height:24px; color:#333;"><b><xsl:value-of select="format-number(shop_order/total_amount, '### ##0,00', 'my')" /><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign" disable-output-escaping="yes" /></b></span>
 																											</div>
 																										</td>
 																									</tr>

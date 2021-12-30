@@ -757,7 +757,7 @@
 						<xsl:value-of select="percent"/>%
 					</xsl:when>
 					<xsl:otherwise>
-						<xsl:value-of select="amount"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/name"/>
+						<xsl:value-of select="amount"/><xsl:text> </xsl:text><xsl:value-of select="/shop/shop_currency/sign"/>
 					</xsl:otherwise>
 				</xsl:choose>
 			</span>

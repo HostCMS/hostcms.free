@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Apply extends Admin_Form_Action_Controller_Type_Apply
 {
@@ -48,6 +48,11 @@ class Shop_Order_Controller_Apply extends Admin_Form_Action_Controller_Type_Appl
 
 			$this->_object->historyPushChangeStatus();
 			$this->_object->notifyBotsChangeStatus();
+
+			if (Core::moduleIsActive('webhook'))
+			{
+				Webhook_Controller::notify('onShopOrderChangeStatus', $this->_object);
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterExecute', $this, array($this->_object));

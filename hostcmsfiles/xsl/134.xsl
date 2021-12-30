@@ -20,7 +20,7 @@
 					<div class="field">
 						<input type="text" size="15" class="width1" name="amount" />
 						<xsl:text> </xsl:text>
-						<xsl:value-of disable-output-escaping="yes" select="shop_currency/name" />
+						<xsl:value-of disable-output-escaping="yes" select="shop_currency/sign" />
 						<span class="redSup"> *</span>
 					</div>
 				</div>

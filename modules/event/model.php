@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Event_Model extends Core_Entity
 {
@@ -113,20 +113,24 @@ class Event_Model extends Core_Entity
 	{
 		ob_start();
 
-		$path = $oAdmin_Form_Controller->getPath();
-
 		$oUser = Core_Auth::getCurrentUser();
 
-		$nameColorClass = $this->deadline()
+		/*$nameColorClass = $this->deadline()
 			? 'event-title-deadline'
 			: '';
 
 		$deadlineIcon = $this->deadline()
 			? '<i class="fa fa-clock-o event-title-deadline"></i>'
-			: '';
+			: '';*/
 
-		?><div class="semi-bold editable <?php echo $nameColorClass?>" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo $deadlineIcon, htmlspecialchars($this->name)?></div>
-		<?php if ($this->parent_id)
+		if ($this->Event_Attachments->getCount(FALSE))
+		{
+			?><i class="fa fa-paperclip name-attachments"></i><?php
+		}
+
+		?><div class="semi-bold editable" style="display: inline-block;" id="apply_check_0_<?php echo $this->id?>_fv_1226"><?php echo htmlspecialchars($this->name)?></div>
+		<?php
+		if ($this->parent_id)
 		{
 			?>
 			<span class="small gray"> → <?php echo htmlspecialchars($this->Event->name)?></span>
@@ -136,8 +140,46 @@ class Event_Model extends Core_Entity
 		{
 			?><div class="event-description"><?php echo nl2br(htmlspecialchars($this->description))?></div><?php
 		}
-		?><div class="event-title"><?php
-		$this->event_type_id && $this->showType();
+		?><div class="event-creator-wrapper"><div class="small2"><?php
+
+		$oEventCreator = $this->getCreator();
+
+		// Сотрудник - создатель дела
+		if (!is_null($oEventCreator) && $oEventCreator->id != $oUser->id)
+		{
+			$currentColor = Core_Str::createColor($oEventCreator->id);
+
+			?><span data-popover="hover" data-user-id="<?php echo $oEventCreator->id?>"><a style="color: <?php echo $currentColor?>" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oEventCreator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEventCreator->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>', width: '70%'}); return false"><?php echo htmlspecialchars($oEventCreator->getFullName());?></a></span><?php
+		}
+
+		?></div><span class="small darkgray text-align-right"><i class="fa fa-clock-o"></i><?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($this->datetime))?></span><?php
+		?></div><?php
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function event_type_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		return $this->event_type_id
+			? $this->showType()
+			: '';
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function event_status_idBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		ob_start();
+
+		$path = $oAdmin_Form_Controller->getPath();
+
+		$oUser = Core_Auth::getCurrentUser();
 
 		// Менять статус дела может только его создатель
 		if ($this->checkPermission2ChangeStatus($oUser))
@@ -178,44 +220,40 @@ class Event_Model extends Core_Entity
 			?><div class="event-status margin-right-10"><i class="fa fa-circle margin-right-5" style="color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span></div><?php
 		}
 
-		?><div class="event-date"><?php
-		if ($this->all_day)
-		{
-			echo Event_Controller::getDate($this->start);
-		}
-		else
-		{
-			if (!is_null($this->start) && $this->start != '0000-00-00 00:00:00')
-			{
-				echo Event_Controller::getDateTime($this->start);
-			}
-
-			if (!is_null($this->start) && $this->start != '0000-00-00 00:00:00'
-				&& !is_null($this->deadline) && $this->deadline != '0000-00-00 00:00:00'
-			)
-			{
-				echo ' — ';
-			}
-
-			if (!is_null($this->deadline) && $this->deadline != '0000-00-00 00:00:00')
-			{
-				?><strong><?php echo Event_Controller::getDateTime($this->deadline);?></strong><?php
-			}
-		}
-		?></div><?php
-
-		$oEventCreator = $this->getCreator();
-
-		// Сотрудник - создатель дела
-		if (!(!is_null($oEventCreator) && $oEventCreator->id == $oUser->id) && !is_null($oEventCreator))
-		{
-			?><div class="event-date margin-left-10"><div class="<?php echo $oEventCreator->isOnline() ? 'online' : 'offline'?> margin-right-5"></div><a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oEventCreator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEventCreator->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oEventCreator->getFullName());?></a></div><?php
-		}
-
-		?><span class="small darkgray pull-right"><i class="fa fa-clock-o"></i><?php echo Core_Date::time2string(time() - Core_Date::sql2timestamp($this->datetime))?></span><?php
-		?></div><?php
-
 		return ob_get_clean();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function deadlineBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		if ($this->deadline != '0000-00-00 00:00:00')
+		{
+			if ($this->completed)
+			{
+				$class = 'darkgray';
+			}
+			elseif (Core_Date::sql2timestamp($this->deadline) < time())
+			{
+				$class = 'badge badge-orange';
+			}
+			elseif (Core_Date::timestamp2sqldate(Core_Date::sql2timestamp($this->deadline)) == Core_Date::timestamp2sqldate(time()))
+			{
+				$class = 'badge badge-palegreen';
+			}
+			else
+			{
+				$class = 'badge badge-lightgray';
+			}
+		}
+
+		$bShowTime = $this->all_day ? FALSE : TRUE;
+
+		return $this->deadline != '0000-00-00 00:00:00'
+			? '<span class="' . $class . ' small2">' . Core_Date::timestamp2string(Core_Date::sql2timestamp($this->deadline), $bShowTime) . '</span>'
+			: '';
 	}
 
 	/**
@@ -234,7 +272,9 @@ class Event_Model extends Core_Entity
 			&& $this->showDocuments($oAdmin_Form_Controller);
 
 		Core::moduleIsActive('crm_project')
-			&& $this->showCrmProject($oAdmin_Form_Controller);
+			&& $this->crm_project_id
+			// && $this->Crm_Project->showKanbanLine($oAdmin_Form_Controller);
+			&& $this->showCrmProjects($oAdmin_Form_Controller);
 	}
 
 	/**
@@ -250,7 +290,10 @@ class Event_Model extends Core_Entity
 		{
 			$oDeal = $oDeal_Event->Deal;
 
-			?><span class="label label-related margin-right-5" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa fa-handshake-o margin-right-5"></i><a style="color: inherit;" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></span><?php
+			?><div class="related-events-wrapper">
+				<div class="related-events" style="color: <?php echo $oDeal->Deal_Template->color?>; background-color:<?php echo Core_Str::hex2lighter($oDeal->Deal_Template->color, 0.88)?>"><i class="fa fa-handshake-o"></i></div>
+				<div><a style="color: <?php echo $oDeal->Deal_Template->color?>" href="/admin/deal/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDeal->id?>]=1" onclick="$.modalLoad({path: '/admin/deal/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDeal->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oDeal->name)?></a></div>
+			</div><?php
 		}
 	}
 
@@ -267,7 +310,10 @@ class Event_Model extends Core_Entity
 		{
 			$oLead = $oLead_Event->Lead;
 
-			?><span class="label label-related margin-right-5" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa fa-user-circle-o margin-right-5"></i><a style="color: inherit;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></span><?php
+			?><div class="related-events-wrapper">
+				<div class="related-events" style="color: <?php echo $oLead->Lead_Status->color?>; background-color:<?php echo Core_Str::hex2lighter($oLead->Lead_Status->color, 0.88)?>"><i class="fa fa-user-circle-o"></i></div>
+				<div><a style="color: <?php echo $oLead->Lead_Status->color?>;" href="/admin/lead/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oLead->id?>]=1" onclick="$.modalLoad({path: '/admin/lead/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oLead->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oLead->getFullName())?></a></div>
+			</div><?php
 		}
 	}
 
@@ -286,27 +332,59 @@ class Event_Model extends Core_Entity
 
 			$name = $oDms_Document->Dms_Document_Type->name . ' ' . $oDms_Document->numberBackend();
 
-			?><span class="label label-related margin-right-5" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa fa-columns margin-right-5"></i><a style="color: inherit;" href="/admin/dms/document/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: '/admin/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>'}); return false"><?php echo htmlspecialchars($name)?></a></span><?php
+			?><div class="related-events-wrapper">
+				<div class="related-events" style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>; background-color:<?php echo Core_Str::hex2lighter($oDms_Document->Dms_Document_Type->color, 0.88)?>"><i class="fa fa-columns"></i></div>
+				<div><a style="color: <?php echo $oDms_Document->Dms_Document_Type->color?>;" href="/admin/dms/document/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oDms_Document->id?>]=1" onclick="$.modalLoad({path: '/admin/dms/document/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oDms_Document->id?>]=1', windowId: 'modal<?php echo $oDms_Document->id?>'}); return false"><?php echo htmlspecialchars($name)?></a></div>
+			</div><?php
 		}
 	}
 
 	/**
-	 * Show crm project badge
+	 * Show document badge
 	 * @param Admin_Form_Controller_Model $oAdmin_Form_Controller
 	 * @return string
 	 */
-	public function showCrmProject($oAdmin_Form_Controller)
+	public function showCrmProjects($oAdmin_Form_Controller)
 	{
-		if ($this->crm_project_id)
-		{
-			$oCrm_Project = $this->Crm_Project;
+		$oCrm_Project = $this->Crm_Project;
 
-			$color = strlen($oCrm_Project->color)
-				? htmlspecialchars($oCrm_Project->color)
-				: '#aebec4';
+		$color = strlen($oCrm_Project->color)
+			? htmlspecialchars($oCrm_Project->color)
+			: '#aebec4';
 
-			?><span class="label label-related margin-right-5" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa fa-folder-o margin-right-5"></i><a style="color: inherit;" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oCrm_Project->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oCrm_Project->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oCrm_Project->name)?></a></span><?php
-		}
+		?><div class="related-events-wrapper">
+			<div class="related-events" style="color: <?php echo $color?>; background-color:<?php echo Core_Str::hex2lighter($color, 0.88)?>"><i class="fa fa-folder-o"></i></div>
+			<div><a style="color: <?php echo $color?>" href="/admin/crm/project/index.php?hostcms[action]=edit&hostcms[checked][0][<?php echo $oCrm_Project->id?>]=1" onclick="$.modalLoad({path: '/admin/crm/project/index.php', action: 'edit', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oCrm_Project->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oCrm_Project->name)?></a></div>
+		</div><?php
+	}
+
+	/**
+	 * Update kanban
+	 * @param int $event_status_id
+	 * @return array
+	 */
+	public function	updateKanban($event_status_id)
+	{
+		$aReturn = array();
+
+		$oUser = Core_Auth::getCurrentUser();
+
+		$queryBuilder = Core_QueryBuilder::select(array('COUNT(*)', 'count'))
+			->from('events')
+			->join('event_users', 'events.id', '=', 'event_users.event_id')
+			->where('event_users.user_id', '=', $oUser->id)
+			->where('events.event_status_id', '=', $event_status_id)
+			->groupBy('events.id');
+
+		$aRow = $queryBuilder->execute()->asAssoc()->result();
+
+		$count = count($aRow);
+
+		$aReturn['data'] = $count == 0
+			? ''
+			: array('count' => $count);
+
+		return $aReturn;
 	}
 
 	/**
@@ -325,25 +403,34 @@ class Event_Model extends Core_Entity
 
 			if (count($aEvent_Siteusers))
 			{
-				$sResult .= '<div class="profile-container tickets-container"><ul class="tickets-list">';
+				$sResult .= '<div class="profile-container tickets-container counterparty-block"><ul class="tickets-list">';
 
-				foreach ($aEvent_Siteusers as $oEvent_Siteuser)
+				foreach ($aEvent_Siteusers as $key => $oEvent_Siteuser)
 				{
+					$class = $key > 1 ? 'hidden' : '';
+
 					if ($oEvent_Siteuser->siteuser_company_id)
 					{
 						$oSiteuser_Company = $oEvent_Siteuser->Siteuser_Company;
 
-						$sResult .= $oSiteuser_Company->getProfileBlock();
+						$sResult .= $oSiteuser_Company->getProfileBlock($class);
 					}
 					elseif ($oEvent_Siteuser->siteuser_person_id)
 					{
 						$oSiteuser_Person = $oEvent_Siteuser->Siteuser_Person;
 
-						$sResult .= $oSiteuser_Person->getProfileBlock();
+						$sResult .= $oSiteuser_Person->getProfileBlock($class);
 					}
 				}
 
-				$sResult .= '</div"></ul>';
+				$sResult .= '</ul>';
+
+				if ($key > 1)
+				{
+					$sResult .= '<div class="more" onclick="$.showCounterparty(this)">' . Core::_('Event.more') . ' <i class="fas fa-chevron-down"></div>';
+				}
+
+				$sResult .= '</div>';
 			}
 		}
 
@@ -597,7 +684,7 @@ class Event_Model extends Core_Entity
 				$ico = '<i class="fa fa-circle-o fa-inactive" title="' . Core::_('Event.in_process') . '"></i>';
 			break;
 			case 1:
-				$ico = '<i class="fa fa-dot-circle-o fa-active azure" title="' . Core::_('Event.complete') . '"></i>';
+				$ico = '<i class="fa fa-dot-circle-o fa-active palegreen" title="' . Core::_('Event.complete') . '"></i>';
 			break;
 			case -1:
 				$ico = '<i class="fa fa-times darkorange" title="' . Core::_('Event.failed') . '"></i>';

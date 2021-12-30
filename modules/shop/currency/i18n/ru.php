@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Валюты',
@@ -29,6 +29,13 @@ return array(
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'update_currency' => 'Обновить курсы валют',
-	'update_success'=>'Курсы валют успешно обновлены',
-	'date'=>'Дата курса',
+	'update_success'=> 'Курсы валют успешно обновлены',
+	'date'=> 'Дата курса',
+	'sign'=> 'Знак валюты',
+	'sign_position'=> 'Позиция знака',
+	'decimal_separator'=> 'Десятичный разделитель',
+	'thousands_separator'=> 'Разделитель тысяч',
+	'hide_zeros'=> 'Не показывать незначащие нули',
+	'after_number'=> 'После суммы',
+	'before_number'=> 'Перед суммой',
 );

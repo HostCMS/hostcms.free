@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Template
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Model extends Core_Entity
 {
@@ -128,7 +128,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateFilePath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/template.htm';
+		return CMS_FOLDER . $this->getDir() . '/template.htm';
 	}
 
 	/**
@@ -179,7 +179,7 @@ class Template_Model extends Core_Entity
 	 * Get directory for template
 	 * @return string
 	 */
-	protected function _getDir()
+	public function getDir()
 	{
 		return 'templates/template' . intval($this->id);
 	}
@@ -190,7 +190,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateCssFileHref()
 	{
-		return '/' . $this->_getDir() . '/style.css';
+		return '/' . $this->getDir() . '/style.css';
 	}
 
 	/**
@@ -199,7 +199,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateCssFilePath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/style.css';
+		return CMS_FOLDER . $this->getDir() . '/style.css';
 	}
 
 	/**
@@ -236,7 +236,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateLessFileHref()
 	{
-		return '/' . $this->_getDir() . '/style.less';
+		return '/' . $this->getDir() . '/style.less';
 	}
 
 	/**
@@ -245,7 +245,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateLessFilePath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/style.less';
+		return CMS_FOLDER . $this->getDir() . '/style.less';
 	}
 
 	/**
@@ -289,7 +289,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateScssFileHref()
 	{
-		return '/' . $this->_getDir() . '/style.scss';
+		return '/' . $this->getDir() . '/style.scss';
 	}
 
 	/**
@@ -298,7 +298,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateScssFilePath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/style.scss';
+		return CMS_FOLDER . $this->getDir() . '/style.scss';
 	}
 
 	/**
@@ -341,7 +341,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateJsFileHref()
 	{
-		return '/' . $this->_getDir() . '/script.js';
+		return '/' . $this->getDir() . '/script.js';
 	}
 
 	/**
@@ -350,7 +350,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getTemplateJsFilePath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/script.js';
+		return CMS_FOLDER . $this->getDir() . '/script.js';
 	}
 
 	/**
@@ -385,7 +385,7 @@ class Template_Model extends Core_Entity
 	 */
 	public function getManifestPath()
 	{
-		return CMS_FOLDER . $this->_getDir() . '/manifest.xml';
+		return CMS_FOLDER . $this->getDir() . '/manifest.xml';
 	}
 
 	/**
@@ -556,7 +556,7 @@ class Template_Model extends Core_Entity
 
 		try
 		{
-			is_dir(CMS_FOLDER . $this->_getDir()) && Core_File::deleteDir(CMS_FOLDER . $this->_getDir());
+			is_dir(CMS_FOLDER . $this->getDir()) && Core_File::deleteDir(CMS_FOLDER . $this->getDir());
 		}
 		catch (Exception $e) {}
 
@@ -1041,7 +1041,7 @@ class Template_Model extends Core_Entity
 		{
 			$this->_i18n[$lng] = array();
 
-			$path = CMS_FOLDER . $this->_getDir() . DIRECTORY_SEPARATOR . 'i18n' . DIRECTORY_SEPARATOR . $lng . '.php';
+			$path = CMS_FOLDER . $this->getDir() . DIRECTORY_SEPARATOR . 'i18n' . DIRECTORY_SEPARATOR . $lng . '.php';
 			$path = Core_File::pathCorrection($path);
 
 			if (is_file($path))

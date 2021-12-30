@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -167,8 +167,10 @@ if (defined('SHOP_ORDER_CARD_XSL'))
 }
 else
 {
+	$oShop_Order_Currency = $oShop_Order->Shop_Currency;
+	
 	?>
-	<p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p>
+	<!-- <p style="margin-bottom: 40px"><img src="/admin/images/logo.gif" alt="(^) HostCMS" title="HostCMS"></p> -->
 
 	<table cellpadding="2" cellspacing="2" border="0" width="100%">
 		<tr>
@@ -381,7 +383,7 @@ else
 			<?php echo Core::_("Shop_Order.table_warehouse")?>
 		</td>
 		<td class="td_header">
-			<?php echo Core::_("Shop_Order.table_price") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_price") . ", " . htmlspecialchars($oShop_Order_Currency->sign)?>
 		</td>
 		<td class="td_header">
 			<?php echo Core::_("Shop_Order.table_amount")?>
@@ -390,16 +392,16 @@ else
 			<?php echo Core::_("Shop_Order.table_nds_tax")?>
 		</td>
 		<td class="td_header">
-			<?php echo Core::_("Shop_Order.table_nds_value") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_nds_value") . ", " . htmlspecialchars($oShop_Order_Currency->sign)?>
 		</td>
 		<td class="td_header" style="border-right: 1px solid black; white-space: nowrap">
-			<?php echo Core::_("Shop_Order.table_amount_value") . ", <br/>" . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo Core::_("Shop_Order.table_amount_value") . ", " . htmlspecialchars($oShop_Order_Currency->sign)?>
 		</td>
 	</tr>
 	<?php
 	$i = 1;
 
-	$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll();
+	$aShopOrderItems = $oShop_Order->Shop_Order_Items->findAll(FALSE);
 
 	$fShopTaxValueSum = $fShopOrderItemSum = 0.0;
 
@@ -449,19 +451,19 @@ else
 			<?php echo htmlspecialchars($oShop_Order_Item->Shop_Warehouse->name)?><br/><?php echo htmlspecialchars($oShop_Order_Item->getCellName())?>
 			</td>
 			<td class="td_main_2">
-			<?php echo number_format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
+			<?php echo $oShop_Order_Currency->format(Shop_Controller::instance()->round($oShop_Order_Item->price), 2, '.', '')?>
 			</td>
 			<td style="text-align: center" class="td_main_2">
-			<?php echo $oShop_Order_Item->quantity?>
+			<?php echo Core_Str::hideZeros($oShop_Order_Item->quantity)?>
 			</td>
 			<td style="text-align: center" class="td_main_2">
 			<?php echo $sShopTaxRate != 0 ? "{$sShopTaxRate}%" : '-'?>
 			</td>
 			<td style="text-align: center" class="td_main_2">
-			<?php echo $fShopTaxValue != 0 ? $fShopTaxValue : '-'?>
+			<?php echo $fShopTaxValue != 0 ? $oShop_Order_Currency->format($fShopTaxValue) : '-'?>
 			</td>
 			<td class="td_main_2" style="border-right: 1px solid black; white-space: nowrap">
-			<?php echo $bNotCanceled ? number_format($fItemAmount, 2, '.', '') : '-'?>
+			<?php echo $bNotCanceled ? $oShop_Order_Currency->format($fItemAmount) : '-'?>
 			</td>
 			</tr><?php
 		}
@@ -474,7 +476,7 @@ else
 			<?php echo Core::_("Shop_Order.table_nds")?>
 		</td>
 		<td width="80%" align="right"  style="border-bottom: 1px solid black" colspan="2">
-			<?php echo sprintf("%.2f", $fShopTaxValueSum) . " " . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo $oShop_Order_Currency->formatWithCurrency($fShopTaxValueSum)?>
 		</td>
 	</tr>
 	<tr class="tr_footer">
@@ -482,7 +484,7 @@ else
 			<?php echo Core::_("Shop_Order.table_all_to_pay")?>
 		</td>
 		<td align="right" colspan="2">
-			<?php echo sprintf("%.2f", $fShopOrderItemSum) . " " . htmlspecialchars($oShop->Shop_Currency->name)?>
+			<?php echo $oShop_Order_Currency->formatWithCurrency($fShopOrderItemSum)?>
 		</td>
 	</tr>
 	</table>

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Incoming_Model extends Core_Entity
 {
@@ -408,7 +408,7 @@ class Shop_Warehouse_Incoming_Model extends Core_Entity
 			$node->item = $oShop_Item;
 			$node->name = htmlspecialchars($oShop_Item->name);
 			$node->measure = htmlspecialchars($oShop_Item->Shop_Measure->name);
-			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->name);
+			$node->currency = htmlspecialchars($oShop_Item->Shop_Currency->sign);
 			$node->price = $oShop_Warehouse_Incoming_Item->price;
 			$node->quantity = $oShop_Warehouse_Incoming_Item->count;
 			$node->amount = $amount;

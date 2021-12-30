@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Cart_Model extends Core_Entity
 {
@@ -111,7 +111,7 @@ class Shop_Cart_Model extends Core_Entity
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_A')
 					->href(
-						htmlspecialchars($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/item/index.php', 'edit', NULL, 1, $object->id))
+						$oAdmin_Form_Controller->getAdminActionLoadHref('/admin/shop/item/index.php', 'edit', NULL, 1, $object->id)
 					)
 					->target('_blank')
 					->value(htmlspecialchars($this->name))
@@ -132,7 +132,7 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	public function restBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return $this->Shop_Item->getRest();
+		return Core_Str::hideZeros($this->Shop_Item->getRest());
 	}
 
 	/**
@@ -163,9 +163,9 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	public function priceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$price = $this->getPrice();
-
-		return Shop_Controller::instance()->round($price) . ' ' . $this->Shop->Shop_Currency->name;
+		return htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency(
+			Shop_Controller::instance()->round($this->getPrice())
+		));
 	}
 
 	/**
@@ -174,9 +174,9 @@ class Shop_Cart_Model extends Core_Entity
 	 */
 	public function amount()
 	{
-		return htmlspecialchars(
-			sprintf("%.2f %s", $this->getPrice() * $this->quantity, $this->Shop->Shop_Currency->name)
-		);
+		return htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency(
+			$this->getPrice() * $this->quantity
+		));
 	}
 
 	/**

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -63,10 +63,10 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 		->getObjects();
 
 	$iCount = 0;
-	
+
 	$offset = Core_Array::getGet('offset', 0, 'int');
 	$limit = 100;
-	
+
 	foreach ($aTables as $oTrash_Entity)
 	{
 		do {
@@ -81,7 +81,7 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 			}
 
 		} while ($iDeleted);
-		
+
 		$offset = 0;
 		$tableOffset++;
 	}
@@ -109,6 +109,8 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 	}
 	else
 	{
+		$oAdmin_Form_Controller->additionalParams('');
+
 		Core_Message::show(Core::_('Trash.deleted_complete'));
 
 		Core_Log::instance()->clear()

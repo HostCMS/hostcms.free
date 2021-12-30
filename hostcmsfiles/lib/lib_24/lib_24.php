@@ -1,5 +1,8 @@
 <?php
 
+// Привязывать сессию пользователя к IP
+$attachSessionToIp = FALSE;
+
 if (!Core::moduleIsActive('siteuser'))
 {
 	?>
@@ -680,7 +683,10 @@ if (!is_null(Core_Array::getPost('apply')))
 									if ($bQuickRegistration)
 									{
 										// Авторизуем зарегистрированного пользователя
-										$oSiteuser->setCurrent();
+										$oSiteuser
+											// Не привязывать сессию пользователя к IP
+											->attachSessionToIp($attachSessionToIp)
+											->setCurrent();
 
 										// Перенаправляем на страницу, с которой он пришел
 										!is_null(Core_Array::getPost('location')) && $Siteuser_Controller_Show->go(

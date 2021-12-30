@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Trash
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Trash_Controller_Delete extends Admin_Form_Action_Controller
 {
@@ -30,15 +30,15 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 		$timeout = Core::getmicrotime();
 
 		$iCount = 0;
-		
+
 		$offset = Core_Array::getGet('offset', 0, 'int');
 		$limit = 100;
 
 		do {
 			$iDeleted = $this->_object->chunkDelete($offset, $limit);
-			
+
 			$iCount += $iDeleted;
-			
+
 			$offset += ($limit - $iDeleted);
 
 			if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
@@ -73,6 +73,8 @@ class Trash_Controller_Delete extends Admin_Form_Action_Controller
 		}
 		else
 		{
+			$oAdmin_Form_Controller->additionalParams('');
+
 			Core_Message::show(Core::_('Trash.deleted_complete'));
 
 			Core_Log::instance()->clear()

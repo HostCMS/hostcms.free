@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -699,7 +699,6 @@ $oAdmin_Form_Dataset
 	->changeField('shop_payment_system_id', 'list', $aList);
 
 Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_Form_Controller) {
-
 	$windowId = $oAdmin_Form_Controller->getWindowId();
 	?>
 	<script>
@@ -734,24 +733,19 @@ Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_
 				$this.attr('data-popoverAttached', true);
 
 				$this.on('hide.bs.popover', function(e) {
-
 					$this.attr('data-popoverAttached')
 						? $this.removeAttr('data-popoverAttached')
 						: e.preventDefault();
 				})
 				.on('show.bs.popover', function(e) {
-
 					!$this.attr('data-popoverAttached') && e.preventDefault();
 				})
 				.on('shown.bs.popover', function(e) {
-
 					$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
-
 						!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
 					});
 				})
 				.on('mouseleave', function(e) {
-
 					!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
 					&& $this.attr('data-popoverAttached')
 					&& $this.popover('destroy');

@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Controller_Show extends Core_Controller
 {
@@ -183,8 +183,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 			return $this->error404();
 		}
 
-		$row = Core_QueryBuilder::select(array('FOUND_ROWS()', 'count'))->execute()->asAssoc()->current();
-		$this->total = $row['count'];
+		$this->total = Core_QueryBuilder::select()->getFoundRows();
 
 		$this->addEntity(
 			Core::factory('Core_Xml_Entity')

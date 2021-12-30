@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -64,7 +64,7 @@ class Shop_Bonus_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->divAttr(array('class' => ''))
 				->options(array(
 					'%',
-					$this->_object->Shop->Shop_Currency->name
+					$this->_object->Shop->Shop_Currency->sign
 				))
 				->value($this->_object->type)
 				->class('form-control input-group-addon')

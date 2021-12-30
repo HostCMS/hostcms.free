@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Controller extends Core_Servant_Properties
 {
@@ -386,7 +386,10 @@ class Shop_Item_Controller extends Core_Servant_Properties
 			{
 				$price = $oShop_Specialprice->percent != 0
 					? $price * $oShop_Specialprice->percent / 100
-					: $oShop_Specialprice->price;
+					: ($oShop_Specialprice->price < $price
+						? $oShop_Specialprice->price
+						: $price
+					);
 				break;
 			}
 		}

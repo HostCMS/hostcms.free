@@ -31,7 +31,7 @@
 				<p>
 					&labelMinQuantity; <b><xsl:value-of select="min_count_of_items"/></b>
 					<br/>
-					&labelMinAmount; <b><xsl:value-of select="min_amount_of_items"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/name"/></b>
+					&labelMinAmount; <b><xsl:value-of select="min_amount_of_items"/><xsl:text> </xsl:text><xsl:value-of select="../shop_currency/sign"/></b>
 				</p>
 
 				<xsl:if test="count(affiliate_plan_level)">
@@ -43,7 +43,7 @@
 								<!-- Процент -->
 								<xsl:when test="type = 0"><xsl:value-of select="percent"/>%</xsl:when>
 								<!-- Amount -->
-								<xsl:otherwise><xsl:value-of select="value"/><xsl:text> </xsl:text><xsl:value-of select="../../shop_currency/name"/></xsl:otherwise>
+								<xsl:otherwise><xsl:value-of select="value"/><xsl:text> </xsl:text><xsl:value-of select="../../shop_currency/sign"/></xsl:otherwise>
 							</xsl:choose></b>
 							</li>
 						</xsl:for-each>

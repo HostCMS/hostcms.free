@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -150,16 +150,22 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					? htmlspecialchars($oShop_Item->getSmallFileHref())
 					: '';
 
+				$oTmpCurrency = $price_mode == 'shop'
+					? $oShop_Currency
+					: $oShop_Item->Shop_Currency;
+
 				$aJSON[] = array(
 					'type' => 'item',
 					'id' => $oShop_Item->id,
 					'label' => $oShop_Item->name,
 					'price' => $aPrice['price_tax'] - $aPrice['tax'],
+					'price_formatWithCurrency' => $oTmpCurrency->formatWithCurrency($aPrice['price_tax'] - $aPrice['tax']),
 					'price_with_tax' => $aPrice['price_tax'],
+					'price_with_tax_formatWithCurrency' => $oTmpCurrency->formatWithCurrency($aPrice['price_tax']),
 					'rate' => $aPrice['rate'],
 					'marking' => strval($oShop_Item->marking), // NULL => ''
-					'currency_id' => $price_mode == 'shop' ? $oShop_Currency->id : $oShop_Item->Shop_Currency->id,
-					'currency' => $price_mode == 'shop' ? $oShop_Currency->name : $oShop_Item->Shop_Currency->name,
+					'currency_id' => $oTmpCurrency->id,
+					'currency' => $oTmpCurrency->sign,
 					'measure' => $measureName,
 					'measure_id' => $oShop_Item->shop_measure_id,
 					'count' => $rest,
@@ -500,8 +506,7 @@ $oAdmin_Form_Dataset->changeField('name', 'class', 'semi-bold');
 $oAdmin_Form_Dataset
 	->addCondition(
 		array('select' =>
-			array('*', array(Core_QueryBuilder::expression("''"), 'shop_currency_name'),
-			array(Core_QueryBuilder::expression("''"), 'email'))
+			array('*', array(Core_QueryBuilder::expression("''"), 'email'))
 		)
 	)
 	->addCondition(
@@ -527,7 +532,7 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 
 // Ограничение источника 1 по родительской группе
 $oAdmin_Form_Dataset->addCondition(
-		array('select' => array('shops.*', array('shop_currencies.name', 'shop_currency_name')))
+		array('select' => array('shops.*'))
 	)
 	->addCondition(
 		array(

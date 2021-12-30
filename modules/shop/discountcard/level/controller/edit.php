@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -41,11 +41,9 @@ class Shop_Discountcard_Level_Controller_Edit extends Admin_Form_Action_Controll
 
 		$oMainTab->delete($this->getField('amount'));
 
-		$oShop_Currency = $this->_object->Shop->Shop_Currency;
-
 		$oMainRow2->add(
 			Admin_Form_Entity::factory('Input')
-				->caption(Core::_('Shop_Discountcard_Level.amount', htmlspecialchars($oShop_Currency->name)))
+				->caption(Core::_('Shop_Discountcard_Level.amount', htmlspecialchars($this->_object->Shop->Shop_Currency->sign)))
 				->name('amount')
 				->value($this->_object->amount)
 				->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))

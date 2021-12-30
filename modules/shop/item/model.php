@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Model extends Core_Entity
 {
@@ -482,7 +482,11 @@ class Shop_Item_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeGetRest', $this, array($queryBuilder));
 
-		$aResult = $queryBuilder->execute()->asAssoc()->current();
+		$oCore_DataBase = $queryBuilder->execute();
+
+		$aResult = $oCore_DataBase->asAssoc()->current();
+
+		$oCore_DataBase->free();
 
 		$this->_rest = $aResult['count'];
 
@@ -542,7 +546,7 @@ class Shop_Item_Model extends Core_Entity
 		if (is_null($value) || is_object($value))
 		{
 			//return $this->getRest();
-			return $this->adminRest;
+			return Core_Str::hideZeros($this->adminRest);
 		}
 
 		// Save value for default warehouse
@@ -586,7 +590,7 @@ class Shop_Item_Model extends Core_Entity
 				? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 				: $this;
 
-			return $oShop_Item->price;
+			return Core_Str::hideZeros($oShop_Item->price);
 		}
 
 		if ($this->price != $value)
@@ -620,7 +624,7 @@ class Shop_Item_Model extends Core_Entity
 			? Core_Entity::factory('Shop_Item', $this->shortcut_id)
 			: $this;
 
-		return htmlspecialchars($oShop_Item->Shop_Currency->name);
+		return htmlspecialchars($oShop_Item->Shop_Currency->sign);
 	}
 
 	/**
@@ -643,7 +647,7 @@ class Shop_Item_Model extends Core_Entity
 	public function currencyName()
 	{
 		return $this->shop_currency_id
-			? $this->Shop_Currency->name
+			? $this->Shop_Currency->sign
 			: '';
 	}
 
@@ -656,7 +660,7 @@ class Shop_Item_Model extends Core_Entity
 	{
 		$aPrices = $this->getPrices();
 
-		return sprintf($format, $aPrices['price_discount'], $this->Shop->Shop_Currency->name);
+		return sprintf($format, $aPrices['price_discount'], $this->Shop->Shop_Currency->sign);
 	}
 
 	/**
@@ -2423,19 +2427,37 @@ class Shop_Item_Model extends Core_Entity
 
 		if (!isset($this->_forbiddenTags['getPrices']))
 		{
-			// Prices
-			$aPrices = $this->getPrices();
+			if ($this->shop_currency_id)
+			{
+				$oShopCurrency = $this->Shop->Shop_Currency;
 
-			// Будет совпадать с ценой вместе с налогом
-			$this->addXmlTag('price', $aPrices['price_discount']);
-			!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount']);
-			!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax']);
-			!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax']);
+				// Prices
+				$aPrices = $this->getPrices();
 
-			count($aPrices['discounts']) && $this->addEntities($aPrices['discounts']);
+				// Будет совпадать с ценой вместе с налогом
+				$this->addXmlTag('price', $aPrices['price_discount'], array(
+					'formatted' => $oShopCurrency->format($aPrices['price_discount']),
+					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_discount']))
+				);
+				!isset($this->_forbiddenTags['discount']) && $this->addXmlTag('discount', $aPrices['discount'], array(
+					'formatted' => $oShopCurrency->format($aPrices['discount']),
+					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['discount']))
+				);
+				!isset($this->_forbiddenTags['tax']) && $this->addXmlTag('tax', $aPrices['tax'], array(
+					'formatted' => $oShopCurrency->format($aPrices['tax']),
+					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['tax']))
+				);
+				!isset($this->_forbiddenTags['price_tax']) && $this->addXmlTag('price_tax', $aPrices['price_tax'], array(
+					'formatted' => $oShopCurrency->format($aPrices['price_tax']),
+					'formattedWithCurrency' => $oShopCurrency->formatWithCurrency($aPrices['price_tax']))
+				);
 
-			// Валюта от магазина
-			$this->shop_currency_id && $this->addXmlTag('currency', $this->Shop->Shop_Currency->name);
+				count($aPrices['discounts'])
+					&& $this->addEntities($aPrices['discounts']);
+
+				// Валюта от магазина
+				$this->addXmlTag('currency', $oShopCurrency->sign);
+			}
 
 			// Бонусы
 			if ($this->_showXmlBonuses && Core::moduleIsActive('siteuser'))

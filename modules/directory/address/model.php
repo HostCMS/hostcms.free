@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Directory
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Directory_Address_Model extends Core_Entity
 {
@@ -87,6 +87,23 @@ class Directory_Address_Model extends Core_Entity
 	}
 
 	/**
+	 * Get full address
+	 * @return string
+	 */
+	public function getFullAddress()
+	{
+		$aFullAddress = array(
+			$this->postcode,
+			$this->country,
+			$this->city,
+			$this->value
+		);
+
+		$aFullAddress = array_filter($aFullAddress, 'strlen');
+		return implode(', ', $aFullAddress);
+	}
+
+	/**
 	 * Get XML for entity and children entities
 	 * @return string
 	 * @hostcms-event directory_address.onBeforeRedeclaredGetXml
@@ -122,17 +139,7 @@ class Directory_Address_Model extends Core_Entity
 	{
 		$this->clearXmlTags();
 
-		$aFullAddress = array(
-			$this->postcode,
-			$this->country,
-			$this->city,
-			$this->value
-		);
-
-		$aFullAddress = array_filter($aFullAddress, 'strlen');
-		$sFullAddress = implode(', ', $aFullAddress);
-
-		$this->addXmlTag('full_address', $sFullAddress);
+		$this->addXmlTag('full_address', $this->getFullAddress());
 
 		$this->directory_address_type_id
 			&& $this->addXmlTag('name', $this->Directory_Address_Type->name);

@@ -6,7 +6,7 @@
  * @subpackage Event
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Дела',
@@ -135,4 +135,9 @@ return array(
 	'tabEvents' => 'Дела',
 
 	'crm_project_id' => 'Проект',
+
+	'event_deadline' => 'Просрочено',
+	'event_today' => 'Сегодня',
+	'event_empty' => 'Скоро',
+	'more' => 'еще',
 );

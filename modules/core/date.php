@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Date
 {
@@ -292,6 +292,8 @@ class Core_Date
 			else
 			{
 				$sReturn = Core::_('Core.estimate_date_year', $day, $aMonth[$month], $year);
+				// Для прошлого года время не указываем
+				$withTime = FALSE;
 			}
 
 			$withTime && $sReturn .= Core::_('Core.time_postfix', $time);

@@ -32,9 +32,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Querybuilder
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 {
@@ -608,6 +608,27 @@ class Core_QueryBuilder_Select extends Core_QueryBuilder_Selection
 	{
 		$this->_offsetPostgreSQLSyntax = $compatible;
 		return $this;
+	}
+
+	/**
+	 * Get FOUND_ROWS()
+	 *
+	 * <code>
+	 * $iCount = Core_QueryBuilder::select()->getFoundRows();
+	 * </code>
+	 * @return integer
+	 */
+	public function getFoundRows()
+	{
+		$oDataBase = $this->clear()
+			->columns(array('FOUND_ROWS()', 'count'))
+			->execute();
+
+		$row = $oDataBase->asAssoc()->current(FALSE);
+
+		$oDataBase->free();
+
+		return $row['count'];
 	}
 
 	/**

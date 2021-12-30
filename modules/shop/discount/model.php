@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discount_Model extends Core_Entity
 {
@@ -73,6 +73,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 			$this->_preloadValues['start_datetime'] = Core_Date::timestamp2sql(time());
 			$this->_preloadValues['end_datetime'] = Core_Date::timestamp2sql(strtotime("+1 year"));
+			$this->_preloadValues['guid'] = Core_Guid::get();
 		}
 	}
 
@@ -378,7 +379,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		echo $this->type == 0
 			? '%'
-			: ' ' . htmlspecialchars($this->Shop->Shop_Currency->name);
+			: ' ' . htmlspecialchars($this->Shop->Shop_Currency->sign);
 	}
 
 	/**

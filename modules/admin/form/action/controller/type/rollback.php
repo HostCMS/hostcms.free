@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Controller
 {
@@ -127,7 +127,7 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 						if ($prevDate != $sDate)
 						{
 							?><li class="timeline-node">
-								<a class="label label-<?php echo $color?>"><?php echo Core_Date::timestamp2string(Core_Date::date2timestamp($sDate), FALSE)?></a>
+								<a class="badge badge-<?php echo $color?>"><?php echo Core_Date::timestamp2string(Core_Date::date2timestamp($sDate), FALSE)?></a>
 							</li><?php
 
 							$prevDate = $sDate;

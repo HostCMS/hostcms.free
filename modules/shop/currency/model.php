@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Currency_Model extends Core_Entity
 {
@@ -138,19 +138,40 @@ class Shop_Currency_Model extends Core_Entity
 	}
 
 	/**
-	 * Get Related Site
-	 * @return Site_Model|NULL
-	 * @hostcms-event shop_currency.onBeforeGetRelatedSite
-	 * @hostcms-event shop_currency.onAfterGetRelatedSite
+	 * Backend callback method
+	 * @return string
 	 */
-	public function getRelatedSite()
+	public function formatNumberBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+		return $this->formatWithCurrency(345);
+	}
 
-		$oSite = $this->Shop->Site;
+	/**
+	 * Format Number
+	 * @param mixed $decimal
+	 * @return string
+	 */
+	public function format($decimal)
+	{
+		$return = number_format($decimal, 2, $this->decimal_separator, $this->thousands_separator);
 
-		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+		$this->hide_zeros && $this->decimal_separator != ''
+			&& $return = str_replace($this->decimal_separator . '00', '', $return);
 
-		return $oSite;
+		return $return;
+	}
+
+	/**
+	 * Format Decimal with Currency
+	 * @param mixed $decimal
+	 * @return string
+	 */
+	public function formatWithCurrency($decimal)
+	{
+		$str = $this->format($decimal);
+
+		return $this->sign_position == 0
+			? $str . ' ' . $this->sign
+			: $this->sign . $str;
 	}
 }

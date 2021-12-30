@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Crm
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Crm_Project_Entity_View extends Admin_Form_Controller_View
 {
@@ -206,8 +206,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 							<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags($oEvent->description), 250)?></div>
 
-							<div class="event-date"><?php
-
+							<div class="crm-date"><?php
 							if ($oEvent->all_day)
 							{
 								echo Event_Controller::getDate($oEvent->start);
@@ -242,7 +241,6 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 								<a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oEventCreator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEventCreator->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oEventCreator->getFullName());?></a><?php
 							}
 							?>
-							<!-- <span class="small darkgray pull-right"><i class="fa fa-clock-o"></i><?php echo Core_Date::time2string($iDeltaTime)?></span> -->
 							</div><?php
 
 							$text = ob_get_clean();

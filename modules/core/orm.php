@@ -63,7 +63,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ORM
 {
@@ -357,10 +357,8 @@ class Core_ORM
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeDelete', $this, array($primaryKey));
 
-		if (is_null($primaryKey))
-		{
-			$primaryKey = $this->getPrimaryKey();
-		}
+		is_null($primaryKey)
+			&& $primaryKey = $this->getPrimaryKey();
 
 		if (!is_null($primaryKey))
 		{
@@ -607,7 +605,7 @@ class Core_ORM
 		!count($this->queryBuilder()->getFrom())
 			&& $this->queryBuilder()->from($this->_tableName);
 
-		$aRow = $this->queryBuilder()
+		$Core_DataBase = $this->queryBuilder()
 			->clearSelect()
 			->clearLimit()
 			->clearOffset()
@@ -617,9 +615,13 @@ class Core_ORM
 				, 'count')
 			)
 			//->from($this->_tableName)
-			->execute()
+			->execute();
+
+		$aRow = $Core_DataBase
 			->asAssoc()
 			->current($bCache);
+
+		$Core_DataBase->free();
 
 		return is_array($aRow) ? $aRow['count'] : FALSE;
 	}
@@ -1349,7 +1351,7 @@ class Core_ORM
 	/**
 	 * Check is primary key NULL
 	 */
-	protected function isEmptyPrimaryKey()
+	public function isEmptyPrimaryKey()
 	{
 		return is_null($this->getPrimaryKey());
 	}

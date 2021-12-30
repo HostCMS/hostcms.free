@@ -1,5 +1,8 @@
 <?php
 
+// Привязывать сессию пользователя к IP
+$attachSessionToIp = FALSE;
+
 if (Core::moduleIsActive('siteuser'))
 {
 	$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
@@ -236,7 +239,11 @@ if (Core::moduleIsActive('siteuser'))
 					$oSiteuser = $oFoundSiteuser;
 				}
 
-				$oSiteuser->setCurrent();
+				$oSiteuser
+					// Привязывать ли сессию пользователя к IP
+					->attachSessionToIp($attachSessionToIp)
+					->setCurrent();
+
 				$Siteuser_Controller_Show->setEntity($oSiteuser);
 
 				$oauth_location = Core_Array::get($_SESSION, 'oauth_location');
@@ -266,7 +273,10 @@ if (Core::moduleIsActive('siteuser'))
 					? 2678400 // 31 день
 					: 86400; // 1 день
 
-				$oSiteuser->setCurrent($expires);
+				$oSiteuser
+					// Привязывать ли сессию пользователя к IP
+					->attachSessionToIp($attachSessionToIp)
+					->setCurrent($expires);
 
 				// Change controller's siteuser
 				$Siteuser_Controller_Show->setEntity($oSiteuser);
@@ -447,7 +457,10 @@ if (Core::moduleIsActive('siteuser'))
 				$oSiteuser = $aSiteusers[0];
 			}
 
-			$oSiteuser->setCurrent();
+			$oSiteuser
+				// Привязывать ли сессию пользователя к IP
+				->attachSessionToIp($attachSessionToIp)
+				->setCurrent();
 
 			// Change controller's siteuser
 			$Siteuser_Controller_Show->setEntity($oSiteuser);
@@ -478,6 +491,8 @@ if (Core::moduleIsActive('siteuser'))
 		{
 			$oSiteuser
 				->activate()
+				// Привязывать ли сессию пользователя к IP
+				->attachSessionToIp($attachSessionToIp)
 				->setCurrent();
 
 			$Siteuser_Controller_Show->setEntity($oSiteuser);

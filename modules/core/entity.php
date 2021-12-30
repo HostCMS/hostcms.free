@@ -21,7 +21,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Entity extends Core_ORM
 {
@@ -151,13 +151,14 @@ class Core_Entity extends Core_ORM
 	 * Add external tag for entity
 	 * @param string $tagName tag name
 	 * @param string $tagValue tag value
+	 * @param array $attributes attributes
 	 * @return self
 	 */
-	public function addXmlTag($tagName, $tagValue)
+	public function addXmlTag($tagName, $tagValue, array $attributes = array())
 	{
 		//if (!isset($this->_forbiddenTags[$tagName]))
 		//{
-		$this->_xmlTags[] = array($tagName, $tagValue);
+		$this->_xmlTags[] = array($tagName, $tagValue, $attributes);
 		//}
 		return $this;
 	}
@@ -376,6 +377,12 @@ class Core_Entity extends Core_ORM
 				$marksDeletedFieldName = $this->_marksDeleted;
 				$this->$marksDeletedFieldName = 1;
 				$this->save();
+
+				if (Core::moduleIsActive('webhook'))
+				{
+					$webhookName = 'on' . implode('', array_map('ucfirst', explode('_', $this->getModelName())));
+					Webhook_Controller::notify($webhookName . 'MarkDeleted', $this);
+				}
 			}
 
 			Core_Event::notify($this->_modelName . '.onAfterMarkDeleted', $this);
@@ -441,10 +448,8 @@ class Core_Entity extends Core_ORM
 		// Delete Revisions
 		if ($this->_hasRevisions && Core::moduleIsActive('revision'))
 		{
-			if (is_null($primaryKey))
-			{
-				$primaryKey = $this->getPrimaryKey();
-			}
+			is_null($primaryKey)
+				&& $primaryKey = $this->getPrimaryKey();
 
 			Core_QueryBuilder::delete('revisions')
 				->where('model', '=', $this->getModelName())
@@ -455,31 +460,42 @@ class Core_Entity extends Core_ORM
 		// Delete Fields
 		if (Core::moduleIsActive('field'))
 		{
-			$aFieldsIds = array();
-
 			$aFields = Field_Controller::getFields($this->getModelName());
 
-			foreach ($aFields as $oField)
+			if (count($aFields))
 			{
-				$aFieldsIds[] = $oField->id;
-			}
-
-			$fieldDir = CMS_FOLDER . Field_Controller::getPath($this);
-
-			$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $primaryKey);
-			foreach ($aField_Values as $oField_Value)
-			{
-				$oField_Value->Field->type == 2 && $oField_Value->setDir($fieldDir);
-				$oField_Value->delete();
-			}
-
-			if (is_dir($fieldDir))
-			{
-				try {
-					Core_File::deleteDir($fieldDir);
+				$aFieldsIds = array();
+				foreach ($aFields as $oField)
+				{
+					$aFieldsIds[] = $oField->id;
 				}
-				catch (Exception $e) {}
+
+				$fieldDir = CMS_FOLDER . Field_Controller::getPath($this);
+
+				is_null($primaryKey)
+					&& $primaryKey = $this->getPrimaryKey();
+
+				$aField_Values = Field_Controller_Value::getFieldsValues($aFieldsIds, $primaryKey, FALSE);
+				foreach ($aField_Values as $oField_Value)
+				{
+					$oField_Value->Field->type == 2 && $oField_Value->setDir($fieldDir);
+					$oField_Value->delete();
+				}
+
+				if (is_dir($fieldDir))
+				{
+					try {
+						Core_File::deleteDir($fieldDir);
+					}
+					catch (Exception $e) {}
+				}
 			}
+		}
+
+		if (Core::moduleIsActive('webhook'))
+		{
+			$webhookName = 'on' . implode('', array_map('ucfirst', explode('_', $this->getModelName())));
+			Webhook_Controller::notify($webhookName . 'Deleted', $this);
 		}
 
 		return parent::delete($primaryKey);
@@ -696,7 +712,17 @@ class Core_Entity extends Core_ORM
 		// External tags
 		foreach ($this->_xmlTags as $aTag)
 		{
-			$xml .= "<{$aTag[0]}>" . Core_Str::xml($aTag[1]) . "</{$aTag[0]}>\n";
+			$xml .= "<{$aTag[0]}";
+
+			if (isset($aTag[2]))
+			{
+				foreach ($aTag[2] as $tagName => $tagValue)
+				{
+					$xml .= " {$tagName}=\"" . Core_Str::xml($tagValue) . "\"";
+				}
+			}
+
+			$xml .= ">" . Core_Str::xml($aTag[1]) . "</{$aTag[0]}>\n";
 		}
 
 		// Children entities
@@ -723,7 +749,7 @@ class Core_Entity extends Core_ORM
 		foreach ($aField_Values as $oField_Value)
 		{
 			$oField_Value->Field->type == 2 && $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
-				
+
 			$xml .= $oField_Value->getXml();
 		}
 
@@ -790,7 +816,23 @@ class Core_Entity extends Core_ORM
 		foreach ($this->_xmlTags as $aTag)
 		{
 			$sTmp = $aTag[0];
-			$oRetrun->$sTmp = $aTag[1];
+			if (empty($aTag[2]))
+			{
+				$oRetrun->$sTmp = $aTag[1];
+			}
+			else
+			{
+				$stdClass = new stdClass();
+				$stdClass->value = $aTag[1];
+
+				foreach ($aTag[2] as $tagName => $tagValue)
+				{
+					$properttName = $attributePrefix . $tagName;
+					$stdClass->$properttName = $tagValue;
+				}
+
+				$oRetrun->$sTmp = $stdClass;
+			}
 		}
 
 		// Children entities
@@ -809,7 +851,8 @@ class Core_Entity extends Core_ORM
 			else
 			{
 				// Convert to array
-				!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
+				!is_array($oRetrun->$childName)
+					&& $oRetrun->$childName = array($oRetrun->$childName);
 
 				$oRetrun->{$childName}[] = $childArray;
 			}
