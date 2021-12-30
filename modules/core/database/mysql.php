@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Database
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -623,6 +623,16 @@ class Core_DataBase_Mysql extends Core_DataBase
 		$result = mysql_query($query, $this->_connection);
 
 		return $this->_fetch($result, FALSE);
+	}
+
+/**
+	 * Get the process list indicates the operations currently being performed
+	 *
+	 * @return array
+	 */
+	public function getProcesslist()
+	{
+		return array();
 	}
 
 	/**

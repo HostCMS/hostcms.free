@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -850,7 +850,7 @@ class Shop_Report_Controller
 						?>
 						<tr>
 							<td><?php echo $oShop_Item->shop_group_id ? htmlspecialchars($oShop_Item->Shop_Group->name) : Core::_('Report.root')?></td>
-							<td><a href="<?php echo $sItemUrl?>" target="_blank" data-container="body" data-titleclass="bordered-palegreen" data-toggle="popover-hover" data-placement="top" data-title="<?php echo htmlspecialchars(htmlspecialchars($aTmp['name']))?>" data-content="<div class='text-align-center'><img src='<?php echo $imgSrc?>' /></div>"><?php echo htmlspecialchars($aTmp['name'])?></a></td>
+							<td><a href="<?php echo $sItemUrl?>" target="_blank"  data-titleclass="bordered-palegreen" data-toggle="popover" data-container="body" data-trigger="hover" data-html="true" data-placement="top" data-title="<?php echo htmlspecialchars(htmlspecialchars($aTmp['name']))?>" data-content="<div class='text-align-center'><img src='<?php echo $imgSrc?>' /></div>"><?php echo htmlspecialchars($aTmp['name'])?></a></td>
 							<td><?php echo htmlspecialchars($aTmp['marking'])?></td>
 							<td><?php echo round($aTmp['quantityAmount'])?></td>
 							<td><?php echo $aTmp['totalAmount']?> <?php echo htmlspecialchars(self::$_oDefault_Currency->name)?></td>

@@ -164,4 +164,5 @@ return array(
 	'warehouse' => 'Warehouse',
 	'date' => 'Date',
 	'change_user' => 'Change responsible user: "%s"',
+	'merge_success' => 'Measure merged successfully!',
 );

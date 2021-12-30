@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Value
 {
@@ -29,7 +29,7 @@ class Property_Controller_Value
 	}
 
 	static protected $_cacheGetProperty = array();
-	
+
 	/**
 	 * Get Property by ID
 	 * @param int $iPropertyId
@@ -41,10 +41,10 @@ class Property_Controller_Value
 		{
 			self::$_cacheGetProperty[$iPropertyId] = Core_Entity::factory('Property')->getById($iPropertyId);
 		}
-		
+
 		return self::$_cacheGetProperty[$iPropertyId];
 	}
-	
+
 	/**
 	 * Получение значений свойств $aProperiesId объекта $entityId
 	 * @param array $aProperiesId properties ID
@@ -52,7 +52,7 @@ class Property_Controller_Value
 	 * @param boolean $bCache cache mode
 	 * @return array
 	 */
-	static public function getPropertiesValues($aProperiesId, $entityId, $bCache = TRUE)
+	static public function getPropertiesValues($aProperiesId, $entityId, $bCache = TRUE, $bSorting = FALSE)
 	{
 		$aReturn = array();
 
@@ -104,6 +104,11 @@ class Property_Controller_Value
 					->queryBuilder()
 					->where('entity_id', '=', $entityId)
 					->where('property_id', 'IN', $aTmpProperiesId);
+
+				$bSorting && $oProperty_Values
+					->queryBuilder()
+					->clearOrderBy()
+					->orderBy('sorting', 'ASC');
 
 				$aReturn = array_merge($aReturn, $oProperty_Values->findAll($bCache));
 			}

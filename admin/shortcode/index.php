@@ -1,11 +1,11 @@
 <?php
 /**
- * Hostcms Redirect
+ * Hostcms Shortcode
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -138,6 +138,20 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+$oAdminFormActionRollback = $oAdmin_Form
+	->Admin_Form_Actions
+	->getByName('rollback');
+
+if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
+{
+	$oControllerRollback = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Rollback', $oAdminFormActionRollback
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerRollback);
 }
 
 // Источник данных 0

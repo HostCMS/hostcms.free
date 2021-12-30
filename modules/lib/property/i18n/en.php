@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Lib
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Parameters of sample dynamic pages',
@@ -31,6 +31,7 @@ return array(
 	'lib_property_type_4' => 'SQL query',
 	'lib_property_type_5' => 'Large text field',
 	'lib_property_type_7' => 'TPL template',
+	'lib_property_type_8' => 'File',
 	'value' => 'Value',
 	'multivalue' => 'Multiple values',
 	'copy_from' => ' [Copy of %s]',
@@ -43,4 +44,5 @@ return array(
 	'copy_success' => 'Parameters of sample dynamic pages copied successfully.',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'change_filename' => '<acronym title="Conversion of names of all uploaded files for all online store objects - products, groups, additional properties of products and groups">Change names of uploaded files</acronym>',
 );

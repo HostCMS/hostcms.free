@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Measure_Model extends Core_Entity
 {
@@ -50,5 +50,41 @@ class Shop_Measure_Model extends Core_Entity
 			$oUser = Core_Auth::getCurrentUser();
 			$this->_preloadValues['user_id'] = is_null($oUser) ? 0 : $oUser->id;
 		}
+	}
+
+	/**
+	 * Merge shop measure
+	 * @param Shop_Measure_Model $oObject
+	 * @return self
+	 */
+	public function merge(Shop_Measure_Model $oObject)
+	{
+		trim($this->name) == ''
+			&& $oObject->name != ''
+			&& $this->name = $oObject->name;
+
+		trim($this->description) == ''
+			&& $oObject->description != ''
+			&& $this->description = $oObject->description;
+
+		$this->okei == 0
+			&& $oObject->okei
+			&& $this->okei = $oObject->okei;
+
+		$this->save();
+
+		Core_QueryBuilder::update('shop_items')
+			->set('shop_measure_id', $this->id)
+			->where('shop_measure_id', '=', $oObject->id)
+			->execute();
+
+		Core_QueryBuilder::update('shop_order_items')
+			->set('shop_measure_id', $this->id)
+			->where('shop_measure_id', '=', $oObject->id)
+			->execute();
+
+		$oObject->markDeleted();
+
+		return $this;
 	}
 }

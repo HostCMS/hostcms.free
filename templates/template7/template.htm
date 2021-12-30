@@ -16,21 +16,26 @@
 				)
 				->groupsMode('none')
 				//->itemsForbiddenTags(array('text', 'marking', 'vendorcode', 'description'))
+				->filterStrictMode(TRUE)
 				->group(FALSE)
 				->cache(FALSE)
 				->limit(3);
 
+			$fieldName = $Shop_Controller_Show->getEntity()->filter && count($Shop_Controller_Show->getFilterProperties())
+				? $Shop_Controller_Show->getFilterTableName() . '.shop_item_id'
+				: 'shop_items.id';
+
 			$Shop_Controller_Show
 				->shopItems()
 				->queryBuilder()
-				->join('shop_item_discounts', 'shop_item_discounts.shop_item_id', '=', 'shop_items.id')
+				->join('shop_item_discounts', 'shop_item_discounts.shop_item_id', '=', $fieldName)
 				->join('shop_discounts', 'shop_discounts.id', '=', 'shop_item_discounts.shop_discount_id')
 				->where('shop_discounts.active', '=', 1)
 				->where('shop_discounts.start_datetime', '<', Core_Date::timestamp2sql(time()))
 				->where('shop_discounts.end_datetime', '>', Core_Date::timestamp2sql(time()))
 				->where('shop_discounts.deleted', '=', 0)
 				->where('shop_items.modification_id', '=', 0)
-				->groupBy('shop_items.id')
+				->groupBy($fieldName)
 				->clearOrderBy()
 				->orderBy('RAND()');
 

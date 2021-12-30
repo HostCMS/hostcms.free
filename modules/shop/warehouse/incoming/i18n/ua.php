@@ -27,7 +27,6 @@ return array(
 	'position' => '№',
 	'sum' => 'Сума',
 	'currency' => 'Вал.',
-	'basic' => 'Роздрібна',
 	'shop_price_id' => 'Ціна',
 	'recalc_price' => 'Заповнити',
 	'delete_dialog' => "Ви впевнені, що хочете видалити?",

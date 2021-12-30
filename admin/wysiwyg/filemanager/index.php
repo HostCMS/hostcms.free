@@ -3,7 +3,7 @@
  * Wysiwyg Filemanager.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -140,99 +140,107 @@ $oMainTabs = Admin_Form_Entity::factory('Tabs')
 		$oMainTab = Admin_Form_Entity::factory('Tab')->name('main')
 	);
 
-$oCore_Html_Entity_Form_File = Core::factory('Core_Html_Entity_Form')
-	->action($sAdminFormAction)
-	->method('post')
-	->enctype('multipart/form-data')
-	->class('margin-top-40 margin-bottom-20')
-	// Load file
-	->add($oMainTabs);
-	
-$windowId = $oAdmin_Form_Controller->getWindowId();	
+$windowId = $oAdmin_Form_Controller->getWindowId();
 
-$oMainTab
-	->add(
-		Core::factory('Core_Html_Entity_Div')
-			->id('dropzone')
-			->add(
-				Core::factory('Core_Html_Entity_Div')
-				->class('dz-message needsclick')
-				->value('<i class="fa fa-arrow-circle-o-up"></i> ' . Core::_('Wysiwyg_Filemanager.upload_message'))
-			)
-	)
-	->add(Admin_Form_Entity::factory('Code')->html('
-		<script type="text/javascript">
-			$(function() {
-				$("#' . $windowId . ' #dropzone").dropzone({
-					url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) .'",
-					parallelUploads: ' . $aConfig['parallelUploads'] . ',
-					maxFilesize: ' . $aConfig['maxFilesize'] . ',
-					paramName: "file",
-					uploadMultiple: true,
-					clickable: true,
-					init: function() {
-						this.on("thumbnail", function(file) {
-							var thumbnail = $(file.previewElement);
+$oUser = Core_Auth::getCurrentUser();
 
-							thumbnail.on("click", function(){
-							  window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+if (!$oUser->read_only)
+{
+	$oCore_Html_Entity_Form_File = Core::factory('Core_Html_Entity_Form')
+		->action($sAdminFormAction)
+		->method('post')
+		->enctype('multipart/form-data')
+		->class('margin-top-40 margin-bottom-20')
+		// Load file
+		->add($oMainTabs)
+		;
+
+	// $oCore_Html_Entity_Form_File->add($oMainTabs);
+
+	$oMainTab
+		->add(
+			Core::factory('Core_Html_Entity_Div')
+				->id('dropzone')
+				->add(
+					Core::factory('Core_Html_Entity_Div')
+					->class('dz-message needsclick')
+					->value('<i class="fa fa-arrow-circle-o-up"></i> ' . Core::_('Wysiwyg_Filemanager.upload_message'))
+				)
+		)
+		->add(Admin_Form_Entity::factory('Code')->html('
+			<script type="text/javascript">
+				$(function() {
+					$("#' . $windowId . ' #dropzone").dropzone({
+						url: "/admin/wysiwyg/filemanager/index.php?hostcms[action]=uploadFile&hostcms[checked][1][0]=1&cdir=' . rawurlencode($cdir) .'",
+						parallelUploads: ' . $aConfig['parallelUploads'] . ',
+						maxFilesize: ' . $aConfig['maxFilesize'] . ',
+						paramName: "file",
+						uploadMultiple: true,
+						clickable: true,
+						init: function() {
+							this.on("thumbnail", function(file) {
+								var thumbnail = $(file.previewElement);
+
+								thumbnail.on("click", function(){
+								window.opener.HostCMSFileManager.insertFile("' . rawurlencode(DIRECTORY_SEPARATOR . ltrim($cdir, DIRECTORY_SEPARATOR)) . '" + file.name); return false;
+								});
 							});
-						});
-					}
+						}
+					});
 				});
-			});
-		</script>
-	'))
-	->add(
-		Core::factory('Core_Html_Entity_Div')
-			->class('row')
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->caption(Core::_('Wysiwyg_Filemanager.fm_form_dir'))
-					->name('dir_name')
-					->type('text')
-					->controller($oAdmin_Form_Controller)
-					->divAttr(array('class' => 'form-group col-xs-4 col-sm-4 col-md-4 col-lg-4'))
-			)
-			->add(
-				Admin_Form_Entity::factory('Input')
-					->name('dir_mode')
-					->type('text')
-					->size(6)
-					->caption(Core::_('Wysiwyg_Filemanager.chmod'))
-					->value('0' . decoct(CHMOD))
-					->controller($oAdmin_Form_Controller)
-					->divAttr(array('class' => 'form-group col-xs-2 col-sm-2 col-md-2 col-lg-2'))
-			)
-			->add(
-				Core::factory('Core_Html_Entity_Div')
-					->class('form-group col-xs-3 col-sm-3 col-md-3 col-lg-3')
-					->add(
-						Admin_Form_Entity::factory('Button')
-							->name('load_file')
-							->class('saveButton btn btn-blue margin-top-21')
-							->value(Core::_('Wysiwyg_Filemanager.fm_form_dir_button'))
-							->onclick($oAdmin_Form_Controller
-								->checked(array(0 => array(0)))
-								->getAdminSendForm('createDirectory', NULL, 'cdir=' . rawurlencode($cdir))
-							)
-					)
-			)
+			</script>
+		'))
+		->add(
+			Core::factory('Core_Html_Entity_Div')
+				->class('row')
+				->add(
+					Admin_Form_Entity::factory('Input')
+						->caption(Core::_('Wysiwyg_Filemanager.fm_form_dir'))
+						->name('dir_name')
+						->type('text')
+						->controller($oAdmin_Form_Controller)
+						->divAttr(array('class' => 'form-group col-xs-4 col-sm-4 col-md-4 col-lg-4'))
+				)
+				->add(
+					Admin_Form_Entity::factory('Input')
+						->name('dir_mode')
+						->type('text')
+						->size(6)
+						->caption(Core::_('Wysiwyg_Filemanager.chmod'))
+						->value('0' . decoct(CHMOD))
+						->controller($oAdmin_Form_Controller)
+						->divAttr(array('class' => 'form-group col-xs-2 col-sm-2 col-md-2 col-lg-2'))
+				)
+				->add(
+					Core::factory('Core_Html_Entity_Div')
+						->class('form-group col-xs-3 col-sm-3 col-md-3 col-lg-3')
+						->add(
+							Admin_Form_Entity::factory('Button')
+								->name('load_file')
+								->class('saveButton btn btn-blue margin-top-21')
+								->value(Core::_('Wysiwyg_Filemanager.fm_form_dir_button'))
+								->onclick($oAdmin_Form_Controller
+									->checked(array(0 => array(0)))
+									->getAdminSendForm('createDirectory', NULL, 'cdir=' . rawurlencode($cdir))
+								)
+						)
+				)
+		);
+
+	// Restore checked list
+	$oAdmin_Form_Controller->checked($aChecked);
+
+	ob_start();
+	$oCore_Html_Entity_Form_File->execute();
+
+	Core::factory('Core_Html_Entity_Script')
+		->value('$(window).off(\'beforeunload\');')
+		->execute();
+
+	$oAdmin_Form_Controller->addEntity(
+		$oAdmin_Form_Entity_Code->html(ob_get_clean())
 	);
-
-// Restore checked list
-$oAdmin_Form_Controller->checked($aChecked);
-
-ob_start();
-$oCore_Html_Entity_Form_File->execute();
-
-Core::factory('Core_Html_Entity_Script')
-	->value('$(window).off(\'beforeunload\');')
-	->execute();
-
-$oAdmin_Form_Controller->addEntity(
-	$oAdmin_Form_Entity_Code->html(ob_get_clean())
-);
+}
 
 // Действие редактирования
 $oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
@@ -319,8 +327,8 @@ $oAdmin_Form_Controller->addDataset(
 
 $oAdmin_Form_Dataset = new Wysiwyg_Filemanager_Dataset('file');
 $oAdmin_Form_Dataset
-	->changeField('name', 'type', 1)
 	->setPath($path)
+	->changeField('name', 'type', 1)
 	->addExternalField('name')
 	->addExternalField('datetime');
 // Добавляем источник данных контроллеру формы

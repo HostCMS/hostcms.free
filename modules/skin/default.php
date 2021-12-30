@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -86,16 +86,7 @@ class Skin_Default extends Core_Skin
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.crosshair.js')
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.resize.js')
 			->addJs('/modules/skin/bootstrap/js/charts/flot/jquery.flot.selection.js')
-			->addJs('/modules/skin/bootstrap/js/jquery.slimscroll.js')
-
-			;
-
-		/*if (defined('USE_HOSTCMS_5') && USE_HOSTCMS_5)
-		{
-			$this
-				->addJs('/admin/js/JsHttpRequest.js')
-				->addJs('/admin/js/hostcms5.js');
-		}*/
+			->addJs('/modules/skin/bootstrap/js/jquery.slimscroll.js');
 
 		$this
 			->addCss('/modules/skin/' . $this->_skinName . '/js/mb.menu/menu.css')
@@ -106,9 +97,7 @@ class Skin_Default extends Core_Skin
 			->addCss('/modules/skin/default/js/ui/ui.css')
 			->addCss('/modules/skin/bootstrap/js/codemirror/lib/codemirror.css')
 			->addCss('/modules/skin/default/js/codemirror/addon/dialog/dialog.css')
-
-			->addCss('/modules/skin/bootstrap/css/font-awesome.min.css')
-			;
+			->addCss('/modules/skin/bootstrap/css/font-awesome.min.css');
 	}
 
 	/**
@@ -202,7 +191,7 @@ if ($this->_mode != 'blank')
 ?>
 <div id="top">
 	<div id="hostCmsLogo">
-		<a href="/admin/"><img id="hostCmsLogoImg" src="<?php echo $this->getImageHref()?>logo.png" alt="(^) HostCMS" title="HostCMS<?php echo Core_Auth::logged() ? ' v. ' . htmlspecialchars(CURRENT_VERSION) : ''?>"></img></a>
+		<a href="/admin/"><img id="hostCmsLogoImg" src="<?php echo $this->getImageHref()?>logo.png" alt="(^) HostCMS" title="HostCMS<?php echo Core_Auth::logged() ? ' v. ' . htmlspecialchars(Core::getVersion()) : ''?>"></img></a>
 	</div>
 	<?php if (Core_Auth::logged() && defined('CURRENT_SITE'))
 	{ ?>

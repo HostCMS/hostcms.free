@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -101,7 +101,7 @@ class Shop_Filter_Controller_Rebuild extends Admin_Form_Action_Controller
 				{
 					<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'rebuildFilter', NULL, 1, $oShop->id, $sAdditionalParams)?>
 				}
-				setTimeout ('set_location()', <?php echo $iDelay * 1000?>);
+				setTimeout('set_location()', <?php echo $iDelay * 1000?>);
 				</script><?php
 			}
 			else

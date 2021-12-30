@@ -8,7 +8,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -45,7 +45,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 			)->name
 		);
 
-		$this->buttonName(Core::_('admin_form.apply'));
+		$this->buttonName(Core::_('Admin_Form.apply'));
 
 		$this->autocomplete = FALSE;
 	}
@@ -232,7 +232,7 @@ class Admin_Form_Action_Controller_Type_Move extends Admin_Form_Action_Controlle
 
 			Core::factory('Core_Html_Entity_Script')
 				->value("$(function() {
-				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . $this->title . "', AppendTo: '#{$windowId}', width: 750, height: 140, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 140, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());

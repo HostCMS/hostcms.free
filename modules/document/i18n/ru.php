@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Document
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'menu' => 'Страницы и документы',
@@ -34,4 +34,5 @@ return array(
 	'text' => 'Содержание документа',
 	'template_id' => 'Макет',
 	'datetime' => 'Дата',
+	'rollback_success' => 'Версия восстановлена успешно!',
 );

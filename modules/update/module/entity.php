@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Update
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -54,7 +54,7 @@ class Update_Module_Entity extends Core_Entity
 	 * @var string
 	 */
 	public $file = NULL;
-	
+
 	/**
 	 * Backend property
 	 * @var string
@@ -165,14 +165,23 @@ class Update_Module_Entity extends Core_Entity
 			$sSqlFilename = $oMarket_Controller->tmpDir . '/update.sql';
 			if (is_file($sSqlFilename))
 			{
-				$sSqlCode = Core_File::read($sSqlFilename);
-				Sql_Controller::instance()->execute($sSqlCode);
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Update.msg_execute_sql'));
+
+				//$sSqlCode = Core_File::read($sSqlFilename);
+				//Sql_Controller::instance()->execute($sSqlCode);
+				Sql_Controller::instance()->executeByFile($sSqlFilename);
 			}
 
 			// Размещаем PHP из описания обновления
 			$sPhpFilename = $oMarket_Controller->tmpDir . '/update.php';
 			if (is_file($sPhpFilename))
 			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write(Core::_('Update.msg_execute_file'));
+
 				include($sPhpFilename);
 			}
 

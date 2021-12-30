@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -767,7 +767,7 @@ class Core_File
 
 			if ($filegroup)
 			{
-				$aGroupOwnerInfo = posix_getgrgid($fileowner);
+				$aGroupOwnerInfo = posix_getgrgid($filegroup);
 				is_array($aGroupOwnerInfo)
 					&& $aReturn[] = $aGroupOwnerInfo['name'];
 			}

@@ -13,9 +13,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Log
 {
@@ -183,7 +183,7 @@ class Core_Log
 
 		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST', 'unknown');
 		$page = Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI');
-		$user_ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+		$user_ip = Core::getClientIp();
 
 		$fname = $this->getLogName(date('Y-m-d'));
 

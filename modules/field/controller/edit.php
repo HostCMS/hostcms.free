@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -144,7 +144,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
 
-		$oMainTab->delete($this->getField('sorting'));
+		// $oMainTab->delete($this->getField('sorting'));
 		$sModel = Core_Array::getGet('model');
 		$oMainTab->delete($this->getField('model'));
 		$oModel_Field = $this->getField('model');
@@ -379,8 +379,9 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oMainTab
 					->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow6)
-					->move($this->getField('tag_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow7)
-					->move($this->getField('default_value')->class('form-control')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6 hidden-2 hidden-5 hidden-7 hidden-8 hidden-9 hidden-12 hidden-13 hidden-14')), $oMainRow7)
+					->move($this->getField('tag_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow7)
+					->move($this->getField('default_value')->class('form-control')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 hidden-2 hidden-5 hidden-7 hidden-8 hidden-9 hidden-12 hidden-13 hidden-14')), $oMainRow7)
+					->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow7)
 					->move($this->getField('multiple')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow8)
 					->move($this->getField('obligatory')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow8)
 					->move($this->getField('visible')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow8)
@@ -462,10 +463,12 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oMainTab
 					->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 					->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+					->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
+					->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'));
 
 				$oMainTab->move($this->getField('name')->class('form-control input-lg'), $oMainRow1);
 				$oMainTab->move($this->getField('description')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow3);
+				$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow4);
 
 				$aExclude = array($this->_object->id);
 

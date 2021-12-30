@@ -8,6 +8,7 @@ return array(
 	'actions' => 'Дії',
 
 	'add' => 'Додати',
+	'restore' => 'Відновити',
 
 	'yes' => 'Так',
 	'no' => 'Ні',

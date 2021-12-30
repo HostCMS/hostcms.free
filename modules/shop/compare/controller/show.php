@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
  * - limit($limit) количество
@@ -32,7 +33,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -46,6 +47,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 		'compareUrl',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'sortPropertiesValues',
 		'modifications',
 		'commentsRating',
 		'offset',
@@ -95,7 +97,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 		);
 
 		$this->itemsProperties = $this->modifications = $this->commentsRating = FALSE;
-		$this->itemsPropertiesList = TRUE;
+		$this->itemsPropertiesList = $this->sortPropertiesValues = TRUE;
 		$this->limit = 10;
 
 		$this->offset = $this->page = 0;
@@ -188,7 +190,7 @@ class Shop_Compare_Controller_Show extends Core_Controller
 						&& $aGroups[] = $oShop_Item->shop_group_id;
 
 					$oShop_Compare
-						->showXmlProperties($this->itemsProperties)
+						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
 						->showXmlModifications($this->modifications)
 						->showXmlCommentsRating($this->commentsRating);
 

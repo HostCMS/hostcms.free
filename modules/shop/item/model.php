@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -24,6 +24,12 @@ class Shop_Item_Model extends Core_Entity
 	 * @var int
 	 */
 	public $related = 1;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * Callback property_id
@@ -339,9 +345,10 @@ class Shop_Item_Model extends Core_Entity
 	 * Значения всех свойств товара
 	 * @param boolean $bCache cache mode status
 	 * @param array $aPropertiesId array of properties' IDs
+	 * @param boolean $bSorting sort results, default FALSE
 	 * @return array Property_Value
 	 */
-	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array())
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array(), $bSorting = FALSE)
 	{
 		if ($bCache && !is_null($this->_propertyValues))
 		{
@@ -361,7 +368,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 		}
 
-		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache);
+		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache, $bSorting);
 
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
@@ -2164,15 +2171,23 @@ class Shop_Item_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = is_array($showXmlProperties)
 			? array_combine($showXmlProperties, $showXmlProperties)
 			: $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
 
 		return $this;
 	}
@@ -2307,7 +2322,7 @@ class Shop_Item_Model extends Core_Entity
 
 		if ($this->_showXmlSiteuser && $this->siteuser_id && Core::moduleIsActive('siteuser'))
 		{
-			$this->Siteuser->showXmlProperties($this->_showXmlSiteuserProperties);
+			$this->Siteuser->showXmlProperties($this->_showXmlSiteuserProperties, $this->_xmlSortPropertiesValues);
 			$this->addEntity($this->Siteuser);
 		}
 
@@ -2380,7 +2395,7 @@ class Shop_Item_Model extends Core_Entity
 								$oTmp_Shop_Item->addEntity(
 									$oTmp_Modification
 										->id($oModification->id)
-										->showXmlProperties($this->_showXmlProperties)
+										->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 										->showXmlAssociatedItems($this->_showXmlAssociatedItems)
 										->cartQuantity(1)
 								);
@@ -2545,7 +2560,7 @@ class Shop_Item_Model extends Core_Entity
 						->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 						->showXmlBonuses($this->_showXmlBonuses)
 						->showXmlSiteuser($this->_showXmlSiteuser)
-						->showXmlProperties($this->_showXmlProperties)
+						->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 						->cartQuantity(1);
 
 					Core_Event::notify($this->_modelName . '.onBeforeAddModification', $this, array(
@@ -2609,7 +2624,7 @@ class Shop_Item_Model extends Core_Entity
 							->showXmlTags($this->_showXmlTags)
 							->showXmlWarehousesItems($this->_showXmlWarehousesItems)
 							->showXmlSiteuser($this->_showXmlSiteuser)
-							->showXmlProperties($this->_showXmlProperties)
+							->showXmlProperties($this->_showXmlProperties, $this->_xmlSortPropertiesValues)
 							->cartQuantity(1);
 
 						Core_Event::notify($this->_modelName . '.onBeforeAddAssociatedEntity', $this, array($oShop_Item_Associated));
@@ -2736,7 +2751,7 @@ class Shop_Item_Model extends Core_Entity
 		{
 			if (is_array($this->_showXmlProperties))
 			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
 
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
@@ -2745,7 +2760,7 @@ class Shop_Item_Model extends Core_Entity
 			}
 			else
 			{
-				$aProperty_Values = $this->getPropertyValues();
+				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
 				// Add all values
 				//$this->addEntities($aProperty_Values);
 			}
@@ -2801,7 +2816,7 @@ class Shop_Item_Model extends Core_Entity
 			{
 				$parentObject->addEntity($oComment
 					->clearEntities()
-					->showXmlProperties($this->_showXmlCommentProperties)
+					->showXmlProperties($this->_showXmlCommentProperties, $this->_xmlSortPropertiesValues)
 					->showXmlSiteuserProperties($this->_showXmlSiteuserProperties)
 					->showXmlVotes($this->_showXmlVotes)
 					->dateFormat($this->Shop->format_date)
@@ -3170,17 +3185,16 @@ class Shop_Item_Model extends Core_Entity
 		{
 			return '<i class="fa fa-link"></i>';
 		}
-		elseif (strlen($this->image_small))
+		elseif (strlen($this->image_small) || strlen($this->image_large))
 		{
-			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
+			$srcImg = htmlspecialchars(strlen($this->image_small)
+				? $this->getSmallFileHref()
+				: $this->getLargeFileHref()
+			);
 
-			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getSmallFileHref()) . '" />';
-		}
-		elseif (strlen($this->image_large))
-		{
-			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+			$dataContent = '<img class="backend-preview" src="' . $srcImg . '" />';
 
-			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->getLargeFileHref()) . '" />';
+			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . $srcImg . '" />';
 		}
 		else
 		{

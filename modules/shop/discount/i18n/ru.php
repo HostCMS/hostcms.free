@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -51,4 +51,7 @@ return array(
 	'coupon_text' => '<acronym title="Если указан купон, то скидка доступна только после ввода купона">Купон</acronym>',
 	'public' => "Выгружать в Маркет",
 	'percent_error' => "Скидка не может быть более 100%!",
+	'siteuser_groups' => "Группа доступа",
+	'all' => 'Все',
+	'not_apply_purchase_discount' => 'Не применять скидки от суммы заказа'
 );

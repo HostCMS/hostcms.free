@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств заказов, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - ordersPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств заказов, по умолчанию FALSE
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - offset($offset) смещение, с которого выводить товары. По умолчанию 0
  * - limit($limit) количество выводимых заказов
  * - page(2) текущая страница, по умолчанию 0, счет ведется с 0
@@ -16,7 +17,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -29,6 +30,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 	protected $_allowedProperties = array(
 		'itemsProperties',
 		'ordersPropertiesList',
+		'sortPropertiesValues',
 		'offset',
 		'limit',
 		'page',
@@ -107,8 +109,10 @@ class Shop_Order_Controller_Show extends Core_Controller
 			->where('shop_orders.siteuser_id', '=', $siteuser_id)
 			->orderBy('shop_orders.datetime', 'DESC');
 
-		$this->itemsProperties = FALSE;
-		$this->ordersPropertiesList = FALSE;
+		$this->itemsProperties = $this->ordersPropertiesList = FALSE;
+
+		$this->sortPropertiesValues = TRUE;
+
 		$this->limit = 999;
 		$this->offset = 0;
 		$this->page = 0;
@@ -251,7 +255,7 @@ class Shop_Order_Controller_Show extends Core_Controller
 				->showXmlOrderStatus(TRUE);
 
 			$this->itemsProperties
-				&& $oShop_Order->showXmlProperties($this->itemsProperties);
+				&& $oShop_Order->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
 
 			$this->addEntity($oShop_Order);
 		}

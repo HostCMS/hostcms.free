@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Revision
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Revision_Model extends Core_Entity
 {
@@ -49,12 +49,22 @@ class Revision_Model extends Core_Entity
 	}
 
 	/**
+	 * Get Model for revision
+	 * @return Core_Entity
+	 */
+	public function getModel()
+	{
+		return Core_Entity::factory($this->model, $this->entity_id);
+	}
+
+	/**
 	 * Rollback Revision
 	 * @return self
 	 */
 	public function rollback()
 	{
-		$oModel = Core_Entity::factory($this->model, $this->entity_id);
+		$oModel = $this->getModel();
+		$oModel->backupRevision();
 		$oModel->rollbackRevision($this->id);
 		return $this;
 	}
@@ -74,6 +84,11 @@ class Revision_Model extends Core_Entity
 			) . '</span>';
 	}
 
+	/**
+	 * Print decoded json
+	 * @param mixed $value json value
+	 * @return string
+	 */
 	protected function _printJson($value)
 	{
 		if (is_array($value))
@@ -105,6 +120,17 @@ class Revision_Model extends Core_Entity
 	 */
 	public function nameBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
+		$this->printValue();
+
+		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . htmlspecialchars($this->name) . '</a>';
+	}
+
+	/**
+	 * Print revision value
+	 * @return self
+	 */
+	public function printValue()
+	{
 		$oRevision = Core_Entity::factory('Revision', $this->id);
 
 		$aValue = json_decode($oRevision->value, TRUE);
@@ -116,7 +142,7 @@ class Revision_Model extends Core_Entity
 		$(function() {
 			$('a#revision<?php echo $this->id?>').on('click', function (){
 				var dialog = bootbox.dialog({
-					title: $.escapeHtml('<?php echo Core_Str::escapeJavascriptVariable($this->name)?> <?php echo $this->datetime?>'),
+					title: $.escapeHtml('<?php echo Core_Str::escapeJavascriptVariable($this->name)?> <?php echo Core_Date::sql2datetime($this->datetime)?>'),
 					message: $('#revision<?php echo $this->id?>').html(),
 					backdrop: true,
 					size: 'large'
@@ -127,7 +153,25 @@ class Revision_Model extends Core_Entity
 		</script>
 		<?php
 
-		return '<a id="revision' . $this->id . '" href="javascript:void(0);">' . htmlspecialchars($this->name) . '</a>';
+		return $this;
+	}
+
+	/**
+	 * Backend callback method
+	 * @param Admin_Form_Field $oAdmin_Form_Field
+	 * @param Admin_Form_Controller $oAdmin_Form_Controller
+	 * @return string
+	 */
+	public function sizeBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
+	{
+		$oRevision = Core_Entity::factory('Revision', $this->id);
+
+		$size = strlen($oRevision->value);
+
+		if ($size)
+		{
+			return Core_Str::getTextSize($size);
+		}
 	}
 
 	/**
@@ -139,5 +183,22 @@ class Revision_Model extends Core_Entity
 		return htmlspecialchars(
 			Core_Str::cut($this->model, 255)
 		);
+	}
+
+	/**
+	 * Get Related Site
+	 * @return Site_Model|NULL
+	 * @hostcms-event advertisement_group_list.onBeforeGetRelatedSite
+	 * @hostcms-event advertisement_group_list.onAfterGetRelatedSite
+	 */
+	public function getRelatedSite()
+	{
+		Core_Event::notify($this->_modelName . '.onBeforeGetRelatedSite', $this);
+
+		$oSite = $this->getModel()->getRelatedSite();
+
+		Core_Event::notify($this->_modelName . '.onAfterGetRelatedSite', $this, array($oSite));
+
+		return $oSite;
 	}
 }

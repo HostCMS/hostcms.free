@@ -7,11 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Trash
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Trash_Entity extends Core_Entity
+class Trash_Entity
 {
 	/**
 	 * Backend property
@@ -42,6 +42,15 @@ class Trash_Entity extends Core_Entity
 	 * @var string
 	 */
 	protected $_modelName = 'trash';
+
+	/**
+	 * Get model name, e.g. 'book' for 'Book_Model'
+	 * @return string
+	 */
+	public function getModelName()
+	{
+		return $this->_modelName;
+	}
 
 	/**
 	 * Load columns list
@@ -100,14 +109,19 @@ class Trash_Entity extends Core_Entity
 
 			$totalCount = $Trash_Table_Dataset->getCount();
 
+			$offset = 0;
 			$limit = 100;
 
 			while ($totalCount > 0)
 			{
-				if (!$this->chunkDelete($limit))
+				$iDeleted = $this->chunkDelete($offset, $limit);
+
+				if (!$iDeleted)
 				{
 					break;
 				}
+
+				$offset += ($limit - $iDeleted);
 
 				$totalCount -= $limit;
 			}
@@ -121,21 +135,30 @@ class Trash_Entity extends Core_Entity
 	 * @param int $limit
 	 * @return int
 	 */
-	public function chunkDelete($limit)
+	public function chunkDelete($offset, $limit)
 	{
 		$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
 
 		$aTrash_Table_Items = $Trash_Table_Dataset
+			->offset($offset)
 			->limit($limit)
 			->clear()
 			->getObjects();
 
+		$oUser = Core_Auth::getCurrentUser();
+
+		$iCount = 0;
+
 		foreach ($aTrash_Table_Items as $oTrash_Table_Item)
 		{
-			$oTrash_Table_Item->delete();
+			if (!$oUser || $oUser->checkObjectAccess($oTrash_Table_Item))
+			{
+				$oTrash_Table_Item->delete();
+				$iCount++;
+			}
 		}
 
-		return count($aTrash_Table_Items);
+		return $iCount;
 	}
 
 	/**
@@ -148,23 +171,31 @@ class Trash_Entity extends Core_Entity
 		{
 			$Trash_Table_Dataset = new Trash_Table_Dataset($this->table_name);
 
-			$totalCount = $Trash_Table_Dataset->getCount();
+			$offset = 0;
 			$limit = 100;
 
-			while ($totalCount > 0)
-			{
+			do {
 				$aTrash_Table_Items = $Trash_Table_Dataset
+					->offset($offset)
 					->limit($limit)
 					->clear()
 					->getObjects();
 
+				$oUser = Core_Auth::getCurrentUser();
+
 				foreach ($aTrash_Table_Items as $oTrash_Table_Item)
 				{
-					$oTrash_Table_Item->undelete();
+					if (!$oUser || $oUser->checkObjectAccess($oTrash_Table_Item))
+					{
+						$oTrash_Table_Item->undelete();
+					}
+					else
+					{
+						$offset++;
+					}
 				}
-
-				$totalCount -= $limit;
 			}
+			while (count($aTrash_Table_Items));
 		}
 
 		return $this;

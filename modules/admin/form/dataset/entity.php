@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -29,7 +29,7 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	 * Restrict access to entities
 	 * @var FALSE|int
 	 */
-	protected $_restrictAccess = FALSE;
+	//protected $_restrictAccess = FALSE;
 
 	/**
 	 * Constructor.
@@ -40,12 +40,12 @@ class Admin_Form_Dataset_Entity extends Admin_Form_Dataset
 	{
 		$this->_entity = $oCore_Entity;
 
-		$oUser = Core_Auth::getCurrentUser();
+		/*$oUser = Core_Auth::getCurrentUser();
 
-		if (!is_null($oUser) && $oUser->superuser != 1 && $oUser->only_access_my_own != 0)
+		if (!is_null($oUser) && !$oUser->superuser && $oUser->only_access_my_own)
 		{
 			$this->_restrictAccess = $oUser->id;
-		}
+		}*/
 
 		Core_Event::notify(get_class($this) . '.onAfterConstruct', $this);
 	}

@@ -3,7 +3,7 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -39,10 +39,14 @@ $oAdmin_Form_Controller
 	->title($sFormTitle = Core::_('Shop_Order.show_order_title', $oShop->name))
 	->pageTitle($sFormTitle);
 
+$windowId = $oAdmin_Form_Controller->getWindowId();
+
 $siteuser_id = intval(Core_Array::getGet('siteuser_id'));
-$siteuser_id && $oAdmin_Form_Controller->Admin_View(
+$siteuser_id && $windowId != 'id_content' && $oAdmin_Form_Controller->Admin_View(
 	Admin_View::getClassName('Admin_Internal_View')
 );
+
+$oUser = Core_Auth::getCurrentUser();
 
 // Shop Order Print Forms
 $shop_print_form_id = intval(Core_Array::getGet('shop_print_form_id'));
@@ -62,6 +66,24 @@ if ($shop_print_form_id)
 	exit();
 }
 
+if (!is_null(Core_Array::getPost('showPopover')))
+{
+	$aJSON = array(
+		'html' => ''
+	);
+
+	$shop_order_id = Core_Array::getPost('shop_order_id', 0, 'int');
+
+	$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
+
+	if (!is_null($oShop_Order) && $oUser->checkObjectAccess($oShop_Order))
+	{
+		$aJSON['html'] = $oShop_Order->orderPopover();
+	}
+
+	Core::showJson($aJSON);
+}
+
 if (Core_Array::getPost('recalcFormula'))
 {
 	$aJSON = array(
@@ -72,7 +94,7 @@ if (Core_Array::getPost('recalcFormula'))
 
 	$oShop_Order = Core_Entity::factory('Shop_Order')->getById($shop_order_id);
 
-	if (!is_null($oShop_Order))
+	if (!is_null($oShop_Order) && $oUser->checkObjectAccess($oShop_Order))
 	{
 		$shop_delivery_condition_name = Core_Array::getPost('shop_delivery_condition_name');
 		$price = Core_Array::getPost('shop_delivery_condition_price');
@@ -102,8 +124,6 @@ if (Core_Array::getPost('recalcFormula'))
 
 // Меню формы
 $oAdmin_Form_Entity_Menus = Admin_Form_Entity::factory('Menus');
-
-$windowId = $oAdmin_Form_Controller->getWindowId();
 
 if ($siteuser_id)
 {
@@ -150,7 +170,7 @@ if ($siteuser_id)
 
 						if (shop_id)
 						{
-							var path = \'' . Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'edit', NULL, 0, 0, 'shop_id=###&siteuser_id=' . $siteuser_id . '')) . '\';
+							var path = \'' . Core_Str::escapeJavascriptVariable($oAdmin_Form_Controller->getAdminActionModalLoad($oAdmin_Form_Controller->getPath(), 'edit', 'modal', 0, 0, 'shop_id=###&siteuser_id=' . $siteuser_id . '')) . '\';
 
 							// Replace
 							path = path.replace(/\###/g, shop_id)
@@ -530,6 +550,35 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'sendMail')
 	$oAdmin_Form_Controller->addAction($Shop_Order_Controller_Print);
 }
 
+$oAdminFormActionRollback = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('rollback');
+
+if ($oAdminFormActionRollback && $oAdmin_Form_Controller->getAction() == 'rollback')
+{
+	$oControllerRollback = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Rollback', $oAdminFormActionRollback
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oControllerRollback);
+}
+
+// Действие "Объединить"
+$oAdminFormActionMerge = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('merge');
+
+if ($oAdminFormActionMerge && $oAdmin_Form_Controller->getAction() == 'merge')
+{
+	$oAdmin_Form_Action_Controller_Type_Merge = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Merge', $oAdminFormActionMerge
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oAdmin_Form_Action_Controller_Type_Merge);
+}
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 	Core_Entity::factory('Shop_Order')
@@ -539,7 +588,6 @@ $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
 $oAdmin_Form_Controller->addDataset($oAdmin_Form_Dataset);
 
 // Доступ только к своим
-$oUser = Core_Auth::getCurrentUser();
 !$oUser->superuser && $oUser->only_access_my_own
 	&& $oAdmin_Form_Dataset->addCondition(array('where' => array('user_id', '=', $oUser->id)));
 
@@ -548,6 +596,8 @@ if ($siteuser_id)
 	$oAdmin_Form_Dataset->addCondition(
 		array('where' => array('siteuser_id', '=', $siteuser_id))
 	);
+
+	$oAdmin_Form_Dataset->changeAction('edit', 'modal', 1);
 }
 else
 {
@@ -647,6 +697,72 @@ foreach ($aShop_Payment_Systems as $oShop_Payment_System)
 $oAdmin_Form_Dataset
 	->changeField('shop_payment_system_id', 'type', 8)
 	->changeField('shop_payment_system_id', 'list', $aList);
+
+Core_Event::attach('Admin_Form_Controller.onAfterShowContent', function($oAdmin_Form_Controller) {
+
+	$windowId = $oAdmin_Form_Controller->getWindowId();
+	?>
+	<script>
+		$('[data-popover="hover"]').on('mouseenter', function(event) {
+			var $this = $(this);
+
+			if (!$this.data("bs.popover"))
+			{
+				$this.popover({
+					placement:'left',
+					trigger:'manual',
+					html:true,
+					content: function() {
+						var content = '';
+
+						$.ajax({
+							url: '/admin/shop/order/index.php',
+							data: { showPopover: 1, shop_order_id: $(this).data('id') },
+							dataType: 'json',
+							type: 'POST',
+							async: false,
+							success: function(response) {
+								content = response.html;
+							}
+						});
+
+						return content;
+					},
+					container: "#<?php echo $windowId?>"
+				});
+
+				$this.attr('data-popoverAttached', true);
+
+				$this.on('hide.bs.popover', function(e) {
+
+					$this.attr('data-popoverAttached')
+						? $this.removeAttr('data-popoverAttached')
+						: e.preventDefault();
+				})
+				.on('show.bs.popover', function(e) {
+
+					!$this.attr('data-popoverAttached') && e.preventDefault();
+				})
+				.on('shown.bs.popover', function(e) {
+
+					$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+
+						!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+					});
+				})
+				.on('mouseleave', function(e) {
+
+					!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+					&& $this.attr('data-popoverAttached')
+					&& $this.popover('destroy');
+				});
+
+				$this.popover('show');
+			}
+		});
+	</script>
+	<?php
+});
 
 // Показ формы
 $oAdmin_Form_Controller->execute();

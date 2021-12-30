@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -370,7 +370,7 @@ class Shop_Warehouse_Item_Model extends Core_Entity
 		{
 			$dataContent = '<img class="backend-preview" src="' . htmlspecialchars($this->Shop_Item->getSmallFileHref()) . '" />';
 
-			return '<img data-toggle="popover-hover" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->Shop_Item->getSmallFileHref()) . '" />';
+			return '<img data-toggle="popover" data-trigger="hover" data-html="true" data-placement="top" data-content="' . htmlspecialchars($dataContent) . '" class="backend-thumbnail" src="' . htmlspecialchars($this->Shop_Item->getSmallFileHref()) . '" />';
 		}
 		else
 		{

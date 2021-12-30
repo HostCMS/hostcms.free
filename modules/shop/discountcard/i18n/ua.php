@@ -29,5 +29,6 @@ return array(
 	'backendWrongWriteoffWarning' => 'Недостатньо бонусів для списання!',
 	'backendWriteoffSuccess' => 'Бонуси списані успішно!',
 	'active' => 'Активність',
-	'changeActive_success' => 'Інформація успішно змінена'
+	'changeActive_success' => 'Інформація успішно змінена',
+	'card_already_exist' => 'У користувача вже є дисконтна карта'
 );

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -278,7 +278,7 @@ class Event_Model extends Core_Entity
 	 */
 	public function showDocuments($oAdmin_Form_Controller)
 	{
-		$aDms_Workflow_Execution_Users = $this->Dms_Workflow_Execution_Users->findAll();
+		$aDms_Workflow_Execution_Users = $this->Dms_Workflow_Execution_Users->findAll(FALSE);
 
 		foreach ($aDms_Workflow_Execution_Users as $oDms_Workflow_Execution_User)
 		{
@@ -533,7 +533,7 @@ class Event_Model extends Core_Entity
 	{
 		Core_Event::notify($this->_modelName . '.onBeforeChangeCompleted', $this);
 
-		switch ($this->completed)
+		switch (intval($this->completed))
 		{
 			case 0:
 				$this->completed = 1;
@@ -546,7 +546,7 @@ class Event_Model extends Core_Entity
 			break;
 		}
 
-		if ($this->completed = 1 || $this->completed = -1)
+		if ($this->completed == 1 || $this->completed == -1)
 		{
 			$this->finish = Core_Date::timestamp2sql(time());
 		}
@@ -1076,6 +1076,8 @@ class Event_Model extends Core_Entity
 				return FALSE;
 			}
 		}
+
+		// $oEventCreator = $this->getCreator();
 
 		return $this->Event_Users->getCountByUser_id($oUser->id, FALSE) != 0;
 	}

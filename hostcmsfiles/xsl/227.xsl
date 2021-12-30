@@ -5,15 +5,15 @@
 	xmlns:hostcms="http://www.hostcms.ru/"
 	exclude-result-prefixes="hostcms">
 	<xsl:output xmlns="http://www.w3.org/TR/xhtml1/strict" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" encoding="utf-8" indent="yes" method="html" omit-xml-declaration="no" version="1.0" media-type="text/xml"/>
-
+	
 	<!-- ИзбранноеНаГлавной -->
-
+	
 	<xsl:decimal-format name="my" decimal-separator="," grouping-separator=" "/>
-
+	
 	<xsl:template match="/">
 		<xsl:apply-templates select="/shop"/>
 	</xsl:template>
-
+	
 	<xsl:template match="/shop">
 		<!-- Есть избранные товары -->
 		<xsl:if test="favorite/shop_item">
@@ -26,10 +26,10 @@
 			</div>
 		</xsl:if>
 	</xsl:template>
-
+	
 	<!-- Шаблон для товара -->
 	<xsl:template match="favorite/shop_item">
-
+		
 		<div class="shop_item">
 			<div class="shop_table_item">
 				<div class="image_row">
@@ -64,7 +64,7 @@
 									<img src="/images/add_to_cart.gif" alt="&labelCart;" title="&labelCart;" />
 								</a>
 							</xsl:if>
-
+							
 							<!-- Сравнение товаров -->
 							<xsl:variable name="shop_item_id" select="@id" />
 							<div class="compare" onclick="return $.addCompare('{/shop/url}', {@id}, this)">
@@ -83,6 +83,6 @@
 				</div>
 			</div>
 		</div>
-
+		
 	</xsl:template>
 </xsl:stylesheet>

@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -97,6 +97,7 @@ return array(
 	'cond_of_delivery_duplicate' => "Внимание при выборе доставки было выбрано несколько одинаковых условий доставки для типа \"%s\". Было оставлено условие доставки (код %s) с наименьшей ценой, рекомендуем проверить условия доставки для данного типа.",
 	'shop_order_admin_subject' => 'Заказ N %1$s от %3$s в "%2$s"',
 	'delete_success' => 'Элемент удален!',
+	'merge_success' => 'Элементы объединены!',
 	'undelete_success' => 'Элемент восстановлен!',
 	'changeStatusPaid_success' => 'Статус заказа успешно изменен',
 	'changeStatusPosted_success' => 'Статус отправки успешно изменен',

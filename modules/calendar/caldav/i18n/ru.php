@@ -4,12 +4,12 @@
  *
  * @package HostCMS
  * @subpackage Calendar
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
-	'model_name' => 'Настройки',
+	'model_name' => 'Настройки календарей',
 	'title' => 'Настройки',
 	'id' => 'Идентификатор',
 	'name' => 'Название',

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -148,7 +148,7 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 			->divAttr(
 				array('class' => 'form-group col-xs-12 col-sm-3')
 			)
-			->options(self::fillPricesList($oShop))
+			->options(Shop_Item_Controller_Edit::fillPricesList($oShop))
 			->class('form-control select-price')
 			->name('shop_price_id')
 			->value($this->_object->id
@@ -433,23 +433,5 @@ class Shop_Warehouse_Writeoff_Controller_Edit extends Admin_Form_Action_Controll
 		Core_Array::getPost('posted') && $this->_object->post();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
-	}
-
-	/**
-	 * Fill prices list
-	 * @return array
-	 */
-	public function fillPricesList(Shop_Model $oShop)
-	{
-		$aReturn = array(Core::_('Shop_Warehouse_Incoming.basic'));
-
-		$aShop_Prices = $oShop->Shop_Prices->findAll();
-
-		foreach ($aShop_Prices as $oShop_Price)
-		{
-			$aReturn[$oShop_Price->id] = $oShop_Price->name . ' [' . $oShop_Price->id . ']';
-		}
-
-		return $aReturn;
 	}
 }

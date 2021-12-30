@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -104,7 +104,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	 */
 	public function getAllowedActionsForUser(User_Model $oUser)
 	{
-		if ($oUser->superuser != 1)
+		if (!$oUser->superuser)
 		{
 			$this
 				->queryBuilder()
@@ -137,7 +137,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	{
 		if (!isset($this->_cacheCheckAllowedActionForUser[$oUser->id][$actionName]))
 		{
-			if ($oUser->superuser != 1)
+			if (!$oUser->superuser)
 			{
 				$this
 					->queryBuilder()

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Xsl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -17,13 +17,13 @@ class Xsl_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.9';
+	public $version = '7.0';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-08-23';
+	public $date = '2021-12-03';
 
 	/**
 	 * Module name

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Html
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -74,7 +74,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			</a>
 			<?php
 			if (!$this->disabled)
-			{
+			{				
 				?>
 				<ul <?php echo implode(' ', $aAttr)?>>
 				<?php

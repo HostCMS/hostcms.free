@@ -3,7 +3,7 @@
  * Trash.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -54,17 +54,26 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 
 	$oAdmin_Form_Dataset = new Trash_Dataset();
 
+	$tableOffset = Core_Array::getGet('tableOffset', 0, 'int');
+
 	$aTables = $oAdmin_Form_Dataset
+		->offset($tableOffset)
 		->limit(9999)
 		->fillTables()
 		->getObjects();
 
 	$iCount = 0;
+	
+	$offset = Core_Array::getGet('offset', 0, 'int');
+	$limit = 100;
+	
 	foreach ($aTables as $oTrash_Entity)
 	{
 		do {
-			$iDeleted = $oTrash_Entity->chunkDelete(100);
+			$iDeleted = $oTrash_Entity->chunkDelete($offset, $limit);
 			$iCount += $iDeleted;
+
+			$offset += ($limit - $iDeleted);
 
 			if (Core::getmicrotime() - $timeout + 3 > $iMaxTime)
 			{
@@ -72,6 +81,9 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 			}
 
 		} while ($iDeleted);
+		
+		$offset = 0;
+		$tableOffset++;
 	}
 
 	$bRedirect = $iCount > 0;
@@ -84,9 +96,15 @@ if ($oAdmin_Form_Controller->getAction() == 'deleteAll')
 		<script type="text/javascript">
 		function set_location()
 		{
-			<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax($oAdmin_Form_Controller->getPath(), 'deleteAll', NULL, 0, 0)?>
+			<?php echo $oAdmin_Form_Controller->getAdminActionLoadAjax(array(
+				'path' => $oAdmin_Form_Controller->getPath(),
+				'action' => 'deleteAll',
+				'datasetKey' => 0,
+				'datasetValue' => 0,
+				'additionalParams' => 'offset=' . $offset . '&tableOffset=' . $tableOffset)
+			)?>
 		}
-		setTimeout ('set_location()', <?php echo $iDelay * 1000?>);
+		setTimeout('set_location()', <?php echo $iDelay * 1000?>);
 		</script><?php
 	}
 	else

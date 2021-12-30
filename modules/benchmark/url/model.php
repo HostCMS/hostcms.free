@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Benchmark
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -80,7 +80,7 @@ class Benchmark_Url_Model extends Core_Entity
 		if (is_null($id) && !$this->loaded())
 		{
 			$this->_preloadValues['datetime'] = Core_Date::timestamp2sql(time());
-			$this->_preloadValues['ip'] = Core_Array::get($_SERVER, 'REMOTE_ADDR');
+			$this->_preloadValues['ip'] = Core::getClientIp();
 		}
 	}
 

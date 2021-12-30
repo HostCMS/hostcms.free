@@ -19,7 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -722,6 +722,8 @@ class Core_Entity extends Core_ORM
 		$aField_Values = $this->getFields();
 		foreach ($aField_Values as $oField_Value)
 		{
+			$oField_Value->Field->type == 2 && $oField_Value->setDir(CMS_FOLDER . ($sPath = Field_Controller::getPath($this)))->setHref('/' . $sPath);
+				
 			$xml .= $oField_Value->getXml();
 		}
 

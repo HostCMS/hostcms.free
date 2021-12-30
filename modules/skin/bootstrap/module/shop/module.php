@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -478,9 +478,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 														mostOrderedDiagramData.push({
 															label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->name, $aConfig['cutNames'])))?>',
 															data:[<?php echo $oShop_Order_Item->sum?>],
-															color: '#<?php echo $iCountColors
-																? $aColors[$key % $iCountColors]
-																: 'E75B8D'?>'
+															color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
 														});
 														<?php
 														$i++;
@@ -502,7 +500,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 																			show: true,
 																			radius: 0,
 																			formatter: function(label, series) {
-																				return "<div style='font-size:8pt;'>" + label + "</div>";
+																				return "<div style='font-size:8pt;' title='" + label + "'>" + label + "</div>";
 																			}
 																	}
 																}
@@ -558,15 +556,11 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 													foreach ($aBrand_Shop_Items as $key => $oShop_Order_Item)
 													{
 														?>
-														brandsDiagramData.push(
-															{
+														brandsDiagramData.push({
 																label:'<?php echo Core_Str::escapeJavascriptVariable(htmlspecialchars(Core_Str::cut($oShop_Order_Item->Shop_Item->Shop_Producer->name, $aConfig['cutNames'])))?>',
 																data:[<?php echo $oShop_Order_Item->sum?>],
-																color: '#<?php echo $iCountColors
-																	? $aColors[$key % $iCountColors]
-																	: 'E75B8D'?>'
-															}
-														);
+																color: '#<?php echo $iCountColors ? $aColors[$key % $iCountColors] : 'E75B8D'?>'
+														});
 														<?php
 														$i++;
 													}
@@ -586,7 +580,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 																			show: true,
 																			radius: 0,
 																			formatter: function(label, series) {
-																				return "<div style='font-size:8pt;'>" + label + "</div>";
+																				return "<div style='font-size:8pt;' title='" + label + "'>" + label + "</div>";
 																			}
 																	}
 																}

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Bot
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -138,13 +138,28 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 							{
 								$('#<?php echo $windowId?> li[data-id = ' + bot_module_id + ']').append(result.html);
 
-								$('#<?php echo $windowId?> #settingsModal' + bot_module_id).modal('show');
+								//$('#<?php echo $windowId?> #settingsModal' + bot_module_id).modal('show');
 
-								$('#<?php echo $windowId?> #settingsModal' + bot_module_id).on('hidden.bs.modal', function (e) {
-									$('#<?php echo $windowId?> #settingsModal' + bot_module_id)
-										.removeTinyMCE()
-										.remove();
-								});
+								//$('#<?php echo $windowId?> #settingsModal' + bot_module_id).on('hide.bs.modal', function (event) {
+									
+								$('#<?php echo $windowId?> #settingsModal' + bot_module_id)
+									.modal('show')
+									.on('hide.bs.modal', function (event) {
+
+										var triggerReturn = $('body').triggerHandler('beforeHideModal');
+
+										if (triggerReturn == 'break')
+										{
+											event.preventDefault();
+										}
+										else
+										{
+											$('#<?php echo $windowId?> #settingsModal' + bot_module_id)
+												.removeTinyMCE()
+												.remove();
+										}
+
+									});
 							}
 						}
 					});
@@ -158,10 +173,6 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 						type: 'POST',
 						success: function(result){
 							$('#<?php echo $windowId?> #settingsModal' + bot_module_id).modal('hide');
-
-							setTimeout(function(){
-								$('body').removeClass('modal-open');
-							}, 100);
 
 							// Reload list
 							$.adminLoad({ path: '/admin/bot/module/index.php', additionalParams: 'entity_id=' + entity_id + '&module_id=' + module_id + '&type=' + type + '&hideMenu=1&_module=0', windowId: 'bots-container', loadingScreen: false });

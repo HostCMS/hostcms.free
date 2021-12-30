@@ -53,7 +53,7 @@ return array(
 	'seo_description' => 'Опис (Description)',
 	'seo_keywords' => 'Ключові слова (Keywords)',
 
-	'tags' => '<acronym title="Мітки (теги) інформаційного елемента, розділяються комою, наприклад процесори, AMD, Athlon64">Мітки (теги)</acronym>',
+	'tags' => '<acronym title="Мітки (теги) інформаційного елемента, розділяються комою, наприклад процесори, AMD, Intel">Мітки (теги)</acronym>',
 	'type_tag' => 'Введіть тег ...',
 
 	'error_information_group_URL_item' => 'У групі вже існує інформаційний елемент з такою назвою в URL!',
@@ -132,5 +132,7 @@ return array(
 	'add_value' => 'Додати відсутні значення властивості за замовчуванням у елементів',
 	'file_does_not_specified' => 'Файл не вказано',
 
-	'shortcut' => 'Ярлик ',
+	'shortcut' => 'Ярлик',
+
+	'closed' => 'Закритий',
 );

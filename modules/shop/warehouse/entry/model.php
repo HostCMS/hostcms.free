@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -89,12 +89,22 @@ class Shop_Warehouse_Entry_Model extends Core_Entity
 	 */
 	public function getByDocument($document_id, $type, $bCache = FALSE)
 	{
-		$this->queryBuilder()
-			->where('shop_warehouse_entries.document_id', '=', $this->_getDocumentId($document_id, $type))
-			->clearOrderBy()
-			->orderBy('shop_warehouse_entries.id', 'ASC');
+		return $this->getAllBydocument_id($this->_getDocumentId($document_id, $type), $bCache);
+	}
 
-		return $this->findAll($bCache);
+	/*
+	 * Delete entries by document id
+	 * @param $document_id document ID
+	 * @param $type document type
+	 * @return self
+	 */
+	public function deleteByDocument($document_id, $type)
+	{
+		Core_QueryBuilder::delete('shop_warehouse_entries')
+			->where('document_id', '=', $this->_getDocumentId($document_id, $type))
+			->execute();
+
+		return $this;
 	}
 
 	/*

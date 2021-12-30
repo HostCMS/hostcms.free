@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -37,10 +37,10 @@ class Core_Auth
 	static public function checkBackendBlockedIp()
 	{
 		// Check IP addresses
-		$sRemoteAddr = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
-		$aIp = array($sRemoteAddr);
+		$ip = Core::getClientIp();
+		$aIp = array($ip);
 		$HTTP_X_FORWARDED_FOR = Core_Array::get($_SERVER, 'HTTP_X_FORWARDED_FOR');
-		if (!is_null($HTTP_X_FORWARDED_FOR) && $sRemoteAddr != $HTTP_X_FORWARDED_FOR)
+		if (!is_null($HTTP_X_FORWARDED_FOR) && $ip != $HTTP_X_FORWARDED_FOR)
 		{
 			$aIp[] = $HTTP_X_FORWARDED_FOR;
 		}
@@ -343,7 +343,7 @@ class Core_Auth
 					&& isset($_SESSION['current_users_id']) && $_SESSION['current_users_id'] > 0
 					&& isset($_SESSION['is_superuser']))
 				{
-					$ip = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+					$ip = Core::getClientIp();
 
 					// Привязки к IP не было или IP совпадают
 					if (!isset($_SESSION['current_user_ip']) || $_SESSION['current_user_ip'] == $ip)
@@ -415,24 +415,24 @@ class Core_Auth
 			// Если нет выбранного сайта
 			if (!isset($_SESSION['current_site_id']))
 			{
-				$domain = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST'));
-				$oSiteAlias = Core_Entity::factory('Site_Alias')->findAlias($domain);
-
-				if (!is_null($oSiteAlias))
+				if (is_null(self::$_currentUser))
 				{
-					$site_id = $oSiteAlias->site_id;
+					exit('User does not exist!');
+				}
+				
+				$domain = strtolower(Core_Array::get($_SERVER, 'HTTP_HOST'));
+
+				$oSite_Alias = Core_Entity::factory('Site_Alias')->findAlias($domain);
+				if (!is_null($oSite_Alias)
+					&& (self::$_currentUser->superuser || self::$_currentUser->checkSiteAccess($oSite_Alias->Site))
+				)
+				{
+					$site_id = $oSite_Alias->site_id;
 				}
 				else
 				{
-					$oUser = Core_Entity::factory('User')->getByLogin($_SESSION['valid_user']);
-
-					if (is_null($oUser->id))
-					{
-						exit('User does not exist!');
-					}
-
 					// Для суперпользователя выбираем все сайты
-					if ($oUser->superuser == 1)
+					if (self::$_currentUser->superuser)
 					{
 						$oSite = Core_Entity::factory('Site')->getFirstSite();
 						$site_id = $oSite->id;
@@ -445,11 +445,11 @@ class Core_Auth
 							->select('sites.*')
 							->join('company_department_modules', 'company_department_modules.site_id', '=', 'sites.id')
 							->join('company_department_post_users', 'company_department_modules.company_department_id', '=', 'company_department_post_users.company_department_id')
-							->where('company_department_post_users.user_id', '=', $oUser->id)
+							->where('company_department_post_users.user_id', '=', self::$_currentUser->id)
 							->groupBy('sites.id')
 							->limit(1);
 
-						$aSites = $oSites->findAll();
+						$aSites = $oSites->findAll(FALSE);
 
 						$site_id = isset($aSites[0])
 							? $aSites[0]->id
@@ -491,16 +491,16 @@ class Core_Auth
 	{
 		Core_Event::notify('Core_Auth.onBeforeLogin', NULL, array($login));
 
-		$sIp = Core_Array::get($_SERVER, 'REMOTE_ADDR', '127.0.0.1');
+		$ip = Core::getClientIp();
 
 		// Получаем количество неудачных попыток
-		$iCountAccessdenied = Core_Entity::factory('User_Accessdenied')->getCountByIp($sIp);
+		$iCountAccessdenied = Core_Entity::factory('User_Accessdenied')->getCountByIp($ip);
 
 		// Были ли у данного пользователя неудачные попытки входа в систему администрирования за последние 24 часа?
 		if ($iCountAccessdenied)
 		{
 			// Last User_Accessdenied by IP
-			$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied')->getLastByIp($sIp);
+			$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied')->getLastByIp($ip);
 
 			if (!is_null($oUser_Accessdenied))
 			{
@@ -550,7 +550,7 @@ class Core_Auth
 			$_SESSION['date_user'] = date('d.m.Y H:i:s');
 			$_SESSION['is_superuser'] = $oUser->superuser;
 
-			$assignSessionToIp && $_SESSION['current_user_ip'] = $sIp;
+			$assignSessionToIp && $_SESSION['current_user_ip'] = $ip;
 
 			self::$_logged = TRUE;
 			self::$_currentUser = $oUser;
@@ -567,7 +567,7 @@ class Core_Auth
 				->where('datetime', '<', Core_Date::timestamp2sql(time() - 86400))
 				// Удаляем все попытки доступа с текущего IP
 				->setOr()
-				->where('ip', '=', $sIp);
+				->where('ip', '=', $ip);
 
 			$aUser_Accessdenieds = $oUser_Accessdenied->findAll(FALSE);
 			foreach ($aUser_Accessdenieds as $oUser_Accessdenied)
@@ -580,7 +580,7 @@ class Core_Auth
 			// Запись в базу об ошибке доступа
 			$oUser_Accessdenied = Core_Entity::factory('User_Accessdenied');
 			$oUser_Accessdenied->datetime = Core_Date::timestamp2sql(time());
-			$oUser_Accessdenied->ip = $sIp;
+			$oUser_Accessdenied->ip = $ip;
 			$oUser_Accessdenied->save();
 
 			self::$_lastError = 'wrong data';

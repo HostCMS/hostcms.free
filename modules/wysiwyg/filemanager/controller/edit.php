@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Wysiwyg
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -51,13 +51,56 @@ class Wysiwyg_Filemanager_Controller_Edit extends Admin_Form_Action_Controller_T
 			throw new Core_Exception('File %file not found', array('%file' => $this->_object->name));
 		}
 
-		$oFile_Content = Admin_Form_Entity::factory('Textarea')
+		switch (Core_File::getExtension($filePath))
+		{
+			case 'php':
+			case 'html':
+			case 'htm':
+				$mode = 'ace/mode/php';
+			break;
+			case 'css':
+				$mode = 'ace/mode/css';
+			break;
+			case 'less':
+				$mode = 'ace/mode/less';
+			break;
+			case 'scss':
+				$mode = 'ace/mode/scss';
+			break;
+			case 'xml':
+			case 'xsl':
+				$mode = 'ace/mode/scss';
+			break;
+			case 'sql':
+				$mode = 'ace/mode/sql';
+			break;
+			case 'tpl':
+				$mode = 'ace/mode/smarty';
+			break;
+			case 'js':
+				$mode = 'ace/mode/javascript';
+			break;
+			case 'json':
+				$mode = 'ace/mode/json';
+			break;
+			default:
+				$mode = 'ace/mode/text';
+		}
+
+		$oFile_Content = Admin_Form_Entity::factory('Textarea');
+
+		$oTmpOptions = $oFile_Content->syntaxHighlighterOptions;
+		$oTmpOptions['mode'] = $mode;
+
+		$oFile_Content
 			->value(
 				Core_File::read($filePath)
 			)
 			->caption(Core::_('Wysiwyg_Filemanager.edit_file_text'))
 			->name('text')
-			->rows(20);
+			->rows(40)
+			->syntaxHighlighter(defined('SYNTAX_HIGHLIGHTING') ? SYNTAX_HIGHLIGHTING : TRUE)
+			->syntaxHighlighterOptions($oTmpOptions);
 
 		$oMainRow1->add($oFile_Content);
 

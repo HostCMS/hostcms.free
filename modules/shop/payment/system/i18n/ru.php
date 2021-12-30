@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Платежные системы',
@@ -32,5 +32,11 @@ return array(
 	'undelete_success' => 'Элемент восстановлен!',
 	'id' => 'Идентификатор',
 	'attention' => 'Внимание! Имя класса зависит от идентификатора платежной системы, например, для платежной системы 17 имя будет<br/><b>class Shop_Payment_System_Handler17 extends Shop_Payment_System_Handler</b>',
-	'file_error' => 'Ошибка записи файла %s. Проверьте права доступа к директории!'
+	'file_error' => 'Ошибка записи файла %s. Проверьте права доступа к директории!',
+	'type' => 'Тип',
+	'type0' => 'Наличные',
+	'type1' => 'Онлайн',
+	'type2' => 'Банк',
+	'type3' => 'Счет',
+	'shop_order_status_id' => 'Статус заказа при оплате',
 );

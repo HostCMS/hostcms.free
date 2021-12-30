@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -136,6 +136,11 @@ class Property_Value_Int_Model extends Core_Entity
 	protected function _prepareData()
 	{
 		$oProperty = $this->Property;
+
+		// ---------------------------
+		/*$this->_tagName = $this->Property->tag_name;
+		return $this;*/
+		// ---------------------------
 
 		$this->clearXmlTags()
 			->addXmlTag('property_dir_id', $this->Property->property_dir_id)

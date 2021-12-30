@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -81,6 +81,21 @@ class Shop_Price_Entry_Model extends Core_Entity
 	public function getByDocument($document_id, $type, $bCache = FALSE)
 	{
 		return $this->getAllBydocument_id($this->_getDocumentId($document_id, $type), $bCache);
+	}
+
+	/*
+	 * Delete entries by document id
+	 * @param $document_id document ID
+	 * @param $type document type
+	 * @return self
+	 */
+	public function deleteByDocument($document_id, $type)
+	{
+		Core_QueryBuilder::delete('shop_price_entries')
+			->where('document_id', '=', $this->_getDocumentId($document_id, $type))
+			->execute();
+
+		return $this;
 	}
 
 	/*

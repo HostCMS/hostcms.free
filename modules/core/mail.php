@@ -25,7 +25,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Mail
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -88,7 +88,7 @@ abstract class Core_Mail
 			throw new Core_Exception('Wrong argument type (expected String)');
 		}
 
-		$aConfig = Core::$config->get('core_mail');
+		$aConfig = Core::$config->get('core_mail', array());
 
 		if (!isset($aConfig[$name]) || !isset($aConfig[$name]['driver']))
 		{
@@ -435,7 +435,7 @@ abstract class Core_Mail
 
 		$this
 			->header('From', $sFrom)
-			->header('X-Mailer', 'HostCMS/6.0');
+			->header('X-Mailer', 'HostCMS/7.0');
 
 		$sTo = !is_null($this->_recipientName)
 			// NO SPACES BETWEEN name and <email> // rolled back

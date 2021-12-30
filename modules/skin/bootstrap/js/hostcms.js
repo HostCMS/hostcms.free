@@ -121,20 +121,25 @@ $('.page-content')
 	});
 
 /* Handles Popovers and Tooltip */
+
 $('body').popover({
+	selector: '[data-toggle=popover]',
+	html: true,
+	trigger: 'focus'
+});
+
+$('body').on("mouseenter", '[data-toggle="popover"][data-trigger="hover"]', function() {
+	$(this).popover("show");
+});
+
+// OLD
+/*$('body').popover({
 	html: true,
 	selector: '[data-toggle=popover]',
 	template: '<div class="popover ' + $(this).data("class") +
 		'"><div class="arrow"></div><h3 class="popover-title ' +
 		$(this).data("titleclass") + '"></h3><div class="popover-content"></div></div>'
 });
-
-
-/*$('body').popover({
-	html: true,
-	selector: '[data-toggle=popover-hover]',
-	trigger: "hover"
-});*/
 $('body').on("mouseenter", '[data-toggle=popover-hover]', function() {
 	var _this = this;
 	$(this).popover({
@@ -153,7 +158,7 @@ $('body').on("mouseenter", '[data-toggle=popover-hover]', function() {
 			$(_this).popover("destroy");
 		}
 	}, 300);
-});
+});*/
 
 /*$("#pop123").popover({
 	trigger: "manual",
@@ -245,6 +250,12 @@ function InitiateSideMenu() {
 	$(".sidebar-menu").on('click touchend', function (e) {
 
 		var menuLink = $(e.target).closest("a");
+
+		// Скрываем все контекстные меню
+		$('.context-menu').hide();
+
+		// Сворачиваем открытые выпадающие списки
+		$('.open [data-toggle="dropdown"]').dropdown('toggle');
 
 		if (!menuLink || menuLink.length == 0)
 			return;
@@ -356,9 +367,9 @@ function maximize(widgetbox) {
 }
 
 /* Scroll To */
-function scrollTo(el, offeset) {
+function scrollTo(el, offset) {
 	var pos = (el && el.size() > 0) ? el.offset().top : 0;
-	jQuery('html,body').animate({ scrollTop: pos + (offeset ? offeset : 0) }, 'slow');
+	jQuery('html,body').animate({ scrollTop: pos + (offset ? offset : 0) }, 'slow');
 }
 
 /*Show Notification*/

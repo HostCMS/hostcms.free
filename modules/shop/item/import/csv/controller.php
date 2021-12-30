@@ -26,7 +26,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -1229,17 +1229,17 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 			->addOption(CURLOPT_FOLLOWLOCATION, TRUE)
 			->execute();
 
-		$content = $Core_Http->getDecompressedBody();
-
 		$aHeaders = $Core_Http->parseHeaders();
 		$sStatus = Core_Array::get($aHeaders, 'status');
 		$iStatusCode = $Core_Http->parseHttpStatusCode($sStatus);
 
 		if ($iStatusCode != 200)
 		{
-			throw new Core_Exception("HTTP %code ERROR: %body.\nSource URL: %url",
-				array('%code' => $iStatusCode, '%body' => strip_tags($content), '%url' => $sSourceFile));
+			throw new Core_Exception("Shop_Item_Import_Csv_Controller::_uploadHttpFile error, code: %code. Source URL: %url\nHeaders: %headers.",
+				array('%code' => $iStatusCode, '%headers' => $Core_Http->getHeaders(), '%url' => $sSourceFile));
 		}
+
+		$content = $Core_Http->getDecompressedBody();
 
 		// Файл из WEB'а, создаем временный файл
 		$sTempFileName = tempnam(CMS_FOLDER . TMP_DIR, "CMS");
@@ -1818,9 +1818,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 							// Файл-источник
 							$sTmpFilePath = $this->imagesPath . (
-								strtoupper($this->encoding) == 'UTF-8'
+								/*strtoupper($this->encoding) == 'UTF-8'
 									? $sData
-									: Core_File::convertfileNameToLocalEncoding($sData)
+									: Core_File::convertfileNameFromLocalEncoding($sData)*/
+								$sData
 							);
 							$sSourceFileBaseName = basename($sTmpFilePath, '');
 
@@ -1967,9 +1968,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 							// Файл-источник
 							$sTmpFilePath = $this->imagesPath . (
-								strtoupper($this->encoding) == 'UTF-8'
+								/*strtoupper($this->encoding) == 'UTF-8'
 									? $sData
-									: Core_File::convertfileNameToLocalEncoding($sData)
+									: Core_File::convertfileNameFromLocalEncoding($sData)*/
+								$sData
 							);
 							$sSourceFileBaseName = basename($sTmpFilePath, '');
 
@@ -3029,9 +3031,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 					// Файл-источник
 					$sTmpFilePath = $sOriginalSourceFile = $this->imagesPath . (
-						strtoupper($this->encoding) == 'UTF-8'
+						/*strtoupper($this->encoding) == 'UTF-8'
 							? $this->_sBigImageFile
-							: Core_File::convertfileNameToLocalEncoding($this->_sBigImageFile)
+							: Core_File::convertfileNameFromLocalEncoding($this->_sBigImageFile)*/
+						$this->_sBigImageFile
 					);
 					$sSourceFileBaseName = basename($sTmpFilePath, '');
 
@@ -3167,9 +3170,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 					// Файл-источник
 					$sTmpFilePath = $this->imagesPath . (
-						strtoupper($this->encoding) == 'UTF-8'
+						/*strtoupper($this->encoding) == 'UTF-8'
 							? $this->_sSmallImageFile
-							: Core_File::convertfileNameToLocalEncoding($this->_sSmallImageFile)
+							: Core_File::convertfileNameFromLocalEncoding($this->_sSmallImageFile)*/
+						$this->_sSmallImageFile
 					);
 
 					$sSourceFileBaseName = basename($sTmpFilePath, '');
@@ -3760,9 +3764,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 	{
 		$aPropertyValues = $oProperty->getValues($oShopItem->id, FALSE);
 
+		// Удалять ранее загруженные свойства или свойство в массиве у удалению перед загрузкой
 		if ($this->deletePropertyValues === TRUE
 			|| is_array($this->deletePropertyValues) && in_array($oProperty->id, $this->deletePropertyValues))
 		{
+			// Свойство для данного товара не было очищено
 			if (!isset($this->_aClearedItemsPropertyValues[$oShopItem->id])
 				|| !in_array($oProperty->id, $this->_aClearedItemsPropertyValues[$oShopItem->id]))
 			{
@@ -3877,9 +3883,11 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 		{
 			if ($oProperty->multiple)
 			{
+				$bHttp = strpos(strtolower($changedValue), "http://") === 0 || strpos(strtolower($changedValue), "https://") === 0;
+
 				foreach ($aPropertyValues as $oProperty_Value)
 				{
-					if ($oProperty->type == 2 && $oProperty_Value->file_name == basename($changedValue)
+					if ($oProperty->type == 2 && $oProperty_Value->file_name == ($bHttp ? $changedValue : basename($changedValue))
 						|| $oProperty->type != 2 && $oProperty_Value->value == $changedValue)
 					{
 						return $oProperty_Value;
@@ -3903,14 +3911,19 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 				// Файл-источник
 				$sTmpFilePath = $this->imagesPath . (
-					strtoupper($this->encoding) == 'UTF-8'
+					/*strtoupper($this->encoding) == 'UTF-8'
 						? $sPropertyValue
-						: Core_File::convertfileNameToLocalEncoding($sPropertyValue)
+						: Core_File::convertfileNameFromLocalEncoding($sPropertyValue)*/
+					$sPropertyValue
 				);
 
 				$sSourceFileBaseName = basename($sTmpFilePath, '');
 
 				$bHttp = strpos(strtolower($sTmpFilePath), "http://") === 0 || strpos(strtolower($sTmpFilePath), "https://") === 0;
+
+				$sSourceFileName = $bHttp
+					? $sPropertyValue
+					: $sSourceFileBaseName;
 
 				if (Core_File::isValidExtension($sTmpFilePath, Core::$mainConfig['availableExtension']) || $bHttp)
 				{
@@ -4090,7 +4103,7 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 					if ($aResult['large_image'])
 					{
 						$oProperty_Value->file = $sTargetFileName;
-						$oProperty_Value->file_name = $sSourceFileBaseName;
+						$oProperty_Value->file_name = $sSourceFileName;
 					}
 
 					if ($aResult['small_image'])
@@ -4190,9 +4203,10 @@ class Shop_Item_Import_Csv_Controller extends Core_Servant_Properties
 
 			// Файл-источник
 			$sTmpFilePath = $this->imagesPath . (
-				strtoupper($this->encoding) == 'UTF-8'
+				/*strtoupper($this->encoding) == 'UTF-8'
 					? $sPropertyValue
-					: Core_File::convertfileNameToLocalEncoding($sPropertyValue)
+					: Core_File::convertfileNameFromLocalEncoding($sPropertyValue)*/
+				$sPropertyValue
 			);
 
 			$sSourceFileBaseName = basename($sTmpFilePath, '');

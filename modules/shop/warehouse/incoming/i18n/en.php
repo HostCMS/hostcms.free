@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -35,7 +35,6 @@ return array(
 	'position' => '#',
 	'sum' => 'Amount',
 	'currency' => 'Curr.',
-	'basic' => 'Basic',
 	'shop_price_id' => 'Price',
 	'recalc_price' => 'Fill',
 	'delete_dialog' => "Are you sure you want to delete?",

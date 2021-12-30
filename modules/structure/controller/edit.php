@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Structure
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -21,7 +21,8 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 	public function setObject($object)
 	{
 		$this
-			->addSkipColumn('data_template_id');
+			->addSkipColumn('data_template_id')
+			->addSkipColumn('options');
 
 		if (!$object->id)
 		{
@@ -81,7 +82,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $this->_object->Document->template_id
 			: $this->_object->template_id;
 
-		$oMainTab->delete($this->getField('options'));
+		// $oMainTab->delete($this->getField('options'));
 
 		// -!- Row --
 		$this->getField('name')
@@ -614,7 +615,7 @@ class Structure_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		{
 			$oLib = $this->_object->Lib;
 
-			$JSON = Structure_Controller_Libproperties::getJson($oLib);
+			$JSON = Structure_Controller_Libproperties::getJson($this->_object);
 
 			// Сохраняем настройки
 			$this->_object->options = $JSON;

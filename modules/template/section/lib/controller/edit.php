@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -29,6 +29,9 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 	 */
 	public function setObject($object)
 	{
+		$this
+			->addSkipColumn('options');
+
 		// При добавлении объекта
 		if (!$object->id)
 		{
@@ -59,7 +62,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 			->add($oAdditionalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab->delete($this->getField('lib_id'));
-		$oMainTab->delete($this->getField('options'));
+		// $oMainTab->delete($this->getField('options'));
 
 		$oMainTab
 			->move($this->getField('class')->divAttr(array('class' => 'form-group col-xs-12 col-sm-6')), $oMainRow1)
@@ -148,9 +151,7 @@ class Template_Section_Lib_Controller_Edit extends Admin_Form_Action_Controller_
 		// Lib properies
 		if ($this->_object->lib_id)
 		{
-			$oLib = $this->_object->Lib;
-
-			$JSON = Structure_Controller_Libproperties::getJson($oLib);
+			$JSON = Structure_Controller_Libproperties::getJson($this->_object);
 
 			// Сохраняем настройки
 			$this->_object->options = $JSON;

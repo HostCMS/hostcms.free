@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Typograph
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Typograph_Controller
 {
@@ -33,9 +33,17 @@ class Typograph_Controller
 		return self::$instance;
 	}
 
+	public function getConfig()
+	{
+		return (array)Core::$config->get('typograph_config', array()) + array(
+			'typograph' => TRUE,
+			'trailing_punctuation' => TRUE
+		);
+	}
+
 	protected $_left_span = NULL;
 	protected $_right_span = NULL;
-	
+
 	/**
 	 * Метод для удаления тегов предыдущего оптического выравнивания
 	 *
@@ -250,7 +258,7 @@ class Typograph_Controller
 		// Удаляем множекственные запятые и точки с запятой
 		$str = preg_replace('/([,]){2,}/', '\1', $str);
 		$str = preg_replace('/([;]){2,}/', '\1', $str);
-		
+
 		// Многоточие
 		$str = str_replace('...', '…', $str);
 
@@ -460,7 +468,7 @@ class Typograph_Controller
 		$str = str_replace(" де,", "-де,", $str);
 		$str = str_replace(" кась ", "-кась ", $str);
 		$str = str_replace(" кась,", "-кась,", $str);
-	
+
 		// (' &nbsp;', '&nbsp; ') => '&nbsp;'
 		$str = str_replace(array('  ', '  '), ' ', $str);
 
@@ -490,7 +498,7 @@ class Typograph_Controller
 			// т.к. тогда span вылезает слева за <p>
 			//$str = preg_replace("/(\s)?(\(\w*)/iseu", "'{$this->_right_span} </span> {$this->_left_span}'.str_replace('(', chr(0x01), '\\2').'</span>'", $str);
 			$str = preg_replace_callback("/(\s)?(\(\w*)/isu", array($this, '_trailingPunctuationBrackets'), $str);
-	
+
 			// Восстанавливаем скобки в тегах.
 			$str = str_replace(chr(0x01), '(', $str);
 
@@ -502,7 +510,7 @@ class Typograph_Controller
 			// возможно проблема вылезания за <p>, пример изменения см. выше
 			//$str = preg_replace("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/iseu", "'{$this->_right_span} </span> \\2{$this->_left_span}'.str_replace('«', chr(0x02), '\\4').'</span>'", $str);
 			$str = preg_replace_callback("/(\s)?(<[^\/][^>]*>)?(\s)?(\«\w*)/isu", array($this, '_trailingPunctuationFrenchQuotes'), $str);
-			
+
 			// Восстанавливаем елочки в тегах.
 			$str = str_replace(chr(0x02), '«', $str);
 
@@ -531,12 +539,12 @@ class Typograph_Controller
 
 		return $str;
 	}
-	
+
 	protected function _trailingPunctuationBrackets($matches)
 	{
 		return "{$this->_right_span} </span> {$this->_left_span}" . str_replace('(', chr(0x01), $matches[2]) . '</span>';
 	}
-	
+
 	protected function _trailingPunctuationFrenchQuotes($matches)
 	{
 		return "{$this->_right_span} </span> " . $matches[2] . $this->_left_span . str_replace('«', chr(0x02), $matches[4]) . '</span>';

@@ -7,11 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Revision
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Revision_Entity extends Core_Entity
+class Revision_Entity
 {
 	/**
 	 * Backend property
@@ -42,6 +42,15 @@ class Revision_Entity extends Core_Entity
 	 * @var string
 	 */
 	protected $_modelName = 'revision';
+
+	/**
+	 * Get model name, e.g. 'book' for 'Book_Model'
+	 * @return string
+	 */
+	public function getModelName()
+	{
+		return $this->_modelName;
+	}
 
 	/**
 	 * Load columns list
@@ -99,6 +108,8 @@ class Revision_Entity extends Core_Entity
 
 		$singular = Core_Inflection::getSingular($this->table_name);
 
+		$oUser = Core_Auth::getCurrentUser();
+
 		do {
 			$oRevisions = Core_Entity::factory('Revision');
 			$oRevisions
@@ -110,7 +121,14 @@ class Revision_Entity extends Core_Entity
 			$aRevisions = $oRevisions->findAll(FALSE);
 			foreach ($aRevisions as $oRevision)
 			{
-				$oRevision->markDeleted();
+				if (!$oUser || $oUser->checkObjectAccess($oRevision))
+				{
+					$oRevision->markDeleted();
+				}
+				else
+				{
+					$offset++;
+				}
 			}
 
 			// $offset += $limit;

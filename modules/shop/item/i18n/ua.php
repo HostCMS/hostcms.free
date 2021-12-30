@@ -328,8 +328,8 @@ return array(
 	'change_attributes_items_title' => 'Змінити атрибути',
 	'shop_currency_select_caption' => 'Валюта',
 	'change_attributes_success' => 'Атрибути змінені успішно!',
-	'remove' => 'Прибрати',
-	'set' => 'Встановити',
+	'remove' => '× Прибрати',
+	'set' => '✓ Встановити',
 	'delete_property_values' => 'Видаляти існуючі значення додаткових властивостей',
 	'continue_import' => "Якщо Ваш браузер не підтримує автоматичне перенаправлення - натисніть <b><a href=\"%s\" onclick=\"%s\">тут</a></b>",
 	'seo_filter' => 'SEO-фильтр',
@@ -352,4 +352,7 @@ return array(
 	'delete_unsent_modifications_by_properties' => 'Видаляти непередані модифікації, створені по властивості',
 	'shortcut' => 'Ярлик',
 	'include_modifications' => 'Враховувати модифікації',
+	'attribute_item_tab' => 'Товари',
+	'attribute_group_tab' => 'Групи',
+	'include_subgroups' => 'Учитувати підгрупи',
 );

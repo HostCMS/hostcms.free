@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -18,7 +18,8 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * @var array
 	 */
 	protected $_hasMany = array(
-		'shop_item_discount' => array()
+		'shop_item_discount' => array(),
+		'shop_discount_siteuser_group' => array()
 	);
 
 	/**
@@ -76,20 +77,59 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	}
 
 	/**
+	 * Cache isActive()
+	 * @var NULL|boolean
+	 */
+	protected $_cacheIsActive = NULL;
+
+	/**
 	 * Check if discount active is
 	 * @return boolean
 	 */
 	public function isActive()
 	{
-		$time = time();
-		$dayFieldName = 'day' . date('N');
+		if (is_null($this->_cacheIsActive))
+		{
+			$time = time();
+			$dayFieldName = 'day' . date('N');
 
-		return $this->active
-			&& Core_Date::sql2timestamp($this->start_datetime) <= $time
-			&& Core_Date::sql2timestamp($this->end_datetime) >= $time
-			&& $time >= strtotime($this->start_time)
-			&& $time <= strtotime($this->end_time)
-			&& $this->$dayFieldName == 1;
+			$active = $this->active
+				&& Core_Date::sql2timestamp($this->start_datetime) <= $time
+				&& Core_Date::sql2timestamp($this->end_datetime) >= $time
+				&& $time >= strtotime($this->start_time)
+				&& $time <= strtotime($this->end_time)
+				&& $this->$dayFieldName == 1;
+
+			if ($active)
+			{
+				$aSiteuser_Group_IDs = array(0);
+
+				if (Core::moduleIsActive('siteuser'))
+				{
+					$oSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
+					if ($oSiteuser)
+					{
+						$aSiteuser_Groups = $oSiteuser->Siteuser_Groups->findAll();
+						foreach ($aSiteuser_Groups as $oSiteuser_Group)
+						{
+							$aSiteuser_Group_IDs[] = $oSiteuser_Group->id;
+						}
+					}
+				}
+
+				$oShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups;
+				$oShop_Discount_Siteuser_Groups->queryBuilder()
+					->where('shop_discount_siteuser_groups.siteuser_group_id', 'IN', $aSiteuser_Group_IDs);
+
+				$iCount = $oShop_Discount_Siteuser_Groups->getCount();
+
+				!$iCount && $active = FALSE;
+			}
+
+			$this->_cacheIsActive = $active;
+		}
+
+		return $this->_cacheIsActive;
 	}
 
 	/**
@@ -121,6 +161,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
 		$this->Shop_Item_Discounts->deleteAll(FALSE);
+		$this->Shop_Discount_Siteuser_Groups->deleteAll(FALSE);
 
 		return parent::delete($primaryKey);
 	}
@@ -184,23 +225,28 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
-			htmlspecialchars($this->name)
+		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+
+		$oCore_Html_Entity_Div->add(
+			$Core_Html_Entity_Span = Core::factory('Core_Html_Entity_Span')->value(
+				htmlspecialchars($this->name)
+			)
 		);
 
 		$bRightTime = ($this->start_datetime == '0000-00-00 00:00:00' || time() > Core_Date::sql2timestamp($this->start_datetime))
 			&& ($this->end_datetime == '0000-00-00 00:00:00' || time() < Core_Date::sql2timestamp($this->end_datetime));
 
-		!$bRightTime && $oCore_Html_Entity_Div->class('wrongTime');
+		!$bRightTime && $Core_Html_Entity_Span->class('wrongTime');
 
 		// Зачеркнут в зависимости от статуса родительского товара или своего статуса
 		if (!$this->active)
 		{
-			$oCore_Html_Entity_Div->class('inactive');
+			// $oCore_Html_Entity_Div->class('inactive');
+			$Core_Html_Entity_Span->class('line-through');
 		}
 		elseif (!$bRightTime)
 		{
-			$oCore_Html_Entity_Div
+			$Core_Html_Entity_Span
 				->add(
 					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
 				);
@@ -210,7 +256,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_Span')
-					->class('label label-sky label-sm')
+					->class('badge badge-square badge-sky badge-sm')
 					->value(htmlspecialchars($this->coupon_text))
 			);
 		}
@@ -219,7 +265,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_Span')
-					->class('label label-orange label-sm')
+					->class('badge badge-square badge-orange badge-sm')
 					->value($this->start_time . ' – ' . $this->end_time)
 			);
 		}
@@ -240,7 +286,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 		{
 			$oCore_Html_Entity_Div->add(
 				Core::factory('Core_Html_Entity_Span')
-					->class('label label-palegreen label-sm')
+					->class('badge badge-square badge-palegreen badge-sm')
 					->value(Core::_('Shop_Discount.all_days'))
 				);
 		}
@@ -254,11 +300,36 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 				{
 					$oCore_Html_Entity_Div->add(
 						Core::factory('Core_Html_Entity_Span')
-							->class('label label-palegreen label-sm')
+							->class('badge badge-square badge-palegreen badge-sm')
 							->value(Core::_('Shop_Discount.' . $fieldName))
 						);
 				}
 			}
+		}
+
+		$aShop_Discount_Siteuser_Groups = $this->Shop_Discount_Siteuser_Groups->findAll();
+		foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+		{
+			$siteuserGroupName = $oShop_Discount_Siteuser_Group->siteuser_group_id
+				? htmlspecialchars($oShop_Discount_Siteuser_Group->Siteuser_Group->name)
+				: Core::_('Shop_Discount.all');
+
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('badge badge-square badge-hostcms')
+					->value('<i class="fa fa-users darkgray"></i> ' . $siteuserGroupName)
+				);
+		}
+
+		if ($this->not_apply_purchase_discount)
+		{
+			$oCore_Html_Entity_Div->add(
+				Core::factory('Core_Html_Entity_Span')
+					->class('fa-stack')
+					->style('font-size: 0.7em;')
+					->title(Core::_('Shop_Discount.not_apply_purchase_discount'))
+					->value('<i class="fas fa-percent fa-stack-1x"></i><i class="fas fa-ban fa-stack-2x danger"></i>')
+			);
 		}
 
 		$oCore_Html_Entity_Div->execute();

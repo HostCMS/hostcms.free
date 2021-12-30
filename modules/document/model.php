@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Document
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -18,6 +18,12 @@ class Document_Model extends Core_Entity
 	 * @var mixed
 	 */
 	public $img = 1;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * Belongs to relations
@@ -147,9 +153,9 @@ class Document_Model extends Core_Entity
 		}
 
 		$oSearch_Page->text = htmlspecialchars($this->name) . ' ' . $this->text;
-		
+
 		$oSearch_Page->title = $this->name;
-		
+
 		if (Core::moduleIsActive('field'))
 		{
 			$aField_Values = Field_Controller_Value::getFieldsValues($this->getFieldIDs(), $this->id);
@@ -200,7 +206,7 @@ class Document_Model extends Core_Entity
 				}
 			}
 		}
-		
+
 		$oSearch_Page->size = mb_strlen($oSearch_Page->text);
 		$oSearch_Page->datetime = $this->datetime;
 		$oSearch_Page->site_id = $this->site_id;
@@ -244,8 +250,9 @@ class Document_Model extends Core_Entity
 				. '">' . htmlspecialchars($oStructure->name) . "</a><br />";
 			}
 
+			// type="button"
 			Admin_Form_Entity::factory('Code')
-				->html('<a id="document_' . $this->id . '" type="button" class="structure_list_link" data-toggle="popover" data-placement="right" data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" data-container="#document_' . $this->id . '" title="' . Core::_('Document.structures') . '"><i class="fa fa-link gray"></i></a>
+				->html('<a id="document_' . $this->id . '" class="structure_list_link" tabindex="0" role="button" data-toggle="popover" data-placement="right" data-container="body", data-content="' . htmlspecialchars($sListStructures) . '" data-title="' . Core::_('Document.structures') . '" data-titleclass="bordered-darkorange" title="' . Core::_('Document.structures') . '"><i class="fa fa-link gray"></i></a>
 				')
 				->execute();
 

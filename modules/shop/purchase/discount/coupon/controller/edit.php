@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -56,7 +56,7 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 		$oMainTab
 			->move($this->getField('start_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
 			->move($this->getField('end_datetime')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
-			->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-md-4')), $oMainRow2)
+			->move($this->getField('count')->divAttr(array('class' => 'form-group col-xs-12 col-md-2')), $oMainRow2)
 			;
 			
 		$title = $this->_object->id
@@ -83,7 +83,7 @@ class Shop_Purchase_Discount_Coupon_Controller_Edit extends Admin_Form_Action_Co
 			->where('active', '=', 1)
 			->orderBy('id', 'ASC');
 
-		$aShopPurchaseDiscountCoupons = $oShopPurchaseDiscountCoupon->findAll();
+		$aShopPurchaseDiscountCoupons = $oShopPurchaseDiscountCoupon->findAll(FALSE);
 
 		$aReturn = array();
 		foreach ($aShopPurchaseDiscountCoupons as $oShopPurchaseDiscountCoupon)

@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -760,6 +760,12 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 		$this->init();
 
 		$sFilename = 'CSV_' . date("Y_m_d_H_i_s") . '.csv';
+
+		// Stop buffering
+		ob_get_clean();
+
+		header("Cache-Control: no-cache, must-revalidate");
+		header('X-Accel-Buffering: no');
 
 		header("Pragma: public");
 		header("Content-Description: File Transfer");

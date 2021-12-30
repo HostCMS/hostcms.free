@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -77,7 +77,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 					->options(array(' … ') + $this->fillGroupList($this->_object->shop_id))
 					->name('shop_filter_seo_dir_id')
 					->value($this->_object->shop_filter_seo_dir_id)
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'));
 
 				// Добавляем группу
 				$oMainRow3->add($oGroupSelect);
@@ -87,7 +87,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				$oShopProducerSelect = Admin_Form_Entity::factory('Select')
 					->caption(Core::_('Shop_Filter_Seo.shop_producer_id'))
-					->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'))
+					->divAttr(array('class' => 'form-group col-xs-6 col-sm-3'))
 					->options(Shop_Item_Controller_Edit::fillProducersList($object->shop_id))
 					->name('shop_producer_id')
 					->value($this->_object->id
@@ -97,6 +97,10 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				// Добавляем производителей
 				$oMainRow3->add($oShopProducerSelect);
+
+				$oMainTab
+					->move($this->getField('price_from')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3')), $oMainRow3)
+					->move($this->getField('price_to')->divAttr(array('class' => 'form-group col-xs-6 col-sm-3')), $oMainRow3);
 
 				ob_start();
 				?>
@@ -293,6 +297,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 					->move($this->getField('h1')->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow7)
 					->move($this->getField('text')->wysiwyg(TRUE)->rows(10)->divAttr(array('class' => 'form-group col-xs-12')), $oMainRow8)
 					->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9)
+					->move($this->getField('indexing')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3')), $oMainRow9)
 					;
 			break;
 			case 'shop_filter_seo_dir':

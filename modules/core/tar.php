@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core
- * @version 6.x
+ * @version 7.x
  * @author Vincent Blavet <vincent@phpconcept.net>
  */
 class Core_Tar
@@ -1192,7 +1192,7 @@ class Core_Tar
 	 */
 	protected function _readHeader($v_binary_data, &$v_header)
 	{
-		if (strlen($v_binary_data)==0)
+		if (strlen($v_binary_data) == 0)
 		{
 			$v_header['filename'] = '';
 			return true;
@@ -1201,11 +1201,11 @@ class Core_Tar
 		if (strlen($v_binary_data) != 512)
 		{
 			$v_header['filename'] = '';
-			$this->_error('Неправильный размер блока : '.strlen($v_binary_data));
+			$this->_error('Wrong block size: '.strlen($v_binary_data));
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$ERROR)
-				->write($v_binary_data);
+				->write('Core_Tar. Wrong block size: '.strlen($v_binary_data));
 
 			return false;
 		}

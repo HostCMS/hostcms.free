@@ -3,7 +3,7 @@
  * SQL.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -78,6 +78,17 @@ $oAdmin_Form_Entity_Menus->add(
 		)
 		->onclick(
 			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/table/index.php', '', NULL)
+		)
+)
+->add(
+	Admin_Form_Entity::factory('Menu')
+		->name(Core::_('Sql.processlist'))
+		->icon('fa fa-list')
+		->href(
+			$oAdmin_Form_Controller->getAdminLoadHref('/admin/sql/processlist/index.php', '', NULL)
+		)
+		->onclick(
+			$oAdmin_Form_Controller->getAdminLoadAjax('/admin/sql/processlist/index.php', '', NULL)
 		)
 );
 
@@ -162,10 +173,6 @@ if ($formSettings['action'] == 'duplicate')
 	}
 }
 
-$sText = Core_Array::getPost('text');
-
-$iCountQueries = 0;
-
 try
 {
 	// Текущий пользователь
@@ -179,98 +186,127 @@ try
 		);
 	}
 
-	$aFile = Core_Array::getFiles('file');
-	!is_null($aFile) && $aFile['size'] > 0
-		&& $sText = Core_File::read($aFile['tmp_name']);
+	$sText = Core_Array::getPost('text');
 
-	if (!is_null($sText))
+	$aFile = Core_Array::getFiles('file');
+	/*!is_null($aFile) && $aFile['size'] > 0
+		&& $sText = Core_File::read($aFile['tmp_name']);*/
+
+	$iCountQueries = 0;
+
+	$bExecuted = FALSE;
+
+	
+	if (!is_null($aFile) && $aFile['size'] > 0)
 	{
-		if (strlen(trim($sText)) > 0)
+		$startTime = Core::getmicrotime();
+
+		Core_Log::instance()->clear()
+			->status(Core_Log::$MESSAGE)
+			->write('Sql Query From File');
+
+		$iCountQueries = Sql_Controller::instance()->executeByFile($aFile['tmp_name']);
+
+		$bExecuted = TRUE;
+
+		$fTime = Core::getmicrotime() - $startTime;
+
+		$bExecuted = TRUE;
+	}
+	elseif (!is_null($sText))
+	{
+		$iLen = strlen(trim($sText));
+		if ($iLen)
 		{
 			$startTime = Core::getmicrotime();
 
 			Core_Log::instance()->clear()
 				->status(Core_Log::$MESSAGE)
-				->write('Sql Query: ' . $sText);
+				->write('Sql Query: ' . substr($sText, 0, 1000));
 
-			$iCountQueries = Sql_Controller::instance()->execute($sText);
+			$iCountQueries = Sql_Controller::instance()->executeByString($sText);
+
+			$bExecuted = TRUE;
 
 			$fTime = Core::getmicrotime() - $startTime;
-
-			$iAffectedRows = Core_DataBase::instance()->getAffectedRows();
-
-			$iColumnCount = Core_DataBase::instance()->getColumnCount();
-
-			$iCountQueries == 1
-				? Core_Message::show(Core::_('Sql.success_message_with_affected', $iCountQueries, $iAffectedRows))
-				: Core_Message::show(Core::_('Sql.success_message', $iCountQueries));
-
-			// It was Select Query
-			if ($iColumnCount)
-			{
-				$iLimit = 30;
-
-				if ($iAffectedRows && $iCountQueries == 1)
-				{
-					$oTable = Core::factory('Core_Html_Entity_Table')
-						->class('admin-table table table-bordered table-hover table-striped sql-table')
-						// Top title
-						->add($oTitleTr = Core::factory('Core_Html_Entity_Tr'));
-
-					$iLine = 0;
-
-					do {
-						$row = Core_DataBase::instance()->asAssoc()->current();
-
-						if ($iLine == 0 && is_array($row) && count($row))
-						{
-							foreach ($row as $key => $value)
-							{
-								$oTitleTr->add(
-									Core::factory('Core_Html_Entity_Th')
-										->value(htmlspecialchars($key))
-								);
-							}
-						}
-
-						$oDiv = Core::factory('Core_Html_Entity_Div')
-							->style('height: 200px; overflow: auto');
-
-						$oDiv->add($oTable);
-
-						$oTr = Core::factory('Core_Html_Entity_Tr');
-
-						if (is_array($row) && count($row))
-						{
-							foreach ($row as $value)
-							{
-								is_null($value) && $value = 'NULL';
-
-								$oTr->add(
-									Core::factory('Core_Html_Entity_Td')
-										->value(Core_Str::cut(htmlspecialchars($value), 100))
-								);
-							}
-						}
-						$oTable->add($oTr);
-
-						$iLine++;
-					} while ($iLine < $iLimit);
-
-					// Bottom title
-					$oTable->add($oTitleTr);
-
-					$oDiv->execute();
-
-					Core::factory('Core_Html_Entity_P')
-						->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
-						->execute();
-				}
-			}
 		}
 		else
 		{
 			Core_Message::show(Core::_('Sql.error_message'), 'error');
+		}
+	}
+
+	if ($bExecuted)
+	{
+		$iAffectedRows = Core_DataBase::instance()->getAffectedRows();
+
+		$iColumnCount = Core_DataBase::instance()->getColumnCount();
+
+		$iCountQueries == 1
+			? Core_Message::show(Core::_('Sql.success_message_with_affected', $iCountQueries, $iAffectedRows))
+			: Core_Message::show(Core::_('Sql.success_message', $iCountQueries));
+
+		// It was Select Query
+		if ($iColumnCount)
+		{
+			$iLimit = 30;
+
+			if ($iAffectedRows && $iCountQueries == 1)
+			{
+				$oTable = Core::factory('Core_Html_Entity_Table')
+					->class('admin-table table table-bordered table-hover table-striped sql-table')
+					// Top title
+					->add($oTitleTr = Core::factory('Core_Html_Entity_Tr'));
+
+				$iLine = 0;
+
+				$oDiv = Core::factory('Core_Html_Entity_Div')
+					->style('height: 200px; resize: vertical; overflow: auto');
+
+				$oDiv->add($oTable);
+
+				do {
+					$row = Core_DataBase::instance()->asAssoc()->current();
+
+					if ($iLine == 0 && is_array($row) && count($row))
+					{
+						foreach ($row as $key => $value)
+						{
+							$oTitleTr->add(
+								Core::factory('Core_Html_Entity_Th')
+									->value(htmlspecialchars($key))
+							);
+						}
+					}
+
+					$oTr = Core::factory('Core_Html_Entity_Tr');
+
+					if (is_array($row) && count($row))
+					{
+						foreach ($row as $value)
+						{
+							is_null($value) && $value = 'NULL';
+
+							$oTr->add(
+								Core::factory('Core_Html_Entity_Td')
+									->value(Core_Str::cut(htmlspecialchars($value), 100))
+							);
+						}
+					}
+					$oTable->add($oTr);
+
+					$iLine++;
+				} while ($iLine < $iLimit);
+
+				// Bottom title
+				$oTable->add($oTitleTr);
+
+				$oDiv->execute();
+
+				Core::factory('Core_Html_Entity_P')
+					->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
+					->execute();
+			}
 		}
 	}
 }
@@ -287,7 +323,7 @@ $oTextarea_Sql = Admin_Form_Entity::factory('Textarea')
 	->rows(25)
 	->divAttr(array('class' => 'form-group col-xs-12'))
 	->value(
-		($iCountQueries == 0 || mb_strlen($sText) < 10240)
+		($iCountQueries == 0 || strlen($sText) < 60000)
 			? $sText
 			: NULL
 	);

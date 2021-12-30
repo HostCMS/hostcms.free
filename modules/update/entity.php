@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Update
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Entity extends Core_Entity
 {
@@ -268,25 +268,24 @@ class Update_Entity extends Core_Entity
 								->write('Empty update_list_file');
 						}
 
-						$update_list_sql = (string)$module->update_list_sql;
-						// Размещаем файлы обновления в директорию
 						if (!$error_update)
 						{
-							$filename = $current_update_dir . '/' . $current_update_list_id . '.sql';
+							// SQL
+							$sqlContent = (string)$module->update_list_sql;
+							// XML convert "\r\n" to "\r"
+							$aTmpUpdateItem['sql'] = html_entity_decode($sqlContent, ENT_COMPAT, 'UTF-8');
 
-							Core_File::write($filename, html_entity_decode($update_list_sql, ENT_COMPAT, 'UTF-8'));
+							// File
+							$fileContent = (string)$module->update_list_php;
 
-							$aTmpUpdateItem['sql'] = $filename;
-						}
+							if ($fileContent != '')
+							{
+								$filename = $current_update_dir . '/' . $current_update_list_id . '.php';
 
-						$update_list_php = (string)$module->update_list_php;
-						if (!$error_update)
-						{
-							$filename = $current_update_dir . '/' . $current_update_list_id . '.php';
+								Core_File::write($filename, html_entity_decode($fileContent, ENT_COMPAT, 'UTF-8'));
 
-							Core_File::write($filename, html_entity_decode($update_list_php, ENT_COMPAT, 'UTF-8'));
-
-							$aTmpUpdateItem['file'] = $filename;
+								$aTmpUpdateItem['file'] = $filename;
+							}
 						}
 
 						$aUpdateItems[] = $aTmpUpdateItem;
@@ -323,20 +322,15 @@ class Update_Entity extends Core_Entity
 							}
 						}
 
-						if (isset($aTmpUpdateItem['sql']))
+						if (isset($aTmpUpdateItem['sql']) && strlen($aTmpUpdateItem['sql']))
 						{
-							$sql_code = Core_File::read($aTmpUpdateItem['sql']);
+							Core_Log::instance()->clear()
+								->status(Core_Log::$MESSAGE)
+								->write(Core::_('Update.msg_execute_sql'));
 
-							// Если версия MySQL меньше 4.1.0
-							/*if (version_compare($kernel->GetDBVersion(), '4.1.0', "<"))
-							{
-								$search = array('CHARACTER SET cp1251', 'COLLATE cp1251_general_ci', 'ENGINE=MyISAM', 'DEFAULT CHARSET=cp1251',
-								'CHARACTER SET utf8', 'COLLATE utf8_general_ci', 'ENGINE=MyISAM', 'DEFAULT CHARSET=utf8');
-
-								$sql_code = str_replace($search, ' ', $sql_code);
-							}*/
-
-							Sql_Controller::instance()->execute($sql_code);
+							//$sql_code = Core_File::read($aTmpUpdateItem['sql']);
+							//Sql_Controller::instance()->execute($sql_code);
+							Sql_Controller::instance()->execute($aTmpUpdateItem['sql']);
 						}
 
 						// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
@@ -350,6 +344,10 @@ class Update_Entity extends Core_Entity
 
 						if (isset($aTmpUpdateItem['file']))
 						{
+							Core_Log::instance()->clear()
+								->status(Core_Log::$MESSAGE)
+								->write(Core::_('Update.msg_execute_file'));
+
 							include($aTmpUpdateItem['file']);
 						}
 					}
@@ -363,13 +361,6 @@ class Update_Entity extends Core_Entity
 					// Clear Core_ORM_ColumnCache, Core_ORM_RelationCache
 					Core_ORM::clearColumnCache();
 					Core_ORM::clearRelationModelCache();
-
-					/*$aCore_Orm_Config = Core::$config->get('core_orm') + array(
-						'cache' => 'memory',
-						'columnCache' => 'memory'
-					);
-					$oCore_Cache = Core_Cache::instance($aCore_Orm_Config['columnCache']);
-					$oCore_Cache->deleteAll('Core_ORM_ColumnCache');*/
 
 					// Если не было ошибок
 					if (!$error_update)

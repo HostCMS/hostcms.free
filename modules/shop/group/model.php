@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -24,6 +24,12 @@ class Shop_Group_Model extends Core_Entity
 	 * @var int
 	 */
 	public $img = 0;
+
+	/**
+	 * Backend property
+	 * @var mixed
+	 */
+	public $rollback = 0;
 
 	/**
 	 * Backend property
@@ -180,9 +186,10 @@ class Shop_Group_Model extends Core_Entity
 	 * Values of all properties of element
 	 * @param boolean $bCache cache mode
 	 * @param array $aPropertiesId array of properties' IDs
+	 * @param boolean $bSorting sort results, default FALSE
 	 * @return array Property_Value
 	 */
-	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array())
+	public function getPropertyValues($bCache = TRUE, $aPropertiesId = array(), $bSorting = FALSE)
 	{
 		$iMd5 = md5(serialize($aPropertiesId));
 
@@ -204,7 +211,7 @@ class Shop_Group_Model extends Core_Entity
 			}
 		}
 
-		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache);
+		$aReturn = Property_Controller_Value::getPropertiesValues($aPropertiesId, $this->id, $bCache, $bSorting);
 
 		// setHref()
 		foreach ($aReturn as $oProperty_Value)
@@ -1188,15 +1195,23 @@ class Shop_Group_Model extends Core_Entity
 	protected $_showXmlProperties = FALSE;
 
 	/**
+	 * Sort properties values in XML
+	 * @var mixed
+	 */
+	protected $_xmlSortPropertiesValues = TRUE;
+
+	/**
 	 * Show properties in XML
 	 * @param mixed $showXmlProperties array of allowed properties ID or boolean
 	 * @return self
 	 */
-	public function showXmlProperties($showXmlProperties = TRUE)
+	public function showXmlProperties($showXmlProperties = TRUE, $xmlSortPropertiesValues = TRUE)
 	{
 		$this->_showXmlProperties = is_array($showXmlProperties)
 			? array_combine($showXmlProperties, $showXmlProperties)
 			: $showXmlProperties;
+
+		$this->_xmlSortPropertiesValues = $xmlSortPropertiesValues;
 
 		return $this;
 	}
@@ -1247,7 +1262,7 @@ class Shop_Group_Model extends Core_Entity
 		{
 			if (is_array($this->_showXmlProperties))
 			{
-				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id);
+				$aProperty_Values = Property_Controller_Value::getPropertiesValues($this->_showXmlProperties, $this->id, FALSE, $this->_xmlSortPropertiesValues);
 				foreach ($aProperty_Values as $oProperty_Value)
 				{
 					$this->_preparePropertyValue($oProperty_Value);
@@ -1257,7 +1272,7 @@ class Shop_Group_Model extends Core_Entity
 			}
 			else
 			{
-				$aProperty_Values = $this->getPropertyValues();
+				$aProperty_Values = $this->getPropertyValues(TRUE, array(), $this->_xmlSortPropertiesValues);
 				// Add all values
 				$this->addEntities($aProperty_Values);
 			}

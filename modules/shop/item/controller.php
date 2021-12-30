@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -168,6 +168,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 	 * Calculate the cost with tax and discounts without currencies
 	 * @param Shop_Item_Model $oShop_Item item
 	 * @return array
+	 * @hostcms-event Shop_Item_Controller.onGetShopItemDiscounts
 	 */
 	protected function _calculatePrice(Shop_Item_Model $oShop_Item)
 	{
@@ -175,13 +176,20 @@ class Shop_Item_Controller extends Core_Servant_Properties
 		{
 			// Определены ли скидки на товар
 			$aShop_Item_Discounts = $oShop_Item->Shop_Item_Discounts->findAll();
+			
+			Core_Event::notify(get_class($this) . '.onGetShopItemDiscounts', $this, array($oShop_Item, $aShop_Item_Discounts));
+
+			$eventResult = Core_Event::getLastReturn();
+
+			if (is_array($eventResult))
+			{
+				$aShop_Item_Discounts = $eventResult;
+			}
+			
 			if (count($aShop_Item_Discounts))
 			{
 				// Определяем количество скидок на товар
 				$discountPercent = $discountAmount = 0;
-
-				//$couponText = isset($_SESSION['hostcmsOrder']['coupon_text']) ? $_SESSION['hostcmsOrder']['coupon_text'] : NULL;
-				$couponText = self::$_coupon;
 
 				// Цикл по идентификаторам скидок для товара
 				foreach ($aShop_Item_Discounts as $oShop_Item_Discount)
@@ -189,7 +197,7 @@ class Shop_Item_Controller extends Core_Servant_Properties
 					$oShop_Discount = $oShop_Item_Discount->Shop_Discount;
 					if ($oShop_Discount->isActive()
 						&& ($oShop_Discount->coupon == 0
-							|| $bCoupon = strlen($couponText) && $oShop_Discount->coupon_text == $couponText
+							|| $bCoupon = strlen(self::$_coupon) && $oShop_Discount->coupon_text == self::$_coupon
 						)
 					)
 					{
@@ -210,7 +218,8 @@ class Shop_Item_Controller extends Core_Servant_Properties
 				$this->_aPrice['discount'] = $this->_aPrice['price'] * $discountPercent / 100;
 
 				// Если оставшаяся цена > скидки в фиксированном размере, то применяем скидку в фиксированном размере
-				($this->_aPrice['price'] - $this->_aPrice['discount']) > $discountAmount && $this->_aPrice['discount'] += $discountAmount;
+				($this->_aPrice['price'] - $this->_aPrice['discount']) > $discountAmount
+					&& $this->_aPrice['discount'] += $discountAmount;
 
 				// Вычисляем цену со скидкой как ее разность с величиной скидки в %
 				$this->_aPrice['price_discount'] = $this->_aPrice['price'] - $this->_aPrice['discount'];

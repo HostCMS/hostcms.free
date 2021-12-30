@@ -3,9 +3,9 @@
  * Revision.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -89,6 +89,7 @@ $oAdmin_Form_Dataset->addCondition(
 			'revisions.datetime',
 			'revisions.user_id',
 			'revisions.id',
+			'revisions.model',
 			'revisions.entity_id'
 		)
 	)

@@ -22,7 +22,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -158,11 +158,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$str = Core_File::read($sXMLFilePath);
 
-		// Remove BOM
-		if (substr($str, 0, 3) === "\xEF\xBB\xBF")
-		{
-			$str = substr($str, 3);
-		}
+		$str = Core_Str::removeBOM($str);
 
 		$this->_oSimpleXMLElement = new SimpleXMLElement($str, defined('LIBXML_PARSEHUGE') ? LIBXML_PARSEHUGE : 0);
 
@@ -196,6 +192,66 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$this->_tmpPath = CMS_FOLDER . TMP_DIR . '1c_exchange_files/' . 'month-' . date('n') . '/';
 
 		Core_File::mkdir($this->_tmpPath, CHMOD, TRUE);
+	}
+
+	/**
+	 * Import Special Prices
+	 * @param SimpleXMLElement $oXMLNode node
+	 * @return self
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportSpecialPrice
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportSpecialPrice
+	 */
+	protected function _importSpecialPrices($oXMLNode)
+	{
+		// Обработка специальных цен делается независимо от $importPosition
+		foreach ($this->xpath($oXMLNode, 'ТипыЦен/ТипЦены') as $oPrice)
+		{
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportSpecialPrice', $this, array($oPrice));
+
+			$oShop_Price = Core_Entity::factory('Shop', $this->iShopId)
+				->Shop_Prices
+				->getByGuid(strval($oPrice->Ид), FALSE);
+
+			if (is_null($oShop_Price))
+			{
+				$oShop_Price = Core_Entity::factory('Shop_Price');
+				$oShop_Price->shop_id = $this->iShopId;
+				$oShop_Price->guid = strval($oPrice->Ид);
+				$oShop_Price->percent = 100;
+			}
+
+			$oShop_Price->name = strval($oPrice->Наименование);
+
+			// Если это основная цена, обновляем информацию о налоге
+			if (mb_strtoupper($oShop_Price->name) == mb_strtoupper($this->sShopDefaultPriceName))
+			{
+				$sTaxGUID = md5(mb_strtoupper($oPrice->Налог->Наименование));
+				$oShopTax = Core_Entity::factory('Shop_Tax')->getByGuid($sTaxGUID, FALSE);
+
+				// для совместимости с МойСклад
+				if (!is_null($oShopTax))
+				{
+					// В связи с разницей логик HostCMS и 1С по хранению налогов, поле "учтено в сумме" больше не будет импортироваться
+					$iInSum = strval($oPrice->Налог->УчтеноВСумме);
+
+					strtoupper($iInSum) == 'TRUE'
+						? $oShopTax->tax_is_included = 1
+						: $oShopTax->tax_is_included = 0;
+
+					$this->_oTaxForBasePrice = $oShopTax->save();
+				}
+
+				$this->sShopDefaultPriceGUID = $oShop_Price->guid;
+			}
+			else
+			{
+				$oShop_Price->save();
+			}
+
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportSpecialPrice', $this, array($oPrice, $oShop_Price));
+		}
+
+		return $this;
 	}
 
 	/**
@@ -365,7 +421,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				$this->_importGroups($oSubGroup, $oShop_Group->id);
 			}
 
-			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopGroup', $this, array($oXMLGroupNode));
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportShopGroup', $this, array($oXMLGroupNode, $oShop_Group));
 		}
 
 		return $this;
@@ -382,29 +438,42 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 			return $this;
 		}
 
-		$sPropertyGUID = strval($oPropertyValue->Наименование);
+		$sPropertyName = strval($oPropertyValue->Наименование);
 
-		$sUpperGUID = mb_strtoupper($sPropertyGUID);
+		$sUpperPropertyName = mb_strtoupper($sPropertyName);
 
-		if (isset($this->_aBaseAttributes[$sUpperGUID]))
+		if (isset($this->_aBaseAttributes[$sUpperPropertyName]))
 		{
-			$sFieldName = $this->_aBaseAttributes[$sUpperGUID];
+			$sFieldName = $this->_aBaseAttributes[$sUpperPropertyName];
 			$oShop_Item->$sFieldName = Shop_Controller::convertDecimal($sValue);
 			$oShop_Item->save();
-
 			return $this;
 		}
 
-		if ($sPropertyGUID == 'ОписаниеВФорматеHTML' && strlen($sValue))
+		if ($sPropertyName == 'ОписаниеВФорматеHTML' && strlen($sValue))
 		{
 			$oShop_Item->text = $sValue;
 			$oShop_Item->save();
 			return $this;
 		}
 
+		// CML 3.x
+		/* <ЗначениеРеквизита>
+			<Наименование>Торговая марка</Наименование>
+			<Значение>Xyz</Значение>
+		</ЗначениеРеквизита> */
+		if ($sPropertyName == 'Торговая марка' && strlen($sValue))
+		{
+			if ($this->_checkUpdateField('shop_producer_id'))
+			{
+				$this->_setProducer($sValue, $oShop_Item);
+			}
+			return $this;
+		}
+
 		/*// для совместимости с МойСклад
 		// не импортируется, т.к. затирает значение поля "Описание"
-		if (mb_strtoupper($sPropertyGUID) == 'ПОЛНОЕ НАИМЕНОВАНИЕ')
+		if (mb_strtoupper($sPropertyName) == 'ПОЛНОЕ НАИМЕНОВАНИЕ')
 		{
 			$oShop_Item->description = $sValue;
 			$oShop_Item->save();
@@ -412,7 +481,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		}*/
 
 		if ($bForcedAdd
-			|| (in_array(mb_strtoupper($sPropertyGUID), array_map('mb_strtoupper', $this->aPredefinedAdditionalProperties)) !== FALSE)
+			|| (in_array($sUpperPropertyName, array_map('mb_strtoupper', $this->aPredefinedAdditionalProperties)) !== FALSE)
 		)
 		{
 			$oProperty = $this->_getProperty($oPropertyValue);
@@ -1115,7 +1184,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 		$return = $object->xpath($path);
 
-		if ($this->namespace && ($return === FALSE || !count($return)))
+		if ($this->namespace && ($return === FALSE || is_array($return) && !count($return)))
 		{
 			$return = $object->xpath($sOriginalPath);
 		}
@@ -1159,6 +1228,26 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		return $this->_bNewShopGroup
 			|| !count($this->updateGroupFields)
 			|| in_array($fieldName, $this->updateGroupFields);
+	}
+
+	/**
+	 * Загрузить сохраненные данные классификатора по его ИД
+	 * @param string $classifierId ИД классификатора
+	 * @return self
+	 */
+	protected function _loadJson($classifierId)
+	{
+		$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($classifierId) . '.json';
+
+		if (is_file($sJsonFilePath))
+		{
+			$aJSON = json_decode(Core_File::read($sJsonFilePath), TRUE);
+
+			$this->_aPropertyValues = Core_Array::get($aJSON, '_aPropertyValues', array());
+			$this->_aBaseProperties = Core_Array::get($aJSON, '_aBaseProperties', array());
+		}
+
+		return $this;
 	}
 
 	/**
@@ -1270,6 +1359,15 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					// Импортируем дополнительные свойства товаров
 					$this->_importProperties($classifier);
 
+					// CML 3.x: ТипыЦен/ТипЦены
+					$this->_importSpecialPrices($classifier);
+
+					// CML 3.x: Склады/Склад
+					$this->_importWarehouses($classifier);
+
+					// CML 3.x: ЕдиницыИзмерения/ЕдиницаИзмерения
+					$this->_importMeasures($classifier);
+
 					// Сохраняем классификатор
 					$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Классификатор->Ид) . '.json';
 
@@ -1283,15 +1381,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				// Классификатора не было, но указан его ИД
 				elseif (isset($this->_oSimpleXMLElement->Каталог->ИдКлассификатора))
 				{
-					$sJsonFilePath = $this->_tmpPath . Core_File::filenameCorrection($this->_oSimpleXMLElement->Каталог->ИдКлассификатора) . '.json';
-
-					if (is_file($sJsonFilePath))
-					{
-						$aJSON = json_decode(Core_File::read($sJsonFilePath), TRUE);
-
-						$this->_aPropertyValues = Core_Array::get($aJSON, '_aPropertyValues', array());
-						$this->_aBaseProperties = Core_Array::get($aJSON, '_aBaseProperties', array());
-					}
+					$this->_loadJson($this->_oSimpleXMLElement->Каталог->ИдКлассификатора);
 				}
 
 				$xPath = $importPosition == 0
@@ -1531,30 +1621,27 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					}
 
 					// Обрабатываем описание товара
-					foreach ($this->xpath($oXmlItem, 'Описание') as $DescriptionData)
+					$sDescription = strval($oXmlItem->Описание);
+					if ($sDescription != '')
 					{
-						if ($DescriptionData != '')
+						if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
 						{
-							if ($this->itemDescription == 'text' && $this->_checkUpdateField('text'))
-							{
-								$oShopItem->text = nl2br(strval($DescriptionData));
-							}
-							elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
-							{
-								$oShopItem->description = nl2br(strval($DescriptionData));
-							}
-							$oShopItem->save();
+							$oShopItem->text = nl2br($sDescription);
 						}
+						elseif ($this->itemDescription == 'description' && $this->_checkUpdateField('description'))
+						{
+							$oShopItem->description = nl2br($sDescription);
+						}
+						$oShopItem->save();
 					}
 
-					// Обрабатываем "малое описание" товара. Данный тег не соответствует стандарту
-					foreach ($this->xpath($oXmlItem, $this->shortDescription) as $DescriptionData)
+					// Обрабатываем "малое описание" товара (не соответствует стандарту)
+					$sShortTag = $this->shortDescription;
+					$sDescription = strval($oXmlItem->$sShortTag);
+					if ($sDescription != '')
 					{
-						if ($DescriptionData != '')
-						{
-							$oShopItem->description = nl2br(strval($DescriptionData));
-							$oShopItem->save();
-						}
+						$oShopItem->description = nl2br($sDescription);
+						$oShopItem->save();
 					}
 
 					// Картинки основного товара
@@ -1575,6 +1662,23 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						$this->_addPredefinedAdditionalProperty($oShopItem, $oItemProperty, strval($oItemProperty->Значение));
 					}
+
+					// CML 3.x
+					/* <Вес>999</Вес>
+					<Ширина>10</Ширина>
+					<Длина>20</Длина>
+					<Высота>30</Высота> */
+					strval($oXmlItem->Вес) != ''
+						&& $oShopItem->weight = strval($oXmlItem->Вес);
+
+					strval($oXmlItem->Ширина) != ''
+						&& $oShopItem->width = strval($oXmlItem->Ширина);
+
+					strval($oXmlItem->Длина) != ''
+						&& $oShopItem->length = strval($oXmlItem->Длина);
+
+					strval($oXmlItem->Высота) != ''
+						&& $oShopItem->height = strval($oXmlItem->Высота);
 
 					// Налоги
 					if ($this->_checkUpdateField('taxes'))
@@ -1648,85 +1752,26 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 				}
 				Core_Session::close();
 
+				$packageOfProposals = isset($this->_oSimpleXMLElement->ПакетПредложений)
+					? $this->_oSimpleXMLElement->ПакетПредложений
+					: $this->_oSimpleXMLElement->ИзмененияПакетаПредложений;
+
+				if (isset($packageOfProposals->ИдКлассификатора))
+				{
+					$this->_loadJson($packageOfProposals->ИдКлассификатора);
+				}
+
 				$classifier = $this->_oSimpleXMLElement->Классификатор;
 
 				// Импортируем дополнительные свойства товаров
 				$this->_importProperties($classifier);
 
-				$packageOfProposals = isset($this->_oSimpleXMLElement->ПакетПредложений)
-					? $this->_oSimpleXMLElement->ПакетПредложений
-					: $this->_oSimpleXMLElement->ИзмененияПакетаПредложений;
-
-				// Обработка специальных цен делается независимо от $importPosition
-				foreach ($this->xpath($packageOfProposals, 'ТипыЦен/ТипЦены') as $oPrice)
-				{
-					$oShopPrice = Core_Entity::factory('Shop', $this->iShopId)
-						->Shop_Prices
-						->getByGuid(strval($oPrice->Ид), FALSE);
-
-					if (is_null($oShopPrice))
-					{
-						$oShopPrice = Core_Entity::factory('Shop_Price');
-						$oShopPrice->shop_id = $this->iShopId;
-						$oShopPrice->guid = strval($oPrice->Ид);
-						$oShopPrice->percent = 100;
-					}
-
-					$oShopPrice->name = strval($oPrice->Наименование);
-
-					// Если это основная цена, обновляем информацию о налоге
-					if (mb_strtoupper($oShopPrice->name) == mb_strtoupper($this->sShopDefaultPriceName))
-					{
-						$sTaxGUID = md5(mb_strtoupper($oPrice->Налог->Наименование));
-						$oShopTax = Core_Entity::factory('Shop_Tax')->getByGuid($sTaxGUID, FALSE);
-
-						// для совместимости с МойСклад
-						if (!is_null($oShopTax))
-						{
-							// В связи с разницей логик HostCMS и 1С по хранению налогов, поле "учтено в сумме" больше не будет импортироваться
-							$iInSum = strval($oPrice->Налог->УчтеноВСумме);
-
-							strtoupper($iInSum) == 'TRUE'
-								? $oShopTax->tax_is_included = 1
-								: $oShopTax->tax_is_included = 0;
-
-							$this->_oTaxForBasePrice = $oShopTax->save();
-						}
-
-						$this->sShopDefaultPriceGUID = $oShopPrice->guid;
-					}
-					else
-					{
-						$oShopPrice->save();
-					}
-				}
+				// CML 2.x: ТипыЦен/ТипЦены
+				$this->_importSpecialPrices($packageOfProposals);
 
 				if ($importPosition == 0)
 				{
-					// Обработка складов
-					foreach ($this->xpath($packageOfProposals, 'Склады/Склад') as $oWarehouse)
-					{
-						$sWarehouseGuid = strval($oWarehouse->Ид);
-
-						$oShopWarehouse = $oShop
-							->Shop_Warehouses
-							->getByGuid($sWarehouseGuid, FALSE);
-
-						if (is_null($oShopWarehouse))
-						{
-							$oShopWarehouse = Core_Entity::factory('Shop_Warehouse');
-							$oShopWarehouse->shop_id = $oShop->id;
-							$oShopWarehouse->guid = $sWarehouseGuid;
-							$oShopWarehouse->name = strval($oWarehouse->Наименование);
-							$oShopWarehouse->address = strval($oWarehouse->Адрес->Представление);
-							$oShopWarehouse->save();
-						}
-
-						/*foreach ($this->xpath($oWarehouse, 'Адрес/АдресноеПоле') as $oWarehouseAddressField)
-						{
-							//echo "Адресное поле: " . strval($oWarehouseAddressField->Тип) . " - " . strval($oWarehouseAddressField->Значение) . "<br/>";
-						}*/
-					}
+					$this->_importWarehouses($packageOfProposals);
 				}
 
 				$xPath = $importPosition == 0
@@ -1807,7 +1852,8 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 							$this->_checkUpdateField('marking') && strval($oProposal->Артикул) != ''
 								&& $oShopItem->marking = strval($oProposal->Артикул);
 
-							$this->_checkUpdateField('name') && $oShopItem->name = strval($oProposal->Наименование);
+							$this->_checkUpdateField('name') && ($this->_bNewShopItem || strval($oProposal->Наименование) != '')
+								&& $oShopItem->name = strval($oProposal->Наименование);
 						}
 
 						// Отключение товара после определения модификация или нет
@@ -1852,11 +1898,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 								if (is_null(Core_Event::getLastReturn()))
 								{
 									// Ищем цену
-									$oShopPrice = $oShop
+									$oShop_Price = $oShop
 										->Shop_Prices
 										->getByGuid(strval($oPrice->ИдТипаЦены), FALSE);
 
-									if (!is_null($oShopPrice)
+									if (!is_null($oShop_Price)
 										&& $this->sShopDefaultPriceGUID != strval($oPrice->ИдТипаЦены))
 									{
 										$itemPrice = strval($oPrice->ЦенаЗаЕдиницу);
@@ -1922,7 +1968,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 										$oShop_Item_Price = $oShopItem
 											->Shop_Item_Prices
-											->getByPriceId($oShopPrice->id, FALSE);
+											->getByPriceId($oShop_Price->id, FALSE);
 
 										$old_price = !is_null($oShop_Item_Price)
 											? $oShop_Item_Price->value
@@ -1933,7 +1979,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											$oShop_Price_Setting = $this->getPrices();
 
 											$oShop_Price_Setting_Item = Core_Entity::factory('Shop_Price_Setting_Item');
-											$oShop_Price_Setting_Item->shop_price_id = $oShopPrice->id;
+											$oShop_Price_Setting_Item->shop_price_id = $oShop_Price->id;
 											$oShop_Price_Setting_Item->shop_item_id = $oShopItem->id;
 											$oShop_Price_Setting_Item->old_price = $old_price;
 											$oShop_Price_Setting_Item->new_price = $itemPrice;
@@ -1943,7 +1989,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 											{
 												$oShop_Item_Price = Core_Entity::factory('Shop_Item_Price');
 												$oShop_Item_Price->shop_item_id = $oShopItem->id;
-												$oShop_Item_Price->shop_price_id = $oShopPrice->id;
+												$oShop_Item_Price->shop_price_id = $oShop_Price->id;
 											}
 											$oShop_Item_Price->value = $itemPrice;
 
@@ -2024,89 +2070,101 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 						if ($this->_checkUpdateField('warehouses'))
 						{
-							$aWarehouses = $this->xpath($oProposal, 'Склад');
+							/*<Предложение>
+							<Ид>c0eba50e-7385-11e8-8001-c4e98401fadf#1ff9c1e7-7388-11e8-8001-c4e98401fadf</Ид>
+							<Остатки>
+								<Остаток>
+									<Склад>
+										<Ид>547f1a9b-88c3-11e7-8035-c4e98401fadf</Ид>
+										<Количество>0</Количество>
+									</Склад>
+								</Остаток>*/
 
-							// Явно переданы остатки по каждому складу
-							if (count($aWarehouses))
+							// CML 3.x: Остатки/Остаток/Склад в rests___xxx.xml
+							if (isset($oProposal->Остатки))
 							{
-								/* <Склад ИдСклада="xxx" КоличествоНаСкладе="10"></Склад>
-								<Склад ИдСклада="yyy" КоличествоНаСкладе="15"></Склад> */
+								$aWarehouses = $this->xpath($oProposal->Остатки, 'Остаток/Склад');
 
 								foreach ($aWarehouses as $oWarehouseCount)
 								{
-									$sWarehouseGuid = strval($oWarehouseCount['ИдСклада']);
-									$sWarehouseCount = strval($oWarehouseCount['КоличествоНаСкладе']);
-
-									$oShopWarehouse = Core_Entity::factory('Shop', $this->iShopId)
-										->Shop_Warehouses
-										->getByGuid($sWarehouseGuid, FALSE);
-
-									if (!is_null($oShopWarehouse))
+									if (isset($oWarehouseCount->Ид) && isset($oWarehouseCount->Количество))
 									{
-										//$rest = $oShopWarehouse->getRest($oShopItem->id);
-										$oShop_Warehouse_Items = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oShopWarehouse->id, FALSE);
-										$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
+										$sWarehouseGuid = strval($oWarehouseCount->Ид);
+										$newRest = strval($oWarehouseCount->Количество);
 
-										$newRest = floatval($sWarehouseCount);
-
-										if (is_null($rest) || $rest != $newRest)
-										{
-											$oShop_Warehouse_Inventory = $this->getInventory($oShopWarehouse->id);
-
-											$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-											$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
-											$oShop_Warehouse_Inventory_Item->count = $newRest;
-											$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
-										}
+										$this->_setWarehouseRest($oShopItem, $sWarehouseGuid, $newRest);
 									}
 								}
 							}
-							// Общее количество на складе по умолчанию
 							else
 							{
-								$iItemCount = 0;
+								/* Новые версии: <Склад ИдСклада="xxx" КоличествоНаСкладе="10"></Склад>
+								<Склад ИдСклада="yyy" КоличествоНаСкладе="15"></Склад> */
+								$aWarehouses = $this->xpath($oProposal, 'Склад');
 
-								foreach ($this->xpath($oProposal, 'Количество') as $oCount)
+								/* 2.07: <Склады ИдСклада="xxx" КоличествоНаСкладе="0"/>
+								<Склады ИдСклада="yyy" КоличествоНаСкладе="2"/> */
+								!count($aWarehouses)
+									&& $aWarehouses = $this->xpath($oProposal, 'Склады');
+
+								// Явно переданы остатки по каждому складу
+								if (count($aWarehouses))
 								{
-									$iItemCount = $oCount;
-								}
-
-								// если нет тега "Количество", ставим количество товара на главном складе равным нулю
-								// Ищем главный склад
-								$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault("1", FALSE);
-
-								if (is_null($oWarehouse))
-								{
-									// Склад не обнаружен
-									$oWarehouse = Core_Entity::factory('Shop_Warehouse');
-									$oWarehouse->name = Core::_("Shop_Warehouse.warehouse_default_name");
-									$oWarehouse->active = 1;
-									$oWarehouse->default = 1;
-									$oWarehouse->shop_id = $this->iShopId;
-									$oWarehouse->save();
-								}
-
-								$rest = $oWarehouse->getRest($oShopItem->id);
-								$newRest = floatval($iItemCount);
-
-								if (is_null($rest) || $rest != $newRest)
-								{
-									$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
-
-									$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
-									$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
-									$oShop_Warehouse_Inventory_Item->count = $newRest;
-									$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
-
-									/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
-									if (is_null($oShop_Warehouse_Item))
+									foreach ($aWarehouses as $oWarehouseCount)
 									{
-										$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
-											->shop_warehouse_id($oWarehouse->id)
-											->shop_item_id($oShopItem->id);
+										if (isset($oWarehouseCount['ИдСклада']) && isset($oWarehouseCount['КоличествоНаСкладе']))
+										{
+											$sWarehouseGuid = strval($oWarehouseCount['ИдСклада']);
+											$newRest = strval($oWarehouseCount['КоличествоНаСкладе']);
+
+											$this->_setWarehouseRest($oShopItem, $sWarehouseGuid, $newRest);
+										}
+									}
+								}
+								// Общее количество на складе по умолчанию
+								else
+								{
+									$iItemCount = isset($oProposal->Количество)
+										? strval($oProposal->Количество)
+										: 0;
+
+									// если нет тега "Количество", ставим количество товара на главном складе равным нулю
+									// Ищем главный склад
+									$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault('1', FALSE);
+
+									if (is_null($oWarehouse))
+									{
+										// Склад не обнаружен
+										$oWarehouse = Core_Entity::factory('Shop_Warehouse');
+										$oWarehouse->name = Core::_("Shop_Warehouse.warehouse_default_name");
+										$oWarehouse->active = 1;
+										$oWarehouse->default = 1;
+										$oWarehouse->shop_id = $this->iShopId;
+										$oWarehouse->save();
 									}
 
-									$oShop_Warehouse_Item->count(floatval($iItemCount))->save();*/
+									$rest = $oWarehouse->getRest($oShopItem->id);
+									$newRest = floatval($iItemCount);
+
+									if (is_null($rest) || $rest != $newRest)
+									{
+										$oShop_Warehouse_Inventory = $this->getInventory($oWarehouse->id);
+
+										$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+										$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+										$oShop_Warehouse_Inventory_Item->count = $newRest;
+										$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+
+										/*$oShop_Warehouse_Item = $oWarehouse->Shop_Warehouse_Items->getByShopItemId($oShopItem->id, FALSE);
+										if (is_null($oShop_Warehouse_Item))
+										{
+											$oShop_Warehouse_Item = Core_Entity::factory('Shop_Warehouse_Item')
+												->shop_warehouse_id($oWarehouse->id)
+												->shop_item_id($oShopItem->id);
+										}
+
+										$oShop_Warehouse_Item->count(floatval($iItemCount))->save();*/
+									}
 								}
 							}
 						}
@@ -2159,7 +2217,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		elseif (count((array)$this->_oSimpleXMLElement->Каталог))
 		{
 			$catalog = $this->_oSimpleXMLElement->Каталог;
-			//$this->xpath($oItemProperty, 'ВариантыЗначений/Справочник')
+
 			foreach ($this->xpath($catalog, 'Свойство') as $oXmlProperty)
 			{
 				$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
@@ -2250,11 +2308,11 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				$oShopItem->shop_group_id = $oShopGroup->id;
 
-				$oShopMeasure = Core_Entity::factory('Shop_Measure')
+				$oShop_Measure = Core_Entity::factory('Shop_Measure')
 					->getByName(strval($oXmlItem->attributes()->Единица), FALSE);
 
-				!is_null($oShopMeasure)
-					&& $oShopItem->shop_measure_id = $oShopMeasure->id;
+				!is_null($oShop_Measure)
+					&& $oShopItem->shop_measure_id = $oShop_Measure->id;
 
 				$oShopItem->save();
 
@@ -2448,6 +2506,7 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					{
 						$oShopItem->shop_currency_id = $oShop_Currency->id;
 					}
+
 					$oShopItem->save();
 
 					$oWarehouse = Core_Entity::factory('Shop', $this->iShopId)->Shop_Warehouses->getByDefault(1, FALSE);
@@ -2502,6 +2561,137 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		return $this->_aReturn;
 	}
 
+	protected function _setWarehouseRest($oShopItem, $sWarehouseGuid, $newRest)
+	{
+		$oShop_Warehouse = Core_Entity::factory('Shop', $this->iShopId)
+			->Shop_Warehouses
+			->getByGuid($sWarehouseGuid, FALSE);
+
+		if (!is_null($oShop_Warehouse))
+		{
+			//$rest = $oShop_Warehouse->getRest($oShopItem->id);
+			$oShop_Warehouse_Items = $oShopItem->Shop_Warehouse_Items->getByWarehouseId($oShop_Warehouse->id, FALSE);
+			$rest = $oShop_Warehouse_Items ? $oShop_Warehouse_Items->count : NULL;
+
+			$newRest = floatval($newRest);
+
+			if (is_null($rest) || $rest != $newRest)
+			{
+				$oShop_Warehouse_Inventory = $this->getInventory($oShop_Warehouse->id);
+
+				$oShop_Warehouse_Inventory_Item = Core_Entity::factory('Shop_Warehouse_Inventory_Item');
+				$oShop_Warehouse_Inventory_Item->shop_item_id = $oShopItem->id;
+				$oShop_Warehouse_Inventory_Item->count = $newRest;
+				$oShop_Warehouse_Inventory->add($oShop_Warehouse_Inventory_Item);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Import warehouses
+	 * @param object $packageOfProposals
+	 * @return self
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportWarehouse
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportWarehouse
+	 */
+	protected function _importWarehouses($packageOfProposals)
+	{
+		$oShop = Core_Entity::factory('Shop', $this->iShopId);
+
+		// Обработка складов
+		foreach ($this->xpath($packageOfProposals, 'Склады/Склад') as $oWarehouse)
+		{
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportWarehouse', $this, array($oWarehouse));
+
+			$sWarehouseGuid = strval($oWarehouse->Ид);
+
+			$oShopWarehouse = $oShop
+				->Shop_Warehouses
+				->getByGuid($sWarehouseGuid, FALSE);
+
+			if (is_null($oShopWarehouse))
+			{
+				$oShopWarehouse = Core_Entity::factory('Shop_Warehouse');
+				$oShopWarehouse->shop_id = $oShop->id;
+				$oShopWarehouse->guid = $sWarehouseGuid;
+				$oShopWarehouse->name = strval($oWarehouse->Наименование);
+				$oShopWarehouse->address = strval($oWarehouse->Адрес->Представление);
+				$oShopWarehouse->save();
+			}
+
+			/*foreach ($this->xpath($oWarehouse, 'Адрес/АдресноеПоле') as $oWarehouseAddressField)
+			{
+				//echo "Адресное поле: " . strval($oWarehouseAddressField->Тип) . " - " . strval($oWarehouseAddressField->Значение) . "<br/>";
+			}*/
+
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportWarehouse', $this, array($oWarehouse, $oShopWarehouse));
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Import Measures
+	 * @param object $packageOfProposals
+	 * @return self
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onBeforeImportMeasure
+	 * @hostcms-event Shop_Item_Import_Cml_Controller.onAfterImportMeasure
+	 */
+	protected function _importMeasures($packageOfProposals)
+	{
+		/* <ЕдиницыИзмерения>
+			<ЕдиницаИзмерения>
+				<Ид>ccdb982a-c231-11e0-b7ae-00e04c4c3fd6</Ид>
+				<НомерВерсии>AAAAAADTkmM=</НомерВерсии>
+				<ПометкаУдаления>false</ПометкаУдаления>
+				<НаименованиеКраткое>шт.</НаименованиеКраткое>
+				<Код>796 </Код>
+				<НаименованиеПолное>Штука</НаименованиеПолное>
+				<МеждународноеСокращение>PCE</МеждународноеСокращение>
+			</ЕдиницаИзмерения>
+		</ЕдиницыИзмерения> */
+		foreach ($this->xpath($packageOfProposals, 'ЕдиницыИзмерения/ЕдиницаИзмерения') as $oNode)
+		{
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onBeforeImportMeasure', $this, array($oNode));
+
+			$okei = trim(strval($oNode->Код));
+
+			// Получаем по коду ОКЕЙ
+			$oShop_Measure = strlen($okei)
+				? Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE)
+				: NULL;
+
+			// Получаем по названию
+			if (is_null($oShop_Measure))
+			{
+				$sMeasure = trim(strval($oNode->НаименованиеКраткое));
+				$sMeasureFull = trim(strval($oNode->НаименованиеПолное));
+
+				$sMeasure == '' && $sMeasure = $sMeasureFull;
+
+				if ($sMeasure != '')
+				{
+					$oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasure, FALSE);
+
+					if (is_null($oShop_Measure))
+					{
+						$oShop_Measure = Core_Entity::factory('Shop_Measure');
+						$oShop_Measure->name = $sMeasure;
+						$oShop_Measure->description = $sMeasureFull;
+						$oShop_Measure->okei = $okei;
+						$oShop_Measure->save();
+					}
+				}
+			}
+
+			Core_Event::notify('Shop_Item_Import_Cml_Controller.onAfterImportMeasure', $this, array($oNode));
+		}
+
+		return $this;
+	}
+
 	/**
 	 * Import list of properties
 	 * @param object $classifier
@@ -2514,7 +2704,10 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 		$oShop = Core_Entity::factory('Shop', $this->iShopId);
 
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $this->iShopId);
-		foreach ($this->xpath($classifier, 'Свойства/Свойство') as $oItemProperty)
+
+		$aProperties = $this->xpath($classifier, 'Свойства/Свойство');
+
+		foreach ($aProperties as $oItemProperty)
 		{
 			$sPropertyGUID = strval($oItemProperty->Ид);
 			$sPropertyName = strval($oItemProperty->Наименование);
@@ -2536,28 +2729,37 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 					$oProperty->name = $sPropertyName;
 					$oProperty->guid = $sPropertyGUID;
 
-					if (strval($oItemProperty->ТипЗначений) == 'Справочник' && Core::moduleIsActive('list'))
+					switch (strval($oItemProperty->ТипЗначений))
 					{
-						$oProperty->type = 3;
+						case 'Справочник':
+							if (Core::moduleIsActive('list'))
+							{
+								$oProperty->type = 3;
 
-						// Check if list exists
-						$oList = $oShop->Site->Lists->getByName($sPropertyName, FALSE);
+								// Check if list exists
+								$oList = $oShop->Site->Lists->getByName($sPropertyName, FALSE);
 
-						// Create new List
-						if (is_null($oList))
-						{
-							$oList = Core_Entity::factory('List');
-							$oList->name = $sPropertyName;
-							$oList->list_dir_id = 0;
-							$oList->site_id = $oShop->site_id;
-							$oList->save();
-						}
+								// Create new List
+								if (is_null($oList))
+								{
+									$oList = Core_Entity::factory('List');
+									$oList->name = $sPropertyName;
+									$oList->list_dir_id = 0;
+									$oList->site_id = $oShop->site_id;
+									$oList->save();
+								}
 
-						$oProperty->list_id = $oList->id;
-					}
-					else
-					{
-						$oProperty->type = 1;
+								$oProperty->list_id = $oList->id;
+								break;
+							}
+						//break;
+						case 'Строка':
+						default:
+							$oProperty->type = 1;
+						break;
+						case 'Число':
+							$oProperty->type = 0;
+						break;
 					}
 
 					$sTagName = Core_Str::transliteration($oProperty->name);
@@ -2637,15 +2839,17 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 	{
 		if (isset($oNode->БазоваяЕдиница))
 		{
-			$okei = trim(strval($oNode->БазоваяЕдиница->attributes()->Код));
+			$okei = is_null($oNode->БазоваяЕдиница->attributes()->Код)
+				? trim(strval($oNode->БазоваяЕдиница)) // CML 3.x: Товар/БазоваяЕдиница
+				: trim(strval($oNode->БазоваяЕдиница->attributes()->Код));
 
 			// Получаем по коду ОКЕЙ
-			$oShopMeasure = strlen($okei)
+			$oShop_Measure = strlen($okei)
 				? Core_Entity::factory('Shop_Measure')->getByOkei($okei, FALSE)
 				: NULL;
 
 			// Получаем по названию
-			if (is_null($oShopMeasure))
+			if (is_null($oShop_Measure))
 			{
 				$sMeasure = trim(strval($oNode->БазоваяЕдиница));
 				$sMeasureFull = trim(strval($oNode->БазоваяЕдиница->attributes()->НаименованиеПолное));
@@ -2654,21 +2858,21 @@ class Shop_Item_Import_Cml_Controller extends Core_Servant_Properties
 
 				if ($sMeasure != '')
 				{
-					$oShopMeasure = Core_Entity::factory('Shop_Measure')->getByName($sMeasure, FALSE);
+					$oShop_Measure = Core_Entity::factory('Shop_Measure')->getByName($sMeasure, FALSE);
 
-					if (is_null($oShopMeasure))
+					if (is_null($oShop_Measure))
 					{
-						$oShopMeasure = Core_Entity::factory('Shop_Measure');
-						$oShopMeasure->name = $sMeasure;
-						$oShopMeasure->description = $sMeasureFull;
-						$oShopMeasure->okei = $okei;
-						$oShopMeasure->save();
+						$oShop_Measure = Core_Entity::factory('Shop_Measure');
+						$oShop_Measure->name = $sMeasure;
+						$oShop_Measure->description = $sMeasureFull;
+						$oShop_Measure->okei = $okei;
+						$oShop_Measure->save();
 					}
 				}
 			}
 
-			!is_null($oShopMeasure)
-				&& $oShopItem->shop_measure_id = $oShopMeasure->id;
+			!is_null($oShop_Measure)
+				&& $oShopItem->shop_measure_id = $oShop_Measure->id;
 		}
 
 		return $this;

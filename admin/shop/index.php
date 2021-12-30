@@ -3,7 +3,7 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -161,6 +161,7 @@ if (!is_null(Core_Array::getGet('autocomplete'))
 					'currency_id' => $price_mode == 'shop' ? $oShop_Currency->id : $oShop_Item->Shop_Currency->id,
 					'currency' => $price_mode == 'shop' ? $oShop_Currency->name : $oShop_Item->Shop_Currency->name,
 					'measure' => $measureName,
+					'measure_id' => $oShop_Item->shop_measure_id,
 					'count' => $rest,
 					'image_small' => $imageSmall,
 					'aPrices' => $aPrices,

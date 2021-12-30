@@ -4,7 +4,7 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -51,4 +51,7 @@ return array(
 	'coupon_text' => "Coupon",
 	'public' => "Upload to Y.Market",
 	'percent_error' => "Discount cannot be more than 100%!",
+	'siteuser_groups' => "Access Group",
+	'all' => 'All',
+	'not_apply_purchase_discount' => 'Do not apply discounts on order amount'
 );

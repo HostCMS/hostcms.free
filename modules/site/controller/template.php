@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Site_Controller_Template extends Core_Servant_Properties
 {
@@ -101,7 +101,7 @@ class Site_Controller_Template extends Core_Servant_Properties
 	 */
 	static public function getDriverName()
 	{
-		$aConfig = Core::$config->get('core_http');
+		$aConfig = Core::$config->get('core_http', array());
 
 		$driverName = $aConfig['default']['driver'];
 

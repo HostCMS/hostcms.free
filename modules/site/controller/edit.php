@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -110,7 +110,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oSiteTabCacheRow2 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabCacheRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oSiteTabCacheRow4 = Admin_Form_Entity::factory('Div')->class('row'));
-			
+
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		/* $oMainRow1 */
@@ -194,11 +194,13 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$oMainTab->move($this->getField('max_size_load_image_big'), $oMainRow3);
 
 		/* $oMainRow4 */
-		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$this->getField('admin_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 		$oMainTab->move($this->getField('admin_email'), $oMainRow4);
-		$this->getField('error_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$this->getField('error_email')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 		$oMainTab->move($this->getField('error_email'), $oMainRow4);
-		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'));
+		$this->getField('sender_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
+		$oMainTab->move($this->getField('sender_name'), $oMainRow4);
+		$this->getField('lng')->divAttr(array('class' => 'form-group col-xs-12 col-sm-3'));
 		$oMainTab->move($this->getField('lng'), $oMainRow4);
 
 		/* $oMainRow5 */
@@ -214,7 +216,7 @@ class Site_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 		/* $oMainRow7 */
 		$sFormPath = $this->_Admin_Form_Controller->getPath();
-		
+
 		$oFavicon = Admin_Form_Entity::factory('File');
 		$oFavicon
 			->type('file')

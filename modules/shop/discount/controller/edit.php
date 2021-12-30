@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -45,6 +45,7 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			->add($oMainRow3 = Admin_Form_Entity::factory('Div')->class('row'))
 			//->add($oMainRow4 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oDaysBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
+			->add($oSiteuserGroupBlock = Admin_Form_Entity::factory('Div')->class('well with-header well-sm'))
 			->add($oMainRow5 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow6 = Admin_Form_Entity::factory('Div')->class('row'));
 
@@ -71,8 +72,46 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainTab->move($this->getField('day6')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2'))->class('colored-danger'), $oDaysBlockRow1);
 		$oMainTab->move($this->getField('day7')->divAttr(array('class' => 'form-group col-xs-6 col-sm-4 col-md-3 col-lg-2'))->class('colored-danger'), $oDaysBlockRow1);
 
-		$oMainTab->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
-		$oMainTab->move($this->getField('public')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')), $oMainRow5);
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Shop_Discount.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$oSiteuserGroupBlock
+			->add(Admin_Form_Entity::factory('Div')
+				->class('header bordered-azure')
+				->value(Core::_("Shop_Discount.siteuser_groups"))
+			)
+			->add($oSiteuserGroupBlockRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$aTmp = array();
+
+		$aShop_Discount_Siteuser_Groups = $this->_object->Shop_Discount_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+		{
+			!in_array($oShop_Discount_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Discount_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$oSiteuserGroupBlockRow1->add($oCheckbox = Admin_Form_Entity::factory('Checkbox')
+				->divAttr(array('class' => 'form-group col-xs-12 col-md-4'))
+				->name('siteuser_group_' . $siteuser_group_id)
+				->caption(htmlspecialchars($name))
+			);
+
+			in_array($siteuser_group_id, $aTmp) && $oCheckbox->checked('checked');
+		}
+
+		$oMainTab
+			->move($this->getField('active')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow5)
+			->move($this->getField('not_apply_purchase_discount')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21'))->class('colored-danger times'), $oMainRow5)
+			->move($this->getField('public')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4 margin-top-21')), $oMainRow5);
 
 		$oMainTab->move($this->getField('url')->divAttr(array('class' => 'form-group col-xs-12'))->placeholder('https://'), $oMainRow6);
 
@@ -139,6 +178,50 @@ class Shop_Discount_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 			$this->addMessage(
 				Core_Message::get(Core::_('Shop_Discount.percent_error'), 'error')
 			);
+		}
+
+		// Группа доступа
+		$aSiteuser_Groups = array(0 => Core::_('Structure.all'));
+
+		if (Core::moduleIsActive('siteuser'))
+		{
+			$oSiteuser_Controller_Edit = new Siteuser_Controller_Edit($this->_Admin_Form_Action);
+			$aSiteuser_Groups = $aSiteuser_Groups + $oSiteuser_Controller_Edit->fillSiteuserGroups($this->_object->Shop->site_id);
+		}
+
+		$aTmp = array();
+
+		$aShop_Discount_Siteuser_Groups = $this->_object->Shop_Discount_Siteuser_Groups->findAll(FALSE);
+		foreach ($aShop_Discount_Siteuser_Groups as $oShop_Discount_Siteuser_Group)
+		{
+			!in_array($oShop_Discount_Siteuser_Group->siteuser_group_id, $aTmp)
+				&& $aTmp[] = $oShop_Discount_Siteuser_Group->siteuser_group_id;
+		}
+
+		foreach ($aSiteuser_Groups as $siteuser_group_id => $name)
+		{
+			$bSiteuserGroupChecked = Core_Array::getPost('siteuser_group_' . $siteuser_group_id);
+
+			if ($bSiteuserGroupChecked)
+			{
+				if (!in_array($siteuser_group_id, $aTmp))
+				{
+
+					$oShop_Discount_Siteuser_Group = Core_Entity::factory('Shop_Discount_Siteuser_Group');
+					$oShop_Discount_Siteuser_Group->siteuser_group_id = $siteuser_group_id;
+					$this->_object->add($oShop_Discount_Siteuser_Group);
+				}
+			}
+			else
+			{
+				if (in_array($siteuser_group_id, $aTmp))
+				{
+					$oShop_Discount_Siteuser_Group = $this->_object->Shop_Discount_Siteuser_Groups->getObject($this->_object, $siteuser_group_id);
+
+					!is_null($oShop_Discount_Siteuser_Group)
+						&& $oShop_Discount_Siteuser_Group->delete();
+				}
+			}
 		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));

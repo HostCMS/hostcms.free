@@ -45,7 +45,7 @@ return array (
 		'system' => array(
 			'ico' => 'fa fa-gear',
 			'caption' => Core::_('Skin_Bootstrap.admin_menu_system'),
-			'modules' => array('site', 'eventlog', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'constant', 'restapi', 'ipaddress'),
+			'modules' => array('site', 'eventlog', 'notification', 'field', 'benchmark', 'admin_form', 'module', 'constant', 'restapi', 'webhook', 'ipaddress'),
 		),
 		'cache' => array(
 			'ico' => 'fa fa-archive',

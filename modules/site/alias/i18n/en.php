@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Site
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Domains',
@@ -43,9 +43,12 @@ return array(
 	'server_error_respond_10' => 'Error 10. Please contact the support.',
 	'server_error_respond_data' => 'Error while processing data.',
 	'site_delete_domens_message' => 'Domains deleted successfully!',
-	'getKey_success' => 'Key received successfully.',
+	'getKey_success' => 'Key received successfully!',
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
 	'redirect' => '<acronym title="Use 301 redirect to base domain">Redirect</acronym>',
 	'setRedirect_success' => 'Information has been saved',
+	'get_key' => 'Get key',
+	'select_site' => 'Site',
+	'move_success' => 'Domain moved successfully!',
 );

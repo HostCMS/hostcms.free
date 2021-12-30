@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -15,23 +15,24 @@ class Field_Controller
 {
 	/**
 	 * Array of model's fields
-	 * @var array|NULL
+	 * @var array
 	 */
-	static protected $_fields = NULL;
+	static protected $_fields = array();
 
 	/**
 	 * Fill Model's Fields Cache
+	 * @param int $site_id
 	 */
-	static protected function _fillFields()
+	static protected function _fillFields($site_id)
 	{
-		if (is_null(self::$_fields) && defined('CURRENT_SITE'))
+		if (!isset(self::$_fields[$site_id]))
 		{
-			self::$_fields = array();
+			self::$_fields[$site_id] = array();
 
 			$oFields = Core_Entity::factory('Field');
 			$oFields->queryBuilder()
 				->open()
-					->where('fields.site_id', '=', CURRENT_SITE)
+					->where('fields.site_id', '=', $site_id)
 					->setOr()
 					->where('fields.site_id', '=', 0)
 				->close()
@@ -42,7 +43,7 @@ class Field_Controller
 
 			foreach ($aFields as $oField)
 			{
-				self::$_fields[$oField->model][] = $oField;
+				self::$_fields[$site_id][$oField->model][] = $oField;
 			}
 		}
 	}
@@ -50,15 +51,25 @@ class Field_Controller
 	/**
 	 * Get Model Filelds
 	 * @param string $modelName Model name
+	 * @param int $site_id if NULL uses CURRENT_SITE, default NULL
 	 * @return array
 	 */
-	static public function getFields($modelName)
+	static public function getFields($modelName, $site_id = NULL)
 	{
-		self::_fillFields();
+		is_null($site_id)
+			&& defined('CURRENT_SITE')
+			&& $site_id = CURRENT_SITE;
 
-		return isset(self::$_fields[$modelName])
-			? self::$_fields[$modelName]
-			: array();
+		if ($site_id)
+		{
+			self::_fillFields($site_id);
+
+			return isset(self::$_fields[$site_id][$modelName])
+				? self::$_fields[$site_id][$modelName]
+				: array();
+		}
+
+		return array();
 	}
 
 	/**

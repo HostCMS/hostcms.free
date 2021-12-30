@@ -9,6 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств товаров, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств товаров, по умолчанию TRUE
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - modifications(TRUE|FALSE) показывать модификации для выбранных товаров, по умолчанию FALSE
  * - specialprices(TRUE|FALSE) показывать специальные цены для выбранных товаров, по умолчанию FALSE
  * - commentsRating(TRUE|FALSE) показывать оценки комментариев для выбранных товаров, по умолчанию FALSE
@@ -33,7 +34,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -47,6 +48,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		'favoriteUrl',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'sortPropertiesValues',
 		'modifications',
 		'specialprices',
 		'commentsRating',
@@ -97,7 +99,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 		);
 
 		$this->itemsProperties = $this->modifications = $this->specialprices = $this->commentsRating = FALSE;
-		$this->itemsPropertiesList = TRUE;
+		$this->itemsPropertiesList = $this->sortPropertiesValues = TRUE;
 		$this->limit = 10;
 
 		$this->offset = $this->page = 0;
@@ -221,7 +223,7 @@ class Shop_Favorite_Controller_Show extends Core_Controller
 				if (!is_null($oShop_Item->id))
 				{
 					$oShop_Favorite
-						->showXmlProperties($this->itemsProperties)
+						->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues)
 						->showXmlModifications($this->modifications)
 						->showXmlSpecialprices($this->specialprices)
 						->showXmlCommentsRating($this->commentsRating);

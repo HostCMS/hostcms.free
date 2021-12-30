@@ -3,7 +3,7 @@
  * Benchmark.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -768,7 +768,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 									->value(Core::_('Benchmark.convert'))
 									->class('btn btn-default')
 									->onclick(
-										$oAdmin_Form_Controller->getAdminSendForm(array('action' => 'convertTables'))
+										$oAdmin_Form_Controller->clearChecked()->getAdminSendForm(array('action' => 'convertTables', 'additionalParams' => ''))
 									)
 									->execute();
 								?>
@@ -917,7 +917,7 @@ function benchmarkShow($oAdmin_Form_Controller)
 									->value(Core::_('Benchmark.convert'))
 									->class('btn btn-default')
 									->onclick(
-										$oAdmin_Form_Controller->getAdminSendForm(array('action' => 'convertCharsets'))
+										$oAdmin_Form_Controller->clearChecked()->getAdminSendForm(array('action' => 'convertCharsets', 'additionalParams' => ''))
 									)
 									->execute();
 								?>

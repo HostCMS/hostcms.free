@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Property
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -146,7 +146,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	public function fillTab()
 	{
 		$aTmp_Property_Values = $this->_object->id
-			? $this->_object->getPropertyValues(FALSE)
+			? $this->_object->getPropertyValues(FALSE, array(), TRUE)
 			: array();
 
 		$this->_property_values = array();
@@ -241,7 +241,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 	*/
 	protected function _setPropertyDirs($property_dir_id, $parentObject)
 	{
-		$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Section')
+		$oAdmin_Form_Entity_Panel = Admin_Form_Entity::factory('Section')
 			->caption($property_dir_id == 0
 				? Core::_('Property_Dir.main_section')
 				: htmlspecialchars(Core_Entity::factory('Property_Dir', $property_dir_id)->name)
@@ -259,7 +259,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 		foreach ($aProperties as $oProperty)
 		{
-			$this->_addIntoSection($oAdmin_Form_Entity_Section, $oProperty);
+			$this->_addIntoSection($oAdmin_Form_Entity_Panel, $oProperty);
 		}
 
 		// Property Dirs
@@ -272,7 +272,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		$aProperty_Dirs = $oProperty_Dirs->findAll();
 		foreach ($aProperty_Dirs as $oProperty_Dir)
 		{
-			$this->_setPropertyDirs($oProperty_Dir->id, $property_dir_id == 0 ? $this->_tab : $oAdmin_Form_Entity_Section);
+			$this->_setPropertyDirs($oProperty_Dir->id, $property_dir_id == 0 ? $this->_tab : $oAdmin_Form_Entity_Panel);
 		}
 
 		// Оставшиеся значения выводятся внизу
@@ -280,16 +280,16 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		{
 			foreach ($this->_property_values as $property_id => $aProperty_Values)
 			{
-				$this->_addIntoSection($oAdmin_Form_Entity_Section, Core_Entity::factory('Property', $property_id));
+				$this->_addIntoSection($oAdmin_Form_Entity_Panel, Core_Entity::factory('Property', $property_id));
 			}
 		}
 
-		Core_Event::notify('Property_Controller_Tab.onBeforeAddSection', $this, array($oAdmin_Form_Entity_Section, $property_dir_id));
+		Core_Event::notify('Property_Controller_Tab.onBeforeAddSection', $this, array($oAdmin_Form_Entity_Panel, $property_dir_id));
 
-		$oAdmin_Form_Entity_Section->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Section);
+		$oAdmin_Form_Entity_Panel->getCountChildren() && $parentObject->add($oAdmin_Form_Entity_Panel);
 	}
 
-	protected function _addIntoSection($oAdmin_Form_Entity_Section, $oProperty)
+	protected function _addIntoSection($oAdmin_Form_Entity_Panel, $oProperty)
 	{
 		/*$aProperty_Values = $this->_object->id
 			? $oProperty->getValues($this->_object->id, FALSE)
@@ -304,6 +304,11 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		{
 			$aProperty_Values = array();
 		}
+
+		$oAdmin_Form_Entity_Panel->add(
+			$oAdmin_Form_Entity_Section = Admin_Form_Entity::factory('Div')
+				->class('section-' . $oProperty->id)
+		);
 
 		$oAdmin_Form_Entity = NULL;
 
@@ -386,7 +391,7 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							->smallImage($smallImage)
 							->crop(TRUE);
 
-						$width = 710;
+						// $width = 710;
 					break;
 
 					/*case 3: // List
@@ -430,7 +435,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 							$this->_correctPrintValue($oProperty, $oProperty->default_value)
 						)
 						->divAttr(array(
-							'class' => ($oProperty->type != 2 ? 'form-group' : '')
+							'class' => //($oProperty->type != 2 ? 'form-group' : 'input-group')
+								'form-group'
 								. (
 									($oProperty->type == 7 || $oProperty->type == 8 || $oProperty->type == 9)
 									? ' col-xs-12 col-sm-7 col-md-6 col-lg-5'
@@ -449,14 +455,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 					{
 						Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty));
 
+						$oDiv_Group = Admin_Form_Entity::factory('Div')
+							->class($oProperty->multiple ? 'input-group' : '')
+							->add($oAdmin_Form_Entity);
+
 						$oAdmin_Form_Entity_Section->add(
 							Admin_Form_Entity::factory('Div')
 								->class('row')
 								->id("property_{$oProperty->id}")
-								->add($oAdmin_Form_Entity)
+								->add($oDiv_Group)
 						);
 
-						$oProperty->multiple && $this->imgBox($oAdmin_Form_Entity, $oProperty);
+						$oProperty->multiple && $this->imgBox($oDiv_Group, $oProperty);
 					}
 					else
 					{
@@ -530,16 +540,20 @@ class Property_Controller_Tab extends Core_Servant_Properties
 
 							Core_Event::notify('Property_Controller_Tab.onBeforeAddFormEntity', $this, array($oNewAdmin_Form_Entity, $oAdmin_Form_Entity_Section, $oProperty, $oProperty_Value));
 
+							$oDiv_Group = Admin_Form_Entity::factory('Div')
+								->class($oProperty->multiple ? 'input-group' : '')
+								->add($oNewAdmin_Form_Entity);
+
 							$oAdmin_Form_Entity_Section->add(
 								Admin_Form_Entity::factory('Div')
 									->class('row')
 									->id("property_{$oProperty->id}")
-									->add($oNewAdmin_Form_Entity)
+									->add($oDiv_Group)
 							);
 
 							// Визуальный редактор клонировать запрещено
 							$oProperty->multiple /*&& $oProperty->type != 6*/
-								&& $this->imgBox($oNewAdmin_Form_Entity, $oProperty, '$.cloneProperty', $this->getImgDeletePath());
+								&& $this->imgBox($oDiv_Group, $oProperty, '$.cloneProperty', $this->getImgDeletePath());
 						}
 					}
 				}
@@ -841,6 +855,45 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				Core_Event::notify('Property_Controller_Tab.onSetPropertyType', $this, array($oAdmin_Form_Entity_Section, $oProperty, $aProperty_Values));
 		}
 
+		if ($oProperty->multiple)
+		{
+			$oAdmin_Form_Entity_Section->add(Core::factory('Core_Html_Entity_Script')->value("
+				$('.section-" . $oProperty->id . "').sortable({
+					connectWith: '.section-" . $oProperty->id . "',
+					items: '> div#property_" . $oProperty->id . "',
+					scroll: false,
+					placeholder: 'placeholder',
+					tolerance: 'pointer',
+					// appendTo: 'body',
+					// helper: 'clone',
+					helper: function(event, ui) {
+						var jUi = $(ui),
+							clone = jUi.clone();
+
+						// установить актуальные выбранные элементы у склонированных списков
+						jUi.find('select').each(function(index, object){
+							clone.find('#' + object.id).val($(object).val());
+						});
+
+						return clone.css('position','absolute').get(0);
+					},
+					start: function(event, ui) {
+						// Ghost show
+						$('.section-" . $oProperty->id . "').find('div#property_" . $oProperty->id . ":hidden')
+							.addClass('ghost-item')
+							.css('opacity', .5)
+							.show();
+					},
+					stop: function(event, ui) {
+						// Ghost hide
+						$('.section-" . $oProperty->id . "').find('div.ghost-item')
+							.removeClass('ghost-item')
+							.css('opacity', 1);
+					}
+				}).disableSelection();
+			"));
+		}
+
 		return $this;
 	}
 
@@ -891,10 +944,8 @@ class Property_Controller_Tab extends Core_Servant_Properties
 				&& $oAdmin_Form_Entity_ListItemsInput->format(array('minlen' => array('value' => 1)));
 		}
 
-		$input_group = $oProperty->multiple ? 'input-group' : '';
-
 		$oDiv_Group = Admin_Form_Entity::factory('Div')
-			->class($input_group)
+			->class($oProperty->multiple ? 'input-group' : '')
 			->add($oAdmin_Form_Entity_ListItemsSelect)
 			->add($oAdmin_Form_Entity_ListItemsInput)
 			->add($oAdmin_Form_Entity_Autocomplete_Select);
@@ -1640,12 +1691,32 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		return $this->linkedObject->Properties;
 	}
 
+	protected $_aSortings = array();
+	protected $_aSortingTree = array();
+
 	protected function _setValue($oProperty_Value, $value)
 	{
+		!isset($this->_aSortings[$oProperty_Value->property_id])
+			&& $this->_aSortings[$oProperty_Value->property_id] = 0;
+
+		if ($oProperty_Value->id)
+		{
+			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
+			if (isset($this->_aSortingTree[$oProperty_Value->property_id]))
+			{
+				$sorting = array_search($oProperty_Value->id, $this->_aSortingTree[$oProperty_Value->property_id]);
+			}
+		}
+		else
+		{
+			$sorting = $this->_aSortings[$oProperty_Value->property_id]++;
+		}
+
 		$value = $this->_correctValue($oProperty_Value->Property, $value);
 
 		$oProperty_Value
 			->setValue($value)
+			->sorting($sorting)
 			->save();
 
 		return $this;
@@ -1664,6 +1735,18 @@ class Property_Controller_Tab extends Core_Servant_Properties
 		Core_Event::notify('Property_Controller_Tab.onBeforeApplyObjectProperty', $this, array($this->_Admin_Form_Controller, $aProperties));
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		foreach ($_POST as $key => $value)
+		{
+			if (strpos($key, 'property_') === 0)
+			{
+				$aTmp = explode('_', $key);
+				if (count($aTmp) == 3)
+				{
+					$this->_aSortingTree[$aTmp[1]][] = $aTmp[2];
+				}
+			}
+		}
 
 		// Values already exist
 		$aProperty_Values = $this->_object->getPropertyValues(FALSE);

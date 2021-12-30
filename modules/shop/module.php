@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -17,13 +17,13 @@ class Shop_Module extends Core_Module
 	 * Module version
 	 * @var string
 	 */
-	public $version = '6.9';
+	public $version = '7.0';
 
 	/**
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-08-23';
+	public $date = '2021-12-03';
 
 	/**
 	 * Module name
@@ -443,6 +443,7 @@ class Shop_Module extends Core_Module
 			->join('shops', 'shop_filter_seos.shop_id', '=', 'shops.id')
 			->where('shop_filter_seos.deleted', '=', 0)
 			->where('shop_filter_seos.active', '=', 1)
+			->where('shop_filter_seos.indexing', '=', 1)
 			->where('shops.deleted', '=', 0)
 			->clearOrderBy()
 			->orderBy('shop_filter_seos.id')
@@ -847,4 +848,5 @@ class Shop_Module extends Core_Module
 		'popularItems' => array('Shop_Report_Controller', 'popularItems'),
 		'popularProducers' => array('Shop_Report_Controller', 'popularProducers')
 	);
+
 }

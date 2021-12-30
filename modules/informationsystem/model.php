@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -73,8 +73,8 @@ class Informationsystem_Model extends Core_Entity
 		'image_small_max_width' => 70,
 		'image_small_max_height' => 70,
 		'url_type' => 0,
-		'typograph_default_items' => 0,
-		'typograph_default_groups' => 0,
+		'typograph_default_items' => 1,
+		'typograph_default_groups' => 1,
 		'apply_tags_automatically' => 1,
 		'change_filename' => 1,
 		'apply_keywords_automatically' => 1,

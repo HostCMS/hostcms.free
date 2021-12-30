@@ -16,4 +16,5 @@ return array(
 	'model_name' => 'Розділ користувальницьких полів',
 	'apply_success' => 'Інформацію змінено',
 	'markDeleted_success' => 'Розділ видалено',
+	'sorting' => 'Сортування',
 );

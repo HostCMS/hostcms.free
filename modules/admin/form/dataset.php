@@ -7,7 +7,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -36,6 +36,12 @@ abstract class Admin_Form_Dataset
 	 * @var array
 	 */
 	protected $_changedFields = array();
+	
+	/**
+	 * List of changed actions
+	 * @var array
+	 */
+	protected $_changedActions = array();
 
 	/**
 	 * Form controller
@@ -165,12 +171,10 @@ abstract class Admin_Form_Dataset
 	}
 
 	/**
-	 * Изменение данных поля Admin_Form_Field для источника
-	 * используется, например, для изменение типа выводимого поля
 	 * Change the data for the field Admin_Form_Field
 	 * @param string $name field name
-	 * @param string $property property name
-	 * @param string $value property value
+	 * @param string $property field's property name
+	 * @param string $value field's property value
 	 * @return self
 	 */
 	public function changeField($name, $property, $value)
@@ -188,6 +192,31 @@ abstract class Admin_Form_Dataset
 	{
 		return isset($this->_changedFields[$name])
 			? $this->_changedFields[$name]
+			: NULL;
+	}
+
+	/**
+	 * Change the data for the action Admin_Form_Action
+	 * @param string $name action name
+	 * @param string $property action's property name
+	 * @param string $value action's property value
+	 * @return self
+	 */
+	public function changeAction($name, $property, $value)
+	{
+		$this->_changedActions[$name][$property] = $value;
+		return $this;
+	}
+
+	/**
+	 * Get changed field
+	 * @param string $name field name
+	 * @return string
+	 */
+	public function getActionChanges($name)
+	{
+		return isset($this->_changedActions[$name])
+			? $this->_changedActions[$name]
 			: NULL;
 	}
 

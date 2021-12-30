@@ -19,6 +19,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - groupsForbiddenTags(array('description')) массив тегов групп, запрещенных к передаче в генерируемый XML
  * - item(123) идентификатор показываемого информационного элемента
  * - itemsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств информационных элементов, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
+ * - sortPropertiesValues(TRUE|FALSE) сортировать значения дополнительных свойств, по умолчанию TRUE.
  * - itemsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств информационных элементов, по умолчанию TRUE
  * - commentsProperties(TRUE|FALSE|array()) выводить значения дополнительных свойств комментариев, по умолчанию FALSE. Может принимать массив с идентификаторами дополнительных свойств, значения которых необходимо вывести.
  * - commentsPropertiesList(TRUE|FALSE|array()) выводить список дополнительных свойств комментариев, по умолчанию TRUE.
@@ -66,7 +67,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
  * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
@@ -87,6 +88,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 		'item',
 		'itemsProperties',
 		'itemsPropertiesList',
+		'sortPropertiesValues',
 		'commentsProperties',
 		'commentsPropertiesList',
 		'itemsForbiddenTags',
@@ -276,7 +278,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			= $this->tags = $this->calculateCounts = $this->siteuserProperties = FALSE;
 
 		$this->siteuser = $this->cache = $this->itemsPropertiesList = $this->commentsPropertiesList = $this->groupsPropertiesList
-			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = TRUE;
+			= $this->votes = $this->showPanel = $this->calculateTotal = $this->parts = $this->sortPropertiesValues = TRUE;
 
 		$this->groupsMode = 'tree';
 		$this->part = 1;
@@ -854,7 +856,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 							->commentsActivity($this->commentsActivity);
 
 						// Properties for informationsystem's item entity
-						$oInformationsystem_Item->showXmlProperties($this->itemsProperties);
+						$oInformationsystem_Item->showXmlProperties($this->itemsProperties, $this->sortPropertiesValues);
 						$oInformationsystem_Item->showXmlCommentProperties($this->commentsProperties);
 
 						// Tags
@@ -869,10 +871,10 @@ class Informationsystem_Controller_Show extends Core_Controller
 							->showXmlSiteuserProperties($this->siteuserProperties);
 
 						// <!-- pagebreak -->
-						if ($this->parts && ($this->part || $this->item))
-						{
-							$oInformationsystem_Item->showXmlPart($this->part);
-						}
+						$oInformationsystem_Item->showXmlPart($this->parts && ($this->part || $this->item)
+							? $this->part
+							: 0
+						);
 
 						$this->addEntity($oInformationsystem_Item);
 					}
@@ -1815,7 +1817,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$oXslSubPanel->add(
 				Core::factory('Core_Html_Entity_A')
 					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
+					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false }")
 					->add(
 						Core::factory('Core_Html_Entity_Img')
 							->width(16)->height(16)

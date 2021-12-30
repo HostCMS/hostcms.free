@@ -50,6 +50,7 @@ return array(
 	'important_view' => 'Important',
 	'all_day' => 'All day',
 	'result' => 'Result',
+	'creator' => 'Event creator',
 	'busy' => 'Busy',
 	'month_01' => 'January %s',
 	'month_02' => 'February %s',
