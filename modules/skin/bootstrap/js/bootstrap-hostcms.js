@@ -581,7 +581,7 @@ function isEmpty(str) {
 		resizeIframe: function(object) {
 			if (object.contentWindow !== null)
 			{
-				console.log(object.contentWindow);
+				//console.log(object.contentWindow);
 
 				setTimeout(function (e) {
 					object.style.height = (object.contentWindow.document.documentElement.scrollHeight) + 'px';
@@ -2804,8 +2804,8 @@ function isEmpty(str) {
 		},
 		chatGetUserMessages: function (event)
 		{
-			console.log('chatGetUserMessages');
-			
+			//console.log('chatGetUserMessages');
+
 			// add ajax '_'
 			var data = $.getData({});
 			data['user-id'] = $(this).data('user-id');
@@ -2820,8 +2820,8 @@ function isEmpty(str) {
 		},
 		chatGetUserMessagesCallback: function(result)
 		{
-			console.log('chatGetUserMessagesCallback');
-			
+			//console.log('chatGetUserMessagesCallback');
+
 			// Hide contact list
 			$('#chatbar .chatbar-contacts').css("display","none");
 
@@ -2853,7 +2853,7 @@ function isEmpty(str) {
 			if (result['messages'])
 			{
 				$.each(result['messages'], function(i, object) {
-					console.log('addChatMessage from chatGetUserMessagesCallback')
+					//console.log('addChatMessage from chatGetUserMessagesCallback')
 					$.addChatMessage(recipientUserInfo, userInfo, object, 0);
 				});
 
@@ -2936,8 +2936,8 @@ function isEmpty(str) {
 		},
 
 		addChatMessage: function(recipientUserInfo, userInfo, object, bDirectOrder) {
-			
-			console.log('addChatMessage');
+
+			//console.log('addChatMessage');
 			if (recipientUserInfo.id != userInfo.id)
 			{
 				var jClone = $(".message.hidden").eq(0).clone(),
@@ -3089,8 +3089,8 @@ function isEmpty(str) {
 							firstMessage = result['messages'].length - 1; // ID верхнего (более раннего) сообщения в списке
 
 						$.each(result['messages'], function(i, object) {
-							
-							console.log('addChatMessage from uploadingMessagesList');
+
+							//console.log('addChatMessage from uploadingMessagesList');
 							$.addChatMessage(recipientUserInfo, userInfo, object, 0);
 						});
 
@@ -3124,15 +3124,15 @@ function isEmpty(str) {
 		},
 		refreshMessagesListCallback: function(result)
 		{
-			console.log('refreshMessagesListCallback', 'result= ', result);
-			
+			//console.log('refreshMessagesListCallback', 'result= ', result);
+
 			var jMessagesList = $('.chatbar-messages .messages-list');
 
 			if (result['messages'])
 			{
 				$.each(result['messages'], function(i, object) {
-					
-					console.log('addChatMessage from refreshMessagesListCallback');
+
+					//console.log('addChatMessage from refreshMessagesListCallback');
 					$.addChatMessage(result['recipient-user-info'], result['user-info'], object, 1);
 				});
 
@@ -3196,12 +3196,12 @@ function isEmpty(str) {
 			}
 		},
 		refreshMessagesList: function(recipientUserId) {
-			
-			console.log('refreshMessagesList');
-			
+
+			//console.log('refreshMessagesList');
+
 			var refreshMessagesListIntervalId = setInterval(function () {
-				
-				console.log('setInterval refreshMessagesList');
+
+				//console.log('setInterval refreshMessagesList');
 
 				var jMessagesList = $('.chatbar-messages .messages-list'),
 					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=81',
@@ -3229,7 +3229,7 @@ function isEmpty(str) {
 						}
 						else
 						{
-							console.log('refreshMessagesListCallback from refreshMessagesList 1111')
+							//console.log('refreshMessagesListCallback from refreshMessagesList 1111')
 							$.refreshMessagesListCallback(storageObj);
 						}
 					} catch(e) {
@@ -3265,7 +3265,7 @@ function isEmpty(str) {
 									console.log('nameStorage: chat_messages_list, localStorage: ' + e);
 								// }
 							}
-						}, function(result){ console.log('refreshMessagesListCallback from refreshMessagesList 222222');  $.refreshMessagesListCallback(result)}]
+						}, $.refreshMessagesListCallback /*function(result){ console.log('refreshMessagesListCallback from refreshMessagesList 222222');  $.refreshMessagesListCallback(result)}*/ ]
 					});
 				}
 			}, 10000);
