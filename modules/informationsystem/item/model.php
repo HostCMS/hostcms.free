@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Informationsystem
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Item_Model extends Core_Entity
 {
@@ -939,13 +939,13 @@ class Informationsystem_Item_Model extends Core_Entity
 			? $this->Informationsystem_Item
 			: $this;
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 		if ($this->closed)
 		{
 			$oCore_Html_Entity_Div
 			->add(
-				Core::factory('Core_Html_Entity_I')
+				Core_Html_Entity::factory('I')
 					->class('fa fa-lock darkorange locked-item')
 					->title(Core::_('Informationsystem_Item.closed'))
 			);
@@ -977,11 +977,11 @@ class Informationsystem_Item_Model extends Core_Entity
 
 				$oCore_Html_Entity_Div
 					->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href($href)
 							->target('_blank')
 							->add(
-								Core::factory('Core_Html_Entity_I')
+								Core_Html_Entity::factory('I')
 									->class('fa fa-external-link')
 							)
 					);
@@ -991,7 +991,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')
+					Core_Html_Entity::factory('I')
 						->class('fa fa-clock-o black')
 				);
 		}
@@ -1735,7 +1735,7 @@ class Informationsystem_Item_Model extends Core_Entity
 		if (Core::moduleIsActive('comment'))
 		{
 			$count = $this->Comments->getCount();
-			$count && Core::factory('Core_Html_Entity_Span')
+			$count && Core_Html_Entity::factory('Span')
 				->class('badge badge-ico badge-azure white')
 				->value($count < 100 ? $count : '∞')
 				->title($count)

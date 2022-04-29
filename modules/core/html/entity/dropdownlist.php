@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core\Html
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 {
@@ -26,7 +26,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'options', // array
 		'value'
 	);
@@ -63,8 +63,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			// Получаем информацию о элементе - значение, ико, цвет
 			$aItemInfo = $this->_getItemInfo($indexValueItem);
 
-			?>
-			<a data-toggle="dropdown" style="color: <?php echo $aItemInfo['color'] ?>" href="javascript:void(0);" aria-expanded="false"><?php
+			?><a data-toggle="dropdown" style="color: <?php echo $aItemInfo['color'] ?>" href="javascript:void(0);" aria-expanded="false"><?php
 				if ($aItemInfo['icon'] != '')
 				{
 					?><i class="<?php echo $aItemInfo['icon']?>"></i><?php
@@ -74,21 +73,21 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			</a>
 			<?php
 			if (!$this->disabled)
-			{				
+			{
 				?>
 				<ul <?php echo implode(' ', $aAttr)?>>
 				<?php
 
 				foreach ($aOptions as $key => $value)
 				{
-					// Получаем информацию о элементе - значение, ико, цвет
+					// Получаем информацию о элементе - значение, ico, цвет
 					$aItemInfo = $this->_getItemInfo($key);
 
 					$marginLeft = isset($aItemInfo['level']) && $aItemInfo['level']
 						? " margin-left: " . ($aItemInfo['level'] * 5) . "px;"
 						: '';
 					?>
-					<li id="<?php echo htmlspecialchars($key)?>" <?php echo $indexValueItem == $key ? 'selected="selected"' : ''?>>
+					<li id="<?php echo htmlspecialchars($key)?>"<?php echo $indexValueItem == $key ? ' selected="selected"' : ''?><?php echo $aItemInfo['class'] != '' ? ' class="' . htmlspecialchars($aItemInfo['class']) . '"' : ''?>>
 						<a href="javascript:void(0);" style="color: <?php echo htmlspecialchars($aItemInfo['color'])?>;<?php echo $marginLeft?>"><?php
 						if ($aItemInfo['icon'] != '')
 						{
@@ -131,6 +130,7 @@ class Core_Html_Entity_Dropdownlist extends Core_Html_Entity
 			'icon' => 'fa fa-circle fa-dropdownlist',
 			'color' => '#aebec4',
 			'value' => NULL,
+			'class' => NULL,
 			'level' => 0
 		);
 

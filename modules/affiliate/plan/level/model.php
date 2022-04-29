@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Affiliate
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Affiliate_Plan_Level_Model extends Core_Entity
 {
@@ -66,6 +66,17 @@ class Affiliate_Plan_Level_Model extends Core_Entity
 			: $this->percent = 0;
 
 		return parent::save();
+	}
+
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+	public function rewardBackend()
+	{
+		return $this->type == 0
+			? Core_Str::hideZeros($this->percent) . '%'
+			: Core_Str::hideZeros($this->value);
 	}
 
 	/**

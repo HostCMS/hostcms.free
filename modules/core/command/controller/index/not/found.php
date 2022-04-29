@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Command
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Command_Controller_Index_Not_Found extends Core_Command_Controller
 {
@@ -42,10 +42,10 @@ class Core_Command_Controller_Index_Not_Found extends Core_Command_Controller
 			->setMode('authorization')
 			->header();
 
-		Core::factory('Core_Html_Entity_Div')
+		Core_Html_Entity::factory('Div')
 			->class('indexMessage')
-			->add(Core::factory('Core_Html_Entity_H1')->value($title))
-			->add(Core::factory('Core_Html_Entity_P')->value(Core::_('Core.message_home_page_must_be_added')
+			->add(Core_Html_Entity::factory('H1')->value($title))
+			->add(Core_Html_Entity::factory('P')->value(Core::_('Core.message_home_page_must_be_added')
 			))
 			->execute();
 

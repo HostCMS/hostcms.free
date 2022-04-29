@@ -507,9 +507,6 @@ class Informationsystem_Controller_Show extends Core_Controller
 		// Load model columns BEFORE FOUND_ROWS()
 		Core_Entity::factory('Informationsystem_Item')->getTableColumns();
 
-		// Load user BEFORE FOUND_ROWS()
-		Core_Auth::getCurrentUser();
-
 		$this->calculateTotal && $this->_Informationsystem_Items
 			->queryBuilder()
 			->sqlCalcFoundRows();
@@ -536,7 +533,15 @@ class Informationsystem_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$this->showPanel && Core::checkPanel() && $this->_showPanel();
+		$oInformationsystem = $this->getEntity();
+
+		// Load user BEFORE FOUND_ROWS()
+		$oUser = Core_Auth::getCurrentUser();
+
+		$this->showPanel && Core::checkPanel()
+			&& in_array($this->_mode, array('xsl', 'tpl'))
+			&& $oUser && $oUser->checkModuleAccess(array('informationsystem'), $oInformationsystem->Site)
+			&& $this->_showPanel();
 
 		$this->group === 0 && $this->subgroups
 			&& $this->group = FALSE;
@@ -569,7 +574,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$this->_cacheTags[] = 'informationsystem_group_' . intval($this->group);
 		}
 
-		$oInformationsystem = $this->getEntity();
+
 
 		$oInformationsystem->showXmlCounts($this->calculateCounts);
 
@@ -803,7 +808,9 @@ class Informationsystem_Controller_Show extends Core_Controller
 					$oInformationsystem_Item = $oInformationsystem_Item->Informationsystem_Item;
 				}
 
-				$oInformationsystem_Item->clearEntities();
+				$oInformationsystem_Item
+					->clearEntities()
+					->clearEntitiesAfterGetXml(FALSE);
 
 				if (!$bTpl)
 				{
@@ -1660,30 +1667,30 @@ class Informationsystem_Controller_Show extends Core_Controller
 		$oInformationsystem = $this->getEntity();
 
 		// Panel
-		$oXslPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsPanel')
 			->style('display: none');
 
-		$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel hostcmsXsl')
 			->add(
-				Core::factory('Core_Html_Entity_Img')
+				Core_Html_Entity::factory('Img')
 					->width(3)->height(16)
 					->src('/hostcmsfiles/images/drag_bg.gif')
 			);
 
-		if ($this->item == 0)
+		if ($this->item == 0 && !is_array($this->group))
 		{
 			$sPath = '/admin/informationsystem/item/index.php';
 			$sAdditional = "hostcms[action]=edit&informationsystem_id={$oInformationsystem->id}&informationsystem_group_id={$this->group}&hostcms[checked][1][0]=1";
 			$sTitle = Core::_('Informationsystem_Item.information_items_add_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/page_add.gif')
 							->alt($sTitle)
@@ -1696,11 +1703,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Group.information_groups_add_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder_add.gif')
 							->alt($sTitle)
@@ -1717,11 +1724,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$sTitle = Core::_('Informationsystem_Group.information_groups_edit_form_title', $oInformationsystem_Group->name);
 
 				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 						->add(
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->width(16)->height(16)
 								->src('/admin/images/folder_edit.gif')
 								->alt($sTitle)
@@ -1736,11 +1743,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder.gif')
 							->alt($sTitle)
@@ -1756,11 +1763,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 				$sTitle = Core::_('Informationsystem_Group.markDeleted');
 
 				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 						->add(
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->width(16)->height(16)
 								->src('/admin/images/delete.gif')
 								->alt($sTitle)
@@ -1774,11 +1781,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem.edit_title', $oInformationsystem->name);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder_page_edit.gif')
 							->alt($sTitle)
@@ -1786,7 +1793,7 @@ class Informationsystem_Controller_Show extends Core_Controller
 					)
 			);
 		}
-		else
+		elseif ($this->item)
 		{
 			$oInformationsystem_Item = Core_Entity::factory('Informationsystem_Item', $this->item);
 
@@ -1796,11 +1803,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Item.information_items_edit_form_title', $oInformationsystem_Item->name);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/edit.gif')
 							->alt($sTitle)
@@ -1814,11 +1821,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Item.information_items_copy_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false }")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/copy.gif')
 							->alt($sTitle)
@@ -1832,11 +1839,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Group.information_system_top_menu_groups');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder.gif')
 							->alt($sTitle)
@@ -1850,11 +1857,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Item.show_all_comments_top_menu');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/comments.gif')
 							->alt($sTitle)
@@ -1868,11 +1875,11 @@ class Informationsystem_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Informationsystem_Item.markDeleted');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/delete.gif')
 							->alt($sTitle)

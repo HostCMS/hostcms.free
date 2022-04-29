@@ -55,7 +55,7 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 		$this->_showContent();
 		?>
-		<div class="row margin-bottom-20">
+		<div class="row margin-bottom-20 margin-top-10">
 			<div class="col-xs-12 col-sm-6 col-md-8 text-align-left timeline-board">
 				<?php $this->_Admin_Form_Controller->pageNavigation()?>
 			</div>
@@ -117,191 +117,214 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 		$aEntities = $aDatasets[0]->load();
 		?>
-			<ul class="timeline timeline-left timeline-crm">
-				<?php
-				foreach ($aEntities as $oEntity)
+		<ul class="timeline timeline-left timeline-crm">
+			<?php
+			foreach ($aEntities as $oEntity)
+			{
+				$iDatetime = Core_Date::sql2timestamp($oEntity->datetime);
+
+				$class = '';
+
+				switch ($oEntity->type)
 				{
-					switch ($oEntity->type)
-					{
-						// Events
-						case 0:
-							$badge = 'fa fa-tasks';
+					// Events
+					case 0:
+						$badge = 'fa fa-tasks';
 
-							$color = 'palegreen';
+						$color = 'success';
 
-							$oEvent = Core_Entity::factory('Event', $oEntity->id);
+						$oObject = Core_Entity::factory('Event', $oEntity->id);
 
-							// $title = htmlspecialchars($oEvent->name);
-							// $title = '';
+						ob_start();
 
-							ob_start();
+						$oEventCreator = $oObject->getCreator();
 
-							// $path = $oAdmin_Form_Controller->getPath();
+						// Временая метка создания дела
+						$iEventCreationTimestamp = Core_Date::sql2timestamp($oObject->datetime);
 
-							$oEventCreator = $oEvent->getCreator();
+						// Сотрудник - создатель дела
+						$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
 
-							// Временая метка создания дела
-							$iEventCreationTimestamp = Core_Date::sql2timestamp($oEvent->datetime);
+						$oEvent_Type = $oObject->Event_Type;
 
-							// Сотрудник - создатель дела
-							$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
+						$oObject->event_type_id && $oObject->showType();
 
-							$oEvent_Type = $oEvent->Event_Type;
+						// Менять статус дела может только его создатель
+						if ($userIsEventCreator)
+						{
+							// Список статусов дел
+							$aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll();
 
-							$oEvent->event_type_id && $oEvent->showType();
+							$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
 
-							// Менять статус дела может только его создатель
-							if ($userIsEventCreator)
+							foreach ($aEvent_Statuses as $oEvent_Status)
 							{
-								// Список статусов дел
-								$aEvent_Statuses = Core_Entity::factory('Event_Status')->findAll();
+								$aMasEventStatuses[$oEvent_Status->id] = array('value' => $oEvent_Status->name, 'color' => $oEvent_Status->color);
+							}
 
-								$aMasEventStatuses = array(array('value' => Core::_('Event.notStatus'), 'color' => '#aebec4'));
+							$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
 
-								foreach ($aEvent_Statuses as $oEvent_Status)
-								{
-									$aMasEventStatuses[$oEvent_Status->id] = array('value' => $oEvent_Status->name, 'color' => $oEvent_Status->color);
-								}
+							$oCore_Html_Entity_Dropdownlist
+								->value($oObject->event_status_id)
+								->options($aMasEventStatuses)
+								//->class('btn-group event-status')
+								->onchange("$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$oObject->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
+								->execute();
+						}
+						else
+						{
+							if ($oObject->event_status_id)
+							{
+								$oEvent_Status = Core_Entity::factory('Event_Status', $oObject->event_status_id);
 
-								$oCore_Html_Entity_Dropdownlist = new Core_Html_Entity_Dropdownlist();
-
-								$oCore_Html_Entity_Dropdownlist
-									->value($oEvent->event_status_id)
-									->options($aMasEventStatuses)
-									//->class('btn-group event-status')
-									->onchange("$.adminLoad({path: '/admin/event/index.php', additionalParams: 'hostcms[checked][0][{$oEvent->id}]=0&eventStatusId=' + $(this).find('li[selected]').prop('id'), action: 'changeStatus', windowId: '{$oAdmin_Form_Controller->getWindowId()}'});")
-									->execute();
+								$sEventStatusName = htmlspecialchars($oEvent_Status->name);
+								$sEventStatusColor = htmlspecialchars($oEvent_Status->color);
 							}
 							else
 							{
-								if ($oEvent->event_status_id)
-								{
-									$oEvent_Status = Core_Entity::factory('Event_Status', $oEvent->event_status_id);
-
-									$sEventStatusName = htmlspecialchars($oEvent_Status->name);
-									$sEventStatusColor = htmlspecialchars($oEvent_Status->color);
-								}
-								else
-								{
-									$sEventStatusName = Core::_('Event.notStatus');
-									$sEventStatusColor = '#aebec4';
-								}
-								?>
-								<div class="event-status">
-									<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
-								</div>
-								<?php
-							}
-
-							$nameColorClass = $oEvent->deadline()
-								? 'event-title-deadline'
-								: '';
-
-							$deadlineIcon = $oEvent->deadline()
-								? '<i class="fa fa-clock-o event-title-deadline"></i>'
-								: '';
-
-							?>
-							<div class="event-title <?php echo $nameColorClass?>"><?php echo $deadlineIcon, htmlspecialchars($oEvent->name)?></div>
-
-							<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags($oEvent->description), 250)?></div>
-
-							<div class="crm-date"><?php
-							if ($oEvent->all_day)
-							{
-								echo Event_Controller::getDate($oEvent->start);
-							}
-							else
-							{
-								if (!is_null($oEvent->start) && $oEvent->start != '0000-00-00 00:00:00')
-								{
-									echo Event_Controller::getDateTime($oEvent->start);
-								}
-
-								if (!is_null($oEvent->start) && $oEvent->start != '0000-00-00 00:00:00'
-									&& !is_null($oEvent->deadline) && $oEvent->deadline != '0000-00-00 00:00:00'
-								)
-								{
-									echo ' — ';
-								}
-
-								if (!is_null($oEvent->deadline) && $oEvent->deadline != '0000-00-00 00:00:00')
-								{
-									?><strong><?php echo Event_Controller::getDateTime($oEvent->deadline);?></strong><?php
-								}
-							}
-
-							$iDeltaTime = time() - $iEventCreationTimestamp;
-
-							// ФИО создателя дела, если оным не является текущий сотрудник
-							if (!$userIsEventCreator && !is_null($oEventCreator))
-							{
-								?>
-								<div class="<?php echo $oEventCreator->isOnline() ? 'online margin-left-20' : 'offline margin-left-20'?>"></div>
-								<a href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oEventCreator->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEventCreator->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false"><?php echo htmlspecialchars($oEventCreator->getFullName());?></a><?php
+								$sEventStatusName = Core::_('Event.notStatus');
+								$sEventStatusColor = '#aebec4';
 							}
 							?>
-							</div><?php
-
-							$text = ob_get_clean();
-
-							$iEntityAdminFormId = 220;
-							$entityPath = '/admin/event/index.php';
-							// $additionalParams = "";
-							// $datasetId = 0;
-						break;
-						// Deals
-						case 1:
-							$badge = 'fa fa-handshake-o';
-
-							$color = 'darkorange';
-
-							$oDeal = Core_Entity::factory('Deal', $oEntity->id);
-
-							ob_start();
-							echo $oDeal->nameBackend(NULL, $oAdmin_Form_Controller);
-							$text = ob_get_clean();
-
-							$iEntityAdminFormId = 226;
-							$entityPath = '/admin/deal/index.php';
-							// $additionalParams = "";
-							// $datasetId = 0;
-						break;
-						// Notes
-						case 2:
-							$badge = 'fa fa-comment-o';
-
-							$color = 'warning';
-
-							$oCrm_Project_Note = Core_Entity::factory('Crm_Project_Note', $oEntity->id);
-
-							$oUser = $oCrm_Project_Note->User;
-							$iDatetime = Core_Date::sql2timestamp($oCrm_Project_Note->datetime);
-
-							ob_start();
-							echo nl2br(htmlspecialchars($oCrm_Project_Note->text));
-							?>
-							<div class="small gray"><span><a class="gray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $oUser->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oUser->id?>]=1', windowId: '<?php echo $oAdmin_Form_Controller->getWindowId()?>'}); return false" title="<?php echo htmlspecialchars($oUser->getFullName())?>"><?php echo htmlspecialchars($oUser->getFullName())?></a></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+							<div class="event-status">
+								<i class="fa fa-circle" style="margin-right: 5px; color: <?php echo $sEventStatusColor?>"></i><span style="color: <?php echo $sEventStatusColor?>"><?php echo $sEventStatusName?></span>
+							</div>
 							<?php
-							$text = ob_get_clean();
+						}
 
-							$iEntityAdminFormId = 312;
-							$entityPath = '/admin/crm/project/note/index.php';
-							// $additionalParams = "";
-							// $datasetId = 0;
-						break;
-					}
-					?>
-					<li class="timeline-inverted">
-						<div class="timeline-badge <?php echo $color?>">
-							<i class="<?php echo $badge?>"></i>
-						</div>
-						<div class="timeline-panel">
-							<div class="timeline-header bordered-bottom bordered-<?php echo $color?>">
-								<div class="pull-right timeline-entity-actions">
-									<?php
-									$oEntity_Admin_Form = Core_Entity::factory('Admin_Form', $iEntityAdminFormId);
+						$nameColorClass = $oObject->deadline()
+							? 'event-title-deadline'
+							: '';
 
+						$deadlineIcon = $oObject->deadline()
+							? '<i class="fa fa-clock-o event-title-deadline"></i>'
+							: '';
+
+						?>
+						<div class="event-title <?php echo $nameColorClass?>"><?php echo $deadlineIcon, htmlspecialchars($oObject->name)?></div>
+
+						<div class="event-description"><?php echo Core_Str::cutSentences(strip_tags($oObject->description), 250)?></div>
+
+						<div class="crm-date"><?php
+						if ($oObject->all_day)
+						{
+							echo Event_Controller::getDate($oObject->start);
+						}
+						else
+						{
+							if (!is_null($oObject->start) && $oObject->start != '0000-00-00 00:00:00')
+							{
+								echo Event_Controller::getDateTime($oObject->start);
+							}
+
+							if (!is_null($oObject->start) && $oObject->start != '0000-00-00 00:00:00'
+								&& !is_null($oObject->deadline) && $oObject->deadline != '0000-00-00 00:00:00'
+							)
+							{
+								echo ' — ';
+							}
+
+							if (!is_null($oObject->deadline) && $oObject->deadline != '0000-00-00 00:00:00')
+							{
+								?><strong><?php echo Event_Controller::getDateTime($oObject->deadline)?></strong><?php
+							}
+						}
+
+						// ФИО создателя дела, если оным не является текущий сотрудник
+						if (!$userIsEventCreator && !is_null($oEventCreator))
+						{
+							$userColor = Core_Str::createColor($oEventCreator->id);
+
+							?><div class="<?php echo $oEventCreator->isOnline() ? 'online' : 'offline'?> margin-left-20 margin-right-5"></div><span style="color: <?php echo $userColor?>"><?php $oEventCreator->showLink($oAdmin_Form_Controller->getWindowId());?></span><?php
+						}
+						?>
+						</div><?php
+
+						$text = ob_get_clean();
+
+						$iEntityAdminFormId = 220;
+						$entityPath = '/admin/event/index.php';
+					break;
+					// Deals
+					case 1:
+						$badge = 'fa fa-handshake-o';
+
+						$color = 'info';
+
+						$oObject = Core_Entity::factory('Deal', $oEntity->id);
+
+						ob_start();
+						echo $oObject->nameBackend(NULL, $oAdmin_Form_Controller, TRUE);
+						$text = ob_get_clean();
+
+						$iEntityAdminFormId = 226;
+						$entityPath = '/admin/deal/index.php';
+					break;
+					// Notes
+					case 2:
+						$badge = 'fa fa-comment-o';
+
+						$color = 'danger';
+
+						$oObject = Core_Entity::factory('Crm_Note', $oEntity->id);
+						$oObject->result && $class = 'timeline-crm-note-result';
+
+						ob_start();
+						echo nl2br($oObject->text);
+
+						$files = $oObject->getFilesBlock($oObject->Crm_Project);
+
+						if (!is_null($files))
+						{
+							?><div class="crm-note-attachment-wrapper"><?php echo $files?></div><?php
+						}
+						?>
+						<div class="timeline-body-footer small gray"><span class="gray"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+						<?php
+						$text = ob_get_clean();
+
+						$iEntityAdminFormId = 312;
+						$entityPath = '/admin/crm/project/note/index.php';
+					break;
+					case 3:
+						$badge = 'fa fa-file-o';
+
+						$color = 'warning';
+
+						$oObject = Core_Entity::factory('Crm_Project_Attachment', $oEntity->id);
+
+						$src = '/admin/crm/project/attachment/index.php?crm_project_id=' . $oObject->crm_project_id . '&crm_project_attachment_id=' . $oObject->id . '&rand=' . time();
+
+						$ext = Core_File::getExtension($oObject->getFilePath());
+
+						$dataSrc = in_array($ext, array('png', 'jpg', 'jpeg', 'webp', 'gif'))
+							? 'data-popover="hover-file" data-src="' . $src. '"'
+							: '';
+
+						ob_start();
+						?>
+						<div><i class="<?php echo Core_File::getIcon($oObject->file_name)?> margin-right-5"></i><a target="_blank" <?php echo $dataSrc?> href="<?php echo $src?>"><?php echo nl2br($oObject->file_name)?></a></div>
+						<div class="small gray"><span class="gray"><?php $oObject->User->showLink($oAdmin_Form_Controller->getWindowId())?></span><span class="pull-right"><?php echo date('H:i', $iDatetime)?></span></div>
+						<?php
+						$text = ob_get_clean();
+
+						$iEntityAdminFormId = 326;
+						$entityPath = '/admin/crm/project/attachment/index.php';
+					break;
+				}
+				?>
+				<li class="timeline-inverted <?php echo $class?>">
+					<div class="timeline-badge <?php echo $color?>">
+						<i class="<?php echo $badge?>"></i>
+					</div>
+					<div class="timeline-panel">
+						<div class="timeline-header">
+							<div class="pull-right timeline-entity-actions">
+								<?php
+								$oEntity_Admin_Form = Core_Entity::factory('Admin_Form', $iEntityAdminFormId);
+
+								if (!in_array($oEntity_Admin_Form->id, array(326)))
+								{
 									// Отображать в списке действий
 									if ($oEntity_Admin_Form->show_operations)
 									{
@@ -309,7 +332,9 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 
 										foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 										{
-											if ($oAdmin_Form_Action->name == 'edit')
+											if ($oAdmin_Form_Action->name == 'edit'
+												&& (!method_exists($oObject, 'checkBackendAccess') || $oObject->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
+											)
 											{
 												// Отображаем действие, только если разрешено.
 												if (!$oAdmin_Form_Action->single)
@@ -323,64 +348,107 @@ class Crm_Project_Entity_View extends Admin_Form_Controller_View
 													? $Admin_Word_Value->name
 													: '';
 
-												// $path = '/admin/crm/project/entity/index.php';
 												$additionalParams = "hostcms[checked][0][{$oEntity->id}]=1&crm_project_id={$crm_project_id}";
 
 												$href = $oAdmin_Form_Controller->getAdminActionLoadHref($entityPath, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'list');
 
-												$onclick = "$.modalLoad({path: '{$entityPath}', action: 'edit', operation: 'modal', additionalParams: '{$additionalParams}', windowId: '{$windowId}'}); return false";
+												$onclick = "$.modalLoad({path: '{$entityPath}', action: 'edit', operation: 'modal', additionalParams: '{$additionalParams}', windowId: '{$windowId}', width: '90%'}); return false";
 
 												?><a onclick="<?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
 											}
 										}
 									}
+								}
 
-									// Отображать в списке действий
-									if ($oAdmin_Form->show_operations)
+								// Отображать в списке действий
+								if ($oAdmin_Form->show_operations)
+								{
+									$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
+
+									foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
 									{
-										$aAllowed_Admin_Form_Actions = $oAdmin_Form->Admin_Form_Actions->getAllowedActionsForUser($oUser);
-
-										foreach ($aAllowed_Admin_Form_Actions as $oAdmin_Form_Action)
+										// Отображаем действие, только если разрешено.
+										if (!$oAdmin_Form_Action->single || !method_exists($oObject, 'checkBackendAccess') || !$oObject->checkBackendAccess($oAdmin_Form_Action->name, $oUser))
 										{
-											// Отображаем действие, только если разрешено.
-											if (!$oAdmin_Form_Action->single)
-											{
-												continue;
-											}
-
-											$Admin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
-
-											$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
-												? $Admin_Word_Value->name
-												: '';
-
-											$path = '/admin/crm/project/entity/index.php';
-											$additionalParams = "type={$oEntity->type}&entity_id={$oEntity->id}&crm_project_id={$crm_project_id}";
-
-											$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');
-
-											$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');
-
-											// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
-											if ($oAdmin_Form_Action->confirm)
-											{
-												$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEntity->id}').toggleHighlight(); } else {{$onclick}} return res;";
-											}
-											?><a onclick="<?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
+											continue;
 										}
+
+										$Admin_Word_Value = $oAdmin_Form_Action->Admin_Word->getWordByLanguage($oAdmin_Language->id);
+
+										$name = $Admin_Word_Value && strlen($Admin_Word_Value->name) > 0
+											? $Admin_Word_Value->name
+											: '';
+
+										$path = '/admin/crm/project/entity/index.php';
+										$additionalParams = "type={$oEntity->type}&entity_id={$oEntity->id}&crm_project_id={$crm_project_id}";
+
+										$href = $oAdmin_Form_Controller->getAdminActionLoadHref($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');
+
+										$onclick = $oAdmin_Form_Controller->getAdminActionLoadAjax($path, $oAdmin_Form_Action->name, NULL, 0, intval($oEntity->id), $additionalParams, 10, 1, NULL, NULL, 'entity');
+
+										// Добавляем установку метки для чекбокса и строки + добавлем уведомление, если необходимо
+										if ($oAdmin_Form_Action->confirm)
+										{
+											$onclick = "res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($name))."'); if (!res) { $('#{$windowId} #row_0_{$oEntity->id}').toggleHighlight(); } else {{$onclick}} return res;";
+										}
+										?><a onclick="<?php echo htmlspecialchars($onclick)?>" href="<?php echo htmlspecialchars($href)?>" title="<?php echo htmlspecialchars($name)?>"><i class="<?php echo htmlspecialchars($oAdmin_Form_Action->icon)?>"></i></a><?php
 									}
-									?>
-								</div>
-							</div>
-							<div class="timeline-body">
-								<?php echo $text?>
+								}
+								?>
 							</div>
 						</div>
-					</li>
-					<?php
+						<div class="timeline-body">
+							<?php echo $text?>
+						</div>
+					</div>
+				</li>
+				<?php
+			}
+			?>
+		</ul>
+
+		<script>
+			$('[data-popover="hover-file"]').on('mouseenter', function(event) {
+				var $this = $(this);
+
+				if (!$this.data("bs.popover"))
+				{
+					$this.popover({
+						placement: 'top',
+						trigger: 'manual',
+						html: true,
+						content: function() {
+							return '<img src="' + $(this).data('src') +'" style="max-width:200px" />';
+						},
+						container: "#<?php echo $windowId?>"
+					});
+
+					$this.attr('data-popoverAttached', true);
+
+					$this.on('hide.bs.popover', function(e) {
+						$this.attr('data-popoverAttached')
+							? $this.removeAttr('data-popoverAttached')
+							: e.preventDefault();
+					})
+					.on('show.bs.popover', function(e) {
+						!$this.attr('data-popoverAttached') && e.preventDefault();
+					})
+					.on('shown.bs.popover', function(e) {
+						$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+							!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+						});
+					})
+					.on('mouseleave', function(e) {
+						!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+						&& $this.attr('data-popoverAttached')
+						&& $this.popover('destroy');
+					});
+
+					$this.popover('show');
 				}
-				?>
-			</ul>
+			});
+		</script>
+
 		<?php
 		return $this;
 	}

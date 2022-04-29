@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Update_Module extends Update_Module
 {
@@ -43,7 +43,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 			{
 				$oUpdate = end($aUpdates['entities']);
 
-				$oNotification = Core_Entity::factory('Notification')->getNotification($oModule->id, 0, $oUpdate->id);
+				$oNotification = Core_Entity::factory('Notification')->setMarksDeleted(NULL)->getNotification($oModule->id, 0, $oUpdate->id);
 
 				if (is_null($oNotification))
 				{
@@ -70,7 +70,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 			{
 				foreach ($aModuleUpdates as $oModuleUpdate)
 				{
-					$oNotificationModule = Core_Entity::factory('Notification')->getNotification($oModule->id, 1, $oModuleUpdate->id);
+					$oNotificationModule = Core_Entity::factory('Notification')->setMarksDeleted(NULL)->getNotification($oModule->id, 1, $oModuleUpdate->id);
 
 					if (is_null($oNotificationModule))
 					{
@@ -86,7 +86,7 @@ class Skin_Bootstrap_Module_Update_Module extends Update_Module
 						// Связываем уведомление с сотрудниками
 						foreach ($aUsers as $oUser)
 						{
-							$oUser->add($oNotification);
+							$oUser->add($oNotificationModule);
 						}
 					}
 				}

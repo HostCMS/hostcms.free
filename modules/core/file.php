@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_File
 {
@@ -48,7 +48,7 @@ class Core_File
 
 			if (move_uploaded_file($source, $destination))
 			{
-				chmod($destination, $mode);
+				@chmod($destination, $mode);
 			}
 			else
 			{
@@ -81,7 +81,7 @@ class Core_File
 			{
 				if (copy($source, $destination))
 				{
-					chmod($destination, $mode);
+					@chmod($destination, $mode);
 					return TRUE;
 				}
 				else
@@ -188,7 +188,7 @@ class Core_File
 	{
 		if (is_file($fileName) || is_link($fileName))
 		{
-			if (!unlink($fileName))
+			if (!@unlink($fileName))
 			{
 				throw new Core_Exception("Delete file '%fileName' error.",
 					array('%fileName' => Core::cutRootPath($fileName)));
@@ -415,7 +415,7 @@ class Core_File
 
 			if (@mkdir($pathname, $mode, $recursive))
 			{
-				chmod($pathname, $mode);
+				@chmod($pathname, $mode);
 			}
 			else
 			{
@@ -1132,5 +1132,85 @@ class Core_File
 		$result['small_image'] = $small_image_created;
 
 		return $result;
+	}
+
+	static public function getIcon($originalName)
+	{
+		$ext = self::getExtension($originalName);
+
+		switch ($ext)
+		{
+			case 'jpg':
+			case 'jpeg':
+			case 'png':
+			case 'gif':
+			case 'bmp':
+			case 'webp':
+				$class = 'fa fa-file-image-o image-color';
+			break;
+			case 'pdf':
+				$class = 'fa fa-file-pdf-o pdf-color';
+			break;
+			case 'xls':
+			case 'xlsx':
+			case 'csv':
+				$class = 'fa fa-file-excel-o excel-color';
+			break;
+			case 'doc':
+			case 'docx':
+				$class = 'fa fa-file-word-o word-color';
+			break;
+			case 'txt':
+			case 'rtf':
+				$class = 'fa fa-file-text-o text-color';
+			break;
+			case 'zip':
+			case 'gz':
+			case 'rar':
+			case 'tar':
+				$class = 'fa fa-file-archive-o archive-color';
+			break;
+			default:
+				$class = 'fa fa-file-o default-color';
+		}
+
+		return $class;
+	}
+	
+	/**
+	 * Get Upload Error by code
+	 * @param int $errorCode
+	 * @return string|NULL
+	 */
+	static public function getUploadError($errorCode)
+	{
+		switch ($errorCode)
+		{
+			case 1:
+				$error = 'The uploaded file exceeds the upload_max_filesize directive in php.ini.';
+			break;
+			case 2:
+				$error = 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.';
+			break;
+			case 3:
+				$error = 'The uploaded file was only partially uploaded.';
+			break;
+			case 4:
+				$error = 'No file was uploaded.';
+			break;
+			case 6:
+				$error = 'Missing a temporary folder.';
+			break;
+			case 7:
+				$error = 'Failed to write file to disk.';
+			break;
+			case 8:
+				$error = 'A PHP extension stopped the file upload.';
+			break;
+			default:
+				$error = NULL;
+		}
+		
+		return $error;
 	}
 }

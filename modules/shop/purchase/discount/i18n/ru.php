@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Скидки от суммы заказа',
@@ -41,4 +41,9 @@ return array(
 	'changeStatus_success' => "Информация успешно изменена",
 	'delete_success' => 'Элемент удален!',
 	'undelete_success' => 'Элемент восстановлен!',
+	'badge_coupon_count' => 'Количество купонов связанных со скидкой',
+	'shop_purchase_discount_dir_id' => 'Раздел',
+	'sorting' => 'Порядок сортировки',
+	'apply_success' => "Информация успешно изменена.",
+	'copy_success' => "Элемент успешно скопирован!",
 );

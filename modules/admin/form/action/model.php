@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Model extends Core_Entity
 {
@@ -174,7 +174,7 @@ class Admin_Form_Action_Model extends Core_Entity
 
 		return $newObject;
 	}
-	
+
 	/**
 	 * Get caption of the action
 	 * @return string|NULL
@@ -187,7 +187,7 @@ class Admin_Form_Action_Model extends Core_Entity
 			? $oAdmin_Word->name
 			: NULL;
 	}
-	
+
 	/**
 	 * Backend badge
 	 * @param Admin_Form_Field $oAdmin_Form_Field
@@ -198,7 +198,7 @@ class Admin_Form_Action_Model extends Core_Entity
 	{
 		if ($this->modal)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('badge badge-hostcms badge-square darkgray pull-right')
 				->title(Core::_('Admin_Form_Action.modalBadge'))
 				->value('<i class="fa fa-window-restore fa-fw"></i>')

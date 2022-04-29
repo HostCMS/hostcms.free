@@ -3,9 +3,9 @@
  * Typograph.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -60,13 +60,13 @@ if ($oAdmin_Form_Controller->getAction() == 'process')
 {
 	ob_start();
 
-	Core::factory('Core_Html_Entity_Div')
+	Core_Html_Entity::factory('Div')
 		//->class('row')
 		->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->class('form-group col-lg-12')
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					Core_Html_Entity::factory('Div')
 						->class('typograph_result')
 						->value($sText)
 				)

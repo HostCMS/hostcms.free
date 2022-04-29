@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 {
@@ -265,8 +265,7 @@ class Skin_Bootstrap_Module_Shop_Module extends Shop_Module
 
 									if (count($aShops))
 									{
-										Core_Session::start();
-
+										//Core_Session::start();
 										?>
 										<select class="input-xs widget-select-shop" name="select_shop">
 											<option value="0"><?php echo Core::_('Shop.all_shops')?></option>

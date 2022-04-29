@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Informationsystem
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Informationsystem_Comment_Property_Controller_Edit extends Property_Controller_Edit
 {
@@ -40,6 +40,7 @@ class Informationsystem_Comment_Property_Controller_Edit extends Property_Contro
 					->value(1)
 					->checked(is_null($object->id))
 					->caption(Core::_("Informationsystem_Item.add_value"))
+					->class('colored-danger')
 					->name("add_value");
 
 				$oMainRow1->add($oAddValueCheckbox);

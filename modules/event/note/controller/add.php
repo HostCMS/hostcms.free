@@ -7,11 +7,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Event
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
-class Event_Note_Controller_Add extends Admin_Form_Action_Controller
+class Event_Note_Controller_Add extends Crm_Note_Controller_Add
 {
 	/**
 	 * Executes the business logic.
@@ -20,37 +20,85 @@ class Event_Note_Controller_Add extends Admin_Form_Action_Controller
 	 */
 	public function execute($operation = NULL)
 	{
-		if (!is_null(Core_Array::getRequest('text_note')) && strlen(Core_Array::getRequest('text_note')))
+		parent::execute();
+
+		$iEventId = Core_Array::getGet('event_id', 0, 'int');
+		$result = Core_Array::getPost('result', 0, 'int');
+
+		$oCrm_Note = $this->_object;
+
+		$oCrm_Note->result = $result;
+		$oCrm_Note->save();
+
+		$oEvent = Core_Entity::factory('Event', $iEventId);
+		$oEvent->add($oCrm_Note);
+
+		$aFiles = Core_Array::getFiles('file', array());
+
+		if (is_array($aFiles) && isset($aFiles['name']))
 		{
-			$iEventId = intval(Core_Array::getGet('event_id', 0));
-			$sCommentText = trim(strval(Core_Array::getRequest('text_note')));
+			$oCrm_Note->dir = $oEvent->getHref();
+			$oCrm_Note->save();
 
-			$oEvent_Note = Core_Entity::factory('Event_Note');
-			$oEvent_Note->event_id = $iEventId;
-			$oEvent_Note->text = $sCommentText;
-			$oEvent_Note->datetime = Core_Date::timestamp2sql(time());
-			$oEvent_Note->save();
+			$iCount = count($aFiles['name']);
 
-			$oModule = Core_Entity::factory('Module')->getByPath('event');
-
-			$oEvent = $oEvent_Note->Event;
-
-			$aEvent_Users = $oEvent->Event_Users->findAll();
-			foreach ($aEvent_Users as $oEvent_User)
+			for ($i = 0; $i < $iCount; $i++)
 			{
-				// Добавляем уведомление
-				$oNotification = Core_Entity::factory('Notification')
-					->title(Core::_('Event_Note.add_notification', $oEvent->name, FALSE))
-					->description($sCommentText)
-					->datetime(Core_Date::timestamp2sql(time()))
-					->module_id($oModule->id)
-					->type(6) // 6 - В сделку добавлена заметка
-					->entity_id($oEvent->id)
-					->save();
+				$aFile = array(
+					'name' => $aFiles['name'][$i],
+					'tmp_name' => $aFiles['tmp_name'][$i],
+					'size' => $aFiles['size'][$i]
+				);
 
-				// Связываем уведомление с сотрудниками
-				Core_Entity::factory('User', $oEvent_User->user_id)->add($oNotification);
+				if (intval($aFile['size']) > 0)
+				{
+					$oCrm_Note_Attachment = Core_Entity::factory('Crm_Note_Attachment');
+					$oCrm_Note_Attachment->crm_note_id = $oCrm_Note->id;
+
+					$oCrm_Note_Attachment
+						->setDir(CMS_FOLDER . $oCrm_Note->dir)
+						->setHref($oEvent->getHref())
+						->saveFile($aFile['tmp_name'], $aFile['name']);
+				}
 			}
+		}
+
+		$oModule = Core_Entity::factory('Module')->getByPath('event');
+
+		$aEvent_Users = $oEvent->Event_Users->findAll();
+		foreach ($aEvent_Users as $oEvent_User)
+		{
+			// Добавляем уведомление
+			$oNotification = Core_Entity::factory('Notification')
+				->title(Core::_('Event_Note.add_notification', $oEvent->name, FALSE))
+				->description(
+					html_entity_decode(strip_tags($oCrm_Note->text), ENT_COMPAT, 'UTF-8')
+				)
+				->datetime(Core_Date::timestamp2sql(time()))
+				->module_id($oModule->id)
+				->type(6) // 6 - В дело добавлена заметка
+				->entity_id($oEvent->id)
+				->save();
+
+			// Связываем уведомление с сотрудниками
+			Core_Entity::factory('User', $oEvent_User->user_id)->add($oNotification);
+		}
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+
+		$aExplodeWindowId = explode('-', $windowId);
+
+		if (strpos($windowId, '-event-notes') !== FALSE)
+		{
+			$this->addMessage("<script>$(function() {
+				$.adminLoad({ path: '/admin/event/timeline/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-timeline' });
+			});</script>");
+		}
+		elseif (strpos($windowId, '-event-timeline') !== FALSE)
+		{
+			$this->addMessage("<script>$(function() {
+				$.adminLoad({ path: '/admin/event/note/index.php', additionalParams: 'event_id={$oEvent->id}', windowId: '{$aExplodeWindowId[0]}-event-notes' });
+			});</script>");
 		}
 	}
 }

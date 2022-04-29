@@ -15,7 +15,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Log
 {
@@ -167,12 +167,8 @@ class Core_Log
 	 */
 	public function write($message)
 	{
-		if (is_null($this->_login))
-		{
-			$this->_login = isset($_SESSION['valid_user'])
-				? $_SESSION['valid_user']
-				: 'undefined';
-		}
+		is_null($this->_login)
+			&& $this->_login = Core_Array::getSession('valid_user');
 
 		if (is_null($this->_site))
 		{
@@ -181,8 +177,10 @@ class Core_Log
 				: '-';
 		}
 
-		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST', 'unknown');
-		$page = Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI');
+		$sHttpHost = Core_Array::get($_SERVER, 'HTTP_HOST');
+		$page = !is_null($sHttpHost)
+			? Core_Array::get($_SERVER, 'REQUEST_SCHEME', 'http') . '://' . $sHttpHost . Core_Array::get($_SERVER, 'REQUEST_URI')
+			: Core_Array::get($_SERVER, 'PHP_SELF');
 		$user_ip = Core::getClientIp();
 
 		$fname = $this->getLogName(date('Y-m-d'));
@@ -287,6 +285,21 @@ class Core_Log
 				}
 			}
 			@closedir($handle);
+		}
+
+		// Create .htaccess
+		if (!is_file($this->_logDir . '/.htaccess'))
+		{
+			try {
+				Core_File::write($this->_logDir . '/.htaccess', '<IfModule !mod_authz_core.c>
+	Order deny,allow
+	Deny from all
+</IfModule>
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>');
+			}
+			catch (Exception $e) { }
 		}
 
 		return $this;

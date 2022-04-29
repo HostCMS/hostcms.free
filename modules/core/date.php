@@ -172,37 +172,48 @@ class Core_Date
 	 */
 	static public function time2string($time)
 	{
-		if (is_null($time))
+		if (is_null($time) || $time < 0)
 		{
-			$sLastMessageTime = '';
+			$return = '';
 		}
 		// Секунды
 		elseif ($time >= 0 && $time < 60)
 		{
-			$sLastMessageTime = $time . ' ' . Core::_('Core.shortTitleSeconds');
+			$return = $time . ' ' . Core::_('Core.shortTitleSeconds');
 		}
 		// Минуты
 		elseif ($time >= 60 && $time < 60 * 60)
 		{
-			$sLastMessageTime = floor($time / 60) . ' ' . Core::_('Core.shortTitleMinutes');
+			$return = floor($time / 60) . ' ' . Core::_('Core.shortTitleMinutes');
 		}
 		// Часы
 		elseif ($time >= 60 * 60 && $time < 60 * 60 * 24)
 		{
-			$sLastMessageTime = floor($time / 60 / 60) . ' ' . Core::_('Core.shortTitleHours');
+			$return = floor($time / 60 / 60) . ' ' . Core::_('Core.shortTitleHours');
 		}
 		// Дни
 		elseif ($time >= 60 * 60 * 24 && $time < 60 * 60 * 24 * 365)
 		{
-			$sLastMessageTime = floor($time / 60 / 60 / 24) . ' ' . Core::_('Core.shortTitleDays');
+			$return = floor($time / 60 / 60 / 24) . ' ' . Core::_('Core.shortTitleDays');
 		}
 		// Годы
 		else
 		{
-			$sLastMessageTime = floor($time / 60 / 60 / 24 / 365) . ' ' . Core::_('Core.shortTitleYears');
+			$return = floor($time / 60 / 60 / 24 / 365) . ' ' . Core::_('Core.shortTitleYears');
 		}
 
-		return $sLastMessageTime;
+		return $return;
+	}
+
+	/**
+	 * Преобразовывает дату из SQL в текстовый формат
+	 *
+	 * @param strin $sql
+	 * @return string
+	 */
+	static public function sql2string($sql, $withTime = TRUE)
+	{
+		return self::timestamp2string(self::sql2timestamp($sql), $withTime);
 	}
 
 	/**

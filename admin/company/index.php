@@ -3,9 +3,9 @@
  * Company.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -184,6 +184,25 @@ if ($oAdminFormActionCopy && $oAdmin_Form_Controller->getAction() == 'copy')
 
 	// Добавляем типовой контроллер редактирования контроллеру формы
 	$oAdmin_Form_Controller->addAction($oControllerCopy);
+}
+
+// Действие "Удаление файла большого изображения"
+$oAction = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteImageFile');
+
+if ($oAction && $oAdmin_Form_Controller->getAction() == 'deleteImageFile')
+{
+	$oDeleteImageFileController = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Delete_File', $oAction
+	);
+
+	$oDeleteImageFileController
+		->methodName('deleteImageFile')
+		->divId(array('preview_large_image', 'delete_large_image'));
+
+	// Добавляем контроллер удаления изображения к контроллеру формы
+	$oAdmin_Form_Controller->addAction($oDeleteImageFileController);
 }
 
 // Источник данных 0

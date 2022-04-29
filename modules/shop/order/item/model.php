@@ -121,7 +121,11 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function quantityBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return Core_Str::hideZeros($this->quantity);
+		$quantity = Core_Str::hideZeros($this->quantity);
+
+		return $oAdmin_Form_Field->editable
+			? '<span id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id .'" class="editable">' . $quantity . '</span>'
+			: $quantity;
 	}
 
 	/**
@@ -130,9 +134,11 @@ class Shop_Order_Item_Model extends Core_Entity
 	 */
 	public function priceBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		return htmlspecialchars(
-			$this->Shop_Order->Shop_Currency->format($this->price)
-		);
+		$price = htmlspecialchars($this->Shop_Order->Shop_Currency->format($this->price));
+
+		return $oAdmin_Form_Field->editable
+			? '<span id="apply_check_0_' . $this->id . '_fv_' . $oAdmin_Form_Field->id .'" class="editable">' . $price . '</span>'
+			: $price;
 	}
 
 	/**
@@ -235,7 +241,7 @@ class Shop_Order_Item_Model extends Core_Entity
 				str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 			);
 
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('padding-left-10')
 				->add(
 					$oCore_Html_Entity_Dropdownlist
@@ -639,7 +645,7 @@ class Shop_Order_Item_Model extends Core_Entity
 		{
 			$count = $this->Shop_Order_Item_Codes->getCount(FALSE);
 
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->id('code-badge' . $this->id)
 				->class('badge badge-ico badge-darkorange white')
 				->value($count < 100 ? $count : '∞')

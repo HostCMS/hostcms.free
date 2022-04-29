@@ -27,6 +27,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	protected $_belongsTo = array(
 		'shop' => array(),
+		'shop_bonus_dir' => array(),
 		'shop_item' => array(),
 		'user' => array()
 	);
@@ -45,7 +46,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 * Backend property
 	 * @var int
 	 */
-	public $img = 1;
+	public $img = 0;
 
 	/**
 	 * Constructor.
@@ -174,18 +175,17 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		if ($this->accrual_date != '0000-00-00 00:00:00')
 		{
-			$class = 'label-sky';
-			$text = Core::_('Shop_Bonus.from') . ' ' . Core_Date::sql2datetime($this->accrual_date);
+			$class = 'badge-sky';
+			$text = Core::_('Shop_Bonus.badge_from', Core_Date::sql2datetime($this->accrual_date), $this->expire_days);
 		}
 		else
 		{
-			$class = 'label-pink';
-			$text = Core::_('Shop_Bonus.accrual_days') . ': ' . $this->accrual_days;
+			$class = 'badge-pink';
+			$text = Core::_('Shop_Bonus.badge_through', $this->accrual_days, $this->expire_days);
 		}
 
-		?><span class="margin-left-5 label <?php echo $class?> pull-right"><?php echo $text . ', ' . Core::_('Shop_Bonus.expire_days') . ': ' . $this->expire_days?></span><?php
+		?><span class="margin-left-5 badge badge-square <?php echo $class?> badge-sm pull-right"><?php echo $text?></span><?php
 	}
-
 
 	/**
 	 * Backend callback method

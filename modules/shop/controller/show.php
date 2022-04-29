@@ -490,6 +490,9 @@ class Shop_Controller_Show extends Core_Controller
 			case 'in-stock':
 				$oCore_QueryBuilder_Select
 					->join('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
+					->join('shop_warehouses', 'shop_warehouses.id', '=', 'shop_warehouse_items.shop_warehouse_id')
+					->where('shop_warehouses.active', '=', 1)
+					->where('shop_warehouses.deleted', '=', 0)
 					->having('SUM(shop_warehouse_items.count)', '>', 0);
 
 				!$this->modificationsGroup
@@ -500,7 +503,7 @@ class Shop_Controller_Show extends Core_Controller
 					// Модификации и остатки на складах модификаций
 					->leftJoin(array('shop_items', 'modifications'), 'modifications.modification_id', '=', $fieldName)
 					->leftJoin(array('shop_warehouse_items', 'modifications_shop_warehouse_items'), 'modifications_shop_warehouse_items.shop_item_id', '=', 'modifications.id')
-					// Остатки на складах основного отвара
+					// Остатки на складах основного товара
 					->leftJoin('shop_warehouse_items', 'shop_warehouse_items.shop_item_id', '=', $fieldName)
 					// Есть остатки на основном складе
 					->havingOpen()
@@ -901,9 +904,6 @@ class Shop_Controller_Show extends Core_Controller
 		// Load model columns BEFORE FOUND_ROWS()
 		Core_Entity::factory('Shop_Item')->getTableColumns();
 
-		// Load user BEFORE FOUND_ROWS()
-		Core_Auth::getCurrentUser();
-
 		$this->calculateTotal && $this->_Shop_Items
 			->queryBuilder()
 			->sqlCalcFoundRows();
@@ -929,12 +929,18 @@ class Shop_Controller_Show extends Core_Controller
 	{
 		Core_Event::notify(get_class($this) . '.onBeforeRedeclaredShow', $this);
 
-		$this->showPanel && Core::checkPanel() && in_array($this->_mode, array('xsl', 'tpl')) && $this->_showPanel();
+		$oShop = $this->getEntity();
+
+		// Load user BEFORE FOUND_ROWS()
+		$oUser = Core_Auth::getCurrentUser();
+
+		$this->showPanel && Core::checkPanel()
+			&& in_array($this->_mode, array('xsl', 'tpl'))
+			&& $oUser && $oUser->checkModuleAccess(array('shop'), $oShop->Site)
+			&& $this->_showPanel();
 
 		$this->group === 0 && $this->subgroups
 			&& $this->group = FALSE;
-
-		$oShop = $this->getEntity();
 
 		$hasSessionId = Core_Session::hasSessionId();
 
@@ -1351,6 +1357,8 @@ class Shop_Controller_Show extends Core_Controller
 
 				$oShop_Item
 					->clearEntities()
+					// shortcodes may clear attached entities
+					->clearEntitiesAfterGetXml(FALSE)
 					->cartQuantity(1);
 
 				if (!$bTpl)
@@ -2927,8 +2935,13 @@ class Shop_Controller_Show extends Core_Controller
 					? $oCore_QueryBuilder_Select->having('dataOriginalCount', '=', $iCount)
 					: $oCore_QueryBuilder_Select->where('shop_filter_seo_properties.id', 'IS', NULL);
 
-				$this->group !== FALSE
-					&& $this->applyFilterGroupCondition($oCore_QueryBuilder_Select, 'shop_filter_seos.shop_group_id');
+				// при включенном subgroups(TRUE) не должен срабатывать SEO-фильтр у родительских групп, например, в корне
+				/*$this->group !== FALSE
+					&& $this->applyFilterGroupCondition($oCore_QueryBuilder_Select, 'shop_filter_seos.shop_group_id');*/
+
+				// при FALSE в корне не должны срабатывать все SEO-фильтры
+				/*$this->group !== FALSE
+					&& */$oCore_QueryBuilder_Select->where('shop_filter_seos.shop_group_id', '=', is_array($this->group) ? reset($this->group) : intval($this->group));
 
 				$oShop_Filter_Seo = $oCore_QueryBuilder_Select->execute()->asObject('Shop_Filter_Seo_Model')->current();
 			}
@@ -3675,14 +3688,14 @@ class Shop_Controller_Show extends Core_Controller
 		$oShop = $this->getEntity();
 
 		// Panel
-		$oXslPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsPanel')
 			->style('display: none');
 
-		$oXslSubPanel = Core::factory('Core_Html_Entity_Div')
+		$oXslSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel hostcmsXsl')
 			->add(
-				Core::factory('Core_Html_Entity_Img')
+				Core_Html_Entity::factory('Img')
 					->width(3)->height(16)
 					->src('/hostcmsfiles/images/drag_bg.gif')
 			);
@@ -3694,11 +3707,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Item.items_catalog_add_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/page_add.gif')
 							->alt($sTitle)
@@ -3711,11 +3724,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Group.groups_add_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder_add.gif')
 							->alt($sTitle)
@@ -3733,11 +3746,11 @@ class Shop_Controller_Show extends Core_Controller
 				$sTitle = Core::_('Shop_Group.groups_edit_form_title', $oShop_Group->name);
 
 				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 						->add(
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->width(16)->height(16)
 								->src('/admin/images/folder_edit.gif')
 								->alt($sTitle)
@@ -3752,11 +3765,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Group.links_groups');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder.gif')
 							->alt($sTitle)
@@ -3772,11 +3785,11 @@ class Shop_Controller_Show extends Core_Controller
 				$sTitle = Core::_('Shop_Group.markDeleted');
 
 				$oXslSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 						->add(
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->width(16)->height(16)
 								->src('/admin/images/delete.gif')
 								->alt($sTitle)
@@ -3790,11 +3803,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop.edit_title', $oShop->name);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder_page_edit.gif')
 							->alt($sTitle)
@@ -3812,11 +3825,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Item.items_catalog_edit_form_title', $oShop_Item->name);
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/edit.gif')
 							->alt($sTitle)
@@ -3830,11 +3843,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Item.items_catalog_copy_form_title');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("res = confirm('".Core::_('Admin_Form.confirm_dialog', htmlspecialchars($sTitle))."'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false } else { return false } ")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/copy.gif')
 							->alt($sTitle)
@@ -3848,11 +3861,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Group.links_groups');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/folder.gif')
 							->alt($sTitle)
@@ -3866,11 +3879,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Item.items_catalog_add_form_comment_link');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/comments.gif')
 							->alt($sTitle)
@@ -3884,11 +3897,11 @@ class Shop_Controller_Show extends Core_Controller
 			$sTitle = Core::_('Shop_Item.markDeleted');
 
 			$oXslSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6'});} return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/admin/images/delete.gif')
 							->alt($sTitle)
@@ -5481,7 +5494,8 @@ class Shop_Controller_Show extends Core_Controller
 			$oShop_Producers->queryBuilder()
 				->clearSelect();
 
-			if ($this->subgroups)
+			// При включенном filterShortcuts используется ниже unionAll и он должен совпадать со схемой (shop_item_id, shop_producer_id), а не с shop_producers.*
+			if ($this->subgroups || $this->filterShortcuts)
 			{
 				$oShop_Producers->queryBuilder()
 					->select('shop_producers.*', array('tmp_counts.ct', 'dataCount'))
@@ -5531,6 +5545,49 @@ class Shop_Controller_Show extends Core_Controller
 						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
 				}
 			}
+
+			if ($this->filterShortcuts)
+			{
+				$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
+					->from('shop_items')
+					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.active', '=', 1)
+					->where('shop_items.shortcut_id', '>', 0);
+
+				$this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id');
+
+				// Стандартные ограничения для товаров
+				$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
+				// Ограничения на активность товаров
+				$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
+
+				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+				{
+					//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+					if ($this->_oTag)
+					{
+						$oCore_QueryBuilder_Select_Shortcuts
+							->join('tag_shop_items', 'shop_items.id', '=', 'tag_shop_items.shop_item_id')
+							->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+					}
+				}
+
+				// INNER JOIN с filter_group не позволит выбрать оригинальные товары из других групп через OR ... IN (SELECT ...), поэтому UNION ALL
+				/*$oQB
+					->setOr()
+					->where($oShop->filter ? $tableName . '.shop_item_id' : 'shop_items.id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);*/
+
+				$oQBFS = Core_QueryBuilder::select()
+					->distinct()
+					->select($tableName . '.shop_item_id', $tableName . '.shop_producer_id')
+					->from($tableName)
+					->where($tableName . '.primary', '=', 1)
+					->where($tableName . '.shop_item_id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);
+
+				$oQB->unionAll($oQBFS);
+			}
 		}
 		else
 		{
@@ -5563,37 +5620,37 @@ class Shop_Controller_Show extends Core_Controller
 						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
 				}
 			}
-		}
 
-		if ($this->filterShortcuts)
-		{
-			$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
-				->from('shop_items')
-				->where('shop_items.deleted', '=', 0)
-				->where('shop_items.active', '=', 1)
-				->where('shop_items.shortcut_id', '>', 0);
-
-			$this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id');
-
-			// Стандартные ограничения для товаров
-			$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
-
-			// Ограничения на активность товаров
-			$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
-
-			$oQB
-				->setOr()
-				->where($oShop->filter ? $tableName . '.shop_item_id' : 'shop_items.id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);
-
-			if (!is_null($this->tag) && Core::moduleIsActive('tag'))
+			if ($this->filterShortcuts)
 			{
-				//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+				$oCore_QueryBuilder_Select_Shortcuts = Core_QueryBuilder::select('shop_items.shortcut_id')
+					->from('shop_items')
+					->where('shop_items.deleted', '=', 0)
+					->where('shop_items.active', '=', 1)
+					->where('shop_items.shortcut_id', '>', 0);
 
-				if ($this->_oTag)
+				$this->applyFilterGroupCondition($oCore_QueryBuilder_Select_Shortcuts, 'shop_items.shop_group_id');
+
+				// Стандартные ограничения для товаров
+				$this->_applyItemConditionsQueryBuilder($oCore_QueryBuilder_Select_Shortcuts);
+
+				// Ограничения на активность товаров
+				$this->_setItemsActivity($oCore_QueryBuilder_Select_Shortcuts);
+
+				$oQB
+					->setOr()
+					->where(/*$oShop->filter ? $tableName . '.shop_item_id' : */'shop_items.id', 'IN', $oCore_QueryBuilder_Select_Shortcuts);
+
+				if (!is_null($this->tag) && Core::moduleIsActive('tag'))
 				{
-					$oCore_QueryBuilder_Select_Shortcuts
-						->join('tag_shop_items', 'shop_items.id', '=', 'tag_shop_items.shop_item_id')
-						->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+					//$this->_oTag = Core_Entity::factory('Tag')->getByPath($this->tag);
+
+					if ($this->_oTag)
+					{
+						$oCore_QueryBuilder_Select_Shortcuts
+							->join('tag_shop_items', 'shop_items.id', '=', 'tag_shop_items.shop_item_id')
+							->where('tag_shop_items.tag_id', '=', $this->_oTag->id);
+					}
 				}
 			}
 		}

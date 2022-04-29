@@ -20,7 +20,10 @@ class Crm_Project_Model extends Core_Entity
 	protected $_hasMany = array(
 		'event' => array(),
 		'deal' => array(),
-		'crm_project_note' => array(),
+		// 'crm_project_note' => array(),
+		'crm_project_crm_note' => array(),
+		'crm_note' => array('through' => 'crm_project_crm_note'),
+		'crm_project_attachment' => array(),
 	);
 
 	/**
@@ -71,11 +74,9 @@ class Crm_Project_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		if (Core::moduleIsActive('event') && $this->Events->getCount())
+		if (Core::moduleIsActive('event') && $countEvents = $this->Events->getCount())
 		{
-			$countEvents = $this->Events->getCount();
-
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('label-crm-project')
 				->style('border-color: #53a93f; color: #53a93f; background-color: ' . Core_Str::hex2lighter('#53a93f', 0.88))
 				->value('<i class="fa fa-tasks"></i> ' . $countEvents)
@@ -83,25 +84,30 @@ class Crm_Project_Model extends Core_Entity
 				->execute();
 		}
 
-		if (Core::moduleIsActive('deal') && $this->Deals->getCount())
+		if (Core::moduleIsActive('deal') && $countDeals = $this->Deals->getCount())
 		{
-			$countDeals = $this->Deals->getCount();
-
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('label-crm-project')
-				->style('border-color: #2dc3e8; color: #2dc3e8; background-color: ' . Core_Str::hex2lighter('#2dc3e8', 0.88))
+				->style('border-color: #57b5e3; color: #57b5e3; background-color: ' . Core_Str::hex2lighter('#57b5e3', 0.88))
 				->value('<i class="fa fa-handshake-o"></i> ' . $countDeals)
 				->title(Core::_('Crm_Project.deals_count', $countDeals))
 				->execute();
 		}
 
-		$countNotes = $this->Crm_Project_Notes->getCount();
-
-		$countNotes && Core::factory('Core_Html_Entity_Span')
+		$countNotes = $this->Crm_Project_Crm_Notes->getCount();
+		$countNotes && Core_Html_Entity::factory('Span')
 			->class('label-crm-project')
-			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
+			->style('border-color: #d73d32; color: #d73d32; background-color: ' . Core_Str::hex2lighter('#d73d32', 0.88))
 			->value('<i class="fa fa-comment-o"></i> ' . $countNotes)
 			->title(Core::_('Crm_Project.notes_count', $countNotes))
+			->execute();
+
+		$countFiles = $this->Crm_Project_Attachments->getCount();
+		$countFiles && Core_Html_Entity::factory('Span')
+			->class('label-crm-project')
+			->style('border-color: #f4b400; color: #f4b400; background-color: ' . Core_Str::hex2lighter('#f4b400', 0.88))
+			->value('<i class="fa fa-file-o"></i> ' . $countFiles)
+			->title(Core::_('Crm_Project.files_count', $countFiles))
 			->execute();
 	}
 
@@ -202,6 +208,58 @@ class Crm_Project_Model extends Core_Entity
 	}
 
 	/**
+	 * Get message files href
+	 * @return string
+	 */
+	public function getHref()
+	{
+		 return 'upload/private/crm/projects/' . Core_File::getNestingDirPath($this->id, 3) . '/project_' . $this->id . '/';
+	}
+
+	/**
+	 * Get path for files
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return CMS_FOLDER . $this->getHref();
+	}
+
+	/**
+	 * Create message files directory
+	 * @return self
+	 */
+	public function createDir()
+	{
+		if (!is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::mkdir($this->getPath(), CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete message files directory
+	 * @return self
+	 */
+	public function deleteDir()
+	{
+		if (is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::deleteDir($this->getPath());
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
 	 * @return Core_Entity
@@ -218,7 +276,8 @@ class Crm_Project_Model extends Core_Entity
 
 		Core_Event::notify($this->_modelName . '.onBeforeRedeclaredDelete', $this, array($primaryKey));
 
-		$this->Crm_Project_Notes->deleteAll(FALSE);
+		$this->Crm_Notes->deleteAll(FALSE);
+		$this->Crm_Project_Crm_Notes->deleteAll(FALSE);
 
 		if (Core::moduleIsActive('event'))
 		{
@@ -235,6 +294,8 @@ class Crm_Project_Model extends Core_Entity
 				->where('crm_project_id', '=', $this->id)
 				->execute();
 		}
+
+		$this->deleteDir();
 
 		return parent::delete($primaryKey);
 	}

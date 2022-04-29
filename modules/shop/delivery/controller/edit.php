@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -109,6 +109,24 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 
 		$this->addTabAfter($oShopDeliveryTabPaymentSystems, $oMainTab);
 
+		// Интервалы
+		$oShopDeliveryTabIntervals = Admin_Form_Entity::factory('Tab')
+			->caption(Core::_('Shop_Delivery.intervals'))
+			->name('Intervals');
+
+		$this->addTabAfter($oShopDeliveryTabIntervals, $oShopDeliveryTabPaymentSystems);
+
+		$oShopDeliveryTabIntervals
+			->add($oIntervalRow1 = Admin_Form_Entity::factory('Div')->class('row'));
+
+		$oShop_Delivery_Interval_Controller_Tab = new Shop_Delivery_Interval_Controller_Tab($this->_Admin_Form_Controller);
+
+		$oDeliveryOption = $oShop_Delivery_Interval_Controller_Tab
+			->shop_delivery_id($this->_object->id)
+			->execute();
+
+		$oIntervalRow1->add($oDeliveryOption);
+
 		// Заполняем вкладку платежных систем
 
 		// Получаем платежные системы, связанные с доставкой
@@ -176,7 +194,7 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 		$oMainRow2
 			->add($oTextarea)
 			->add(
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("radiogroupOnChange('{$windowId}', {$this->_object->type}, [0,1])")
 			);
 
@@ -422,6 +440,12 @@ class Shop_Delivery_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				}
 			}
 		}
+
+		// Интервалы
+		$oShop_Delivery_Interval_Controller_Tab = new Shop_Delivery_Interval_Controller_Tab($this->_Admin_Form_Controller);
+		$oShop_Delivery_Interval_Controller_Tab
+			->shop_delivery_id($this->_object->id)
+			->applyObjectProperty();
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

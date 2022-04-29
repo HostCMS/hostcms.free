@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Discount coupon',
@@ -33,5 +33,9 @@ return array(
 	'import_form' => 'File',
 	'import_result' => '%s coupons were imported!',
 	'import_error' => 'An error has occured: %s',
-	'shop_order_id' => 'Order',	
+	'shop_order_id' => 'Order',
+	'apply_success' => "Information changed successfully.",
+	'copy_success' => "Item copied successfully!",
+	'sorting' => "Sort order",
+	'shop_purchase_discount_coupon_dir_id' => 'Section',
 );

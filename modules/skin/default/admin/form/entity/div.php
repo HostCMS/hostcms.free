@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 {
@@ -17,7 +17,7 @@ class Skin_Default_Admin_Form_Entity_Div extends Admin_Form_Entity
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'divAttr',
 		'value'
 	);

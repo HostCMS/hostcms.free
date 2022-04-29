@@ -47,4 +47,5 @@ return array(
 	'show_messengers' => 'Месенджери',
 	'sorting' => 'Сортування',
 	'apply_success' => 'Елемент успішно змінено!',
+	'image' => 'Зображення',
 );

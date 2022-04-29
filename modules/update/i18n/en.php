@@ -27,7 +27,7 @@ return array(
 	'update_files_error' => 'Error while extracting tar.gz file.',
 	'server_return_empty_answer' => 'Server returned an empty response. Outgoing connections using fsockopen() may be forbidden on the hosting server. Please contact your hosting provider or server administrator.',
 	'support_available' => 'Support available until %s.',
-	'support_has_expired' => 'Support has expired at %s. <a href="http://%s/users/" target="_blank">Extend technical support</a>. Up to %s',
+	'support_has_expired' => 'Support has expired at %s. <a href="https://%s/users/" target="_blank">Extend technical support</a>. Up to %s',
 	'support_unavailable' => 'Support is not available',
 	'msg_update_required' => 'Update %s required',
 	'msg_installing_package' => 'Installing package %s',
@@ -39,5 +39,5 @@ return array(
 	'add_system_notification' => 'Update %s',
 	'system_notification_description' => 'Update %s available',
 	'add_module_notification' => 'Module update %s',
-	'system_notification_description' => 'New version %s available',
+	'module_notification_description' => 'New version %s available',
 );

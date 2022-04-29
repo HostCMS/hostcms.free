@@ -88,7 +88,6 @@ class Core_Database_Observer
 			$oCore_Registry->get('Core_DataBase.queryTime', 0) + $time
 		);
 
-		// Warning: to delete
 		/*if (FALSE)
 		{
 			if ($f_log = @fopen(CMS_FOLDER . 'sql.log', 'a'))
@@ -104,46 +103,51 @@ class Core_Database_Observer
 
 		if (defined('ALLOW_SHOW_SQL') && ALLOW_SHOW_SQL && !defined('IS_ADMIN_PART'))
 		{
-			$queryLog = $oCore_Registry->get('Core_DataBase.queryLog', array());
+			$oUser = Core_Auth::getCurrentUser();
 
-			if (count($queryLog) < 2000)
+			if ($oUser && $oUser->superuser)
 			{
-				$aLog = array(
-					'query' => $args[0],
-					'time' => $time,
-					'trimquery' => trim(str_replace(array("\n", "\t"), '', $args[0]))
-				);
+				$queryLog = $oCore_Registry->get('Core_DataBase.queryLog', array());
 
-				// Получаем данные о вызывающем
-				if (function_exists('debug_backtrace'))
+				if (count($queryLog) < 2000)
 				{
-					$aLog['debug_backtrace'] = debug_backtrace();
-				}
+					$aLog = array(
+						'query' => $args[0],
+						'time' => $time,
+						'trimquery' => trim(str_replace(array("\n", "\t"), '', $args[0]))
+					);
 
-				/*if ($object->getQueryType() === 0 && $object->getResult())
-				{
-					$sQueryUpper = strtoupper($args[0]);
-
-					// Перед выполнением "SELECT FOUND_ROWS() ..." не должно быть лишнего запроса
-					if (strpos($sQueryUpper, 'FOUND_ROWS() ') === FALSE
-						&& strpos($sQueryUpper, 'EXPLAIN ') === FALSE
-						&& strpos($sQueryUpper, '_LOCK') === FALSE
-					)
+					// Получаем данные о вызывающем
+					if (function_exists('debug_backtrace'))
 					{
-						$oExplainCore_DataBase = clone $object;
-						$oExplainCore_DataBase->query("EXPLAIN {$args[0]}")->asAssoc();
-
-						while ($row = $oExplainCore_DataBase->current())
-						{
-							$aLog['explain'][] = $row;
-						}
-						
-						$oExplainCore_DataBase->free();
+						$aLog['debug_backtrace'] = debug_backtrace();
 					}
-				}*/
 
-				$queryLog[] = $aLog;
-				$oCore_Registry->set('Core_DataBase.queryLog', $queryLog);
+					/*if ($object->getQueryType() === 0 && $object->getResult())
+					{
+						$sQueryUpper = strtoupper($args[0]);
+
+						// Перед выполнением "SELECT FOUND_ROWS() ..." не должно быть лишнего запроса
+						if (strpos($sQueryUpper, 'FOUND_ROWS() ') === FALSE
+							&& strpos($sQueryUpper, 'EXPLAIN ') === FALSE
+							&& strpos($sQueryUpper, '_LOCK') === FALSE
+						)
+						{
+							$oExplainCore_DataBase = clone $object;
+							$oExplainCore_DataBase->query("EXPLAIN {$args[0]}")->asAssoc();
+
+							while ($row = $oExplainCore_DataBase->current())
+							{
+								$aLog['explain'][] = $row;
+							}
+
+							$oExplainCore_DataBase->free();
+						}
+					}*/
+
+					$queryLog[] = $aLog;
+					$oCore_Registry->set('Core_DataBase.queryLog', $queryLog);
+				}
 			}
 		}
 

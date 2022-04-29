@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -111,7 +111,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<script>
 						$(function(){
 							$("#' . $windowId . ' .shop-tab-groups").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
+								language: "' . Core_I18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Item.select_group') . '",
 								tags: true,
@@ -156,7 +156,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<script>
 						$(function(){
 							$("#' . $windowId . ' .shop-tab-items").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
+								language: "' . Core_I18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Tab.select_item') . '",
 								tags: true,
@@ -201,7 +201,7 @@ class Shop_Tab_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<script>
 						$(function(){
 							$("#' . $windowId . ' .shop-tab-producers").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
+								language: "' . Core_I18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Tab.select_producer') . '",
 								tags: true,

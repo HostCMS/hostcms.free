@@ -305,7 +305,7 @@ class Core_Session_Database extends Core_Session
 
 		return TRUE;
 	}
-	
+
 	/**
 	 * Delete all sessions from database
 	 */

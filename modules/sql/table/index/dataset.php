@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Index_Dataset extends Admin_Form_Dataset
 {
@@ -69,7 +69,7 @@ class Sql_Table_Index_Dataset extends Admin_Form_Dataset
 
 				$aReturn[$indexName] = $oSql_Table_Index_Entity;
 			}
-		} catch(Exception $exc) {
+		} catch (Exception $exc) {
 			Core_Message::show($exc->getMessage(), "error");
 		}
 

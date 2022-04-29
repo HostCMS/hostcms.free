@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
  class Shop_Discountcard_Bonus_Model extends Core_Entity
 {
@@ -75,7 +75,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$color = 'default';
 		}
 		// Бонус доступен и НЕ потрачен
-		elseif($this->datetime <= $datetime && $this->expired >= $datetime && floatval($value))
+		elseif ($this->datetime <= $datetime && $this->expired >= $datetime && floatval($value))
 		{
 			$color = 'palegreen';
 		}
@@ -85,7 +85,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			$color = 'pink';
 		}
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('label label-' . $color)
 			->value($value)
 			->execute();
@@ -107,7 +107,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 			str_replace(array('"'), array('&quot;'), $oAdmin_Form_Controller->additionalParams)
 		);
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist

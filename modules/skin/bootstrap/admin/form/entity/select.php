@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_Entity_Select
 {
@@ -90,7 +90,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 	protected function _invertor()
 	{
 		?><label class="checkbox-inline"><?php
-		$oCore_Html_Entity_Input = Core::factory('Core_Html_Entity_Input')
+		$oCore_Html_Entity_Input = Core_Html_Entity::factory('Input')
 			->type("checkbox")
 			->id($this->invertor_id)
 			->name($this->name . '_inverted')
@@ -100,7 +100,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 
 		$oCore_Html_Entity_Input->execute();
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('caption text')
 			->style('display:inline')
 			->value($this->invertorCaption . '&nbsp;')
@@ -116,18 +116,21 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 	protected function _filter()
 	{
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
-		$iFilterCount = self::$iFilterCount;
+
+		$filterName = !is_null($this->filterName)
+			? $this->filterName
+			: "oSelectFilter" . (self::$iFilterCount++);
 
 		Admin_Form_Entity::factory('Div')
-			->class($this->caseSensitive ? 'col-xs-10 col-md-5' : 'col-xs-5 col-sm-4 col-md-4 col-lg-4 no-padding-left')
+			->class($this->caseSensitive ? 'col-xs-10 col-sm-5' : 'col-xs-5 col-sm-4 no-padding-left')
 			->add(
 				Admin_Form_Entity::factory('Div')
 					->class('input-group' . (strlen($this->caption) ? ' margin-top-21' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<span class="input-group-addon"><i class="fa fa-search"></i></span>
-								<input class="form-control" type="text" id="filter_' . $this->id . '" onkeyup="clearTimeout(oSelectFilter' . $iFilterCount . '.timeout); oSelectFilter' . $iFilterCount . '.timeout = setTimeout(function(){oSelectFilter' . $iFilterCount . ".Set($(event.target).val()); oSelectFilter{$iFilterCount}.Filter(); }, 500)". '" onkeypress="if (event.keyCode == 13) return false;" />' .
-								'<span class="input-group-addon" onclick="' . " $(this).prev('input').val(''); oSelectFilter{$iFilterCount}.Set(''); oSelectFilter{$iFilterCount}.Filter();" . '"><i class="fa fa-times-circle no-margin"></i></span>'
+								<input class="form-control" type="text" id="filter_' . $this->id . '" onkeyup="clearTimeout(' . $filterName . '.timeout); ' . $filterName . '.timeout = setTimeout(function(){' . $filterName . ".Set($(event.target).val()); {$filterName}.Filter(); }, 500)". '" onkeypress="if (event.keyCode == 13) return false;" />' .
+								'<span class="input-group-addon" onclick="' . " $(this).prev('input').val(''); {$filterName}.Set(''); {$filterName}.Filter();" . '"><i class="fa fa-times-circle no-margin"></i></span>'
 							)
 					)
 			)
@@ -136,21 +139,19 @@ class Skin_Bootstrap_Admin_Form_Entity_Select extends Skin_Default_Admin_Form_En
 			if ($this->caseSensitive)
 			{
 				Admin_Form_Entity::factory('Div')
-					->class('col-xs-2 col-md-1 no-padding-left' . (strlen($this->caption) ? ' margin-top-25' : ''))
+					->class('col-xs-2 col-sm-1 no-padding-left' . (strlen($this->caption) ? ' margin-top-25' : ''))
 					->add(
 						Admin_Form_Entity::factory('Code')
 							->html('<label class="checkbox-inline" title="' . Core::_('Admin_Form.case_sensitive') . '">' .
-							'<input id="filter_ignorecase_' . $this->id . '" class="form-control colored-blue font" type="checkbox" value="1" checked="checked" onclick="oSelectFilter' . $iFilterCount . '.SetIgnoreCase(!this.checked); oSelectFilter' . $iFilterCount . '.Filter()" />' .
+							'<input id="filter_ignorecase_' . $this->id . '" class="form-control colored-blue font" type="checkbox" value="1" checked="checked" onclick="' . $filterName . '.SetIgnoreCase(!this.checked); ' . $filterName . '.Filter()" />' .
 							'<span class="text"></span></label>')
 					)
 					->execute();
 			}
 
-			Core::factory('Core_Html_Entity_Script')
-				->value("var oSelectFilter{$iFilterCount} = new cSelectFilter('{$windowId}', '{$this->id}');")
+			Core_Html_Entity::factory('Script')
+				->value("var {$filterName} = new cSelectFilter('{$windowId}', '{$this->id}');")
 				->execute();
-
-		self::$iFilterCount++;
 
 		return $this;
 	}

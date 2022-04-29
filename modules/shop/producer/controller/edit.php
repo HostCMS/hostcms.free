@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -218,7 +218,7 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 				$(function(){
 					$("#' . $windowId . ' .shop-tabs").select2({
 						dropdownParent: $("#' . $windowId . '"),
-						language: "' . Core_i18n::instance()->getLng() . '",
+						language: "' . Core_I18n::instance()->getLng() . '",
 						minimumInputLength: 1,
 						placeholder: "' . Core::_('Shop_Tab.select_tab') . '",
 						tags: true,
@@ -356,39 +356,46 @@ class Shop_Producer_Controller_Edit extends Admin_Form_Action_Controller_Type_Ed
 	{
 		parent::_applyObjectProperty();
 
-		$this->_object->default
-			&& $this->_object->changeDefaultStatus();
+		$modelName = $this->_object->getModelName();
 
-		// Вкладки
-		$aShopTabIds = Core_Array::getPost('shop_tab_id', array());
-		!is_array($aShopTabIds) && $aShopTabIds = array();
-
-		$aTmp = array();
-
-		$aShop_Tabs = $this->_object->Shop_Tabs->findAll(FALSE);
-		foreach ($aShop_Tabs as $oShop_Tab)
+		switch ($modelName)
 		{
-			if (!in_array($oShop_Tab->id, $aShopTabIds))
-			{
-				$oShop_Tab_Producer = $oShop_Tab->Shop_Tab_Producers->getByShop_producer_id($this->_object->id);
-				!is_null($oShop_Tab_Producer)
-					&& $oShop_Tab_Producer->delete();
-			}
-			else
-			{
-				$aTmp[] = $oShop_Tab->id;
-			}
-		}
+			case 'shop_producer':
+				$this->_object->default
+					&& $this->_object->changeDefaultStatus();
 
-		// Новые вкладки
-		$aNewShopTabIds = array_diff($aShopTabIds, $aTmp);
-		foreach ($aNewShopTabIds as $iNewShopTabId)
-		{
-			$oShop_Tab_Producer = Core_Entity::factory('Shop_Tab_Producer');
-			$oShop_Tab_Producer->shop_id = $this->_object->shop_id;
-			$oShop_Tab_Producer->shop_producer_id = $this->_object->id;
-			$oShop_Tab_Producer->shop_tab_id = $iNewShopTabId;
-			$oShop_Tab_Producer->save();
+				// Вкладки
+				$aShopTabIds = Core_Array::getPost('shop_tab_id', array());
+				!is_array($aShopTabIds) && $aShopTabIds = array();
+
+				$aTmp = array();
+
+				$aShop_Tabs = $this->_object->Shop_Tabs->findAll(FALSE);
+				foreach ($aShop_Tabs as $oShop_Tab)
+				{
+					if (!in_array($oShop_Tab->id, $aShopTabIds))
+					{
+						$oShop_Tab_Producer = $oShop_Tab->Shop_Tab_Producers->getByShop_producer_id($this->_object->id);
+						!is_null($oShop_Tab_Producer)
+							&& $oShop_Tab_Producer->delete();
+					}
+					else
+					{
+						$aTmp[] = $oShop_Tab->id;
+					}
+				}
+
+				// Новые вкладки
+				$aNewShopTabIds = array_diff($aShopTabIds, $aTmp);
+				foreach ($aNewShopTabIds as $iNewShopTabId)
+				{
+					$oShop_Tab_Producer = Core_Entity::factory('Shop_Tab_Producer');
+					$oShop_Tab_Producer->shop_id = $this->_object->shop_id;
+					$oShop_Tab_Producer->shop_producer_id = $this->_object->id;
+					$oShop_Tab_Producer->shop_tab_id = $iNewShopTabId;
+					$oShop_Tab_Producer->save();
+				}
+			break;
 		}
 
 		$param = array();

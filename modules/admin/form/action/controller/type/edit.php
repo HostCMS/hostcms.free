@@ -570,13 +570,14 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 							);
 						}
 
-						if (is_null($columnArray['default']) && !$columnArray['null'])
+						// При редактировании уже заданной пустой строки все равно требует значение
+						/*if (is_null($columnArray['default']) && !$columnArray['null'])
 						{
 							$format += array('minlen' =>
 								// ограничение длины поля
 								array('value' => 1)
 							);
-						}
+						}*/
 					break;
 					case 'int':
 						$format += array('lib' => array(
@@ -633,7 +634,7 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 								$this->_tabs[$sTabName]->delete($oAdmin_Form_Entity_For_Column);
 
 								$placeholder = Core::_('User.select_user');
-								$language = Core_i18n::instance()->getLng();
+								$language = Core_I18n::instance()->getLng();
 
 								$aSelectResponsibleUsers = $oSite->Companies->getUsersOptions();
 
@@ -875,7 +876,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				}
 				elseif (!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
 				{
-					$value = intval($value);
+					$value = $columnArray['zerofill']
+						? preg_replace('/[^0-9\.\-]/', '', $value)
+						: intval($value);
 				}
 			break;
 			case 'smallint':
@@ -886,7 +889,9 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			case 'int unsigned':
 			case 'integer unsigned':
 				(!is_null($value) || !$columnArray['null'] && $columnArray['default'] != 'NULL' && strpos($columnArray['extra'], 'auto_increment') === FALSE)
-					&& $value = intval($value);
+					&& $value = $columnArray['zerofill']
+						? preg_replace('/[^0-9\.\-]/', '', $value)
+						: intval($value);
 			break;
 			case 'decimal':
 				$value = str_replace(',', '.', $value);
@@ -990,10 +995,20 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 
 		$oAdmin_Form = $this->_Admin_Form_Controller->getAdminForm();
 
-		if ($datasetId != '')
+		if ($datasetId !== '')
 		{
 			$oAdmin_Form_Autosave = Core_Entity::factory('Admin_Form_Autosave')->getObject($oAdmin_Form->id, $datasetId, intval($this->_object->getPrimaryKey()));
-			!is_null($oAdmin_Form_Autosave) && $oAdmin_Form_Autosave->delete();
+
+			!is_null($oAdmin_Form_Autosave)
+				&& $oAdmin_Form_Autosave->delete();
+		}
+
+		// Remove old items
+		if (rand(0, 999) == 0)
+		{
+			Core_QueryBuilder::delete('admin_form_autosaves')
+				->where('datetime', '<', Core_Date::timestamp2sql(strtotime('-1 month')))
+				->execute();
 		}
 
 		return $this;
@@ -1072,24 +1087,16 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 		return TRUE;
 	}
 
-	/**
-	 * Add form buttons
-	 * @return Admin_Form_Entity_Buttons
-	 */
-	protected function _addButtons()
+	protected function _getSaveButton()
 	{
 		$sOperaion = $this->_Admin_Form_Controller->getOperation();
-		$sOperaionSufix = $sOperaion == 'modal'
-			? 'Modal'
-			: '';
+		$sOperaionSufix = $sOperaion == 'modal' ? 'Modal' : '';
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getRequest('parentWindowId'));
 
-		$parentWindowId = Core_Array::getRequest('parentWindowId');
-		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', $parentWindowId);
-
-		// Кнопки
-		$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
+		// remove parentWindowId
+		//$additionalParams = preg_replace('/&parentWindowId=[A-Za-z0-9_-]*/', '', $this->_Admin_Form_Controller->additionalParams);
 
 		// Сохранить
 		$oAdmin_Form_Entity_Button_Save = Admin_Form_Entity::factory('Button')
@@ -1100,10 +1107,24 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 			->onclick(
 				$this->_Admin_Form_Controller
 					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+					//->additionalParams($additionalParams)
 					->getAdminSendForm(array('operation' => 'save' . $sOperaionSufix))
 			);
 
-		// Применить
+		return $oAdmin_Form_Entity_Button_Save;
+	}
+
+	protected function _getApplyButton()
+	{
+		$sOperaion = $this->_Admin_Form_Controller->getOperation();
+		$sOperaionSufix = $sOperaion == 'modal' ? 'Modal' : '';
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getRequest('parentWindowId'));
+		
+		// remove parentWindowId
+		//$additionalParams = preg_replace('/&parentWindowId=[A-Za-z0-9_-]*/', '', $this->_Admin_Form_Controller->additionalParams);
+
 		$oAdmin_Form_Entity_Button_Apply = Admin_Form_Entity::factory('Button')
 			->name('apply')
 			->id('action-button-apply')
@@ -1114,12 +1135,35 @@ class Admin_Form_Action_Controller_Type_Edit extends Admin_Form_Action_Controlle
 				// После применения загрузка новой таблицы осуществляется в родительское окно
 				$this->_Admin_Form_Controller
 					->windowId(strlen($parentWindowId) ? $parentWindowId : $windowId)
+					//->additionalParams($additionalParams)
 					->getAdminSendForm(array('operation' => 'apply' . $sOperaionSufix))
 			);
 
-		$oAdmin_Form_Entity_Buttons
-			->add($oAdmin_Form_Entity_Button_Save)
-			->add($oAdmin_Form_Entity_Button_Apply);
+		return $oAdmin_Form_Entity_Button_Apply;
+	}
+
+	/**
+	 * Add form buttons
+	 * @return Admin_Form_Entity_Buttons
+	 */
+	protected function _addButtons()
+	{
+		$sOperaion = $this->_Admin_Form_Controller->getOperation();
+		$sOperaionSufix = $sOperaion == 'modal' ? 'Modal' : '';
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
+		$parentWindowId = preg_replace('/[^A-Za-z0-9_-]/', '', Core_Array::getRequest('parentWindowId'));
+
+		// Кнопки
+		$oAdmin_Form_Entity_Buttons = Admin_Form_Entity::factory('Buttons');
+
+		// Сохранить
+		($oAdmin_Form_Entity_Button_Save = $this->_getSaveButton())
+			&& $oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Save);
+
+		// Применить
+		($oAdmin_Form_Entity_Button_Apply = $this->_getApplyButton())
+			&& $oAdmin_Form_Entity_Buttons->add($oAdmin_Form_Entity_Button_Apply);
 
 		$aChecked = $this->_Admin_Form_Controller->getChecked();
 		$aFirst = reset($aChecked);

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Http
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Http_Curl extends Core_Http
 {
@@ -42,22 +42,18 @@ class Core_Http_Curl extends Core_Http
 				curl_setopt($curl, CURLOPT_HTTPGET, TRUE);
 				//curl_setopt($curl, CURLOPT_POST, FALSE);
 			break;
-
 			case 'PUT':
 				curl_setopt($curl, CURLOPT_HTTPGET, FALSE);
 				curl_setopt($curl, CURLOPT_POST, FALSE);
 				curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "PUT");
 			break;
-
 			case 'POST':
 				curl_setopt($curl, CURLOPT_POST, TRUE);
 				//curl_setopt($curl, CURLOPT_HTTPGET, FALSE);
 			break;
-
 			case 'HEAD':
 				curl_setopt($curl, CURLOPT_NOBODY, TRUE);
 			break;
-
 			default:
 				curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $this->_method);
 		}
@@ -103,7 +99,7 @@ class Core_Http_Curl extends Core_Http
 		//curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); // No certificate
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE); // Return in string
-		
+
 		// Close connection
 		//curl_setopt($curl, CURLOPT_FORBID_REUSE, TRUE);
 
@@ -193,7 +189,7 @@ class Core_Http_Curl extends Core_Http
 
 		// Close PHP cURL handle
 		@curl_close($curl);
-		unset($curl); // PHP-8: curl_close no longer closes the resource 
+		unset($curl); // PHP-8: curl_close no longer closes the resource
 
 		//$aTmp = explode("\r\n\r\n", $datastr, 2);
 

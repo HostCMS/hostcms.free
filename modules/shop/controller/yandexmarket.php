@@ -37,6 +37,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * - request(string) [Покупка на Яндекс.Маркете] данные запроса, если заданы, то используются вместо присланного запроса
  * - utm_source() определяет рекламодателя, например, market
  * - utm_medium() определяет рекламный или маркетинговый канал (цена за клик, баннер, рассылка по электронной почте).
+ * - debug(TRUE|FALSE) фиксировать в логах поступаемые запросы, по умолчанию FALSE.
  *
  *
  * <code>
@@ -102,6 +103,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		'marketMode',
 		'utm_source',
 		'utm_medium',
+		'debug',
 		//'pattern',
 		//'patternExpressions',
 		//'patternParams'
@@ -341,7 +343,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		$this->itemsProperties = $this->modifications = $this->deliveryOptions = $this->checkAvailable = TRUE;
 
-		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = FALSE;
+		$this->groupModifications = $this->rootItems = $this->recommended = $this->checkRest = $this->outlets = $this->debug = FALSE;
 
 		$this->paymentMethod = $this->cdata = $this->itemsForbiddenProperties = array();
 
@@ -665,14 +667,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	/**
 	 * Show offers
 	 * @return self
-	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffer
-	 * @hostcms-event Shop_Controller_YandexMarket.onAfterOffer
 	 */
 	protected function _offers()
 	{
 		$this->write("<offers>\n");
 
 		$oShop = $this->getEntity();
+
 		$oShop_Item_Property_List = Core_Entity::factory('Shop_Item_Property_List', $oShop->id);
 
 		$this->_MarketCategory = $oShop_Item_Property_List->Properties->getByTag_name('market_category');
@@ -844,6 +845,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * Print offer's content
 	 * @param Shop_Item_Model $oShop_Item
 	 * @return self
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffer
+	 * @hostcms-event Shop_Controller_YandexMarket.onAfterOffer
 	 */
 	protected function _showOffer(Shop_Item_Model $oShop_Item)
 	{
@@ -867,11 +870,39 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		В формате YML не поддерживается элемент currencies с информацией о валютах магазина и курсах конвертации. */
 		if ($this->priceMode == 'shop' || $this->model == 'ADV' || $this->model == 'DBS')
 		{
-			$aPrices = $this->_Shop_Item_Controller->calculatePrice($oShop_Item->price, $oShop_Item);
+			if ($this->surcharge)
+			{
+				// Получаем коэффициент пересчета из валюты товара в валюту магазина
+				$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+					$oShop_Item->Shop_Currency, $oShop->Shop_Currency
+				);
+
+				$surcharge = $this->surcharge * $currency_coefficient;
+			}
+			else
+			{
+				$surcharge = 0;
+			}
+
+			$aPrices = $this->_Shop_Item_Controller->calculatePrice($oShop_Item->price + $surcharge, $oShop_Item);
 		}
 		elseif ($this->priceMode == 'item')
 		{
-			$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price, $oShop_Item);
+			if ($this->surcharge)
+			{
+				// Получаем коэффициент пересчета из валюты магазина в валюту товара
+				$currency_coefficient = Shop_Controller::instance()->getCurrencyCoefficientInShopCurrency(
+					$oShop->Shop_Currency, $oShop_Item->Shop_Currency
+				);
+
+				$surcharge = $this->surcharge * $currency_coefficient;
+			}
+			else
+			{
+				$surcharge = 0;
+			}
+
+			$aPrices = $this->_Shop_Item_Controller->calculatePriceInItemCurrency($oShop_Item->price + $surcharge, $oShop_Item);
 		}
 		else
 		{
@@ -881,12 +912,12 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		}
 
 		/* Цена */
-		$this->write('<price>' . ($aPrices['price_discount'] + $this->surcharge) . '</price>'. "\n");
+		$this->write('<price>' . ($aPrices['price_discount']) . '</price>'. "\n");
 
 		if ($aPrices['discount'] > 0 && !isset($this->_forbiddenTags['discount']))
 		{
 			/* Старая цена */
-			$this->write('<oldprice>' . ($aPrices['price'] + $aPrices['tax'] + $this->surcharge) . '</oldprice>'. "\n");
+			$this->write('<oldprice>' . ($aPrices['price'] + $aPrices['tax']) . '</oldprice>'. "\n");
 		}
 
 		/* CURRENCY */
@@ -981,14 +1012,14 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* Delivery options */
 		if ($this->deliveryOptions)
 		{
-			 !isset($this->_forbiddenTags['store'])
-				&& $this->write('<store>' . ($oShop_Item->store == 1 ? 'true' : 'false') . '</store>'. "\n");
+			!isset($this->_forbiddenTags['delivery'])
+				&& $this->write('<delivery>' . ($oShop_Item->delivery == 1 ? 'true' : 'false') . '</delivery>'. "\n");
 
 			!isset($this->_forbiddenTags['pickup'])
 				&& $this->write('<pickup>' . ($oShop_Item->pickup == 1 ? 'true' : 'false') . '</pickup>'. "\n");
 
-			!isset($this->_forbiddenTags['delivery'])
-				&& $this->write('<delivery>' . ($oShop_Item->delivery == 1 ? 'true' : 'false') . '</delivery>'. "\n");
+			!isset($this->_forbiddenTags['store'])
+				&& $this->write('<store>' . ($oShop_Item->store == 1 ? 'true' : 'false') . '</store>'. "\n");
 
 			$this->_deliveryOptions($oShop, $oShop_Item);
 		}
@@ -1589,6 +1620,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 
 		if (strlen($action))
 		{
+			if ($this->debug)
+			{
+				Core_Log::instance()->clear()
+					->status(Core_Log::$MESSAGE)
+					->write("Shop_Controller_YandexMarket: ACTION: '{$action}', BODY: '" . $this->getRequest() . "'");
+			}
+
 			$aParseUrl = parse_url($action);
 
 			$path = $aParseUrl['path'];
@@ -1597,15 +1635,18 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			{
 				parse_str($aParseUrl['query'], $request);
 
-				if ($this->token != Core_Array::get($request, 'auth-token'))
+				$requestToken = Core_Array::get($request, 'auth-token');
+				if ($this->token != $requestToken)
 				{
-					//return $this->error404();
-					throw new Core_Exception("Wrong auth-token!");
+					!is_null(Core_Page::instance()->response) && Core_Page::instance()->response->status(403);
+
+					throw new Core_Exception("Wrong auth-token '{$requestToken}' from Y.Market!");
 				}
 			}
 			else
 			{
-				//return $this->error404();
+				!is_null(Core_Page::instance()->response) && Core_Page::instance()->response->status(403);
+
 				throw new Core_Exception("Empty query!");
 			}
 		}
@@ -1904,6 +1945,27 @@ class Shop_Controller_YandexMarket extends Core_Controller
 												'toDate' => date('d-m-Y', strtotime('+' . $oShop_Delivery->days_to . ' day'))
 											);
 
+											$aShop_Delivery_Intervals = $oShop_Delivery->Shop_Delivery_Intervals->findAll(FALSE);
+
+											for ($day = $oShop_Delivery->days_from; $day <= $oShop_Delivery->days_to; $day++)
+											{
+												foreach ($aShop_Delivery_Intervals as $key => $oShop_Delivery_Interval)
+												{
+													$aTmpDelivery['dates']['intervals'][] = array(
+														'date' => date('d-m-Y', strtotime('+' . $day . ' day')),
+														'fromTime' => substr($oShop_Delivery_Interval->from_time, 0, strrpos($oShop_Delivery_Interval->from_time, ':')),
+														'toTime' => substr($oShop_Delivery_Interval->to_time, 0, strrpos($oShop_Delivery_Interval->to_time, ':'))
+													);
+
+													// https://yandex.ru/dev/market/partner-dsbs/doc/dg/reference/post-cart.html
+													// В параметре можно указать до 5 интервалов для каждой даты.
+													if ($key == 4)
+													{
+														break;
+													}
+												}
+											}
+
 											$aDeliveries[] = $aTmpDelivery;
 										}
 									}
@@ -1975,6 +2037,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 		}
 
+		if ($this->debug)
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write("Shop_Controller_YandexMarket: REQUEST: {$this->marketMode}, ANSWER: " . json_encode($aAnswer));
+		}
+
 		Core::showJson($aAnswer);
 	}
 
@@ -2034,6 +2103,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 		}
 
+		if ($this->debug)
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write("Shop_Controller_YandexMarket: REQUEST: {$this->marketMode}, ANSWER: " . json_encode($aAnswer));
+		}
+
 		Core::showJson($aAnswer);
 	}
 
@@ -2060,6 +2136,13 @@ class Shop_Controller_YandexMarket extends Core_Controller
 					"id" => strval($oShop_Order->id)
 				);
 			}
+		}
+
+		if ($this->debug)
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write("Shop_Controller_YandexMarket: REQUEST: {$this->marketMode}, ANSWER: " . json_encode($aAnswer));
 		}
 
 		Core::showJson($aAnswer);
@@ -2252,6 +2335,7 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		$oShop_Order->createInvoice()->save();
 
 		// Еще неизвестно ФИО заказчика, см. updateOrder()
+		// там же производится отправка писем
 
 		Core_Event::notify(get_class($this) . '.onAfterCreateOrder', $this, array($oShop_Order));
 
@@ -2313,7 +2397,16 @@ class Shop_Controller_YandexMarket extends Core_Controller
 			}
 		}
 
-		Core::showJson('OK');
+		$aAnswer = 'OK';
+
+		if ($this->debug)
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write("Shop_Controller_YandexMarket: REQUEST: {$this->marketMode}, ANSWER: " . json_encode($aAnswer));
+		}
+
+		Core::showJson($aAnswer);
 	}
 
 	/**
@@ -2322,7 +2415,16 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 */
 	public function orderShipmentStatus()
 	{
-		Core::showJson('OK');
+		$aAnswer = 'OK';
+
+		if ($this->debug)
+		{
+			Core_Log::instance()->clear()
+				->status(Core_Log::$MESSAGE)
+				->write("Shop_Controller_YandexMarket: REQUEST: {$this->marketMode}, ANSWER: " . json_encode($aAnswer));
+		}
+
+		Core::showJson($aAnswer);
 	}
 
 	/**
@@ -2480,6 +2582,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 	 * Show UML built data
 	 * @return self
 	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeRedeclaredShowYml
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeCategories
+	 * @hostcms-event Shop_Controller_YandexMarket.onBeforeOffers
 	 */
 	public function showYml()
 	{
@@ -2527,6 +2631,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/*$this->model != 'ADV' && $this->model != 'DBS'
 			&& */$this->_currencies();
 
+		Core_Event::notify(get_class($this) . '.onBeforeCategories', $this, array($oShop));
+
 		/* Категории */
 		$this->_categories();
 
@@ -2551,6 +2657,8 @@ class Shop_Controller_YandexMarket extends Core_Controller
 		/* cpa */
 		!isset($this->_forbiddenTags['cpa'])
 			&& $this->write('<cpa>' . $cpa . '</cpa>' . "\n");
+
+		Core_Event::notify(get_class($this) . '.onBeforeOffers', $this, array($oShop));
 
 		/* Товары */
 		$this->_offers();

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -85,7 +85,7 @@ class Shop_Warehouse_Cell_Controller_Edit extends Admin_Form_Action_Controller_T
 				->value($this->_object->parent_id)
 				->type('hidden');
 
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("
 				$('#{$windowId} [name = parent_name]').autocomplete({
 					source: function(request, response) {

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Value_Int_Model extends Core_Entity
 {
@@ -132,6 +132,7 @@ class Field_Value_Int_Model extends Core_Entity
 	 * @hostcms-event field_value_int.onBeforeAddListItem
 	 * @hostcms-event field_value_int.onBeforeAddInformationsystemItem
 	 * @hostcms-event field_value_int.onBeforeAddShopItem
+	 * @hostcms-event field_value_int.onBeforeAddShopGroup
 	 */
 	protected function _prepareData()
 	{
@@ -363,7 +364,7 @@ class Field_Value_Int_Model extends Core_Entity
 						->clearEntities()
 						->showXmlProperties(count($aTmp) ? $aTmp : FALSE);
 
-					Core_Event::notify($this->_modelName . '.onBeforeAddShopItem', $this, array($oShop_Group));
+					Core_Event::notify($this->_modelName . '.onBeforeAddShopGroup', $this, array($oShop_Group));
 
 					$oLastReturn = Core_Event::getLastReturn();
 

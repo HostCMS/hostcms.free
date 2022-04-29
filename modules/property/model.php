@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Model extends Core_Entity
 {
@@ -646,12 +646,37 @@ class Property_Model extends Core_Entity
 				$aList_Items = $oList_Items->findAll(FALSE);
 				foreach ($aList_Items as $oList_Item)
 				{
-					$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item;
+					$this->_aListItemsTree[$oList_Item->parent_id][] = $oList_Item->clearEntities();
+
+					// Добавить родителей иерархических значений, когда родители не были упомянуты в фильтрации
+					$this->_addParentListItem($oList_Item);
 				}
 
 				$this->_addListItems(0, $this->List);
 
 				$this->_aListItemsTree = array();
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Add a hierarchy of items missing from filtering
+	 * @param List_Item_Model $oList_Item
+	 * @return self
+	 */
+	protected function _addParentListItem(List_Item_Model $oList_Item)
+	{
+		if ($oList_Item->parent_id != 0 && is_array($this->_limitListItems) && !in_array($oList_Item->parent_id, $this->_limitListItems))
+		{
+			$oParent = $oList_Item->getParent();
+
+			if ($oParent)
+			{
+				$this->_aListItemsTree[$oParent->parent_id][] = $oParent->clearEntities()->addAttribute('available', 'false');
+
+				$this->_addParentListItem($oParent);
 			}
 		}
 
@@ -664,7 +689,7 @@ class Property_Model extends Core_Entity
 		{
 			foreach ($this->_aListItemsTree[$parentId] as $oList_Item)
 			{
-				$oObject->addEntity($oList_Item->clearEntities());
+				$oObject->addEntity($oList_Item/*->clearEntities()*/); // ->clearEntities() moved above cause clears available="false"
 
 				$this->_addListItems($oList_Item->id, $oList_Item);
 			}
@@ -729,7 +754,7 @@ class Property_Model extends Core_Entity
 	{
 		if (!is_null($this->dataTmp) && $this->Shop_Item_Property->filter)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('badge badge-hostcms badge-square gray pull-right')
 				->value('<i class="fa fa-filter fa-fw"></i>')
 				->execute();
@@ -737,8 +762,16 @@ class Property_Model extends Core_Entity
 
 		if ($this->obligatory)
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->value('<i class="fa fa-asterisk darkorange fa-small"></i>')
+				->execute();
+		}
+
+		if ($this->type == 3 && $this->list_id == 0)
+		{
+			Core_Html_Entity::factory('Span')
+				->class('badge badge-darkorange badge-ico white')
+				->add(Core_Html_Entity::factory('I')->class('fa fa-chain-broken'))
 				->execute();
 		}
 	}

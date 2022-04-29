@@ -6,7 +6,7 @@
  * @subpackage Site
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Сайты',
@@ -113,4 +113,5 @@ return array(
 
 	'protect' => 'Защита от атак',
 	'sender_name' => 'Имя отправителя',
+	'filter_placeholder' => 'Фильтр по названию',
 );

@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -253,14 +253,14 @@ try
 
 			if ($iAffectedRows && $iCountQueries == 1)
 			{
-				$oTable = Core::factory('Core_Html_Entity_Table')
+				$oTable = Core_Html_Entity::factory('Table')
 					->class('admin-table table table-bordered table-hover table-striped sql-table')
 					// Top title
-					->add($oTitleTr = Core::factory('Core_Html_Entity_Tr'));
+					->add($oTitleTr = Core_Html_Entity::factory('Tr'));
 
 				$iLine = 0;
 
-				$oDiv = Core::factory('Core_Html_Entity_Div')
+				$oDiv = Core_Html_Entity::factory('Div')
 					->style('height: 200px; resize: vertical; overflow: auto');
 
 				$oDiv->add($oTable);
@@ -273,13 +273,13 @@ try
 						foreach ($row as $key => $value)
 						{
 							$oTitleTr->add(
-								Core::factory('Core_Html_Entity_Th')
+								Core_Html_Entity::factory('Th')
 									->value(htmlspecialchars($key))
 							);
 						}
 					}
 
-					$oTr = Core::factory('Core_Html_Entity_Tr');
+					$oTr = Core_Html_Entity::factory('Tr');
 
 					if (is_array($row) && count($row))
 					{
@@ -288,7 +288,7 @@ try
 							is_null($value) && $value = 'NULL';
 
 							$oTr->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->value(Core_Str::cut(htmlspecialchars($value), 100))
 							);
 						}
@@ -303,7 +303,7 @@ try
 
 				$oDiv->execute();
 
-				Core::factory('Core_Html_Entity_P')
+				Core_Html_Entity::factory('P')
 					->value(Core::_('Sql.rows_count', $iAffectedRows, $iLine, $fTime))
 					->execute();
 			}

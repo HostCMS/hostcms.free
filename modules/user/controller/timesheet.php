@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage User
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class User_Controller_Timesheet extends Admin_Form_Controller_View
 {
@@ -330,7 +330,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 				}
 				?>
 			</div>
-			<script>				
+			<script>
 				setTableWithFixedHeaderAndLeftColumn();
 			</script>
 			<?php
@@ -397,13 +397,7 @@ class User_Controller_Timesheet extends Admin_Form_Controller_View
 			</td>
 			<td style="min-width: 200px">
 			<?php
-			$name = strlen($oUser->getFullName())
-				? $oUser->getFullName()
-				: $oUser->login;
-
-			$name = htmlspecialchars($name);
-
-			echo "<a href=\"/admin/user/index.php?hostcms[action]=view&amp;hostcms[checked][0][{$oUser->id}]=1\" onclick=\"$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][{$oUser->id}]=1', windowId: 'deal-notes'}); return false\" title=\"{$name}\">{$name}</a>";
+			$oUser->showLink('deal-notes');
 
 			$oCurrentUser = Core_Auth::getCurrentUser();
 

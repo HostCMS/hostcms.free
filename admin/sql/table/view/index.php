@@ -3,9 +3,9 @@
  * SQL.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../../bootstrap.php');
 
@@ -28,12 +28,12 @@ if (strlen($tableName))
 	foreach ($aFileds as $key => $aRow)
 	{
 		// Set temporary key and order field for the Admin_Form
-		if ($aRow['key'] == 'PRI' && !$bSetPK)
+		if (!$bSetPK && $aRow['key'] == 'PRI')
 		{
 			$oAdmin_Form->key_field
 				= $oAdmin_Form->default_order_field
 				= $aRow['name'];
-				
+
 			$bSetPK = TRUE;
 		}
 		$oAdmin_Form_Field = new Sql_Table_View_Field();
@@ -49,6 +49,39 @@ if (strlen($tableName))
 		$oAdmin_Form_Field->ico = '';
 		$oAdmin_Form_Field->format = '';
 		$oAdmin_Form_Field->width = '';
+
+		switch ($aRow['type'])
+		{
+			case 'int':
+				$oAdmin_Form_Field->width = '95px';
+			break;
+			case 'string':
+				if (is_numeric($aRow['defined_max_length'])
+					&& $aRow['defined_max_length'] <= 10)
+				{
+					$oAdmin_Form_Field->width = $aRow['defined_max_length'] < 3
+						? '25px'
+						: ($aRow['defined_max_length'] * 10) . 'px';
+				}
+			break;
+		}
+
+		switch ($aRow['datatype'])
+		{
+			case 'tinyint':
+				$oAdmin_Form_Field->width = '40px';
+			break;
+			case 'smallint':
+				$oAdmin_Form_Field->width = '55px';
+			break;
+			case 'date':
+				$oAdmin_Form_Field->width = '85px';
+			break;
+			case 'datetime':
+				$oAdmin_Form_Field->width = '135px';
+			break;
+		}
+
 		//$oAdmin_Form_Field->class = $aRow['max_length'] > 1000 ? 'truncated' : '';
 		$oAdmin_Form_Field->class = 'truncated' . ($aRow['key'] == 'PRI' ? ' semi-bold' : '');
 		$aAdmin_Form_Fields[$oAdmin_Form_Field->id] = $oAdmin_Form_Field;

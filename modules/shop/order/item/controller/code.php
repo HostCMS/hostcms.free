@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Order_Item_Controller_Code extends Admin_Form_Action_Controller
 {
@@ -61,7 +61,7 @@ class Shop_Order_Item_Controller_Code extends Admin_Form_Action_Controller
 
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
-		Core::factory('Core_Html_Entity_Script')
+		Core_Html_Entity::factory('Script')
 			->value('$(function() {
 				$("#codes-' . $this->_object->id . '").modal("hide");
 

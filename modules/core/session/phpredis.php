@@ -21,6 +21,12 @@ class Core_Session_Phpredis extends Core_Session
 	static protected $_redis = NULL;
 
 	/**
+	 * Redis instance
+	 * @var Redis
+	 */
+	static protected $_config = NULL;
+
+	/**
 	 * Session has been read
 	 * @var boolean
 	 */
@@ -75,39 +81,42 @@ class Core_Session_Phpredis extends Core_Session
 		$this->_ttl = intval(ini_get('session.gc_maxlifetime'));
 	}
 
-	static protected _connect()
+	/**
+	 * Connect to the Redis
+	 */
+	static protected function _connect()
 	{
-		if (is_null(self::_redis))
+		if (is_null(self::$_redis))
 		{
-			self::_redis = new Redis();
+			self::$_redis = new Redis();
 
-			$aConfig = Core::$mainConfig['session'] + array(
+			self::$_config = Core::$mainConfig['session'] + array(
 				'server' => '127.0.0.1',
 				'port' => 6379,
 				'auth' => NULL,
 				'database' => NULL
 			);
 
-			if (!self::_redis->connect($aConfig['server'], $aConfig['port']))
+			if (!self::$_redis->connect(self::$_config['server'], self::$_config['port']))
 			{
 				self::_error('Redis connection error. Check \'session\' section, see modules/core/config/config.php');
-				self::_redis = NULL;
+				self::$_redis = NULL;
 
 				return FALSE;
 			}
 
-			if (!is_null($aConfig['auth']) && !self::_redis->auth($aConfig['auth']))
+			if (!is_null(self::$_config['auth']) && !self::$_redis->auth(self::$_config['auth']))
 			{
 				self::_error('Redis connection authenticate error. Check \'session\' section, see modules/core/config/config.php');
-				self::_redis = NULL;
+				self::$_redis = NULL;
 
 				return FALSE;
 			}
 
-			if (!is_null($aConfig['database']) && !self::_redis->select($aConfig['database']))
+			if (!is_null(self::$_config['database']) && !self::$_redis->select(self::$_config['database']))
 			{
 				self::_error('Redis changing the selected database error. Check \'session\' section, see modules/core/config/config.php');
-				self::_redis = NULL;
+				self::$_redis = NULL;
 
 				return FALSE;
 			}
@@ -152,7 +161,7 @@ class Core_Session_Phpredis extends Core_Session
 
 		if ($this->_lock($id))
 		{
-			$value = self::_redis->get($key);
+			$value = self::$_redis->get($key);
 
 			$this->_read = TRUE;
 
@@ -167,7 +176,7 @@ class Core_Session_Phpredis extends Core_Session
 					// Should be INT
 					$this->_ttl = intval($aUnpackedHash[1]);
 
-					self::_redis->expire($key, $this->_ttl);
+					self::$_redis->expire($key, $this->_ttl);
 				}
 
 				return substr($value, 4);
@@ -189,7 +198,7 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$key = $this->_getKey($id);
 
-			self::_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
+			self::$_redis->set($key, pack($this->_format, $this->_ttl) . $value, $this->_ttl);
 
 			$this->_unlock($id);
 
@@ -210,7 +219,7 @@ class Core_Session_Phpredis extends Core_Session
 		{
 			$key = $this->_getKey($id);
 
-			self::_redis->del($key);
+			self::$_redis->del($key);
 
 			$this->_unlock($id);
 
@@ -238,7 +247,7 @@ class Core_Session_Phpredis extends Core_Session
 			// Should be INT
 			$this->_ttl = intval($maxlifetime);
 
-			self::_redis->expire($key, $this->_ttl);
+			self::$_redis->expire($key, $this->_ttl);
 		}
 
 		// Set cookie with expiration date
@@ -270,11 +279,11 @@ class Core_Session_Phpredis extends Core_Session
 		$this->_lockToken = uniqid();
 		$this->_lockKey = $this->_getKey($id) . '.lock';
 
-		while (!connection_aborted())
+		while (!is_null(self::$_redis) && !connection_aborted())
 		{
 			// Redis 2.6.12+
-			if (self::_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
-			//if (self::_redis->setNx($this->_lockKey, $this->_lockToken))
+			if (self::$_redis->set($this->_lockKey, $this->_lockToken, array('NX')))
+			//if (self::$_redis->setNx($this->_lockKey, $this->_lockToken))
 			{
 				return TRUE;
 			}
@@ -306,10 +315,22 @@ class Core_Session_Phpredis extends Core_Session
 			return 0
 		end';
 
-		self::_redis->eval($script, array($this->_lockKey, self::_redis->_serialize($this->_lockToken)), 1);
+		self::$_redis->eval($script, array($this->_lockKey, self::$_redis->_serialize($this->_lockToken)), 1);
 
 		$this->_lockKey = NULL;
 
 		return TRUE;
+	}
+
+	/**
+	 * Delete all sessions from Redis
+	 */
+	static public function flushAll()
+	{
+		self::_connect();
+
+		!is_null(self::$_config['database'])
+			? $redis->flushDb()
+			: $redis->flushAll();
 	}
 }

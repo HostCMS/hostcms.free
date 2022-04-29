@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Tpl
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Tpl_Processor_Observer
 {
@@ -42,14 +42,14 @@ class Tpl_Processor_Observer
 
 		if (Core::checkPanel() && Core_Array::getSession('HOSTCMS_SHOW_XML'))
 		{
-			$oTplPanel = Core::factory('Core_Html_Entity_Div')
+			$oTplPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsPanel')
 				->style('display: none');
 
-			$oTplSubPanel = Core::factory('Core_Html_Entity_Div')
+			$oTplSubPanel = Core_Html_Entity::factory('Div')
 				->class('hostcmsSubPanel hostcmsXsl')
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->width(3)->height(16)
 						->src('/hostcmsfiles/images/drag_bg.gif')
 				);
@@ -62,11 +62,11 @@ class Tpl_Processor_Observer
 			$sTitle = Core::_('Tpl.panel_edit_tpl', $oTpl->name);
 
 			$oTplSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href("{$sPath}?{$sAdditional}")
 					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', title: '" . Core_Str::escapeJavascriptVariable($sTitle) . "'}); return false")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/hostcmsfiles/images/xsl_edit.gif')
 							->id('hostcmsEditXsl')
@@ -84,10 +84,10 @@ class Tpl_Processor_Observer
 
 			$sTitle = Core::_('Tpl.panel_show_vars', $oTpl->name);
 			$oTplSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->onclick("hQuery.showWindow('xmlWindow{$iCount}', '" . Core_Str::escapeJavascriptVariable($content) . "', {width: 600, height: 350, title: '{$sTitle}'})")
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/hostcmsfiles/images/xml.gif')
 							->id('hostcmsShowXml')
 							->alt($sTitle)
@@ -97,23 +97,23 @@ class Tpl_Processor_Observer
 			);
 
 			$oTplSubPanel->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->src('/hostcmsfiles/images/time.png')
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Div')
+						Core_Html_Entity::factory('Div')
 							->value(
 								Core::_('Tpl.panel_tpl_time', $iTime)
 							)
 					)
 			)->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->class('hostcmsButton')
 					->add(
-						Core::factory('Core_Html_Entity_Div')
+						Core_Html_Entity::factory('Div')
 							->value("ID {$oTpl->id}")
 					)
 			);

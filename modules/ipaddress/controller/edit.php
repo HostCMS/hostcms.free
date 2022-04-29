@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Ipaddress
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -132,11 +132,11 @@ class Ipaddress_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oIp
 				->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('input-group-addon')
 						->onclick('$.blockIp({ ip: "' . $ip . '", comment: "' . Core_Str::escapeJavascriptVariable($comment) . '" })')
 						->add(
-							Core::factory('Core_Html_Entity_Span')
+							Core_Html_Entity::factory('Span')
 								->class('fa fa-ban')
 						)
 				);

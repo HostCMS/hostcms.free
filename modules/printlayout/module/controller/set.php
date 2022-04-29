@@ -5,11 +5,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * Printlayout_Module_Controller_Set
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Printlayout
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 {
@@ -66,9 +66,9 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 
 				$newWindowId = 'Printlayout_Print_' . time();
 
-				$oCore_Html_Entity_Form = Core::factory('Core_Html_Entity_Form');
+				$oCore_Html_Entity_Form = Core_Html_Entity::factory('Form');
 
-				$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+				$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 					->id($newWindowId)
 					->add($oCore_Html_Entity_Form);
 
@@ -79,17 +79,17 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 
 				$oCore_Html_Entity_Form
 					->add(
-						 Core::factory('Core_Html_Entity_Input')
+						 Core_Html_Entity::factory('Input')
 							->name('hostcms[checked][1][' . $this->_printlayout_id . ']')
 							->value(1)
 							->type('hidden')
 					)->add(
-						 Core::factory('Core_Html_Entity_Input')
+						 Core_Html_Entity::factory('Input')
 							->name('hostcms[action]')
 							->value('setModules')
 							->type('hidden')
 					)->add(
-						 Core::factory('Core_Html_Entity_Input')
+						 Core_Html_Entity::factory('Input')
 							->name('hostcms[operation]')
 							->value('apply')
 							->type('hidden')
@@ -125,7 +125,7 @@ class Printlayout_Module_Controller_Set extends Admin_Form_Action_Controller
 					? 80 + $this->_rowsCount * 30
 					: 400;
 
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$(function() {
 						$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 500, height: {$iHeight}, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 					->execute();

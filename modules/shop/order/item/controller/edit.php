@@ -20,16 +20,26 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	 */
 	public function setObject($object)
 	{
+		$this
+			->addSkipColumn('hash')
+			->addSkipColumn('shop_item_digital_id');
+
 		if (!$object->id)
 		{
 			$object->shop_order_id = Core_Array::getGet('shop_order_id');
 		}
 
-		$this->addSkipColumn('hash');
-		$this->addSkipColumn('shop_item_digital_id');
+		return parent::setObject($object);
+	}
 
-		parent::setObject($object);
-
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
 		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		$oMainTab = $this->getTab('main');
@@ -39,7 +49,6 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 			->add($oMainRow1 = Admin_Form_Entity::factory('Div')->class('row'))
 			->add($oMainRow2 = Admin_Form_Entity::factory('Div')->class('row'));
 
-		$oShop_Order = $this->_object->Shop_Order;
 		$oShop = Core_Entity::factory('Shop', intval(Core_Array::getGet('shop_id')));
 
 		$oMainTab->move($this->getField('price')
@@ -47,6 +56,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				->divAttr(array('class' => 'form-group col-sm-2 col-xs-5')),
 			$oMainRow1
 		);
+
 		$oMainTab->move($this->getField('quantity')->divAttr(array('class' => 'form-group col-sm-2 col-xs-12')), $oMainRow1);
 
 		$oAdditionalTab->delete($this->getField('shop_measure_id'));
@@ -118,7 +128,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				->value($this->_object->shop_warehouse_id)
 				->type('hidden');
 
-			$oCore_Html_Entity_Script_Modification = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script_Modification = Core_Html_Entity::factory('Script')
 			->value("
 				$('#{$windowId} [name = warehouse_name]').autocomplete({
 					source: function(request, response) {
@@ -197,9 +207,9 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oMainRow2->add($oDropdownlistStatuses);
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			// &shop_order_id= может использоваться в хуках, когда цена товара зависит от опций заказа (страна, город и т.д.)
-			->value("$('#{$windowId} #itemInput').autocompleteShopItem({ shop_id: '{$oShop_Order->shop_id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$oShop_Order->id}' }, function(event, ui) {
+			->value("$('#{$windowId} #itemInput').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: '{$oShop->shop_currency_id}', shop_order_id: '{$this->_object->shop_order_id}' }, function(event, ui) {
 				$('#{$windowId} #itemId').val(typeof ui.item.id !== 'undefined' ? ui.item.id : 0);
 				$('#{$windowId} #itemPrice').val(typeof ui.item.price !== 'undefined' ? ui.item.price : 0);
 				$('#{$windowId} #itemMeasure').val(typeof ui.item.measure_id !== 'undefined' ? ui.item.measure_id : 0);
@@ -209,6 +219,7 @@ class Shop_Order_Item_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 		$oMainTab->add($oCore_Html_Entity_Script);
 
+		$oShop_Order = $this->_object->Shop_Order;
 		$title = $this->_object->id
 			? Core::_('Shop_Order_Item.order_items_edit_form_title', $oShop_Order->invoice)
 			: Core::_('Shop_Order_Item.order_items_add_form_title', $oShop_Order->invoice);

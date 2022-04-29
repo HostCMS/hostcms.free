@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_Index_Entity
 {
@@ -117,7 +117,7 @@ class Sql_Table_Index_Entity
 	 */
 	public function uniqueBackend()
 	{
-		$this->unique && Core::factory('Core_Html_Entity_Span')
+		$this->unique && Core_Html_Entity::factory('Span')
 			->value('<i class="fa fa-check-circle green"></i>')
 			->execute();
 	}

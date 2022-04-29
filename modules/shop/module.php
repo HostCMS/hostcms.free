@@ -23,7 +23,7 @@ class Shop_Module extends Core_Module
 	 * Module date
 	 * @var date
 	 */
-	public $date = '2021-12-29';
+	public $date = '2022-04-29';
 
 	/**
 	 * Module name
@@ -43,6 +43,8 @@ class Shop_Module extends Core_Module
 		4 => 'rebuildFastfilter',
 		5 => 'unsetApplyPurchaseDiscounts',
 		6 => 'setApplyPurchaseDiscounts',
+		7 => 'recountSets',
+		8 => 'updateCurrency'
 	);
 
 	protected $_options = array(
@@ -734,6 +736,25 @@ class Shop_Module extends Core_Module
 						->where('shop_items.deleted', '=', 0)
 						->where('shop_discounts.id', 'IS', NULL)
 						->execute();
+				break;
+				// Recount sets
+				case 7:
+					if (!$entityId)
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as shop_id, fill in the form', array(), 0, FALSE);
+					}
+
+					Core_Entity::factory('Shop', $entityId)->recountSets();
+				break;
+				// update currencies
+				case 8:
+					if (!strlen($entityId))
+					{
+						throw new Core_Exception('callSchedule:: entityId expected as `cbrf` or `floatrates`, fill in the form', array(), 0, FALSE);
+					}
+
+					$oShop_Currency_Driver = Shop_Currency_Driver::instance($entityId);
+					$oShop_Currency_Driver->execute();
 				break;
 			}
 		}

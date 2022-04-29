@@ -55,9 +55,9 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			$window_Admin_Form_Controller = clone $this->_Admin_Form_Controller;
 
-			$oCore_Html_Entity_Form = Core::factory('Core_Html_Entity_Form');
+			$oCore_Html_Entity_Form = Core_Html_Entity::factory('Form');
 
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->id($newWindowId)
 				->class('tabbable')
 				->add(
@@ -241,7 +241,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.weight'))
 				->controller($window_Admin_Form_Controller)
 				->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('input-group-addon dimension_patch')
 						->value(htmlspecialchars($oShop->Shop_Measure->name))
 				);
@@ -257,6 +257,12 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 					)
 				)
 				->caption(Core::_('Shop_Item.apply_purchase_discount'))
+				->controller($window_Admin_Form_Controller);
+
+			$oAdmin_Form_Entity_Input_Datetime = Admin_Form_Entity::factory('Datetime')
+				->divAttr(array('class' => 'form-group col-xs-12 col-sm-4'))
+				->name('datetime')
+				->caption(Core::_('Shop_Item.datetime'))
 				->controller($window_Admin_Form_Controller);
 
 			$oAdmin_Form_Entity_Input_Min_Quantity = Admin_Form_Entity::factory('Input')
@@ -283,9 +289,9 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.item_length'))
 				->controller($window_Admin_Form_Controller)
 				->add(
-					Core::factory('Core_Html_Entity_Span')
-					->class('input-group-addon dimension_patch')
-					->value('×')
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value('×')
 				);
 
 			$oAdmin_Form_Entity_Input_Width = Admin_Form_Entity::factory('Input')
@@ -294,9 +300,9 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.item_width'))
 				->controller($window_Admin_Form_Controller)
 				->add(
-					Core::factory('Core_Html_Entity_Span')
-					->class('input-group-addon dimension_patch')
-					->value('×')
+					Core_Html_Entity::factory('Span')
+						->class('input-group-addon dimension_patch')
+						->value('×')
 				);
 
 			$oAdmin_Form_Entity_Input_Height = Admin_Form_Entity::factory('Input')
@@ -305,7 +311,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 				->caption(Core::_('Shop_Item.item_height'))
 				->controller($window_Admin_Form_Controller)
 				->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('input-group-addon dimension_patch')
 						->value(Core::_('Shop.size_measure_' . $oShop->size_measure))
 				);
@@ -337,6 +343,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 						->class('row')
 						->add($oAdmin_Form_Entity_Input_Weight)
 						->add($oAdmin_Form_Entity_Select_Order_Discount)
+						->add($oAdmin_Form_Entity_Input_Datetime)
 				)
 				->add(
 					Admin_Form_Entity::factory('Div')
@@ -361,7 +368,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 					<script>
 						$(function(){
 							$("#' . $newWindowId . ' .shop-item-tags").select2({
-								language: "' . Core_i18n::instance()->getLng() . '",
+								language: "' . Core_I18n::instance()->getLng() . '",
 								minimumInputLength: 1,
 								placeholder: "' . Core::_('Shop_Item.type_tag') . '",
 								tags: true,
@@ -434,7 +441,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 					foreach ($checkedItems as $key => $value)
 					{
 						$oCore_Html_Entity_Form->add(
-							 Core::factory('Core_Html_Entity_Input')
+							 Core_Html_Entity::factory('Input')
 								->name('hostcms[checked][' . $datasetKey . '][' . $key . ']')
 								->value(1)
 								->type('hidden')
@@ -516,9 +523,9 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 			ob_start();
 
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value("$(function() {
-					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 650, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
+					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 800, height: 650, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();
 
 			$this->addMessage(ob_get_clean());
@@ -641,6 +648,7 @@ class Shop_Item_Controller_Change_Attribute extends Admin_Form_Action_Controller
 
 		Core_Array::getPost('weight') !== '' && $oShop_Item->weight = floatval(Core_Array::getPost('weight'));
 		Core_Array::getPost('apply_purchase_discount') !== '' && $oShop_Item->apply_purchase_discount = intval(Core_Array::getPost('apply_purchase_discount'));
+		Core_Array::getPost('datetime') !== '' && $oShop_Item->datetime = strval(Core_Date::datetime2sql(Core_Array::getPost('datetime')));
 
 		Core_Array::getPost('length') !== '' && $oShop_Item->length = floatval(Core_Array::getPost('length'));
 		Core_Array::getPost('width') !== '' && $oShop_Item->width = floatval(Core_Array::getPost('width'));

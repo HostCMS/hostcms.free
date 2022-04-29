@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Lib
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 {
@@ -61,13 +61,20 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				{
 					$propertyValue = array();
 
-					foreach ($aTmp['name'] as $key => $sName)
+					if ($oLib_Property->multivalue)
 					{
-						$propertyValue[] = array(
-							'name' => $sName,
-							'tmp_name' => $aTmp['tmp_name'][$key],
-							'size' => $aTmp['size'][$key]
-						);
+						foreach ($aTmp['name'] as $key => $sName)
+						{
+							$propertyValue[] = array(
+								'name' => $sName,
+								'tmp_name' => $aTmp['tmp_name'][$key],
+								'size' => $aTmp['size'][$key]
+							);
+						}
+					}
+					else
+					{
+						$propertyValue[] = $aTmp;
 					}
 				}
 				else
@@ -76,7 +83,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				}
 			}
 
-			if ($oLib_Property->multivalue)
+			// Множественные значения или файл
+			if ($oLib_Property->multivalue || $oLib_Property->type == 8)
 			{
 				$aPropertyValues = is_array($propertyValue)
 					? $propertyValue
@@ -89,8 +97,12 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					: array($propertyValue);
 			}
 
-			$aNewValues = $oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name]) && is_array($aOptions[$oLib_Property->varible_name])
-				? $aOptions[$oLib_Property->varible_name]
+			$aNewValues = $oLib_Property->type == 8 && isset($aOptions[$oLib_Property->varible_name])
+				? (
+					is_array($aOptions[$oLib_Property->varible_name])
+						? $aOptions[$oLib_Property->varible_name]
+						: array($aOptions[$oLib_Property->varible_name])
+				)
 				: array();
 
 			foreach ($aPropertyValues as $key => $propertyValue)
@@ -121,59 +133,53 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					case 8:
 						if (is_array($propertyValue) && isset($propertyValue['name']))
 						{
+							// Для одиночного значения очищаем ранее восстановленные значения
+							if (!$oLib_Property->multivalue)
+							{
+								// Удаление ранее загруженных файлов
+								foreach ($aNewValues as $oldValue)
+								{
+									$oldValue = ltrim($oldValue, '/');
+									if (strpos($oldValue, $oObject->getLibFileHref()) === 0)
+									{
+										try
+										{
+											Core_File::delete(CMS_FOLDER . $oldValue);
+										}
+										catch (Exception $e)
+										{
+											Core_Message::show($e->getMessage(), 'error');
+										}
+									}
+								}
+
+								$aNewValues = array();
+							}
+
 							$aFile = $propertyValue;
 
 							$propertyValue = NULL;
 
-							if (intval($aFile['size']) > 0)
+							if (intval($aFile['size']) > 0 && strlen($aFile['name']))
 							{
 								if (Core_File::isValidExtension($aFile['name'], Core::$mainConfig['availableExtension']))
 								{
-									$param = array();
-
 									$ext = Core_File::getExtension($aFile['name']);
 
 									$imageName = $oLib_Property->change_filename
 										? strtolower(Core_Guid::get()) . '.' . $ext
-										: $aFile['name'];
+										: Core_File::filenameCorrection($aFile['name']);
 
-									// Путь к файлу-источнику большого изображения;
-									$param['large_image_source'] = $aFile['tmp_name'];
-									// Оригинальное имя файла большого изображения
-									$param['large_image_name'] = $aFile['name'];
+									Core_File::moveUploadedFile($aFile['tmp_name'], $oObject->getLibFilePath() . $imageName);
 
-									// Путь к создаваемому файлу большого изображения;
-									$param['large_image_target'] = !empty($imageName)
-										? $oObject->getLibFilePath() . $imageName
-										: '';
-
-									// Использовать большое изображение для создания малого
-									$param['create_small_image_from_large'] = FALSE;
-
-									// Значение максимальной ширины большого изображения
-									// $param['large_image_max_width'] = Core_Array::getPost('large_max_width_image', 0);
-
-									// Значение максимальной высоты большого изображения
-									// $param['large_image_max_height'] = Core_Array::getPost('large_max_height_image', 0);
-
-									// Сохранять пропорции изображения для большого изображения
-									// $param['large_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('large_preserve_aspect_ratio_image'));
-
-									// $oObject->createDir();
-
-									$result = Core_File::adminUpload($param);
-
-									if ($result['large_image'])
-									{
-										$propertyValue = '/' . $oObject->getLibFileHref() . $imageName;
-									}
+									$propertyValue = '/' . $oObject->getLibFileHref() . $imageName;
 								}
 							}
 						}
-						else
+						/*else
 						{
 							$propertyValue = NULL;
-						}
+						}*/
 					break;
 				}
 
@@ -229,8 +235,8 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			}
 		}
 
-		$oDivOpen = Core::factory('Core_Html_Entity_Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
-		$oDivClose = Core::factory('Core_Html_Entity_Code')->value('</div>');
+		$oDivOpen = Core_Html_Entity::factory('Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
+		$oDivClose = Core_Html_Entity::factory('Code')->value('</div>');
 
 		foreach ($aLib_Properties as $oLib_Property)
 		{
@@ -244,18 +250,18 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				: '<acronym title="' . htmlspecialchars($oLib_Property->description) . '">'
 					. htmlspecialchars($oLib_Property->name) . '</acronym>';
 
-			$oDivCaption = Core::factory('Core_Html_Entity_Div')
+			$oDivCaption = Core_Html_Entity::factory('Div')
 				->class('col-xs-6 col-sm-5 col-lg-4 no-padding-right')
 				->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('caption')
 						->value($acronym)
 				);
 
-			$oDivInputs = Core::factory('Core_Html_Entity_Div')
+			$oDivInputs = Core_Html_Entity::factory('Div')
 				->class('col-xs-6 col-sm-7 col-lg-8');
 
-			$oDivRow = Core::factory('Core_Html_Entity_Div')
+			$oDivRow = Core_Html_Entity::factory('Div')
 				->class('row form-group')
 				->add($oDivCaption)
 				->add($oDivInputs);
@@ -272,7 +278,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 			switch ($oLib_Property->type)
 			{
 				case 0: /* Текстовое поле */
-					$oValue = Core::factory('Core_Html_Entity_Input')
+					$oValue = Core_Html_Entity::factory('Input')
 						->class('form-control')
 						->name($sFieldName);
 
@@ -297,7 +303,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					}
 				break;
 				case 1: /* Флажок */
-					$oValue = Core::factory('Core_Html_Entity_Input')
+					$oValue = Core_Html_Entity::factory('Input')
 						->name($sFieldName)
 						->type('checkbox')
 						->id("lib_property_id_{$oLib_Property->id}");
@@ -321,13 +327,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						}
 
 						$oDivInputs->add(
-							Core::factory('Core_Html_Entity_Td')
+							Core_Html_Entity::factory('Td')
 								->add(
-									Core::factory('Core_Html_Entity_Label')
+									Core_Html_Entity::factory('Label')
 										->for("lib_property_id_{$oLib_Property->id}")
 										->add($oValue)
 										->add(
-											Core::factory('Core_Html_Entity_Span')
+											Core_Html_Entity::factory('Span')
 												->class('text')
 												->value('&nbsp;' . Core::_('Admin_Form.yes'))
 										)
@@ -359,13 +365,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						}
 
 						$oDivInputs->add(
-							Core::factory('Core_Html_Entity_Div')
+							Core_Html_Entity::factory('Div')
 								->class('row')
 								->add(
-									Core::factory('Core_Html_Entity_Div')
+									Core_Html_Entity::factory('Div')
 										->class('col-xs-12 col-sm-6')
 										->add(
-											Core::factory('Core_Html_Entity_Select')
+											Core_Html_Entity::factory('Select')
 												->name("xsl_dir_id_{$oLib_Property->id}")
 												->id("xsl_dir_id_{$oLib_Property->id}")
 												->class('form-control')
@@ -377,23 +383,23 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
+									Core_Html_Entity::factory('Script')->value("$('#{$windowId} #xsl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Div')
+									Core_Html_Entity::factory('Div')
 										->class('col-xs-12 col-sm-6')
 										->add(
-											Core::factory('Core_Html_Entity_Div')
+											Core_Html_Entity::factory('Div')
 												->class('input-group')
 												->add(
-													Core::factory('Core_Html_Entity_Select')
+													Core_Html_Entity::factory('Select')
 														->name($sFieldName)
 														->id("lib_property_id_{$oLib_Property->id}")
 														->class('form-control')
 														->value($xsl_dir_id)
 												)
 												->add(
-													Core::factory('Core_Html_Entity_A')
+													Core_Html_Entity::factory('A')
 														->href("/admin/xsl/index.php?xsl_dir_id={$xsl_dir_id}&hostcms[checked][1][{$xsl_id}]=1&hostcms[action]=edit")
 														->target('_blank')
 														->class('input-group-addon bg-blue bordered-blue')
@@ -412,7 +418,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						$aOptions[$oLib_Property_List_Value->value] = $oLib_Property_List_Value->name;
 					}
 
-					$oValue = Core::factory('Core_Html_Entity_Select')
+					$oValue = Core_Html_Entity::factory('Select')
 						->name($sFieldName)
 						->id("lib_property_id_{$oLib_Property->id}")
 						->class('form-control')
@@ -473,7 +479,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 
 					if (count($aOptions))
 					{
-						$oValue = Core::factory('Core_Html_Entity_Select')
+						$oValue = Core_Html_Entity::factory('Select')
 							->name($sFieldName)
 							->id("lib_property_id_{$oLib_Property->id}")
 							->class('form-control')
@@ -501,7 +507,7 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					}
 				break;
 				case 5: // Текстовое поле
-					$oValue = Core::factory('Core_Html_Entity_Textarea')
+					$oValue = Core_Html_Entity::factory('Textarea')
 						->class('form-control')
 						->name($sFieldName);
 
@@ -526,10 +532,10 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 					}
 				break;
 				case 6: // Множественные значения
-					$oDivOpen = Core::factory('Core_Html_Entity_Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
-					$oDivClose = Core::factory('Core_Html_Entity_Code')->value('</div>');
+					$oDivOpen = Core_Html_Entity::factory('Code')->value('<div class="input-group margin-bottom-10 multiple_value item_div clear">');
+					$oDivClose = Core_Html_Entity::factory('Code')->value('</div>');
 
-					$oValue = Core::factory('Core_Html_Entity_Input')
+					$oValue = Core_Html_Entity::factory('Input')
 						->class('form-control')
 						->name("lib_property_id_{$oLib_Property->id}[]");
 
@@ -563,13 +569,13 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 						}
 
 						$oDivInputs->add(
-							Core::factory('Core_Html_Entity_Div')
+							Core_Html_Entity::factory('Div')
 								->class('row')
 								->add(
-									Core::factory('Core_Html_Entity_Div')
+									Core_Html_Entity::factory('Div')
 										->class('col-xs-12 col-sm-6')
 										->add(
-											Core::factory('Core_Html_Entity_Select')
+											Core_Html_Entity::factory('Select')
 												->name("tpl_dir_id_{$oLib_Property->id}")
 												->id("tpl_dir_id_{$oLib_Property->id}")
 												->class('form-control')
@@ -581,23 +587,23 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 										)
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Script')->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
+									Core_Html_Entity::factory('Script')->value("$('#{$windowId} #tpl_dir_id_{$oLib_Property->id}').change();")
 								)
 								->add(
-									Core::factory('Core_Html_Entity_Div')
+									Core_Html_Entity::factory('Div')
 										->class('col-xs-12 col-sm-6')
 										->add(
-											Core::factory('Core_Html_Entity_Div')
+											Core_Html_Entity::factory('Div')
 												->class('input-group')
 												->add(
-													Core::factory('Core_Html_Entity_Select')
+													Core_Html_Entity::factory('Select')
 														->name($sFieldName)
 														->id("lib_property_id_{$oLib_Property->id}")
 														->class('form-control')
 														->value($tpl_dir_id)
 												)
 												->add(
-													Core::factory('Core_Html_Entity_A')
+													Core_Html_Entity::factory('A')
 														->href("/admin/tpl/index.php?tpl_dir_id={$tpl_dir_id}&hostcms[checked][1][{$tpl_id}]=1&hostcms[action]=edit")
 														->target('_blank')
 														->class('input-group-addon bg-blue bordered-blue')
@@ -610,6 +616,18 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 				break;
 				// Файл
 				case 8:
+					$oFile = Admin_Form_Entity::factory('File')
+						->controller($this->_Admin_Form_Controller)
+						->type('file')
+						->name($sFieldName)
+						->divAttr(array('class' => 'lib-property-file-row'))
+						->largeImage(
+							array('show_params' => FALSE)
+						)
+						->smallImage(
+							array('show' => FALSE)
+						);
+
 					foreach ($value as $key => $valueItem)
 					{
 						switch ($oObject->getModelName())
@@ -623,69 +641,45 @@ abstract class Lib_Controller_Libproperties extends Admin_Form_Action_Controller
 							break;
 						}
 
+						$oFileClone = clone $oFile;
+
+						$oDivInputs->add($oFileClone);
+
 						if ($valueItem != '')
 						{
-							$oDivInputs->add(
-								Admin_Form_Entity::factory('File')
-									->controller($this->_Admin_Form_Controller)
-									->type('file')
-									->name($sFieldName)
-									->largeImage(
-										array(
-											// 'path' => '/' . $oObject->getLibFileHref() . $valueItem,
-											'path' => $valueItem,
-											'show_params' => FALSE,
-											'originalName' => basename($valueItem),
-											'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
-											// 'delete_href' => '',
-											// 'show_description' => TRUE,
-											// 'description' => $oDeal_Attachment->description
-										)
-									)
-									->smallImage(
-										array('show' => FALSE)
-									)
-									// ->divAttr(array('id' => "file_{$oDeal_Attachment->id}", 'class' => 'input-group col-xs-12'))
-									// ->execute();
+							$oFileClone->largeImage(
+								array(
+									// 'path' => '/' . $oObject->getLibFileHref() . $valueItem,
+									'id' => "id_{$sFieldName}_{$key}",
+									'path' => $valueItem,
+									'show_params' => FALSE,
+									'originalName' => basename($valueItem),
+									'delete_onclick' => "$.adminLoad({path: '{$path}', additionalParams: 'hostcms[checked][0][{$this->_object->id}]=1&varible_name=" . Core_Str::escapeJavascriptVariable($oLib_Property->varible_name) . "', operation: '{$key}', action: 'deleteLibFile', windowId: '{$windowId}'}); return false",
+									// 'delete_href' => '',
+								)
 							);
 						}
 					}
 
-					/*if ($oLib_Property->multivalue)
+					if ($oLib_Property->multivalue || !count($value))
 					{
-						$oAdmin_Form_Entity_Code = Admin_Form_Entity::factory('Code');
-						$oAdmin_Form_Entity_Code->html('<div class="input-group-addon no-padding add-remove-property"><div class="no-padding-left col-lg-12"><div class="btn btn-palegreen" onclick="$.cloneFile(\'' . $windowId .'\'); event.stopPropagation();"><i class="fa fa-plus-circle close"></i></div>
-							<div class="btn btn-darkorange" onclick="$(this).parents(\'#file\').remove(); event.stopPropagation();"><i class="fa fa-minus-circle close"></i></div>
-							</div>
-							</div>');
-					}*/
+						$oLib_Property->multivalue && $oDivInputs->add($oDivOpen);
 
-					$oLib_Property->multivalue && $oDivInputs->add($oDivOpen);
-
-					$oDivInputs->add(
-						Admin_Form_Entity::factory('File')
-							->controller($this->_Admin_Form_Controller)
-							->type('file')
-							->name($sFieldName)
-							->largeImage(
+						$oDivInputs->add(
+							$oFile->largeImage(
 								array(
 									'show_params' => FALSE,
 									'show_description' => FALSE
 								)
 							)
-							->smallImage(
-								array('show' => FALSE)
-							)
-							// ->divAttr(array('id' => 'file', 'class' => 'row col-xs-12 add-deal-attachment'))
-							// ->add($oAdmin_Form_Entity_Code)
-							// ->execute();
-					);
+						);
 
-					if ($oLib_Property->multivalue)
-					{
-						$oDivInputs
-							->add($this->imgBox())
-							->add($oDivClose);
+						if ($oLib_Property->multivalue)
+						{
+							$oDivInputs
+								->add($this->imgBox())
+								->add($oDivClose);
+						}
 					}
 				break;
 				default:

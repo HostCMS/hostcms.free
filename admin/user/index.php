@@ -3,9 +3,9 @@
  * Administration center users.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../bootstrap.php');
 
@@ -977,6 +977,24 @@ if (Core_Auth::logged())
 				->execute();
 
 			$aJSON['success'] = 1;
+		}
+
+		Core::showJson($aJSON);
+	}
+
+	if (!is_null(Core_Array::getPost('showPopover')))
+	{
+		$aJSON = array(
+			'html' => ''
+		);
+
+		$user_id = Core_Array::getPost('user_id', 0, 'int');
+
+		$oUser = Core_Entity::factory('User')->getById($user_id);
+
+		if (!is_null($oUser))
+		{
+			$aJSON['html'] = $oUser->getProfilePopupBlock();
 		}
 
 		Core::showJson($aJSON);

@@ -56,4 +56,8 @@ return array(
 	'not_apply_purchase_discount' => 'Do not apply discounts on order amount',
 	'guid' => '<acronym title="Product identifier for CommerceML format, e.g. ID00029527">CommerceML product identifier</acronym>',
 	'tab_export' => 'Export/Import',
+	'shop_discount_dir_id' => 'Section',
+	'sorting' => "Sort order",
+	'apply_success' => "Information changed successfully.",
+	'copy_success' => "Item copied successfully!",
 );

@@ -157,7 +157,7 @@ function isEmpty(str) {
 
 			if (data.form_html != '')
 			{
-				jQuery.beforeContentLoad(jBody, data);
+				jQuery.beforeContentLoad(jBody);
 				jQuery.insertContent(jBody, data.form_html);
 				jQuery.afterContentLoad(jBody, data);
 			}
@@ -266,6 +266,58 @@ function isEmpty(str) {
 						: jSoundSwitch.html('<i class="icon fa fa-volume-up"></i>');
 				},
 			});
+		},
+		dealChangeProfit: function(object, windowId)
+		{
+			var amount = $('#' + windowId + ' input[name=amount]').val(),
+				expenditure = $('#' + windowId + ' input[name=expenditure]').val(),
+				profit = $('#' + windowId + ' #profit'),
+				value = amount - expenditure;
+
+			profit.val(value);
+
+			if (value > 0)
+			{
+				profit.removeClass('darkorange');
+			}
+			else
+			{
+				profit.addClass('darkorange');
+			}
+		},
+		showCrmNoteAttachment: function(object, model)
+		{
+			var $object = $(object),
+				id = $object.data(model + '-id'),
+				crm_note_attachment_id = $object.data('id');
+
+			$.ajax({
+				url: '/admin/crm/note/index.php',
+				data: { 'showCrmNoteAttachment': 1, 'crm_note_attachment_id': crm_note_attachment_id, 'params': model + '_id=' + id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					$('body').append(response.html);
+
+					$('#crmNoteAttachmentModal' + crm_note_attachment_id).modal('show');
+
+					$('#crmNoteAttachmentModal' + crm_note_attachment_id).on('hidden.bs.modal', function () {
+						$(this).remove();
+					});
+				}
+			});
+		},
+		showDropzone: function(object, windowId)
+		{
+			$('#' + windowId +' .crm-note-attachments-dropzone').toggleClass('hidden');
+		},
+		showFastDealForm: function(deal_template_id) {
+			$('.fast-add-template' + deal_template_id).addClass('hidden');
+			$('.fast-add-form-template' + deal_template_id).removeClass('hidden');
+		},
+		cancelFastDealForm: function(deal_template_id) {
+			$('.fast-add-template' + deal_template_id).removeClass('hidden');
+			$('.fast-add-form-template' + deal_template_id).addClass('hidden');
 		},
 		showCounterparty: function(object) {
 			var $object = $(object),
@@ -453,11 +505,11 @@ function isEmpty(str) {
 				}
 			});
 		},
-		applySeoFilterConditions: function()
+		applySeoFilterConditions: function(modalWindow)
 		{
-			var property_id = $('#conditionsModal select[name = "modal_property_id"]').val(),
-				jPropertyValue = $('#conditionsModal *[name = "modal_property_value"]'),
-				jPropertyValueTo = $('#conditionsModal *[name = "modal_property_value_to"]'),
+			var property_id = modalWindow.find('select[name = "modal_property_id"]').val(),
+				jPropertyValue = modalWindow.find('*[name = "modal_property_value"]'),
+				jPropertyValueTo = modalWindow.find('*[name = "modal_property_value_to"]'),
 				type = jPropertyValue.attr('type'),
 				property_value = null;
 				property_value_to = null;
@@ -496,7 +548,7 @@ function isEmpty(str) {
 							$.loadSeoFilterNestable();
 						}
 
-						$('#conditionsModal').modal('hide');
+						modalWindow.modal('hide');
 					}
 				});
 		},
@@ -529,6 +581,8 @@ function isEmpty(str) {
 		resizeIframe: function(object) {
 			if (object.contentWindow !== null)
 			{
+				console.log(object.contentWindow);
+
 				setTimeout(function (e) {
 					object.style.height = (object.contentWindow.document.documentElement.scrollHeight) + 'px';
 					object.style.width = (object.contentWindow.document.documentElement.scrollWidth) + 'px';
@@ -1006,13 +1060,13 @@ function isEmpty(str) {
 
 			$.each(oActions, function (i, oAction){
 				var href = typeof oAction.href !== 'undefined'
-						? ' href="' + oAction.href + '"'
+						? ' href="' + $.escapeHtml(oAction.href) + '"'
 						: '',
 					onclick = typeof oAction.onclick !== 'undefined'
-						? ' onclick="' + oAction.onclick + '"'
+						? ' onclick="' + $.escapeHtml(oAction.onclick) + '"'
 						: '',
 					sClass = typeof oAction.class !== 'undefined'
-						? ' class="' + oAction.class + '"'
+						? ' class="' + $.escapeHtml(oAction.class) + '"'
 						: '';
 					target = typeof oAction.target !== 'undefined' && oAction.target
 						? ' target="_blank"'
@@ -1027,7 +1081,7 @@ function isEmpty(str) {
 			if (message.length)
 			{
 				var dialog = bootbox.dialog({
-					title: name,
+					title: $.escapeHtml(name),
 					message: message,
 					backdrop: true,
 					size: 'small',
@@ -1035,12 +1089,11 @@ function isEmpty(str) {
 				});
 
 				dialog.init(function(){
-
 					dialog.find('.modal-dialog').css('visibility', 'hidden');
+					dialog.find('.modal-title').addClass('small');
 				})
 
 				dialog.on("shown.bs.modal", function(){
-
 					$(this)
 						.find('.modal-dialog')
 						.css({
@@ -1146,6 +1199,12 @@ function isEmpty(str) {
 				type: 'POST',
 				success: function(result){
 					$('#dmsWorkflowDocumentModal' + dms_document_id).modal('hide');
+
+					if (result.status == 'success')
+					{
+						$('.dms-workflow-executions-wrapper').empty();
+						$('.dms-workflow-executions-wrapper').html(result.html);
+					}
 				}
 			});
 		},
@@ -1271,7 +1330,7 @@ function isEmpty(str) {
 		},
 		loadDmsStepsNestable: function()
 		{
-			var aScripts = [
+			/*var aScripts = [
 				'jquery.nestable.min.js'
 			];
 
@@ -1288,6 +1347,22 @@ function isEmpty(str) {
 				$('.dms-workflow-template-actions .dd').on('change', function() {
 					$.resortDmsStepsList();
 				});
+			});*/
+
+			$('.dms-workflow-template-actions').sortable({
+				connectWith: '.dms-workflow-template-actions',
+				items: '> .dd',
+				scroll: false,
+				placeholder: 'placeholder',
+				tolerance: 'pointer',
+				stop: function(event, ui)
+				{
+					$.resortDmsStepsList();
+				}
+			}).disableSelection();
+
+			$('.dms-workflow-template-actions .dd-handle a, .dms-workflow-template-actions .dd-handle .property-data').on('mousedown', function (e) {
+				e.stopPropagation();
 			});
 		},
 		resortDmsStepsList: function()
@@ -1400,6 +1475,109 @@ function isEmpty(str) {
 					$('#routesModal' + dms_workflow_template_step_id).modal('hide');
 				}
 			});
+		},
+		dmsShowFilesEdit: function(dms_document_version_attachment_id, ext)
+		{
+			$.loadingScreen('show');
+
+			$.ajax({
+				url: '/admin/dms/document/version/attachment/index.php',
+				data: { 'open_iframe_modal': 1, 'dms_document_version_attachment_id': dms_document_version_attachment_id },
+				dataType: 'json',
+				type: 'POST',
+				success: function(response){
+					if (response.status == 'success')
+					{
+						$('body').append(response.html);
+
+						$('#dmsShowFilesModal' + dms_document_version_attachment_id).on('hidden.bs.modal', function () {
+							$(this).remove();
+						});
+
+						var modal = $('#dmsShowFilesModal' + dms_document_version_attachment_id),
+							embed = modal.find('#iframe-modal'),
+							aExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff'];
+
+						if (embed.context.readyState  == 'complete')
+						{
+							// console.log('load');
+
+							if ($.inArray(ext, aExt) !== -1)
+							{
+								modal.find('.modal-body').addClass('text-align-center');
+								modal.find('#iframe-modal').attr('width', modal.height() - 150);
+							}
+							else
+							{
+								modal.find('.modal-body').css('padding', 0);
+							}
+
+							modal.find('#iframe-modal')
+								.height(modal.height() - 150)
+								.css('object-fit', 'scale-down')
+								;
+
+							modal.modal('show');
+						}
+
+						$('#dmsShowFilesModal' + dms_document_version_attachment_id).on('shown.bs.modal', function() {
+							$.loadingScreen('hide');
+						});
+
+						// Fix for chromium
+						if (navigator.userAgent.search("Chrome") >= 0 && $.inArray(ext, aExt) !== -1)
+						{
+							setTimeout(function(){
+								modal.find('#iframe-modal').contents().find('img').css('max-width', '100%');
+
+								modal.find('#iframe-modal').contents().find('body')
+									.css('display', 'flex')
+									.css('align-items', 'center')
+									.css('justify-content', 'center')
+							}, 500);
+						}
+					}
+				}
+			});
+		},
+		dmsAddAccessUser: function (windowId, options)
+		{
+			var cloneHtml = $('#' + windowId + ' .dms-document-access-user-wrapper-empty.hidden').html();
+
+			$('#' + windowId + ' .dms-document-access-user-wrapper:last-child').after('<div class="row dms-document-access-user-wrapper">' + cloneHtml + '</div>');
+
+			var $clonedSelect = $('#' + windowId + ' .dms-document-access-user-wrapper:last-child').find('#dms_document_access_user_0').removeAttr('id');
+
+			$clonedSelect
+				.attr('id', 'dms_document_access_user_' + Math.floor(Math.random() * 99)) // Fix for user-container
+				.select2(options)
+				.val(0)
+				.trigger("change.select2");
+		},
+		dmsRemoveAccessUser: function (object, dms_document_access_user_id)
+		{
+			if (dms_document_access_user_id)
+			{
+				if (confirm(i18n['confirm_delete']))
+				{
+					$.loadingScreen('show');
+
+					$.ajax({
+						url: '/admin/dms/document/index.php',
+						data: { 'remove_user_access': 1, 'dms_document_access_user_id': dms_document_access_user_id },
+						dataType: 'json',
+						type: 'POST',
+						success: function(answer){
+							if (answer.status = 'success')
+							{
+								$(object).parents('.dms-document-access-user-wrapper').remove();
+
+								$.loadingScreen('hide');
+							}
+						}
+					});
+				}
+			}
 		},
 		dmsEditDocument: function(dms_document_version_attachment_id, cloud_id)
 		{
@@ -1614,7 +1792,7 @@ function isEmpty(str) {
 							localStorage.setItem('bookmarks', JSON.stringify(resultData));
 						} catch (e) {
 							// if (e == QUOTA_EXCEEDED_ERR) {
-								console.log('localStorage error: ' + e);
+								console.log('nameStorage: bookmarks, localStorage: ' + e);
 							// }
 						}
 					}, $.refreshBookmarksCallback]
@@ -2035,25 +2213,15 @@ function isEmpty(str) {
 				handle: ".drag-handle"
 			}, options);
 
+			$sortableContainer = $(options.container);
+
+			//console.log("$sortableContainer", $sortableContainer);
+
 			$(options.container).on('mousedown', function(e) {
 
-				//console.log('options.container mousedown', e.target);
+				var sortableLi = $(e.target).closest(".connectedSortable > li:not('.failed'):not('.finish')");
 
-				var $this = $(this), sortableLi = $(e.target).closest(".connectedSortable > li:not('.failed'):not('.finish')");
-
-
-				if (sortableLi.length)
-				{
-					$(this).data('mousedownLi', sortableLi.attr('id'));
-
-					//console.log($(this).data('mousedownLi'));
-
-					var currentSortableList = sortableLi.parents('.connectedSortable');
-
-					console.log('mousedown');
-					console.log("currentSortableList.outerHeight()", currentSortableList.outerHeight());
-					console.log("$(this).outerHeight()", $(this).outerHeight());
-				}
+				sortableLi.length && $(this).data('mousedownLi', sortableLi.attr('id'));
 			})
 			.on('mousemove', function(){
 
@@ -2061,61 +2229,22 @@ function isEmpty(str) {
 
 				if ($this.data('mousedownLi'))
 				{
-					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
-					console.log('mousemove');
+					$this.find('.kanban-action-wrapper').removeClass('hidden');
 
 					currentSortableList = $this.find('#' + $this.data('mousedownLi')).parents('.connectedSortable');
-
 					kanbanActionWrapper = $(options.container + ' .kanban-action-wrapper');
 
+					// Расстояние от нижней границы списка до верхней границы блока действий
 					delta = currentSortableList.offset().top + currentSortableList.outerHeight() - kanbanActionWrapper.offset().top
-
-					//console.log('currentSortableList.offset().top + currentSortableList.outerHeight()', currentSortableList.offset().top + currentSortableList.outerHeight());
-					//console.log('kanbanActionWrapper.offset().top', kanbanActionWrapper.offset().top);
-					console.log('delta', delta);
 
 					if (delta > 0)
 					{
-						$this.data(
-							{
-								containerOriginalHeight:  $this.outerHeight(),
-								currentSortableListHeight: currentSortableList.outerHeight()
-							}
-						);
-
-						console.log("$this.outerHeight()", $this.outerHeight());
-						console.log("currentSortableList.outerHeight()", currentSortableList.outerHeight());
-
-						//currentSortableList.outerHeight(currentSortableList.outerHeight() - delta - 5);
+						currentSortableList.outerHeight(currentSortableList.outerHeight() - delta - 5);
 					}
-
-					// currentSortableList.height(300);
 				}
-
 			})
 			.on('mouseup', function() {
-
-				var $this = $(this), currentSortableList;
-
-
-				if ($this.data('containerOriginalHeight'))
-				{
-					//console.log('$this.data()', $this.data());
-					currentSortableList = $this.find('#' + $this.data('mousedownLi')).parents('.connectedSortable');
-
-					console.log('mouseup');
-					console.log('currentSortableList.outerHeight()', currentSortableList.outerHeight());
-
-					//currentSortableList.outerHeight($this.data('currentSortableListHeight'));
-
-					//$this.outerHeight($this.data('containerOriginalHeight'));
-
-					$this
-						.removeData('containerOriginalHeight')
-						.removeData('currentSortableListHeight');
-				}
-
-				$this.removeData('mousedownLi');
+				$(this).removeData('mousedownLi');
 			});
 
 
@@ -2127,57 +2256,24 @@ function isEmpty(str) {
 				// handle: ".drag-handle",
 				handle: options.handle,
 				helper: "clone",
-				/* helper: function (event, item) {
-
-					//!!! Для корректной работы хелпер надо прикреплять к body
-					var $item = $(item),
-						positions = $item.offset(),
-						//positions = $item.position(),
-						$helper = $item.clone(),
-						//$container = $('body');
-						$container = $item.parents('.kanban-board');
-						//$kanbanBoard = $item.parents('.kanban-board');
-
-					$helper
-						.addClass('body-ui-sortable-helper')
-						.css('z-index', 100);
-
-					console.log('item positions', positions);
-
-					$container.append($helper);
-
-					//+ $(window).scrollTop() + 200
-					$helper.offset({ top: positions.top , left: positions.left});
-					$helper.find('.well').css({'background-color': 'red'});
-					//$helper.css({ top: positions.top, left: positions.left});
-
-					console.log('$helper.position()', $helper.offset());
-					console.log("$(window).scrollTop()", $(window).scrollTop());
-
-					return $helper;
-				}, */
 				tolerance: "pointer",
 				// revert: true,
-				scroll: false,
-				//scroll: true,
+				//scroll: false,
+				scroll: true,
 				//containment:  'document',
 				//scroll: true,
 				receive: function (event, ui) {
 
-					console.log('receive');
-					var sender_id = $(ui.sender[0]).data('step-id'),
+					var sender_id = ui.sender.data('step-id'),
 						target_id = $(this).data('step-id'),
 						$element = $(event.target),
-						$item = $(ui.item[0]);
+						$item = ui.item;
 
 					if ($element.hasClass('kanban-action-item'))
 					{
-						ui.item
+						$item
 							.addClass('hidden')
 							.addClass('just-hidden');
-
-						// $element.css('background-color', $element.data('old-background'));
-						// $element.css('color', '#fff');
 
 						$element.css('opacity', 1);
 
@@ -2195,78 +2291,35 @@ function isEmpty(str) {
 							$element.removeClass('error-drop');
 						}
 					}, 200);
+
+					ui.sender.removeAttr('style');
+
+					prepareKanbanBoards();
 				},
 				start: function (event, ui) {
 
-					console.log('start event', event);
+					//console.log('start arguments', arguments);
 
-					var kanbanActionWrapper = $(options.container + ' .kanban-action-wrapper');
-
-					//console.log(kanbanActionWrapper.offset().top - kanbanActionWrapper.scrollTop());
-					//console.log(kanbanActionWrapper.offset().top);
-
-					//currentSortableList = ui.item.parents('.connectedSortable');
-
-					//var delta = currentSortableList.offset().top + currentSortableList.outerHeight() - kanbanActionWrapper.offset().top
-
-					/* if (delta > 0)
-					{
-						currentSortableList.outerHeight(currentSortableList.outerHeight() - delta - 10);
-					}  */
-
-					//console.log('start delta', delta);
-
-					//currentSortableList.height(300);
-
-					//console.log("ui.helper", ui.helper);
-					//console.log("ui.item", ui.item);
-
-					//ui.helper.children('.well').css('background-color', 'red');
-
-					//console.log('event', event);
-					//kanbanBoardRow
-
-
-					var $item = $(ui.item[0]), $ul = $item.parent(),
+					var $item = ui.item, $ul = $item.parent(),
 						kanbanBoardWrapper = $item.parents('.kanban-board').children('.kanban-wrapper'),
-						//positions = ui.item.offset(),
-						$container = ui.item.parents('.kanban-board');
+						kanbanActionWrapper = $(options.container + ' .kanban-action-wrapper');
 
-						//console.log('before item positions', positions);
-
-						//console.log("ui.helper.offset()", ui.helper.offset());
-						//alert(11);
-
+					$sortableContainer.data('startKanbanList', event.currentTarget);
 
 					if (kanbanBoardWrapper.hasClass('scrollable'))
 					{
-						//console.log('!!!!!');
 						kanbanBoardWrapper
-							.attr('data-draggingItem', true)
-							.data('draggingItemId', $item.attr('id'));
+							.attr('data-draggingItem', true);
+							//.data('draggingItemId', $item.attr('id'));
 
-						$('body').on('mousemove', moveKanbanItem);
-							//.data("scrollingRemoved", 1)
-							//.removeClass("scrollable");
+						//$('body').on('mousemove', moveKanbanItem);
 					}
 
-					//var clone = $('<li>').html($item.html());
-					//var clone = $('<li class="222" style="">1111<li>');
-
-					//$ul.append(clone);
 
 					//$(options.container + ' .connectedSortable').sortable("refresh").sortable("refreshPositions");
 					//$(options.container + ' .connectedSortable').trigger('sortover');
 
-					//clone.attr('class', '222').attr('id', '111111111');
-					// $(ui.helper[0]).before(clone);
-					// $item.before(clone);
-
-					//$ul.outerHeight($ul.outerHeight() + 90);
-
-					//$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
-					//$(options.container + ' .kanban-action-wrapper').animate({height: "100px"}, 500);
-					//$(options.container + ' .kanban-action-wrapper').css("visibility", "visible");
+					$(options.container + ' .kanban-action-wrapper').removeClass('hidden');
 
 					$item.removeClass('cancel-' + $item.data('id'));
 
@@ -2278,55 +2331,29 @@ function isEmpty(str) {
 						.addClass('cancel-' + $item.data('id'))
 						.css('opacity', .5)
 						.show();
-
-					//var positions = ui.item.offset();
-					/*var positions = hiddenElement.offset();
-
-					console.log('after item positions', positions);
-
-					ui.item.css('background-color', 'red');
-
-					ui.helper
-						.addClass('body-ui-sortable-helper')
-						.css('z-index', 100);
-
-					ui.helper.offset({ top: positions.top , left: positions.left});
-					*/
-
-				//	$container.append(ui.helper);
-
-					//console.log('ui.helper.offset()', ui.helper.offset());*/
-
 				},
 				stop: function (event, ui) {
+					var kanbanBoardWrapper = ui.item.parents('.kanban-board').children(".kanban-wrapper");
 
-					//$(options.container + ' .kanban-action-wrapper').css("visibility", "hidden");
-
-					console.log("$item.ui.item.parents('.connectedSortable')", ui.item.parents('.connectedSortable'));
-
-					//currentSortableList.removeAttr('style');
-
-					//return;
-
-					//console.log('stop');
-
-					//kanbanBoardRow
-					//
-					var kanbanBoardWrapper = $(ui.item[0]).parents('.kanban-board').children(".kanban-wrapper");
+					if ($sortableContainer.data('startKanbanList'))
+					{
+						$($sortableContainer.data('startKanbanList')).removeAttr('style');
+						$sortableContainer.removeData('startKanbanList');
+					}
 
 					if (kanbanBoardWrapper.attr('data-draggingItem'))
 					{
 						kanbanBoardWrapper
-							.removeAttr('data-draggingItem')
-							.removeData('draggingItemId');
+							.removeAttr('data-draggingItem');
+							//.removeData('draggingItemId');
 
-						$('body').unbind('mousemove', moveKanbanItem);
+						// $('body').unbind('mousemove', moveKanbanItem);
 					}
 
 					ui.item.parents('.kanban-action-item').find('.kanban-action-item-name').addClass('hidden');
 					ui.item.parents('.kanban-action-item').find('.return').removeClass('hidden');
 
-					$(ui.item[0]).data('target', $(event.target).data('step-id'));
+					ui.item.data('target', $(event.target).data('step-id'));
 
 					if (ui.item.parents('.kanban-action-item').length)
 					{
@@ -2348,20 +2375,18 @@ function isEmpty(str) {
 				},
 				over: function (event, ui) {
 
-					console.log('over');
+					//console.log('over');
 
-					var $element = $(event.target);
+					var $element = $(event.target), bg;
 
 					if ($element.hasClass('kanban-action-item'))
 					{
 						$element.css('opacity', 0.6);
-
-						var bg = $element.data('hover-bg');
-						$(ui.helper[0]).find('.well').css('background-color', bg);
+						bg = $element.data('hover-bg');
+						ui.helper.find('.well').css('background-color', bg);
 					}
 				},
 				out: function (event, ui) {
-					console.log('out');
 
 					var $element = $(event.target);
 
@@ -2370,24 +2395,24 @@ function isEmpty(str) {
 						$element.css('opacity', 1);
 
 						ui.helper !== null
-							&& $(ui.helper[0]).find('.well').css('background-color', '#fff');
+							&& ui.helper.find('.well').css('background-color', '#fff');
 					}
 
 					//$(options.container + ' .connectedSortable').sortable("option", "scroll", true);
 				},
-				sort: function (event, ui) {
+				sort: function(event, ui) {
 					// removes anything that starts with "cancel-"
 					$('html').removeClass(function (index, css) {
 						return (css.match (/\bcancel-\S+/g) || []).join(' ');
 					});
 
-					var y = ui.position.top,
+					/* var y = ui.position.top,
 						x = ui.position.left;
 
 					if (y > $(options.container).height() || x > $(options.container).width())
 					{
 						//$(options.container + ' .connectedSortable').sortable("option", "scroll", false);
-					}
+					} */
 				}
 			}).disableSelection();
 
@@ -2404,16 +2429,14 @@ function isEmpty(str) {
 				$(this).parents('.kanban-action-item').find('.return').addClass('hidden');
 
 				$(options.container + ' .connectedSortable').find('.just-hidden').removeClass('hidden');
+
+				prepareKanbanBoards();
 			});
 
-			$(function(){
-
-				prepareKanbanBoard();
-				$(window).on('resize', prepareKanbanBoard);
-			});
+			prepareKanbanBoard($sortableContainer);
 
 			// Обработчик перемещения элемента канбана
-			function moveKanbanItem(event){
+			/* function moveKanbanItem(event){
 
 				//kanbanBoardRow
 				var kanbanBoard = $(event.target).parents('.kanban-board'), kanbanBoardWrapper = kanbanBoard.find('.scrollable');
@@ -2462,73 +2485,9 @@ function isEmpty(str) {
 
 					kanbanBoardWrapper.data('currentMousePositionX', event.pageX);
 				}
-			}
-
-			function prepareKanbanBoard(){
-
-				//console.log('prepareKanbanBoard');
-				//kanbanBoardRow
-
-				var kanbanBoardWrapper = $('.kanban-board > .kanban-wrapper');
-
-				if ( kanbanBoardWrapper.length && kanbanBoardWrapper.get(0).scrollWidth > kanbanBoardWrapper.innerWidth())
-				{
-					kanbanBoardWrapper
-						.addClass('scrollable')
-						.on('mousedown', function (e){
-
-							$(this)
-								.data({
-									currentMousePositionX: e.pageX
-								})
-								.attr('data-mousedown', true)
-								.parent()
-								.addClass('noselect');
-
-							$(window).one('mouseup', function (){
-
-								kanbanBoardWrapper
-									.removeAttr('data-mousedown')
-									.parent()
-									.removeClass('noselect');
-							});
-						})
-						.on('mousemove', function (e){
-
-							var $this = $(this), kanbanBoard = $this.parent('.kanban-board'), deltaMousePosition;
-
-							if ($this.attr('data-mousedown') && !$this.attr('data-draggingItem'))
-							{
-								deltaMousePosition = $this.data('currentMousePositionX') - e.pageX;
-
-								// Двигаем мышь налево
-								if (deltaMousePosition > 0 && ($this.scrollLeft() < $this.get(0).scrollWidth - $this.innerWidth()))
-								{
-									$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
-								}
-								else if($this.scrollLeft() > 0)
-								{
-									$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
-								}
-
-								$this.data('currentMousePositionX', e.pageX);
-							}
-						});
-				}
-				else
-				{
-					kanbanBoardWrapper.removeClass('scrollable');
-				}
-			}
+			} */
 		},
 		closeActions: function(container, ui) {
-
-			console.log('closeActions');
-
-			//$(container + ' .kanban-action-wrapper').animate({height: "0px"}, 500);
-			//$(container + ' .kanban-action-wrapper').css("visibility", "hidden");
-
-			return;
 
 			$(container + ' .kanban-action-wrapper').slideUp("slow", function(){
 
@@ -2761,10 +2720,12 @@ function isEmpty(str) {
 			var settings = jQuery.extend({
 					title: '',
 					message: '',
+					error: '',
 					className: ''
 				}, settings),
 				dialog = bootbox.dialog({
-					message: settings.message,
+					//message: settings.message,
+					message: ' ',
 					title: $.escapeHtml(settings.title),
 					className: settings.className,
 					onEscape: function(){
@@ -2773,10 +2734,11 @@ function isEmpty(str) {
 					}
 					//onEscape: true
 				}),
-				modalBody = dialog.find('.modal-body'),
-				content = dialog.find('.modal-body .bootbox-body div');
+				modalBody = dialog.find('.modal-body')/*,
+				content = dialog.find('.modal-body .bootbox-body div')*/;
 
-			// console.log(settings.className);
+			// save global
+			window.currentDialog = dialog;
 
 			dialog.on('shown.bs.modal', function () {
 				$('html').css('overflow', 'hidden');
@@ -2794,15 +2756,14 @@ function isEmpty(str) {
 				}
 
 				$('html').css('overflow', '');
+
+				delete window.currentDialog;
 			});
 
 			dialog.on('hide.bs.modal', function(event){
-
 				// Call own event
 				var triggerReturn = $('body').triggerHandler('beforeHideModal');
-
 				triggerReturn == 'break' && event.preventDefault();
-
 				//$('.open [data-toggle="dropdown"]').dropdown('toggle');
 			});
 
@@ -2819,17 +2780,19 @@ function isEmpty(str) {
 				//.width(settings.width > 500 ? settings.width : oContentBlock.width() - 50);
 			//}
 
-			if (typeof settings.height != 'undefined')
-			{
+			if (typeof settings.height != 'undefined') {
 				modalBody.height(settings.height);
 			}
 
-			/*if (settings.error != '')
+			jQuery.insertContent(modalBody, settings.message);
+
+			// Добавление визы в DMS
+			if (settings.error != '')
 			{
 				var jMessage = modalBody.find('#id_message');
 				$(jMessage[0]).empty().html(settings.error);
 				$(jMessage[0]).nextAll().remove();
-			}*/
+			}
 		},
 		chatClearMessagesList: function()
 		{
@@ -2841,6 +2804,8 @@ function isEmpty(str) {
 		},
 		chatGetUserMessages: function (event)
 		{
+			console.log('chatGetUserMessages');
+			
 			// add ajax '_'
 			var data = $.getData({});
 			data['user-id'] = $(this).data('user-id');
@@ -2855,6 +2820,8 @@ function isEmpty(str) {
 		},
 		chatGetUserMessagesCallback: function(result)
 		{
+			console.log('chatGetUserMessagesCallback');
+			
 			// Hide contact list
 			$('#chatbar .chatbar-contacts').css("display","none");
 
@@ -2886,6 +2853,7 @@ function isEmpty(str) {
 			if (result['messages'])
 			{
 				$.each(result['messages'], function(i, object) {
+					console.log('addChatMessage from chatGetUserMessagesCallback')
 					$.addChatMessage(recipientUserInfo, userInfo, object, 0);
 				});
 
@@ -2968,6 +2936,8 @@ function isEmpty(str) {
 		},
 
 		addChatMessage: function(recipientUserInfo, userInfo, object, bDirectOrder) {
+			
+			console.log('addChatMessage');
 			if (recipientUserInfo.id != userInfo.id)
 			{
 				var jClone = $(".message.hidden").eq(0).clone(),
@@ -3119,6 +3089,8 @@ function isEmpty(str) {
 							firstMessage = result['messages'].length - 1; // ID верхнего (более раннего) сообщения в списке
 
 						$.each(result['messages'], function(i, object) {
+							
+							console.log('addChatMessage from uploadingMessagesList');
 							$.addChatMessage(recipientUserInfo, userInfo, object, 0);
 						});
 
@@ -3152,11 +3124,15 @@ function isEmpty(str) {
 		},
 		refreshMessagesListCallback: function(result)
 		{
+			console.log('refreshMessagesListCallback', 'result= ', result);
+			
 			var jMessagesList = $('.chatbar-messages .messages-list');
 
 			if (result['messages'])
 			{
 				$.each(result['messages'], function(i, object) {
+					
+					console.log('addChatMessage from refreshMessagesListCallback');
 					$.addChatMessage(result['recipient-user-info'], result['user-info'], object, 1);
 				});
 
@@ -3167,8 +3143,10 @@ function isEmpty(str) {
 				// Hide message
 				$(".chatbar-messages #messages-none").addClass("hidden");
 
+				//.console.log('$("li.message:not(.unread):not(.hidden):last", jMessagesList)', $("li.message:not(.unread):not(.hidden):last", jMessagesList));
+
 				// Последнее прочитанное сообщение находится выше области ввода сообщений, т.е. скрол находится в нижнем положении
-				if ($(".chatbar-messages .send-message").offset().top > $("li.message:not(.unread):not(.hidden):last", jMessagesList).offset().top)
+				if ($("li.message:not(.unread):not(.hidden):last", jMessagesList).length && $(".chatbar-messages .send-message").offset().top > $("li.message:not(.unread):not(.hidden):last", jMessagesList).offset().top)
 				{
 
 					$("li.message.hidden ~ li.message.unread", jMessagesList).each(function(){
@@ -3218,7 +3196,12 @@ function isEmpty(str) {
 			}
 		},
 		refreshMessagesList: function(recipientUserId) {
+			
+			console.log('refreshMessagesList');
+			
 			var refreshMessagesListIntervalId = setInterval(function () {
+				
+				console.log('setInterval refreshMessagesList');
 
 				var jMessagesList = $('.chatbar-messages .messages-list'),
 					path = '/admin/index.php?ajaxWidgetLoad&moduleId=' + jMessagesList.data('moduleId') + '&type=81',
@@ -3246,6 +3229,7 @@ function isEmpty(str) {
 						}
 						else
 						{
+							console.log('refreshMessagesListCallback from refreshMessagesList 1111')
 							$.refreshMessagesListCallback(storageObj);
 						}
 					} catch(e) {
@@ -3278,10 +3262,10 @@ function isEmpty(str) {
 								localStorage.setItem('chat_messages_list', JSON.stringify(result));
 							} catch (e) {
 								// if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage error: ' + e);
+									console.log('nameStorage: chat_messages_list, localStorage: ' + e);
 								// }
 							}
-						}, $.refreshMessagesListCallback]
+						}, function(result){ console.log('refreshMessagesListCallback from refreshMessagesList 222222');  $.refreshMessagesListCallback(result)}]
 					});
 				}
 			}, 10000);
@@ -3369,7 +3353,7 @@ function isEmpty(str) {
 								localStorage.setItem('chat', JSON.stringify(data));
 							} catch (e) {
 								// if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage: ' + e);
+									console.log('nameStorage: chat, localStorage: ' + e);
 								// }
 							}
 						}, $.refreshChatCallback]
@@ -3455,7 +3439,7 @@ function isEmpty(str) {
 								localStorage.setItem('chat_user_statuses', JSON.stringify(result));
 							} catch (e) {
 								// if (e == QUOTA_EXCEEDED_ERR) {
-									console.log('localStorage: ' + e);
+									console.log('nameStorage: chat_user_statuses, localStorage: ' + e);
 								// }
 							}
 						}, $.refreshUserStatusesCallback]
@@ -3933,7 +3917,7 @@ function isEmpty(str) {
 		},
 		toggleEventFields: function(object, selector) {
 			$(selector).toggleClass('hidden');
-			object.parents('.row').remove();
+			object.parents('.row').eq(0).remove();
 		},
 		generatePassword: function() {
 			var jFirstPassword = $("[name = 'password_first']"),
@@ -4057,7 +4041,7 @@ function isEmpty(str) {
 							localStorage.setItem('events', JSON.stringify(resultData));
 						} catch (e) {
 							// if (e == QUOTA_EXCEEDED_ERR) {
-								console.log('localStorage error: ' + e);
+								console.log('nameStorage: events, localStorage: ' + e);
 							// }
 						}
 					}, $.refreshEventsCallback]
@@ -4559,7 +4543,8 @@ function isEmpty(str) {
 					localStorage.setItem(itemName, JSON.stringify(object));
 				} catch (e) {
 					// if (e == QUOTA_EXCEEDED_ERR) {
-						console.log('localStorage: ' + e);
+						console.log('nameStorage: ' + itemName + ', localStorage: ' + e);
+						$.removeLocalStorageItem(itemName);
 					// }
 				}
 			}
@@ -4742,6 +4727,9 @@ function isEmpty(str) {
 			$('.navbar-account #notificationsListBox .footer .fa-trash-o').hide();
 			$('.navbar-account #notificationsListBox .footer #notification-search').hide();
 			$('.navbar-account #notificationsListBox .footer .glyphicon-search').hide();
+
+			$.removeLocalStorageItem('notifications');
+			$.removeLocalStorageItem('notificationRead');
 		},
 		eventsWidgetPrepare: function (){
 
@@ -5316,7 +5304,7 @@ function isEmpty(str) {
 
 			if ($('.section-' + index).hasClass('ui-sortable'))
 			{
-				console.log($('.section-' + index));
+				//console.log($('.section-' + index));
 				$('.section-' + index).sortable('refresh');
 			}
 		},
@@ -5829,24 +5817,43 @@ function isEmpty(str) {
 				success: function(result) {
 					var buttonIcoClass, dealTemplateStepId, stepColor;
 
+					var dealTemplateStepId = $('#deal-steps .steps').data('template-step-id'),
+						$currentStepLi = $('#deal-steps li#simplewizardstep' + dealTemplateStepId + ' .step');
+
+					// currentStepLi = $("li#simplewizardstep" + currentDealTemplateStepId, dealTemplateSteps);
+					// currentStepName = $.escapeHtml($("span.title", currentStepLi).text());
+					// currentStepBorderColor = $('span.step', currentStepLi).data('border-color');
+					// currentStepBgColor = $('span.step', currentStepLi).data('bg-color');
+					// currentStepColor = $('span.step', currentStepLi).data('color');
+
 					if (result['success'])
 					{
 						buttonIcoClass = 'fa-times';
 
 						oButton
-							.addClass('btn-darkorange')
+							// .addClass('btn-darkorange')
+							.addClass('btn-deal-refuse')
 							.removeAttr('style');
+
+						currentStepBorderColor = $currentStepLi.data('refuse-border-color');
+						currentStepBgColor = $currentStepLi.data('refuse-bg-color');
+						currentStepColor = $currentStepLi.data('refuse-color');
+
+						oButton
+							.css({'color': currentStepColor, 'background-color': currentStepBgColor, 'border-color': currentStepBorderColor, 'border-radius': '15px'});
 					}
 					else
 					{
 						buttonIcoClass = 'fa-check';
 
-						dealTemplateStepId = $('#deal-steps .steps').data('template-step-id');
-						stepColor = $('#deal-steps #simplewizardstep' + dealTemplateStepId + ' .step' ).css('color');
+						currentStepBorderColor = $currentStepLi.data('border-color');
+						currentStepBgColor = $currentStepLi.data('bg-color');
+						currentStepColor = $currentStepLi.data('color');
 
 						oButton
 							.removeClass('btn-darkorange')
-							.css({'color': '#fff', 'background-color': stepColor, 'border-color': stepColor});
+							.css({'color': currentStepColor, 'background-color': currentStepBgColor, 'border-color': currentStepBorderColor, 'border-radius': '15px'})
+							.removeClass('btn-deal-refuse');
 					}
 
 					$('span', oButton).text(result['name']);
@@ -5856,11 +5863,11 @@ function isEmpty(str) {
 						.addClass(buttonIcoClass);
 
 					// Reload users list
-					$.loadDealStepUsers(result.deal_step_id);
+					$.loadDealStepUsers(result.deal_step_id, settings.windowId);
 				}
 			});
 		},
-		loadDealStepUsers: function(deal_step_id)
+		loadDealStepUsers: function(deal_step_id, windowId)
 		{
 			$.ajax({
 				url: '/admin/deal/index.php',
@@ -5881,16 +5888,23 @@ function isEmpty(str) {
 							</div>'
 						);
 
+						var col = 4;
+
+						if (result['users'].length < 4)
+						{
+							col = 12 / result['users'].length;
+						}
+
 						$.each(result['users'], function(i, oUser){
 							$('.deal-step-users-list .row:last-child').append(
-								'<div class="col-xs-12 col-sm-3">\
+								'<div class="col-xs-12 col-sm-' + col + '">\
 									<div class="databox databox-graded" style="overflow: hidden;">\
 										<div class="databox-left no-padding">\
-											<img src="' + $.escapeHtml(oUser['avatar']) + '" style="width:65px; height:65px;">\
+											<img class="databox-user-avatar" src="' + $.escapeHtml(oUser['avatar']) + '">\
 										</div>\
 										<div class="databox-right bg-whitesmoke">\
 											<div class="orange radius-bordered" style="right: 0; left: 7px">\
-												<div class="databox-text black semi-bold"><a class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
+												<div class="databox-text black semi-bold"><a data-popover="hover" data-user-id="' + oUser['id'] + '" class="black" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' + oUser['id'] + ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' + oUser['id'] + ']=1\', windowId: \'id_content\'}); return false">' + $.escapeHtml(oUser['name']) + '</a></div>\
 												<div class="databox-text darkgray">' + $.escapeHtml(oUser['post']) + '</div>\
 											</div>\
 										</div>\
@@ -5900,20 +5914,22 @@ function isEmpty(str) {
 						});
 
 						$('.deal-step-users-list').removeClass('hidden');
+
+						$('#' + windowId + ' .deal-step-users-list [data-popover="hover"]').showUserPopover(windowId);
 					}
 				}
 			});
 		},
-		dealAddUserBlock: function(object)
+		dealAddUserBlock: function(object, windowId)
 		{
 			var id = object.id.split('_', 2)[1],
 				dataset = object.type == 'company' ? 0 : 1;
 
-			$('.deal-users-row').append('<div class="col-xs-12 col-sm-6 col-lg-3 user-block">\
+			$('#' + windowId + ' .deal-users-row').append('<div class="col-xs-12 col-sm-6 col-lg-4 user-block">\
 				<div class="databox">\
 					<div class="databox-left no-padding">\
 						<div class="img-wrapper">\
-							<img src="' + $.escapeHtml(object.avatar) + '" style="width:65px; height:65px;"/>\
+							<img class="databox-user-avatar" src="' + $.escapeHtml(object.avatar) + '"/>\
 							<a href="/admin/siteuser/representative/index.php?hostcms[action]=view&hostcms[checked][' + dataset + '][' + id + ']=1" onclick="$.modalLoad({path: \"/admin/siteuser/representative/index.php\", action: \"view\", operation: \"modal\", additionalParams: \"hostcms[checked][' + dataset + '][' + id + ']=1\", windowId: \"id_content\"}); return false">\
 								<span class="fa fa-eye fa-2x"></span>\
 							</a>\
@@ -6564,7 +6580,6 @@ function isEmpty(str) {
 			return false;
 		},
 		adminLoad: function(settings) {
-
 			// Call own event
 			var triggerReturn = $('body').triggerHandler('beforeAdminLoad', [settings]);
 
@@ -6632,7 +6647,7 @@ function isEmpty(str) {
 				jFiltersItem = jFiltersItems.eq(i);
 
 				// Если значение фильтра до 255 символов
-				if (jFiltersItem.val() && jFiltersItem.val().length < 256)
+				if (typeof jFiltersItem.val() == 'string' && jFiltersItem.val().toString().length < 256)
 				{
 					// Дописываем к передаваемым данным
 					data[jFiltersItem.attr('name')] = jFiltersItem.val();
@@ -6687,7 +6702,6 @@ function isEmpty(str) {
 				{
 					var pjax = window.history && window.history.pushState && window.history.replaceState /*&& !navigator.userAgent.match(/(WebApps\/.+CFNetwork)/)*/;
 
-					/*if (settings.windowId == 'id_content'){*/
 					if (pjax && settings.windowId == 'id_content')
 					{
 						var state = {
@@ -6709,10 +6723,6 @@ function isEmpty(str) {
 
 						window.history.pushState(state, document.title, path);
 					}
-
-					// Call own event
-					$("#" + settings.windowId).trigger('adminLoadSuccess');
-					//}
 				}, readCookiesForInitiateSettings]
 			});
 
@@ -6839,7 +6849,7 @@ function isEmpty(str) {
 			// Fix blink in FF
 			jObject.scrollTop(0).empty().html(content);
 		},
-		ajaxCallback: function(data, status, jqXHR)
+		ajaxCallback: function(data)
 		{
 			var triggerReturn = $('body').triggerHandler('beforeAjaxCallback', [data]);
 
@@ -6860,9 +6870,12 @@ function isEmpty(str) {
 
 			if (data.form_html !== null && data.form_html.length)
 			{
-				jQuery.beforeContentLoad(jObject, data);
+				jQuery.beforeContentLoad(jObject);
 				jQuery.insertContent(jObject, data.form_html);
 				jQuery.afterContentLoad(jObject, data);
+
+				// Call own event
+				jObject.trigger('adminLoadSuccess');
 			}
 
 			if (data.error != '')
@@ -7080,7 +7093,40 @@ function isEmpty(str) {
 		},
 		deleteNewDeliveryOption: function(object)
 		{
-			var jObject = jQuery(object).closest('.delivery_options').remove();
+			jQuery(object).closest('.delivery_options').remove();
+		},
+		cloneDeliveryInterval: function(windowId, cloneDelete)
+		{
+			var jDeliveryInterval = jQuery(cloneDelete).closest('.delivery_intervals'),
+			jNewObject = jDeliveryInterval.clone();
+
+			// Change input name
+			jNewObject.find(':regex(name, ^\\S+_\\d+$)').each(function(index, object){
+				var reg = /^(\S+)_(\d+)$/;
+				var arr = reg.exec(object.name);
+				jQuery(object).prop('name', arr[1] + '_' + '[]');
+			});
+			jNewObject.find("input").val('00:00');
+
+			jNewObject.insertAfter(jDeliveryInterval);
+
+			jNewObject.find("input").wickedpicker({
+				now: '00 : 00',
+				twentyFour: true, //Display 24 hour format, defaults to false
+				upArrow: 'wickedpicker__controls__control-up', //The up arrow class selector to use, for custom CSS
+				downArrow: 'wickedpicker__controls__control-down', //The down arrow class selector to use, for custom CSS
+				close: 'wickedpicker__close', //The close class selector to use, for custom CSS
+				hoverState: 'hover-state', //The hover state class to use, for custom CSS
+				showSeconds: false, //Whether or not to show seconds,
+				timeSeparator: ' : ', // The string to put in between hours and minutes (and seconds)
+				secondsInterval: 1, //Change interval for seconds, defaults to 1,
+				minutesInterval: 1, //Change interval for minutes, defaults to 1
+				clearable: false //Make the picker's input clearable (has clickable 'x')
+			});
+		},
+		deleteNewDeliveryInterval: function(object)
+		{
+			jQuery(object).closest('.delivery_intervals').remove();
 		},
 		cloneMultipleValue: function(windowId, cloneDelete)
 		{
@@ -7229,6 +7275,13 @@ function isEmpty(str) {
 						typeof array[key].disabled !== 'undefined'
 							&& array[key].disabled
 							&& $option.attr('disabled', 'disabled');
+
+						if (typeof array[key].data !== 'undefined')
+						{
+							$.each(array[key].data, function (name, value) {
+								$option.attr('data-' + name, value);
+							});
+						}
 
 						$select.append($option);
 					}
@@ -7442,7 +7495,7 @@ function isEmpty(str) {
 		},*/
 		HostCMSWindow: function(settings)
 		{
-			var object = $(this), oModalDialog;
+			var object = $(this);
 
 			settings = jQuery.extend({
 				title: '',
@@ -7454,13 +7507,6 @@ function isEmpty(str) {
 			$.modalWindow(settings);
 
 			object.remove();
-
-			/* oModalDialog = $('#' + object.attr('id')).closest('.modal-dialog');
-
-			if (oModalDialog.attr('style'))
-			{
-				oModalDialog.data({'originalWidth': oModalDialog.width()});
-			} */
 		},
 		toggleDisabled: function()
 		{
@@ -7592,6 +7638,122 @@ function isEmpty(str) {
 				var object = jQuery(this), bChecked = !object.find("input[type='checkbox'][id^='check_']").is(':not(:checked)');
 				object.find("input[type='checkbox'][id^='id_admin_forms_all_check']").prop('checked', bChecked);
 			});
+		},
+		showUserPopover: function(windowId)
+		{
+			return this.each(function(){
+				var object = jQuery(this);
+				object.on('mouseenter', function(event) {
+					var $this = $(this);
+
+					if (!$this.data("bs.popover") && $(this).data('user-id'))
+					{
+						$this.popover({
+							placement: 'top',
+							trigger: 'manual',
+							html: true,
+							content: function() {
+								var content = '';
+
+								$.ajax({
+									url: '/admin/user/index.php',
+									data: { showPopover: 1, user_id: $(this).data('user-id') },
+									dataType: 'json',
+									type: 'POST',
+									async: false,
+									success: function(response) {
+										content = response.html;
+									}
+								});
+
+								return content;
+							},
+							container: "#" + windowId
+						});
+
+						$this.attr('data-popoverAttached', true);
+
+						$this.on('hide.bs.popover', function(e) {
+							$this.attr('data-popoverAttached')
+								? $this.removeAttr('data-popoverAttached')
+								: e.preventDefault();
+						})
+						.on('show.bs.popover', function(e) {
+							!$this.attr('data-popoverAttached') && e.preventDefault();
+						})
+						.on('shown.bs.popover', function(e) {
+							$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+								!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+							});
+						})
+						.on('mouseleave', function(e) {
+							!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+							&& $this.attr('data-popoverAttached')
+							&& $this.popover('destroy');
+						});
+
+						$this.popover('show');
+					}
+				});
+			});
+		},
+		showSiteuserPopover: function(windowId)
+		{
+			return this.each(function(){
+				var object = jQuery(this);
+				object.on('mouseenter', function(event) {
+					var $this = $(this);
+
+					if (!$this.data("bs.popover") && ($(this).data('person-id') || $(this).data('company-id')))
+					{
+						$this.popover({
+							placement:'top',
+							trigger:'manual',
+							html:true,
+							content: function() {
+								var content = '';
+
+								$.ajax({
+									url: '/admin/siteuser/index.php',
+									data: { showPopover: 1, person_id: $(this).data('person-id'), company_id: $(this).data('company-id') },
+									dataType: 'json',
+									type: 'POST',
+									async: false,
+									success: function(response) {
+										content = response.html;
+									}
+								});
+
+								return content;
+							},
+							container: "#" + windowId
+						});
+
+						$this.attr('data-popoverAttached', true);
+
+						$this.on('hide.bs.popover', function(e) {
+							$this.attr('data-popoverAttached')
+								? $this.removeAttr('data-popoverAttached')
+								: e.preventDefault();
+						})
+						.on('show.bs.popover', function(e) {
+							!$this.attr('data-popoverAttached') && e.preventDefault();
+						})
+						.on('shown.bs.popover', function(e) {
+							$('#' + $this.attr('aria-describedby')).on('mouseleave', function(e) {
+								!$this.parent().find(e.relatedTarget).length && $this.popover('destroy');
+							});
+						})
+						.on('mouseleave', function(e) {
+							!$(e.relatedTarget).parent('#' + $this.attr('aria-describedby')).length
+							&& $this.attr('data-popoverAttached')
+							&& $this.popover('destroy');
+						});
+
+						$this.popover('show');
+					}
+				});
+			});
 		}
 	});
 
@@ -7646,6 +7808,7 @@ function isEmpty(str) {
 })(jQuery);
 
 $(function(){
+
 	$(window).on('resize', function(event) {
 
 		var $this = $(this);
@@ -7658,6 +7821,9 @@ $(function(){
 
 		changeDublicateTables();
 
+		//console.log('resize');
+		prepareKanbanBoards();
+
 		// Настройка отображения заголовка окна
 		// true - без анимации
 		navbarHeaderCustomization(true);
@@ -7669,6 +7835,8 @@ $(function(){
 			modalDialog.data('originalWidth') && modalDialog.css({'width': ($this.width() > modalDialog.data('originalWidth') + 30) ? modalDialog.data('originalWidth') : '95%'});
 		});
 	});
+
+	//prepareKanbanBoard();
 
 	// Настройка отображения заголовка окна
 	navbarHeaderCustomization();
@@ -7729,9 +7897,7 @@ $(function(){
 		.on('show.bs.popover', '[id ^= \'file_\'][id *= \'_settings_\']', function () {
 			$(this).find("i.fa").toggleClass("fa-times fa-cog");
 		})
-		/*.on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
-			$(e.target.getAttribute('href')).refreshEditor();
-		})*/
+		.on('shown.bs.tab', 'a[data-toggle="tab"]', prepareKanbanBoards)
 		.on('touchend', '.page-sidebar.menu-compact .sidebar-menu .submenu > li', function(e) {
 			$(this).find('a').click();
 		})
@@ -7902,7 +8068,96 @@ $(function(){
 					$(this).removeClass('changed');
 				}
 			},
-			'.icons_permissions i'
+			'.icons_permissions:not(.dms-document-icons-permissions):not(.dms-document-type-icons-permissions) i'
+		)
+		.on(
+			{
+				'click': function(event) {
+					$(this).focus();
+
+					// Действие, доступ к которому изменяем, недоступно для сотрудника или авторизованный сотрудник не может менять доступ к действию.
+					if ($(this).hasClass('blocked') || $(this).parent('.not-changeable').length)
+					{
+						return false;
+					}
+
+					var $input = $(this).parents('.dms-document-icons-permissions').find('input[type=hidden]'),
+						val = $input.val();
+
+					switch ($(this).data('bitoperation'))
+					{
+						case 'xor':
+							val ^= $(this).data('bitmask');
+						break;
+						case 'or':
+							val |= $(this).data('bitmask');
+						break;
+						case 'and':
+							val &= $(this).data('bitmask');
+						break;
+					}
+
+					$input.val(val);
+
+					if (!$(this).hasClass('set-permissions') && !$(this).hasClass('remove-permissions'))
+					{
+						$(this).toggleClass('fa-circle-o fa-circle');
+					}
+
+					if ($(this).hasClass('set-permissions'))
+					{
+						$aI = $(this).parents('.dms-document-icons-permissions').find('i:not(.set-permissions):not(.remove-permissions)');
+
+						$aI.each(function(){
+							$(this).removeClass('fa-circle-o').removeClass('fa-circle').addClass('fa-circle');
+						});
+					}
+
+					if ($(this).hasClass('remove-permissions'))
+					{
+						$aI = $(this).parents('.dms-document-icons-permissions').find('i:not(.set-permissions):not(.remove-permissions)');
+
+						$aI.each(function(){
+							$(this).removeClass('fa-circle-o').removeClass('fa-circle').addClass('fa-circle-o');
+						});
+					}
+				}
+			},
+			'.dms-document-icons-permissions i'
+		)
+		.on(
+			{
+				'click': function(event) {
+					$(this).focus();
+
+					// Действие, доступ к которому изменяем, недоступно для сотрудника или авторизованный сотрудник не может менять доступ к действию.
+					if ($(this).hasClass('blocked') || $(this).parent('.not-changeable').length)
+					{
+						return false;
+					}
+
+					var type = $(this).data('type'), // тип объекта: user, head, department
+						objectId = $(this).data('id'), // идентификатор объекта (отдел или сотрудник или глава отдела), к которому применяются права
+						dmsDocumentTypeId = $(this).data('dms-document-type-id'), // идентификатор типа документа
+						dmsClassId = $(this).data('dms-class-id'), // идентификатор типа документа
+						action = $(this).data('action-id'); // тип действия
+
+					$.adminLoad({path: '/admin/dms/document/type/index.php', action: 'changeAccess', operation: '', additionalParams: 'dms_class_id=' + dmsClassId + '&dms_document_type_id=' + dmsDocumentTypeId + '&type=' + type + '&objectId=' + objectId + '&action=' + action + '&hostcms[checked][0][' + dmsDocumentTypeId + ']=1', windowId: 'id_content'});
+				},
+				'mousedown': function() {
+					$(this).removeClass('changed');
+				},
+				'mouseover': function() {
+					if ($(this).hasClass('changed'))
+					{
+						$(this).toggleClass('fa-circle-o fa-circle');
+					}
+				},
+				'mouseout': function() {
+					$(this).removeClass('changed');
+				}
+			},
+			'.dms-document-type-icons-permissions i'
 		)
 		.on('click', '.workday #workdayControl > span:not(.user-workday-end-text)', function(e) {
 			e.stopPropagation();
@@ -7993,7 +8248,7 @@ $(function(){
 							.addClass("hidden");
 
 						$this.removeClass("next");
-						$(".deal-template-step-name").html('');
+						$(".deal-template-step-name-edit").html('');
 
 						dealTemplateStepId = dealTemplateSteps.data("template-step-id");
 					}
@@ -8008,32 +8263,38 @@ $(function(){
 
 						currentStepLi = $("li#simplewizardstep" + currentDealTemplateStepId, dealTemplateSteps);
 						currentStepName = $.escapeHtml($("span.title", currentStepLi).text());
-						currentStepColor = $('span.step', currentStepLi).css('color');
+						currentStepBorderColor = $('span.step', currentStepLi).data('border-color');
+						currentStepBgColor = $('span.step', currentStepLi).data('bg-color');
+						currentStepColor = $('span.step', currentStepLi).data('color');
 
 						newStepName = $.escapeHtml($("span.title", $this).text());
-						newStepColor = $('span.step', $this).css('color');
+						newStepBorderColor = $('span.step', $this).data('border-color');
+						newStepBgColor = $('span.step', $this).data('bg-color');
+						newStepColor = $('span.step', $this).data('color');
 
-						$(".deal-template-step-name").html('<span class="badge current-step" style="background-color:' + currentStepColor + '">' + currentStepName + '</span><span class="darkgray"> → </span><span class="badge new-step" style="background-color:' + newStepColor + '">' + newStepName + '</span>');
+						$(".deal-template-step-name-edit").html('<span class="badge current-step" style="background-color:' + currentStepBgColor + ';color:' + currentStepColor + ';border:1px solid ' + currentStepBorderColor + '">' + currentStepName + '</span><span class="darkgray"> → </span><span class="badge new-step" style="background-color:' + newStepBgColor + '; color:' + newStepColor + ';border:1px solid ' + newStepBorderColor + '">' + newStepName + '</span>');
 					}
 
 					// Сотрудник не принял сделку или отказался от ее выполнения
-					if (!$('.join-user a').hasClass('btn-darkorange')
+					// if (!$('.join-user a').hasClass('btn-darkorange')
+					if (!$('.join-user a').hasClass('btn-deal-refuse')
 						&& !$('.join-user a').hasClass('btn-default')
 					)
 					{
 						// stepColor = $('li#simplewizardstep' + dealTemplateSteps.data("template-step-id") + ' span.step', dealTemplateSteps).css('color');
-						stepColor = $('li#simplewizardstep' + dealTemplateStepId + ' span.step', dealTemplateSteps).css('color');
+						stepColor = $('li#simplewizardstep' + dealTemplateStepId + ' span.step', dealTemplateSteps).data('color');
+						stepBorderColor = $('li#simplewizardstep' + dealTemplateStepId + ' span.step', dealTemplateSteps).data('border-color');
+						stepBgColor = $('li#simplewizardstep' + dealTemplateStepId + ' span.step', dealTemplateSteps).data('bg-color');
 
 						var $joinUserA = $('.join-user a'),
-							dealId = $joinUserA.data('deal-id');
-
-						var onclick = !$this.hasClass('next')
-							? '{deal_step_id: ' + parseInt(dealTemplateSteps.data("step-id")) + '}'
-							: '{deal_id: ' + dealId + ', deal_template_step_id: ' + dealTemplateStepId + '}';
+							dealId = $joinUserA.data('deal-id'),
+							options = !$this.hasClass('next')
+								? '{deal_step_id: ' + parseInt(dealTemplateSteps.data("step-id")) + ', windowId: "' + dealTemplateSteps.data("window-id") + '"}'
+								: '{deal_id: ' + dealId + ', deal_template_step_id: ' + dealTemplateStepId + ', windowId: "' + dealTemplateSteps.data("window-id") + '"}';
 
 						$joinUserA
-							.attr('onclick', '$.joinUser2DealStep(' + onclick + ')')
-							.css({'color': '#fff', 'background-color': stepColor, 'border-color': stepColor});
+							.attr('onclick', '$.joinUser2DealStep(' + options + ')')
+							.css({'color': stepColor, 'background-color': stepBgColor, 'border-color': stepBorderColor});
 					}
 				}
 
@@ -8424,6 +8685,7 @@ $(function(){
 
 		$('.navbar').hasClass('navbar-fixed-top') && navbarHeaderCustomization();
 		setResizableAdminTableTh();
+		prepareKanbanBoards();
 	});
 	$(".page-content").on('click', '.sidebar-toggler', function() {
 
@@ -8431,9 +8693,309 @@ $(function(){
 
 		setResizableAdminTableTh();
 		changeDublicateTables();
+		prepareKanbanBoards();
 	});
 
 });
+
+function prepareKanbanBoard(oKanbanBoard)
+{
+	var oWindow = $(window), bottomKanbanBoard = oKanbanBoard.offset().top + oKanbanBoard.outerHeight(),
+		kanbanBoardWrapper = oKanbanBoard.find('>.kanban-wrapper').filter(':visible'),
+		oKanbanBoardMiniatureWrapper, oKanbanBoardMiniature, oMiniatureTransparent, oKanbanBoardMiniatureUl, oKanbanBoardMiniatureLi,
+		kanbanColumns, aKanbanColumnsUlHeight = [], maxHeightKanbanColumnsUl, koef;
+
+	//console.log('kanbanBoardWrapper.length', kanbanBoardWrapper.length);
+
+	//console.log(oWindow.scrollTop());
+	/* console.log(oWindow.outerHeight());
+	console.log('oKanbanBoard.outerHeight()', oKanbanBoard.outerHeight());
+	console.log('oKanbanBoard.offset()', oKanbanBoard.offset().top);
+	 */
+	//var bottomKanbanBoard = oKanbanBoard.offset().top + oKanbanBoard.outerHeight() > oWindow.outerHeight() ? 'канбан больше' : 'канбан меньше';
+
+	if ( kanbanBoardWrapper.length )
+	{
+		//oKanbanBoardMiniature = oKanbanBoard.find('.kanban-board-miniature');
+
+		oKanbanBoardMiniatureWrapper = oKanbanBoard.find('.kanban-board-miniature-wrapper');
+
+		if (kanbanBoardWrapper.get(0).scrollWidth > kanbanBoardWrapper.innerWidth())
+		{
+			kanbanColumns = kanbanBoardWrapper.find('.kanban-col');
+
+			// if (oKanbanBoardMiniature.length)
+			if (oKanbanBoardMiniatureWrapper.length)
+			{
+				/*
+				//oKanbanBoardMiniature = oKanbanBoard.find('.kanban-board-miniature');
+				oMiniatureTransparent = oKanbanBoardMiniature.find('.transparent');
+				oKanbanBoardMiniatureUl = oKanbanBoardMiniature.find('ul');
+				*/
+
+				oKanbanBoardMiniatureWrapper
+
+				oKanbanBoardMiniature = oKanbanBoardMiniatureWrapper.find('.kanban-board-miniature');
+				oMiniatureTransparent = oKanbanBoardMiniatureWrapper.find('.transparent');
+				oKanbanBoardMiniatureUl = oKanbanBoardMiniatureWrapper.find('ul');
+
+			}
+			else
+			{
+				oKanbanBoardMiniatureWrapper = $('<div class="kanban-board-miniature-wrapper"></div>');
+				oKanbanBoardMiniature = $('<div class="kanban-board-miniature"></div>');
+				oMiniatureTransparent = $('<div class="transparent"></div>');
+				oKanbanBoardMiniatureUl = $('<ul></ul>');
+
+				oKanbanBoard.append(
+
+					// oKanbanBoardMiniature.append(oMiniatureTransparent, oKanbanBoardMiniatureUl)
+
+					oKanbanBoardMiniatureWrapper.append(
+						oKanbanBoardMiniature.append(oMiniatureTransparent, oKanbanBoardMiniatureUl)
+					)
+				);
+
+				oKanbanBoardMiniatureUl.append('<li><span class="miniature-col-header" style="background-color: #79cc14;"></span><span class="miniature-col-content"></span></li>'.repeat(kanbanColumns.length));
+			}
+
+			/* oKanbanBoardMiniature.css({
+				top:  bottomKanbanBoard < oWindow.outerHeight() ? bottomKanbanBoard - 65 : oWindow.outerHeight() - 75,
+				left: oWindow.outerWidth() - oKanbanBoardMiniature.outerWidth() - 35
+			}); */
+
+
+			oKanbanBoardMiniatureWrapper.css({
+				top:  bottomKanbanBoard < oWindow.outerHeight() ? bottomKanbanBoard - 65 : oWindow.outerHeight() - 75,
+				left: oWindow.outerWidth() - oKanbanBoardMiniatureWrapper.outerWidth() - 35
+			});
+
+			oKanbanBoardMiniatureLi = oKanbanBoardMiniatureUl.find('li');
+
+			kanbanColumns.each(function(index) {
+
+				var $this = $(this), oLi = $(oKanbanBoardMiniatureLi.get(index)),
+					backgroundColor = $this.find('.kanban-board-header > h5').css('background-color');
+
+				oLi.find('span.miniature-col-header').css('background-color', backgroundColor);
+
+				aKanbanColumnsUlHeight[index] = $this.find('ul.kanban-list li').length ? $this.find('ul.kanban-list').outerHeight() : 0;
+
+			});
+
+			// Максимальная высота столбца
+			maxHeightKanbanColumnsUl = Math.max.apply(null, aKanbanColumnsUlHeight);
+			//indexMaxHeight = aKanbanColumnsUlHeight.indexOf(maxHeightKanbanColumnsUl);
+
+			aKanbanColumnsUlHeight.forEach(function(element, index) {
+
+				var oLi = $(oKanbanBoardMiniatureLi.get(index)),
+					heightLi = oLi.innerHeight() - oLi.find('.miniature-col-header').outerHeight(true);
+
+				oLi.find('.miniature-col-content').css('height', element / maxHeightKanbanColumnsUl * heightLi - 1);
+			});
+
+			koef = kanbanBoardWrapper.get(0).scrollWidth / oKanbanBoardMiniature.innerWidth();
+
+			oMiniatureTransparent.outerWidth(kanbanBoardWrapper.innerWidth() / koef - 2);
+
+			if (!oKanbanBoard.data('hasEventListeners'))
+			{
+
+				/* oKanbanBoardMiniatureWrapper.on('mousedown touchstart', function(e) {
+
+					e.stopPropagation();
+
+					console.log('oKanbanBoardMiniatureWrapper mousedown');
+				}); */
+
+				// oKanbanBoardMiniature.on('mousedown touchstart', function(e) {
+				oKanbanBoardMiniatureWrapper.on('mousedown touchstart', function(e) {
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					$(this)
+						.data({
+							currentMousePositionX: e.type == 'touchstart' ? e.originalEvent.touches[0].pageX : e.pageX,
+							currentMousePositionY: e.type == 'touchstart' ? e.originalEvent.touches[0].pageY : e.pageY
+						})
+						.attr('data-mousedown', true);
+
+					$(window).one('mouseup touchend', function (){
+
+						oKanbanBoardMiniatureWrapper
+							.removeData(['currentMousePositionX', 'currentMousePositionY'])
+							.removeAttr('data-mousedown');
+
+						$(this).off('mousemove touchmove');
+					})
+					.on('mousemove touchmove', function (e){
+
+						var $this = $(this), posX, posY, deltaMousePositionX, deltaMousePositionY, offset;
+
+						//e.preventDefault();
+						//e.stopPropagation();
+
+						//if (oKanbanBoardMiniature.attr('data-mousedown'))
+						if (oKanbanBoardMiniatureWrapper.attr('data-mousedown'))
+						{
+							posX = e.type == 'touchmove' ? e.originalEvent.touches[0].pageX : e.pageX;
+							posY = e.type == 'touchmove' ? e.originalEvent.touches[0].pageY : e.pageY;
+
+							/* deltaMousePositionX = oKanbanBoardMiniature.data('currentMousePositionX') - posX + $this.scrollLeft();
+							deltaMousePositionY = oKanbanBoardMiniature.data('currentMousePositionY') - posY + $this.scrollTop(); */
+
+							deltaMousePositionX = oKanbanBoardMiniatureWrapper.data('currentMousePositionX') - posX + $this.scrollLeft();
+							deltaMousePositionY = oKanbanBoardMiniatureWrapper.data('currentMousePositionY') - posY + $this.scrollTop();
+
+							//oKanbanBoardMiniature.data({'currentMousePositionX': posX, 'currentMousePositionY': posY});
+							oKanbanBoardMiniatureWrapper.data({'currentMousePositionX': posX, 'currentMousePositionY': posY});
+
+							//offset = oKanbanBoardMiniature.offset();
+							offset = oKanbanBoardMiniatureWrapper.offset();
+
+							//oKanbanBoardMiniature.css({'top': offset.top - deltaMousePositionY, 'left': offset.left - deltaMousePositionX});
+							oKanbanBoardMiniatureWrapper.css({'top': offset.top - deltaMousePositionY, 'left': offset.left - deltaMousePositionX});
+						}
+					});
+				});
+
+				oMiniatureTransparent.on('mousedown touchstart', function(e) {
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					$(this)
+						.data({
+							currentMousePositionX: e.type == 'touchstart' ? e.originalEvent.touches[0].pageX : e.pageX
+						})
+						.attr('data-mousedown', true);
+
+					oKanbanBoard.addClass('noselect');
+
+					$(window).one('mouseup touchend', function (){
+
+						oKanbanBoard.removeClass('noselect');
+						oMiniatureTransparent
+							.removeData('currentMousePositionX')
+							.removeAttr('data-mousedown');
+					});
+				})
+				.on('mousemove touchmove', function(e) {
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					var $this = $(this), posX, deltaTransparentMove, deltaMousePosition, offsetLeft, currentOffset, positionLeft, difference, oKanbanBoardMiniatureWidth /* , positionRight */;
+
+					if ($this.attr('data-mousedown'))
+					{
+						oKanbanBoardMiniatureWidth = oKanbanBoardMiniature.innerWidth();
+
+						posX = e.type == 'touchmove' ? e.originalEvent.touches[0].pageX : e.pageX;
+
+						deltaMousePosition = $this.data('currentMousePositionX') - posX;
+
+						$this.data('currentMousePositionX', posX);
+
+						positionLeft = $this.position().left
+
+						currentOffset = $this.offset();
+
+						// Сдвигаем влево
+						if (deltaMousePosition > 0 && positionLeft > 0)
+						{
+							deltaTransparentMove = positionLeft > deltaMousePosition ? deltaMousePosition : positionLeft;
+						}
+						else if (deltaMousePosition < 0) // Сдвигаем вправо
+						{
+							difference = oKanbanBoardMiniatureWidth - positionLeft - $this.outerWidth();
+
+							if (difference > 1)
+							{
+								deltaTransparentMove = difference > Math.abs(deltaMousePosition) ? deltaMousePosition : -difference;
+							}
+						}
+
+						if (deltaTransparentMove)
+						{
+							offsetLeft = currentOffset.left - deltaTransparentMove;
+
+							$this.offset({top: currentOffset.top, left: offsetLeft});
+
+							kanbanBoardWrapper.scrollLeft($this.position().left * koef);
+						}
+					}
+				});
+
+				kanbanBoardWrapper
+					.addClass('scrollable')
+					.on('mousedown', function(e) {
+
+						$(this)
+							.data({
+								currentMousePositionX: e.pageX
+							})
+							.attr('data-mousedown', true)
+							.parent()
+							.addClass('noselect');
+
+						$(window).one('mouseup', function (){
+
+							kanbanBoardWrapper
+								.removeAttr('data-mousedown')
+								.parent()
+								.removeClass('noselect');
+						});
+					})
+					.on('mousemove', function (e){
+
+						var $this = $(this), kanbanBoard = $this.parent('.kanban-board'), deltaMousePosition;
+
+						if ($this.attr('data-mousedown') && !$this.attr('data-draggingItem'))
+						{
+							deltaMousePosition = $this.data('currentMousePositionX') - e.pageX;
+
+							// Двигаем мышь налево
+							if (deltaMousePosition > 0 && ($this.scrollLeft() < $this.get(0).scrollWidth - $this.innerWidth()))
+							{
+								$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
+							}
+							else if($this.scrollLeft() > 0)
+							{
+								$this.scrollLeft($this.scrollLeft() + deltaMousePosition);
+							}
+
+							$this.data('currentMousePositionX', e.pageX);
+						}
+					})
+					.on('scroll', function (e){
+
+						!oMiniatureTransparent.attr('data-mousedown')
+							&& oMiniatureTransparent.css('left', $(this).scrollLeft() / koef);
+					});
+
+				oKanbanBoard.data('hasEventListeners', true);
+			}
+		}
+		else
+		{
+			kanbanBoardWrapper.removeClass('scrollable');
+			//oKanbanBoardMiniature.length && oKanbanBoardMiniature.remove();
+
+			oKanbanBoardMiniatureWrapper.length && oKanbanBoardMiniatureWrapper.remove();
+		}
+	}
+}
+
+function prepareKanbanBoards()
+{
+	$('.kanban-board:visible').each(function() {
+
+		prepareKanbanBoard($(this));
+	});
+}
 
 // Настройка отображения заголовка окна
 function navbarHeaderCustomization(withoutAnimation)
@@ -9292,38 +9854,58 @@ $.getMultiContent = function(arr, path) {
 		});
 	}
 
-    var _arr = $.map(arr, function(url) {
+	var aScripts = [], cssCount = 0, loadedCssCount = 0, cssDeferred = $.Deferred(), _arr, returnDeferred;
+
+	aScripts = $.map(arr, function(url) {
 		url = (path || '') + url;
-		if ($.inArray(url, loadedMultiContent) == -1)
+
+		return ($.inArray(url, loadedMultiContent) == -1 && url.indexOf('.css') == -1)
+			? url
+			: null; // Already loaded, delete item from the array
+	});
+
+	$.each(arr, function() {
+
+		var url = (path || '') + this;
+
+		if ($.inArray(url, loadedMultiContent) == -1 && url.indexOf('.css') != -1)
 		{
-			//loadedMultiContent.push(url);
-			if (url.indexOf('.css') != -1)
-			{
-				$('<link>', {rel: 'stylesheet', href: url}).appendTo('head');
-			}
-			else
-			{
-				return loadSctriptContent(url);
-			}
+			$('<link>', {rel: 'stylesheet', href: url}).appendTo('head');
+
+			cssCount++;
+
+			$("link[href = '" + url + "']").on('load error', function() {
+
+				//loadedCssCount++;
+
+				loadedMultiContent.push(url);
+
+				cssCount == ++loadedCssCount && cssDeferred.resolve();
+			});
 		}
+	});
 
-		// Already loaded, delete item from the array
-		return null;
-    });
+	_arr = $.map(aScripts, function(url) {
+		return loadSctriptContent(url);
+	});
 
-    /*_arr.push($.Deferred(function(deferred) {
-        $(deferred.resolve);
-    }));*/
+	returnDeferred = cssCount
+		? cssDeferred.then(function() {
 
-    return $.when.apply($, _arr).done(function() {
+			return $.when.apply($, _arr);
+		})
+		: $.when.apply($, _arr);
+
+	return returnDeferred.done(function() {
 		if (arguments.length)
 		{
 			// when() with multiple deferred, 'arguments' is aggregate state of all the deferreds
 			if (Array.isArray(arguments[0]))
 			{
-				for (var i=0; i < arguments.length; i++) {
+				for (var i = 0; i < arguments.length; i++) {
 					//contentType = arguments[i][2].getResponseHeader('Content-Type');
 					//if (contentType.indexOf('javascript') != -1)
+
 					$.globalEval(arguments[i][0]);
 				}
 			}
@@ -9333,6 +9915,62 @@ $.getMultiContent = function(arr, path) {
 			}
 		}
 	});
+
+	//}
+
+	///////////////////////////////////
+	/* if (0)
+	{
+		var _arr = $.map(arr, function(url) {
+			url = (path || '') + url;
+			if ($.inArray(url, loadedMultiContent) == -1)
+			{
+				//loadedMultiContent.push(url);
+				if (url.indexOf('.css') != -1)
+				{
+					//console.log('link');
+					//alert('link');
+					//$('<link>', {rel: 'stylesheet', href: url, id: 'ts-css'}).appendTo('head');
+
+					$('<link>', {rel: 'stylesheet', href: url}).appendTo('head');
+					loadedMultiContent.push(url);
+				}
+				else
+				{
+					//console.log('loadSctriptContent url', url);
+					//alert('loadSctriptContent');
+					return loadSctriptContent(url);
+				}
+			}
+
+			// Already loaded, delete item from the array
+			return null;
+		});
+
+		return $.when.apply($, _arr).done(function() {
+
+			console.log('Выполнение скриптов');
+			if (arguments.length)
+			{
+				// when() with multiple deferred, 'arguments' is aggregate state of all the deferreds
+				if (Array.isArray(arguments[0]))
+				{
+					for (var i = 0; i < arguments.length; i++) {
+						//contentType = arguments[i][2].getResponseHeader('Content-Type');
+						//if (contentType.indexOf('javascript') != -1)
+
+						console.log('$.globalEval1');
+						$.globalEval(arguments[i][0]);
+					}
+				}
+				else
+				{
+					console.log('$.globalEval2');
+					$.globalEval(arguments[0]);
+				}
+			}
+		});
+	} */
 }
 
 function cSelectFilter(windowId, sObjectId)
@@ -10129,3 +10767,9 @@ function uuidv4() {
     return v.toString(16);
   });
 }
+
+// own case in-sensitive function
+jQuery.expr[':'].icontains = function(a, i, m) {
+	return jQuery(a).text().toUpperCase()
+		.indexOf(m[3].toUpperCase()) >= 0;
+};

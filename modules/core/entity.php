@@ -203,7 +203,7 @@ class Core_Entity extends Core_ORM
 	 */
 	public function clearEntities()
 	{
-		$this->_childrenEntities = $this->_allowedTags = array();
+		$this->_childrenEntities = $this->_allowedTags = $this->_attributes = array();
 		$this->_forbiddenTags = $this->_typicalForbiddenTags;
 
 		$this->clearXmlTags();
@@ -242,10 +242,22 @@ class Core_Entity extends Core_ORM
 		return $this;
 	}
 
+	/**
+	 * Cache for $this->_allowedTags
+	 * @var array
+	 */
 	static protected $_cacheAllowedTags = array();
 
+	/**
+	 * Cache for $this->_forbiddenTags
+	 * @var array
+	 */
 	static protected $_cacheForbiddenTags = array();
 
+	/**
+	 * Cache for $this->_shortcodeTags
+	 * @var array
+	 */
 	static protected $_cacheShortcodeTags = array();
 
 	/**
@@ -359,7 +371,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Mark entity as deleted
-	 * @return Core_Entity
+	 * @return self
 	 * @hostcms-event modelname.onBeforeMarkDeleted
 	 * @hostcms-event modelname.onAfterMarkDeleted
 	 */
@@ -438,7 +450,7 @@ class Core_Entity extends Core_ORM
 	/**
 	 * Delete object from database
 	 * @param mixed $primaryKey primary key for deleting object
-	 * @return Core_Entity
+	 * @return self
 	 */
 	public function delete($primaryKey = NULL)
 	{
@@ -586,6 +598,7 @@ class Core_Entity extends Core_ORM
 	 * Add a children entity
 	 *
 	 * @param Core_Entity $oChildrenEntity
+	 * @return self
 	 */
 	public function addEntity($oChildrenEntity)
 	{
@@ -597,6 +610,7 @@ class Core_Entity extends Core_ORM
 	 * Add children entities
 	 *
 	 * @param array $aChildrenEntities
+	 * @return self
 	 */
 	public function addEntities(array $aChildrenEntities)
 	{
@@ -604,6 +618,25 @@ class Core_Entity extends Core_ORM
 		{
 			$this->addEntity($oChildrenEntity);
 		}
+		return $this;
+	}
+
+	/**
+	 * Attributes
+	 * @var array
+	 */
+	protected $_attributes = array();
+
+	/**
+	 * Add attribute
+	 *
+	 * @param string $name
+	 * @param string $value
+	 * @return self
+	 */
+	public function addAttribute($name, $value)
+	{
+		$this->_attributes[$name] = $value;
 		return $this;
 	}
 
@@ -676,6 +709,11 @@ class Core_Entity extends Core_ORM
 		if (array_key_exists($this->_primaryKey, $this->_modelColumns))
 		{
 			$xml .= " {$this->_primaryKey}=\"" . Core_Str::xml($this->getPrimaryKey()) . "\"";
+		}
+
+		foreach ($this->_attributes as $attributeName => $attributeValue)
+		{
+			$xml .= ' ' . $attributeName . '="' . Core_Str::xml($attributeValue) . '"';
 		}
 
 		$xml .= ">\n";
@@ -1021,7 +1059,7 @@ class Core_Entity extends Core_ORM
 
 	/**
 	 * Copy object
-	 * @return Core_Entity new copied object
+	 * @return new copied object
 	 * @hostcms-event modelname.onBeforeCopy
 	 * @hostcms-event modelname.onAfterCopy
 	 */

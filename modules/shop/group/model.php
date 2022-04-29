@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Group_Model extends Core_Entity
 {
@@ -880,13 +880,13 @@ class Shop_Group_Model extends Core_Entity
 		$link = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $link);
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $object, $onclick);
 
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 		!$object->active
 			&& $oCore_Html_Entity_Div->class('line-through');
 
 		$oCore_Html_Entity_Div->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href($link)
 				->onclick($onclick)
 				->value(htmlspecialchars($object->name))
@@ -904,11 +904,11 @@ class Shop_Group_Model extends Core_Entity
 					. $object->getPath();
 
 				$oCore_Html_Entity_Div->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href($href)
 						->target('_blank')
 						->add(
-							Core::factory('Core_Html_Entity_I')
+							Core_Html_Entity::factory('I')
 							->class('fa fa-external-link')
 						)
 				);
@@ -917,7 +917,7 @@ class Shop_Group_Model extends Core_Entity
 
 		$object->items_total_count > 0 && $oCore_Html_Entity_Div
 			->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-hostcms badge-square')
 					->value($object->items_total_count)
 			);

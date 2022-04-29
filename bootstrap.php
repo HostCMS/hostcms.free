@@ -63,14 +63,3 @@ if (Core_Auth::logged())
 
 // Windows locale
 //setlocale(LC_ALL, array ('ru_RU.utf-8', 'rus_RUS.utf8'));
-
-/*class Skin_Bootstrap_Admin_Form_Entity_File_Observer
-{
-	static public function onAfterShowLargeImage($object, $args, $options)
-	{
-		$smallImage = $object->smallImage;
-		$smallImage['create_small_image_from_large_checked'] = TRUE;
-		$object->smallImage($smallImage);
-	}
-}
-Core_Event::attach('Skin_Bootstrap_Admin_Form_Entity_File.onAfterShowLargeImage', array('Skin_Bootstrap_Admin_Form_Entity_File_Observer', 'onAfterShowLargeImage'));*/

@@ -86,7 +86,7 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 			/*if (!$oUser_Directory_Messenger)
 			{
 				$oRowElements->add(
-					Core::factory('Core_Html_Entity_Input')
+					Core_Html_Entity::factory('Input')
 						->type('hidden')
 						->value(0)
 						->name($this->prefix . 'messenger_public_value' . $sNameSuffix)
@@ -121,7 +121,7 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 			{
 				// Удаляем пустую строку с полями
 				ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='{$prefix}messenger#{$oDirectory_Messenger->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$Admin_Form_Controller->addMessage(ob_get_clean());
@@ -153,7 +153,7 @@ class Directory_Controller_Tab_Messenger extends Directory_Controller_Tab
 					$object->add($oDirectory_Messenger);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='{$prefix}messenger\\[\\]']\").eq({$i}).prop('name', '{$prefix}messenger#{$oDirectory_Messenger->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='{$prefix}messenger_username\\[\\]']\").eq({$i}).prop('name', '{$prefix}messenger_username#{$oDirectory_Messenger->id}');
 						$(\"#{$windowId} input[name='{$prefix}messenger_public\\[\\]']\").eq({$i}).prop('name', '{$prefix}messenger_public#{$oDirectory_Messenger->id}');

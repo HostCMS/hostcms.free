@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shortcode
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shortcode_Model extends Core_Entity
 {
@@ -106,7 +106,7 @@ class Shortcode_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
 
@@ -124,7 +124,7 @@ class Shortcode_Model extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value(htmlspecialchars($this->example))
 			->execute();

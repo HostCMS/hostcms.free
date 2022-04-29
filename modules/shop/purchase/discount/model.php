@@ -53,9 +53,16 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	 */
 	protected $_belongsTo = array(
 		'shop' => array(),
+		'shop_purchase_discount_dir' => array(),
 		'shop_currency' => array(),
 		'user' => array()
 	);
+
+	/**
+	 * Backend property
+	 * @var int
+	 */
+	public $img = 0;
 
 	/**
 	 * Constructor.
@@ -264,8 +271,8 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	public function valueBackend($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		return $this->type == 0
-			? $this->value . '%'
-			: $this->value . htmlspecialchars($this->shop_currency_id ? ' ' . $this->Shop_Currency->sign : '');
+			? Core_Str::hideZeros($this->value) . '%'
+			: htmlspecialchars($this->Shop->Shop_Currency->formatWithCurrency($this->value));
 	}
 
 	/**
@@ -274,7 +281,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	 */
 	public function nameBackend()
 	{
-		$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')->value(
+		$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')->value(
 			htmlspecialchars($this->name)
 		);
 
@@ -292,7 +299,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 		{
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_I')->class('fa fa-clock-o black')
+					Core_Html_Entity::factory('I')->class('fa fa-clock-o black')
 				);
 		}
 
@@ -301,8 +308,9 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 			$count = $this->Shop_Purchase_Discount_Coupons->getCountByShop_purchase_discount_id($this->id);
 
 			$count && $oCore_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Span')
-					->class('badge badge-warning badge-square')
+				Core_Html_Entity::factory('Span')
+					->class('badge badge-warning badge-square badge-sm')
+					->title(Core::_('Shop_Purchase_Discount.badge_coupon_count'))
 					->value($count)
 			);
 		}
@@ -320,7 +328,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	{
 		return $this->min_amount == 0
 			? '—'
-			: $this->min_amount;
+			: htmlspecialchars($this->Shop_Currency->formatWithCurrency($this->min_amount));
 	}
 
 	/**
@@ -333,7 +341,7 @@ class Shop_Purchase_Discount_Model extends Core_Entity
 	{
 		return $this->max_amount == 0
 			? '—'
-			: $this->max_amount;
+			: htmlspecialchars($this->Shop_Currency->formatWithCurrency($this->max_amount));
 	}
 
 	/**

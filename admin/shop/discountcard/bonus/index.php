@@ -198,7 +198,7 @@ $oAdmin_Form_Action_Edit = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
 	->getByName('edit');
 
-if ($oAdmin_Form_Action_Edit)
+if ($oAdmin_Form_Action_Edit && $oAdmin_Form_Controller->getAction() == 'edit')
 {
 	$Shop_Discountcard_Bonus_Controller_Edit = Admin_Form_Action_Controller::factory(
 		'Shop_Discountcard_Bonus_Controller_Edit', $oAdmin_Form_Action_Edit

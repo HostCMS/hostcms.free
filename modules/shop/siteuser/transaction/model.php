@@ -7,18 +7,12 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Siteuser_Transaction_Model extends Core_Entity
 {
-	/**
-	 * Backend property
-	 * @var string
-	 */
-	public $currency_name = NULL;
-
 	/**
 	 * One-to-many or many-to-many relations
 	 * @var array
@@ -177,6 +171,28 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 			? '<a href="/admin/shop/order/index.php?hostcms[action]=edit&hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '" onclick="$.adminLoad({path: \'/admin/shop/order/index.php\', action: \'edit\', operation: \'\', additionalParams: \'hostcms[checked][0][' . $this->shop_order_id . ']=1&shop_id=' . $this->Shop_Order->shop_id . '\', view: \'list\', windowId: \'id_content\'}); return false">' . $this->Shop_Order->invoice . '</a>'
 			: '—';
 	}
+	
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function amountBackend()
+	{
+		return ($this->amount > 0 ? '<span class="success">+' : '<span class="darkorange">') . ($this->shop_currency_id
+			? $this->Shop_Currency->formatWithCurrency($this->amount)
+			: $this->amount) . '</span>';
+	}
+	
+	/**
+	 * Backend callback method
+	 * @return string
+	 */
+ 	public function amount_base_currencyBackend()
+	{
+		return ($this->amount_base_currency > 0 ? '<span class="success">+' : '<span class="darkorange">') . ($this->shop_id
+			? $this->Shop->Shop_Currency->formatWithCurrency($this->amount_base_currency)
+			: $this->amount_base_currency) . '</span>';
+	}
 
 	/**
 	 * Backend callback method.
@@ -194,7 +210,11 @@ class Shop_Siteuser_Transaction_Model extends Core_Entity
 			->where('datetime', '<=', $this->datetime)
 			->execute()->asAssoc()->current();
 
-		return round($aTmp['amount'], 2);
+		$amount = round($aTmp['amount'], 2);
+
+		return $this->shop_id
+			? $this->Shop->Shop_Currency->formatWithCurrency($amount)
+			: $amount;
 	}
 
 	/**

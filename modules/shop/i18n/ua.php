@@ -130,6 +130,8 @@ return array(
 	'schedule-rebuildFastfilter' => 'Перебудувати швидкий фільтр',
 	'schedule-unsetApplyPurchaseDiscounts' => 'Не застосовувати знижки від суми замовлення і карти до товарів зі знижками',
 	'schedule-setApplyPurchaseDiscounts' => 'Застосовувати знижки від суми замовлення і карти до товарів без знижок',
+	'schedule-recountSets' => 'Перерахунок комплектів',
+	'schedule-updateCurrency' => 'Оновлення валют',
 	'order_admin_subject' => 'Тема листа про замовлення куратору магазину',
 	'order_user_subject' => 'Тема листа про замовлення користувачеві',
 	'confirm_admin_subject' => 'Тема листа підтвердження оплати куратору магазину',

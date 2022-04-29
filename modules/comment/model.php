@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Comment
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Model extends Core_Entity
 {
@@ -231,11 +231,11 @@ class Comment_Model extends Core_Entity
 		$onclick = $oAdmin_Form_Controller->doReplaces($oAdmin_Form_Field, $this, $oAdmin_Form_Field->onclick);
 
 		// Subject
-		trim($this->subject) != '' && Core::factory('Core_Html_Entity_Strong')
+		trim($this->subject) != '' && Core_Html_Entity::factory('Strong')
 			->value(htmlspecialchars($this->subject))
 			->execute();
 
-		Core::factory('Core_Html_Entity_A')
+		Core_Html_Entity::factory('A')
 			->href($link)
 			->onclick($onclick)
 			->value(htmlspecialchars($this->getShortText()))
@@ -243,14 +243,14 @@ class Comment_Model extends Core_Entity
 
 		$subCommentCount = $this->Comments->getCount(FALSE);
 
-		$subCommentCount && Core::factory('Core_Html_Entity_Span')
+		$subCommentCount && Core_Html_Entity::factory('Span')
 			->class('count')
 			->value(htmlspecialchars($subCommentCount))
 			->execute();
 
 		if (strlen($this->ip))
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('small darkgray')
 				->value(htmlspecialchars($this->ip))
 				->execute();
@@ -258,7 +258,7 @@ class Comment_Model extends Core_Entity
 
 		if ($this->grade && $this->grade <= $aConfig['gradeLimit'])
 		{
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->class('small green')
 				->value(str_repeat('★', $this->grade) . str_repeat('☆', $aConfig['gradeLimit'] - $this->grade))
 				->execute();
@@ -291,11 +291,11 @@ class Comment_Model extends Core_Entity
 			ob_start();
 			$windowId = $oAdmin_Form_Controller->getWindowId();
 
-			Core::factory('Core_Html_Entity_I')
+			Core_Html_Entity::factory('I')
 				->class('fa fa-user')
 				->execute();
 
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href($oAdmin_Form_Controller->getAdminActionLoadHref('/admin/siteuser/index.php', 'edit', NULL, 0, intval($this->Siteuser->id)))
 				->onclick("$.openWindowAddTaskbar({path: '/admin/siteuser/index.php', additionalParams: '&hostcms[checked][0][{$this->Siteuser->id}]=1&hostcms[action]=edit', shortcutImg: '" . '/modules/skin/' . Core_Skin::instance()->getSkinName() . '/images/module/siteuser.png' . "', shortcutTitle: 'undefined', Minimize: true}); return false")
 				->value(htmlspecialchars($this->Siteuser->login))

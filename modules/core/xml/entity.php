@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Xml
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Xml_Entity extends Core_Servant_Properties
 {
@@ -32,7 +32,7 @@ class Core_Xml_Entity extends Core_Servant_Properties
 	 * Add a children entity
 	 *
 	 * @param Core_Entity $oChildrenEntity
-	 * @return Core_Xml_Entity
+	 * @return self
 	 */
 	public function addEntity($oChildrenEntity)
 	{
@@ -44,7 +44,7 @@ class Core_Xml_Entity extends Core_Servant_Properties
 	 * Add children entities
 	 *
 	 * @param array $aChildrenEntities
-	 * @return Core_Xml_Entity
+	 * @return self
 	 */
 	public function addEntities(array $aChildrenEntities)
 	{
@@ -85,12 +85,53 @@ class Core_Xml_Entity extends Core_Servant_Properties
 	 *
 	 * @param string $name
 	 * @param string $value
-	 * @return Core_Xml_Entity
+	 * @return self
 	 */
 	public function addAttribute($name, $value)
 	{
 		$this->_attributes[$name] = $value;
 		return $this;
+	}
+
+	/**
+	 * External XML tags for entity.
+	 *
+	 * @var array
+	 */
+	protected $_xmlTags = array();
+
+	/**
+	 * Add external tag for entity
+	 * @param string $tagName tag name
+	 * @param string $tagValue tag value
+	 * @param array $attributes attributes
+	 * @return self
+	 */
+	public function addXmlTag($tagName, $tagValue, array $attributes = array())
+	{
+		//if (!isset($this->_forbiddenTags[$tagName]))
+		//{
+		$this->_xmlTags[] = array($tagName, $tagValue, $attributes);
+		//}
+		return $this;
+	}
+
+	/**
+	 * Clear external XML tags for entity.
+	 */
+	public function clearXmlTags()
+	{
+		$this->_xmlTags = array();
+		return $this;
+	}
+
+	/**
+	 * Get external XML tags for entity.
+	 * @return array
+	 */
+	public function getXmlTags()
+	{
+		return $this->_xmlTags;
 	}
 
 	/**
@@ -108,6 +149,22 @@ class Core_Xml_Entity extends Core_Servant_Properties
 		}
 
 		$xml .= '>';
+
+		// External tags
+		foreach ($this->_xmlTags as $aTag)
+		{
+			$xml .= "<{$aTag[0]}";
+
+			if (isset($aTag[2]))
+			{
+				foreach ($aTag[2] as $tagName => $tagValue)
+				{
+					$xml .= " {$tagName}=\"" . Core_Str::xml($tagValue) . "\"";
+				}
+			}
+
+			$xml .= ">" . Core_Str::xml($aTag[1]) . "</{$aTag[0]}>\n";
+		}
 
 		// Children entities
 		if (!empty($this->_childrenEntities))
@@ -144,30 +201,50 @@ class Core_Xml_Entity extends Core_Servant_Properties
 			$oRetrun->$properttName = $attributeValue;
 		}
 
-		// Children entities
-		if (!empty($this->_childrenEntities))
+		// External tags
+		foreach ($this->_xmlTags as $aTag)
 		{
-			foreach ($this->_childrenEntities as $oChildEntity)
+			$sTmp = $aTag[0];
+			if (empty($aTag[2]))
 			{
-				//$xml .= $oChildEntity->getXml();
-				$childName = $oChildEntity instanceof Core_ORM
-					? $oChildEntity->getModelName()
-					: $oChildEntity->name;
+				$oRetrun->$sTmp = $aTag[1];
+			}
+			else
+			{
+				$stdClass = new stdClass();
+				$stdClass->value = $aTag[1];
 
-				$childArray = $oChildEntity->getStdObject($attributePrefix);
-
-				if (!isset($oRetrun->$childName))
+				foreach ($aTag[2] as $tagName => $tagValue)
 				{
-					$oRetrun->$childName = $childArray;
+					$properttName = $attributePrefix . $tagName;
+					$stdClass->$properttName = $tagValue;
 				}
-				else
-				{
-					// Convert to array
-					!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
 
-					// array_push($oRetrun->$childName, $childArray);
-					$oRetrun->{$childName}[] = $childArray;
-				}
+				$oRetrun->$sTmp = $stdClass;
+			}
+		}
+
+		// Children entities
+		foreach ($this->_childrenEntities as $oChildEntity)
+		{
+			//$xml .= $oChildEntity->getXml();
+			$childName = $oChildEntity instanceof Core_ORM
+				? $oChildEntity->getModelName()
+				: $oChildEntity->name;
+
+			$childArray = $oChildEntity->getStdObject($attributePrefix);
+
+			if (!isset($oRetrun->$childName))
+			{
+				$oRetrun->$childName = $childArray;
+			}
+			else
+			{
+				// Convert to array
+				!is_array($oRetrun->$childName) && $oRetrun->$childName = array($oRetrun->$childName);
+
+				// array_push($oRetrun->$childName, $childArray);
+				$oRetrun->{$childName}[] = $childArray;
 			}
 		}
 

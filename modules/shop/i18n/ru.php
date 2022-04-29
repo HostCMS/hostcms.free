@@ -3,9 +3,9 @@
  * Online shop.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Интернет-магазины',
@@ -134,6 +134,8 @@ return array(
 	'schedule-rebuildFastfilter' => 'Перестроить быстрый фильтр',
 	'schedule-unsetApplyPurchaseDiscounts' => 'Не применять скидки от суммы заказа и карты к товарам со скидками',
 	'schedule-setApplyPurchaseDiscounts' => 'Применять скидки от суммы заказа и карты к товарам без скидок',
+	'schedule-recountSets' => 'Пересчет комплектов',
+	'schedule-updateCurrency' => 'Обновление валют',
 	'order_admin_subject' => 'Тема письма о поступившем заказе куратору магазина',
 	'order_user_subject' => 'Тема письма о поступившем заказе пользователю',
 	'confirm_admin_subject' => 'Тема письма подтверждения оплаты куратору магазина',

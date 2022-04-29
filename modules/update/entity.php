@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Update
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Update_Entity extends Core_Entity
 {
@@ -407,9 +407,18 @@ class Update_Entity extends Core_Entity
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->beta && Core::factory('Core_Html_Entity_Span')
+		$this->beta && Core_Html_Entity::factory('Span')
 			->class('badge badge-darkorange')
 			->value('β')
 			->execute();
+	}
+	
+	/**
+	 * Get Related Site
+	 * @return NULL
+	 */
+	public function getRelatedSite()
+	{
+		return NULL;
 	}
 }

@@ -211,7 +211,7 @@ class Core
 				'X-XSS-Protection' => '1;mode=block',
 			),
 			'backendSessionLifetime' => 14400,
-			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
+			'backendContentSecurityPolicy' => "default-src 'self' www.hostcms.ru www.youtube.com youtube.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: *.cloudflare.com *.kaspersky-labs.com; img-src 'self' chart.googleapis.com data: blob: www.hostcms.ru; font-src 'self'; connect-src 'self' blob:; style-src 'self' 'unsafe-inline'"
 		);
 	}
 
@@ -305,7 +305,8 @@ class Core
 		// или код ошибки меньше кода вывода ошибок
 		$error_reporting = error_reporting();
 
-		$bShowError = $error_reporting != 0 && $error_reporting >= $code;
+		$bShowError = $error_reporting && $error_reporting >= $code;
+		//$bShowError = error_reporting() & $err_no;
 
 		// Уровень критичности ошибки
 
@@ -938,20 +939,23 @@ class Core
 	 */
 	static public function showJson($content)
 	{
-		header('Pragma: no-cache');
-		header('Cache-Control: private, no-cache');
-		header('Content-Disposition: inline; filename="files.json"');
-		header('Vary: Accept');
+		if (!headers_sent())
+		{
+			header('Pragma: no-cache');
+			header('Cache-Control: private, no-cache');
+			header('Content-Disposition: inline; filename="files.json"');
+			header('Vary: Accept');
 
-		if (is_null(Core_Array::get($_SERVER, 'HTTP_ACCEPT'))
-			|| strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
-		{
-			header('Content-type: application/json; charset=utf-8');
-		}
-		else
-		{
-			header('X-Content-Type-Options: nosniff');
-			header('Content-type: text/plain; charset=utf-8');
+			if (is_null(Core_Array::get($_SERVER, 'HTTP_ACCEPT'))
+				|| strpos(Core_Array::get($_SERVER, 'HTTP_ACCEPT', ''), 'application/json') !== FALSE)
+			{
+				header('Content-type: application/json; charset=utf-8');
+			}
+			else
+			{
+				header('X-Content-Type-Options: nosniff');
+				header('Content-type: text/plain; charset=utf-8');
+			}
 		}
 
 		// bug in Chrome

@@ -47,4 +47,5 @@ return array(
 	'conditions_for_delivery' => 'Delivery conditions for "%s"',
 	'empty_conditions_for_delivery' => 'There are no delivery terms',
 	'apply_button' => 'Apply',
+	'intervals' => 'Intervals',
 );

@@ -72,6 +72,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/cropper.min.js')
 			->addJs('/modules/skin/' . $this->_skinName . '/js/cropper/jquery-cropper.min.js')
 
+
+			//->addJs('/modules/skin/' . $this->_skinName . '/js/timeslider/timeslider.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/fuelux/wizard/wizard-custom.min.js')
 			//->addJs('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range-min.js')
 			;
@@ -96,6 +98,8 @@ class Skin_Bootstrap extends Core_Skin
 			->addCss('/modules/skin/' . $this->_skinName . '/css/wickedpicker.min.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/cropper.css')
 			->addCss('/modules/skin/' . $this->_skinName . '/css/cropper/jquery-cropper.css')
+
+			//->addCss('/modules/skin/' . $this->_skinName . '/css/timeslider.css')
 			//->addCss('/modules/skin/' . $this->_skinName . '/js/jRange/jquery.range.css')
 			;
 	}
@@ -119,7 +123,7 @@ class Skin_Bootstrap extends Core_Skin
 		$this->addJs('/modules/skin/' . $this->_skinName . "/js/lng/{$lng}/{$lng}.js");
 		foreach ($this->_js as $sPath)
 		{
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->src($sPath . '?' . $timestamp)
 				->execute();
 		}
@@ -628,8 +632,8 @@ class Skin_Bootstrap extends Core_Skin
 											event.stopPropagation ? event.stopPropagation() : (event.cancelBubble=true);
 										};
 										$('.scroll-languages').slimscroll({
-											// height: '215px',
-											height: 'auto',
+											height: '135px',
+											// height: 'auto',
 											color: 'rgba(0, 0, 0, 0.3)',
 											size: '5px'
 										});
@@ -1221,7 +1225,7 @@ class Skin_Bootstrap extends Core_Skin
 		$message = Core_Skin::instance()->answer()->message;
 		if ($message)
 		{
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->id('authorizationError')
 				->value($message)
 				->execute();
@@ -1511,7 +1515,6 @@ class Skin_Bootstrap extends Core_Skin
 			<!--Header Buttons End-->
 		</div>
 		<div class="page-body">
-
 			<div class="row">
 				<?php
 				// Core
@@ -1674,6 +1677,9 @@ class Skin_Bootstrap extends Core_Skin
 	{
 		$iTimestamp = abs(Core::crc32(Core::getVersion()));
 
+		$oUser = Core_Auth::getCurrentUser();
+		$oSite = Core_Entity::factory('Site', CURRENT_SITE);
+
 		$oTemplate = Core_Page::instance()->template;
 		$aTemplates = array();
 		$bLess = FALSE;
@@ -1763,14 +1769,14 @@ class Skin_Bootstrap extends Core_Skin
 			<?php
 		}
 
-		$oHostcmsTopPanel = Core::factory('Core_Html_Entity_Div')
+		$oHostcmsTopPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsPanel hostcmsTopPanel')
 			->style('display: none');
 
-		$oHostcmsSubPanel = Core::factory('Core_Html_Entity_Div')
+		$oHostcmsSubPanel = Core_Html_Entity::factory('Div')
 			->class('hostcmsSubPanel')
 			->add(
-				Core::factory('Core_Html_Entity_Img')
+				Core_Html_Entity::factory('Img')
 					->width(3)->height(16)
 					->src('/hostcmsfiles/images/drag_bg.gif')
 			);
@@ -1779,69 +1785,74 @@ class Skin_Bootstrap extends Core_Skin
 
 		if (defined('CURRENT_STRUCTURE_ID'))
 		{
-			//if ($bIsUtf8)
-			//{
-			// Structure
 			$oStructure = Core_Entity::factory('Structure', CURRENT_STRUCTURE_ID);
-			$sPath = '/admin/structure/index.php';
-			$sAdditional = "hostcms[action]=edit&parent_id={$oStructure->parent_id}&hostcms[checked][0][{$oStructure->id}]=1";
 
-			$oHostcmsSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
-					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Structure.edit_title', $oStructure->name)) . "'}); return false")
-					->add(
-						Core::factory('Core_Html_Entity_Img')
-							->width(16)->height(16)
-							->src('/hostcmsfiles/images/structure_edit.gif')
-							->id('hostcmsEditStructure')
-							->alt(Core::_('Structure.edit_title', $oStructure->name))
-							->title(Core::_('Structure.edit_title', $oStructure->name))
-					)
-			);
-
-			// Template
-			if ($oStructure->type == 0)
+			// Structure
+			if ($oUser->checkModuleAccess(array('structure'), $oSite))
 			{
-				$oTemplate = $oStructure->Document->Template;
-			}
-			else
-			{
-				$oTemplate = $oStructure->Template;
-			}
-
-			if ($oTemplate && $oTemplate->id)
-			{
-				$sPath = '/admin/template/index.php';
-				$sAdditional = "hostcms[action]=edit&hostcms[checked][1][{$oTemplate->id}]=1";
+				$sPath = '/admin/structure/index.php';
+				$sAdditional = "hostcms[action]=edit&parent_id={$oStructure->parent_id}&hostcms[checked][0][{$oStructure->id}]=1";
 
 				$oHostcmsSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
-					->href("{$sPath}?{$sAdditional}")
-					->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Template.title_edit', $oTemplate->name)) . "'}); return false")
-					->add(
-						Core::factory('Core_Html_Entity_Img')
-							->width(16)->height(16)
-							->src('/hostcmsfiles/images/template_edit.gif')
-							->id('hostcmsEditTemplate')
-							->alt(Core::_('Template.title_edit', $oTemplate->name))
-							->title(Core::_('Template.title_edit', $oTemplate->name))
-					)
+					Core_Html_Entity::factory('A')
+						->href("{$sPath}?{$sAdditional}")
+						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Structure.edit_title', $oStructure->name)) . "'}); return false")
+						->add(
+							Core_Html_Entity::factory('Img')
+								->width(16)->height(16)
+								->src('/hostcmsfiles/images/structure_edit.gif')
+								->id('hostcmsEditStructure')
+								->alt(Core::_('Structure.edit_title', $oStructure->name))
+								->title(Core::_('Structure.edit_title', $oStructure->name))
+						)
 				);
 			}
 
+			// Template
+			if ($oUser->checkModuleAccess(array('template'), $oSite))
+			{
+				if ($oStructure->type == 0)
+				{
+					$oTemplate = $oStructure->Document->Template;
+				}
+				else
+				{
+					$oTemplate = $oStructure->Template;
+				}
+
+				if ($oTemplate && $oTemplate->id)
+				{
+					$sPath = '/admin/template/index.php';
+					$sAdditional = "hostcms[action]=edit&hostcms[checked][1][{$oTemplate->id}]=1";
+
+					$oHostcmsSubPanel->add(
+						Core_Html_Entity::factory('A')
+						->href("{$sPath}?{$sAdditional}")
+						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Template.title_edit', $oTemplate->name)) . "'}); return false")
+						->add(
+							Core_Html_Entity::factory('Img')
+								->width(16)->height(16)
+								->src('/hostcmsfiles/images/template_edit.gif')
+								->id('hostcmsEditTemplate')
+								->alt(Core::_('Template.title_edit', $oTemplate->name))
+								->title(Core::_('Template.title_edit', $oTemplate->name))
+						)
+					);
+				}
+			}
+
 			// Document
-			if ($oStructure->type == 0 && $oStructure->document_id)
+			if ($oUser->checkModuleAccess(array('document'), $oSite) && $oStructure->type == 0 && $oStructure->document_id)
 			{
 				$sPath = '/admin/document/index.php';
 				$sAdditional = "hostcms[action]=edit&document_dir_id={$oStructure->Document->document_dir_id}&hostcms[checked][1][{$oStructure->Document->id}]=1";
 
 				$oHostcmsSubPanel->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href("{$sPath}?{$sAdditional}")
 						->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Document.edit', $oStructure->Document->name)) . "'}); return false")
 						->add(
-							Core::factory('Core_Html_Entity_Img')
+							Core_Html_Entity::factory('Img')
 								->width(16)->height(16)
 								->src('/hostcmsfiles/images/page_edit.gif')
 								->id('hostcmsEditDocument')
@@ -1852,7 +1863,7 @@ class Skin_Bootstrap extends Core_Skin
 			}
 
 			// Informationsystem
-			if (Core::moduleIsActive('informationsystem'))
+			if ($oUser->checkModuleAccess(array('informationsystem'), $oSite) && Core::moduleIsActive('informationsystem'))
 			{
 				$oInformationsystem = Core_Entity::factory('Informationsystem')
 					->getByStructureId($oStructure->id);
@@ -1863,11 +1874,11 @@ class Skin_Bootstrap extends Core_Skin
 					$sAdditional = "hostcms[action]=edit&informationsystem_dir_id={$oInformationsystem->informationsystem_dir_id}&hostcms[checked][1][{$oInformationsystem->id}]=1";
 
 					$oHostcmsSubPanel->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href("{$sPath}?{$sAdditional}")
 							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Informationsystem.edit_title')) . "'}); return false")
 							->add(
-								Core::factory('Core_Html_Entity_Img')
+								Core_Html_Entity::factory('Img')
 									->width(16)->height(16)
 									->src('/hostcmsfiles/images/folder_page_edit.gif')
 									->id('hostcmsEditInformationsystem')
@@ -1879,7 +1890,7 @@ class Skin_Bootstrap extends Core_Skin
 			}
 
 			// Shop
-			if (Core::moduleIsActive('shop'))
+			if ($oUser->checkModuleAccess(array('shop'), $oSite) && Core::moduleIsActive('shop'))
 			{
 				$oShop = Core_Entity::factory('Shop')
 					->getByStructureId($oStructure->id);
@@ -1890,11 +1901,11 @@ class Skin_Bootstrap extends Core_Skin
 					$sAdditional = "hostcms[action]=edit&shop_dir_id={$oShop->shop_dir_id}&hostcms[checked][1][{$oShop->id}]=1";
 
 					$oHostcmsSubPanel->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->href("{$sPath}?{$sAdditional}")
 							->onclick("hQuery.openWindow({path: '{$sPath}', additionalParams: '{$sAdditional}', dialogClass: 'hostcms6', title: '" . Core_Str::escapeJavascriptVariable(Core::_('Shop.edit_title')) . "'}); return false")
 							->add(
-								Core::factory('Core_Html_Entity_Img')
+								Core_Html_Entity::factory('Img')
 									->width(16)->height(16)
 									->src('/hostcmsfiles/images/shop_edit.gif')
 									->id('hostcmsEditShop')
@@ -1904,20 +1915,19 @@ class Skin_Bootstrap extends Core_Skin
 					);
 				}
 			}
-			//}
 		}
 
 		// Separator
 		$oHostcmsSubPanel->add(
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->style('padding-left: 10px')
 		)
 		->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href('/admin/')
 				->target('_blank')
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->width(16)->height(16)
 						->src('/hostcmsfiles/images/system.gif')
 						->id('hostcmsAdministrationCenter')
@@ -1931,21 +1941,21 @@ class Skin_Bootstrap extends Core_Skin
 
 		$oCore_Registry = Core_Registry::instance();
 
-		$oDebugWindow = Core::factory('Core_Html_Entity_Div')
+		$oDebugWindow = Core_Html_Entity::factory('Div')
 			->class('hostcmsModalWindow')
 			->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->value(Core::_('Core.total_time', $oCore_Registry->get('Core_Statistics.totalTime')))
 			);
 
-		$oDebugWindowUl = Core::factory('Core_Html_Entity_Ul');
+		$oDebugWindowUl = Core_Html_Entity::factory('Ul');
 		$oDebugWindow->add($oDebugWindowUl);
 
 		$aFrontendExecutionTimes = Core_Page::instance()->getFrontendExecutionTimes();
 		foreach ($aFrontendExecutionTimes as $sFrontendExecutionTimes)
 		{
 			$oDebugWindowUl->add(
-				Core::factory('Core_Html_Entity_Li')
+				Core_Html_Entity::factory('Li')
 					->liValue($sFrontendExecutionTimes)
 			);
 		}
@@ -1953,51 +1963,51 @@ class Skin_Bootstrap extends Core_Skin
 		// Fixed Options
 		$oDebugWindowUl
 			->add(
-				Core::factory('Core_Html_Entity_Li')
+				Core_Html_Entity::factory('Li')
 					->liValue(Core::_('Core.time_database_connection', $oCore_Registry->get('Core_DataBase.connectTime', 0)))
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Li')
+				Core_Html_Entity::factory('Li')
 					->liValue(Core::_('Core.time_database_select', $oCore_Registry->get('Core_DataBase.selectDbTime', 0)))
 			)
 			->add(
-				Core::factory('Core_Html_Entity_Li')
+				Core_Html_Entity::factory('Li')
 					->liValue(Core::_('Core.time_sql_execution', $oCore_Registry->get('Core_DataBase.queryTime', 0)))
 			);
 
 		$fXslExecution = $oCore_Registry->get('Xsl_Processor.process', 0);
 		$fXslExecution && $oDebugWindowUl->add(
-			Core::factory('Core_Html_Entity_Li')
+			Core_Html_Entity::factory('Li')
 				->liValue(Core::_('Core.time_xml_execution', $fXslExecution))
 		);
 
 		$fTplExecution = $oCore_Registry->get('Tpl_Processor.process', 0);
 		$fTplExecution && $oDebugWindowUl->add(
-			Core::factory('Core_Html_Entity_Li')
+			Core_Html_Entity::factory('Li')
 				->liValue(Core::_('Core.time_tpl_execution', $fTplExecution))
 		);
 
 		if (function_exists('memory_get_usage') && substr(PHP_OS, 0, 3) != 'WIN')
 		{
 			$oDebugWindow->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->value(Core::_('Core.memory_usage', memory_get_usage() / 1048576))
 			);
 		}
 
 		$oDebugWindow->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->value(Core::_('Core.number_of_queries', $oCore_Registry->get('Core_DataBase.queryCount', 0)))
 		)
 		->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->value(
 					Core::_('Core.compression', (Core::moduleIsActive('compression')
 						? Core::_('Admin_Form.enabled') : Core::_('Admin_Form.disabled')))
 				)
 		)
 		->add(
-			Core::factory('Core_Html_Entity_Div')
+			Core_Html_Entity::factory('Div')
 				->value(Core::_('Core.cache', (Core::moduleIsActive('cache')
 					? Core::_('Admin_Form.enabled') : Core::_('Admin_Form.disabled'))))
 		);
@@ -2005,21 +2015,21 @@ class Skin_Bootstrap extends Core_Skin
 		if (Core::moduleIsActive('cache'))
 		{
 			$oDebugWindow->add(
-				Core::factory('Core_Html_Entity_Ul')
+				Core_Html_Entity::factory('Ul')
 					->add(
-						Core::factory('Core_Html_Entity_Li')
+						Core_Html_Entity::factory('Li')
 							->liValue(Core::_('Core.cache_insert_time', $oCore_Registry->get('Core_Cache.setTime', 0)))
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Li')
+						Core_Html_Entity::factory('Li')
 							->liValue(Core::_('Core.cache_write_requests', $oCore_Registry->get('Core_Cache.setCount', 0)))
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Li')
+						Core_Html_Entity::factory('Li')
 							->liValue(Core::_('Core.cache_read_time', $oCore_Registry->get('Core_Cache.getTime', 0)))
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Li')
+						Core_Html_Entity::factory('Li')
 							->liValue(Core::_('Core.cache_read_requests', $oCore_Registry->get('Core_Cache.getCount', 0)))
 					)
 			);
@@ -2028,10 +2038,10 @@ class Skin_Bootstrap extends Core_Skin
 		$form_content = ob_get_clean();
 
 		$oHostcmsSubPanel->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->onclick("hQuery.showWindow('debugWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: 400, height: 220, title: '" . Core::_('Core.debug_information') . "', Maximize: false})")
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->src('/hostcmsfiles/images/chart_bar.gif')
 						->id('hostcmsShowDebugWindow')
 						->alt(Core::_('Core.debug_information'))
@@ -2039,12 +2049,12 @@ class Skin_Bootstrap extends Core_Skin
 				)
 		);
 
-		if (defined('ALLOW_SHOW_SQL') && ALLOW_SHOW_SQL)
+		if (defined('ALLOW_SHOW_SQL') && ALLOW_SHOW_SQL && $oUser->superuser)
 		{
 			// SQL window
 			ob_start();
 
-			$oSqlWindow = Core::factory('Core_Html_Entity_Div')
+			$oSqlWindow = Core_Html_Entity::factory('Div')
 				->class('hostcmsModalWindow');
 
 			$aQueryLogs = $oCore_Registry->get('Core_DataBase.queryLog', array());
@@ -2077,7 +2087,7 @@ class Skin_Bootstrap extends Core_Skin
 
 					$oSqlWindow
 						->add(
-							Core::factory('Core_Html_Entity_Div')
+							Core_Html_Entity::factory('Div')
 								->class($sClassName)
 								->value(
 									$oCore_DataBase->highlightSql(htmlspecialchars($aQueryLog['query']))
@@ -2097,14 +2107,14 @@ class Skin_Bootstrap extends Core_Skin
 						}
 
 						$oSqlWindow->add(
-							Core::factory('Core_Html_Entity_Div')
+							Core_Html_Entity::factory('Div')
 								->class('sql_db')
 								->id("sql_h{$key}")
 								->value($sdebugBacktrace)
 						);
 					}
 
-					$oSqlDivDescription = Core::factory('Core_Html_Entity_Div')
+					$oSqlDivDescription = Core_Html_Entity::factory('Div')
 						->class('sql_t')
 						->value(Core::_('Core.sql_statistics', $aQueryLog['time'], $key));
 
@@ -2112,23 +2122,23 @@ class Skin_Bootstrap extends Core_Skin
 					{
 						$oSqlDivDescription
 							->add(
-								Core::factory('Core_Html_Entity_Div')
+								Core_Html_Entity::factory('Div')
 									->value('Explain:')
 							);
 
-						$oExplainTable = Core::factory('Core_Html_Entity_Table')
+						$oExplainTable = Core_Html_Entity::factory('Table')
 							->class('sql_explain');
 
-						$oExplainTableTr = Core::factory('Core_Html_Entity_Tr');
+						$oExplainTableTr = Core_Html_Entity::factory('Tr');
 						$oExplainTable->add($oExplainTableTr);
 
 						foreach ($aQueryLog['explain'][0] as $explain_key => $aExplain)
 						{
 							$oExplainTableTr
 								->add(
-									Core::factory('Core_Html_Entity_Td')
+									Core_Html_Entity::factory('Td')
 										->add(
-											Core::factory('Core_Html_Entity_Strong')
+											Core_Html_Entity::factory('Strong')
 												->value($explain_key)
 										)
 								);
@@ -2136,11 +2146,11 @@ class Skin_Bootstrap extends Core_Skin
 
 						foreach ($aQueryLog['explain'] as $aExplain)
 						{
-							$oExplainTableTr = Core::factory('Core_Html_Entity_Tr');
+							$oExplainTableTr = Core_Html_Entity::factory('Tr');
 
 							foreach ($aExplain as $sExplainKey => $sExplainValue)
 							{
-								$oExplainTableTd = Core::factory('Core_Html_Entity_Td');
+								$oExplainTableTd = Core_Html_Entity::factory('Td');
 
 								if ($sExplainKey == 'type')
 								{
@@ -2169,10 +2179,10 @@ class Skin_Bootstrap extends Core_Skin
 			$form_content = ob_get_clean();
 
 			$oHostcmsSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 				->onclick("hQuery.showWindow('sqlWindow', '" . Core_Str::escapeJavascriptVariable($form_content) . "', {width: '70%', height: 500, title: '" . Core::_('Core.sql_queries') . "'})")
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->src('/hostcmsfiles/images/sql.gif')
 						->id('hostcmsShowSql')
 						->alt(Core::_('Core.sql_queries'))
@@ -2181,17 +2191,17 @@ class Skin_Bootstrap extends Core_Skin
 			);
 		}
 
-		if (defined('ALLOW_SHOW_XML') && ALLOW_SHOW_XML)
+		if (defined('ALLOW_SHOW_XML') && ALLOW_SHOW_XML && $oUser->checkModuleAccess(array('xsl'), $oSite))
 		{
 			$oHostcmsSubPanel->add(
-				Core::factory('Core_Html_Entity_A')
+				Core_Html_Entity::factory('A')
 					->href(
 						'?hostcmsAction=' . (Core_Type_Conversion::toBool($_SESSION['HOSTCMS_SHOW_XML'])
 						? 'HIDE_XML'
 						: 'SHOW_XML')
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Img')
+						Core_Html_Entity::factory('Img')
 							->width(16)->height(16)
 							->src('/hostcmsfiles/images/xsl.gif')
 							->id('hostcmsXml')
@@ -2211,15 +2221,15 @@ class Skin_Bootstrap extends Core_Skin
 
 		$oHostcmsSubPanel->add(
 			// Separator
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->style('padding-left: 10px')
 		)
 		->add(
-			Core::factory('Core_Html_Entity_A')
+			Core_Html_Entity::factory('A')
 				->href('/admin/logout.php')
 				->onclick("hQuery.ajax({url: '/admin/logout.php', dataType: 'html', success: function() {location.reload()}}); return false;")
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->width(16)->height(16)
 						->src('/hostcmsfiles/images/exit.gif')
 						->id('hostcmsLogout')
@@ -2247,7 +2257,7 @@ class Skin_Bootstrap extends Core_Skin
 
 		$oHostcmsTopPanel
 			->add(
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value(
 						'var backendLng = "' . htmlspecialchars(Core_I18n::instance()->getLng()) . '";' . PHP_EOL .
 						'(function($){' . PHP_EOL .

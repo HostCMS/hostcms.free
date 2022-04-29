@@ -83,7 +83,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 	protected function _getFoundRows()
 	{
 		// Warning
-		if (Core_Array::getRequest('debug'))
+		if (!is_null(Core_Array::getRequest('debug')))
 		{
 			echo '<p><b>Query FOUND_ROWS</b>.</p>';
 		}
@@ -116,7 +116,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 			$row = $Core_DataBase->current();
 
 			// Warning
-			if (Core_Array::getRequest('debug'))
+			if (!is_null(Core_Array::getRequest('debug')))
 			{
 				echo '<p><b>getCount Query</b>: <pre>', $Core_DataBase->getLastQuery(), '</pre></p>';
 			}
@@ -195,7 +195,7 @@ class Sql_Table_View_Dataset extends Admin_Form_Dataset
 				->result();
 
 			// Warning
-			if (Core_Array::getRequest('debug'))
+			if (!is_null(Core_Array::getRequest('debug')))
 			{
 				echo '<p><b>Select Query</b>: <pre>', Core_DataBase::instance()->getLastQuery(), '</pre></p>';
 			}

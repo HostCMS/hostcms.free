@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Notification
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Notification_Model extends Core_Entity
 {
@@ -149,8 +149,7 @@ class Notification_Model extends Core_Entity
 		$this->queryBuilder()
 			->where('notifications.module_id', '=', $module_id)
 			->where('notifications.type', '=', $type)
-			->where('notifications.entity_id', '=', $entity_id)
-			;
+			->where('notifications.entity_id', '=', $entity_id);
 
 		return $this->getFirst(FALSE);
 	}

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Comment
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -77,7 +77,6 @@ class Comment_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Comment.siteuser_id'))
-				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')

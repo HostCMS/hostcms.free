@@ -284,7 +284,7 @@ class Field_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							->value($this->_object->list_id)
 							->type('hidden');
 
-						$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+						$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 							->value("
 								$('#{$windowId} [name = list_name]').autocomplete({
 									source: function(request, response) {

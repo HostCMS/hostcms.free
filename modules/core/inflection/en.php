@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Core\Inflection
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_Inflection_En extends Core_Inflection
 {
@@ -128,15 +128,15 @@ class Core_Inflection_En extends Core_Inflection
 		'rice' => 'rice',
 
 		// Aggregate Nouns
-		'accomodations' => 'accomodations',
+		//'accomodations' => 'accomodations',
 		'bread' => 'bread',
 		'amends' => 'amends',
 		'tea' => 'tea',
-		'archives' => 'archives',
+		//'archives' => 'archives',
 		'cheese' => 'cheese',
 		'bowels' => 'bowels',
 		'jam' => 'jam',
-		'communications' => 'communications',
+		//'communications' => 'communications',
 		'soup' => 'soup',
 		'congratulations' => 'congratulations',
 		'soap' => 'soap',
@@ -149,7 +149,7 @@ class Core_Inflection_En extends Core_Inflection
 		'water' => 'water',
 		'goods' => 'goods',
 		'information' => 'information',
-		'advice' => 'advice',
+		//'advice' => 'advice',
 		'knowledge' => 'knowledge',
 		'furniture' => 'furniture',
 		'news' => 'news',

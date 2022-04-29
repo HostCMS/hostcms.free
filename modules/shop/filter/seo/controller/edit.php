@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -21,6 +21,8 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 	public function setObject($object)
 	{
 		$modelName = $object->getModelName();
+		
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		switch ($modelName)
 		{
@@ -28,7 +30,8 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				if (!$object->id)
 				{
 					$object->shop_id = Core_Array::getGet('shop_id');
-					$object->shop_group_id = Core_Array::getGet('shop_group_id', 0);
+					$object->shop_group_id = Core_Array::getGet('shop_group_id', 0, 'int');
+					$object->shop_filter_seo_dir_id = Core_Array::getGet('shop_filter_seo_dir_id', 0, 'int');
 				}
 
 				parent::setObject($object);
@@ -105,10 +108,10 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				ob_start();
 				?>
 				<div class="form-group col-xs-12">
-					<a class="btn btn-sky" onclick="$('#conditionsModal').modal('show')"><i class="fa fa-plus"></i> <?php echo Core::_('Shop_Filter_Seo.condition')?></a>
+					<a class="btn btn-sky" onclick="$('#<?php echo $windowId?>-conditionsModal').modal('show')"><i class="fa fa-plus"></i> <?php echo Core::_('Shop_Filter_Seo.condition')?></a>
 				</div>
 
-				<div class="modal fade" id="conditionsModal" tabindex="-1" role="dialog" aria-labelledby="conditionsModalLabel">
+				<div class="modal fade" id="<?php echo $windowId?>-conditionsModal" tabindex="-1" role="dialog" aria-labelledby="conditionsModalLabel">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
@@ -123,7 +126,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 								</div>
 							</div>
 							<div class="modal-footer">
-								<button type="button" class="btn btn-success" onclick="$.applySeoFilterConditions()"><?php echo Core::_('Shop_Filter_Seo.add')?></button>
+								<button type="button" class="btn btn-success" onclick="$.applySeoFilterConditions($('#<?php echo $windowId?>-conditionsModal'))"><?php echo Core::_('Shop_Filter_Seo.add')?></button>
 							</div>
 						</div>
 					</div>
@@ -131,28 +134,29 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 
 				<script>
 				$(function() {
-					$('#conditionsModal').on('show.bs.modal', function () {
-						var shop_group_id = $(':input[name = "shop_group_id"]').val(),
-							shop_id = $('input[name = "shop_id"]').val();
+					$('#<?php echo $windowId?>-conditionsModal').on('show.bs.modal', function () {
+						var shop_group_id = $('#<?php echo $windowId?> :input[name = "shop_group_id"]').val(),
+							shop_id = $('#<?php echo $windowId?> input[name = "shop_id"]').val();
 
 						$.ajax({
 							url: '/admin/shop/filter/seo/index.php',
 							data: { 'load_properties': 1, 'shop_group_id': shop_group_id, 'shop_id': shop_id },
 							dataType: 'json',
 							type: 'POST',
+							context: $(this),
 							success: function(result){
+								var $this = $(this);
 								if (result.html.length)
 								{
-									$('.property-list').html(result.html);
+									$this.find('.property-list').html(result.html);
 
 									// first select
-									$('.property-list .property-select').change();
+									$this.find('.property-list .property-select').change();
 								}
 
-								if (result.count == 0)
-								{
-									$('#conditionsModal').find('button.btn-success').remove();
-								}
+								result.count == 0
+									? $this.find('button.btn-success').hide()
+									: $this.find('button.btn-success').show();
 							}
 						});
 					});
@@ -561,7 +565,7 @@ class Shop_Filter_Seo_Controller_Edit extends Admin_Form_Action_Controller_Type_
 				->value($this->_object->$fieldName)
 				->type('hidden');
 
-			$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+			$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 				->value("
 					$('[name = shop_group_name]').autocomplete({
 						source: function(request, response) {

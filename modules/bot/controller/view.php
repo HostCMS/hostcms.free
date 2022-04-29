@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Bot
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Bot_Controller_View extends Admin_Form_Controller_View
 {
@@ -19,6 +19,7 @@ class Bot_Controller_View extends Admin_Form_Controller_View
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
 		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
+			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
 		$oUser = Core_Auth::getCurrentUser();

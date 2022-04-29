@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Core
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Core_ObjectWatcher
 {
@@ -79,14 +79,15 @@ class Core_ObjectWatcher
 	static public function add(Core_Entity $model)
 	{
 		$instance = self::instance();
+		$databaseDriver = Core_ORM::getDatabaseDriver();
 
 		// Delete old items
-		if (/*rand(0, self::$_maxObjects) == 0 && */count($instance->_cache) > self::$_maxObjects)
+		if (/*rand(0, self::$_maxObjects) == 0 && */isset($instance->_cache[$databaseDriver]) && count($instance->_cache[$databaseDriver]) > self::$_maxObjects)
 		{
 			$instance->reduce();
 		}
 
-		$instance->_cache[$instance->getKey($model)] = $model;
+		$instance->_cache[$databaseDriver][$instance->getKey($model)] = $model;
 	}
 
 	/**
@@ -94,10 +95,15 @@ class Core_ObjectWatcher
 	 */
 	public function reduce()
 	{
-		$this->_cache = array_slice($this->_cache, floor(self::$_maxObjects / 4));
+		$databaseDriver = Core_ORM::getDatabaseDriver();
+		
+		if (isset($this->_cache[$databaseDriver]))
+		{
+			$this->_cache[$databaseDriver] = array_slice($this->_cache[$databaseDriver], floor(self::$_maxObjects / 4));
 
-		// Forces collection of any existing garbage cycles
-		function_exists('gc_collect_cycles') && gc_collect_cycles();
+			// Forces collection of any existing garbage cycles
+			function_exists('gc_collect_cycles') && gc_collect_cycles();
+		}
 	}
 
 	/**
@@ -120,12 +126,13 @@ class Core_ObjectWatcher
 	static public function delete(Core_Entity $model)
 	{
 		$instance = self::instance();
+		$databaseDriver = Core_ORM::getDatabaseDriver();
 
 		$key = $instance->getKey($model);
 
-		if (array_key_exists($key, $instance->_cache))
+		if (isset($instance->_cache[$databaseDriver]) && array_key_exists($key, $instance->_cache[$databaseDriver]))
 		{
-			unset($instance->_cache[$key]);
+			unset($instance->_cache[$databaseDriver][$key]);
 		}
 	}
 
@@ -138,11 +145,12 @@ class Core_ObjectWatcher
 	static public function exists($classname, $primaryKey)
 	{
 		$instance = self::instance();
+		$databaseDriver = Core_ORM::getDatabaseDriver();
 
 		$key = $classname . '.' . $primaryKey;
 
-		return isset($instance->_cache[$key])
-			? $instance->_cache[$key]
+		return isset($instance->_cache[$databaseDriver][$key])
+			? $instance->_cache[$databaseDriver][$key]
 			: NULL;
 	}
 }

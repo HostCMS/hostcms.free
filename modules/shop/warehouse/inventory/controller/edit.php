@@ -119,7 +119,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
 			->value('$("#' . $windowId . ' #user_id").selectUser({
 					placeholder: "",
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					dropdownParent: $("#' . $windowId . '")
 				});'
 			);
@@ -256,7 +256,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 				)
 		);
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: {$oShop->id}, price_mode: 'item', shop_currency_id: 0, datetime: '{$this->_object->datetime}' }, function(event, ui) {
 					var warehouseId = $('#{$windowId} select.select-warehouse').val(),
 						foundRest = ui.item.aWarehouses.find(x => x.id === warehouseId);
@@ -395,7 +395,7 @@ class Shop_Warehouse_Inventory_Controller_Edit extends Admin_Form_Action_Control
 				$script .= "$(\"#{$windowId} input[name='shop_item_quantity\\[\\]']\").eq(0).remove();";
 			}
 
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value($script)
 				->execute();
 			$this->_Admin_Form_Controller->addMessage(ob_get_clean());

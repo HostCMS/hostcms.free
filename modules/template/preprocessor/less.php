@@ -5,11 +5,11 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 /**
  * LESS Preprocessor
  *
- * @package HostCMS 6
+ * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Preprocessor_Less extends Template_Preprocessor
 {

@@ -574,7 +574,7 @@ class Shop_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 							$(function(){
 								$("#' . $windowId . ' .shop-notification-subscribers").select2({
 									dropdownParent: $("#' . $windowId . '"),
-									language: "' . Core_i18n::instance()->getLng() . '",
+									language: "' . Core_I18n::instance()->getLng() . '",
 									placeholder: "' . Core::_('Shop.type_subscriber') . '",
 									allowClear: true,
 									templateResult: $.templateResultItemResponsibleEmployees,

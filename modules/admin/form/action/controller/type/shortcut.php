@@ -10,7 +10,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Controller
 {
@@ -62,7 +62,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 
 			$newWindowId = 'Shortcut_' . time();
 
-			$oCore_Html_Entity_Form = Core::factory('Core_Html_Entity_Form')
+			$oCore_Html_Entity_Form = Core_Html_Entity::factory('Form')
 				->action($this->_Admin_Form_Controller->getPath())
 				->method('post');
 
@@ -70,7 +70,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 			// Select на всплывающем окне должен быть найден через ID нового окна, а не id_content
 			$window_Admin_Form_Controller->window($newWindowId);
 
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->id($newWindowId)
 				->add($oCore_Html_Entity_Form);
 
@@ -122,7 +122,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 					$entity_id = $oShop->id;
 					$path = '/admin/shop/item/index.php?autocomplete=1&show_shortcut_groups=1';
 				}
-				elseif(Core_Array::getGet('informationsystem_id'))
+				elseif (Core_Array::getGet('informationsystem_id'))
 				{
 					$oInformationsystem = Core_Entity::factory('Informationsystem', Core_Array::getGet('informationsystem_id', 0));
 					$entity_id = $oInformationsystem->id;
@@ -131,7 +131,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 
 				if ($entity_id)
 				{
-					$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+					$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 					->value("
 						$('[name = destinationName]').autocomplete({
 							source: function(request, response) {
@@ -187,7 +187,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 				foreach ($checkedItems as $key => $value)
 				{
 					$oCore_Html_Entity_Form->add(
-						Core::factory('Core_Html_Entity_Input')
+						Core_Html_Entity::factory('Input')
 							->name('hostcms[checked][' . $datasetKey . '][' . $key . ']')
 							->value(1)
 							->type('hidden')
@@ -220,7 +220,7 @@ class Admin_Form_Action_Controller_Type_Shortcut extends Admin_Form_Action_Contr
 
 			ob_start();
 
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->value("$(function() {
 				$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 140, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				->execute();

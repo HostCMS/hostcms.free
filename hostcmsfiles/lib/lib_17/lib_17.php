@@ -982,7 +982,7 @@ elseif ($Forum_Controller_Show->topic)
 	}
 
 	// Показ формы редактирования сообщения
-	if (($show_form_edit_post = $Forum_Controller_Show->editPost /*($forum_topic_post_id = Core_Array::getRequest('edit_post_id', 0))*/
+	if (($show_form_edit_post = $Forum_Controller_Show->editPost /*($forum_topic_post_id = Core_Array::getRequest('edit_post_id', 0, 'int'))*/
 		&& ($oForum_Topic_Post = Core_Entity::factory('Forum_Topic_Post', $Forum_Controller_Show->editPost))
 		&& $oForum_Topic_Post->Forum_Topic->id == $Forum_Controller_Show->topic)
 		&& $oForum_Topic_Post->hasEditPermission($oSiteuser)

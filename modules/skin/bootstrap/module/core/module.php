@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Skin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Module_Core_Module extends Core_Module
 {
@@ -649,6 +649,15 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 
 		ob_start();
 		?><div class="scroll-sites">
+			<?php
+			if (count($aSites) > 5)
+			{
+				?><div class="filter-sites">
+					<input type="text" class="filter-sites-input" placeholder="<?php echo Core::_('Site.filter_placeholder')?>">
+					<i class="fa fa-search"></i>
+				</div><?php
+			}
+			?>
 			<ul>
 			<?php
 			$aSiteColors = array(
@@ -699,6 +708,16 @@ class Skin_Bootstrap_Module_Core_Module extends Core_Module
 			?>
 			</ul>
 		</div>
+		<script>
+			$(function(){
+				$('.filter-sites-input').on('input', function(){
+					var txt = $(this).val();
+
+					$('div.scroll-sites ul > *:not(:icontains("' + txt + '"))').hide();
+					$('div.scroll-sites ul > *:icontains("'+ txt +'")').show();
+				});
+			});
+		</script>
 
 		<?php
 		$aJson['content'] = ob_get_clean();

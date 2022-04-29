@@ -44,7 +44,7 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 	protected function _getFoundRows()
 	{
 		// Warning
-		if (Core_Array::getRequest('debug'))
+		if (!is_null(Core_Array::getRequest('debug')))
 		{
 			echo '<p><b>Query FOUND_ROWS</b>.</p>';
 		}
@@ -54,12 +54,14 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 
 	protected function _loadItems()
 	{
-		$oQB = Core_QueryBuilder::select(array(2, 'type'), 'id', 'datetime')
+		$oQB = Core_QueryBuilder::select(array(2, 'type'), 'crm_notes.id', 'datetime')
 			->sqlCalcFoundRows()
-			->from('crm_project_notes')
-			->where('crm_project_notes.crm_project_id', '=', $this->_crm_project->id)
-			->where('crm_project_notes.deleted', '=', 0)
+			->from('crm_notes')
+			->leftJoin('crm_project_crm_notes', 'crm_notes.id', '=', 'crm_project_crm_notes.crm_note_id')
+			->where('crm_project_crm_notes.crm_project_id', '=', $this->_crm_project->id)
+			->where('crm_notes.deleted', '=', 0)
 			->unionOrderBy('datetime', 'DESC')
+			->unionOrderBy('id', 'DESC')
 			->unionLimit($this->_limit)
 			->unionOffset($this->_offset);
 
@@ -83,6 +85,12 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 			$oQB->union($deals);
 		}
 
+		$attachments = Core_QueryBuilder::select(array(3, 'type'), 'id', 'datetime')
+			->from('crm_project_attachments')
+			->where('crm_project_attachments.crm_project_id', '=', $this->_crm_project->id);
+
+		$oQB->union($attachments);
+
 		$queryBuilder = $oQB->execute();
 
 		$this->_objects = $queryBuilder->asObject()->result();
@@ -91,7 +99,7 @@ class Crm_Project_Entity_Dataset extends Admin_Form_Dataset
 		$this->_count = $this->_getFoundRows();
 
 		// Warning
-		if (Core_Array::getRequest('debug'))
+		if (!is_null(Core_Array::getRequest('debug')))
 		{
 			echo '<p><b>Query</b>: sqlCalcFoundRows before FOUND_ROWS()</p>';
 		}

@@ -20,7 +20,9 @@ if (typeof jQuery === 'undefined') {
 
 
 (function ($) {
+		
     var TimeSlider = function(element, options) {
+
         this.$element = null;
         this.$ruler = null;
         this.$prompts = null;
@@ -70,6 +72,7 @@ if (typeof jQuery === 'undefined') {
     };
 
     TimeSlider.prototype.init = function(element, options) {
+
         this.$element = $(element);
         this.$element.append('<div class="graduation-title" style="display:none">init</div>');
         this.gt_height = this.$element.find('.graduation-title').height();
@@ -335,7 +338,9 @@ if (typeof jQuery === 'undefined') {
         var date;
         var caret_class;
         var left;
+
         for (var i = -4; i <= num_steps; i++) {
+
             caret_class = '';
             date = new Date(minute_caret);
             left = i * px_per_step + this.px_per_ms * ms_offset;
@@ -353,6 +358,7 @@ if (typeof jQuery === 'undefined') {
             );
             minute_caret += min_step * 60 * 1000;
         }
+
     };
 
     /* Start new or stop current timecell */
@@ -1105,6 +1111,7 @@ if (typeof jQuery === 'undefined') {
             var _this = $(this);
             var data = _this.data('timeslider');
             if (! data) {
+
                 _this.data('timeslider', new TimeSlider(_this, options));
             }
             else {

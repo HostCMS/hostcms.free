@@ -139,4 +139,6 @@ return array(
 	'female' => 'Жіночий',
 
 	'filter_enter_title' => 'Введіть назву фільтра',
+
+	'upload_file' => 'Завантажити файл'
 );

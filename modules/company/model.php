@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Company
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Model extends Core_Entity
 {
@@ -49,13 +49,19 @@ class Company_Model extends Core_Entity
 		'directory_address' => array('through' => 'company_directory_address', 'foreign_key' => 'company_id'),
 		'company_directory_website' => array(),
 		'directory_website' => array('through' => 'company_directory_website', 'foreign_key' => 'company_id'),
+		'company_directory_social' => array(),
+		'directory_social' => array('through' => 'company_directory_social', 'foreign_key' => 'company_id'),
+		'company_directory_messenger' => array(),
+		'directory_messenger' => array('through' => 'company_directory_messenger', 'foreign_key' => 'company_id'),
 		'user' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
 		'company_activity' => array(),
 		'company_location' => array(),
+		'dms_case_archive' => array(),
+		'dms_case_destruction' => array(),
+		'dms_document' => array(),
 		'dms_nomenclature' => array(),
 		'dms_nomenclature_dir' => array(),
-		'dms_case_archive' => array(),
 	);
 
 	/**
@@ -477,7 +483,7 @@ class Company_Model extends Core_Entity
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Company_Department_Post_Users->getCount(FALSE, 'user_id', TRUE);
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->title(Core::_('Company_Department.caption_block_users'))
 			->value('<i class="fa fa-user"></i> ' . $count)
@@ -486,7 +492,7 @@ class Company_Model extends Core_Entity
 		$oCompany_Site = $this->Company_Sites->getBySite_id(CURRENT_SITE);
 
 		!is_null($oCompany_Site) &&
-			Core::factory('Core_Html_Entity_Span')
+			Core_Html_Entity::factory('Span')
 				->value('<i class="fa fa-check-circle-o palegreen"></i>')
 				->title(Core::_('Company.sites'))
 				->execute();
@@ -501,7 +507,7 @@ class Company_Model extends Core_Entity
 	public function structureBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Company_Departments->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-azure white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -517,7 +523,7 @@ class Company_Model extends Core_Entity
 	public function activityBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Company_Activities->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-darkorange white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
@@ -533,11 +539,126 @@ class Company_Model extends Core_Entity
 	public function locationBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->Company_Locations->getCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-ico badge-yellow white')
 			->value($count < 100 ? $count : '∞')
 			->title($count)
 			->execute();
+	}
+
+	public function imgBackend()
+	{
+		return $this->image != ''
+			? '<img width="25" class="company-image" src="' . $this->getImageHref() . '"/>'
+			: '';
+	}
+
+	/**
+	 * Get company href
+	 * @return string
+	 */
+	public function getHref()
+	{
+		$aConfig = Core_Config::instance()->get('company_config', array()) + array(
+			'uploaddir' => 'upload/'
+		);
+
+		return $aConfig['uploaddir'] . 'company_' . intval($this->id) . '/';
+	}
+
+	/**
+	 * Get company path include CMS_FOLDER
+	 * @return string
+	 */
+	public function getPath()
+	{
+		return CMS_FOLDER . $this->getHref();
+	}
+
+	/**
+	 * Get image file path
+	 * @return string|NULL
+	 */
+	public function getImageFilePath()
+	{
+		return $this->image != ''
+			? $this->getPath() . $this->image
+			: NULL;
+	}
+
+	/**
+	 * Get image href or default user icon
+	 * @return string
+	 */
+	public function getImageHref()
+	{
+		return $this->image
+			? $this->getImageFileHref()
+			: '/modules/skin/bootstrap/img/default_user.png';
+	}
+
+	/**
+	 * Get image href
+	 * @return string
+	 */
+	public function getImageFileHref()
+	{
+		return '/' . $this->getHref() . $this->image;
+	}
+
+	/**
+	 * Create files directory
+	 * @return self
+	 */
+	public function createDir()
+	{
+		clearstatcache();
+
+		if (!is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::mkdir($this->getPath(), CHMOD, TRUE);
+			} catch (Exception $e) {}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Delete image file
+	 * @return self
+	 */
+	public function deleteImageFile()
+	{
+		try
+		{
+			is_file($this->getImageFilePath()) && Core_File::delete($this->getImageFilePath());
+		} catch (Exception $e) {}
+
+		$this->image = '';
+		$this->save();
+
+		return $this;
+	}
+
+	/**
+	 * Delete person directory
+	 * @return self
+	 */
+	public function deleteDir()
+	{
+		$this->deleteImageFile();
+
+		if (is_dir($this->getPath()))
+		{
+			try
+			{
+				Core_File::deleteDir($this->getPath());
+			} catch (Exception $e) {}
+		}
+
+		return $this;
 	}
 
 	/**
@@ -567,6 +688,20 @@ class Company_Model extends Core_Entity
 		$this->Directory_Emails->deleteAll(FALSE);
 		$this->Directory_Phones->deleteAll(FALSE);
 		$this->Directory_Websites->deleteAll(FALSE);
+		$this->Directory_Socials->deleteAll(FALSE);
+		$this->Directory_Messengers->deleteAll(FALSE);
+
+		if (Core::moduleIsActive('dms'))
+		{
+			$this->Dms_Case_Archives->deleteAll(FALSE);
+			$this->Dms_Case_Destructions->deleteAll(FALSE);
+			$this->Dms_Documents->deleteAll(FALSE);
+			$this->Dms_Nomenclatures->deleteAll(FALSE);
+			$this->Dms_Nomenclature_Dirs->deleteAll(FALSE);
+		}
+
+		// Удаляем директорию
+		$this->deleteDir();
 
 		return parent::delete($primaryKey);
 	}
@@ -609,12 +744,16 @@ class Company_Model extends Core_Entity
 		$aDirectory_Phones = $this->Directory_Phones->findAll(FALSE);
 		$aDirectory_Websites = $this->Directory_Websites->findAll(FALSE);
 		$aDirectory_Emails = $this->Directory_Emails->findAll(FALSE);
+		$aDirectory_Socials = $this->Directory_Socials->findAll(FALSE);
+		$aDirectory_Messengers = $this->Directory_Messengers->findAll(FALSE);
 
 		$this
 			->addEntities($aDirectory_Addresses)
 			->addEntities($aDirectory_Phones)
 			->addEntities($aDirectory_Emails)
-			->addEntities($aDirectory_Websites);
+			->addEntities($aDirectory_Websites)
+			->addEntities($aDirectory_Socials)
+			->addEntities($aDirectory_Messengers);
 
 		return $this;
 	}
@@ -717,17 +856,26 @@ class Company_Model extends Core_Entity
 	 */
 	public function checkBackendAccess($actionName, $oUser)
 	{
-		$aUser_Sites = $oUser->getSites();
+		// Create Company
+		if (!$this->id)
+		{
+			return TRUE;
+		}
 
 		$aSites = $this->Sites->findAll();
 
-		foreach ($aSites as $oSite)
+		if (count($aSites))
 		{
-			foreach ($aUser_Sites as $oUser_Site)
+			$aUser_Sites = $oUser->getSites();
+
+			foreach ($aSites as $oSite)
 			{
-				if ($oSite->id == $oUser_Site->id)
+				foreach ($aUser_Sites as $oUser_Site)
 				{
-					return TRUE;
+					if ($oSite->id == $oUser_Site->id)
+					{
+						return TRUE;
+					}
 				}
 			}
 		}

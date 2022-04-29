@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_Form_Entity_Radiogroup
 {
@@ -21,7 +21,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 		// Add label propery
 		$this->_allowedProperties[] = 'colors';
 
-		$this->_skipProperies[] = 'colors';
+		$this->_skipProperties[] = 'colors';
 
 		parent::__construct();
 
@@ -73,7 +73,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Radiogroup extends Skin_Default_Admin_For
 			?>
 
 			<label class="checkbox-inline">
-			<input <?php echo implode(' ', $tmpAttr) ?> />
+			<input <?php echo implode(' ', $tmpAttr)?> />
 			<span class="btn btn-labeled <?php echo htmlspecialchars($i < count($aClassBtnColors) ? $aClassBtnColors[$i++] : $aClassBtnColors[$i = 0])?>">
 			<?php
 			// ico к пункту

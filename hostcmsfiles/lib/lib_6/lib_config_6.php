@@ -36,6 +36,7 @@ $Shop_Controller_Show
 	//->groupsProperties(TRUE)
 	// Фильтровать по ярлыкам
 	->filterShortcuts(TRUE)
+	->filterStrictMode(TRUE)
 	// Только доступные элементы списков в фильтре
 	//->itemsPropertiesListJustAvailable(TRUE)
 	// ->barcodes(TRUE)
@@ -52,7 +53,7 @@ if (count($Shop_Controller_Show->getFilterProperties()) || count($Shop_Controlle
 }
 
 // Быстрый фильтр
-if (Core_Array::getRequest('fast_filter'))
+if (!is_null(Core_Array::getRequest('fast_filter')))
 {
 	$aJson = array();
 
@@ -71,7 +72,7 @@ if (Core_Array::getRequest('fast_filter'))
 }
 
 // Сравнение товаров
-if (Core_Array::getRequest('compare'))
+if (!is_null(Core_Array::getRequest('compare')))
 {
 	$shop_item_id = Core_Array::getRequest('compare', 0, 'int');
 
@@ -109,7 +110,7 @@ if (Core_Array::getRequest('compare'))
 }
 
 // Избранное
-if (Core_Array::getRequest('favorite'))
+if (!is_null(Core_Array::getRequest('favorite')))
 {
 	$shop_item_id = Core_Array::getRequest('favorite', 0, 'int');
 

@@ -4,9 +4,9 @@
  *
  * @package HostCMS
  * @subpackage Shop
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2019 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'model_name' => 'Purchase discounts',
@@ -41,4 +41,9 @@ return array(
 	'changeStatus_success' => "Warehouse updated successfully",
 	'delete_success' => 'Item deleted successfully!',
 	'undelete_success' => 'Item restored successfully!',
+	'badge_coupon_count' => 'Number of coupons associated with the discount',
+	'shop_purchase_discount_dir_id' => 'Section',
+	'sorting' => 'Sort order',
+	'apply_success' => "Information changed successfully.",
+	'copy_success' => "Item copied successfully!",
 );

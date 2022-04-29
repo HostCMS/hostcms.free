@@ -189,7 +189,6 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 			$oSiteuserSelect = Admin_Form_Entity::factory('Select')
 				->caption(Core::_('Shop_Order.siteuser_id'))
-				->id('object_siteuser_id')
 				->options($options)
 				->name('siteuser_id')
 				->class('siteuser-tag')
@@ -369,7 +368,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				<thead>
 					<tr>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_number') . '</th>
-						<th class="hidden-xs hidden-sm"></th>
+						<th scope="col" class="hidden-xs hidden-sm"></th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_name') . '</th>
 						<th scope="col" class="hidden-xs hidden-sm"></th>
 						<th scope="col">' . Core::_('Shop_Order.shop_order_item_quantity') . '</th>
@@ -378,6 +377,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						<th scope="col" class="hidden-xs hidden-sm">' . Core::_('Shop_Order.shop_order_item_type') . '</th>
 						<th scope="col" class="hidden-xs">' . Core::_('Shop_Order.shop_order_item_marking') . '</th>
 						<th scope="col" class="hidden-xs hidden-sm hidden-md">' . Core::_('Shop_Order.shop_order_item_warehouse') . '</th>
+						<th scope="col" class="hidden-xs hidden-sm">' . Core::_('Shop_Order_Item.shop_order_item_status_id') . '</th>
 						<th scope="col" class="hidden-xs hidden-sm hidden-md">' . Core::_('Shop_Order.shop_order_item_id') . '</th>
 						<th scope="col"> </th>
 					</tr>
@@ -404,6 +404,10 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->divAttr(array('class' => ''))
 			->class('form-control');
 
+		$oItemsStatusSelect = Admin_Form_Entity::factory('Select')
+			->divAttr(array('class' => ''))
+			->class('form-control');
+
 		$aShop_Warehouses = $this->_object->Shop->Shop_Warehouses->findAll(FALSE);
 
 		// Товары
@@ -411,7 +415,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			? $this->_object->Shop_Order_Items->findAll(FALSE)
 			: array();
 
-		$oShop_Currency = $this->_object->Shop_Currency;
+		// $oShop_Currency = $this->_object->Shop_Currency;
 
 		foreach ($aShop_Order_Items as $key => $oShop_Order_Item)
 		{
@@ -450,6 +454,15 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				->execute();
 			$warehouse_select = ob_get_clean();
 
+			ob_start();
+			$oItemsStatusSelect
+				->id('shop_order_item_status_id')
+				->options($this->_fillShopOrderItemStatuses())
+				->name('shop_order_item_status_' . $oShop_Order_Item->id)
+				->value($oShop_Order_Item->shop_order_item_status_id)
+				->execute();
+			$status_select = ob_get_clean();
+
 			$smallImage = '';
 
 			if ($oShop_Order_Item->type == 0 && $oShop_Order_Item->Shop_Item->image_small)
@@ -457,11 +470,24 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$smallImage = '<img class="backend-thumbnail" src="' . htmlspecialchars($oShop_Order_Item->Shop_Item->getSmallFileHref()) . '" />';
 			}
 
+			$link = '';
+
+			if ($oShop_Order_Item->type == 0)
+			{
+				$sShopItemPath = '/admin/shop/item/index.php';
+				$iShopItemId = intval($oShop_Order_Item->shop_item_id);
+
+				$link = sprintf(
+					'<a href="%s" target="_blank"><i class="fa fa-external-link"></i></a>',
+					htmlspecialchars($this->_Admin_Form_Controller->getAdminActionLoadHref($sShopItemPath, 'edit', NULL, 1, $iShopItemId))
+				);
+			}
+
 			$itemTable .= '
 				<tr id="' . $oShop_Order_Item->id . '">
 					<td class="index">' . ($key + 1) . '</td>
 					<td class="hidden-xs hidden-sm">' . $smallImage . '</td>
-					<td><input class="form-control" name="shop_order_item_name_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->name) . '" /></td>
+					<td class="shop-order-item-name"><input class="form-control" name="shop_order_item_name_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->name) . '"/>' . $link . '</td>
 					<td width="25" class="hidden-xs hidden-sm">' . $oShop_Order_Item->showCodesBackend(NULL, $this->_Admin_Form_Controller) . '</i></td>
 					<td width="5%"><input class="form-control" name="shop_order_item_quantity_' . $oShop_Order_Item->id . '" value="' . Core_Str::hideZeros($oShop_Order_Item->quantity) . '" /></td>
 					<td width="10%"><input class="form-control" name="shop_order_item_price_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->price . '" /></td>
@@ -469,6 +495,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<td width="10%" class="hidden-xs hidden-sm">' . $type_select . '</td>
 					<td width="10%" class="hidden-xs"><input class="form-control" name="shop_order_item_marking_' . $oShop_Order_Item->id . '" value="' . htmlspecialchars($oShop_Order_Item->marking) . '" /></td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md">' . $warehouse_select . '</td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md">' . ($oShop_Order_Item->type == 0 ? $status_select : '') . '</td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md"><input readonly="readonly" class="form-control" name="shop_order_item_id_' . $oShop_Order_Item->id . '" value="' . $oShop_Order_Item->shop_item_id . '" /></td>
 					<td width="22"><a class="delete-associated-item" onclick="res = confirm(\'' . Core::_('Shop_Warehouse_Inventory.delete_dialog') . '\'); if (res) { $(this).parents(\'tr\').remove(); recountPosition() } return res;"><i class="fa fa-times-circle darkorange"></i></a></td>
 				</tr>
@@ -489,6 +516,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					<td width="5%" class="hidden-xs hidden-sm"></td>
 					<td width="10%" class="hidden-xs hidden-sm"></td>
 					<td width="10%" class="hidden-xs"></td>
+					<td width="10%" class="hidden-xs hidden-sm hidden-md"></td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md"></td>
 					<td width="10%" class="hidden-xs hidden-sm hidden-md"></td>
 					<td width="22"></td>
@@ -534,7 +562,13 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->execute();
 		$warehouse_select = ob_get_clean();
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+		ob_start();
+		$oItemsStatusSelect
+			->name('shop_order_item_status[]')
+			->execute();
+		$status_select = ob_get_clean();
+
+		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("
 				$('#{$windowId} .add-item-autocomplete').parents('.input-group').removeClass('input-group');
 
@@ -595,9 +629,10 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 						break;
 					}
 
-					var shop_item_id = (typeof ui.item.id !== 'undefined' && ui.item.type == 'item' ? ui.item.id : 0);
+					var shop_item_id = (typeof ui.item.id !== 'undefined' && ui.item.type == 'item' ? ui.item.id : 0),
+						edit_link = (typeof ui.item.link !== 'undefined' && ui.item.type == 'item' ? ui.item.link : '');
 
-					appendRow(ui.item.id, ui.item.label, '1.00', price, ui.item.rate, ui.item.marking, shop_item_id, ui.item.image_small);
+					appendRow(ui.item.id, ui.item.label, '1.00', price, ui.item.rate, ui.item.marking, shop_item_id, ui.item.image_small, edit_link);
 
 					if (ui.item.type == 'delivery')
 					{
@@ -616,7 +651,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					if (e.which == 13) {
 						e.preventDefault();
 
-						appendRow(0, $(this).val(), '1.00', '0.00', 0, '', 0, '');
+						appendRow(0, $(this).val(), '1.00', '0.00', 0, '', 0, '', '');
 
 						$(this).val('');
 
@@ -636,43 +671,24 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 					$.recountTotal();
 				}
 
-				/*function recountTotal()
+				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id, image_small, href)
 				{
-					var quantity = 0,
-						amount = 0;
+					var position = $('#{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child)').length + 1,
+						img = image_small != ''
+							? '<img class=\"backend-thumbnail\" src=\"' + image_small + '\" />'
+							: '',
+						link = '',
+						status = '';
 
-					$('.shop-item-table.shop-order-items > tbody tr:not(:last-child) input[name ^= \'shop_order_item_quantity\']').each(function() {
-						quantity += parseFloat($(this).val());
-					});
+					if (href != '')
+					{
+						link = '<a href=\"' + href + '\" target=\"_blank\"><i class=\"fa fa-external-link\"></i></a>';
 
-					$('td.total_quantity').text(quantity);
-
-					// Amount
-					$('.shop-item-table.shop-order-items > tbody tr:not(:last-child)').each(function() {
-						var price = parseFloat($(this).find('input[name ^= \'shop_order_item_price\']').val()),
-							quantity = parseFloat($(this).find('input[name ^= \'shop_order_item_quantity\']').val()),
-							rate_value = parseInt($(this).find('input[name ^= \'shop_order_item_rate\']').val()),
-							sum = price * quantity,
-							rate = 0;
-
-						if (rate_value > 0)
-						{
-							rate = sum * rate_value / 100;
-							sum += rate;
-						}
-
-						amount += sum;
-					});
-
-					$('td.total_amount').text($.mathRound(amount, 2));
-				}*/
-
-				function appendRow(item_id, name, quantity, price, rate, marking, shop_item_id, image_small)
-				{
-					var position = $('#{$windowId} .shop-item-table.shop-order-items > tbody tr:not(:last-child)').length + 1;
+						status = '{$status_select}';
+					}
 
 					$('#{$windowId} .shop-item-table.shop-order-items > tbody tr:last-child').before(
-						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td><img class=\"backend-thumbnail\" src=\"' + image_small + '\" /></td><td><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/></td><td></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
+						$('<tr data-item-id=\"' + item_id + '\"><td class=\"index\">' + position + '</td><td></td>' + img + '<td class=\"shop-order-item-name\"><input class=\"form-control\" onsubmit=\"$(\'.add-item-autocomplete\').focus();return false;\" name=\"shop_order_item_name[]\" value=\"' + $.escapeHtml(name) + '\"/>' + link + '</td><td></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_quantity[]\" value=\"' + quantity + '\"/></td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_price[]\" value=\"' + price + '\"/></td><td width=\"5%\"><input class=\"form-control\" name=\"shop_order_item_rate[]\" value=\"' + rate + '\"/></td><td width=\"10%\">{$type_select}</td><td width=\"10%\"><input class=\"form-control\" name=\"shop_order_item_marking[]\" value=\"' + $.escapeHtml(marking) + '\"/></td><td width=\"10%\">{$warehouse_select}</td><td width=\"10%\">' + status + '</td><td width=\"10%\"><input readonly=\"readonly\" class=\"form-control\" name=\"shop_order_item_id[]\" value=\"' + shop_item_id + '\"/></td><td width=\"22\"><a class=\"delete-associated-item\" onclick=\"$(this).parents(\'tr\').remove(); recountPosition()\"><i class=\"fa fa-times-circle darkorange\"></i></a></td></tr>')
 					);
 				}
 
@@ -973,16 +989,16 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 
 				$oAdmin_Form_Entity_Div_Print_Form_Buttons
 					->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->class('btn btn-labeled ' . $aColors[$index])
 							->href($this->_Admin_Form_Controller->getAdminLoadHref("/admin/shop/order/index.php", NULL, NULL, $additionalParams))
 							->target('_blank')
 							->add(
-								Core::factory('Core_Html_Entity_I')
+								Core_Html_Entity::factory('I')
 									->class("btn-label fa fa-print")
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Code')
+								Core_Html_Entity::factory('Code')
 									->value(htmlspecialchars($oShop_Print_Form->name))
 							)
 					);
@@ -1262,6 +1278,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 				$oShop_Order_Item->type = intval(Core_Array::getPost('shop_order_item_type_' . $oShop_Order_Item->id));
 				$oShop_Order_Item->marking = trim(Core_Array::getPost('shop_order_item_marking_' . $oShop_Order_Item->id));
 				$oShop_Order_Item->shop_warehouse_id = $shop_warehouse_id;
+				$oShop_Order_Item->shop_order_item_status_id = intval(Core_Array::getPost('shop_order_item_status_' . $oShop_Order_Item->id));
 				$oShop_Order_Item->save();
 			}
 			else
@@ -1280,6 +1297,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		$aNew_Shop_Order_Items_Marking = Core_Array::getPost('shop_order_item_marking', array());
 		$aNew_Shop_Order_Items_Warehouse = Core_Array::getPost('shop_order_item_warehouse', array());
 		$aNew_Shop_Order_Items_Shop_Item_Id = Core_Array::getPost('shop_order_item_id', array());
+		$aNew_Shop_Order_Items_Shop_Item_Status_Id = Core_Array::getPost('shop_order_item_status', array());
 
 		// Новые товары
 		foreach ($aNew_Shop_Order_Items_Name as $key => $name)
@@ -1302,6 +1320,7 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oShop_Order_Item->rate = Core_Array::get($aNew_Shop_Order_Items_Rate, $key);
 			$oShop_Order_Item->type = intval(Core_Array::get($aNew_Shop_Order_Items_Type, $key));
 			$oShop_Order_Item->marking = trim(Core_Array::get($aNew_Shop_Order_Items_Marking, $key));
+			$oShop_Order_Item->shop_order_item_status_id = intval(Core_Array::get($aNew_Shop_Order_Items_Shop_Item_Status_Id, $key));
 			$oShop_Order_Item->shop_warehouse_id = intval(Core_Array::get($aNew_Shop_Order_Items_Warehouse, $key));
 			$oShop_Order_Item->save();
 
@@ -1426,6 +1445,50 @@ class Shop_Order_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			!$oObject->active && $aReturn[$oObject->id]['attr'] = array(
 				'class' => 'darkgray line-through'
 			);
+		}
+
+		return $aReturn;
+	}
+
+	/**
+	 * Array of Shop_Order_Item_Statuses tree
+	 * @var NULL|array
+	 */
+	protected $_statusesTree = NULL;
+
+	protected function _getStatusesTree($parent_id)
+	{
+		if (is_null($this->_statusesTree))
+		{
+			$this->_statusesTree = array();
+
+			$oShop_Order_Item_Statuses = Core_Entity::factory('Shop_Order_Item_Status')->findAll(FALSE);
+			foreach ($oShop_Order_Item_Statuses as $oShop_Order_Item_Status)
+			{
+				$this->_statusesTree[$oShop_Order_Item_Status->parent_id][] = $oShop_Order_Item_Status;
+			}
+		}
+
+		return isset($this->_statusesTree[$parent_id])
+			? $this->_statusesTree[$parent_id]
+			: array();
+	}
+
+	protected function _fillShopOrderItemStatuses($iParentId = 0, $iLevel = 0)
+	{
+		$iLevel = intval($iLevel);
+
+		$aReturn = array(0 => '...');
+
+		// $oShop_Order_Item_Status_Parent = Core_Entity::factory('Shop_Order_Item_Status', $iParentId);
+
+		// Дочерние элементы
+		$aShop_Order_Item_Statuses = $this->_getStatusesTree($iParentId);
+
+		foreach ($aShop_Order_Item_Statuses as $childrenStatus)
+		{
+			$aReturn[$childrenStatus->id] = array('value' => str_repeat('  ', $iLevel) . $childrenStatus->name);
+			$aReturn += $this->_fillShopOrderItemStatuses($childrenStatus->id, $iLevel + 1);
 		}
 
 		return $aReturn;

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -205,7 +205,7 @@ class Shop_Warehouse_Controller_Edit extends Admin_Form_Action_Controller_Type_E
 			$(function(){
 				$("#' . $windowId . ' .shop-warehouse-tags").select2({
 					dropdownParent: $("#' . $windowId . '"),
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					minimumInputLength: 1,
 					placeholder: "' . Core::_('Shop_Warehouse.type_tag') . '",
 					tags: true,

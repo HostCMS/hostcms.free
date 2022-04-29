@@ -24,13 +24,12 @@
 			</strong>.</p>
 			
 			<xsl:if test="total!=0">
-				<ol start="{(page) * limit + 1}" class="search">
+				<ol start="{page * limit + 1}" class="search">
 					<xsl:apply-templates select="search_page"></xsl:apply-templates>
 				</ol>
 				
 				<!-- Pagination -->
 				<p>
-					
 					<xsl:variable name="count_pages" select="ceiling(total div limit)"/>
 					
 					<xsl:variable name="visible_pages" select="5"/>
@@ -171,7 +170,7 @@
 				<xsl:otherwise>0</xsl:otherwise>
 		</xsl:choose></xsl:variable>
 		
-		<xsl:if test="$i = $start_page and $page != 0">
+		<!-- <xsl:if test="$i = $start_page and $page != 0">
 			<span class="ctrl">
 				← Ctrl
 			</span>
@@ -181,7 +180,7 @@
 			<span class="ctrl">
 				Ctrl →
 			</span>
-		</xsl:if>
+		</xsl:if> -->
 		
 		<xsl:if test="$items_count &gt; $limit and ($page + $post_count_page + 1) &gt; $i">
 			

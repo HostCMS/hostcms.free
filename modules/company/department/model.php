@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Department_Model extends Core_Entity
 {
@@ -28,8 +28,8 @@ class Company_Department_Model extends Core_Entity
 		'directory_phone' => array('through' => 'company_department_directory_phone'),
 		'company_department' => array('foreign_key' => 'parent_id'),
 		'deal_template_step_access_department' => array(),
-		'dms_nomenclature_dir' => array()
-
+		'dms_nomenclature_dir' => array(),
+		'dms_document_type_department_access' => array(),
 	);
 
 	protected $_belongsTo = array(
@@ -146,6 +146,11 @@ class Company_Department_Model extends Core_Entity
 		if (Core::moduleIsActive('deal'))
 		{
 			$this->Deal_Template_Step_Access_Departments->deleteAll(FALSE);
+		}
+
+		if (Core::moduleIsActive('dms'))
+		{
+			$this->Dms_Document_Type_Department_Accesses->deleteAll(FALSE);
 		}
 
 		return parent::delete($primaryKey);

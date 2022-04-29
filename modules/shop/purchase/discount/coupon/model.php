@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 {
@@ -23,21 +23,21 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 	);
 
 	/**
-	 * One-to-many or many-to-many relations
-	 * @var array
-	 */
-	protected $_hasMany = array(
-	);
-
-	/**
 	 * Belongs to relations
 	 * @var array
 	 */
 	protected $_belongsTo = array(
 		'shop_purchase_discount' => array(),
+		'shop_purchase_discount_coupon_dir' => array(),
 		'shop_order' => array(),
 		'user' => array()
 	);
+
+	/**
+	 * Backend property
+	 * @var string
+	 */
+	public $img = 0;
 
 	/**
 	 * Constructor.
@@ -69,6 +69,23 @@ class Shop_Purchase_Discount_Coupon_Model extends Core_Entity
 		Core_Event::notify($this->_modelName . '.onAfterGenerateCode', $this);
 
 		return $this;
+	}
+
+	/**
+	 * Copy object
+	 * @return Core_Entity
+	 * @hostcms-event shop_discount.onAfterRedeclaredCopy
+	 */
+	public function copy()
+	{
+		$newObject = parent::copy();
+
+		$newObject->generateCode();
+		$newObject->save();
+
+		Core_Event::notify($this->_modelName . '.onAfterRedeclaredCopy', $newObject, array($this));
+
+		return $newObject;
 	}
 
 	/**

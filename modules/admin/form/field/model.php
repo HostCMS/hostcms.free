@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Admin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Admin_Form_Field_Model extends Core_Entity
 {
@@ -134,7 +134,7 @@ class Admin_Form_Field_Model extends Core_Entity
 			break;
 		}
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square darkgray pull-right')
 			->title(Core::_('Admin_Form_Field.field_view' . $this->view))
 			->value($badge)

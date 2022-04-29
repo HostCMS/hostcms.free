@@ -5,7 +5,7 @@
  * @package HostCMS
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -773,6 +773,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('informationsystem_groups.name', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_groups.guid', '=', $sGlobalSearch)))
+			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('informationsystem_groups.path', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('informationsystem_groups.seo_title', 'LIKE', '%' . $sGlobalSearch . '%')))
@@ -826,6 +828,8 @@ if (strlen($sGlobalSearch))
 			->addCondition(array('where' => array('informationsystem_items.id', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('informationsystem_items.name', 'LIKE', '%' . $sGlobalSearch . '%')))
+			->addCondition(array('setOr' => array()))
+			->addCondition(array('where' => array('informationsystem_items.guid', '=', $sGlobalSearch)))
 			->addCondition(array('setOr' => array()))
 			->addCondition(array('where' => array('informationsystem_items.path', 'LIKE', '%' . $sGlobalSearch . '%')))
 			->addCondition(array('setOr' => array()))

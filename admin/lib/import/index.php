@@ -3,9 +3,9 @@
  * Lib.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../bootstrap.php');
 
@@ -77,7 +77,7 @@ $oAdmin_Form_Entity_Form->add($oMainTab
 );
 
 $oAdmin_Form_Entity_Form->add(
-	Core::factory('Core_Html_Entity_Input')
+	Core_Html_Entity::factory('Input')
 		->name('hostcms[checked][1][0]')
 		->value(1)
 		->type('hidden')

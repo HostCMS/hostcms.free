@@ -45,6 +45,7 @@ class User_Model extends Core_Entity
 		'company_post' => array('through' => 'company_department_post_user'),
 		'company_department' => array('through' => 'company_department_post_user'),
 		'company_department_post_user' => array(),
+		'crm_note' => array(),
 		'event' => array('through' => 'event_user'),
 		'event_user' => array(),
 		'forum' => array(),
@@ -731,13 +732,13 @@ class User_Model extends Core_Entity
 	{
 		if ($this->id)
 		{
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->class('avatar-user')
 				->title($this->getFullName());
 
 			$oCore_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_Img')
+					Core_Html_Entity::factory('Img')
 						->src($this->getAvatar())
 						->width(30)
 						->height(30)
@@ -924,7 +925,7 @@ class User_Model extends Core_Entity
 			}
 		}
 		// Рабочий день уже начат
-		elseif(!is_null($oUser_Workday = $this->User_Workdays->getByDate($sDate, FALSE)))
+		elseif (!is_null($oUser_Workday = $this->User_Workdays->getByDate($sDate, FALSE)))
 		{
 			// Рабочий день завершен
 			if($oUser_Workday->end != '00:00:00')
@@ -1127,7 +1128,7 @@ class User_Model extends Core_Entity
 			$oCurrentUser = Core_Auth::getCurrentUser();
 
 			$link = $oCurrentUser && !$oCurrentUser->only_access_my_own
-				? '<a class="darkgray" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
+				? '<a data-popover="hover" data-user-id="' . $this->id . '" style="color: inherit" href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][' . $this->id . ']=1" onclick="$.modalLoad({path: \'/admin/user/index.php\', action: \'view\', operation: \'modal\', additionalParams: \'hostcms[checked][0][' . $this->id . ']=1\', windowId: \'id_content\', width: \'90%\'}); return false">' . htmlspecialchars($this->getFullName()) . '</a>'
 				: '<span>' . htmlspecialchars($this->getFullName()) . '</span>';
 
 			return '<div class="contracrot">
@@ -1144,7 +1145,7 @@ class User_Model extends Core_Entity
 	 */
 	public function showAvatarWithName()
 	{
-		echo $this->getAvatarWithName();
+		return $this->getAvatarWithName();
 	}
 
 	/**
@@ -1223,5 +1224,24 @@ class User_Model extends Core_Entity
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Show user link
+	 * @param string $windowId window id
+	 * @param string|NULL $content content
+	 */
+	public function showLink($windowId, $content = NULL, $width = '80%')
+	{
+		$content = is_null($content)
+			? $this->getFullName()
+			: $content;
+
+		?><a data-popover="hover" data-user-id="<?php echo $this->id?>" style="color: inherit" <?php
+		if ($this->checkModuleAccess(array('user'), Core_Entity::factory('Site', CURRENT_SITE)))
+		{
+			?>href="/admin/user/index.php?hostcms[action]=view&hostcms[checked][0][<?php echo $this->id?>]=1" onclick="$.modalLoad({path: '/admin/user/index.php', action: 'view', operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $this->id?>]=1', windowId: '<?php echo $windowId?>', width: '<?php echo $width?>'}); return false"<?php
+		}
+		?>><?php echo htmlspecialchars($content)?></a><?php
 	}
 }

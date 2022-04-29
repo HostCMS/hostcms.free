@@ -281,7 +281,8 @@
 		<a href="{/informationsystem/url}tag/{urlencode}/" class="tag">
 			<xsl:value-of select="name"/>
 		</a>
-<xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if></xsl:template>
+		<xsl:if test="position() != last()"><xsl:text>, </xsl:text></xsl:if>
+	</xsl:template>
 	
 	<!-- Pagination -->
 	<xsl:template name="for">
@@ -302,7 +303,7 @@
 				<xsl:otherwise>0</xsl:otherwise>
 		</xsl:choose></xsl:variable>
 		
-		<xsl:if test="$i = $start_page and $page != 0">
+		<!-- <xsl:if test="$i = $start_page and $page != 0">
 			<span class="ctrl">
 				← Ctrl
 			</span>
@@ -312,7 +313,7 @@
 			<span class="ctrl">
 				Ctrl →
 			</span>
-		</xsl:if>
+		</xsl:if> -->
 		
 		<xsl:if test="$items_count &gt; $limit and ($page + $post_count_page + 1) &gt; $i">
 			<!-- Store in the variable $group ID of the current group -->

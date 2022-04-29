@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_Input extends Admin_Form_Entity
 {
@@ -17,7 +17,7 @@ class Skin_Default_Admin_Form_Entity_Input extends Admin_Form_Entity
 	 * Skip properties
 	 * @var array
 	 */
-	protected $_skipProperies = array(
+	protected $_skipProperties = array(
 		'divAttr', // array
 		'caption',
 		'format' // array, массив условий форматирования
@@ -33,13 +33,13 @@ class Skin_Default_Admin_Form_Entity_Input extends Admin_Form_Entity
 		);
 
 		// Combine
-		$this->_skipProperies = array_combine($this->_skipProperies, $this->_skipProperies);
+		$this->_skipProperties = array_combine($this->_skipProperties, $this->_skipProperties);
 
 		$oCore_Html_Entity_Input = new Core_Html_Entity_Input();
 		$this->_allowedProperties += $oCore_Html_Entity_Input->getAllowedProperties();
 
 		// Свойства, исключаемые для <input>, добавляем в список разрешенных объекта
-		$this->_allowedProperties += $this->_skipProperies;
+		$this->_allowedProperties += $this->_skipProperties;
 
 		parent::__construct();
 

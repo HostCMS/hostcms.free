@@ -676,7 +676,7 @@ class Core_Str
 	 * Convert size from bytes to kb, mb, etc
 	 *
 	 * @param int $int e.g. 20480000
-	 * @return int
+	 * @return string
 	 */
 	static public function getTextSize($size)
 	{
@@ -684,20 +684,23 @@ class Core_Str
 		{
 			$textSize = Core::_('Core.kbyte');
 			$size = $size / 1024;
+			$round = 0;
 
 			if ($size >= 1024)
 			{
 				$textSize = Core::_('Core.mbyte');
 				$size = $size / 1024;
+				$round = 1;
 
 				if ($size >= 1024)
 				{
 					$textSize = Core::_('Core.gbyte');
 					$size = $size / 1024;
+					$round = 2;
 				}
 			}
 
-			$size = sprintf('%.2f', $size);
+			$size = sprintf("%.{$round}f", $size);
 		}
 		else
 		{

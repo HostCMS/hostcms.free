@@ -83,7 +83,7 @@ if (!is_null(Core_Array::getGet('vote')))
 			->header('Content-type', 'text/plain; charset=utf-8');
 	}
 
-	if(Core_Array::getRequest('_'))
+	if (Core_Array::getRequest('_'))
 	{
 		Core_Page::instance()->response
 			->sendHeaders()

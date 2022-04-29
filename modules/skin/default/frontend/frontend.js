@@ -41,11 +41,24 @@
 		hostcmsEditable: function(settings){
 			settings = hQuery.extend({
 				save: function(item, settings){
+					var value;
+					
+					switch(item.attr('hostcms:type'))
+					{
+						case 'textarea':
+						case 'wysiwyg':
+							value = item.html();
+						break;
+						case 'input':
+						default:
+							value = item.text();
+					}
+					
 					var data = {
 						'id': item.attr('hostcms:id'),
 						'entity': item.attr('hostcms:entity'),
 						'field': item.attr('hostcms:field'),
-						'value': item.html()
+						'value': value
 					};
 					data['_'] = Math.round(new Date().getTime());
 
@@ -60,8 +73,21 @@
 					});
 				},
 				blur: function(jEditInPlace) {
-					var item = jEditInPlace.prevAll('.hostcmsEditable').eq(0);
-					item.html(jEditInPlace.val()).css('display', '');
+					var item = jEditInPlace.prevAll('.hostcmsEditable').eq(0),
+						type = item.attr('hostcms:type');
+
+					switch(type)
+					{
+						case 'textarea':
+						case 'wysiwyg':
+							item.html(jEditInPlace.val());
+						break;
+						case 'input':
+						default:
+							item.text(jEditInPlace.val());
+					}
+
+					item.css('display', '');
 					jEditInPlace.remove();
 					settings.save(item, settings);
 				}
@@ -184,7 +210,7 @@
 											'searchreplace visualblocks code fullscreen',
 											'insertdatetime media table paste help wordcount importcss'
 										],
-										toolbar: 'undo redo | styleselect formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
+										toolbar: 'undo redo | styleselect formatselect | bold italic underline backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | code help',
 										content_css: aCss
 									}, settings.wysiwygConfig));
 								}, 300);

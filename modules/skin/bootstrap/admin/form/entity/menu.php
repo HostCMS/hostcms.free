@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 {
@@ -63,13 +63,13 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 		$bHasSubmenu = !empty($this->_children);
 		$bHasName = strlen($this->name) > 0;
 
-		$oCore_Html_Entity_A = Core::factory('Core_Html_Entity_A');
+		$oCore_Html_Entity_A = Core_Html_Entity::factory('A');
 
 		strlen($this->href) && $oCore_Html_Entity_A->href($this->href);
 		strlen($this->onclick) && $oCore_Html_Entity_A->onclick($this->onclick);
 		!is_null($this->target) && $oCore_Html_Entity_A->target($this->target);
 		strlen($this->icon) && $oCore_Html_Entity_A->add(
-			Core::factory('Core_Html_Entity_I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
+			Core_Html_Entity::factory('I')->class($this->icon . ($bHasName ? ' icon-separator' : ' fa-fw no-margin'))
 		);
 
 		$bTop && $oCore_Html_Entity_A
@@ -81,7 +81,7 @@ class Skin_Bootstrap_Admin_Form_Entity_Menu extends Admin_Form_Entity
 			->set('data-toggle', 'dropdown');
 
 		$bHasName && $oCore_Html_Entity_A->add(
-			Core::factory('Core_Html_Entity_Code')->value(htmlspecialchars($this->name))
+			Core_Html_Entity::factory('Code')->value(htmlspecialchars($this->name))
 		);
 
 		$oCore_Html_Entity_A->execute();

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Sql
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Sql_Table_View_Entity
 {
@@ -151,8 +151,7 @@ class Sql_Table_View_Entity
 
 		Core_QueryBuilder::delete($this->_tableName)
 			->where($primaryKeyName, '=', $this->$primaryKeyName)
-			->execute()
-			->getResult();
+			->execute();
 
 		return $this;
 	}

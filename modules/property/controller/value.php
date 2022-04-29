@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Property
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Property_Controller_Value
 {
@@ -46,20 +46,20 @@ class Property_Controller_Value
 	}
 
 	/**
-	 * Получение значений свойств $aProperiesId объекта $entityId
-	 * @param array $aProperiesId properties ID
+	 * Получение значений свойств $aPropertiesId объекта $entityId
+	 * @param array $aPropertiesId properties ID
 	 * @param int $entityId entity ID
 	 * @param boolean $bCache cache mode
 	 * @return array
 	 */
-	static public function getPropertiesValues($aProperiesId, $entityId, $bCache = TRUE, $bSorting = FALSE)
+	static public function getPropertiesValues($aPropertiesId, $entityId, $bCache = TRUE, $bSorting = FALSE)
 	{
 		$aReturn = array();
 
-		if (count($aProperiesId) > 0)
+		if (count($aPropertiesId) > 0)
 		{
 			$aSelect = array();
-			foreach ($aProperiesId as $iPropertyId)
+			foreach ($aPropertiesId as $iPropertyId)
 			{
 				$oProperty = self::_getProperty($iPropertyId);
 				if (!is_null($oProperty))
@@ -70,18 +70,18 @@ class Property_Controller_Value
 			}
 
 			// Вариант на UNION
-			/*foreach ($aSelect as $sModelName => $aTmpProperiesId)
+			/*foreach ($aSelect as $sModelName => $aTmpPropertiesId)
 			{
 				$oProperty_Values = Core_Entity::factory($sModelName);
 
-				$iFirstProperyId = array_shift($aTmpProperiesId);
+				$iFirstProperyId = array_shift($aTmpPropertiesId);
 
 				$oProperty_Values
 					->queryBuilder()
 					->where('property_id', '=', $iFirstProperyId)
 					->where('entity_id', '=', $entityId);
 
-				foreach ($aTmpProperiesId as $iTmpProperyId)
+				foreach ($aTmpPropertiesId as $iTmpProperyId)
 				{
 					$queryBuilder = Core_QueryBuilder::select()
 						->from(Core_Inflection::getPlural($sModelName))
@@ -96,14 +96,14 @@ class Property_Controller_Value
 				$aReturn = array_merge($aReturn, $oProperty_Values->findAll());
 			}*/
 
-			foreach ($aSelect as $sModelName => $aTmpProperiesId)
+			foreach ($aSelect as $sModelName => $aTmpPropertiesId)
 			{
 				$oProperty_Values = Core_Entity::factory($sModelName);
 
 				$oProperty_Values
 					->queryBuilder()
 					->where('entity_id', '=', $entityId)
-					->where('property_id', 'IN', $aTmpProperiesId);
+					->where('property_id', 'IN', $aTmpPropertiesId);
 
 				$bSorting && $oProperty_Values
 					->queryBuilder()

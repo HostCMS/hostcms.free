@@ -3,9 +3,9 @@
  * Information systems.
 *
 * @package HostCMS
-* @version 6.x
+* @version 7.x
 * @author Hostmake LLC
-* @copyright © 2005-2020 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+* @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
 */
 require_once('../../../../bootstrap.php');
 
@@ -437,19 +437,19 @@ if ($oAdmin_Form_Controller->getAction() == 'show_form')
 						}
 
 						$oMainTab->add(Admin_Form_Entity::factory('Div')->class('row')
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('informationsystem_group_id')->value($oInformationsystem_Group->id))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_separator')->value($sSeparator))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_stop')->value($sLimiter))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_name_field_f']) ? 1 : 0))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('locale')->value($sLocale))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_max_time')->value(Core_Array::getPost('import_max_time')))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_max_count')->value(Core_Array::getPost('import_max_count')))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_load_files_path')->value(Core_Array::getPost('import_load_files_path')))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_action_items')->value(Core_Array::getPost('import_action_items')))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('informationsystem_groups_parent_id')->value(Core_Array::getPost('informationsystem_groups_parent_id')))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
-							->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('import_action_delete_image')->value(isset($_POST['import_action_delete_image']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_group_id')->value($oInformationsystem_Group->id))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('csv_filename')->value($sTmpFileName))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_separator')->value($sSeparator))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_stop')->value($sLimiter))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('firstlineheader')->value(isset($_POST['import_name_field_f']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('locale')->value($sLocale))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_max_time')->value(Core_Array::getPost('import_max_time')))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_max_count')->value(Core_Array::getPost('import_max_count')))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_load_files_path')->value(Core_Array::getPost('import_load_files_path')))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_action_items')->value(Core_Array::getPost('import_action_items')))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('informationsystem_groups_parent_id')->value(Core_Array::getPost('informationsystem_groups_parent_id')))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('search_event_indexation')->value(isset($_POST['search_event_indexation']) ? 1 : 0))
+							->add(Core_Html_Entity::factory('Input')->type('hidden')->name('import_action_delete_image')->value(isset($_POST['import_action_delete_image']) ? 1 : 0))
 						);
 
 						$oAdmin_Form_Entity_Form->add($oMainTab);
@@ -570,7 +570,7 @@ elseif ($oAdmin_Form_Controller->getAction() == 'start_import')
 		if ($sRedirectAction)
 		{
 			$iRedirectTime = 1000;
-			Core::factory('Core_Html_Entity_Script')
+			Core_Html_Entity::factory('Script')
 				->type('text/javascript')
 				->value('setTimeout(function (){ ' . $sRedirectAction . '}, ' . $iRedirectTime . ')')
 				->execute();
@@ -664,8 +664,8 @@ else
 		->add(Admin_Form_Entity::factory('Div')->class('row')->add(Admin_Form_Entity::factory('Select')
 			->name("import_encoding")
 			->options(array(
-				'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0'),
-				'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1')
+				'UTF-8' => Core::_('Informationsystem_Item.input_file_encoding1'),
+				'Windows-1251' => Core::_('Informationsystem_Item.input_file_encoding0')
 			))
 			->divAttr(array('class' => 'form-group col-xs-12 col-sm-6', 'id' => 'import_encoding'))
 			->caption(Core::_('Informationsystem_Item.import_encoding')))

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Skin
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 {
@@ -191,7 +191,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			}
 		}
 
-		$oLarge_Main_Block_Core_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+		$oLarge_Main_Block_Core_Html_Entity_Div = Core_Html_Entity::factory('Div')
 			->class('row');
 
 		$oLarge_Core_Html_Entity_Div
@@ -204,7 +204,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		{
 			$oLarge_Core_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					Core_Html_Entity::factory('Div')
 						->class('col-xs-12')
 						->add($oLarge_Main_Block_Core_Html_Entity_Div)
 				);
@@ -214,19 +214,19 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			$oLarge_Core_Html_Entity_Div->add($oLarge_Main_Block_Core_Html_Entity_Div);
 		}
 
-		$oLarge_Input_Div = Core::factory('Core_Html_Entity_Div')
+		$oLarge_Input_Div = Core_Html_Entity::factory('Div')
 			->id('file_large_' . $iAdmin_Form_Count)
 			->class('form-group col-xs-6 col-sm-7 col-md-5 col-lg-6')
 			->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('caption')
 					->value($this->largeImage['caption'])
 			)
 			->add(
-				$oLarge_Input_Group_Div = Core::factory('Core_Html_Entity_Div')
+				$oLarge_Input_Group_Div = Core_Html_Entity::factory('Div')
 					->class('input-group')
 					->add(
-						Core::factory('Core_Html_Entity_Input')
+						Core_Html_Entity::factory('Input')
 							->class('form-control')
 							->name($this->largeImage['name'])
 							->id($this->largeImage['id'])
@@ -242,7 +242,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			if ($this->largeImage['path'] != '')
 			{
 					$oLarge_Input_Group_Div->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							//->id('control_' . 'large_' . $this->largeImage['id'])
 							->id('preview_' . 'large_' . $this->largeImage['id'])
 							//->style("float: left")
@@ -252,7 +252,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
 					)
 					->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->id('delete_' . 'large_' . $this->largeImage['id'])
 							->class('input-group-addon control-item')
 							->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->largeImage['delete_onclick']} } else {return false;}")
@@ -265,7 +265,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			{
 				$oLarge_Input_Group_Div
 					->add(
-						Core::factory('Core_Html_Entity_A')
+						Core_Html_Entity::factory('A')
 							->id('file_large_settings_' . $iAdmin_Form_Count)
 							->class('input-group-addon control-item')
 							//->style('margin: 10px 0 0 15px')
@@ -280,22 +280,22 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		// Настройки большого изображения
 		if ($this->largeImage['show_params'])
 		{
-			$oLargeWatermark_Div = Core::factory('Core_Html_Entity_Div')
+			$oLargeWatermark_Div = Core_Html_Entity::factory('Div')
 				->id("{$windowId}_watermark_{$this->largeImage['name']}");
 
-			$oLargeWatermark_Table = Core::factory('Core_Html_Entity_Table')
+			$oLargeWatermark_Table = Core_Html_Entity::factory('Table')
 				->border(0)
 				->class('no_border')
 				->add(
-					Core::factory('Core_Html_Entity_Tr')
+					Core_Html_Entity::factory('Tr')
 						->add(
-							Core::factory('Core_Html_Entity_Td')
+							Core_Html_Entity::factory('Td')
 								->value(Core::_('Admin_Form.large_image_max_width'))
 						)
 						->add(
-							Core::factory('Core_Html_Entity_Td')
+							Core_Html_Entity::factory('Td')
 								->add(
-									Core::factory('Core_Html_Entity_Input')
+									Core_Html_Entity::factory('Input')
 										->type('text')
 										->name("large_max_width_{$this->largeImage['name']}")
 										->size(5)
@@ -304,15 +304,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 						)
 				)
 				->add(
-					Core::factory('Core_Html_Entity_Tr')
+					Core_Html_Entity::factory('Tr')
 						->add(
-							Core::factory('Core_Html_Entity_Td')
+							Core_Html_Entity::factory('Td')
 								->value(Core::_('Admin_Form.large_image_max_height'))
 						)
 						->add(
-							Core::factory('Core_Html_Entity_Td')
+							Core_Html_Entity::factory('Td')
 								->add(
-									Core::factory('Core_Html_Entity_Input')
+									Core_Html_Entity::factory('Input')
 										->type('text')
 										->name("large_max_height_{$this->largeImage['name']}")
 										->size(5)
@@ -326,7 +326,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			// Отображать Сохранять пропорции изображения
 			if ($this->largeImage['preserve_aspect_ratio_checkbox'])
 			{
-				$Core_Html_Entity_Checkbox = Core::factory('Core_Html_Entity_Input')
+				$Core_Html_Entity_Checkbox = Core_Html_Entity::factory('Input')
 						->type('checkbox')
 						->name("large_preserve_aspect_ratio_{$this->largeImage['name']}")
 						->id("large_preserve_aspect_ratio_{$this->largeImage['name']}")
@@ -335,12 +335,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 				$oLargeWatermark_Table
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->colspan(2)
 									->add(
-										Core::factory('Core_Html_Entity_Label')
+										Core_Html_Entity::factory('Label')
 											->value(Core::_('Admin_Form.image_preserve_aspect_ratio'))
 											->add(
 												$Core_Html_Entity_Checkbox
@@ -353,7 +353,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			// Наложить водяной знак на изображение
 			if ($this->largeImage['place_watermark_checkbox'] == 1)
 			{
-				$Core_Html_Entity_Checkbox = Core::factory('Core_Html_Entity_Input')
+				$Core_Html_Entity_Checkbox = Core_Html_Entity::factory('Input')
 						->type('checkbox')
 						->name("large_place_watermark_checkbox_{$this->largeImage['name']}")
 						->id("large_place_watermark_checkbox_{$this->largeImage['name']}")
@@ -362,12 +362,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 				$oLargeWatermark_Table
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->colspan(2)
 									->add(
-										Core::factory('Core_Html_Entity_Label')
+										Core_Html_Entity::factory('Label')
 											->value(Core::_('Admin_Form.place_watermark'))
 											->add(
 												$Core_Html_Entity_Checkbox
@@ -382,15 +382,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			{
 				$oLargeWatermark_Table
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->value(Core::_('Admin_Form.watermark_position_x'))
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->add(
-										Core::factory('Core_Html_Entity_Input')
+										Core_Html_Entity::factory('Input')
 											->type('text')
 											->name("watermark_position_x_{$this->largeImage['name']}")
 											->size(5)
@@ -405,15 +405,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			{
 				$oLargeWatermark_Table
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->value(Core::_('Admin_Form.watermark_position_y'))
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->add(
-										Core::factory('Core_Html_Entity_Input')
+										Core_Html_Entity::factory('Input')
 											->type('text')
 											->name("watermark_position_y_{$this->largeImage['name']}")
 											->size(5)
@@ -432,7 +432,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			$oLarge_Core_Html_Entity_Div
 				->add($oLargeWatermark_Div)
 				->add(
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(function() {
 							$('#{$windowId}_watermark_" . $this->_correctId($this->largeImage['name']) . "').HostCMSWindow({ autoOpen: false, destroyOnClose: false, title: '" . Core::_('Admin_Form.window_large_image') . "', AppendTo: '#{$windowId} form #file_large_{$iAdmin_Form_Count}', width: 360, height: 230, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 				);
@@ -443,15 +443,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			//$oLarge_Core_Html_Entity_Div
 			$oLarge_Main_Block_Core_Html_Entity_Div
 				->add(
-					 Core::factory('Core_Html_Entity_Div')
+					 Core_Html_Entity::factory('Div')
 						->class('form-group col-xs-6 col-sm-5 col-md-7 col-lg-6')
 						->add(
-							Core::factory('Core_Html_Entity_Span')
+							Core_Html_Entity::factory('Span')
 								->class('caption')
 								->value(Core::_('Admin_Form.file_description'))
 						)
 						->add(
-							Core::factory('Core_Html_Entity_Input')
+							Core_Html_Entity::factory('Input')
 								->type('text')
 								->name("description_{$this->largeImage['name']}")
 								//->size(45)
@@ -465,19 +465,19 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		// Отображать поле загрузки малого изображения
 		if ($this->smallImage['show'] == 1)
 		{
-			$oSmall_Input_Div = Core::factory('Core_Html_Entity_Div')
+			$oSmall_Input_Div = Core_Html_Entity::factory('Div')
 				->id('file_small_' . $iAdmin_Form_Count)
 				->class('form-group col-xs-6 col-sm-7 col-md-5 col-lg-6')
 				->add(
-					Core::factory('Core_Html_Entity_Span')
+					Core_Html_Entity::factory('Span')
 						->class('caption')
 						->value($this->smallImage['caption'])
 				)
 				->add(
-					$oSmall_Input_Group_Div = Core::factory('Core_Html_Entity_Div')
+					$oSmall_Input_Group_Div = Core_Html_Entity::factory('Div')
 						->class('input-group')
 						->add(
-							Core::factory('Core_Html_Entity_Input')
+							Core_Html_Entity::factory('Input')
 								->class('form-control')
 								->name($this->smallImage['name'])
 								->id($this->smallImage['id'])
@@ -487,7 +487,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 			$oLarge_Main_Block_Core_Html_Entity_Div
 				->add(
-					Core::factory('Core_Html_Entity_Div')
+					Core_Html_Entity::factory('Div')
 						->style('clear:both')
 				)
 				->add($oSmall_Input_Div);
@@ -498,7 +498,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				{
 					//$oSmallControl_Div->add(
 					$oSmall_Input_Group_Div->add(
-							Core::factory('Core_Html_Entity_A')
+							Core_Html_Entity::factory('A')
 								//->id('control_' . $this->smallImage['id'])
 								->id('preview_' . 'small_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
@@ -507,7 +507,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 								->add(Admin_Form_Entity::factory('Code')->html('<i class="fa fa-image"></i>'))
 						)
 						->add(
-							Core::factory('Core_Html_Entity_A')
+							Core_Html_Entity::factory('A')
 								->id('delete_' . 'small_' . $this->smallImage['id'])
 								->class('input-group-addon control-item')
 								->onclick("res = confirm('" . Core::_('Admin_Form.msg_information_delete') . "'); if (res) { {$this->smallImage['delete_onclick']} } else {return false;}")
@@ -520,7 +520,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				{
 					$oSmall_Input_Group_Div
 						->add(
-							Core::factory('Core_Html_Entity_Span')
+							Core_Html_Entity::factory('Span')
 								->id('file_small_settings_' . $iAdmin_Form_Count)
 								->class('input-group-addon control-item')
 								->add(
@@ -534,19 +534,19 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 			// Настройки малого изображения
 			if ($this->smallImage['show_params'])
 			{
-				$oSmallWatermark_Table = Core::factory('Core_Html_Entity_Table')
+				$oSmallWatermark_Table = Core_Html_Entity::factory('Table')
 					->border(0)
 					->class('no_border')
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->value(Core::_('Admin_Form.small_image_max_width'))
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->add(
-										Core::factory('Core_Html_Entity_Input')
+										Core_Html_Entity::factory('Input')
 											->type('text')
 											->name("small_max_width_{$this->smallImage['name']}")
 											->size(5)
@@ -555,15 +555,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 							)
 					)
 					->add(
-						Core::factory('Core_Html_Entity_Tr')
+						Core_Html_Entity::factory('Tr')
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->value(Core::_('Admin_Form.small_image_max_height'))
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Td')
+								Core_Html_Entity::factory('Td')
 									->add(
-										Core::factory('Core_Html_Entity_Input')
+										Core_Html_Entity::factory('Input')
 											->type('text')
 											->name("small_max_height_{$this->smallImage['name']}")
 											->size(5)
@@ -575,7 +575,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				// Создать малое изображение из большого
 				if ($this->smallImage['create_small_image_from_large'])
 				{
-					$Core_Html_Entity_Checkbox = Core::factory('Core_Html_Entity_Input')
+					$Core_Html_Entity_Checkbox = Core_Html_Entity::factory('Input')
 							->type('checkbox')
 							->name("create_small_image_from_large_{$this->smallImage['name']}")
 							->id("create_small_image_from_large_{$this->smallImage['name']}")
@@ -584,12 +584,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 					$oSmallWatermark_Table
 						->add(
-							Core::factory('Core_Html_Entity_Tr')
+							Core_Html_Entity::factory('Tr')
 								->add(
-									Core::factory('Core_Html_Entity_Td')
+									Core_Html_Entity::factory('Td')
 										->colspan(2)
 										->add(
-											Core::factory('Core_Html_Entity_Label')
+											Core_Html_Entity::factory('Label')
 												->value(Core::_('Admin_Form.create_thumbnail'))
 												->add(
 													$Core_Html_Entity_Checkbox
@@ -602,7 +602,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				// Отображать Сохранять пропорции изображения
 				if ($this->smallImage['preserve_aspect_ratio_checkbox'])
 				{
-					$Core_Html_Entity_Checkbox = Core::factory('Core_Html_Entity_Input')
+					$Core_Html_Entity_Checkbox = Core_Html_Entity::factory('Input')
 							->type('checkbox')
 							->name("small_preserve_aspect_ratio_{$this->smallImage['name']}")
 							->id("small_preserve_aspect_ratio_{$this->smallImage['name']}")
@@ -611,12 +611,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 					$oSmallWatermark_Table
 						->add(
-							Core::factory('Core_Html_Entity_Tr')
+							Core_Html_Entity::factory('Tr')
 								->add(
-									Core::factory('Core_Html_Entity_Td')
+									Core_Html_Entity::factory('Td')
 										->colspan(2)
 										->add(
-											Core::factory('Core_Html_Entity_Label')
+											Core_Html_Entity::factory('Label')
 												->value(Core::_('Admin_Form.image_preserve_aspect_ratio'))
 												->add(
 													$Core_Html_Entity_Checkbox
@@ -629,7 +629,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				// Наложить водяной знак на изображение
 				if ($this->smallImage['place_watermark_checkbox'] == 1)
 				{
-					$Core_Html_Entity_Checkbox = Core::factory('Core_Html_Entity_Input')
+					$Core_Html_Entity_Checkbox = Core_Html_Entity::factory('Input')
 							->type('checkbox')
 							->name("small_place_watermark_checkbox_{$this->smallImage['name']}")
 							->id("small_place_watermark_checkbox_{$this->smallImage['name']}")
@@ -638,12 +638,12 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 
 					$oSmallWatermark_Table
 						->add(
-							Core::factory('Core_Html_Entity_Tr')
+							Core_Html_Entity::factory('Tr')
 								->add(
-									Core::factory('Core_Html_Entity_Td')
+									Core_Html_Entity::factory('Td')
 										->colspan(2)
 										->add(
-											Core::factory('Core_Html_Entity_Label')
+											Core_Html_Entity::factory('Label')
 												->value(Core::_('Admin_Form.place_watermark'))
 												->add(
 													$Core_Html_Entity_Checkbox
@@ -657,15 +657,15 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				{
 					$oLarge_Main_Block_Core_Html_Entity_Div
 						->add(
-							Core::factory('Core_Html_Entity_Div')
+							Core_Html_Entity::factory('Div')
 							->class('form-group col-xs-6 col-sm-5 col-md-7 col-lg-6')
 							->add(
-								Core::factory('Core_Html_Entity_Span')
+								Core_Html_Entity::factory('Span')
 									->class('caption')
 									->value(Core::_('Admin_Form.file_description'))
 							)
 							->add(
-								Core::factory('Core_Html_Entity_Input')
+								Core_Html_Entity::factory('Input')
 									->type('text')
 									->name("description_{$this->smallImage['name']}")
 									->class('form-control description-small')
@@ -675,7 +675,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				}
 
 				// -----------------
-				$oSmallWatermark_Div = Core::factory('Core_Html_Entity_Div')
+				$oSmallWatermark_Div = Core_Html_Entity::factory('Div')
 					->id("{$windowId}_watermark_{$this->smallImage['name']}")
 					->add(
 						$oSmallWatermark_Table
@@ -684,7 +684,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 				$oSmall_Input_Div
 					->add($oSmallWatermark_Div)
 					->add(
-						Core::factory('Core_Html_Entity_Script')
+						Core_Html_Entity::factory('Script')
 							//->value("CreateWindow('{$windowId}_watermark_{$this->smallImage['name']}', '" . Core::_('Admin_Form.window_small_image') . "', '', '')")
 							->value("$(function() {
 							$('#{$windowId}_watermark_" . $this->_correctId($this->smallImage['name']) . "').HostCMSWindow({ autoOpen: false, destroyOnClose: false, title: '" . Core::_('Admin_Form.window_small_image') . "', AppendTo: '#{$windowId} form #file_small_{$iAdmin_Form_Count}', width: 360, height: 180, addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
@@ -698,7 +698,7 @@ class Skin_Default_Admin_Form_Entity_File extends Admin_Form_Entity_Input
 		}
 
 		$oLarge_Core_Html_Entity_Div->add(
-				Core::factory('Core_Html_Entity_Div')
+				Core_Html_Entity::factory('Div')
 					->style('clear: both')
 			);
 

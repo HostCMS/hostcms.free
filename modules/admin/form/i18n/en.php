@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Save',
@@ -152,4 +152,6 @@ return array(
 	'female' => 'Female',
 
 	'filter_enter_title' => 'Enter filter name',
+
+	'upload_file' => 'Upload file'
 );

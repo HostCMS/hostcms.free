@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Field
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Field_Dir_Model extends Core_Entity
 {
@@ -64,14 +64,14 @@ class Field_Dir_Model extends Core_Entity
 	{
 
 		$countField_Dirs = $this->Field_Dirs->getCount();
-		$countField_Dirs && Core::factory('Core_Html_Entity_Span')
+		$countField_Dirs && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value('<i class="fa fa-folder-open-o"></i> ' . $countField_Dirs)
 			->title(Core::_('Informationsystem.all_groups_count', $countField_Dirs))
 			->execute();
 
 		$countFields = $this->Fields->getCount();
-		$countFields && Core::factory('Core_Html_Entity_Span')
+		$countFields && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value('<i class="fa fa-file-o"></i> ' . $countFields)
 			->title(Core::_('Informationsystem.all_items_count', $countFields))

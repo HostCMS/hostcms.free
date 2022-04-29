@@ -289,7 +289,7 @@ foreach ($aCheckboxNames as $name)
 	);
 }
 
-$oMainRow4->add(Core::factory('Core_Html_Entity_Input')->type('hidden')->name('shop_item_id')->value($oShopItemParent->id));
+$oMainRow4->add(Core_Html_Entity::factory('Input')->type('hidden')->name('shop_item_id')->value($oShopItemParent->id));
 
 $oAdmin_Form_Entity_Form
 	->add($oMainTab)

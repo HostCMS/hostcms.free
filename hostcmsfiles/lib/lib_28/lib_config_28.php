@@ -34,7 +34,7 @@ if (Core::moduleIsActive('siteuser'))
 		Core_Page::instance()->keywords($oSiteuser->login);
 
 		// AJAX add as friend
-		if (!is_null(Core_Array::getGet('addFriend')))
+		if (!is_null(Core_Array::getGet('addFriend', '', 'str')))
 		{
 			$oCurrentSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 
@@ -48,7 +48,7 @@ if (Core::moduleIsActive('siteuser'))
 		}
 
 		// AJAX delete friend
-		if (!is_null(Core_Array::getGet('removeFriend')))
+		if (!is_null(Core_Array::getGet('removeFriend', '', 'str')))
 		{
 			$oCurrentSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 
@@ -62,7 +62,7 @@ if (Core::moduleIsActive('siteuser'))
 		}
 
 		// AJAX add into list
-		if (!is_null(Core_Array::getGet('changeType')))
+		if (!is_null(Core_Array::getGet('changeType', '', 'str')))
 		{
 			$oCurrentSiteuser = Core_Entity::factory('Siteuser')->getCurrent();
 

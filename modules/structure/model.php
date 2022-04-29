@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Structure
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Structure_Model extends Core_Entity
 {
@@ -430,7 +430,7 @@ class Structure_Model extends Core_Entity
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
 		$count = $this->getChildCount();
-		$count && Core::factory('Core_Html_Entity_Span')
+		$count && Core_Html_Entity::factory('Span')
 			->class('badge badge-hostcms badge-square')
 			->value($count)
 			->execute();
@@ -466,12 +466,12 @@ class Structure_Model extends Core_Entity
 		$oSite_Alias = Core_Entity::factory('Site', $this->site_id)->getCurrentAlias();
 		if ($oSite_Alias)
 		{
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div');
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div');
 
 			$oCore_Html_Entity_Div
 				->class('hostcms-linkbox')
 				->add(
-					Core::factory('Core_Html_Entity_A')
+					Core_Html_Entity::factory('A')
 						->href(($this->https ? 'https://' : 'http://') . $oSite_Alias->name . $sPath)
 						->target("_blank")
 						->value(htmlspecialchars(urldecode($sPath)))
@@ -635,7 +635,7 @@ class Structure_Model extends Core_Entity
 			);
 		}
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class('padding-left-10')
 			->add(
 				$oCore_Html_Entity_Dropdownlist

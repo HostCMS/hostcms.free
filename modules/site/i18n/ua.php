@@ -105,4 +105,5 @@ return array(
 
 	'protect' => 'Захист від атак',
 	'sender_name' => 'Ім\'я відправника',
+	'filter_placeholder' => 'Фільтр за назвою',
 );

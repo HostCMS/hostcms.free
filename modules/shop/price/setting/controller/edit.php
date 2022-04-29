@@ -126,7 +126,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 		$oScriptResponsibleUsers = Admin_Form_Entity::factory('Script')
 			->value('$("#' . $windowId . ' #user_id").selectUser({
 					placeholder: "",
-					language: "' . Core_i18n::instance()->getLng() . '",
+					language: "' . Core_I18n::instance()->getLng() . '",
 					dropdownParent: $("#' . $windowId . '")
 				});'
 			);
@@ -373,7 +373,7 @@ class Shop_Price_Setting_Controller_Edit extends Admin_Form_Action_Controller_Ty
 				)
 		);
 
-		$oCore_Html_Entity_Script = Core::factory('Core_Html_Entity_Script')
+		$oCore_Html_Entity_Script = Core_Html_Entity::factory('Script')
 			->value("$('#{$windowId} .add-shop-item').autocompleteShopItem({ shop_id: '{$oShop->id}', shop_currency_id: 0 }, function(event, ui) {
 				$('#{$windowId} .shop-item-table > tbody').append(
 					$('<tr id=\"shop-item-' + ui.item.id + '\" data-item-id=\"' + ui.item.id + '\"><td class=\"index\"></td><td>' + $.escapeHtml(ui.item.label) + '<input type=\'hidden\' name=\'shop_item_id[]\' value=\'' + (typeof ui.item.id !== 'undefined' ? ui.item.id : 0) + '\'/>' + '</td><td>' + $.escapeHtml(ui.item.measure) + '</td><td>' + ui.item.currency + '</td></tr>')

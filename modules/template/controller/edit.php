@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Template
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -28,6 +28,8 @@ class Template_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 		}*/
 		$aTmp = Core_QueryBuilder::select('lng')
 			->from('sites')
+			->clearOrderBy()
+			->orderBy('sorting', 'ASC')
 			->groupBy('lng')
 			->execute()->asAssoc()->result();
 

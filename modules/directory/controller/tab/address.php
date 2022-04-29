@@ -124,7 +124,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 			/*if (!$oUser_Directory_Address)
 			{
 				$oRowElements->add(
-					Core::factory('Core_Html_Entity_Input')
+					Core_Html_Entity::factory('Input')
 						->type('hidden')
 						->value(0)
 						->name($this->prefix . 'address_public_value' . $sNameSuffix)
@@ -167,7 +167,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 			{
 				// Удаляем пустую строку с полями
 				ob_start();
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$.deleteFormRow($(\"#{$windowId} select[name='{$prefix}address_type#{$oDirectory_Address->id}']\").closest('.row').find('.btn-delete').get(0));")
 					->execute();
 				$Admin_Form_Controller->addMessage(ob_get_clean());
@@ -212,7 +212,7 @@ class Directory_Controller_Tab_Address extends Directory_Controller_Tab
 					$object->add($oDirectory_Address);
 
 					ob_start();
-					Core::factory('Core_Html_Entity_Script')
+					Core_Html_Entity::factory('Script')
 						->value("$(\"#{$windowId} select[name='{$prefix}address_type\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_type#{$oDirectory_Address->id}').closest('.row').find('.btn-delete').removeClass('hide');
 						$(\"#{$windowId} input[name='{$prefix}address_type\\[\\]']\").eq({$i}).prop('name', '{$prefix}address_type#{$oDirectory_Address->id}');
 						$(\"#{$windowId} input[name='{$prefix}address\\[\\]']\").eq({$i}).prop('name', '{$prefix}address#{$oDirectory_Address->id}');

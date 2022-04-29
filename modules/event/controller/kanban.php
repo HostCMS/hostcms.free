@@ -18,7 +18,7 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 		$oAdmin_Form_Controller = $this->_Admin_Form_Controller;
 		$oAdmin_Form = $oAdmin_Form_Controller->getAdminForm();
 
-		$oAdmin_View = Admin_View::create($this->_Admin_Form_Controller->Admin_View)
+		$oAdmin_View = Admin_View::create($oAdmin_Form_Controller->Admin_View)
 			->pageTitle($oAdmin_Form_Controller->pageTitle)
 			->module($oAdmin_Form_Controller->module);
 
@@ -123,6 +123,12 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 
 		$aDatasets = $oAdmin_Form_Controller->getDatasets();
 
+		$aDatasets[0]->addCondition(
+				array('clearOrderBy' => array(''))
+			)->addCondition(
+				array('orderBy' => array('events.datetime', 'DESC'))
+			);
+
 		$aEntities = $aDatasets[0]->load();
 
 		$aCounts = array();
@@ -134,15 +140,15 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 		}
 		?>
 		<div class="kanban-board">
-			<div class="horizon-prev"><img src="/admin/images/scroll/l-arrow.png"></div>
-			<div class="horizon-next"><img src="/admin/images/scroll/r-arrow.png"></div>
+			<div class="chevron-wrapper">
+				<div class="horizon-prev"><img src="/admin/images/scroll/l-arrow.png"></div>
+				<div class="horizon-next"><img src="/admin/images/scroll/r-arrow.png"></div>
+			</div>
 			<div class="kanban-wrapper">
 			<?php
 				foreach ($aStatuses as $iEventStatusId => $aEventStatus)
 				{
 					?><div class="kanban-col">
-						<!-- <h5 style="color: <?php echo htmlspecialchars($aEventStatus['color'])?>; padding-bottom: 5px; border-bottom: 2px solid <?php echo htmlspecialchars($aEventStatus['color'])?>"><?php echo htmlspecialchars($aEventStatus['name'])?></h5> -->
-
 						<div id="data-<?php echo $iEventStatusId?>" class="kanban-board-header margin-bottom-20 no-padding-bottom">
 							<?php
 							$aHSL = Core_Str::hex2hsl($aEventStatus['color']);
@@ -167,10 +173,10 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 						{
 							if ($oEntity->event_status_id == $iEventStatusId)
 							{
-								$oEventCreator = $oEntity->getCreator();
-								$userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
+								// $oEventCreator = $oEntity->getCreator();
+								// $userIsEventCreator = !is_null($oEventCreator) && $oEventCreator->id == $oUser->id;
 								?>
-								<li ondblclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content'});" id="event-<?php echo $oEntity->id?>" data-id="<?php echo $oEntity->id?>">
+								<li ondblclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});" id="event-<?php echo $oEntity->id?>" data-id="<?php echo $oEntity->id?>">
 									<div class="well">
 										<!-- <div class="drag-handle"></div> -->
 										<div class="row">
@@ -179,13 +185,6 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 											</div>
 											<div class="col-xs-12 col-sm-6 well-avatar text-align-right">
 												<?php
-												/*if (!$userIsEventCreator && $oEventCreator)
-												{
-												?>
-													<span data-popover="hover" data-user-id="<?php echo $oEventCreator->id?>"><img src="<?php echo $oEventCreator->getAvatar()?>" title="<?php echo htmlspecialchars($oEventCreator->getFullName())?>"/></span>
-												<?php
-												}*/
-
 												$aEvent_Users = $oEntity->Event_Users->findAll(FALSE);
 												$aEvent_Users = array_slice($aEvent_Users, 0, 4);
 												$count = count($aEvent_Users);
@@ -201,7 +200,7 @@ class Event_Controller_Kanban extends Admin_Form_Controller_View
 											</div>
 										</div>
 										<div class="well-body">
-											<a class="name" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content'});"><?php echo htmlspecialchars($oEntity->name)?></a>
+											<a class="evetn-title name" onclick="$.modalLoad({path: '/admin/event/index.php', action: 'edit',operation: 'modal', additionalParams: 'hostcms[checked][0][<?php echo $oEntity->id?>]=1&parentWindowId=id_content', windowId: 'id_content', width: '90%'});"><?php echo htmlspecialchars($oEntity->name)?></a>
 										</div>
 										<?php
 										if (strlen($oEntity->description))

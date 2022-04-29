@@ -26,4 +26,8 @@ return array(
 	'import_result' => 'Проімпортовано %s купонів!',
 	'import_error' => 'Виникла помилка: %s',
 	'shop_order_id' => 'Замовлення',
+	'apply_success' => "Інформація успішно змінена.",
+	'copy_success' => "Елемент успішно скопійований!",
+	'sorting' => "Порядок сортування",
+	'shop_purchase_discount_coupon_dir_id' => 'Розділ',
 );

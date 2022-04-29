@@ -7,7 +7,7 @@
  * @subpackage Admin
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 return array(
 	'save' => 'Сохранить',
@@ -148,4 +148,6 @@ return array(
 	'female' => 'Женский',
 
 	'filter_enter_title' => 'Введите название фильтра',
+
+	'upload_file' => 'Загрузить файл'
 );

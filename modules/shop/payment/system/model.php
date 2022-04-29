@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Payment_System_Model extends Core_Entity
 {
@@ -97,7 +97,7 @@ class Shop_Payment_System_Model extends Core_Entity
 
 		$name = Core::_('Shop_Payment_System.type' . $this->type);
 
-		Core::factory('Core_Html_Entity_Span')
+		Core_Html_Entity::factory('Span')
 			->class("badge badge-square badge-{$color}")
 			->title($name)
 			->value($name)

@@ -3,9 +3,9 @@
  * Events.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -54,9 +54,9 @@ if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'edit')
 // Добавление заметки
 $oAdmin_Form_Action_Add_Event_Note = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
 	->Admin_Form_Actions
-	->getByName('addEventNote');
+	->getByName('addNote');
 
-if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() == 'addEventNote')
+if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() == 'addNote')
 {
 	$oEvent_Note_Controller_Add = Admin_Form_Action_Controller::factory(
 		'Event_Note_Controller_Add', $oAdmin_Form_Action_Add_Event_Note
@@ -66,17 +66,60 @@ if ($oAdmin_Form_Action_Add_Event_Note && $oAdmin_Form_Controller->getAction() =
 	$oAdmin_Form_Controller->addAction($oEvent_Note_Controller_Add);
 }
 
+// Действие "Удалить файл"
+$oAdminFormActionDeleteFile = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('deleteFile');
+
+if ($oAdminFormActionDeleteFile && $oAdmin_Form_Controller->getAction() == 'deleteFile')
+{
+	$oController_Type_Delete_File = Admin_Form_Action_Controller::factory(
+		'Admin_Form_Action_Controller_Type_Delete_File', $oAdminFormActionDeleteFile
+	);
+
+	$oController_Type_Delete_File
+		->methodName('deleteFile')
+		->dir($oEvent->getPath())
+		->divId('file_' . $oAdmin_Form_Controller->getOperation());
+
+	// Добавляем контроллер удаления файла контроллеру формы
+	$oAdmin_Form_Controller->addAction($oController_Type_Delete_File);
+}
+
+// Действие "Отметить удаленным"
+$oAdmin_Form_Action = Core_Entity::factory('Admin_Form', $iAdmin_Form_Id)
+	->Admin_Form_Actions
+	->getByName('markDeleted');
+
+if ($oAdmin_Form_Action && $oAdmin_Form_Controller->getAction() == 'markDeleted')
+{
+	$oEvent_Note_Controller_Markdeleted = Admin_Form_Action_Controller::factory(
+		'Event_Note_Controller_Markdeleted', $oAdmin_Form_Action
+	);
+
+	// Добавляем типовой контроллер редактирования контроллеру формы
+	$oAdmin_Form_Controller->addAction($oEvent_Note_Controller_Markdeleted);
+}
+
+
 // Источник данных 0
 $oAdmin_Form_Dataset = new Admin_Form_Dataset_Entity(
-	Core_Entity::factory('Event_Note')
+	Core_Entity::factory('Crm_Note')
 );
 
 $oAdmin_Form_Dataset
 	->addCondition(
-		array('where' => array('event_notes.event_id', '=', $oEvent->id))
-	)->addCondition(
-		array('orderBy' => array('event_notes.id', 'DESC'))
-	);
+		array('select' => array('crm_notes.*'))
+	)
+	->addCondition(
+		array('leftJoin' => array('event_crm_notes', 'crm_notes.id', '=', 'event_crm_notes.crm_note_id'))
+	)
+	->addCondition(
+		array('where' => array('event_crm_notes.event_id', '=', $oEvent->id))
+	)
+	/*->addCondition(
+		array('orderBy' => array('event_crm_notes.id', 'DESC'))
+	)*/;
 
 // Добавляем источник данных контроллеру формы
 $oAdmin_Form_Controller->addDataset(

@@ -7,9 +7,9 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  *
  * @package HostCMS
  * @subpackage Company
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 {
@@ -27,11 +27,28 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->addSkipColumn('~site')
 			->addSkipColumn('~email');*/
 
-		parent::setObject($object);
+		$this
+			->addSkipColumn('image');
+
+		return parent::setObject($object);
+	}
+
+	/**
+	 * Prepare backend item's edit form
+	 *
+	 * @return self
+	 */
+	protected function _prepareForm()
+	{
+		parent::_prepareForm();
+
+		$object = $this->_object;
 
 		// Основная вкладка
 		$oMainTab = $this->getTab('main');
 		$oAdditionalTab = $this->getTab('additional');
+
+		$windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		// Добавляем вкладки
 		$this
@@ -41,9 +58,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			$oMainTab);
 
 		$oMainTab
-			->add($oMainTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainTabRow2 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oMainTabRow3 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oMainTabRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oTabBankingDetails
 			->add($oTabBankingDetailsRow1 = Admin_Form_Entity::factory('Div')->class('row'))
@@ -53,8 +68,7 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->add($oTabBankingDetailsRow5 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oAdditionalTab
-			->add($oAdditionalTabRow1 = Admin_Form_Entity::factory('Div')->class('row'))
-			->add($oAdditionalTabRow2 = Admin_Form_Entity::factory('Div')->class('row'));
+			->add($oAdditionalTabRow1 = Admin_Form_Entity::factory('Div')->class('row'));
 
 		$oMainTab
 			// BankingDetails
@@ -71,9 +85,51 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			// GUID
 			->move($this->getField('guid'), $oAdditionalTab);
 
-		$oMainTab->move($this->getField('legal_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oMainTabRow1);
-		$oMainTab->move($this->getField('accountant_legal_name')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oMainTabRow1);
-		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-sm-4')),$oMainTabRow1);
+		$oMainTab->move($this->getField('legal_name')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3')),$oMainTabRow1);
+		$oMainTab->move($this->getField('accountant_legal_name')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3')),$oMainTabRow1);
+
+		$sFormPath = $this->_Admin_Form_Controller->getPath();
+
+		$aConfig = Core_Config::instance()->get('company_config', array()) + array(
+			'max_height' => 130,
+			'max_width' => 130
+		);
+
+		// Изображение
+		$oImageField = Admin_Form_Entity::factory('File');
+		$oImageField
+			->type('file')
+			->caption(Core::_('Company.image'))
+			->name('image')
+			->id('image')
+			->class('') // form-group col-xs-12 col-md-6 col-lg-3
+			->largeImage(
+				array(
+					'max_width' => $aConfig['max_width'],
+					'max_height' => $aConfig['max_height'],
+					'path' => is_file($this->_object->getImageFilePath())
+						? $this->_object->getImageFileHref()
+						: '',
+					'show_params' => TRUE,
+					'preserve_aspect_ratio_checkbox_checked' => FALSE,
+					// deleteWatermarkFile
+					'delete_onclick' => "$.adminLoad({path: '{$sFormPath}', additionalParams: 'hostcms[checked][{$this->_datasetId}][{$object->id}]=1', action: 'deleteImageFile', windowId: '{$windowId}'}); return false",
+					'place_watermark_checkbox' => FALSE,
+					'place_watermark_x_show' => FALSE,
+					'place_watermark_y_show' => FALSE
+				)
+			)
+			->smallImage(
+				array(
+					'show' => FALSE
+				)
+			)
+			->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3'))
+			;
+
+		$oMainTabRow1->add($oImageField);
+
+		$oMainTab->move($this->getField('sorting')->divAttr(array('class' => 'form-group col-xs-12 col-md-6 col-lg-3')),$oMainTabRow1);
 
 		// Адреса
 		$oCompanyAddressesRow = Directory_Controller_Tab::instance('address')
@@ -98,6 +154,22 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			->execute();
 
 		$oMainTab->add($oCompanyEmailsRow);
+
+		// Социальные сети
+		$oCompanySocialRow = Directory_Controller_Tab::instance('social')
+			->title(Core::_('Directory_Social.socials'))
+			->relation($this->_object->Company_Directory_Socials)
+			->execute();
+
+		$oMainTab->add($oCompanySocialRow);
+
+		// Мессенджеры
+		$oCompanyMessengerRow = Directory_Controller_Tab::instance('messenger')
+			->title(Core::_('Directory_Messenger.messengers'))
+			->relation($this->_object->Company_Directory_Messengers)
+			->execute();
+
+		$oMainTab->add($oCompanyMessengerRow);
 
 		// Сайты
 		$oCompanyWebsitesRow = Directory_Controller_Tab::instance('website')
@@ -200,12 +272,67 @@ class Company_Controller_Edit extends Admin_Form_Action_Controller_Type_Edit
 			}
 		}
 
-		$windowId = $this->_Admin_Form_Controller->getWindowId();
+		// $windowId = $this->_Admin_Form_Controller->getWindowId();
 
 		Directory_Controller_Tab::instance('address')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
 		Directory_Controller_Tab::instance('email')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
 		Directory_Controller_Tab::instance('phone')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
 		Directory_Controller_Tab::instance('website')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
+		Directory_Controller_Tab::instance('social')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
+		Directory_Controller_Tab::instance('messenger')->applyObjectProperty($this->_Admin_Form_Controller, $this->_object);
+
+		if (
+			// Поле файла существует
+			!is_null($aFileData = Core_Array::getFiles('image', NULL))
+			// и передан файл
+			&& intval($aFileData['size']) > 0)
+		{
+			if (Core_File::isValidExtension($aFileData['name'], array('JPG', 'JPEG', 'GIF', 'PNG')))
+			{
+				$fileExtension = Core_File::getExtension($aFileData['name']);
+				$sImageName = 'image.' . $fileExtension;
+
+				$param = array();
+				// Путь к файлу-источнику большого изображения;
+				$param['large_image_source'] = $aFileData['tmp_name'];
+				// Оригинальное имя файла большого изображения
+				$param['large_image_name'] = $aFileData['name'];
+
+				// Путь к создаваемому файлу большого изображения;
+				$param['large_image_target'] = $this->_object->getPath() . $sImageName;
+
+				// Использовать большое изображение для создания малого
+				$param['create_small_image_from_large'] = FALSE;
+
+				// Значение максимальной ширины большого изображения
+				$param['large_image_max_width'] = Core_Array::getPost('large_max_width_image', 0);
+
+				// Значение максимальной высоты большого изображения
+				$param['large_image_max_height'] = Core_Array::getPost('large_max_height_image', 0);
+
+				// Сохранять пропорции изображения для большого изображения
+				$param['large_image_preserve_aspect_ratio'] = !is_null(Core_Array::getPost('large_preserve_aspect_ratio_image'));
+
+				$this->_object->createDir();
+
+				$result = Core_File::adminUpload($param);
+
+				if ($result['large_image'])
+				{
+					$this->_object->image = $sImageName;
+					$this->_object->save();
+				}
+			}
+			else
+			{
+				$this->addMessage(
+					Core_Message::get(
+						Core::_('Core.extension_does_not_allow', Core_File::getExtension($aFileData['name'])),
+						'error'
+					)
+				);
+			}
+		}
 
 		Core_Event::notify(get_class($this) . '.onAfterRedeclaredApplyObjectProperty', $this, array($this->_Admin_Form_Controller));
 	}

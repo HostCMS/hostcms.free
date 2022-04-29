@@ -56,9 +56,9 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 
 			$newWindowId = 'Rollback_' . time();
 
-			$oCore_Html_Entity_Form = Core::factory('Core_Html_Entity_Form');
+			$oCore_Html_Entity_Form = Core_Html_Entity::factory('Form');
 
-			$oCore_Html_Entity_Div = Core::factory('Core_Html_Entity_Div')
+			$oCore_Html_Entity_Div = Core_Html_Entity::factory('Div')
 				->id($newWindowId)
 				->add($oCore_Html_Entity_Form);
 
@@ -80,7 +80,7 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 				foreach ($checkedItems as $key => $value)
 				{
 					$oCore_Html_Entity_Form->add(
-						Core::factory('Core_Html_Entity_Input')
+						Core_Html_Entity::factory('Input')
 							->name('hostcms[checked][' . $datasetKey . '][' . $key . ']')
 							->value(1)
 							->type('hidden')
@@ -194,7 +194,7 @@ class Admin_Form_Action_Controller_Type_Rollback extends Admin_Form_Action_Contr
 
 				ob_start();
 
-				Core::factory('Core_Html_Entity_Script')
+				Core_Html_Entity::factory('Script')
 					->value("$(function() {
 					$('#{$newWindowId}').HostCMSWindow({ autoOpen: true, destroyOnClose: false, title: '" . Core_Str::escapeJavascriptVariable($this->title) . "', AppendTo: '#{$windowId}', width: 750, height: 'auto', addContentPadding: true, modal: false, Maximize: false, Minimize: false }); });")
 					->execute();

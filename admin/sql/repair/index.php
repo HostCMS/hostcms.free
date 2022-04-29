@@ -3,9 +3,9 @@
  * SQL.
  *
  * @package HostCMS
- * @version 6.x
+ * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 require_once('../../../bootstrap.php');
 
@@ -24,7 +24,8 @@ $oAdmin_Form_Controller
 	->setUp()
 	->path($sAdminFormAction)
 	->title(Core::_('Sql.repair_table_title'))
-	->pageTitle(Core::_('Sql.repair_table_title'));
+	->pageTitle(Core::_('Sql.repair_table_title'))
+	->limit(1000);
 
 // Элементы строки навигации
 $oAdmin_Form_Entity_Breadcrumbs = Admin_Form_Entity::factory('Breadcrumbs');

@@ -9,7 +9,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
  * @subpackage Shop
  * @version 7.x
  * @author Hostmake LLC
- * @copyright © 2005-2021 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
+ * @copyright © 2005-2022 ООО "Хостмэйк" (Hostmake LLC), http://www.hostcms.ru
  */
 class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 {
@@ -1023,6 +1023,12 @@ class Shop_Item_Export_Csv_Controller extends Core_Servant_Properties
 							$oModifications = Core_Entity::factory('Shop_Item');
 							$oModifications->queryBuilder()
 								->where('modification_id', '=', $oShopItem->id);
+								
+							$this->producer
+								&& $oModifications->queryBuilder()->where('shop_producer_id', '=', $this->producer);
+
+							$this->seller
+								&& $oModifications->queryBuilder()->where('shop_seller_id', '=', $this->seller);
 
 							$aModifications = $oModifications->findAll(FALSE);
 

@@ -95,10 +95,10 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	{
 		ob_start();
 
-		Core::factory('Core_Html_Entity_Div')
+		Core_Html_Entity::factory('Div')
 			->class('text-align-center')
 			->add(
-				Core::factory('Core_Html_Entity_Span')
+				Core_Html_Entity::factory('Span')
 					->class('badge badge-hostcms badge-square')
 					->value($this->level)
 			)
@@ -115,7 +115,7 @@ defined('HOSTCMS') || exit('HostCMS: access denied.');
 	 */
 	public function nameBadge($oAdmin_Form_Field, $oAdmin_Form_Controller)
 	{
-		$this->apply_max_discount && Core::factory('Core_Html_Entity_Span')
+		$this->apply_max_discount && Core_Html_Entity::factory('Span')
 			->class('label label-yellow label-sm')
 			->value('MAX')
 			->execute();
